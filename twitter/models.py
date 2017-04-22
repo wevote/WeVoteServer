@@ -47,6 +47,12 @@ class TwitterLinkToOrganization(models.Model):
             twitter_user = twitter_results['twitter_user']
             twitter_handle = twitter_user.twitter_handle
 
+            # Strip out the twitter handles "False" or "None"
+            if twitter_handle:
+                twitter_handle_lower = twitter_handle.lower()
+                if twitter_handle_lower == 'false' or twitter_handle_lower == 'none':
+                    twitter_handle = ''
+
         return twitter_handle
 
 
@@ -79,6 +85,12 @@ class TwitterLinkToVoter(models.Model):
         if twitter_results['twitter_user_found']:
             twitter_user = twitter_results['twitter_user']
             twitter_handle = twitter_user.twitter_handle
+
+            # Strip out the twitter handles "False" or "None"
+            if twitter_handle:
+                twitter_handle_lower = twitter_handle.lower()
+                if twitter_handle_lower == 'false' or twitter_handle_lower == 'none':
+                    twitter_handle = ''
 
         return twitter_handle
 
@@ -385,6 +397,12 @@ class TwitterUserManager(models.Model):
         success = False
         status = "TWITTER_USER_NOT_FOUND"
 
+        # Strip out the twitter handles "False" or "None"
+        if twitter_handle:
+            twitter_handle_lower = twitter_handle.lower()
+            if twitter_handle_lower == 'false' or twitter_handle_lower == 'none':
+                twitter_handle = ''
+
         # Is this twitter_handle already stored locally? If so, return that
         twitter_results = self.retrieve_twitter_user(twitter_user_id, twitter_handle)
         if twitter_results['twitter_user_found']:
@@ -412,6 +430,12 @@ class TwitterUserManager(models.Model):
         twitter_user_on_stage = TwitterUser()
         twitter_user_found = False
         success = False
+
+        # Strip out the twitter handles "False" or "None"
+        if twitter_handle:
+            twitter_handle_lower = twitter_handle.lower()
+            if twitter_handle_lower == 'false' or twitter_handle_lower == 'none':
+                twitter_handle = ''
 
         try:
             if positive_value_exists(twitter_user_id):
@@ -658,6 +682,13 @@ class TwitterUserManager(models.Model):
             twitter_description = twitter_json['description'] if 'description' in twitter_json else ""
             twitter_followers_count = twitter_json['followers_count'] if 'followers_count' in twitter_json else 0
             twitter_handle = twitter_json['screen_name'] if 'screen_name' in twitter_json else ""
+
+            # Strip out the twitter handles "False" or "None"
+            if twitter_handle:
+                twitter_handle_lower = twitter_handle.lower()
+                if twitter_handle_lower == 'false' or twitter_handle_lower == 'none':
+                    twitter_handle = ''
+
             twitter_id = twitter_json['id'] if 'id' in twitter_json else None
             twitter_location = twitter_json['location'] if 'location' in twitter_json else ""
             twitter_name = twitter_json['name'] if 'name' in twitter_json else ""
