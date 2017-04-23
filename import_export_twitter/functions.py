@@ -25,17 +25,36 @@ def retrieve_twitter_user_info(twitter_user_id, twitter_handle):
 
     api = tweepy.API(auth)
 
+    # Strip out the twitter handles "False" or "None"
+    if twitter_handle is False:
+        twitter_handle = ''
+    elif twitter_handle is None:
+        twitter_handle = ''
+    elif twitter_handle:
+        twitter_handle_lower = twitter_handle.lower()
+        if twitter_handle_lower == 'false' or twitter_handle_lower == 'none':
+            twitter_handle = ''
+
     twitter_handle_found = False
     twitter_json = []
     try:
         if positive_value_exists(twitter_user_id):
             twitter_user = api.get_user(user_id=twitter_user_id)
-        else:
+            twitter_json = twitter_user._json
+            success = True
+            status = 'TWITTER_RETRIEVE_SUCCESSFUL-TWITTER_USER_ID'
+            twitter_handle_found = True
+        elif positive_value_exists(twitter_handle):
             twitter_user = api.get_user(screen_name=twitter_handle)
-        twitter_json = twitter_user._json
-        success = True
-        status = 'TWITTER_RETRIEVE_SUCCESSFUL'
-        twitter_handle_found = True
+            twitter_json = twitter_user._json
+            success = True
+            status = 'TWITTER_RETRIEVE_SUCCESSFUL-TWITTER_HANDLE'
+            twitter_handle_found = True
+        else:
+            twitter_json = {}
+            success = False
+            status = 'TWITTER_RETRIEVE_NOT_SUCCESSFUL-MISSING_VARIABLE'
+            twitter_handle_found = False
     except tweepy.RateLimitError as rate_limit_error:
         success = False
         status = 'TWITTER_RATE_LIMIT_ERROR'
