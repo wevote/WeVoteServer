@@ -99,6 +99,21 @@ class FriendInvitationTwitterLink(models.Model):
     deleted = models.BooleanField(default=False)  # If invitation is completed or rescinded, mark as deleted
 
 
+class FriendInvitationFacebookLink(models.Model):
+    """
+    Created when voter 1) invites via Facebook direct message.
+    """
+    sender_facebook_id = models.BigIntegerField(verbose_name='facebook user id of sender', null=True, blank=True)
+    recipient_facebook_id = models.BigIntegerField(verbose_name='facebook user id of recipient', null=True, blank=True)
+    recipient_facebook_name = models.CharField(
+        verbose_name="recipient facebook full name", max_length=255, null=True, blank=True, unique=False)
+    facebook_request_id = models.CharField(
+        verbose_name="facebook app request id", max_length=255, null=True, blank=True, unique=False)
+    invitation_status = models.CharField(max_length=50, choices=INVITATION_STATUS_CHOICES, default=NO_RESPONSE)
+    date_last_changed = models.DateTimeField(verbose_name='date last changed', null=True, auto_now=True)
+    deleted = models.BooleanField(default=False)  # If invitation is completed or rescinded, mark as deleted
+
+
 class FriendInvitationVoterLink(models.Model):
     """
     Created when voter 1) invites via email (and the email IS recognized), 2) invites via Facebook direct message, or
@@ -201,6 +216,40 @@ class FriendManager(models.Model):
             'friend_invitation_saved':      friend_invitation_saved,
             'friend_invitation_created':    created,
             'friend_invitation':            friend_invitation,
+        }
+        return results
+
+    def create_or_update_friend_invitation_facebook_link(self, facebook_request_id, sender_facebook_id,
+                                                         recipient_facebook_id, recipient_facebook_name='',):
+        defaults = {
+            "facebook_request_id": facebook_request_id,
+            "sender_facebook_id": sender_facebook_id,
+            "recipient_facebook_id": recipient_facebook_id,
+            "recipient_facebook_name":  recipient_facebook_name,
+        }
+
+        try:
+            friend_invitation, created = FriendInvitationFacebookLink.objects.update_or_create(
+                sender_facebook_id=sender_facebook_id,
+                recipient_facebook_id=recipient_facebook_id,
+                defaults=defaults,
+            )
+            friend_invitation_saved = True
+            success = True
+            status = "FRIEND_INVITATION_FACEBOOK_LINK_UPDATED_OR_CREATED"
+        except Exception as e:
+            friend_invitation_saved = False
+            friend_invitation = FriendInvitationFacebookLink()
+            success = False
+            created = False
+            status = "FRIEND_INVITATION_FACEBOOK_LINK_NOT_UPDATED_OR_CREATED"
+
+        results = {
+            'success': success,
+            'status': status,
+            'friend_invitation_saved': friend_invitation_saved,
+            'friend_invitation_created': created,
+            'friend_invitation': friend_invitation,
         }
         return results
 
@@ -1410,6 +1459,44 @@ class FriendManager(models.Model):
             'friend_invitation_email_link':         friend_invitation_email_link,
             'friend_invitation_voter_link_found':   friend_invitation_voter_link_found,
             'friend_invitation_voter_link':         friend_invitation_voter_link,
+        }
+        return results
+
+    def retrieve_friend_invitation_from_facebook(self, facebook_request_id, recipient_facebook_id,
+                                                 sender_facebook_id):
+        """
+
+        :param facebook_request_id:
+        :param recipient_facebook_id:
+        :param sender_facebook_id:
+        :return:
+        """
+        # Start by looking in FriendInvitationFacebookLink table
+        friend_invitation_facebook_link_found = False
+        friend_invitation_facebook_link = FriendInvitationFacebookLink()
+        status = ""
+
+        try:
+            friend_invitation_facebook_link = FriendInvitationFacebookLink.objects.get(
+                facebook_request_id=facebook_request_id,
+                recipient_facebook_id=recipient_facebook_id,
+                sender_facebook_id=sender_facebook_id,
+            )
+            friend_invitation_facebook_link_found = True
+            success = True
+            status += "RETRIEVE_FRIEND_FACEBOOK_INVITATION_FROM_FACEBOOK_FOUND "
+        except FriendInvitationVoterLink.DoesNotExist:
+            success = True
+            status += "RETRIEVE_FRIEND_INVITATION_FROM_FACEBOOK_NOT_FOUND1 "
+        except Exception as e:
+            success = False
+            status += 'FAILED retrieve_friend_invitation_from_facebook FriendInvitationFacebookLink '
+
+        results = {
+            'success':                                  success,
+            'status':                                   status,
+            'friend_invitation_facebook_link_found':    friend_invitation_facebook_link_found,
+            'friend_invitation_facebook_link':          friend_invitation_facebook_link
         }
         return results
 

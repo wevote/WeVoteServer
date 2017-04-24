@@ -19,7 +19,8 @@ from email_outbound.controllers import voter_email_address_save_for_api, voter_e
     voter_email_address_sign_in_for_api, voter_email_address_verify_for_api
 from follow.controllers import organization_suggestion_tasks_for_api
 from friend.controllers import friend_invitation_by_email_send_for_api, friend_invitation_by_email_verify_for_api, \
-    friend_invitation_by_we_vote_id_send_for_api, friend_invite_response_for_api, friend_list_for_api
+    friend_invitation_by_we_vote_id_send_for_api, friend_invite_response_for_api, friend_list_for_api, \
+    friend_invitation_by_facebook_send_for_api, friend_invitation_by_facebook_verify_for_api
 from friend.models import CURRENT_FRIENDS, DELETE_INVITATION_EMAIL_SENT_BY_ME, DELETE_INVITATION_VOTER_SENT_BY_ME, \
     FRIEND_INVITATIONS_PROCESSED, FRIEND_INVITATIONS_SENT_TO_ME, FRIEND_INVITATIONS_SENT_BY_ME, \
     SUGGESTED_FRIEND_LIST, \
@@ -305,6 +306,51 @@ def friend_invitation_by_email_verify_view(request):  # friendInvitationByEmailV
         'attempted_to_approve_own_invitation':          results['attempted_to_approve_own_invitation'],
         'invitation_secret_key':                        invitation_secret_key,
         'invitation_secret_key_belongs_to_this_voter':  results['invitation_secret_key_belongs_to_this_voter'],
+    }
+    return HttpResponse(json.dumps(json_data), content_type='application/json')
+
+
+def friend_invitation_by_facebook_send_view(request):  # friendInvitationByFacebookSend
+    """
+
+    :param request:
+    :return:
+    """
+    voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
+    recipients_facebook_id_array = request.GET.getlist('recipients_facebook_id_array[]',"")
+    recipients_facebook_name_array = request.GET.getlist('recipients_facebook_name_array[]',"")
+    facebook_request_id = request.GET.get('facebook_request_id', "")
+    results = friend_invitation_by_facebook_send_for_api(voter_device_id, recipients_facebook_id_array,
+                                                         recipients_facebook_name_array, facebook_request_id)
+    json_data = {
+        'status':                                       results['status'],
+        'success':                                      results['success'],
+        'voter_device_id':                              voter_device_id,
+        'all_friends_facebook_link_created_results':    results['all_friends_facebook_link_created_results'],
+    }
+    return HttpResponse(json.dumps(json_data), content_type='application/json')
+
+
+def friend_invitation_by_facebook_verify_view(request):  # friendInvitationByFacebookVerify
+    """
+
+    :param request:
+    :return:
+    """
+    voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
+    facebook_request_id = request.GET.get('facebook_request_id', "")
+    recipient_facebook_id = request.GET.get('recipient_facebook_id', "")
+    sender_facebook_id = request.GET.get('sender_facebook_id', "")
+    results = friend_invitation_by_facebook_verify_for_api(voter_device_id, facebook_request_id,
+                                                           recipient_facebook_id, sender_facebook_id)
+    json_data = {
+        'status':                               results['status'],
+        'success':                              results['success'],
+        'voter_device_id':                      voter_device_id,
+        'voter_has_data_to_preserve':           results['voter_has_data_to_preserve'],
+        'invitation_found':                     results['invitation_found'],
+        'attempted_to_approve_own_invitation':  results['attempted_to_approve_own_invitation'],
+        'facebook_request_id':                  facebook_request_id,
     }
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 
