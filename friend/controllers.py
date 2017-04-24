@@ -1,7 +1,6 @@
 # friend/controllers.py
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
-
 from .models import ACCEPTED, FriendInvitationVoterLink, FriendManager, CURRENT_FRIENDS, \
     DELETE_INVITATION_EMAIL_SENT_BY_ME, FRIEND_INVITATIONS_PROCESSED, \
     FRIEND_INVITATIONS_SENT_BY_ME, FRIEND_INVITATIONS_SENT_TO_ME, SUGGESTED_FRIEND_LIST, \
@@ -10,6 +9,7 @@ from config.base import get_environment_variable
 from email_outbound.controllers import schedule_email_with_email_outbound_description, schedule_verification_email
 from email_outbound.models import EmailAddress, EmailManager, FRIEND_ACCEPTED_INVITATION_TEMPLATE, \
     FRIEND_INVITATION_TEMPLATE, VERIFY_EMAIL_ADDRESS_TEMPLATE
+from import_export_facebook.models import FacebookManager
 import json
 from organization.models import OrganizationManager
 from validate_email import validate_email
@@ -686,6 +686,232 @@ def friend_invitation_by_email_verify_for_api(voter_device_id, invitation_secret
         'attempted_to_approve_own_invitation':          False,
         'invitation_secret_key':                        invitation_secret_key,
         'invitation_secret_key_belongs_to_this_voter':  invitation_secret_key_belongs_to_this_voter,
+    }
+    return json_data
+
+
+def friend_invitation_by_facebook_send_for_api(voter_device_id, recipients_facebook_id_array,
+                                               recipients_facebook_name_array, facebook_request_id):
+    # friendInvitationByFacebookSend
+    """
+    :param voter_device_id:
+    :param recipients_facebook_id_array:
+    :param recipients_facebook_name_array:
+    :param facebook_request_id:
+    :param sender_facebook_id:
+    :return:
+    """
+    success = False
+    status = ""
+    friends_facebook_detail_array = []
+    all_friends_facebook_link_created_results = []
+
+    if recipients_facebook_id_array:
+        # reconstruct dictionary array from lists
+        for n in range(len(recipients_facebook_id_array)):
+            one_friend_facebook_id_dict = {'recipient_facebook_name': recipients_facebook_name_array[n],
+                                           'recipient_facebook_id': recipients_facebook_id_array[n]}
+            friends_facebook_detail_array.append(one_friend_facebook_id_dict)
+
+    results = is_voter_device_id_valid(voter_device_id)
+    if not results['success']:
+        error_results = {
+            'status':                                       results['status'],
+            'success':                                      False,
+            'voter_device_id':                              voter_device_id,
+            'all_friends_facebook_link_created_results':    all_friends_facebook_link_created_results
+        }
+        return error_results
+
+    voter_manager = VoterManager()
+    voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id)
+    sender_voter_id = voter_results['voter_id']
+    if not positive_value_exists(sender_voter_id):
+        error_results = {
+            'status':                                       "VOTER_NOT_FOUND_FROM_VOTER_DEVICE_ID",
+            'success':                                      False,
+            'voter_device_id':                              voter_device_id,
+            'all_friends_facebook_link_created_results':    all_friends_facebook_link_created_results
+        }
+        return error_results
+
+    sender_voter = voter_results['voter']
+    sender_voter_we_vote_id = sender_voter.we_vote_id
+    facebook_manager = FacebookManager()
+    friend_manager = FriendManager()
+
+    facebook_link_to_voter_results = facebook_manager.retrieve_facebook_link_to_voter_from_voter_we_vote_id(
+        sender_voter_we_vote_id)
+    if not facebook_link_to_voter_results['facebook_link_to_voter_found']:
+        error_results = {
+            'status':                                       "FACEBOOK_LINK_TO_VOTER_NOT_FOUND",
+            'success':                                      False,
+            'voter_device_id':                              voter_device_id,
+            'all_friends_facebook_link_created_results':    all_friends_facebook_link_created_results
+        }
+        return error_results
+
+    facebook_link_to_voter = facebook_link_to_voter_results['facebook_link_to_voter']
+    sender_facebook_id = facebook_link_to_voter.facebook_user_id
+    for friend_facebook_detail in friends_facebook_detail_array:
+        recipient_facebook_id = friend_facebook_detail["recipient_facebook_id"]
+        recipient_facebook_name = friend_facebook_detail["recipient_facebook_name"]
+        create_results = friend_manager.create_or_update_friend_invitation_facebook_link(
+            facebook_request_id, sender_facebook_id, recipient_facebook_id, recipient_facebook_name)
+        results = {
+            'success': create_results['success'],
+            'status': create_results['status'],
+            'recipient_facebook_name': recipient_facebook_name,
+            'friend_invitation_saved': create_results['friend_invitation_saved'],
+            # 'friend_invitation': create_results['friend_invitation'],
+        }
+        all_friends_facebook_link_created_results.append(results)
+
+    results = {
+        'status':                                       "FRIEND_INVITATION_BY_FACEBOOK_SEND_COMPLETED",
+        'success':                                      True,
+        'voter_device_id':                              voter_device_id,
+        'all_friends_facebook_link_created_results':    all_friends_facebook_link_created_results
+    }
+    return results
+
+
+def friend_invitation_by_facebook_verify_for_api( voter_device_id, facebook_request_id, recipient_facebook_id,
+                                                  sender_facebook_id):  # friendInvitationByFacebookVerify
+    """
+
+    :param voter_device_id:
+    :param facebook_request_id:
+    :param recipient_facebook_id:
+    :param sender_facebook_id:
+    :return:
+    """
+    status = ""
+    success = False
+
+    # If a voter_device_id is passed in that isn't valid, we want to throw an error
+    device_id_results = is_voter_device_id_valid(voter_device_id)
+    if not device_id_results['success']:
+        json_data = {
+            'status':                                       device_id_results['status'],
+            'success':                                      False,
+            'voter_device_id':                              voter_device_id,
+            'voter_has_data_to_preserve':                   False,
+            'invitation_found':                             False,
+            'attempted_to_approve_own_invitation':          False,
+            'facebook_request_id':                          facebook_request_id,
+        }
+        return json_data
+
+    if not positive_value_exists(facebook_request_id):
+        error_results = {
+            'status':                                       "MISSING_FACEBOOK_REQUEST_ID",
+            'success':                                      False,
+            'voter_device_id':                              voter_device_id,
+            'voter_has_data_to_preserve':                   False,
+            'invitation_found':                             False,
+            'attempted_to_approve_own_invitation':          False,
+            'facebook_request_id':                          facebook_request_id,
+        }
+        return error_results
+
+    voter_manager = VoterManager()
+    voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id)
+    voter_id = voter_results['voter_id']
+    if not positive_value_exists(voter_id):
+        error_results = {
+            'status':                                       "VOTER_NOT_FOUND_FROM_VOTER_DEVICE_ID",
+            'success':                                      False,
+            'voter_device_id':                              voter_device_id,
+            'voter_has_data_to_preserve':                   False,
+            'invitation_found':                             False,
+            'attempted_to_approve_own_invitation':          False,
+            'facebook_request_id':                          facebook_request_id,
+        }
+        return error_results
+    voter = voter_results['voter']
+    voter_we_vote_id_accepting_invitation = voter.we_vote_id
+    voter_has_data_to_preserve = voter.has_data_to_preserve()
+
+    friend_manager = FriendManager()
+    facebook_manager = FacebookManager()
+
+    # Retrieve sender voter we vote id
+    facebook_link_to_voter_results = facebook_manager.retrieve_facebook_link_to_voter(sender_facebook_id)
+    if not facebook_link_to_voter_results['facebook_link_to_voter_found']:
+        error_results = {
+            'status':                                       "FACEBOOK_LINK_TO_SENDER_NOT_FOUND",
+            'success':                                      False,
+            'voter_device_id':                              voter_device_id,
+            'voter_has_data_to_preserve':                   voter_has_data_to_preserve,
+            'invitation_found':                             False,
+            'attempted_to_approve_own_invitation':          False,
+            'facebook_request_id':                          facebook_request_id,
+        }
+        return error_results
+
+    facebook_link_to_voter = facebook_link_to_voter_results['facebook_link_to_voter']
+    sender_voter_we_vote_id = facebook_link_to_voter.voter_we_vote_id
+
+    friend_invitation_results = friend_manager.retrieve_friend_invitation_from_facebook(
+        facebook_request_id.split('_')[0], recipient_facebook_id, sender_facebook_id)
+    if not friend_invitation_results['friend_invitation_facebook_link_found']:
+        error_results = {
+            'status':                                       "INVITATION_NOT_FOUND_FROM_FACEBOOK",
+            'success':                                      False,
+            'voter_device_id':                              voter_device_id,
+            'voter_has_data_to_preserve':                   voter_has_data_to_preserve,
+            'invitation_found':                             False,
+            'attempted_to_approve_own_invitation':          False,
+            'facebook_request_id':                          facebook_request_id,
+        }
+        return error_results
+
+    # Now that we have the friend_invitation data, look more closely at it
+    invitation_found = True
+    friend_invitation_facebook_link = friend_invitation_results['friend_invitation_facebook_link']
+
+    if sender_voter_we_vote_id == voter_we_vote_id_accepting_invitation:
+        error_results = {
+            'status':                                       "SENDER_AND_RECIPIENT_ARE_IDENTICAL_FAILED",
+            'success':                                      False,
+            'voter_device_id':                              voter_device_id,
+            'voter_has_data_to_preserve':                   voter_has_data_to_preserve,
+            'invitation_found':                             True,
+            'attempted_to_approve_own_invitation':          True,
+            'facebook_request_id':                          facebook_request_id,
+        }
+        return error_results
+
+    # Now we want to make sure we have a current_friend entry
+    friend_results = friend_manager.create_or_update_current_friend(
+        sender_voter_we_vote_id, voter_we_vote_id_accepting_invitation)
+
+    friend_manager.update_suggested_friends_starting_with_one_voter(sender_voter_we_vote_id)
+    friend_manager.update_suggested_friends_starting_with_one_voter(voter_we_vote_id_accepting_invitation)
+
+    if friend_results['success']:
+        try:
+            friend_invitation_facebook_link.invitation_status = ACCEPTED
+            friend_invitation_facebook_link.deleted = True
+            friend_invitation_facebook_link.save ()
+            success = True
+            status = "INVITATION_FROM_FACEBOOK_UPDATED"
+        except Exception as e:
+            success = False
+            status += 'FAILED_TO_UPDATE_INVITATION_STATUS1'
+    else:
+        success = False
+        status = " friend_invitation_facebook_link_found CREATE_OR_UPDATE_CURRENT_FRIEND_FAILED"
+
+    json_data = {
+        'status':                                       status,
+        'success':                                      success,
+        'voter_device_id':                              voter_device_id,
+        'voter_has_data_to_preserve':                   voter_has_data_to_preserve,
+        'invitation_found':                             invitation_found,
+        'attempted_to_approve_own_invitation':          False,
+        'facebook_request_id':                          facebook_request_id,
     }
     return json_data
 

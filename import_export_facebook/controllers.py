@@ -250,7 +250,7 @@ def facebook_friends_action_for_api(voter_device_id):   # facebookFriendsAction
             facebook_user_location_name = facebook_user_entry['facebook_user_location_name']
             facebook_user_gender = facebook_user_entry['facebook_user_gender']
             facebook_user_birthday = facebook_user_entry['facebook_user_birthday']
-            facebook_user_cover_source = facebook_user_entry['facebook_user_cover_source']
+            facebook_user_cover_source = facebook_user_entry['facebook_background_image_url_https']
             facebook_user_profile_url_https = facebook_user_entry['facebook_user_profile_url_https']
             facebook_user_about = facebook_user_entry['facebook_user_about']
             facebook_user_is_verified = facebook_user_entry['facebook_user_is_verified']
