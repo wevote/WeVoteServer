@@ -1,0 +1,134 @@
+{# templates/image/create_resized_images_for_organization.html #}
+{% extends "template_base.html" %}
+
+{% block title %}
+    {% if organization_we_vote_id %}organization_we_vote_id: {{ organization_we_vote_id }}
+    {% else %}No Organization Found {% endif %}
+{% endblock %}
+
+{%  block content %}
+<a href="{% url 'image:cache_images_locally_for_all_organizations' %}">< Back to Cache images locally for all organizations</a>
+<br />
+<h1>Created Resized Images for Organization{% if organization_we_vote_id %}: {{ organization.organization_name }}{% endif %}</h1>
+
+{% if organization_we_vote_id %}
+<a href="{% url 'image:images_for_one_organization' organization_we_vote_id %}" target="_blank">See images</a> (in new window)
+{% endif %}
+
+{% if create_resized_images_for_organization %}
+    <table border="1" cellpadding="10">
+        <tr>
+            <td></td>
+            <td>We Vote ID</td>
+            <td>large_twitter_profile_image</td>
+            <td>medium_twitter_profile_image</td>
+            <td>tiny_twitter_profile_image</td>
+            <td>large_twitter_background_image</td>
+            <td>medium_twitter_background_image</td>
+            <td>tiny_twitter_background_image</td>
+            <td>large_twitter_banner_image</td>
+            <td>medium_twitter_banner_image</td>
+            <td>tiny_twitter_banner_image</td>
+            <td>large_facebook_profile_image</td>
+            <td>medium_facebook_profile_image</td>
+            <td>tiny_facebook_profile_image</td>
+            <td>large_facebook_background_image</td>
+            <td>medium_facebook_background_image</td>
+            <td>tiny_facebook_background_image</td>
+        </tr>
+
+    {% for resized_images_for_one_organization in create_resized_images_for_organization %}
+        <tr>
+            <td>{{ forloop.counter }}</td>
+            <td>{{ resized_images_for_one_organization.organization_we_vote_id }}</td>
+            <td>
+                {% if resized_images_for_one_organization.cached_large_twitter_profile_image %}
+                    {{ resized_images_for_one_organization.cached_large_twitter_profile_image }}
+                {% else %}{% endif %}
+            </td>
+
+            <td>
+                {% if resized_images_for_one_organization.cached_medium_twitter_profile_image %}
+                    {{ resized_images_for_one_organization.cached_medium_twitter_profile_image }}
+                {% else %}{% endif %}
+            </td>
+            <td>
+                {% if resized_images_for_one_organization.cached_tiny_twitter_profile_image %}
+                    {{ resized_images_for_one_organization.cached_tiny_twitter_profile_image }}
+                {% else %}{% endif %}
+            </td>
+            <td>
+                {% if resized_images_for_one_organization.cached_large_twitter_background_image %}
+                    {{ resized_images_for_one_organization.cached_large_twitter_background_image }}
+                {% else %}{% endif %}
+            </td>
+
+            <td>
+                {% if resized_images_for_one_organization.cached_medium_twitter_background_image %}
+                    {{ resized_images_for_one_organization.cached_medium_twitter_background_image }}
+                {% else %}{% endif %}
+            </td>
+            <td>
+                {% if resized_images_for_one_organization.cached_tiny_twitter_background_image %}
+                    {{ resized_images_for_one_organization.cached_tiny_twitter_background_image }}
+                {% else %}{% endif %}
+            </td>
+            <td>
+                {% if resized_images_for_one_organization.cached_large_twitter_banner_image %}
+                    {{ resized_images_for_one_organization.cached_large_twitter_banner_image }}
+                {% else %}{% endif %}
+            </td>
+
+            <td>
+                {% if resized_images_for_one_organization.cached_medium_twitter_banner_image %}
+                    {{ resized_images_for_one_organization.cached_medium_twitter_banner_image }}
+                {% else %}{% endif %}
+            </td>
+            <td>
+                {% if resized_images_for_one_organization.cached_tiny_twitter_banner_image %}
+                    {{ resized_images_for_one_organization.cached_tiny_twitter_banner_image }}
+                {% else %}{% endif %}
+            </td>
+            <td>
+                {% if resized_images_for_one_organization.cached_large_facebook_profile_image %}
+                    {{ resized_images_for_one_organization.cached_large_facebook_profile_image }}
+                {% else %}{% endif %}
+            </td>
+
+            <td>
+                {% if resized_images_for_one_organization.cached_medium_facebook_profile_image %}
+                    {{ resized_images_for_one_organization.cached_medium_facebook_profile_image }}
+                {% else %}{% endif %}
+            </td>
+            <td>
+                {% if resized_images_for_one_organization.cached_tiny_facebook_profile_image %}
+                    {{ resized_images_for_one_organization.cached_tiny_facebook_profile_image }}
+                {% else %}{% endif %}
+            </td>
+            <td>
+                {% if resized_images_for_one_organization.cached_large_facebook_background_image %}
+                    {{ resized_images_for_one_organization.cached_large_facebook_background_image }}
+                {% else %}{% endif %}
+            </td>
+
+            <td>
+                {% if resized_images_for_one_organization.cached_medium_facebook_background_image %}
+                    {{ resized_images_for_one_organization.cached_medium_facebook_background_image }}
+                {% else %}{% endif %}
+            </td>
+            <td>
+                {% if resized_images_for_one_organization.cached_tiny_facebook_background_image %}
+                    {{ resized_images_for_one_organization.cached_tiny_facebook_background_image }}
+                {% else %}{% endif %}
+            </td>
+
+        </tr>
+    {% endfor %}
+
+    </table>
+{% else %}
+    <p>(no organization found)</p>
+{% endif %}
+<br />
+
+{% endblock %}

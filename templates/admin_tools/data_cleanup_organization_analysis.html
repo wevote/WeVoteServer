@@ -18,7 +18,7 @@
 <h1>Organization Analysis: {{ organization.organization_name  }}</h1>
 
     <p>
-    We Vote ID: {{ organization.we_vote_id }}<br />
+    We Vote ID: {{ organization.we_vote_id }} (<a href="{% url 'image:images_for_one_organization' organization.we_vote_id %}" target="_blank">See images</a> in new window)<br />
     Vote Smart ID: {{ organization.vote_smart_id }}<br />
     Website: <a href={{ organization.organization_website }} target="_blank">{{ organization.organization_website }}</a> (open in new window)<br />
     Voter from voter.linked_organization_we_vote_id: {% if organization.linked_voter %}

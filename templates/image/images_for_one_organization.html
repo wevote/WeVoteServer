@@ -1,22 +1,22 @@
-{# templates/image/images_for_one_voter.html #}
+{# templates/image/images_for_one_organization.html #}
 {% extends "template_base.html" %}
 
 {% block title %}
-    {% if voter_id %}{{ voter_id }}
-    {% else %}No Voter Found {% endif %}voter_id
+    {% if organization_we_vote_id %}Org we_vote_id: {{ organization_we_vote_id }}
+    {% else %}No Voter Found {% endif %}
 {% endblock %}
 
 {%  block content %}
-<a href="{% url 'admin_tools:data_cleanup_voter_list_analysis' %}">
-    < Back to Voter List Analysis</a><br />
+<a href="{% url 'admin_tools:data_cleanup_organization_list_analysis' %}">
+    < Back to Organization List Analysis</a><br />
 
-<a href="{% url 'image:cache_images_locally_for_all_voters' %}">< Back to Cache images locally for all voters</a>
+<a href="{% url 'image:cache_images_locally_for_all_organizations' %}">< Back to Cache images locally for all organizations</a>
 <br />
-<h1>Images for One Voter</h1>
+<h1>Images for One Organization{% if organization_we_vote_id %}: {{ organization.organization_name }}{% endif %}</h1>
 
-<a href="{% url 'image:create_resized_images_for_voters' voter_id %}" target="_blank">Create resized images for this voter</a><br />
+<a href="{% url 'image:create_resized_images_for_organization' organization_we_vote_id %}">Create resized images for this organization</a><br />
 
-{% if images_for_one_voter %}
+{% if images_for_one_organization %}
     <table border="1" cellpadding="10">
         <tr>
             <td></td>
@@ -26,10 +26,10 @@
             <td>we_vote_image_url</td>
         </tr>
 
-    {% for one_image_row in images_for_one_voter %}
+    {% for one_image_row in images_for_one_organization %}
         <tr>
             <td>{{ forloop.counter }}</td>
-            <td>{{ one_image_row.voter_we_vote_id }}</td>
+            <td>{{ one_image_row.organization_we_vote_id }}</td>
             <td>{{ one_image_row.display_kind_of_image }} / {{ one_image_row.display_image_size }}</td>
             <td>{% if one_image_row.display_image_size != "original" %}
                 {# Don't show image if too big #}
@@ -46,7 +46,7 @@
 
     </table>
 {% else %}
-    <p>(no voters found)</p>
+    <p>(no organization images found)</p>
 {% endif %}
 <br />
 
