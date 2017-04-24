@@ -42,6 +42,8 @@ class OrganizationManager(models.Manager):
     def create_organization_simple(self, organization_name, organization_website, organization_twitter_handle,
                                    organization_email='', organization_facebook='', organization_image=''):
         try:
+            if organization_twitter_handle is False or organization_twitter_handle == 'False':
+                organization_twitter_handle = ""
             organization = self.create(organization_name=organization_name,
                                        organization_website=organization_website,
                                        organization_twitter_handle=organization_twitter_handle,
@@ -58,6 +60,8 @@ class OrganizationManager(models.Manager):
         try:
             if not positive_value_exists(organization_name):
                 organization_name = ""
+            if organization_twitter_handle is False or organization_twitter_handle == 'False':
+                organization_twitter_handle = ""
             # TODO DALE We should stop saving organization_twitter_handle without saving a TwitterLinkToOrganization
             organization = Organization.create(organization_name=organization_name,
                                                organization_website=organization_website,
@@ -281,6 +285,8 @@ class OrganizationManager(models.Manager):
         organization_name = organization_name.strip() if organization_name else False
         organization_website = organization_website.strip() if organization_website else False
         # TODO DALE We should stop saving organization_twitter_handle without saving a TwitterLinkToOrganization
+        if organization_twitter_handle is False or organization_twitter_handle == 'False':
+            organization_twitter_handle = ""
         organization_twitter_handle = organization_twitter_handle.strip() if organization_twitter_handle else False
         organization_email = organization_email.strip() if organization_email else False
         organization_facebook = organization_facebook.strip() if organization_facebook else False
@@ -667,6 +673,8 @@ class OrganizationManager(models.Manager):
         status = "ENTERING_UPDATE_ORGANIZATION_SOCIAL_MEDIA"
         values_changed = False
 
+        if organization_twitter_handle is False or organization_twitter_handle == 'False':
+            organization_twitter_handle = ""
         organization_twitter_handle = organization_twitter_handle.strip() if organization_twitter_handle else False
         organization_facebook = organization_facebook.strip() if organization_facebook else False
         # organization_image = organization_image.strip() if organization_image else False
@@ -722,7 +730,11 @@ class OrganizationManager(models.Manager):
                     values_changed = True
             if 'screen_name' in twitter_json and positive_value_exists(twitter_json['screen_name']):
                 incoming_twitter_screen_name = str(twitter_json['screen_name'])
+                if incoming_twitter_screen_name is False or incoming_twitter_screen_name == 'False':
+                    incoming_twitter_screen_name = ""
                 organization_twitter_handle = str(organization.organization_twitter_handle)
+                if organization_twitter_handle is False or organization_twitter_handle == 'False':
+                    organization_twitter_handle = ""
                 if incoming_twitter_screen_name.lower() != organization_twitter_handle.lower():
                     organization.organization_twitter_handle = twitter_json['screen_name']
                     values_changed = True
@@ -1247,6 +1259,9 @@ class Organization(models.Model):
     @classmethod
     def create(cls, organization_name, organization_website, organization_twitter_handle, organization_email,
                organization_facebook, organization_image):
+        if organization_twitter_handle is False or organization_twitter_handle == 'False':
+            organization_twitter_handle = ""
+
         organization = cls(organization_name=organization_name,
                            organization_website=organization_website,
                            organization_twitter_handle=organization_twitter_handle,
