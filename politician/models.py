@@ -19,6 +19,17 @@ from wevote_functions.functions import convert_to_int, convert_to_political_part
 from wevote_settings.models import fetch_next_we_vote_id_last_politician_integer, fetch_site_unique_id_prefix
 
 
+FEMALE = 'F'
+GENDER_NEUTRAL = 'N'
+MALE = 'M'
+UNKNOWN = 'U'
+GENDER_CHOICES = (
+    (FEMALE, 'Female'),
+    (GENDER_NEUTRAL, 'Gender Neutral'),
+    (MALE, 'Male'),
+    (UNKNOWN, 'Unknown'),
+)
+
 logger = wevote_functions.admin.get_logger(__name__)
 
 
@@ -47,18 +58,6 @@ class Politician(models.Model):
     # This is the politician's name assembled from TheUnitedStatesIo first_name + last_name for quick search
     full_name_assembled = models.CharField(verbose_name="full name assembled from first_name + last_name",
                                            max_length=255, default=None, null=True, blank=True)
-
-    FEMALE = 'F'
-    GENDER_NEUTRAL = 'N'
-    MALE = 'M'
-    UNKNOWN = 'U'
-    GENDER_CHOICES = (
-        (FEMALE, 'Female'),
-        (GENDER_NEUTRAL, 'Gender Neutral'),
-        (MALE, 'Male'),
-        (UNKNOWN, 'Unknown'),
-    )
-
     gender = models.CharField("gender", max_length=1, choices=GENDER_CHOICES, default=UNKNOWN)
 
     birth_date = models.DateField("birth date", default=None, null=True, blank=True)
@@ -107,6 +106,7 @@ class Politician(models.Model):
                                                               blank=True, null=True)
     we_vote_hosted_profile_image_url_tiny = models.URLField(verbose_name='we vote hosted tiny image url',
                                                             blank=True, null=True)
+    ctcl_uuid = models.CharField(verbose_name="ctcl uuid", max_length=80, null=True, blank=True)
 
     # We override the save function so we can auto-generate we_vote_id
     def save(self, *args, **kwargs):

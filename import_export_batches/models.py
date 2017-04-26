@@ -9,6 +9,7 @@ import csv
 from django.db import models
 from organization.models import ORGANIZATION_TYPE_CHOICES, UNKNOWN, alphanumeric
 from position.models import POSITION, POSITION_CHOICES, NO_STANCE
+from politician.models import GENDER_CHOICES, UNKNOWN
 import urllib.request
 from voter_guide.models import ORGANIZATION_WORD
 import wevote_functions.admin
@@ -372,6 +373,39 @@ class BatchManager(models.Model):
             'status':                   status,
             'batch_row_action_found':   batch_row_action_found,
             'batch_row_action_office':  batch_row_action_office,
+        }
+        return results
+
+    def retrieve_batch_row_action_politician(self, batch_header_id, batch_row_id):
+        """
+        Retrieves data from BatchRowActionPolitician table
+        :param batch_header_id:
+        :param batch_row_id:
+        :return:
+        """
+
+        try:
+            batch_row_action_politician = BatchRowActionPolitician.objects.get(batch_header_id=batch_header_id,
+                                                                           batch_row_id=batch_row_id)
+            batch_row_action_found = True
+            success = True
+            status = "BATCH_ROW_ACTION_POLITICIAN_RETRIEVED"
+        except BatchDescription.DoesNotExist:
+            batch_row_action_politician = BatchRowActionPolitician()
+            batch_row_action_found = False
+            success = True
+            status = "BATCH_ROW_ACTION_POLITICIAN_NOT_FOUND"
+        except Exception as e:
+            batch_row_action_politician = BatchRowActionPolitician()
+            batch_row_action_found = False
+            success = False
+            status = "BATCH_ROW_ACTION_POLITICIAN_RETRIEVE_ERROR"
+
+        results = {
+            'success':                  success,
+            'status':                   status,
+            'batch_row_action_found':   batch_row_action_found,
+            'batch_row_action_politician':  batch_row_action_politician,
         }
         return results
 
@@ -746,7 +780,7 @@ class BatchManager(models.Model):
         first_line = True
         success = False
         status = ''
-        limit_for_testing = 5
+        limit_for_testing = 25
 
         # Get party names and their corresponding party ids
         party_details_list = retrieve_all_party_names_and_ids_api()
@@ -882,7 +916,7 @@ class BatchManager(models.Model):
                             batch_header_map_007='politician_phone_number',
                             batch_header_map_008='politician_website_url',
                             batch_header_map_009='politician_facebook_id',
-                            batch_header_map_010='politician_twitter_id',
+                            batch_header_map_010='politician_twitter_url',
                             batch_header_map_011='politician_youtube_id',
                             batch_header_map_012='politician_googleplus_id',
                             batch_header_map_013='politician_ctcl_uuid',
@@ -1373,7 +1407,7 @@ class BatchRowActionMeasure(models.Model):
         verbose_name="Page title on Ballotpedia", max_length=255, null=True, blank=True)
     ballotpedia_photo_url = models.URLField(verbose_name='url of ballotpedia logo', blank=True, null=True)
     ctcl_uuid = models.CharField(verbose_name="ctcl uuid", max_length=80, null=True, blank=True)
-    status = models.CharField(verbose_name="Batch Row Action Status", max_length=80, null=True, blank=True)
+    status = models.CharField(verbose_name="batch row action measure status", max_length=80, null=True, blank=True)
 
 
 class BatchRowActionOffice(models.Model):
@@ -1449,8 +1483,83 @@ class BatchRowActionOffice(models.Model):
     ctcl_uuid = models.CharField(verbose_name="ctcl uuid", max_length=80, null=True, blank=True)
     office_description = models.CharField(verbose_name="office description", max_length=255, null=True, blank=True)
     office_is_partisan = models.BooleanField(verbose_name='office is_partisan', default=False)
-    status = models.CharField(verbose_name="Batch Row Action Office Status", max_length=80, null=True, blank=True)
+    status = models.CharField(verbose_name="batch row action office status", max_length=80, null=True, blank=True)
 
+
+class BatchRowActionPolitician(models.Model):
+    """
+    The definition of the action for importing one Politician.
+    """
+    batch_header_id = models.PositiveIntegerField(verbose_name="unique id of header row", unique=False, null=False)
+    batch_row_id = models.PositiveIntegerField(verbose_name="unique id of batch row", unique=False, null=False)
+    kind_of_action = models.CharField(max_length=16, choices=KIND_OF_ACTION_CHOICES, default=TO_BE_DETERMINED)
+
+    # Fields from Politician
+    politician_we_vote_id = models.CharField(verbose_name="we vote permanent id of this politician", max_length=255,
+                                              default=None, null=True, blank=True, unique=True)
+    # See this url for properties: https://docs.python.org/2/library/functions.html#property
+    first_name = models.CharField(verbose_name="first name", max_length=255, default=None, null=True, blank=True)
+    middle_name = models.CharField(verbose_name="middle name", max_length=255, default=None, null=True, blank=True)
+    last_name = models.CharField(verbose_name="last name", max_length=255, default=None, null=True, blank=True)
+    politician_name = models.CharField(verbose_name="official full name", max_length=255, default=None, null=True,
+                                       blank=True)
+    # This is the politician's name from GoogleCivicCandidateCampaign
+    google_civic_candidate_name = models.CharField(verbose_name="full name from google civic", max_length=255,
+                                                   default=None, null=True, blank=True)
+    # This is the politician's name assembled from TheUnitedStatesIo first_name + last_name for quick search
+    full_name_assembled = models.CharField(verbose_name="full name assembled from first_name + last_name",
+                                           max_length=255, default=None, null=True, blank=True)
+    gender = models.CharField("gender", max_length=1, choices=GENDER_CHOICES, default=UNKNOWN)
+
+    birth_date = models.DateField("birth date", default=None, null=True, blank=True)
+    # race = enum?
+    # official_image_id = ??
+    bioguide_id = models.CharField(verbose_name="bioguide unique identifier", max_length=200, null=True, unique=True)
+    thomas_id = models.CharField(verbose_name="thomas unique identifier", max_length=200, null=True, unique=True)
+    lis_id = models.CharField(verbose_name="lis unique identifier", max_length=200, null=True, blank=True, unique=False)
+    govtrack_id = models.CharField(verbose_name="govtrack unique identifier", max_length=200, null=True, unique=True)
+    opensecrets_id = models.CharField(verbose_name="opensecrets unique identifier", max_length=200, null=True,
+                                      unique=False)
+    vote_smart_id = models.CharField(verbose_name="votesmart unique identifier", max_length=200, null=True,
+                                     unique=False)
+    fec_id = models.CharField(verbose_name="fec unique identifier", max_length=200, null=True, unique=True, blank=True)
+    cspan_id = models.CharField(verbose_name="cspan unique identifier", max_length=200, null=True, blank=True,
+                                unique=False)
+    wikipedia_id = models.CharField(verbose_name="wikipedia url", max_length=500, default=None, null=True, blank=True)
+    ballotpedia_id = models.CharField(verbose_name="ballotpedia url", max_length=500, default=None, null=True,
+                                      blank=True)
+    house_history_id = models.CharField(verbose_name="house history unique identifier", max_length=200, null=True,
+                                        blank=True)
+    maplight_id = models.CharField(verbose_name="maplight unique identifier", max_length=200, null=True, unique=True,
+                                   blank=True)
+    washington_post_id = models.CharField(verbose_name="washington post unique identifier", max_length=200, null=True,
+                                          unique=False)
+    icpsr_id = models.CharField(verbose_name="icpsr unique identifier", max_length=200, null=True, unique=False)
+    # The full name of the party the official belongs to.
+    political_party = models.CharField(verbose_name="politician political party", max_length=255, null=True)
+    state_code = models.CharField(verbose_name="politician home state", max_length=2, null=True)
+    politician_url = models.URLField(verbose_name='latest website url of politician', blank=True, null=True)
+
+    politician_twitter_handle = models.CharField(verbose_name='politician twitter screen_name', max_length=255,
+                                                  null=True, unique=False)
+    we_vote_hosted_profile_image_url_large = models.URLField(verbose_name='we vote hosted large image url',
+                                                             blank=True, null=True)
+    we_vote_hosted_profile_image_url_medium = models.URLField(verbose_name='we vote hosted medium image url',
+                                                              blank=True, null=True)
+    we_vote_hosted_profile_image_url_tiny = models.URLField(verbose_name='we vote hosted tiny image url', blank=True,
+                                                            null=True)
+    status = models.CharField(verbose_name="batch row action politician status", max_length=80, null=True, blank=True)
+    ctcl_uuid = models.CharField(verbose_name="ctcl uuid", max_length=80, null=True, blank=True)
+    politician_facebook_id = models.CharField(verbose_name='politician facebook user name', max_length=255, null=True,
+                                              unique=False)
+    politician_phone_number = models.CharField(verbose_name='politician phone number', max_length=255, null=True,
+                                               unique=False)
+    politician_googleplus_id = models.CharField(verbose_name='politician googleplus profile name', max_length=255,
+                                                null=True, unique=False)
+    politician_youtube_id = models.CharField(verbose_name='politician youtube profile name', max_length=255, null=True,
+                                             unique=False)
+    politician_email_address = models.CharField(verbose_name='politician email address', max_length=80, null=True,
+                                                unique=False)
 
 class BatchRowActionCandidate(models.Model):
     """
