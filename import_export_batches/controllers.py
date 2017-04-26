@@ -11,11 +11,12 @@ from position.models import PositionManager, PERCENT_RATING
 import requests
 from voter_guide.models import ORGANIZATION_WORD
 import wevote_functions.admin
-from wevote_functions.functions import convert_to_int, positive_value_exists
+from wevote_functions.functions import convert_to_int, positive_value_exists, extract_twitter_handle_from_text_string
 from .models import BatchManager, BatchDescription, BatchHeaderMap, BatchRow, BatchRowActionOrganization, \
-    BatchRowActionMeasure, BatchRowActionOffice
+    BatchRowActionMeasure, BatchRowActionOffice, BatchRowActionPolitician
 from measure.models import ContestMeasure
 from office.models import ContestOffice
+from politician.models import Politician
 from electoral_district.controllers import retrieve_electoral_district
 from exception.models import handle_exception
 
@@ -124,7 +125,14 @@ def create_batch_row_actions(batch_header_id, batch_row_id):
                     # batch_row_action_office = results['batch_row_action_office']
                     number_of_batch_actions_created += 1
                     success = True
+            elif kind_of_batch == POLITICIAN:
+                results = create_batch_row_action_politician(batch_description, batch_header_map, one_batch_row)
 
+                if results['new_action_politician_created']:
+                    # for now, do not handle batch_row_action_politician data
+                    # batch_row_action_politician = results['batch_row_action_politician']
+                    number_of_batch_actions_created += 1
+                    success = True
                 # Now check for warnings (like "this is a duplicate"). If warnings are found,
                 # add the warning to batch_row_action_measure entry
                 # batch_row_action_measure.kind_of_action = "TEST"
@@ -388,6 +396,148 @@ def create_batch_row_action_office(batch_description, batch_header_map, one_batc
         'status': status,
         'new_action_office_created': new_action_office_created,
         'batch_row_action_office': batch_row_action_office,
+    }
+    return results
+
+def create_batch_row_action_politician(batch_description, batch_header_map, one_batch_row):
+    """
+    Handle batch_row for politician type
+    :param batch_description:
+    :param batch_header_map:
+    :param one_batch_row:
+    :return:
+    """
+    batch_manager = BatchManager()
+
+    # new_action_politician_created = False
+    batch_row_action_politician_status = ''
+
+    # Find the column in the incoming batch_row with the header == politician_full_name
+    politician_name = batch_manager.retrieve_value_from_batch_row("politician_full_name", batch_header_map, one_batch_row)
+    # Find the column in the incoming batch_row with the header == ctcl_uuid
+    ctcl_uuid = batch_manager.retrieve_value_from_batch_row("politician_ctcl_uuid", batch_header_map, one_batch_row)
+    politician_twitter_url = batch_manager.retrieve_value_from_batch_row("politician_twitter_url", batch_header_map, one_batch_row)
+    facebook_id = batch_manager.retrieve_value_from_batch_row("politician_facebook_id", batch_header_map, one_batch_row)
+    party_name = batch_manager.retrieve_value_from_batch_row("politician_party_name", batch_header_map, one_batch_row)
+    first_name = batch_manager.retrieve_value_from_batch_row("politician_first_name", batch_header_map, one_batch_row)
+    middle_name = batch_manager.retrieve_value_from_batch_row("politician_middle_name", batch_header_map, one_batch_row)
+    last_name = batch_manager.retrieve_value_from_batch_row("politician_last_name", batch_header_map, one_batch_row)
+    website_url = batch_manager.retrieve_value_from_batch_row("politician_website_url", batch_header_map, one_batch_row)
+    email_address = batch_manager.retrieve_value_from_batch_row("politician_email_address", batch_header_map, one_batch_row)
+    youtube_id = batch_manager.retrieve_value_from_batch_row("politician_youtube_id", batch_header_map, one_batch_row)
+    googleplus_id = batch_manager.retrieve_value_from_batch_row("politician_googleplus_id", batch_header_map, one_batch_row)
+    phone_number = batch_manager.retrieve_value_from_batch_row("politician_phone_number", batch_header_map, one_batch_row)
+
+    # extract twitter handle from politician_twitter_url
+    politician_twitter_handle = extract_twitter_handle_from_text_string(politician_twitter_url)
+
+    kind_of_action = 'TBD'
+    single_politician_found = False
+    multiple_politicians_found = False
+    # First look up Politician table to see if an entry exists based on twitter_handle
+    if positive_value_exists(politician_twitter_handle):
+        try:
+            politician_query = Politician.objects.all()
+            politician_query = politician_query.filter(politician_twitter_handle__iexact=politician_twitter_handle)
+
+            politician_item_list = list(politician_query)
+            if len(politician_item_list):
+                # entry exists
+                batch_row_action_politician_status = 'BATCH_ROW_ACTION_POLITICIAN_RETRIEVED'
+                batch_row_action_found = True
+                new_action_politician_created = False
+                # success = True
+                # if a single entry matches, update that entry
+                if len(politician_item_list) == 1:
+                    kind_of_action = 'ADD_TO_EXISTING'
+                    single_politician_found = True
+                else:
+                    # more than one entry found with a match in Politician
+                    kind_of_action = 'DO_NOT_PROCESS'
+                    multiple_politicians_found = True
+            else:
+                # kind_of_action = 'CREATE'
+                single_politician_found = False
+        except Politician.DoesNotExist:
+            batch_row_action_politician = BatchRowActionPolitician()
+            batch_row_action_found = False
+            # success = True
+            batch_row_action_politician_status = "BATCH_ROW_ACTION_POLITICIAN_NOT_FOUND"
+            kind_of_action = 'TBD'
+    # twitter handle does not exist, next look up politician based on politician_name
+    if not single_politician_found and not multiple_politicians_found and positive_value_exists(politician_name):
+        try:
+            politician_query = Politician.objects.all()
+            politician_query = politician_query.filter(politician_name__iexact=politician_name)
+
+            politician_item_list = list(politician_query)
+            if len(politician_item_list):
+                # entry exists
+                batch_row_action_politician_status = 'BATCH_ROW_ACTION_POLITICIAN_RETRIEVED'
+                batch_row_action_found = True
+                new_action_politician_created = False
+                # success = True
+                # if a single entry matches, update that entry
+                if len(politician_item_list) == 1:
+                    single_politician_found = True
+                    kind_of_action = 'ADD_TO_EXISTING'
+                else:
+                    # more than one entry found with a match in Politician
+                    kind_of_action = 'DO_NOT_PROCESS'
+                    multiple_politicians_found = True
+            else:
+                single_politician_found = False
+        except Politician.DoesNotExist:
+            batch_row_action_politician = BatchRowActionPolitician()
+            single_politician_found = True
+            batch_row_action_found = False
+            # success = True
+            batch_row_action_politician_status = "BATCH_ROW_ACTION_POLITICIAN_NOT_FOUND"
+            kind_of_action = 'TBD'
+    if not positive_value_exists(politician_name) and not positive_value_exists(politician_twitter_handle):
+        kind_of_action = 'TBD'
+        batch_row_action_politician_status = "INSUFFICIENT_DATA_FOR_BATCH_ROW_ACTION_POLITICIAN_CREATE"
+    if not single_politician_found and not multiple_politicians_found:
+        kind_of_action = 'CREATE'
+    # Create a new entry in BatchRowActionPolitician
+    try:
+        updated_values = {
+            'politician_name': politician_name,
+            'first_name': first_name,
+            'middle_name': middle_name,
+            'last_name': last_name,
+            'political_party': party_name,
+            'ctcl_uuid': ctcl_uuid,
+            'politician_email_address': email_address,
+            'politician_phone_number': phone_number,
+            'politician_twitter_handle': politician_twitter_handle,
+            'politician_facebook_id': facebook_id,
+            'politician_googleplus_id': googleplus_id,
+            'politician_youtube_id': youtube_id,
+            'politician_url': website_url,
+            'kind_of_action': kind_of_action,
+            'status': batch_row_action_politician_status
+        }
+
+        batch_row_action_politician, new_action_politician_created = BatchRowActionPolitician.objects.update_or_create(
+            batch_header_id=batch_description.batch_header_id, batch_row_id=one_batch_row.id, defaults=updated_values)
+        # new_action_politician_created = True
+        success = True
+        status = "BATCH_ROW_ACTION_POLITICIAN_CREATED"
+
+    except Exception as e:
+        batch_row_action_politician = BatchRowActionPolitician()
+        batch_row_action_found = False
+        success = False
+        new_action_politician_created = False
+        status = "BATCH_ROW_ACTION_POLITICIAN_RETRIEVE_ERROR"
+        handle_exception(e, logger=logger, exception_message=status)
+
+    results = {
+        'success': success,
+        'status': status,
+        'new_action_politician_created': new_action_politician_created,
+        'batch_row_action_politician': batch_row_action_politician,
     }
     return results
 

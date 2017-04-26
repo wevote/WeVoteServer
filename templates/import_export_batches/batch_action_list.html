@@ -86,7 +86,7 @@
             {% if batch_header_map.batch_header_map_007 %}<th>{{ batch_header_map.batch_header_map_007 }}</th>{% endif %}
             {% if batch_header_map.batch_header_map_008 %}<th>{{ batch_header_map.batch_header_map_008 }}</th>{% endif %}
             {% if batch_header_map.batch_header_map_009 %}<th>{{ batch_header_map.batch_header_map_009 }}</th>{% endif %}
-            {% if batch_header_map.batch_header_map_0010 %}<th>{{ batch_header_map.batch_header_map_010 }}</th>{% endif %}
+            {% if batch_header_map.batch_header_map_010 %}<th>{{ batch_header_map.batch_header_map_010 }}</th>{% endif %}
             {% if batch_header_map.batch_header_map_011 %}<th>{{ batch_header_map.batch_header_map_011 }}</th>{% endif %}
             {% if batch_header_map.batch_header_map_012 %}<th>{{ batch_header_map.batch_header_map_012 }}</th>{% endif %}
             {% if batch_header_map.batch_header_map_013 %}<th>{{ batch_header_map.batch_header_map_013 }}</th>{% endif %}
@@ -165,6 +165,23 @@
                     <td></td>
                     <td>{{ one_batch_row.batch_row_action.kind_of_action }}</td>
                 </tr>
+                {% elif one_batch_row.kind_of_batch == "POLITICIAN" %}
+            {# ### POLITICIAN### #}
+                <tr>
+                    <th></th>
+                    <th>politician_name</th>
+                    <th>politician_twitter_handle</th>
+                    <th>ALERTS</th>
+                    <th>ACTIONS</th>
+                </tr>
+                <tr>
+                    <td>analysis:</td>
+                    <td>{{ one_batch_row.batch_row_action.politician_name}}</td>
+                    <td>{{ one_batch_row.batch_row_action.politician_twitter_handle}}</td>
+                    <td></td>
+                    <td>{{ one_batch_row.batch_row_action.kind_of_action }}</td>
+                </tr>
+
             {% endif %}
             </table></td>
         </tr>

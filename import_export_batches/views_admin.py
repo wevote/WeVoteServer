@@ -236,6 +236,16 @@ def batch_action_list_view(request):
                 else:
                     one_batch_row.batch_row_action_exists = False
                 modified_batch_row_list.append(one_batch_row)
+            elif kind_of_batch == POLITICIAN:
+                existing_results = batch_manager.retrieve_batch_row_action_politician(batch_header_id, one_batch_row.id)
+                if existing_results['batch_row_action_found']:
+                    one_batch_row.batch_row_action = existing_results['batch_row_action_politician']
+                    one_batch_row.kind_of_batch = POLITICIAN
+                    one_batch_row.batch_row_action_exists = True
+                else:
+                    one_batch_row.batch_row_action_exists = False
+                modified_batch_row_list.append(one_batch_row)
+
 
     election_list = Election.objects.order_by('-election_day_text')
     messages_on_stage = get_messages(request)
