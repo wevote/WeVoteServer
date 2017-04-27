@@ -206,9 +206,8 @@ Create a file on your computer to match the one expected in the environment_vari
 As configured in github, only errors get written to the log.
 Logging has five levels: CRITICAL, ERROR, INFO, WARN, DEBUG.
 It works as a hierarchy (i.e. INFO picks up all messages logged as INFO, ERROR and CRITICAL), and when logging we
-specify the level assigned to each message. You can change this to info items by changing this:
-
-    LOG_FILE_LEVEL = logging.INFO
+specify the level assigned to each message. You can change this to info items by changing the LOG_FILE_LEVEL variable 
+in the config/environment_variables.json file to "INFO".
 
 ## Set up GeoIP
 
