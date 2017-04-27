@@ -14,8 +14,10 @@
 
     <a href="{% url 'import_export_batches:batch_list' %}?kind_of_batch=MEASURE&google_civic_election_id={{ google_civic_election_id }}">
         Measure</a> -
-    <a href="{% url 'import_export_batches:batch_list' %}?kind_of_batch=OFFICE&google_civic_election_id={{ google_civic_election_id }}">
-        Office</a> -
+    <a href="{% url 'import_export_batches:batch_list' %}?kind_of_batch=ELECTED_OFFICE&google_civic_election_id={{ google_civic_election_id }}">
+        Elected Office</a> -
+    <a href="{% url 'import_export_batches:batch_list' %}?kind_of_batch=CONTEST_OFFICE&google_civic_election_id={{ google_civic_election_id }}">
+        Contest Office</a> -
     <a href="{% url 'import_export_batches:batch_list' %}?kind_of_batch=CANDIDATE&google_civic_election_id={{ google_civic_election_id }}">
         Candidate</a> -
     <a href="{% url 'import_export_batches:batch_list' %}?kind_of_batch=ORGANIZATION&google_civic_election_id={{ google_civic_election_id }}">
@@ -29,8 +31,10 @@
     <h1>
     {% if kind_of_batch == "MEASURE" %}
         Process Measure Data
-    {% elif kind_of_batch == "OFFICE" %}
-        Process Office Data
+    {% elif kind_of_batch == "ELECTED_OFFICE" %}
+        Process Elected Office Data
+    {% elif kind_of_batch == "CONTEST_OFFICE" %}
+        Process Contest Office Data
     {% elif kind_of_batch == "CANDIDATE" %}
         Process Candidate Data
     {% elif kind_of_batch == "ORGANIZATION" %}
@@ -110,6 +114,7 @@
             {% if batch_header_map.batch_header_map_013 %}<td>{{ one_batch_row.batch_row_013 }}</td>{% endif %}
             {% if not one_batch_row.batch_row_action_exists %}<td>    <a href="{% url 'import_export_batches:batch_action_list_process' %}?batch_header_id={{ batch_header_id }}&batch_row_id={{ one_batch_row.id }}">
         Analyze</a>
+            {%elif one_batch_row.kind_of_batch == "ELECTED_OFFICE" %}<td>    <a href="{% url 'import_export_batches:batch_action_list_process_import' %}?batch_header_id={{ batch_header_id }}&&batch_row_id={{ one_batch_row.id }}">  Import into ElectedOffice Table</a>
 </td>{% endif %}
         </tr>
         {% if one_batch_row.batch_row_action_exists %}
@@ -149,18 +154,18 @@
                     <td></td>
                     <td>{{ one_batch_row.batch_row_action.kind_of_action }}</td>
                 </tr>
-                {% elif one_batch_row.kind_of_batch == "OFFICE" %}
+                {% elif one_batch_row.kind_of_batch == "ELECTED_OFFICE" %}
             {# ### OFFICE### #}
                 <tr>
                     <th></th>
-                    <th>office_name</th>
+                    <th>elected_office_name</th>
                     <th>state_code</th>
                     <th>ALERTS</th>
                     <th>ACTIONS</th>
                 </tr>
                 <tr>
                     <td>analysis:</td>
-                    <td>{{ one_batch_row.batch_row_action.office_name}}</td>
+                    <td>{{ one_batch_row.batch_row_action.elected_office_name}}</td>
                     <td>{{ one_batch_row.batch_row_action.state_code }}</td>
                     <td></td>
                     <td>{{ one_batch_row.batch_row_action.kind_of_action }}</td>

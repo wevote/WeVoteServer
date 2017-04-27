@@ -10,8 +10,10 @@
 
 <p><a href="{% url 'import_export_batches:batch_list' %}?kind_of_batch=MEASURE&google_civic_election_id={{ google_civic_election_id }}">
     Import Measures</a></p>
-<p><a href="{% url 'import_export_batches:batch_list' %}?kind_of_batch=OFFICE&google_civic_election_id={{ google_civic_election_id }}">
-    Import Offices</a></p>
+<p><a href="{% url 'import_export_batches:batch_list' %}?kind_of_batch=ELECTED_OFFICE&google_civic_election_id={{ google_civic_election_id }}">
+    Import Elected Offices</a></p>
+<p><a href="{% url 'import_export_batches:batch_list' %}?kind_of_batch=CONTEST_OFFICE&google_civic_election_id={{ google_civic_election_id }}">
+    Import Contest Offices</a></p>
 <p><a href="{% url 'import_export_batches:batch_list' %}?kind_of_batch=CANDIDATE&google_civic_election_id={{ google_civic_election_id }}">
     Import Candidates</a></p>
 <p><a href="{% url 'import_export_batches:batch_list' %}?kind_of_batch=ORGANIZATION&google_civic_election_id={{ google_civic_election_id }}">
