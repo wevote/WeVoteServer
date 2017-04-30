@@ -281,12 +281,12 @@ Transfer it to the live API server:
 
 ## Setup - Database Creation
 
-If you would like to match the local database settings from the "config/environment_variables.json" file,
-(Search for "DATABASES"):
+Set up a new database that matches the local database settings from the "config/environment_variables.json" file,
+(Search for "DATABASES"). Using the database tool you prefer create the following Database.
 
-    $ createdb WeVoteServerDB
+    WeVoteServerDB
 
-Populate your database with the latest database tables:
+Populate your database with the latest database tables using these terminal commands:
 
     $ python manage.py makemigrations
     $ python manage.py migrate
