@@ -7,7 +7,7 @@ from .models import BALLOT_ADDRESS, fetch_voter_id_from_voter_device_link, Voter
 from django.http import HttpResponse
 from email_outbound.controllers import move_email_address_entries_to_another_voter
 from email_outbound.models import EmailManager
-from follow.controllers import move_follow_entries_to_another_voter, move_organization_followers_to_another_organization
+from follow.controllers import move_follow_entries_to_another_voter
 from friend.controllers import fetch_friend_invitation_recipient_voter_we_vote_id, friend_accepted_invitation_send, \
     move_friend_invitations_to_another_voter, move_friends_to_another_voter
 from friend.models import FriendManager
@@ -20,6 +20,7 @@ from position.controllers import move_positions_to_another_voter
 from twitter.models import TwitterLinkToVoter, TwitterUserManager
 import wevote_functions.admin
 from wevote_functions.functions import generate_voter_device_id, is_voter_device_id_valid, positive_value_exists
+from donate.controllers import donation_history_for_a_voter
 
 logger = wevote_functions.admin.get_logger(__name__)
 
@@ -1224,6 +1225,7 @@ def voter_retrieve_for_api(voter_device_id):  # voterRetrieve
                     except Exception as e:
                         status += "UNABLE_TO_CREATE_NEW_ORGANIZATION_TO_VOTER_FROM_RETRIEVE_VOTER "
 
+        donation_list = donation_history_for_a_voter(voter.we_vote_id)
         json_data = {
             'status':                           status,
             'success':                          True,
@@ -1254,7 +1256,8 @@ def voter_retrieve_for_api(voter_device_id):  # voterRetrieve
                 if positive_value_exists(voter.we_vote_hosted_profile_image_url_large)
                 else voter.voter_photo_url(),
             'voter_photo_url_medium':           voter.we_vote_hosted_profile_image_url_medium,
-            'voter_photo_url_tiny':             voter.we_vote_hosted_profile_image_url_tiny
+            'voter_photo_url_tiny':             voter.we_vote_hosted_profile_image_url_tiny,
+            'voter_donation_history_list':      donation_list
         }
         return json_data
 

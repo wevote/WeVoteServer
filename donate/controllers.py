@@ -17,7 +17,6 @@ def donation_with_stripe_for_api(request, token, email, donation_amount, monthly
 
     donation_manager = DonationManager()
     success = False
-    saved_stripe_customer_id = False
     saved_stripe_donation = False
     donation_entry_saved = False
     donation_date_time = datetime.today()
@@ -25,12 +24,38 @@ def donation_with_stripe_for_api(request, token, email, donation_amount, monthly
     action_taken = 'VOTER_SUBMITTED_DONATION'
     action_taken_date_time = donation_date_time
     charge_id = ''
+    amount = 0
+    currency = ''
     stripe_customer_id = ''
     subscription_saved = 'NOT_APPLICABLE'
     status = ''
     charge_processed_successfully = bool
     error_text_description = ''
     error_message = ''
+    one_time_donation = True
+    subscription_id = ''
+    funding = ''
+    livemode = False
+    created = 0
+    failure_code = ''
+    failure_message = ''
+    network_status = ''
+    reason = ''
+    seller_message = ''
+    stripe_type = ''
+    paid = ''
+    amount_refunded = 0
+    refund_count = 0
+    name = ''
+    address_zip = ''
+    brand = ''
+    country = ''
+    exp_month = ''
+    exp_year = ''
+    last4 = ''
+    id_card = ''
+    stripe_object = ''
+    stripe_status = ''
 
     ip_address = get_ip_from_headers(request)
 
@@ -92,25 +117,56 @@ def donation_with_stripe_for_api(request, token, email, donation_amount, monthly
                 subscription_saved = recurring_donation['voter_subscription_saved']
                 status += recurring_donation['status']
                 success = recurring_donation['success']
+                one_time_donation = False
+                subscription_id = recurring_donation['subscription_id']
                 charge_processed_successfully = recurring_donation['success']
-            else:
-                charge = stripe.Charge.create(
-                    amount=donation_amount,
-                    currency="usd",
-                    customer=stripe_customer_id
-                )
-                status = 'STRIPE_CHARGE_SUCCESSFUL'
-                charge_id = charge.id
-                success = positive_value_exists(charge_id)
-                charge_processed_successfully = positive_value_exists(charge_id)
+                # TODO April 2017: Following lines were not being executed if recurring, but what we want to do is make
+                # record, and make a charge record for the first payment.
+                # Previous 3 code lines will do nothing, need to rethink
 
-        if charge_processed_successfully:
+            charge = stripe.Charge.create(
+                amount=donation_amount,
+                currency="usd",
+                customer=stripe_customer_id
+            )
+            status = 'STRIPE_CHARGE_SUCCESSFUL'
+            charge_id = charge.id
+            success = positive_value_exists(charge_id)
+
+        if positive_value_exists(charge_id):
             saved_donation = donation_manager.create_donation_from_voter(stripe_customer_id, voter_we_vote_id,
                                                                          donation_amount, email,
                                                                          donation_date_time, charge_id,
                                                                          charge_processed_successfully)
             saved_stripe_donation = saved_donation['success']
             donation_status = saved_donation['status'] + ' DONATION_PROCESSED_SUCCESSFULLY '
+            stripe_detail = stripe.Charge.retrieve(charge_id)
+            amount = stripe_detail['amount']
+            currency = stripe_detail['currency']
+            amount_refunded = stripe_detail['amount_refunded']
+            funding = stripe_detail['source']['funding']
+            livemode = stripe_detail['livemode']
+            utc_dt = datetime.utcfromtimestamp(stripe_detail['created'])
+            created = utc_dt.isoformat()
+            failure_code = str(stripe_detail['failure_code'])
+            failure_message = str(stripe_detail['failure_message'])
+            network_status = stripe_detail['outcome']['network_status']
+            reason = str(stripe_detail['outcome']['reason'])
+            seller_message = stripe_detail['outcome']['seller_message']
+            stripe_type = stripe_detail['outcome']['type']
+            paid = str(stripe_detail['paid'])
+            amount_refunded = stripe_detail['amount_refunded']
+            refund_count = stripe_detail['refunds']['total_count']
+            name = stripe_detail['source']['name']
+            address_zip = stripe_detail['source']['address_zip']
+            brand = stripe_detail['source']['brand']
+            country = stripe_detail['source']['country']
+            exp_month = stripe_detail['source']['exp_month']
+            exp_year = stripe_detail['source']['exp_year']
+            last4 = int(stripe_detail['source']['last4'])
+            id_card = stripe_detail['source']['id']
+            stripe_object = stripe_detail['source']['object']
+            stripe_status = stripe_detail['status']
 
     except stripe.error.CardError as e:
         body = e.json_body
@@ -140,13 +196,22 @@ def donation_with_stripe_for_api(request, token, email, donation_amount, monthly
         error_message = 'Your payment was unsuccessful. Please try again later.'
 
     result_taken = donation_status  # TODO: Update this to match "action_result" below
+    action_result = donation_status  # TODO: Update this to match "action_result" below
     result_taken_date_time = donation_date_time
 
+    # steve:  These are good, will need to be expanded when webhooks are setup, to indicate recurring payments etc
     # action_taken should be VOTER_SUBMITTED_DONATION, VOTER_CANCELED_DONATION or CANCEL_REQUEST_SUBMITTED
     # action_result should be CANCEL_REQUEST_FAILED, CANCEL_REQUEST_SUCCEEDED or DONATION_PROCESSED_SUCCESSFULLY
     donation_log_results = donation_manager.create_donation_log_entry(
         ip_address, stripe_customer_id, voter_we_vote_id, charge_id, action_taken, action_taken_date_time,
         result_taken, result_taken_date_time, error_text_description, error_message)
+
+    donation_history_results = donation_manager.create_donation_history_entry(
+        ip_address, stripe_customer_id, voter_we_vote_id, charge_id, amount, currency, one_time_donation,
+        subscription_id, funding, livemode, action_taken, action_result, created, failure_code, failure_message,
+        network_status, reason, seller_message, stripe_type, paid, amount_refunded, refund_count, name, address_zip,
+        brand, country, exp_month, exp_year, last4, id_card, stripe_object, stripe_status, status)
+
     donation_entry_saved = donation_log_results['success']
 
     results = {
@@ -159,7 +224,6 @@ def donation_with_stripe_for_api(request, token, email, donation_amount, monthly
         'monthly_donation': monthly_donation,
         'subscription': subscription_saved,
         'error_message_for_voter': error_message
-
     }
 
     return results
@@ -175,3 +239,30 @@ def translate_stripe_error_to_voter_explanation_text(donation_http_status, error
         error_message_for_voter = generic_voter_error_message
 
     return error_message_for_voter
+
+
+# Get a list of all prior donations by the voter that is associated with this voter_we_vote_id
+# If they donated without logging in they are out of luck for tracking past donations
+def donation_history_for_a_voter(voter_we_vote_id):
+    donation_manager = DonationManager()
+    donation_list = donation_manager.retrieve_donation_history_list(voter_we_vote_id)
+
+    simple_donation_list = []
+    for donation_row in donation_list['voters_donation_list']:
+        row = donation_row
+        json_data = {
+            'created': str(row[0].isoformat()),
+            'amount': row[1],
+            'currency': row[2],
+            'one_time_donation': row[3],
+            'brand': row[4],
+            'exp_month': row[5],
+            'exp_year': row[6],
+            'last4': row[7],
+            'stripe_status': row[8],
+            'charge_id': row[9]
+        }
+
+        simple_donation_list.append(json_data)
+
+    return simple_donation_list
