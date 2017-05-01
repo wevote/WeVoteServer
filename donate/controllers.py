@@ -240,16 +240,14 @@ def translate_stripe_error_to_voter_explanation_text(donation_http_status, error
 
     return error_message_for_voter
 
+
 # Get a list of all prior donations by the voter that is associated with this voter_we_vote_id
 # If they donated without logging in they are out of luck for tracking past donations
 def donation_history_for_a_voter(voter_we_vote_id):
     donation_manager = DonationManager()
     donation_list = donation_manager.retrieve_donation_history_list(voter_we_vote_id)
 
-    i = 0
     simple_donation_list = []
-    element_tuple = []
-    names = ['created','amount','currency','one_time_donation','brand','exp_month','exp_year','last4','stripe_status','charge_id']
     for donation_row in donation_list['voters_donation_list']:
         row = donation_row
         json_data = {
@@ -266,6 +264,5 @@ def donation_history_for_a_voter(voter_we_vote_id):
         }
 
         simple_donation_list.append(json_data)
-
 
     return simple_donation_list
