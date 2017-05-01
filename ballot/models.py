@@ -119,14 +119,14 @@ class BallotItemManager(models.Model):
         contest_or_measure_identifier_found = required_office_ids_found or required_measure_ids_found
         if not contest_or_measure_identifier_found:
             success = False
-            status = 'MISSING_SUFFICIENT_OFFICE_OR_MEASURE_IDS'
+            status = 'MISSING_SUFFICIENT_OFFICE_OR_MEASURE_IDS '
         # If here, then we know that there are sufficient office or measure ids
         elif not google_civic_election_id:
             success = False
-            status = 'MISSING_GOOGLE_CIVIC_ELECTION_ID'
+            status = 'MISSING_GOOGLE_CIVIC_ELECTION_ID '
         elif not voter_id:
             success = False
-            status = 'MISSING_VOTER_ID'
+            status = 'MISSING_VOTER_ID '
         else:
             try:
                 # Use get_or_create to see if a ballot item exists
@@ -167,15 +167,15 @@ class BallotItemManager(models.Model):
                     ballot_item_on_stage.save()
 
                     success = True
-                    status = 'BALLOT_ITEM_UPDATED'
+                    status = 'BALLOT_ITEM_UPDATED '
                 else:
                     success = True
-                    status = 'BALLOT_ITEM_CREATED'
+                    status = 'BALLOT_ITEM_CREATED '
 
             except BallotItemManager.MultipleObjectsReturned as e:
                 handle_record_found_more_than_one_exception(e, logger=logger)
                 success = False
-                status = 'MULTIPLE_MATCHING_BALLOT_ITEMS_FOUND'
+                status = 'MULTIPLE_MATCHING_BALLOT_ITEMS_FOUND '
                 exception_multiple_object_returned = True
 
         results = {
@@ -484,17 +484,21 @@ class BallotItemListManager(models.Model):
         return 0
 
     def copy_ballot_items(self, ballot_returned, to_voter_id):
-
+        status = ""
         # Get all ballot items from the reference ballot_returned
         if positive_value_exists(ballot_returned.polling_location_we_vote_id):
             retrieve_results = self.retrieve_all_ballot_items_for_polling_location(
                 ballot_returned.polling_location_we_vote_id, ballot_returned.google_civic_election_id)
+            status += retrieve_results['status']
         else:
             retrieve_results = self.retrieve_all_ballot_items_for_voter(ballot_returned.voter_id,
                                                                         ballot_returned.google_civic_election_id)
+            status += retrieve_results['status']
         if not retrieve_results['ballot_item_list_found']:
             error_results = {
-                'ballot_returned_copied': False,
+                'ballot_returned_copied':   False,
+                'success':                  False,
+                'status':                   status,
             }
             return error_results
 
@@ -508,9 +512,13 @@ class BallotItemListManager(models.Model):
                 ballot_item.ballot_item_display_name, ballot_item.measure_subtitle, ballot_item.local_ballot_order,
                 ballot_item.contest_office_id, ballot_item.contest_office_we_vote_id,
                 ballot_item.contest_measure_id, ballot_item.contest_measure_we_vote_id)
+            if not create_results['success']:
+                status += create_results['status']
 
         results = {
-            'ballot_returned_copied': True,
+            'ballot_returned_copied':   True,
+            'success':                  True,
+            'status':                   status,
         }
         return results
 
