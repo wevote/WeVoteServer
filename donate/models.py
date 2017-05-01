@@ -440,7 +440,7 @@ class DonationManager(models.Model):
                                                                                   voter_we_vote_id=voter_we_vote_id,
                                                                                   donation_plan_id=donation_plan_id,
                                                                                   start_date_time=start_date_time,
-                                                                                  donation_amount=start_date_time,
+                                                                                  donation_amount=donation_amount,
                                                                                   subscription_id=subscription_id,
                                                                                   ended_at=ended_at,
                                                                                   canceled_at=canceled_at,
