@@ -54,7 +54,6 @@ def voter_retrieve_doc_template_values(url_root):
                    '  "facebook_email": string,\n' \
                    '  "facebook_profile_image_url_https": string,\n' \
                    '  "full_name": string,\n' \
-                   '  "full_name": string,\n' \
                    '  "first_name": string,\n' \
                    '  "last_name": string,\n' \
                    '  "twitter_screen_name": string,\n' \
