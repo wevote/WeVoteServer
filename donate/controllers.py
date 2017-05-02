@@ -249,20 +249,18 @@ def donation_history_for_a_voter(voter_we_vote_id):
 
     simple_donation_list = []
     for donation_row in donation_list['voters_donation_list']:
-        row = donation_row
         json_data = {
-            'created': str(row[0].isoformat()),
-            'amount': row[1],
-            'currency': row[2],
-            'one_time_donation': row[3],
-            'brand': row[4],
-            'exp_month': row[5],
-            'exp_year': row[6],
-            'last4': row[7],
-            'stripe_status': row[8],
-            'charge_id': row[9]
+            'created': str(donation_row.created),
+            'amount': donation_row.amount,
+            'currency': donation_row.currency,
+            'one_time_donation': donation_row.one_time_donation,
+            'brand': donation_row.brand,
+            'exp_month': donation_row.exp_month,
+            'exp_year': donation_row.exp_year,
+            'last4': donation_row.last4,
+            'stripe_status': donation_row.stripe_status,
+            'charge_id': donation_row.charge_id
         }
-
         simple_donation_list.append(json_data)
 
     return simple_donation_list

@@ -557,9 +557,7 @@ class DonationManager(models.Model):
         status = ''
 
         try:
-            donation_queryset = DonationHistory.objects.values_list('created', 'amount', 'currency',
-                                                                    'one_time_donation', 'brand', 'exp_month',
-                                                                    'exp_year', 'last4', 'stripe_status', 'charge_id')
+            donation_queryset = DonationHistory.objects.all()
             donation_queryset = donation_queryset.filter(voter_we_vote_id=we_vote_id)
             voters_donation_list = donation_queryset
 
