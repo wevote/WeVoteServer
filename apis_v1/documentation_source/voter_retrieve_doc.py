@@ -83,6 +83,7 @@ def voter_retrieve_doc_template_values(url_root):
                    '    "stripe_status" : string,\n' \
                    '    "charge_id" : string,\n' \
                    '   ]\n' \
+                   '  "interface_status_flags": integer,\n' \
                    '}'
 
     template_values = {
