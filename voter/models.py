@@ -18,6 +18,7 @@ from wevote_settings.models import fetch_next_we_vote_id_last_voter_integer, fet
 
 
 logger = wevote_functions.admin.get_logger(__name__)
+SUPPORT_OPPOSE_MODAL_SHOWN = 1
 
 
 # This way of extending the base user described here:
@@ -789,7 +790,9 @@ class VoterManager(BaseUserManager):
 
     def update_voter(self, voter_id, facebook_email, facebook_profile_image_url_https,
                      first_name, middle_name, last_name,
-                     twitter_profile_image_url_https, we_vote_hosted_profile_image_url_large=None,
+                     flag_integer_to_set, flag_integer_to_unset,
+                     twitter_profile_image_url_https,
+                     we_vote_hosted_profile_image_url_large=None,
                      we_vote_hosted_profile_image_url_medium=None, we_vote_hosted_profile_image_url_tiny=None):
         voter_updated = False
         results = self.retrieve_voter(voter_id)
@@ -826,6 +829,12 @@ class VoterManager(BaseUserManager):
                 if positive_value_exists(we_vote_hosted_profile_image_url_tiny):
                     voter.we_vote_hosted_profile_image_url_tiny = we_vote_hosted_profile_image_url_tiny
                     should_save_voter = True
+                if flag_integer_to_set is not False:
+                    voter.set_interface_status_flags(flag_integer_to_set)
+                    should_save_voter = True
+                if flag_integer_to_unset is not False:
+                    voter.unset_interface_status_flags(flag_integer_to_unset)
+                    should_save_voter = True
                 if should_save_voter:
                     voter.save()
                     voter_updated = True
@@ -844,10 +853,10 @@ class VoterManager(BaseUserManager):
             voter_updated = False
 
         results = {
-            'status':           status,
-            'success':          success,
-            'voter':            voter,
-            'voter_updated':    voter_updated,
+            'status':                       status,
+            'success':                      success,
+            'voter':                        voter,
+            'voter_updated':                voter_updated,
         }
         return results
 
@@ -1030,6 +1039,12 @@ class Voter(AbstractBaseUser):
     twitter_access_token = models.TextField(verbose_name='twitter access token', null=True, blank=True)
     twitter_access_secret = models.TextField(verbose_name='twitter access secret', null=True, blank=True)
     twitter_connection_active = models.BooleanField(default=False)
+
+    # Interface Status Flags is a positive integer, when represented as a stream of bits,
+    # each bit maps to a status of a variable's boolean value
+    # for eg. the first bit(rightmost bit) = 1 means, the SUPPORT_OPPOSE_MODAL_SHOWN_BIT has been shown
+    # more constants at top of this file
+    interface_status_flags = models.PositiveIntegerField(verbose_name="interface status flags", default=0)
 
     # Custom We Vote fields
 #     image_displayed
@@ -1221,6 +1236,16 @@ class Voter(AbstractBaseUser):
         if self.email_ownership_is_verified:
             return True
         return False
+
+    # for every bit set in flag_integer_to_set,
+    # corresponding bits in self.interface_status_flags will be set
+    def set_interface_status_flags(self, flag_integer_to_set):
+        self.interface_status_flags = flag_integer_to_set | self.interface_status_flags
+
+    # for every bit set in flag_integer_to_unset,
+    # corresponding bits in self.interface_status_flags will be unset
+    def unset_interface_status_flags(self, flag_integer_to_unset):
+        self.interface_status_flags = ~flag_integer_to_unset & self.interface_status_flags
 
 
 class VoterDeviceLink(models.Model):

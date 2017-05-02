@@ -2684,6 +2684,27 @@ def voter_update_view(request):  # voterUpdate
     except KeyError:
         twitter_profile_image_url_https = False
 
+    try:
+        interface_status_flags = request.GET['interface_status_flags']
+        interface_status_flags = interface_status_flags.strip()
+        interface_status_flags = convert_to_int(interface_status_flags)
+    except KeyError:
+        interface_status_flags = False
+
+    try:
+        flag_integer_to_set = request.GET['flag_integer_to_set']
+        flag_integer_to_set = flag_integer_to_set.strip()
+        flag_integer_to_set = convert_to_int(flag_integer_to_set)
+    except KeyError:
+        flag_integer_to_set = False
+
+    try:
+        flag_integer_to_unset = request.GET['flag_integer_to_unset']
+        flag_integer_to_unset = flag_integer_to_unset.strip()
+        flag_integer_to_unset = convert_to_int(flag_integer_to_unset)
+    except KeyError:
+        flag_integer_to_unset = False
+
     device_id_results = is_voter_device_id_valid(voter_device_id)
     if not device_id_results['success']:
         json_data = {
@@ -2697,6 +2718,9 @@ def voter_update_view(request):  # voterUpdate
                 'last_name':                        last_name,
                 'twitter_profile_image_url_https':  twitter_profile_image_url_https,
                 'voter_updated':                    voter_updated,
+                'interface_status_flags':           interface_status_flags,
+                'flag_integer_to_set':              flag_integer_to_set,
+                'flag_integer_to_unset':            flag_integer_to_unset,
             }
         response = HttpResponse(json.dumps(json_data), content_type='application/json')
         return response
@@ -2704,6 +2728,8 @@ def voter_update_view(request):  # voterUpdate
     at_least_one_variable_has_changed = True if \
         facebook_email or facebook_profile_image_url_https \
         or first_name or middle_name or last_name \
+        or interface_status_flags or flag_integer_to_unset \
+        or flag_integer_to_set \
         else False
 
     if not at_least_one_variable_has_changed:
@@ -2718,6 +2744,9 @@ def voter_update_view(request):  # voterUpdate
                 'last_name':                        last_name,
                 'twitter_profile_image_url_https':  twitter_profile_image_url_https,
                 'voter_updated':                    voter_updated,
+                'interface_status_flags':           interface_status_flags,
+                'flag_integer_to_set':              flag_integer_to_set,
+                'flag_integer_to_unset':            flag_integer_to_unset,
             }
         response = HttpResponse(json.dumps(json_data), content_type='application/json')
         return response
@@ -2737,6 +2766,9 @@ def voter_update_view(request):  # voterUpdate
             'last_name':                        last_name,
             'twitter_profile_image_url_https':  twitter_profile_image_url_https,
             'voter_updated':                    voter_updated,
+            'interface_status_flags':           interface_status_flags,
+            'flag_integer_to_set':              flag_integer_to_set,
+            'flag_integer_to_unset':            flag_integer_to_unset,
         }
         response = HttpResponse(json.dumps(json_data), content_type='application/json')
         return response
@@ -2748,6 +2780,7 @@ def voter_update_view(request):  # voterUpdate
 
     if twitter_profile_image_url_https:
         # Cache original and resized images
+        # TODO: Replace voter.twitter_id with value from twitter link to voter
         cache_results = cache_original_and_resized_image(
             voter_we_vote_id=voter.we_vote_id,
             twitter_id=voter.twitter_id,
@@ -2763,6 +2796,7 @@ def voter_update_view(request):  # voterUpdate
 
     if facebook_profile_image_url_https:
         # Cache original and resized images
+        # TODO: Replace voter.facebook_id with value from facebook link to voter
         cache_results = cache_original_and_resized_image(
             voter_we_vote_id=voter.we_vote_id,
             facebook_user_id=voter.facebook_id,
@@ -2778,10 +2812,11 @@ def voter_update_view(request):  # voterUpdate
     # At this point, we have a valid voter
     voter_manager = VoterManager()
     results = voter_manager.update_voter(voter_id, facebook_email, facebook_profile_image_url_https,
-                                         first_name, middle_name, last_name, twitter_profile_image_url_https,
-                                         we_vote_hosted_profile_image_url_large,
+                                         first_name, middle_name, last_name,
+                                         flag_integer_to_set, flag_integer_to_unset,
+                                         twitter_profile_image_url_https, we_vote_hosted_profile_image_url_large,
                                          we_vote_hosted_profile_image_url_medium, we_vote_hosted_profile_image_url_tiny)
-
+    voter = results['voter']
     json_data = {
         'status':                                   results['status'],
         'success':                                  results['success'],
@@ -2796,6 +2831,9 @@ def voter_update_view(request):  # voterUpdate
         'we_vote_hosted_profile_image_url_medium':  we_vote_hosted_profile_image_url_medium,
         'we_vote_hosted_profile_image_url_tiny':    we_vote_hosted_profile_image_url_tiny,
         'voter_updated':                            results['voter_updated'],
+        'interface_status_flags':                   voter.interface_status_flags,
+        'flag_integer_to_set':                      flag_integer_to_set,
+        'flag_integer_to_unset':                    flag_integer_to_unset,
     }
 
     response = HttpResponse(json.dumps(json_data), content_type='application/json')

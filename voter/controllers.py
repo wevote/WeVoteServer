@@ -7,7 +7,7 @@ from .models import BALLOT_ADDRESS, fetch_voter_id_from_voter_device_link, Voter
 from django.http import HttpResponse
 from email_outbound.controllers import move_email_address_entries_to_another_voter
 from email_outbound.models import EmailManager
-from follow.controllers import move_follow_entries_to_another_voter
+from follow.controllers import move_follow_entries_to_another_voter, move_organization_followers_to_another_organization
 from friend.controllers import fetch_friend_invitation_recipient_voter_we_vote_id, friend_accepted_invitation_send, \
     move_friend_invitations_to_another_voter, move_friends_to_another_voter
 from friend.models import FriendManager
@@ -1143,11 +1143,11 @@ def voter_retrieve_for_api(voter_device_id):  # voterRetrieve
 
         if not positive_value_exists(voter_id):
             json_data = {
-                'status':           "VOTER_NOT_FOUND_AFTER_BEING_CREATED",
-                'success':          False,
-                'voter_device_id':  voter_device_id,
-                'voter_created':    False,
-                'voter_found':      False,
+                'status':                           "VOTER_NOT_FOUND_AFTER_BEING_CREATED",
+                'success':                          False,
+                'voter_device_id':                  voter_device_id,
+                'voter_created':                    False,
+                'voter_found':                      False,
             }
             return json_data
 
@@ -1257,7 +1257,8 @@ def voter_retrieve_for_api(voter_device_id):  # voterRetrieve
                 else voter.voter_photo_url(),
             'voter_photo_url_medium':           voter.we_vote_hosted_profile_image_url_medium,
             'voter_photo_url_tiny':             voter.we_vote_hosted_profile_image_url_tiny,
-            'voter_donation_history_list':      donation_list
+            'voter_donation_history_list':      donation_list,
+            'interface_status_flags':           voter.interface_status_flags
         }
         return json_data
 
@@ -1292,6 +1293,7 @@ def voter_retrieve_for_api(voter_device_id):  # voterRetrieve
             'voter_photo_url_large':            '',
             'voter_photo_url_medium':           '',
             'voter_photo_url_tiny':             '',
+            'interface_status_flags':           0
         }
         return json_data
 
