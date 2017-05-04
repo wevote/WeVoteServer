@@ -48,7 +48,7 @@
     {% endif %}
     : {{ batch_description.batch_name }}
     </h1>
-    <form action="{% url "import_export_batches:batch_action_list_process" %}" method="get" class="form-horizontal">
+    <form action="{% url 'import_export_batches:batch_action_list_process' %}" method="get" class="form-horizontal">
         {% csrf_token %}
         <input type="hidden" name="kind_of_batch" value="{{ kind_of_batch }}">
         <input type="hidden" name="batch_header_id" value="{{ batch_header_id }}">
@@ -72,6 +72,29 @@
             </div>
         </div>
     </form>
+    <form action="{% url 'import_export_batches:batch_action_list_import_create_rows' %}" method="get" class="form-horizontal">
+        {% csrf_token %}
+        <input type="hidden" name="kind_of_batch" value="{{ kind_of_batch }}">
+        <input type="hidden" name="batch_header_id" value="{{ batch_header_id }}">
+        <div class="form-group">
+            <label for="create_actions_button_id" class="col-sm-3 control-label"></label>
+            <div class="col-sm-8">
+                <button type="submit" id="create_import_create_actions_button_id" name="create_actions_button" class="btn btn-default" value={{ kind_of_batch }}>Import CREATE Data</button>
+            </div>
+        </div>
+    </form>
+    <form action="{% url 'import_export_batches:batch_action_list_import_update_rows' %}" method="get" class="form-horizontal">
+        {% csrf_token %}
+        <input type="hidden" name="kind_of_batch" value="{{ kind_of_batch }}">
+        <input type="hidden" name="batch_header_id" value="{{ batch_header_id }}">
+        <div class="form-group">
+            <label for="create_actions_button_id" class="col-sm-3 control-label"></label>
+            <div class="col-sm-8">
+                <button type="submit" id="create_import_update_actions_button_id" name="create_actions_button" class="btn btn-default" value={{ kind_of_batch }}>Import ADD_TO_EXISTING Data</button>
+            </div>
+        </div>
+    </form>
+
 {% endif %}
 
 
@@ -112,10 +135,9 @@
             {% if batch_header_map.batch_header_map_011 %}<td>{{ one_batch_row.batch_row_011 }}</td>{% endif %}
             {% if batch_header_map.batch_header_map_012 %}<td>{{ one_batch_row.batch_row_012 }}</td>{% endif %}
             {% if batch_header_map.batch_header_map_013 %}<td>{{ one_batch_row.batch_row_013 }}</td>{% endif %}
-            {% if not one_batch_row.batch_row_action_exists %}<td>    <a href="{% url 'import_export_batches:batch_action_list_process' %}?batch_header_id={{ batch_header_id }}&batch_row_id={{ one_batch_row.id }}">
-        Analyze</a>
-            {%elif one_batch_row.kind_of_batch == "ELECTED_OFFICE" %}<td>    <a href="{% url 'import_export_batches:batch_action_list_process_import' %}?batch_header_id={{ batch_header_id }}&&batch_row_id={{ one_batch_row.id }}">  Import into ElectedOffice Table</a>
-</td>{% endif %}
+            <td>    <a href="{% url 'import_export_batches:batch_action_list_process' %}?batch_header_id={{ batch_header_id }}&batch_row_id={{ one_batch_row.id }}">
+                Analyze</a>
+            </td>
         </tr>
         {% if one_batch_row.batch_row_action_exists %}
         <tr>
@@ -162,10 +184,28 @@
                     <th>state_code</th>
                     <th>ALERTS</th>
                     <th>ACTIONS</th>
+                    <th>Import</th>
                 </tr>
                 <tr>
                     <td>analysis:</td>
                     <td>{{ one_batch_row.batch_row_action.elected_office_name}}</td>
+                    <td>{{ one_batch_row.batch_row_action.state_code }}</td>
+                    <td></td>
+                    <td>{{ one_batch_row.batch_row_action.kind_of_action }}</td>
+                    <td><a href="{% url 'import_export_batches:batch_action_list_process_import_elected_office' %}?kind_of_batch=ELECTED_OFFICE&batch_header_id={{ batch_header_id }}&batch_row_id={{ one_batch_row.id }}">Import into ElectedOffice Table</a></td>
+                </tr>
+                {% elif one_batch_row.kind_of_batch == "CONTEST_OFFICE" %}
+            {# ### MEASURE### #}
+                <tr>
+                    <th></th>
+                    <th>contest_office_name</th>
+                    <th>state_code</th>
+                    <th>ALERTS</th>
+                    <th>ACTIONS</th>
+                </tr>
+                <tr>
+                    <td>analysis:</td>
+                    <td>{{ one_batch_row.batch_row_action.contest_office_name}}</td>
                     <td>{{ one_batch_row.batch_row_action.state_code }}</td>
                     <td></td>
                     <td>{{ one_batch_row.batch_row_action.kind_of_action }}</td>

@@ -2,8 +2,9 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
-from .models import BatchDescription, BatchHeaderMap, BatchManager, BatchRow, CONTEST_OFFICE, ELECTED_OFFICE
-from .controllers import create_batch_row_actions, create_elected_office_entry
+from .models import BatchDescription, BatchHeaderMap, BatchManager, BatchRow, CONTEST_OFFICE, ELECTED_OFFICE, CREATE,\
+    ADD_TO_EXISTING
+from .controllers import create_batch_row_actions, create_elected_office_entry, import_create_rows
 from admin_tools.views import redirect_to_sign_in_page
 from ballot.models import MEASURE, OFFICE, CANDIDATE, POLITICIAN
 from django.contrib.auth.decorators import login_required
@@ -238,6 +239,16 @@ def batch_action_list_view(request):
                 else:
                     one_batch_row.batch_row_action_exists = False
                 modified_batch_row_list.append(one_batch_row)
+            elif kind_of_batch == CONTEST_OFFICE:
+                existing_results = batch_manager.retrieve_batch_row_action_contest_office(batch_header_id,
+                                                                                          one_batch_row.id)
+                if existing_results['batch_row_action_found']:
+                    one_batch_row.batch_row_action = existing_results['batch_row_action_contest_office']
+                    one_batch_row.kind_of_batch = CONTEST_OFFICE
+                    one_batch_row.batch_row_action_exists = True
+                else:
+                    one_batch_row.batch_row_action_exists = False
+                modified_batch_row_list.append(one_batch_row)
             elif kind_of_batch == POLITICIAN:
                 existing_results = batch_manager.retrieve_batch_row_action_politician(batch_header_id, one_batch_row.id)
                 if existing_results['batch_row_action_found']:
@@ -306,7 +317,7 @@ def batch_action_list_process_view(request):
                                 "&batch_header_id=" + str(batch_header_id))
 
 @login_required
-def batch_action_list_process_import_view(request):
+def batch_action_list_process_import_elected_office_view(request):
     """
     Work with the BatchRows and BatchActionXXXs of an existing batch
     :param request:
@@ -327,7 +338,7 @@ def batch_action_list_process_import_view(request):
     # results = batch_manager.create_batch_row_actions(batch_header_id)
     if kind_of_batch == ELECTED_OFFICE:
         results = create_elected_office_entry(batch_header_id, batch_row_id)
-        if results['new_elected_office_created']:
+        if results['success']:
             messages.add_message(request, messages.INFO, 'ElectedOffice:'
                                                          'Created:{created} '
                                                          ''.format(created=results['number_of_elected_offices_created']))
@@ -340,9 +351,110 @@ def batch_action_list_process_import_view(request):
             messages.add_message(request, messages.ERROR, 'ElectedOffice create failed.')
             return HttpResponseRedirect(reverse('import_export_batches:batch_list', args=()))
 
-        messages.add_message(request, messages.INFO, 'ElectedOffice:'
-                                                     'Created:{created} '
-                                                     ''.format(created=results['number_of_elected_offices_created']))
+    return HttpResponseRedirect(reverse('import_export_batches:batch_action_list', args=()) +
+                                "?kind_of_batch=" + str(kind_of_batch) +
+                                "&batch_header_id=" + str(batch_header_id))
+
+@login_required
+def batch_action_list_import_update_rows_view(request):
+    """
+    Work with batch_row_actions with kind_of_action as ADD_TO_EXISTING
+    :param request: 
+    :return: 
+    """
+    authority_required = {'verified_volunteer'}  # admin, verified_volunteer
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
+    batch_header_id = convert_to_int(request.GET.get('batch_header_id', 0))
+    kind_of_batch = request.GET.get('kind_of_batch', '')
+
+    # do for entire batch_rows
+    try:
+        batch_header_map = BatchHeaderMap.objects.get(batch_header_id=batch_header_id)
+        batch_header_map_found = True
+    except BatchHeaderMap.DoesNotExist:
+        # This is fine
+        batch_header_map = BatchHeaderMap()
+        batch_header_map_found = False
+
+    if batch_header_map_found:
+        batch_row_list_found = False
+        try:
+            batch_row_list = BatchRow.objects.order_by('id')
+            batch_row_list = batch_row_list.filter(batch_header_id=batch_header_id)
+
+            if len(batch_row_list):
+                batch_row_list_found = True
+        except BatchDescription.DoesNotExist:
+            # This is fine
+            batch_row_list = []
+            batch_row_list_found = False
+            pass
+
+    if batch_header_map_found and batch_row_list_found:
+        results = import_create_rows(batch_header_id, batch_row_list, kind_of_batch, ADD_TO_EXISTING)
+        if results['success']:
+            messages.add_message(request, messages.INFO,
+                                 'ElectedOffice:' 'Updated:{updated} ' 
+                                 ''.format(updated=results['number_of_table_rows_updated']))
+
+        else:
+            messages.add_message(request, messages.ERROR, 'ElectedOffice update failed.')
+            return HttpResponseRedirect(reverse('import_export_batches:batch_list', args=()))
+
+    return HttpResponseRedirect(reverse('import_export_batches:batch_action_list', args=()) +
+                                "?kind_of_batch=" + str(kind_of_batch) +
+                                "&batch_header_id=" + str(batch_header_id))
+
+@login_required
+def batch_action_list_import_create_rows_view(request):
+    """
+    Work with batch_row_actions with kind_of_action as CREATE
+    :param request: 
+    :return: 
+    """
+    authority_required = {'verified_volunteer'}  # admin, verified_volunteer
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
+    batch_header_id = convert_to_int(request.GET.get('batch_header_id', 0))
+    kind_of_batch = request.GET.get('kind_of_batch', '')
+
+    # do for entire batch_rows
+    try:
+        batch_header_map = BatchHeaderMap.objects.get(batch_header_id=batch_header_id)
+        batch_header_map_found = True
+    except BatchHeaderMap.DoesNotExist:
+        # This is fine
+        batch_header_map = BatchHeaderMap()
+        batch_header_map_found = False
+
+    if batch_header_map_found:
+        batch_row_list_found = False
+        try:
+            batch_row_list = BatchRow.objects.order_by('id')
+            batch_row_list = batch_row_list.filter(batch_header_id=batch_header_id)
+
+            if len(batch_row_list):
+                batch_row_list_found = True
+        except BatchDescription.DoesNotExist:
+            # This is fine
+            batch_row_list = []
+            batch_row_list_found = False
+            pass
+
+    if batch_header_map_found and batch_row_list_found:
+        results = import_create_rows(batch_header_id, batch_row_list, kind_of_batch, CREATE)
+        if results['success']:
+            messages.add_message(request, messages.INFO,
+                                 'ElectedOffice:' 
+                                 'Created:{created} ' 
+                                ''.format(created=results['number_of_table_rows_created']))
+
+        else:
+            messages.add_message(request, messages.ERROR, 'ElectedOffice create failed.')
+            return HttpResponseRedirect(reverse('import_export_batches:batch_list', args=()))
 
     return HttpResponseRedirect(reverse('import_export_batches:batch_action_list', args=()) +
                                 "?kind_of_batch=" + str(kind_of_batch) +

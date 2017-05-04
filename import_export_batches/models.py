@@ -380,6 +380,39 @@ class BatchManager(models.Model):
         }
         return results
 
+    def retrieve_batch_row_action_contest_office(self, batch_header_id, batch_row_id):
+        """
+        Retrieves data from BatchRowActionContestOffice table
+        :param batch_header_id:
+        :param batch_row_id:
+        :return:
+        """
+
+        try:
+            batch_row_action_contest_office = BatchRowActionContestOffice.objects.get(batch_header_id=batch_header_id,
+                                                                                      batch_row_id=batch_row_id)
+            batch_row_action_found = True
+            success = True
+            status = "BATCH_ROW_ACTION_CONTEST_OFFICE_RETRIEVED"
+        except BatchDescription.DoesNotExist:
+            batch_row_action_contest_office = BatchRowActionContestOffice()
+            batch_row_action_found = False
+            success = True
+            status = "BATCH_ROW_ACTION_CONTEST_OFFICE_NOT_FOUND"
+        except Exception as e:
+            batch_row_action_contest_office = BatchRowActionContestOffice()
+            batch_row_action_found = False
+            success = False
+            status = "BATCH_ROW_ACTION_CONTEST_OFFICE_RETRIEVE_ERROR"
+
+        results = {
+            'success':                          success,
+            'status':                           status,
+            'batch_row_action_found':           batch_row_action_found,
+            'batch_row_action_contest_office':  batch_row_action_contest_office,
+        }
+        return results
+
     def retrieve_batch_row_action_politician(self, batch_header_id, batch_row_id):
         """
         Retrieves data from BatchRowActionPolitician table
@@ -926,7 +959,7 @@ class BatchManager(models.Model):
         first_line = True
         success = False
         status = ''
-        limit_for_testing = 25
+        limit_for_testing = 5
 
         # Get party names and their corresponding party ids
         party_details_list = retrieve_all_party_names_and_ids_api()
@@ -1643,8 +1676,9 @@ class BatchRowActionContestOffice(models.Model):
     # "Yes" or "No" depending on whether this a contest being held outside the normal election cycle.
     special = models.CharField(verbose_name="google civic primary party", max_length=255, null=True, blank=True)
     ctcl_uuid = models.CharField(verbose_name="ctcl uuid", max_length=80, null=True, blank=True)
-    office_description = models.CharField(verbose_name="office description", max_length=255, null=True, blank=True)
-    office_is_partisan = models.BooleanField(verbose_name='office is_partisan', default=False)
+    contest_office_description = models.CharField(verbose_name="office description", max_length=255, null=True,
+                                                  blank=True)
+    contest_office_is_partisan = models.BooleanField(verbose_name='office is_partisan', default=False)
     status = models.CharField(verbose_name="batch row action office status", max_length=80, null=True, blank=True)
 
 
@@ -1679,7 +1713,7 @@ class BatchRowActionElectedOffice(models.Model):
     wikipedia_id = models.CharField(verbose_name="wikipedia unique identifier", max_length=255, null=True, blank=True)
     # vote_type (ranked choice, majority)
     # The number of candidates that a voter may vote for in this contest.
-    # TODO check if number_voting_for is needed for elected_office table
+    # TODO for now comment out number_voting_for for elected_office table
     # number_voting_for = models.CharField(verbose_name="google civic number of candidates to vote for",
     #                                      max_length=255, null=True, blank=True)
     # The number of candidates that will be elected to office in this contest.

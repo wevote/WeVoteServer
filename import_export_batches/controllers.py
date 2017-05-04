@@ -14,7 +14,7 @@ from voter_guide.models import ORGANIZATION_WORD
 import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, positive_value_exists, extract_twitter_handle_from_text_string
 from .models import BatchManager, BatchDescription, BatchHeaderMap, BatchRow, BatchRowActionOrganization, \
-    BatchRowActionMeasure, BatchRowActionElectedOffice, BatchRowActionPolitician
+    BatchRowActionMeasure, BatchRowActionElectedOffice, BatchRowActionContestOffice, BatchRowActionPolitician
 from measure.models import ContestMeasure
 from office.models import ContestOffice, ElectedOffice
 from politician.models import Politician
@@ -126,6 +126,14 @@ def create_batch_row_actions(batch_header_id, batch_row_id):
                     # batch_row_action_elected_office = results['batch_row_action_elected_office']
                     number_of_batch_actions_created += 1
                     success = True
+            elif kind_of_batch == CONTEST_OFFICE:
+                    results = create_batch_row_action_contest_office(batch_description, batch_header_map, one_batch_row)
+
+                    if results['new_action_contest_office_created']:
+                        # for now, do not handle batch_row_action_contest_office data
+                        # batch_row_action_contest_office = results['batch_row_action_contest_office']
+                        number_of_batch_actions_created += 1
+                        success = True
             elif kind_of_batch == POLITICIAN:
                 results = create_batch_row_action_politician(batch_description, batch_header_map, one_batch_row)
 
@@ -194,7 +202,7 @@ def create_batch_row_action_measure(batch_description, batch_header_map, one_bat
     """
     batch_manager = BatchManager()
 
-    new_action_measure_created = False
+    # new_action_measure_created = False
     state_code = ''
     batch_row_action_measure_status = ''
 
@@ -213,7 +221,7 @@ def create_batch_row_action_measure(batch_description, batch_header_map, one_bat
     else:
         # state_code = ''
         batch_row_action_measure_status = 'ELECTORAL_DISTRICT_NOT_FOUND'
-        kind_of_action = 'TBD'
+        # kind_of_action = 'TBD'
 
     measure_text = batch_manager.retrieve_value_from_batch_row("measure_name",
                                                                batch_header_map,
@@ -308,7 +316,8 @@ def create_batch_row_action_elected_office(batch_description, batch_header_map, 
     batch_row_action_elected_office_status = ''
 
     # Find the column in the incoming batch_row with the header == elected_office_name
-    elected_office_name = batch_manager.retrieve_value_from_batch_row("elected_office_name", batch_header_map, one_batch_row)
+    elected_office_name = batch_manager.retrieve_value_from_batch_row("elected_office_name",
+                                                                      batch_header_map, one_batch_row)
     # Find the column in the incoming batch_row with the header == state_code
     electoral_district_id = batch_manager.retrieve_value_from_batch_row("electoral_district_id", batch_header_map,
                                                                         one_batch_row)
@@ -375,7 +384,7 @@ def create_batch_row_action_elected_office(batch_description, batch_header_map, 
             'google_civic_election_id': google_civic_election_id,
             'status': batch_row_action_elected_office_status
         }
-
+        # TODO should elected_office_name be also part of filter criteria in the below update_or_create?
         batch_row_action_elected_office, new_action_elected_office_created = BatchRowActionElectedOffice.objects.\
             update_or_create(batch_header_id=batch_description.batch_header_id, batch_row_id=one_batch_row.id,
                              defaults=updated_values)
@@ -399,6 +408,114 @@ def create_batch_row_action_elected_office(batch_description, batch_header_map, 
     }
     return results
 
+def create_batch_row_action_contest_office(batch_description, batch_header_map, one_batch_row):
+    """
+    Handle batch_row for contest office type
+    :param batch_description:
+    :param batch_header_map:
+    :param one_batch_row:
+    :return:
+    """
+    batch_manager = BatchManager()
+
+    new_action_contest_office_created = False
+    state_code = ''
+    batch_row_action_contest_office_status = ''
+
+    # Find the column in the incoming batch_row with the header == contest_office_name
+    contest_office_name = batch_manager.retrieve_value_from_batch_row("contest_office_name", batch_header_map,
+                                                                      one_batch_row)
+    # Find the column in the incoming batch_row with the header == state_code
+    electoral_district_id = batch_manager.retrieve_value_from_batch_row("electoral_district_id", batch_header_map,
+                                                                        one_batch_row)
+    google_civic_election_id = str(batch_description.google_civic_election_id)
+    results = retrieve_electoral_district(electoral_district_id)
+    if results['electoral_district_found']:
+        if results['state_code_found']:
+            state_code = results['state_code']
+    else:
+        # state_code = ''
+        batch_row_action_contest_office_status = 'ELECTORAL_DISTRICT_NOT_FOUND'
+        kind_of_action = 'TBD'
+
+    ctcl_uuid = batch_manager.retrieve_value_from_batch_row("contest_office_ctcl_uuid", batch_header_map, one_batch_row)
+
+    contest_office_description = batch_manager.retrieve_value_from_batch_row("contest_office_description",
+                                                                             batch_header_map, one_batch_row)
+    contest_office_is_partisan = batch_manager.retrieve_value_from_batch_row("contest_office_is_partisan",
+                                                                             batch_header_map, one_batch_row)
+
+    # Look up ContestOffice to see if an entry exists
+    # contest_office = ContestOffice()
+    # These three parameters are needed to look up in ContestOffice table for a match
+    if positive_value_exists(contest_office_name) and positive_value_exists(state_code) and \
+            positive_value_exists(google_civic_election_id):
+        try:
+            contest_office_query = ContestOffice.objects.all()
+            contest_office_query = contest_office_query.filter(office_name__iexact=contest_office_name,
+                                                               state_code__iexact=state_code,
+                                                               google_civic_election_id=google_civic_election_id)
+
+            contest_office_item_list = list(contest_office_query)
+            if len(contest_office_item_list):
+                # entry exists
+                batch_row_action_contest_office_status = 'BATCH_ROW_ACTION_CONTEST_OFFICE_RETRIEVED'
+                batch_row_action_found = True
+                new_action_contest_office_created = False
+                # success = True
+                # if a single entry matches, update that entry
+                if len(contest_office_item_list) == 1:
+                    kind_of_action = 'ADD_TO_EXISTING'
+                else:
+                    # more than one entry found with a match in ContestOffice
+                    kind_of_action = 'DO_NOT_PROCESS'
+            else:
+                kind_of_action = 'CREATE'
+        except ContestOffice.DoesNotExist:
+            batch_row_contest_action_office = BatchRowActionContestOffice()
+            batch_row_action_found = False
+            # success = True
+            batch_row_action_contest_office_status = "BATCH_ROW_ACTION_CONTEST_OFFICE_NOT_FOUND"
+            kind_of_action = 'TBD'
+    else:
+        kind_of_action = 'TBD'
+        batch_row_action_contest_office_status = "INSUFFICIENT_DATA_FOR_BATCH_ROW_ACTION_CONTEST_OFFICE_CREATE"
+    # Create a new entry in BatchRowActionContestOffice
+    try:
+        updated_values = {
+            'contest_office_name': contest_office_name,
+            'state_code': state_code,
+            'contest_office_description': contest_office_description,
+            'ctcl_uuid': ctcl_uuid,
+            'contest_office_is_partisan': contest_office_is_partisan,
+            'kind_of_action': kind_of_action,
+            'google_civic_election_id': google_civic_election_id,
+            'status': batch_row_action_contest_office_status
+        }
+
+        batch_row_action_contest_office, new_action_contest_office_created = BatchRowActionContestOffice.objects.\
+            update_or_create( batch_header_id=batch_description.batch_header_id, batch_row_id=one_batch_row.id,
+                              defaults=updated_values)
+        # new_action_contest_office_created = True
+        success = True
+        status = "BATCH_ROW_ACTION_CONTEST_OFFICE_CREATED"
+
+    except Exception as e:
+        batch_row_action_contest_office = BatchRowActionContestOffice()
+        batch_row_action_found = False
+        success = False
+        new_action_contest_office_created = False
+        status = "BATCH_ROW_ACTION_CONTEST_OFFICE_RETRIEVE_ERROR"
+        handle_exception(e, logger=logger, exception_message=status)
+
+    results = {
+        'success': success,
+        'status': status,
+        'new_action_contest_office_created': new_action_contest_office_created,
+        'batch_row_action_contest_office': batch_row_action_contest_office,
+    }
+    return results
+
 def create_batch_row_action_politician(batch_description, batch_header_map, one_batch_row):
     """
     Handle batch_row for politician type
@@ -413,20 +530,25 @@ def create_batch_row_action_politician(batch_description, batch_header_map, one_
     batch_row_action_politician_status = ''
 
     # Find the column in the incoming batch_row with the header == politician_full_name
-    politician_name = batch_manager.retrieve_value_from_batch_row("politician_full_name", batch_header_map, one_batch_row)
+    politician_name = batch_manager.retrieve_value_from_batch_row("politician_full_name", batch_header_map,
+                                                                  one_batch_row)
     # Find the column in the incoming batch_row with the header == ctcl_uuid
     ctcl_uuid = batch_manager.retrieve_value_from_batch_row("politician_ctcl_uuid", batch_header_map, one_batch_row)
-    politician_twitter_url = batch_manager.retrieve_value_from_batch_row("politician_twitter_url", batch_header_map, one_batch_row)
+    politician_twitter_url = batch_manager.retrieve_value_from_batch_row("politician_twitter_url", batch_header_map,
+                                                                         one_batch_row)
     facebook_id = batch_manager.retrieve_value_from_batch_row("politician_facebook_id", batch_header_map, one_batch_row)
     party_name = batch_manager.retrieve_value_from_batch_row("politician_party_name", batch_header_map, one_batch_row)
     first_name = batch_manager.retrieve_value_from_batch_row("politician_first_name", batch_header_map, one_batch_row)
     middle_name = batch_manager.retrieve_value_from_batch_row("politician_middle_name", batch_header_map, one_batch_row)
     last_name = batch_manager.retrieve_value_from_batch_row("politician_last_name", batch_header_map, one_batch_row)
     website_url = batch_manager.retrieve_value_from_batch_row("politician_website_url", batch_header_map, one_batch_row)
-    email_address = batch_manager.retrieve_value_from_batch_row("politician_email_address", batch_header_map, one_batch_row)
+    email_address = batch_manager.retrieve_value_from_batch_row("politician_email_address", batch_header_map,
+                                                                one_batch_row)
     youtube_id = batch_manager.retrieve_value_from_batch_row("politician_youtube_id", batch_header_map, one_batch_row)
-    googleplus_id = batch_manager.retrieve_value_from_batch_row("politician_googleplus_id", batch_header_map, one_batch_row)
-    phone_number = batch_manager.retrieve_value_from_batch_row("politician_phone_number", batch_header_map, one_batch_row)
+    googleplus_id = batch_manager.retrieve_value_from_batch_row("politician_googleplus_id", batch_header_map,
+                                                                one_batch_row)
+    phone_number = batch_manager.retrieve_value_from_batch_row("politician_phone_number", batch_header_map,
+                                                               one_batch_row)
 
     # extract twitter handle from politician_twitter_url
     politician_twitter_handle = extract_twitter_handle_from_text_string(politician_twitter_url)
@@ -541,18 +663,18 @@ def create_batch_row_action_politician(batch_description, batch_header_map, one_
     }
     return results
 
-def create_elected_office_entry(batch_header_id, batch_row_id):
+
+def create_elected_office_entry(batch_header_id, batch_row_id, kind_of_action=''):
     """
     Handle batch_row for elected office
-    :param batch_description:
-    :param batch_header_map:
-    :param one_batch_row:
-    :return:
+    :param batch_header_id: 
+    :param batch_row_id: 
+    :return: 
     """
-
     success = False
     status = ""
     number_of_elected_offices_created = 0
+    number_of_elected_offices_updated = 0
     kind_of_batch = ""
     new_elected_office = ''
     new_elected_office_created = False
@@ -560,10 +682,10 @@ def create_elected_office_entry(batch_header_id, batch_row_id):
     if not positive_value_exists(batch_header_id):
         status = "CREATE_BATCH_ROW_ACTIONS-BATCH_HEADER_ID_MISSING"
         results = {
-            'success': success,
-            'status': status,
-            'new_elected_office_created': success,
-            'number_of_elected_offices_created': number_of_elected_offices_created,
+            'success':                              success,
+            'status':                               status,
+            'number_of_elected_offices_created':    number_of_elected_offices_created,
+            'number_of_elected_offices_updated':    number_of_elected_offices_updated
         }
         return results
 
@@ -575,125 +697,224 @@ def create_elected_office_entry(batch_header_id, batch_row_id):
         batch_description = BatchDescription()
         batch_description_found = False
 
-    if batch_description_found:
-        kind_of_batch = batch_description.kind_of_batch
-
-        try:
-            batch_header_map = BatchHeaderMap.objects.get(batch_header_id=batch_header_id)
-            batch_header_map_found = True
-        except BatchHeaderMap.DoesNotExist:
-            # This is fine
-            batch_header_map = BatchHeaderMap()
-            batch_header_map_found = False
-
-    if batch_header_map_found:
-        batch_row_list_found = False
-        try:
-            batch_row_list = BatchRow.objects.order_by('id')
-            batch_row_list = batch_row_list.filter(batch_header_id=batch_header_id)
-            if positive_value_exists(batch_row_id):
-                batch_row_list = batch_row_list.filter(id=batch_row_id)
-
-            if len(batch_row_list):
-                batch_row_list_found = True
-        except BatchDescription.DoesNotExist:
-            # This is fine
-            batch_row_list = []
-            batch_row_list_found = False
-            pass
-
-        batch_manager = BatchManager()
-
-    if batch_description_found and batch_header_map_found and batch_row_list_found:
-        for one_batch_row in batch_row_list:
-            add_row_to_elected_office = False
-            if kind_of_batch is not ELECTED_OFFICE:
-                continue
-            else:
-                new_action_elected_office_created = False
-                state_code = ''
-                batch_row_action_elected_office_status = ''
-
-                # Find the column in the incoming batch_row with the header == elected_office_name
-                elected_office_name = batch_manager.retrieve_value_from_batch_row("elected_office_name", batch_header_map,
-                                                                                  one_batch_row)
-                # Find the column in the incoming batch_row with the header == state_code
-                electoral_district_id = batch_manager.retrieve_value_from_batch_row("electoral_district_id", batch_header_map,
-                                                                                    one_batch_row)
-                google_civic_election_id = str(batch_description.google_civic_election_id)
-                results = retrieve_electoral_district(electoral_district_id)
-                if results['electoral_district_found']:
-                    if results['state_code_found']:
-                        state_code = results['state_code']
-                else:
-                    # state_code = ''
-                    batch_row_action_office_status = 'ELECTORAL_DISTRICT_NOT_FOUND'
-                    kind_of_action = 'TBD'
-
-                ctcl_uuid = batch_manager.retrieve_value_from_batch_row("elected_office_ctcl_uuid", batch_header_map,
-                                                                        one_batch_row)
-
-                elected_office_description = batch_manager.retrieve_value_from_batch_row("elected_office_description",
-                                                                                         batch_header_map, one_batch_row)
-                elected_office_is_partisan = batch_manager.retrieve_value_from_batch_row("elected_office_is_partisan",
-                                                                                         batch_header_map, one_batch_row)
-
-                # Look up ElectedOffice to see if an entry exists
-                # These three parameters are needed to look up in ElectedOffice table for a match
-                if positive_value_exists(elected_office_name) and positive_value_exists(state_code) and \
-                        positive_value_exists(google_civic_election_id):
-                    try:
-                        batch_row_action_elected_office_query = BatchRowActionElectedOffice.objects.all()
-                        batch_row_action_elected_office_query = batch_row_action_elected_office_query.filter(
-                            elected_office_name__iexact=elected_office_name, state_code__iexact=state_code,
-                            google_civic_election_id=google_civic_election_id)
-
-                        batch_row_action_elected_office_item_list = list(batch_row_action_elected_office_query)
-                        if len(batch_row_action_elected_office_item_list):
-                            if kind_of_action == 'CREATE' or kind_of_action == 'ADD_TO_EXISTING':
-                                add_row_to_elected_office = True
-                    except BatchRowActionElectedOffice.DoesNotExist:
-                        pass
-                        # batch_row_action_elected_office = BatchRowActionElectedOffice()
-                        # batch_row_action_found = False
-                        # success = True
-                        # batch_row_action_elected_office_status = "BATCH_ROW_ACTION_ELECTED_OFFICE_NOT_FOUND"
-                        # kind_of_action = 'TBD'
-                else:
-                    pass
-                    # kind_of_action = 'TBD'
-                    # batch_row_action_elected_office_status = "INSUFFICIENT_DATA_FOR_BATCH_ROW_ACTION_ELECTED_OFFICE_CREATE"
-                # Create a new entry in BatchRowActionElectedOffice
-                if add_row_to_elected_office:
-                    try:
-                        updated_values = {
-                            'elected_office_name': elected_office_name,
-                            'state_code': state_code,
-                            'elected_office_description': elected_office_description,
-                            'ctcl_uuid': ctcl_uuid,
-                            'elected_office_is_partisan': elected_office_is_partisan,
-                            'kind_of_action': kind_of_action,
-                            'google_civic_election_id': google_civic_election_id,
-                            'status': batch_row_action_elected_office_status
-                        }
-
-                        new_elected_office, new_elected_office_created = ElectedOffice.objects.update_or_create(
-                            elected_office_name=elected_office_name, state_code=state_code, defaults=updated_values)
-                        if new_action_elected_office_created:
-                            success = True
-                            status = "ELECTED_OFFICE_CREATED"
-                    except Exception as e:
-                        # batch_row_action_elected_office = BatchRowActionElectedOffice()
-                        # batch_row_action_found = False
-                        success = False
-                        new_elected_office_created = False
-                        status = "ELECTED_OFFICE_RETRIEVE_ERROR"
-                        handle_exception(e, logger=logger, exception_message=status)
-
+    if not batch_description_found:
+        status = "CREATE_BATCH_ROW_ACTIONS-BATCH_DESCRIPTION_MISSING"
         results = {
-            'success': success,
-            'status': status,
-            'new_elected_office_created': new_elected_office_created,
-            'new_elected_office': new_elected_office,
+            'success':                              success,
+            'status':                               status,
+            'number_of_elected_offices_created':    number_of_elected_offices_created,
+            'number_of_elected_offices_updated':    number_of_elected_offices_updated
         }
         return results
+
+        # kind_of_batch = batch_description.kind_of_batch
+
+    try:
+        batch_header_map = BatchHeaderMap.objects.get(batch_header_id=batch_header_id)
+        batch_header_map_found = True
+    except BatchHeaderMap.DoesNotExist:
+        # This is fine
+        batch_header_map = BatchHeaderMap()
+        batch_header_map_found = False
+
+    if not batch_header_map_found:
+        status = "CREATE_BATCH_ROW_ACTIONS-BATCH_HEADER_MAP_MISSING"
+        results = {
+            'success':                              success,
+            'status':                               status,
+            'number_of_elected_offices_created':    number_of_elected_offices_created,
+            'number_of_elected_offices_updated':    number_of_elected_offices_updated
+        }
+        return results
+
+    batch_row_list_found = False
+    try:
+        batch_row_list = BatchRow.objects.order_by('id')
+        batch_row_list = batch_row_list.filter(batch_header_id=batch_header_id)
+        if positive_value_exists(batch_row_id):
+            batch_row_list = batch_row_list.filter(id=batch_row_id)
+
+        if len(batch_row_list):
+            batch_row_list_found = True
+    except BatchDescription.DoesNotExist:
+        batch_row_list = []
+        batch_row_list_found = False
+        pass
+
+    batch_manager = BatchManager()
+
+    if not batch_row_list_found:
+        status = "CREATE_BATCH_ROW_ACTIONS-BATCH_ROW_LIST_MISSING"
+        results = {
+            'success':                              success,
+            'status':                               status,
+            'number_of_elected_offices_created':    number_of_elected_offices_created,
+            'number_of_elected_offices_updated':    number_of_elected_offices_updated
+        }
+        return results
+
+    for one_batch_row in batch_row_list:
+        # add_row_to_elected_office = False
+        # new_action_elected_office_created = False
+        state_code = ''
+
+        # Find the column in the incoming batch_row with the header == elected_office_name
+        elected_office_name = batch_manager.retrieve_value_from_batch_row("elected_office_name", batch_header_map,
+                                                                          one_batch_row)
+        # Find the column in the incoming batch_row with the header == state_code
+        electoral_district_id = batch_manager.retrieve_value_from_batch_row("electoral_district_id", batch_header_map,
+                                                                            one_batch_row)
+        google_civic_election_id = str(batch_description.google_civic_election_id)
+        # get state code from electoral district
+        results = retrieve_electoral_district(electoral_district_id)
+        if results['electoral_district_found']:
+            if results['state_code_found']:
+                state_code = results['state_code']
+        else:
+            # state_code = ''
+            batch_row_action_elected_office_status = 'ELECTORAL_DISTRICT_NOT_FOUND'
+            kind_of_action = 'TBD'
+
+        ctcl_uuid = batch_manager.retrieve_value_from_batch_row("elected_office_ctcl_uuid", batch_header_map,
+                                                                one_batch_row)
+
+        elected_office_description = batch_manager.retrieve_value_from_batch_row("elected_office_description",
+                                                                                 batch_header_map, one_batch_row)
+        elected_office_is_partisan = batch_manager.retrieve_value_from_batch_row("elected_office_is_partisan",
+                                                                                 batch_header_map, one_batch_row)
+
+        # Look up ElectedOffice to see if an entry exists
+        # TODO verify the filter criteria below
+        # These five parameters are needed to look up in ElectedOffice table for a match
+        if positive_value_exists(elected_office_name) and positive_value_exists(state_code) and \
+                positive_value_exists(google_civic_election_id):
+            try:
+                batch_row_action_elected_office_query = BatchRowActionElectedOffice.objects.all()
+                batch_row_action_elected_office_query = batch_row_action_elected_office_query.filter(
+                    elected_office_name__iexact=elected_office_name, state_code__iexact=state_code,
+                    google_civic_election_id=google_civic_election_id, batch_header_id=batch_header_id,
+                    batch_row_id=batch_row_id)
+
+                batch_row_action_elected_office_item_list = list(batch_row_action_elected_office_query)
+                if len(batch_row_action_elected_office_item_list):
+                    for one_batch_row_action_elected_office in batch_row_action_elected_office_item_list:
+                        # TODO will there be multiple table entries matching or a single entry match?
+                        results = update_elected_office(elected_office_name, state_code, elected_office_description,
+                                                        ctcl_uuid, elected_office_is_partisan, google_civic_election_id,
+                                                        kind_of_action, one_batch_row_action_elected_office)
+                        if results['new_elected_office_created']:
+                            number_of_elected_offices_created += 1
+                        elif results['elected_office_updated']:
+                            number_of_elected_offices_updated += 1
+                            # now update BatchRowActionElectedOffice table entry
+                        batch_row_action_results = create_batch_row_action_elected_office(
+                            batch_description, batch_header_map, one_batch_row)
+                        success = results['success']
+                        status = results['status']
+            except BatchRowActionElectedOffice.DoesNotExist:
+                pass
+                # batch_row_action_elected_office = BatchRowActionElectedOffice()
+                # batch_row_action_found = False
+                # success = True
+                # batch_row_action_elected_office_status = "BATCH_ROW_ACTION_ELECTED_OFFICE_NOT_FOUND"
+                # kind_of_action = 'TBD'
+        results = {
+            'success':                              success,
+            'status':                               status,
+            'number_of_elected_offices_created':    number_of_elected_offices_created,
+            'number_of_elected_offices_updated':    number_of_elected_offices_updated,
+            'new_elected_office':                   new_elected_office,
+        }
+        return results
+
+
+def update_elected_office(elected_office_name, state_code, elected_office_description, ctcl_uuid,
+                          elected_office_is_partisan, google_civic_election_id, kind_of_action,
+                          one_batch_row_action_elected_office):
+    """
+    Either create or update ElectedOffice table entry with batch_row elected_office details 
+    :param elected_office_name: 
+    :param state_code: 
+    :param elected_office_description: 
+    :param ctcl_uuid: 
+    :param elected_office_is_partisan: 
+    :param google_civic_election_id: 
+    :param one_batch_row_action_elected_office: 
+    :return: 
+    """
+    success = False
+    status = ""
+    elected_office_updated = False
+    new_elected_office_created = False
+    new_elected_office = ''
+
+    if not positive_value_exists(kind_of_action):
+        kind_of_action = one_batch_row_action_elected_office.kind_of_action
+    # Only add entries with kind_of_action set to either CREATE or ADD_TO_EXISTING.
+    # TODO verify that CREATE action does not update or update action does not create for import CREATE or
+    # import ADD_TO_EXISTING
+    if kind_of_action == 'CREATE' or kind_of_action == 'ADD_TO_EXISTING':
+        # add_row_to_elected_office = True
+        try:
+            updated_values = {
+                'elected_office_name': elected_office_name,
+                # 'state_code': state_code,
+                'elected_office_description': elected_office_description,
+                'ctcl_uuid': ctcl_uuid,
+                'elected_office_is_partisan': elected_office_is_partisan,
+                'google_civic_election_id': google_civic_election_id,
+            }
+            # TODO verify filter criteria here. Right now if elected_office_name is same and electoral_district_id is
+            # different (state_code is same), it will not treat them as two different entries
+
+            new_elected_office, new_elected_office_created = ElectedOffice.objects.update_or_create(
+                elected_office_name=elected_office_name, state_code=state_code, defaults=updated_values)
+            if new_elected_office_created:
+                success = True
+                status = "ELECTED_OFFICE_CREATED"
+            else:
+                success = True
+                status = "ELECTED_OFFICE_EXISTS"
+                elected_office_updated = True
+        except Exception as e:
+            success = False
+            new_elected_office_created = False
+            status = "ELECTED_OFFICE_RETRIEVE_ERROR"
+            handle_exception(e, logger=logger, exception_message=status)
+
+    results = {
+            'success':                      success,
+            'status':                       status,
+            'new_elected_office_created':   new_elected_office_created,
+            'elected_office_updated':       elected_office_updated,
+            'new_elected_office':           new_elected_office,
+        }
+    return results
+
+def import_create_rows(batch_header_id, batch_row_list, kind_of_batch, kind_of_action):
+
+    success = False
+    status = ''
+    number_of_table_rows_created = 0
+    number_of_table_rows_updated = 0
+    for one_batch_row in batch_row_list:
+        if kind_of_batch == 'ELECTED_OFFICE':
+            results = create_elected_office_entry(batch_header_id, one_batch_row.id, kind_of_action)
+            if results['success']:
+                if results['number_of_elected_offices_created']:
+                # for now, do not handle batch_row_action_elected_office data
+                # batch_row_action_elected_office = results['batch_row_action_elected_office']
+                    number_of_table_rows_created += 1
+                elif results['number_of_elected_offices_updated']:
+                    number_of_table_rows_updated += 1
+                success = True
+    results = {
+        'success': success,
+        'status': status,
+        'batch_header_id': batch_header_id,
+        'kind_of_batch': kind_of_batch,
+        'table_rows_created': success,
+        'number_of_table_rows_created': number_of_table_rows_created,
+        'number_of_table_rows_updated': number_of_table_rows_updated
+    }
+    return results
