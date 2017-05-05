@@ -140,6 +140,7 @@ def donation_with_stripe_for_api(request, token, email, donation_amount, monthly
                                                                          charge_processed_successfully)
             saved_stripe_donation = saved_donation['success']
             donation_status = saved_donation['status'] + ' DONATION_PROCESSED_SUCCESSFULLY '
+            # Make an api call to get the charge details
             stripe_detail = stripe.Charge.retrieve(charge_id)
             amount = stripe_detail['amount']
             currency = stripe_detail['currency']
@@ -251,13 +252,14 @@ def donation_history_for_a_voter(voter_we_vote_id):
     for donation_row in donation_list['voters_donation_list']:
         json_data = {
             'created': str(donation_row.created),
-            'amount': donation_row.amount,
-            'currency': donation_row.currency,
+            'amount': '{:20,.2f}'.format(donation_row.amount).strip(),
+            'currency': donation_row.currency.upper(),
             'one_time_donation': donation_row.one_time_donation,
+            'funding': donation_row.funding.title(),
             'brand': donation_row.brand,
             'exp_month': donation_row.exp_month,
             'exp_year': donation_row.exp_year,
-            'last4': donation_row.last4,
+            'last4': '{:04d}'.format(donation_row.last4),
             'stripe_status': donation_row.stripe_status,
             'charge_id': donation_row.charge_id
         }
