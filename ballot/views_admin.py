@@ -37,11 +37,18 @@ def ballot_items_sync_out_view(request):
     google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
     state_code = request.GET.get('state_code', '')
 
+    if not positive_value_exists(google_civic_election_id) and not positive_value_exists(state_code):
+        json_data = {
+            'success': False,
+            'status': 'BALLOT_ITEM_LIST-ELECTION_OR_STATE_CODE_FILTER_REQUIRED'
+        }
+        return HttpResponse(json.dumps(json_data), content_type='application/json')
+
     try:
         ballot_item_list = BallotItem.objects.all()
         # We only want BallotItem values associated with polling locations
-        ballot_item_list = ballot_item_list.exclude(polling_location_we_vote_id__isnull=True).exclude(
-            polling_location_we_vote_id__iexact='')
+        ballot_item_list = ballot_item_list.exclude(polling_location_we_vote_id__isnull=True)
+        ballot_item_list = ballot_item_list.exclude(polling_location_we_vote_id__iexact='')
         if positive_value_exists(google_civic_election_id):
             ballot_item_list = ballot_item_list.filter(google_civic_election_id=google_civic_election_id)
         if positive_value_exists(state_code):
