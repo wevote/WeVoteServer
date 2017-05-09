@@ -11,12 +11,15 @@ def ballot_items_sync_out_doc_template_values(url_root):
         {
             'name':         'google_civic_election_id',
             'value':        'integer',  # boolean, integer, long, string
-            'description':  'Limit the ballot_items retrieved to those for this google_civic_election_id.',
+            'description':  'Limit the ballot_items retrieved to those for this google_civic_election_id. '
+                            'At least one of these variables is needed'
+                            ' so we do not overwhelm the API server. ',
         },
         {
             'name':         'state_code',
             'value':        'string',  # boolean, integer, long, string
-            'description':  'The us state the ballot item is for. '
+            'description':  'The us state the ballot item is for. At least one of these variables is needed'
+                            ' so we do not overwhelm the API server. '
         },
     ]
 

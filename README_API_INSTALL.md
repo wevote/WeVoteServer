@@ -116,7 +116,9 @@ For mac:
     brew install libmagic
 
 ## Installing Postgres
-    
+
+### Running Mac?
+
 Install the latest version of Postgres for your machine (see instructions further down on this page as well):
  
 MAC: Download and install the DMG from [http://postgresapp.com/](http://postgresapp.com/)

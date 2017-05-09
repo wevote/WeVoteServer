@@ -580,7 +580,7 @@ def elections_sync_out_view(request):
         # serializer = ElectionSerializer(election_list, many=True)
         # return Response(serializer.data)
         election_list_dict = election_list.values('google_civic_election_id', 'election_name', 'election_day_text',
-                                                  'ocd_division_id', 'get_election_state')
+                                                  'ocd_division_id', 'state_code')
         if election_list_dict:
             election_list_json = list(election_list_dict)
             return HttpResponse(json.dumps(election_list_json), content_type='application/json')
