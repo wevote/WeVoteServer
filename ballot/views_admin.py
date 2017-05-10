@@ -82,22 +82,26 @@ def ballot_returned_sync_out_view(request):
     try:
         ballot_returned_list = BallotReturned.objects.all()
         # We only want BallotReturned values associated with polling locations
-        ballot_returned_list = ballot_returned_list.exclude(polling_location_we_vote_id__isnull=True).exclude(
-            polling_location_we_vote_id__iexact='')
+        ballot_returned_list = ballot_returned_list.exclude(polling_location_we_vote_id__isnull=True)
+        ballot_returned_list = ballot_returned_list.exclude(polling_location_we_vote_id__iexact='')
         if positive_value_exists(google_civic_election_id):
             ballot_returned_list = ballot_returned_list.filter(google_civic_election_id=google_civic_election_id)
+        # ballot_returned_list = list(ballot_returned_list)
 
         # serializer = BallotReturnedSerializer(ballot_returned_list, many=True)
         # return Response(serializer.data)
-        ballot_returned_list_dict = ballot_returned_list.values('election_date', 'election_description_text',
-                                                                'google_civic_election_id', 'latitude', 'longitude',
-                                                                'normalized_line1', 'normalized_line2',
-                                                                'normalized_city', 'normalized_state',
-                                                                'normalized_zip', 'polling_location_we_vote_id',
-                                                                'text_for_map_search')
         if ballot_returned_list:
-            ballot_returned_list_json = list(ballot_returned_list_dict)
-            return HttpResponse(json.dumps(ballot_returned_list_json), content_type='application/json')
+            ballot_returned_list = ballot_returned_list.extra(
+                select={'election_date_str': "to_char(election_date, 'YYYY-MM-DD')"})
+            ballot_returned_list_dict = ballot_returned_list.values('election_date_str', 'election_description_text',
+                                                                    'google_civic_election_id', 'latitude', 'longitude',
+                                                                    'normalized_line1', 'normalized_line2',
+                                                                    'normalized_city', 'normalized_state',
+                                                                    'normalized_zip', 'polling_location_we_vote_id',
+                                                                    'text_for_map_search')
+            if ballot_returned_list_dict:
+                ballot_returned_list_json = list(ballot_returned_list_dict)
+                return HttpResponse(json.dumps(ballot_returned_list_json), content_type='application/json')
     except Exception as e:
         pass
 
