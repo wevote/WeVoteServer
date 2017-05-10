@@ -21,6 +21,7 @@ from wevote_functions.functions import convert_to_int, extract_twitter_handle_fr
 from django.http import HttpResponse
 import json
 
+
 # This page does not need to be protected.
 # class VoterGuidesSyncOutView(APIView):
 #     def get(self, request, format=None):
@@ -34,8 +35,10 @@ def voter_guides_sync_out_view(request):
 
         # serializer = VoterGuideSerializer(voter_guide_list, many=True)
         # return Response(serializer.data)
+        voter_guide_list = voter_guide_list.extra(
+            select={'last_updated_str': "to_char(last_updated, 'YYYY-MM-DD HH24:MI:SS')"})
         voter_guide_list_dict = voter_guide_list.values('we_vote_id', 'display_name', 'google_civic_election_id',
-                                                        'image_url', 'last_updated', 'organization_we_vote_id',
+                                                        'image_url', 'last_updated_str', 'organization_we_vote_id',
                                                         'owner_we_vote_id', 'public_figure_we_vote_id',
                                                         'twitter_description', 'twitter_followers_count',
                                                         'twitter_handle', 'vote_smart_time_span',
