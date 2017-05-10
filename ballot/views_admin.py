@@ -92,8 +92,8 @@ def ballot_returned_sync_out_view(request):
         # return Response(serializer.data)
         if ballot_returned_list:
             ballot_returned_list = ballot_returned_list.extra(
-                select={'election_date_str': "to_char(election_date, 'YYYY-MM-DD')"})
-            ballot_returned_list_dict = ballot_returned_list.values('election_date_str', 'election_description_text',
+                select={'election_date': "to_char(election_date, 'YYYY-MM-DD')"})
+            ballot_returned_list_dict = ballot_returned_list.values('election_date', 'election_description_text',
                                                                     'google_civic_election_id', 'latitude', 'longitude',
                                                                     'normalized_line1', 'normalized_line2',
                                                                     'normalized_city', 'normalized_state',
