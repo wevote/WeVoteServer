@@ -35,7 +35,7 @@ logger = wevote_functions.admin.get_logger(__name__)
 #     def get(self, request, format=None):
 def ballot_items_sync_out_view(request):
     google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
-    state_code = request.GET.get('state_code', '')
+    state_code = request.GET.get('state_code', False)
 
     if not positive_value_exists(google_civic_election_id) and not positive_value_exists(state_code):
         json_data = {
@@ -86,7 +86,6 @@ def ballot_returned_sync_out_view(request):
         ballot_returned_list = ballot_returned_list.exclude(polling_location_we_vote_id__iexact='')
         if positive_value_exists(google_civic_election_id):
             ballot_returned_list = ballot_returned_list.filter(google_civic_election_id=google_civic_election_id)
-        # ballot_returned_list = list(ballot_returned_list)
 
         # serializer = BallotReturnedSerializer(ballot_returned_list, many=True)
         # return Response(serializer.data)

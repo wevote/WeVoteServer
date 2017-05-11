@@ -38,11 +38,24 @@ def ballot_items_import_from_master_server(request, google_civic_election_id, st
     # Request json file from We Vote servers
     messages.add_message(request, messages.INFO, "Loading Ballot Items from We Vote Master servers")
     logger.info("Loading Ballot Items from We Vote Master servers")
-    request = requests.get(BALLOT_ITEMS_SYNC_URL, params={
-        "key":                      WE_VOTE_API_KEY,  # This comes from an environment variable
-        "google_civic_election_id": google_civic_election_id,
-        "state_code":               state_code,
-    })
+
+    if positive_value_exists(google_civic_election_id) and positive_value_exists(state_code):
+        request = requests.get(BALLOT_ITEMS_SYNC_URL, params={
+            "key":                      WE_VOTE_API_KEY,  # This comes from an environment variable
+            "google_civic_election_id": google_civic_election_id,
+            "state_code":               state_code,
+        })
+    elif positive_value_exists(google_civic_election_id):
+        request = requests.get(BALLOT_ITEMS_SYNC_URL, params={
+            "key":                      WE_VOTE_API_KEY,
+            "google_civic_election_id": google_civic_election_id,
+        })
+    elif not positive_value_exists(state_code):
+        request = requests.get(BALLOT_ITEMS_SYNC_URL, params={
+            "key":                      WE_VOTE_API_KEY,
+            "state_code":               state_code,
+        })
+
     try:
         structured_json = json.loads(request.text)
         results = filter_ballot_items_structured_json_for_local_duplicates(structured_json)
@@ -875,6 +888,7 @@ def voter_ballot_items_retrieve_for_one_election_for_api(voter_device_id, voter_
 
     ballot_item_list = []
     ballot_items_to_display = []
+    results = {}
     try:
         results = ballot_item_list_manager.retrieve_all_ballot_items_for_voter(voter_id, google_civic_election_id)
         success = results['success']
@@ -921,7 +935,8 @@ def voter_ballot_items_retrieve_for_one_election_for_api(voter_device_id, voter_
                     # status = 'FAILED candidates_retrieve. ' \
                     #          '{error} [type: {error_type}]'.format(error=e.message, error_type=type(e))
                     candidates_to_display = []
-                    status += results['status'] + " "
+                    if hasattr(results, 'status'):
+                        status += results['status'] + " "
                 one_ballot_item = {
                     'ballot_item_display_name':     ballot_item.ballot_item_display_name,
                     'google_civic_election_id':     ballot_item.google_civic_election_id,
