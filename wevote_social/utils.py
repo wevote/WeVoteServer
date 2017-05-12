@@ -82,22 +82,31 @@ def social_user(backend, uid, details, user=None, *args, **kwargs):
             # No other account matches this, so we want to save basic information in social.user
             if backend.name == 'twitter':
                 if social and social.user:
+                    if user is None:
+                        user = social.user
                     twitter_user_dict = {
                         'id': uid,
                         'profile_image_url_https': kwargs['response']['profile_image_url_https'],
                         'screen_name': kwargs['response']['screen_name']
                     }
-                    # Cache original and resized images
-                    cache_results = cache_original_and_resized_image(
-                        voter_we_vote_id=user.we_vote_id,
-                        twitter_id=twitter_user_dict['id'],
-                        twitter_screen_name=twitter_user_dict['screen_name,'],
-                        twitter_profile_image_url_https=twitter_user_dict['profile_image_url_https'],
-                        image_source=TWITTER)
-                    cached_twitter_profile_image_url_https = cache_results['cached_twitter_profile_image_url_https']
-                    we_vote_hosted_profile_image_url_large = cache_results['we_vote_hosted_profile_image_url_large']
-                    we_vote_hosted_profile_image_url_medium = cache_results['we_vote_hosted_profile_image_url_medium']
-                    we_vote_hosted_profile_image_url_tiny = cache_results['we_vote_hosted_profile_image_url_tiny']
+                    if hasattr(user, 'we_vote_id'):
+                        # Cache original and resized images
+                        cache_results = cache_original_and_resized_image(
+                            voter_we_vote_id=user.we_vote_id,
+                            twitter_id=twitter_user_dict['id'],
+                            twitter_screen_name=twitter_user_dict['screen_name'],
+                            twitter_profile_image_url_https=twitter_user_dict['profile_image_url_https'],
+                            image_source=TWITTER)
+                        cached_twitter_profile_image_url_https = cache_results['cached_twitter_profile_image_url_https']
+                        we_vote_hosted_profile_image_url_large = cache_results['we_vote_hosted_profile_image_url_large']
+                        we_vote_hosted_profile_image_url_medium = \
+                            cache_results['we_vote_hosted_profile_image_url_medium']
+                        we_vote_hosted_profile_image_url_tiny = cache_results['we_vote_hosted_profile_image_url_tiny']
+                    else:
+                        cached_twitter_profile_image_url_https = ""
+                        we_vote_hosted_profile_image_url_large = ""
+                        we_vote_hosted_profile_image_url_medium = ""
+                        we_vote_hosted_profile_image_url_tiny = ""
 
                     results = voter_manager.save_twitter_user_values_from_dict(
                         social.user, twitter_user_dict, cached_twitter_profile_image_url_https,
