@@ -32,7 +32,6 @@ def donation_with_stripe_for_api(request, token, email, donation_amount, monthly
     charge_processed_successfully = bool
     error_text_description = ''
     error_message = ''
-    subscription_id = ''
     funding = ''
     livemode = False
     created = 0
@@ -123,9 +122,8 @@ def donation_with_stripe_for_api(request, token, email, donation_amount, monthly
                 status += recurring_donation['status']
                 success = recurring_donation['success']
                 create_subscription_entry = True
-                subscription_id = recurring_donation['subscription_id']
+                subs_id = recurring_donation['subscription_id']
                 charge_processed_successfully = recurring_donation['success']
-                subscription_id = recurring_donation['subscription_id']
                 subs_plan_id = recurring_donation['subs_plan_id']
                 subs_created_at = datetime.fromtimestamp(recurring_donation['subs_created_at'], timezone.utc)
                 subs_canceled_at = None
