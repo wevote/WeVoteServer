@@ -50,11 +50,21 @@ def ballot_items_import_from_master_server(request, google_civic_election_id, st
             "key":                      WE_VOTE_API_KEY,
             "google_civic_election_id": google_civic_election_id,
         })
-    elif not positive_value_exists(state_code):
+    elif positive_value_exists(state_code):
         request = requests.get(BALLOT_ITEMS_SYNC_URL, params={
             "key":                      WE_VOTE_API_KEY,
             "state_code":               state_code,
         })
+    else:
+        import_results = {
+            'success': False,
+            'status': "BALLOT_ITEMS_IMPORT_COULD_NOT_RUN-INSUFFICIENT_VARIABLES",
+            'saved': 0,
+            'updated': 0,
+            'not_processed': 0,
+            'duplicates_removed': 0
+        }
+        return import_results
 
     try:
         structured_json = json.loads(request.text)
