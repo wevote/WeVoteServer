@@ -74,10 +74,10 @@ class DonationSubscription(models.Model):
     subscription_livemode = models.BooleanField(verbose_name="subscription was made in live mode", default=False,
                                                 null=False, blank=False)
     subscription_update = models.PositiveIntegerField(verbose_name="number of updates to this subscription",
-                                                       default=0, null=False)  # for when we get webhook updates
+                                                      default=0, null=False)  # for when we get webhook updates
 
 # Not used 5/10/17
-#class DonationVoterCreditCard(models.Model):
+# class DonationVoterCreditCard(models.Model):
 #    """
 #    This is a generated table with donor credit card details
 #    """
@@ -85,7 +85,7 @@ class DonationSubscription(models.Model):
 #                                      null=False, blank=False)
 #    stripe_customer_id = models.CharField(verbose_name="stripe unique customer id", max_length=255, unique=False,
 #                                          null=False, blank=False)
-#    voter_we_vote_id = models.CharField(verbose_name="unique we vote user id", max_length=255, unique=False, null=False)
+#    voter_we_vote_id = models.CharField(verbose_name="unique we vote user id", max_length=255, unique=False,null=False)
 #    expiration_date_time = models.DateField(verbose_name="credit card expiration date", auto_now=False,
 #                                            auto_now_add=False)
 #    last_four_digits = models.PositiveIntegerField(verbose_name="recurring donation amount", default=0, null=False)
@@ -149,9 +149,9 @@ class DonationJournal(models.Model):
     """
      This is a generated table that will tracks donation and refund activity
      """
-    record_enum = models.CharField(verbose_name=
-                    "enum of record type {PAYMENT_FROM_UI, PAYMENT_AUTO_SUBS, SUBS_SETUP_AND_INITIAL}",
-                    max_length = 32, unique = False, null = False, blank = False)
+    record_enum = models.CharField(
+        verbose_name="enum of record type {PAYMENT_FROM_UI, PAYMENT_AUTO_SUBSCRIPTION, SUBSCRIPTION_SETUP_AND_INITIAL}",
+        max_length=32, unique=False, null=False, blank=False)
     ip_address = models.GenericIPAddressField(verbose_name="user ip address", protocol='both', unpack_ipv4=False,
                                               null=True, blank=True, unique=False)
     stripe_customer_id = models.CharField(verbose_name="stripe unique customer id", max_length=32,
@@ -207,17 +207,18 @@ class DonationJournal(models.Model):
     stripe_status = models.CharField(verbose_name="status string reported by stripe", max_length=64, default="",
                                      null=True, blank=True)
     status = models.CharField(verbose_name="our generated status message", max_length=255, default="", null=True,
-                             blank=True)
-    subs_id = models.CharField(verbose_name="unique subscription id for one voter, amount, and creation time",
-                               max_length=32, default="", null=True, blank=True)
-    subs_plan_id = models.CharField(verbose_name="stripe subscription plan id", max_length=32, default="",
-                                    unique=False, null=True, blank=True)
-    subs_created_at = models.DateTimeField(verbose_name="stripe subscription creation timestamp", auto_now=False,
-                               auto_now_add=False, null=True)
-    subs_canceled_at = models.DateTimeField(verbose_name="stripe subscription canceled timestamp", auto_now=False,
-                               auto_now_add=False, null=True)
-    subs_ended_at = models.DateTimeField(verbose_name="stripe subscription ended timestamp", auto_now=False,
-                               auto_now_add=False, null=True)
+                              blank=True)
+    subscription_id = models.CharField(verbose_name="unique subscription id for one voter, amount, and creation time",
+                                       max_length=32, default="", null=True, blank=True)
+    subscription_plan_id = models.CharField(verbose_name="stripe subscription plan id", max_length=32, default="",
+                                            unique=False, null=True, blank=True)
+    subscription_created_at = models.DateTimeField(verbose_name="stripe subscription creation timestamp",
+                                                   auto_now=False, auto_now_add=False, null=True)
+    subscription_canceled_at = models.DateTimeField(verbose_name="stripe subscription canceled timestamp",
+                                                    auto_now=False, auto_now_add=False, null=True)
+    subscription_ended_at = models.DateTimeField(verbose_name="stripe subscription ended timestamp", auto_now=False,
+                                                 auto_now_add=False, null=True)
+
 
 class DonationManager(models.Model):
 
@@ -300,7 +301,7 @@ class DonationManager(models.Model):
                 else:
                     success = False
                     status = "EXISTING_STRIPE_CUSTOMER_ID_NOT_FOUND"
-            except Exception as e:
+            except Exception:
                 success = False
                 status = "STRIPE_CUSTOMER_ID_RETRIEVAL_ATTEMPT_FAILED"
 
@@ -350,6 +351,7 @@ class DonationManager(models.Model):
         exception_multiple_object_returned = False
         status = ''
         stripe_plan_id = ''
+        success = False
 
         try:
             # the donation plan needs to exist in two places: our stripe account and our database
@@ -411,11 +413,11 @@ class DonationManager(models.Model):
             self, record_enum, ip_address, stripe_customer_id, voter_we_vote_id, charge_id, amount, currency,
             funding, livemode, action_taken, action_result, created, failure_code, failure_message, network_status,
             reason, seller_message, stripe_type, paid, amount_refunded, refund_count, email, address_zip, brand,
-            country, exp_month, exp_year, last4, id_card, stripe_object, stripe_status, status, subs_id, subs_plan_id,
-            subs_created_at, subs_canceled_at, subs_ended_at):
+            country, exp_month, exp_year, last4, id_card, stripe_object, stripe_status, status, subscription_id,
+            subscription_plan_id, subscription_created_at, subscription_canceled_at, subscription_ended_at):
 
         new_history_entry = 0
-        success = False
+
         try:
             new_history_entry = DonationJournal.objects.create(
                 record_enum=record_enum, ip_address=ip_address, stripe_customer_id=stripe_customer_id,
@@ -426,8 +428,9 @@ class DonationManager(models.Model):
                 seller_message=seller_message, stripe_type=stripe_type, paid=paid, amount_refunded=amount_refunded,
                 refund_count=refund_count, email=email, address_zip=address_zip, brand=brand, country=country,
                 exp_month=exp_month, exp_year=exp_year, last4=last4, id_card=id_card, stripe_object=stripe_object,
-                stripe_status=stripe_status, status=status, subs_id=subs_id, subs_plan_id=subs_plan_id,
-                subs_created_at=subs_created_at, subs_canceled_at=subs_canceled_at, subs_ended_at=subs_ended_at)
+                stripe_status=stripe_status, status=status, subscription_id=subscription_id,
+                subscription_plan_id=subscription_plan_id, subscription_created_at=subscription_created_at,
+                subscription_canceled_at=subscription_canceled_at, subscription_ended_at=subscription_ended_at)
 
             success = True
             status = 'NEW_HISTORY_ENTRY_SAVED'
@@ -440,7 +443,6 @@ class DonationManager(models.Model):
             'history_entry_saved': new_history_entry
         }
         return saved_results
-
 
     def create_subscription_entry(self, stripe_customer_id, voter_we_vote_id, donation_plan_id, start_date_time,
                                   donation_amount, subscription_id, ended_at, canceled_at, livemode):
@@ -470,7 +472,7 @@ class DonationManager(models.Model):
         saved_results = {
             'success': success,
             'status': status,
-            'subscription_id' : subscription_id,
+            'subscription_id': subscription_id,
             'donation_entry_saved': new_donation_subscription_entry
         }
         return saved_results
@@ -478,6 +480,7 @@ class DonationManager(models.Model):
     def create_recurring_donation(self, stripe_customer_id, voter_we_vote_id, donation_amount, start_date_time):
 
         subscription_entry = object
+        subscription = object
         success = False
         donation_plan_id = "monthly-" + str(donation_amount)
 
@@ -498,7 +501,7 @@ class DonationManager(models.Model):
                 status += "USER_SUCCESSFULLY_SUBSCRIBED_TO_PLAN "
                 subscription_entry = self.create_subscription_entry(stripe_customer_id, voter_we_vote_id,
                                                                     donation_plan_id, start_date_time, donation_amount,
-                                                                    subscription_id, ended_at, canceled_at, livemode )
+                                                                    subscription_id, ended_at, canceled_at, livemode)
 
             except stripe.error.StripeError as e:
                 body = e.json_body
@@ -513,8 +516,8 @@ class DonationManager(models.Model):
             'success': success,
             'status': status,
             'voter_subscription_saved': subscription_entry['status'],
-            'subs_plan_id': donation_plan_id,
-            'subs_created_at': subscription['created'],
+            'subscription_plan_id': donation_plan_id,
+            'subscription_created_at': subscription['created'],
             'subscription_id': subscription_id
         }
         return results
@@ -580,11 +583,11 @@ class DonationManager(models.Model):
                 success = True
                 status += ' NO_HISTORY_EXISTS_FOR_THIS_VOTER '
 
-        except DonationJournal.DoesNotExist as e:
+        except DonationJournal.DoesNotExist:
             status += " WE_VOTE_HISTORY_DOES_NOT_EXIST "
             success = True
 
-        except Exception as e:
+        except Exception:
             status += " FAILED_TO RETRIEVE_CACHED_WE_VOTE_HISTORY_LIST "
             success = False
             # handle_exception(e, logger=logger, exception_message=status)

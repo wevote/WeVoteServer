@@ -53,11 +53,11 @@ def donation_with_stripe_for_api(request, token, email, donation_amount, monthly
     id_card = ''
     stripe_object = ''
     stripe_status = ''
-    subs_id = None
-    subs_plan_id = None
-    subs_created_at = None
-    subs_canceled_at = None
-    subs_ended_at = None
+    subscription_id = None
+    subscription_plan_id = None
+    subscription_created_at = None
+    subscription_canceled_at = None
+    subscription_ended_at = None
     create_donation_entry = False
     create_subscription_entry = False
 
@@ -122,12 +122,13 @@ def donation_with_stripe_for_api(request, token, email, donation_amount, monthly
                 status += recurring_donation['status']
                 success = recurring_donation['success']
                 create_subscription_entry = True
-                subs_id = recurring_donation['subscription_id']
+                subscription_id = recurring_donation['subscription_id']
                 charge_processed_successfully = recurring_donation['success']
-                subs_plan_id = recurring_donation['subs_plan_id']
-                subs_created_at = datetime.fromtimestamp(recurring_donation['subs_created_at'], timezone.utc)
-                subs_canceled_at = None
-                subs_ended_at = None
+                subscription_plan_id = recurring_donation['subscription_plan_id']
+                subscription_created_at = datetime.fromtimestamp(recurring_donation['subscription_created_at'],
+                                                                 timezone.utc)
+                subscription_canceled_at = None
+                subscription_ended_at = None
 
             charge = stripe.Charge.create(
                 amount=donation_amount,
@@ -219,13 +220,14 @@ def donation_with_stripe_for_api(request, token, email, donation_amount, monthly
             brand, country, exp_month, exp_year, last4, id_card, stripe_object, stripe_status, status,
             None, None, None, None, None)
     if create_subscription_entry:
-        #Create the Journal entry for a new subscription, with some fields from the intial payment on that subscription
+        # Create the Journal entry for a new subscription, with some fields from the intial payment on that subscription
         donation_history_results = donation_manager.create_donation_journal_entry("SUBS_SETUP_AND_INITIAL",
             ip_address, stripe_customer_id, voter_we_vote_id, charge_id, amount, currency, funding, livemode,
             action_taken, action_result, created, failure_code, failure_message, network_status, reason, seller_message,
             stripe_type, paid, amount_refunded, refund_count, email, address_zip,
             brand, country, exp_month, exp_year, last4, id_card, stripe_object, stripe_status, status,
-            subs_id, subs_plan_id, subs_created_at, subs_canceled_at, subs_ended_at)
+            subscription_id, subscription_plan_id, subscription_created_at, subscription_canceled_at,
+            subscription_ended_at)
 
         donation_entry_saved = donation_log_results['success']
 
@@ -242,6 +244,7 @@ def donation_with_stripe_for_api(request, token, email, donation_amount, monthly
     }
 
     return results
+
 
 def translate_stripe_error_to_voter_explanation_text(donation_http_status, error_type):
     donation_manager = DonationManager()
@@ -262,7 +265,7 @@ def donation_history_for_a_voter(voter_we_vote_id):
     donation_list = donation_manager.retrieve_donation_journal_list(voter_we_vote_id)
 
     simple_donation_list = []
-    if donation_list['success'] == True:
+    if donation_list['success']:
         for donation_row in donation_list['voters_donation_list']:
             json_data = {
                 'created': str(donation_row.created),
@@ -276,9 +279,9 @@ def donation_history_for_a_voter(voter_we_vote_id):
                 'last4': '{:04d}'.format(donation_row.last4),
                 'stripe_status': donation_row.stripe_status,
                 'charge_id': donation_row.charge_id,
-                'subs_id': donation_row.subs_id,
-                'subs_canceled_at': donation_row.subs_canceled_at,
-                'subs_ended_at': donation_row.subs_ended_at
+                'subscription_id': donation_row.subscription_id,
+                'subscription_canceled_at': donation_row.subscription_canceled_at,
+                'subscription_ended_at': donation_row.subscription_ended_at
             }
             simple_donation_list.append(json_data)
 
