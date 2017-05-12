@@ -152,8 +152,6 @@ def donation_with_stripe_for_api(request, token, email, donation_amount, monthly
             funding = charge['source']['funding']
             livemode = charge['livemode']
             created = datetime.fromtimestamp(charge['created'], timezone.utc)
-            # utc_dt = datetime.utcfromtimestamp(charge['created'])
-            # created = utc_dt.isoformat()
             failure_code = str(charge['failure_code'])
             failure_message = str(charge['failure_message'])
             network_status = charge['outcome']['network_status']
