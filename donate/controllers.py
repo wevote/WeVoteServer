@@ -284,3 +284,8 @@ def donation_history_for_a_voter(voter_we_vote_id):
             simple_donation_list.append(json_data)
 
     return simple_donation_list
+
+def donation_process_stripe_webhook_event(event):
+    # TODO handle the event
+
+    return
