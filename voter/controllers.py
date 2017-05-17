@@ -25,6 +25,77 @@ from donate.controllers import donation_history_for_a_voter
 logger = wevote_functions.admin.get_logger(__name__)
 
 
+def merge_voter_accounts(from_voter, to_voter):
+    status = "MOVE_VOTER_TABLE_INFO "  # Deal with situation where destination account already has facebook_id
+    success = False
+
+    if not hasattr(from_voter, "we_vote_id") or not positive_value_exists(from_voter.we_vote_id) \
+            or not hasattr(to_voter, "we_vote_id") or not positive_value_exists(to_voter.we_vote_id):
+        status += "MOVE_VOTER_INFO_MISSING_FROM_OR_TO_VOTER_WE_VOTE_ID "
+        results = {
+            'status': status,
+            'success': success,
+            'from_voter': from_voter,
+            'to_voter': to_voter,
+        }
+        return results
+
+    # Transfer data in voter records
+    # first_name
+    # middle_name
+    # last_name
+    # interface_status_flags
+    # is_admin
+    # is_verified_volunteer
+    # primary_email_we_vote_id
+
+    # Is there data we should migrate?
+    if positive_value_exists(from_voter.first_name) or positive_value_exists(from_voter.middle_name) \
+            or positive_value_exists(from_voter.last_name) or positive_value_exists(from_voter.interface_status_flags) \
+            or positive_value_exists(from_voter.is_admin) or positive_value_exists(from_voter.is_verified_volunteer) \
+            or positive_value_exists(from_voter.primary_email_we_vote_id):
+        from_voter_data_to_migrate_exists = True
+    else:
+        from_voter_data_to_migrate_exists = False
+    if from_voter_data_to_migrate_exists:
+        # Remove info from the from_voter and then move Twitter info to the to_voter
+        try:
+            # Now move values to new entry and save if the to_voter doesn't have any data
+            if positive_value_exists(from_voter.first_name) and not positive_value_exists(to_voter.first_name):
+                to_voter.first_name = from_voter.first_name
+            if positive_value_exists(from_voter.middle_name) and not positive_value_exists(to_voter.middle_name):
+                to_voter.middle_name = from_voter.middle_name
+            if positive_value_exists(from_voter.last_name) and not positive_value_exists(to_voter.last_name):
+                to_voter.last_name = from_voter.last_name
+            # Set all bits that have a value in either from_voter or to_voter
+            to_voter.interface_status_flags = to_voter.interface_status_flags | from_voter.interface_status_flags
+            if positive_value_exists(from_voter.is_admin) and not positive_value_exists(to_voter.is_admin):
+                to_voter.is_admin = from_voter.is_admin
+            if positive_value_exists(from_voter.is_verified_volunteer) \
+                    and not positive_value_exists(to_voter.is_verified_volunteer):
+                to_voter.is_verified_volunteer = from_voter.is_verified_volunteer
+            if positive_value_exists(from_voter.primary_email_we_vote_id) \
+                    and not positive_value_exists(to_voter.primary_email_we_vote_id):
+                to_voter.primary_email_we_vote_id = from_voter.primary_email_we_vote_id
+            to_voter.save()
+            status += "TO_VOTER_MERGE_SAVED "
+        except Exception as e:
+            # Fail silently
+            status += "TO_VOTER_MERGE_SAVE_FAILED "
+
+    else:
+        success = True
+        status += "FROM_VOTER_DATA_TO_MIGRATE_NOT_FOUND "
+
+    results = {
+        'status': status,
+        'success': success,
+        'from_voter': from_voter,
+        'to_voter': to_voter,
+    }
+    return results
+
+
 def move_facebook_info_to_another_voter(from_voter, to_voter):
     status = "MOVE_FACEBOOK_INFO "  # Deal with situation where destination account already has facebook_id
     success = False
@@ -986,6 +1057,15 @@ def voter_merge_two_accounts_for_api(  # voterMergeTwoAccounts
     move_twitter_results = move_twitter_info_to_another_voter(voter, new_owner_voter)
     status += " " + move_twitter_results['status']
 
+    # Bring over the voter-table data
+    merge_voter_accounts_results = merge_voter_accounts(voter, new_owner_voter)
+    status += " " + merge_voter_accounts_results['status']
+
+    # TODO Keep a record of voter_we_vote_id's associated with this voter, so we can find the
+    #  latest we_vote_id
+
+    # TODO If no errors, delete the voter account
+
     # And finally, relink the current voter_device_id to email_owner_voter
     update_link_results = voter_device_link_manager.update_voter_device_link(voter_device_link, new_owner_voter)
     if update_link_results['voter_device_link_updated']:
@@ -1252,9 +1332,8 @@ def voter_retrieve_for_api(voter_device_id):  # voterRetrieve
             'has_data_to_preserve':             voter.has_data_to_preserve(),
             'has_email_with_verified_ownership':    voter.has_email_with_verified_ownership(),
             'linked_organization_we_vote_id':   voter.linked_organization_we_vote_id,
-            'voter_photo_url_large':            voter.we_vote_hosted_profile_image_url_large
-                if positive_value_exists(voter.we_vote_hosted_profile_image_url_large)
-                else voter.voter_photo_url(),
+            'voter_photo_url_large':            voter.we_vote_hosted_profile_image_url_large if positive_value_exists(
+                voter.we_vote_hosted_profile_image_url_large) else voter.voter_photo_url(),
             'voter_photo_url_medium':           voter.we_vote_hosted_profile_image_url_medium,
             'voter_photo_url_tiny':             voter.we_vote_hosted_profile_image_url_tiny,
             'voter_donation_history_list':      donation_list,
