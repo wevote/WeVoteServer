@@ -712,6 +712,7 @@ def organization_retrieve_for_api(organization_id, organization_we_vote_id):  # 
             'organization_photo_url_large':     '',
             'organization_photo_url_medium':    '',
             'organization_photo_url_tiny':      '',
+            'organization_banner_url':          '',
         }
         return HttpResponse(json.dumps(json_data), content_type='application/json')
 
@@ -756,6 +757,8 @@ def organization_retrieve_for_api(organization_id, organization_we_vote_id):  # 
                 else organization.organization_photo_url(),
             'organization_photo_url_medium': organization.we_vote_hosted_profile_image_url_medium,
             'organization_photo_url_tiny':  organization.we_vote_hosted_profile_image_url_tiny,
+            'organization_banner_url':      organization.twitter_profile_banner_url_https if positive_value_exists(
+                organization.twitter_profile_banner_url_https) else '',
         }
         return HttpResponse(json.dumps(json_data), content_type='application/json')
     else:
@@ -775,6 +778,7 @@ def organization_retrieve_for_api(organization_id, organization_we_vote_id):  # 
             'organization_photo_url_large':     '',
             'organization_photo_url_medium':    '',
             'organization_photo_url_tiny':      '',
+            'organization_banner_url':          '',
         }
         return HttpResponse(json.dumps(json_data), content_type='application/json')
 
