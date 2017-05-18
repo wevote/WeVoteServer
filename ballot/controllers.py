@@ -423,7 +423,7 @@ def figure_out_google_civic_election_id_voter_is_watching(voter_device_id):
     return results
 
 
-def voter_ballot_items_retrieve_for_api(voter_device_id, google_civic_election_id):
+def voter_ballot_items_retrieve_for_api(voter_device_id, google_civic_election_id):  # voterBallotItemsRetrieve
     status = ''
 
     # We retrieve voter_device_link
@@ -432,17 +432,18 @@ def voter_ballot_items_retrieve_for_api(voter_device_id, google_civic_election_i
     if not voter_device_link_results['voter_device_link_found']:
         status += "VALID_VOTER_DEVICE_ID_MISSING "
         error_json_data = {
-            'status':                       status,
-            'success':                      False,
-            'voter_device_id':              voter_device_id,
-            'ballot_found':                 False,
-            'ballot_item_list':             [],
-            'google_civic_election_id':     google_civic_election_id,
-            'text_for_map_search':          '',
-            'substituted_address_nearby':   '',
-            'ballot_caveat':                '',
-            'is_from_substituted_address':  False,
-            'is_from_test_ballot':          False,
+            'status':                               status,
+            'success':                              False,
+            'voter_device_id':                      voter_device_id,
+            'ballot_found':                         False,
+            'ballot_item_list':                     [],
+            'google_civic_election_id':             google_civic_election_id,
+            'text_for_map_search':                  '',
+            'substituted_address_nearby':           '',
+            'ballot_caveat':                        '',
+            'is_from_substituted_address':          False,
+            'is_from_test_ballot':                  False,
+            'polling_location_we_vote_id_source':   '',
         }
         return error_json_data
 
@@ -463,6 +464,7 @@ def voter_ballot_items_retrieve_for_api(voter_device_id, google_civic_election_i
             'ballot_caveat':                '',
             'is_from_substituted_address':  False,
             'is_from_test_ballot':          False,
+            'polling_location_we_vote_id_source': '',
         }
         return error_json_data
 
@@ -484,6 +486,7 @@ def voter_ballot_items_retrieve_for_api(voter_device_id, google_civic_election_i
             'ballot_caveat':                '',
             'is_from_substituted_address':  False,
             'is_from_test_ballot':          False,
+            'polling_location_we_vote_id_source': '',
         }
         return error_json_data
 
@@ -510,6 +513,7 @@ def voter_ballot_items_retrieve_for_api(voter_device_id, google_civic_election_i
             'ballot_caveat':                ballot_caveat,
             'is_from_substituted_address':  False,
             'is_from_test_ballot':          False,
+            'polling_location_we_vote_id_source': '',
         }
         return error_json_data
 
@@ -576,6 +580,7 @@ def voter_ballot_items_retrieve_for_api(voter_device_id, google_civic_election_i
             'ballot_caveat':                voter_ballot_saved.ballot_caveat(),
             'is_from_substituted_address':  voter_ballot_saved.is_from_substituted_address,
             'is_from_test_ballot':          voter_ballot_saved.is_from_test_ballot,
+            'polling_location_we_vote_id_source': voter_ballot_saved.polling_location_we_vote_id_source,
         }
         return json_data
 
@@ -592,6 +597,7 @@ def voter_ballot_items_retrieve_for_api(voter_device_id, google_civic_election_i
         'ballot_caveat':                '',
         'is_from_substituted_address':  False,
         'is_from_test_ballot':          False,
+        'polling_location_we_vote_id_source': '',
     }
     return error_json_data
 
@@ -679,6 +685,7 @@ def generate_ballot_data(voter_device_link, voter_address):
         is_from_substituted_address = False
         substituted_address_nearby = ''
         is_from_test_address = False
+        polling_location_we_vote_id_source = ''  # Not used when retrieving directly for the voter
 
         # We update the voter_address with this google_civic_election_id outside of this function
 
@@ -691,7 +698,8 @@ def generate_ballot_data(voter_device_link, voter_address):
             results['text_for_map_search'],
             substituted_address_nearby,
             is_from_substituted_address,
-            is_from_test_address
+            is_from_test_address,
+            polling_location_we_vote_id_source
         )
         status += save_results['status']
         results = {
@@ -717,7 +725,8 @@ def generate_ballot_data(voter_device_link, voter_address):
             text_for_map_search,
             copy_results['substituted_address_nearby'],
             is_from_substituted_address,
-            is_from_test_address
+            is_from_test_address,
+            copy_results['polling_location_we_vote_id_source']
         )
         status += save_results['status']
         results = {
@@ -737,6 +746,7 @@ def generate_ballot_data(voter_device_link, voter_address):
     #     is_from_substituted_address = False
     #     substituted_address_nearby = ''
     #     is_from_test_address = True
+    #     polling_location_we_vote_id_source = ''  # Not used when retrieving directly for the voter
         # Since this is a test address, we don't want to save the google_civic_election_id (of 2000)
         # with the voter_address
     #     save_results = voter_ballot_saved_manager.create_voter_ballot_saved(
@@ -747,7 +757,8 @@ def generate_ballot_data(voter_device_link, voter_address):
     #         results['text_for_map_search'],
     #         substituted_address_nearby,
     #         is_from_substituted_address,
-    #         is_from_test_address
+    #         is_from_test_address,
+    #         polling_location_we_vote_id_source
     #     )
     #     results = {
     #         'status':                   save_results['status'],

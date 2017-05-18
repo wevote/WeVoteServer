@@ -158,7 +158,13 @@ def ballot_returned_import_from_master_server_view(request):
 
 
 @login_required
-def ballot_item_list_edit_view(request, ballot_returned_id):
+def ballot_item_list_by_polling_location_edit_view(request, polling_location_we_vote_id):
+    ballot_returned_id = 0
+    return ballot_item_list_edit_view(request, ballot_returned_id, polling_location_we_vote_id)
+
+
+@login_required
+def ballot_item_list_edit_view(request, ballot_returned_id, polling_location_we_vote_id_from_path=''):
     authority_required = {'verified_volunteer'}  # admin, verified_volunteer
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
@@ -168,19 +174,20 @@ def ballot_item_list_edit_view(request, ballot_returned_id):
     polling_location_we_vote_id = request.GET.get('polling_location_we_vote_id', '')
     polling_location_city = request.GET.get('polling_location_city', '')
     polling_location_zip = request.GET.get('polling_location_zip', '')
+    google_civic_election_id = request.GET.get('google_civic_election_id', 0)
+    google_civic_election_id = convert_to_int(google_civic_election_id)
 
     ballot_returned_found = False
     ballot_returned = BallotReturned()
 
     ballot_returned_manager = BallotReturnedManager()
-    results = ballot_returned_manager.retrieve_existing_ballot_returned_by_identifier(ballot_returned_id)
+    voter_id = 0
+    results = ballot_returned_manager.retrieve_existing_ballot_returned_by_identifier(
+        ballot_returned_id, google_civic_election_id, voter_id, polling_location_we_vote_id_from_path)
     if results['ballot_returned_found']:
         ballot_returned = results['ballot_returned']
         ballot_returned_found = True
         google_civic_election_id = ballot_returned.google_civic_election_id
-    else:
-        google_civic_election_id = request.GET.get('google_civic_election_id', 0)
-        google_civic_election_id = convert_to_int(google_civic_election_id)
 
     election = Election()
     election_state = ''

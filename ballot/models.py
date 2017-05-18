@@ -1271,6 +1271,11 @@ class VoterBallotSaved(models.Model):
     is_from_substituted_address = models.BooleanField(default=False)
     is_from_test_ballot = models.BooleanField(default=False)
 
+    # The polling location for which this ballot was retrieved
+    polling_location_we_vote_id_source = models.CharField(
+        verbose_name="we vote permanent id of the polling location this was copied from",
+        max_length=255, default=None, null=True, blank=True, unique=False)
+
     def election_date_text(self):
         if isinstance(self.election_date, datetime.date):
             return self.election_date.strftime('%Y-%m-%d')
@@ -1491,7 +1496,8 @@ class VoterBallotSavedManager(models.Model):
             original_text_for_map_search,
             substituted_address_nearby='',
             is_from_substituted_address=False,
-            is_from_test_ballot=False):
+            is_from_test_ballot=False,
+            polling_location_we_vote_id_source=''):
         # We assume that we tried to find an entry for this voter
         voter_ballot_saved_found = False
         try:
@@ -1500,14 +1506,15 @@ class VoterBallotSavedManager(models.Model):
                     voter_id=voter_id,
                     google_civic_election_id=google_civic_election_id,
                     defaults={
-                        'voter_id':                     voter_id,
-                        'google_civic_election_id':     google_civic_election_id,
-                        'election_date':                election_date_text,
-                        'election_description_text':    election_description_text,
-                        'original_text_for_map_search': original_text_for_map_search,
-                        'substituted_address_nearby':   substituted_address_nearby,
-                        'is_from_substituted_address':  is_from_substituted_address,
-                        'is_from_test_ballot':          is_from_test_ballot
+                        'voter_id':                             voter_id,
+                        'google_civic_election_id':             google_civic_election_id,
+                        'election_date':                        election_date_text,
+                        'election_description_text':            election_description_text,
+                        'original_text_for_map_search':         original_text_for_map_search,
+                        'substituted_address_nearby':           substituted_address_nearby,
+                        'is_from_substituted_address':          is_from_substituted_address,
+                        'is_from_test_ballot':                  is_from_test_ballot,
+                        'polling_location_we_vote_id_source':   polling_location_we_vote_id_source,
                     }
                 )
                 voter_ballot_saved_found = voter_ballot_saved.id
@@ -1549,14 +1556,15 @@ def copy_existing_ballot_items_from_stored_ballot(voter_id, text_for_map_search,
 
     if not find_results['ballot_returned_found']:
         error_results = {
-            'voter_id':                     voter_id,
-            'google_civic_election_id':     0,
-            'election_date_text':           '',
-            'election_description_text':    '',
-            'text_for_map_search':          text_for_map_search,
-            'substituted_address_nearby':   '',
-            'ballot_returned_copied':       False,
-            'status':                       status,
+            'voter_id':                             voter_id,
+            'google_civic_election_id':             0,
+            'election_date_text':                   '',
+            'election_description_text':            '',
+            'text_for_map_search':                  text_for_map_search,
+            'substituted_address_nearby':           '',
+            'ballot_returned_copied':               False,
+            'polling_location_we_vote_id_source':   '',
+            'status':                               status,
         }
         return error_results
 
@@ -1568,27 +1576,29 @@ def copy_existing_ballot_items_from_stored_ballot(voter_id, text_for_map_search,
 
     if not copy_item_results['ballot_returned_copied']:
         error_results = {
-            'voter_id':                     voter_id,
-            'google_civic_election_id':     0,
-            'election_date_text':           '',
-            'election_description_text':    '',
-            'text_for_map_search':          text_for_map_search,
-            'substituted_address_nearby':   '',
-            'ballot_returned_copied':       False,
-            'status':                       status,
+            'voter_id':                             voter_id,
+            'google_civic_election_id':             0,
+            'election_date_text':                   '',
+            'election_description_text':            '',
+            'text_for_map_search':                  text_for_map_search,
+            'substituted_address_nearby':           '',
+            'ballot_returned_copied':               False,
+            'polling_location_we_vote_id_source':   '',
+            'status':                               status,
         }
         return error_results
 
     # VoterBallotSaved is updated outside of this function
 
     results = {
-        'voter_id':                     voter_id,
-        'google_civic_election_id':     ballot_returned.google_civic_election_id,
-        'election_date_text':           ballot_returned.election_date_text(),
-        'election_description_text':    ballot_returned.election_description_text,
-        'text_for_map_search':          text_for_map_search,
-        'substituted_address_nearby':   ballot_returned.text_for_map_search,
-        'ballot_returned_copied':       True,
-        'status':                       status,
+        'voter_id':                             voter_id,
+        'google_civic_election_id':             ballot_returned.google_civic_election_id,
+        'election_date_text':                   ballot_returned.election_date_text(),
+        'election_description_text':            ballot_returned.election_description_text,
+        'text_for_map_search':                  text_for_map_search,
+        'substituted_address_nearby':           ballot_returned.text_for_map_search,
+        'ballot_returned_copied':               True,
+        'polling_location_we_vote_id_source':   ballot_returned.polling_location_we_vote_id,
+        'status':                               status,
     }
     return results
