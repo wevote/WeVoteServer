@@ -392,9 +392,9 @@ def voter_address_save_view(request):  # voterAddressSave
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 
 
-def voter_ballot_items_retrieve_view(request):
+def voter_ballot_items_retrieve_view(request):  # voterBallotItemsRetrieve
     """
-    (voterBallotItemsRetrieve) Request a skeleton of ballot data for this voter location,
+    Request a skeleton of ballot data for this voter location,
     so that the web_app has all of the ids it needs to make more requests for data about each ballot item.
     :param request:
     :return:
@@ -441,6 +441,7 @@ def voter_ballot_items_retrieve_from_google_civic_view(request):
             is_from_substituted_address = False
             substituted_address_nearby = ''
             is_from_test_address = False
+            polling_location_we_vote_id_source = ""  # Not used when retrieving directly from Google Civic
 
             # We don't update the voter_address because this view might be used independent of the voter_address
 
@@ -453,7 +454,8 @@ def voter_ballot_items_retrieve_from_google_civic_view(request):
                 results['text_for_map_search'],
                 substituted_address_nearby,
                 is_from_substituted_address,
-                is_from_test_address
+                is_from_test_address,
+                polling_location_we_vote_id_source
             )
 
     return HttpResponse(json.dumps(results), content_type='application/json')
