@@ -192,7 +192,7 @@
                     <td>{{ one_batch_row.batch_row_action.state_code }}</td>
                     <td></td>
                     <td>{{ one_batch_row.batch_row_action.kind_of_action }}</td>
-                    <td><a href="{% url 'import_export_batches:batch_action_list_process_import_elected_office' %}?kind_of_batch=ELECTED_OFFICE&batch_header_id={{ batch_header_id }}&batch_row_id={{ one_batch_row.id }}">Import into ElectedOffice Table</a></td>
+                    <td><a href="{% url 'import_export_batches:batch_action_list_import_create_or_update_rows' %}?kind_of_batch=ELECTED_OFFICE&batch_header_id={{ batch_header_id }}&batch_row_id={{ one_batch_row.id }}">Import into ElectedOffice Table</a></td>
                 </tr>
                 {% elif one_batch_row.kind_of_batch == "CONTEST_OFFICE" %}
             {# ### MEASURE### #}
