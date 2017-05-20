@@ -72,10 +72,11 @@
             </div>
         </div>
     </form>
-    <form action="{% url 'import_export_batches:batch_action_list_import_create_rows' %}" method="get" class="form-horizontal">
+    <form action="{% url 'import_export_batches:batch_action_list_bulk_import_create_or_update_rows' %}" method="get" class="form-horizontal">
         {% csrf_token %}
         <input type="hidden" name="kind_of_batch" value="{{ kind_of_batch }}">
         <input type="hidden" name="batch_header_id" value="{{ batch_header_id }}">
+        <input type="hidden" name="kind_of_action" value="CREATE">
         <div class="form-group">
             <label for="create_actions_button_id" class="col-sm-3 control-label"></label>
             <div class="col-sm-8">
@@ -83,10 +84,11 @@
             </div>
         </div>
     </form>
-    <form action="{% url 'import_export_batches:batch_action_list_import_update_rows' %}" method="get" class="form-horizontal">
+    <form action="{% url 'import_export_batches:batch_action_list_bulk_import_create_or_update_rows' %}" method="get" class="form-horizontal">
         {% csrf_token %}
         <input type="hidden" name="kind_of_batch" value="{{ kind_of_batch }}">
         <input type="hidden" name="batch_header_id" value="{{ batch_header_id }}">
+        <input type="hidden" name="kind_of_action" value="ADD_TO_EXISTING">
         <div class="form-group">
             <label for="create_actions_button_id" class="col-sm-3 control-label"></label>
             <div class="col-sm-8">

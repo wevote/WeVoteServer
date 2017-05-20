@@ -2,7 +2,7 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
-from ballot.models import MEASURE, OFFICE, CANDIDATE, POLITICIAN
+from ballot.models import MEASURE, CANDIDATE, POLITICIAN
 from .models import CONTEST_OFFICE, ELECTED_OFFICE, CREATE, ADD_TO_EXISTING
 from candidate.models import CandidateCampaignManager
 from config.base import get_environment_variable
@@ -12,11 +12,11 @@ from position.models import PositionManager, PERCENT_RATING
 import requests
 from voter_guide.models import ORGANIZATION_WORD
 import wevote_functions.admin
-from wevote_functions.functions import convert_to_int, positive_value_exists, extract_twitter_handle_from_text_string
+from wevote_functions.functions import positive_value_exists, extract_twitter_handle_from_text_string
 from .models import BatchManager, BatchDescription, BatchHeaderMap, BatchRow, BatchRowActionOrganization, \
     BatchRowActionMeasure, BatchRowActionElectedOffice, BatchRowActionContestOffice, BatchRowActionPolitician
 from measure.models import ContestMeasure
-from office.models import ContestOffice, ElectedOffice
+from office.models import ContestOffice, ElectedOffice, ElectedOfficeManager
 from politician.models import Politician
 from electoral_district.controllers import retrieve_electoral_district
 from exception.models import handle_exception
@@ -73,7 +73,7 @@ def create_batch_row_actions(batch_header_id, batch_row_id):
     if batch_header_map_found:
         batch_row_list_found = False
         try:
-            batch_row_list = BatchRow.objects.order_by('id')
+            batch_row_list = BatchRow.objects.all()
             batch_row_list = batch_row_list.filter(batch_header_id=batch_header_id)
             if positive_value_exists(batch_row_id):
                 batch_row_list = batch_row_list.filter(id=batch_row_id)
@@ -236,7 +236,7 @@ def create_batch_row_action_measure(batch_description, batch_header_map, one_bat
     if positive_value_exists(measure_title) and positive_value_exists(state_code) and \
             positive_value_exists(google_civic_election_id):
         try:
-            contest_measure_query = ContestMeasure.objects.order_by('id')
+            contest_measure_query = ContestMeasure.objects.all()
             contest_measure_item_list = contest_measure_query.filter(measure_title__iexact=measure_title,
                                                                      state_code__iexact=state_code,
                                                                      google_civic_election_id=google_civic_election_id)
@@ -354,15 +354,14 @@ def create_batch_row_action_elected_office(batch_description, batch_header_map, 
             elected_office_item_list = list(elected_office_query)
             if len(elected_office_item_list):
                 # entry exists
-                batch_row_action_elected_office_status = 'BATCH_ROW_ACTION_ELECTED_OFFICE_RETRIEVED'
+                batch_row_action_elected_office_status = 'ELECTED_OFFICE_ENTRY_EXISTS'
                 batch_row_action_found = True
                 new_action_elected_office_created = False
                 # success = True
                 # if a single entry matches, update that entry
                 if len(elected_office_item_list) == 1:
                     kind_of_action = 'ADD_TO_EXISTING'
-                    # TODO fix below code later
-                    elected_office_we_vote_id = elected_office_item_list[0].we_vote_id
+                    elected_office_we_vote_id = elected_office_query.first().we_vote_id
                 else:
                     # more than one entry found with a match in ElectedOffice
                     kind_of_action = 'DO_NOT_PROCESS'
@@ -388,8 +387,9 @@ def create_batch_row_action_elected_office(batch_description, batch_header_map, 
             batch_header_id=batch_description.batch_header_id, elected_office_name=elected_office_name,
             state_code=state_code, google_civic_election_id=google_civic_election_id)
         existing_batch_row_action_elected_office_list = list(existing_batch_row_action_elected_office_query)
-        if not len(existing_batch_row_action_elected_office_list):
-            # entry exists, do nothing
+        number_of_existing_entries = len(existing_batch_row_action_elected_office_list)
+        if not number_of_existing_entries:
+            # no entry exists, create one
             updated_values = {
                 'elected_office_name': elected_office_name,
                 'state_code': state_code,
@@ -407,18 +407,44 @@ def create_batch_row_action_elected_office(batch_description, batch_header_map, 
                                  defaults=updated_values)
             # new_action_elected_office_created = True
             success = True
-            status = "BATCH_ROW_ACTION_ELECTED_OFFICE_CREATED"
+            status += "CREATE_BATCH_ROW_ACTION_ELECTED_OFFICE_BATCH_ROW_ACTION_ELECTED_OFFICE_CREATED"
         else:
-            status = 'BATCH_ROW_ACTION_ELECTED_OFFICE_ENTRY_EXISTS'
-            success = True
-            # TODO verify if success should be True or False
-            batch_row_action_elected_office = existing_batch_row_action_elected_office_query.get()
+            # # if batch_header_id is same then it is a duplicate entry?
+            existing_elected_office_entry = existing_batch_row_action_elected_office_query.first()
+            if one_batch_row.id != existing_elected_office_entry.batch_row_id:
+                # duplicate entry, create a new entry but set kind_of_action as DO_NOT_PROCESS and
+                # set status as duplicate
+                # kind_of_action = 'DO_NOT_PROCESS'
+                updated_values = {
+                    'elected_office_name': elected_office_name,
+                    'state_code': state_code,
+                    'elected_office_description': elected_office_description,
+                    'ctcl_uuid': ctcl_uuid,
+                    'elected_office_is_partisan': elected_office_is_partisan,
+                    'elected_office_we_vote_id': elected_office_we_vote_id,
+                    'kind_of_action': 'DO_NOT_PROCESS',
+                    'google_civic_election_id': google_civic_election_id,
+                    'status': 'DUPLICATE_ELECTED_OFFICE_ENTRY'
+                }
+
+                batch_row_action_elected_office, new_action_elected_office_created = \
+                    BatchRowActionElectedOffice.objects.update_or_create(
+                        batch_header_id=batch_description.batch_header_id, batch_row_id=one_batch_row.id,
+                        defaults=updated_values)
+                status += 'CREATE_BATCH_ROW_ACTION_ELECTED_OFFICE_BATCH_ROW_ACTION_ELECTED_OFFICE_DUPLICATE_ENTRIES'
+                success = True
+                # this is a duplicate entry, mark it's kind_of_action as DO_NOT_PROCESS and status as duplicate
+            else:
+                # existing entry but not duplicate
+                status += 'BATCH_ROW_ACTION_ELECTED_OFFICE_ENTRY_EXISTS'
+                success = True
+                batch_row_action_elected_office = existing_batch_row_action_elected_office_query.get()
     except Exception as e:
         batch_row_action_elected_office = BatchRowActionElectedOffice()
         batch_row_action_found = False
         success = False
         new_action_elected_office_created = False
-        status = "BATCH_ROW_ACTION_ELECTED_OFFICE_RETRIEVE_ERROR"
+        status = "CREATE_BATCH_ROW_ACTION_ELECTED_OFFICE_BATCH_ROW_ACTION_ELECTED_OFFICE_RETRIEVE_ERROR"
         handle_exception(e, logger=logger, exception_message=status)
 
     results = {
@@ -428,6 +454,7 @@ def create_batch_row_action_elected_office(batch_description, batch_header_map, 
         'batch_row_action_elected_office': batch_row_action_elected_office,
     }
     return results
+
 
 def create_batch_row_action_contest_office(batch_description, batch_header_map, one_batch_row):
     """
@@ -515,8 +542,8 @@ def create_batch_row_action_contest_office(batch_description, batch_header_map, 
         }
 
         batch_row_action_contest_office, new_action_contest_office_created = BatchRowActionContestOffice.objects.\
-            update_or_create( batch_header_id=batch_description.batch_header_id, batch_row_id=one_batch_row.id,
-                              defaults=updated_values)
+            update_or_create(batch_header_id=batch_description.batch_header_id, batch_row_id=one_batch_row.id,
+                             defaults=updated_values)
         # new_action_contest_office_created = True
         success = True
         status = "BATCH_ROW_ACTION_CONTEST_OFFICE_CREATED"
@@ -536,6 +563,7 @@ def create_batch_row_action_contest_office(batch_description, batch_header_map, 
         'batch_row_action_contest_office': batch_row_action_contest_office,
     }
     return results
+
 
 def create_batch_row_action_politician(batch_description, batch_header_map, one_batch_row):
     """
@@ -723,7 +751,7 @@ def import_elected_office_entry(batch_header_id, batch_row_id, create_entry_flag
         batch_description_found = False
 
     if not batch_description_found:
-        status = "IMPORT_ELECTED_OFFICE_ENTRY-BATCH_DESCRIPTION_MISSING"
+        status += "IMPORT_ELECTED_OFFICE_ENTRY-BATCH_DESCRIPTION_MISSING"
         results = {
             'success':                              success,
             'status':                               status,
@@ -743,7 +771,7 @@ def import_elected_office_entry(batch_header_id, batch_row_id, create_entry_flag
         batch_header_map_found = False
 
     if not batch_header_map_found:
-        status = "CREATE_BATCH_ROW_ACTIONS-BATCH_HEADER_MAP_MISSING"
+        status += "CREATE_BATCH_ROW_ACTIONS-BATCH_HEADER_MAP_MISSING"
         results = {
             'success':                              success,
             'status':                               status,
@@ -754,7 +782,7 @@ def import_elected_office_entry(batch_header_id, batch_row_id, create_entry_flag
 
     batch_row_list_found = False
     try:
-        batch_row_action_list = BatchRowActionElectedOffice.objects.order_by('id')
+        batch_row_action_list = BatchRowActionElectedOffice.objects.all()
         batch_row_action_list = batch_row_action_list.filter(batch_header_id=batch_header_id)
         if positive_value_exists(batch_row_id):
             batch_row_action_list = batch_row_action_list.filter(batch_row_id=batch_row_id)
@@ -766,12 +794,12 @@ def import_elected_office_entry(batch_header_id, batch_row_id, create_entry_flag
             kind_of_action = ADD_TO_EXISTING
         else:
             # error handling
-            status = "IMPORT_BATCH_ROW_ACTIONS-KIND_OF_ACTION_MISSING"
+            status += "IMPORT_BATCH_ROW_ACTIONS-KIND_OF_ACTION_MISSING"
             results = {
-                'success': success,
-                'status': status,
-                'number_of_elected_offices_created': number_of_elected_offices_created,
-                'number_of_elected_offices_updated': number_of_elected_offices_updated
+                'success':                              success,
+                'status':                               status,
+                'number_of_elected_offices_created':    number_of_elected_offices_created,
+                'number_of_elected_offices_updated':    number_of_elected_offices_updated
             }
             return results
 
@@ -786,7 +814,7 @@ def import_elected_office_entry(batch_header_id, batch_row_id, create_entry_flag
     # batch_manager = BatchManager()
 
     if not batch_row_action_list_found:
-        status = "IMPORT_BATCH_ROW_ACTIONS-BATCH_ROW_ACTION_LIST_MISSING"
+        status += "IMPORT_BATCH_ROW_ACTIONS-BATCH_ROW_ACTION_LIST_MISSING"
         results = {
             'success':                              success,
             'status':                               status,
@@ -809,31 +837,40 @@ def import_elected_office_entry(batch_header_id, batch_row_id, create_entry_flag
         # These five parameters are needed to look up in ElectedOffice table for a match
         if positive_value_exists(elected_office_name) and positive_value_exists(state_code) and \
                 positive_value_exists(google_civic_election_id):
+            elected_office_manager = ElectedOfficeManager()
             if create_entry_flag:
-                results = create_elected_office_row_entry(elected_office_name, state_code,
-                                                          elected_office_description, ctcl_uuid,
-                                                          elected_office_is_partisan, google_civic_election_id)
+                results = elected_office_manager.create_elected_office_row_entry(elected_office_name, state_code,
+                                                                                 elected_office_description,
+                                                                                 ctcl_uuid,
+                                                                                 elected_office_is_partisan,
+                                                                                 google_civic_election_id)
                 if results['new_elected_office_created']:
                     number_of_elected_offices_created += 1
                     success = True
-                    status = "IMPORT_ELECTED_OFFICE_ENTRY:ELECTED_OFFICE_CREATED"
                     # now update BatchRowActionElectedOffice table entry
-                    one_batch_action_row.kind_of_action = 'ADD_TO_EXISTING'
-                    one_batch_action_row.save()
-
+                    try:
+                        one_batch_action_row.kind_of_action = 'ADD_TO_EXISTING'
+                        new_elected_office = results['new_elected_office']
+                        one_batch_action_row.elected_office_we_vote_id = new_elected_office.we_vote_id
+                        one_batch_action_row.save()
+                    except Exception as e:
+                        success = False
+                        status += "ELECTED_OFFICE_RETRIEVE_ERROR"
+                        handle_exception(e, logger=logger, exception_message=status)
             elif update_entry_flag:
                 elected_office_we_vote_id = one_batch_action_row.elected_office_we_vote_id
-                results = update_elected_office_row_entry(elected_office_name, state_code,
-                                                          elected_office_description, ctcl_uuid,
-                                                          elected_office_is_partisan, google_civic_election_id,
-                                                          elected_office_we_vote_id)
+                results = elected_office_manager.update_elected_office_row_entry(elected_office_name, state_code,
+                                                                                 elected_office_description,
+                                                                                 ctcl_uuid,
+                                                                                 elected_office_is_partisan,
+                                                                                 google_civic_election_id,
+                                                                                 elected_office_we_vote_id)
                 if results['elected_office_updated']:
                     number_of_elected_offices_updated += 1
-                    status = "IMPORT_ELECTED_OFFICE_ENTRY:ELECTED_OFFICE_UPDATED"
                     success = True
             else:
                 # This is error, it shouldn't reach here, we are handling CREATE or UPDATE entries only.
-                status = "IMPORT_ELECTED_OFFICE_ENTRY:NO_CREATE_OR_UPDATE_ERROR"
+                status += "IMPORT_ELECTED_OFFICE_ENTRY:NO_CREATE_OR_UPDATE_ERROR"
                 results = {
                     'success': success,
                     'status': status,
@@ -843,6 +880,11 @@ def import_elected_office_entry(batch_header_id, batch_row_id, create_entry_flag
                 }
                 return results
 
+    if number_of_elected_offices_created:
+        status += "IMPORT_ELECTED_OFFICE_ENTRY:ELECTED_OFFICE_CREATED"
+    elif number_of_elected_offices_updated:
+        status += "IMPORT_ELECTED_OFFICE_ENTRY:ELECTED_OFFICE_UPDATED"
+
     results = {
         'success':                              success,
         'status':                               status,
@@ -850,105 +892,6 @@ def import_elected_office_entry(batch_header_id, batch_row_id, create_entry_flag
         'number_of_elected_offices_updated':    number_of_elected_offices_updated,
         'new_elected_office':                   new_elected_office,
     }
-    return results
-
-
-def create_elected_office_row_entry(elected_office_name, state_code, elected_office_description, ctcl_uuid,
-                          elected_office_is_partisan, google_civic_election_id):
-    """
-    Create ElectedOffice table entry with BatchRowActionElectedOffice details 
-    :param elected_office_name: 
-    :param state_code: 
-    :param elected_office_description: 
-    :param ctcl_uuid: 
-    :param elected_office_is_partisan: 
-    :param google_civic_election_id: 
-    :return: 
-    """
-    success = False
-    status = ""
-    elected_office_updated = False
-    new_elected_office_created = False
-    new_elected_office = ''
-
-    try:
-        new_elected_office = ElectedOffice.objects.create(
-            elected_office_name=elected_office_name, state_code=state_code,
-            elected_office_description=elected_office_description, ctcl_uuid=ctcl_uuid,
-            elected_office_is_partisan=elected_office_is_partisan,
-            google_civic_election_id=google_civic_election_id)
-        if new_elected_office:
-            success = True
-            status = "ELECTED_OFFICE_CREATED"
-            new_elected_office_created = True
-        else:
-            success = False
-            status = "ELECTED_OFFICE_CREATE_FAILED"
-    except Exception as e:
-        success = False
-        new_elected_office_created = False
-        status = "ELECTED_OFFICE_RETRIEVE_ERROR"
-        handle_exception(e, logger=logger, exception_message=status)
-
-    results = {
-            'success':                      success,
-            'status':                       status,
-            'new_elected_office_created':   new_elected_office_created,
-            'elected_office_updated':       elected_office_updated,
-            'new_elected_office':           new_elected_office,
-        }
-    return results
-
-
-def update_elected_office_row_entry(elected_office_name, state_code, elected_office_description, ctcl_uuid,
-                          elected_office_is_partisan, google_civic_election_id, elected_office_we_vote_id):
-    """
-        Update ElectedOffice table entry with batch_row elected_office details 
-    :param elected_office_name: 
-    :param state_code: 
-    :param elected_office_description: 
-    :param ctcl_uuid: 
-    :param elected_office_is_partisan: 
-    :param google_civic_election_id: 
-    :param elected_office_we_vote_id: 
-    :return: 
-    """
-    success = False
-    status = ""
-    elected_office_updated = False
-    # new_elected_office_created = False
-    # new_elected_office = ''
-    existing_elected_office_entry = ''
-
-    try:
-        # when an entry in BatchRowActionElectedOffice is changed from CREATE to ADD_TO_EXISTING, we store we_vote_id
-        # from matching ElectedOffice entry
-        existing_elected_office_entry = ElectedOffice.objects.get(we_vote_id=elected_office_we_vote_id)
-        if existing_elected_office_entry:
-            # found the existing entry, update the values
-            existing_elected_office_entry.elected_office_name = elected_office_name
-            existing_elected_office_entry.state_code = state_code
-            existing_elected_office_entry.google_civic_election_id = google_civic_election_id
-            existing_elected_office_entry.elected_office_description = elected_office_description
-            existing_elected_office_entry.ctcl_uuid = ctcl_uuid
-            existing_elected_office_entry.elected_office_is_partisan = elected_office_is_partisan
-            # now go ahead and save this entry (update)
-            existing_elected_office_entry.save()
-            elected_office_updated = True
-            success = True
-            status = "ELECTED_OFFICE_UPDATED"
-    except Exception as e:
-        success = False
-        elected_office_updated = False
-        status = "ELECTED_OFFICE_RETRIEVE_ERROR"
-        handle_exception(e, logger=logger, exception_message=status)
-
-    results = {
-            'success':                      success,
-            'status':                       status,
-            'elected_office_updated':       elected_office_updated,
-            'updated_elected_office':       existing_elected_office_entry,
-        }
     return results
 
 
@@ -970,7 +913,7 @@ def import_create_or_update_elected_office_entry(batch_header_id, batch_row_id):
     batch_row_action_list_found = False
 
     if not positive_value_exists(batch_header_id):
-        status = "IMPORT_ELECTED_OFFICE_ENTRY-BATCH_HEADER_ID_MISSING"
+        status += "IMPORT_CREATE_OR_UPDATE_ELECTED_OFFICE_ENTRY-BATCH_HEADER_ID_MISSING"
         results = {
             'success':                              success,
             'status':                               status,
@@ -988,7 +931,7 @@ def import_create_or_update_elected_office_entry(batch_header_id, batch_row_id):
         batch_description_found = False
 
     if not batch_description_found:
-        status = "IMPORT_ELECTED_OFFICE_ENTRY-BATCH_DESCRIPTION_MISSING"
+        status += "IMPORT_CREATE_OR_UPDATE_ELECTED_OFFICE_ENTRY-BATCH_DESCRIPTION_MISSING"
         results = {
             'success':                              success,
             'status':                               status,
@@ -1008,7 +951,7 @@ def import_create_or_update_elected_office_entry(batch_header_id, batch_row_id):
         batch_header_map_found = False
 
     if not batch_header_map_found:
-        status = "CREATE_BATCH_ROW_ACTIONS-BATCH_HEADER_MAP_MISSING"
+        status += "IMPORT_CREATE_OR_UPDATE_ELECTED_OFFICE_ENTRY-BATCH_HEADER_MAP_MISSING"
         results = {
             'success':                              success,
             'status':                               status,
@@ -1019,7 +962,7 @@ def import_create_or_update_elected_office_entry(batch_header_id, batch_row_id):
 
     batch_row_action_list_found = False
     try:
-        batch_row_action_elected_office_list = BatchRowActionElectedOffice.objects.order_by('id')
+        batch_row_action_elected_office_list = BatchRowActionElectedOffice.objects.all()
         batch_row_action_elected_office_list = batch_row_action_elected_office_list.filter(
             batch_header_id=batch_header_id)
         if positive_value_exists(batch_row_id):
@@ -1038,7 +981,7 @@ def import_create_or_update_elected_office_entry(batch_header_id, batch_row_id):
     # batch_manager = BatchManager()
 
     if not batch_row_action_list_found:
-        status = "IMPORT_BATCH_ROW_ACTIONS-BATCH_ROW_ACTION_LIST_MISSING"
+        status += "IMPORT_CREATE_OR_UPDATE_ELECTED_OFFICE_ENTRY-BATCH_ROW_ACTION_LIST_MISSING"
         results = {
             'success':                              success,
             'status':                               status,
@@ -1060,47 +1003,61 @@ def import_create_or_update_elected_office_entry(batch_header_id, batch_row_id):
 
         kind_of_action = batch_row_action_elected_office.kind_of_action
         # Only add entries with kind_of_action set to either CREATE or ADD_TO_EXISTING.
-        if kind_of_action == 'CREATE' or kind_of_action == 'ADD_TO_EXISTING':
-            try:
-                updated_values = {
-                    # 'elected_office_name': elected_office_name,
-                    # 'state_code': state_code,
-                    'elected_office_description': elected_office_description,
-                    'ctcl_uuid': ctcl_uuid,
-                    'elected_office_is_partisan': elected_office_is_partisan,
-                    'google_civic_election_id': google_civic_election_id,
-                }
+        elected_office_manager = ElectedOfficeManager()
+        if kind_of_action == 'CREATE':
+            # call create_elected_office_row_entry
+            results = elected_office_manager.create_elected_office_row_entry(elected_office_name, state_code,
+                                                                             elected_office_description, ctcl_uuid,
+                                                                             elected_office_is_partisan,
+                                                                             google_civic_election_id)
 
-                new_elected_office, new_elected_office_created = ElectedOffice.objects.update_or_create(
-                    elected_office_name=elected_office_name, state_code=state_code, defaults=updated_values)
-                if new_elected_office_created:
-                    success = True
-                    status = "ELECTED_OFFICE_CREATED"
-                    number_of_elected_offices_created += 1
+            if results['new_elected_office_created']:
+                success = True
+                number_of_elected_offices_created += 1
 
-                    # now update BatchRowActionElectedOffice table entry
+                # now update BatchRowActionElectedOffice table entry
+                try:
                     batch_row_action_elected_office.kind_of_action = ADD_TO_EXISTING
-                    batch_row_action_elected_office.elected_office_we_vote_id = new_elected_office.we_vote_id
+                    batch_row_action_elected_office.elected_office_we_vote_id = \
+                        results['new_elected_office'].we_vote_id
                     batch_row_action_elected_office.save()
-                else:
-                    success = True
-                    status = "ELECTED_OFFICE_EXISTS"
-                    elected_office_updated = True
-                    number_of_elected_offices_updated += 1
+                except Exception as e:
+                    success = False
+                    new_elected_office_created = False
+                    status += "IMPORT_UPDATE_OR_CREATE_ELECTED_OFFICE_ENTRY_ELECTED_OFFICE_RETRIEVE_ERROR"
+                    handle_exception(e, logger=logger, exception_message=status)
+        elif kind_of_action == 'ADD_TO_EXISTING':
+            # call update_elected_office_row_entry
+            elected_office_we_vote_id = batch_row_action_elected_office.elected_office_we_vote_id
+            results = elected_office_manager.update_elected_office_row_entry(elected_office_name, state_code,
+                                                                             elected_office_description,
+                                                                             ctcl_uuid,
+                                                                             elected_office_is_partisan,
+                                                                             google_civic_election_id,
+                                                                             elected_office_we_vote_id)
+            if results['elected_office_updated']:
+                success = True
+                elected_office_updated = True
+                number_of_elected_offices_updated += 1
 
-                    # store elected_we_vote_id from ElectedOffice table
-                    batch_row_action_elected_office.elected_office_we_vote_id = new_elected_office.we_vote_id
-                    batch_row_action_elected_office.save()
-
+            try:
+                # store elected_we_vote_id from ElectedOffice table
+                updated_elected_office = results['updated_elected_office']
+                batch_row_action_elected_office.elected_office_we_vote_id = updated_elected_office.we_vote_id
+                batch_row_action_elected_office.save()
             except Exception as e:
                 success = False
                 new_elected_office_created = False
-                status = "ELECTED_OFFICE_RETRIEVE_ERROR"
+                status += "IMPORT_CREATE_OR_UPDATE_ELECTED_OFFICE_ENTRY_ELECTED_OFFICE_RETRIEVE_ERROR"
                 handle_exception(e, logger=logger, exception_message=status)
         else:
             # kind_of_action is either TBD or DO_NOT_PROCESS, do nothing
             success = True
             status = "IMPORT_CREATE_OR_UPDATE_ELECTED_OFFICE_ENTRY:ACTION_TBD_OR_DO_NOT_PROCESS"
+    if number_of_elected_offices_created:
+        status = "IMPORT_CREATE_OR_UPDATE_ELECTED_OFFICE_ENTRY_ELECTED_OFFICE_CREATED"
+    elif number_of_elected_offices_updated:
+        status = "IMPORT_CREATE_OR_UPDATE_ELECTED_OFFICE_ENTRY_ELECTED_OFFICE_UPDATED"
     results = {
         'success':                              success,
         'status':                               status,

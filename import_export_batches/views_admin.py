@@ -2,8 +2,7 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
-from .models import BatchDescription, BatchHeaderMap, BatchManager, BatchRow, CONTEST_OFFICE, ELECTED_OFFICE, CREATE,\
-    ADD_TO_EXISTING
+from .models import BatchDescription, BatchHeaderMap, BatchManager, BatchRow, CONTEST_OFFICE, ELECTED_OFFICE
 from .controllers import create_batch_row_actions, import_create_or_update_elected_office_entry, \
     import_batch_action_rows
 from admin_tools.views import redirect_to_sign_in_page
@@ -316,6 +315,7 @@ def batch_action_list_process_view(request):
                                 "?kind_of_batch=" + str(kind_of_batch) +
                                 "&batch_header_id=" + str(batch_header_id))
 
+
 @login_required
 def batch_action_list_import_create_or_update_rows(request):
     """
@@ -345,8 +345,8 @@ def batch_action_list_import_create_or_update_rows(request):
         if results['success']:
             messages.add_message(request, messages.INFO, 'ElectedOffice: Created:{created},  Updated:{updated} '
                                                          ''.format(created=results['number_of_elected_offices_created'],
-                                                                   updated=
-                                                                   results['number_of_elected_offices_updated']))
+                                                                   updated=results['number_of_elected_offices_updated'])
+                                 )
         else:
             messages.add_message(request, messages.ERROR, 'ElectedOffice create failed.')
             return HttpResponseRedirect(reverse('import_export_batches:batch_list', args=()))
@@ -357,9 +357,9 @@ def batch_action_list_import_create_or_update_rows(request):
 
 
 @login_required
-def batch_action_list_import_update_rows_view(request):
+def batch_action_list_bulk_import_create_or_update_rows_view(request):
     """
-    Work with batch_row_actions with kind_of_action as ADD_TO_EXISTING
+    Work with batch_row_actions with kind_of_action as CREATE or ADD_TO_EXISTING
     :param request: 
     :return: 
     """
@@ -369,7 +369,7 @@ def batch_action_list_import_update_rows_view(request):
 
     batch_header_id = convert_to_int(request.GET.get('batch_header_id', 0))
     kind_of_batch = request.GET.get('kind_of_batch', '')
-
+    kind_of_action = request.GET.get('kind_of_action')
     # do for entire batch_rows
     try:
         batch_header_map = BatchHeaderMap.objects.get(batch_header_id=batch_header_id)
@@ -382,7 +382,7 @@ def batch_action_list_import_update_rows_view(request):
     if batch_header_map_found:
         batch_row_list_found = False
         try:
-            batch_row_list = BatchRow.objects.order_by('id')
+            batch_row_list = BatchRow.objects.all()
             batch_row_list = batch_row_list.filter(batch_header_id=batch_header_id)
 
             if len(batch_row_list):
@@ -394,69 +394,34 @@ def batch_action_list_import_update_rows_view(request):
             pass
 
     if batch_header_map_found and batch_row_list_found:
-        results = import_batch_action_rows(batch_header_id, kind_of_batch, ADD_TO_EXISTING)
+        results = import_batch_action_rows(batch_header_id, kind_of_batch, kind_of_action)
         if results['success']:
-            messages.add_message(request, messages.INFO,
-                                 'Batch kind:{kind_of_batch},' 'Updated:{updated} ' 
-                                 ''.format(kind_of_batch=kind_of_batch,
-                                           updated=results['number_of_table_rows_updated']))
+            if kind_of_action == 'CREATE':
+                messages.add_message(request, messages.INFO,
+                                     'Batch kind:{kind_of_batch}, ' 'Created:{created} '
+                                     ''.format(kind_of_batch=kind_of_batch,
+                                               created=results['number_of_table_rows_created']))
+            elif kind_of_action == 'ADD_TO_EXISTING':
+                messages.add_message(request, messages.INFO,
+                                     'Batch kind:{kind_of_batch}, ' 'Updated:{updated} '
+                                     ''.format(kind_of_batch=kind_of_batch,
+                                               updated=results['number_of_table_rows_updated']))
         else:
-            messages.add_message(request, messages.ERROR, 'Batch kind: {kind_of_batch} update failed.'
-                                 ''.format(kind_of_batch=kind_of_batch))
-            return HttpResponseRedirect(reverse('import_export_batches:batch_list', args=()))
+            if kind_of_action == 'CREATE':
+                # messages.add_message(request, messages.ERROR, 'Batch kind:{batch} create failed.',
+                #                      ''.format(batch=kind_of_batch))
+                messages.add_message(request, messages.ERROR, 'Batch kind: {kind_of_batch} create failed: {status}'
+                                                              ''.format(kind_of_batch=kind_of_batch,
+                                                                        status=results['status']))
 
-    return HttpResponseRedirect(reverse('import_export_batches:batch_action_list', args=()) +
-                                "?kind_of_batch=" + str(kind_of_batch) +
-                                "&batch_header_id=" + str(batch_header_id))
-
-
-@login_required
-def batch_action_list_import_create_rows_view(request):
-    """
-    Work with batch_row_actions with kind_of_action as CREATE
-    :param request: 
-    :return: 
-    """
-    authority_required = {'verified_volunteer'}  # admin, verified_volunteer
-    if not voter_has_authority(request, authority_required):
-        return redirect_to_sign_in_page(request, authority_required)
-
-    batch_header_id = convert_to_int(request.GET.get('batch_header_id', 0))
-    kind_of_batch = request.GET.get('kind_of_batch', '')
-
-    # do for entire batch_rows
-    try:
-        batch_header_map = BatchHeaderMap.objects.get(batch_header_id=batch_header_id)
-        batch_header_map_found = True
-    except BatchHeaderMap.DoesNotExist:
-        # This is fine
-        batch_header_map = BatchHeaderMap()
-        batch_header_map_found = False
-
-    if batch_header_map_found:
-        batch_row_list_found = False
-        try:
-            batch_row_list = BatchRow.objects.order_by('id')
-            batch_row_list = batch_row_list.filter(batch_header_id=batch_header_id)
-
-            if len(batch_row_list):
-                batch_row_list_found = True
-        except BatchDescription.DoesNotExist:
-            # This is fine
-            batch_row_list = []
-            batch_row_list_found = False
-            pass
-
-    if batch_header_map_found and batch_row_list_found:
-        results = import_batch_action_rows(batch_header_id, kind_of_batch, CREATE)
-        if results['success']:
-            messages.add_message(request, messages.INFO,
-                                 'Batch kind:{kind_of_batch}, Created:{created} '
-                                 ''.format(kind_of_batch=kind_of_batch,
-                                           created=results['number_of_table_rows_created']))
-        else:
-            messages.add_message(request, messages.ERROR, 'Batch kind:{kind_of_batch} create failed.',
-                                 ''.format(kind_of_batch=kind_of_batch))
+            elif kind_of_action == 'ADD_TO_EXISTING':
+                messages.add_message(request, messages.ERROR, 'Batch kind: {kind_of_batch} update failed.'
+                                                              ''.format(kind_of_batch=kind_of_batch))
+            else:
+                # messages.add_message(request, messages.ERROR, results['status'])
+                messages.add_message(request, messages.ERROR, 'Batch kind: {kind_of_batch} import failed: {status}'
+                                                              ''.format(kind_of_batch=kind_of_batch,
+                                                                        status=results['status']))
             return HttpResponseRedirect(reverse('import_export_batches:batch_list', args=()))
 
     return HttpResponseRedirect(reverse('import_export_batches:batch_action_list', args=()) +

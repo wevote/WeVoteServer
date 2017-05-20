@@ -528,6 +528,7 @@ class ContestOfficeListManager(models.Model):
         }
         return results
 
+
 class ElectedOffice(models.Model):
     # The we_vote_id identifier is unique across all We Vote sites, and allows us to share our data with other
     # organizations
@@ -916,6 +917,102 @@ class ElectedOfficeManager(models.Model):
 
         return elected_office_id
 
+    def create_elected_office_row_entry(self, elected_office_name, state_code, elected_office_description, ctcl_uuid,
+                                        elected_office_is_partisan, google_civic_election_id):
+        """
+        Create ElectedOffice table entry with ElectedOffice details 
+        :param elected_office_name: 
+        :param state_code: 
+        :param elected_office_description: 
+        :param ctcl_uuid: 
+        :param elected_office_is_partisan: 
+        :param google_civic_election_id: 
+        :return: 
+        """
+        success = False
+        status = ""
+        elected_office_updated = False
+        new_elected_office_created = False
+        new_elected_office = ''
+
+        try:
+            new_elected_office = ElectedOffice.objects.create(
+                elected_office_name=elected_office_name, state_code=state_code,
+                elected_office_description=elected_office_description, ctcl_uuid=ctcl_uuid,
+                elected_office_is_partisan=elected_office_is_partisan,
+                google_civic_election_id=google_civic_election_id)
+            if new_elected_office:
+                success = True
+                status = "ELECTED_OFFICE_CREATED"
+                new_elected_office_created = True
+            else:
+                success = False
+                status = "ELECTED_OFFICE_CREATE_FAILED"
+        except Exception as e:
+            success = False
+            new_elected_office_created = False
+            status = "ELECTED_OFFICE_RETRIEVE_ERROR"
+            handle_exception(e, logger=logger, exception_message=status)
+
+        results = {
+                'success':                      success,
+                'status':                       status,
+                'new_elected_office_created':   new_elected_office_created,
+                'elected_office_updated':       elected_office_updated,
+                'new_elected_office':           new_elected_office,
+            }
+        return results
+
+    def update_elected_office_row_entry(self, elected_office_name, state_code, elected_office_description, ctcl_uuid,
+                                        elected_office_is_partisan, google_civic_election_id,
+                                        elected_office_we_vote_id):
+        """
+            Update ElectedOffice table entry with matching we_vote_id 
+        :param elected_office_name: 
+        :param state_code: 
+        :param elected_office_description: 
+        :param ctcl_uuid: 
+        :param elected_office_is_partisan: 
+        :param google_civic_election_id: 
+        :param elected_office_we_vote_id: 
+        :return: 
+        """
+        success = False
+        status = ""
+        elected_office_updated = False
+        # new_elected_office_created = False
+        # new_elected_office = ''
+        existing_elected_office_entry = ''
+
+        try:
+            existing_elected_office_entry = ElectedOffice.objects.get(we_vote_id=elected_office_we_vote_id)
+            if existing_elected_office_entry:
+                # found the existing entry, update the values
+                existing_elected_office_entry.elected_office_name = elected_office_name
+                existing_elected_office_entry.state_code = state_code
+                existing_elected_office_entry.google_civic_election_id = google_civic_election_id
+                existing_elected_office_entry.elected_office_description = elected_office_description
+                existing_elected_office_entry.ctcl_uuid = ctcl_uuid
+                existing_elected_office_entry.elected_office_is_partisan = elected_office_is_partisan
+                # now go ahead and save this entry (update)
+                existing_elected_office_entry.save()
+                elected_office_updated = True
+                success = True
+                status = "ELECTED_OFFICE_UPDATED"
+        except Exception as e:
+            success = False
+            elected_office_updated = False
+            status = "ELECTED_OFFICE_RETRIEVE_ERROR"
+            handle_exception(e, logger=logger, exception_message=status)
+
+        results = {
+                'success':                      success,
+                'status':                       status,
+                'elected_office_updated':       elected_office_updated,
+                'updated_elected_office':       existing_elected_office_entry,
+            }
+        return results
+
 
 class ElectedOfficeListManager(models.Model):
     """
@@ -928,7 +1025,8 @@ class ElectedOfficeListManager(models.Model):
     # def retrieve_all_elected_offices_for_upcoming_election(self, google_civic_election_id=0, state_code="",
     #                                                return_list_of_objects=False):
     #     elected_office_list = []
-    #     return self.retrieve_elected_offices(google_civic_election_id, state_code, elected_office_list, return_list_of_objects)
+    #     return self.retrieve_elected_offices(google_civic_election_id, state_code, elected_office_list,
+    # return_list_of_objects)
 
     def retrieve_elected_offices_by_list(self, office_list, return_list_of_objects=False):
         google_civic_election_id = 0
@@ -936,7 +1034,7 @@ class ElectedOfficeListManager(models.Model):
         return self.retrieve_elected_offices(google_civic_election_id, state_code, office_list, return_list_of_objects)
 
     def retrieve_elected_offices(self, google_civic_election_id=0, state_code="", elected_office_list=[],
-                         return_list_of_objects=False):
+                                 return_list_of_objects=False):
         elected_office_list_objects = []
         elected_office_list_light = []
         elected_office_list_found = False
@@ -944,7 +1042,8 @@ class ElectedOfficeListManager(models.Model):
         try:
             elected_office_queryset = ElectedOffice.objects.all()
             if positive_value_exists(google_civic_election_id):
-                elected_office_queryset = elected_office_queryset.filter(google_civic_election_id=google_civic_election_id)
+                elected_office_queryset = elected_office_queryset.filter(
+                    google_civic_election_id=google_civic_election_id)
             else:
                 # TODO Limit this search to upcoming_elections only
                 pass
@@ -994,8 +1093,8 @@ class ElectedOfficeListManager(models.Model):
         }
         return results
 
-    def retrieve_possible_duplicate_elected_offices(self, google_civic_election_id, elected_office_name,
-                                            state_code, we_vote_id_from_master=''):
+    def retrieve_possible_duplicate_elected_offices(self, google_civic_election_id, elected_office_name, state_code,
+                                                    we_vote_id_from_master=''):
         """
         Find elected offices that match another elected office in all critical fields other than we_vote_id_from_master
         :param google_civic_election_id:
@@ -1007,10 +1106,13 @@ class ElectedOfficeListManager(models.Model):
         try:
             elected_office_queryset = ElectedOffice.objects.all()
             elected_office_queryset = elected_office_queryset.filter(google_civic_election_id=google_civic_election_id)
-            elected_office_queryset = elected_office_queryset.filter(elected_office_name__iexact=elected_office_name)  # Case doesn't matter
-            elected_office_queryset = elected_office_queryset.filter(state_code__iexact=state_code)  # Case doesn't matter
+            elected_office_queryset = elected_office_queryset.filter(elected_office_name__iexact=elected_office_name)
+            # Case doesn't matter
+            elected_office_queryset = elected_office_queryset.filter(state_code__iexact=state_code)
+            # Case doesn't matter
             # elected_office_queryset = elected_office_queryset.filter(district_id__exact=district_id)
-            # elected_office_queryset = elected_office_queryset.filter(district_name__iexact=district_name)  # Case doesn't matter
+            # elected_office_queryset = elected_office_queryset.filter(district_name__iexact=district_name)
+            #  Case doesn't matter
 
             # Ignore we_vote_id coming in from master server
             if positive_value_exists(we_vote_id_from_master):
