@@ -91,7 +91,8 @@
   "SECRET_KEY":                     "REALLYANYTHINGYOUWANT",
 
   "_comment":                       "stripe test secret key",
-  "STRIPE_SECRET_KEY":              "",
+  "STRIPE_SECRET_KEY":              "API Secret key begins with - pk_...",
+  "STRIPE_SIGNING_SECRET":          "Webhook signing secret key, begins with - whsec_...",
 
   "_comment":                       "Image server (Amazon Web Service AWS s3) settings",
   "AWS_ACCESS_KEY_ID":              "",

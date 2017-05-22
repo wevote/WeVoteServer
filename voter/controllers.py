@@ -20,7 +20,8 @@ from position.controllers import move_positions_to_another_voter
 from twitter.models import TwitterLinkToVoter, TwitterUserManager
 import wevote_functions.admin
 from wevote_functions.functions import generate_voter_device_id, is_voter_device_id_valid, positive_value_exists
-from donate.controllers import donation_history_for_a_voter
+from donate.controllers import donation_history_for_a_voter, move_donation_info_to_another_voter
+
 
 logger = wevote_functions.admin.get_logger(__name__)
 
@@ -1056,6 +1057,11 @@ def voter_merge_two_accounts_for_api(  # voterMergeTwoAccounts
     # Bring over Twitter information
     move_twitter_results = move_twitter_info_to_another_voter(voter, new_owner_voter)
     status += " " + move_twitter_results['status']
+
+    # Bring over any donations that have been made in this session by the new_owner_voter to the voter, subscriptions
+    # are complicated.  See the comments in the donate/controllers.py
+    move_donation_results = move_donation_info_to_another_voter(voter, new_owner_voter)
+    status += " " + move_donation_results['status']
 
     # Bring over the voter-table data
     merge_voter_accounts_results = merge_voter_accounts(voter, new_owner_voter)
