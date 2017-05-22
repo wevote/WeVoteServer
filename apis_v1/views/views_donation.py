@@ -67,7 +67,7 @@ def donation_with_stripe_view(request):  # donationWithStripe
 # http://a9a761d9.ngrok.io -> localhost:8000
 @csrf_exempt
 def donation_stripe_webhook_view(request):
-    payload = request.body
+    payload = request.body.decode('utf-8')
     sig_header = request.META['HTTP_STRIPE_SIGNATURE']
     endpoint_secret = get_environment_variable("STRIPE_SIGNING_SECRET")
 
