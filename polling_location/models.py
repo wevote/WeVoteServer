@@ -125,6 +125,7 @@ class PollingLocationManager(models.Model):
                         # Values we search against
                         # No need to include we_vote_id here
                         # The rest of the values
+                        'we_vote_id': we_vote_id,
                         'polling_location_id': polling_location_id,
                         'state': state,
                         'location_name': location_name.strip() if location_name else '',

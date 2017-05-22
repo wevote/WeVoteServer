@@ -733,7 +733,7 @@ def voter_ballot_items_retrieve_from_google_civic_for_api(
     # Confirm that we have a Google Civic API Key (GOOGLE_CIVIC_API_KEY)
     if not positive_value_exists(GOOGLE_CIVIC_API_KEY):
         results = {
-            'status': 'NO_GOOGLE_CIVIC_API_KEY',
+            'status': 'NO_GOOGLE_CIVIC_API_KEY ',
             'success': False,
             'voter_device_id': voter_device_id,
             'google_civic_election_id': 0,
@@ -744,7 +744,7 @@ def voter_ballot_items_retrieve_from_google_civic_for_api(
     # Confirm that we have the URL where we retrieve voter ballots (VOTER_INFO_URL)
     if not positive_value_exists(VOTER_INFO_URL):
         results = {
-            'status': 'MISSING VOTER_INFO_URL in config/environment_variables.json',
+            'status': 'MISSING VOTER_INFO_URL in config/environment_variables.json ',
             'success': False,
             'voter_device_id': voter_device_id,
             'google_civic_election_id': 0,
@@ -756,7 +756,7 @@ def voter_ballot_items_retrieve_from_google_civic_for_api(
     results = is_voter_device_id_valid(voter_device_id)
     if not results['success']:
         results = {
-            'status': 'VALID_VOTER_DEVICE_ID_MISSING',
+            'status': 'VALID_VOTER_DEVICE_ID_MISSING ',
             'success': False,
             'voter_device_id': voter_device_id,
             'google_civic_election_id': 0,
@@ -767,7 +767,7 @@ def voter_ballot_items_retrieve_from_google_civic_for_api(
     voter_id = fetch_voter_id_from_voter_device_link(voter_device_id)
     if not positive_value_exists(voter_id):
         results = {
-            'status': "VALID_VOTER_ID_MISSING",
+            'status': "VALID_VOTER_ID_MISSING ",
             'success': False,
             'voter_device_id': voter_device_id,
             'google_civic_election_id': 0,
@@ -838,7 +838,7 @@ def voter_ballot_items_retrieve_from_google_civic_for_api(
                     success = True
                     google_civic_election_id = store_one_ballot_results['google_civic_election_id']
                 else:
-                    status += 'UNABLE_TO-store_one_ballot_from_google_civic_api'
+                    status += 'UNABLE_TO-store_one_ballot_from_google_civic_api '
         elif 'error' in one_ballot_results['structured_json']:
             if one_ballot_results['structured_json']['error']['message'] == 'Election unknown':
                 success = False  # It is only successful if new ballot data is retrieved.

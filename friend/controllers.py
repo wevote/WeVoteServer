@@ -169,17 +169,7 @@ def friend_invitation_by_email_send_for_api(voter_device_id, email_address_array
     success = False
     status = ""
     error_message_to_show_voter = ""
-    friend_email_address_dict = []
-    friend_email_address_array = {}
 
-    if email_address_array:
-        #reconstruct dictionary array from lists
-        for n in range(len(email_address_array)):
-           friend_email_address_array = dict({ 'first_name': first_name_array[n], 'last_name':last_name_array[n],
-                                               'email_address': email_address_array[n] })
-           friend_email_address_dict.append(friend_email_address_array)
-
-        #friend_email_address_details_tuple = list(zip(first_name_array, last_name_array, email_address_array))
     results = is_voter_device_id_valid(voter_device_id)
     if not results['success']:
         error_results = {
@@ -206,7 +196,6 @@ def friend_invitation_by_email_send_for_api(voter_device_id, email_address_array
 
     sender_voter = voter_results['voter']
     email_manager = EmailManager()
-    messages_to_send = []
 
     send_now = False
     valid_new_sender_email_address = False
@@ -304,137 +293,174 @@ def friend_invitation_by_email_send_for_api(voter_device_id, email_address_array
         }
         return error_results
 
-    # Break apart all of the emails in email_addresses_raw input from the voter
-    results = email_manager.parse_raw_emails_into_list(email_addresses_raw)
-    if results['at_least_one_email_found']:
-        raw_email_list_to_invite = results['email_list']
+    if not isinstance(first_name_array, (list, tuple)):
+        first_name_array = []
+
+    if not isinstance(last_name_array, (list, tuple)):
+        last_name_array = []
+
+    if email_address_array:
+        # Reconstruct dictionary array from lists
+        for n in range(len(email_address_array)):
+            first_name = first_name_array[n] if n in first_name_array else ""
+            last_name = last_name_array[n] if n in last_name_array else ""
+            one_normalized_raw_email = email_address_array[n]
+            send_results = send_to_one_friend(voter_device_id, sender_voter, send_now,
+                                              sender_email_with_ownership_verified,
+                                              one_normalized_raw_email, first_name, last_name, invitation_message)
+            status += send_results['status']
+
     else:
-        error_message_to_show_voter = "Please enter the email address of at least one friend."
-        error_results = {
-            'status':                               "LIST_OF_EMAILS_NOT_RECEIVED " + results['status'],
-            'success':                              False,
-            'voter_device_id':                      voter_device_id,
-            'sender_voter_email_address_missing':   False,
-            'error_message_to_show_voter':          error_message_to_show_voter
-        }
-        return error_results
-
-    sender_name = sender_voter.get_full_name()
-    sender_photo = sender_voter.voter_photo_url()
-    sender_description = ""
-    sender_network_details = ""
-
-    # Check to see if we recognize any of these emails
-    for one_normalized_raw_email in raw_email_list_to_invite:
-        # Starting with a raw email address, find (or create) the EmailAddress entry
-        # and the owner (Voter) if exists
-        retrieve_results = retrieve_voter_and_email_address(one_normalized_raw_email)
-        if not retrieve_results['success']:
-            error_message_to_show_voter = "There was an error retrieving one of your friend's email addresses. " \
-                                          "Please try again."
-            results = {
+        # Break apart all of the emails in email_addresses_raw input from the voter
+        results = email_manager.parse_raw_emails_into_list(email_addresses_raw)
+        if results['at_least_one_email_found']:
+            raw_email_list_to_invite = results['email_list']
+            first_name = ""
+            last_name = ""
+            for one_normalized_raw_email in raw_email_list_to_invite:
+                send_results = send_to_one_friend(voter_device_id, sender_voter, send_now,
+                                                  sender_email_with_ownership_verified,
+                                                  one_normalized_raw_email, first_name, last_name, invitation_message)
+                status += send_results['status']
+        else:
+            error_message_to_show_voter = "Please enter the email address of at least one friend."
+            error_results = {
+                'status':                               "LIST_OF_EMAILS_NOT_RECEIVED " + results['status'],
                 'success':                              False,
-                'status':                               retrieve_results['status'],
                 'voter_device_id':                      voter_device_id,
                 'sender_voter_email_address_missing':   False,
                 'error_message_to_show_voter':          error_message_to_show_voter
             }
-            return results
-        status += retrieve_results['status'] + " "
-
-        recipient_email_address_object = retrieve_results['email_address_object']
-
-        # Store the friend invitation linked to voter (if the email address has had its ownership verified),
-        # or to an email that isn't linked to a voter
-        invitation_secret_key = ""
-        if retrieve_results['voter_found']:
-            # Store the friend invitation in FriendInvitationVoterLink table
-            voter_friend = retrieve_results['voter']
-            friend_invitation_results = store_internal_friend_invitation_with_two_voters(
-                sender_voter, invitation_message, voter_friend)
-            status += friend_invitation_results['status'] + " "
-            success = friend_invitation_results['success']
-            if friend_invitation_results['friend_invitation_saved']:
-                friend_invitation = friend_invitation_results['friend_invitation']
-                invitation_secret_key = friend_invitation.secret_key
-            sender_voter_we_vote_id = sender_voter.we_vote_id
-            recipient_voter_we_vote_id = voter_friend.we_vote_id
-            recipient_email_we_vote_id = recipient_email_address_object.we_vote_id
-            recipient_voter_email = recipient_email_address_object.normalized_email_address
-
-            # Template variables
-            recipient_name = voter_friend.get_full_name()
-        else:
-            # Store the friend invitation in FriendInvitationEmailLink table
-            friend_invitation_results = store_internal_friend_invitation_with_unknown_email(
-                sender_voter, invitation_message, recipient_email_address_object)
-            status += friend_invitation_results['status'] + " "
-            success = friend_invitation_results['success']
-            if friend_invitation_results['friend_invitation_saved']:
-                friend_invitation = friend_invitation_results['friend_invitation']
-                invitation_secret_key = friend_invitation.secret_key
-            sender_voter_we_vote_id = sender_voter.we_vote_id
-            recipient_voter_we_vote_id = ""
-            recipient_email_we_vote_id = recipient_email_address_object.we_vote_id
-            recipient_voter_email = recipient_email_address_object.normalized_email_address
-
-            # Template variables
-            recipient_name = ""
-
-        # Variables used by templates/email_outbound/email_templates/friend_invitation.txt and .html
-        if positive_value_exists(sender_name):
-            subject = sender_name + " wants to be friends on We Vote"
-        else:
-            subject = "Invitation to be friends on We Vote"
-
-        if positive_value_exists(sender_email_with_ownership_verified):
-            sender_email_address = sender_email_with_ownership_verified
-
-        if invitation_secret_key is None:
-            invitation_secret_key = ""
-
-        system_sender_email_address = "We Vote <info@WeVote.US>"  # TODO DALE Make system variable
-
-        template_variables_for_json = {
-            "subject":                      subject,
-            "invitation_message":           invitation_message,
-            "sender_name":                  sender_name,
-            "sender_photo":                 sender_photo,
-            "sender_email_address":         system_sender_email_address,  # TODO DALE WAS sender_email_address,
-            "sender_description":           sender_description,
-            "sender_network_details":       sender_network_details,
-            "recipient_name":               recipient_name,
-            "recipient_voter_email":        recipient_voter_email,
-            "see_all_friend_requests_url":  WEB_APP_ROOT_URL + "/more/network",
-            "confirm_friend_request_url":   WEB_APP_ROOT_URL + "/more/network/" + invitation_secret_key,
-            "recipient_unsubscribe_url":    WEB_APP_ROOT_URL + "/unsubscribe?email_key=1234",
-            "email_open_url":               WE_VOTE_SERVER_ROOT_URL + "/apis/v1/emailOpen?email_key=1234",
-        }
-        template_variables_in_json = json.dumps(template_variables_for_json, ensure_ascii=True)
-
-        # TODO DALE - What kind of policy do we want re: sending a second email to a person?
-        # Create the outbound email description, then schedule it
-        if friend_invitation_results['friend_invitation_saved'] and send_now:
-            kind_of_email_template = FRIEND_INVITATION_TEMPLATE
-            outbound_results = email_manager.create_email_outbound_description(
-                sender_voter_we_vote_id, sender_email_with_ownership_verified, recipient_voter_we_vote_id,
-                recipient_email_we_vote_id, recipient_voter_email,
-                template_variables_in_json, kind_of_email_template)
-            status += outbound_results['status'] + " "
-            if outbound_results['email_outbound_description_saved']:
-                email_outbound_description = outbound_results['email_outbound_description']
-                schedule_results = schedule_email_with_email_outbound_description(email_outbound_description)
-                status += schedule_results['status'] + " "
-                if schedule_results['email_scheduled_saved']:
-                    # messages_to_send.append(schedule_results['email_scheduled_id'])
-                    email_scheduled = schedule_results['email_scheduled']
-                    send_results = email_manager.send_scheduled_email(email_scheduled)
-                    email_scheduled_sent = send_results['email_scheduled_sent']
-                    status += send_results['status']
+            return error_results
 
     # When we are done scheduling all email, send it with a single connection to the smtp server
     # if send_now:
     #     send_results = email_manager.send_scheduled_email_list(messages_to_send)
+
+    results = {
+        'success':                              success,
+        'status':                               status,
+        'voter_device_id':                      voter_device_id,
+        'sender_voter_email_address_missing':   False,
+        'error_message_to_show_voter':          error_message_to_show_voter
+    }
+    return results
+
+
+def send_to_one_friend(voter_device_id, sender_voter, send_now, sender_email_with_ownership_verified,
+                       one_normalized_raw_email, first_name, last_name, invitation_message):
+    # Starting with a raw email address, find (or create) the EmailAddress entry
+    # and the owner (Voter) if exists
+    status = ""
+    sender_name = sender_voter.get_full_name()
+    sender_photo = sender_voter.voter_photo_url()
+    sender_description = ""
+    sender_network_details = ""
+    email_manager = EmailManager()
+
+    retrieve_results = retrieve_voter_and_email_address(one_normalized_raw_email)
+    if not retrieve_results['success']:
+        error_message_to_show_voter = "There was an error retrieving one of your friend's email addresses. " \
+                                      "Please try again."
+        results = {
+            'success':                              False,
+            'status':                               retrieve_results['status'],
+            'voter_device_id':                      voter_device_id,
+            'sender_voter_email_address_missing':   False,
+            'error_message_to_show_voter':          error_message_to_show_voter
+        }
+        return results
+    status += retrieve_results['status'] + " "
+
+    recipient_email_address_object = retrieve_results['email_address_object']
+
+    # Store the friend invitation linked to voter (if the email address has had its ownership verified),
+    # or to an email that isn't linked to a voter
+    invitation_secret_key = ""
+    if retrieve_results['voter_found']:
+        # Store the friend invitation in FriendInvitationVoterLink table
+        voter_friend = retrieve_results['voter']
+        friend_invitation_results = store_internal_friend_invitation_with_two_voters(
+            sender_voter, invitation_message, voter_friend)
+        status += friend_invitation_results['status'] + " "
+        success = friend_invitation_results['success']
+        if friend_invitation_results['friend_invitation_saved']:
+            friend_invitation = friend_invitation_results['friend_invitation']
+            invitation_secret_key = friend_invitation.secret_key
+        sender_voter_we_vote_id = sender_voter.we_vote_id
+        recipient_voter_we_vote_id = voter_friend.we_vote_id
+        recipient_email_we_vote_id = recipient_email_address_object.we_vote_id
+        recipient_voter_email = recipient_email_address_object.normalized_email_address
+
+        # Template variables
+        recipient_name = voter_friend.get_full_name()
+    else:
+        # Store the friend invitation in FriendInvitationEmailLink table
+        friend_invitation_results = store_internal_friend_invitation_with_unknown_email(
+            sender_voter, invitation_message, recipient_email_address_object)
+        status += friend_invitation_results['status'] + " "
+        success = friend_invitation_results['success']
+        if friend_invitation_results['friend_invitation_saved']:
+            friend_invitation = friend_invitation_results['friend_invitation']
+            invitation_secret_key = friend_invitation.secret_key
+        sender_voter_we_vote_id = sender_voter.we_vote_id
+        recipient_voter_we_vote_id = ""
+        recipient_email_we_vote_id = recipient_email_address_object.we_vote_id
+        recipient_voter_email = recipient_email_address_object.normalized_email_address
+
+        # Template variables
+        recipient_name = ""
+
+    # Variables used by templates/email_outbound/email_templates/friend_invitation.txt and .html
+    if positive_value_exists(sender_name):
+        subject = sender_name + " wants to be friends on We Vote"
+    else:
+        subject = "Invitation to be friends on We Vote"
+
+    if positive_value_exists(sender_email_with_ownership_verified):
+        sender_email_address = sender_email_with_ownership_verified
+
+    if invitation_secret_key is None:
+        invitation_secret_key = ""
+
+    system_sender_email_address = "We Vote <info@WeVote.US>"  # TODO DALE Make system variable
+
+    template_variables_for_json = {
+        "subject":                      subject,
+        "invitation_message":           invitation_message,
+        "sender_name":                  sender_name,
+        "sender_photo":                 sender_photo,
+        "sender_email_address":         system_sender_email_address,  # TODO DALE WAS sender_email_address,
+        "sender_description":           sender_description,
+        "sender_network_details":       sender_network_details,
+        "recipient_name":               recipient_name,
+        "recipient_voter_email":        recipient_voter_email,
+        "see_all_friend_requests_url":  WEB_APP_ROOT_URL + "/more/network",
+        "confirm_friend_request_url":   WEB_APP_ROOT_URL + "/more/network/" + invitation_secret_key,
+        "recipient_unsubscribe_url":    WEB_APP_ROOT_URL + "/unsubscribe?email_key=1234",
+        "email_open_url":               WE_VOTE_SERVER_ROOT_URL + "/apis/v1/emailOpen?email_key=1234",
+    }
+    template_variables_in_json = json.dumps(template_variables_for_json, ensure_ascii=True)
+
+    # TODO DALE - What kind of policy do we want re: sending a second email to a person?
+    # Create the outbound email description, then schedule it
+    if friend_invitation_results['friend_invitation_saved'] and send_now:
+        kind_of_email_template = FRIEND_INVITATION_TEMPLATE
+        outbound_results = email_manager.create_email_outbound_description(
+            sender_voter_we_vote_id, sender_email_with_ownership_verified, recipient_voter_we_vote_id,
+            recipient_email_we_vote_id, recipient_voter_email,
+            template_variables_in_json, kind_of_email_template)
+        status += outbound_results['status'] + " "
+        if outbound_results['email_outbound_description_saved']:
+            email_outbound_description = outbound_results['email_outbound_description']
+            schedule_results = schedule_email_with_email_outbound_description(email_outbound_description)
+            status += schedule_results['status'] + " "
+            if schedule_results['email_scheduled_saved']:
+                # messages_to_send.append(schedule_results['email_scheduled_id'])
+                email_scheduled = schedule_results['email_scheduled']
+                send_results = email_manager.send_scheduled_email(email_scheduled)
+                email_scheduled_sent = send_results['email_scheduled_sent']
+                status += send_results['status']
 
     results = {
         'success':                              success,

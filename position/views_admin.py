@@ -41,22 +41,24 @@ def positions_sync_out_view(request):
 
     if position_list:
         # convert datetime to str for date_entered and date_last_changed columns
-        position_list = position_list.extra(select={'date_entered_str': "to_char(date_entered, 'YYYY-MM-DD HH24:MI:SS')"})
         position_list = position_list.extra(
-            select={'date_last_changed_str': "to_char(date_last_changed, 'YYYY-MM-DD HH24:MI:SS')"})
+            select={'date_entered': "to_char(date_entered, 'YYYY-MM-DD HH24:MI:SS')"})
+        position_list = position_list.extra(
+            select={'date_last_changed': "to_char(date_last_changed, 'YYYY-MM-DD HH24:MI:SS')"})
 
-        position_list_dict = position_list.values('we_vote_id', 'ballot_item_display_name', 'ballot_item_image_url_https',
-                                                  'ballot_item_twitter_handle', 'speaker_display_name',
-                                                  'speaker_image_url_https', 'speaker_twitter_handle', 'date_entered_str',
-                                                  'date_last_changed_str', 'organization_we_vote_id', 'voter_we_vote_id',
-                                                  'public_figure_we_vote_id', 'google_civic_election_id', 'state_code',
-                                                  'vote_smart_rating_id', 'vote_smart_time_span', 'vote_smart_rating',
-                                                  'vote_smart_rating_name', 'contest_office_we_vote_id',
-                                                  'candidate_campaign_we_vote_id', 'google_civic_candidate_name',
-                                                  'politician_we_vote_id', 'contest_measure_we_vote_id', 'stance',
-                                                  'statement_text', 'statement_html', 'more_info_url', 'from_scraper',
-                                                  'organization_certified', 'volunteer_certified', 'voter_entering_position',
-                                                  'tweet_source_id', 'twitter_user_entered_position')
+        position_list_dict = position_list.values(
+            'we_vote_id', 'ballot_item_display_name', 'ballot_item_image_url_https',
+            'ballot_item_twitter_handle', 'speaker_display_name',
+            'speaker_image_url_https', 'speaker_twitter_handle', 'date_entered',
+            'date_last_changed', 'organization_we_vote_id', 'voter_we_vote_id',
+            'public_figure_we_vote_id', 'google_civic_election_id', 'state_code',
+            'vote_smart_rating_id', 'vote_smart_time_span', 'vote_smart_rating',
+            'vote_smart_rating_name', 'contest_office_we_vote_id',
+            'candidate_campaign_we_vote_id', 'google_civic_candidate_name',
+            'politician_we_vote_id', 'contest_measure_we_vote_id', 'stance',
+            'statement_text', 'statement_html', 'more_info_url', 'from_scraper',
+            'organization_certified', 'volunteer_certified', 'voter_entering_position',
+            'tweet_source_id', 'twitter_user_entered_position')
         if position_list_dict:
             position_list_json = list(position_list_dict)
             return HttpResponse(json.dumps(position_list_json), content_type='application/json')

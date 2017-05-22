@@ -723,7 +723,7 @@ class WeVoteImageManager(models.Model):
                                            kind_of_image_twitter_background=False, kind_of_image_twitter_banner=False,
                                            kind_of_image_facebook_profile=False,
                                            kind_of_image_facebook_background=False,
-                                           kind_of_image_maplight=False, kind_of_image_vote_smart=None,
+                                           kind_of_image_maplight=False, kind_of_image_vote_smart=False,
                                            kind_of_image_original=False, kind_of_image_large=False,
                                            kind_of_image_medium=False, kind_of_image_tiny=False):
         """

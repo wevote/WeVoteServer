@@ -35,13 +35,20 @@ logger = wevote_functions.admin.get_logger(__name__)
 #     def get(self, request, format=None):
 def ballot_items_sync_out_view(request):
     google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
-    state_code = request.GET.get('state_code', '')
+    state_code = request.GET.get('state_code', False)
+
+    if not positive_value_exists(google_civic_election_id) and not positive_value_exists(state_code):
+        json_data = {
+            'success': False,
+            'status': 'BALLOT_ITEM_LIST-ELECTION_OR_STATE_CODE_FILTER_REQUIRED'
+        }
+        return HttpResponse(json.dumps(json_data), content_type='application/json')
 
     try:
         ballot_item_list = BallotItem.objects.all()
         # We only want BallotItem values associated with polling locations
-        ballot_item_list = ballot_item_list.exclude(polling_location_we_vote_id__isnull=True).exclude(
-            polling_location_we_vote_id__iexact='')
+        ballot_item_list = ballot_item_list.exclude(polling_location_we_vote_id__isnull=True)
+        ballot_item_list = ballot_item_list.exclude(polling_location_we_vote_id__iexact='')
         if positive_value_exists(google_civic_election_id):
             ballot_item_list = ballot_item_list.filter(google_civic_election_id=google_civic_election_id)
         if positive_value_exists(state_code):
@@ -75,22 +82,25 @@ def ballot_returned_sync_out_view(request):
     try:
         ballot_returned_list = BallotReturned.objects.all()
         # We only want BallotReturned values associated with polling locations
-        ballot_returned_list = ballot_returned_list.exclude(polling_location_we_vote_id__isnull=True).exclude(
-            polling_location_we_vote_id__iexact='')
+        ballot_returned_list = ballot_returned_list.exclude(polling_location_we_vote_id__isnull=True)
+        ballot_returned_list = ballot_returned_list.exclude(polling_location_we_vote_id__iexact='')
         if positive_value_exists(google_civic_election_id):
             ballot_returned_list = ballot_returned_list.filter(google_civic_election_id=google_civic_election_id)
 
         # serializer = BallotReturnedSerializer(ballot_returned_list, many=True)
         # return Response(serializer.data)
-        ballot_returned_list_dict = ballot_returned_list.values('election_date', 'election_description_text',
-                                                                'google_civic_election_id', 'latitude', 'longitude',
-                                                                'normalized_line1', 'normalized_line2',
-                                                                'normalized_city', 'normalized_state',
-                                                                'normalized_zip', 'polling_location_we_vote_id',
-                                                                'text_for_map_search')
         if ballot_returned_list:
-            ballot_returned_list_json = list(ballot_returned_list_dict)
-            return HttpResponse(json.dumps(ballot_returned_list_json), content_type='application/json')
+            ballot_returned_list = ballot_returned_list.extra(
+                select={'election_date': "to_char(election_date, 'YYYY-MM-DD')"})
+            ballot_returned_list_dict = ballot_returned_list.values('election_date', 'election_description_text',
+                                                                    'google_civic_election_id', 'latitude', 'longitude',
+                                                                    'normalized_line1', 'normalized_line2',
+                                                                    'normalized_city', 'normalized_state',
+                                                                    'normalized_zip', 'polling_location_we_vote_id',
+                                                                    'text_for_map_search')
+            if ballot_returned_list_dict:
+                ballot_returned_list_json = list(ballot_returned_list_dict)
+                return HttpResponse(json.dumps(ballot_returned_list_json), content_type='application/json')
     except Exception as e:
         pass
 
@@ -148,7 +158,13 @@ def ballot_returned_import_from_master_server_view(request):
 
 
 @login_required
-def ballot_item_list_edit_view(request, ballot_returned_id):
+def ballot_item_list_by_polling_location_edit_view(request, polling_location_we_vote_id):
+    ballot_returned_id = 0
+    return ballot_item_list_edit_view(request, ballot_returned_id, polling_location_we_vote_id)
+
+
+@login_required
+def ballot_item_list_edit_view(request, ballot_returned_id, polling_location_we_vote_id_from_path=''):
     authority_required = {'verified_volunteer'}  # admin, verified_volunteer
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
@@ -158,19 +174,20 @@ def ballot_item_list_edit_view(request, ballot_returned_id):
     polling_location_we_vote_id = request.GET.get('polling_location_we_vote_id', '')
     polling_location_city = request.GET.get('polling_location_city', '')
     polling_location_zip = request.GET.get('polling_location_zip', '')
+    google_civic_election_id = request.GET.get('google_civic_election_id', 0)
+    google_civic_election_id = convert_to_int(google_civic_election_id)
 
     ballot_returned_found = False
     ballot_returned = BallotReturned()
 
     ballot_returned_manager = BallotReturnedManager()
-    results = ballot_returned_manager.retrieve_existing_ballot_returned_by_identifier(ballot_returned_id)
+    voter_id = 0
+    results = ballot_returned_manager.retrieve_existing_ballot_returned_by_identifier(
+        ballot_returned_id, google_civic_election_id, voter_id, polling_location_we_vote_id_from_path)
     if results['ballot_returned_found']:
         ballot_returned = results['ballot_returned']
         ballot_returned_found = True
         google_civic_election_id = ballot_returned.google_civic_election_id
-    else:
-        google_civic_election_id = request.GET.get('google_civic_election_id', 0)
-        google_civic_election_id = convert_to_int(google_civic_election_id)
 
     election = Election()
     election_state = ''

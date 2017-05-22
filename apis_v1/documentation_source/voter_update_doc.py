@@ -50,6 +50,23 @@ def voter_update_doc_template_values(url_root):
             'value':        'string',  # boolean, integer, long, string
             'description':  'The url on the twitter servers of this person\'s profile photo.',
         },
+        {
+            'name':         'interface_status_flags',
+            'value':        'integer',  # boolean, integer, long, string
+            'description':  'An integer whose bits represent several flags for the user, such as the ',
+        },
+        {
+            'name':         'flag_integer_to_set',
+            'value':        'integer',  # boolean, integer, long, string
+            'description':  'Sets the corresponding bit represented by this integer\'s bit, '
+                            'in interface_status_flags bit',
+        },
+        {
+            'name':         'flag_integer_to_unset',
+            'value':        'integer',  # boolean, integer, long, string
+            'description':  'Unsets the corresponding bit represented by this integer\'s bit, '
+                            'in interface_status_flags bit',
+        },
     ]
 
     potential_status_codes_list = [
@@ -74,8 +91,12 @@ def voter_update_doc_template_values(url_root):
         'middle_name': 'False',
         'last_name': 'False',
         'twitter_profile_image_url_https': 'False',
+        'interface_status_flags': 'False',
+        'flag_integer_to_set': 'False',
+        'flag_integer_to_unset': 'False',
     }
 
+    # TODO: update api_response with all the variables, such as first_name and last_name
     api_response = '{\n' \
                    '  "status": string (description of what happened),\n' \
                    '  "success": boolean (True as long as no db errors),\n' \
@@ -86,6 +107,9 @@ def voter_update_doc_template_values(url_root):
                    '  "we_vote_hosted_profile_image_url_large": string,\n' \
                    '  "we_vote_hosted_profile_image_url_medium": string,\n' \
                    '  "we_vote_hosted_profile_image_url_tiny": string,\n' \
+                   '  "interface_status_flags": integer,\n' \
+                   '  "flag_integer_to_set": integer,\n' \
+                   '  "flag_integer_to_unset": integer,\n' \
                    '}'
 
     template_values = {
