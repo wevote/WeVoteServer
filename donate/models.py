@@ -3,7 +3,8 @@
 # -*- coding: UTF-8 -*-
 
 from django.db import models
-from exception.models import handle_record_found_more_than_one_exception
+from datetime import datetime, timezone
+from exception.models import handle_exception, handle_record_found_more_than_one_exception
 import wevote_functions.admin
 from wevote_functions.functions import positive_value_exists
 import stripe
@@ -218,6 +219,8 @@ class DonationJournal(models.Model):
                                                     auto_now=False, auto_now_add=False, null=True)
     subscription_ended_at = models.DateTimeField(verbose_name="stripe subscription ended timestamp", auto_now=False,
                                                  auto_now_add=False, null=True)
+    not_loggedin_voter_we_vote_id = models.CharField(verbose_name="unique we vote user id", max_length=32, unique=False,
+                                                     null=True, blank=True)
 
 
 class DonationManager(models.Model):
@@ -246,7 +249,8 @@ class DonationManager(models.Model):
         }
         return saved_results
 
-    def create_donation_from_voter(self, stripe_customer_id, voter_we_vote_id, donation_amount, email,
+    @staticmethod
+    def create_donation_from_voter(stripe_customer_id, voter_we_vote_id, donation_amount, email,
                                    donation_date_time, charge_id, charge_processed_successfully):
 
         new_donation_from_voter_created = False
@@ -284,7 +288,8 @@ class DonationManager(models.Model):
         }
         return saved_donation
 
-    def retrieve_stripe_customer_id(self, voter_we_vote_id):
+    @staticmethod
+    def retrieve_stripe_customer_id(voter_we_vote_id):
 
         stripe_customer_id = ''
         status = ''
@@ -301,7 +306,7 @@ class DonationManager(models.Model):
                 else:
                     success = False
                     status = "EXISTING_STRIPE_CUSTOMER_ID_NOT_FOUND"
-            except Exception:
+            except Exception as e:
                 success = False
                 status = "STRIPE_CUSTOMER_ID_RETRIEVAL_ATTEMPT_FAILED"
 
@@ -312,7 +317,8 @@ class DonationManager(models.Model):
         }
         return results
 
-    def create_donation_log_entry(self, ip_address, stripe_customer_id, voter_we_vote_id, charge_id, action_taken,
+    @staticmethod
+    def create_donation_log_entry(ip_address, stripe_customer_id, voter_we_vote_id, charge_id, action_taken,
                                   action_taken_date_time, action_result, action_result_date_time,
                                   error_text_description, error_message_for_voter):
 
@@ -330,7 +336,7 @@ class DonationManager(models.Model):
                 error_text_description=error_text_description, error_message_for_voter=error_message_for_voter)
             success = True
             status = 'DONATION_LOG_ENTRY_SAVED'
-        except Exception:
+        except Exception as e:
             success = False
             status = 'DONATION_LOG_ENTRY_NOT_SAVED'
 
@@ -341,7 +347,8 @@ class DonationManager(models.Model):
         }
         return saved_results
 
-    def retrieve_or_create_recurring_donation_plan(self, donation_amount):
+    @staticmethod
+    def retrieve_or_create_recurring_donation_plan(donation_amount):
 
         recurring_donation_plan_id = "monthly-" + str(donation_amount)
         # plan_name = donation_plan_id + " Plan"
@@ -409,12 +416,14 @@ class DonationManager(models.Model):
         }
         return results
 
+    @staticmethod
     def create_donation_journal_entry(
-            self, record_enum, ip_address, stripe_customer_id, voter_we_vote_id, charge_id, amount, currency,
+            record_enum, ip_address, stripe_customer_id, voter_we_vote_id, charge_id, amount, currency,
             funding, livemode, action_taken, action_result, created, failure_code, failure_message, network_status,
             reason, seller_message, stripe_type, paid, amount_refunded, refund_count, email, address_zip, brand,
             country, exp_month, exp_year, last4, id_card, stripe_object, stripe_status, status, subscription_id,
-            subscription_plan_id, subscription_created_at, subscription_canceled_at, subscription_ended_at):
+            subscription_plan_id, subscription_created_at, subscription_canceled_at, subscription_ended_at,
+            not_loggedin_voter_we_vote_id):
 
         new_history_entry = 0
 
@@ -430,11 +439,12 @@ class DonationManager(models.Model):
                 exp_month=exp_month, exp_year=exp_year, last4=last4, id_card=id_card, stripe_object=stripe_object,
                 stripe_status=stripe_status, status=status, subscription_id=subscription_id,
                 subscription_plan_id=subscription_plan_id, subscription_created_at=subscription_created_at,
-                subscription_canceled_at=subscription_canceled_at, subscription_ended_at=subscription_ended_at)
+                subscription_canceled_at=subscription_canceled_at, subscription_ended_at=subscription_ended_at,
+                not_loggedin_voter_we_vote_id=not_loggedin_voter_we_vote_id)
 
             success = True
             status = 'NEW_HISTORY_ENTRY_SAVED'
-        except Exception:
+        except Exception as e:
             success = False
 
         saved_results = {
@@ -444,7 +454,8 @@ class DonationManager(models.Model):
         }
         return saved_results
 
-    def create_subscription_entry(self, stripe_customer_id, voter_we_vote_id, donation_plan_id, start_date_time,
+    @staticmethod
+    def create_subscription_entry(stripe_customer_id, voter_we_vote_id, donation_plan_id, start_date_time,
                                   donation_amount, subscription_id, ended_at, canceled_at, livemode):
 
         new_donation_subscription_entry = False
@@ -477,7 +488,7 @@ class DonationManager(models.Model):
         }
         return saved_results
 
-    def create_recurring_donation(self, stripe_customer_id, voter_we_vote_id, donation_amount, start_date_time):
+    def create_recurring_donation(self, stripe_customer_id, voter_we_vote_id, donation_amount, start_date_time, email):
 
         subscription_entry = object
         subscription = object
@@ -489,9 +500,13 @@ class DonationManager(models.Model):
             status = donation_plan_id_query['status']
 
             try:
+                # If not logged in, this voter_we_vote_id will not be the same as the logged in id.
+                # Passing the voter_we_vote_id to the subscription gives us a chance to associate logged in with not
+                # logged in subscriptions in the future
                 subscription = stripe.Subscription.create(
                     customer=stripe_customer_id,
-                    plan=donation_plan_id
+                    plan=donation_plan_id,
+                    metadata={'voter_we_vote_id': voter_we_vote_id, 'email': email}
                 )
                 success = True
                 canceled_at = subscription['canceled_at']
@@ -522,7 +537,8 @@ class DonationManager(models.Model):
         }
         return results
 
-    def retrieve_stripe_card_error_message(self, error_type):
+    @staticmethod
+    def retrieve_stripe_card_error_message(error_type):
         voter_card_error_message = 'Your card has been declined for an unknown reason. Contact your bank for more' \
                                                ' information.'
 
@@ -566,12 +582,13 @@ class DonationManager(models.Model):
 
         return voter_card_error_message
 
-    def retrieve_donation_journal_list(self, we_vote_id):
+    @staticmethod
+    def retrieve_donation_journal_list(we_vote_id):
         voters_donation_list = []
         status = ''
 
         try:
-            donation_queryset = DonationJournal.objects.all()
+            donation_queryset = DonationJournal.objects.all().order_by('-created')
             donation_queryset = donation_queryset.filter(voter_we_vote_id=we_vote_id)
             voters_donation_list = donation_queryset
 
@@ -587,7 +604,7 @@ class DonationManager(models.Model):
             status += " WE_VOTE_HISTORY_DOES_NOT_EXIST "
             success = True
 
-        except Exception:
+        except Exception as e:
             status += " FAILED_TO RETRIEVE_CACHED_WE_VOTE_HISTORY_LIST "
             success = False
             # handle_exception(e, logger=logger, exception_message=status)
@@ -599,3 +616,97 @@ class DonationManager(models.Model):
         }
 
         return results
+
+    @staticmethod
+    def does_donation_journal_charge_exist(charge_id):
+        try:
+            donation_queryset = DonationJournal.objects.all()
+            donation_queryset = donation_queryset.filter(charge_id=charge_id)
+
+            if len(donation_queryset):
+                exists = True
+                success = True
+            else:
+                exists = False
+                success = True
+
+        except Exception as e:
+            exists = False
+            success = True
+            handle_exception(e, logger=logger, exception_message="Exception in does_donation_journal_charge_exist")
+
+        results = {
+            'exists': exists,
+            'success': success,
+        }
+
+        return results
+
+    @staticmethod
+    def mark_subscription_canceled_or_ended(subscription_id, customer_id, subscription_ended_at,
+                                            subscription_canceled_at):
+        try:
+            subscription_row = DonationJournal.objects.get(subscription_id=subscription_id,
+                                                           stripe_customer_id=customer_id)
+            subscription_row.subscription_ended_at = datetime.fromtimestamp(subscription_ended_at, timezone.utc)
+            subscription_row.subscription_canceled_at = datetime.fromtimestamp(subscription_canceled_at, timezone.utc)
+            subscription_row.save()
+
+        except DonationJournal.DoesNotExist:
+            logger.error("Subscription " + subscription_id + " with customer_id " + customer_id + " does not exist",
+                         {}, {})
+            return False
+
+        except Exception as e:
+            handle_exception(e, logger=logger, exception_message="Exception in mark_subscription_canceled_or_ended")
+            return False
+
+        return True
+
+    @staticmethod
+    def move_donations_between_donors(from_voter, to_voter):
+        status = ''
+        voter_we_vote_id = from_voter.we_vote_id
+        to_voter_we_vote_id = to_voter.we_vote_id
+
+        try:
+            rows = DonationJournal.objects.get(voter_we_vote_id=voter_we_vote_id)
+            rows.voter_we_vote_id = to_voter_we_vote_id
+            rows.save()
+            status = "move_donations_between_donors MOVED-DONATIONS-FROM-" + \
+                     voter_we_vote_id + "-TO-" + to_voter_we_vote_id + " "
+            print(status)
+
+        except DonationJournal.DoesNotExist:
+            status += " move_donations_between_donors-FAILED-WITH-A-DoesNotExist-ERROR-FROM-" + \
+                      voter_we_vote_id +  "-TO-" + to_voter_we_vote_id + " "
+            logger.error(status, {}, {})
+            status += " EXCEPTION-IN-move_donations_between_donors "
+            logger.error(status, {}, {})
+            results = {
+                'status': status,
+                'success': False,
+                'from_voter': from_voter,
+                'to_voter': to_voter,
+            }
+            return results
+
+        except Exception as e:
+            status += " EXCEPTION-IN-move_donations_between_donors "
+            logger.error(status, {}, {})
+            results = {
+                'status': status,
+                'success': False,
+                'from_voter': from_voter,
+                'to_voter': to_voter,
+            }
+            return results
+
+        results = {
+            'status': status,
+            'success': True,
+            'from_voter': from_voter,
+            'to_voter': to_voter,
+        }
+        return results
+

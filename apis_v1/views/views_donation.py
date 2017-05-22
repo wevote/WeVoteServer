@@ -51,7 +51,6 @@ def donation_with_stripe_view(request):  # donationWithStripe
             'monthly_donation': monthly_donation,
             'subscription': results['subscription'],
             'error_message_for_voter': results['error_message_for_voter']
-
         }
         return HttpResponse(json.dumps(json_data), content_type='application/json')
 
@@ -62,38 +61,32 @@ def donation_with_stripe_view(request):  # donationWithStripe
         }
         return HttpResponse(json.dumps(json_data), content_type='application/json')
 
-# TODO: Move the endpoint secret to the environment variables
-# Set your secret key: remember to change this to your live secret key in production
-# See your keys here: https://dashboard.stripe.com/account/apikeys
-# You can find your endpoint's secret in your webhook settings
-endpoint_secret = "sk_test_mgeds61AuQ7vGBfwVxFdQqTh"
 
-
+# Using ngrok to test Stripe Webhook
+# https://a9a761d9.ngrok.io/apis/v1/donationStripeWebhook/
+# http://a9a761d9.ngrok.io -> localhost:8000
 @csrf_exempt
 def donation_stripe_webhook_view(request):
     payload = request.body
     sig_header = request.META['HTTP_STRIPE_SIGNATURE']
-    event = None
+    endpoint_secret = get_environment_variable("STRIPE_SIGNING_SECRET")
 
     try:
-        event = stripe.Webhook.construct_event(
-            payload, sig_header, endpoint_secret)
+        event = stripe.Webhook.construct_event(payload, sig_header, endpoint_secret)
 
     except ValueError as e:
-        logger.error("apis_v1/views/views_donation.py, Stripe returned \"Invalid payload\": "
-                     # TODO: Debug e, and see if there is something worth adding to the log
-                     )
+        logger.error("apis_v1/views/views_donation.py, Stripe returned 'Invalid payload'", {}, {})
         return HttpResponse(status=400)
 
-    except stripe.error.SignatureVerificationError as e:
-        logger.error("apis_v1/views/views_donation.py, Stripe returned \"Invalid signature\": "
-                     # TODO: Debug e, and see if there is something worth adding to the log
-                     )
+    except stripe.error.SignatureVerificationError as err:
+        logger.error("apis_v1/views/views_donation.py, Stripe returned SignatureVerificationError: " + err._message,
+                     {}, {})
         return HttpResponse(status=400)
 
-    except:
-        logger.error("apis_v1/views/views_donation.py, Stripe returned \"Unknown\": ")
+    except Exception as err:
+        logger.error(err, {}, {})
         return HttpResponse(status=400)
+
     donation_process_stripe_webhook_event(event)
 
     return HttpResponse(status=200)
