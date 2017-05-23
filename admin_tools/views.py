@@ -61,9 +61,11 @@ def admin_home_view(request):
     store_new_voter_api_device_id_in_cookie = results['store_new_voter_api_device_id_in_cookie']
 
     google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
+    state_code = request.GET.get('state_code', '')
 
     template_values = {
         'google_civic_election_id': google_civic_election_id,
+        'state_code':               state_code,
     }
     response = render(request, 'admin_tools/index.html', template_values)
 

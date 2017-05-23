@@ -101,6 +101,7 @@ INSTALLED_APPS = (
     'import_export_vote_smart',
     'import_export_wikipedia',
     'import_export_endorsements',
+    'issue',
     'measure',
     'office',
     'organization',
@@ -114,7 +115,6 @@ INSTALLED_APPS = (
     'support_oppose_deciding',
     'search',
     'signals',
-    'star',
     'tag',
     'twitter',  # See also import_export_twitter
     'voter',  # See also AUTH_USER_MODEL in config/settings.py
