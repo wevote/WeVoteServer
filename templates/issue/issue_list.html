@@ -1,12 +1,13 @@
-{# templates/office/office_list.html #}
+{# templates/issue/issue_list.html #}
 {% extends "template_base.html" %}
 
-{% block title %}Offices{% endblock %}
+{% block title %}Issues{% endblock %}
 
 {%  block content %}
+{% load template_filters %}
 <a href="{% url 'admin_tools:admin_home' %}?google_civic_election_id={{ google_civic_election_id }}">< Back to Admin Home</a>
 
-<h1>Offices</h1>
+<h1>Issues</h1>
 
     <p>Jump to:
 
@@ -22,20 +23,18 @@
 
     </p>
 
-<p><a href="{% url 'office:office_new' %}?google_civic_election_id={{ google_civic_election_id }}">Add New Office</a></p>
-
-    <form name="organization_position_choose_election" method="get" action="{% url 'office:office_list' %}">
-        {% csrf_token %}
+<form name="issue_choose_election" method="get" action="{% url 'issue:issue_list' %}">
+    {% csrf_token %}
     {% if election_list %}
-        <select id="google_civic_election_id" name="google_civic_election_id">
-            <option value="0" {% if 0 == google_civic_election_id %} selected="selected"{% endif %}>
-                -- Filter by Election --</option>
+    <select id="google_civic_election_id" name="google_civic_election_id">
+        <option value="0" {% if 0 == google_civic_election_id|convert_to_int %} selected="selected"{% endif %}>
+            -- Filter by Election --</option>
         {% for election in election_list %}
-            <option value="{{ election.google_civic_election_id }}"
-                    {% if election.google_civic_election_id|slugify == google_civic_election_id|slugify %} selected="selected"{% endif %}>
-                {{ election.election_name }} - {{ election.google_civic_election_id }} - {{ election.election_day_text }}</option>
+        <option value="{{ election.google_civic_election_id }}"
+                {% if election.google_civic_election_id|slugify == google_civic_election_id|slugify %} selected="selected"{% endif %}>
+            {{ election.election_name }} - {{ election.google_civic_election_id }} - {{ election.election_day_text }}</option>
         {% endfor %}
-        </select>
+    </select>
     {% endif %}{# End of if election_list #}
 
     {% if state_list %}
@@ -49,48 +48,57 @@
         {% endfor %}
         </select>
         {% if state_code != "" %}
-        <a href="{% url 'office:office_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}&candidate_search={{ candidate_search }}&show_all=1">
+        <a href="{% url 'issue:issue_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}&issue_search={{ issue_search }}&show_all=1">
             show all</a>
         {% endif %}
     {% endif %}{# End of if state_list #}
 
-{% if office_list %}
+    <a href="{% url 'issue:issue_new' %}?google_civic_election_id={{ google_civic_election_id }}">Add New Issue</a><br />
+
+    <br />
+    {% if issue_search %}
+    <a href="{% url 'issue:issue_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
+         clear search</a>&nbsp;
+    {% endif %}
+    <input type="text" name="issue_search" id="issue_search_id" value="{{ issue_search }}" />
+    <input type="submit" value="Search for Issue" />
+</form>
+
+{% if issue_list %}
     <table border="1" cellpadding="5" cellspacing="5">
         <tr>
             <td>&nbsp;</td>
-            <td>ID</td>
-            <td>We Vote ID</td>
-            <td>Office Name</td>
-            <td>State</td>
-            <td>District ID</td>
-            <td># of Candidates</td>
+            <td>&nbsp;</td>
+            <td>Issue Name</td>
+            <td>Issue Description</td>
         </tr>
-    {% for office in office_list %}
+    {% for issue in issue_list %}
         <tr>
             <td>{{ forloop.counter }}</td>
-            <td>{{ office.id }}</td>
-            <td>{{ office.we_vote_id }}</td>
-            <td><a href="{% url 'office:office_summary' office.id %}">{{ office.office_name }}
-                {% if office.district_id %}
-                    - District {{ office.district_id }}
+            <td>
+                {% if issue.issue_photo_url %}
+                <a href="{% url 'issue:issue_edit' issue.we_vote_id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
+                    <img src='{{ issue.issue_photo_url }}' height="25px" />
+                </a>
                 {% endif %}
-                {% if office.state_code %}
-                    - {{ office.state_code }}
-                {% endif %}
-            </a></td>
-            <td>{{ office.state_code }}</td>
-            <td>{{ office.district_id|default_if_none:"" }}</td>
-            <td>{{ office.candidate_count }}</td>
+            </td>
+            <td><a href="{% url 'issue:issue_edit' issue.we_vote_id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">{{ issue.issue_name }}</a></td>
+            <td>{{ issue.issue_description }}</td>
         </tr>
     {% endfor %}
     </table>
 
+    <p>
+        <a href="{% url 'apis_v1:issuesSyncOutView' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}&issue_search={{ issue_search }}" target="_blank" >Export Issues</a><br />
+    </p>
+
     <p></p>
-    {# <p><a href="{% url 'office:offices_export' %}?format=json" target="_blank" >Export Offices</a></p> #}
 {% else %}
-    <p>(no offices found)</p>
+    <p>(no issues found)</p>
+    <p>
+        <a href="{% url 'issue:issue_new' %}?google_civic_election_id={{ google_civic_election_id }}">Add New Issue</a><br />
+    </p>
 {% endif %}
-    </form>
 
     <script>
     $(function() {

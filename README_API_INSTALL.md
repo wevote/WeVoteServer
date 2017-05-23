@@ -13,7 +13,7 @@ NOTE: WeVoteServer is built for Python 3. It currently still works with Python v
 
 ## Clone WeVoteServer from github
 
-Create a place to put all of the code from Github:
+Create a place to put all of the code from Github (this example is for Mac):
 
     $ mkdir /Users/<YOUR NAME HERE>/PythonProjects/
 
@@ -31,7 +31,9 @@ This will ensure you will be able to test donations with the most up to date TLS
 
  `brew install openssl`
 
-## Installing Python 3 on Mac (See below for Ubuntu)
+## Installing Python 3
+ 
+### On Mac (See below for Ubuntu)
 
 Mac instructions (Based on [this](http://joebergantine.com/blog/2015/apr/30/installing-python-2-and-python-3-alongside-each-ot/))
 
@@ -67,7 +69,7 @@ If you need to upgrade your Python version later (Macintosh), this command does 
 
     $ virtualenv3 -p /Library/Frameworks/Python.framework/Versions/3.6/bin/python3 WeVoteServer3.6.1
     
-## Installing Python 3 on Ubuntu
+### Installing Python 3 on Ubuntu
 
 Taken from here:
 https://www.digitalocean.com/community/tutorials/how-to-install-the-django-web-framework-on-ubuntu-16-04#install-through-pip-in-a-virtualenv
@@ -117,13 +119,23 @@ For mac:
 
 ## Installing Postgres
 
-### Running Mac?
+### Installing Postgres on Mac
 
 Install the latest version of Postgres for your machine (see instructions further down on this page as well):
  
 MAC: Download and install the DMG from [http://postgresapp.com/](http://postgresapp.com/)
  
-OTHER: Go to [https://www.postgresql.org/download/](https://www.postgresql.org/download/).
+(Alternate: Go to [https://www.postgresql.org/download/](https://www.postgresql.org/download/).)
+
+Run this on your command line:
+
+    export PATH=$PATH:/Applications/Postgres.app/Contents/Versions/latest/bin
+
+Start up the command line for postgres (there is an 'open psql' button/navigation item if you installed postgresapp.
+Run these commands:
+
+    create role postgres;
+    alter role postgres with login;
 
 Install PGAdmin4. Go to [https://www.pgadmin.org/download/](https://www.pgadmin.org/download/).
 
@@ -135,7 +147,7 @@ Then run these comments from your virtual environment for WeVoteServer:
 [Having troubles? See Installation Troubleshooting](README_INSTALLATION_TROUBLESHOOTING.md)
 
 
-### Running Linux?
+### Installing Postgres on Linux
 If you are installing on a Linux environment, we recommend the following steps within your virtual environment. If you
 are installing on a Mac or Windows machine, you can skip these steps.
 
@@ -151,31 +163,17 @@ THEN:
     pip install --upgrade pip
     pip install -r requirements.txt
 
-## Setup - Install the Postgres database
-
-### METHOD 1 (Mac)
-For Mac, download and install the DMG from [http://postgresapp.com/](http://postgresapp.com/)
-
-Run this on your command line:
-
-    export PATH=$PATH:/Applications/Postgres.app/Contents/Versions/latest/bin
-
-Start up the command line for postgres (there is an 'open psql' button/navigation item if you installed postgresapp.
 Run these commands:
 
-    create role postgres;
-    alter role postgres with login;
+    $ sudo apt-get install postgresql-client
+    $ sudo apt-get install postgresql postgresql-contrib
+    $ sudo -u postgres psql postgres
+    postgres=# \password postgres
+    (NOTE: We recommend using a very simple password like "123" since it is just local development)
+    postgres=# \q
+    $ sudo -u postgres createdb WeVoteServerDB
 
-### METHOD 2 (Windows)
-
-Install Postgres:
-
-    $ sudo port install postgresql94
-    $ sudo port install postgresql94-server
-
-### METHOD 3 (linux Ubuntu)
-
-Follow [these instructions](https://help.ubuntu.com/community/PostgreSQL)
+See here for more detailed [instructions](https://help.ubuntu.com/community/PostgreSQL)
 
 ## Setup - Install pgAdmin 4
 
@@ -186,12 +184,50 @@ See: http://blog.tcs.de/program-cant-be-opened-because-it-is-from-an-unidentifie
 
 In pgadmin add a server. You can use your sign in name as the server name.
 
+Open this file:
 
-## Setup - Environment Variables Configuration - config/environment_variables.json
+    $ sudo vi /etc/postgres/9.5/main/pg_hba.conf
+
+Change the line:
+
+    # Database administrative login by Unix domain socket
+    local   all             postgres                                peer
+to
+
+    # Database administrative login by Unix domain socket
+    local   all             postgres                                md5
+    
+Now you should reload the server configuration changes and connect pgAdmin III to your PostgreSQL database server.
+
+    sudo /etc/init.d/postgresql reload
+
+Open pgAdmin 4 and navigate to:
+
+    Server Groups > Servers
+
+1) Right-click on "Servers" and choose "Create > Server"
+
+2) Name: WeVoteServer
+
+3) Switch to "Connection" tab
+
+3a) Host name: localhost
+
+3b) Port: 5432
+
+3c) Maintenance database: postgres
+
+3d) User name: postgres
+
+Double click on WeVoteServerDB (there may be a red x thru it). It will prompt you for a password; leave it blank and click
+OK. You may see an additional warning screen about saving passwords, if so, click ok. 
+
+
+## Setup - Environment Variables Configuration - WeVoteServer/config/environment_variables.json
 
 NOTE: IMPORTANT STEP
 
-Copy "config/environment_variables-template.json" to "config/environment_variables.json". 
+Copy "WeVoteServer/config/environment_variables-template.json" to "WeVoteServer/config/environment_variables.json". 
 You will configure many variables for your local environment in this file. 
 
 New variables needed by WeVoteServer will be added to
@@ -209,7 +245,7 @@ As configured in github, only errors get written to the log.
 Logging has five levels: CRITICAL, ERROR, INFO, WARN, DEBUG.
 It works as a hierarchy (i.e. INFO picks up all messages logged as INFO, ERROR and CRITICAL), and when logging we
 specify the level assigned to each message. You can change this to info items by changing the LOG_FILE_LEVEL variable 
-in the config/environment_variables.json file to "INFO".
+in the WeVoteServer/config/environment_variables.json file to "INFO".
 
 ## Set up GeoIP
 
@@ -283,7 +319,7 @@ Transfer it to the live API server:
 
 ## Setup - Database Creation
 
-Set up a new database that matches the local database settings from the "config/environment_variables.json" file,
+Make sure you have a database that matches the local database settings from the "config/environment_variables.json" file,
 (Search for "DATABASES"). Using the database tool you prefer create the following Database.
 
     WeVoteServerDB
@@ -297,7 +333,7 @@ Create the initial database:
 
     $ python manage.py syncdb
 
-When prompted for a super user, enter your email address and a simple password. This admin account is only used in development.
+When prompted for a super user, enter your email address and a simple password (or no password). This admin account is only used in development.
 
 If you are not prompted to create a superuser, run the following command:
 
@@ -322,7 +358,7 @@ Find admin tools here:
     
 Now you will need to authenticate as an admin. For now, this will require that you log in with your Twitter account. 
 Please contact Dale.McGrew@WeVoteUSA.org for configuration settings you can add to your local 
-config/environment_variables.json file.
+WeVoteServer/config/environment_variables.json file.
 
     Click "Sign in with Twitter" and use your Twitter credentials to Sign-In. 
     
@@ -334,10 +370,28 @@ text string like "wv01voter1234" next to it, note the we_vote_id number.
 
 Open pgAdmin 4 and navigate to:
 
-    Server Groups > Servers > WeVoteServerDB 
+    Server Groups > Servers > WeVoteServer 
+
+If you do not see "WeVoteServer", then do the following:
+
+1) Right-click on "Servers" and choose "Create > Server"
+
+2) Name: WeVoteServer
+
+3) Switch to "Connection" tab
+
+3a) Host name: localhost
+
+3b) Port: 5432
+
+3c) Maintenance database: postgres
+
+3d) User name: postgres
 
 Double click on WeVoteServerDB (there may be a red x thru it). It will prompt you for a password; leave it blank and click
-OK. You may see an additional warning screen about saving passwords, if so, click ok. Once you are connected, navigate to:
+OK. You may see an additional warning screen about saving passwords, if so, click ok. 
+
+Once you are connected, navigate to:
 
     WeVoteServerDB > Schemas > public > Tables > voter_voter
 

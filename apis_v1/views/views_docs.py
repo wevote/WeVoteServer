@@ -8,7 +8,7 @@ from apis_v1.documentation_source import ballot_item_options_retrieve_doc, ballo
     elections_sync_out_doc, facebook_disconnect_doc, facebook_friends_action_doc, friend_invitation_by_email_send_doc, \
     friend_invitation_by_email_verify_doc, friend_invitation_by_we_vote_id_send_doc, \
     friend_invitation_by_facebook_send_doc,  friend_invitation_by_facebook_verify_doc, \
-    friend_invite_response_doc, friend_list_doc, \
+    friend_invite_response_doc, friend_list_doc, issues_sync_out_doc, \
     measure_retrieve_doc, measures_sync_out_doc, \
     office_retrieve_doc, offices_sync_out_doc, \
     organization_count_doc, organizations_followed_retrieve_doc, \
@@ -24,7 +24,7 @@ from apis_v1.documentation_source import ballot_item_options_retrieve_doc, ballo
     positions_count_for_all_ballot_items_doc, positions_count_for_one_ballot_item_doc, \
     quick_info_retrieve_doc, search_all_doc, twitter_identity_retrieve_doc, \
     twitter_sign_in_request_access_token_doc, twitter_sign_in_request_voter_info_doc, twitter_sign_in_retrieve_doc, \
-    twitter_sign_in_start_doc, voter_address_retrieve_doc, voter_address_save_doc, \
+    twitter_sign_in_start_doc, twitter_retrieve_ids_i_follow_doc, voter_address_retrieve_doc, voter_address_save_doc, \
     voter_all_positions_retrieve_doc, voter_all_bookmarks_status_retrieve_doc, \
     voter_ballot_items_retrieve_doc, \
     voter_ballot_items_retrieve_from_google_civic_doc, voter_ballot_list_retrieve_doc, \
@@ -269,6 +269,16 @@ def friend_list_doc_view(request):
     """
     url_root = WE_VOTE_SERVER_ROOT_URL
     template_values = friend_list_doc.friend_list_doc_template_values(url_root)
+    template_values['voter_api_device_id'] = get_voter_api_device_id(request)
+    return render(request, 'apis_v1/api_doc_page.html', template_values)
+
+
+def issues_sync_out_doc_view(request):
+    """
+    Show documentation about issuesSyncOut
+    """
+    url_root = WE_VOTE_SERVER_ROOT_URL
+    template_values = issues_sync_out_doc.issues_sync_out_doc_template_values(url_root)
     template_values['voter_api_device_id'] = get_voter_api_device_id(request)
     return render(request, 'apis_v1/api_doc_page.html', template_values)
 
@@ -604,6 +614,16 @@ def twitter_sign_in_retrieve_doc_view(request):
     """
     url_root = WE_VOTE_SERVER_ROOT_URL
     template_values = twitter_sign_in_retrieve_doc.twitter_sign_in_retrieve_doc_template_values(url_root)
+    template_values['voter_api_device_id'] = get_voter_api_device_id(request)
+    return render(request, 'apis_v1/api_doc_page.html', template_values)
+
+
+def twitter_retrieve_ids_i_follow_doc_view(request):
+    """
+    Show documentation about twitterRetrieveIdsIFollow
+    """
+    url_root = WE_VOTE_SERVER_ROOT_URL
+    template_values = twitter_retrieve_ids_i_follow_doc.twitter_retrieve_ids_i_follow_doc_template_values(url_root)
     template_values['voter_api_device_id'] = get_voter_api_device_id(request)
     return render(request, 'apis_v1/api_doc_page.html', template_values)
 

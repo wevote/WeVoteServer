@@ -5,7 +5,7 @@ from config.base import get_environment_variable
 from django.http import HttpResponse, HttpResponseRedirect
 from import_export_twitter.controllers import twitter_sign_in_start_for_api, \
     twitter_sign_in_request_access_token_for_api, twitter_sign_in_request_voter_info_for_api, \
-    twitter_sign_in_retrieve_for_api
+    twitter_sign_in_retrieve_for_api, twitter_retrieve_ids_i_follow_for_api
 import json
 from twitter.controllers import twitter_identity_retrieve_for_api
 from urllib.parse import quote
@@ -180,5 +180,23 @@ def twitter_sign_in_retrieve_view(request):  # twitterSignInRetrieve
         'we_vote_hosted_profile_image_url_tiny':    results['we_vote_hosted_profile_image_url_tiny'],
         # 'twitter_who_i_follow':                   results['twitter_who_i_follow'],
         # There are more values we currently aren't returning
+    }
+    return HttpResponse(json.dumps(json_data), content_type='application/json')
+
+
+def twitter_retrieve_ids_i_follow_view(request): # twitterRetrieveIdsIFollow
+    """
+    :param request:
+    :return:
+    """
+    voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
+
+    results = twitter_retrieve_ids_i_follow_for_api(voter_device_id=voter_device_id)
+
+    json_data = {
+        'status':                   results['status'],
+        'success':                  results['success'],
+        'voter_device_id':          voter_device_id,
+        'twitter_ids_i_follow':     results['twitter_ids_i_follow'],
     }
     return HttpResponse(json.dumps(json_data), content_type='application/json')

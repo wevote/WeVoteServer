@@ -1175,17 +1175,6 @@ def twitter_sign_in_retrieve_for_api(voter_device_id):  # twitterSignInRetrieve
     else:
         twitter_profile_image_url_https = twitter_auth_response.twitter_profile_image_url_https
 
-    # Now that voter is signed in, reach out to twitter to get up to 5000 ids of other twitter users
-    twitter_ids_i_follow_results = twitter_user_manager.retrieve_twitter_ids_i_follow_from_twitter(
-        twitter_auth_response.twitter_id, twitter_auth_response.twitter_access_token,
-        twitter_auth_response.twitter_access_secret)
-    status += ' ' + twitter_ids_i_follow_results['status']
-    twitter_ids_i_follow = twitter_ids_i_follow_results['twitter_ids_i_follow']
-    if twitter_ids_i_follow_results['success']:
-        twitter_who_i_follow_results = twitter_user_manager.create_twitter_who_i_follow_entries(
-            twitter_auth_response.twitter_id, twitter_ids_i_follow)
-        status += ' ' + twitter_who_i_follow_results['status']
-
     json_data = {
         'success':                                  success,
         'status':                                   status,
@@ -1211,6 +1200,60 @@ def twitter_sign_in_retrieve_for_api(voter_device_id):  # twitterSignInRetrieve
         'we_vote_hosted_profile_image_url_tiny':    we_vote_hosted_profile_image_url_tiny,
     }
     return json_data
+
+
+def twitter_retrieve_ids_i_follow_for_api(voter_device_id):     # twitterRetrieveIdsIFollow
+    """
+
+    :param voter_device_id:
+    :return:
+    """
+    success = False
+
+    twitter_auth_manager = TwitterAuthManager()
+    auth_response_results = twitter_auth_manager.retrieve_twitter_auth_response(voter_device_id)
+    status = auth_response_results['status']
+    if not auth_response_results['twitter_auth_response_found']:
+        error_results = {
+            'success':                  success,
+            'status':                   status,
+            'voter_device_id':          voter_device_id,
+            'twitter_ids_i_follow':     [],
+        }
+        return error_results
+
+    twitter_auth_response = auth_response_results['twitter_auth_response']
+
+    if not twitter_auth_response.twitter_id:
+        success = False
+        error_results = {
+            'success':                  success,
+            'status':                   status,
+            'voter_device_id':          voter_device_id,
+            'twitter_ids_i_follow':     [],
+        }
+        return error_results
+
+    twitter_user_manager = TwitterUserManager()
+
+    # Now that voter is signed in, reach out to twitter to get up to 5000 ids of other twitter users
+    twitter_ids_i_follow_results = twitter_user_manager.retrieve_twitter_ids_i_follow_from_twitter(
+        twitter_auth_response.twitter_id, twitter_auth_response.twitter_access_token,
+        twitter_auth_response.twitter_access_secret)
+    status += ' ' + twitter_ids_i_follow_results['status']
+    twitter_ids_i_follow = twitter_ids_i_follow_results['twitter_ids_i_follow']
+    if twitter_ids_i_follow_results['success']:
+        twitter_who_i_follow_results = twitter_user_manager.create_twitter_who_i_follow_entries(
+            twitter_auth_response.twitter_id, twitter_ids_i_follow)
+        status += ' ' + twitter_who_i_follow_results['status']
+        success = twitter_who_i_follow_results['success']
+    results = {
+        'success':              success,
+        'status':               status,
+        'voter_device_id':      voter_device_id,
+        'twitter_ids_i_follow': twitter_ids_i_follow
+    }
+    return results
 
 
 def voter_twitter_save_to_current_account_for_api(voter_device_id):  # voterTwitterSaveToCurrentAccount

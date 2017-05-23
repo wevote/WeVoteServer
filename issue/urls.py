@@ -1,0 +1,20 @@
+# issue/urls.py
+# Brought to you by We Vote. Be good.
+# -*- coding: UTF-8 -*-
+
+from . import views_admin
+from django.conf.urls import url
+
+
+urlpatterns = [
+    # views_admin
+    url(r'^$', views_admin.issue_list_view, name='issue_list',),
+    url(r'^edit_process/$', views_admin.issue_edit_process_view, name='issue_edit_process'),
+    url(r'^delete/', views_admin.issue_delete_process_view, name='issue_delete_process'),
+    url(r'^import/$',
+        views_admin.issues_import_from_master_server_view, name='issues_import_from_master_server'),
+    url(r'^new/$', views_admin.issue_new_view, name='issue_new'),
+    url(r'^edit/(?P<issue_we_vote_id>wv[\w]{2}issue[\w]+)/$', views_admin.issue_edit_view, name='issue_edit'),
+    url(r'^summary/(?P<issue_we_vote_id>wv[\w]{2}issue[\w]+)/$', views_admin.issue_summary_view,
+        name='issue_summary'),
+]
