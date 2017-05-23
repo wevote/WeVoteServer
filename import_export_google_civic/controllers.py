@@ -775,7 +775,7 @@ def voter_ballot_items_retrieve_from_google_civic_for_api(
         }
         return results
 
-    google_civic_election_id = 5000  # TODO DALE TESTING A PROBLEM - when we remove this, update
+    google_civic_election_id = 0  # = 5000  # TODO DALE TESTING A PROBLEM - when we remove this, update
     #  retrieve_one_ballot_from_google_civic_api to go back for a second look once we have google_civic_election_id
     status = ''
     success = False

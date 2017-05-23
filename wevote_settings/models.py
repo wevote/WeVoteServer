@@ -236,6 +236,16 @@ def fetch_next_we_vote_id_last_email_integer():
     return we_vote_id_last_email_integer
 
 
+def fetch_next_we_vote_id_last_issue_integer():
+    we_vote_settings_manager = WeVoteSettingsManager()
+    we_vote_id_last_issue_integer = we_vote_settings_manager.fetch_setting('we_vote_id_last_issue_integer')
+    we_vote_id_last_issue_integer = convert_to_int(we_vote_id_last_issue_integer)
+    we_vote_id_last_issue_integer += 1
+    we_vote_settings_manager.save_setting('we_vote_id_last_issue_integer',
+                                          we_vote_id_last_issue_integer)
+    return we_vote_id_last_issue_integer
+
+
 def fetch_next_we_vote_id_last_measure_campaign_integer():
     we_vote_settings_manager = WeVoteSettingsManager()
     we_vote_id_last_measure_campaign_integer = \
