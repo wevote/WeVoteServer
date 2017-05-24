@@ -19,4 +19,7 @@ urlpatterns = [
         name='batch_action_list_import_create_or_update_rows'),
     url(r'^batch_list/$', views_admin.batch_list_view, name='batch_list'),
     url(r'^batch_list_process/$', views_admin.batch_list_process_view, name='batch_list_process'),
+    url(r'^batch_set_list/$', views_admin.batch_set_list_view, name='batch_set_list'),
+    url(r'^batch_set_list_process/$', views_admin.batch_set_list_process_view, name='batch_set_list_process'),
+    # url(r'^batch_set_action_list/$', views_admin.batch_set_action_list_view, name='batch_set_action_list'),
 ]
