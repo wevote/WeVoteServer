@@ -17,6 +17,7 @@ from wevote_functions.functions import positive_value_exists, LANGUAGE_CODE_ENGL
 import urllib
 from exception.models import handle_exception
 import magic
+from datetime import date
 
 import xml.etree.ElementTree as ElementTree
 
@@ -44,6 +45,8 @@ KIND_OF_ACTION_CHOICES = (
     (CREATE,            'Create'),
     (ADD_TO_EXISTING,   'Add to Existing'),
 )
+
+BATCH_SET_SOURCE_CTCL = 'CTCL'
 
 logger = wevote_functions.admin.get_logger(__name__)
 
@@ -531,13 +534,14 @@ class BatchManager(models.Model):
                 }
                 return results
 
-    def store_measure_xml(self, batch_uri, google_civic_election_id, organization_we_vote_id, xml_root):
+    def store_measure_xml(self, batch_uri, google_civic_election_id, organization_we_vote_id, xml_root, batch_set_id=0):
         """
         Retrieves Measure data from CTCL xml file
         :param batch_uri:
         :param google_civic_election_id:
         :param organization_we_vote_id:
         :param xml_root:
+        :param batch_set_id:
         :return:
         """
         # Process BallotMeasureContest data
@@ -632,6 +636,7 @@ class BatchManager(models.Model):
                             kind_of_batch='MEASURE',
                             organization_we_vote_id=organization_we_vote_id,
                             source_uri=batch_uri,
+                            batch_set_id=batch_set_id,
                         )
                         status += " BATCH_DESCRIPTION_SAVED"
                         success = True
@@ -673,13 +678,15 @@ class BatchManager(models.Model):
         }
         return results
 
-    def store_elected_office_xml(self, batch_uri, google_civic_election_id, organization_we_vote_id, xml_root):
+    def store_elected_office_xml(self, batch_uri, google_civic_election_id, organization_we_vote_id, xml_root,
+                                 batch_set_id=0):
         """
         Retrieves Office data from CTCL xml file
         :param batch_uri:
         :param google_civic_election_id:
         :param organization_we_vote_id:
         :param xml_root:
+        :param batch_set_id
         :return:
         """
         # Process VIP Office data
@@ -765,6 +772,7 @@ class BatchManager(models.Model):
                             kind_of_batch='ELECTED_OFFICE',
                             organization_we_vote_id=organization_we_vote_id,
                             source_uri=batch_uri,
+                            batch_set_id=batch_set_id,
                         )
                         status += " BATCH_DESCRIPTION_SAVED"
                         success = True
@@ -805,13 +813,15 @@ class BatchManager(models.Model):
         }
         return results
 
-    def store_contest_office_xml(self, batch_uri, google_civic_election_id, organization_we_vote_id, xml_root):
+    def store_contest_office_xml(self, batch_uri, google_civic_election_id, organization_we_vote_id, xml_root,
+                                 batch_set_id=0):
         """
         Retrieves CandidateContest data from CTCL xml file
         :param batch_uri:
         :param google_civic_election_id:
         :param organization_we_vote_id:
         :param xml_root:
+        :param batch_set_id
         :return:
         """
         # Process VIP CandidateContest data
@@ -904,6 +914,7 @@ class BatchManager(models.Model):
                             kind_of_batch='CONTEST_OFFICE',
                             organization_we_vote_id=organization_we_vote_id,
                             source_uri=batch_uri,
+                            batch_set_id=batch_set_id,
                         )
                         status += " BATCH_DESCRIPTION_SAVED"
                         success = True
@@ -945,13 +956,15 @@ class BatchManager(models.Model):
         }
         return results
 
-    def store_politician_xml(self, batch_uri, google_civic_election_id, organization_we_vote_id, xml_root):
+    def store_politician_xml(self, batch_uri, google_civic_election_id, organization_we_vote_id, xml_root,
+                             batch_set_id=0):
         """
         Retrieves Politician data from CTCL xml file
         :param batch_uri:
         :param google_civic_election_id:
         :param organization_we_vote_id:
         :param xml_root:
+        :param batch_set_id
         :return:
         """
         # Process VIP Person data
@@ -1116,6 +1129,7 @@ class BatchManager(models.Model):
                             kind_of_batch='POLITICIAN',
                             organization_we_vote_id=organization_we_vote_id,
                             source_uri=batch_uri,
+                            batch_set_id=batch_set_id,
                         )
                         status += " BATCH_DESCRIPTION_SAVED"
                         success = True
@@ -1166,13 +1180,15 @@ class BatchManager(models.Model):
         }
         return results
 
-    def store_candidate_xml(self, batch_uri, google_civic_election_id, organization_we_vote_id, xml_root):
+    def store_candidate_xml(self, batch_uri, google_civic_election_id, organization_we_vote_id, xml_root,
+                            batch_set_id=0):
         """
         Retrieves Candidate data from CTCL xml file
         :param batch_uri:
         :param google_civic_election_id:
         :param organization_we_vote_id:
         :param xml_root:
+        :param batch_set_id
         :return:
         """
         # Process VIP Candidate data
@@ -1271,6 +1287,7 @@ class BatchManager(models.Model):
                             kind_of_batch='CANDIDATE',
                             organization_we_vote_id=organization_we_vote_id,
                             source_uri=batch_uri,
+                            batch_set_id=batch_set_id,
                         )
                         status += " BATCH_DESCRIPTION_SAVED"
                         success = True
@@ -1313,6 +1330,107 @@ class BatchManager(models.Model):
         }
         return results
 
+    def create_batch_set_vip_xml(self, batch_uri, google_civic_election_id, organization_we_vote_id):
+        """
+        Retrieves CTCL Batch Set data from an xml file - Measure, Office, Candidate, Politician
+        :param batch_uri:
+        :param google_civic_election_id:
+        :param organization_we_vote_id:
+        :return:
+        """
+        # Retrieve from XML
+        request = urllib.request.urlopen(batch_uri)
+        # xml_data = request.read()
+        # xml_data = xmltodict.parse(xml_data)
+        # # xml_data_list_json = list(xml_data)
+        # structured_json = json.dumps(xml_data)
+
+        xml_tree = ElementTree.parse(request)
+        request.close()
+        xml_root = xml_tree.getroot()
+
+        status = ''
+        success = False
+        number_of_batch_rows = 0
+        batch_set_id = 0
+
+        if xml_root:
+
+            # set batch_set_name as file_name
+            batch_set_name_list = batch_uri.split('/')
+            # get the file name
+            batch_set_name = batch_set_name_list[len(batch_set_name_list) - 1]
+            import_date = date.today()
+            # create batch_set object
+            try:
+                batch_set = BatchSet.objects.create(batch_set_description_text="", batch_set_name=batch_set_name,
+                                                       batch_set_source=BATCH_SET_SOURCE_CTCL,
+                                                       google_civic_election_id=google_civic_election_id,
+                                                       source_uri=batch_uri, import_date=import_date)
+                batch_set_id = batch_set.id
+                if positive_value_exists(batch_set_id):
+                    status += " BATCH_SET_SAVED"
+                    success = True
+            except Exception as e:
+                # Stop trying to save rows -- break out of the for loop
+                batch_set_id = 0
+                status += " EXCEPTION_BATCH_SET"
+                handle_exception(e, logger=logger, exception_message=status)
+
+            # look for different data sets in the XML file - Measure, ElectedOffice, ContestOffice, Candidate,
+            # Politician
+            results = self.store_measure_xml(batch_uri, google_civic_election_id, organization_we_vote_id, xml_root,
+                                             batch_set_id)
+            if results['success']:
+                # Measure data found
+                status += 'CREATE_BATCH_SET_MEASURE_DATA_FOUND'
+                number_of_batch_rows += results['number_of_batch_rows']
+                success = True
+            results = self.store_elected_office_xml(batch_uri, google_civic_election_id, organization_we_vote_id,
+                                                    xml_root, batch_set_id)
+            if results['success']:
+                # Elected Office data found
+                status += 'CREATE_BATCH_SET_ELECTED_OFFICE_DATA_FOUND'
+                number_of_batch_rows += results['number_of_batch_rows']
+
+            results = self.store_contest_office_xml(batch_uri, google_civic_election_id, organization_we_vote_id,
+                                                    xml_root, batch_set_id)
+            if results['success']:
+                # Contest Office data found
+                status += 'CREATE_BATCH_SET_CONTEST_OFFICE_DATA_FOUND'
+                number_of_batch_rows += results['number_of_batch_rows']
+
+            results = self.store_candidate_xml(batch_uri, google_civic_election_id, organization_we_vote_id, xml_root,
+                                               batch_set_id)
+            if results['success']:
+                # Candidate data found
+                status += 'CREATE_BATCH_SET_CANDIDATE_DATA_FOUND'
+                number_of_batch_rows += results['number_of_batch_rows']
+
+            results = self.store_politician_xml(batch_uri, google_civic_election_id, organization_we_vote_id, xml_root,
+                                                batch_set_id)
+            if results['success']:
+                # Politician data found
+                status += 'CREATE_BATCH_SET_POLITICIAN_DATA_FOUND'
+                number_of_batch_rows += results['number_of_batch_rows']
+            else:
+                results = {
+                    'success': False,
+                    'status': '',
+                    'batch_header_id': 0,
+                    'batch_saved': False,
+                    'number_of_batch_rows': 0,
+                }
+                return results
+
+        results = {
+            'success':                  success,
+            'status':                   status,
+            'batch_set_id':             batch_set_id,
+            'batch_saved':              success,
+            'number_of_batch_rows':     number_of_batch_rows,
+        }
+        return results
 
 class BatchSet(models.Model):
     """
@@ -1321,10 +1439,10 @@ class BatchSet(models.Model):
     google_civic_election_id = models.PositiveIntegerField(
         verbose_name="google civic election id", default=0, null=True, blank=True)
     batch_set_name = models.CharField(max_length=255)
-    # kind_of_batch = models.CharField(max_length=32, choices=KIND_OF_BATCH_CHOICES, default=MEASURE)
     batch_set_description_text = models.CharField(max_length=255)
     batch_set_source = models.CharField(max_length=255)
     source_uri = models.URLField(blank=True, null=True, verbose_name='uri where data is coming from')
+    import_date = models.DateTimeField(verbose_name="date when batch set was imported", null=True, auto_now=True)
 
 
 class BatchDescription(models.Model):
