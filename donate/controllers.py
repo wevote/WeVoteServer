@@ -28,7 +28,6 @@ def donation_with_stripe_for_api(request, token, email, donation_amount, monthly
     donation_date_time = datetime.today()
     donation_status = 'STRIPE_DONATION_NOT_COMPLETED'
     action_taken = 'VOTER_SUBMITTED_DONATION'
-    action_taken_date_time = donation_date_time
     charge_id = ''
     amount = 0
     currency = ''
@@ -130,7 +129,6 @@ def donation_with_stripe_for_api(request, token, email, donation_amount, monthly
                 success = recurring_donation['success']
                 create_subscription_entry = True
                 subscription_id = recurring_donation['subscription_id']
-                charge_processed_successfully = recurring_donation['success']
                 subscription_plan_id = recurring_donation['subscription_plan_id']
                 subscription_created_at = datetime.fromtimestamp(recurring_donation['subscription_created_at'],
                                                                  timezone.utc)
@@ -149,12 +147,8 @@ def donation_with_stripe_for_api(request, token, email, donation_amount, monthly
             success = positive_value_exists(charge_id)
 
         if positive_value_exists(charge_id):
-            saved_donation = donation_manager.create_donation_from_voter(stripe_customer_id, voter_we_vote_id,
-                                                                         donation_amount, email,
-                                                                         donation_date_time, charge_id,
-                                                                         charge_processed_successfully)
-            saved_stripe_donation = saved_donation['success']
-            donation_status = saved_donation['status'] + ' DONATION_PROCESSED_SUCCESSFULLY '
+            saved_stripe_donation = True
+            donation_status = ' DONATION_PROCESSED_SUCCESSFULLY '
             amount = charge['amount']
             currency = charge['currency']
             amount_refunded = charge['amount_refunded']
@@ -190,7 +184,7 @@ def donation_with_stripe_for_api(request, token, email, donation_amount, monthly
                                     error_message=error_from_json['message'])
         status += donation_status
         error_message = translate_stripe_error_to_voter_explanation_text(e.http_status, error_from_json['type'])
-        error_text_description = donation_status
+        # error_text_description = donation_status
     except stripe.error.StripeError as e:
         body = e.json_body
         error_from_json = body['error']
@@ -200,7 +194,7 @@ def donation_with_stripe_for_api(request, token, email, donation_amount, monthly
                                     error_message=error_from_json['message'])
         status += donation_status
         error_message = translate_stripe_error_to_voter_explanation_text(e.http_status, error_from_json['type'])
-        error_text_description = donation_status
+        # error_text_description = donation_status
         print(donation_status)
     except Exception:
         # Something else happened, completely unrelated to Stripe
@@ -214,9 +208,9 @@ def donation_with_stripe_for_api(request, token, email, donation_amount, monthly
 
     # action_taken should be VOTER_SUBMITTED_DONATION, VOTER_CANCELED_DONATION or CANCEL_REQUEST_SUBMITTED
     # action_result should be CANCEL_REQUEST_FAILED, CANCEL_REQUEST_SUCCEEDED or DONATION_PROCESSED_SUCCESSFULLY
-    donation_log_results = donation_manager.create_donation_log_entry(
-        ip_address, stripe_customer_id, voter_we_vote_id, charge_id, action_taken, action_taken_date_time,
-        result_taken, result_taken_date_time, error_text_description, error_message)
+    # donation_log_results = donation_manager.create_donation_log_entry(
+    #     ip_address, stripe_customer_id, voter_we_vote_id, charge_id, action_taken, action_taken_date_time,
+    #     result_taken, result_taken_date_time, error_text_description, error_message)
 
     logged_in = is_voter_logged_in(request)
     # print("is_voter_logged_in() = " + str(logged_in))
@@ -225,28 +219,32 @@ def donation_with_stripe_for_api(request, token, email, donation_amount, monthly
 
     if create_donation_entry:
         # Create the Journal entry for a payment initiated by the UI.  (Automatic payments from the subscription will be
-        donation_manager.create_donation_journal_entry("PAYMENT_FROM_UI", ip_address, stripe_customer_id,
-                                                       voter_we_vote_id, charge_id, amount, currency, funding,
-                                                       livemode, action_taken, action_result, created, failure_code,
-                                                       failure_message, network_status, reason, seller_message,
-                                                       stripe_type, paid, amount_refunded, refund_count, email,
-                                                       address_zip, brand, country, exp_month, exp_year, last4,
-                                                       id_card, stripe_object, stripe_status, status, None, None,
-                                                       None, None, None, not_loggedin_voter_we_vote_id)
+        donation_journal_entry = \
+            donation_manager.create_donation_journal_entry("PAYMENT_FROM_UI", ip_address, stripe_customer_id,
+                                                           voter_we_vote_id, charge_id, amount, currency, funding,
+                                                           livemode, action_taken, action_result, created, failure_code,
+                                                           failure_message, network_status, reason, seller_message,
+                                                           stripe_type, paid, amount_refunded, refund_count, email,
+                                                           address_zip, brand, country, exp_month, exp_year, last4,
+                                                           id_card, stripe_object, stripe_status, status, None, None,
+                                                           None, None, None, not_loggedin_voter_we_vote_id)
+        status += donation_journal_entry['status']
+
     if create_subscription_entry:
         # Create the Journal entry for a new subscription, with some fields from the intial payment on that subscription
-        donation_manager.create_donation_journal_entry("SUBS_SETUP_AND_INITIAL", ip_address, stripe_customer_id,
-                                                       voter_we_vote_id, charge_id, amount, currency, funding,
-                                                       livemode, action_taken, action_result, created, failure_code,
-                                                       failure_message, network_status, reason, seller_message,
-                                                       stripe_type, paid, amount_refunded, refund_count, email,
-                                                       address_zip, brand, country, exp_month, exp_year, last4,
-                                                       id_card, stripe_object, stripe_status, status,
-                                                       subscription_id, subscription_plan_id,
-                                                       subscription_created_at, subscription_canceled_at,
-                                                       subscription_ended_at, not_loggedin_voter_we_vote_id)
-
-        donation_entry_saved = donation_log_results['success']
+        donation_journal_entry = \
+            donation_manager.create_donation_journal_entry("SUBSCRIPTION_SETUP_AND_INITIAL", ip_address, stripe_customer_id,
+                                                           voter_we_vote_id, charge_id, amount, currency, funding,
+                                                           livemode, action_taken, action_result, created, failure_code,
+                                                           failure_message, network_status, reason, seller_message,
+                                                           stripe_type, paid, amount_refunded, refund_count, email,
+                                                           address_zip, brand, country, exp_month, exp_year, last4,
+                                                           id_card, stripe_object, stripe_status, status,
+                                                           subscription_id, subscription_plan_id,
+                                                           subscription_created_at, subscription_canceled_at,
+                                                           subscription_ended_at, not_loggedin_voter_we_vote_id)
+        donation_entry_saved = donation_journal_entry['success']
+        status += donation_journal_entry['status']
 
     results = {
         'status': status,
@@ -341,7 +339,6 @@ def donation_process_charge(event):
         results = donation_manager.does_donation_journal_charge_exist(charge['id'])
 
         if results['success'] and not results['exists']:
-            # TODO: Subscription id is not in the return, maybe there is some other way to find it
             # Create the Journal entry for a payment initiated by an automatic subscription payment.
             donation_manager.create_donation_journal_entry("PAYMENT_AUTO_SUBSCRIPTION", "0.0.0.0",
                                                            str(charge['customer']),
@@ -378,9 +375,11 @@ def donation_process_subscription_deleted(event):
                                                              subscription_canceled_at)
     return
 
+
 # Handle this event (in the same way for now) if it comes in from Stripe
 def donation_process_subscription_updated(event):
     return donation_process_subscription_deleted(event)
+
 
 # Within a session, if the voter donates before logging in, the donations will be created under a new unique
 # voter_we_vote_id.  Subsequently when they login, their proper voter_we_vote_id will come into effect.  If we did not

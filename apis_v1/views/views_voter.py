@@ -37,6 +37,7 @@ from voter_guide.controllers import voter_guide_possibility_retrieve_for_api, vo
 import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, get_voter_device_id, is_voter_device_id_valid, \
     positive_value_exists
+from donate.controllers import donation_history_for_a_voter
 
 logger = wevote_functions.admin.get_logger(__name__)
 
@@ -1507,6 +1508,12 @@ def voter_update_view(request):  # voterUpdate
     except KeyError:
         flag_integer_to_unset = False
 
+    try:
+        send_journal_list = request.GET['send_journal_list']
+    except KeyError:
+        send_journal_list = False
+
+
     device_id_results = is_voter_device_id_valid(voter_device_id)
     if not device_id_results['success']:
         json_data = {
@@ -1523,6 +1530,7 @@ def voter_update_view(request):  # voterUpdate
                 'interface_status_flags':           interface_status_flags,
                 'flag_integer_to_set':              flag_integer_to_set,
                 'flag_integer_to_unset':            flag_integer_to_unset,
+                'voter_donation_history_list':      None,
             }
         response = HttpResponse(json.dumps(json_data), content_type='application/json')
         return response
@@ -1531,7 +1539,7 @@ def voter_update_view(request):  # voterUpdate
         facebook_email or facebook_profile_image_url_https \
         or first_name or middle_name or last_name \
         or interface_status_flags or flag_integer_to_unset \
-        or flag_integer_to_set \
+        or flag_integer_to_set or send_journal_list \
         else False
 
     if not at_least_one_variable_has_changed:
@@ -1549,6 +1557,7 @@ def voter_update_view(request):  # voterUpdate
                 'interface_status_flags':           interface_status_flags,
                 'flag_integer_to_set':              flag_integer_to_set,
                 'flag_integer_to_unset':            flag_integer_to_unset,
+                'voter_donation_history_list':      None,
             }
         response = HttpResponse(json.dumps(json_data), content_type='application/json')
         return response
@@ -1571,6 +1580,7 @@ def voter_update_view(request):  # voterUpdate
             'interface_status_flags':           interface_status_flags,
             'flag_integer_to_set':              flag_integer_to_set,
             'flag_integer_to_unset':            flag_integer_to_unset,
+            'voter_donation_history_list':      None,
         }
         response = HttpResponse(json.dumps(json_data), content_type='application/json')
         return response
@@ -1612,6 +1622,8 @@ def voter_update_view(request):  # voterUpdate
             facebook_profile_image_url_https = cached_facebook_profile_image_url_https
 
     # At this point, we have a valid voter
+    donation_list = donation_history_for_a_voter(voter.we_vote_id)
+
     voter_manager = VoterManager()
     results = voter_manager.update_voter(voter_id, facebook_email, facebook_profile_image_url_https,
                                          first_name, middle_name, last_name,
@@ -1636,6 +1648,7 @@ def voter_update_view(request):  # voterUpdate
         'interface_status_flags':                   voter.interface_status_flags,
         'flag_integer_to_set':                      flag_integer_to_set,
         'flag_integer_to_unset':                    flag_integer_to_unset,
+        'voter_donation_history_list':              donation_list,
     }
 
     response = HttpResponse(json.dumps(json_data), content_type='application/json')
