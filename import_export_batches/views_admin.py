@@ -2,7 +2,7 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
-from .models import BatchDescription, BatchHeaderMap, BatchManager, BatchRow, CONTEST_OFFICE, ELECTED_OFFICE
+from .models import BatchDescription, BatchHeaderMap, BatchManager, BatchRow, BatchSet, CONTEST_OFFICE, ELECTED_OFFICE
 from .controllers import create_batch_row_actions, import_create_or_update_elected_office_entry, \
     import_batch_action_rows
 from admin_tools.views import redirect_to_sign_in_page
@@ -427,3 +427,222 @@ def batch_action_list_bulk_import_create_or_update_rows_view(request):
     return HttpResponseRedirect(reverse('import_export_batches:batch_action_list', args=()) +
                                 "?kind_of_batch=" + str(kind_of_batch) +
                                 "&batch_header_id=" + str(batch_header_id))
+
+
+@login_required
+def batch_set_list_view(request):
+    """
+    Display a list of import batch set
+    :param request:
+    :return:
+    """
+    authority_required = {'verified_volunteer'}  # admin, verified_volunteer
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
+    # kind_of_batch = request.GET.get('kind_of_batch', '')
+    batch_uri = request.GET.get('batch_uri', '')
+    google_civic_election_id = request.GET.get('google_civic_election_id', 0)
+
+    messages_on_stage = get_messages(request)
+    batch_set_list_found = False
+    try:
+        batch_set_list = BatchSet.objects.order_by('id')
+        # batch_set_list = batch_set_list.exclude(batch_set_id__isnull=True)
+        if positive_value_exists(google_civic_election_id):
+            batch_set_list = batch_set_list.filter(google_civic_election_id=google_civic_election_id)
+        if len(batch_set_list):
+            batch_set_list_found = True
+    except BatchDescription.DoesNotExist:
+        # This is fine
+        batch_set_list = BatchDescription()
+        batch_set_list_found = False
+        pass
+
+    election_list = Election.objects.order_by('-election_day_text')
+
+    if batch_set_list_found:
+        template_values = {
+            'messages_on_stage':        messages_on_stage,
+            'batch_set_list':           batch_set_list,
+            'election_list':            election_list,
+            'batch_uri':                batch_uri,
+            'google_civic_election_id': google_civic_election_id,
+        }
+    else:
+        template_values = {
+            'messages_on_stage':        messages_on_stage,
+            'election_list':            election_list,
+            'batch_uri':                batch_uri,
+            'google_civic_election_id': google_civic_election_id,
+        }
+    return render(request, 'import_export_batches/batch_set_list.html', template_values)
+
+
+@login_required
+def batch_set_list_process_view(request):
+    """
+    Load in a new batch set to start the importing process
+    :param request:
+    :return:
+    """
+    authority_required = {'verified_volunteer'}  # admin, verified_volunteer
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
+    batch_uri = request.POST.get('batch_uri', '')
+    google_civic_election_id = request.POST.get('google_civic_election_id', 0)
+    organization_we_vote_id = request.POST.get('organization_we_vote_id', '')
+    # Was form submitted, or was election just changed?
+    import_batch_button = request.POST.get('import_batch_button', '')
+
+    batch_uri_encoded = urlquote(batch_uri) if positive_value_exists(batch_uri) else ""
+
+    # Store contents of spreadsheet?
+    if not positive_value_exists(google_civic_election_id):
+        messages.add_message(request, messages.ERROR, 'This batch set requires you '
+                                                      'to choose an election.')
+        return HttpResponseRedirect(reverse('import_export_batches:batch_set_list', args=()) +
+                                    "?batch_uri=" + batch_uri_encoded)
+
+    election_manager = ElectionManager()
+    results = election_manager.retrieve_election(google_civic_election_id)
+    if results['election_found']:
+        election = results['election']
+
+        if positive_value_exists(import_batch_button):  # If the button was pressed...
+            batch_manager = BatchManager()
+
+            # check file type
+            filetype = batch_manager.find_file_type(batch_uri)
+            if "xml" in filetype:
+                # file is XML
+                # Retrieve the VIP data from XML
+                results = batch_manager.create_batch_set_vip_xml(batch_uri, google_civic_election_id,
+                                                             organization_we_vote_id)
+            else:
+                pass
+                # results = batch_manager.create_batch(batch_uri, google_civic_election_id, organization_we_vote_id)
+            if results['batch_saved']:
+                messages.add_message(request, messages.INFO, 'Import batch for {election_name} election saved.'
+                                                             ''.format(election_name=election.election_name))
+            else:
+                messages.add_message(request, messages.ERROR, results['status'])
+
+    return HttpResponseRedirect(reverse('import_export_batches:batch_set_list', args=()) +
+                                "?google_civic_election_id=" + str(google_civic_election_id) +
+                                "&batch_uri=" + batch_uri_encoded)
+
+@login_required
+def batch_set_action_list_view(request):
+    """
+    Display row-by-row details of batch_set actions being reviewed, leading up to processing an entire batch_set.
+    :param request:
+    :return:
+    """
+    authority_required = {'verified_volunteer'}  # admin, verified_volunteer
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
+    batch_set_id = convert_to_int(request.GET.get('batch_set_id', 0))
+    # kind_of_batch = request.GET.get('kind_of_batch', '')
+
+    if not positive_value_exists(batch_set_id):
+        messages.add_message(request, messages.ERROR, 'Batch_set_id required.')
+        return HttpResponseRedirect(reverse('import_export_batches:batch_set_list', args=()))
+
+    google_civic_election_id = request.GET.get('google_civic_election_id', 0)
+
+    try:
+        batch_description = BatchDescription.objects.get(batch_set_id=batch_set_id)
+        batch_description_found = True
+    except BatchDescription.DoesNotExist:
+        # This is fine
+        batch_description = BatchDescription()
+        batch_description_found = False
+
+    # try:
+    #     batch_header_map = BatchHeaderMap.objects.get(batch_header_id=batch_header_id)
+    # except BatchHeaderMap.DoesNotExist:
+        # This is fine
+        # batch_header_map = BatchHeaderMap()
+
+    # batch_set_list_found = False
+    # try:
+    #     batch_set_row_list = BatchRow.objects.order_by('id')
+    #     batch_set_row_list = batch_row_list.filter(batch_header_id=batch_header_id)
+    #     if len(batch_row_list):
+    #         batch_list_found = True
+    # except BatchDescription.DoesNotExist:
+    #     # This is fine
+    #     batch_row_list = []
+    #     batch_list_found = False
+    #     pass
+    #
+    # modified_batch_row_list = []
+    # batch_manager = BatchManager()
+    # if batch_list_found:
+    #     for one_batch_row in batch_row_list:
+    #         if kind_of_batch == ORGANIZATION_WORD:
+    #             existing_results = batch_manager.retrieve_batch_row_action_organization(batch_header_id,
+    #                                                                                     one_batch_row.id)
+    #             if existing_results['batch_row_action_found']:
+    #                 one_batch_row.batch_row_action = existing_results['batch_row_action_organization']
+    #                 one_batch_row.kind_of_batch = ORGANIZATION_WORD
+    #                 one_batch_row.batch_row_action_exists = True
+    #             else:
+    #                 one_batch_row.batch_row_action_exists = False
+    #             modified_batch_row_list.append(one_batch_row)
+    #         elif kind_of_batch == MEASURE:
+    #             existing_results = batch_manager.retrieve_batch_row_action_measure(batch_header_id, one_batch_row.id)
+    #             if existing_results['batch_row_action_found']:
+    #                 one_batch_row.batch_row_action = existing_results['batch_row_action_measure']
+    #                 one_batch_row.kind_of_batch = MEASURE
+    #                 one_batch_row.batch_row_action_exists = True
+    #             else:
+    #                 one_batch_row.batch_row_action_exists = False
+    #             modified_batch_row_list.append(one_batch_row)
+    #         elif kind_of_batch == ELECTED_OFFICE:
+    #             existing_results = batch_manager.retrieve_batch_row_action_elected_office(batch_header_id,
+    #                                                                                       one_batch_row.id)
+    #             if existing_results['batch_row_action_found']:
+    #                 one_batch_row.batch_row_action = existing_results['batch_row_action_elected_office']
+    #                 one_batch_row.kind_of_batch = ELECTED_OFFICE
+    #                 one_batch_row.batch_row_action_exists = True
+    #             else:
+    #                 one_batch_row.batch_row_action_exists = False
+    #             modified_batch_row_list.append(one_batch_row)
+    #         elif kind_of_batch == CONTEST_OFFICE:
+    #             existing_results = batch_manager.retrieve_batch_row_action_contest_office(batch_header_id,
+    #                                                                                       one_batch_row.id)
+    #             if existing_results['batch_row_action_found']:
+    #                 one_batch_row.batch_row_action = existing_results['batch_row_action_contest_office']
+    #                 one_batch_row.kind_of_batch = CONTEST_OFFICE
+    #                 one_batch_row.batch_row_action_exists = True
+    #             else:
+    #                 one_batch_row.batch_row_action_exists = False
+    #             modified_batch_row_list.append(one_batch_row)
+    #         elif kind_of_batch == POLITICIAN:
+    #             existing_results = batch_manager.retrieve_batch_row_action_politician(batch_header_id, one_batch_row.id)
+    #             if existing_results['batch_row_action_found']:
+    #                 one_batch_row.batch_row_action = existing_results['batch_row_action_politician']
+    #                 one_batch_row.kind_of_batch = POLITICIAN
+    #                 one_batch_row.batch_row_action_exists = True
+    #             else:
+    #                 one_batch_row.batch_row_action_exists = False
+    #             modified_batch_row_list.append(one_batch_row)
+
+    election_list = Election.objects.order_by('-election_day_text')
+    messages_on_stage = get_messages(request)
+
+    template_values = {
+        'messages_on_stage':        messages_on_stage,
+        'batch_set_id':             batch_set_id,
+        'batch_description':        batch_description,
+        # 'batch_header_map':         batch_header_map,
+        # 'batch_row_list':           modified_batch_row_list,
+        'election_list':            election_list,
+        # 'kind_of_batch':            kind_of_batch,
+        'google_civic_election_id': google_civic_election_id,
+    }
+    return render(request, 'import_export_batches/batch_action_list.html', template_values)
