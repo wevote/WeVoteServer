@@ -16,10 +16,18 @@ from voter.models import VoterManager
 logger = get_logger(__name__)
 stripe.api_key = get_environment_variable("STRIPE_SECRET_KEY")
 
+
 # TODO set up currency option in webapp
 def donation_with_stripe_for_api(request, token, email, donation_amount, monthly_donation, voter_we_vote_id):
     """
-    @type voter_we_vote_id: str
+
+    :param request:
+    :param token:
+    :param email:
+    :param donation_amount:
+    :param monthly_donation:
+    :param voter_we_vote_id:
+    :return:
     """
     donation_manager = DonationManager()
     success = False
@@ -262,6 +270,11 @@ def donation_with_stripe_for_api(request, token, email, donation_amount, monthly
 
 
 def is_voter_logged_in(request):
+    """
+
+    :param request:
+    :return:
+    """
     voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
     voter_manager = VoterManager()
     voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id)
@@ -274,6 +287,12 @@ def is_voter_logged_in(request):
 
 
 def translate_stripe_error_to_voter_explanation_text(donation_http_status, error_type):
+    """
+
+    :param donation_http_status:
+    :param error_type:
+    :return:
+    """
     donation_manager = DonationManager()
     generic_voter_error_message = 'Your payment was unsuccessful. Please try again later.'
 
@@ -288,6 +307,11 @@ def translate_stripe_error_to_voter_explanation_text(donation_http_status, error
 # Get a list of all prior donations by the voter that is associated with this voter_we_vote_id
 # If they donated without logging in and then ended the session, then are out of luck for tracking past donations
 def donation_history_for_a_voter(voter_we_vote_id):
+    """
+
+    :param voter_we_vote_id:
+    :return:
+    """
     donation_manager = DonationManager()
     donation_list = donation_manager.retrieve_donation_journal_list(voter_we_vote_id)
 
@@ -315,8 +339,12 @@ def donation_history_for_a_voter(voter_we_vote_id):
     return simple_donation_list
 
 
-# These are the only three events that we handle from the webhook
 def donation_process_stripe_webhook_event(event):
+    """
+    NOTE: These are the only three events that we handle from the webhook
+    :param event:
+    :return:
+    """
     if event['type'] == 'charge.succeeded':
         return donation_process_charge(event)
     elif event['type'] == 'customer.subscription.deleted':
@@ -330,6 +358,11 @@ def donation_process_stripe_webhook_event(event):
 
 
 def donation_process_charge(event):
+    """
+
+    :param event:
+    :return:
+    """
     donation_manager = DonationManager()
 
     try:
@@ -361,6 +394,11 @@ def donation_process_charge(event):
 
 
 def donation_process_subscription_deleted(event):
+    """
+
+    :param event:
+    :return:
+    """
     donation_manager = DonationManager()
     data = event['data']
     subscription = data['object']
@@ -378,6 +416,11 @@ def donation_process_subscription_deleted(event):
 
 # Handle this event (in the same way for now) if it comes in from Stripe
 def donation_process_subscription_updated(event):
+    """
+
+    :param event:
+    :return:
+    """
     return donation_process_subscription_deleted(event)
 
 
@@ -387,6 +430,12 @@ def donation_process_subscription_updated(event):
 # Unfortuately at this time "un-logged-in" donations created in a session that was ended before logging in will not
 # be associated with the correct voter -- we could do this in the future by doing something with email addresses.
 def move_donation_info_to_another_voter(from_voter, to_voter):
+    """
+
+    :param from_voter:
+    :param to_voter:
+    :return:
+    """
     status = "MOVE_DONATION_INFO "
     success = False
 

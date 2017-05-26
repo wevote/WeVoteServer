@@ -135,8 +135,14 @@ class DonationJournal(models.Model):
 
 class DonationManager(models.Model):
     @staticmethod
-    def create_donate_link_to_voter(stripe_customer_id, voter_we_vote_id):
+    def create_donate_link_to_voter(self, stripe_customer_id, voter_we_vote_id):
+        """
 
+        :param self:
+        :param stripe_customer_id:
+        :param voter_we_vote_id:
+        :return:
+        """
         new_customer_id_created = False
 
         if not voter_we_vote_id:
@@ -161,14 +167,18 @@ class DonationManager(models.Model):
 
     @staticmethod
     def retrieve_stripe_customer_id(voter_we_vote_id):
+        """
 
+        :param voter_we_vote_id:
+        :return:
+        """
         stripe_customer_id = ''
         status = ''
         success = bool
         if positive_value_exists(voter_we_vote_id):
             try:
                 stripe_customer_id_queryset = DonateLinkToVoter.objects.filter(
-                    voter_we_vote_id=voter_we_vote_id).values()
+                    voter_we_vote_id__iexact=voter_we_vote_id).values()
                 stripe_customer_id = stripe_customer_id_queryset[0]['stripe_customer_id']
                 # print("model stripe_customer_id_query " + stripe_customer_id)
                 if positive_value_exists(stripe_customer_id):
@@ -190,7 +200,11 @@ class DonationManager(models.Model):
 
     @staticmethod
     def retrieve_or_create_recurring_donation_plan(donation_amount):
+        """
 
+        :param donation_amount:
+        :return:
+        """
         recurring_donation_plan_id = "monthly-" + str(donation_amount)
         # plan_name = donation_plan_id + " Plan"
         billing_interval = "monthly"
@@ -265,7 +279,48 @@ class DonationManager(models.Model):
             country, exp_month, exp_year, last4, id_card, stripe_object, stripe_status, status, subscription_id,
             subscription_plan_id, subscription_created_at, subscription_canceled_at, subscription_ended_at,
             not_loggedin_voter_we_vote_id):
+        """
 
+        :param record_enum:
+        :param ip_address:
+        :param stripe_customer_id:
+        :param voter_we_vote_id:
+        :param charge_id:
+        :param amount:
+        :param currency:
+        :param funding:
+        :param livemode:
+        :param action_taken:
+        :param action_result:
+        :param created:
+        :param failure_code:
+        :param failure_message:
+        :param network_status:
+        :param reason:
+        :param seller_message:
+        :param stripe_type:
+        :param paid:
+        :param amount_refunded:
+        :param refund_count:
+        :param email:
+        :param address_zip:
+        :param brand:
+        :param country:
+        :param exp_month:
+        :param exp_year:
+        :param last4:
+        :param id_card:
+        :param stripe_object:
+        :param stripe_status:
+        :param status:
+        :param subscription_id:
+        :param subscription_plan_id:
+        :param subscription_created_at:
+        :param subscription_canceled_at:
+        :param subscription_ended_at:
+        :param not_loggedin_voter_we_vote_id:
+        :return:
+        """
         new_history_entry = 0
 
         try:
@@ -296,11 +351,21 @@ class DonationManager(models.Model):
         return saved_results
 
     def create_recurring_donation(self, stripe_customer_id, voter_we_vote_id, donation_amount, start_date_time, email):
+        """
 
+        # subscription_entry = object
+        :param stripe_customer_id:
+        :param voter_we_vote_id:
+        :param donation_amount:
+        :param start_date_time:
+        :param email:
+        :return:
+        """
         # subscription_entry = object
         subscription = object
         success = False
         donation_plan_id = "monthly-" + str(donation_amount)
+        subscription_id = 0
 
         donation_plan_id_query = self.retrieve_or_create_recurring_donation_plan(donation_amount)
         if donation_plan_id_query['success']:
@@ -343,6 +408,11 @@ class DonationManager(models.Model):
 
     @staticmethod
     def retrieve_stripe_card_error_message(error_type):
+        """
+
+        :param error_type:
+        :return:
+        """
         voter_card_error_message = 'Your card has been declined for an unknown reason. Contact your bank for more' \
                                                ' information.'
 
@@ -388,12 +458,17 @@ class DonationManager(models.Model):
 
     @staticmethod
     def retrieve_donation_journal_list(we_vote_id):
+        """
+
+        :param we_vote_id:
+        :return:
+        """
         voters_donation_list = []
         status = ''
 
         try:
             donation_queryset = DonationJournal.objects.all().order_by('-created')
-            donation_queryset = donation_queryset.filter(voter_we_vote_id=we_vote_id)
+            donation_queryset = donation_queryset.filter(voter_we_vote_id__iexact=we_vote_id)
             voters_donation_list = donation_queryset
 
             if len(donation_queryset):
@@ -423,6 +498,11 @@ class DonationManager(models.Model):
 
     @staticmethod
     def does_donation_journal_charge_exist(charge_id):
+        """
+
+        :param charge_id:
+        :return:
+        """
         try:
             donation_queryset = DonationJournal.objects.all()
             donation_queryset = donation_queryset.filter(charge_id=charge_id)
@@ -449,6 +529,14 @@ class DonationManager(models.Model):
     @staticmethod
     def mark_subscription_canceled_or_ended(subscription_id, customer_id, subscription_ended_at,
                                             subscription_canceled_at):
+        """
+
+        :param subscription_id:
+        :param customer_id:
+        :param subscription_ended_at:
+        :param subscription_canceled_at:
+        :return:
+        """
         try:
             subscription_row = DonationJournal.objects.get(subscription_id=subscription_id,
                                                            stripe_customer_id=customer_id)
@@ -469,12 +557,18 @@ class DonationManager(models.Model):
 
     @staticmethod
     def move_donations_between_donors(from_voter, to_voter):
+        """
+
+        :param from_voter:
+        :param to_voter:
+        :return:
+        """
         status = ''
         voter_we_vote_id = from_voter.we_vote_id
         to_voter_we_vote_id = to_voter.we_vote_id
 
         try:
-            rows = DonationJournal.objects.get(voter_we_vote_id=voter_we_vote_id)
+            rows = DonationJournal.objects.get(voter_we_vote_id__iexact=voter_we_vote_id)
             rows.voter_we_vote_id = to_voter_we_vote_id
             rows.save()
             status = "move_donations_between_donors MOVED-DONATIONS-FROM-" + \

@@ -229,6 +229,15 @@ class VoterManager(BaseUserManager):
 
         return voter_twitter_handle
 
+    def this_voter_has_first_or_last_name_saved(self, voter):
+        try:
+            if positive_value_exists(voter.first_name) or positive_value_exists(voter.last_name):
+                return True
+            else:
+                return False
+        except AttributeError:
+            return False
+
     def retrieve_voter_by_id(self, voter_id):
         email = ''
         voter_we_vote_id = ''
@@ -788,18 +797,66 @@ class VoterManager(BaseUserManager):
         }
         return results
 
-    def update_voter(self, voter_id, facebook_email, facebook_profile_image_url_https,
-                     first_name, middle_name, last_name,
-                     flag_integer_to_set, flag_integer_to_unset,
-                     twitter_profile_image_url_https,
-                     we_vote_hosted_profile_image_url_large=None,
-                     we_vote_hosted_profile_image_url_medium=None, we_vote_hosted_profile_image_url_tiny=None):
+    def update_voter_by_id(
+            self, voter_id, facebook_email, facebook_profile_image_url_https=False,
+            first_name=False, middle_name=False, last_name=False,
+            flag_integer_to_set=False, flag_integer_to_unset=False,
+            twitter_profile_image_url_https=False,
+            we_vote_hosted_profile_image_url_large=False,
+            we_vote_hosted_profile_image_url_medium=False,
+            we_vote_hosted_profile_image_url_tiny=False):
         voter_updated = False
+        success = False
         results = self.retrieve_voter(voter_id)
+        status = results['status']
 
         if results['voter_found']:
             voter = results['voter']
 
+            results = self.update_voter_by_object(
+                voter, facebook_email, facebook_profile_image_url_https,
+                first_name, middle_name, last_name,
+                flag_integer_to_set, flag_integer_to_unset,
+                twitter_profile_image_url_https,
+                we_vote_hosted_profile_image_url_large,
+                we_vote_hosted_profile_image_url_medium,
+                we_vote_hosted_profile_image_url_tiny)
+            success = results['success']
+        else:
+            voter = Voter()
+
+        results = {
+            'status': status,
+            'success': success,
+            'voter': voter,
+            'voter_updated': voter_updated,
+        }
+        return results
+
+    def update_voter_name_by_object(self, voter, first_name, last_name):
+        facebook_email = False
+        facebook_profile_image_url_https = False
+        middle_name = False
+        return self.update_voter_by_object(voter, facebook_email, facebook_profile_image_url_https,
+                                           first_name, middle_name, last_name)
+
+    def update_voter_by_object(
+            self, voter, facebook_email, facebook_profile_image_url_https=False,
+            first_name=False, middle_name=False, last_name=False,
+            flag_integer_to_set=False, flag_integer_to_unset=False,
+            twitter_profile_image_url_https=False,
+            we_vote_hosted_profile_image_url_large=False,
+            we_vote_hosted_profile_image_url_medium=False,
+            we_vote_hosted_profile_image_url_tiny=False):
+        voter_updated = False
+
+        try:
+            test_we_vote_id = voter.we_vote_id
+            voter_found = True
+        except AttributeError:
+            voter_found = False
+
+        if voter_found:
             try:
                 should_save_voter = False
                 if facebook_email is not False:
