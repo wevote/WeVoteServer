@@ -121,12 +121,6 @@ class Issue(models.Model):
         super(Issue, self).save(*args, **kwargs)
 
 
-def fetch_issue_count_for_organization(organization_id=0, organization_we_vote_id=''):
-    issue_list = IssueListManager()
-    results = issue_list.retrieve_issue_count_for_organization(organization_id, organization_we_vote_id)
-    return results['issue_count']
-
-
 class IssueManager(models.Model):
 
     def __unicode__(self):
@@ -148,6 +142,14 @@ class IssueManager(models.Model):
         if results['success']:
             return results['issue_id']
         return 0
+
+    def fetch_issue_name_from_we_vote_id(self, we_vote_id):
+        issue_id = 0
+        issue_manager = IssueManager()
+        results = issue_manager.retrieve_issue(issue_id, we_vote_id)
+        if results['success']:
+            return results['issue_name']
+        return ''
 
     def fetch_issue_we_vote_id_from_id(self, issue_id):
         we_vote_id = ''
@@ -177,18 +179,21 @@ class IssueManager(models.Model):
                 issue_on_stage = Issue.objects.get(id=issue_id)
                 issue_id = issue_on_stage.id
                 issue_we_vote_id = issue_on_stage.we_vote_id
+                issue_name = issue_on_stage.issue_name
                 issue_found = True
                 status = "RETRIEVE_ISSUE_FOUND_BY_ID"
             elif positive_value_exists(issue_we_vote_id):
                 issue_on_stage = Issue.objects.get(we_vote_id=issue_we_vote_id)
                 issue_id = issue_on_stage.id
                 issue_we_vote_id = issue_on_stage.we_vote_id
+                issue_name = issue_on_stage.issue_name
                 issue_found = True
                 status = "RETRIEVE_ISSUE_FOUND_BY_WE_VOTE_ID"
             elif positive_value_exists(issue_name):
                 issue_on_stage = Issue.objects.get(issue_name=issue_name)
                 issue_id = issue_on_stage.id
                 issue_we_vote_id = issue_on_stage.we_vote_id
+                issue_name = issue_on_stage.issue_name
                 issue_found = True
                 status = "RETRIEVE_ISSUE_FOUND_BY_NAME"
             else:
@@ -215,6 +220,7 @@ class IssueManager(models.Model):
             'MultipleObjectsReturned':  exception_multiple_object_returned,
             'issue_found':              issue_found,
             'issue_id':                 convert_to_int(issue_id),
+            'issue_name':               issue_name,
             'issue_we_vote_id':         issue_we_vote_id,
             'issue':                    issue_on_stage,
         }

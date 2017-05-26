@@ -36,7 +36,14 @@
         <a href="{{ organization.generate_wikipedia_link }}" target="_blank">{{ organization.wikipedia_page_title }}</a>{% endif %}<br />
     Endorsements Importer URL: {% if organization.organization_endorsements_api_url %}
         <a href="{{ organization.organization_endorsements_api_url }}" target="_blank">{{ organization.organization_endorsements_api_url }}</a>{% endif %}<br />
-    <a href="{% url 'organization:organization_edit' organization.id %}">edit</a>
+
+    Issue Followed:
+    {% if issue_names_list %}
+        {% for issue_name in issue_names_list %}
+            &bullet; <td>{{ issue_name }}</td> &nbsp;
+        {% endfor %}
+    {% endif %}
+
     </p>
 <p>
     <a href="{% url 'import_export_wikipedia:import_organization_logo' organization.id %}">Retrieve photos from Wikipedia</a>,
