@@ -31,7 +31,7 @@ python-magic==0.4.13  # Requires "brew install libmagic"
 python-openid==2.2.5
 python-social-auth==0.2.10
 pytz==2016.6.1
-requests==2.6.2
+requests==2.14.2
 requests-oauthlib==0.5.0
 rsa==3.1.4
 selenium==2.45.0
@@ -39,7 +39,7 @@ sendgrid-django==2.0.0
 simplejson==3.6.5
 six==1.9.0
 static3==0.5.1
-stripe==1.49.0
+stripe==1.55.2
 tweepy==3.5.0
 Unipath==1.1
 uritemplate==0.6
