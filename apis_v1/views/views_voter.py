@@ -1625,11 +1625,12 @@ def voter_update_view(request):  # voterUpdate
     donation_list = donation_history_for_a_voter(voter.we_vote_id)
 
     voter_manager = VoterManager()
-    results = voter_manager.update_voter(voter_id, facebook_email, facebook_profile_image_url_https,
-                                         first_name, middle_name, last_name,
-                                         flag_integer_to_set, flag_integer_to_unset,
-                                         twitter_profile_image_url_https, we_vote_hosted_profile_image_url_large,
-                                         we_vote_hosted_profile_image_url_medium, we_vote_hosted_profile_image_url_tiny)
+    results = voter_manager.update_voter_by_id(
+        voter_id, facebook_email, facebook_profile_image_url_https,
+        first_name, middle_name, last_name,
+        flag_integer_to_set, flag_integer_to_unset,
+        twitter_profile_image_url_https, we_vote_hosted_profile_image_url_large,
+        we_vote_hosted_profile_image_url_medium, we_vote_hosted_profile_image_url_tiny)
     voter = results['voter']
     json_data = {
         'status':                                   results['status'],
