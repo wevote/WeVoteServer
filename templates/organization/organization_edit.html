@@ -130,6 +130,19 @@
                value="{% if organization %}{{ organization.organization_endorsements_api_url|default_if_none:"" }}{% else %}{{ organization_endorsements_api_url }}{% endif %}" />
     </div>
 </div>
+
+{% if issue_list %}
+<div class="form-group">
+    <label class="col-sm-3 control-label">Select Issues</label>
+    <div class="col-sm-8 ">
+    {% for issue in issue_list %}
+        <input type="checkbox" name="selected_issues" id="selected_issues" value={{ issue.we_vote_id }}
+                {% if issue.followed_by_organization %}checked{% endif %} />{{ issue.issue_name }} &nbsp;
+    {% endfor %}
+    </div>
+</div>
+{% endif %}
+
 {% endif %}
 
 {% if upcoming_election_list %}
@@ -171,5 +184,4 @@
         Full size<br />
     {% endif %}
 {% endif %}
-
 {% endblock %}

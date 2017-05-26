@@ -124,6 +124,13 @@
     Retrieve Voter Guides</a>{% if google_civic_election_id|convert_to_int > 0 %} for election {{ google_civic_election_id }}{% else %} for ALL elections{% endif %}</p>
 <br />
 
+{# ################################### #}
+<h4>Issues</h4>
+
+<p><a href="{% url 'issue:issues_import_from_master_server' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
+    Retrieve Issues</a>{% if google_civic_election_id|convert_to_int > 0 %} for election {{ google_civic_election_id }}{% else %} for ALL elections{% endif %}</p>
+<br />
+
 </form>
 
 {# ################################### #}
@@ -141,6 +148,7 @@
 <p>BALLOT_ITEMS_SYNC_URL: {{ ballot_items_sync_url }}</p>
 <p>BALLOT_RETURNED_SYNC_URL: {{ ballot_returned_sync_url }}</p>
 <p>VOTER_GUIDES_SYNC_URL: {{ voter_guides_sync_url }}</p>
+<p>ISSUES_SYNC_URL: {{ issues_sync_url }}</p>
 
 
 <script>

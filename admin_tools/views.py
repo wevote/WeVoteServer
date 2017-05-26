@@ -40,6 +40,7 @@ from wevote_functions.functions import convert_to_int, delete_voter_api_device_i
 BALLOT_ITEMS_SYNC_URL = get_environment_variable("BALLOT_ITEMS_SYNC_URL")
 BALLOT_RETURNED_SYNC_URL = get_environment_variable("BALLOT_RETURNED_SYNC_URL")
 ELECTIONS_SYNC_URL = get_environment_variable("ELECTIONS_SYNC_URL")
+ISSUES_SYNC_URL = get_environment_variable("ISSUES_SYNC_URL")
 ORGANIZATIONS_SYNC_URL = get_environment_variable("ORGANIZATIONS_SYNC_URL")
 OFFICES_SYNC_URL = get_environment_variable("OFFICES_SYNC_URL")
 CANDIDATES_SYNC_URL = get_environment_variable("CANDIDATES_SYNC_URL")
@@ -1788,6 +1789,7 @@ def sync_data_with_master_servers_view(request):
         'ballot_returned_sync_url':     BALLOT_RETURNED_SYNC_URL,
         'candidates_sync_url':          CANDIDATES_SYNC_URL,
         'elections_sync_url':           ELECTIONS_SYNC_URL,
+        'issues_sync_url':              ISSUES_SYNC_URL,
         'measures_sync_url':            MEASURES_SYNC_URL,
         'offices_sync_url':             OFFICES_SYNC_URL,
         'organizations_sync_url':       ORGANIZATIONS_SYNC_URL,

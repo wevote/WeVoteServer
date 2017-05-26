@@ -56,7 +56,18 @@
 {% endif %}{# End of if state_list #}
 
     <br />
-{% if organization_search %}
+
+{% if issue_list %}
+    <p>Issues to filter [OR] :
+    {% for issue in issue_list %}
+        <input type="checkbox" name="selected_issues" id="selected_issues" value={{ issue.we_vote_id }}
+        {% if issue.selected %}checked{% endif %} />{{ issue.issue_name }} &nbsp;
+    {% endfor %}
+    </p>
+{% endif %}
+    <br />
+
+{% if organization_search or issues_selected %}
     <a href="{% url 'organization:organization_list' %}?organization_state={{ organization_state }}">
          clear search</a>&nbsp;
 {% endif %}

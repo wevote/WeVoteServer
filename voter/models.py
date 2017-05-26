@@ -19,6 +19,7 @@ from wevote_settings.models import fetch_next_we_vote_id_last_voter_integer, fet
 
 logger = wevote_functions.admin.get_logger(__name__)
 SUPPORT_OPPOSE_MODAL_SHOWN = 1
+BALLOT_INTRO_MODAL_SHOWN = 2
 
 
 # This way of extending the base user described here:
