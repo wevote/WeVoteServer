@@ -87,6 +87,30 @@ class OrganizationManager(models.Manager):
         }
         return results
 
+    def duplicate_organization(self, existing_organization):
+        try:
+            organization = Organization()
+            # TODO DALE Search for a way to cycle through all values of existing_voter
+            organization.we_vote_id = ""
+            organization.facebook_id = 0
+            organization.save()  # We do this so the we_vote_id is created
+            status = "DUPLICATE_ORGANIZATION_SUCCESSFUL"
+            success = True
+            organization_duplicated = True
+        except Exception as e:
+            handle_record_not_saved_exception(e, logger=logger)
+            organization = Organization
+            status = "DUPLICATE_ORGANIZATION_FAILED"
+            success = False
+            organization_duplicated = False
+        results = {
+            'success':              success,
+            'status':               status,
+            'organization':         organization,
+            'organization_duplicated': organization_duplicated,
+        }
+        return results
+
     def retrieve_organization_from_id(self, organization_id):
         return self.retrieve_organization(organization_id)
 

@@ -1,6 +1,7 @@
 # apis_v1/views/views_docs.py
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
+
 from apis_v1.documentation_source import ballot_item_options_retrieve_doc, ballot_item_retrieve_doc, \
     ballot_items_sync_out_doc, ballot_returned_sync_out_doc, \
     candidate_retrieve_doc, \
@@ -28,6 +29,8 @@ from apis_v1.documentation_source import ballot_item_options_retrieve_doc, ballo
     voter_all_positions_retrieve_doc, voter_all_bookmarks_status_retrieve_doc, \
     voter_ballot_items_retrieve_doc, \
     voter_ballot_items_retrieve_from_google_civic_doc, voter_ballot_list_retrieve_doc, \
+    voter_bookmark_off_save_doc, \
+    voter_bookmark_on_save_doc, voter_bookmark_status_retrieve_doc, \
     voter_count_doc, voter_create_doc, voter_email_address_retrieve_doc, voter_email_address_save_doc, \
     voter_email_address_sign_in_doc, voter_email_address_verify_doc, voter_facebook_save_to_current_account_doc, \
     voter_facebook_sign_in_retrieve_doc, voter_facebook_sign_in_save_doc, \
@@ -37,8 +40,8 @@ from apis_v1.documentation_source import ballot_item_options_retrieve_doc, ballo
     voter_location_retrieve_from_ip_doc, voter_merge_two_accounts_doc, voter_photo_save_doc, \
     voter_position_like_off_save_doc, voter_position_like_on_save_doc, voter_position_like_status_retrieve_doc, \
     voter_position_comment_save_doc, voter_position_retrieve_doc, voter_position_visibility_save_doc, \
-    voter_opposing_save_doc, voter_retrieve_doc, voter_sign_out_doc, voter_bookmark_off_save_doc, \
-    voter_bookmark_on_save_doc, voter_bookmark_status_retrieve_doc, voter_stop_opposing_save_doc, \
+    voter_opposing_save_doc, voter_retrieve_doc, voter_sign_out_doc, voter_split_into_two_accounts_doc, \
+    voter_stop_opposing_save_doc, \
     voter_stop_supporting_save_doc, voter_supporting_save_doc, voter_twitter_save_to_current_account_doc, \
     voter_update_doc
 from config.base import get_environment_variable
@@ -876,6 +879,16 @@ def voter_position_like_status_retrieve_doc_view(request):
     url_root = WE_VOTE_SERVER_ROOT_URL
     template_values = voter_position_like_status_retrieve_doc.voter_position_like_status_retrieve_doc_template_values(
         url_root)
+    template_values['voter_api_device_id'] = get_voter_api_device_id(request)
+    return render(request, 'apis_v1/api_doc_page.html', template_values)
+
+
+def voter_split_into_two_accounts_doc_view(request):
+    """
+    Show documentation about voterSplitIntoTwoAccounts
+    """
+    url_root = WE_VOTE_SERVER_ROOT_URL
+    template_values = voter_split_into_two_accounts_doc.voter_split_into_two_accounts_doc_template_values(url_root)
     template_values['voter_api_device_id'] = get_voter_api_device_id(request)
     return render(request, 'apis_v1/api_doc_page.html', template_values)
 

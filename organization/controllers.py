@@ -231,6 +231,67 @@ def move_organization_to_another_complete(from_organization_id, from_organizatio
     return results
 
 
+def duplicate_organization_to_another_complete(from_organization_id, from_organization_we_vote_id,
+                                          to_organization_id, to_organization_we_vote_id,
+                                          to_voter_id, to_voter_we_vote_id):
+    status = ""
+    success = True
+
+    # Make sure we have both from_organization values
+    organization_manager = OrganizationManager()
+    if positive_value_exists(from_organization_id) and not positive_value_exists(from_organization_we_vote_id):
+        from_organization_we_vote_id = organization_manager.fetch_we_vote_id_from_local_id(from_organization_id)
+    elif positive_value_exists(from_organization_we_vote_id) and not positive_value_exists(from_organization_id):
+        from_organization_id = organization_manager.fetch_organization_id(from_organization_we_vote_id)
+
+    # Make sure we have both to_organization values
+    if positive_value_exists(to_organization_id) and not positive_value_exists(to_organization_we_vote_id):
+        to_organization_we_vote_id = organization_manager.fetch_we_vote_id_from_local_id(to_organization_id)
+    elif positive_value_exists(to_organization_we_vote_id) and not positive_value_exists(to_organization_id):
+        to_organization_id = organization_manager.fetch_organization_id(to_organization_we_vote_id)
+
+    # Make sure we have both to_voter values
+    voter_manager = VoterManager()
+    if positive_value_exists(to_voter_id) and not positive_value_exists(to_voter_we_vote_id):
+        to_voter_we_vote_id = voter_manager.fetch_we_vote_id_from_local_id(to_voter_id)
+    elif positive_value_exists(to_voter_we_vote_id) and not positive_value_exists(to_voter_id):
+        to_voter_id = voter_manager.fetch_local_id_from_we_vote_id(to_voter_we_vote_id)
+
+    # If anyone is following the old voter's organization, move those followers to the new voter's organization
+    move_organization_followers_results = move_organization_followers_to_another_organization(
+        from_organization_id, from_organization_we_vote_id,
+        to_organization_id, to_organization_we_vote_id)
+    status += " " + move_organization_followers_results['status']
+
+    # Transfer positions from "from" organization to the "to" organization
+    move_positions_to_another_org_results = move_positions_to_another_organization(
+        from_organization_id, from_organization_we_vote_id,
+        to_organization_id, to_organization_we_vote_id,
+        to_voter_id, to_voter_we_vote_id)
+    status += " " + move_positions_to_another_org_results['status']
+
+    # There might be some useful information in the from_voter's organization that needs to be moved
+    move_organization_results = move_organization_data_to_another_organization(
+        from_organization_we_vote_id, to_organization_we_vote_id)
+    status += " " + move_organization_results['status']
+
+    # Finally, delete the from_voter's organization
+    if move_organization_results['data_transfer_complete']:
+        from_organization = move_organization_results['from_organization']
+        try:
+            from_organization.delete()
+        except Exception as e:
+            status += "UNABLE_TO_DELETE_FROM_ORGANIZATION "
+
+    # We need to make sure to update voter.linked_organization_we_vote_id outside of this routine
+
+    results = {
+        'status': status,
+        'success': success,
+    }
+    return results
+
+
 def transfer_to_organization_if_missing(from_organization, to_organization, field):
     save_to_organization = False
     if positive_value_exists(getattr(from_organization, field)):
