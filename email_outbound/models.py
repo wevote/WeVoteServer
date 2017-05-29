@@ -682,9 +682,12 @@ class EmailManager(models.Model):
         if positive_value_exists(email_scheduled.message_html):
             mail.attach_alternative(email_scheduled.message_html, "text/html")
 
-        mail.send()
+        try:
+            mail.send()
+            status += "SENDING_VIA_SENDGRID "
+        except Exception as e:
+            status += "COULD_NOT_SEND_VIA_SENDGRID "
 
-        status += "SENDING_VIA_SENDGRID"
         email_scheduled_sent = True
 
         results = {

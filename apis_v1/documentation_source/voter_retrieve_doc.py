@@ -89,6 +89,7 @@ def voter_retrieve_doc_template_values(url_root):
                    '    "subscription_ended_at" : datetime, (Date the subscription was ended)\n' \
                    '   ]\n' \
                    '  "interface_status_flags": integer,\n' \
+                   '  "notification_settings_flags": integer,\n' \
                    '}'
 
     template_values = {
