@@ -533,8 +533,9 @@ def batch_set_list_process_view(request):
                                 "?google_civic_election_id=" + str(google_civic_election_id) +
                                 "&batch_uri=" + batch_uri_encoded)
 
+
 @login_required
-def batch_set_action_list_view(request):
+def batch_set_batch_list_view(request):
     """
     Display row-by-row details of batch_set actions being reviewed, leading up to processing an entire batch_set.
     :param request:
@@ -554,83 +555,18 @@ def batch_set_action_list_view(request):
     google_civic_election_id = request.GET.get('google_civic_election_id', 0)
 
     try:
-        batch_description = BatchDescription.objects.get(batch_set_id=batch_set_id)
+        batch_description = BatchDescription.objects.filter(batch_set_id=batch_set_id)
         batch_description_found = True
+
+        batch_list = list(batch_description)
+        # loop through all data sets in this batch
+        # for one_batch_set_row in batch_description_list:
+        #     batch_header_id = one_batch_set_row.batch_header_id
+
     except BatchDescription.DoesNotExist:
         # This is fine
         batch_description = BatchDescription()
         batch_description_found = False
-
-    # try:
-    #     batch_header_map = BatchHeaderMap.objects.get(batch_header_id=batch_header_id)
-    # except BatchHeaderMap.DoesNotExist:
-        # This is fine
-        # batch_header_map = BatchHeaderMap()
-
-    # batch_set_list_found = False
-    # try:
-    #     batch_set_row_list = BatchRow.objects.order_by('id')
-    #     batch_set_row_list = batch_row_list.filter(batch_header_id=batch_header_id)
-    #     if len(batch_row_list):
-    #         batch_list_found = True
-    # except BatchDescription.DoesNotExist:
-    #     # This is fine
-    #     batch_row_list = []
-    #     batch_list_found = False
-    #     pass
-    #
-    # modified_batch_row_list = []
-    # batch_manager = BatchManager()
-    # if batch_list_found:
-    #     for one_batch_row in batch_row_list:
-    #         if kind_of_batch == ORGANIZATION_WORD:
-    #             existing_results = batch_manager.retrieve_batch_row_action_organization(batch_header_id,
-    #                                                                                     one_batch_row.id)
-    #             if existing_results['batch_row_action_found']:
-    #                 one_batch_row.batch_row_action = existing_results['batch_row_action_organization']
-    #                 one_batch_row.kind_of_batch = ORGANIZATION_WORD
-    #                 one_batch_row.batch_row_action_exists = True
-    #             else:
-    #                 one_batch_row.batch_row_action_exists = False
-    #             modified_batch_row_list.append(one_batch_row)
-    #         elif kind_of_batch == MEASURE:
-    #             existing_results = batch_manager.retrieve_batch_row_action_measure(batch_header_id, one_batch_row.id)
-    #             if existing_results['batch_row_action_found']:
-    #                 one_batch_row.batch_row_action = existing_results['batch_row_action_measure']
-    #                 one_batch_row.kind_of_batch = MEASURE
-    #                 one_batch_row.batch_row_action_exists = True
-    #             else:
-    #                 one_batch_row.batch_row_action_exists = False
-    #             modified_batch_row_list.append(one_batch_row)
-    #         elif kind_of_batch == ELECTED_OFFICE:
-    #             existing_results = batch_manager.retrieve_batch_row_action_elected_office(batch_header_id,
-    #                                                                                       one_batch_row.id)
-    #             if existing_results['batch_row_action_found']:
-    #                 one_batch_row.batch_row_action = existing_results['batch_row_action_elected_office']
-    #                 one_batch_row.kind_of_batch = ELECTED_OFFICE
-    #                 one_batch_row.batch_row_action_exists = True
-    #             else:
-    #                 one_batch_row.batch_row_action_exists = False
-    #             modified_batch_row_list.append(one_batch_row)
-    #         elif kind_of_batch == CONTEST_OFFICE:
-    #             existing_results = batch_manager.retrieve_batch_row_action_contest_office(batch_header_id,
-    #                                                                                       one_batch_row.id)
-    #             if existing_results['batch_row_action_found']:
-    #                 one_batch_row.batch_row_action = existing_results['batch_row_action_contest_office']
-    #                 one_batch_row.kind_of_batch = CONTEST_OFFICE
-    #                 one_batch_row.batch_row_action_exists = True
-    #             else:
-    #                 one_batch_row.batch_row_action_exists = False
-    #             modified_batch_row_list.append(one_batch_row)
-    #         elif kind_of_batch == POLITICIAN:
-    #             existing_results = batch_manager.retrieve_batch_row_action_politician(batch_header_id, one_batch_row.id)
-    #             if existing_results['batch_row_action_found']:
-    #                 one_batch_row.batch_row_action = existing_results['batch_row_action_politician']
-    #                 one_batch_row.kind_of_batch = POLITICIAN
-    #                 one_batch_row.batch_row_action_exists = True
-    #             else:
-    #                 one_batch_row.batch_row_action_exists = False
-    #             modified_batch_row_list.append(one_batch_row)
 
     election_list = Election.objects.order_by('-election_day_text')
     messages_on_stage = get_messages(request)
@@ -640,9 +576,9 @@ def batch_set_action_list_view(request):
         'batch_set_id':             batch_set_id,
         'batch_description':        batch_description,
         # 'batch_header_map':         batch_header_map,
-        # 'batch_row_list':           modified_batch_row_list,
+        'batch_list':               batch_list,
         'election_list':            election_list,
         # 'kind_of_batch':            kind_of_batch,
         'google_civic_election_id': google_civic_election_id,
     }
-    return render(request, 'import_export_batches/batch_action_list.html', template_values)
+    return render(request, 'import_export_batches/batch_set_batch_list.html', template_values)
