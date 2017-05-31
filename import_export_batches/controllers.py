@@ -80,7 +80,7 @@ def create_batch_row_actions(batch_header_id, batch_row_id):
 
             if len(batch_row_list):
                 batch_row_list_found = True
-        except BatchDescription.DoesNotExist:
+        except BatchRow.DoesNotExist:
             # This is fine
             batch_row_list = []
             batch_row_list_found = False

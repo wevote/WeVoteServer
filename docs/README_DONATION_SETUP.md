@@ -1,5 +1,7 @@
 # Donation System Setup (for testing donations on your local)
 
+[Back to Install Table of Contents](README_API_INSTALL.md)
+
 **If you've already updated your openssl and installed pyopenssl during the setup of your virtual environment, then you can skip to step 4**
 
 In order to test Stripe transactions, your local will need to be updated to TLS1.2. For OS X, see instructions below.
@@ -29,4 +31,5 @@ For Mac OS X, type in your terminal:
 4. `pip install stripe`
 
 
+[Back to Install Table of Contents](README_API_INSTALL.md)
  

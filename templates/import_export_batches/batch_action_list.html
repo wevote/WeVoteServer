@@ -5,8 +5,12 @@
 
 {%  block content %}
 {% load template_filters %}
+{% if batch_set_id %}
+    <p><a href="{% url 'import_export_batches:batch_set_batch_list' %}?batch_set_id={{ batch_set_id }}&google_civic_election_id={{ google_civic_election_id }}">
+            Back to Batch Set</a></p>
+{% else %}
 <p><a href="{% url 'import_export_batches:batch_list' %}?kind_of_batch={{ kind_of_batch }}&google_civic_election_id={{ google_civic_election_id }}">< Back to Batch List</a></p>
-
+{% endif %}
 
 {% if not kind_of_batch %}
 <h1>Import Batches</h1>
@@ -98,9 +102,6 @@
     </form>
 
 {% endif %}
-
-
-
 
 {% if batch_row_list %}
     <table class="table table-condensed">
