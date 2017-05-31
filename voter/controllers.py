@@ -7,16 +7,16 @@ from .models import BALLOT_ADDRESS, fetch_voter_id_from_voter_device_link, Voter
 from django.http import HttpResponse
 from email_outbound.controllers import move_email_address_entries_to_another_voter
 from email_outbound.models import EmailManager
-from follow.controllers import move_follow_entries_to_another_voter, move_organization_followers_to_another_organization
+from follow.controllers import duplicate_follow_entries_to_another_voter, move_follow_entries_to_another_voter
 from friend.controllers import fetch_friend_invitation_recipient_voter_we_vote_id, friend_accepted_invitation_send, \
     move_friend_invitations_to_another_voter, move_friends_to_another_voter
 from friend.models import FriendManager
 from import_export_facebook.models import FacebookManager
 from import_export_twitter.models import TwitterAuthManager
 import json
-from organization.controllers import move_organization_to_another_complete
+from organization.controllers import duplicate_organization_to_another_complete, move_organization_to_another_complete
 from organization.models import OrganizationManager
-from position.controllers import move_positions_to_another_voter
+from position.controllers import duplicate_positions_to_another_voter, move_positions_to_another_voter
 from twitter.models import TwitterLinkToVoter, TwitterUserManager
 import wevote_functions.admin
 from wevote_functions.functions import generate_voter_device_id, is_voter_device_id_valid, positive_value_exists
@@ -52,7 +52,9 @@ def merge_voter_accounts(from_voter, to_voter):
 
     # Is there data we should migrate?
     if positive_value_exists(from_voter.first_name) or positive_value_exists(from_voter.middle_name) \
-            or positive_value_exists(from_voter.last_name) or positive_value_exists(from_voter.interface_status_flags) \
+            or positive_value_exists(from_voter.last_name) \
+            or positive_value_exists(from_voter.interface_status_flags) \
+            or positive_value_exists(from_voter.notification_settings_flags) \
             or positive_value_exists(from_voter.is_admin) or positive_value_exists(from_voter.is_verified_volunteer) \
             or positive_value_exists(from_voter.primary_email_we_vote_id):
         from_voter_data_to_migrate_exists = True
@@ -70,6 +72,8 @@ def merge_voter_accounts(from_voter, to_voter):
                 to_voter.last_name = from_voter.last_name
             # Set all bits that have a value in either from_voter or to_voter
             to_voter.interface_status_flags = to_voter.interface_status_flags | from_voter.interface_status_flags
+            to_voter.notification_settings_flags = \
+                to_voter.notification_settings_flags | from_voter.notification_settings_flags
             if positive_value_exists(from_voter.is_admin) and not positive_value_exists(to_voter.is_admin):
                 to_voter.is_admin = from_voter.is_admin
             if positive_value_exists(from_voter.is_verified_volunteer) \
@@ -515,7 +519,7 @@ def voter_merge_two_accounts_for_api(  # voterMergeTwoAccounts
             and not positive_value_exists(twitter_secret_key) \
             and not positive_value_exists(invitation_secret_key):
         error_results = {
-            'status':                       "VOTER_MERGE_TWO_ACCOUNTS_SECRET_KEY_NOT_PASSED_IN",
+            'status':                       "VOTER_SPLIT_INTO_TWO_ACCOUNTS_SECRET_KEY_NOT_PASSED_IN",
             'success':                      False,
             'voter_device_id':              voter_device_id,
             'current_voter_found':          current_voter_found,
@@ -1343,7 +1347,8 @@ def voter_retrieve_for_api(voter_device_id):  # voterRetrieve
             'voter_photo_url_medium':           voter.we_vote_hosted_profile_image_url_medium,
             'voter_photo_url_tiny':             voter.we_vote_hosted_profile_image_url_tiny,
             'voter_donation_history_list':      donation_list,
-            'interface_status_flags':           voter.interface_status_flags
+            'interface_status_flags':           voter.interface_status_flags,
+            'notification_settings_flags':        voter.notification_settings_flags
         }
         return json_data
 
@@ -1378,7 +1383,8 @@ def voter_retrieve_for_api(voter_device_id):  # voterRetrieve
             'voter_photo_url_large':            '',
             'voter_photo_url_medium':           '',
             'voter_photo_url_tiny':             '',
-            'interface_status_flags':           0
+            'interface_status_flags':           0,
+            'notification_settings_flags':        0
         }
         return json_data
 
@@ -1703,4 +1709,210 @@ def voter_sign_out_for_api(voter_device_id, sign_out_all_devices=False):  # vote
         'success':  results['success'],
         'status':   status,
     }
+    return results
+
+
+def voter_split_into_two_accounts_for_api(voter_device_id, split_off_twitter):  # voterSplitIntoTwoAccounts
+    new_owner_voter = Voter()
+    success = False
+    status = ""
+
+    voter_device_link_manager = VoterDeviceLinkManager()
+    voter_device_link_results = voter_device_link_manager.retrieve_voter_device_link(voter_device_id)
+    if not voter_device_link_results['voter_device_link_found']:
+        error_results = {
+            'status':                       voter_device_link_results['status'],
+            'success':                      False,
+            'voter_device_id':              voter_device_id,
+            'split_off_twitter':          split_off_twitter,
+        }
+        return error_results
+
+    # We need this below
+    voter_device_link = voter_device_link_results['voter_device_link']
+
+    voter_manager = VoterManager()
+    voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id)
+    voter_id = voter_results['voter_id']
+    if not positive_value_exists(voter_id):
+        error_results = {
+            'status':                       "VOTER_NOT_FOUND_FROM_VOTER_DEVICE_ID",
+            'success':                      False,
+            'voter_device_id':              voter_device_id,
+            'split_off_twitter':          split_off_twitter,
+        }
+        return error_results
+
+    from_voter = voter_results['voter']
+
+    if not positive_value_exists(split_off_twitter):
+        error_results = {
+            'status':                       "VOTER_SPLIT_INTO_TWO_ACCOUNTS_TWITTER_NOT_PASSED_IN",
+            'success':                      False,
+            'voter_device_id':              voter_device_id,
+            'split_off_twitter':          split_off_twitter,
+        }
+        return error_results
+
+    from_voter_id = 0
+    from_voter_we_vote_id = ""
+    to_voter = Voter
+    to_voter_id = 0
+    to_voter_we_vote_id = ""
+    email_manager = EmailManager()
+
+    # Create a duplicate voter
+    voter_duplicate_results = voter_manager.duplicate_voter(from_voter)
+    if not voter_duplicate_results['voter_duplicated']:
+        status += "VOTER_SPLIT_INTO_TWO_ACCOUNTS_NEW_VOTER_NOT_DUPLICATED "
+    else:
+        to_voter = voter_duplicate_results['voter']
+        to_voter_id = to_voter.id
+        to_voter_we_vote_id = to_voter.we_vote_id
+
+        # Make sure we remove any legacy of Twitter
+        from_voter.twitter_id = 0
+        try:
+            from_voter.save()
+        except Exception as e:
+            status += "VOTER_SPLIT_INTO_TWO_ACCOUNTS_NEW_VOTER_NOT_UPDATED "
+
+    if not positive_value_exists(to_voter_we_vote_id):
+        error_results = {
+            'status':                       status,
+            'success':                      False,
+            'voter_device_id':              voter_device_id,
+            'split_off_twitter':            split_off_twitter,
+        }
+        return error_results
+
+    # Move TwitterLinkToVoter to the new voter
+    twitter_user_manager = TwitterUserManager()
+    twitter_id = 0
+    twitter_link_moved = False
+    twitter_link_to_voter = twitter_user_manager.retrieve_twitter_link_to_voter(twitter_id, from_voter.we_vote_id)
+    try:
+        twitter_link_to_voter.voter_we_vote_id = to_voter.we_vote_id
+        twitter_link_to_voter.save()
+        twitter_link_moved = True
+    except Exception as e:
+        status += "VOTER_SPLIT_INTO_TWO_ACCOUNTS_TWITTER_LINK_TO_VOTER_NOT_CREATED "
+
+    if not twitter_link_moved:
+        error_results = {
+            'status':                       status,
+            'success':                      False,
+            'voter_device_id':              voter_device_id,
+            'split_off_twitter':            split_off_twitter,
+        }
+        return error_results
+
+    # Get the organization linked to the from_voter, copy it, and link it to the to_voter
+    organization_manager = OrganizationManager()
+    twitter_link_to_organization_moved = False
+    to_voter_linked_organization_id = 0
+    to_voter_linked_organization_we_vote_id = ""
+    from_voter_linked_organization_id = 0
+    from_voter_linked_organization_we_vote_id = from_voter.linked_organization_we_vote_id
+    if not positive_value_exists(from_voter.linked_organization_we_vote_id):
+        status += "NO_LINKED_ORGANIZATION_WE_VOTE_ID_FOUND "
+    else:
+        from_linked_organization_results = organization_manager.retrieve_organization_from_we_vote_id(
+            from_voter.linked_organization_we_vote_id)
+        if not from_linked_organization_results['organization_found']:
+            status += "NO_LINKED_ORGANIZATION_FOUND "
+        else:
+            from_linked_organization = from_linked_organization_results['organization']
+            from_voter_linked_organization_id = from_linked_organization.id
+            from_voter_linked_organization_we_vote_id = from_linked_organization.we_vote_id
+
+            # Now that we have the original organization, we want to duplicate it, and then remove data
+            #  that shouldn't be in both
+            duplicate_organization_results = organization_manager.duplicate_organization(from_linked_organization)
+            if not duplicate_organization_results['organization_duplicated']:
+                status += "NOT_ABLE_TO_DUPLICATE_ORGANIZATION "
+            else:
+                to_linked_organization = duplicate_organization_results['organization']
+                to_voter_linked_organization_id = to_linked_organization.id
+                to_voter_linked_organization_we_vote_id = to_linked_organization.we_vote_id
+
+                if positive_value_exists(to_voter_linked_organization_we_vote_id):
+                    # Remove the link to the organization so we don't have a future conflict
+                    try:
+                        to_voter.linked_organization_we_vote_id = to_voter_linked_organization_we_vote_id
+                        to_voter.save()
+                    except Exception as e:
+                        status += "UNABLE_TO_SAVE_LINKED_ORGANIZATION_WE_VOTE_ID_IN_TO_VOTER "
+
+                # Move TwitterLinkToOrganization to the new organization
+                twitter_link_to_organization_moved = False
+                twitter_link_to_organization = \
+                    twitter_user_manager.retrieve_twitter_link_to_organization_from_organization_we_vote_id(
+                        to_linked_organization.we_vote_id)
+                try:
+                    twitter_link_to_organization.organization_we_vote_id = to_linked_organization.we_vote_id
+                    twitter_link_to_organization.save()
+                    twitter_link_to_organization_moved = True
+                except Exception as e:
+                    status += "VOTER_SPLIT_INTO_TWO_ACCOUNTS_TWITTER_LINK_TO_ORG_NOT_MOVED "
+                    pass
+
+    if not twitter_link_to_organization_moved:
+        error_results = {
+            'status': status,
+            'success': False,
+            'voter_device_id': voter_device_id,
+            'split_off_twitter': split_off_twitter,
+        }
+        return error_results
+
+    # Copy positions from voter to new_owner_voter
+    # TODO DALE To be built
+    move_positions_results = duplicate_positions_to_another_voter(
+        from_voter_id, from_voter_we_vote_id,
+        to_voter_id, to_voter_we_vote_id,
+        to_voter_linked_organization_id, to_voter_linked_organization_we_vote_id)
+    status += " " + move_positions_results['status']
+
+    # TODO DALE To be updated
+    if positive_value_exists(from_voter_linked_organization_we_vote_id) and \
+            positive_value_exists(to_voter_linked_organization_we_vote_id) and \
+            from_voter_linked_organization_we_vote_id != to_voter_linked_organization_we_vote_id:
+        move_organization_to_another_complete_results = duplicate_organization_to_another_complete(
+            from_voter_linked_organization_id, from_voter_linked_organization_we_vote_id,
+            to_voter_linked_organization_id, to_voter_linked_organization_we_vote_id,
+            to_voter_id, to_voter_we_vote_id
+        )
+        status += " " + move_organization_to_another_complete_results['status']
+
+    # We do not transfer friends or friend invitations from voter to new_owner_voter
+
+    # Duplicate the organizations the from_voter is following to the new_owner_voter
+    duplicate_follow_results = duplicate_follow_entries_to_another_voter(from_voter_id, to_voter_id,
+                                                                         to_voter_we_vote_id)
+    status += " " + duplicate_follow_results['status']
+
+    # We do not bring over all emails from the from_voter over to the to_voter
+
+    if positive_value_exists(to_voter.primary_email_we_vote_id):
+        # Remove the email information so we don't have a future conflict
+        try:
+            to_voter.email = None
+            to_voter.primary_email_we_vote_id = None
+            to_voter.email_ownership_is_verified = False
+            to_voter.save()
+        except Exception as e:
+            status += "VOTER_SPLIT_INTO_TWO_ACCOUNTS_PRIMARY_EMAIL_REMOVED "
+
+    # We do not bring over Facebook information
+
+    # We do not bring over any donations that have been made in this session
+
+    results = {
+        'status': status,
+        'success': success,
+        'voter_device_id': voter_device_id,
+        'split_off_twitter': split_off_twitter,
+    }
+
     return results

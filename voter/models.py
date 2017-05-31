@@ -19,6 +19,7 @@ from wevote_settings.models import fetch_next_we_vote_id_last_voter_integer, fet
 
 logger = wevote_functions.admin.get_logger(__name__)
 SUPPORT_OPPOSE_MODAL_SHOWN = 1
+BALLOT_INTRO_MODAL_SHOWN = 2
 
 
 # This way of extending the base user described here:
@@ -157,6 +158,44 @@ class VoterManager(BaseUserManager):
         }
         return results
 
+    def duplicate_voter(self, existing_voter):
+        """
+        Starting with an existing voter, create a duplicate version with different we_vote_id
+        :param existing_voter:
+        :return:
+        """
+        voter = Voter()
+        voter_id = 0
+        try:
+            # TODO DALE Search for a way to cycle through all values of existing_voter
+            voter.we_vote_id = ""  # Clear out existing we_vote_id
+            voter.facebook_id = None
+            voter.facebook_email = None
+            voter.save()
+            voter_id = voter.id
+        except voter.IntegrityError as e:
+            handle_record_not_saved_exception(e, logger=logger)
+            try:
+                # Trying to save again will increment the 'we_vote_id_last_voter_integer'
+                # by calling 'fetch_next_we_vote_id_last_voter_integer'
+                # TODO We could get into a race condition where multiple creates could be failing at once, so we
+                #  should look more closely at this
+                voter.save()
+                voter_id = voter.id
+            except voter.IntegrityError as e:
+                handle_record_not_saved_exception(e, logger=logger)
+            except Exception as e:
+                handle_record_not_saved_exception(e, logger=logger)
+
+        except Exception as e:
+            handle_record_not_saved_exception(e, logger=logger)
+
+        results = {
+            'voter_duplicated': True if voter_id > 0 else False,
+            'voter':            voter,
+        }
+        return results
+
     def retrieve_voter_from_voter_device_id(self, voter_device_id):
         voter_id = fetch_voter_id_from_voter_device_link(voter_device_id)
 
@@ -228,6 +267,15 @@ class VoterManager(BaseUserManager):
             voter_twitter_handle = ''
 
         return voter_twitter_handle
+
+    def this_voter_has_first_or_last_name_saved(self, voter):
+        try:
+            if positive_value_exists(voter.first_name) or positive_value_exists(voter.last_name):
+                return True
+            else:
+                return False
+        except AttributeError:
+            return False
 
     def retrieve_voter_by_id(self, voter_id):
         email = ''
@@ -346,6 +394,7 @@ class VoterManager(BaseUserManager):
         error_result = False
         exception_does_not_exist = False
         exception_multiple_object_returned = False
+        status = ""
         voter_on_stage = Voter()
 
         try:
@@ -354,6 +403,7 @@ class VoterManager(BaseUserManager):
                 # If still here, we found an existing voter
                 voter_id = voter_on_stage.id
                 success = True
+                status += "VOTER_RETRIEVED_BY_VOTER_ID "
             elif email is not '' and email is not None:
                 voter_queryset = Voter.objects.all()
                 voter_queryset = voter_queryset.filter(Q(email__iexact=email))
@@ -362,6 +412,7 @@ class VoterManager(BaseUserManager):
                     voter_on_stage = voter_list[0]
                     voter_id = voter_on_stage.id
                     success = True
+                    status += "VOTER_RETRIEVED_BY_VOTER_EMAIL "
                 else:
                     voter_on_stage = Voter()
                     voter_id = 0
@@ -372,12 +423,14 @@ class VoterManager(BaseUserManager):
                 # If still here, we found an existing voter
                 voter_id = voter_on_stage.id
                 success = True
+                status += "VOTER_RETRIEVED_BY_VOTER_WE_VOTE_ID "
             elif positive_value_exists(twitter_request_token):
                 voter_on_stage = Voter.objects.get(
                     twitter_request_token=twitter_request_token)
                 # If still here, we found an existing voter
                 voter_id = voter_on_stage.id
                 success = True
+                status += "VOTER_RETRIEVED_BY_TWITTER_REQUEST_TOKEN "
             elif positive_value_exists(facebook_id):
                 # 2016-11-22 This is only used to heal data. When retrieving by facebook_id,
                 # we use the FacebookLinkToVoter table
@@ -387,6 +440,7 @@ class VoterManager(BaseUserManager):
                 # If still here, we found an existing voter
                 voter_id = voter_on_stage.id
                 success = True
+                status += "VOTER_RETRIEVED_BY_FACEBOOK_ID "
             elif positive_value_exists(twitter_id):
                 # 2016-11-22 This is only used to heal data. When retrieving by twitter_id,
                 # we use the TwitterLinkToVoter table
@@ -398,6 +452,7 @@ class VoterManager(BaseUserManager):
                     # If still here, we found a single existing voter
                     voter_id = voter_on_stage.id
                     success = True
+                    status += "VOTER_RETRIEVED_BY_TWITTER_ID "
                 except Voter.MultipleObjectsReturned as e:
                     # If there are multiple entries, we do not want to guess which one to use here
                     voter_on_stage = Voter()
@@ -413,12 +468,14 @@ class VoterManager(BaseUserManager):
                 # If still here, we found an existing voter
                 voter_id = voter_on_stage.id
                 success = True
+                status += "VOTER_RETRIEVED_BY_ORGANIZATION_WE_VOTE_ID "
             elif positive_value_exists(primary_email_we_vote_id):
                 voter_on_stage = Voter.objects.get(
                     primary_email_we_vote_id__iexact=primary_email_we_vote_id)
                 # If still here, we found an existing voter
                 voter_id = voter_on_stage.id
                 success = True
+                status += "VOTER_RETRIEVED_BY_PRIMARY_EMAIL_WE_VOTE_ID "
             else:
                 voter_id = 0
                 error_result = True
@@ -432,9 +489,11 @@ class VoterManager(BaseUserManager):
             error_result = True
             exception_does_not_exist = True
             success = True
+            status += "VOTER_NOT_FOUND "
 
         results = {
             'success':                  success,
+            'status':                   status,
             'error_result':             error_result,
             'DoesNotExist':             exception_does_not_exist,
             'MultipleObjectsReturned':  exception_multiple_object_returned,
@@ -788,18 +847,75 @@ class VoterManager(BaseUserManager):
         }
         return results
 
-    def update_voter(self, voter_id, facebook_email, facebook_profile_image_url_https,
-                     first_name, middle_name, last_name,
-                     flag_integer_to_set, flag_integer_to_unset,
-                     twitter_profile_image_url_https,
-                     we_vote_hosted_profile_image_url_large=None,
-                     we_vote_hosted_profile_image_url_medium=None, we_vote_hosted_profile_image_url_tiny=None):
+    def update_voter_by_id(
+            self, voter_id, facebook_email, facebook_profile_image_url_https=False,
+            first_name=False, middle_name=False, last_name=False,
+            interface_status_flags=False,
+            flag_integer_to_set=False, flag_integer_to_unset=False,
+            notification_settings_flags=False,
+            notification_flag_integer_to_set=False, notification_flag_integer_to_unset=False,
+            twitter_profile_image_url_https=False,
+            we_vote_hosted_profile_image_url_large=False,
+            we_vote_hosted_profile_image_url_medium=False,
+            we_vote_hosted_profile_image_url_tiny=False):
         voter_updated = False
+        success = False
         results = self.retrieve_voter(voter_id)
+        status = results['status']
 
         if results['voter_found']:
             voter = results['voter']
 
+            results = self.update_voter_by_object(
+                voter, facebook_email, facebook_profile_image_url_https,
+                first_name, middle_name, last_name,
+                interface_status_flags,
+                flag_integer_to_set, flag_integer_to_unset,
+                notification_settings_flags,
+                notification_flag_integer_to_set, notification_flag_integer_to_unset,
+                twitter_profile_image_url_https,
+                we_vote_hosted_profile_image_url_large,
+                we_vote_hosted_profile_image_url_medium,
+                we_vote_hosted_profile_image_url_tiny)
+            success = results['success']
+        else:
+            voter = Voter()
+
+        results = {
+            'status': status,
+            'success': success,
+            'voter': voter,
+            'voter_updated': voter_updated,
+        }
+        return results
+
+    def update_voter_name_by_object(self, voter, first_name, last_name):
+        facebook_email = False
+        facebook_profile_image_url_https = False
+        middle_name = False
+        return self.update_voter_by_object(voter, facebook_email, facebook_profile_image_url_https,
+                                           first_name, middle_name, last_name)
+
+    def update_voter_by_object(
+            self, voter, facebook_email, facebook_profile_image_url_https=False,
+            first_name=False, middle_name=False, last_name=False,
+            interface_status_flags=False,
+            flag_integer_to_set=False, flag_integer_to_unset=False,
+            notification_settings_flags=False,
+            notification_flag_integer_to_set=False, notification_flag_integer_to_unset=False,
+            twitter_profile_image_url_https=False,
+            we_vote_hosted_profile_image_url_large=False,
+            we_vote_hosted_profile_image_url_medium=False,
+            we_vote_hosted_profile_image_url_tiny=False):
+        voter_updated = False
+
+        try:
+            test_we_vote_id = voter.we_vote_id
+            voter_found = True
+        except AttributeError:
+            voter_found = False
+
+        if voter_found:
             try:
                 should_save_voter = False
                 if facebook_email is not False:
@@ -829,12 +945,30 @@ class VoterManager(BaseUserManager):
                 if positive_value_exists(we_vote_hosted_profile_image_url_tiny):
                     voter.we_vote_hosted_profile_image_url_tiny = we_vote_hosted_profile_image_url_tiny
                     should_save_voter = True
-                if flag_integer_to_set is not False:
-                    voter.set_interface_status_flags(flag_integer_to_set)
+                if interface_status_flags is not False:
+                    # If here, we set the entire value to a new positive integer
+                    voter.interface_status_flags = interface_status_flags
                     should_save_voter = True
-                if flag_integer_to_unset is not False:
-                    voter.unset_interface_status_flags(flag_integer_to_unset)
+                else:
+                    # If here, we flip or un-flip one or more bits
+                    if flag_integer_to_set is not False:
+                        voter.set_interface_status_flags(flag_integer_to_set)
+                        should_save_voter = True
+                    if flag_integer_to_unset is not False:
+                        voter.unset_interface_status_flags(flag_integer_to_unset)
+                        should_save_voter = True
+                if notification_settings_flags is not False:
+                    # If here, we set the entire value to a new positive integer
+                    voter.notification_settings_flags = notification_settings_flags
                     should_save_voter = True
+                else:
+                    # If here, we flip or un-flip one or more bits
+                    if notification_flag_integer_to_set is not False:
+                        voter.set_notification_settings_flags(notification_flag_integer_to_set)
+                        should_save_voter = True
+                    if notification_flag_integer_to_unset is not False:
+                        voter.unset_notification_settings_flags(notification_flag_integer_to_unset)
+                        should_save_voter = True
                 if should_save_voter:
                     voter.save()
                     voter_updated = True
@@ -1039,6 +1173,10 @@ class Voter(AbstractBaseUser):
     twitter_access_token = models.TextField(verbose_name='twitter access token', null=True, blank=True)
     twitter_access_secret = models.TextField(verbose_name='twitter access secret', null=True, blank=True)
     twitter_connection_active = models.BooleanField(default=False)
+
+    # Does this voter want to be on the We Vote newsletter? This is using a series of bits in case we want
+    #  to offer different newsletter or notification options.
+    notification_settings_flags = models.PositiveIntegerField(verbose_name="notification status flags", default=0)
 
     # Interface Status Flags is a positive integer, when represented as a stream of bits,
     # each bit maps to a status of a variable's boolean value
@@ -1246,6 +1384,12 @@ class Voter(AbstractBaseUser):
     # corresponding bits in self.interface_status_flags will be unset
     def unset_interface_status_flags(self, flag_integer_to_unset):
         self.interface_status_flags = ~flag_integer_to_unset & self.interface_status_flags
+
+    def set_notification_settings_flags(self, notification_flag_integer_to_set):
+        self.notification_settings_flags = notification_flag_integer_to_set | self.notification_settings_flags
+
+    def unset_notification_settings_flags(self, notification_flag_integer_to_unset):
+        self.notification_settings_flags = ~notification_flag_integer_to_unset & self.notification_settings_flags
 
 
 class VoterDeviceLink(models.Model):

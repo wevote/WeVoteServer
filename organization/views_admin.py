@@ -16,6 +16,8 @@ from django.shortcuts import render
 from exception.models import handle_record_found_more_than_one_exception,\
     handle_record_not_deleted_exception, handle_record_not_found_exception, handle_record_not_saved_exception
 from election.models import Election, ElectionManager
+from follow.models import FollowIssueList, FollowIssueManager
+from issue.models import IssueListManager, IssueManager
 from measure.models import ContestMeasure, ContestMeasureList, ContestMeasureManager
 from organization.models import OrganizationListManager, OrganizationManager
 from position.models import PositionEntered, PositionManager, INFORMATION_ONLY, OPPOSE, \
@@ -118,12 +120,40 @@ def organization_list_view(request):
     google_civic_election_id = request.GET.get('google_civic_election_id', '')
     candidate_we_vote_id = request.GET.get('candidate_we_vote_id', '')
     organization_search = request.GET.get('organization_search', '')
+    selected_issue_vote_id_list = request.GET.getlist('selected_issues', '')
 
     messages_on_stage = get_messages(request)
     organization_list_query = Organization.objects.all()
     organization_list_query = organization_list_query.order_by('organization_name')
+
     if positive_value_exists(organization_state_code):
         organization_list_query = organization_list_query.filter(state_served_code__iexact=organization_state_code)
+
+    # Retrieve all issues
+    issue_list = []
+    issues_selected = False
+    issue_list_manager = IssueListManager()
+    issue_list_results = issue_list_manager.retrieve_issues()
+    if issue_list_results["issue_list_found"]:
+        issue_list = issue_list_results["issue_list"]
+        if positive_value_exists(selected_issue_vote_id_list):
+            issues_selected = True
+            new_issue_list = []
+            for issue in issue_list:
+                if issue.we_vote_id in selected_issue_vote_id_list:
+                    issue.selected = True
+                new_issue_list.append(issue)
+            issue_list = new_issue_list
+
+            follow_issue_list = FollowIssueList()
+            organization_we_vote_id_list_result = follow_issue_list.\
+                retrieve_organization_we_vote_id_list_from_issue_we_vote_id_list(selected_issue_vote_id_list)
+            organization_we_vote_id_list_result = organization_we_vote_id_list_result['organization_we_vote_id_list']
+            organization_we_vote_id_list = []
+            for we_vote_id in organization_we_vote_id_list_result:
+                organization_we_vote_id_list.append(we_vote_id['organization_we_vote_id'])
+            # we decided to not deal with case-insensitivity, in favor of using '__in'
+            organization_list_query = organization_list_query.filter(we_vote_id__in=organization_we_vote_id_list)
 
     if positive_value_exists(organization_search):
         filters = []
@@ -182,6 +212,8 @@ def organization_list_view(request):
         'messages_on_stage':        messages_on_stage,
         'candidate_we_vote_id':     candidate_we_vote_id,
         'google_civic_election_id': google_civic_election_id,
+        'issue_list':               issue_list,
+        'issues_selected':          issues_selected,
         'organization_list':        organization_list,
         'organization_search':      organization_search,
         'organization_state':       organization_state_code,
@@ -233,11 +265,26 @@ def organization_edit_view(request, organization_id):
     organization_manager = OrganizationManager()
     organization_on_stage = Organization()
     state_served_code = ''
+    new_issue_list = []
     results = organization_manager.retrieve_organization(organization_id)
     if results['organization_found']:
         organization_on_stage = results['organization']
         state_served_code = organization_on_stage.state_served_code
         organization_on_stage_found = True
+        issue_list_manager = IssueListManager()
+        issue_list_results = issue_list_manager.retrieve_issues()
+        if issue_list_results["issue_list_found"]:
+            issue_list = issue_list_results["issue_list"]
+            follow_issue_list_manager = FollowIssueList()
+            organization_issue_id_list = follow_issue_list_manager. \
+                retrieve_follow_issue_id_list_by_organization_we_vote_id(organization_on_stage.we_vote_id)
+
+            for issue in issue_list:
+                if issue.id in organization_issue_id_list:
+                    issue.followed_by_organization = True
+                else:
+                    issue.followed_by_organization = False
+                new_issue_list.append(issue)
 
     election_manager = ElectionManager()
     upcoming_election_list = []
@@ -256,13 +303,15 @@ def organization_edit_view(request, organization_id):
             'google_civic_election_id': google_civic_election_id,
             'state_list':               sorted_state_list,
             'state_served_code':        state_served_code,
+            'issue_list':               new_issue_list,
         }
     else:
         template_values = {
-            'messages_on_stage': messages_on_stage,
+            'messages_on_stage':        messages_on_stage,
             'upcoming_election_list':   upcoming_election_list,
             'google_civic_election_id': google_civic_election_id,
             'state_list':               sorted_state_list,
+            'issue_list':               new_issue_list,
         }
     return render(request, 'organization/organization_edit.html', template_values)
 
@@ -287,6 +336,7 @@ def organization_edit_process_view(request):
     wikipedia_photo_url = request.POST.get('wikipedia_photo_url', False)
     organization_endorsements_api_url = request.POST.get('organization_endorsements_api_url', False)
     state_served_code = request.POST.get('state_served_code', False)
+    organization_follow_issue_we_vote_ids = request.POST.getlist('selected_issues', False)
 
     # A positive value in google_civic_election_id or add_organization_button means we want to create a voter guide
     # for this org for this election
@@ -411,6 +461,13 @@ def organization_edit_process_view(request):
             if results['voter_guide_saved']:
                 messages.add_message(request, messages.INFO, 'Voter guide for {election_name} election saved.'
                                                              ''.format(election_name=election.election_name))
+    # Have the organization follow the issues selected
+    follow_issue_manager = FollowIssueManager()
+    issue_id=0
+    # TODO: fecth all the list of issues organiztion is following, prior to update
+    # then, for any issue that is unchecked, delete the entry from DB
+    for issue_we_vote_id in organization_follow_issue_we_vote_ids:
+        follow_issue_manager.toggle_on_organization_following_issue(organization_we_vote_id, issue_id, issue_we_vote_id)
 
     return HttpResponseRedirect(reverse('organization:organization_position_list', args=(organization_id,)) +
                                 "?google_civic_election_id=" + str(google_civic_election_id))
@@ -456,6 +513,15 @@ def organization_position_list_view(request, organization_id):
                 'google_civic_election_id', '-vote_smart_time_span')
             if len(organization_position_list):
                 organization_position_list_found = True
+            follow_issue_list_manager = FollowIssueList()
+            organization_follow_issue_list = follow_issue_list_manager. \
+                retrieve_follow_issue_list_by_organization_we_vote_id(organization_we_vote_id)
+            issue_manager = IssueManager()
+            issue_names_list = []
+            for follow_issue in organization_follow_issue_list:
+                issue_name = issue_manager.fetch_issue_name_from_we_vote_id(follow_issue.issue_we_vote_id)
+                issue_names_list.append(issue_name)
+
         except Exception as e:
             organization_position_list = []
 
@@ -481,6 +547,7 @@ def organization_position_list_view(request, organization_id):
                 'google_civic_election_id':     google_civic_election_id,
                 'candidate_we_vote_id':         candidate_we_vote_id,
                 'voter':                        voter,
+                'issue_names_list':             issue_names_list,
             }
         else:
             template_values = {
@@ -490,6 +557,7 @@ def organization_position_list_view(request, organization_id):
                 'google_civic_election_id':     google_civic_election_id,
                 'candidate_we_vote_id':         candidate_we_vote_id,
                 'voter':                        voter,
+                'issue_names_list':             issue_names_list,
             }
     return render(request, 'organization/organization_position_list.html', template_values)
 

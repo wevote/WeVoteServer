@@ -79,11 +79,9 @@ def issues_import_from_master_server_view(request):
         messages.add_message(request, messages.INFO, 'Issues import completed. '
                                                      'Saved: {saved}, Updated: {updated}, '
                                                      'Master data not imported (local duplicates found): '
-                                                     '{duplicates_removed}, '
                                                      'Not processed: {not_processed}'
                                                      ''.format(saved=results['saved'],
                                                                updated=results['updated'],
-                                                               duplicates_removed=results['duplicates_removed'],
                                                                not_processed=results['not_processed']))
     return HttpResponseRedirect(reverse('admin_tools:sync_dashboard', args=()) + "?google_civic_election_id=" +
                                 str(google_civic_election_id) + "&state_code=" + str(state_code))

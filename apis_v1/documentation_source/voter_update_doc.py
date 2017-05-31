@@ -67,6 +67,23 @@ def voter_update_doc_template_values(url_root):
             'description':  'Unsets the corresponding bit represented by this integer\'s bit, '
                             'in interface_status_flags bit',
         },
+        {
+            'name': 'notification_settings_flags',
+            'value': 'integer',  # boolean, integer, long, string
+            'description': 'An integer whose bits represent several flags for the user, such as the ',
+        },
+        {
+            'name': 'notification_flag_integer_to_set',
+            'value': 'integer',  # boolean, integer, long, string
+            'description': 'Sets the corresponding bit represented by this integer\'s bit, '
+                           'in notification_settings_flags bit',
+        },
+        {
+            'name': 'notification_flag_integer_to_unset',
+            'value': 'integer',  # boolean, integer, long, string
+            'description': 'Unsets the corresponding bit represented by this integer\'s bit, '
+                           'in notification_settings_flags bit',
+        },
     ]
 
     potential_status_codes_list = [
@@ -94,6 +111,9 @@ def voter_update_doc_template_values(url_root):
         'interface_status_flags': 'False',
         'flag_integer_to_set': 'False',
         'flag_integer_to_unset': 'False',
+        'notification_settings_flags': 'False',
+        'notification_flag_integer_to_set': 'False',
+        'notification_flag_integer_to_unset': 'False',
     }
 
     # TODO: update api_response with all the variables, such as first_name and last_name
@@ -110,6 +130,9 @@ def voter_update_doc_template_values(url_root):
                    '  "interface_status_flags": integer,\n' \
                    '  "flag_integer_to_set": integer,\n' \
                    '  "flag_integer_to_unset": integer,\n' \
+                   '  "notification_settings_flags": integer,\n' \
+                   '  "notification_flag_integer_to_set": integer,\n' \
+                   '  "notification_flag_integer_to_unset": integer,\n' \
                    '}'
 
     template_values = {

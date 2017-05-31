@@ -125,28 +125,62 @@ class FollowIssueManager(models.Model):
     def __unicode__(self):
         return "FollowIssueManager"
 
-    def toggle_on_voter_following_issue(self, voter_id, issue_id, issue_we_vote_id):
+    def toggle_on_voter_following_issue(self, voter_we_vote_id, issue_id, issue_we_vote_id):
         following_status = FOLLOWING
         follow_issue_manager = FollowIssueManager()
-        return follow_issue_manager.toggle_voter_following_issue(
-            voter_id, issue_id, issue_we_vote_id, following_status)
+        organization_we_vote_id = ""
+        return follow_issue_manager.toggle_following_issue(voter_we_vote_id, organization_we_vote_id,
+            issue_id, issue_we_vote_id, following_status, TAGGED_BY_ORGANIZATION)
 
-    def toggle_off_voter_following_issue(self, voter_id, issue_id, issue_we_vote_id):
+    def toggle_off_voter_following_issue(self, voter_we_vote_id, issue_id, issue_we_vote_id):
         following_status = STOP_FOLLOWING
         follow_issue_manager = FollowIssueManager()
-        return follow_issue_manager.toggle_voter_following_issue(
-            voter_id, issue_id, issue_we_vote_id, following_status)
+        organization_we_vote_id = ""
+        return follow_issue_manager.toggle_following_issue(voter_we_vote_id,
+               organization_we_vote_id, issue_id, issue_we_vote_id, following_status)
 
-    def toggle_ignore_voter_following_issue(self, voter_id, issue_id, issue_we_vote_id):
+    def toggle_ignore_voter_following_issue(self, voter_we_vote_id, issue_id, issue_we_vote_id):
         following_status = FOLLOW_IGNORE
         follow_issue_manager = FollowIssueManager()
-        return follow_issue_manager.toggle_voter_following_issue(
-            voter_id, issue_id, issue_we_vote_id, following_status)
+        organization_we_vote_id = ""
+        return follow_issue_manager.toggle_following_issue(voter_we_vote_id,
+               organization_we_vote_id, issue_id, issue_we_vote_id, following_status)
 
-    def toggle_voter_following_issue(self, voter_id, issue_id, issue_we_vote_id, following_status):
+    # TODO: reason needs to be modified later
+    def toggle_on_organization_following_issue(self, organization_we_vote_id, issue_id, issue_we_vote_id):
+        following_status = FOLLOWING
+        follow_issue_manager = FollowIssueManager()
+        voter_we_vote_id = ""
+        return follow_issue_manager.toggle_following_issue(voter_we_vote_id,
+            organization_we_vote_id, issue_id, issue_we_vote_id, following_status, TAGGED_BY_WE_VOTE)
+
+    def toggle_off_organization_following_issue(self, organization_we_vote_id, issue_id, issue_we_vote_id):
+        following_status = STOP_FOLLOWING
+        follow_issue_manager = FollowIssueManager()
+        voter_we_vote_id = ""
+        return follow_issue_manager.toggle_following_issue(voter_we_vote_id,
+            organization_we_vote_id, issue_id, issue_we_vote_id, following_status)
+
+    def toggle_ignore_organization_following_issue(self, organization_we_vote_id, issue_id, issue_we_vote_id):
+        following_status = FOLLOW_IGNORE
+        follow_issue_manager = FollowIssueManager()
+        voter_we_vote_id = ""
+        return follow_issue_manager.toggle_following_issue(voter_we_vote_id,
+            organization_we_vote_id, issue_id, issue_we_vote_id, following_status)
+
+    def toggle_following_issue(self, voter_we_vote_id, organization_we_vote_id,
+                               issue_id, issue_we_vote_id, following_status, reason=None):
+        # Todo: check if voter_we_vote_id  or organization_we_vote_id exist,
+        # else return results
+
+        # check if issue_id or issue_we_vote_id exist
+        # else return results
+
         # Does a follow_issue entry exist from this voter already exist?
         follow_issue_manager = FollowIssueManager()
-        results = follow_issue_manager.retrieve_follow_issue(0, voter_id, issue_id, issue_we_vote_id)
+        follow_issue_id = 0
+        results = follow_issue_manager.retrieve_follow_issue(follow_issue_id, voter_we_vote_id, organization_we_vote_id,
+                                                             issue_id, issue_we_vote_id)
 
         follow_issue_on_stage_found = False
         follow_issue_on_stage_id = 0
@@ -166,6 +200,10 @@ class FollowIssueManager(models.Model):
                 #         follow_issue_on_stage.following_status = following_status
                 # else:
                 follow_issue_on_stage.following_status = following_status
+                if positive_value_exists(reason) and following_status == FOLLOWING:
+                    follow_issue_on_stage.reason_for_following = reason
+                elif positive_value_exists(reason) and following_status == STOP_FOLLOWING:
+                    follow_issue_on_stage.reason_following_is_blocked = reason
                 follow_issue_on_stage.auto_followed_from_twitter_suggestion = False
                 # We don't need to update here because set set auto_now=True in the field
                 # follow_issue_on_stage.date_last_changed =
@@ -183,19 +221,27 @@ class FollowIssueManager(models.Model):
             try:
                 # Create new follow_issue entry
                 # First make sure that issue_id is for a valid issue
-                issue_manager = FollowIssueManager()
+                issue_manager = IssueManager()
                 if positive_value_exists(issue_id):
                     results = issue_manager.retrieve_issue(issue_id)
                 else:
                     results = issue_manager.retrieve_issue(0, issue_we_vote_id)
                 if results['issue_found']:
                     issue = results['issue']
-                    follow_issue_on_stage = FollowIssue(
-                        voter_id=voter_id,
-                        issue_id=issue.id,
-                        issue_we_vote_id=issue.we_vote_id,
-                        following_status=following_status,
-                    )
+                    if positive_value_exists(voter_we_vote_id):
+                        follow_issue_on_stage = FollowIssue(
+                            voter_id=voter_we_vote_id,
+                            issue_id=issue.id,
+                            issue_we_vote_id=issue.we_vote_id,
+                            following_status=following_status,
+                        )
+                    elif positive_value_exists(organization_we_vote_id):
+                        follow_issue_on_stage = FollowIssue(
+                            organization_we_vote_id=organization_we_vote_id,
+                            issue_id=issue.id,
+                            issue_we_vote_id=issue.we_vote_id,
+                            following_status=following_status,
+                        )
                     # if auto_followed_from_twitter_suggestion:
                     #     follow_issue_on_stage.auto_followed_from_twitter_suggestion = True
                     follow_issue_on_stage.save()
@@ -219,7 +265,7 @@ class FollowIssueManager(models.Model):
         }
         return results
 
-    def retrieve_follow_issue(self, follow_issue_id, voter_id, issue_id, issue_we_vote_id):
+    def retrieve_follow_issue(self, follow_issue_id, voter_we_vote_id, organization_we_vote_id, issue_id, issue_we_vote_id):
         """
         follow_issue_id is the identifier for records stored in this table (it is NOT the issue_id)
         """
@@ -235,18 +281,34 @@ class FollowIssueManager(models.Model):
                 follow_issue_on_stage_id = issue_id.id
                 success = True
                 status = 'FOLLOW_ISSUE_FOUND_WITH_ID'
-            elif positive_value_exists(voter_id) and positive_value_exists(issue_id):
+            elif positive_value_exists(voter_we_vote_id) and positive_value_exists(issue_id):
                 follow_issue_on_stage = FollowIssue.objects.get(
-                    voter_id=voter_id, issue_id=issue_id)
+                    voter_we_vote_id__iexact=voter_we_vote_id,
+                    issue_id=issue_id)
                 follow_issue_on_stage_id = follow_issue_on_stage.id
                 success = True
-                status = 'FOLLOW_ISSUE_FOUND_WITH_VOTER_ID_AND_ORGANIZATION_ID'
-            elif positive_value_exists(voter_id) and positive_value_exists(issue_we_vote_id):
+                status = 'FOLLOW_ISSUE_FOUND_WITH_VOTER_WE_VOTE_ID_AND_ISSUE_ID'
+            elif positive_value_exists(voter_we_vote_id) and positive_value_exists(issue_we_vote_id):
                 follow_issue_on_stage = FollowIssue.objects.get(
-                    voter_id=voter_id, issue_we_vote_id=issue_we_vote_id)
+                    voter_we_vote_id__iexact=voter_we_vote_id,
+                    issue_we_vote_id__iexact=issue_we_vote_id)
                 follow_issue_on_stage_id = follow_issue_on_stage.id
                 success = True
-                status = 'FOLLOW_ISSUE_FOUND_WITH_VOTER_ID_AND_ORGANIZATION_WE_VOTE_ID'
+                status = 'FOLLOW_ISSUE_FOUND_WITH_VOTER_WE_VOTE_ID_AND_ISSUE_WE_VOTE_ID'
+            elif positive_value_exists(organization_we_vote_id) and positive_value_exists(issue_id):
+                follow_issue_on_stage = FollowIssue.objects.get(
+                    organization_we_vote_id__iexact=organization_we_vote_id,
+                    issue_id=issue_id)
+                follow_issue_on_stage_id = follow_issue_on_stage.id
+                success = True
+                status = 'FOLLOW_ISSUE_FOUND_WITH_ORGANIZATION_ID_WE_VOTE_ID_AND_ISSUE_ID'
+            elif positive_value_exists(organization_we_vote_id) and positive_value_exists(issue_we_vote_id):
+                follow_issue_on_stage = FollowIssue.objects.get(
+                    organization_we_vote_id__iexact=organization_we_vote_id,
+                    issue_we_vote_id__iexact=issue_we_vote_id)
+                follow_issue_on_stage_id = follow_issue_on_stage.id
+                success = True
+                status = 'FOLLOW_ISSUE_FOUND_WITH_ORGANIZATION_ID_WE_VOTE_ID_AND_ISSUE_WE_VOTE_ID'
             else:
                 success = False
                 status = 'FOLLOW_ISSUE_MISSING_REQUIRED_VARIABLES'
@@ -286,36 +348,6 @@ class FollowIssueManager(models.Model):
             'MultipleObjectsReturned':      exception_multiple_object_returned,
         }
         return results
-
-    def retrieve_voter_following_issue_status(self, voter_id, voter_we_vote_id,
-                                              issue_id, issue_we_vote_id):
-        """
-        Retrieve one follow entry so we can see if a voter is following or ignoring a particular issue
-        """
-
-        if not positive_value_exists(voter_id) and positive_value_exists(voter_we_vote_id):
-            # We need voter_id to call retrieve_follow_issue
-            voter_manager = VoterManager()
-            voter_id = voter_manager.fetch_local_id_from_we_vote_id(voter_we_vote_id)
-
-        if not positive_value_exists(voter_id) and \
-                not (positive_value_exists(issue_id) or positive_value_exists(issue_we_vote_id)):
-            results = {
-                'status':                       'RETRIEVE_VOTER_FOLLOWING_ISSUE_MISSING_VARIABLES',
-                'success':                      False,
-                'follow_issue_found':    False,
-                'follow_issue_id':       0,
-                'follow_issue':          FollowIssue(),
-                'is_following':                 False,
-                'is_not_following':             True,
-                'is_ignoring':                  False,
-                'error_result':                 True,
-                'DoesNotExist':                 False,
-                'MultipleObjectsReturned':      False,
-            }
-            return results
-
-        return self.retrieve_follow_issue(0, voter_id, issue_id, issue_we_vote_id)
 
     def create_or_update_suggested_issue_to_follow(self, viewer_voter_we_vote_id, issue_we_vote_id,
                                                           from_twitter=False):
@@ -512,6 +544,83 @@ class FollowIssueList(models.Model):
         else:
             follow_issue_list = {}
             return follow_issue_list
+
+    def retrieve_follow_issue_list_by_organization_we_vote_id(self, organization_we_vote_id):
+        # Retrieve a list of follow_organization entries for this organization
+        follow_issue_list_found = False
+        following_status = FOLLOWING
+        follow_issue_list = {}
+        try:
+            follow_issue_query = FollowIssue.objects.all()
+            follow_issue_query = follow_issue_query.filter(organization_we_vote_id__iexact=organization_we_vote_id)
+            follow_issue_query = follow_issue_query.filter(following_status=following_status)
+            follow_issue_list = list(follow_issue_query)
+            if len(follow_issue_list):
+                follow_issue_list_found = True
+        except Exception as e:
+            pass
+
+        if follow_issue_list_found:
+            return follow_issue_list
+        else:
+            follow_issue_list = {}
+            return follow_issue_list
+
+    def retrieve_follow_issue_id_list_by_organization_we_vote_id(self, organization_we_vote_id):
+        follow_issue_id_list = []
+        follow_issue_list = self.retrieve_follow_issue_list_by_organization_we_vote_id(organization_we_vote_id)
+
+        for issue in follow_issue_list:
+            follow_issue_id_list.append(issue.id)
+
+        return follow_issue_id_list
+
+    def fetch_issue_count_for_organization(self, organization_id=0, organization_we_vote_id=''):
+        follow_issue_list_found = False
+        following_status = FOLLOWING
+        follow_issue_list = {}
+        follow_issue_list_count = 0
+        try:
+            follow_issue_list = FollowIssue.objects.all()
+            follow_issue_list = follow_issue_list.filter(organization_we_vote_id__iexact=organization_we_vote_id)
+            follow_issue_list = follow_issue_list.filter(following_status=following_status)
+            follow_issue_list_count = follow_issue_list.count()
+
+        except Exception as e:
+            pass
+
+        return follow_issue_list_count
+
+    def retrieve_organization_we_vote_id_list_from_issue_we_vote_id_list(self, issue_we_vote_id_list):
+        organization_we_vote_id_list = []
+        organization_we_vote_id_list_found = False
+        try:
+            follow_queryset = FollowIssue.objects.all()
+            # we decided not to use case-insensitivty in favour of '__in'
+            follow_queryset = follow_queryset.filter(issue_we_vote_id__in=issue_we_vote_id_list)
+            follow_queryset = follow_queryset.values('organization_we_vote_id').distinct()
+            organization_we_vote_id_list = list(follow_queryset)
+            if len(organization_we_vote_id_list):
+                organization_we_vote_id_list_found = True
+                status = 'ORGANIZATION_WE_VOTE_ID_LIST_RETRIEVED'
+            else:
+                status = 'NO_ORGANIZATION_WE_VOTE_IDS_RETRIEVED'
+        except Issue.DoesNotExist:
+            # No issues found. Not a problem.
+            status = 'NO_ORGANIZATION_WE_VOTE_IDS_DO_NOT_EXIST'
+            organization_we_vote_id_list = []
+        except Exception as e:
+            handle_exception(e, logger=logger)
+            status = 'FAILED retrieve_organization_we_vote_id_list' \
+                     '{error} [type: {error_type}]'.format(error=e.message, error_type=type(e))
+
+        results = {
+            'success': True if organization_we_vote_id_list else False,
+            'status': status,
+            'organization_we_vote_id_list_found': organization_we_vote_id_list_found,
+            'organization_we_vote_id_list': organization_we_vote_id_list,
+        }
+        return results
 
 
 class FollowOrganization(models.Model):

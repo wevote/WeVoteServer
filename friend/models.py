@@ -71,6 +71,8 @@ class FriendInvitationEmailLink(models.Model):
     # We include this here for data monitoring and debugging
     recipient_voter_email = models.EmailField(
         verbose_name='email address for recipient', max_length=255, null=True, blank=True, unique=False)
+    recipient_first_name = models.CharField(verbose_name='first name', max_length=255, null=True, blank=True)
+    recipient_last_name = models.CharField(verbose_name='last name', max_length=255, null=True, blank=True)
     secret_key = models.CharField(
         verbose_name="secret key to accept invite", max_length=255, null=True, blank=True, unique=True)
     invitation_message = models.TextField(null=True, blank=True)
@@ -139,7 +141,9 @@ class FriendManager(models.Model):
         return "FriendManager"
 
     def create_or_update_friend_invitation_email_link(self, sender_voter_we_vote_id, recipient_email_we_vote_id='',
-                                                      recipient_voter_email='', invitation_message='',
+                                                      recipient_voter_email='',
+                                                      recipient_first_name='', recipient_last_name='',
+                                                      invitation_message='',
                                                       sender_email_ownership_is_verified=False,
                                                       invitation_secret_key=''):
         defaults = {
@@ -147,6 +151,10 @@ class FriendManager(models.Model):
             "recipient_email_we_vote_id":       recipient_email_we_vote_id,
             "recipient_voter_email":            recipient_voter_email,
         }
+        if positive_value_exists(recipient_first_name):
+            defaults["recipient_first_name"] = recipient_first_name
+        if positive_value_exists(recipient_last_name):
+            defaults["recipient_last_name"] = recipient_last_name
         if positive_value_exists(sender_email_ownership_is_verified):
             defaults["sender_email_ownership_is_verified"] = sender_email_ownership_is_verified
         if positive_value_exists(invitation_message):

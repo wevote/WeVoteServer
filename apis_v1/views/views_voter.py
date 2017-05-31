@@ -8,6 +8,7 @@ from config.base import get_environment_variable
 from django.http import HttpResponse
 from email_outbound.controllers import voter_email_address_save_for_api, voter_email_address_retrieve_for_api, \
     voter_email_address_sign_in_for_api, voter_email_address_verify_for_api
+from wevote_functions.functions import extract_first_name_from_full_name, extract_last_name_from_full_name
 from geoip.controllers import voter_location_retrieve_from_ip_for_api
 from import_export_facebook.controllers import voter_facebook_sign_in_retrieve_for_api, \
     voter_facebook_sign_in_save_for_api
@@ -27,7 +28,8 @@ from bookmark.controllers import voter_all_bookmarks_status_retrieve_for_api, vo
 from support_oppose_deciding.controllers import voter_opposing_save, voter_stop_opposing_save, \
     voter_stop_supporting_save, voter_supporting_save_for_api
 from voter.controllers import voter_address_retrieve_for_api, voter_create_for_api, voter_merge_two_accounts_for_api, \
-    voter_photo_save_for_api, voter_retrieve_for_api, voter_retrieve_list_for_api, voter_sign_out_for_api
+    voter_photo_save_for_api, voter_retrieve_for_api, voter_retrieve_list_for_api, voter_sign_out_for_api, \
+    voter_split_into_two_accounts_for_api
 from voter.models import BALLOT_ADDRESS, fetch_voter_id_from_voter_device_link, VoterAddress, \
     VoterAddressManager, VoterDeviceLink, VoterDeviceLinkManager, VoterManager
 from voter.serializers import VoterSerializer
@@ -1111,6 +1113,25 @@ def voter_opposing_save_view(request):
                                measure_id=measure_id, measure_we_vote_id=measure_we_vote_id)
 
 
+def voter_split_into_two_accounts_view(request):  # voterSplitIntoTwoAccounts
+    """
+    :param request:
+    :return:
+    """
+    voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
+    split_off_twitter = request.GET.get('split_off_twitter', False)
+
+    results = voter_split_into_two_accounts_for_api(voter_device_id=voter_device_id,
+                                               split_off_twitter=split_off_twitter)
+
+    json_data = {
+        'status':                           results['status'],
+        'success':                          results['success'],
+        'voter_device_id':                  voter_device_id,
+    }
+    return HttpResponse(json.dumps(json_data), content_type='application/json')
+
+
 class VoterExportView(APIView):
     """
     Export raw voter data to JSON format
@@ -1480,6 +1501,22 @@ def voter_update_view(request):  # voterUpdate
         last_name = False
 
     try:
+        full_name = request.GET['full_name']
+        full_name = full_name.strip()
+        if full_name.lower() == 'false':
+            full_name = False
+    except KeyError:
+        full_name = False
+
+    try:
+        name_save_only_if_no_existing_names = request.GET['name_save_only_if_no_existing_names']
+        name_save_only_if_no_existing_names = name_save_only_if_no_existing_names.strip()
+        if name_save_only_if_no_existing_names.lower() == 'false':
+            name_save_only_if_no_existing_names = False
+    except KeyError:
+        name_save_only_if_no_existing_names = False
+
+    try:
         twitter_profile_image_url_https = request.GET['twitter_profile_image_url_https']
         twitter_profile_image_url_https = twitter_profile_image_url_https.strip()
         if twitter_profile_image_url_https.lower() == 'false':
@@ -1509,10 +1546,30 @@ def voter_update_view(request):  # voterUpdate
         flag_integer_to_unset = False
 
     try:
+        notification_settings_flags = request.GET['notification_settings_flags']
+        notification_settings_flags = notification_settings_flags.strip()
+        notification_settings_flags = convert_to_int(notification_settings_flags)
+    except KeyError:
+        notification_settings_flags = False
+
+    try:
+        notification_flag_integer_to_set = request.GET['notification_flag_integer_to_set']
+        notification_flag_integer_to_set = notification_flag_integer_to_set.strip()
+        notification_flag_integer_to_set = convert_to_int(notification_flag_integer_to_set)
+    except KeyError:
+        notification_flag_integer_to_set = False
+
+    try:
+        notification_flag_integer_to_unset = request.GET['notification_flag_integer_to_unset']
+        notification_flag_integer_to_unset = notification_flag_integer_to_unset.strip()
+        notification_flag_integer_to_unset = convert_to_int(notification_flag_integer_to_unset)
+    except KeyError:
+        notification_flag_integer_to_unset = False
+
+    try:
         send_journal_list = request.GET['send_journal_list']
     except KeyError:
         send_journal_list = False
-
 
     device_id_results = is_voter_device_id_valid(voter_device_id)
     if not device_id_results['success']:
@@ -1530,6 +1587,9 @@ def voter_update_view(request):  # voterUpdate
                 'interface_status_flags':           interface_status_flags,
                 'flag_integer_to_set':              flag_integer_to_set,
                 'flag_integer_to_unset':            flag_integer_to_unset,
+                'notification_settings_flags':      notification_settings_flags,
+                'notification_flag_integer_to_set': notification_flag_integer_to_set,
+                'notification_flag_integer_to_unset': notification_flag_integer_to_unset,
                 'voter_donation_history_list':      None,
             }
         response = HttpResponse(json.dumps(json_data), content_type='application/json')
@@ -1538,8 +1598,12 @@ def voter_update_view(request):  # voterUpdate
     at_least_one_variable_has_changed = True if \
         facebook_email or facebook_profile_image_url_https \
         or first_name or middle_name or last_name \
+        or full_name \
         or interface_status_flags or flag_integer_to_unset \
-        or flag_integer_to_set or send_journal_list \
+        or flag_integer_to_set \
+        or notification_settings_flags or notification_flag_integer_to_unset \
+        or notification_flag_integer_to_set \
+        or send_journal_list \
         else False
 
     if not at_least_one_variable_has_changed:
@@ -1557,6 +1621,9 @@ def voter_update_view(request):  # voterUpdate
                 'interface_status_flags':           interface_status_flags,
                 'flag_integer_to_set':              flag_integer_to_set,
                 'flag_integer_to_unset':            flag_integer_to_unset,
+                'notification_settings_flags':      notification_settings_flags,
+                'notification_flag_integer_to_set': notification_flag_integer_to_set,
+                'notification_flag_integer_to_unset': notification_flag_integer_to_unset,
                 'voter_donation_history_list':      None,
             }
         response = HttpResponse(json.dumps(json_data), content_type='application/json')
@@ -1580,6 +1647,9 @@ def voter_update_view(request):  # voterUpdate
             'interface_status_flags':           interface_status_flags,
             'flag_integer_to_set':              flag_integer_to_set,
             'flag_integer_to_unset':            flag_integer_to_unset,
+            'notification_settings_flags':      notification_settings_flags,
+            'notification_flag_integer_to_set': notification_flag_integer_to_set,
+            'notification_flag_integer_to_unset': notification_flag_integer_to_unset,
             'voter_donation_history_list':      None,
         }
         response = HttpResponse(json.dumps(json_data), content_type='application/json')
@@ -1624,12 +1694,38 @@ def voter_update_view(request):  # voterUpdate
     # At this point, we have a valid voter
     donation_list = donation_history_for_a_voter(voter.we_vote_id)
 
+    if positive_value_exists(voter.first_name) or positive_value_exists(voter.last_name):
+        saved_first_or_last_name_exists = True
+    else:
+        saved_first_or_last_name_exists = False
+
+    incoming_first_or_last_name = positive_value_exists(first_name) or positive_value_exists(last_name)
+    # If a first_name or last_name is coming in, we want to ignore the full_name
+    if positive_value_exists(full_name) and not positive_value_exists(incoming_first_or_last_name):
+        incoming_full_name_can_be_processed = True
+    else:
+        incoming_full_name_can_be_processed = False
+
+    if incoming_full_name_can_be_processed:
+        # If here we want to parse full_name into first and last
+        first_name = extract_first_name_from_full_name(full_name)
+        last_name = extract_last_name_from_full_name(full_name)
+
+    if name_save_only_if_no_existing_names:
+        if saved_first_or_last_name_exists:
+            first_name = False
+            last_name = False
+
     voter_manager = VoterManager()
-    results = voter_manager.update_voter(voter_id, facebook_email, facebook_profile_image_url_https,
-                                         first_name, middle_name, last_name,
-                                         flag_integer_to_set, flag_integer_to_unset,
-                                         twitter_profile_image_url_https, we_vote_hosted_profile_image_url_large,
-                                         we_vote_hosted_profile_image_url_medium, we_vote_hosted_profile_image_url_tiny)
+    results = voter_manager.update_voter_by_id(
+        voter_id, facebook_email, facebook_profile_image_url_https,
+        first_name, middle_name, last_name,
+        interface_status_flags,
+        flag_integer_to_set, flag_integer_to_unset,
+        notification_settings_flags,
+        notification_flag_integer_to_set, notification_flag_integer_to_unset,
+        twitter_profile_image_url_https, we_vote_hosted_profile_image_url_large,
+        we_vote_hosted_profile_image_url_medium, we_vote_hosted_profile_image_url_tiny)
     voter = results['voter']
     json_data = {
         'status':                                   results['status'],
@@ -1648,6 +1744,9 @@ def voter_update_view(request):  # voterUpdate
         'interface_status_flags':                   voter.interface_status_flags,
         'flag_integer_to_set':                      flag_integer_to_set,
         'flag_integer_to_unset':                    flag_integer_to_unset,
+        'notification_settings_flags':              voter.notification_settings_flags,
+        'notification_flag_integer_to_set':         notification_flag_integer_to_set,
+        'notification_flag_integer_to_unset':       notification_flag_integer_to_unset,
         'voter_donation_history_list':              donation_list,
     }
 
