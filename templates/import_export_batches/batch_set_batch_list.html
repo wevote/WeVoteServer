@@ -1,0 +1,68 @@
+{# templates/import_export_batches/batch_list.html #}
+{% extends "template_base.html" %}
+
+{% block title %}List of Batches in one Batch Set{% endblock %}
+
+{%  block content %}
+{% load template_filters %}
+<p><a href="{% url 'import_export_batches:batches_home' %}?google_civic_election_id={{ google_civic_election_id }}">< Back to Import Batches Index</a></p>
+
+
+<h1>List of Batches in one Batch Set</h1>
+
+
+{% if batch_list %}
+    <table border="1" cellpadding="5" cellspacing="5" class="table">
+        <tr>
+            <th>#</th>
+            <th>Batch Name</th>
+            <th>Action</th>
+            <th>Election</th>
+            <th>Processed</th>
+            <th>Total Records</th>
+            <th>Date Created</th>
+        </tr>
+    {% for one_batch in batch_list %}
+        <tr>
+            <td>{{ forloop.counter }}</td>
+            <td>{{ one_batch.batch_name }}</td>
+            <td><a href="{% url 'import_export_batches:batch_action_list' %}?batch_header_id={{ one_batch.batch_header_id }}&kind_of_batch={{ one_batch.kind_of_batch }}&google_civic_election_id={{ google_civic_election_id }}">
+            review</a></td>
+            <td>
+                {% for election in election_list %}
+                    {% if election.google_civic_election_id|slugify == one_batch.google_civic_election_id|slugify %}
+                        {{ election.election_name }} - {{ election.google_civic_election_id }} - {{ election.election_day_text }}
+                    {% endif %}
+                {% endfor %}
+            </td>
+            <td>{{ one_batch.rows_processed }}</td>
+            <td>{{ one_batch.total_rows }}</td>
+            <td>{{ one_batch.date_created }}</td>
+        </tr>
+    {% endfor %}
+    </table>
+
+    <p></p>
+
+{% else %}
+    <br />
+    <br />
+    <br />
+    <br />
+    <br />
+    <br />
+    <div>
+        <p>(no batches found)</p>
+    </div>
+{% endif %}
+
+
+    <script>
+        $(function() {
+            $('#google_civic_election_id').change(function() {
+                this.form.submit();
+            });
+        });
+    </script>
+
+{% endblock %}

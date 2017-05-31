@@ -62,7 +62,7 @@
         <tr>
             <td>{{ forloop.counter }}</td>
             <td>{{ one_batch_set.batch_set_name }}</td>
-            <td><a href="{% url 'import_export_batches:batch_action_list' %}?batch_set_id={{ one_batch.batch_set_id }}&google_civic_election_id={{ google_civic_election_id }}">
+            <td><a href="{% url 'import_export_batches:batch_set_batch_list' %}?batch_set_id={{ one_batch_set.id }}&google_civic_election_id={{ google_civic_election_id }}">
             review</a></td>
             <td>
                 {% for election in election_list %}
