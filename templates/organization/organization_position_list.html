@@ -37,9 +37,16 @@
     Endorsements Importer URL: {% if organization.organization_endorsements_api_url %}
         <a href="{{ organization.organization_endorsements_api_url }}" target="_blank">{{ organization.organization_endorsements_api_url }}</a>{% endif %}<br />
 
-    Issue Followed:
+    Issue Linked:
     {% if issue_names_list %}
         {% for issue_name in issue_names_list %}
+            &bullet; <td>{{ issue_name }}</td> &nbsp;
+        {% endfor %}
+    {% endif %}
+    <br />
+    Issue Blocked:
+    {% if issue_blocked_names_list %}
+        {% for issue_name in issue_blocked_names_list %}
             &bullet; <td>{{ issue_name }}</td> &nbsp;
         {% endfor %}
     {% endif %}
