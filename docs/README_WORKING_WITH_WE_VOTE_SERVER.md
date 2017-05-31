@@ -1,5 +1,7 @@
 # Working with WeVoteServer API Endpoints
 
+[Back to Install Table of Contents](README_API_INSTALL.md)
+
 ## Staying Synchronized with Latest Code
 
 If you are returning to work on WeVoteServer after a few weeks or months, these are the steps:
@@ -64,3 +66,5 @@ Please make sure to run our tests before checking in any code (Still not working
     source venv/bin/activate
     cd WeVoteServer
     python manage.py test
+
+[Back to Install Table of Contents](README_API_INSTALL.md)

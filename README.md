@@ -7,31 +7,26 @@ Google Civic API, Vote Smart, MapLight, TheUnitedStates.io and the Voting Inform
 it up to voters, and let voters Support/Oppose and Like ballot items. We are also building tools to capture
 and share voter guide data.
 
-You can use these API endpoints for any of these the We Vote front-end applications:
-
- * [Node/React/Flux WebApp mobile website](https://github.com/wevote/WebApp)
- 
- * [ioS App](https://github.com/wevote/iOSApp)
- 
- * (Android coming soon)
-
-You can see our current wireframe mockup for a San Francisco ballot here:
-http://start.wevoteusa.org/
+You can see our current alpha version for a San Francisco ballot here:
+https://WeVote.US/
 
 ## Installing Python/Django API Server
 
-[Installation instructions](README_API_INSTALL.md).
+[Installation instructions](docs/README_API_INSTALL.md).
 
 ## Installing We Vote Mobile Web Application (Node/React/Flux)
 
-The mobile web front end application can be found in this repository: [WebApp](https://github.com/wevote/WebApp)
+The website front end application is powered by [WebApp](https://github.com/wevote/WebApp)
+
+The mobile native front end applications are powered by [ReactNative for iOS and Android](https://github.com/wevote/WeVoteReactNative)
+
 
 ## After Installation: Working with WeVoteServer Day-to-Day
 
-[Read about working with WeVoteServer on a daily basis](README_WORKING_WITH_WE_VOTE_SERVER.md)
+[Read about working with WeVoteServer on a daily basis](docs/README_WORKING_WITH_WE_VOTE_SERVER.md)
 
 If you need to test donations and have not updated your openssl and pyopenssl during install and setup, you will need
-[to update your local](README_DONATION_SETUP.md).
+[to update your local](docs/README_DONATION_SETUP.md).
 
 ## Join Us
 Join our Google Group here to discuss the WeVoteServer application (creating a social ballot):
