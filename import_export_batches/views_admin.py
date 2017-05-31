@@ -590,6 +590,7 @@ def batch_set_batch_list_view(request):
         return HttpResponseRedirect(reverse('import_export_batches:batch_set_list', args=()))
 
     google_civic_election_id = request.GET.get('google_civic_election_id', 0)
+    number_of_batch_actions_created = 0
 
     try:
         batch_description = BatchDescription.objects.filter(batch_set_id=batch_set_id)
@@ -597,9 +598,20 @@ def batch_set_batch_list_view(request):
 
         batch_list = list(batch_description)
         # loop through all data sets in this batch
-        # for one_batch_set_row in batch_description_list:
-        #     batch_header_id = one_batch_set_row.batch_header_id
-
+        for one_batch_set_row in batch_list:
+            batch_header_id = one_batch_set_row.batch_header_id
+            results = create_batch_row_actions(batch_header_id, 0)
+            if results['success']:
+                # number_of_batch_actions_created += results['number_of_batch_actions_created']
+                # status += results['status']
+                one_batch_set_row.number_of_batch_actions_created = results['number_of_batch_actions_created']
+                pass
+            else:
+                # rows must be existing in the action table, get the count
+                batch_manager = BatchManager()
+                kind_of_batch = one_batch_set_row.kind_of_batch
+                one_batch_set_row.number_of_batch_actions_created = batch_manager.count_number_of_batch_action_rows(
+                    batch_header_id, kind_of_batch)
     except BatchDescription.DoesNotExist:
         # This is fine
         batch_description = BatchDescription()
@@ -609,11 +621,11 @@ def batch_set_batch_list_view(request):
     messages_on_stage = get_messages(request)
 
     template_values = {
-        'messages_on_stage':        messages_on_stage,
-        'batch_set_id':             batch_set_id,
-        'batch_description':        batch_description,
-        'batch_list':               batch_list,
-        'election_list':            election_list,
-        'google_civic_election_id': google_civic_election_id,
+        'messages_on_stage':                messages_on_stage,
+        'batch_set_id':                     batch_set_id,
+        'batch_description':                batch_description,
+        'batch_list':                       batch_list,
+        'election_list':                    election_list,
+        'google_civic_election_id':         google_civic_election_id,
     }
     return render(request, 'import_export_batches/batch_set_batch_list.html', template_values)

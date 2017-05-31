@@ -21,6 +21,7 @@
             <th>Processed</th>
             <th>Total Records</th>
             <th>Date Created</th>
+            <th>Action Rows Created</th>
         </tr>
     {% for one_batch in batch_list %}
         <tr>
@@ -38,6 +39,7 @@
             <td>{{ one_batch.rows_processed }}</td>
             <td>{{ one_batch.total_rows }}</td>
             <td>{{ one_batch.date_created }}</td>
+            <td>{{ one_batch.number_of_batch_actions_created }}</td>
         </tr>
     {% endfor %}
     </table>
