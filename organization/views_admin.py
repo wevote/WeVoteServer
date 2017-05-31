@@ -17,7 +17,7 @@ from exception.models import handle_record_found_more_than_one_exception,\
     handle_record_not_deleted_exception, handle_record_not_found_exception, handle_record_not_saved_exception
 from election.models import Election, ElectionManager
 from follow.models import FollowIssueList, FollowIssueManager
-from issue.models import IssueListManager, IssueManager
+from issue.models import IssueListManager, IssueManager, OrganizationLinkToIssueList ,OrganizationLinkToIssueManager
 from measure.models import ContestMeasure, ContestMeasureList, ContestMeasureManager
 from organization.models import OrganizationListManager, OrganizationManager
 from position.models import PositionEntered, PositionManager, INFORMATION_ONLY, OPPOSE, \
@@ -145,8 +145,8 @@ def organization_list_view(request):
                 new_issue_list.append(issue)
             issue_list = new_issue_list
 
-            follow_issue_list = FollowIssueList()
-            organization_we_vote_id_list_result = follow_issue_list.\
+            link_issue_list = OrganizationLinkToIssueList()
+            organization_we_vote_id_list_result = link_issue_list.\
                 retrieve_organization_we_vote_id_list_from_issue_we_vote_id_list(selected_issue_vote_id_list)
             organization_we_vote_id_list_result = organization_we_vote_id_list_result['organization_we_vote_id_list']
             organization_we_vote_id_list = []
@@ -275,12 +275,12 @@ def organization_edit_view(request, organization_id):
         issue_list_results = issue_list_manager.retrieve_issues()
         if issue_list_results["issue_list_found"]:
             issue_list = issue_list_results["issue_list"]
-            follow_issue_list_manager = FollowIssueList()
-            organization_issue_id_list = follow_issue_list_manager. \
-                retrieve_follow_issue_id_list_by_organization_we_vote_id(organization_on_stage.we_vote_id)
+            link_issue_list_manager = OrganizationLinkToIssueList()
+            organization_issue_we_vote_id_list = link_issue_list_manager. \
+                fetch_issue_we_vote_id_list_by_organization_we_vote_id(organization_on_stage.we_vote_id)
 
             for issue in issue_list:
-                if issue.id in organization_issue_id_list:
+                if issue.we_vote_id in organization_issue_we_vote_id_list:
                     issue.followed_by_organization = True
                 else:
                     issue.followed_by_organization = False
@@ -336,7 +336,7 @@ def organization_edit_process_view(request):
     wikipedia_photo_url = request.POST.get('wikipedia_photo_url', False)
     organization_endorsements_api_url = request.POST.get('organization_endorsements_api_url', False)
     state_served_code = request.POST.get('state_served_code', False)
-    organization_follow_issue_we_vote_ids = request.POST.getlist('selected_issues', False)
+    organization_link_issue_we_vote_ids = request.POST.getlist('selected_issues', False)
 
     # A positive value in google_civic_election_id or add_organization_button means we want to create a voter guide
     # for this org for this election
@@ -461,13 +461,27 @@ def organization_edit_process_view(request):
             if results['voter_guide_saved']:
                 messages.add_message(request, messages.INFO, 'Voter guide for {election_name} election saved.'
                                                              ''.format(election_name=election.election_name))
-    # Have the organization follow the issues selected
-    follow_issue_manager = FollowIssueManager()
+
+    # Link the selected issues with organization and delete any links that were unselected
+    link_issue_list_manager = OrganizationLinkToIssueList()
+    organization_follow_issues_we_vote_id_list_prior_to_update = link_issue_list_manager.\
+        fetch_issue_we_vote_id_list_by_organization_we_vote_id(organization_we_vote_id)
+    link_issue_manager = OrganizationLinkToIssueManager()
     issue_id=0
-    # TODO: fecth all the list of issues organiztion is following, prior to update
-    # then, for any issue that is unchecked, delete the entry from DB
-    for issue_we_vote_id in organization_follow_issue_we_vote_ids:
-        follow_issue_manager.toggle_on_organization_following_issue(organization_we_vote_id, issue_id, issue_we_vote_id)
+
+    if positive_value_exists(organization_link_issue_we_vote_ids) or \
+            positive_value_exists(organization_follow_issues_we_vote_id_list_prior_to_update):
+        if positive_value_exists(organization_link_issue_we_vote_ids):
+            for issue_we_vote_id in organization_link_issue_we_vote_ids:
+                if issue_we_vote_id in organization_follow_issues_we_vote_id_list_prior_to_update:
+                    organization_follow_issues_we_vote_id_list_prior_to_update.remove(issue_we_vote_id)
+                else:
+                    link_issue_manager.link_organization_to_issue(organization_we_vote_id, issue_id, issue_we_vote_id)
+        # this check necessary when, organization has issues linked previously, but all the
+        # issues are unchecked
+        if positive_value_exists(organization_follow_issues_we_vote_id_list_prior_to_update):
+            for issue_we_vote_id in organization_follow_issues_we_vote_id_list_prior_to_update:
+                link_issue_manager.unlink_organization_to_issue(organization_we_vote_id, issue_id, issue_we_vote_id)
 
     return HttpResponseRedirect(reverse('organization:organization_position_list', args=(organization_id,)) +
                                 "?google_civic_election_id=" + str(google_civic_election_id))
@@ -487,6 +501,8 @@ def organization_position_list_view(request, organization_id):
     organization_on_stage = Organization()
     organization_we_vote_id = ""
     organization_on_stage_found = False
+    issue_names_list = []
+    issue_blocked_names_list = []
     try:
         organization_query = Organization.objects.filter(id=organization_id)
         if organization_query.count():
@@ -513,14 +529,20 @@ def organization_position_list_view(request, organization_id):
                 'google_civic_election_id', '-vote_smart_time_span')
             if len(organization_position_list):
                 organization_position_list_found = True
-            follow_issue_list_manager = FollowIssueList()
-            organization_follow_issue_list = follow_issue_list_manager. \
-                retrieve_follow_issue_list_by_organization_we_vote_id(organization_we_vote_id)
+
+            link_issue_list_manager = OrganizationLinkToIssueList()
+            organization_link_issue_list = link_issue_list_manager. \
+                retrieve_issue_list_by_organization_we_vote_id(organization_we_vote_id)
             issue_manager = IssueManager()
-            issue_names_list = []
-            for follow_issue in organization_follow_issue_list:
-                issue_name = issue_manager.fetch_issue_name_from_we_vote_id(follow_issue.issue_we_vote_id)
+            for link_issue in organization_link_issue_list:
+                issue_name = issue_manager.fetch_issue_name_from_we_vote_id(link_issue.issue_we_vote_id)
                 issue_names_list.append(issue_name)
+
+            organization_link_block_issue_list = link_issue_list_manager.\
+                retrieve_issue_blocked_list_by_organization_we_vote_id(organization_we_vote_id)
+            for blocked_issue in organization_link_block_issue_list:
+                issue_name = issue_manager.fetch_issue_name_from_we_vote_id(blocked_issue.issue_we_vote_id)
+                issue_blocked_names_list.append(issue_name)
 
         except Exception as e:
             organization_position_list = []
@@ -548,6 +570,7 @@ def organization_position_list_view(request, organization_id):
                 'candidate_we_vote_id':         candidate_we_vote_id,
                 'voter':                        voter,
                 'issue_names_list':             issue_names_list,
+                'issue_blocked_names_list':     issue_blocked_names_list,
             }
         else:
             template_values = {
@@ -558,6 +581,7 @@ def organization_position_list_view(request, organization_id):
                 'candidate_we_vote_id':         candidate_we_vote_id,
                 'voter':                        voter,
                 'issue_names_list':             issue_names_list,
+                'issue_blocked_names_list':     issue_blocked_names_list,
             }
     return render(request, 'organization/organization_position_list.html', template_values)
 
