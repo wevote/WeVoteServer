@@ -3,7 +3,8 @@
 # -*- coding: UTF-8 -*-
 
 from ballot.models import MEASURE, CANDIDATE, POLITICIAN
-from party.controllers import retrieve_all_party_names_and_ids_api
+from party.controllers import retrieve_all_party_names_and_ids_api, party_import_from_xml_data
+from electoral_district.controllers import electoral_district_import_from_xml_data
 import codecs
 import csv
 from django.db import models
@@ -305,7 +306,7 @@ class BatchManager(models.Model):
             batch_row_action_found = True
             success = True
             status = "BATCH_ROW_ACTION_ORGANIZATION_RETRIEVED"
-        except BatchDescription.DoesNotExist:
+        except BatchRowActionOrganization.DoesNotExist:
             batch_row_action_organization = BatchRowActionOrganization()
             batch_row_action_found = False
             success = True
@@ -331,7 +332,7 @@ class BatchManager(models.Model):
             batch_row_action_found = True
             success = True
             status = "BATCH_ROW_ACTION_MEASURE_RETRIEVED"
-        except BatchDescription.DoesNotExist:
+        except BatchRowActionMeasure.DoesNotExist:
             batch_row_action_measure = BatchRowActionMeasure()
             batch_row_action_found = False
             success = True
@@ -364,7 +365,7 @@ class BatchManager(models.Model):
             batch_row_action_found = True
             success = True
             status = "BATCH_ROW_ACTION_ELECTED_OFFICE_RETRIEVED"
-        except BatchDescription.DoesNotExist:
+        except BatchRowActionElectedOffice.DoesNotExist:
             batch_row_action_elected_office = BatchRowActionElectedOffice()
             batch_row_action_found = False
             success = True
@@ -397,7 +398,7 @@ class BatchManager(models.Model):
             batch_row_action_found = True
             success = True
             status = "BATCH_ROW_ACTION_CONTEST_OFFICE_RETRIEVED"
-        except BatchDescription.DoesNotExist:
+        except BatchRowActionContestOffice.DoesNotExist:
             batch_row_action_contest_office = BatchRowActionContestOffice()
             batch_row_action_found = False
             success = True
@@ -430,7 +431,7 @@ class BatchManager(models.Model):
             batch_row_action_found = True
             success = True
             status = "BATCH_ROW_ACTION_POLITICIAN_RETRIEVED"
-        except BatchDescription.DoesNotExist:
+        except BatchRowActionPolitician.DoesNotExist:
             batch_row_action_politician = BatchRowActionPolitician()
             batch_row_action_found = False
             success = True
@@ -446,6 +447,39 @@ class BatchManager(models.Model):
             'status':                   status,
             'batch_row_action_found':   batch_row_action_found,
             'batch_row_action_politician':  batch_row_action_politician,
+        }
+        return results
+
+    def retrieve_batch_row_action_candidate(self, batch_header_id, batch_row_id):
+        """
+        Retrieves data from BatchRowActionCandidate table
+        :param batch_header_id:
+        :param batch_row_id:
+        :return:
+        """
+
+        try:
+            batch_row_action_politician = BatchRowActionCandidate.objects.get(batch_header_id=batch_header_id,
+                                                                           batch_row_id=batch_row_id)
+            batch_row_action_found = True
+            success = True
+            status = "BATCH_ROW_ACTION_CANDIDATE_RETRIEVED"
+        except BatchRowActionCandidate.DoesNotExist:
+            batch_row_action_candidate = BatchRowActionCandidate()
+            batch_row_action_found = False
+            success = True
+            status = "BATCH_ROW_ACTION_CANDIDATE_NOT_FOUND"
+        except Exception as e:
+            batch_row_action_candidate = BatchRowActionCandidate()
+            batch_row_action_found = False
+            success = False
+            status = "BATCH_ROW_ACTION_CANDIDATE_RETRIEVE_ERROR"
+
+        results = {
+            'success':                      success,
+            'status':                       status,
+            'batch_row_action_found':       batch_row_action_found,
+            'batch_row_action_politician':  batch_row_action_candidate,
         }
         return results
 
@@ -551,6 +585,7 @@ class BatchManager(models.Model):
         success = False
         status = ''
         limit_for_testing = 5
+        batch_header_id = 0
 
         # Look for BallotMeasureContest and create the batch_header first. BallotMeasureContest is the direct child node
         # of VipObject
@@ -1377,6 +1412,41 @@ class BatchManager(models.Model):
                 status += " EXCEPTION_BATCH_SET"
                 handle_exception(e, logger=logger, exception_message=status)
 
+            # import Electoral District
+            electoral_district_list_found = False
+            electoral_district_item_list = xml_root.findall('ElectoralDistrict')
+            if len(electoral_district_item_list):
+                results = electoral_district_import_from_xml_data(electoral_district_item_list)
+                if results['success']:
+                    status += "CREATE_BATCH_SET_ELECTORAL_DISTRICT_IMPORTED"
+                    number_of_batch_rows += results['saved']
+                    # TODO check this whether it should be only saved or updated Electoral districts
+                    number_of_batch_rows += results['updated']
+                    success = True
+                    electoral_district_list_found = True
+
+            # import Party
+            party_list_found = False
+            party_item_list = xml_root.findall('Party')
+            if len(party_item_list):
+                results = party_import_from_xml_data(party_item_list)
+                if results['success']:
+                    status += "CREATE_BATCH_SET_PARTY_IMPORTED"
+                    number_of_batch_rows += results['saved']
+                    number_of_batch_rows += results['updated']
+                    # TODO check this whether it should be only saved or updated Electoral districts
+                    success = True
+                    party_list_found = True
+            if not electoral_district_list_found or not party_list_found:
+                results = {
+                    'success': False,
+                    'status': status,
+                    'batch_header_id': 0,
+                    'batch_saved': False,
+                    'number_of_batch_rows': 0,
+                }
+                return results
+
             # look for different data sets in the XML file - Measure, ElectedOffice, ContestOffice, Candidate,
             # Politician
             results = self.store_measure_xml(batch_uri, google_civic_election_id, organization_we_vote_id, xml_root,
@@ -1386,6 +1456,11 @@ class BatchManager(models.Model):
                 status += 'CREATE_BATCH_SET_MEASURE_DATA_FOUND'
                 number_of_batch_rows += results['number_of_batch_rows']
                 success = True
+
+                # Get the batchRows for this imported Measure data
+
+                # Analyze Measure data
+                # create_batch_row_actions()
             results = self.store_elected_office_xml(batch_uri, google_civic_election_id, organization_we_vote_id,
                                                     xml_root, batch_set_id)
             if results['success']:

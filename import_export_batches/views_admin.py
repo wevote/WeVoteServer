@@ -180,13 +180,27 @@ def batch_action_list_view(request):
 
     google_civic_election_id = request.GET.get('google_civic_election_id', 0)
 
+    batch_set_id = 0
     try:
         batch_description = BatchDescription.objects.get(batch_header_id=batch_header_id)
         batch_description_found = True
+        batch_set_id = batch_description.batch_set_id
     except BatchDescription.DoesNotExist:
         # This is fine
         batch_description = BatchDescription()
         batch_description_found = False
+
+    batch_set_list_found = False
+    # if batch_set_id exists, send data sets associated with this batch_set_id
+    if positive_value_exists(batch_set_id):
+        try:
+            batch_set_list = BatchSet.objects.get(id=batch_set_id)
+            if batch_set_list:
+                batch_set_list_found = True
+        except BatchSet.DoesNotExist:
+            # This is fine
+            batch_set_list = BatchSet()
+            batch_set_list_found = False
 
     try:
         batch_header_map = BatchHeaderMap.objects.get(batch_header_id=batch_header_id)
@@ -258,20 +272,44 @@ def batch_action_list_view(request):
                 else:
                     one_batch_row.batch_row_action_exists = False
                 modified_batch_row_list.append(one_batch_row)
+            elif kind_of_batch == CANDIDATE:
+                existing_results = batch_manager.retrieve_batch_row_action_candidate(batch_header_id, one_batch_row.id)
+                if existing_results['batch_row_action_found']:
+                    one_batch_row.batch_row_action = existing_results['batch_row_action_candidate']
+                    one_batch_row.kind_of_batch = CANDIDATE
+                    one_batch_row.batch_row_action_exists = True
+                else:
+                    one_batch_row.batch_row_action_exists = False
+                modified_batch_row_list.append(one_batch_row)
 
     election_list = Election.objects.order_by('-election_day_text')
     messages_on_stage = get_messages(request)
 
-    template_values = {
-        'messages_on_stage':        messages_on_stage,
-        'batch_header_id':          batch_header_id,
-        'batch_description':        batch_description,
-        'batch_header_map':         batch_header_map,
-        'batch_row_list':           modified_batch_row_list,
-        'election_list':            election_list,
-        'kind_of_batch':            kind_of_batch,
-        'google_civic_election_id': google_civic_election_id,
-    }
+    if batch_set_id:
+        template_values = {
+            'messages_on_stage': messages_on_stage,
+            'batch_header_id': batch_header_id,
+            'batch_description': batch_description,
+            'batch_set_id': batch_set_id,
+            'batch_header_map': batch_header_map,
+            'batch_set_list': batch_set_list,
+            'batch_row_list': modified_batch_row_list,
+            'election_list': election_list,
+            'kind_of_batch': kind_of_batch,
+            'google_civic_election_id': google_civic_election_id,
+        }
+    else:
+        template_values = {
+            'messages_on_stage':        messages_on_stage,
+            'batch_header_id':          batch_header_id,
+            'batch_description':        batch_description,
+            'batch_set_id':             batch_set_id,
+            'batch_header_map':         batch_header_map,
+            'batch_row_list':           modified_batch_row_list,
+            'election_list':            election_list,
+            'kind_of_batch':            kind_of_batch,
+            'google_civic_election_id': google_civic_election_id,
+        }
     return render(request, 'import_export_batches/batch_action_list.html', template_values)
 
 
@@ -447,15 +485,15 @@ def batch_set_list_view(request):
     messages_on_stage = get_messages(request)
     batch_set_list_found = False
     try:
-        batch_set_list = BatchSet.objects.order_by('id')
+        batch_set_list = BatchSet.objects.order_by('-import_date')
         # batch_set_list = batch_set_list.exclude(batch_set_id__isnull=True)
         if positive_value_exists(google_civic_election_id):
             batch_set_list = batch_set_list.filter(google_civic_election_id=google_civic_election_id)
         if len(batch_set_list):
             batch_set_list_found = True
-    except BatchDescription.DoesNotExist:
+    except BatchSet.DoesNotExist:
         # This is fine
-        batch_set_list = BatchDescription()
+        batch_set_list = BatchSet()
         batch_set_list_found = False
         pass
 
@@ -546,7 +584,6 @@ def batch_set_batch_list_view(request):
         return redirect_to_sign_in_page(request, authority_required)
 
     batch_set_id = convert_to_int(request.GET.get('batch_set_id', 0))
-    # kind_of_batch = request.GET.get('kind_of_batch', '')
 
     if not positive_value_exists(batch_set_id):
         messages.add_message(request, messages.ERROR, 'Batch_set_id required.')
@@ -575,10 +612,8 @@ def batch_set_batch_list_view(request):
         'messages_on_stage':        messages_on_stage,
         'batch_set_id':             batch_set_id,
         'batch_description':        batch_description,
-        # 'batch_header_map':         batch_header_map,
         'batch_list':               batch_list,
         'election_list':            election_list,
-        # 'kind_of_batch':            kind_of_batch,
         'google_civic_election_id': google_civic_election_id,
     }
     return render(request, 'import_export_batches/batch_set_batch_list.html', template_values)
