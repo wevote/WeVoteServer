@@ -42,12 +42,12 @@ def create_batch_row_actions(batch_header_id, batch_row_id):
     if not positive_value_exists(batch_header_id):
         status = "CREATE_BATCH_ROW_ACTIONS-BATCH_HEADER_ID_MISSING"
         results = {
-            'success': success,
-            'status': status,
-            'batch_header_id': batch_header_id,
-            'kind_of_batch': kind_of_batch,
-            'batch_actions_created': success,
-            'number_of_batch_actions_created': number_of_batch_actions_created,
+            'success':                          success,
+            'status':                           status,
+            'batch_header_id':                  batch_header_id,
+            'kind_of_batch':                    kind_of_batch,
+            'batch_actions_created':            success,
+            'number_of_batch_actions_created':  number_of_batch_actions_created,
         }
         return results
 
@@ -147,12 +147,12 @@ def create_batch_row_actions(batch_header_id, batch_row_id):
                 # batch_row_action_measure.kind_of_action = "TEST"
 
     results = {
-        'success': success,
-        'status': status,
-        'batch_header_id': batch_header_id,
-        'kind_of_batch': kind_of_batch,
-        'batch_actions_created': success,
-        'number_of_batch_actions_created': number_of_batch_actions_created,
+        'success':                          success,
+        'status':                           status,
+        'batch_header_id':                  batch_header_id,
+        'kind_of_batch':                    kind_of_batch,
+        'batch_actions_created':            success,
+        'number_of_batch_actions_created':  number_of_batch_actions_created,
     }
     return results
 

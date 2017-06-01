@@ -551,9 +551,11 @@ class BatchManager(models.Model):
             if kind_of_batch == MEASURE:
                 return self.store_measure_xml(batch_uri, google_civic_election_id, organization_we_vote_id, xml_root)
             elif kind_of_batch == ELECTED_OFFICE:
-                return self.store_elected_office_xml(batch_uri, google_civic_election_id, organization_we_vote_id, xml_root)
+                return self.store_elected_office_xml(batch_uri, google_civic_election_id, organization_we_vote_id,
+                                                     xml_root)
             elif kind_of_batch == CONTEST_OFFICE:
-                return self.store_contest_office_xml(batch_uri, google_civic_election_id, organization_we_vote_id, xml_root)
+                return self.store_contest_office_xml(batch_uri, google_civic_election_id, organization_we_vote_id,
+                                                     xml_root)
             elif kind_of_batch == CANDIDATE:
                 return self.store_candidate_xml(batch_uri, google_civic_election_id, organization_we_vote_id, xml_root)
             elif kind_of_batch == POLITICIAN:
@@ -749,7 +751,8 @@ class BatchManager(models.Model):
             if elected_office_name_node is not None:
                 elected_office_name = elected_office_name_node.text
 
-            elected_office_description_node = one_elected_office.find("Description/Text/[@language='"+LANGUAGE_CODE_ENGLISH+"']")
+            elected_office_description_node = one_elected_office.find(
+                "Description/Text/[@language='"+LANGUAGE_CODE_ENGLISH+"']")
             if elected_office_description_node is not None:
                 elected_office_description = elected_office_description_node.text
 
@@ -1437,15 +1440,18 @@ class BatchManager(models.Model):
                     # TODO check this whether it should be only saved or updated Electoral districts
                     success = True
                     party_list_found = True
-            if not electoral_district_list_found or not party_list_found:
-                results = {
-                    'success': False,
-                    'status': status,
-                    'batch_header_id': 0,
-                    'batch_saved': False,
-                    'number_of_batch_rows': 0,
-                }
-                return results
+            # A given data source may not always have electoral district and/or party data, but the referenced electoral
+            # district id or party id might be already present in the master database tables, hence commenting out
+            # below code
+            # if not electoral_district_list_found or not party_list_found:
+            #     results = {
+            #         'success': False,
+            #         'status': status,
+            #         'batch_header_id': 0,
+            #         'batch_saved': False,
+            #         'number_of_batch_rows': 0,
+            #     }
+            #     return results
 
             # look for different data sets in the XML file - Measure, ElectedOffice, ContestOffice, Candidate,
             # Politician
@@ -1457,10 +1463,6 @@ class BatchManager(models.Model):
                 number_of_batch_rows += results['number_of_batch_rows']
                 success = True
 
-                # Get the batchRows for this imported Measure data
-
-                # Analyze Measure data
-                # create_batch_row_actions()
             results = self.store_elected_office_xml(batch_uri, google_civic_election_id, organization_we_vote_id,
                                                     xml_root, batch_set_id)
             if results['success']:
@@ -1507,6 +1509,28 @@ class BatchManager(models.Model):
         }
         return results
 
+    def count_number_of_batch_action_rows(self, header_id, kind_of_batch):
+        """
+            Return count of batch rows for a given header id
+        :param header_id: 
+        :return: 
+        """
+        if positive_value_exists(header_id):
+            if kind_of_batch == MEASURE:
+                number_of_batch_action_rows = BatchRowActionMeasure.objects.filter(batch_header_id=header_id).count()
+            elif kind_of_batch == ELECTED_OFFICE:
+                number_of_batch_action_rows = BatchRowActionElectedOffice.objects.filter(batch_header_id=header_id).\
+                    count()
+            elif kind_of_batch == CONTEST_OFFICE:
+                number_of_batch_action_rows = BatchRowActionContestOffice.objects.filter(batch_header_id=header_id).\
+                    count()
+            elif kind_of_batch == CANDIDATE:
+                number_of_batch_action_rows = BatchRowActionCandidate.objects.filter(batch_header_id=header_id).count()
+            elif kind_of_batch == POLITICIAN:
+                number_of_batch_action_rows = BatchRowActionPolitician.objects.filter(batch_header_id=header_id).count()
+            else:
+                number_of_batch_action_rows = 0
+        return number_of_batch_action_rows
 class BatchSet(models.Model):
     """
     We call each imported CSV or JSON a “batch set”, and store basic information about it in this table.
