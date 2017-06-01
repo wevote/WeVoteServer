@@ -195,6 +195,7 @@ def organization_suggestion_tasks_for_api(voter_device_id,
         return error_results
     voter = voter_results['voter']
     voter_we_vote_id = voter.we_vote_id
+    voter_linked_organization_we_vote_id = voter.linked_organization_we_vote_id
     twitter_id_of_me = voter.twitter_id
 
     follow_organization_list = FollowOrganizationList()
@@ -324,6 +325,7 @@ def organization_suggestion_tasks_for_api(voter_device_id,
                 organization_we_vote_id = suggested_organization_to_follow_entry.organization_we_vote_id
                 toggle_on_results = follow_organization_manager.\
                     toggle_on_voter_following_organization(voter_id, 0, organization_we_vote_id,
+                                                           voter_linked_organization_we_vote_id,
                                                            auto_followed_from_twitter_suggestion)
                 status += ' ' + toggle_on_results['status']
                 success = toggle_on_results['success']
