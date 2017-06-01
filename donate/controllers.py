@@ -325,8 +325,9 @@ def donation_history_for_a_voter(voter_we_vote_id):
                 'stripe_status': donation_row.stripe_status,
                 'charge_id': donation_row.charge_id,
                 'subscription_id': donation_row.subscription_id,
-                'subscription_canceled_at': donation_row.subscription_canceled_at,
-                'subscription_ended_at': donation_row.subscription_ended_at
+                'subscription_canceled_at': str(donation_row.subscription_canceled_at),
+                'subscription_ended_at': str(donation_row.subscription_ended_at),
+                'refund_days_limit': refund_days,
             }
             simple_donation_list.append(json_data)
 
