@@ -205,7 +205,7 @@ class DonationManager(models.Model):
         :param donation_amount:
         :return:
         """
-        recurring_donation_plan_id = "monthly-" + str(donation_amount)
+        recurring_donation_plan_id = voter_we_vote_id + "-monthly-" + str(donation_amount)
         # plan_name = donation_plan_id + " Plan"
         billing_interval = "monthly"
         currency = "usd"
