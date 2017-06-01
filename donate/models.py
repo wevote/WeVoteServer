@@ -63,14 +63,16 @@ class DonationJournal(models.Model):
     record_enum = models.CharField(
         verbose_name="enum of record type {PAYMENT_FROM_UI, PAYMENT_AUTO_SUBSCRIPTION, SUBSCRIPTION_SETUP_AND_INITIAL}",
         max_length=32, unique=False, null=False, blank=False)
-    ip_address = models.GenericIPAddressField(verbose_name="user ip address", protocol='both', unpack_ipv4=False,
-                                              null=True, blank=True, unique=False)
-    stripe_customer_id = models.CharField(verbose_name="stripe unique customer id", max_length=32,
-                                          unique=False, null=False, blank=False)
     voter_we_vote_id = models.CharField(verbose_name="unique we vote user id", max_length=32, unique=False, null=False,
                                         blank=False)
+    not_loggedin_voter_we_vote_id = models.CharField(verbose_name="unique we vote user id", max_length=32, unique=False,
+                                                     null=True, blank=True)
+    stripe_customer_id = models.CharField(verbose_name="stripe unique customer id", max_length=32,
+                                          unique=False, null=False, blank=False)
     charge_id = models.CharField(verbose_name="unique charge id per specific donation", max_length=32, default="",
                                  null=True, blank=True)
+    subscription_id = models.CharField(verbose_name="unique subscription id for one voter, amount, and creation time",
+                                       max_length=32, default="", null=True, blank=True)
     amount = models.PositiveIntegerField(verbose_name="donation amount", default=0, null=False)
     currency = models.CharField(verbose_name="donation currency country code", max_length=8, default="", null=True,
                                 blank=True)
@@ -119,8 +121,6 @@ class DonationJournal(models.Model):
                                      null=True, blank=True)
     status = models.CharField(verbose_name="our generated status message", max_length=255, default="", null=True,
                               blank=True)
-    subscription_id = models.CharField(verbose_name="unique subscription id for one voter, amount, and creation time",
-                                       max_length=32, default="", null=True, blank=True)
     subscription_plan_id = models.CharField(verbose_name="stripe subscription plan id", max_length=32, default="",
                                             unique=False, null=True, blank=True)
     subscription_created_at = models.DateTimeField(verbose_name="stripe subscription creation timestamp",
@@ -129,14 +129,14 @@ class DonationJournal(models.Model):
                                                     auto_now=False, auto_now_add=False, null=True)
     subscription_ended_at = models.DateTimeField(verbose_name="stripe subscription ended timestamp", auto_now=False,
                                                  auto_now_add=False, null=True)
-    not_loggedin_voter_we_vote_id = models.CharField(verbose_name="unique we vote user id", max_length=32, unique=False,
-                                                     null=True, blank=True)
+    ip_address = models.GenericIPAddressField(verbose_name="user ip address", protocol='both', unpack_ipv4=False,
+                                              null=True, blank=True, unique=False)
 
 
 class DonationManager(models.Model):
     @staticmethod
-    def create_donate_link_to_voter(self, stripe_customer_id, voter_we_vote_id):
-        """
+    def create_donate_link_to_voter(stripe_customer_id, voter_we_vote_id):
+        """"
 
         :param self:
         :param stripe_customer_id:
@@ -199,13 +199,13 @@ class DonationManager(models.Model):
         return results
 
     @staticmethod
-    def retrieve_or_create_recurring_donation_plan(donation_amount):
+    def retrieve_or_create_recurring_donation_plan(voter_we_vote_id, donation_amount):
         """
 
         :param donation_amount:
         :return:
         """
-        recurring_donation_plan_id = "monthly-" + str(donation_amount)
+        recurring_donation_plan_id = voter_we_vote_id + "-monthly-" + str(donation_amount)
         # plan_name = donation_plan_id + " Plan"
         billing_interval = "monthly"
         currency = "usd"
@@ -364,10 +364,9 @@ class DonationManager(models.Model):
         # subscription_entry = object
         subscription = object
         success = False
-        donation_plan_id = "monthly-" + str(donation_amount)
-        subscription_id = 0
+        donation_plan_id = voter_we_vote_id +"-monthly-" + str(donation_amount)
 
-        donation_plan_id_query = self.retrieve_or_create_recurring_donation_plan(donation_amount)
+        donation_plan_id_query = self.retrieve_or_create_recurring_donation_plan(voter_we_vote_id, donation_amount)
         if donation_plan_id_query['success']:
             status = donation_plan_id_query['status']
 
@@ -390,8 +389,8 @@ class DonationManager(models.Model):
             except stripe.error.StripeError as e:
                 body = e.json_body
                 err = body['error']
-                status = "STATUS_IS_{}_AND_ERROR_IS_{}".format(e.http_status, err['type'])
-                print("Type is: {}".format(err['type']))
+                status = "STATUS_IS_{}_AND_ERROR_IS_{}".format(e.http_status, err)
+                print("create_recurring_donation StripeError: " + status)
 
         else:
             status = donation_plan_id_query['status']
@@ -545,7 +544,7 @@ class DonationManager(models.Model):
             subscription_row.save()
 
         except DonationJournal.DoesNotExist:
-            logger.error("Subscription " + subscription_id + " with customer_id " + customer_id + " does not exist",
+            logger.error("mark_subscription_canceled_or_ended: Subscription " + subscription_id + " with customer_id " + customer_id + " does not exist",
                          {}, {})
             return False
 
@@ -576,11 +575,10 @@ class DonationManager(models.Model):
             print(status)
 
         except DonationJournal.DoesNotExist:
-            status += " move_donations_between_donors-FAILED-WITH-A-DoesNotExist-ERROR-FROM-" + \
+            # The not-loggedin-voter rarely has made a donation, so this is not a problem
+            status += " NO-DONATIONS-TO-MOVE-FROM-" + \
                       voter_we_vote_id + "-TO-" + to_voter_we_vote_id + " "
-            logger.error(status, {}, {})
-            status += " EXCEPTION-IN-move_donations_between_donors "
-            logger.error(status, {}, {})
+            logger.debug("move_donations_between_donors 1:" + status, {}, {})
             results = {
                 'status': status,
                 'success': False,
@@ -591,7 +589,7 @@ class DonationManager(models.Model):
 
         except Exception as e:
             status += " EXCEPTION-IN-move_donations_between_donors "
-            logger.error(status, {}, {})
+            logger.error("move_donations_between_donors 2:" + status, {}, {})
             results = {
                 'status': status,
                 'success': False,
@@ -607,3 +605,68 @@ class DonationManager(models.Model):
             'to_voter': to_voter,
         }
         return results
+
+
+    @staticmethod
+    def check_for_subscription_in_db_without_card_info(customer, plan_id):
+        # get the rows with the correct subscription_plan_id, most recently created first (created a few seconds ago)
+        # since subscription_plan_id has the we_voter_voter_id, it is very specific
+        row_id = -1
+        try:
+            queryset = DonationJournal.objects.all().order_by('-id')
+            rows = queryset.filter(subscription_plan_id=plan_id)
+            if len(rows):
+                row = rows[0]
+                if row.last4 == 0:
+                    row_id = row.id
+        except DonationJournal.DoesNotExist:
+            logger.error("check_for_subscription_in_db_without_card_info row does not exist for stripe customer" +
+                         customer)
+        except Exception as e:
+            print("check_for_subscription_in_db_without_card_info Exception " + str(e))
+
+        return row_id
+
+
+    @staticmethod
+    def update_subscription_in_db(row_id, amount, currency, id_card, address_zip, brand, country, exp_month, exp_year,
+                                  funding):
+        try:
+            row = DonationJournal.objects.get(id=row_id)
+            row.amount = amount
+            row.currency = currency
+            row.id_card = id_card
+            row.address_zip = address_zip
+            row.brand = brand
+            row.country = country
+            row.exp_month = exp_month
+            row.exp_year = exp_year
+            row.funding = funding
+            row.save()
+#            print("update_subscription_in_db row=" + row_id + ", plan_id=" + row.subscription_plan_id +
+#                  ", amount=" + str(amount) )
+        except Exception as err:
+            logger.error("update_subscription_in_db: " + str(err), {}, {})
+
+        return
+
+    @staticmethod
+    def find_we_vote_voter_id_for_stripe_customer(stripe_customer_id):
+
+        try:
+            queryset = DonationJournal.objects.all().order_by('-id')
+            rows = queryset.filter(stripe_customer_id=stripe_customer_id)
+            for row in rows:
+                if row.not_loggedin_voter_we_vote_id == None and \
+                   row.record_enum == "SUBSCRIPTION_SETUP_AND_INITIAL" and \
+                   row.voter_we_vote_id != "":
+                    return row.voter_we_vote_id
+
+            return ""
+
+        except DonationJournal.DoesNotExist:
+            print("find_we_vote_voter_id_for_stripe_customer row does not exist")
+        except Exception as e:
+            logger.error("find_we_vote_voter_id_for_stripe_customer: " + str(e), {}, {})
+
+        return ""
