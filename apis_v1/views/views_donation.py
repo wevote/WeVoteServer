@@ -3,7 +3,8 @@
 # -*- coding: UTF-8 -*-
 from config.base import get_environment_variable
 from django.http import HttpResponse
-from donate.controllers import donation_with_stripe_for_api, donation_process_stripe_webhook_event
+from donate.controllers import donation_with_stripe_for_api, donation_process_stripe_webhook_event, \
+    donation_refund_for_api, donation_subscription_cancellation_for_api
 import json
 from voter.models import fetch_voter_we_vote_id_from_voter_device_link
 import wevote_functions.admin
@@ -62,6 +63,78 @@ def donation_with_stripe_view(request):  # donationWithStripe
         return HttpResponse(json.dumps(json_data), content_type='application/json')
 
 
+def donation_refund_view(request):  # donationRefund
+    """
+    Refund a stripe charge
+    :type request: object
+    :param request:
+    :return:
+    """
+
+    charge_id = request.GET.get('charge_id', '')
+    voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
+
+    if positive_value_exists(voter_device_id):
+        voter_we_vote_id = fetch_voter_we_vote_id_from_voter_device_link(voter_device_id)
+        if len(charge_id) > 1:
+            results = donation_refund_for_api(request, charge_id, voter_we_vote_id)
+            json_data = {
+                'status': results['status'],
+                'success': results['success'],
+                'charge_id': results['charge_id'],
+                'refund_id': results['customer_id'],
+                'refund_amount': results['amount'],
+                'currency': results['currency'],
+                'reason': results['reason'],
+                'receipt_number': results['receipt_number'],
+            }
+        else :
+            print('donation_refund_with_stripe_view voter_we_vote_id is missing')
+            json_data = {
+                'status': "VOTER_WE_VOTE_ID_IS_MISSING",
+                'success': False,
+            }
+    else :
+        print('donation_refund_with_stripe_view stripe_charge_id is missing')
+        json_data = {
+            'status': "STRIPE_CHARGE_ID_IS_MISSING",
+            'success': False,
+        }
+
+
+    return HttpResponse(json.dumps(json_data), content_type='application/json')
+
+
+def donation_cancel_subscription_view(request):  # donationCancelSubscription
+    """
+    Cancel a stripe subscription
+    :type request: object
+    :param request:
+    :return:
+    """
+
+    subscription_id = request.GET.get('subscription_id', '')
+    voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
+
+    if positive_value_exists(voter_device_id):
+        voter_we_vote_id = fetch_voter_we_vote_id_from_voter_device_link(voter_device_id)
+        if len(subscription_id) > 0:
+            json_data = donation_subscription_cancellation_for_api(request, subscription_id, voter_we_vote_id)
+        else:
+            print('donation_subscription_cancellation_with_stripe_view voter_we_vote_id is missing')
+            json_data = {
+                'status': "VOTER_WE_VOTE_ID_IS_MISSING",
+                'success': False,
+            }
+    else:
+        print('donation_subscription_cancellation_with_stripe_view stripe_subscription_id is missing')
+        json_data = {
+            'status': "STRIPE_SUBSCRIPTION_ID_IS_MISSING",
+            'success': False,
+        }
+
+    return HttpResponse(json.dumps(json_data), content_type='application/json')
+
 # Using ngrok to test Stripe Webhook
 # https://a9a761d9.ngrok.io/apis/v1/donationStripeWebhook/
 # http://a9a761d9.ngrok.io -> localhost:8000
@@ -75,16 +148,16 @@ def donation_stripe_webhook_view(request):
         event = stripe.Webhook.construct_event(payload, sig_header, endpoint_secret)
 
     except ValueError as e:
-        logger.error("apis_v1/views/views_donation.py, Stripe returned 'Invalid payload'", {}, {})
+        logger.error("donation_stripe_webhook_view, Stripe returned 'Invalid payload'", {}, {})
         return HttpResponse(status=400)
 
     except stripe.error.SignatureVerificationError as err:
-        logger.error("apis_v1/views/views_donation.py, Stripe returned SignatureVerificationError: " + err._message,
+        logger.error("donation_stripe_webhook_view, Stripe returned SignatureVerificationError: " + err._message,
                      {}, {})
         return HttpResponse(status=400)
 
     except Exception as err:
-        logger.error(err, {}, {})
+        logger.error("donation_stripe_webhook_view: " + err, {}, {})
         return HttpResponse(status=400)
 
     donation_process_stripe_webhook_event(event)
