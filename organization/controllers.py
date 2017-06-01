@@ -322,6 +322,20 @@ def organization_follow_all(voter_device_id, organization_id, organization_we_vo
         }
         return HttpResponse(json.dumps(json_data), content_type='application/json')
 
+    voter_manager = VoterManager()
+    results = voter_manager.retrieve_voter_by_id(voter_id)
+    if not results['voter_found']:
+        json_data = {
+            'status': 'VOTER_NOT_FOUND',
+            'success': False,
+            'voter_device_id': voter_device_id,
+            'organization_id': organization_id,
+        }
+        return HttpResponse(json.dumps(json_data), content_type='application/json')
+
+    voter = results['voter']
+    voter_linked_organization_we_vote_id = voter.linked_organization_we_vote_id
+
     organization_id = convert_to_int(organization_id)
     if not positive_value_exists(organization_id) and not positive_value_exists(organization_we_vote_id):
         json_data = {
@@ -335,7 +349,7 @@ def organization_follow_all(voter_device_id, organization_id, organization_we_vo
     if follow_kind == FOLLOWING:
         follow_organization_manager = FollowOrganizationManager()
         results = follow_organization_manager.toggle_on_voter_following_organization(
-            voter_id, organization_id, organization_we_vote_id)
+            voter_id, organization_id, organization_we_vote_id, voter_linked_organization_we_vote_id)
         if results['follow_organization_found']:
             status = 'FOLLOWING'
             success = True
@@ -349,7 +363,7 @@ def organization_follow_all(voter_device_id, organization_id, organization_we_vo
     elif follow_kind == FOLLOW_IGNORE:
         follow_organization_manager = FollowOrganizationManager()
         results = follow_organization_manager.toggle_ignore_voter_following_organization(
-            voter_id, organization_id, organization_we_vote_id)
+            voter_id, organization_id, organization_we_vote_id, voter_linked_organization_we_vote_id)
         if results['follow_organization_found']:
             status = 'IGNORING'
             success = True
@@ -362,7 +376,7 @@ def organization_follow_all(voter_device_id, organization_id, organization_we_vo
     elif follow_kind == STOP_FOLLOWING:
         follow_organization_manager = FollowOrganizationManager()
         results = follow_organization_manager.toggle_off_voter_following_organization(
-            voter_id, organization_id, organization_we_vote_id)
+            voter_id, organization_id, organization_we_vote_id, voter_linked_organization_we_vote_id)
         if results['follow_organization_found']:
             status = 'STOPPED_FOLLOWING'
             success = True
