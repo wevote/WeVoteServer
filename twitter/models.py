@@ -866,6 +866,33 @@ class TwitterUserManager(models.Model):
                 we_vote_hosted_profile_image_url_tiny)
             return twitter_save_results
 
+    def delete_twitter_link_to_organization(self, twitter_id, organization_we_vote_id):
+        twitter_id = convert_to_int(twitter_id)
+        twitter_link_to_organization_deleted = False
+
+        try:
+            if positive_value_exists(twitter_id):
+                results = self.retrieve_twitter_link_to_organization_from_twitter_user_id(twitter_id)
+                if results['twitter_link_to_organization_found']:
+                    twitter_link_to_organization = results['twitter_link_to_organization']
+                    twitter_link_to_organization.delete()
+                    twitter_link_to_organization_deleted = True
+            elif positive_value_exists(organization_we_vote_id):
+                results = self.retrieve_twitter_link_to_organization_from_organization_we_vote_id(
+                    organization_we_vote_id)
+                if results['twitter_link_to_organization_found']:
+                    twitter_link_to_organization = results['twitter_link_to_organization']
+                    twitter_link_to_organization.delete()
+                    twitter_link_to_organization_deleted = True
+        except Exception as e:
+            pass
+
+        results = {
+            'success':                              twitter_link_to_organization_deleted,
+            'twitter_link_to_organization_deleted': twitter_link_to_organization_deleted,
+        }
+        return results
+
     def delete_twitter_user(self, twitter_id):
         twitter_id = convert_to_int(twitter_id)
         twitter_user_deleted = False

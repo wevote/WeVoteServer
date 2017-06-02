@@ -35,7 +35,7 @@ In pgadmin add a server. You can use your sign in name as the server name.
 
 Open this file:
 
-    $ sudo vi /etc/postgres/9.5/main/pg_hba.conf
+    $ sudo vi "/Users/<YOUR_NAME>/Library/Application Support/Postgres/var-9.6/pg_hba.conf"
 
 Change the line:
 
@@ -44,11 +44,9 @@ Change the line:
 to
 
     # Database administrative login by Unix domain socket
-    local   all             postgres                                md5
+    local   all             postgres                                trust
     
-Now you should reload the server configuration changes and connect pgAdmin III to your PostgreSQL database server.
-
-    sudo /etc/init.d/postgresql reload
+Now you should reload the server configuration changes by stopping and staring PostgreSQL and connect pgAdmin 4 to your PostgreSQL database server.
 
 Open pgAdmin 4 and navigate to:
 
@@ -70,7 +68,9 @@ Open pgAdmin 4 and navigate to:
 
 ## Create Database
 
-TODO Instructions needed here
+If you do not see "WeVoteServerDB" in PGAdmin, try this command from your terminal window:
+
+    $ sudo -u postgres createdb WeVoteServerDB
 
 
 [NEXT: 2. Get WeVoteServer Code from Github](README_API_INSTALL_CODE_FROM_GITHUB.md)

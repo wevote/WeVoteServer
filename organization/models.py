@@ -1064,6 +1064,14 @@ class OrganizationListManager(models.Manager):
                 organization_list_objects.append(organization)
                 success = True
                 status = "ORGANIZATION_FOUND_FROM_TWITTER_LINK_TO_ORGANIZATION"
+            else:
+                # Heal the data -- the organization is missing so we should delete the Twitter link
+                twitter_id = 0
+                delete_results = twitter_user_manager.delete_twitter_link_to_organization(
+                    twitter_id, twitter_link_to_organization.organization_we_vote_id)
+                organization_list_found = False
+                success = True
+                status = "ORGANIZATION_NOT_FOUND_FROM_TWITTER_LINK_TO_ORGANIZATION-DELETED_BAD_LINK"
         else:
             try:
                 organization_queryset = Organization.objects.all()
