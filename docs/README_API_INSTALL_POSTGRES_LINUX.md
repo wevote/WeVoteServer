@@ -27,7 +27,7 @@ In pgadmin add a server. You can use your sign in name as the server name.
 
 Open this file:
 
-    $ sudo vi /etc/postgres/9.5/main/pg_hba.conf
+    $ sudo vi /etc/postgres/9.6/main/pg_hba.conf
 
 Change the line:
 
@@ -36,11 +36,11 @@ Change the line:
 to
 
     # Database administrative login by Unix domain socket
-    local   all             postgres                                md5
+    local   all             postgres                                trust
     
-Now you should reload the server configuration changes and connect pgAdmin III to your PostgreSQL database server.
+Now you should reload the server configuration changes and connect pgAdmin 4 to your PostgreSQL database server.
 
-    sudo /etc/init.d/postgresql reload
+    $ sudo /etc/init.d/postgresql reload
 
 Open pgAdmin 4 and navigate to:
 

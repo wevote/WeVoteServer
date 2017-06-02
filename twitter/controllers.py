@@ -10,7 +10,7 @@ from organization.models import OrganizationListManager
 from wevote_functions.functions import convert_to_int, positive_value_exists
 
 
-def twitter_identity_retrieve_for_api(twitter_handle, voter_device_id=''):
+def twitter_identity_retrieve_for_api(twitter_handle, voter_device_id=''):  # twitterIdentityRetrieve
     status = "TWITTER_HANDLE_DOES_NOT_EXIST"  # Default to this
     success = True
     kind_of_owner = "TWITTER_HANDLE_DOES_NOT_EXIST"
@@ -65,7 +65,6 @@ def twitter_identity_retrieve_for_api(twitter_handle, voter_device_id=''):
                 owner_found = True
                 status = "OWNER_OF_THIS_TWITTER_HANDLE_FOUND-CANDIDATE"
 
-    # Check Organization table
     if not positive_value_exists(owner_found):
         organization_list_manager = OrganizationListManager()
         organization_results = organization_list_manager.retrieve_organizations_from_non_unique_identifiers(
