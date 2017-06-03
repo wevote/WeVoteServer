@@ -6,7 +6,7 @@ from django.core.validators import RegexValidator
 from django.db import models
 from django.db.models import Q
 from exception.models import handle_exception, \
-    handle_record_found_more_than_one_exception, handle_record_not_saved_exception
+    handle_record_found_more_than_one_exception, handle_record_not_saved_exception, handle_record_not_found_exception
 from import_export_facebook.models import FacebookManager
 from import_export_twitter.functions import retrieve_twitter_user_info
 from twitter.models import TwitterUserManager
@@ -1169,6 +1169,59 @@ class OrganizationListManager(models.Manager):
             'status':                       status,
             'organization_list_found':      organization_list_found,
             'organization_list':            organization_list_objects,
+        }
+        return results
+
+    def retrieve_organizations_by_organization_list(self, followers_organization_we_vote_ids):
+        organization_list = []
+        organization_list_found = False
+
+        if not type(followers_organization_we_vote_ids) is list:
+            status = 'NO_ORGANIZATIONS_FOUND_MISSING_ORGANIZATION_LIST'
+            success = False
+            results = {
+                'success':                      success,
+                'status':                       status,
+                'organization_list_found':      organization_list_found,
+                'organization_list':            organization_list,
+            }
+            return results
+
+        if not len(followers_organization_we_vote_ids):
+            status = 'NO_ORGANIZATIONS_FOUND_NO_ORGANIZATIONS_IN_LIST'
+            success = False
+            results = {
+                'success':                      success,
+                'status':                       status,
+                'organization_list_found':      organization_list_found,
+                'organization_list':            organization_list,
+            }
+            return results
+
+        try:
+            organization_queryset = Organization.objects.all()
+            organization_queryset = organization_queryset.filter(
+                we_vote_id__in=followers_organization_we_vote_ids)
+            organization_queryset = organization_queryset.order_by('-twitter_followers_count')
+            organization_list = organization_queryset
+
+            if len(organization_list):
+                organization_list_found = True
+                status = 'ORGANIZATIONS_FOUND_BY_ORGANIZATION_LIST'
+            else:
+                status = 'NO_ORGANIZATIONS_FOUND_BY_ORGANIZATION_LIST'
+            success = True
+        except Exception as e:
+            handle_record_not_found_exception(e, logger=logger)
+            status = 'voterGuidesFollowersRetrieve: Unable to retrieve organizations from db. ' \
+                     '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
+            success = False
+
+        results = {
+            'success':                      success,
+            'status':                       status,
+            'organization_list_found':      organization_list_found,
+            'organization_list':            organization_list,
         }
         return results
 
