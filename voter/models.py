@@ -316,7 +316,7 @@ class VoterManager(BaseUserManager):
                 new_voter_filter = Q(facebook_id__gt=0)
                 voter_raw_filters.append(new_voter_filter)
             if positive_value_exists(has_verified_email):
-                new_voter_filter = Q(email_ownership_is_verified=True)
+                new_voter_filter = Q(primary_email_we_vote_id__isnull=False)
                 voter_raw_filters.append(new_voter_filter)
         else:
             # Add "and" filter here
