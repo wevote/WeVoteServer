@@ -1141,7 +1141,7 @@ def voter_split_into_two_accounts_view(request):  # voterSplitIntoTwoAccounts
     split_off_twitter = request.GET.get('split_off_twitter', False)
 
     results = voter_split_into_two_accounts_for_api(voter_device_id=voter_device_id,
-                                               split_off_twitter=split_off_twitter)
+                                                    split_off_twitter=split_off_twitter)
 
     json_data = {
         'status':                           results['status'],

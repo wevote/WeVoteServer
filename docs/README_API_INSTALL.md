@@ -6,7 +6,8 @@
 
 Please note: We do not support direct development on Windows. 
 If you are using a Windows machine, we recommend setting up an [Oracle VirtualBox](https://www.virtualbox.org/wiki/Downloads)
-and installing within that.
+and installing within that. In our experience, a Windows machine should have 8 GB RAM (minimum), 
+and you should allocate 2 CPUs and 4 GB RAM to the virtual machine.
 
 1a. [Installing PostgreSQL on Mac](README_API_INSTALL_POSTGRES_MAC.md)
 

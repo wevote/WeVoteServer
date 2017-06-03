@@ -64,9 +64,19 @@ def admin_home_view(request):
     google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
     state_code = request.GET.get('state_code', '')
 
+    voter_manager = VoterManager()
+    voter_accounts_count = voter_manager.fetch_voter_count_with_sign_in()
+    voter_twitter_accounts_count = voter_manager.fetch_voter_count_with_twitter()
+    voter_facebook_accounts_count = voter_manager.fetch_voter_count_with_facebook()
+    voter_email_accounts_count = voter_manager.fetch_voter_count_with_verified_email()
+
     template_values = {
-        'google_civic_election_id': google_civic_election_id,
-        'state_code':               state_code,
+        'google_civic_election_id':         google_civic_election_id,
+        'state_code':                       state_code,
+        'voter_accounts_count':             voter_accounts_count,
+        'voter_twitter_accounts_count':     voter_twitter_accounts_count,
+        'voter_facebook_accounts_count':    voter_facebook_accounts_count,
+        'voter_email_accounts_count':       voter_email_accounts_count,
     }
     response = render(request, 'admin_tools/index.html', template_values)
 

@@ -70,20 +70,9 @@ def organization_follow_ignore(voter_device_id, organization_id=0, organization_
 
 
 def voter_count():
-    voter_count_all = 0
-    try:
-        voter_list_all = Voter.objects.all()
-        # In future, add a filter to only show voters who have actually done something
-        # voter_list = voter_list.filter(id=voter_id)
-        voter_count_all = voter_list_all.count()
-        success = True
-
-        # We will want to cache a json file and only refresh it every couple of seconds (so it doesn't become
-        # a bottle neck as we grow)
-    except Exception as e:
-        exception_message = "voterCount: Unable to count list of Voters from db."
-        handle_exception(e, logger=logger, exception_message=exception_message)
-        success = False
+    voter_manager = VoterManager()
+    voter_count_all = voter_manager.fetch_voter_count()
+    success = True
 
     json_data = {
         'success': success,

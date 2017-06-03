@@ -1831,12 +1831,25 @@ def voter_split_into_two_accounts_for_api(voter_device_id, split_off_twitter):  
         }
         return error_results
 
+    # Make sure this voter has a TwitterLinkToVoter entry
+    twitter_user_manager = TwitterUserManager()
+    twitter_id = 0
+    twitter_link_to_voter_results = twitter_user_manager.retrieve_twitter_link_to_voter(
+        twitter_id, from_voter.we_vote_id)
+    if not twitter_link_to_voter_results['twitter_link_to_voter_found']:
+        error_results = {
+            'status':                       "VOTER_SPLIT_INTO_TWO_ACCOUNTS_TWITTER_LINK_TO_VOTER_NOT_FOUND",
+            'success':                      False,
+            'voter_device_id':              voter_device_id,
+            'split_off_twitter':          split_off_twitter,
+        }
+        return error_results
+
     from_voter_id = 0
     from_voter_we_vote_id = ""
     to_voter = Voter
     to_voter_id = 0
     to_voter_we_vote_id = ""
-    email_manager = EmailManager()
 
     # Create a duplicate voter
     voter_duplicate_results = voter_manager.duplicate_voter(from_voter)
@@ -1849,6 +1862,7 @@ def voter_split_into_two_accounts_for_api(voter_device_id, split_off_twitter):  
 
         # Make sure we remove any legacy of Twitter
         from_voter.twitter_id = 0
+        from_voter.twitter_screen_name = ""
         try:
             from_voter.save()
         except Exception as e:
@@ -1863,11 +1877,10 @@ def voter_split_into_two_accounts_for_api(voter_device_id, split_off_twitter):  
         }
         return error_results
 
-    # Move TwitterLinkToVoter to the new voter
-    twitter_user_manager = TwitterUserManager()
-    twitter_id = 0
+    # Move TwitterLinkToVoter to the new voter "to_voter"
     twitter_link_moved = False
-    twitter_link_to_voter = twitter_user_manager.retrieve_twitter_link_to_voter(twitter_id, from_voter.we_vote_id)
+    twitter_link_to_voter = twitter_link_to_voter_results['twitter_link_to_voter']
+    twitter_link_to_voter_twitter_id = twitter_link_to_voter.twitter_id
     try:
         twitter_link_to_voter.voter_we_vote_id = to_voter.we_vote_id
         twitter_link_to_voter.save()
@@ -1884,55 +1897,83 @@ def voter_split_into_two_accounts_for_api(voter_device_id, split_off_twitter):  
         }
         return error_results
 
-    # Get the organization linked to the from_voter, copy it, and link it to the to_voter
+    # Get the organization linked to the twitter_id
+    # Next, link that organization connected to the Twitter account to the to_voter
+    # Then duplicate that org, and connect the duplicate to the from_voter
     organization_manager = OrganizationManager()
     twitter_link_to_organization_moved = False
     to_voter_linked_organization_id = 0
     to_voter_linked_organization_we_vote_id = ""
     from_voter_linked_organization_id = 0
     from_voter_linked_organization_we_vote_id = from_voter.linked_organization_we_vote_id
-    if not positive_value_exists(from_voter.linked_organization_we_vote_id):
+    organization_associated_with_twitter_id_we_vote_id = ""
+
+    twitter_link_to_organization_results = \
+        twitter_user_manager.retrieve_twitter_link_to_organization_from_twitter_user_id(
+            twitter_link_to_voter_twitter_id)
+    if not twitter_link_to_organization_results['twitter_link_to_organization_found']:
         status += "NO_LINKED_ORGANIZATION_WE_VOTE_ID_FOUND "
     else:
-        from_linked_organization_results = organization_manager.retrieve_organization_from_we_vote_id(
-            from_voter.linked_organization_we_vote_id)
-        if not from_linked_organization_results['organization_found']:
+        twitter_link_to_organization = twitter_link_to_organization_results['twitter_link_to_organization']
+        organization_associated_with_twitter_id_we_vote_id = twitter_link_to_organization.organization_we_vote_id
+        twitter_organization_results = organization_manager.retrieve_organization_from_we_vote_id(
+            organization_associated_with_twitter_id_we_vote_id)
+        if not twitter_organization_results['organization_found']:
             status += "NO_LINKED_ORGANIZATION_FOUND "
+            organization_associated_with_twitter_id_we_vote_id = ""
+            # Create new organization
+            # Update the twitter_link_to_organization with new organization_we_vote_id
+            pass
         else:
-            from_linked_organization = from_linked_organization_results['organization']
-            from_voter_linked_organization_id = from_linked_organization.id
-            from_voter_linked_organization_we_vote_id = from_linked_organization.we_vote_id
+            # Error checking successful. The existing organization that is tied to this twitter_id will be put in
+            #  the "from_voter" and we will duplicate an organization for use with the Twitter account
+            from_voter_linked_organization = twitter_organization_results['organization']
+            from_voter_linked_organization_id = from_voter_linked_organization.id
+            from_voter_linked_organization_we_vote_id = from_voter_linked_organization.we_vote_id
 
-            # Now that we have the original organization, we want to duplicate it, and then remove data
+            # Now that we have the organization linked to the Twitter account, we want to duplicate it,
+            #  and then remove data
             #  that shouldn't be in both
-            duplicate_organization_results = organization_manager.duplicate_organization(from_linked_organization)
+            duplicate_organization_results = organization_manager.duplicate_organization_destination_twitter(
+                from_voter_linked_organization)
             if not duplicate_organization_results['organization_duplicated']:
                 status += "NOT_ABLE_TO_DUPLICATE_ORGANIZATION "
             else:
-                to_linked_organization = duplicate_organization_results['organization']
-                to_voter_linked_organization_id = to_linked_organization.id
-                to_voter_linked_organization_we_vote_id = to_linked_organization.we_vote_id
+                to_voter_linked_organization = duplicate_organization_results['organization']
+                to_voter_linked_organization_id = to_voter_linked_organization.id
+                to_voter_linked_organization_we_vote_id = to_voter_linked_organization.we_vote_id
 
                 if positive_value_exists(to_voter_linked_organization_we_vote_id):
-                    # Remove the link to the organization so we don't have a future conflict
+                    # Remove the Twitter information from the from_voter_linked_organization
+                    try:
+                        from_voter_linked_organization.twitter_user_id = 0
+                        from_voter_linked_organization.twitter_followers_count = 0
+                        from_voter_linked_organization.save()
+                    except Exception as e:
+                        status += "UNABLE_TO_SAVE_FROM_ORGANIZATION "
+
+                    # Update the link to the organization on the to_voter
                     try:
                         to_voter.linked_organization_we_vote_id = to_voter_linked_organization_we_vote_id
                         to_voter.save()
                     except Exception as e:
                         status += "UNABLE_TO_SAVE_LINKED_ORGANIZATION_WE_VOTE_ID_IN_TO_VOTER "
 
-                # Move TwitterLinkToOrganization to the new organization
-                twitter_link_to_organization_moved = False
-                twitter_link_to_organization = \
-                    twitter_user_manager.retrieve_twitter_link_to_organization_from_organization_we_vote_id(
-                        to_linked_organization.we_vote_id)
-                try:
-                    twitter_link_to_organization.organization_we_vote_id = to_linked_organization.we_vote_id
-                    twitter_link_to_organization.save()
+                    # Update the TwitterLinkToOrganization to the organization on the to_voter
+                    try:
+                        twitter_link_to_organization.organization_we_vote_id = to_voter_linked_organization_we_vote_id
+                        twitter_link_to_organization.save()
+                    except Exception as e:
+                        status += "UNABLE_TO_SAVE_TWITTER_LINK_TO_ORGANIZATION "
+
+                    # Update the link to the organization on the from_voter
+                    try:
+                        from_voter.linked_organization_we_vote_id = from_voter_linked_organization_we_vote_id
+                        from_voter.save()
+                    except Exception as e:
+                        status += "UNABLE_TO_SAVE_LINKED_ORGANIZATION_WE_VOTE_ID_IN_FROM_VOTER "
+
                     twitter_link_to_organization_moved = True
-                except Exception as e:
-                    status += "VOTER_SPLIT_INTO_TWO_ACCOUNTS_TWITTER_LINK_TO_ORG_NOT_MOVED "
-                    pass
 
     if not twitter_link_to_organization_moved:
         error_results = {
@@ -1943,43 +1984,33 @@ def voter_split_into_two_accounts_for_api(voter_device_id, split_off_twitter):  
         }
         return error_results
 
-    # Copy positions from voter to new_owner_voter
-    # TODO DALE To be built
-    move_positions_results = duplicate_positions_to_another_voter(
-        from_voter_id, from_voter_we_vote_id,
-        to_voter_id, to_voter_we_vote_id,
-        to_voter_linked_organization_id, to_voter_linked_organization_we_vote_id)
-    status += " " + move_positions_results['status']
-
-    # TODO DALE To be updated
-    if positive_value_exists(from_voter_linked_organization_we_vote_id) and \
-            positive_value_exists(to_voter_linked_organization_we_vote_id) and \
-            from_voter_linked_organization_we_vote_id != to_voter_linked_organization_we_vote_id:
-        move_organization_to_another_complete_results = duplicate_organization_to_another_complete(
-            from_voter_linked_organization_id, from_voter_linked_organization_we_vote_id,
-            to_voter_linked_organization_id, to_voter_linked_organization_we_vote_id,
-            to_voter_id, to_voter_we_vote_id
-        )
-        status += " " + move_organization_to_another_complete_results['status']
+    # # Copy positions from_voter to to_voter
+    # # TODO DALE To be built
+    # move_positions_results = duplicate_positions_to_another_voter(
+    #     from_voter_id, from_voter_we_vote_id,
+    #     to_voter_id, to_voter_we_vote_id,
+    #     to_voter_linked_organization_id, to_voter_linked_organization_we_vote_id)
+    # status += " " + move_positions_results['status']
+    #
+    # # TODO DALE To be updated
+    # if positive_value_exists(from_voter_linked_organization_we_vote_id) and \
+    #         positive_value_exists(to_voter_linked_organization_we_vote_id) and \
+    #         from_voter_linked_organization_we_vote_id != to_voter_linked_organization_we_vote_id:
+    #     move_organization_to_another_complete_results = duplicate_organization_to_another_complete(
+    #         from_voter_linked_organization_id, from_voter_linked_organization_we_vote_id,
+    #         to_voter_linked_organization_id, to_voter_linked_organization_we_vote_id,
+    #         to_voter_id, to_voter_we_vote_id
+    #     )
+    #     status += " " + move_organization_to_another_complete_results['status']
 
     # We do not transfer friends or friend invitations from voter to new_owner_voter
 
     # Duplicate the organizations the from_voter is following to the new_owner_voter
-    duplicate_follow_results = duplicate_follow_entries_to_another_voter(from_voter_id, to_voter_id,
-                                                                         to_voter_we_vote_id)
-    status += " " + duplicate_follow_results['status']
+    # duplicate_follow_results = duplicate_follow_entries_to_another_voter(from_voter_id, to_voter_id,
+    #                                                                      to_voter_we_vote_id)
+    # status += " " + duplicate_follow_results['status']
 
     # We do not bring over all emails from the from_voter over to the to_voter
-
-    if positive_value_exists(to_voter.primary_email_we_vote_id):
-        # Remove the email information so we don't have a future conflict
-        try:
-            to_voter.email = None
-            to_voter.primary_email_we_vote_id = None
-            to_voter.email_ownership_is_verified = False
-            to_voter.save()
-        except Exception as e:
-            status += "VOTER_SPLIT_INTO_TWO_ACCOUNTS_PRIMARY_EMAIL_REMOVED "
 
     # We do not bring over Facebook information
 
