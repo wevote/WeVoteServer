@@ -893,7 +893,7 @@ class FollowOrganizationList(models.Model):
                     follow_organization_list_simple_array.append(follow_organization.organization_id)
         return follow_organization_list_simple_array
 
-    def retrieve_follow_organization_by_organization_we_vote_id_simple_id_array(
+    def retrieve_followed_organization_by_organization_we_vote_id_simple_id_array(
             self, voter_linked_organization_we_vote_id, return_we_vote_id=False,
             auto_followed_from_twitter_suggestion=False):
         follow_organization_list_manager = FollowOrganizationList()
@@ -908,6 +908,23 @@ class FollowOrganizationList(models.Model):
                 else:
                     follow_organization_list_simple_array.append(follow_organization.organization_id)
         return follow_organization_list_simple_array
+
+    def retrieve_followers_organization_by_organization_we_vote_id_simple_id_array(
+            self, organization_we_vote_id, return_we_vote_id=False,
+            auto_followed_from_twitter_suggestion=False):
+        follow_organization_list_manager = FollowOrganizationList()
+        followers_organization_list = \
+            follow_organization_list_manager.retrieve_follow_organization_by_organization_we_vote_id(
+                organization_we_vote_id)
+        followers_organization_list_simple_array = []
+        if len(followers_organization_list):
+            for follow_organization in followers_organization_list:
+                if return_we_vote_id:
+                    followers_organization_list_simple_array.append(
+                        follow_organization.voter_linked_organization_we_vote_id)
+                else:
+                    followers_organization_list_simple_array.append(follow_organization.organization_id)
+        return followers_organization_list_simple_array
 
     def retrieve_ignore_organization_by_voter_id_simple_id_array(self, voter_id, return_we_vote_id=False):
         follow_organization_list_manager = FollowOrganizationList()
