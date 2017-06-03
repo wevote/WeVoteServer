@@ -87,27 +87,35 @@ class OrganizationManager(models.Manager):
         }
         return results
 
-    def duplicate_organization(self, existing_organization):
+    def duplicate_organization_destination_twitter(self, organization):
+        """
+        Starting with an existing organization, create a duplicate version with different we_vote_id
+        :param organization:
+        :return:
+        """
+        success = False
+        status = ""
+        organization_duplicated = False
         try:
-            organization = Organization()
-            # TODO DALE Search for a way to cycle through all values of existing_voter
-            organization.we_vote_id = ""
-            organization.facebook_id = 0
+            organization.id = None  # Remove the primary key so it is forced to save a new entry
+            organization.pk = None
+            organization.facebook_email = ""
+            organization.fb_username = ""
+            organization.we_vote_id = None  # Clear out existing we_vote_id
+            organization.generate_new_we_vote_id()
             organization.save()  # We do this so the we_vote_id is created
-            status = "DUPLICATE_ORGANIZATION_SUCCESSFUL"
+            status += "DUPLICATE_ORGANIZATION_SUCCESSFUL"
             success = True
             organization_duplicated = True
         except Exception as e:
             handle_record_not_saved_exception(e, logger=logger)
             organization = Organization
-            status = "DUPLICATE_ORGANIZATION_FAILED"
-            success = False
-            organization_duplicated = False
+            status += "DUPLICATE_ORGANIZATION_FAILED"
         results = {
-            'success':              success,
-            'status':               status,
-            'organization':         organization,
-            'organization_duplicated': organization_duplicated,
+            'success':                  success,
+            'status':                   status,
+            'organization':             organization,
+            'organization_duplicated':  organization_duplicated,
         }
         return results
 
@@ -1361,19 +1369,23 @@ class Organization(models.Model):
         if self.we_vote_id:
             self.we_vote_id = self.we_vote_id.strip().lower()
         if self.we_vote_id == "" or self.we_vote_id is None:  # If there isn't a value...
-            # ...generate a new id
-            site_unique_id_prefix = fetch_site_unique_id_prefix()
-            next_local_integer = fetch_next_we_vote_id_last_org_integer()
-            # "wv" = We Vote
-            # site_unique_id_prefix = a generated (or assigned) unique id for one server running We Vote
-            # "org" = tells us this is a unique id for an org
-            # next_integer = a unique, sequential integer for this server - not necessarily tied to database id
-            self.we_vote_id = "wv{site_unique_id_prefix}org{next_integer}".format(
-                site_unique_id_prefix=site_unique_id_prefix,
-                next_integer=next_local_integer,
-            )
-            # TODO we need to deal with the situation where we_vote_id is NOT unique on save
+            self.generate_new_we_vote_id()
         super(Organization, self).save(*args, **kwargs)
+
+    def generate_new_we_vote_id(self):
+        # ...generate a new id
+        site_unique_id_prefix = fetch_site_unique_id_prefix()
+        next_local_integer = fetch_next_we_vote_id_last_org_integer()
+        # "wv" = We Vote
+        # site_unique_id_prefix = a generated (or assigned) unique id for one server running We Vote
+        # "org" = tells us this is a unique id for an org
+        # next_integer = a unique, sequential integer for this server - not necessarily tied to database id
+        self.we_vote_id = "wv{site_unique_id_prefix}org{next_integer}".format(
+            site_unique_id_prefix=site_unique_id_prefix,
+            next_integer=next_local_integer,
+        )
+        # TODO we need to deal with the situation where we_vote_id is NOT unique on save
+        return
 
     def is_nonprofit_501c3(self):
         return self.organization_type in NONPROFIT_501C3

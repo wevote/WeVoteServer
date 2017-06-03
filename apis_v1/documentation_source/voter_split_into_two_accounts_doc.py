@@ -39,7 +39,7 @@ def voter_split_into_two_accounts_doc_template_values(url_root):
     ]
 
     try_now_link_variables_dict = {
-        # 'organization_we_vote_id': 'wv85org1',
+        'split_off_twitter': True,
     }
 
     api_response = '{\n' \
@@ -55,7 +55,8 @@ def voter_split_into_two_accounts_doc_template_values(url_root):
         'api_name': 'voterSplitIntoTwoAccounts',
         'api_slug': 'voterSplitIntoTwoAccounts',
         'api_introduction':
-            "Split one account into two accounts. Used for 'setting free' a Twitter account.",
+            "Split one account into two accounts. Used for un-linking a Twitter account "
+            "from the current voter account.",
         'try_now_link': 'apis_v1:voterSplitIntoTwoAccountsView',
         'try_now_link_variables_dict': try_now_link_variables_dict,
         'url_root': url_root,

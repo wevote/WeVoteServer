@@ -158,39 +158,37 @@ class VoterManager(BaseUserManager):
         }
         return results
 
-    def duplicate_voter(self, existing_voter):
+    def duplicate_voter(self, voter):
         """
         Starting with an existing voter, create a duplicate version with different we_vote_id
-        :param existing_voter:
+        :param voter:
         :return:
         """
-        voter = Voter()
         voter_id = 0
+        success = False
+        status = ""
         try:
-            # TODO DALE Search for a way to cycle through all values of existing_voter
-            voter.we_vote_id = ""  # Clear out existing we_vote_id
+            voter.id = None  # Remove the primary key so it is forced to save a new entry
+            voter.pk = None
+            voter.we_vote_id = None  # Clear out existing we_vote_id
+            voter.generate_new_we_vote_id()
+            voter.email = ""
+            voter.email_ownership_is_verified = False
             voter.facebook_id = None
             voter.facebook_email = None
+            voter.fb_username = None
+            voter.linked_organization_we_vote_id = ""
+            voter.primary_email_we_vote_id = None
             voter.save()
+            status += "DUPLICATE_VOTER_SUCCESSFUL"
             voter_id = voter.id
-        except voter.IntegrityError as e:
-            handle_record_not_saved_exception(e, logger=logger)
-            try:
-                # Trying to save again will increment the 'we_vote_id_last_voter_integer'
-                # by calling 'fetch_next_we_vote_id_last_voter_integer'
-                # TODO We could get into a race condition where multiple creates could be failing at once, so we
-                #  should look more closely at this
-                voter.save()
-                voter_id = voter.id
-            except voter.IntegrityError as e:
-                handle_record_not_saved_exception(e, logger=logger)
-            except Exception as e:
-                handle_record_not_saved_exception(e, logger=logger)
-
         except Exception as e:
             handle_record_not_saved_exception(e, logger=logger)
+            status += "DUPLICATE_VOTER_FAILED"
 
         results = {
+            'success':          success,
+            'status':           status,
             'voter_duplicated': True if voter_id > 0 else False,
             'voter':            voter,
         }
@@ -267,6 +265,80 @@ class VoterManager(BaseUserManager):
             voter_twitter_handle = ''
 
         return voter_twitter_handle
+
+    def fetch_voter_count_with_sign_in(self):
+        or_filter = True
+        has_twitter = True
+        has_facebook = True
+        has_email = False
+        has_verified_email = True
+        return self.fetch_voter_count(or_filter, has_twitter, has_facebook, has_email, has_verified_email)
+
+    def fetch_voter_count_with_twitter(self):
+        or_filter = True
+        has_twitter = True
+        has_facebook = False
+        has_email = False
+        has_verified_email = False
+        return self.fetch_voter_count(or_filter, has_twitter, has_facebook, has_email, has_verified_email)
+
+    def fetch_voter_count_with_facebook(self):
+        or_filter = True
+        has_twitter = False
+        has_facebook = True
+        has_email = False
+        has_verified_email = False
+        return self.fetch_voter_count(or_filter, has_twitter, has_facebook, has_email, has_verified_email)
+
+    def fetch_voter_count_with_verified_email(self):
+        or_filter = True
+        has_twitter = False
+        has_facebook = False
+        has_email = False
+        has_verified_email = True
+        return self.fetch_voter_count(or_filter, has_twitter, has_facebook, has_email, has_verified_email)
+
+    def fetch_voter_count(self, or_filter=True,
+                          has_twitter=False, has_facebook=False, has_email=False, has_verified_email=False,
+                          by_notification_settings=0, by_interface_status_flags=0):
+        voter_queryset = Voter.objects.all()
+
+        voter_raw_filters = []
+        if positive_value_exists(or_filter):
+            if positive_value_exists(has_twitter):
+                new_voter_filter = Q(twitter_id__isnull=False)
+                voter_raw_filters.append(new_voter_filter)
+                new_voter_filter = Q(twitter_id__gt=0)
+                voter_raw_filters.append(new_voter_filter)
+            if positive_value_exists(has_facebook):
+                new_voter_filter = Q(facebook_id__isnull=False)
+                voter_raw_filters.append(new_voter_filter)
+                new_voter_filter = Q(facebook_id__gt=0)
+                voter_raw_filters.append(new_voter_filter)
+            if positive_value_exists(has_verified_email):
+                new_voter_filter = Q(email_ownership_is_verified=True)
+                voter_raw_filters.append(new_voter_filter)
+        else:
+            # Add "and" filter here
+            pass
+
+        if positive_value_exists(or_filter):
+            if len(voter_raw_filters):
+                final_voter_filters = voter_raw_filters.pop()
+
+                # ...and "OR" the remaining items in the list
+                for item in voter_raw_filters:
+                    final_voter_filters |= item
+
+                voter_queryset = voter_queryset.filter(final_voter_filters)
+
+        voter_count = 0
+        try:
+            voter_count = voter_queryset.count()
+        except Exception as e:
+            pass
+
+        return voter_count
 
     def this_voter_has_first_or_last_name_saved(self, voter):
         try:
@@ -1220,19 +1292,23 @@ class Voter(AbstractBaseUser):
         if self.we_vote_id:
             self.we_vote_id = self.we_vote_id.strip().lower()
         if self.we_vote_id == "" or self.we_vote_id is None:  # If there isn't a value...
-            # ...generate a new id
-            site_unique_id_prefix = fetch_site_unique_id_prefix()
-            next_local_integer = fetch_next_we_vote_id_last_voter_integer()
-            # "wv" = We Vote
-            # site_unique_id_prefix = a generated (or assigned) unique id for one server running We Vote
-            # "voter" = tells us this is a unique id for an org
-            # next_integer = a unique, sequential integer for this server - not necessarily tied to database id
-            self.we_vote_id = "wv{site_unique_id_prefix}voter{next_integer}".format(
-                site_unique_id_prefix=site_unique_id_prefix,
-                next_integer=next_local_integer,
-            )
-            # TODO we need to deal with the situation where we_vote_id is NOT unique on save
+            self.generate_new_we_vote_id()
         super(Voter, self).save(*args, **kwargs)
+
+    def generate_new_we_vote_id(self):
+        # ...generate a new id
+        site_unique_id_prefix = fetch_site_unique_id_prefix()
+        next_local_integer = fetch_next_we_vote_id_last_voter_integer()
+        # "wv" = We Vote
+        # site_unique_id_prefix = a generated (or assigned) unique id for one server running We Vote
+        # "voter" = tells us this is a unique id for an org
+        # next_integer = a unique, sequential integer for this server - not necessarily tied to database id
+        self.we_vote_id = "wv{site_unique_id_prefix}voter{next_integer}".format(
+            site_unique_id_prefix=site_unique_id_prefix,
+            next_integer=next_local_integer,
+        )
+        # TODO we need to deal with the situation where we_vote_id is NOT unique on save
+        return
 
     def get_full_name(self):
         full_name = self.first_name if positive_value_exists(self.first_name) else ''
