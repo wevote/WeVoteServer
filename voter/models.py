@@ -2063,6 +2063,68 @@ class VoterAddressManager(models.Model):
         }
         return results
 
+    def fetch_address_basic_count(self):
+        or_filter = True
+        refreshed_from_google = False
+        has_election = True
+        google_civic_election_id = False
+        has_latitude_longitude = False
+        return self.fetch_address_count(or_filter, refreshed_from_google, has_election, google_civic_election_id,
+                                        has_latitude_longitude)
+
+    def fetch_address_full_address_count(self):
+        or_filter = True
+        refreshed_from_google = True  # This tells us the person entered their full address
+        has_election = False
+        google_civic_election_id = False
+        has_latitude_longitude = False
+        return self.fetch_address_count(or_filter, refreshed_from_google, has_election, google_civic_election_id,
+                                        has_latitude_longitude)
+
+    def fetch_address_count(self, or_filter=True,
+                            refreshed_from_google=False, has_election=False, google_civic_election_id=False,
+                            has_latitude_longitude=False):
+        voter_address_queryset = VoterAddress.objects.all()
+
+        voter_raw_filters = []
+        if positive_value_exists(or_filter):
+            if positive_value_exists(refreshed_from_google):
+                new_voter_filter = Q(refreshed_from_google=True)
+                voter_raw_filters.append(new_voter_filter)
+            if positive_value_exists(has_election):
+                new_voter_filter = Q(google_civic_election_id__isnull=False)
+                voter_raw_filters.append(new_voter_filter)
+                new_voter_filter = Q(google_civic_election_id__gt=0)
+                voter_raw_filters.append(new_voter_filter)
+            if positive_value_exists(google_civic_election_id):
+                google_civic_election_id = convert_to_int(google_civic_election_id)
+                new_voter_filter = Q(google_civic_election_id=google_civic_election_id)
+                voter_raw_filters.append(new_voter_filter)
+            if positive_value_exists(has_latitude_longitude):
+                new_voter_filter = Q(latitude__isnull=False)
+                voter_raw_filters.append(new_voter_filter)
+        else:
+            # Add "and" filter here
+            pass
+
+        if positive_value_exists(or_filter):
+            if len(voter_raw_filters):
+                final_voter_filters = voter_raw_filters.pop()
+
+                # ...and "OR" the remaining items in the list
+                for item in voter_raw_filters:
+                    final_voter_filters |= item
+
+                voter_address_queryset = voter_address_queryset.filter(final_voter_filters)
+
+        voter_address_count = 0
+        try:
+            voter_address_count = voter_address_queryset.count()
+        except Exception as e:
+            pass
+
+        return voter_address_count
+
 
 def voter_setup(request):
     """

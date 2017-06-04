@@ -70,6 +70,10 @@ def admin_home_view(request):
     voter_facebook_accounts_count = voter_manager.fetch_voter_count_with_facebook()
     voter_email_accounts_count = voter_manager.fetch_voter_count_with_verified_email()
 
+    voter_address_manager = VoterAddressManager()
+    voter_address_basic_count = voter_address_manager.fetch_address_basic_count()
+    voter_address_full_address_count = voter_address_manager.fetch_address_full_address_count()
+
     template_values = {
         'google_civic_election_id':         google_civic_election_id,
         'state_code':                       state_code,
@@ -77,6 +81,8 @@ def admin_home_view(request):
         'voter_twitter_accounts_count':     voter_twitter_accounts_count,
         'voter_facebook_accounts_count':    voter_facebook_accounts_count,
         'voter_email_accounts_count':       voter_email_accounts_count,
+        'voter_address_basic_count':        voter_address_basic_count,
+        'voter_address_full_address_count': voter_address_full_address_count,
     }
     response = render(request, 'admin_tools/index.html', template_values)
 
