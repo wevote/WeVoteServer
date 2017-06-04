@@ -9,7 +9,7 @@ from exception.models import handle_exception, \
     handle_record_found_more_than_one_exception, handle_record_not_saved_exception, handle_record_not_found_exception
 from import_export_facebook.models import FacebookManager
 from import_export_twitter.functions import retrieve_twitter_user_info
-from twitter.models import TwitterUserManager
+from twitter.models import TwitterLinkToOrganization, TwitterLinkToVoter, TwitterUserManager
 from voter.models import VoterManager
 import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, extract_twitter_handle_from_text_string, positive_value_exists
@@ -259,6 +259,188 @@ class OrganizationManager(models.Manager):
                 or organization.organization_name.startswith("wv"):
             return True
         return False
+
+    def repair_missing_linked_organization_we_vote_id(self, voter):
+        """
+        Take in a voter that is missing a linked_organization_we_vote_id (or has a we_vote_id for a missing organization
+        entry), and repair the link.
+        :param voter:
+        :return:
+        """
+        status = ""
+        success = False
+        voter_repaired = False
+        linked_organization_we_vote_id = ""
+        twitter_link_to_voter = TwitterLinkToVoter()
+        twitter_link_to_voter_found = False
+        twitter_link_to_voter_twitter_id = 0
+        create_twitter_link_to_organization = False
+        repair_twitter_link_to_organization = False
+        twitter_link_to_organization = TwitterLinkToOrganization()
+        twitter_link_to_organization_found = False
+        twitter_organization_found = False
+        create_new_organization = False
+        organization_manager = OrganizationManager()
+        twitter_user_manager = TwitterUserManager()
+        voter_manager = VoterManager()
+
+        # Gather what we know about TwitterLinkToVoter
+        twitter_id = 0
+        twitter_link_to_voter_results = twitter_user_manager.retrieve_twitter_link_to_voter(
+            twitter_id, voter.we_vote_id)
+        if twitter_link_to_voter_results['twitter_link_to_voter_found']:
+            twitter_link_to_voter = twitter_link_to_voter_results['twitter_link_to_voter']
+            twitter_link_to_voter_twitter_id = twitter_link_to_voter.twitter_id
+            twitter_link_to_voter_found = True
+            twitter_link_to_organization_results = \
+                twitter_user_manager.retrieve_twitter_link_to_organization_from_twitter_user_id(
+                    twitter_link_to_voter_twitter_id)
+            if twitter_link_to_organization_results['twitter_link_to_organization_found']:
+                twitter_link_to_organization = twitter_link_to_organization_results['twitter_link_to_organization']
+                twitter_link_to_organization_found = True
+                twitter_organization_results = organization_manager.retrieve_organization_from_we_vote_id(
+                    twitter_link_to_organization.organization_we_vote_id)
+                if twitter_organization_results['organization_found']:
+                    # This is the simplest case of the linked_organization_we_vote_id not stored in the voter table
+                    twitter_organization_found = True
+                    existing_linked_organization = twitter_organization_results['organization']
+                    linked_organization_we_vote_id = existing_linked_organization.we_vote_id
+            else:
+                status += "NO_LINKED_ORGANIZATION_WE_VOTE_ID_FOUND "
+
+        if positive_value_exists(voter.linked_organization_we_vote_id):
+            # If here check to see if an organization exists with the value in linked_organization_we_vote_id
+            organization_results = organization_manager.retrieve_organization_from_we_vote_id(
+                voter.linked_organization_we_vote_id)
+            if organization_results['organization_found']:
+                create_new_organization = False
+                # If here, we found organization that matches the value stored in voter.linked_organization_we_vote_id
+                linked_organization_we_vote_id = voter.linked_organization_we_vote_id
+                if positive_value_exists(twitter_link_to_voter_twitter_id):
+                    # If this voter is linked to a Twitter account, we want to make sure there is a
+                    # TwitterLinkToOrganization as well
+                    twitter_link_to_organization_results = \
+                        twitter_user_manager.retrieve_twitter_link_to_organization_from_twitter_user_id(
+                            twitter_link_to_voter_twitter_id)
+                    if twitter_link_to_organization_results['twitter_link_to_organization_found']:
+                        twitter_link_to_organization = twitter_link_to_organization_results[
+                            'twitter_link_to_organization']
+                    else:
+                        create_twitter_link_to_organization = True
+            else:
+                status += "NO_LINKED_ORGANIZATION_FOUND "
+                create_new_organization = True
+                if positive_value_exists(twitter_link_to_voter_twitter_id):
+                    create_twitter_link_to_organization = True
+        else:
+            # If here, linked_organization_we_vote_id is not stored in the voter record
+
+            # Is there another with linked_organization_we_vote_id matching?
+            if positive_value_exists(linked_organization_we_vote_id):
+                # If here, we have found the organization linked to the voter's twitter_id.
+                # Check to make sure another voter isn't using linked_organization_we_vote_id (which
+                # would prevent this voter account from claiming that twitter org with linked_organization_we_vote_id
+                # If found, we want to forcibly move that organization to this voter
+                # Search for another voter that has voter.linked_organization_we_vote_id
+                voter_results = voter_manager.retrieve_voter_by_organization_we_vote_id(linked_organization_we_vote_id)
+                if voter_results['voter_found']:
+                    voter_with_linked_organization_we_vote_id = voter_results['voter']
+                    if voter.we_vote_id != voter_with_linked_organization_we_vote_id.we_vote_id:
+                        try:
+                            voter_with_linked_organization_we_vote_id.linked_organization_we_vote_id = None
+                            voter_with_linked_organization_we_vote_id.save()
+                            status += "REPAIR_MISSING_LINKED_ORG-REMOVED_LINKED_ORGANIZATION_WE_VOTE_ID "
+                        except Exception as e:
+                            status += "REPAIR_MISSING_LINKED_ORG-COULD_NOT_REMOVE_LINKED_ORGANIZATION_WE_VOTE_ID "
+
+            # If this voter is linked to a Twitter id, see if there is also an org linked to the same Twitter id
+            #  so we can use that information to find an existing organization we should link to this voter
+            if twitter_organization_found:
+                # If here, there was a complete chain from TwitterLinkToVoter -> TwitterLinkToOrganization
+                create_new_organization = False
+                repair_twitter_link_to_organization = False
+                create_twitter_link_to_organization = False
+            elif twitter_link_to_organization_found:
+                # If here, we know that a twitter_link_to_organization was found, but the organization wasn't
+                create_new_organization = True
+                repair_twitter_link_to_organization = True
+                create_twitter_link_to_organization = False
+            elif twitter_link_to_voter_found:
+                if positive_value_exists(twitter_link_to_voter_twitter_id):
+                    # If here, we know the voter is linked to a twitter account, but NOT a twitter_link_to_organization
+                    # There could be an organization out there that informally has Twitter info associated with it
+                    create_new_organization = True
+                    repair_twitter_link_to_organization = False
+                    create_twitter_link_to_organization = True
+                else:
+                    # If here, the twitter_link_to_voter entry is damaged and should be removed
+                    try:
+                        twitter_link_to_voter.delete()
+                        status += "REPAIR_MISSING_LINKED_ORG-TWITTER_LINK_TO_VOTER_DELETED "
+                        create_new_organization = True
+                        repair_twitter_link_to_organization = False
+                        create_twitter_link_to_organization = True
+                    except Exception as e:
+                        status += "REPAIR_MISSING_LINKED_ORG-TWITTER_LINK_TO_VOTER_COULD_NOT_DELETE "
+            else:
+                status += "NO_TWITTER_LINKED_ORGANIZATION_FOUND "
+                create_new_organization = True
+
+        if create_new_organization:
+            # If here, then we know that there isn't a pre-existing organization related to this voter
+            # Create new organization
+            organization_name = voter.get_full_name()
+            organization_website = ""
+            organization_twitter_handle = ""
+            organization_email = ""
+            organization_facebook = ""
+            organization_image = voter.voter_photo_url()
+            organization_manager = OrganizationManager()
+            create_results = organization_manager.create_organization(
+                organization_name, organization_website, organization_twitter_handle,
+                organization_email, organization_facebook, organization_image)
+            if create_results['organization_created']:
+                # Add value to twitter_owner_voter.linked_organization_we_vote_id when done.
+                organization = create_results['organization']
+                linked_organization_we_vote_id = organization.we_vote_id
+
+        if positive_value_exists(linked_organization_we_vote_id):
+            if repair_twitter_link_to_organization:
+                try:
+                    twitter_link_to_organization.twitter_id = twitter_link_to_voter_twitter_id
+                    twitter_link_to_organization.organization_we_vote_id = linked_organization_we_vote_id
+                    twitter_link_to_organization.save()
+                    status += "REPAIRED_TWITTER_LINK_TO_ORGANIZATION "
+                except Exception as e:
+                    status += "UNABLE_TO_REPAIR_TWITTER_LINK_TO_ORGANIZATION "
+            elif create_twitter_link_to_organization:
+                # Create TwitterLinkToOrganization
+                results = twitter_user_manager.create_twitter_link_to_organization(
+                    twitter_link_to_voter_twitter_id, linked_organization_we_vote_id)
+                if results['twitter_link_to_organization_saved']:
+                    status += "TwitterLinkToOrganization_CREATED_AFTER_REPAIR_LINKED_ORGANIZATION "
+                else:
+                    status += "TwitterLinkToOrganization_NOT_CREATED_AFTER_REPAIR_LINKED_ORGANIZATION "
+
+            if voter.linked_organization_we_vote_id != linked_organization_we_vote_id:
+                voter.linked_organization_we_vote_id = linked_organization_we_vote_id
+                try:
+                    voter.save()
+                    status += "REPAIR_MISSING_LINKED_ORG-SUCCESS "
+                    voter_repaired = True
+                    success = True
+                except Exception as e:
+                    status += "REPAIR_MISSING_LINKED_ORG-COULD_NOT_SAVE_VOTER "
+            else:
+                status += "NO_REPAIR_NEEDED "
+
+        results = {
+            'status': status,
+            'success': success,
+            'voter_repaired': voter_repaired,
+            'voter': voter,
+        }
+        return results
 
     def repair_organization(self, organization):
         if not hasattr(organization, 'organization_name'):

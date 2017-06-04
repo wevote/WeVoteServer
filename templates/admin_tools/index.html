@@ -6,11 +6,13 @@
 {%  block content %}
 <h1>We Vote Admin Menu</h1>
 
+    Total Ballot Requests: {{ voter_address_basic_count }}
+        (Full Address: {{ voter_address_full_address_count }})<br />
+
     Total Voter Accounts: {{ voter_accounts_count }}
         (Twitter: {{ voter_twitter_accounts_count }},
         Facebook: {{ voter_facebook_accounts_count }},
         Email: {{ voter_email_accounts_count }})
-
 
 {# ################## #}
 <h2>Election Data</h2>

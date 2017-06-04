@@ -742,8 +742,8 @@ def move_positions_to_another_voter(from_voter_id, from_voter_we_vote_id,
 
 
 def duplicate_positions_to_another_voter(from_voter_id, from_voter_we_vote_id,
-                                    to_voter_id, to_voter_we_vote_id,
-                                    to_voter_linked_organization_id, to_voter_linked_organization_we_vote_id):
+                                         to_voter_id, to_voter_we_vote_id,
+                                         to_voter_linked_organization_id, to_voter_linked_organization_we_vote_id):
     status = ''
     success = False
     position_entries_moved = 0
@@ -2699,7 +2699,7 @@ def voter_position_visibility_save_for_api(  # voterPositionVisibilitySave
         measure_we_vote_id,
         visibility_setting
         ):
-    status = "ENTERING_VOTER_POSITION_VISIBILITY"
+    status = "ENTERING_VOTER_POSITION_VISIBILITY "
     is_public_position = None
 
     results = is_voter_device_id_valid(voter_device_id)
@@ -2719,8 +2719,9 @@ def voter_position_visibility_save_for_api(  # voterPositionVisibilitySave
     voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id)
     voter_id = voter_results['voter_id']
     if not positive_value_exists(voter_id):
+        status += "VOTER_NOT_FOUND_FROM_VOTER_DEVICE_ID-VOTER_POSITION_VISIBILITY "
         json_data = {
-            'status':                   "VOTER_NOT_FOUND_FROM_VOTER_DEVICE_ID-VOTER_POSITION_COMMENT",
+            'status':                   status,
             'success':                  False,
             'voter_device_id':          voter_device_id,
             'ballot_item_id':           0,
@@ -2739,8 +2740,9 @@ def voter_position_visibility_save_for_api(  # voterPositionVisibilitySave
         positive_value_exists(measure_we_vote_id)
         )
     if not unique_identifier_found:
+        status += "VOTER_POSITION_VISIBILITY-REQUIRED_UNIQUE_IDENTIFIER_VARIABLES_MISSING "
         json_data = {
-            'status':                   "VOTER_POSITION_VISIBILITY-REQUIRED_UNIQUE_IDENTIFIER_VARIABLES_MISSING",
+            'status':                   status,
             'success':                  False,
             'voter_device_id':          voter_device_id,
             'ballot_item_id':           0,
@@ -2755,8 +2757,9 @@ def voter_position_visibility_save_for_api(  # voterPositionVisibilitySave
     switch_to_show_position_to_friends = visibility_setting == FRIENDS_ONLY
 
     if not switch_to_show_position_to_public and not switch_to_show_position_to_friends:
+        status += "VOTER_POSITION_VISIBILITY-NO_VISIBILITY_SETTING_PROVIDED "
         json_data = {
-            'status':                   "VOTER_POSITION_VISIBILITY-NO_VISIBILITY_SETTING_PROVIDED",
+            'status':                   status,
             'success':                  False,
             'voter_device_id':          voter_device_id,
             'ballot_item_id':           0,
@@ -2768,10 +2771,19 @@ def voter_position_visibility_save_for_api(  # voterPositionVisibilitySave
         return json_data
 
     if switch_to_show_position_to_public:
+        # Check to see if this voter has a linked_organization_we_vote_id. If not, try to repair the data.
+        if not positive_value_exists(voter.linked_organization_we_vote_id):
+            organization_manager = OrganizationManager()
+            repair_results = organization_manager.repair_missing_linked_organization_we_vote_id(voter)
+            status += repair_results['status']
+            if repair_results['voter_repaired']:
+                voter = repair_results['voter']
+
         # Check to see if this voter has a linked_organization_we_vote_id. If not, don't proceed.
         if not positive_value_exists(voter.linked_organization_we_vote_id):
+            status += "VOTER_POSITION_VISIBILITY-VOTER_DOES_NOT_HAVE_LINKED_ORG_WE_VOTE_ID "
             json_data = {
-                'status':                   "VOTER_POSITION_VISIBILITY-VOTER_DOES_NOT_HAVE_LINKED_ORG_WE_VOTE_ID",
+                'status':                   status,
                 'success':                  False,
                 'voter_device_id':          voter_device_id,
                 'position_we_vote_id':      '',
@@ -2803,10 +2815,10 @@ def voter_position_visibility_save_for_api(  # voterPositionVisibilitySave
         if results['position_found']:
             is_public_position = results['is_public_position']
             position = results['position']
-            status = results['status']
+            status += results['status']
             success = results['success']
         else:
-            status = "VOTER_POSITION_VISIBILITY-POSITION_NOT_FOUND_AND_NOT_CREATED"
+            status += "VOTER_POSITION_VISIBILITY-POSITION_NOT_FOUND_AND_NOT_CREATED "
             success = False
 
     elif results['position_found']:
@@ -2815,13 +2827,13 @@ def voter_position_visibility_save_for_api(  # voterPositionVisibilitySave
 
         if positive_value_exists(switch_to_show_position_to_public):
             if positive_value_exists(is_public_position):
-                status = "VOTER_POSITION_VISIBILITY-ALREADY_PUBLIC_POSITION"
+                status += "VOTER_POSITION_VISIBILITY-ALREADY_PUBLIC_POSITION "
                 merge_results = position_manager.merge_into_public_position(position)
                 success = merge_results['success']
                 status += " " + merge_results['status']
             else:
                 # If here, copy the position from the PositionForFriends table to the PositionEntered table
-                status = "VOTER_POSITION_VISIBILITY-SWITCHING_TO_PUBLIC_POSITION"
+                status += "VOTER_POSITION_VISIBILITY-SWITCHING_TO_PUBLIC_POSITION "
                 change_results = position_manager.transfer_to_public_position(position)
                 success = change_results['success']
                 status += " " + change_results['status']
@@ -2830,19 +2842,19 @@ def voter_position_visibility_save_for_api(  # voterPositionVisibilitySave
         elif positive_value_exists(switch_to_show_position_to_friends):
             if positive_value_exists(is_public_position):
                 # If here, copy the position from the PositionEntered to the PositionForFriends table
-                status = "VOTER_POSITION_VISIBILITY-SWITCHING_TO_FRIENDS_ONLY_POSITION"
+                status += "VOTER_POSITION_VISIBILITY-SWITCHING_TO_FRIENDS_ONLY_POSITION "
                 change_results = position_manager.transfer_to_friends_only_position(position)
                 success = change_results['success']
                 status += " " + change_results['status']
                 if success:
                     is_public_position = False
             else:
-                status = "VOTER_POSITION_VISIBILITY-ALREADY_FRIENDS_ONLY_POSITION"
+                status += "VOTER_POSITION_VISIBILITY-ALREADY_FRIENDS_ONLY_POSITION "
                 merge_results = position_manager.merge_into_friends_only_position(position)
                 success = merge_results['success']
                 status += " " + merge_results['status']
     else:
-        status = "VOTER_POSITION_VISIBILITY-POSITION_NOT_FOUND-COULD_NOT_BE_CREATED"
+        status += "VOTER_POSITION_VISIBILITY-POSITION_NOT_FOUND-COULD_NOT_BE_CREATED"
         # If here, an existing position could not be created
         position_manager.create_position_for_visibility_change()
 

@@ -232,8 +232,8 @@ def move_organization_to_another_complete(from_organization_id, from_organizatio
 
 
 def duplicate_organization_to_another_complete(from_organization_id, from_organization_we_vote_id,
-                                          to_organization_id, to_organization_we_vote_id,
-                                          to_voter_id, to_voter_we_vote_id):
+                                               to_organization_id, to_organization_we_vote_id,
+                                               to_voter_id, to_voter_we_vote_id):
     status = ""
     success = True
 
