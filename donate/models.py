@@ -8,6 +8,7 @@ from exception.models import handle_exception, handle_record_found_more_than_one
 import wevote_functions.admin
 from wevote_functions.functions import positive_value_exists
 import stripe
+import textwrap
 
 logger = wevote_functions.admin.get_logger(__name__)
 
@@ -670,3 +671,55 @@ class DonationManager(models.Model):
             logger.error("find_we_vote_voter_id_for_stripe_customer: " + str(e), {}, {})
 
         return ""
+
+
+    @staticmethod
+    def update_journal_entry_for_refund(charge, voter_we_vote_id, refund):
+        if refund and refund['amount'] > 0 and refund['status'] == "succeeded":
+            row = DonationJournal.objects.get(charge_id__iexact=charge, voter_we_vote_id__iexact=voter_we_vote_id)
+            row.status = textwrap.shorten(" CHARGE_REFUND_REQUESTED" + "_" + str(refund['created']) + "_" + \
+                         refund['currency'] + "_" + str(refund['amount']) + "_REFUND_ID" + \
+                         refund['id'] + " " + row.status, width=255, placeholder="...")
+            row.amount_refunded = refund['amount']
+            row.stripe_status = "refund pending"
+            row.save()
+            print("update_journal_entry_for_refund for charge " + charge)
+            print(row.status)
+
+            return "True"
+
+        logger.error("update_journal_entry_for_refund bad charge or refund for charge_id " + charge +
+                     " and voter_we_vote_id " + voter_we_vote_id)
+        return "False"
+
+
+    @staticmethod
+    def update_journal_entry_for_already_refunded(charge, voter_we_vote_id):
+        row = DonationJournal.objects.get(charge_id__iexact=charge, voter_we_vote_id__iexact=voter_we_vote_id)
+        row.status = textwrap.shorten("CHARGE_WAS_ALREADY_REFUNDED_" + str(datetime.utcnow()) + " " + row.status,
+                                      width=255, placeholder="...")
+        row.amount_refunded = row.amount
+        row.stripe_status = "refunded"
+        row.save()
+        print("update_journal_entry_for_refund_completed for charge " + charge)
+        print(row.status)
+
+        return "True"
+
+
+    @staticmethod
+    def update_journal_entry_for_refund_completed(charge):
+        print("update_journal_entry_for_refund_completed: " + charge)
+        try:
+            row = DonationJournal.objects.get(charge_id=charge)
+            row.status = textwrap.shorten("CHARGE_REFUNDED_" + str(datetime.utcnow()) + " " + row.status, width=255,
+                                          placeholder="...")
+            row.stripe_status = "refunded"
+            row.save()
+            print("update_journal_entry_for_refund_completed for charge " + charge)
+            print(row.status)
+            return "True"
+
+        except DonationJournal.DoesNotExist:
+            print("update_journal_entry_for_refund_completed row does not exist for charge " + charge)
+        return "False"

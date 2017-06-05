@@ -6,18 +6,18 @@
 from config.base import get_environment_variable
 from datetime import datetime, timezone
 from donate.models import DonationManager
-import stripe
 from wevote_functions.functions import get_ip_from_headers, positive_value_exists
 from wevote_functions.admin import get_logger
 from wevote_functions.functions import get_voter_device_id
 from voter.models import VoterManager
+import json
+import stripe
 
 
 logger = get_logger(__name__)
 stripe.api_key = get_environment_variable("STRIPE_SECRET_KEY")
 
 
-# TODO set up currency option in webapp
 def donation_with_stripe_for_api(request, token, email, donation_amount, monthly_donation, voter_we_vote_id):
     """
 
@@ -336,25 +336,26 @@ def donation_history_for_a_voter(voter_we_vote_id):
 
 def donation_process_stripe_webhook_event(event):
     """
-    NOTE: These are the only four events that we handle from the webhook
+    NOTE: These are the only five events that we handle from the webhook
     :param event:
     :return:
     """
+    print("donation_process_stripe_webhook_event received: " + event.type)
+    logger.debug("donation_process_stripe_webhook_event received: " + event.type, {}, {})
+
     if event['type'] == 'charge.succeeded':
-        print("donation_process_stripe_webhook_event received: " + event.type)
         return donation_process_charge(event)
     elif event['type'] == 'customer.subscription.deleted':
-        print("donation_process_stripe_webhook_event received: " + event.type)
-        return donation_process_subscription_deleted(event)
+         return donation_process_subscription_deleted(event)
     elif event['type'] == 'customer.subscription.updated':
-        print("donation_process_stripe_webhook_event received: " + event.type)
-        return donation_process_subscription_updated(event)
+         return donation_process_subscription_updated(event)
     elif event['type'] == 'invoice.payment_succeeded':
-        print("donation_process_stripe_webhook_event received: " + event.type)
         return donation_process_subscription_payment(event)
+    elif event['type'] == 'charge.refunded':
+        return donation_process_refund_payment(event)
     else:
-        logger.debug("Stripe event ignored: " + event.type, {}, {})
         print("donation_process_stripe_webhook_event Stripe event ignored: " + event.type)
+        logger.info("donation_process_stripe_webhook_event Stripe event ignored: " + event.type, {}, {})
         return
 
 
@@ -375,6 +376,9 @@ def donation_process_charge(event):           # 'charge.succeeded'
         # Charges from subscription payments, won't have our metadata
         try:
             voter_we_vote_id = charge['metadata']['voter_we_vote_id']
+            # Has our metadata?  Then we have already made a journal entry at the time of the donation
+            print("Stripe 'charge.succeeded' received for a PAYMENT_FROM_UI -- ignored, charge = " + charge)
+            return None
         except Exception:
             voter_we_vote_id = DonationManager.find_we_vote_voter_id_for_stripe_customer(str(charge['customer']))
 
@@ -509,14 +513,42 @@ def donation_process_subscription_payment(event):
 
     return None
 
-def donation_refund_for_api(request, charge, voter_we_vote_id):
-    # TODO: Error handling voter id checking
-    re = stripe.Refund.create(
-        charge=charge
-    )
+def donation_process_refund_payment(event):
+    # The Stripe webhook has sent a refund event "charge.refunded"
+    print("donation_process_refund_payment: " + json.dumps(event))
+    dataobject = event['data']['object']
+    charge = dataobject['id']
+    paid = dataobject['paid']  # boolean
+    if paid:
+        success = DonationManager.update_journal_entry_for_refund_completed(charge)
 
-    results = {}
-    return results
+    return success
+
+def donation_refund_for_api(request, charge, voter_we_vote_id):
+    # The WebApp has requested a refund
+
+    try:
+        refund = stripe.Refund.create(
+            charge=charge
+        )
+    except stripe.error.InvalidRequestError as err:
+        body = err.json_body
+        error_string = body['error']['message']
+        logger.error("donation_refund_for_api: " + error_string, {}, {})
+        success = DonationManager.update_journal_entry_for_already_refunded(charge, voter_we_vote_id)
+        return success
+
+    except DonationManager.DoesNotExist as err:
+        logger.error("donation_refund_for_api returned DoesNotExist for : " + charge, {}, {})
+        return False
+
+    except Exception as err:
+        logger.error("donation_refund_for_api: " + str(err), {}, {})
+        return False
+
+    success = DonationManager.update_journal_entry_for_refund(charge, voter_we_vote_id, refund)
+
+    return success
 
 
 def donation_subscription_cancellation_for_api(request, subscription_id, voter_we_vote_id):

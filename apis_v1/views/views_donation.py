@@ -71,7 +71,7 @@ def donation_refund_view(request):  # donationRefund
     :return:
     """
 
-    charge_id = request.GET.get('charge_id', '')
+    charge_id = request.GET.get('charge', '')
     voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
 
     if positive_value_exists(voter_device_id):
@@ -79,23 +79,18 @@ def donation_refund_view(request):  # donationRefund
         if len(charge_id) > 1:
             results = donation_refund_for_api(request, charge_id, voter_we_vote_id)
             json_data = {
-                'status': results['status'],
-                'success': results['success'],
-                'charge_id': results['charge_id'],
-                'refund_id': results['customer_id'],
-                'refund_amount': results['amount'],
-                'currency': results['currency'],
-                'reason': results['reason'],
-                'receipt_number': results['receipt_number'],
+                'success': str(results),
+                'charge_id': charge_id,
+                'voter_we_vote_id': voter_we_vote_id,
             }
         else :
-            print('donation_refund_with_stripe_view voter_we_vote_id is missing')
+            print('donation_refund_view voter_we_vote_id is missing')
             json_data = {
                 'status': "VOTER_WE_VOTE_ID_IS_MISSING",
                 'success': False,
             }
     else :
-        print('donation_refund_with_stripe_view stripe_charge_id is missing')
+        print('donation_refund_view stripe_charge_id is missing')
         json_data = {
             'status': "STRIPE_CHARGE_ID_IS_MISSING",
             'success': False,
