@@ -541,6 +541,8 @@ class ElectedOffice(models.Model):
     # The name of the elected office.
     elected_office_name = models.CharField(verbose_name="name of the elected office", max_length=255, null=False,
                                            blank=False)
+    elected_office_name_es = models.CharField(verbose_name="name of the elected office in Spanish", max_length=255,
+                                              null=True, blank=True, default=None)
     # The offices' name as passed over by Google Civic. We save this so we can match to this office even
     # if we edit the office's name locally.
     google_civic_elected_office_name = models.CharField(
@@ -601,6 +603,8 @@ class ElectedOffice(models.Model):
     ctcl_uuid = models.CharField(verbose_name="ctcl uuid", max_length=80, null=True, blank=True)
     elected_office_description = models.CharField(verbose_name="elected_office description", max_length=255, null=True,
                                                   blank=True)
+    elected_office_description_es = models.CharField(verbose_name="elected_office description in Spanish",
+                                                     max_length=255, null=True, blank=True)
     elected_office_is_partisan = models.BooleanField(verbose_name="elected_office is_partisan", default=False)
 
     def get_elected_office_state(self):
@@ -674,7 +678,7 @@ class ElectedOfficeManager(models.Model):
             return results['elected_office_we_vote_id']
         return 0
 
-    def update_or_create_elected__office(self, elected_office_we_vote_id, maplight_id, google_civic_election_id,
+    def update_or_create_elected_office(self, elected_office_we_vote_id, maplight_id, google_civic_election_id,
                                          elected_office_name, state_code, district_id, updated_elected_office_values):
         """
         Either update or create an elected_office entry.
@@ -918,7 +922,8 @@ class ElectedOfficeManager(models.Model):
         return elected_office_id
 
     def create_elected_office_row_entry(self, elected_office_name, state_code, elected_office_description, ctcl_uuid,
-                                        elected_office_is_partisan, google_civic_election_id):
+                                        elected_office_is_partisan, google_civic_election_id, elected_office_name_es='',
+                                        elected_office_description_es=''):
         """
         Create ElectedOffice table entry with ElectedOffice details 
         :param elected_office_name: 
@@ -927,6 +932,8 @@ class ElectedOfficeManager(models.Model):
         :param ctcl_uuid: 
         :param elected_office_is_partisan: 
         :param google_civic_election_id: 
+        :param elected_office_name_es: elected office name in Spanish
+        :param elected_office_description_es: elected office description in Spanish
         :return: 
         """
         success = False
@@ -940,7 +947,9 @@ class ElectedOfficeManager(models.Model):
                 elected_office_name=elected_office_name, state_code=state_code,
                 elected_office_description=elected_office_description, ctcl_uuid=ctcl_uuid,
                 elected_office_is_partisan=elected_office_is_partisan,
-                google_civic_election_id=google_civic_election_id)
+                google_civic_election_id=google_civic_election_id,
+                elected_office_name_es=elected_office_name_es,
+                elected_office_description_es=elected_office_description_es)
             if new_elected_office:
                 success = True
                 status = "ELECTED_OFFICE_CREATED"
@@ -965,7 +974,8 @@ class ElectedOfficeManager(models.Model):
 
     def update_elected_office_row_entry(self, elected_office_name, state_code, elected_office_description, ctcl_uuid,
                                         elected_office_is_partisan, google_civic_election_id,
-                                        elected_office_we_vote_id):
+                                        elected_office_we_vote_id, elected_office_name_es,
+                                        elected_office_description_es):
         """
             Update ElectedOffice table entry with matching we_vote_id 
         :param elected_office_name: 
@@ -974,7 +984,9 @@ class ElectedOfficeManager(models.Model):
         :param ctcl_uuid: 
         :param elected_office_is_partisan: 
         :param google_civic_election_id: 
-        :param elected_office_we_vote_id: 
+        :param elected_office_we_vote_id:  
+        :param elected_office_name_es: elected office name in Spanish
+        :param elected_office_description_es: elected office description in Spanish
         :return: 
         """
         success = False
@@ -994,6 +1006,8 @@ class ElectedOfficeManager(models.Model):
                 existing_elected_office_entry.elected_office_description = elected_office_description
                 existing_elected_office_entry.ctcl_uuid = ctcl_uuid
                 existing_elected_office_entry.elected_office_is_partisan = elected_office_is_partisan
+                existing_elected_office_entry.elected_office_name_es = elected_office_name_es
+                existing_elected_office_entry.elected_office_description_es = elected_office_description_es
                 # now go ahead and save this entry (update)
                 existing_elected_office_entry.save()
                 elected_office_updated = True

@@ -340,6 +340,10 @@ def create_batch_row_action_elected_office(batch_description, batch_header_map, 
                                                                              batch_header_map, one_batch_row)
     elected_office_is_partisan = batch_manager.retrieve_value_from_batch_row("elected_office_is_partisan",
                                                                              batch_header_map, one_batch_row)
+    elected_office_name_es = batch_manager.retrieve_value_from_batch_row("elected_office_name_es", batch_header_map,
+                                                                         one_batch_row)
+    elected_office_description_es = batch_manager.retrieve_value_from_batch_row("elected_office_description_es",
+                                                                                batch_header_map, one_batch_row)
 
     # Look up ElectedOffice to see if an entry exists
     # These three parameters are needed to look up in ElectedOffice table for a match
@@ -399,7 +403,9 @@ def create_batch_row_action_elected_office(batch_description, batch_header_map, 
                 'elected_office_we_vote_id': elected_office_we_vote_id,
                 'kind_of_action': kind_of_action,
                 'google_civic_election_id': google_civic_election_id,
-                'status': batch_row_action_elected_office_status
+                'status': batch_row_action_elected_office_status,
+                'elected_office_name_es': elected_office_name_es,
+                'elected_office_description_es': elected_office_description_es
             }
 
             batch_row_action_elected_office, new_action_elected_office_created = BatchRowActionElectedOffice.objects.\
@@ -424,7 +430,9 @@ def create_batch_row_action_elected_office(batch_description, batch_header_map, 
                     'elected_office_we_vote_id': elected_office_we_vote_id,
                     'kind_of_action': 'DO_NOT_PROCESS',
                     'google_civic_election_id': google_civic_election_id,
-                    'status': 'DUPLICATE_ELECTED_OFFICE_ENTRY'
+                    'status': 'DUPLICATE_ELECTED_OFFICE_ENTRY',
+                    'elected_office_name_es': elected_office_name_es,
+                    'elected_office_description_es': elected_office_description_es
                 }
 
                 batch_row_action_elected_office, new_action_elected_office_created = \
@@ -827,23 +835,26 @@ def import_elected_office_entry(batch_header_id, batch_row_id, create_entry_flag
 
         # Find the column in the incoming batch_row with the header == elected_office_name
         elected_office_name = one_batch_action_row.elected_office_name
+        elected_office_name_es = one_batch_action_row.elected_office_name_es
         google_civic_election_id = str(batch_description.google_civic_election_id)
         ctcl_uuid = one_batch_action_row.ctcl_uuid
         elected_office_description = one_batch_action_row.elected_office_description
+        elected_office_description_es = one_batch_action_row.elected_office_description_es
         elected_office_is_partisan = one_batch_action_row.elected_office_is_partisan
         state_code = one_batch_action_row.state_code
 
         # Look up ElectedOffice to see if an entry exists
         # These five parameters are needed to look up in ElectedOffice table for a match
-        if positive_value_exists(elected_office_name) and positive_value_exists(state_code) and \
-                positive_value_exists(google_civic_election_id):
+        if (positive_value_exists(elected_office_name) or positive_value_exists(elected_office_name_es)) and \
+                positive_value_exists(state_code) and positive_value_exists(google_civic_election_id):
             elected_office_manager = ElectedOfficeManager()
             if create_entry_flag:
                 results = elected_office_manager.create_elected_office_row_entry(elected_office_name, state_code,
-                                                                                 elected_office_description,
-                                                                                 ctcl_uuid,
+                                                                                 elected_office_description, ctcl_uuid,
                                                                                  elected_office_is_partisan,
-                                                                                 google_civic_election_id)
+                                                                                 google_civic_election_id,
+                                                                                 elected_office_name_es,
+                                                                                 elected_office_description_es)
                 if results['new_elected_office_created']:
                     number_of_elected_offices_created += 1
                     success = True
@@ -859,12 +870,13 @@ def import_elected_office_entry(batch_header_id, batch_row_id, create_entry_flag
                         handle_exception(e, logger=logger, exception_message=status)
             elif update_entry_flag:
                 elected_office_we_vote_id = one_batch_action_row.elected_office_we_vote_id
-                results = elected_office_manager.update_elected_office_row_entry(elected_office_name, state_code,
-                                                                                 elected_office_description,
-                                                                                 ctcl_uuid,
-                                                                                 elected_office_is_partisan,
+                results = elected_office_manager.update_elected_office_row_entry(elected_office_name,
+                                                                                 state_code, elected_office_description,
+                                                                                 ctcl_uuid, elected_office_is_partisan,
                                                                                  google_civic_election_id,
-                                                                                 elected_office_we_vote_id)
+                                                                                 elected_office_we_vote_id,
+                                                                                 elected_office_name_es,
+                                                                                 elected_office_description_es)
                 if results['elected_office_updated']:
                     number_of_elected_offices_updated += 1
                     success = True
@@ -998,6 +1010,8 @@ def import_create_or_update_elected_office_entry(batch_header_id, batch_row_id):
         ctcl_uuid = batch_row_action_elected_office.ctcl_uuid
         elected_office_description = batch_row_action_elected_office.elected_office_description
         elected_office_is_partisan = batch_row_action_elected_office.elected_office_is_partisan
+        elected_office_name_es = batch_row_action_elected_office.elected_office_name_es
+        elected_office_description_es = batch_row_action_elected_office.elected_office_description_es
 
         # Look up ElectedOffice to see if an entry exists
 
@@ -1034,7 +1048,9 @@ def import_create_or_update_elected_office_entry(batch_header_id, batch_row_id):
                                                                              ctcl_uuid,
                                                                              elected_office_is_partisan,
                                                                              google_civic_election_id,
-                                                                             elected_office_we_vote_id)
+                                                                             elected_office_we_vote_id,
+                                                                             elected_office_name_es,
+                                                                             elected_office_description_es)
             if results['elected_office_updated']:
                 success = True
                 elected_office_updated = True
