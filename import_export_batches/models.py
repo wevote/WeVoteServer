@@ -14,7 +14,7 @@ from politician.models import GENDER_CHOICES, UNKNOWN
 import urllib.request
 from voter_guide.models import ORGANIZATION_WORD
 import wevote_functions.admin
-from wevote_functions.functions import positive_value_exists, LANGUAGE_CODE_ENGLISH
+from wevote_functions.functions import positive_value_exists, LANGUAGE_CODE_ENGLISH, LANGUAGE_CODE_SPANISH
 import urllib
 from exception.models import handle_exception
 import magic
@@ -742,6 +742,7 @@ class BatchManager(models.Model):
                 break
 
             elected_office_description = ''
+            elected_office_description_es = ''
             elected_office_is_partisan = ''
             # look for relevant child nodes under Office: id, Name, Description, ElectoralDistrictId,
             # IsPartisan, other::ctcl-uid
@@ -751,10 +752,19 @@ class BatchManager(models.Model):
             if elected_office_name_node is not None:
                 elected_office_name = elected_office_name_node.text
 
+            elected_office_name_es_node = one_elected_office.find("./Name/Text/[@language='"+LANGUAGE_CODE_SPANISH+"']")
+            if elected_office_name_es_node is not None:
+                elected_office_name_es = elected_office_name_es_node.text
+
             elected_office_description_node = one_elected_office.find(
                 "Description/Text/[@language='"+LANGUAGE_CODE_ENGLISH+"']")
             if elected_office_description_node is not None:
                 elected_office_description = elected_office_description_node.text
+
+            elected_office_description_es_node = one_elected_office.find(
+                "Description/Text/[@language='"+LANGUAGE_CODE_SPANISH+"']")
+            if elected_office_description_es_node is not None:
+                elected_office_description_es = elected_office_description_es_node.text
 
             electoral_district_id_node = one_elected_office.find('ElectoralDistrictId')
             if electoral_district_id_node is not None:
@@ -775,11 +785,13 @@ class BatchManager(models.Model):
                 try:
                     batch_header = BatchHeader.objects.create(
                         batch_header_column_000='id',
-                        batch_header_column_001='Name',
-                        batch_header_column_002='Description',
-                        batch_header_column_003='ElectoralDistrictId',
-                        batch_header_column_004='IsPartisan',
-                        batch_header_column_005='other::ctcl-uuid',
+                        batch_header_column_001='NameEnglish',
+                        batch_header_column_002='NameSpanish',
+                        batch_header_column_003='DescriptionEnglish',
+                        batch_header_column_004='DescriptionSpanish',
+                        batch_header_column_005='ElectoralDistrictId',
+                        batch_header_column_006='IsPartisan',
+                        batch_header_column_007='other::ctcl-uuid',
                     )
                     batch_header_id = batch_header.id
 
@@ -789,10 +801,12 @@ class BatchManager(models.Model):
                             batch_header_id=batch_header_id,
                             batch_header_map_000='elected_office_batch_id',
                             batch_header_map_001='elected_office_name',
-                            batch_header_map_002='elected_office_description',
-                            batch_header_map_003='electoral_district_id',
-                            batch_header_map_004='elected_office_is_partisan',
-                            batch_header_map_005='elected_office_ctcl_uuid',
+                            batch_header_map_002='elected_office_name_es',
+                            batch_header_map_003='elected_office_description',
+                            batch_header_map_004='elected_office_description_es',
+                            batch_header_map_005='electoral_district_id',
+                            batch_header_map_006='elected_office_is_partisan',
+                            batch_header_map_007='elected_office_ctcl_uuid',
                         )
                         batch_header_map_id = batch_header_map.id
                         status += " BATCH_HEADER_MAP_SAVED"
@@ -825,16 +839,19 @@ class BatchManager(models.Model):
 
             # check for office_batch_id or electoral_district or name AND ctcl_uuid
             if positive_value_exists(elected_office_id) and positive_value_exists(ctcl_uuid) and \
-                    (positive_value_exists(electoral_district_id) or positive_value_exists(elected_office_name)):
+                    (positive_value_exists(electoral_district_id) or positive_value_exists(elected_office_name)) or \
+                    positive_value_exists(elected_office_name_es):
                 try:
                     batch_row = BatchRow.objects.create(
                         batch_header_id=batch_header_id,
                         batch_row_000=elected_office_id,
                         batch_row_001=elected_office_name,
-                        batch_row_002=elected_office_description,
-                        batch_row_003=electoral_district_id,
-                        batch_row_004=elected_office_is_partisan,
-                        batch_row_005=ctcl_uuid
+                        batch_row_002=elected_office_name_es,
+                        batch_row_003=elected_office_description,
+                        batch_row_004=elected_office_description_es,
+                        batch_row_005=electoral_district_id,
+                        batch_row_006=elected_office_is_partisan,
+                        batch_row_007=ctcl_uuid
                     )
                     number_of_batch_rows += 1
                 except Exception as e:
@@ -1531,6 +1548,8 @@ class BatchManager(models.Model):
             else:
                 number_of_batch_action_rows = 0
         return number_of_batch_action_rows
+
+
 class BatchSet(models.Model):
     """
     We call each imported CSV or JSON a “batch set”, and store basic information about it in this table.
@@ -1912,7 +1931,10 @@ class BatchRowActionElectedOffice(models.Model):
         verbose_name="we vote permanent id for this elected office", max_length=255, default=None, null=True,
         blank=True)
     # The name of the office for this contest.
-    elected_office_name = models.CharField(verbose_name="name of the elected office", max_length=255, null=False, blank=False)
+    elected_office_name = models.CharField(verbose_name="name of the elected office", max_length=255,
+                                              null=False, blank=False)
+    elected_office_name_es = models.CharField(verbose_name="name of the elected office in Spanish", max_length=255,
+                                              null=True, blank=True, default=None)
     # The offices' name as passed over by Google Civic. We save this so we can match to this office even
     # if we edit the office's name locally.
     google_civic_office_name = models.CharField(verbose_name="office name exactly as received from google civic",
@@ -1971,8 +1993,10 @@ class BatchRowActionElectedOffice(models.Model):
     # "Yes" or "No" depending on whether this a contest being held outside the normal election cycle.
     special = models.CharField(verbose_name="google civic primary party", max_length=255, null=True, blank=True)
     ctcl_uuid = models.CharField(verbose_name="ctcl uuid", max_length=80, null=True, blank=True)
-    elected_office_description = models.CharField(verbose_name="office description", max_length=255, null=True,
-                                                  blank=True)
+    elected_office_description = models.CharField(verbose_name="office description", max_length=255,
+                                                     null=True, blank=True)
+    elected_office_description_es = models.CharField(verbose_name="office description spanish", max_length=255,
+                                                     null=True, blank=True)
     elected_office_is_partisan = models.BooleanField(verbose_name='office is_partisan', default=False)
     status = models.CharField(verbose_name="batch row action office status", max_length=80, null=True, blank=True)
 
