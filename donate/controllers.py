@@ -12,6 +12,7 @@ from wevote_functions.functions import get_voter_device_id
 from voter.models import VoterManager
 import json
 import stripe
+import textwrap
 
 
 logger = get_logger(__name__)
@@ -131,25 +132,27 @@ def donation_with_stripe_for_api(request, token, email, donation_amount, monthly
                                                                                 donation_amount, donation_date_time,
                                                                                 email)
                 subscription_saved = recurring_donation['voter_subscription_saved']
-                status += recurring_donation['status']
+                status = textwrap.shorten(recurring_donation['status'] + " " + status, width=255, placeholder="...")
                 success = recurring_donation['success']
                 create_subscription_entry = True
                 subscription_id = recurring_donation['subscription_id']
                 subscription_plan_id = recurring_donation['subscription_plan_id']
-                subscription_created_at = datetime.fromtimestamp(recurring_donation['subscription_created_at'],
-                                                                 timezone.utc)
+                subscription_created_at = None
+                if type(recurring_donation['subscription_created_at']) is int:
+                    subscription_created_at = datetime.fromtimestamp(recurring_donation['subscription_created_at'],
+                                                                     timezone.utc)
                 created = subscription_created_at
                 subscription_canceled_at = None
                 subscription_ended_at = None
                 create_subscription_entry = True
-            else: # One time charge
+            else:  # One time charge
                 charge = stripe.Charge.create(
                     amount=donation_amount,
                     currency="usd",
                     source=token,
                     metadata={'voter_we_vote_id': voter_we_vote_id}
                 )
-                status += 'STRIPE_CHARGE_SUCCESSFUL '
+                status = textwrap.shorten("STRIPE_CHARGE_SUCCESSFUL " + status, width=255, placeholder="...")
                 create_donation_entry = True
                 charge_id = charge.id
                 success = positive_value_exists(charge_id)
@@ -190,7 +193,7 @@ def donation_with_stripe_for_api(request, token, email, donation_amount, monthly
                           "STRIPE_MESSAGE_IS: {error_message} " \
                           "".format(http_status=e.http_status, error_type=error_from_json['type'],
                                     error_message=error_from_json['message'])
-        status += donation_status
+        status = textwrap.shorten(donation_status + " " + status, width=255, placeholder="...")
         error_message = translate_stripe_error_to_voter_explanation_text(e.http_status, error_from_json['type'])
         # error_text_description = donation_status
     except stripe.error.StripeError as e:
@@ -200,15 +203,18 @@ def donation_with_stripe_for_api(request, token, email, donation_amount, monthly
                           "STRIPE_MESSAGE_IS: {error_message} " \
                           "".format(http_status=e.http_status, error_type=error_from_json['type'],
                                     error_message=error_from_json['message'])
-        status += donation_status
+        status = textwrap.shorten(donation_status + " " + status, width=255, placeholder="...")
         error_message = translate_stripe_error_to_voter_explanation_text(e.http_status, error_from_json['type'])
         print(donation_status)
     except Exception as err:
         # Something else happened, completely unrelated to Stripe
         donation_status = "A_NON_STRIPE_ERROR_OCCURRED "
         print("donation_with_stripe_for_api threw " + str(err))
-        status += donation_status
+        status = textwrap.shorten(donation_status + " " + status, width=255, placeholder="...")
         error_message = 'Your payment was unsuccessful. Please try again later.'
+    if "already has the maximum 25 current subscriptions" in status:
+        error_message = \
+            "No more than 25 active subscriptions are allowed, please delete a subscription before adding another."
 
     # action_result should be CANCEL_REQUEST_FAILED, CANCEL_REQUEST_SUCCEEDED or DONATION_PROCESSED_SUCCESSFULLY
     action_result = donation_status
@@ -229,15 +235,16 @@ def donation_with_stripe_for_api(request, token, email, donation_amount, monthly
                                                            address_zip, brand, country, exp_month, exp_year, last4,
                                                            id_card, stripe_object, stripe_status, status, None, None,
                                                            None, None, None, not_loggedin_voter_we_vote_id)
-        status += donation_journal_entry['status']
+        status = textwrap.shorten(donation_journal_entry['status'] + " " + status, width=255, placeholder="...")
 
     if create_subscription_entry:
         # Create the Journal entry for a new subscription, with some fields from the intial payment on that subscription
         donation_journal_entry = \
-            donation_manager.create_donation_journal_entry("SUBSCRIPTION_SETUP_AND_INITIAL", ip_address, stripe_customer_id,
-                                                           voter_we_vote_id, charge_id, amount, currency, funding,
-                                                           livemode, action_taken, action_result, created, failure_code,
-                                                           failure_message, network_status, reason, seller_message,
+            donation_manager.create_donation_journal_entry("SUBSCRIPTION_SETUP_AND_INITIAL", ip_address,
+                                                           stripe_customer_id, voter_we_vote_id, charge_id, amount,
+                                                           currency, funding, livemode, action_taken, action_result,
+                                                           created, failure_code, failure_message, network_status,
+                                                           reason, seller_message,
                                                            stripe_type, paid, amount_refunded, refund_count, email,
                                                            address_zip, brand, country, exp_month, exp_year, last4,
                                                            id_card, stripe_object, stripe_status, status,
@@ -245,7 +252,7 @@ def donation_with_stripe_for_api(request, token, email, donation_amount, monthly
                                                            subscription_created_at, subscription_canceled_at,
                                                            subscription_ended_at, not_loggedin_voter_we_vote_id)
         donation_entry_saved = donation_journal_entry['success']
-        status += donation_journal_entry['status']
+        status = textwrap.shorten(donation_journal_entry['status'] + " " + status, width=255, placeholder="...")
 
     results = {
         'status': status,
@@ -346,9 +353,9 @@ def donation_process_stripe_webhook_event(event):
     if event['type'] == 'charge.succeeded':
         return donation_process_charge(event)
     elif event['type'] == 'customer.subscription.deleted':
-         return donation_process_subscription_deleted(event)
+        return donation_process_subscription_deleted(event)
     elif event['type'] == 'customer.subscription.updated':
-         return donation_process_subscription_updated(event)
+        return donation_process_subscription_updated(event)
     elif event['type'] == 'invoice.payment_succeeded':
         return donation_process_subscription_payment(event)
     elif event['type'] == 'charge.refunded':
@@ -365,8 +372,6 @@ def donation_process_charge(event):           # 'charge.succeeded'
     :param event:
     :return:
     """
-    donation_manager = DonationManager()
-
     try:
         charge = event['data']['object']
         source = charge['source']
@@ -376,36 +381,34 @@ def donation_process_charge(event):           # 'charge.succeeded'
         # Charges from subscription payments, won't have our metadata
         try:
             voter_we_vote_id = charge['metadata']['voter_we_vote_id']
-            # Has our metadata?  Then we have already made a journal entry at the time of the donation
-            print("Stripe 'charge.succeeded' received for a PAYMENT_FROM_UI -- ignored, charge = " + charge)
-            return None
+            if voter_we_vote_id:
+                # Has our metadata?  Then we have already made a journal entry at the time of the donation
+                print("Stripe 'charge.succeeded' received for a PAYMENT_FROM_UI -- ignored, charge = " + charge)
+                return None
         except Exception:
             voter_we_vote_id = DonationManager.find_we_vote_voter_id_for_stripe_customer(str(charge['customer']))
-
 
         if results['success'] and not results['exists']:
             # Create the Journal entry for a payment initiated by an automatic subscription payment.
             DonationManager.create_donation_journal_entry("PAYMENT_AUTO_SUBSCRIPTION", "0.0.0.0",
-                                                           str(charge['customer']),
-                                                           voter_we_vote_id, charge['id'],
-                                                           charge['amount'], charge['currency'], source['funding'],
-                                                           charge['livemode'], "",  "",
-                                                           datetime.fromtimestamp(charge['created'], timezone.utc),
-                                                           str(charge['failure_code']), str(charge['failure_message']),
-                                                           outcome['network_status'], str(outcome['reason']),
-                                                           outcome['seller_message'], event['type'], charge['paid'],
-                                                           0, charge['refunds']['total_count'], source['name'],
-                                                           source['address_zip'], source['brand'], source['country'],
-                                                           source['exp_month'], source['exp_year'],
-                                                           int(source['last4']), charge['source']['id'], event['id'],
-                                                           charge['status'], "", 'no', None, None, None, None, None)
+                                                          str(charge['customer']),
+                                                          voter_we_vote_id, charge['id'],
+                                                          charge['amount'], charge['currency'], source['funding'],
+                                                          charge['livemode'], "",  "",
+                                                          datetime.fromtimestamp(charge['created'], timezone.utc),
+                                                          str(charge['failure_code']), str(charge['failure_message']),
+                                                          outcome['network_status'], str(outcome['reason']),
+                                                          outcome['seller_message'], event['type'], charge['paid'],
+                                                          0, charge['refunds']['total_count'], source['name'],
+                                                          source['address_zip'], source['brand'], source['country'],
+                                                          source['exp_month'], source['exp_year'],
+                                                          int(source['last4']), charge['source']['id'], event['id'],
+                                                          charge['status'], "", 'no', None, None, None, None, None)
 
     except stripe.error.StripeError as e:
         body = e.json_body
         error_from_json = body['error']
         logger.error("donation_process_charge, Stripe: " + error_from_json, {}, {})
-
-
 
     except Exception as err:
         logger.error("donation_process_charge, general: " + str(err), {}, {})
@@ -461,7 +464,9 @@ def move_donation_info_to_another_voter(from_voter, to_voter):
 
     if not hasattr(from_voter, "we_vote_id") or not positive_value_exists(from_voter.we_vote_id) \
             or not hasattr(to_voter, "we_vote_id") or not positive_value_exists(to_voter.we_vote_id):
-        status += "MOVE_DONATION_INFO_MISSING_FROM_OR_TO_VOTER_ID "
+        status = textwrap.shorten("MOVE_DONATION_INFO_MISSING_FROM_OR_TO_VOTER_ID " + status, width=255,
+                                  placeholder="...")
+
         results = {
             'status': status,
             'success': success,
@@ -475,6 +480,7 @@ def move_donation_info_to_another_voter(from_voter, to_voter):
     results = DonationManager.move_donations_between_donors(from_voter, to_voter)
 
     return results
+
 
 # see https://stripe.com/docs/subscriptions/lifecycle
 def donation_process_subscription_payment(event):
@@ -499,12 +505,12 @@ def donation_process_subscription_payment(event):
         customer = stripe.Customer.retrieve(customer_id)
         source = customer['sources']['data'][0]
         id_card = source['id']
-        address_zip  = source['address_zip']
-        brand  = source['brand']
-        country  = source['country']
-        exp_month  = source['exp_month']
-        exp_year  = source['exp_year']
-        funding  = source['funding']
+        address_zip = source['address_zip']
+        brand = source['brand']
+        country = source['country']
+        exp_month = source['exp_month']
+        exp_year = source['exp_year']
+        funding = source['funding']
 
         DonationManager.update_subscription_in_db(row_id, amount, currency, id_card, address_zip, brand, country,
                                                   exp_month, exp_year, funding)
@@ -513,8 +519,10 @@ def donation_process_subscription_payment(event):
 
     return None
 
+
 def donation_process_refund_payment(event):
     # The Stripe webhook has sent a refund event "charge.refunded"
+    success = False
     print("donation_process_refund_payment: " + json.dumps(event))
     dataobject = event['data']['object']
     charge = dataobject['id']
@@ -523,6 +531,7 @@ def donation_process_refund_payment(event):
         success = DonationManager.update_journal_entry_for_refund_completed(charge)
 
     return success
+
 
 def donation_refund_for_api(request, charge, voter_we_vote_id):
     # The WebApp has requested a refund

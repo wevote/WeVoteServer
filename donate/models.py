@@ -381,29 +381,36 @@ class DonationManager(models.Model):
                     metadata={'voter_we_vote_id': voter_we_vote_id, 'email': email}
                 )
                 success = True
-                canceled_at = subscription['canceled_at']
-                ended_at = subscription['ended_at']
                 subscription_id = subscription['id']
-                livemode = subscription['livemode']
                 status += "USER_SUCCESSFULLY_SUBSCRIBED_TO_PLAN "
 
+                results = {
+                    'success': success,
+                    'status': status,
+                    'voter_subscription_saved': status,
+                    'subscription_plan_id': donation_plan_id,
+                    'subscription_created_at': subscription['created'],
+                    'subscription_id': subscription_id
+                }
+
             except stripe.error.StripeError as e:
+                success = False
                 body = e.json_body
                 err = body['error']
-                status = "STATUS_IS_{}_AND_ERROR_IS_{}".format(e.http_status, err)
+                status = "STRIPE_ERROR_IS_" + err['message'] + "_END"
                 print("create_recurring_donation StripeError: " + status)
 
+                results = {
+                    'success': False,
+                    'status': status,
+                    'voter_subscription_saved': False,
+                    'subscription_plan_id': "",
+                    'subscription_created_at': "",
+                    'subscription_id': ""
+                }
         else:
-            status = donation_plan_id_query['status']
+            results = donation_plan_id_query
 
-        results = {
-            'success': success,
-            'status': status,
-            'voter_subscription_saved': status,
-            'subscription_plan_id': donation_plan_id,
-            'subscription_created_at': subscription['created'],
-            'subscription_id': subscription_id
-        }
         return results
 
     @staticmethod
