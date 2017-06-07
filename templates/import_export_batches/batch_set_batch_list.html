@@ -18,10 +18,12 @@
             <th>Batch Name</th>
             <th>Action</th>
             <th>Election</th>
+            <th>Analyzed</th>
             <th>Processed</th>
             <th>Total Records</th>
             <th>Date Created</th>
             <th>Action Rows Created</th>
+            <th>Action Rows Updated</th>
         </tr>
     {% for one_batch in batch_list %}
         <tr>
@@ -36,10 +38,12 @@
                     {% endif %}
                 {% endfor %}
             </td>
+            <td>{{ one_batch.rows_analyzed }}</td>
             <td>{{ one_batch.rows_processed }}</td>
             <td>{{ one_batch.total_rows }}</td>
             <td>{{ one_batch.date_created }}</td>
             <td>{{ one_batch.number_of_batch_actions_created }}</td>
+            <td>{{ one_batch.number_of_table_rows_updated }}</td>
         </tr>
     {% endfor %}
     </table>

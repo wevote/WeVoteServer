@@ -417,6 +417,97 @@ class ContestMeasureManager(models.Model):
 
         return contest_measure_id
 
+    def create_measure_row_entry(self, measure_title, measure_subtitle, measure_text, state_code, ctcl_uuid,
+                                        google_civic_election_id):
+        """
+        Create ContestMeasure table entry with Measure details from CTCL data
+        :param measure_title: 
+        :param measure_subtitle: 
+        :param measure_text: 
+        :param state_code: 
+        :param ctcl_uuid: 
+        :param google_civic_election_id: 
+        :return: 
+        """
+        success = False
+        status = ""
+        measure_updated = False
+        new_measure_created = False
+        new_measure = ''
+
+        try:
+            new_measure = ContestMeasure.objects.create(
+                measure_title=measure_title, measure_subtitle=measure_subtitle, measure_text=measure_text,
+                state_code=state_code,ctcl_uuid=ctcl_uuid, google_civic_election_id=google_civic_election_id)
+            if new_measure:
+                success = True
+                status = "CREATE_MEASURE_ROW_ENTRY-MEASURE_CREATED"
+                new_measure_created = True
+            else:
+                success = False
+                status = "CREATE_MEASURE_ROW_ENTRY-MEASURE_CREATE_FAILED"
+        except Exception as e:
+            success = False
+            new_measure_created = False
+            status = "CREATE_MEASURE_ROW_ENTRY-MEASURE_RETRIEVE_ERROR"
+            handle_exception(e, logger=logger, exception_message=status)
+
+        results = {
+                'success':               success,
+                'status':                status,
+                'new_measure_created':   new_measure_created,
+                'measure_updated':       measure_updated,
+                'new_measure':           new_measure,
+            }
+        return results
+
+    def update_measure_row_entry(self, measure_title, measure_subtitle, measure_text, state_code, ctcl_uuid,
+                                 google_civic_election_id, measure_we_vote_id):
+        """
+            Update ContestMeasure table entry with matching we_vote_id 
+        :param measure_title: 
+        :param measure_subtitle: 
+        :param measure_text: 
+        :param state_code: 
+        :param ctcl_uuid: 
+        :param google_civic_election_id: 
+        :param measure_we_vote_id:  
+        :return: 
+        """
+        success = False
+        status = ""
+        measure_updated = False
+        existing_measure_entry = ''
+
+        try:
+            existing_measure_entry = ContestMeasure.objects.get(we_vote_id=measure_we_vote_id)
+            if existing_measure_entry:
+                # found the existing entry, update the values
+                existing_measure_entry.measure_title = measure_title
+                existing_measure_entry.measure_subtitle = measure_subtitle
+                existing_measure_entry.measure_text = measure_text
+                existing_measure_entry.state_code = state_code
+                existing_measure_entry.ctcl_uuid = ctcl_uuid
+                existing_measure_entry.google_civic_election_id = google_civic_election_id
+                # now go ahead and save this entry (update)
+                existing_measure_entry.save()
+                measure_updated = True
+                success = True
+                status = "UPDATE_MEASURE_ROW_ENTRY-MEASURE_UPDATED"
+        except Exception as e:
+            success = False
+            measure_updated = False
+            status = "UPDATE_MEASURE_ROW_ENTRY-MEASURE_RETRIEVE_ERROR"
+            handle_exception(e, logger=logger, exception_message=status)
+
+        results = {
+                'success':          success,
+                'status':           status,
+                'measure_updated':  measure_updated,
+                'updated_measure':  existing_measure_entry,
+            }
+        return results
+
 
 class ContestMeasureList(models.Model):
     """
