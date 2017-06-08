@@ -19,16 +19,17 @@ ELECTIONS_SYNC_URL = get_environment_variable("ELECTIONS_SYNC_URL")
 
 def election_remote_retrieve():
     retrieve_results = retrieve_from_google_civic_api_election_query()
-
-    if not retrieve_results['success']:
-
+    structured_json = retrieve_results.get('structured_json', {})
+    error = structured_json.get('error', {})
+    errors = error.get('errors', {})
+    if not retrieve_results['success'] or len('errors'):  # Success refers to http success, not an error free response
+        logger.error("Loading Election from Google Civic failed: " + json.dumps(errors), {}, {})
         results = {
             'success':  False,
             'status':   retrieve_results['status']
         }
         return results
     else:
-        structured_json = retrieve_results['structured_json']
         results = store_results_from_google_civic_api_election_query(structured_json)
         return results
 
