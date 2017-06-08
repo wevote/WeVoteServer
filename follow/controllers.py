@@ -10,6 +10,7 @@ from .models import FollowOrganizationList, FollowOrganizationManager, UPDATE_SU
     UPDATE_SUGGESTIONS_FROM_WHAT_FRIEND_FOLLOWS, UPDATE_SUGGESTIONS_FROM_WHAT_FRIEND_FOLLOWS_ON_TWITTER, \
     UPDATE_SUGGESTIONS_FROM_WHAT_FRIENDS_FOLLOW, UPDATE_SUGGESTIONS_FROM_WHAT_FRIENDS_FOLLOW_ON_TWITTER, \
     UPDATE_SUGGESTIONS_ALL, FOLLOW_SUGGESTIONS_FROM_TWITTER_IDS_I_FOLLOW, FOLLOW_SUGGESTIONS_FROM_FRIENDS
+from organization.models import OrganizationManager
 from voter.models import VoterManager
 import wevote_functions.admin
 from wevote_functions.functions import is_voter_device_id_valid, positive_value_exists
@@ -18,39 +19,59 @@ from twitter.models import TwitterUserManager
 logger = wevote_functions.admin.get_logger(__name__)
 
 
-# TODO DALE To be built
-def duplicate_follow_entries_to_another_voter(from_voter_id, to_voter_id, to_voter_we_vote_id):
+def duplicate_follow_entries_to_another_voter(from_voter_id, from_voter_we_vote_id, to_voter_id, to_voter_we_vote_id):
     status = ''
     success = False
-    follow_entries_moved = 0
-    follow_entries_not_moved = 0
+    follow_entries_duplicated = 0
+    follow_entries_not_duplicated = 0
+    organization_manager = OrganizationManager()
     follow_organization_list = FollowOrganizationList()
     follow_organization_manager = FollowOrganizationManager()
     from_follow_list = follow_organization_list.retrieve_follow_organization_by_voter_id(from_voter_id)
 
     for from_follow_entry in from_follow_list:
+        heal_data = False
+        # See if we need to heal the data
+        if positive_value_exists(from_voter_we_vote_id) and \
+                not positive_value_exists(from_follow_entry.voter_we_vote_id):
+            from_follow_entry.voter_we_vote_id = from_voter_we_vote_id
+            heal_data = True
+        if not positive_value_exists(from_follow_entry.organization_we_vote_id):
+            from_follow_entry.organization_we_vote_id = organization_manager.fetch_we_vote_id_from_local_id(
+                from_follow_entry.organization_id)
+            heal_data = True
+
+        if heal_data:
+            try:
+                from_follow_entry.save()
+            except Exception as e:
+                pass
+
         # See if the "to_voter" already has an entry for this organization
         existing_entry_results = follow_organization_manager.retrieve_follow_organization(
             0, to_voter_id, from_follow_entry.organization_id, from_follow_entry.organization_we_vote_id)
         if not existing_entry_results['follow_organization_found']:
             # Change the voter_id and voter_we_vote_id
             try:
+                from_follow_entry.id = None  # Reset the id so a new entry is created
+                from_follow_entry.pk = None
                 from_follow_entry.voter_id = to_voter_id
                 # We don't currently store follow entries by we_vote_id
                 # from_follow_entry.voter_we_vote_id = to_voter_we_vote_id
                 from_follow_entry.save()
-                follow_entries_moved += 1
+                follow_entries_duplicated += 1
             except Exception as e:
-                follow_entries_not_moved += 1
+                follow_entries_not_duplicated += 1
 
     results = {
-        'status': status,
-        'success': success,
-        'from_voter_id': from_voter_id,
-        'to_voter_id': to_voter_id,
-        'to_voter_we_vote_id': to_voter_we_vote_id,
-        'follow_entries_moved': follow_entries_moved,
-        'follow_entries_not_moved': follow_entries_not_moved,
+        'status':                           status,
+        'success':                          success,
+        'from_voter_id':                    from_voter_id,
+        'from_voter_we_vote_id':            from_voter_we_vote_id,
+        'to_voter_id':                      to_voter_id,
+        'to_voter_we_vote_id':              to_voter_we_vote_id,
+        'follow_entries_duplicated':        follow_entries_duplicated,
+        'follow_entries_not_duplicated':    follow_entries_not_duplicated,
     }
     return results
 
@@ -80,13 +101,108 @@ def move_follow_entries_to_another_voter(from_voter_id, to_voter_id, to_voter_we
                 follow_entries_not_moved += 1
 
     results = {
-        'status': status,
-        'success': success,
-        'from_voter_id': from_voter_id,
-        'to_voter_id': to_voter_id,
-        'to_voter_we_vote_id': to_voter_we_vote_id,
-        'follow_entries_moved': follow_entries_moved,
+        'status':                   status,
+        'success':                  success,
+        'from_voter_id':            from_voter_id,
+        'to_voter_id':              to_voter_id,
+        'to_voter_we_vote_id':      to_voter_we_vote_id,
+        'follow_entries_moved':     follow_entries_moved,
         'follow_entries_not_moved': follow_entries_not_moved,
+    }
+    return results
+
+
+def duplicate_organization_followers_to_another_organization(from_organization_id, from_organization_we_vote_id,
+                                                             to_organization_id, to_organization_we_vote_id):
+    status = ''
+    success = False
+    follow_entries_duplicated = 0
+    follow_entries_not_duplicated = 0
+    voter_manager = VoterManager()
+    organization_manager = OrganizationManager()
+    follow_organization_list = FollowOrganizationList()
+    follow_organization_manager = FollowOrganizationManager()
+
+    # We search on both from_organization_id and from_organization_we_vote_id in case there is some data that needs
+    # to be healed
+    from_follow_list = follow_organization_list.retrieve_follow_organization_by_organization_id(from_organization_id)
+    for from_follow_entry in from_follow_list:
+        heal_data = False
+        # See if we need to heal the data
+        if positive_value_exists(from_follow_entry.voter_id) and \
+                not positive_value_exists(from_follow_entry.voter_we_vote_id):
+            from_follow_entry.voter_we_vote_id = \
+                voter_manager.fetch_we_vote_id_from_local_id(from_follow_entry.voter_id)
+            heal_data = True
+        if not positive_value_exists(from_follow_entry.organization_we_vote_id):
+            from_follow_entry.organization_we_vote_id = organization_manager.fetch_we_vote_id_from_local_id(
+                from_follow_entry.organization_id)
+            heal_data = True
+
+        if heal_data:
+            try:
+                from_follow_entry.save()
+            except Exception as e:
+                pass
+
+        # See if the "to_voter" already has an entry for the to_organization
+        existing_entry_results = follow_organization_manager.retrieve_follow_organization(
+            0, from_follow_entry.voter_id, to_organization_id, to_organization_we_vote_id)
+        if not existing_entry_results['follow_organization_found']:
+            try:
+                from_follow_entry.id = None  # Reset the id so a new entry is created
+                from_follow_entry.pk = None
+                from_follow_entry.organization_id = to_organization_id
+                from_follow_entry.organization_we_vote_id = to_organization_we_vote_id
+                from_follow_entry.save()
+                follow_entries_duplicated += 1
+            except Exception as e:
+                follow_entries_not_duplicated += 1
+
+    from_follow_list = follow_organization_list.retrieve_follow_organization_by_organization_we_vote_id(
+        from_organization_we_vote_id)
+    for from_follow_entry in from_follow_list:
+        heal_data = False
+        # See if we need to heal the data
+        if positive_value_exists(from_follow_entry.voter_id) and \
+                not positive_value_exists(from_follow_entry.voter_we_vote_id):
+            from_follow_entry.voter_we_vote_id = \
+                voter_manager.fetch_we_vote_id_from_local_id(from_follow_entry.voter_id)
+            heal_data = True
+        if not positive_value_exists(from_follow_entry.organization_we_vote_id):
+            from_follow_entry.organization_we_vote_id = organization_manager.fetch_we_vote_id_from_local_id(
+                from_follow_entry.organization_id)
+            heal_data = True
+
+        if heal_data:
+            try:
+                from_follow_entry.save()
+            except Exception as e:
+                pass
+
+        # See if the "to_voter" already has an entry for the to_organization
+        existing_entry_results = follow_organization_manager.retrieve_follow_organization(
+            0, from_follow_entry.voter_id, to_organization_id, to_organization_we_vote_id)
+        if not existing_entry_results['follow_organization_found']:
+            try:
+                from_follow_entry.id = None  # Reset the id so a new entry is created
+                from_follow_entry.pk = None
+                from_follow_entry.organization_id = to_organization_id
+                from_follow_entry.organization_we_vote_id = to_organization_we_vote_id
+                from_follow_entry.save()
+                follow_entries_duplicated += 1
+            except Exception as e:
+                follow_entries_not_duplicated += 1
+
+    results = {
+        'status':                           status,
+        'success':                          success,
+        'from_organization_id':             from_organization_id,
+        'from_organization_we_vote_id':     from_organization_we_vote_id,
+        'to_organization_id':               to_organization_id,
+        'to_organization_we_vote_id':       to_organization_we_vote_id,
+        'follow_entries_duplicated':        follow_entries_duplicated,
+        'follow_entries_not_duplicated':    follow_entries_not_duplicated,
     }
     return results
 

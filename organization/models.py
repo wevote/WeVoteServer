@@ -96,6 +96,7 @@ class OrganizationManager(models.Manager):
         success = False
         status = ""
         organization_duplicated = False
+
         try:
             organization.id = None  # Remove the primary key so it is forced to save a new entry
             organization.pk = None

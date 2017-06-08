@@ -2125,6 +2125,49 @@ class VoterAddressManager(models.Model):
 
         return voter_address_count
 
+    def duplicate_voter_address_from_voter_id(self, from_voter_id, to_voter_id):
+        voter_address_id = 0
+        results = self.retrieve_address(voter_address_id, from_voter_id)
+        if results['voter_address_found']:
+            voter_address = results['voter_address']
+            return self.duplicate_voter_address(voter_address, to_voter_id)
+
+        results = {
+            'success':                  False,
+            'status':                   "EXISTING_VOTER_ADDRESS_NOT_FOUND",
+            'voter_address_duplicated': False,
+            'voter_address':            VoterAddress(),
+        }
+        return results
+
+    def duplicate_voter_address(self, voter_address, new_voter_id):
+        """
+        Starting with an existing voter_address, create a duplicate version for a duplicated voter
+        :param voter_address:
+        :param new_voter_id:
+        :return:
+        """
+        voter_address_duplicated = False
+        success = False
+        status = ""
+        try:
+            voter_address.id = None  # Remove the primary key so it is forced to save a new entry
+            voter_address.pk = None
+            voter_address.voter_id = new_voter_id
+            voter_address.save()
+            status += "DUPLICATE_VOTER_ADDRESS_SUCCESSFUL"
+            voter_address_duplicated = True
+        except Exception as e:
+            status += "DUPLICATE_VOTER_ADDRESS_FAILED"
+
+        results = {
+            'success':                  success,
+            'status':                   status,
+            'voter_address_duplicated': voter_address_duplicated,
+            'voter_address':            voter_address,
+        }
+        return results
+
 
 def voter_setup(request):
     """

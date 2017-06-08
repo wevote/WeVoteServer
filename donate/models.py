@@ -614,7 +614,6 @@ class DonationManager(models.Model):
         }
         return results
 
-
     @staticmethod
     def check_for_subscription_in_db_without_card_info(customer, plan_id):
         # get the rows with the correct subscription_plan_id, most recently created first (created a few seconds ago)
@@ -634,7 +633,6 @@ class DonationManager(models.Model):
             print("check_for_subscription_in_db_without_card_info Exception " + str(e))
 
         return row_id
-
 
     @staticmethod
     def update_subscription_in_db(row_id, amount, currency, id_card, address_zip, brand, country, exp_month, exp_year,
@@ -679,7 +677,6 @@ class DonationManager(models.Model):
 
         return ""
 
-
     @staticmethod
     def update_journal_entry_for_refund(charge, voter_we_vote_id, refund):
         if refund and refund['amount'] > 0 and refund['status'] == "succeeded":
@@ -699,7 +696,6 @@ class DonationManager(models.Model):
                      " and voter_we_vote_id " + voter_we_vote_id)
         return "False"
 
-
     @staticmethod
     def update_journal_entry_for_already_refunded(charge, voter_we_vote_id):
         row = DonationJournal.objects.get(charge_id__iexact=charge, voter_we_vote_id__iexact=voter_we_vote_id)
@@ -712,7 +708,6 @@ class DonationManager(models.Model):
         print(row.status)
 
         return "True"
-
 
     @staticmethod
     def update_journal_entry_for_refund_completed(charge):
