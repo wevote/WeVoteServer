@@ -274,6 +274,13 @@ def move_positions_to_another_organization(from_organization_id, from_organizati
     position_entries_not_moved = 0
     position_manager = PositionManager()
     position_list_manager = PositionListManager()
+    organization_manager = OrganizationManager()
+    to_organization_name = ""
+    if positive_value_exists(to_organization_we_vote_id):
+        results = organization_manager.retrieve_organization_from_we_vote_id(to_organization_we_vote_id)
+        if results['organization_found']:
+            to_voter_organization = results['organization']
+            to_organization_name = to_voter_organization.organization_name
 
     # Find private positions for the "from_organization" that we are moving away from
     stance_we_are_looking_for = ANY_STANCE
@@ -322,6 +329,8 @@ def move_positions_to_another_organization(from_organization_id, from_organizati
         else:
             # Change the position values to the new we_vote_id
             try:
+                if positive_value_exists(to_organization_name):
+                    from_position_entry.speaker_display_name = to_organization_name
                 from_position_entry.organization_id = to_organization_id
                 from_position_entry.organization_we_vote_id = to_organization_we_vote_id
                 from_position_entry.voter_id = to_voter_id
@@ -337,9 +346,7 @@ def move_positions_to_another_organization(from_organization_id, from_organizati
     for from_position_entry in from_position_private_list_remaining:
         # Delete the remaining position values
         try:
-            # Leave this turned off until testing is finished
-            # from_position_entry.delete()
-            pass
+            from_position_entry.delete()
         except Exception as e:
             pass
 
@@ -388,6 +395,8 @@ def move_positions_to_another_organization(from_organization_id, from_organizati
         else:
             # Change the position values to the new we_vote_id
             try:
+                if positive_value_exists(to_organization_name):
+                    from_position_entry.speaker_display_name = to_organization_name
                 from_position_entry.organization_id = to_organization_id
                 from_position_entry.organization_we_vote_id = to_organization_we_vote_id
                 from_position_entry.voter_id = to_voter_id
@@ -404,166 +413,7 @@ def move_positions_to_another_organization(from_organization_id, from_organizati
         # Delete the remaining position values
         try:
             # Leave this turned off until testing is finished
-            # from_position_entry.delete()
-            pass
-        except Exception as e:
-            pass
-
-    results = {
-        'status':                       status,
-        'success':                      success,
-        'from_organization_id':         from_organization_id,
-        'from_organization_we_vote_id': from_organization_we_vote_id,
-        'to_voter_id':                  to_voter_id,
-        'to_voter_we_vote_id':          to_voter_we_vote_id,
-        'position_entries_moved':       position_entries_moved,
-        'position_entries_not_moved':   position_entries_not_moved,
-    }
-    return results
-
-
-# TODO UPDATE THIS 2017-05-28
-def duplicate_positions_to_another_organization(from_organization_id, from_organization_we_vote_id,
-                                           to_organization_id, to_organization_we_vote_id,
-                                           to_voter_id, to_voter_we_vote_id):
-    status = ''
-    success = False
-    position_entries_moved = 0
-    position_entries_not_moved = 0
-    position_manager = PositionManager()
-    position_list_manager = PositionListManager()
-
-    # Find private positions for the "from_organization" that we are moving away from
-    stance_we_are_looking_for = ANY_STANCE
-    friends_vs_public = FRIENDS_ONLY
-
-    from_position_private_list = position_list_manager.retrieve_all_positions_for_organization(
-        from_organization_id, from_organization_we_vote_id,
-        stance_we_are_looking_for, friends_vs_public)
-
-    for from_position_entry in from_position_private_list:
-        # See if the "to_organization" already has the same entry
-        position_we_vote_id = ""
-        # We do not want the voter information to change this retrieve
-        empty_voter_id = 0
-        empty_voter_we_vote_id = ''
-
-        results = position_manager.retrieve_position_table_unknown(
-            position_we_vote_id, to_organization_id, to_organization_we_vote_id,
-            empty_voter_id,
-            from_position_entry.contest_office_id, from_position_entry.candidate_campaign_id,
-            from_position_entry.contest_measure_id,
-            empty_voter_we_vote_id,
-            from_position_entry.contest_office_we_vote_id,
-            from_position_entry.candidate_campaign_we_vote_id, from_position_entry.contest_measure_we_vote_id)
-
-        if results['position_found']:
-            # Look to see if there is a statement that can be preserved (i.e., moved from from_position to to_position
-            to_position_entry = results['position']
-            if not positive_value_exists(to_position_entry.statement_html):
-                # If the "to_position" does NOT have a statement_html, we look to see if the "from_position" has one
-                # we can use
-                if positive_value_exists(from_position_entry.statement_html):
-                    to_position_entry.statement_html = from_position_entry.statement_html
-            if not positive_value_exists(to_position_entry.statement_text):
-                # If the "to_position" does NOT have a statement_html, we look to see if the "from_position" has one
-                # we can use
-                if positive_value_exists(from_position_entry.statement_text):
-                    to_position_entry.statement_text = from_position_entry.statement_text
-            # Update the voter values to the new "to" voter
-            to_position_entry.voter_id = to_voter_id
-            to_position_entry.voter_we_vote_id = to_voter_we_vote_id
-            try:
-                to_position_entry.save()
-            except Exception as e:
-                pass
-        else:
-            # Change the position values to the new we_vote_id
-            try:
-                from_position_entry.organization_id = to_organization_id
-                from_position_entry.organization_we_vote_id = to_organization_we_vote_id
-                from_position_entry.voter_id = to_voter_id
-                from_position_entry.voter_we_vote_id = to_voter_we_vote_id
-                from_position_entry.save()
-                position_entries_moved += 1
-            except Exception as e:
-                position_entries_not_moved += 1
-
-    from_position_private_list_remaining = position_list_manager.retrieve_all_positions_for_organization(
-        from_organization_id, from_organization_we_vote_id,
-        stance_we_are_looking_for, friends_vs_public)
-    for from_position_entry in from_position_private_list_remaining:
-        # Delete the remaining position values
-        try:
-            # Leave this turned off until testing is finished
-            # from_position_entry.delete()
-            pass
-        except Exception as e:
-            pass
-
-    # Find public positions for the "from_voter" that we are moving away from
-    stance_we_are_looking_for = ANY_STANCE
-    friends_vs_public = PUBLIC_ONLY
-    from_position_public_list = position_list_manager.retrieve_all_positions_for_organization(
-        from_organization_id, from_organization_we_vote_id,
-        stance_we_are_looking_for, friends_vs_public)
-
-    for from_position_entry in from_position_public_list:
-        # See if the "to_organization" already has the same entry
-        position_we_vote_id = ""
-        # We do not want the voter information to change this retrieve
-        empty_voter_id = 0
-        empty_voter_we_vote_id = ''
-        results = position_manager.retrieve_position_table_unknown(
-            position_we_vote_id, to_organization_id, to_organization_we_vote_id,
-            empty_voter_id,
-            from_position_entry.contest_office_id, from_position_entry.candidate_campaign_id,
-            from_position_entry.contest_measure_id,
-            empty_voter_we_vote_id,
-            from_position_entry.contest_office_we_vote_id,
-            from_position_entry.candidate_campaign_we_vote_id, from_position_entry.contest_measure_we_vote_id)
-
-        if results['position_found']:
-            # Look to see if there is a statement that can be preserved
-            to_position_entry = results['position']
-            if not positive_value_exists(to_position_entry.statement_html):
-                # If the "to_position" does NOT have a statement_html, we look to see if the "from_position" has one
-                # we can use
-                if positive_value_exists(from_position_entry.statement_html):
-                    to_position_entry.statement_html = from_position_entry.statement_html
-            if not positive_value_exists(to_position_entry.statement_text):
-                # If the "to_position" does NOT have a statement_html, we look to see if the "from_position" has one
-                # we can use
-                if positive_value_exists(from_position_entry.statement_text):
-                    to_position_entry.statement_text = from_position_entry.statement_text
-            # Update the voter values to the new "to" voter
-            to_position_entry.voter_id = to_voter_id
-            to_position_entry.voter_we_vote_id = to_voter_we_vote_id
-            try:
-                to_position_entry.save()
-            except Exception as e:
-                pass
-        else:
-            # Change the position values to the new we_vote_id
-            try:
-                from_position_entry.organization_id = to_organization_id
-                from_position_entry.organization_we_vote_id = to_organization_we_vote_id
-                from_position_entry.voter_id = to_voter_id
-                from_position_entry.voter_we_vote_id = to_voter_we_vote_id
-                from_position_entry.save()
-                position_entries_moved += 1
-            except Exception as e:
-                position_entries_not_moved += 1
-
-    from_position_public_list_remaining = position_list_manager.retrieve_all_positions_for_organization(
-        from_organization_id, from_organization_we_vote_id,
-        stance_we_are_looking_for, friends_vs_public)
-    for from_position_entry in from_position_public_list_remaining:
-        # Delete the remaining position values
-        try:
-            # Leave this turned off until testing is finished
-            # from_position_entry.delete()
-            pass
+            from_position_entry.delete()
         except Exception as e:
             pass
 
@@ -589,6 +439,13 @@ def move_positions_to_another_voter(from_voter_id, from_voter_we_vote_id,
     position_entries_not_moved = 0
     position_manager = PositionManager()
     position_list_manager = PositionListManager()
+    organization_manager = OrganizationManager()
+    to_organization_name = ""
+    if positive_value_exists(to_voter_linked_organization_we_vote_id):
+        results = organization_manager.retrieve_organization_from_we_vote_id(to_voter_linked_organization_we_vote_id)
+        if results['organization_found']:
+            to_voter_organization = results['organization']
+            to_organization_name = to_voter_organization.organization_name
 
     # Find private positions for the "from_voter" that we are moving away from
     stance_we_are_looking_for = ANY_STANCE
@@ -636,6 +493,8 @@ def move_positions_to_another_voter(from_voter_id, from_voter_we_vote_id,
         else:
             # Change the position values to the new values
             try:
+                if positive_value_exists(to_organization_name):
+                    from_position_entry.speaker_display_name = to_organization_name
                 from_position_entry.organization_id = to_voter_linked_organization_id
                 from_position_entry.organization_we_vote_id = to_voter_linked_organization_we_vote_id
                 from_position_entry.voter_id = to_voter_id
@@ -653,9 +512,7 @@ def move_positions_to_another_voter(from_voter_id, from_voter_we_vote_id,
     for from_position_entry in from_position_private_list_remaining:
         # Delete the remaining position values
         try:
-            # Leave this turned off until testing is finished
-            # from_position_entry.delete()
-            pass
+            from_position_entry.delete()
         except Exception as e:
             pass
 
@@ -705,6 +562,8 @@ def move_positions_to_another_voter(from_voter_id, from_voter_we_vote_id,
         else:
             # Change the position values to the new we_vote_id
             try:
+                if positive_value_exists(to_organization_name):
+                    from_position_entry.speaker_display_name = to_organization_name
                 from_position_entry.organization_id = to_voter_linked_organization_id
                 from_position_entry.organization_we_vote_id = to_voter_linked_organization_we_vote_id
                 from_position_entry.voter_id = to_voter_id
@@ -722,9 +581,7 @@ def move_positions_to_another_voter(from_voter_id, from_voter_we_vote_id,
     for from_position_entry in from_position_public_list_remaining:
         # Delete the remaining position values
         try:
-            # Leave this turned off until testing is finished
-            # from_position_entry.delete()
-            pass
+            from_position_entry.delete()
         except Exception as e:
             pass
 
@@ -746,12 +603,13 @@ def duplicate_positions_to_another_voter(from_voter_id, from_voter_we_vote_id,
                                          to_voter_linked_organization_id, to_voter_linked_organization_we_vote_id):
     status = ''
     success = False
-    position_entries_moved = 0
-    position_entries_not_moved = 0
-    position_manager = PositionManager()
+    total_position_entries_moved = 0
+    total_position_entries_not_moved = 0
     position_list_manager = PositionListManager()
+    copy_private_positions = True
+    copy_public_positions = True
 
-    # Find private positions for the "from_voter" that we are moving away from
+    # Find private positions for the "from_voter" that we are duplicating
     stance_we_are_looking_for = ANY_STANCE
     friends_vs_public = FRIENDS_ONLY
     from_position_private_list_results = position_list_manager.retrieve_all_positions_for_voter(
@@ -759,68 +617,42 @@ def duplicate_positions_to_another_voter(from_voter_id, from_voter_we_vote_id,
         stance_we_are_looking_for, friends_vs_public)
     from_position_private_list = from_position_private_list_results['position_list']
 
-    position_we_vote_id = ""
-    # We don't want the organization_id to affect the retrieve
-    empty_organization_id = 0
-    empty_organization_we_vote_id = 0
-    for from_position_entry in from_position_private_list:
-        # See if the "to_voter" already has the same entry
-        results = position_manager.retrieve_position_table_unknown(
-            position_we_vote_id, empty_organization_id, empty_organization_we_vote_id,
-            to_voter_id,
-            from_position_entry.contest_office_id, from_position_entry.candidate_campaign_id,
-            from_position_entry.contest_measure_id,
-            to_voter_we_vote_id,
-            from_position_entry.contest_office_we_vote_id,
-            from_position_entry.candidate_campaign_we_vote_id, from_position_entry.contest_measure_we_vote_id)
+    to_position_private_list_results = position_list_manager.retrieve_all_positions_for_voter(
+        to_voter_id, to_voter_we_vote_id,
+        stance_we_are_looking_for, friends_vs_public)
+    to_position_private_list = to_position_private_list_results['position_list']
+    if len(to_position_private_list):
+        # If the to_voter already has private positions, we don't want to copy because we might create collisions
+        copy_private_positions = False
 
-        if results['position_found']:
-            # Look to see if there is a statement that can be preserved (i.e., moved from from_position to to_position
-            to_position_entry = results['position']
-            if not positive_value_exists(to_position_entry.statement_html):
-                # If the "to_position" does NOT have a statement_html, we look to see if the "from_position" has one
-                # we can use
-                if positive_value_exists(from_position_entry.statement_html):
-                    to_position_entry.statement_html = from_position_entry.statement_html
-            if not positive_value_exists(to_position_entry.statement_text):
-                # If the "to_position" does NOT have a statement_html, we look to see if the "from_position" has one
-                # we can use
-                if positive_value_exists(from_position_entry.statement_text):
-                    to_position_entry.statement_text = from_position_entry.statement_text
-            # Update the organization values
-            to_position_entry.organization_we_vote_id = to_voter_linked_organization_we_vote_id
-            to_position_entry.organization_id = to_voter_linked_organization_id
-            try:
-                to_position_entry.save()
-            except Exception as e:
-                status += "MOVE_TO_ANOTHER_VOTER-UNABLE_TO_SAVE_FRIENDS_ONLY_ORGANIZATION_UPDATE "
-        else:
+    # These are entries found from the from_voter identifiers. May not include positions
+    #  stored with the from_organization identifiers
+    if copy_private_positions:
+        position_entries_moved = 0
+        position_entries_not_moved = 0
+        for from_position_entry in from_position_private_list:
             # Change the position values to the new values
             try:
+                from_position_entry.id = None
+                from_position_entry.pk = None
+                from_position_entry.we_vote_id = None
+                from_position_entry.generate_new_we_vote_id()
                 from_position_entry.organization_id = to_voter_linked_organization_id
                 from_position_entry.organization_we_vote_id = to_voter_linked_organization_we_vote_id
                 from_position_entry.voter_id = to_voter_id
                 from_position_entry.voter_we_vote_id = to_voter_we_vote_id
                 from_position_entry.save()
                 position_entries_moved += 1
+                total_position_entries_moved += 1
             except Exception as e:
-                status += "MOVE_TO_ANOTHER_VOTER-UNABLE_TO_SAVE_FRIENDS_ONLY_ORGANIZATION_UPDATE2 "
                 position_entries_not_moved += 1
+                total_position_entries_not_moved += 1
+        status += "DUPLICATE_TO_ANOTHER_VOTER-SAVED_FRIENDS_ONLY_POSITIONS, " \
+                  "moved: {moved} " \
+                  "not moved: {not_moved}" \
+                  "".format(moved=position_entries_moved, not_moved=position_entries_not_moved)
 
-    from_position_private_list_remaining_results = position_list_manager.retrieve_all_positions_for_voter(
-        from_voter_id, from_voter_we_vote_id,
-        stance_we_are_looking_for, friends_vs_public)
-    from_position_private_list_remaining = from_position_private_list_remaining_results['position_list']
-    for from_position_entry in from_position_private_list_remaining:
-        # Delete the remaining position values
-        try:
-            # Leave this turned off until testing is finished
-            # from_position_entry.delete()
-            pass
-        except Exception as e:
-            pass
-
-    # Find public positions for the "from_voter" that we are moving away from
+    # Find public positions for the "from_voter" that we are duplicating
     stance_we_are_looking_for = ANY_STANCE
     friends_vs_public = PUBLIC_ONLY
     from_position_public_results = position_list_manager.retrieve_all_positions_for_voter(
@@ -828,66 +660,38 @@ def duplicate_positions_to_another_voter(from_voter_id, from_voter_we_vote_id,
         stance_we_are_looking_for, friends_vs_public)
     from_position_public_list = from_position_public_results['position_list']
 
-    position_we_vote_id = ""
-    # We don't want the organization_id to affect the retrieve
-    empty_organization_id = 0
-    empty_organization_we_vote_id = 0
-    for from_position_entry in from_position_public_list:
-        # See if the "to_voter" already has the same entry
-        results = position_manager.retrieve_position_table_unknown(
-            position_we_vote_id, empty_organization_id, empty_organization_we_vote_id,
-            to_voter_id,
-            from_position_entry.contest_office_id, from_position_entry.candidate_campaign_id,
-            from_position_entry.contest_measure_id,
-            to_voter_we_vote_id,
-            from_position_entry.contest_office_we_vote_id,
-            from_position_entry.candidate_campaign_we_vote_id, from_position_entry.contest_measure_we_vote_id)
+    to_position_public_list_results = position_list_manager.retrieve_all_positions_for_voter(
+        to_voter_id, to_voter_we_vote_id,
+        stance_we_are_looking_for, friends_vs_public)
+    to_position_public_list = to_position_public_list_results['position_list']
+    if len(to_position_public_list):
+        # If the to_voter already has public positions, we don't want to copy because we might create collisions
+        copy_public_positions = False
 
-        if results['position_found']:
-            # Look to see if there is a statement that can be preserved
-            to_position_entry = results['position']
-            if not positive_value_exists(to_position_entry.statement_html):
-                # If the "to_position" does NOT have a statement_html, we look to see if the "from_position" has one
-                # we can use
-                if positive_value_exists(from_position_entry.statement_html):
-                    to_position_entry.statement_html = from_position_entry.statement_html
-            if not positive_value_exists(to_position_entry.statement_text):
-                # If the "to_position" does NOT have a statement_html, we look to see if the "from_position" has one
-                # we can use
-                if positive_value_exists(from_position_entry.statement_text):
-                    to_position_entry.statement_text = from_position_entry.statement_text
-            # Update the organization values
-            to_position_entry.organization_we_vote_id = to_voter_linked_organization_we_vote_id
-            to_position_entry.organization_id = to_voter_linked_organization_id
+    if copy_public_positions:
+        position_entries_moved = 0
+        position_entries_not_moved = 0
+        for from_position_entry in from_position_public_list:
+            # Change the position values to the new values
             try:
-                to_position_entry.save()
-            except Exception as e:
-                status += "MOVE_TO_ANOTHER_VOTER-UNABLE_TO_SAVE_PUBLIC_ORGANIZATION_UPDATE "
-        else:
-            # Change the position values to the new we_vote_id
-            try:
+                from_position_entry.id = None
+                from_position_entry.pk = None
+                from_position_entry.we_vote_id = None
+                from_position_entry.generate_new_we_vote_id()
                 from_position_entry.organization_id = to_voter_linked_organization_id
                 from_position_entry.organization_we_vote_id = to_voter_linked_organization_we_vote_id
                 from_position_entry.voter_id = to_voter_id
                 from_position_entry.voter_we_vote_id = to_voter_we_vote_id
                 from_position_entry.save()
                 position_entries_moved += 1
+                total_position_entries_moved += 1
             except Exception as e:
                 position_entries_not_moved += 1
-                status += "MOVE_TO_ANOTHER_VOTER-UNABLE_TO_SAVE_PUBLIC_ORGANIZATION_UPDATE2 "
-
-    from_position_public_results = position_list_manager.retrieve_all_positions_for_voter(
-        from_voter_id, from_voter_we_vote_id,
-        stance_we_are_looking_for, friends_vs_public)
-    from_position_public_list_remaining = from_position_public_results['position_list']
-    for from_position_entry in from_position_public_list_remaining:
-        # Delete the remaining position values
-        try:
-            # Leave this turned off until testing is finished
-            # from_position_entry.delete()
-            pass
-        except Exception as e:
-            pass
+                total_position_entries_not_moved += 1
+        status += "DUPLICATE_TO_ANOTHER_VOTER-SAVED_PUBLIC_POSITIONS, " \
+                  "moved: {moved} " \
+                  "not moved: {not_moved}" \
+                  "".format(moved=position_entries_moved, not_moved=position_entries_not_moved)
 
     results = {
         'status':                       status,
@@ -896,8 +700,8 @@ def duplicate_positions_to_another_voter(from_voter_id, from_voter_we_vote_id,
         'from_voter_we_vote_id':        from_voter_we_vote_id,
         'to_voter_id':                  to_voter_id,
         'to_voter_we_vote_id':          to_voter_we_vote_id,
-        'position_entries_moved':       position_entries_moved,
-        'position_entries_not_moved':   position_entries_not_moved,
+        'position_entries_moved':       total_position_entries_moved,
+        'position_entries_not_moved':   total_position_entries_not_moved,
     }
     return results
 

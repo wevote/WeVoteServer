@@ -408,7 +408,7 @@ class VoterGuideManager(models.Manager):
                             status = " NO_CHANGES_SAVED_TO_ORG_TWITTER_DETAILS"
 
                 voter_guide_list_manager = VoterGuideListManager()
-                results = voter_guide_list_manager.retrieve_all_voter_guides_for_one_organization(
+                results = voter_guide_list_manager.retrieve_all_voter_guides_by_organization_we_vote_id(
                     organization.we_vote_id)
                 if positive_value_exists(results['voter_guide_list_found']):
                     voter_guide_list = results['voter_guide_list']
@@ -688,19 +688,23 @@ class VoterGuide(models.Model):
         if self.we_vote_id:
             self.we_vote_id = self.we_vote_id.strip().lower()
         if self.we_vote_id == "" or self.we_vote_id is None:  # If there isn't a value...
-            # ...generate a new id
-            site_unique_id_prefix = fetch_site_unique_id_prefix()
-            next_local_integer = fetch_next_we_vote_id_last_voter_guide_integer()
-            # "wv" = We Vote
-            # site_unique_id_prefix = a generated (or assigned) unique id for one server running We Vote
-            # "vg" = tells us this is a unique id for a voter guide
-            # next_integer = a unique, sequential integer for this server - not necessarily tied to database id
-            self.we_vote_id = "wv{site_unique_id_prefix}vg{next_integer}".format(
-                site_unique_id_prefix=site_unique_id_prefix,
-                next_integer=next_local_integer,
-            )
-            # TODO we need to deal with the situation where we_vote_id is NOT unique on save
+            self.generate_new_we_vote_id()
         super(VoterGuide, self).save(*args, **kwargs)
+
+    def generate_new_we_vote_id(self):
+        # ...generate a new id
+        site_unique_id_prefix = fetch_site_unique_id_prefix()
+        next_local_integer = fetch_next_we_vote_id_last_voter_guide_integer()
+        # "wv" = We Vote
+        # site_unique_id_prefix = a generated (or assigned) unique id for one server running We Vote
+        # "vg" = tells us this is a unique id for a voter guide
+        # next_integer = a unique, sequential integer for this server - not necessarily tied to database id
+        self.we_vote_id = "wv{site_unique_id_prefix}vg{next_integer}".format(
+            site_unique_id_prefix=site_unique_id_prefix,
+            next_integer=next_local_integer,
+        )
+        # TODO we need to deal with the situation where we_vote_id is NOT unique on save
+        return
 
 
 # This is the class that we use to rapidly show lists of voter guides, regardless of whether they are from an
@@ -802,12 +806,25 @@ class VoterGuideListManager(models.Model):
         }
         return results
 
-    def retrieve_all_voter_guides_for_one_organization(self, organization_we_vote_id):
+    def retrieve_all_voter_guides_by_organization_we_vote_id(self, organization_we_vote_id):
+        return self.retrieve_all_voter_guides(organization_we_vote_id)
+
+    def retrieve_all_voter_guides_by_voter_id(self, owner_voter_id):
+        organization_we_vote_id = ""
+        return self.retrieve_all_voter_guides(organization_we_vote_id, owner_voter_id)
+
+    def retrieve_all_voter_guides_by_voter_we_vote_id(self, owner_voter_we_vote_id):
+        organization_we_vote_id = ""
+        owner_voter_id = 0
+        return self.retrieve_all_voter_guides(organization_we_vote_id, owner_voter_id, owner_voter_we_vote_id)
+
+    def retrieve_all_voter_guides(self, organization_we_vote_id, owner_voter_id=0, owner_voter_we_vote_id=""):
         voter_guide_list = []
         voter_guide_list_found = False
 
-        if not positive_value_exists(organization_we_vote_id):
-            status = 'NO_VOTER_GUIDES_FOUND_FOR_THIS_ORGANIZATION'
+        if not positive_value_exists(organization_we_vote_id) and not positive_value_exists(owner_voter_id) and \
+                not positive_value_exists(owner_voter_we_vote_id):
+            status = 'NO_VOTER_GUIDES_FOUND-MISSING_REQUIRED_VARIABLE'
             success = False
             results = {
                 'success':                      success,
@@ -819,19 +836,26 @@ class VoterGuideListManager(models.Model):
 
         try:
             voter_guide_queryset = VoterGuide.objects.all()
-            voter_guide_queryset = voter_guide_queryset.filter(
-                organization_we_vote_id__iexact=organization_we_vote_id)
+            if positive_value_exists(organization_we_vote_id):
+                voter_guide_queryset = voter_guide_queryset.filter(
+                    organization_we_vote_id__iexact=organization_we_vote_id)
+            elif positive_value_exists(owner_voter_id):
+                voter_guide_queryset = voter_guide_queryset.filter(
+                    owner_voter_id=owner_voter_id)
+            elif positive_value_exists(owner_voter_we_vote_id):
+                voter_guide_queryset = voter_guide_queryset.filter(
+                    owner_voter_we_vote_id__iexact=owner_voter_we_vote_id)
             voter_guide_list = voter_guide_queryset
 
             if len(voter_guide_list):
                 voter_guide_list_found = True
-                status = 'VOTER_GUIDES_FOUND_BY_ORGANIZATION_WE_VOTE_ID'
+                status = 'VOTER_GUIDES_FOUND '
             else:
-                status = 'NO_VOTER_GUIDES_FOUND_BY_ORGANIZATION_WE_VOTE_ID'
+                status = 'NO_VOTER_GUIDES_FOUND '
             success = True
         except Exception as e:
             handle_record_not_found_exception(e, logger=logger)
-            status = 'retrieve_all_voter_guides_for_one_organization: Unable to retrieve voter guides from db. ' \
+            status = 'retrieve_all_voter_guides_by_organization_we_vote_id: Unable to retrieve voter guides from db. ' \
                      '{error} [type: {error_type}]'.format(error=e.message, error_type=type(e))
             success = False
 

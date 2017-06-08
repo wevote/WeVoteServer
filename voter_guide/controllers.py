@@ -25,6 +25,94 @@ WE_VOTE_API_KEY = get_environment_variable("WE_VOTE_API_KEY")
 VOTER_GUIDES_SYNC_URL = get_environment_variable("VOTER_GUIDES_SYNC_URL")
 
 
+def duplicate_voter_guides(from_voter_id, from_voter_we_vote_id, from_organization_we_vote_id,
+                           to_voter_id, to_voter_we_vote_id, to_organization_we_vote_id):
+    status = ''
+    success = False
+    voter_guides_duplicated = 0
+    voter_guides_not_duplicated = 0
+    organization_manager = OrganizationManager()
+    voter_guide_list_manager = VoterGuideListManager()
+    voter_guide_manager = VoterGuideManager()
+    voter_guide_list = voter_guide_list_manager.retrieve_all_voter_guides_by_voter_id(from_voter_id)
+
+    for from_voter_guide in voter_guide_list:
+        # TODO When we want to heal the data
+        # try:
+        #     from_voter_guide.save()
+        # except Exception as e:
+        #     pass
+
+        # See if the "to_voter_organization" already has an entry for this organization
+        voter_guide_id = 0
+        google_civic_election_id = 0
+        vote_smart_time_span = None
+        public_figure_we_vote_id = None
+        existing_entry_results = voter_guide_manager.retrieve_voter_guide(
+            voter_guide_id, google_civic_election_id, vote_smart_time_span,
+            to_organization_we_vote_id, public_figure_we_vote_id, to_voter_we_vote_id)
+        if not existing_entry_results['voter_guide_found']:
+            try:
+                from_voter_guide.id = None  # Reset the id so a new entry is created
+                from_voter_guide.pk = None
+                from_voter_guide.we_vote_id = None  # Clear out existing we_vote_id
+                from_voter_guide.generate_new_we_vote_id()
+                # Now replace with to_voter info
+                from_voter_guide.owner_voter_id = to_voter_id
+                from_voter_guide.owner_voter_we_vote_id = to_voter_we_vote_id
+                from_voter_guide.organization_we_vote_id = to_organization_we_vote_id
+                from_voter_guide.save()
+                voter_guides_duplicated += 1
+            except Exception as e:
+                voter_guides_not_duplicated += 1
+
+    # Now retrieve by organization_we_vote_id in case there is damaged data
+    voter_guide_list = voter_guide_list_manager.retrieve_all_voter_guides_by_organization_we_vote_id(
+        from_organization_we_vote_id)
+
+    for from_voter_guide in voter_guide_list:
+        # TODO When we want to heal the data
+        # try:
+        #     from_voter_guide.save()
+        # except Exception as e:
+        #     pass
+
+        # See if the "to_voter_organization" already has an entry for this organization
+        voter_guide_id = 0
+        google_civic_election_id = 0
+        vote_smart_time_span = None
+        public_figure_we_vote_id = None
+        existing_entry_results = voter_guide_manager.retrieve_voter_guide(
+            voter_guide_id, google_civic_election_id, vote_smart_time_span,
+            to_organization_we_vote_id, public_figure_we_vote_id, to_voter_we_vote_id)
+        if not existing_entry_results['voter_guide_found']:
+            try:
+                from_voter_guide.id = None  # Reset the id so a new entry is created
+                from_voter_guide.pk = None
+                from_voter_guide.we_vote_id = None  # Clear out existing we_vote_id
+                from_voter_guide.generate_new_we_vote_id()
+                # Now replace with to_voter info
+                from_voter_guide.owner_voter_id = to_voter_id
+                from_voter_guide.owner_voter_we_vote_id = to_voter_we_vote_id
+                from_voter_guide.organization_we_vote_id = to_organization_we_vote_id
+                from_voter_guide.save()
+                voter_guides_duplicated += 1
+            except Exception as e:
+                voter_guides_not_duplicated += 1
+
+    results = {
+        'status':                       status,
+        'success':                      success,
+        'from_voter_id':                from_voter_id,
+        'from_voter_we_vote_id':        from_voter_we_vote_id,
+        'to_voter_id':                  to_voter_id,
+        'to_voter_we_vote_id':          to_voter_we_vote_id,
+        'voter_guides_duplicated':      voter_guides_duplicated,
+        'voter_guides_not_duplicated':  voter_guides_not_duplicated,
+    }
+    return results
+
+
 def voter_guides_import_from_master_server(request, google_civic_election_id):
     """
     Get the json data, and either create new entries or update existing

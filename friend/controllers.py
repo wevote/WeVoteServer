@@ -1647,7 +1647,7 @@ def move_friends_to_another_voter(from_voter_we_vote_id, to_voter_we_vote_id):
     to_friend_list = to_friend_results['current_friend_list']
 
     for from_friend_entry in from_friend_list:
-        # See if the "to_voter" already has an entry for this organization
+        # See if the "to_voter" already has a matching entry
         to_friend_found = False
         from_friend_other_friend = from_friend_entry.fetch_other_voter_we_vote_id(from_voter_we_vote_id)
         # Cycle through all of the "to_voter" current_friend entries and if there isn't one, create it
@@ -1673,8 +1673,7 @@ def move_friends_to_another_voter(from_voter_we_vote_id, to_voter_we_vote_id):
         # Delete the remaining friendship values
         try:
             # Leave this turned off until testing is finished
-            # from_friend_entry.delete()
-            pass
+            from_friend_entry.delete()
         except Exception as e:
             pass
 

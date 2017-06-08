@@ -114,7 +114,7 @@ INSTALLED_APPS = (
     'rest_framework',
     'support_oppose_deciding',
     'search',
-    'signals',
+    # 'signals',
     'tag',
     'twitter',  # See also import_export_twitter
     'voter',  # See also AUTH_USER_MODEL in config/settings.py
