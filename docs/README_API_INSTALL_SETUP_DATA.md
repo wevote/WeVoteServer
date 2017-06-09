@@ -23,6 +23,10 @@ In order to retrieve fresh ballot data, you will need to sign up for a Google Ci
   - When you find it, click the "Enable API" button.
   - Copy your newly generated key and paste it into config/environment_variables.json as the value for GOOGLE_CIVIC_API_KEY
   
+  
+  * Note: if your email address is part of a G Suite domain, you may not have the admin access rights to create a project.  If so, logout of the G Suite account and use your personal account to create the project.
+  
+  
 ### Vote Smart
 We also have a paid subscription with Vote Smart. You can sign up for a 
 [Vote Smart developer key](http://votesmart.org/share/api/register#.VrIx4VMrJhE), or reach out to 

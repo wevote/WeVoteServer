@@ -102,6 +102,7 @@ class VoterGuideManager(models.Manager):
         organization_found = False
         voter_guide_owner_type = ORGANIZATION
         exception_multiple_object_returned = False
+        new_voter_guide_created = False
         if not vote_smart_time_span or not organization_we_vote_id:
             status = 'ERROR_VARIABLES_MISSING_FOR_ORGANIZATION_VOTER_GUIDE_BY_TIME_SPAN'
             success = False
