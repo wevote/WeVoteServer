@@ -494,6 +494,11 @@ def retrieve_one_ballot_from_google_civic_api(text_for_map_search, incoming_goog
     polling_location_retrieved = False
     contests_retrieved = False
     google_civic_election_id = 0
+    error = structured_json.get('error', {})
+    errors = error.get('errors', {})
+    if len('errors'):
+        logger.error("retrieve_one_ballot_from_google_civic_api failed: " + json.dumps(errors), {}, {})
+
     if 'election' in structured_json:
         if 'id' in structured_json['election']:
             election_data_retrieved = True
