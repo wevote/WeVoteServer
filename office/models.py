@@ -82,8 +82,8 @@ class ContestOffice(models.Model):
     # "Yes" or "No" depending on whether this a contest being held outside the normal election cycle.
     special = models.CharField(verbose_name="google civic primary party", max_length=255, null=True, blank=True)
     ctcl_uuid = models.CharField(verbose_name="ctcl uuid", max_length=80, null=True, blank=True)
-    office_description = models.CharField(verbose_name="office description", max_length=255, null=True, blank=True)
-    office_is_partisan = models.BooleanField(verbose_name="office is_partisan", default=False)
+    elected_office_name = models.CharField(verbose_name="name of the elected office", max_length=255, null=True,
+                                           blank=True, default=None)
 
     def get_office_state(self):
         if positive_value_exists(self.state_code):
@@ -398,6 +398,104 @@ class ContestOfficeManager(models.Model):
             contest_office_id = 0
 
         return contest_office_id
+
+    def create_contest_office_row_entry(self, contest_office_name, state_code, contest_office_votes_allowed, ctcl_uuid,
+                                        contest_office_number_elected, google_civic_election_id, ):
+        """
+        Create ContestOffice table entry with ContestOffice details 
+        :param contest_office_name: 
+        :param state_code: 
+        :param contest_office_votes_allowed: 
+        :param ctcl_uuid: 
+        :param contest_office_number_elected: 
+        :param google_civic_election_id: 
+        :return: 
+        """
+
+        success = False
+        status = ""
+        contest_office_updated = False
+        new_contest_office_created = False
+        new_contest_office = ''
+
+        try:
+            new_contest_office = ContestOffice.objects.create(
+                office_name=contest_office_name, state_code=state_code,
+                number_voting_for=contest_office_votes_allowed, ctcl_uuid=ctcl_uuid,
+                number_elected=contest_office_number_elected,
+                google_civic_election_id=google_civic_election_id)
+            if new_contest_office:
+                success = True
+                status = "CONTEST_OFFICE_CREATED"
+                new_contest_office_created = True
+            else:
+                success = False
+                status = "CONTEST_OFFICE_CREATE_FAILED"
+        except Exception as e:
+            success = False
+            new_contest_office_created = False
+            status = "CONTEST_OFFICE_RETRIEVE_ERROR"
+            handle_exception(e, logger=logger, exception_message=status)
+
+        results = {
+                'success':                      success,
+                'status':                       status,
+                'new_contest_office_created':   new_contest_office_created,
+                'contest_office_updated':       contest_office_updated,
+                'new_contest_office':           new_contest_office,
+            }
+        return results
+
+    def update_contest_office_row_entry(self, contest_office_name, state_code, contest_office_votes_allowed, ctcl_uuid,
+                                        contest_office_number_elected, google_civic_election_id,
+                                        contest_office_we_vote_id):
+        """
+        Update ContestOffice table entry with matching we_vote_id 
+        :param contest_office_name: 
+        :param state_code: 
+        :param contest_office_votes_allowed: 
+        :param ctcl_uuid: 
+        :param contest_office_number_elected: 
+        :param google_civic_election_id: 
+        :param elected_office_we_vote_id: 
+        :return: 
+        """
+
+        success = False
+        status = ""
+        contest_office_updated = False
+        # new_contest_office_created = False
+        # new_contest_office = ''
+        existing_contest_office_entry = ''
+
+        try:
+            existing_contest_office_entry = ContestOffice.objects.get(we_vote_id=contest_office_we_vote_id)
+            if existing_contest_office_entry:
+                # found the existing entry, update the values
+                existing_contest_office_entry.office_name = contest_office_name
+                existing_contest_office_entry.state_code = state_code
+                existing_contest_office_entry.google_civic_election_id = google_civic_election_id
+                existing_contest_office_entry.number_elected = contest_office_number_elected
+                existing_contest_office_entry.ctcl_uuid = ctcl_uuid
+                existing_contest_office_entry.number_voted_for = contest_office_votes_allowed
+                # now go ahead and save this entry (update)
+                existing_contest_office_entry.save()
+                contest_office_updated = True
+                success = True
+                status = "CONTEST_OFFICE_UPDATED"
+        except Exception as e:
+            success = False
+            contest_office_updated = False
+            status = "CONTEST_OFFICE_RETRIEVE_ERROR"
+            handle_exception(e, logger=logger, exception_message=status)
+
+        results = {
+                'success':                      success,
+                'status':                       status,
+                'contest_office_updated':       contest_office_updated,
+                'updated_contest_office':       existing_contest_office_entry,
+            }
+        return results
 
 
 class ContestOfficeListManager(models.Model):
