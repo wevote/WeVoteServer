@@ -29,7 +29,7 @@ def candidates_import_from_sample_file():
     :return:
     """
     # Load saved json from local file
-    logger.info("Loading CandidateCampaigns from local file")
+    logger.info("Loading CandidateCampaigns from local file", {}, {})
 
     with open("candidate/import_data/candidate_campaigns_sample.json") as json_data:
         structured_json = json.load(json_data)
@@ -43,7 +43,7 @@ def candidates_import_from_master_server(request, google_civic_election_id='', s
     :return:
     """
     messages.add_message(request, messages.INFO, "Loading Candidates from We Vote Master servers")
-    logger.info("Loading Candidates from We Vote Master servers")
+    logger.info("Loading Candidates from We Vote Master servers", {}, {})
     # Request json file from We Vote servers
     request = requests.get(CANDIDATES_SYNC_URL, params={
         "key": WE_VOTE_API_KEY,  # This comes from an environment variable

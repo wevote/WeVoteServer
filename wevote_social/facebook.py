@@ -29,7 +29,7 @@ class FacebookAPI(object):
         try:
             friends = json.loads(urlopen(request).read()).get('data')
         except Exception as err:
-            logger.error(err)
+            logger.error(err, {}, {})
 
         return friends
 

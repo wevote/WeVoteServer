@@ -345,7 +345,7 @@ class PositionEntered(models.Model):
         try:
             candidate_campaign = CandidateCampaign.objects.get(id=self.candidate_campaign_id)
         except CandidateCampaign.MultipleObjectsReturned as e:
-            logger.error("position.candidate_campaign Found multiple")
+            logger.error("position.candidate_campaign Found multiple", {}, {})
             return
         except CandidateCampaign.DoesNotExist:
             return
@@ -357,7 +357,7 @@ class PositionEntered(models.Model):
         try:
             contest_measure = ContestMeasure.objects.get(id=self.contest_measure_id)
         except ContestMeasure.MultipleObjectsReturned as e:
-            logger.error("position.contest_measure Found multiple")
+            logger.error("position.contest_measure Found multiple", {}, {})
             return
         except ContestMeasure.DoesNotExist:
             return
@@ -370,7 +370,7 @@ class PositionEntered(models.Model):
             election = Election.objects.get(google_civic_election_id=self.google_civic_election_id)
         except Election.MultipleObjectsReturned as e:
             handle_record_found_more_than_one_exception(e, logger=logger)
-            logger.error("position.election Found multiple")
+            logger.error("position.election Found multiple", {}, {})
             return
         except Election.DoesNotExist:
             return
@@ -383,7 +383,7 @@ class PositionEntered(models.Model):
             organization = Organization.objects.get(id=self.organization_id)
         except Organization.MultipleObjectsReturned as e:
             handle_record_found_more_than_one_exception(e, logger=logger)
-            logger.error("position.organization Found multiple")
+            logger.error("position.organization Found multiple", {}, {})
             return
         except Organization.DoesNotExist:
             return
@@ -685,7 +685,7 @@ class PositionForFriends(models.Model):
             candidate_campaign = CandidateCampaign.objects.get(id=self.candidate_campaign_id)
         except CandidateCampaign.MultipleObjectsReturned as e:
             handle_record_found_more_than_one_exception(e, logger=logger)
-            logger.error("position.candidate_campaign Found multiple")
+            logger.error("position.candidate_campaign Found multiple", {}, {})
             return
         except CandidateCampaign.DoesNotExist:
             return
@@ -698,7 +698,7 @@ class PositionForFriends(models.Model):
             contest_measure = ContestMeasure.objects.get(id=self.contest_measure_id)
         except ContestMeasure.MultipleObjectsReturned as e:
             handle_record_found_more_than_one_exception(e, logger=logger)
-            logger.error("position.candidate_campaign Found multiple")
+            logger.error("position.candidate_campaign Found multiple", {}, {})
             return
         except ContestMeasure.DoesNotExist:
             return
@@ -711,7 +711,7 @@ class PositionForFriends(models.Model):
             election = Election.objects.get(google_civic_election_id=self.google_civic_election_id)
         except Election.MultipleObjectsReturned as e:
             handle_record_found_more_than_one_exception(e, logger=logger)
-            logger.error("position.election Found multiple")
+            logger.error("position.election Found multiple", {}, {})
             return
         except Election.DoesNotExist:
             return
@@ -724,7 +724,7 @@ class PositionForFriends(models.Model):
             organization = Organization.objects.get(id=self.organization_id)
         except Organization.MultipleObjectsReturned as e:
             handle_record_found_more_than_one_exception(e, logger=logger)
-            logger.error("position.organization Found multiple")
+            logger.error("position.organization Found multiple", {}, {})
             return
         except Organization.DoesNotExist:
             return

@@ -676,10 +676,10 @@ class VoterGuide(models.Model):
             organization = Organization.objects.get(we_vote_id=self.organization_we_vote_id)
         except Organization.MultipleObjectsReturned as e:
             handle_record_found_more_than_one_exception(e, logger=logger)
-            logger.error("voter_guide.organization Found multiple")
+            logger.error("voter_guide.organization Found multiple", {}, {})
             return
         except Organization.DoesNotExist:
-            logger.error("voter_guide.organization did not find")
+            logger.error("voter_guide.organization did not find", {}, {})
             return
         return organization
 
@@ -1425,9 +1425,9 @@ class VoterGuidePossibility(models.Model):
             organization = Organization.objects.get(we_vote_id=self.organization_we_vote_id)
         except Organization.MultipleObjectsReturned as e:
             handle_record_found_more_than_one_exception(e, logger=logger)
-            logger.error("voter_guide.organization Found multiple")
+            logger.error("voter_guide.organization Found multiple", {}, {})
             return
         except Organization.DoesNotExist:
-            logger.error("voter_guide.organization did not find")
+            logger.error("voter_guide.organization did not find", {}, {})
             return
         return organization

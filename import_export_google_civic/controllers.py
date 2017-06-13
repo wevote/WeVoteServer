@@ -154,7 +154,7 @@ def process_candidates_from_structured_json(
 def process_contest_office_from_structured_json(
         one_contest_office_structured_json, google_civic_election_id, ocd_division_id, local_ballot_order, state_code,
         voter_id, polling_location_we_vote_id):
-    logger.debug("General contest_type")
+    logger.debug("General contest_type", {}, {})
 
     # Protect against the case where this is NOT an office
     if 'candidates' not in one_contest_office_structured_json:
@@ -686,7 +686,7 @@ def store_one_ballot_from_google_civic_api(one_ballot_json, voter_id=0, polling_
 # See import_data/election_query_sample.json
 def retrieve_from_google_civic_api_election_query():
     # Request json file from Google servers
-    logger.info("Loading json data from Google servers, API call electionQuery")
+    logger.info("Loading json data from Google servers, API call electionQuery", {}, {})
     if not positive_value_exists(ELECTION_QUERY_URL):
         results = {
             'success':  False,
