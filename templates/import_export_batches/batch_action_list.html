@@ -213,6 +213,22 @@
                     <td></td>
                     <td>{{ one_batch_row.batch_row_action.kind_of_action }}</td>
                 </tr>
+                {% elif one_batch_row.kind_of_batch == "CANDIDATE" %}
+            {# ### CANDIDATE### #}
+                <tr>
+                    <th></th>
+                    <th>candidate_name</th>
+                    <th>candidate_party_name</th>
+                    <th>ALERTS</th>
+                    <th>ACTIONS</th>
+                </tr>
+                <tr>
+                    <td>analysis:</td>
+                    <td>{{ one_batch_row.batch_row_action.candidate_name}}</td>
+                    <td>{{ one_batch_row.batch_row_action.party }}</td>
+                    <td></td>
+                    <td>{{ one_batch_row.batch_row_action.kind_of_action }}</td>
+                </tr>
                 {% elif one_batch_row.kind_of_batch == "POLITICIAN" %}
             {# ### POLITICIAN### #}
                 <tr>

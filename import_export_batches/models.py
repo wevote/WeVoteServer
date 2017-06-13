@@ -344,10 +344,10 @@ class BatchManager(models.Model):
             status = "BATCH_ROW_ACTION_MEASURE_RETRIEVE_ERROR"
 
         results = {
-            'success':                          success,
-            'status':                           status,
-            'batch_row_action_found':           batch_row_action_found,
-            'batch_row_action_measure':    batch_row_action_measure,
+            'success':                  success,
+            'status':                   status,
+            'batch_row_action_found':   batch_row_action_found,
+            'batch_row_action_measure': batch_row_action_measure,
         }
         return results
 
@@ -443,9 +443,9 @@ class BatchManager(models.Model):
             status = "BATCH_ROW_ACTION_POLITICIAN_RETRIEVE_ERROR"
 
         results = {
-            'success':                  success,
-            'status':                   status,
-            'batch_row_action_found':   batch_row_action_found,
+            'success':                      success,
+            'status':                       status,
+            'batch_row_action_found':       batch_row_action_found,
             'batch_row_action_politician':  batch_row_action_politician,
         }
         return results
@@ -459,7 +459,7 @@ class BatchManager(models.Model):
         """
 
         try:
-            batch_row_action_politician = BatchRowActionCandidate.objects.get(batch_header_id=batch_header_id,
+            batch_row_action_candidate = BatchRowActionCandidate.objects.get(batch_header_id=batch_header_id,
                                                                            batch_row_id=batch_row_id)
             batch_row_action_found = True
             success = True
@@ -479,7 +479,7 @@ class BatchManager(models.Model):
             'success':                      success,
             'status':                       status,
             'batch_row_action_found':       batch_row_action_found,
-            'batch_row_action_politician':  batch_row_action_candidate,
+            'batch_row_action_candidate':   batch_row_action_candidate,
         }
         return results
 
@@ -2208,6 +2208,10 @@ class BatchRowActionCandidate(models.Model):
     # Official Statement from Candidate in Ballot Guide
     ballot_guide_official_statement = models.TextField(verbose_name="official candidate statement from ballot guide",
                                                        null=True, blank=True, default="")
+    status = models.CharField(verbose_name="batch row action candidate status", max_length=80, null=True, blank=True)
+    ctcl_uuid = models.CharField(verbose_name="ctcl uuid", max_length=80, null=True, blank=True)
+    candidate_is_top_ticket = models.BooleanField(verbose_name="candidate is top ticket", default=False)
+    candidate_person_id = models.CharField(verbose_name="candidate person id", max_length=255, null=True, blank=True)
 
 
 class BatchRowActionOrganization(models.Model):
