@@ -1549,6 +1549,41 @@ class BatchManager(models.Model):
                 number_of_batch_action_rows = 0
         return number_of_batch_action_rows
 
+    def fetch_elected_office_name_from_elected_office_ctcl_id(self, elected_office_ctcl_id, batch_set_id):
+        """
+        Take in elected_office_ctcl_id, look up BatchRow and return elected_office_name
+        :param elected_office_ctcl_id: 
+        :return: 
+        """
+        elected_office_name = ''
+        batch_header_id = 0
+        try:
+            if positive_value_exists(batch_set_id):
+                batch_description_on_stage = BatchDescription.objects.get(batch_set_id=batch_set_id,
+                                                                          kind_of_batch=ELECTED_OFFICE)
+                if batch_description_on_stage:
+                    batch_header_id = batch_description_on_stage.batch_header_id
+        except BatchDescription.DoesNotExist:
+                elected_office_name = ''
+                pass
+        try:
+            batch_manager = BatchManager()
+            if positive_value_exists(batch_header_id) and elected_office_ctcl_id:
+                # TODO column name for elected_office_ctcl_id is hardcoded as batch_row_000 for now. Find a way to get
+                # the column name with given value
+                batch_header_map = BatchHeaderMap.objects.get(batch_header_id=batch_header_id)
+
+                batch_row_on_stage = BatchRow.objects.get(batch_header_id=batch_header_id,
+                                                               batch_row_000=elected_office_ctcl_id)
+                elected_office_name = batch_manager.retrieve_value_from_batch_row('elected_office_name',
+                                                                                  batch_header_map, batch_row_on_stage)
+                # elected_office_name = batch_row_on_stage.batch_row_001
+
+        except BatchRowActionElectedOffice.DoesNotExist:
+            elected_office_name = ''
+
+        return elected_office_name
+
 
 class BatchSet(models.Model):
     """
@@ -1912,10 +1947,10 @@ class BatchRowActionContestOffice(models.Model):
     # "Yes" or "No" depending on whether this a contest being held outside the normal election cycle.
     special = models.CharField(verbose_name="google civic primary party", max_length=255, null=True, blank=True)
     ctcl_uuid = models.CharField(verbose_name="ctcl uuid", max_length=80, null=True, blank=True)
-    contest_office_description = models.CharField(verbose_name="office description", max_length=255, null=True,
-                                                  blank=True)
-    contest_office_is_partisan = models.BooleanField(verbose_name='office is_partisan', default=False)
-    status = models.CharField(verbose_name="batch row action office status", max_length=80, null=True, blank=True)
+    status = models.CharField(verbose_name="batch row action contest office status", max_length=80, null=True,
+                              blank=True)
+    elected_office_name = models.CharField(verbose_name="name of the elected office", max_length=255, null=True,
+                                           blank=True, default=None)
 
 
 class BatchRowActionElectedOffice(models.Model):
@@ -1999,6 +2034,8 @@ class BatchRowActionElectedOffice(models.Model):
                                                      null=True, blank=True)
     elected_office_is_partisan = models.BooleanField(verbose_name='office is_partisan', default=False)
     status = models.CharField(verbose_name="batch row action office status", max_length=80, null=True, blank=True)
+    elected_office_ctcl_id = models.CharField(verbose_name="we vote permanent id for this elected office",
+                                              max_length=255, default=None, null=True, blank=True)
 
 
 class BatchRowActionPolitician(models.Model):
