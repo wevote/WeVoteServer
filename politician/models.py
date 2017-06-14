@@ -4,7 +4,7 @@
 
 # Politician-related Models
 from django.db import models
-from exception.models import handle_record_found_more_than_one_exception
+from exception.models import handle_exception, handle_record_found_more_than_one_exception
 from tag.models import Tag
 import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, convert_to_political_party_constant, \
@@ -106,7 +106,18 @@ class Politician(models.Model):
                                                               blank=True, null=True)
     we_vote_hosted_profile_image_url_tiny = models.URLField(verbose_name='we vote hosted tiny image url',
                                                             blank=True, null=True)
+    # ctcl politician fields
     ctcl_uuid = models.CharField(verbose_name="ctcl uuid", max_length=80, null=True, blank=True)
+    politician_facebook_id = models.CharField(verbose_name='politician facebook user name', max_length=255, null=True,
+                                              unique=False)
+    politician_phone_number = models.CharField(verbose_name='politician phone number', max_length=255, null=True,
+                                               unique=False)
+    politician_googleplus_id = models.CharField(verbose_name='politician googleplus profile name', max_length=255,
+                                                null=True, unique=False)
+    politician_youtube_id = models.CharField(verbose_name='politician youtube profile name', max_length=255, null=True,
+                                             unique=False)
+    politician_email_address = models.CharField(verbose_name='politician email address', max_length=80, null=True,
+                                                unique=False)
 
     # We override the save function so we can auto-generate we_vote_id
     def save(self, *args, **kwargs):
@@ -490,6 +501,134 @@ class PoliticianManager(models.Model):
         if results['success']:
             return results['politician_we_vote_id']
         return ''
+
+
+    def create_politician_row_entry(self, politician_name, politician_first_name, politician_middle_name,
+                                    politician_last_name, ctcl_uuid, political_party, politician_email_address,
+                                    politician_phone_number, politician_twitter_handle, politician_facebook_id,
+                                    politician_googleplus_id, politician_youtube_id, politician_website_url):
+        """
+        Create Politician table entry with Politician details
+        :param politician_name: 
+        :param politician_first_name: 
+        :param politician_middle_name: 
+        :param politician_last_name: 
+        :param ctcl_uuid: 
+        :param political_party: 
+        :param politician_email_address: 
+        :param politician_phone_number: 
+        :param politician_twitter_handle:
+        :param politician_facebook_id: 
+        :param politician_googleplus_id: 
+        :param politician_youtube_id: 
+        :param politician_website_url: 
+        :return: 
+        """
+        success = False
+        status = ""
+        politician_updated = False
+        new_politician_created = False
+        new_politician = ''
+
+        try:
+            new_politician = Politician.objects.create(politician_name=politician_name, first_name=politician_first_name,
+                                                       middle_name=politician_middle_name,
+                                                       last_name=politician_last_name, political_party=political_party,
+                                                       politician_email_address=politician_email_address,
+                                                       politician_phone_number=politician_phone_number,
+                                                       politician_twitter_handle=politician_twitter_handle,
+                                                       politician_facebook_id=politician_facebook_id,
+                                                       politician_googleplus_id=politician_googleplus_id,
+                                                       politician_youtube_id=politician_youtube_id,
+                                                       politician_url=politician_website_url,ctcl_uuid=ctcl_uuid)
+            if new_politician:
+                success = True
+                status = "POLITICIAN_CREATED"
+                new_politician_created = True
+            else:
+                success = False
+                status = "POLITICIAN_CREATE_FAILED"
+        except Exception as e:
+            success = False
+            new_politician_created = False
+            status = "POLITICIAN_RETRIEVE_ERROR"
+            handle_exception(e, logger=logger, exception_message=status)
+
+        results = {
+                'success':                  success,
+                'status':                   status,
+                'new_politician_created':   new_politician_created,
+                'politician_updated':       politician_updated,
+                'new_politician':           new_politician,
+            }
+        return results
+
+    def update_politician_row_entry(self, politician_name, politician_first_name, politician_middle_name,
+                                    politician_last_name, ctcl_uuid,political_party, politician_email_address,
+                                    politician_twitter_handle, politician_phone_number, politician_facebook_id,
+                                    politician_googleplus_id, politician_youtube_id, politician_website_url,
+                                    politician_we_vote_id):
+        """
+        Update Politician table entry with matching we_vote_id
+        :param politician_name: 
+        :param politician_first_name: 
+        :param politician_middle_name: 
+        :param politician_last_name: 
+        :param ctcl_uuid: 
+        :param political_party: 
+        :param politician_email_address: 
+        :param politician_twitter_handle: 
+        :param politician_phone_number: 
+        :param politician_facebook_id: 
+        :param politician_googleplus_id: 
+        :param politician_youtube_id: 
+        :param politician_website_url: 
+        :param politician_we_vote_id: 
+        :return: 
+        """
+
+        success = False
+        status = ""
+        politician_updated = False
+        # new_politician_created = False
+        # new_politician = ''
+        existing_politician_entry = ''
+
+        try:
+            existing_politician_entry = Politician.objects.get(we_vote_id=politician_we_vote_id)
+            if existing_politician_entry:
+                # found the existing entry, update the values
+                existing_politician_entry.politician_name = politician_name
+                existing_politician_entry.first_name = politician_first_name
+                existing_politician_entry.middle_name = politician_middle_name
+                existing_politician_entry.last_name = politician_last_name
+                existing_politician_entry.party_name = political_party
+                existing_politician_entry.ctcl_uuid = ctcl_uuid
+                existing_politician_entry.politician_phone_number = politician_phone_number
+                existing_politician_entry.twitter_handle = politician_twitter_handle
+                existing_politician_entry.politician_facebook_id = politician_facebook_id
+                existing_politician_entry.politician_googleplus_id = politician_googleplus_id
+                existing_politician_entry.politician_youtube_id = politician_youtube_id
+                existing_politician_entry.politician_url = politician_website_url
+                existing_politician_entry.politician_email_address = politician_email_address
+                # now go ahead and save this entry (update)
+                existing_politician_entry.save()
+                politician_updated = True
+                success = True
+                status = "POLITICIAN_UPDATED"
+        except Exception as e:
+            success = False
+            politician_updated = False
+            status = "POLITICIAN_RETRIEVE_ERROR"
+            handle_exception(e, logger=logger, exception_message=status)
+
+        results = {
+                'success':              success,
+                'status':               status,
+                'politician_updated':   politician_updated,
+                'updated_politician':   existing_politician_entry,
+            }
+        return results
 
 
 # def delete_all_politician_data():
