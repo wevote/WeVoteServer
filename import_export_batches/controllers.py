@@ -18,7 +18,7 @@ from .models import BatchManager, BatchDescription, BatchHeaderMap, BatchRow, Ba
     BatchRowActionCandidate
 from measure.models import ContestMeasure, ContestMeasureManager
 from office.models import ContestOffice, ContestOfficeManager, ElectedOffice, ElectedOfficeManager
-from politician.models import Politician
+from politician.models import Politician, PoliticianManager
 from electoral_district.controllers import retrieve_electoral_district
 from exception.models import handle_exception
 
@@ -733,9 +733,11 @@ def create_batch_row_action_politician(batch_description, batch_header_map, one_
     """
     batch_manager = BatchManager()
 
-    # new_action_politician_created = False
+    new_action_politician_created = False
     action_politician_updated = False
     batch_row_action_politician_status = ''
+    status = ''
+    politician_we_vote_id = ''
 
     # Find the column in the incoming batch_row with the header == politician_full_name
     politician_name = batch_manager.retrieve_value_from_batch_row("politician_full_name", batch_header_map,
@@ -781,6 +783,7 @@ def create_batch_row_action_politician(batch_description, batch_header_map, one_
                 if len(politician_item_list) == 1:
                     kind_of_action = 'ADD_TO_EXISTING'
                     single_politician_found = True
+                    politician_we_vote_id = politician_query.first().we_vote_id
                 else:
                     # more than one entry found with a match in Politician
                     kind_of_action = 'DO_NOT_PROCESS'
@@ -829,38 +832,85 @@ def create_batch_row_action_politician(batch_description, batch_header_map, one_
         batch_row_action_politician_status = "INSUFFICIENT_DATA_FOR_BATCH_ROW_ACTION_POLITICIAN_CREATE"
     if not single_politician_found and not multiple_politicians_found:
         kind_of_action = 'CREATE'
-    # Create a new entry in BatchRowActionPolitician
+
     try:
-        updated_values = {
-            'politician_name': politician_name,
-            'first_name': first_name,
-            'middle_name': middle_name,
-            'last_name': last_name,
-            'political_party': party_name,
-            'ctcl_uuid': ctcl_uuid,
-            'politician_email_address': email_address,
-            'politician_phone_number': phone_number,
-            'politician_twitter_handle': politician_twitter_handle,
-            'politician_facebook_id': facebook_id,
-            'politician_googleplus_id': googleplus_id,
-            'politician_youtube_id': youtube_id,
-            'politician_url': website_url,
-            'kind_of_action': kind_of_action,
-            'status': batch_row_action_politician_status
-        }
+        # Check if politician_name, state_code match exists in BatchRowActionElectedOffice
+        # for this header_id (Duplicate entries in the same data set
+        existing_batch_row_action_politician_query = BatchRowActionPolitician.objects.all()
+        existing_batch_row_action_politician_query = existing_batch_row_action_politician_query.filter(
+            batch_header_id=batch_description.batch_header_id, politician_name=politician_name)
+        existing_batch_row_action_politician_list = list(existing_batch_row_action_politician_query)
+        number_of_existing_entries = len(existing_batch_row_action_politician_list)
+        if not number_of_existing_entries:
+            # no entry exists, create one
+            updated_values = {
+                'politician_name': politician_name,
+                'first_name': first_name,
+                'middle_name': middle_name,
+                'last_name': last_name,
+                'political_party': party_name,
+                'ctcl_uuid': ctcl_uuid,
+                'politician_email_address': email_address,
+                'politician_phone_number': phone_number,
+                'politician_twitter_handle': politician_twitter_handle,
+                'politician_facebook_id': facebook_id,
+                'politician_googleplus_id': googleplus_id,
+                'politician_youtube_id': youtube_id,
+                'politician_url': website_url,
+                'kind_of_action': kind_of_action,
+                'status': batch_row_action_politician_status
+            }
 
-        batch_row_action_politician, new_action_politician_created = BatchRowActionPolitician.objects.update_or_create(
-            batch_header_id=batch_description.batch_header_id, batch_row_id=one_batch_row.id, defaults=updated_values)
-        # new_action_politician_created = True
-        success = True
-        status = "BATCH_ROW_ACTION_POLITICIAN_CREATED"
+            batch_row_action_politician, new_action_politician_created = BatchRowActionPolitician.objects.\
+                update_or_create(batch_header_id=batch_description.batch_header_id, batch_row_id=one_batch_row.id,
+                                 defaults=updated_values)
+            # new_action_politician_created = True
+            success = True
+            status += "CREATE_BATCH_ROW_ACTION_POLITICIAN-BATCH_ROW_ACTION_POLITICIAN_CREATED"
+        else:
+            # # if batch_header_id is same then it is a duplicate entry?
+            existing_politician_entry = existing_batch_row_action_politician_query.first()
+            if one_batch_row.id != existing_politician_entry.batch_row_id:
+                # duplicate entry, create a new entry but set kind_of_action as DO_NOT_PROCESS and
+                # set status as duplicate
+                # kind_of_action = 'DO_NOT_PROCESS'
+                updated_values = {
+                    'politician_name': politician_name,
+                    'first_name': first_name,
+                    'middle_name': middle_name,
+                    'last_name': last_name,
+                    'political_party': party_name,
+                    'ctcl_uuid': ctcl_uuid,
+                    'politician_email_address': email_address,
+                    'politician_phone_number': phone_number,
+                    'politician_twitter_handle': politician_twitter_handle,
+                    'politician_facebook_id': facebook_id,
+                    'politician_googleplus_id': googleplus_id,
+                    'politician_youtube_id': youtube_id,
+                    'politician_url': website_url,
+                    'kind_of_action': 'DO_NOT_PROCESS',
+                    'status': 'DUPLICATE_ELECTED_OFFICE_ENTRY',
+                }
 
+                batch_row_action_politician, new_action_politician_created = \
+                    BatchRowActionPolitician.objects.update_or_create(
+                        batch_header_id=batch_description.batch_header_id, batch_row_id=one_batch_row.id,
+                        defaults=updated_values)
+                status += 'CREATE_BATCH_ROW_ACTION_POLITICIAN-BATCH_ROW_ACTION_POLITICIAN_DUPLICATE_ENTRIES'
+                success = True
+                action_politician_updated = True
+                # this is a duplicate entry, mark it's kind_of_action as DO_NOT_PROCESS and status as duplicate
+            else:
+                # existing entry but not duplicate
+                status += 'CREATE_BATCH_ROW_ACTION_POLITICIAN_ENTRY_EXISTS'
+                success = True
+                batch_row_action_politician = existing_politician_entry
     except Exception as e:
         batch_row_action_politician = BatchRowActionPolitician()
         batch_row_action_found = False
         success = False
         new_action_politician_created = False
-        status = "BATCH_ROW_ACTION_POLITICIAN_RETRIEVE_ERROR"
+        status = "CREATE_BATCH_ROW_ACTION_POLITICIAN-BATCH_ROW_ACTION_POLITICIAN_RETRIEVE_ERROR"
         handle_exception(e, logger=logger, exception_message=status)
 
     results = {
@@ -1738,6 +1788,201 @@ def import_candidate_entry(batch_header_id, batch_row_id, create_entry_flag=Fals
     return results
 
 
+def import_politician_entry(batch_header_id, batch_row_id, create_entry_flag=False, update_entry_flag=False):
+    """
+    Import batch_rows for politician, CREATE or ADD_TO_EXISTING
+    Process batch row entries in order to create or update Politician entries
+    :param batch_header_id: 
+    :param batch_row_id: 
+    :param create_entry_flag: set to True for CREATE
+    :param update_entry_flag: set to True for ADD_TO_EXISTING
+    :return: 
+    """
+    success = False
+    status = ""
+    number_of_politicians_created = 0
+    number_of_politicians_updated = 0
+    kind_of_batch = ""
+    new_politician = ''
+    new_politician_created = False
+    batch_row_action_list_found = False
+
+    if not positive_value_exists(batch_header_id):
+        status = "IMPORT_POLITICIAN_ENTRY-BATCH_HEADER_ID_MISSING"
+        results = {
+            'success':                          success,
+            'status':                           status,
+            'number_of_politicians_created':    number_of_politicians_created,
+            'number_of_politicians_updated':    number_of_politicians_updated
+        }
+        return results
+
+    try:
+        batch_description = BatchDescription.objects.get(batch_header_id=batch_header_id)
+        batch_description_found = True
+    except BatchDescription.DoesNotExist:
+        # This is fine
+        batch_description = BatchDescription()
+        batch_description_found = False
+
+    if not batch_description_found:
+        status += "IMPORT_POLITICIAN_ENTRY-BATCH_DESCRIPTION_MISSING"
+        results = {
+            'success':                          success,
+            'status':                           status,
+            'number_of_politicians_created':    number_of_politicians_created,
+            'number_of_politicians_updated':    number_of_politicians_updated
+        }
+        return results
+
+        # kind_of_batch = batch_description.kind_of_batch
+
+    try:
+        batch_header_map = BatchHeaderMap.objects.get(batch_header_id=batch_header_id)
+        batch_header_map_found = True
+    except BatchHeaderMap.DoesNotExist:
+        # This is fine
+        batch_header_map = BatchHeaderMap()
+        batch_header_map_found = False
+
+    if not batch_header_map_found:
+        status += "IMPORT_POLITICIAN_ENTRY-BATCH_HEADER_MAP_MISSING"
+        results = {
+            'success':                          success,
+            'status':                           status,
+            'number_of_politicians_created':    number_of_politicians_created,
+            'number_of_politicians_updated':    number_of_politicians_updated
+        }
+        return results
+
+    batch_row_list_found = False
+    try:
+        batch_row_action_list = BatchRowActionPolitician.objects.all()
+        batch_row_action_list = batch_row_action_list.filter(batch_header_id=batch_header_id)
+        if positive_value_exists(batch_row_id):
+            batch_row_action_list = batch_row_action_list.filter(batch_row_id=batch_row_id)
+        elif positive_value_exists(create_entry_flag):
+            batch_row_action_list = batch_row_action_list.filter(kind_of_action=CREATE)
+            kind_of_action = CREATE
+        elif positive_value_exists(update_entry_flag):
+            batch_row_action_list = batch_row_action_list.filter(kind_of_action=ADD_TO_EXISTING)
+            kind_of_action = ADD_TO_EXISTING
+        else:
+            # error handling
+            status += "IMPORT_POLITICIAN_ENTRY-KIND_OF_ACTION_MISSING"
+            results = {
+                'success':                          success,
+                'status':                           status,
+                'number_of_politicians_created':    number_of_politicians_created,
+                'number_of_politicians_updated':    number_of_politicians_updated
+            }
+            return results
+
+        if len(batch_row_action_list):
+            batch_row_action_list_found = True
+
+    except BatchDescription.DoesNotExist:
+        batch_row_action_list = []
+        batch_row_action_list_found = False
+        pass
+
+    if not batch_row_action_list_found:
+        status += "IMPORT_POLITICIAN_ENTRY-BATCH_ROW_ACTION_LIST_MISSING"
+        results = {
+            'success':                          success,
+            'status':                           status,
+            'number_of_politicians_created':    number_of_politicians_created,
+            'number_of_politicians_updated':    number_of_politicians_updated
+        }
+        return results
+
+    for one_batch_action_row in batch_row_action_list:
+
+        # Find the column in the incoming batch_row with the header == politician_name
+        politician_name = one_batch_action_row.politician_name
+        politician_first_name = one_batch_action_row.first_name
+        politician_middle_name = one_batch_action_row.middle_name
+        politician_last_name = one_batch_action_row.last_name
+        ctcl_uuid = one_batch_action_row.ctcl_uuid
+        political_party = one_batch_action_row.political_party
+        politician_email_address = one_batch_action_row.politician_email_address
+        politician_phone_number = one_batch_action_row.politician_phone_number
+        politician_twitter_handle = one_batch_action_row.politician_twitter_handle
+        politician_facebook_id = one_batch_action_row.politician_facebook_id
+        politician_googleplus_id = one_batch_action_row.politician_googleplus_id
+        politician_youtube_id = one_batch_action_row.politician_youtube_id
+        politician_website_url = one_batch_action_row.politician_url
+
+        # Look up Politician to see if an entry exists
+        # Look up in Politician table for a match
+        # TODO should below condition be OR or AND? In certain ctcl data sets, twitter_handle is not provided for
+        # politician
+        if positive_value_exists(politician_name) or positive_value_exists(politician_twitter_handle):
+            politician_manager = PoliticianManager()
+            if create_entry_flag:
+                results = politician_manager.create_politician_row_entry(politician_name, politician_first_name,
+                                                                         politician_middle_name, politician_last_name,
+                                                                         ctcl_uuid, political_party,
+                                                                         politician_email_address,
+                                                                         politician_phone_number,
+                                                                         politician_twitter_handle,
+                                                                         politician_facebook_id,
+                                                                         politician_googleplus_id,
+                                                                         politician_youtube_id, politician_website_url)
+                if results['new_politician_created']:
+                    number_of_politicians_created += 1
+                    success = True
+                    # now update BatchRowActionPolitician table entry
+                    try:
+                        one_batch_action_row.kind_of_action = 'ADD_TO_EXISTING'
+                        new_politician = results['new_politician']
+                        one_batch_action_row.politician_we_vote_id = new_politician.we_vote_id
+                        one_batch_action_row.save()
+                    except Exception as e:
+                        success = False
+                        status += "POLITICIAN_RETRIEVE_ERROR"
+                        handle_exception(e, logger=logger, exception_message=status)
+            elif update_entry_flag:
+                politician_we_vote_id = one_batch_action_row.politician_we_vote_id
+                results = politician_manager.update_politician_row_entry(politician_name, politician_first_name,
+                                                                         politician_middle_name, politician_last_name,
+                                                                         ctcl_uuid,political_party,
+                                                                         politician_email_address,
+                                                                         politician_twitter_handle,
+                                                                         politician_phone_number,
+                                                                         politician_facebook_id,
+                                                                         politician_googleplus_id,
+                                                                         politician_youtube_id, politician_website_url,
+                                                                         politician_we_vote_id)
+                if results['politician_updated']:
+                    number_of_politicians_updated += 1
+                    success = True
+            else:
+                # This is error, it shouldn't reach here, we are handling CREATE or UPDATE entries only.
+                status += "IMPORT_POLITICIAN_ENTRY:NO_CREATE_OR_UPDATE_ERROR"
+                results = {
+                    'success':                          success,
+                    'status':                           status,
+                    'number_of_politicians_created':    number_of_politicians_created,
+                    'number_of_politicians_updated':    number_of_politicians_updated,
+                    'new_politician':                   new_politician,
+                }
+                return results
+
+    if number_of_politicians_created:
+        status += "IMPORT_POLITICIAN_ENTRY:POLITICIAN_CREATED"
+    elif number_of_politicians_updated:
+        status += "IMPORT_POLITICIAN_ENTRY:POLITICIAN_UPDATED"
+
+    results = {
+        'success':                          success,
+        'status':                           status,
+        'number_of_politicians_created':    number_of_politicians_created,
+        'number_of_politicians_updated':    number_of_politicians_updated,
+        'new_politician':                   new_politician,
+    }
+    return results
+
 def import_create_or_update_elected_office_entry(batch_header_id, batch_row_id):
     """
     Either create or update ElectedOffice table entry with batch_row elected_office details 
@@ -1982,7 +2227,15 @@ def import_batch_action_rows(batch_header_id, kind_of_batch, kind_of_action):
                 number_of_table_rows_updated = results['number_of_measures_updated']
             success = True
     elif kind_of_batch == POLITICIAN:
-        pass
+        results = import_politician_entry(batch_header_id, 0, create_flag, update_flag)
+        if results['success']:
+            if results['number_of_politicians_created']:
+                # for now, do not handle batch_row_action_politician data
+                # batch_row_action_politician = results['batch_row_action_politician']
+                number_of_table_rows_created = results['number_of_politicians_created']
+            elif results['number_of_politicians_updated']:
+                number_of_table_rows_updated = results['number_of_politicians_updated']
+            success = True
     elif kind_of_batch == CANDIDATE:
         results = import_candidate_entry(batch_header_id, 0, create_flag, update_flag)
         if results['success']:
