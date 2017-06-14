@@ -467,6 +467,9 @@ class CandidateCampaign(models.Model):
     # Official Statement from Candidate in Ballot Guide
     ballot_guide_official_statement = models.TextField(verbose_name="official candidate statement from ballot guide",
                                                        null=True, blank=True, default="")
+    # CTCL candidate data fields
+    ctcl_uuid = models.CharField(verbose_name="ctcl uuid", max_length=80, null=True, blank=True)
+    candidate_is_top_ticket = models.BooleanField(verbose_name="candidate is top ticket", default=False)
 
     def election(self):
         try:
@@ -1156,3 +1159,95 @@ class CandidateCampaignManager(models.Model):
             candidate_object.save()
 
         return candidate_object
+
+    def create_candidate_row_entry(self, candidate_name, candidate_party_name, candidate_is_top_ticket, ctcl_uuid,
+                                   google_civic_election_id):
+        """
+        Create CandidateCampaign table entry with CandidateCampaign details 
+        :param candidate_name: 
+        :param candidate_party_name: 
+        :param candidate_is_top_ticket: 
+        :param ctcl_uuid: 
+        :param google_civic_election_id: 
+        :return: 
+        """
+        success = False
+        status = ""
+        candidate_updated = False
+        new_candidate_created = False
+        new_candidate = ''
+
+        try:
+            new_candidate = CandidateCampaign.objects.create(candidate_name=candidate_name, party=candidate_party_name,
+                                                             candidate_is_top_ticket=candidate_is_top_ticket,
+                                                             ctcl_uuid=ctcl_uuid,
+                                                             google_civic_election_id=google_civic_election_id)
+            if new_candidate:
+                success = True
+                status = "CANDIDATE_CREATED"
+                new_candidate_created = True
+            else:
+                success = False
+                status = "CANDIDATE_CREATE_FAILED"
+        except Exception as e:
+            success = False
+            new_candidate_created = False
+            status = "CANDIDATE_RETRIEVE_ERROR"
+            handle_exception(e, logger=logger, exception_message=status)
+
+        results = {
+                'success':                  success,
+                'status':                   status,
+                'new_candidate_created':    new_candidate_created,
+                'candidate_updated':        candidate_updated,
+                'new_candidate':            new_candidate,
+            }
+        return results
+
+    def update_candidate_row_entry(self, candidate_name,candidate_party_name,candidate_is_top_ticket, ctcl_uuid,
+                                   google_civic_election_id,candidate_we_vote_id):
+        """
+        Update CandidateCampaign table entry with matching we_vote_id
+        :param candidate_name: 
+        :param candidate_party_name: 
+        :param candidate_is_top_ticket: 
+        :param ctcl_uuid: 
+        :param google_civic_election_id: 
+        :param candidate_we_vote_id: 
+        :return: 
+        """
+
+        success = False
+        status = ""
+        candidate_updated = False
+        # new_candidate_created = False
+        # new_candidate = ''
+        existing_candidate_entry = ''
+
+        try:
+            existing_candidate_entry = CandidateCampaign.objects.get(we_vote_id=candidate_we_vote_id)
+            if existing_candidate_entry:
+                # found the existing entry, update the values
+                existing_candidate_entry.candidate_name = candidate_name
+                existing_candidate_entry.party = candidate_party_name
+                existing_candidate_entry.google_civic_election_id = google_civic_election_id
+                existing_candidate_entry.is_top_ticket = candidate_is_top_ticket
+                existing_candidate_entry.ctcl_uuid = ctcl_uuid
+                # now go ahead and save this entry (update)
+                existing_candidate_entry.save()
+                candidate_updated = True
+                success = True
+                status = "CANDIDATE_UPDATED"
+        except Exception as e:
+            success = False
+            candidate_updated = False
+            status = "CANDIDATE_RETRIEVE_ERROR"
+            handle_exception(e, logger=logger, exception_message=status)
+
+        results = {
+                'success':              success,
+                'status':               status,
+                'candidate_updated':    candidate_updated,
+                'updated_candidate':    existing_candidate_entry,
+            }
+        return results

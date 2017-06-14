@@ -48,7 +48,13 @@ def electoral_district_import_from_xml_data(electoral_district_xml_data):
     status = ''
 
     electoral_district_manager = ElectoralDistrictManager()
+
+    limit_for_testing = 5
+
     for one_electoral_district in electoral_district_xml_data:
+        if (electoral_district_saved+electoral_district_not_processed+electoral_district_updated) >= limit_for_testing:
+            break
+
         electoral_district_number = None
         electoral_district_other_type = ''
         ocd_id_external_id = ''
