@@ -52,7 +52,7 @@ class PollingLocation(models.Model):
             if len(text_for_map_search):
                 text_for_map_search += ", "
             text_for_map_search += self.state
-        if self.zip_long:
+        if positive_value_exists(self.zip_long):
             if len(text_for_map_search):
                 text_for_map_search += " "
             text_for_map_search += self.get_formatted_zip()

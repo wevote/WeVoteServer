@@ -22,9 +22,12 @@
 
     </p>
 
-    <p><a href="{% url 'polling_location:import_polling_locations_process' %}?polling_location_state={{ polling_location_state }}" target="_blank">
-        Import Polling Locations File{% if polling_location_state %} (for "{{ polling_location_state }}"){% endif %}</a>
-        (this can take 60-90 seconds)</p>
+{#    <p><a href="{% url 'polling_location:import_polling_locations_process' %}?polling_location_state={{ polling_location_state }}" target="_blank">#}
+{#        Import Polling Locations File{% if polling_location_state %} (for "{{ polling_location_state }}"){% endif %}</a>#}
+{#        (this can take 60-90 seconds)</p>#}
+
+    <p><a href="{% url 'admin_tools:sync_dashboard' %}?state_code={{ polling_location_state }}" target="_blank">
+        Go to "Import Polling Locations From Master Server" Page</a></p>
 
 {% if state_list %}
     <form name="polling_location_state_form" method="get" action="{% url 'polling_location:polling_location_list' %}">
@@ -49,18 +52,15 @@
         <tr>
             <td>{{ forloop.counter }}</td>
             <td><a href="{% url 'polling_location:polling_location_summary' polling_location.id %}">
-            {% if polling_location.location_name %}{{ polling_location.location_name }}{% else %}missing location name{% endif %}</a>
+            {% if polling_location.location_name %}{{ polling_location.location_name }}{% else %}(missing location name)&nbsp;&nbsp;{% endif %}</a>
             </td>
             <td>
-                {% if polling_location.city %}{{ polling_location.city }},{% endif %}
-                {% if polling_location.state %}{{ polling_location.state }} {% endif %}
-            </td>
-            <td>
-            {% if polling_location.zip_long %}{{ polling_location.get_formatted_zip }}{% else %}{% endif %}
+                {{ polling_location.get_text_for_map_search }}
             </td>
             <td>
                 {% if polling_location.we_vote_id %}&nbsp;&nbsp;&nbsp;{{ polling_location.we_vote_id }}{% endif %}
             </td>
+            <td>{% if polling_location.latitude %}&nbsp;&nbsp;Lat/Long: yes{% endif %}</td>
 {#            <td><a href="{% url 'polling_location:polling_location_edit' polling_location.id %}" style="font-size: .65em">(edit)</a></td>#}
         </tr>
     {% endfor %}
