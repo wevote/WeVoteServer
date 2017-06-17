@@ -2,8 +2,9 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
-from .controllers import issues_import_from_master_server, issues_retrieve_for_api #, issue_follow
-from .models import Issue, IssueListManager, IssueManager, MOST_LINKED_ORGANIZATIONS
+from .controllers import issues_import_from_master_server, issues_retrieve_for_api, \
+    organization_link_to_issue_import_from_master_server
+from .models import Issue, MOST_LINKED_ORGANIZATIONS, OrganizationLinkToIssue
 from admin_tools.views import redirect_to_sign_in_page
 from django.db.models import Q
 from django.http import HttpResponseRedirect
@@ -12,10 +13,8 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.messages import get_messages
 from django.shortcuts import render
-from exception.models import handle_record_found_more_than_one_exception,\
-    handle_record_not_found_exception, handle_record_not_saved_exception, print_to_log
-from follow.models import FollowIssueManager
-from position.models import PositionEntered, PositionListManager
+from exception.models import handle_record_found_more_than_one_exception
+from position.models import PositionListManager
 from voter.models import voter_has_authority
 import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, positive_value_exists
@@ -27,7 +26,7 @@ logger = wevote_functions.admin.get_logger(__name__)
 
 
 # This page does not need to be protected.
-def issues_sync_out_view(request):
+def issues_sync_out_view(request):  # issuesSyncOut
     issue_search = request.GET.get('issue_search', '')
 
     try:
@@ -53,7 +52,10 @@ def issues_sync_out_view(request):
 
                 issue_list = issue_list.filter(final_filters)
 
-        issue_list_dict = issue_list.values('we_vote_id', 'issue_name', 'issue_description')
+        issue_list_dict = issue_list.values('we_vote_id', 'issue_name', 'issue_description', 'issue_followers_count',
+                                            'linked_organization_count',
+                                            'we_vote_hosted_image_url_large', 'we_vote_hosted_image_url_medium',
+                                            'we_vote_hosted_image_url_tiny')
         if issue_list_dict:
             issue_list_json = list(issue_list_dict)
             return HttpResponse(json.dumps(issue_list_json), content_type='application/json')
@@ -67,7 +69,7 @@ def issues_sync_out_view(request):
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 
 
-def issues_retrieve_view(request):
+def issues_retrieve_view(request):  # issuesRetrieve
     sort_formula = request.GET.get('sort_formula', MOST_LINKED_ORGANIZATIONS)
     results = issues_retrieve_for_api(sort_formula)
     return results
@@ -87,9 +89,9 @@ def issues_import_from_master_server_view(request):
                                                      'Saved: {saved}, Updated: {updated}, '
                                                      'Master data not imported (local duplicates found): '
                                                      'Not processed: {not_processed}'
-                                                     ''.format(saved=results['saved'],
-                                                               updated=results['updated'],
-                                                               not_processed=results['not_processed']))
+                                                     ''.format(saved=results['issues_saved'],
+                                                               updated=results['issues_updated'],
+                                                               not_processed=results['issues_not_processed']))
     return HttpResponseRedirect(reverse('admin_tools:sync_dashboard', args=()) + "?google_civic_election_id=" +
                                 str(google_civic_election_id) + "&state_code=" + str(state_code))
 
@@ -400,3 +402,67 @@ def issue_delete_process_view(request):
 
     return HttpResponseRedirect(reverse('issue:issue_list', args=()) +
                                 "?google_civic_election_id=" + str(google_civic_election_id))
+
+
+@login_required
+def organization_link_to_issue_import_from_master_server_view(request):
+    google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
+    state_code = request.GET.get('state_code', '')
+
+    results = organization_link_to_issue_import_from_master_server(request)
+
+    if not results['success']:
+        messages.add_message(request, messages.ERROR, results['status'])
+    else:
+        messages.add_message(request, messages.INFO,
+                             'organizationLinkToIssue import completed. '
+                             'Saved: {saved}, Updated: {updated}, '
+                             'Master data not imported (local duplicates found): '
+                             'Not processed: {not_processed}'
+                             ''.format(saved=results['organization_link_to_issue_saved'],
+                                       updated=results['organization_link_to_issue_updated'],
+                                       not_processed=results['organization_link_to_issue_not_processed']))
+    return HttpResponseRedirect(reverse('admin_tools:sync_dashboard', args=()) + "?google_civic_election_id=" +
+                                str(google_civic_election_id) + "&state_code=" + str(state_code))
+
+
+# This page does not need to be protected.
+def organization_link_to_issue_sync_out_view(request):  # organizationLinkToIssueSyncOut
+    issue_search = request.GET.get('issue_search', '')
+
+    try:
+        issue_list = OrganizationLinkToIssue.objects.all()
+        # filters = []
+        # if positive_value_exists(issue_search):
+        #     new_filter = Q(issue_name__icontains=issue_search)
+        #     filters.append(new_filter)
+        #
+        #     new_filter = Q(issue_description__icontains=issue_search)
+        #     filters.append(new_filter)
+        #
+        #     new_filter = Q(we_vote_id__icontains=issue_search)
+        #     filters.append(new_filter)
+        #
+        #     # Add the first query
+        #     if len(filters):
+        #         final_filters = filters.pop()
+        #
+        #         # ...and "OR" the remaining items in the list
+        #         for item in filters:
+        #             final_filters |= item
+        #
+        #         issue_list = issue_list.filter(final_filters)
+
+        issue_list_dict = issue_list.values('issue_we_vote_id', 'organization_we_vote_id',
+                                            'link_active', 'reason_for_link', 'link_blocked', 'reason_link_is_blocked')
+        if issue_list_dict:
+            issue_list_json = list(issue_list_dict)
+            return HttpResponse(json.dumps(issue_list_json), content_type='application/json')
+    except Exception as e:
+        pass
+
+    json_data = {
+        'success': False,
+        'status': 'ORGANIZATION_LINK_TO_ISSUE_LIST_MISSING'
+    }
+    return HttpResponse(json.dumps(json_data), content_type='application/json')

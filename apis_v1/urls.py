@@ -15,7 +15,8 @@ from apis_v1.views import views_docs, views_ballot, views_candidate, views_donat
 from ballot.views_admin import ballot_items_sync_out_view, ballot_returned_sync_out_view
 from candidate.views_admin import candidates_sync_out_view
 from election.views_admin import elections_sync_out_view
-from issue.views_admin import issues_sync_out_view, issue_list_view, issues_retrieve_view
+from issue.views_admin import issues_sync_out_view, issue_list_view, issues_retrieve_view, \
+    organization_link_to_issue_sync_out_view
 from measure.views_admin import measures_sync_out_view
 from office.views_admin import offices_sync_out_view
 from organization.views_admin import organizations_sync_out_view
@@ -55,8 +56,8 @@ urlpatterns = [
         views_friend.friend_invitation_by_we_vote_id_send_view, name='friendInvitationByWeVoteIdSendView'),
     url(r'^friendInviteResponse/', views_friend.friend_invite_response_view, name='friendInviteResponseView'),
     url(r'^friendList/', views_friend.friend_list_view, name='friendListView'),
-    url(r'^issueFollow/',views_voter.voter_issue_follow_view, name='issueFollow'),
-    url(r'^issuesRetrieve/', issues_retrieve_view, name='issuesRetrieve'),
+    url(r'^issueFollow/', views_voter.voter_issue_follow_view, name='issueFollowView'),
+    url(r'^issuesRetrieve/', issues_retrieve_view, name='issuesRetrieveView'),
     url(r'^issuesSyncOut/', issues_sync_out_view, name='issuesSyncOutView'),
     url(r'^measureRetrieve/', views_misc.measure_retrieve_view, name='measureRetrieveView'),
     url(r'^measuresSyncOut/', measures_sync_out_view, name='measuresSyncOutView'),
@@ -66,6 +67,8 @@ urlpatterns = [
     url(r'^organizationFollow/', views_organization.organization_follow_api_view, name='organizationFollowView'),
     url(r'^organizationFollowIgnore/', views_organization.organization_follow_ignore_api_view,
         name='organizationFollowIgnoreView'),
+    url(r'^organizationLinkToIssueSyncOut/',
+        organization_link_to_issue_sync_out_view, name='organizationLinkToIssueSyncOutView'),
     url(r'^organizationRetrieve/', views_organization.organization_retrieve_view, name='organizationRetrieveView'),
     url(r'^organizationSave/', views_organization.organization_save_view, name='organizationSaveView'),
     url(r'^organizationSearch/', views_organization.organization_search_view, name='organizationSearchView'),
@@ -225,6 +228,8 @@ urlpatterns = [
     url(r'^docs/organizationFollow/', views_docs.organization_follow_doc_view, name='organizationFollowDocs'),
     url(r'^docs/organizationFollowIgnore/',
         views_docs.organization_follow_ignore_doc_view, name='organizationFollowIgnoreDocs'),
+    url(r'^docs/organizationLinkToIssueSyncOut/$',
+        views_docs.organization_link_to_issue_sync_out_doc_view, name='organizationLinkToIssueSyncOutDocs'),
     url(r'^docs/organizationRetrieve/$', views_docs.organization_retrieve_doc_view, name='organizationRetrieveDocs'),
     url(r'^docs/organizationSave/$', views_docs.organization_save_doc_view, name='organizationSaveDocs'),
     url(r'^docs/organizationSearch/$', views_docs.organization_search_doc_view, name='organizationSearchDocs'),

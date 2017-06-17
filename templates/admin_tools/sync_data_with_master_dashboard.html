@@ -55,80 +55,79 @@
 {# ################################### #}
 <h4>Offices</h4>
 
-<p><a href="{% url 'office:offices_import_from_master_server' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
+<p>&nbsp;&nbsp;&nbsp;<a href="{% url 'office:offices_import_from_master_server' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
     Retrieve Offices</a>{% if google_civic_election_id|convert_to_int > 0 %} for election {{ google_civic_election_id }}{% else %} for ALL elections{% endif %}</p>
-<br />
 
 
 {# ################################### #}
 <h4>Candidates</h4>
 
-<p><a href="{% url 'candidate:candidates_import_from_master_server' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
+<p>&nbsp;&nbsp;&nbsp;<a href="{% url 'candidate:candidates_import_from_master_server' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
     Retrieve Candidates</a>{% if google_civic_election_id|convert_to_int > 0 %} for election {{ google_civic_election_id }}{% else %} for ALL elections{% endif %}</p>
-<br />
 
 
 {# ################################### #}
 <h4>Measures</h4>
 
-<p><a href="{% url 'measure:measures_import_from_master_server' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
+<p>&nbsp;&nbsp;&nbsp;<a href="{% url 'measure:measures_import_from_master_server' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
     Retrieve Measures</a>{% if google_civic_election_id|convert_to_int > 0 %} for election {{ google_civic_election_id }}{% else %} for ALL elections{% endif %}</p>
-<br />
+
+
+{# ################################### #}
+<h4>Issues</h4>
+
+<p>&nbsp;&nbsp;&nbsp;<a href="{% url 'issue:issues_import_from_master_server' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
+    Retrieve Issues</a> (Note: Issues are independent of elections and state_codes)</p>
 
 
 {# ################################### #}
 <h4>Organizations</h4>
 
-<p><a href="{% url 'organization:organizations_import_from_master_server' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
+<p>&nbsp;&nbsp;&nbsp;<a href="{% url 'organization:organizations_import_from_master_server' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
     Retrieve Organizations</a>{% if state_code %} for the state {{ state_code }}{% else %} for ALL states{% endif %}</p>
-<br />
+
+
+{# ################################### #}
+<h4>Organization Links to Issues</h4>
+
+<p>&nbsp;&nbsp;&nbsp;<a href="{% url 'issue:organization_link_to_issue_import_from_master_server' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
+    Retrieve Organization Links to Issues</a> (Note: Organization Links to Issues are independent of elections and state_codes)</p>
 
 
 {# ################################### #}
 <h4>Positions</h4>
 
-<p>{% if google_civic_election_id|convert_to_int > 0 %}
+<p>&nbsp;&nbsp;&nbsp;{% if google_civic_election_id|convert_to_int > 0 %}
     <a href="{% url 'position:positions_import_from_master_server' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
     Retrieve Positions</a> for election {{ google_civic_election_id }}{% else %} (Cannot retrieve Positions without election id){% endif %}</p>
-<br />
 
 
 {# ################################### #}
 <h4>Polling Locations</h4>
 
-<p><a href="{% url 'polling_location:polling_locations_import_from_master_server' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
+<p>&nbsp;&nbsp;&nbsp;<a href="{% url 'polling_location:polling_locations_import_from_master_server' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
     Retrieve Polling Locations</a>{% if state_code %} for the state {{ state_code }}{% else %} for ALL states{% endif %}</p>
-<br />
 
 
 {# ################################### #}
 <h4>Ballot Items</h4>
 
-<p><a href="{% url 'ballot:ballot_items_import_from_master_server' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
+<p>&nbsp;&nbsp;&nbsp;<a href="{% url 'ballot:ballot_items_import_from_master_server' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
     Retrieve Saved Ballot Items</a>{% if google_civic_election_id|convert_to_int > 0 %} for election {{ google_civic_election_id }}{% else %} for ALL elections{% endif %}</p>
-<br />
 
 
 {# ################################### #}
 <h4>Ballot Returned</h4>
 
-<p><a href="{% url 'ballot:ballot_returned_import_from_master_server' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
+<p>&nbsp;&nbsp;&nbsp;<a href="{% url 'ballot:ballot_returned_import_from_master_server' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
     Retrieve Saved Ballots</a>{% if google_civic_election_id|convert_to_int > 0 %} for election {{ google_civic_election_id }}{% else %} for ALL elections{% endif %}</p>
-<br />
 
 
 {# ################################### #}
 <h4>Voter Guides</h4>
 
-<p><a href="{% url 'voter_guide:voter_guides_import_from_master_server' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
+<p>&nbsp;&nbsp;&nbsp;<a href="{% url 'voter_guide:voter_guides_import_from_master_server' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
     Retrieve Voter Guides</a>{% if google_civic_election_id|convert_to_int > 0 %} for election {{ google_civic_election_id }}{% else %} for ALL elections{% endif %}</p>
-<br />
-
-{# ################################### #}
-<h4>Issues</h4>
-
-<p><a href="{% url 'issue:issues_import_from_master_server' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
-    Retrieve Issues</a>{% if google_civic_election_id|convert_to_int > 0 %} for election {{ google_civic_election_id }}{% else %} for ALL elections{% endif %}</p>
 <br />
 
 </form>

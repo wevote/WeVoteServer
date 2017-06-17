@@ -15,7 +15,7 @@
 <h1>{{ organization.organization_name }}: Position List</h1>
 
     <p>
-    We Vote ID: {{ organization.we_vote_id }} (<a href="{% url 'image:images_for_one_organization' organization.we_vote_id %}" target="_blank">See images</a> in new window)<br />
+    We Vote ID: {{ organization.we_vote_id }} (<a href="{% url 'organization:organization_edit' organization.id %}?google_civic_election_id={{ google_civic_election_id }}">edit</a>) (<a href="{% url 'image:images_for_one_organization' organization.we_vote_id %}" target="_blank">See images</a> in new window)<br />
     Vote Smart ID: {{ organization.vote_smart_id }}<br />
     Website: <a href={{ organization.organization_website }} target="_blank">{{ organization.organization_website }}</a> (open in new window)<br />
     {% if voter %}

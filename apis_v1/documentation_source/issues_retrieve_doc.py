@@ -42,7 +42,7 @@ def issues_retrieve_doc_template_values(url_root):
         'api_slug': 'issuesRetrieve',
         'api_introduction':
             "",
-        'try_now_link': 'apis_v1:issuesRetrieve',
+        'try_now_link': 'apis_v1:issuesRetrieveView',
         'try_now_link_variables_dict': try_now_link_variables_dict,
         'url_root': url_root,
         'get_or_post': 'GET',
