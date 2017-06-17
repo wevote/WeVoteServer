@@ -6,15 +6,17 @@ from ballot.models import OFFICE, CANDIDATE, MEASURE
 from config.base import get_environment_variable
 from django.contrib import messages
 from django.http import HttpResponse
-from follow.models import FollowOrganizationList
+from follow.models import FollowOrganizationList, FollowIssueList
 from friend.models import FriendManager
 from itertools import chain
+from issue.models import OrganizationLinkToIssueList
 import json
 from organization.models import OrganizationManager, OrganizationListManager
 from position.controllers import retrieve_ballot_item_we_vote_ids_for_organizations_to_follow
 from position.models import ANY_STANCE, PositionEntered, PositionManager, PositionListManager, SUPPORT
 import requests
-from voter.models import fetch_voter_id_from_voter_device_link, VoterManager
+from voter.models import fetch_voter_id_from_voter_device_link, fetch_voter_we_vote_id_from_voter_device_link, \
+    VoterManager
 from voter_guide.models import VoterGuideListManager, VoterGuideManager, VoterGuidePossibilityManager
 import wevote_functions.admin
 from wevote_functions.functions import is_voter_device_id_valid, positive_value_exists
@@ -354,7 +356,7 @@ def voter_guide_possibility_save_for_api(voter_device_id, voter_guide_possibilit
 def voter_guides_to_follow_retrieve_for_api(voter_device_id,  # voterGuidesToFollowRetrieve
                                             kind_of_ballot_item='', ballot_item_we_vote_id='',
                                             google_civic_election_id=0, search_string='',
-                                            maximum_number_to_retrieve=0):
+                                            maximum_number_to_retrieve=0, filter_voter_guides_by_issue=False):
     # Get voter_id from the voter_device_id so we can figure out which voter_guides to offer
     results = is_voter_device_id_valid(voter_device_id)
     if not results['success']:
@@ -394,13 +396,52 @@ def voter_guides_to_follow_retrieve_for_api(voter_device_id,  # voterGuidesToFol
         }
         return results
 
+    # If filter_voter_guides_by_issue is set then fetch oragnization_we_vote_ids related to the
+    # issues that the voter follows
+    organization_we_vote_id_list_for_voter_issues = []
+    if filter_voter_guides_by_issue:
+        voter_we_vote_id = fetch_voter_we_vote_id_from_voter_device_link(voter_device_id)
+        if not positive_value_exists(voter_we_vote_id):
+            json_data = {
+                'status': "ERROR_GUIDES_TO_FOLLOW_VOTER_NOT_FOUND_FROM_VOTER_DEVICE_ID VOTER_WE_VOTE_ID_NOT_FOUND",
+                'success': False,
+                'voter_device_id': voter_device_id,
+                'voter_guides': [],
+                'google_civic_election_id': google_civic_election_id,
+                'search_string': search_string,
+            }
+            results = {
+                'success': False,
+                'google_civic_election_id': 0,  # Force the reset of google_civic_election_id cookie
+                'json_data': json_data,
+            }
+            return results
+        else:
+            # add the following lines inside retrieve_voter_guides_to_follow_generic_for_api
+            follow_issue_list_manager = FollowIssueList()
+            issue_list_for_voter = follow_issue_list_manager. \
+                retrieve_follow_issue_by_voter_we_vote_id(voter_we_vote_id)
+            issue_list_for_voter = list(issue_list_for_voter)
+            issue_we_vote_id_list_for_voter = []
+            for issue in issue_list_for_voter:
+                issue_we_vote_id_list_for_voter.append(issue.issue_we_vote_id)
+
+            link_issue_list = OrganizationLinkToIssueList()
+            organization_we_vote_id_list_result = link_issue_list. \
+                retrieve_organization_we_vote_id_list_from_issue_we_vote_id_list(issue_we_vote_id_list_for_voter)
+            organization_we_vote_id_list_result = organization_we_vote_id_list_result[
+                'organization_we_vote_id_list']
+            for we_vote_id in organization_we_vote_id_list_result:
+                organization_we_vote_id_list_for_voter_issues.append(we_vote_id['organization_we_vote_id'])
+
     voter_guide_list = []
     voter_guides = []
     try:
         if positive_value_exists(kind_of_ballot_item) and positive_value_exists(ballot_item_we_vote_id):
             results = retrieve_voter_guides_to_follow_by_ballot_item(voter_id,
                                                                      kind_of_ballot_item, ballot_item_we_vote_id,
-                                                                     search_string)
+                                                                     search_string, filter_voter_guides_by_issue,
+                                                                     organization_we_vote_id_list_for_voter_issues, )
             success = results['success']
             status = results['status']
             voter_guide_list = results['voter_guide_list']
@@ -408,6 +449,8 @@ def voter_guides_to_follow_retrieve_for_api(voter_device_id,  # voterGuidesToFol
             # This retrieve also does the reordering
             results = retrieve_voter_guides_to_follow_by_election_for_api(voter_id, google_civic_election_id,
                                                                           search_string,
+                                                                          filter_voter_guides_by_issue,
+                                                                          organization_we_vote_id_list_for_voter_issues,
                                                                           maximum_number_to_retrieve,
                                                                           'twitter_followers_count', 'desc')
             success = results['success']
@@ -415,6 +458,8 @@ def voter_guides_to_follow_retrieve_for_api(voter_device_id,  # voterGuidesToFol
             status = results['status'] + ", len(voter_guide_list): " + str(len(voter_guide_list)) + " "
         else:
             results = retrieve_voter_guides_to_follow_generic_for_api(voter_id, search_string,
+                                                                      filter_voter_guides_by_issue,
+                                                                      organization_we_vote_id_list_for_voter_issues,
                                                                       maximum_number_to_retrieve,
                                                                       'twitter_followers_count', 'desc')
             success = results['success']
@@ -456,8 +501,8 @@ def voter_guides_to_follow_retrieve_for_api(voter_device_id,  # voterGuidesToFol
                 'time_span':                    voter_guide.vote_smart_time_span,
                 'voter_guide_display_name':     voter_guide.voter_guide_display_name(),
                 'voter_guide_image_url_large':  voter_guide.we_vote_hosted_profile_image_url_large
-                    if positive_value_exists(voter_guide.we_vote_hosted_profile_image_url_large)
-                    else voter_guide.voter_guide_image_url(),
+                if positive_value_exists(voter_guide.we_vote_hosted_profile_image_url_large)
+                else voter_guide.voter_guide_image_url(),
                 'voter_guide_image_url_medium': voter_guide.we_vote_hosted_profile_image_url_medium,
                 'voter_guide_image_url_tiny':   voter_guide.we_vote_hosted_profile_image_url_tiny,
                 'voter_guide_owner_type':       voter_guide.voter_guide_owner_type,
@@ -532,6 +577,7 @@ def voter_guides_to_follow_retrieve_for_api(voter_device_id,  # voterGuidesToFol
                 'search_string': search_string,
                 'ballot_item_we_vote_id': ballot_item_we_vote_id,
                 'maximum_number_to_retrieve': maximum_number_to_retrieve,
+                'filter_voter_guides_by_issue': filter_voter_guides_by_issue
             }
         else:
             json_data = {
@@ -543,6 +589,7 @@ def voter_guides_to_follow_retrieve_for_api(voter_device_id,  # voterGuidesToFol
                 'search_string': search_string,
                 'ballot_item_we_vote_id': ballot_item_we_vote_id,
                 'maximum_number_to_retrieve': maximum_number_to_retrieve,
+                'filter_voter_guides_by_issue': filter_voter_guides_by_issue
             }
 
         results = {
@@ -574,7 +621,8 @@ def voter_guides_to_follow_retrieve_for_api(voter_device_id,  # voterGuidesToFol
 
 
 def retrieve_voter_guides_to_follow_by_ballot_item(voter_id, kind_of_ballot_item, ballot_item_we_vote_id,
-                                                   search_string):
+                                                   search_string, filter_voter_guides_by_issue=False,
+                                                   organization_we_vote_id_list_for_voter_issues=None):
     voter_guide_list_found = False
     retrieve_public_positions = True  # The alternate is positions for friends-only. Since this method returns positions
     # to follow, we never need to return friend's positions here
@@ -602,6 +650,10 @@ def retrieve_voter_guides_to_follow_by_ballot_item(voter_id, kind_of_ballot_item
             'voter_guide_list':             voter_guide_list,
         }
         return results
+
+    if filter_voter_guides_by_issue and organization_we_vote_id_list_for_voter_issues is not None:
+        all_positions_list = position_list_manager.remove_positions_unrelated_to_issues(
+            all_positions_list, organization_we_vote_id_list_for_voter_issues)
 
     follow_organization_list_manager = FollowOrganizationList()
     organizations_followed_by_voter = \
@@ -667,10 +719,13 @@ def retrieve_voter_guides_to_follow_by_ballot_item(voter_id, kind_of_ballot_item
 
 
 def retrieve_voter_guides_to_follow_by_election_for_api(voter_id, google_civic_election_id, search_string,
+                                                        filter_voter_guides_by_issue=False,
+                                                        organization_we_vote_id_list_for_voter_issues=None,
                                                         maximum_number_to_retrieve=0, sort_by='', sort_order=''):
     voter_guide_list_found = False
     status = ""
     status += "voter_id: " + str(voter_id) + " "
+
     # Start with orgs followed and ignored by this voter
     follow_organization_list_manager = FollowOrganizationList()
     organizations_followed_by_voter = \
@@ -695,6 +750,10 @@ def retrieve_voter_guides_to_follow_by_election_for_api(voter_id, google_civic_e
             'voter_guide_list':             voter_guide_list,
         }
         return results
+
+    if filter_voter_guides_by_issue and organization_we_vote_id_list_for_voter_issues is not None:
+        all_positions_list_for_election = position_list_manager.remove_positions_unrelated_to_issues(
+            all_positions_list_for_election, organization_we_vote_id_list_for_voter_issues)
 
     positions_list_minus_ignored = position_list_manager.remove_positions_ignored_by_voter(
         all_positions_list_for_election, organizations_ignored_by_voter)
@@ -724,7 +783,6 @@ def retrieve_voter_guides_to_follow_by_election_for_api(voter_id, google_civic_e
             # Make sure we haven't already recorded that we want to retrieve the voter_guide for this org
             if one_position.organization_we_vote_id in org_list_found_by_google_civic_election_id:
                 continue
-
             org_list_found_by_google_civic_election_id.append(one_position.organization_we_vote_id)
 
     # status += " len(org_list_found_by_google_civic_election_id): " + \
@@ -840,12 +898,15 @@ def retrieve_voter_guides_to_follow_by_election_for_api(voter_id, google_civic_e
     return results
 
 
-def retrieve_voter_guides_to_follow_generic_for_api(voter_id, search_string,
+def retrieve_voter_guides_to_follow_generic_for_api(voter_id, search_string, filter_voter_guides_by_issue=False,
+                                                    organization_we_vote_id_list_for_voter_issues=None,
                                                     maximum_number_to_retrieve=0, sort_by='', sort_order=''):
     """
     Separate from an election or a ballot item, return a list of voter_guides the voter has not already followed
     :param voter_id:
     :param search_string:
+    :param filter_voter_guides_by_issue:
+    :param organization_we_vote_id_list_for_voter_issues:
     :param maximum_number_to_retrieve:
     :param sort_by:
     :param sort_order:
@@ -883,6 +944,11 @@ def retrieve_voter_guides_to_follow_generic_for_api(voter_id, search_string,
         voter_guide_list = voter_guide_results['voter_guide_list']
     else:
         voter_guide_list = []
+
+    position_list_manager = PositionListManager()
+    if filter_voter_guides_by_issue and organization_we_vote_id_list_for_voter_issues is not None:
+        voter_guide_list = position_list_manager.remove_positions_unrelated_to_issues(
+            voter_guide_list, organization_we_vote_id_list_for_voter_issues)
 
     status = 'SUCCESSFUL_RETRIEVE_OF_VOTER_GUIDES_GENERIC'
     success = True
