@@ -396,8 +396,8 @@ def voter_guides_to_follow_retrieve_for_api(voter_device_id,  # voterGuidesToFol
         }
         return results
 
-    # If issue_filter_flag_for_voter_guides is set then fetch oragnization_we_vote_ids related to the
-    # issues that the user follows
+    # If filter_voter_guides_by_issue is set then fetch oragnization_we_vote_ids related to the
+    # issues that the voter follows
     organization_we_vote_id_list_for_voter_issues = []
     if filter_voter_guides_by_issue:
         voter_we_vote_id = fetch_voter_we_vote_id_from_voter_device_link(voter_device_id)
