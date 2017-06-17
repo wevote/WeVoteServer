@@ -56,6 +56,11 @@ def voter_guides_to_follow_retrieve_doc_template_values(url_root):
             'value':        'integer',  # boolean, integer, long, string
             'description':  'Defaults to 20 voter guides. Enter a value to set your own limit.',
         },
+        {
+            'name':         'filter_voter_guides_by_issue',
+            'value':        'boolean',  # boolean, integer, long, string
+            'description':  'Filter the voter guides to contain organizations following the same issues as voter',
+        },
     ]
 
     potential_status_codes_list = [

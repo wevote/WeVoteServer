@@ -2,8 +2,8 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
-from .controllers import issues_import_from_master_server
-from .models import Issue, IssueListManager, IssueManager
+from .controllers import issues_import_from_master_server, issues_retrieve_for_api #, issue_follow
+from .models import Issue, IssueListManager, IssueManager, MOST_LINKED_ORGANIZATIONS
 from admin_tools.views import redirect_to_sign_in_page
 from django.db.models import Q
 from django.http import HttpResponseRedirect
@@ -14,6 +14,7 @@ from django.contrib.messages import get_messages
 from django.shortcuts import render
 from exception.models import handle_record_found_more_than_one_exception,\
     handle_record_not_found_exception, handle_record_not_saved_exception, print_to_log
+from follow.models import FollowIssueManager
 from position.models import PositionEntered, PositionListManager
 from voter.models import voter_has_authority
 import wevote_functions.admin
@@ -64,6 +65,12 @@ def issues_sync_out_view(request):
         'status': 'ISSUES_LIST_MISSING'
     }
     return HttpResponse(json.dumps(json_data), content_type='application/json')
+
+
+def issues_retrieve_view(request):
+    sort_formula = request.GET.get('sort_formula', MOST_LINKED_ORGANIZATIONS)
+    results = issues_retrieve_for_api(sort_formula)
+    return results
 
 
 @login_required

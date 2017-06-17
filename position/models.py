@@ -1116,6 +1116,20 @@ class PositionListManager(models.Model):
 
         return positions_ignored_by_voter
 
+    def remove_positions_unrelated_to_issues(self, positions_list, organizations_related_to_issue):
+        """
+        We filter the list of organizations whose we_vote_id is present in organizations_related_to_issue
+        :param positions_list: 
+        :param organizations_related_to_issue: 
+        :return: 
+        """
+        positions_related_to_organization = []
+        for position in positions_list:
+            if position.organization_we_vote_id in organizations_related_to_issue:
+                positions_related_to_organization.append(position)
+
+        return positions_related_to_organization
+
     def retrieve_all_positions_for_candidate_campaign(self, retrieve_public_positions,
                                                       candidate_campaign_id, candidate_campaign_we_vote_id='',
                                                       stance_we_are_looking_for=ANY_STANCE, most_recent_only=True,

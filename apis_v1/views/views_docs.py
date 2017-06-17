@@ -9,7 +9,7 @@ from apis_v1.documentation_source import ballot_item_options_retrieve_doc, ballo
     elections_sync_out_doc, facebook_disconnect_doc, facebook_friends_action_doc, friend_invitation_by_email_send_doc, \
     friend_invitation_by_email_verify_doc, friend_invitation_by_we_vote_id_send_doc, \
     friend_invitation_by_facebook_send_doc,  friend_invitation_by_facebook_verify_doc, \
-    friend_invite_response_doc, friend_list_doc, issues_sync_out_doc, \
+    friend_invite_response_doc, friend_list_doc, issues_sync_out_doc, issues_retrieve_doc, \
     measure_retrieve_doc, measures_sync_out_doc, \
     office_retrieve_doc, offices_sync_out_doc, \
     organization_count_doc, organizations_followed_retrieve_doc, \
@@ -273,6 +273,16 @@ def friend_list_doc_view(request):
     """
     url_root = WE_VOTE_SERVER_ROOT_URL
     template_values = friend_list_doc.friend_list_doc_template_values(url_root)
+    template_values['voter_api_device_id'] = get_voter_api_device_id(request)
+    return render(request, 'apis_v1/api_doc_page.html', template_values)
+
+
+def issues_retrieve_doc_view(request):
+    """
+    Show documentation about issuesRetrieve
+    """
+    url_root = WE_VOTE_SERVER_ROOT_URL
+    template_values = issues_retrieve_doc.issues_retrieve_doc_template_values(url_root)
     template_values['voter_api_device_id'] = get_voter_api_device_id(request)
     return render(request, 'apis_v1/api_doc_page.html', template_values)
 

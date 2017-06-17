@@ -15,7 +15,7 @@ from apis_v1.views import views_docs, views_ballot, views_candidate, views_donat
 from ballot.views_admin import ballot_items_sync_out_view, ballot_returned_sync_out_view
 from candidate.views_admin import candidates_sync_out_view
 from election.views_admin import elections_sync_out_view
-from issue.views_admin import issues_sync_out_view
+from issue.views_admin import issues_sync_out_view, issue_list_view, issues_retrieve_view
 from measure.views_admin import measures_sync_out_view
 from office.views_admin import offices_sync_out_view
 from organization.views_admin import organizations_sync_out_view
@@ -55,6 +55,8 @@ urlpatterns = [
         views_friend.friend_invitation_by_we_vote_id_send_view, name='friendInvitationByWeVoteIdSendView'),
     url(r'^friendInviteResponse/', views_friend.friend_invite_response_view, name='friendInviteResponseView'),
     url(r'^friendList/', views_friend.friend_list_view, name='friendListView'),
+    url(r'^issueFollow/',views_voter.voter_issue_follow_view, name='issueFollow'),
+    url(r'^issuesRetrieve/', issues_retrieve_view, name='issuesRetrieve'),
     url(r'^issuesSyncOut/', issues_sync_out_view, name='issuesSyncOutView'),
     url(r'^measureRetrieve/', views_misc.measure_retrieve_view, name='measureRetrieveView'),
     url(r'^measuresSyncOut/', measures_sync_out_view, name='measuresSyncOutView'),
@@ -213,6 +215,7 @@ urlpatterns = [
         views_docs.friend_invitation_by_we_vote_id_send_doc_view, name='friendInvitationByWeVoteIdSendDocs'),
     url(r'^docs/friendInviteResponse/$', views_docs.friend_invite_response_doc_view, name='friendInviteResponseDocs'),
     url(r'^docs/friendList/$', views_docs.friend_list_doc_view, name='friendListDocs'),
+    url(r'^docs/issuesRetrieve/$', views_docs.issues_retrieve_doc_view, name='issuesRetrieveDocs'),
     url(r'^docs/issuesSyncOut/$', views_docs.issues_sync_out_doc_view, name='issuesSyncOutDocs'),
     url(r'^docs/measureRetrieve/$', views_docs.measure_retrieve_doc_view, name='measureRetrieveDocs'),
     url(r'^docs/measuresSyncOut/$', views_docs.measures_sync_out_doc_view, name='measuresSyncOutDocs'),

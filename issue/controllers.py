@@ -2,7 +2,7 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
-from .models import IssueListManager, Issue, IssueManager
+from .models import IssueListManager, Issue, IssueManager, MOST_LINKED_ORGANIZATIONS
 from config.base import get_environment_variable
 from django.contrib import messages
 from django.http import HttpResponse
@@ -174,7 +174,7 @@ def issue_retrieve_for_api(issue_id, issue_we_vote_id):  # issueRetrieve
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 
 
-def issues_retrieve_for_api():
+def issues_retrieve_for_api(sort_formula):
     """
     Used by the api
     :return:
@@ -184,10 +184,9 @@ def issues_retrieve_for_api():
 
     issue_list = []
     issues_to_display = []
-    google_civic_election_id = 0
     try:
         issue_list_object = IssueListManager()
-        results = issue_list_object.retrieve_issues()
+        results = issue_list_object.retrieve_issues(sort_formula)
         success = results['success']
         status = results['status']
         issue_list = results['issue_list']
@@ -198,44 +197,25 @@ def issues_retrieve_for_api():
         success = False
 
     if success:
-        # Reset office_we_vote_id and office_id so we are sure that it matches what we pull from the database
-        office_id = 0
-        office_we_vote_id = ''
         for issue in issue_list:
             one_issue = {
-                'id':                           issue.id,
-                'we_vote_id':                   issue.we_vote_id,
-                'issue_name':     issue.issue_name,
-                'issue_photo_url_large':    issue.we_vote_hosted_profile_image_url_large
-                    if positive_value_exists(issue.we_vote_hosted_profile_image_url_large)
-                    else issue.issue_photo_url(),
-                'issue_photo_url_medium':   issue.we_vote_hosted_profile_image_url_medium,
-                'issue_photo_url_tiny':     issue.we_vote_hosted_profile_image_url_tiny,
+                'issue_we_vote_id':         issue.we_vote_id,
+                'issue_name':               issue.issue_name,
+                'issue_photo_url_large':    issue.we_vote_hosted_image_url_large,
+                'issue_photo_url_medium':   issue.we_vote_hosted_image_url_medium,
+                'issue_photo_url_tiny':     issue.we_vote_hosted_image_url_tiny,
             }
             issues_to_display.append(one_issue.copy())
-            # Capture the office_we_vote_id and google_civic_election_id so we can return
-            if not positive_value_exists(office_id) and issue.contest_office_id:
-                office_id = issue.contest_office_id
-            if not positive_value_exists(office_we_vote_id) and issue.contest_office_we_vote_id:
-                office_we_vote_id = issue.contest_office_we_vote_id
-            if not positive_value_exists(google_civic_election_id) and issue.google_civic_election_id:
-                google_civic_election_id = issue.google_civic_election_id
-
-        if len(issues_to_display):
-            status = 'ISSUES_RETRIEVED'
-        else:
-            status = 'NO_ISSUES_RETRIEVED'
-
         json_data = {
             'status':                   status,
             'success':                  True,
-            'issue_list':           issues_to_display,
+            'issue_list':               issues_to_display,
         }
     else:
         json_data = {
             'status':                   status,
             'success':                  False,
-            'issue_list':           [],
+            'issue_list':               [],
         }
 
     return HttpResponse(json.dumps(json_data), content_type='application/json')

@@ -9,9 +9,10 @@ from friend.models import FriendManager
 from .models import FollowOrganizationList, FollowOrganizationManager, UPDATE_SUGGESTIONS_FROM_TWITTER_IDS_I_FOLLOW, \
     UPDATE_SUGGESTIONS_FROM_WHAT_FRIEND_FOLLOWS, UPDATE_SUGGESTIONS_FROM_WHAT_FRIEND_FOLLOWS_ON_TWITTER, \
     UPDATE_SUGGESTIONS_FROM_WHAT_FRIENDS_FOLLOW, UPDATE_SUGGESTIONS_FROM_WHAT_FRIENDS_FOLLOW_ON_TWITTER, \
-    UPDATE_SUGGESTIONS_ALL, FOLLOW_SUGGESTIONS_FROM_TWITTER_IDS_I_FOLLOW, FOLLOW_SUGGESTIONS_FROM_FRIENDS
+    UPDATE_SUGGESTIONS_ALL, FOLLOW_SUGGESTIONS_FROM_TWITTER_IDS_I_FOLLOW, FOLLOW_SUGGESTIONS_FROM_FRIENDS, \
+    FollowIssueManager
 from organization.models import OrganizationManager
-from voter.models import VoterManager
+from voter.models import VoterManager, fetch_voter_we_vote_id_from_voter_device_link
 import wevote_functions.admin
 from wevote_functions.functions import is_voter_device_id_valid, positive_value_exists
 from twitter.models import TwitterUserManager
@@ -205,6 +206,44 @@ def duplicate_organization_followers_to_another_organization(from_organization_i
         'follow_entries_not_duplicated':    follow_entries_not_duplicated,
     }
     return results
+
+
+def voter_issue_follow_for_api(voter_device_id, issue_we_vote_id, follow_value, ignore_value):
+    voter_we_vote_id = False
+    issue_id = ''
+    if positive_value_exists(voter_device_id):
+        voter_we_vote_id = fetch_voter_we_vote_id_from_voter_device_link(voter_device_id)
+    follow_issue_manager = FollowIssueManager()
+    result = False
+    if positive_value_exists(voter_we_vote_id) and positive_value_exists(issue_we_vote_id):
+        if follow_value:
+            result = follow_issue_manager.toggle_on_voter_following_issue(voter_we_vote_id, issue_id,
+                                                                          issue_we_vote_id)
+        elif not follow_value:
+            result = follow_issue_manager.toggle_off_voter_following_issue(voter_we_vote_id, issue_id,
+                                                                           issue_we_vote_id)
+        elif ignore_value:
+            result = follow_issue_manager.toggle_ignore_voter_following_issue(voter_we_vote_id, issue_id,
+                                                                            issue_we_vote_id)
+
+    if not result:
+        new_result = {
+            'success': False,
+            'follow_issue_found': False,
+        }
+    else:
+        new_result = {
+            'success': result['success'],
+            'status': result['status'],
+            'voter_device_id': voter_device_id,
+            'issue_we_vote_id': issue_we_vote_id,
+            'follow_value': follow_value,
+            'ignore_value': ignore_value,
+            'follow_issue_found': result['follow_issue_found'],
+            'follow_issue_id': result['follow_issue_id'],
+        }
+
+    return HttpResponse(json.dumps(new_result), content_type='application/json')
 
 
 def move_organization_followers_to_another_organization(from_organization_id, from_organization_we_vote_id,

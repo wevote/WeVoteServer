@@ -9,6 +9,7 @@ from django.http import HttpResponse
 from email_outbound.controllers import voter_email_address_save_for_api, voter_email_address_retrieve_for_api, \
     voter_email_address_sign_in_for_api, voter_email_address_verify_for_api
 from wevote_functions.functions import extract_first_name_from_full_name, extract_last_name_from_full_name
+from follow.controllers import voter_issue_follow_for_api
 from geoip.controllers import voter_location_retrieve_from_ip_for_api
 from import_export_facebook.controllers import voter_facebook_sign_in_retrieve_for_api, \
     voter_facebook_sign_in_save_for_api
@@ -793,6 +794,10 @@ def voter_guides_to_follow_retrieve_view(request):  # voterGuidesToFollowRetriev
     use_test_election = False if use_test_election == 'false' else use_test_election
     use_test_election = False if use_test_election == 'False' else use_test_election
     maximum_number_to_retrieve = get_maximum_number_to_retrieve_from_request(request)
+    filter_voter_guides_by_issue = request.GET.get('filter_voter_guides_by_issue', False)
+
+    if filter_voter_guides_by_issue == 'true':
+        filter_voter_guides_by_issue = True
 
     if positive_value_exists(ballot_item_we_vote_id):
         # We don't need both ballot_item and google_civic_election_id
@@ -828,8 +833,28 @@ def voter_guides_to_follow_retrieve_view(request):  # voterGuidesToFollowRetriev
 
     results = voter_guides_to_follow_retrieve_for_api(voter_device_id, kind_of_ballot_item, ballot_item_we_vote_id,
                                                       google_civic_election_id, search_string,
-                                                      maximum_number_to_retrieve)
+                                                      maximum_number_to_retrieve, filter_voter_guides_by_issue)
     return HttpResponse(json.dumps(results['json_data']), content_type='application/json')
+
+
+def voter_issue_follow_view(request):
+    voter_device_id = request.GET.get('voter_device_id', False)
+    issue_we_vote_id = request.GET.get('issue_we_vote_id', False)
+    follow_value = request.GET.get('follow', False)
+    if follow_value == 'true':
+        follow_value = True
+    elif follow_value == 'false':
+        follow_value = False
+    ignore_value = request.GET.get('ignore', False)
+    if ignore_value == 'true':
+        ignore_value = True
+    elif ignore_value == 'false':
+        ignore_value = False
+
+    return voter_issue_follow_for_api(voter_device_id=voter_device_id,
+                                      issue_we_vote_id=issue_we_vote_id,
+                                      follow_value=follow_value,
+                                      ignore_value=ignore_value)
 
 
 def voter_location_retrieve_from_ip_view(request):  # GeoIP geo location

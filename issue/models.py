@@ -9,6 +9,9 @@ from wevote_settings.models import fetch_next_we_vote_id_last_issue_integer, fet
 import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, positive_value_exists
 
+# sort_formula
+MOST_LINKED_ORGANIZATIONS = "MOST_LINKED_ORGANIZATIONS"
+
 LINKED= 'LINKED'
 UNLINKED= 'UNLINKED'
 LINK_CHOICES = (
@@ -53,18 +56,17 @@ class IssueListManager(models.Model):
     This is a class to make it easy to retrieve lists of Issues
     """
 
-    def retrieve_issues(self):
+    def retrieve_issues(self, sort_formula):
         issue_list = []
         issue_list_found = False
 
         try:
             issue_queryset = Issue.objects.all()
-            # if positive_value_exists(issue_id):
-            #     issue_queryset = issue_queryset.filter(issue_id=issue_id)
-            # elif positive_value_exists(issue_we_vote_id):
-            #     issue_queryset = issue_queryset.filter(issue_we_vote_id=issue_we_vote_id)
-            issue_queryset = issue_queryset.order_by('-issue_followers_count')
-            issue_list = issue_queryset
+            if sort_formula == MOST_LINKED_ORGANIZATIONS:
+                issue_queryset = issue_queryset.order_by('-issue_followers_count')
+            else:
+                issue_queryset = issue_queryset.order_by('issue_name')
+            issue_list = list(issue_queryset)
 
             if len(issue_list):
                 issue_list_found = True
@@ -73,7 +75,7 @@ class IssueListManager(models.Model):
                 status = 'NO_ISSUES_RETRIEVED'
         except Issue.DoesNotExist:
             # No issues found. Not a problem.
-            status = 'NO_ISSUES_FOUND_DoesNotExist'
+            status = 'NO_ISSUES_FOUND'
             issue_list = []
         except Exception as e:
             handle_exception(e, logger=logger)
@@ -83,8 +85,8 @@ class IssueListManager(models.Model):
         results = {
             'success':              True if issue_list_found else False,
             'status':               status,
-            'issue_list_found': issue_list_found,
-            'issue_list':       issue_list,
+            'issue_list_found':     issue_list_found,
+            'issue_list':           issue_list,
         }
         return results
 
@@ -131,6 +133,9 @@ class Issue(models.Model):
                                          null=True, blank=True, default="")
     issue_followers_count = models.PositiveIntegerField(verbose_name="number of followers of this issue",
                                                         null=False, blank=True, default=0)
+    linked_organization_count = models.PositiveIntegerField(verbose_name="number of organizations linked to the issue",
+                                                        null=False, blank=True, default=0)
+
     we_vote_hosted_image_url_large = models.URLField(
         verbose_name='we vote hosted large image url', blank=True, null=True)
     we_vote_hosted_image_url_medium = models.URLField(

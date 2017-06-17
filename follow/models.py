@@ -93,7 +93,7 @@ class FollowIssueManager(models.Model):
         following_status = FOLLOWING
         follow_issue_manager = FollowIssueManager()
         return follow_issue_manager.toggle_following_issue(voter_we_vote_id, issue_id, issue_we_vote_id,
-                                                           following_status, TAGGED_BY_ORGANIZATION)
+                                                           following_status)
 
     def toggle_off_voter_following_issue(self, voter_we_vote_id, issue_id, issue_we_vote_id):
         following_status = STOP_FOLLOWING
@@ -107,7 +107,7 @@ class FollowIssueManager(models.Model):
         return follow_issue_manager.toggle_following_issue(voter_we_vote_id, issue_id, issue_we_vote_id,
                                                            following_status)
 
-    def toggle_following_issue(self, voter_we_vote_id, issue_id, issue_we_vote_id, following_status, reason=None):
+    def toggle_following_issue(self, voter_we_vote_id, issue_id, issue_we_vote_id, following_status):
         follow_issue_on_stage_found = False
         follow_issue_on_stage_id = 0
         follow_issue_on_stage = FollowIssue()
@@ -146,17 +146,12 @@ class FollowIssueManager(models.Model):
                 #         follow_issue_on_stage.following_status = following_status
                 # else:
                 follow_issue_on_stage.following_status = following_status
-                if positive_value_exists(reason) and following_status == FOLLOWING:
-                    follow_issue_on_stage.reason_for_following = reason
-                elif positive_value_exists(reason) and following_status == STOP_FOLLOWING:
-                    follow_issue_on_stage.reason_following_is_blocked = reason
-                follow_issue_on_stage.auto_followed_from_twitter_suggestion = False
                 # We don't need to update here because set set auto_now=True in the field
                 # follow_issue_on_stage.date_last_changed =
                 follow_issue_on_stage.save()
                 follow_issue_on_stage_id = follow_issue_on_stage.id
                 follow_issue_on_stage_found = True
-                status = 'UPDATE ' + following_status
+                status = 'FOLLOW_STATUS_UPDATED_AS ' + following_status
             except Exception as e:
                 status = 'FAILED_TO_UPDATE ' + following_status
                 handle_record_not_saved_exception(e, logger=logger, exception_message_optional=status)
@@ -175,7 +170,7 @@ class FollowIssueManager(models.Model):
                 if results['issue_found']:
                     issue = results['issue']
                     follow_issue_on_stage = FollowIssue(
-                        voter_id=voter_we_vote_id,
+                        voter_we_vote_id=voter_we_vote_id,
                         issue_id=issue.id,
                         issue_we_vote_id=issue.we_vote_id,
                         following_status=following_status,
@@ -358,18 +353,15 @@ class FollowIssueList(models.Model):
         follow_issue_list = self.retrieve_follow_issue_by_voter_id(voter_id)
         return len(follow_issue_list)
 
-    def retrieve_follow_issue_by_voter_id(self, voter_id, auto_followed_from_twitter_suggestion=False):
+    def retrieve_follow_issue_by_voter_we_vote_id(self, voter_we_vote_id):
         # Retrieve a list of follow_issue entries for this voter
         follow_issue_list_found = False
         following_status = FOLLOWING
         follow_issue_list = {}
         try:
-            follow_issue_list = FollowIssue.objects.all()
-            follow_issue_list = follow_issue_list.filter(voter_id=voter_id)
-            follow_issue_list = follow_issue_list.filter(following_status=following_status)
-            if auto_followed_from_twitter_suggestion:
-                follow_issue_list = follow_issue_list.filter(
-                    auto_followed_from_twitter_suggestion=auto_followed_from_twitter_suggestion)
+            follow_issue_list_query = FollowIssue.objects.all()
+            follow_issue_list_query = follow_issue_list_query.filter(voter_we_vote_id=voter_we_vote_id)
+            follow_issue_list = follow_issue_list_query.filter(following_status=following_status)
             if len(follow_issue_list):
                 follow_issue_list_found = True
         except Exception as e:
@@ -401,8 +393,7 @@ class FollowIssueList(models.Model):
             follow_issue_list = {}
             return follow_issue_list
 
-    def retrieve_follow_issue_by_voter_id_simple_id_array(self, voter_id, return_we_vote_id=False,
-                                                                 auto_followed_from_twitter_suggestion=False):
+    def retrieve_follow_issue_by_voter_id_simple_id_array(self, voter_id, return_we_vote_id=False):
         follow_issue_list_manager = FollowIssueList()
         follow_issue_list = \
             follow_issue_list_manager.retrieve_follow_issue_by_voter_id(
