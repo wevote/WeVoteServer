@@ -56,7 +56,7 @@ class IssueListManager(models.Model):
     This is a class to make it easy to retrieve lists of Issues
     """
 
-    def retrieve_issues(self, sort_formula):
+    def retrieve_issues(self, sort_formula=MOST_LINKED_ORGANIZATIONS):
         issue_list = []
         issue_list_found = False
 

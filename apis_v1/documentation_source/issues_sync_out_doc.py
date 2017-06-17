@@ -20,6 +20,11 @@ def issues_sync_out_doc_template_values(url_root):
                    '  "we_vote_id": string,\n' \
                    '  "issues_name": string,\n' \
                    '  "issues_description": string,\n' \
+                   '  "issue_followers_count": integer,\n' \
+                   '  "linked_organization_count": integer,\n' \
+                   '  "we_vote_hosted_image_url_large": string,\n' \
+                   '  "we_vote_hosted_image_url_medium": string,\n' \
+                   '  "we_vote_hosted_image_url_tiny": string,\n' \
                    '}]'
 
     template_values = {

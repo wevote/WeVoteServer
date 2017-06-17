@@ -365,7 +365,8 @@
         <td>Provide another We Vote Server a complete listing of all public measures information.</td>
     </tr>
 
-    {###  ###}
+
+    {### POSITIONS, BOOKMARKS, LIKES ###}
     <tr>
         <td colspan="3"><strong>Positions (Support, Oppose, Info Only), Bookmarks and Like's</strong></td>
     </tr>
@@ -517,19 +518,8 @@
         <td>c3</td>
         <td>Provide another We Vote Server a complete listing of all public positions information.</td>
     </tr>
-    <tr>
-        <td><a href="{% url 'apis_v1:issuesSyncOutDocs' %}">issuesSyncOut</a></td>
-        <td>c3</td>
-        <td>Provide another We Vote Server a complete listing of all issues.</td>
-    </tr>
 
-    <tr>
-        <td><a href="{% url 'apis_v1:issuesRetrieveDocs' %}">issuesRetrieve</a></td>
-        <td>c3</td>
-        <td>Retrieve complete listing of all issues.</td>
-    </tr>
-
-    {###  ###}
+    {### ORGANIZATIONS, PEOPLE & VOTER GUIDES ###}
     <tr>
         <td colspan="3"><strong>Organizations, People &amp; Voter Guides</strong></td>
     </tr>
@@ -626,6 +616,23 @@
         <td><a href="{% url 'apis_v1:organizationsSyncOutDocs' %}">organizationsSyncOut</a></td>
         <td>c3</td>
         <td>Provide another We Vote Server a complete listing of all public organization information.</td>
+    </tr>
+    <tr>
+        <td><a href="{% url 'apis_v1:issuesSyncOutDocs' %}">issuesSyncOut</a></td>
+        <td>c3</td>
+        <td>Provide another We Vote Server a complete listing of all issues.</td>
+    </tr>
+    <tr>
+        <td><a href="{% url 'apis_v1:issuesRetrieveDocs' %}">issuesRetrieve</a></td>
+        <td>c3</td>
+        <td>Retrieve complete listing of all issues.</td>
+    </tr>
+    <tr>
+        <td><a href="{% url 'apis_v1:organizationLinkToIssueSyncOutDocs' %}">organizationLinkToIssueSyncOut</a></td>
+        <td></td>
+        <td>This is the summary of the way that public organizations are categorized by issues.
+            For example, if I want to find all organizations that are related to climate change,
+            this is the data that tells me this.</td>
     </tr>
 
     {###  ###}

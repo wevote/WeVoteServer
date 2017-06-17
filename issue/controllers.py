@@ -2,7 +2,7 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
-from .models import IssueListManager, Issue, IssueManager, MOST_LINKED_ORGANIZATIONS
+from .models import IssueListManager, Issue, IssueManager, MOST_LINKED_ORGANIZATIONS, OrganizationLinkToIssue
 from config.base import get_environment_variable
 from django.contrib import messages
 from django.http import HttpResponse
@@ -16,6 +16,7 @@ logger = wevote_functions.admin.get_logger(__name__)
 
 WE_VOTE_API_KEY = get_environment_variable("WE_VOTE_API_KEY")
 ISSUES_SYNC_URL = get_environment_variable("ISSUES_SYNC_URL")
+ORGANIZATION_LINK_TO_ISSUE_SYNC_URL = get_environment_variable("ORGANIZATION_LINK_TO_ISSUE_SYNC_URL")
 
 
 def issues_import_from_master_server(request):
@@ -41,19 +42,30 @@ def issues_import_from_structured_json(structured_json):
     issues_updated = 0
     issues_not_processed = 0
     for one_issue in structured_json:
-        # We have already removed duplicate issues
+        # Bring variables from the structure_json in, with error checking
+        we_vote_id = one_issue["we_vote_id"] if "we_vote_id" in one_issue else False
+        issue_name = one_issue["issue_name"] if "issue_name" in one_issue else False
+        issue_description = one_issue["issue_description"] if "issue_description" in one_issue else False
+        issue_followers_count = one_issue["issue_followers_count"] if "issue_followers_count" in one_issue else False
+        linked_organization_count = \
+            one_issue["linked_organization_count"] if "linked_organization_count" in one_issue else False
+        we_vote_hosted_image_url_large = \
+            one_issue["we_vote_hosted_image_url_large"] if "we_vote_hosted_image_url_large" in one_issue else False
+        we_vote_hosted_image_url_medium = \
+            one_issue["we_vote_hosted_image_url_medium"] if "we_vote_hosted_image_url_medium" in one_issue else False
+        we_vote_hosted_image_url_tiny = \
+            one_issue["we_vote_hosted_image_url_tiny"] if "we_vote_hosted_image_url_tiny" in one_issue else False
 
         # Make sure we have the minimum required variables
-        if not positive_value_exists(one_issue["we_vote_id"]) or \
-                not positive_value_exists(one_issue["issue_name"]):
+        if not positive_value_exists(we_vote_id) or not positive_value_exists(issue_name):
             issues_not_processed += 1
             continue
 
         # Check to see if this issue is already being used anywhere
         issue_on_stage_found = False
         try:
-            if positive_value_exists(one_issue["we_vote_id"]):
-                issue_query = Issue.objects.filter(we_vote_id=one_issue["we_vote_id"])
+            if positive_value_exists(we_vote_id):
+                issue_query = Issue.objects.filter(we_vote_id__iexact=we_vote_id)
                 if len(issue_query):
                     issue_on_stage = issue_query[0]
                     issue_on_stage_found = True
@@ -66,28 +78,30 @@ def issues_import_from_structured_json(structured_json):
             continue
 
         try:
-            we_vote_id = one_issue["we_vote_id"]
-            issue_name = one_issue["issue_name"] \
-                if 'issue_name' in one_issue else False
-            issue_description = one_issue["issue_description"] \
-                if 'issue_description' in one_issue else False
-
             if issue_on_stage_found:
                 # Update existing issue in the database
-                if we_vote_id is not False:
-                    issue_on_stage.we_vote_id = we_vote_id
                 if issue_name is not False:
                     issue_on_stage.issue_name = issue_name
             else:
                 # Create new
                 issue_on_stage = Issue(
-                    we_vote_id=one_issue["we_vote_id"],
-                    issue_name=one_issue["issue_name"],
+                    we_vote_id=we_vote_id,
+                    issue_name=issue_name,
                 )
 
             # Now save all of the fields in common to updating an existing entry vs. creating a new entry
             if issue_description is not False:
                 issue_on_stage.issue_description = issue_description
+            if issue_followers_count is not False:
+                issue_on_stage.issue_followers_count = issue_followers_count
+            if linked_organization_count is not False:
+                issue_on_stage.linked_organization_count = linked_organization_count
+            if we_vote_hosted_image_url_large is not False:
+                issue_on_stage.we_vote_hosted_image_url_large = we_vote_hosted_image_url_large
+            if we_vote_hosted_image_url_medium is not False:
+                issue_on_stage.we_vote_hosted_image_url_medium = we_vote_hosted_image_url_medium
+            if we_vote_hosted_image_url_tiny is not False:
+                issue_on_stage.we_vote_hosted_image_url_tiny = we_vote_hosted_image_url_tiny
 
             issue_on_stage.save()
             if issue_on_stage_found:
@@ -98,11 +112,11 @@ def issues_import_from_structured_json(structured_json):
             issues_not_processed += 1
 
     issues_results = {
-        'success':          True,
-        'status':           "ISSUE_IMPORT_PROCESS_COMPLETE",
-        'saved':            issues_saved,
-        'updated':          issues_updated,
-        'not_processed':    issues_not_processed,
+        'success':              True,
+        'status':               "ISSUE_IMPORT_PROCESS_COMPLETE",
+        'issues_saved':         issues_saved,
+        'issues_updated':       issues_updated,
+        'issues_not_processed': issues_not_processed,
     }
     return issues_results
 
@@ -174,13 +188,12 @@ def issue_retrieve_for_api(issue_id, issue_we_vote_id):  # issueRetrieve
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 
 
-def issues_retrieve_for_api(sort_formula):
+def issues_retrieve_for_api(sort_formula):  # issuesRetrieve
     """
     Used by the api
     :return:
     """
-    # NOTE: Issues retrieve is independent of *who* wants to see the data. Issues retrieve never triggers
-    #  a ballot data lookup from Google Civic, like voterBallotItems does
+    # NOTE: Issues retrieve is independent of *who* wants to see the data.
 
     issue_list = []
     issues_to_display = []
@@ -219,3 +232,93 @@ def issues_retrieve_for_api(sort_formula):
         }
 
     return HttpResponse(json.dumps(json_data), content_type='application/json')
+
+
+def organization_link_to_issue_import_from_master_server(request):
+    """
+    Get the json data, and either create new entries or update existing
+    :return:
+    """
+    messages.add_message(request, messages.INFO, "Loading organizationLinkToIssue data from We Vote Master servers")
+    logger.info("Loading organizationLinkToIssue from We Vote Master servers")
+    # Request json file from We Vote servers
+    link_request = requests.get(ORGANIZATION_LINK_TO_ISSUE_SYNC_URL, params={
+        "key": WE_VOTE_API_KEY,  # This comes from an environment variable
+    })
+    structured_json = json.loads(link_request.text)
+
+    import_results = organization_link_to_issue_import_from_structured_json(structured_json)
+
+    return import_results
+
+
+def organization_link_to_issue_import_from_structured_json(structured_json):
+    organization_link_to_issue_saved = 0
+    organization_link_to_issue_updated = 0
+    organization_link_to_issue_not_processed = 0
+    for one_entry in structured_json:
+        # Bring variables from the structure_json in, with error checking
+        organization_we_vote_id = \
+            one_entry["organization_we_vote_id"] if "organization_we_vote_id" in one_entry else False
+        issue_we_vote_id = one_entry["issue_we_vote_id"] if "issue_we_vote_id" in one_entry else False
+        link_active = one_entry["link_active"] if "link_active" in one_entry else False
+        reason_for_link = one_entry["reason_for_link"] if "reason_for_link" in one_entry else False
+        link_blocked = one_entry["link_blocked"] if "link_blocked" in one_entry else False
+        reason_link_is_blocked = one_entry["reason_link_is_blocked"] if "reason_link_is_blocked" in one_entry else False
+
+        # Make sure we have the minimum required variables
+        if not positive_value_exists(organization_we_vote_id) or not positive_value_exists(issue_we_vote_id):
+            organization_link_to_issue_not_processed += 1
+            continue
+
+        # Check to see if this organization_link_to_issue is already being used anywhere
+        organization_link_found = False
+        try:
+            organization_link_query = OrganizationLinkToIssue.objects.filter(
+                organization_we_vote_id__iexact=organization_we_vote_id)
+            organization_link_query = organization_link_query.filter(issue_we_vote_id__iexact=issue_we_vote_id)
+            if len(organization_link_query):
+                organization_link = organization_link_query[0]
+                organization_link_found = True
+        except OrganizationLinkToIssue.DoesNotExist:
+            # No problem that we aren't finding existing issue
+            pass
+        except Exception as e:
+            # handle_record_not_found_exception(e, logger=logger)
+            # We want to skip to the next org link
+            continue
+
+        try:
+            if not organization_link_found:
+                # Create new
+                organization_link = Issue(
+                    organization_we_vote_id=organization_we_vote_id,
+                    issue_we_vote_id=issue_we_vote_id,
+                )
+
+            # Now save all of the fields in common to updating an existing entry vs. creating a new entry
+            if link_active is not False:
+                organization_link.link_active = link_active
+            if reason_for_link is not False:
+                organization_link.reason_for_link = reason_for_link
+            if link_blocked is not False:
+                organization_link.link_blocked = link_blocked
+            if reason_link_is_blocked is not False:
+                organization_link.reason_link_is_blocked = reason_link_is_blocked
+
+            organization_link.save()
+            if organization_link_found:
+                organization_link_to_issue_updated += 1
+            else:
+                organization_link_to_issue_saved += 1
+        except Exception as e:
+            organization_link_to_issue_not_processed += 1
+
+    issues_results = {
+        'success':                                  True,
+        'status':                                   "ORGANIZATION_LINK_TO_ISSUE_IMPORT_PROCESS_COMPLETE",
+        'organization_link_to_issue_saved':         organization_link_to_issue_saved,
+        'organization_link_to_issue_updated':       organization_link_to_issue_updated,
+        'organization_link_to_issue_not_processed': organization_link_to_issue_not_processed,
+    }
+    return issues_results

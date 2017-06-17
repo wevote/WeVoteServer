@@ -43,6 +43,7 @@
   "ELECTIONS_SYNC_URL":             "https://api.wevoteusa.org/apis/v1/electionsSyncOut/",
   "ORGANIZATIONS_SYNC_URL":         "https://api.wevoteusa.org/apis/v1/organizationsSyncOut/",
   "OFFICES_SYNC_URL":               "https://api.wevoteusa.org/apis/v1/officesSyncOut/",
+  "ORGANIZATION_LINK_TO_ISSUE_SYNC_URL":  "https://api.wevoteusa.org/apis/v1/organizationLinkToIssueSyncOut/",
   "CANDIDATES_SYNC_URL":            "https://api.wevoteusa.org/apis/v1/candidatesSyncOut/",
   "ISSUES_SYNC_URL":                "https://api.wevoteusa.org/apis/v1/issuesSyncOut/",
   "MEASURES_SYNC_URL":              "https://api.wevoteusa.org/apis/v1/measuresSyncOut/",
