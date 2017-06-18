@@ -14,10 +14,10 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.messages import get_messages
 from django.shortcuts import render
 from exception.models import handle_record_found_more_than_one_exception,\
-    handle_record_not_deleted_exception, handle_record_not_found_exception, handle_record_not_saved_exception
+    handle_record_not_deleted_exception, handle_record_not_found_exception
 from election.models import Election, ElectionManager
-from follow.models import FollowIssueList, FollowIssueManager
-from issue.models import IssueListManager, IssueManager, OrganizationLinkToIssueList ,OrganizationLinkToIssueManager
+from issue.models import ALPHABETICAL_ASCENDING, IssueListManager, IssueManager, \
+    OrganizationLinkToIssueList, OrganizationLinkToIssueManager
 from measure.models import ContestMeasure, ContestMeasureList, ContestMeasureManager
 from organization.models import OrganizationListManager, OrganizationManager
 from position.models import PositionEntered, PositionManager, INFORMATION_ONLY, OPPOSE, \
@@ -56,24 +56,25 @@ def organizations_sync_out_view(request):
             organization_list = organization_list.filter(state_served_code__iexact=state_served_code)
         # serializer = OrganizationSerializer(organization_list, many=True, allow_null=True)
         # return Response(serializer.data)
-        organization_list_dict = organization_list.values('we_vote_id', 'organization_name', 'organization_type',
-                                                          'organization_description', 'state_served_code',
-                                                          'organization_website', 'organization_email',
-                                                          'organization_image', 'organization_twitter_handle',
-                                                          'twitter_user_id', 'twitter_followers_count',
-                                                          'twitter_description', 'twitter_location', 'twitter_name',
-                                                          'twitter_profile_image_url_https',
-                                                          'twitter_profile_background_image_url_https',
-                                                          'twitter_profile_banner_url_https', 'organization_facebook',
-                                                          'vote_smart_id', 'organization_contact_name',
-                                                          'organization_address', 'organization_city',
-                                                          'organization_state', 'organization_zip',
-                                                          'organization_phone1', 'organization_phone2',
-                                                          'organization_fax', 'wikipedia_page_title',
-                                                          'wikipedia_page_id', 'wikipedia_photo_url',
-                                                          'wikipedia_thumbnail_url', 'wikipedia_thumbnail_width',
-                                                          'wikipedia_thumbnail_height', 'ballotpedia_page_title',
-                                                          'ballotpedia_photo_url')
+        organization_list_dict = organization_list.values(
+            'we_vote_id', 'organization_name', 'organization_type',
+            'organization_description', 'state_served_code',
+            'organization_website', 'organization_email',
+            'organization_image', 'organization_twitter_handle',
+            'twitter_user_id', 'twitter_followers_count',
+            'twitter_description', 'twitter_location', 'twitter_name',
+            'twitter_profile_image_url_https',
+            'twitter_profile_background_image_url_https',
+            'twitter_profile_banner_url_https', 'organization_facebook',
+            'vote_smart_id', 'organization_contact_name',
+            'organization_address', 'organization_city',
+            'organization_state', 'organization_zip',
+            'organization_phone1', 'organization_phone2',
+            'organization_fax', 'wikipedia_page_title',
+            'wikipedia_page_id', 'wikipedia_photo_url',
+            'wikipedia_thumbnail_url', 'wikipedia_thumbnail_width',
+            'wikipedia_thumbnail_height', 'ballotpedia_page_title',
+            'ballotpedia_photo_url')
         if organization_list_dict:
             organization_list_json = list(organization_list_dict)
             return HttpResponse(json.dumps(organization_list_json), content_type='application/json')
@@ -272,7 +273,7 @@ def organization_edit_view(request, organization_id):
         state_served_code = organization_on_stage.state_served_code
         organization_on_stage_found = True
         issue_list_manager = IssueListManager()
-        issue_list_results = issue_list_manager.retrieve_issues()
+        issue_list_results = issue_list_manager.retrieve_issues(ALPHABETICAL_ASCENDING)
         if issue_list_results["issue_list_found"]:
             issue_list = issue_list_results["issue_list"]
             link_issue_list_manager = OrganizationLinkToIssueList()

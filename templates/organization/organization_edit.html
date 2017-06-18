@@ -5,6 +5,10 @@
 
 {%  block content %}
 {% load template_filters %}
+<style>
+span.nobr { white-space: nowrap; }
+</style>
+
 <h1>{% if organization %}{{ organization.organization_name }}{% else %}New Organization{% endif %}</h1>
 {% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
 
@@ -136,8 +140,10 @@
     <label class="col-sm-3 control-label">Select Issues</label>
     <div class="col-sm-8 ">
     {% for issue in issue_list %}
+        <span class="nobr">
         <input type="checkbox" name="selected_issues" id="selected_issues" value={{ issue.we_vote_id }}
-                {% if issue.followed_by_organization %}checked{% endif %} />{{ issue.issue_name }} &nbsp;
+                {% if issue.followed_by_organization %}checked{% endif %} />&nbsp;{{ issue.issue_name }} &nbsp;
+        </span>
     {% endfor %}
     </div>
 </div>

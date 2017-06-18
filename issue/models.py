@@ -11,9 +11,10 @@ from wevote_functions.functions import convert_to_int, positive_value_exists
 
 # sort_formula
 MOST_LINKED_ORGANIZATIONS = "MOST_LINKED_ORGANIZATIONS"
+ALPHABETICAL_ASCENDING = "ALPHABETICAL_ASCENDING"
 
-LINKED= 'LINKED'
-UNLINKED= 'UNLINKED'
+LINKED = 'LINKED'
+UNLINKED = 'UNLINKED'
 LINK_CHOICES = (
     (LINKED,     'Linked'),
     (UNLINKED,   'Unlinked'),
@@ -64,6 +65,8 @@ class IssueListManager(models.Model):
             issue_queryset = Issue.objects.all()
             if sort_formula == MOST_LINKED_ORGANIZATIONS:
                 issue_queryset = issue_queryset.order_by('-issue_followers_count')
+            elif sort_formula == ALPHABETICAL_ASCENDING:
+                issue_queryset = issue_queryset.order_by('issue_name')
             else:
                 issue_queryset = issue_queryset.order_by('issue_name')
             issue_list = list(issue_queryset)
