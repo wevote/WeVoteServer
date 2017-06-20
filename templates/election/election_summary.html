@@ -34,11 +34,11 @@
 
 
     <p>
-        <a href="{% url 'office:office_list' %}?google_civic_election_id={{ election.google_civic_election_id }}">
+        <a href="{% url 'office:office_list' %}?google_civic_election_id={{ election.google_civic_election_id }}&state_code={{ state_code }}">
             See Offices for this Election</a>,
-        <a href="{% url 'candidate:candidate_list' %}?google_civic_election_id={{ election.google_civic_election_id }}">
+        <a href="{% url 'candidate:candidate_list' %}?google_civic_election_id={{ election.google_civic_election_id }}&state_code={{ state_code }}">
             See Candidates for this Election</a><br />
-        <a href="{% url 'ballot:ballot_item_list_edit' 0 %}?google_civic_election_id={{ election.google_civic_election_id }}">
+        <a href="{% url 'ballot:ballot_item_list_edit' 0 %}?google_civic_election_id={{ election.google_civic_election_id }}&state_code={{ state_code }}">
             Create Ballot for this Election for one Location</a> (so voters can find a ballot before Google Civic data is live)<br />
     </p>
 
