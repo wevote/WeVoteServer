@@ -417,7 +417,6 @@ def voter_guides_to_follow_retrieve_for_api(voter_device_id,  # voterGuidesToFol
             }
             return results
         else:
-            # add the following lines inside retrieve_voter_guides_to_follow_generic_for_api
             follow_issue_list_manager = FollowIssueList()
             issue_list_for_voter = follow_issue_list_manager. \
                 retrieve_follow_issue_by_voter_we_vote_id(voter_we_vote_id)
