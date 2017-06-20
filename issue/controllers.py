@@ -256,6 +256,7 @@ def organization_link_to_issue_import_from_structured_json(structured_json):
     organization_link_to_issue_saved = 0
     organization_link_to_issue_updated = 0
     organization_link_to_issue_not_processed = 0
+    issue_manager = IssueManager()
     for one_entry in structured_json:
         # Bring variables from the structure_json in, with error checking
         organization_we_vote_id = \
@@ -291,12 +292,16 @@ def organization_link_to_issue_import_from_structured_json(structured_json):
         try:
             if not organization_link_found:
                 # Create new
-                organization_link = Issue(
+                organization_link = OrganizationLinkToIssue(
                     organization_we_vote_id=organization_we_vote_id,
                     issue_we_vote_id=issue_we_vote_id,
                 )
 
             # Now save all of the fields in common to updating an existing entry vs. creating a new entry
+            if not positive_value_exists(organization_link.issue_id):
+                issue_id = issue_manager.fetch_issue_id_from_we_vote_id(organization_link.issue_we_vote_id)
+                if issue_id != 0:
+                    organization_link.issue_id = issue_id
             if link_active is not False:
                 organization_link.link_active = link_active
             if reason_for_link is not False:
