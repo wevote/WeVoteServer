@@ -65,7 +65,7 @@ def candidates_import_from_master_server_view(request):  # TODO DALE Transition 
     else:
         messages.add_message(request, messages.INFO, 'Candidates import completed. '
                                                      'Saved: {saved}, Updated: {updated}, '
-                                                     'Master data not imported (local duplicates found): '
+                                                     'Duplicates skipped: '
                                                      '{duplicates_removed}, '
                                                      'Not processed: {not_processed}'
                                                      ''.format(saved=results['saved'],

@@ -32,6 +32,7 @@ class ContestOffice(models.Model):
     # The unique ID of the election containing this contest. (Provided by Google Civic)
     google_civic_election_id = models.CharField(verbose_name="google civic election id",
                                                 max_length=255, null=False, blank=False)
+    state_code = models.CharField(verbose_name="state this office serves", max_length=2, null=True, blank=True)
     google_civic_election_id_new = models.PositiveIntegerField(
         verbose_name="google civic election id", default=0, null=False, blank=False)
     ocd_division_id = models.CharField(verbose_name="ocd division id", max_length=255, null=True, blank=True)
@@ -48,8 +49,6 @@ class ContestOffice(models.Model):
     number_elected = models.CharField(verbose_name="google civic number of candidates who will be elected",
                                       max_length=255, null=True, blank=True)
 
-    # State code
-    state_code = models.CharField(verbose_name="state this office serves", max_length=2, null=True, blank=True)
     # If this is a partisan election, the name of the party it is for.
     primary_party = models.CharField(verbose_name="google civic primary party", max_length=255, null=True, blank=True)
     # The name of the district.
@@ -157,7 +156,7 @@ class ContestOfficeManager(models.Model):
         return 0
 
     def update_or_create_contest_office(self, office_we_vote_id, maplight_id, google_civic_election_id,
-                                        office_name, state_code, district_id, updated_contest_office_values):
+                                        office_name, district_id, updated_contest_office_values):
         """
         Either update or create an office entry.
         """
@@ -234,13 +233,13 @@ class ContestOfficeManager(models.Model):
                         google_civic_election_id__exact=google_civic_election_id,
                         google_civic_office_name__iexact=office_name,
                         district_id__exact=district_id,
-                        state_code__iexact=state_code
+                        state_code__iexact=updated_contest_office_values['state_code'],
                     )
                 else:
                     contest_office_on_stage = ContestOffice.objects.get(
                         google_civic_election_id__exact=google_civic_election_id,
                         google_civic_office_name__iexact=office_name,
-                        state_code__iexact=state_code
+                        state_code__iexact=updated_contest_office_values['state_code'],
                     )
                 contest_office_found = True
                 success = True
@@ -265,13 +264,13 @@ class ContestOfficeManager(models.Model):
                             google_civic_election_id__exact=google_civic_election_id,
                             office_name__iexact=office_name,
                             district_id__exact=district_id,
-                            state_code__iexact=state_code
+                            state_code__iexact=updated_contest_office_values['state_code'],
                         )
                     else:
                         contest_office_on_stage = ContestOffice.objects.get(
                             google_civic_election_id__exact=google_civic_election_id,
                             office_name__iexact=office_name,
-                            state_code__iexact=state_code
+                            state_code__iexact=updated_contest_office_values['state_code'],
                         )
                     contest_office_found = True
                     success = True
@@ -399,31 +398,31 @@ class ContestOfficeManager(models.Model):
 
         return contest_office_id
 
-    def create_contest_office_row_entry(self, contest_office_name, state_code, contest_office_votes_allowed, ctcl_uuid,
-                                        contest_office_number_elected, google_civic_election_id, ):
+    def create_contest_office_row_entry(self, contest_office_name, contest_office_votes_allowed, ctcl_uuid,
+                                        contest_office_number_elected, google_civic_election_id, state_code):
         """
         Create ContestOffice table entry with ContestOffice details 
         :param contest_office_name: 
-        :param state_code: 
-        :param contest_office_votes_allowed: 
+        :param contest_office_votes_allowed:
         :param ctcl_uuid: 
         :param contest_office_number_elected: 
         :param google_civic_election_id: 
-        :return: 
+        :param state_code:
+        :return:
         """
 
-        success = False
-        status = ""
         contest_office_updated = False
         new_contest_office_created = False
         new_contest_office = ''
 
         try:
             new_contest_office = ContestOffice.objects.create(
-                office_name=contest_office_name, state_code=state_code,
-                number_voting_for=contest_office_votes_allowed, ctcl_uuid=ctcl_uuid,
+                office_name=contest_office_name,
+                number_voting_for=contest_office_votes_allowed,
+                ctcl_uuid=ctcl_uuid,
                 number_elected=contest_office_number_elected,
-                google_civic_election_id=google_civic_election_id)
+                google_civic_election_id=google_civic_election_id,
+                state_code=state_code)
             if new_contest_office:
                 success = True
                 status = "CONTEST_OFFICE_CREATED"
@@ -446,18 +445,18 @@ class ContestOfficeManager(models.Model):
             }
         return results
 
-    def update_contest_office_row_entry(self, contest_office_name, state_code, contest_office_votes_allowed, ctcl_uuid,
-                                        contest_office_number_elected, google_civic_election_id,
-                                        contest_office_we_vote_id):
+    def update_contest_office_row_entry(self, contest_office_name, contest_office_votes_allowed, ctcl_uuid,
+                                        contest_office_number_elected, contest_office_we_vote_id,
+                                        google_civic_election_id, state_code):
         """
         Update ContestOffice table entry with matching we_vote_id 
         :param contest_office_name: 
-        :param state_code: 
-        :param contest_office_votes_allowed: 
+        :param contest_office_votes_allowed:
         :param ctcl_uuid: 
-        :param contest_office_number_elected: 
-        :param google_civic_election_id: 
-        :param elected_office_we_vote_id: 
+        :param contest_office_number_elected:
+        :param contest_office_we_vote_id:
+        :param google_civic_election_id:
+        :param state_code:
         :return: 
         """
 
@@ -473,11 +472,11 @@ class ContestOfficeManager(models.Model):
             if existing_contest_office_entry:
                 # found the existing entry, update the values
                 existing_contest_office_entry.office_name = contest_office_name
-                existing_contest_office_entry.state_code = state_code
-                existing_contest_office_entry.google_civic_election_id = google_civic_election_id
-                existing_contest_office_entry.number_elected = contest_office_number_elected
-                existing_contest_office_entry.ctcl_uuid = ctcl_uuid
                 existing_contest_office_entry.number_voted_for = contest_office_votes_allowed
+                existing_contest_office_entry.ctcl_uuid = ctcl_uuid
+                existing_contest_office_entry.number_elected = contest_office_number_elected
+                existing_contest_office_entry.google_civic_election_id = google_civic_election_id
+                existing_contest_office_entry.state_code = state_code
                 # now go ahead and save this entry (update)
                 existing_contest_office_entry.save()
                 contest_office_updated = True
@@ -575,11 +574,14 @@ class ContestOfficeListManager(models.Model):
         }
         return results
 
-    def retrieve_possible_duplicate_offices(self, google_civic_election_id, office_name,
-                                            state_code, we_vote_id_from_master=''):
+    def retrieve_possible_duplicate_offices(self, google_civic_election_id, state_code, office_name,
+                                            we_vote_id_from_master=''):
         """
         Find offices that match another office in all critical fields other than we_vote_id_from_master
         :param google_civic_election_id:
+        :param state_code:
+        :param office_name:
+        :param we_vote_id_from_master:
         :return:
         """
         office_list_objects = []
@@ -589,7 +591,8 @@ class ContestOfficeListManager(models.Model):
             office_queryset = ContestOffice.objects.all()
             office_queryset = office_queryset.filter(google_civic_election_id=google_civic_election_id)
             office_queryset = office_queryset.filter(office_name__iexact=office_name)  # Case doesn't matter
-            office_queryset = office_queryset.filter(state_code__iexact=state_code)  # Case doesn't matter
+            if positive_value_exists(state_code):
+                office_queryset = office_queryset.filter(state_code__iexact=state_code)  # Case doesn't matter
             # office_queryset = office_queryset.filter(district_id__exact=district_id)
             # office_queryset = office_queryset.filter(district_name__iexact=district_name)  # Case doesn't matter
 
@@ -621,6 +624,7 @@ class ContestOfficeListManager(models.Model):
             'success':                  success,
             'status':                   status,
             'google_civic_election_id': google_civic_election_id,
+            'state_code':               state_code,
             'office_list_found':        office_list_found,
             'office_list':              office_list_objects,
         }
@@ -650,6 +654,7 @@ class ElectedOffice(models.Model):
                                                 max_length=255, null=False, blank=False)
     google_civic_election_id_new = models.PositiveIntegerField(
         verbose_name="google civic election id", default=0, null=False, blank=False)
+    state_code = models.CharField(verbose_name="state this office serves", max_length=2, null=True, blank=True)
     ocd_division_id = models.CharField(verbose_name="ocd division id", max_length=255, null=True, blank=True)
     maplight_id = models.CharField(
         verbose_name="maplight unique identifier", max_length=255, null=True, blank=True, unique=True)
@@ -1196,12 +1201,13 @@ class ElectedOfficeListManager(models.Model):
                 elected_office_list_light.append(one_elected_office.copy())
 
         results = {
-            'success':                  success,
-            'status':                   status,
-            'google_civic_election_id': google_civic_election_id,
-            'elected_office_list_found':        elected_office_list_found,
-            'elected_office_list_objects':      elected_office_list_objects if return_list_of_objects else [],
-            'elected_office_list_light':        elected_office_list_light,
+            'success':                      success,
+            'status':                       status,
+            'google_civic_election_id':     google_civic_election_id,
+            'state_code':                   state_code,
+            'elected_office_list_found':    elected_office_list_found,
+            'elected_office_list_objects':  elected_office_list_objects if return_list_of_objects else [],
+            'elected_office_list_light':    elected_office_list_light,
         }
         return results
 
@@ -1220,7 +1226,8 @@ class ElectedOfficeListManager(models.Model):
             elected_office_queryset = elected_office_queryset.filter(google_civic_election_id=google_civic_election_id)
             elected_office_queryset = elected_office_queryset.filter(elected_office_name__iexact=elected_office_name)
             # Case doesn't matter
-            elected_office_queryset = elected_office_queryset.filter(state_code__iexact=state_code)
+            if positive_value_exists(state_code):
+                elected_office_queryset = elected_office_queryset.filter(state_code__iexact=state_code)
             # Case doesn't matter
             # elected_office_queryset = elected_office_queryset.filter(district_id__exact=district_id)
             # elected_office_queryset = elected_office_queryset.filter(district_name__iexact=district_name)

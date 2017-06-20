@@ -9,7 +9,7 @@ import glob
 import json
 import requests
 import wevote_functions.admin
-from wevote_functions.functions import positive_value_exists
+from wevote_functions.functions import positive_value_exists, process_request_from_master
 import xml.etree.ElementTree as MyElementTree
 
 logger = wevote_functions.admin.get_logger(__name__)
@@ -23,21 +23,22 @@ def polling_locations_import_from_master_server(request, state_code):
     Get the json data, and either create new entries or update existing
     :return:
     """
-    # Request json file from We Vote servers
-    messages.add_message(request, messages.INFO, "Loading Polling Locations from We Vote Master servers")
-    logger.info("Loading Polling Locations from We Vote Master servers", {}, {})
-    request = requests.get(POLLING_LOCATIONS_SYNC_URL, params={
-        "key": WE_VOTE_API_KEY,  # This comes from an environment variable
-        "format":   'json',
-        "state": state_code,
-    })
-    structured_json = json.loads(request.text)
-    results = filter_polling_locations_structured_json_for_local_duplicates(structured_json)
-    filtered_structured_json = results['structured_json']
-    duplicates_removed = results['duplicates_removed']
+    import_results, structured_json = process_request_from_master(
+        request, "Loading Polling Locations from We Vote Master servers",
+        POLLING_LOCATIONS_SYNC_URL, {
+            "key":    WE_VOTE_API_KEY,  # This comes from an environment variable
+            "format": 'json',
+            "state":  state_code,
+        }
+    )
 
-    import_results = polling_locations_import_from_structured_json(filtered_structured_json)
-    import_results['duplicates_removed'] = duplicates_removed
+    if import_results['success']:
+        results = filter_polling_locations_structured_json_for_local_duplicates(structured_json)
+        filtered_structured_json = results['structured_json']
+        duplicates_removed = results['duplicates_removed']
+
+        import_results = polling_locations_import_from_structured_json(filtered_structured_json)
+        import_results['duplicates_removed'] = duplicates_removed
 
     return import_results
 

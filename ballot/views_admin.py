@@ -31,8 +31,6 @@ logger = wevote_functions.admin.get_logger(__name__)
 
 
 # This page does not need to be protected.
-# class BallotItemsSyncOutView(APIView):
-#     def get(self, request, format=None):
 def ballot_items_sync_out_view(request):
     google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
     state_code = request.GET.get('state_code', False)
@@ -113,6 +111,13 @@ def ballot_returned_sync_out_view(request):
 
 @login_required
 def ballot_items_import_from_master_server_view(request):
+    """
+    Retrieve Saved Ballot Items for election nnnn
+
+    :param request:
+    :return:
+    """
+
     google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
     state_code = request.GET.get('state_code', '')
 
@@ -123,7 +128,7 @@ def ballot_items_import_from_master_server_view(request):
     else:
         messages.add_message(request, messages.INFO, 'Ballot Items import completed. '
                                                      'Saved: {saved}, Updated: {updated}, '
-                                                     'Master data not imported (local duplicates found): '
+                                                     'Duplicates skipped: '
                                                      '{duplicates_removed}, '
                                                      'Not processed: {not_processed}'
                                                      ''.format(saved=results['saved'],
@@ -146,7 +151,7 @@ def ballot_returned_import_from_master_server_view(request):
     else:
         messages.add_message(request, messages.INFO, 'Ballot Returned import completed. '
                                                      'Saved: {saved}, Updated: {updated}, '
-                                                     'Master data not imported (local duplicates found): '
+                                                     'Duplicates skipped: '
                                                      '{duplicates_removed}, '
                                                      'Not processed: {not_processed}'
                                                      ''.format(saved=results['saved'],
@@ -294,6 +299,7 @@ def ballot_item_list_edit_process_view(request):
 
     ballot_returned_id = convert_to_int(request.POST.get('ballot_returned_id', 0))
     google_civic_election_id = request.POST.get('google_civic_election_id', 0)
+    state_code = request.POST.get('state_code', '')
     polling_location_id = convert_to_int(request.POST.get('polling_location_id', 0))
     polling_location_city = request.POST.get('polling_location_city', '')
     polling_location_zip = request.POST.get('polling_location_zip', '')
@@ -353,6 +359,7 @@ def ballot_item_list_edit_process_view(request):
                                                               'required to save ballot_returned.')
                 return HttpResponseRedirect(reverse('ballot:ballot_item_list_edit', args=(ballot_returned_id,)) +
                                             "?google_civic_election_id=" + str(google_civic_election_id) +
+                                            "&state_code=" + str(state_code) +
                                             "&polling_location_id=" + str(polling_location_id) +
                                             "&polling_location_city=" + polling_location_city +
                                             "&polling_location_zip=" + str(polling_location_zip)
@@ -370,6 +377,7 @@ def ballot_item_list_edit_process_view(request):
                                                               'required to save ballot_returned.')
                 return HttpResponseRedirect(reverse('ballot:ballot_item_list_edit', args=(ballot_returned_id,)) +
                                             "?google_civic_election_id=" + str(google_civic_election_id) +
+                                            "&state_code=" + str(state_code) +
                                             "&polling_location_id=" + str(polling_location_id) +
                                             "&polling_location_city=" + polling_location_city +
                                             "&polling_location_zip=" + str(polling_location_zip)
@@ -386,6 +394,7 @@ def ballot_item_list_edit_process_view(request):
                 normalized_state=polling_location.state,
                 normalized_zip=polling_location.get_formatted_zip(),
                 text_for_map_search=polling_location.get_text_for_map_search(),
+                state_code=state_code,
             )
             ballot_returned.save()
             ballot_returned_id = ballot_returned.id
@@ -423,7 +432,7 @@ def ballot_item_list_edit_process_view(request):
             results = ballot_item_manager.update_or_create_ballot_item_for_polling_location(
                 polling_location.we_vote_id, google_civic_election_id, google_ballot_placement,
                 ballot_item_display_name, measure_subtitle, local_ballot_order,
-                contest_office.id, contest_office.we_vote_id)
+                contest_office.id, contest_office.we_vote_id, state_code)
 
             if results['new_ballot_item_created']:
                 messages.add_message(request, messages.INFO, 'Office 1 added.')
@@ -447,12 +456,13 @@ def ballot_item_list_edit_process_view(request):
                 polling_location.we_vote_id, google_civic_election_id, google_ballot_placement,
                 ballot_item_display_name, contest_measure.measure_subtitle, local_ballot_order,
                 contest_office_id, contest_office_we_vote_id,
-                contest_measure.id)
+                contest_measure.id, state_code)
     except Exception as e:
         messages.add_message(request, messages.ERROR, 'Could not save ballot_returned.')
 
     return HttpResponseRedirect(reverse('ballot:ballot_item_list_edit', args=(ballot_returned_id,)) +
                                 "?google_civic_election_id=" + str(google_civic_election_id) +
+                                "&state_code=" + str(state_code) +
                                 "&polling_location_id=" + str(polling_location_id) +
                                 "&polling_location_city=" + polling_location_city +
                                 "&polling_location_zip=" + str(polling_location_zip)

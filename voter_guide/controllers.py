@@ -19,7 +19,7 @@ from voter.models import fetch_voter_id_from_voter_device_link, fetch_voter_we_v
     VoterManager
 from voter_guide.models import VoterGuideListManager, VoterGuideManager, VoterGuidePossibilityManager
 import wevote_functions.admin
-from wevote_functions.functions import is_voter_device_id_valid, positive_value_exists
+from wevote_functions.functions import is_voter_device_id_valid, positive_value_exists, process_request_from_master
 
 logger = wevote_functions.admin.get_logger(__name__)
 
@@ -120,21 +120,22 @@ def voter_guides_import_from_master_server(request, google_civic_election_id):
     Get the json data, and either create new entries or update existing
     :return:
     """
-    # Request json file from We Vote servers
-    messages.add_message(request, messages.INFO, "Loading Voter Guides from We Vote Master servers")
-    logger.info("Loading Voter Guides from We Vote Master servers")
-    request = requests.get(VOTER_GUIDES_SYNC_URL, params={
-        "key":                      WE_VOTE_API_KEY,  # This comes from an environment variable
-        "format":                   'json',
-        "google_civic_election_id": google_civic_election_id,
-    })
-    structured_json = json.loads(request.text)
-    results = filter_voter_guides_structured_json_for_local_duplicates(structured_json)
-    filtered_structured_json = results['structured_json']
-    duplicates_removed = results['duplicates_removed']
+    import_results, structured_json = process_request_from_master(
+        request, "Loading Voter Guides from We Vote Master servers",
+        VOTER_GUIDES_SYNC_URL, {
+            "key":                      WE_VOTE_API_KEY,  # This comes from an environment variable
+            "format":                   'json',
+            "google_civic_election_id": google_civic_election_id,
+        }
+    )
 
-    import_results = voter_guides_import_from_structured_json(filtered_structured_json)
-    import_results['duplicates_removed'] = duplicates_removed
+    if import_results['success']:
+        results = filter_voter_guides_structured_json_for_local_duplicates(structured_json)
+        filtered_structured_json = results['structured_json']
+        duplicates_removed = results['duplicates_removed']
+
+        import_results = voter_guides_import_from_structured_json(filtered_structured_json)
+        import_results['duplicates_removed'] = duplicates_removed
 
     return import_results
 
@@ -206,6 +207,7 @@ def voter_guides_import_from_structured_json(structured_json):
             if 'organization_we_vote_id' in one_voter_guide else ''
         public_figure_we_vote_id = one_voter_guide['public_figure_we_vote_id'] \
             if 'public_figure_we_vote_id' in one_voter_guide else ''
+        state_code = one_voter_guide['state_code'] if 'state_code' in one_voter_guide else ''
 
         if positive_value_exists(we_vote_id) and \
                 (positive_value_exists(organization_we_vote_id) or
@@ -236,7 +238,7 @@ def voter_guides_import_from_structured_json(structured_json):
         if proceed_to_update_or_create:
             if positive_value_exists(organization_we_vote_id) and positive_value_exists(google_civic_election_id):
                 results = voter_guide_manager.update_or_create_organization_voter_guide_by_election_id(
-                    organization_we_vote_id, google_civic_election_id)
+                    organization_we_vote_id, google_civic_election_id, state_code)
             elif positive_value_exists(organization_we_vote_id) and positive_value_exists(vote_smart_time_span):
                 results = voter_guide_manager.update_or_create_organization_voter_guide_by_time_span(
                     organization_we_vote_id, vote_smart_time_span)
@@ -417,7 +419,6 @@ def voter_guides_to_follow_retrieve_for_api(voter_device_id,  # voterGuidesToFol
             }
             return results
         else:
-            # add the following lines inside retrieve_voter_guides_to_follow_generic_for_api
             follow_issue_list_manager = FollowIssueList()
             issue_list_for_voter = follow_issue_list_manager. \
                 retrieve_follow_issue_by_voter_we_vote_id(voter_we_vote_id)

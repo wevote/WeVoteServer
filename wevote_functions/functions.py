@@ -10,6 +10,9 @@ import string
 import sys
 import types
 import wevote_functions.admin
+import json
+import requests
+from django.contrib import messages
 
 
 logger = wevote_functions.admin.get_logger(__name__)
@@ -607,3 +610,34 @@ def convert_state_code_to_state_text(incoming_state_code):
             return state_name
     else:
         return ""
+
+
+def process_request_from_master(request, message_text, get_url, get_params):
+    """
+
+    :param request:
+    :param message_text:
+    :param get_url:
+    :param get_params:
+    :return: structured_json and import_results
+    """
+
+    messages.add_message(request, messages.INFO, message_text)
+    logger.info(message_text)
+    print(message_text)
+
+    response = requests.get(get_url, get_params)
+
+    structured_json = json.loads(response.text)
+    if 'success' in structured_json and not structured_json['success']:
+        import_results = {
+            'success': False,
+            'status': "Error: " + structured_json['status'],
+        }
+    else:
+        import_results = {
+            'success': True,
+            'status': "",
+        }
+
+    return import_results, structured_json

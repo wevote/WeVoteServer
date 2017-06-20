@@ -10,7 +10,7 @@ from django.http import HttpResponse
 import json
 import requests
 import wevote_functions.admin
-from wevote_functions.functions import positive_value_exists
+from wevote_functions.functions import positive_value_exists, process_request_from_master
 
 logger = wevote_functions.admin.get_logger(__name__)
 
@@ -35,21 +35,23 @@ def offices_import_from_master_server(request, google_civic_election_id='', stat
     :return:
     """
     # Request json file from We Vote servers
-    messages.add_message(request, messages.INFO, "Loading Contest Offices from We Vote Master servers")
-    request = requests.get(OFFICES_SYNC_URL, params={
-        "key": WE_VOTE_API_KEY,
-        "format":   'json',
-        "google_civic_election_id": google_civic_election_id,
-        "state_code": state_code,
-    })
-    structured_json = json.loads(request.text)
+    import_results, structured_json = process_request_from_master(
+        request, "Loading Contest Offices from We Vote Master servers",
+        OFFICES_SYNC_URL, {
+            "key": WE_VOTE_API_KEY,
+            "format": 'json',
+            "google_civic_election_id": google_civic_election_id,
+            "state_code": state_code,
+        }
+    )
 
-    results = filter_offices_structured_json_for_local_duplicates(structured_json)
-    filtered_structured_json = results['structured_json']
-    duplicates_removed = results['duplicates_removed']
+    if import_results['success']:
+        results = filter_offices_structured_json_for_local_duplicates(structured_json)
+        filtered_structured_json = results['structured_json']
+        duplicates_removed = results['duplicates_removed']
 
-    import_results = offices_import_from_structured_json(filtered_structured_json)
-    import_results['duplicates_removed'] = duplicates_removed
+        import_results = offices_import_from_structured_json(filtered_structured_json)
+        import_results['duplicates_removed'] = duplicates_removed
 
     return import_results
 
@@ -66,9 +68,9 @@ def filter_offices_structured_json_for_local_duplicates(structured_json):
     for one_office in structured_json:
         google_civic_election_id = one_office['google_civic_election_id'] \
             if 'google_civic_election_id' in one_office else 0
+        state_code = one_office['state_code'] if 'state_code' in one_office else ''
         we_vote_id = one_office['we_vote_id'] if 'we_vote_id' in one_office else ''
         office_name = one_office['office_name'] if 'office_name' in one_office else ''
-        state_code = one_office['state_code'] if 'state_code' in one_office else ''
 
         # district_id = one_office['district_id'] if 'district_id' in one_office else ''
         # ocd_division_id = one_office['ocd_division_id'] if 'ocd_division_id' in one_office else ''
@@ -90,8 +92,8 @@ def filter_offices_structured_json_for_local_duplicates(structured_json):
         # Check to see if there is an entry that matches in all critical ways, minus the we_vote_id
         we_vote_id_from_master = we_vote_id
 
-        results = office_manager_list.retrieve_possible_duplicate_offices(google_civic_election_id, office_name,
-                                                                          state_code, we_vote_id_from_master)
+        results = office_manager_list.retrieve_possible_duplicate_offices(google_civic_election_id, state_code,
+                                                                          office_name, we_vote_id_from_master)
 
         if results['office_list_found']:
             # There seems to be a duplicate already in this database using a different we_vote_id
@@ -118,9 +120,9 @@ def offices_import_from_structured_json(structured_json):
             if 'google_civic_election_id' in one_office else 0
         we_vote_id = one_office['we_vote_id'] if 'we_vote_id' in one_office else ''
         if positive_value_exists(google_civic_election_id) and positive_value_exists(we_vote_id):
+            state_code = one_office['state_code'] if 'state_code' in one_office else ''
             district_id = one_office['district_id'] if 'district_id' in one_office else ''
             office_name = one_office['office_name'] if 'office_name' in one_office else ''
-            state_code = one_office['state_code'] if 'state_code' in one_office else ''
             ocd_division_id = one_office['ocd_division_id'] if 'ocd_division_id' in one_office else ''
             number_voting_for = one_office['number_voting_for'] if 'number_voting_for' in one_office else ''
             number_elected = one_office['number_elected'] if 'number_elected' in one_office else ''
@@ -139,10 +141,10 @@ def offices_import_from_structured_json(structured_json):
             updated_contest_office_values = {
                 'we_vote_id': we_vote_id,
                 'google_civic_election_id': google_civic_election_id,
+                'state_code': state_code,
                 'district_id': district_id,
                 'district_name': district_name,
                 'office_name': office_name,
-                'state_code': state_code,
                 # The rest of the values
                 'ocd_division_id': ocd_division_id,
                 'number_voting_for': number_voting_for,
@@ -159,7 +161,7 @@ def offices_import_from_structured_json(structured_json):
                 'wikipedia_id': wikipedia_id,
             }
             results = office_manager.update_or_create_contest_office(
-                we_vote_id, maplight_id, google_civic_election_id, office_name, state_code, district_id,
+                we_vote_id, maplight_id, google_civic_election_id, office_name, district_id,
                 updated_contest_office_values)
         else:
             offices_not_processed += 1
@@ -203,6 +205,7 @@ def office_retrieve_for_api(office_id, office_we_vote_id):
             'id':                       office_id,
             'we_vote_id':               office_we_vote_id,
             'google_civic_election_id': 0,
+            'state_code':               '',
         }
         return HttpResponse(json.dumps(json_data), content_type='application/json')
 
@@ -224,6 +227,7 @@ def office_retrieve_for_api(office_id, office_we_vote_id):
             'id':                       office_id,
             'we_vote_id':               office_we_vote_id,
             'google_civic_election_id': 0,
+            'state_code':               '',
         }
         return HttpResponse(json.dumps(json_data), content_type='application/json')
 
@@ -236,6 +240,7 @@ def office_retrieve_for_api(office_id, office_we_vote_id):
             'id':                       contest_office.id,
             'we_vote_id':               contest_office.we_vote_id,
             'google_civic_election_id': contest_office.google_civic_election_id,
+            'state_code':               contest_office.state_code,
             'ballot_item_display_name': contest_office.office_name,
             'ocd_division_id':          contest_office.ocd_division_id,
             'maplight_id':              contest_office.maplight_id,
@@ -243,7 +248,6 @@ def office_retrieve_for_api(office_id, office_we_vote_id):
             'wikipedia_id':             contest_office.wikipedia_id,
             'number_voting_for':        contest_office.number_voting_for,
             'number_elected':           contest_office.number_elected,
-            'state_code':               contest_office.state_code,
             'primary_party':            contest_office.primary_party,
             'district_name':            contest_office.district_name,
         }
@@ -255,6 +259,7 @@ def office_retrieve_for_api(office_id, office_we_vote_id):
             'id':                       office_id,
             'we_vote_id':               office_we_vote_id,
             'google_civic_election_id': 0,
+            'state_code':               '',
         }
 
     return HttpResponse(json.dumps(json_data), content_type='application/json')

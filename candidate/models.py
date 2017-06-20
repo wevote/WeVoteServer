@@ -476,10 +476,10 @@ class CandidateCampaign(models.Model):
             election = Election.objects.get(google_civic_election_id=self.google_civic_election_id)
         except Election.MultipleObjectsReturned as e:
             handle_record_found_more_than_one_exception(e, logger=logger)
-            logger.error("candidate.election Found multiple")
+            logger.error("candidate.election Found multiple", {}, {})
             return
         except Election.DoesNotExist:
-            logger.error("candidate.election did not find")
+            logger.error("candidate.election did not find", {}, {})
             return
         return election
 
@@ -488,10 +488,10 @@ class CandidateCampaign(models.Model):
             office = ContestOffice.objects.get(id=self.contest_office_id)
         except ContestOffice.MultipleObjectsReturned as e:
             handle_record_found_more_than_one_exception(e, logger=logger)
-            logger.error("candidate.election Found multiple")
+            logger.error("candidate.election Found multiple", {}, {})
             return
         except ContestOffice.DoesNotExist:
-            logger.error("candidate.election did not find")
+            logger.error("candidate.election did not find", {}, {})
             return
         return office
 

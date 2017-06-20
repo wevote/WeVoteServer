@@ -75,7 +75,7 @@ def offices_import_from_master_server_view(request):
     else:
         messages.add_message(request, messages.INFO, 'Offices import completed. '
                                                      'Saved: {saved}, Updated: {updated}, '
-                                                     'Master data not imported (local duplicates found): '
+                                                     'Duplicates skipped: '
                                                      '{duplicates_removed}, '
                                                      'Not processed: {not_processed}'
                                                      ''.format(saved=results['saved'],
@@ -249,7 +249,8 @@ def office_edit_process_view(request):
             google_civic_election_id = office_on_stage.google_civic_election_id
 
             return HttpResponseRedirect(reverse('office:office_summary', args=(office_on_stage_id,)) +
-                                        "?google_civic_election_id=" + str(google_civic_election_id))
+                                        "?google_civic_election_id=" + str(google_civic_election_id) +
+                                        "&state_code=" + str(state_code))
         else:
             # Create new
             office_on_stage = ContestOffice(
@@ -265,13 +266,15 @@ def office_edit_process_view(request):
 
             # Come back to the "Create New Office" page
             return HttpResponseRedirect(reverse('office:office_new', args=()) +
-                                        "?google_civic_election_id=" + str(google_civic_election_id))
+                                        "?google_civic_election_id=" + str(google_civic_election_id) +
+                                        "&state_code=" + str(state_code))
     except Exception as e:
         handle_record_not_saved_exception(e, logger=logger)
         messages.add_message(request, messages.ERROR, 'Could not save office.')
 
-    return HttpResponseRedirect(reverse('office:office_list', args=()) +
-                                "?google_civic_election_id=" + google_civic_election_id)
+    return HttpResponseRedirect(reverse("office:office_list", args=()) +
+                                "?google_civic_election_id=" + str(google_civic_election_id) +
+                                "&state_code=" + str(state_code))
 
 
 @login_required

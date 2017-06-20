@@ -113,7 +113,7 @@ def candidates_import_from_master_server_view(request):
     else:
         messages.add_message(request, messages.INFO, 'Candidates import completed. '
                                                      'Saved: {saved}, Updated: {updated}, '
-                                                     'Master data not imported (local duplicates found): '
+                                                     'Duplicates skipped: '
                                                      '{duplicates_removed}, '
                                                      'Not processed: {not_processed}'
                                                      ''.format(saved=results['saved'],
@@ -658,7 +658,8 @@ def candidate_edit_process_view(request):
 
     if remove_duplicate_process:
         return HttpResponseRedirect(reverse('candidate:find_and_remove_duplicate_candidates', args=()) +
-                                    "?google_civic_election_id=" + str(google_civic_election_id))
+                                    "?google_civic_election_id=" + str(google_civic_election_id) +
+                                    "&state_code=" + str(state_code))
     else:
         return HttpResponseRedirect(reverse('candidate:candidate_edit', args=(candidate_id,)))
 

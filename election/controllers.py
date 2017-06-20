@@ -7,9 +7,8 @@ from config.base import get_environment_variable
 from import_export_google_civic.controllers import retrieve_from_google_civic_api_election_query, \
     store_results_from_google_civic_api_election_query
 import json
-import requests
 import wevote_functions.admin
-from wevote_functions.functions import positive_value_exists
+from wevote_functions.functions import positive_value_exists, process_request_from_master
 
 logger = wevote_functions.admin.get_logger(__name__)
 
@@ -53,13 +52,16 @@ def elections_import_from_master_server(request=None):
     Get the json data, and either create new entries or update existing
     :return:
     """
-    # Request json file from We Vote servers
-    logger.info("Loading Election from We Vote Master servers")
-    request = requests.get(ELECTIONS_SYNC_URL, params={
-        "key":      WE_VOTE_API_KEY,  # This comes from an environment variable
-        "format":   'json',
-    })
-    structured_json = json.loads(request.text)
+    import_results, structured_json = process_request_from_master(
+        request, "Loading Election from We Vote Master servers",
+        ELECTIONS_SYNC_URL, {
+            "key":    WE_VOTE_API_KEY,  # This comes from an environment variable
+            "format": 'json',
+        }
+    )
+
+    if not import_results['success']:
+        return import_results
 
     return elections_import_from_structured_json(structured_json)
 

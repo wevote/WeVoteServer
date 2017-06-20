@@ -69,7 +69,7 @@ def voter_guides_import_from_master_server_view(request):
     else:
         messages.add_message(request, messages.INFO, 'Voter Guides import completed. '
                                                      'Saved: {saved}, Updated: {updated}, '
-                                                     'Master data not imported (local duplicates found): '
+                                                     'Duplicates skipped: '
                                                      '{duplicates_removed}, '
                                                      'Not processed: {not_processed}'
                                                      ''.format(saved=results['saved'],
@@ -273,6 +273,7 @@ def voter_guide_list_view(request):
         return redirect_to_sign_in_page(request, authority_required)
 
     google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
+    state_code = request.GET.get('state_code', '')
 
     voter_guide_list = []
     voter_guide_list_object = VoterGuideListManager()
@@ -296,12 +297,12 @@ def voter_guide_list_view(request):
         # How many Publicly visible positions are there in this election on this voter guide?
         retrieve_public_positions = True
         one_voter_guide.number_of_public_positions = position_list_manager.fetch_positions_count_for_voter_guide(
-            one_voter_guide.organization_we_vote_id, one_voter_guide.google_civic_election_id,
+            one_voter_guide.organization_we_vote_id, one_voter_guide.google_civic_election_id, state_code,
             retrieve_public_positions)
         # How many Friends-only visible positions are there in this election on this voter guide?
         retrieve_public_positions = False
         one_voter_guide.number_of_friends_only_positions = position_list_manager.fetch_positions_count_for_voter_guide(
-            one_voter_guide.organization_we_vote_id, one_voter_guide.google_civic_election_id,
+            one_voter_guide.organization_we_vote_id, one_voter_guide.google_civic_election_id, state_code,
             retrieve_public_positions)
         modified_voter_guide_list.append(one_voter_guide)
 
@@ -309,10 +310,11 @@ def voter_guide_list_view(request):
 
     messages_on_stage = get_messages(request)
     template_values = {
-        'election_list': election_list,
+        'election_list':            election_list,
         'google_civic_election_id': google_civic_election_id,
-        'messages_on_stage': messages_on_stage,
-        'voter_guide_list': modified_voter_guide_list,
+        'state_code':               state_code,
+        'messages_on_stage':        messages_on_stage,
+        'voter_guide_list':         modified_voter_guide_list,
     }
     return render(request, 'voter_guide/voter_guide_list.html', template_values)
 

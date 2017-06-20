@@ -100,7 +100,7 @@ def organizations_import_from_master_server_view(request):
     else:
         messages.add_message(request, messages.INFO, 'Organizations import completed. '
                                                      'Saved: {saved}, Updated: {updated}, '
-                                                     'Master data not imported (local duplicates found): '
+                                                     'Duplicates skipped: '
                                                      '{duplicates_removed}, '
                                                      'Not processed: {not_processed}'
                                                      ''.format(saved=results['saved'],
@@ -342,6 +342,7 @@ def organization_edit_process_view(request):
     # A positive value in google_civic_election_id or add_organization_button means we want to create a voter guide
     # for this org for this election
     google_civic_election_id = request.POST.get('google_civic_election_id', 0)
+    state_code = request.POST.get('state_code', '')
     # add_organization_button = request.POST.get('add_organization_button', False)
 
     # Filter incoming data
@@ -485,7 +486,8 @@ def organization_edit_process_view(request):
                 link_issue_manager.unlink_organization_to_issue(organization_we_vote_id, issue_id, issue_we_vote_id)
 
     return HttpResponseRedirect(reverse('organization:organization_position_list', args=(organization_id,)) +
-                                "?google_civic_election_id=" + str(google_civic_election_id))
+                                "?google_civic_election_id=" + str(google_civic_election_id) + "&state_code=" +
+                                str(state_code))
 
 
 @login_required
@@ -918,6 +920,7 @@ def organization_position_edit_process_view(request):
                 return HttpResponseRedirect(
                     reverse('organization:organization_position_edit', args=([organization_id], [position_we_vote_id])) +
                     "?google_civic_election_id=" + str(google_civic_election_id) +
+                    "&state_code=" + str(state_code) +
                     "&stance=" + stance +
                     "&statement_text=" + statement_text +
                     "&more_info_url=" + more_info_url +
@@ -927,6 +930,7 @@ def organization_position_edit_process_view(request):
                 return HttpResponseRedirect(
                     reverse('organization:organization_position_new', args=([organization_id])) +
                     "?google_civic_election_id=" + str(google_civic_election_id) +
+                    "&state_code=" + str(state_code) +
                     "&stance=" + stance +
                     "&statement_text=" + statement_text +
                     "&more_info_url=" + more_info_url +
@@ -940,6 +944,7 @@ def organization_position_edit_process_view(request):
         return HttpResponseRedirect(
             reverse('organization:organization_position_new', args=([organization_id])) +
             "?google_civic_election_id=" + str(google_civic_election_id) +
+            "&state_code=" + str(state_code) +
             "&stance=" + stance +
             "&statement_text=" + statement_text +
             "&more_info_url=" + more_info_url +
@@ -1066,13 +1071,13 @@ def organization_position_edit_process_view(request):
     if success:
         voter_guide_manager = VoterGuideManager()
         results = voter_guide_manager.update_or_create_organization_voter_guide_by_election_id(
-            organization_on_stage.we_vote_id, google_civic_election_id)
+            organization_on_stage.we_vote_id, google_civic_election_id, state_code)
         # if results['success']:
 
     if go_back_to_add_new:
         return HttpResponseRedirect(
             reverse('organization:organization_position_new', args=(organization_on_stage.id,)) +
-            "?google_civic_election_id=" + str(google_civic_election_id))
+            "?google_civic_election_id=" + str(google_civic_election_id) + "&state_code=" + str(state_code))
     else:
         return HttpResponseRedirect(
             reverse('organization:organization_position_list', args=(organization_on_stage.id,)))
