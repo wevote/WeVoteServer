@@ -29,7 +29,7 @@ def candidates_import_from_sample_file():
     :return:
     """
     # Load saved json from local file
-    logger.info("Loading CandidateCampaigns from local file", {}, {})
+    logger.info("Loading CandidateCampaigns from local file")
 
     with open("candidate/import_data/candidate_campaigns_sample.json") as json_data:
         structured_json = json.load(json_data)

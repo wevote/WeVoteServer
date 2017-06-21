@@ -70,7 +70,7 @@ class WeVoteSettingsManager(models.Model):
             elif type(setting_value).__name__ == 'str':
                 value_type = WeVoteSetting.STRING
             elif type(setting_value).__name__ == 'list':
-                logger.info("setting is a list. To be developed", {}, {})
+                logger.info("setting is a list. To be developed")
                 value_type = WeVoteSetting.STRING
             else:
                 value_type = WeVoteSetting.STRING

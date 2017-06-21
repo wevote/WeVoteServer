@@ -348,7 +348,7 @@ def donation_process_stripe_webhook_event(event):
     :return:
     """
     print("donation_process_stripe_webhook_event received: " + event.type)
-    logger.debug("donation_process_stripe_webhook_event received: " + event.type, {}, {})
+    logger.debug("donation_process_stripe_webhook_event received: " + event.type)
 
     if event['type'] == 'charge.succeeded':
         return donation_process_charge(event)
@@ -362,7 +362,7 @@ def donation_process_stripe_webhook_event(event):
         return donation_process_refund_payment(event)
     else:
         print("donation_process_stripe_webhook_event Stripe event ignored: " + event.type)
-        logger.info("donation_process_stripe_webhook_event Stripe event ignored: " + event.type, {}, {})
+        logger.info("donation_process_stripe_webhook_event Stripe event ignored: " + event.type)
         return
 
 
@@ -580,7 +580,7 @@ def donation_subscription_cancellation_for_api(request, subscription_id, voter_w
     except stripe.error.InvalidRequestError as err:
         # 5/29/17, Does it throw this every time you cancel a valid subscription?
         if "No such subscription:" in str(err):
-            logger.info("Marking subscription as canceled due to: " + str(err), {}, {})
+            logger.info("Marking subscription as canceled due to: " + str(err))
 
         DonationManager().mark_subscription_canceled_or_ended(subscription['id'], subscription['customer'],
                                                               subscription['ended_at'], subscription['canceled_at'])
