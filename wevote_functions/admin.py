@@ -15,7 +15,7 @@ from config.base import get_environment_variable, convert_logging_level
 
 _ch = None  # root stream handler.
 _fh = None  # root file handler.
-_only_log_once = None
+_only_log_once = None  # if LOG_FILE_LEVEL is misconfigured, only log that config error once per start-up of the server
 host = socket.gethostname()
 
 
@@ -50,11 +50,11 @@ def get_logger(name):
             level = convert_logging_level(environment_variable_log_level)
             if isinstance(level, int):
                 logger.level = level
-            elif (not _only_log_once):
-                logger.error("LOG_FILE_LEVEL is invalid", {}, {})  # startup.run hasn't run yet, so just to the console
+            elif not _only_log_once:
+                logger.error("LOG_FILE_LEVEL is invalid", {}, {})  # setup_logging hasn't run yet so just to the console
                 _only_log_once = True
-        elif not (not _only_log_once):
-            logger.error("LOG_FILE_LEVEL is not set", {}, {})  # startup.run() hasn't run yet, so just to the console
+        elif not _only_log_once:
+            logger.error("LOG_FILE_LEVEL is not set", {}, {})  # setup_logging() hasn't run yet, so just to the console
             _only_log_once = True
 
     return logger
