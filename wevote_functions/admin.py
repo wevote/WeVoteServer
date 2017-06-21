@@ -15,7 +15,7 @@ from config.base import get_environment_variable, convert_logging_level
 
 _ch = None  # root stream handler.
 _fh = None  # root file handler.
-_only_log_once = None
+_only_log_once = None  # if LOG_FILE_LEVEL is misconfigured, only log that config error once per start-up of the server
 host = socket.gethostname()
 
 
