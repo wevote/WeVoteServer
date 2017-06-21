@@ -27,7 +27,7 @@ if positive_value_exists(ELASTIC_SEARCH_CONNECTION_STRING):
 # CandidateCampaign
 @receiver(post_save, sender=CandidateCampaign)
 def save_candidate_campaign_signal(sender, instance, **kwargs):
-    logger.debug("search.save_candidate_campaign_signal")
+    # logger.debug("search.save_candidate_campaign_signal")
     if 'elastic_search_object' in globals():
         doc = {
             "candidate_name": instance.candidate_name,
@@ -48,7 +48,7 @@ def save_candidate_campaign_signal(sender, instance, **kwargs):
 
 @receiver(post_delete, sender=CandidateCampaign)
 def delete_candidate_campaign_signal(sender, instance, **kwargs):
-    logger.debug("search.delete_CandidateCampaign_signal")
+    # logger.debug("search.delete_CandidateCampaign_signal")
     if 'elastic_search_object' in globals():
         try:
             res = elastic_search_object.delete(index="candidates", doc_type='candidate', id=instance.id)
@@ -61,7 +61,7 @@ def delete_candidate_campaign_signal(sender, instance, **kwargs):
 # ContestMeasure
 @receiver(post_save, sender=ContestMeasure)
 def save_contest_measure_signal(sender, instance, **kwargs):
-    logger.debug("search.save_ContestMeasure_signal")
+    # logger.debug("search.save_ContestMeasure_signal")
     if 'elastic_search_object' in globals():
         doc = {
             "we_vote_id": instance.we_vote_id,
@@ -81,7 +81,7 @@ def save_contest_measure_signal(sender, instance, **kwargs):
 
 @receiver(post_delete, sender=ContestMeasure)
 def delete_contest_measure_signal(sender, instance, **kwargs):
-    logger.debug("search.delete_ContestMeasure_signal")
+    # logger.debug("search.delete_ContestMeasure_signal")
     if 'elastic_search_object' in globals():
         try:
             res = elastic_search_object.delete(index="measures", doc_type='measure', id=instance.id)
@@ -94,7 +94,7 @@ def delete_contest_measure_signal(sender, instance, **kwargs):
 # ContestOffice
 @receiver(post_save, sender=ContestOffice)
 def save_contest_office_signal(sender, instance, **kwargs):
-    logger.debug("search.save_ContestOffice_signal")
+    # logger.debug("search.save_ContestOffice_signal")
     if 'elastic_search_object' in globals():
         doc = {
             "we_vote_id": instance.we_vote_id,
@@ -112,7 +112,7 @@ def save_contest_office_signal(sender, instance, **kwargs):
 
 @receiver(post_delete, sender=ContestOffice)
 def delete_contest_office_signal(sender, instance, **kwargs):
-    logger.debug("search.delete_ContestOffice_signal")
+    # logger.debug("search.delete_ContestOffice_signal")
     if 'elastic_search_object' in globals():
         try:
             res = elastic_search_object.delete(index="offices", doc_type='office', id=instance.id)
@@ -125,7 +125,7 @@ def delete_contest_office_signal(sender, instance, **kwargs):
 # Organization
 @receiver(post_save, sender=Organization)
 def save_organization_signal(sender, instance, **kwargs):
-    logger.debug("search.save_Organization_signal")
+    # logger.debug("search.save_Organization_signal")
     if 'elastic_search_object' in globals():
         doc = {
             "we_vote_id": instance.we_vote_id,
@@ -145,7 +145,7 @@ def save_organization_signal(sender, instance, **kwargs):
 
 @receiver(post_delete, sender=Organization)
 def delete_organization_signal(sender, instance, **kwargs):
-    logger.debug("search.delete_Organization_signal")
+    # logger.debug("search.delete_Organization_signal")
     if 'elastic_search_object' in globals():
         try:
             res = elastic_search_object.delete(index="organizations", doc_type='organization', id=instance.id)
