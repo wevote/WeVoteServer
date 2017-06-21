@@ -1377,11 +1377,11 @@ def import_contest_office_entry(batch_header_id, batch_row_id, create_entry_flag
                 positive_value_exists(google_civic_election_id):
             contest_office_manager = ContestOfficeManager()
             if create_entry_flag:
-                results = contest_office_manager.create_contest_office_row_entry(contest_office_name, state_code,
+                results = contest_office_manager.create_contest_office_row_entry(contest_office_name,
                                                                                  contest_office_votes_allowed,
                                                                                  ctcl_uuid,
                                                                                  contest_office_number_elected,
-                                                                                 google_civic_election_id)
+                                                                                 google_civic_election_id, state_code)
                 if results['new_contest_office_created']:
                     number_of_contest_offices_created += 1
                     success = True
@@ -1398,12 +1398,12 @@ def import_contest_office_entry(batch_header_id, batch_row_id, create_entry_flag
             elif update_entry_flag:
                 contest_office_we_vote_id = one_batch_action_row.contest_office_we_vote_id
                 results = contest_office_manager.update_contest_office_row_entry(contest_office_name,
-                                                                                 state_code,
                                                                                  contest_office_votes_allowed,
                                                                                  ctcl_uuid,
                                                                                  contest_office_number_elected,
+                                                                                 contest_office_we_vote_id,
                                                                                  google_civic_election_id,
-                                                                                 contest_office_we_vote_id)
+                                                                                 state_code)
                 if results['contest_office_updated']:
                     number_of_contest_offices_updated += 1
                     success = True

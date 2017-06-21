@@ -15,7 +15,7 @@ from office.models import ContestOfficeManager
 from politician.models import PoliticianManager
 import requests
 import wevote_functions.admin
-from wevote_functions.functions import positive_value_exists
+from wevote_functions.functions import positive_value_exists, process_request_from_master
 
 logger = wevote_functions.admin.get_logger(__name__)
 
@@ -40,25 +40,30 @@ def candidates_import_from_sample_file():
 def candidates_import_from_master_server(request, google_civic_election_id='', state_code=''):
     """
     Get the json data, and either create new entries or update existing
+    :param request:
+    :param google_civic_election_id:
+    :param state_code:
     :return:
     """
-    messages.add_message(request, messages.INFO, "Loading Candidates from We Vote Master servers")
-    logger.info("Loading Candidates from We Vote Master servers", {}, {})
-    # Request json file from We Vote servers
-    request = requests.get(CANDIDATES_SYNC_URL, params={
-        "key": WE_VOTE_API_KEY,  # This comes from an environment variable
-        "format":   'json',
-        "google_civic_election_id": google_civic_election_id,
-        "state_code": state_code,
-    })
-    structured_json = json.loads(request.text)
 
-    results = filter_candidates_structured_json_for_local_duplicates(structured_json)
-    filtered_structured_json = results['structured_json']
-    duplicates_removed = results['duplicates_removed']
+    import_results, structured_json = process_request_from_master(
+        request, "Loading Candidates from We Vote Master servers",
+        CANDIDATES_SYNC_URL,
+        {
+            "key": WE_VOTE_API_KEY,  # This comes from an environment variable
+            "format": 'json',
+            "google_civic_election_id": google_civic_election_id,
+            "state_code": state_code,
+        }
+    )
 
-    import_results = candidates_import_from_structured_json(filtered_structured_json)
-    import_results['duplicates_removed'] = duplicates_removed
+    if import_results['success']:
+        results = filter_candidates_structured_json_for_local_duplicates(structured_json)
+        filtered_structured_json = results['structured_json']
+        duplicates_removed = results['duplicates_removed']
+
+        import_results = candidates_import_from_structured_json(filtered_structured_json)
+        import_results['duplicates_removed'] = duplicates_removed
 
     return import_results
 
@@ -180,6 +185,7 @@ def filter_candidates_structured_json_for_local_duplicates(structured_json):
     :param structured_json:
     :return:
     """
+    processed = 0
     duplicates_removed = 0
     filtered_structured_json = []
     candidate_list_manager = CandidateCampaignListManager()
@@ -208,10 +214,18 @@ def filter_candidates_structured_json_for_local_duplicates(structured_json):
             we_vote_id_from_master)
 
         if results['candidate_list_found']:
-            # There seems to be a duplicate already in this database using a different we_vote_id
+            # print("Skipping candidate " + str(candidate_name) + ",  " + str(google_civic_candidate_name) + ",  " +
+            #       str(google_civic_election_id) + ",  " + str(contest_office_we_vote_id) + ",  " +
+            #       str(politician_we_vote_id) + ",  " + str(candidate_twitter_handle) + ",  " +
+            #       str(vote_smart_id) + ",  " + str(maplight_id) + ",  " + str(we_vote_id_from_master))
+            # Obsolete note?: There seems to be a duplicate already in this database using a different we_vote_id
             duplicates_removed += 1
         else:
             filtered_structured_json.append(one_candidate)
+        processed += 1
+        if processed % 1000 == 0:
+            print("Candidates processed = " + str(processed) + " of " + str(len(structured_json)))
+            logger.debug("Candidates processed = " + str(processed) + " of " + str(len(structured_json)))
 
     candidates_results = {
         'success':              True,

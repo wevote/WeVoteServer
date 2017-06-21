@@ -135,11 +135,10 @@ class PositionEntered(models.Model):
     # The unique ID of the election containing this contest. (Provided by Google Civic)
     google_civic_election_id = models.CharField(verbose_name="google civic election id",
                                                 max_length=255, null=True, blank=False, default=0)
-    google_civic_election_id_new = models.PositiveIntegerField(
-        verbose_name="google civic election id", default=0, null=True, blank=True)
-    # State code
     state_code = models.CharField(verbose_name="us state of the ballot item position is for",
                                   max_length=2, null=True, blank=True)
+    google_civic_election_id_new = models.PositiveIntegerField(
+        verbose_name="google civic election id", default=0, null=True, blank=True)
     # ### Values from Vote Smart ###
     vote_smart_rating_id = models.BigIntegerField(null=True, blank=True, unique=False)
     # Usually in one of these two formats 2015, 2014-2015
@@ -479,7 +478,6 @@ class PositionForFriends(models.Model):
     # The unique ID of the election containing this contest. (Provided by Google Civic)
     google_civic_election_id = models.PositiveIntegerField(
         verbose_name="google civic election id", default=0, null=True, blank=True)
-    # State code
     state_code = models.CharField(verbose_name="us state of the ballot item position is for", max_length=2,
                                   null=True, blank=True)
     # ### Values from Vote Smart ###
@@ -1014,7 +1012,7 @@ class PositionListManager(models.Model):
 
         return total_count
 
-    def fetch_positions_count_for_voter_guide(self, organization_we_vote_id, google_civic_election_id,
+    def fetch_positions_count_for_voter_guide(self, organization_we_vote_id, google_civic_election_id, state_code,
                                               retrieve_public_positions=True, stance_we_are_looking_for=ANY_STANCE):
         # Don't proceed unless we have a correct stance identifier
         if stance_we_are_looking_for not \
@@ -2212,6 +2210,7 @@ class PositionManager(models.Model):
         position_we_vote_id = ""
         position_found = False
         google_civic_election_id = 0
+        state_code = ''
         one_unique_ballot_item_variable_received = positive_value_exists(office_we_vote_id) or \
             positive_value_exists(candidate_we_vote_id) or \
             positive_value_exists(measure_we_vote_id)
@@ -2293,6 +2292,7 @@ class PositionManager(models.Model):
                     candidate_campaign = results['candidate_campaign']
                     candidate_campaign_id = candidate_campaign.id
                     google_civic_election_id = candidate_campaign.google_civic_election_id
+                    state_code = candidate_campaign.state_code
                     ballot_item_display_name = candidate_campaign.candidate_name
 
             contest_measure_id = None
@@ -2303,6 +2303,7 @@ class PositionManager(models.Model):
                     contest_measure = results['contest_measure']
                     contest_measure_id = contest_measure.id
                     google_civic_election_id = contest_measure.google_civic_election_id
+                    state_code = contest_measure.state_code
                     ballot_item_display_name = contest_measure.measure_title
 
             contest_office_id = None
@@ -2313,6 +2314,7 @@ class PositionManager(models.Model):
                     contest_office = results['contest_office']
                     contest_office_id = contest_office.id
                     google_civic_election_id = contest_office.google_civic_election_id
+                    state_code = contest_office.state_code
                     ballot_item_display_name = contest_office.office_name
 
             # In order to show a position publicly we need to tie the position to either organization_we_vote_id,
@@ -2346,6 +2348,7 @@ class PositionManager(models.Model):
                 contest_office_id=contest_office_id,
                 contest_office_we_vote_id=office_we_vote_id,
                 google_civic_election_id=google_civic_election_id,
+                state_code=state_code,
                 organization_id=organization_id,
                 organization_we_vote_id=organization_we_vote_id,
                 ballot_item_display_name=ballot_item_display_name,
@@ -2364,7 +2367,7 @@ class PositionManager(models.Model):
                 # Make sure we have a voter guide so others can find
                 if not voter_guide_manager.voter_guide_exists(organization_we_vote_id, google_civic_election_id):
                     voter_guide_manager.update_or_create_organization_voter_guide_by_election_id(
-                        organization_we_vote_id, google_civic_election_id)
+                        organization_we_vote_id, google_civic_election_id, state_code)
 
         except Exception as e:
             success = False
@@ -2381,12 +2384,13 @@ class PositionManager(models.Model):
         return results
 
     def retrieve_organization_candidate_campaign_position(self, organization_id, candidate_campaign_id,
-                                                          google_civic_election_id=False):
+                                                          google_civic_election_id=False, state_code=False):
         """
         Find a position based on the organization_id & candidate_campaign_id
         :param organization_id:
         :param candidate_campaign_id:
         :param google_civic_election_id:
+        :param state_code:
         :return:
         """
         organization_we_vote_id = ''
@@ -2407,12 +2411,14 @@ class PositionManager(models.Model):
 
     def retrieve_organization_candidate_campaign_position_with_we_vote_id(self, organization_id,
                                                                           candidate_campaign_we_vote_id,
-                                                                          google_civic_election_id=False):
+                                                                          google_civic_election_id=False,
+                                                                          state_code=False):
         """
         Find a position based on the organization_id & candidate_campaign_we_vote_id
         :param organization_id:
         :param candidate_campaign_we_vote_id:
         :param google_civic_election_id:
+        :param state_code:
         :return:
         """
         organization_we_vote_id = ''
@@ -2432,12 +2438,13 @@ class PositionManager(models.Model):
             google_civic_election_id)
 
     def retrieve_organization_contest_measure_position(self, organization_id, contest_measure_id,
-                                                       google_civic_election_id=False):
+                                                       google_civic_election_id=False, state_code=False):
         """
         Find a position based on the organization_id & contest_measure_id
         :param organization_id:
         :param contest_measure_id:
         :param google_civic_election_id:
+        :param state_code:
         :return:
         """
         organization_we_vote_id = ''
@@ -2458,12 +2465,13 @@ class PositionManager(models.Model):
 
     def retrieve_organization_contest_measure_position_with_we_vote_id(self, organization_id,
                                                                        contest_measure_we_vote_id,
-                                                                       google_civic_election_id=False):
+                                                                       google_civic_election_id=False, state_code=False):
         """
         Find a position based on the organization_id & contest_measure_we_vote_id
         :param organization_id:
         :param contest_measure_we_vote_id:
         :param google_civic_election_id:
+        :param state_code:
         :return:
         """
         organization_we_vote_id = ''
@@ -2668,7 +2676,7 @@ class PositionManager(models.Model):
                                   retrieve_position_for_friends=False,
                                   voter_we_vote_id='', contest_office_we_vote_id='', candidate_campaign_we_vote_id='',
                                   contest_measure_we_vote_id='',
-                                  google_civic_election_id=False, vote_smart_time_span=False):
+                                  google_civic_election_id=False, state_code=False, vote_smart_time_span=False):
         error_result = False
         exception_does_not_exist = False
         exception_multiple_object_returned = False
@@ -2927,6 +2935,7 @@ class PositionManager(models.Model):
             'duplicates_repaired':      duplicates_repaired,
             'duplicates_list':          duplicates_list,
             'google_civic_election_id': google_civic_election_id,
+            'state_code':               state_code,
         }
         return results
 
@@ -3348,6 +3357,8 @@ class PositionManager(models.Model):
                         candidate_campaign = results['candidate_campaign']
                         existing_position.google_civic_election_id = \
                             candidate_campaign.google_civic_election_id
+                        if positive_value_exists(candidate_campaign.state_code):
+                            existing_position.state_code = candidate_campaign.state_code
                 elif positive_value_exists(existing_position.contest_measure_we_vote_id):
                     contest_measure_manager = ContestMeasureManager()
                     results = contest_measure_manager.retrieve_contest_measure_from_we_vote_id(
@@ -3355,6 +3366,8 @@ class PositionManager(models.Model):
                     if results['contest_measure_found']:
                         contest_measure = results['contest_measure']
                         existing_position.google_civic_election_id = contest_measure.google_civic_election_id
+                        if positive_value_exists(contest_measure.state_code):
+                            existing_position.state_code = contest_measure.state_code
                 elif positive_value_exists(existing_position.contest_office_we_vote_id):
                     contest_office_manager = ContestOfficeManager()
                     results = contest_office_manager.retrieve_contest_office_from_we_vote_id(
@@ -3362,6 +3375,8 @@ class PositionManager(models.Model):
                     if results['contest_office_found']:
                         contest_office = results['contest_office']
                         existing_position.google_civic_election_id = contest_office.google_civic_election_id
+                        if positive_value_exists(contest_office.state_code):
+                            existing_position.state_code = contest_office.state_code
 
             new_position = new_position_starter.objects.create(
                 we_vote_id=existing_position.we_vote_id,
@@ -3372,9 +3387,9 @@ class PositionManager(models.Model):
                 voter_we_vote_id=existing_position.voter_we_vote_id,
                 voter_id=existing_position.voter_id,
                 google_civic_election_id=existing_position.google_civic_election_id,
+                state_code=existing_position.state_code,
                 google_civic_candidate_name=existing_position.google_civic_candidate_name,
                 tweet_source_id=existing_position.tweet_source_id,
-                state_code=existing_position.state_code,
                 ballot_item_display_name=existing_position.ballot_item_display_name,
                 ballot_item_image_url_https=existing_position.ballot_item_image_url_https,
                 ballot_item_twitter_handle=existing_position.ballot_item_twitter_handle,
@@ -3418,7 +3433,8 @@ class PositionManager(models.Model):
                     if not voter_guide_manager.voter_guide_exists(existing_position.organization_we_vote_id,
                                                                   existing_position.google_civic_election_id):
                         voter_guide_manager.update_or_create_organization_voter_guide_by_election_id(
-                            existing_position.organization_we_vote_id, existing_position.google_civic_election_id)
+                            existing_position.organization_we_vote_id, existing_position.google_civic_election_id,
+                            existing_position.state_code)
             else:
                 is_public_position = False
         except Exception as e:
@@ -3711,6 +3727,7 @@ class PositionManager(models.Model):
                             voter_position_on_stage.candidate_campaign_we_vote_id = candidate_campaign.we_vote_id
                             voter_position_on_stage.google_civic_election_id = \
                                 candidate_campaign.google_civic_election_id
+                            voter_position_on_stage.state_code = candidate_campaign.state_code
                             voter_position_on_stage.ballot_item_display_name = candidate_campaign.candidate_name
 
                 if voter_position_on_stage.contest_measure_id:
@@ -3722,6 +3739,7 @@ class PositionManager(models.Model):
                             contest_measure = results['contest_measure']
                             voter_position_on_stage.contest_measure_we_vote_id = contest_measure.we_vote_id
                             voter_position_on_stage.google_civic_election_id = contest_measure.google_civic_election_id
+                            voter_position_on_stage.state_code = contest_measure.state_code
                             voter_position_on_stage.ballot_item_display_name = contest_measure.measure_title
 
                 voter_manager = VoterManager()
@@ -3768,6 +3786,7 @@ class PositionManager(models.Model):
                 # Create new
                 candidate_campaign_we_vote_id = ""
                 google_civic_election_id = 0
+                state_code = ''
                 ballot_item_display_name = ""
                 if candidate_campaign_id:
                     candidate_campaign_manager = CandidateCampaignManager()
@@ -3777,6 +3796,7 @@ class PositionManager(models.Model):
                         candidate_campaign = results['candidate_campaign']
                         candidate_campaign_we_vote_id = candidate_campaign.we_vote_id
                         google_civic_election_id = candidate_campaign.google_civic_election_id
+                        state_code = candidate_campaign.state_code
                         ballot_item_display_name = candidate_campaign.candidate_name
 
                 contest_measure_we_vote_id = ""
@@ -3787,6 +3807,7 @@ class PositionManager(models.Model):
                         contest_measure = results['contest_measure']
                         contest_measure_we_vote_id = contest_measure.we_vote_id
                         google_civic_election_id = contest_measure.google_civic_election_id
+                        state_code = contest_measure.state_code
                         ballot_item_display_name = contest_measure.measure_title
 
                 # In order to show a position publicly we need to tie the position to either organization_we_vote_id,
@@ -3821,6 +3842,7 @@ class PositionManager(models.Model):
                         contest_measure_we_vote_id=contest_measure_we_vote_id,
                         stance=stance,
                         google_civic_election_id=google_civic_election_id,
+                        state_code=state_code,
                         organization_id=organization_id,
                         organization_we_vote_id=organization_we_vote_id,
                         ballot_item_display_name=ballot_item_display_name,
@@ -3836,6 +3858,7 @@ class PositionManager(models.Model):
                         contest_measure_we_vote_id=contest_measure_we_vote_id,
                         stance=stance,
                         google_civic_election_id=google_civic_election_id,
+                        state_code=state_code,
                         organization_id=organization_id,
                         organization_we_vote_id=organization_we_vote_id,
                         ballot_item_display_name=ballot_item_display_name,
@@ -4073,6 +4096,9 @@ class PositionManager(models.Model):
                             candidate_campaign = results['candidate_campaign']
                             voter_position_on_stage.google_civic_election_id = \
                                 candidate_campaign.google_civic_election_id
+                            if positive_value_exists(candidate_campaign.state_code):
+                                voter_position_on_stage.state_code = candidate_campaign.state_code
+
                     elif positive_value_exists(voter_position_on_stage.contest_measure_we_vote_id):
                         contest_measure_manager = ContestMeasureManager()
                         results = contest_measure_manager.retrieve_contest_measure_from_we_vote_id(
@@ -4080,6 +4106,8 @@ class PositionManager(models.Model):
                         if results['contest_measure_found']:
                             contest_measure = results['contest_measure']
                             voter_position_on_stage.google_civic_election_id = contest_measure.google_civic_election_id
+                            if positive_value_exists(contest_measure.state_code):
+                                voter_position_on_stage.state_code = contest_measure.state_code
                     elif positive_value_exists(voter_position_on_stage.contest_office_we_vote_id):
                         contest_office_manager = ContestOfficeManager()
                         results = contest_office_manager.retrieve_contest_office_from_we_vote_id(
@@ -4087,6 +4115,8 @@ class PositionManager(models.Model):
                         if results['contest_office_found']:
                             contest_office = results['contest_office']
                             voter_position_on_stage.google_civic_election_id = contest_office.google_civic_election_id
+                            if positive_value_exists(contest_office.state_code):
+                                voter_position_on_stage.state_code = contest_office.state_code
 
                 if voter_position_on_stage.candidate_campaign_we_vote_id:
                     if not positive_value_exists(voter_position_on_stage.candidate_campaign_id):
@@ -4117,6 +4147,7 @@ class PositionManager(models.Model):
                 # Create new
                 candidate_campaign_id = None
                 google_civic_election_id = 0
+                state_code = ''
                 ballot_item_display_name = ""
                 speaker_display_name = ""
                 if candidate_we_vote_id:
@@ -4127,6 +4158,7 @@ class PositionManager(models.Model):
                         candidate_campaign = results['candidate_campaign']
                         candidate_campaign_id = candidate_campaign.id
                         google_civic_election_id = candidate_campaign.google_civic_election_id
+                        state_code = candidate_campaign.state_code
                         ballot_item_display_name = candidate_campaign.candidate_name
 
                 contest_measure_id = None
@@ -4137,6 +4169,7 @@ class PositionManager(models.Model):
                         contest_measure = results['contest_measure']
                         contest_measure_id = contest_measure.id
                         google_civic_election_id = contest_measure.google_civic_election_id
+                        state_code = contest_measure.state_code
                         ballot_item_display_name = contest_measure.measure_title
 
                 # In order to show a position publicly we need to tie the position to either organization_we_vote_id,
@@ -4170,6 +4203,7 @@ class PositionManager(models.Model):
                     contest_measure_we_vote_id=measure_we_vote_id,
                     stance=NO_STANCE,
                     google_civic_election_id=google_civic_election_id,
+                    state_code=state_code,
                     organization_id=organization_id,
                     organization_we_vote_id=organization_we_vote_id,
                     statement_text=statement_text,
@@ -4444,8 +4478,8 @@ class PositionManager(models.Model):
                     position_on_stage.vote_smart_rating_name = vote_smart_rating_name
 
                 # As long as at least one of the above variables has changed, then save
-                if organization_we_vote_id or google_civic_election_id or ballot_item_display_name or office_we_vote_id \
-                        or candidate_we_vote_id or measure_we_vote_id or stance or statement_text \
+                if organization_we_vote_id or google_civic_election_id or state_code or ballot_item_display_name or \
+                        office_we_vote_id or candidate_we_vote_id or measure_we_vote_id or stance or statement_text \
                         or statement_html or more_info_url \
                         or vote_smart_time_span or vote_smart_rating_id or vote_smart_rating or vote_smart_rating_name:
                     position_on_stage.save()
@@ -4764,7 +4798,8 @@ class PositionManager(models.Model):
                         position_on_stage = position_on_stage_starter.objects.get(
                             contest_measure_we_vote_id=measure_we_vote_id,
                             public_figure_we_vote_id=public_figure_we_vote_id,
-                            google_civic_election_id=google_civic_election_id
+                            google_civic_election_id=google_civic_election_id,
+                            state_code=state_code,
                         )
                         position_on_stage_found = False  # TODO Update when working
                         found_with_status = "FOUND_WITH_MEASURE_AND_PUBLIC_FIGURE_WE_VOTE_ID"
@@ -4785,7 +4820,8 @@ class PositionManager(models.Model):
                         position_on_stage = position_on_stage_starter.objects.get(
                             contest_office_we_vote_id=office_we_vote_id,
                             public_figure_we_vote_id=public_figure_we_vote_id,
-                            google_civic_election_id=google_civic_election_id
+                            google_civic_election_id=google_civic_election_id,
+                            state_code=state_code
                         )
                         position_on_stage_found = False  # TODO Update when public_figure working
                         found_with_status = "FOUND_WITH_OFFICE_AND_VOTER_WE_VOTE_ID"
@@ -4813,7 +4849,6 @@ class PositionManager(models.Model):
                         # candidate_we_vote_id = ""
                         measure_id = 0
                         measure_we_vote_id = ""
-                        # google_civic_election_id = 0
                         vote_smart_time_span = ""
 
                         results = position_manager.retrieve_position_table_unknown(
@@ -4907,7 +4942,6 @@ class PositionManager(models.Model):
                         candidate_we_vote_id = ""
                         measure_id = 0
                         measure_we_vote_id = ""
-                        # google_civic_election_id = 0
                         vote_smart_time_span = ""
 
                         results = position_manager.retrieve_position_table_unknown(
@@ -4983,6 +5017,7 @@ class PositionManager(models.Model):
                         candidate_campaign = results['candidate_campaign']
                         candidate_campaign_id = candidate_campaign.id
                         google_civic_election_id = candidate_campaign.google_civic_election_id
+                        state_code = candidate_campaign.state_code
                         ballot_item_display_name = candidate_campaign.candidate_name
                 else:
                     # We don't need to ever look up the candidate_we_vote_id from the candidate_campaign_id
@@ -4996,6 +5031,7 @@ class PositionManager(models.Model):
                         contest_measure = results['contest_measure']
                         contest_measure_id = contest_measure.id
                         google_civic_election_id = contest_measure.google_civic_election_id
+                        state_code = contest_measure.state_code
                         ballot_item_display_name = contest_measure.measure_title
                 else:
                     # We don't need to ever look up the measure_we_vote_id from the contest_measure_id
@@ -5009,6 +5045,7 @@ class PositionManager(models.Model):
                         contest_office = results['contest_office']
                         contest_office_id = contest_office.id
                         google_civic_election_id = contest_office.google_civic_election_id
+                        state_code = contest_office.state_code
                         ballot_item_display_name = contest_office.office_name
                 else:
                     # We don't need to ever look up the office_we_vote_id from the contest_office_id

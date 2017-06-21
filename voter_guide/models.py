@@ -32,7 +32,7 @@ class VoterGuideManager(models.Manager):
     A class for working with the VoterGuide model
     """
     def update_or_create_organization_voter_guide_by_election_id(self, organization_we_vote_id,
-                                                                 google_civic_election_id):
+                                                                 google_civic_election_id, state_code):
         """
         This creates voter_guides, and also refreshes voter guides with updated organization data
         """
@@ -69,6 +69,7 @@ class VoterGuideManager(models.Manager):
                         'twitter_description':      organization.twitter_description,
                         'twitter_followers_count':  organization.twitter_followers_count,
                         'display_name':             organization.organization_name,
+                        'state_code':               state_code,
                     }
                     voter_guide_on_stage, new_voter_guide_created = VoterGuide.objects.update_or_create(
                         google_civic_election_id__exact=google_civic_election_id,
@@ -592,6 +593,7 @@ class VoterGuide(models.Model):
     # The unique ID of this election. (Provided by Google Civic)
     google_civic_election_id = models.PositiveIntegerField(
         verbose_name="google civic election id", null=True)
+    state_code = models.CharField(verbose_name="state the ballot item is related to", max_length=2, null=True)
 
     # Usually in one of these two formats 2015, 2014-2015
     vote_smart_time_span = models.CharField(

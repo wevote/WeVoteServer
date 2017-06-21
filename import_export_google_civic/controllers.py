@@ -152,7 +152,7 @@ def process_candidates_from_structured_json(
 
 
 def process_contest_office_from_structured_json(
-        one_contest_office_structured_json, google_civic_election_id, ocd_division_id, local_ballot_order, state_code,
+        one_contest_office_structured_json, google_civic_election_id, state_code, ocd_division_id, local_ballot_order,
         voter_id, polling_location_we_vote_id):
     logger.debug("General contest_type", {}, {})
 
@@ -306,7 +306,7 @@ def process_contest_office_from_structured_json(
         # Presidential races don't have either district_id or district_name, so we can't require one.
         # Perhaps have a special case for "district" -> "scope": "stateUpper"/"stateLower" vs. "scope": "statewide"
         update_or_create_contest_office_results = contest_office_manager.update_or_create_contest_office(
-            we_vote_id, maplight_id, google_civic_election_id, office_name, state_code, district_id,
+            we_vote_id, maplight_id, google_civic_election_id, office_name, district_id,
             updated_contest_office_values)
     else:
         update_or_create_contest_office_results = {
@@ -333,7 +333,7 @@ def process_contest_office_from_structured_json(
         measure_subtitle = ""
         ballot_item_manager.update_or_create_ballot_item_for_voter(
             voter_id, google_civic_election_id, google_ballot_placement, ballot_item_display_name,
-            measure_subtitle, local_ballot_order, contest_office_id, contest_office_we_vote_id)
+            measure_subtitle, local_ballot_order, contest_office_id, contest_office_we_vote_id, state_code)
         # We leave off these and rely on default empty values: contest_measure_id, contest_measure_we_vote_id
 
     # If this is a polling location, we want to save the ballot information for it so we can use it as reference
@@ -344,7 +344,7 @@ def process_contest_office_from_structured_json(
         measure_subtitle = ""
         ballot_item_manager.update_or_create_ballot_item_for_polling_location(
             polling_location_we_vote_id, google_civic_election_id, google_ballot_placement, ballot_item_display_name,
-            measure_subtitle, local_ballot_order, contest_office_id, contest_office_we_vote_id)
+            measure_subtitle, local_ballot_order, contest_office_id, contest_office_we_vote_id, state_code)
         # We leave off these and rely on default empty values: contest_measure_id, contest_measure_we_vote_id
 
     # Note: We do not need to connect the candidates with the voter here for a ballot item  # TODO DALE Actually we do
@@ -457,25 +457,32 @@ def retrieve_one_ballot_from_google_civic_api(text_for_map_search, incoming_goog
                                               use_test_election=False):
     # Request json file from Google servers
     # logger.info("Loading ballot for one address from voterInfoQuery from Google servers")
+    print("retrieving one ballot for " + str(incoming_google_civic_election_id))
     if positive_value_exists(use_test_election):
-        request = requests.get(VOTER_INFO_URL, params={
+        response = requests.get(VOTER_INFO_URL, params={
             "key": GOOGLE_CIVIC_API_KEY,
             "address": text_for_map_search,
             "electionId": 2000,  # The Google Civic API Test election
         })
     elif positive_value_exists(incoming_google_civic_election_id):
-        request = requests.get(VOTER_INFO_URL, params={
+        response = requests.get(VOTER_INFO_URL, params={
             "key": GOOGLE_CIVIC_API_KEY,
             "address": text_for_map_search,
             "electionId": incoming_google_civic_election_id,
         })
     else:
-        request = requests.get(VOTER_INFO_URL, params={
+        response = requests.get(VOTER_INFO_URL, params={
             "key": GOOGLE_CIVIC_API_KEY,
             "address": text_for_map_search,
         })
 
-    structured_json = json.loads(request.text)
+    structured_json = json.loads(response.text)
+    if 'success' in structured_json and structured_json['success'] == False:
+        import_results = {
+            'success': False,
+            'status': "Error: " + structured_json['status'],
+        }
+        return import_results
 
     # # For internal testing. Write the json retrieved above into a local file
     # with open('/Users/dalemcgrew/PythonProjects/WeVoteServer/'
@@ -496,7 +503,7 @@ def retrieve_one_ballot_from_google_civic_api(text_for_map_search, incoming_goog
     google_civic_election_id = 0
     error = structured_json.get('error', {})
     errors = error.get('errors', {})
-    if len('errors'):
+    if len(errors):
         logger.error("retrieve_one_ballot_from_google_civic_api failed: " + json.dumps(errors), {}, {})
 
     if 'election' in structured_json:
@@ -643,7 +650,7 @@ def store_one_ballot_from_google_civic_api(one_ballot_json, voter_id=0, polling_
             results = ballot_returned_manager.retrieve_ballot_returned_from_voter_id(voter_id, google_civic_election_id)
             if results['ballot_returned_found']:
                 update_results = ballot_returned_manager.update_ballot_returned_with_normalized_values(
-                    voter_address_dict, results['ballot_returned'],
+                    voter_address_dict, state_code, results['ballot_returned'],
                     polling_location_latitude, polling_location_longitude)
                 ballot_returned_found = True  # If the update fails, we just return the original ballot_returned object
                 ballot_returned = update_results['ballot_returned']
@@ -651,7 +658,7 @@ def store_one_ballot_from_google_civic_api(one_ballot_json, voter_id=0, polling_
                 create_results = ballot_returned_manager.create_ballot_returned_with_normalized_values(
                     voter_address_dict,
                     election_date_text, election_description_text,
-                    google_civic_election_id, voter_id, '')
+                    google_civic_election_id, state_code, voter_id, '')
                 ballot_returned_found = create_results['ballot_returned_found']
                 ballot_returned = create_results['ballot_returned']
         if positive_value_exists(polling_location_we_vote_id) and positive_value_exists(google_civic_election_id):
@@ -659,7 +666,7 @@ def store_one_ballot_from_google_civic_api(one_ballot_json, voter_id=0, polling_
                 polling_location_we_vote_id, google_civic_election_id)
             if results['ballot_returned_found']:
                 update_results = ballot_returned_manager.update_ballot_returned_with_normalized_values(
-                    voter_address_dict, results['ballot_returned'],
+                    voter_address_dict, state_code, results['ballot_returned'],
                     polling_location_latitude, polling_location_longitude)
                 ballot_returned_found = True  # If the update fails, we just return the original ballot_returned object
                 ballot_returned = update_results['ballot_returned']
@@ -667,7 +674,7 @@ def store_one_ballot_from_google_civic_api(one_ballot_json, voter_id=0, polling_
                 create_results = ballot_returned_manager.create_ballot_returned_with_normalized_values(
                     voter_address_dict,
                     election_date_text, election_description_text,
-                    google_civic_election_id, 0, polling_location_we_vote_id,
+                    google_civic_election_id, state_code, 0, polling_location_we_vote_id,
                     polling_location_latitude, polling_location_longitude)
                 ballot_returned_found = create_results['ballot_returned_found']
                 ballot_returned = create_results['ballot_returned']
@@ -686,7 +693,9 @@ def store_one_ballot_from_google_civic_api(one_ballot_json, voter_id=0, polling_
 # See import_data/election_query_sample.json
 def retrieve_from_google_civic_api_election_query():
     # Request json file from Google servers
-    logger.info("Loading json data from Google servers, API call electionQuery", {}, {})
+    logger.info("Loading json data from Google servers, API call electionQuery")
+    print("Loading json data from Google servers, API call electionQuery")
+
     if not positive_value_exists(ELECTION_QUERY_URL):
         results = {
             'success':  False,
@@ -694,19 +703,26 @@ def retrieve_from_google_civic_api_election_query():
         }
         return results
 
-    request = requests.get(ELECTION_QUERY_URL, params={
+    response = requests.get(ELECTION_QUERY_URL, params={
         "key": GOOGLE_CIVIC_API_KEY,  # This comes from an environment variable
     })
+
     # Use Google Civic API call counter to track the number of queries we are doing each day
     google_civic_api_counter_manager = GoogleCivicApiCounterManager()
     google_civic_api_counter_manager.create_counter_entry('election')
-    structured_json = json.loads(request.text)
 
-    results = {
-        'structured_json':  structured_json,
-        'success':          True,
-        'status':           'structured_json retrieved',
-    }
+    structured_json = json.loads(response.text)
+    if 'success' in structured_json and structured_json['success'] == False:
+        results = {
+            'success': False,
+            'status': "Error: " + structured_json['status'],
+        }
+    else:
+        results = {
+            'structured_json':  structured_json,
+            'success':          True,
+            'status':           'structured_json retrieved',
+        }
     return results
 
 
@@ -796,6 +812,7 @@ def voter_ballot_items_retrieve_from_google_civic_for_api(
 
     # We want to remove all prior ballot items, so we make room for store_one_ballot_from_google_civic_api to save
     #  ballot items
+    # 6/12/17: google_civic_election_id will always be 0 at this point, so next 8 lines are never executed
     if positive_value_exists(google_civic_election_id):
         voter_ballot_saved_manager = VoterBallotSavedManager()
         voter_ballot_saved_results = voter_ballot_saved_manager.delete_voter_ballot_saved(
@@ -986,7 +1003,7 @@ def process_contest_referendum_from_structured_json(
                 voter_id, google_civic_election_id, google_ballot_placement, ballot_item_display_name,
                 measure_subtitle, local_ballot_order,
                 contest_office_id, contest_office_we_vote_id,
-                contest_measure_id, contest_measure_we_vote_id)
+                contest_measure_id, contest_measure_we_vote_id, state_code)
 
         if positive_value_exists(polling_location_we_vote_id) and positive_value_exists(google_civic_election_id) \
                 and positive_value_exists(contest_measure_id):
@@ -997,7 +1014,7 @@ def process_contest_referendum_from_structured_json(
                 ballot_item_display_name, measure_subtitle,
                 local_ballot_order,
                 contest_office_id, contest_office_we_vote_id,
-                contest_measure_id, contest_measure_we_vote_id)
+                contest_measure_id, contest_measure_we_vote_id, state_code)
 
     return update_or_create_contest_measure_results
 

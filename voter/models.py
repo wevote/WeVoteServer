@@ -1483,6 +1483,7 @@ class VoterDeviceLink(models.Model):
     # The unique ID of the election (provided by Google Civic) that the voter is looking at on this device
     google_civic_election_id = models.PositiveIntegerField(
         verbose_name="google civic election id", default=0, null=False)
+    state_code = models.CharField(verbose_name="us state the device is most recently active in", max_length=2, null=True)
 
     def generate_voter_device_id(self):
         # A simple mapping to this function

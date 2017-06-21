@@ -19,7 +19,8 @@ from twitter.models import TwitterUserManager
 from voter.models import fetch_voter_id_from_voter_device_link, VoterManager, Voter
 from voter_guide.models import VoterGuide, VoterGuideManager
 import wevote_functions.admin
-from wevote_functions.functions import convert_to_int, extract_twitter_handle_from_text_string, positive_value_exists
+from wevote_functions.functions import convert_to_int, extract_twitter_handle_from_text_string, positive_value_exists, \
+    process_request_from_master
 
 logger = wevote_functions.admin.get_logger(__name__)
 
@@ -447,22 +448,22 @@ def organizations_import_from_master_server(request, state_code=''):
     Get the json data, and either create new entries or update existing
     :return:
     """
-    messages.add_message(request, messages.INFO, "Loading Organizations from We Vote Master servers")
-    logger.info("Loading Organizations from We Vote Master servers")
-    # Request json file from We Vote servers
-    request = requests.get(ORGANIZATIONS_SYNC_URL, params={
-        "key":              WE_VOTE_API_KEY,  # This comes from an environment variable
-        "format":           'json',
-        "state_served_code": state_code,
-    })
-    structured_json = json.loads(request.text)
+    import_results, structured_json = process_request_from_master(
+        request, "Loading Organizations from We Vote Master servers",
+        ORGANIZATIONS_SYNC_URL, {
+            "key":               WE_VOTE_API_KEY,  # This comes from an environment variable
+            "format":            'json',
+            "state_served_code": state_code,
+        }
+    )
 
-    results = filter_organizations_structured_json_for_local_duplicates(structured_json)
-    filtered_structured_json = results['structured_json']
-    duplicates_removed = results['duplicates_removed']
+    if import_results['success']:
+        results = filter_organizations_structured_json_for_local_duplicates(structured_json)
+        filtered_structured_json = results['structured_json']
+        duplicates_removed = results['duplicates_removed']
 
-    import_results = organizations_import_from_structured_json(filtered_structured_json)
-    import_results['duplicates_removed'] = duplicates_removed
+        import_results = organizations_import_from_structured_json(filtered_structured_json)
+        import_results['duplicates_removed'] = duplicates_removed
 
     return import_results
 

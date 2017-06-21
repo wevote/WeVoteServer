@@ -18,7 +18,7 @@ def _log_exception(exception_message, logger, e):
     frame = caller_frame_record[0]
     info = inspect.getframeinfo(frame)
 
-    logger.error(e)
+    logger.error(e, {}, {})
     logger.error("{message}, function: {function}, file: {filename}, line: {line}".format(
         message=exception_message,
         filename=info.filename,

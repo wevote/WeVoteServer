@@ -20,7 +20,7 @@ import requests
 from voter.models import BALLOT_ADDRESS, VoterAddressManager, \
     VoterDeviceLinkManager
 import wevote_functions.admin
-from wevote_functions.functions import convert_to_int, positive_value_exists
+from wevote_functions.functions import convert_to_int, positive_value_exists, process_request_from_master
 
 logger = wevote_functions.admin.get_logger(__name__)
 
@@ -36,52 +36,48 @@ def ballot_items_import_from_master_server(request, google_civic_election_id, st
     :return:
     """
     # Request json file from We Vote servers
-    messages.add_message(request, messages.INFO, "Loading Ballot Items from We Vote Master servers")
-    logger.info("Loading Ballot Items from We Vote Master servers")
+
+    structured_json = None
+    params = { "key":  WE_VOTE_API_KEY, }  # This comes from an environment variable}
 
     if positive_value_exists(google_civic_election_id) and positive_value_exists(state_code):
-        request = requests.get(BALLOT_ITEMS_SYNC_URL, params={
-            "key":                      WE_VOTE_API_KEY,  # This comes from an environment variable
-            "google_civic_election_id": google_civic_election_id,
-            "state_code":               state_code,
-        })
+        params.update({"google_civic_election_id": google_civic_election_id,
+                       "state_code": state_code, })
     elif positive_value_exists(google_civic_election_id):
-        request = requests.get(BALLOT_ITEMS_SYNC_URL, params={
-            "key":                      WE_VOTE_API_KEY,
-            "google_civic_election_id": google_civic_election_id,
-        })
+        params.update({"google_civic_election_id": google_civic_election_id, })
     elif positive_value_exists(state_code):
-        request = requests.get(BALLOT_ITEMS_SYNC_URL, params={
-            "key":                      WE_VOTE_API_KEY,
-            "state_code":               state_code,
-        })
+        params.update({ "state_code": state_code, })
     else:
         import_results = {
             'success': False,
             'status': "BALLOT_ITEMS_IMPORT_COULD_NOT_RUN-INSUFFICIENT_VARIABLES",
-            'saved': 0,
-            'updated': 0,
-            'not_processed': 0,
-            'duplicates_removed': 0
         }
         return import_results
 
-    try:
-        structured_json = json.loads(request.text)
-        results = filter_ballot_items_structured_json_for_local_duplicates(structured_json)
-        filtered_structured_json = results['structured_json']
-        duplicates_removed = results['duplicates_removed']
+    import_results, structured_json = \
+        process_request_from_master(request, "Loading Ballot Items from We Vote Master servers",
+                                    BALLOT_ITEMS_SYNC_URL, params)
 
-        import_results = ballot_items_import_from_structured_json(filtered_structured_json)
-        import_results['duplicates_removed'] = duplicates_removed
+    if not import_results['success']:
+        return import_results
+
+    try:
+        if 'success' in structured_json: # On error, you get: {'success': False, 'status': 'BALLOT_ITEM_LIST_MISSING'}
+            import_results = {
+                'success': False,
+                'status': structured_json['status'] + ": Did you set the correct state for syncing this election?",
+            }
+        else:
+            results = filter_ballot_items_structured_json_for_local_duplicates(structured_json)
+            filtered_structured_json = results['structured_json']
+            duplicates_removed = results['duplicates_removed']
+
+            import_results = ballot_items_import_from_structured_json(filtered_structured_json)
+            import_results['duplicates_removed'] = duplicates_removed
     except Exception as e:
         import_results = {
             'success': False,
             'status': "FAILED_TO_GET_JSON_FROM_MASTER_SERVER",
-            'saved': 0,
-            'updated': 0,
-            'not_processed': 0,
-            'duplicates_removed': 0
         }
 
     return import_results
@@ -90,24 +86,30 @@ def ballot_items_import_from_master_server(request, google_civic_election_id, st
 def ballot_returned_import_from_master_server(request, google_civic_election_id):
     """
     Get the json data, and either create new entries or update existing
+    Request json file from We Vote servers
+
+    :param request:
+    :param google_civic_election_id:
     :return:
     """
-    # Request json file from We Vote servers
-    messages.add_message(request, messages.INFO, "Loading Ballot Returned entries (saved ballots, specific to one "
-                                                 "location) from We Vote Master servers")
-    logger.info("Loading Ballot Returned entries (saved ballots, specific to one location) from We Vote Master servers")
-    request = requests.get(BALLOT_RETURNED_SYNC_URL, params={
-        "key":                      WE_VOTE_API_KEY,  # This comes from an environment variable
-        "format":                   'json',
-        "google_civic_election_id": google_civic_election_id,
-    })
-    structured_json = json.loads(request.text)
-    results = filter_ballot_returned_structured_json_for_local_duplicates(structured_json)
-    filtered_structured_json = results['structured_json']
-    duplicates_removed = results['duplicates_removed']
 
-    import_results = ballot_returned_import_from_structured_json(filtered_structured_json)
-    import_results['duplicates_removed'] = duplicates_removed
+    import_results, structured_json = process_request_from_master(
+        request, "Loading Ballot Returned entries (saved ballots, specific to one location) from WeVote Master servers",
+        BALLOT_RETURNED_SYNC_URL,
+        {
+            "key": WE_VOTE_API_KEY,  # This comes from an environment variable
+            "format": 'json',
+            "google_civic_election_id": google_civic_election_id,
+        }
+    )
+
+    if import_results['success']:
+        results = filter_ballot_returned_structured_json_for_local_duplicates(structured_json)
+        filtered_structured_json = results['structured_json']
+        duplicates_removed = results['duplicates_removed']
+
+        import_results = ballot_returned_import_from_structured_json(filtered_structured_json)
+        import_results['duplicates_removed'] = duplicates_removed
 
     return import_results
 
@@ -128,6 +130,8 @@ def filter_ballot_items_structured_json_for_local_duplicates(structured_json):
             if 'ballot_item_display_name' in one_ballot_item else ''
         google_civic_election_id = one_ballot_item['google_civic_election_id'] \
             if 'google_civic_election_id' in one_ballot_item else ''
+        state_code = one_ballot_item['state_code'] \
+            if 'state_code' in one_ballot_item else ''
         polling_location_we_vote_id = one_ballot_item['polling_location_we_vote_id'] \
             if 'polling_location_we_vote_id' in one_ballot_item else ''
         contest_office_we_vote_id = one_ballot_item['contest_office_we_vote_id'] \
@@ -141,7 +145,7 @@ def filter_ballot_items_structured_json_for_local_duplicates(structured_json):
         # but different contest_office_we_vote_id or contest_measure_we_vote_id
         results = ballot_item_list_manager.retrieve_possible_duplicate_ballot_items(
             ballot_item_display_name, google_civic_election_id, polling_location_we_vote_id, contest_office_we_vote_id,
-            contest_measure_we_vote_id)
+            contest_measure_we_vote_id, state_code)
 
         if results['ballot_item_list_found']:
             # There seems to be a duplicate already in this database using a different we_vote_id
@@ -211,6 +215,7 @@ def ballot_items_import_from_structured_json(structured_json):
             if 'polling_location_we_vote_id' in one_ballot_item else ''
         google_civic_election_id = \
             one_ballot_item['google_civic_election_id'] if 'google_civic_election_id' in one_ballot_item else ''
+        state_code = one_ballot_item['state_code'] if 'state_code' in one_ballot_item else ''
         contest_office_we_vote_id = one_ballot_item['contest_office_we_vote_id'] \
             if 'contest_office_we_vote_id' in one_ballot_item else ''
         contest_measure_we_vote_id = one_ballot_item['contest_measure_we_vote_id'] \
@@ -241,7 +246,7 @@ def ballot_items_import_from_structured_json(structured_json):
                 polling_location_we_vote_id, google_civic_election_id, google_ballot_placement,
                 ballot_item_display_name, measure_subtitle, local_ballot_order,
                 contest_office_id, contest_office_we_vote_id,
-                contest_measure_id, contest_measure_we_vote_id)
+                contest_measure_id, contest_measure_we_vote_id, state_code)
 
         else:
             ballot_items_not_processed += 1
@@ -658,6 +663,7 @@ def generate_ballot_data(voter_device_link, voter_address):
             'status':                   status,
             'success':                  False,
             'google_civic_election_id': 0,
+            'state_code':               '',
             'voter_ballot_saved_found': False,
             'voter_ballot_saved':       VoterBallotSaved()
         }
@@ -670,6 +676,7 @@ def generate_ballot_data(voter_device_link, voter_address):
             'status':                   status,
             'success':                  True,
             'google_civic_election_id': 0,
+            'state_code':               '',
             'voter_ballot_saved_found': False,
             'voter_ballot_saved':       None,
         }
@@ -693,6 +700,7 @@ def generate_ballot_data(voter_device_link, voter_address):
         save_results = voter_ballot_saved_manager.create_voter_ballot_saved(
             voter_id,
             results['google_civic_election_id'],
+            results['state_code'],
             results['election_date_text'],
             results['election_description_text'],
             results['text_for_map_search'],
@@ -720,6 +728,7 @@ def generate_ballot_data(voter_device_link, voter_address):
         save_results = voter_ballot_saved_manager.create_voter_ballot_saved(
             voter_id,
             copy_results['google_civic_election_id'],
+            copy_results['state_code'],
             copy_results['election_date_text'],
             copy_results['election_description_text'],
             text_for_map_search,
@@ -752,6 +761,7 @@ def generate_ballot_data(voter_device_link, voter_address):
     #     save_results = voter_ballot_saved_manager.create_voter_ballot_saved(
     #         voter_id,
     #         results['google_civic_election_id'],
+    #         results['state_code'],
     #         results['election_date_text'],
     #         results['election_description_text'],
     #         results['text_for_map_search'],

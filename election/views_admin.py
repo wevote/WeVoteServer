@@ -107,6 +107,8 @@ def election_all_ballots_retrieve_view(request, election_local_id=0):
     # number_of_polling_locations_to_retrieve = int(.1 * polling_location_count)
     ballot_returned_manager = BallotReturnedManager()
     rate_limit_count = 0
+    # Step though our set of polling locations, until we find one that contains a ballot.  Some won't contain ballots
+    # due to data quality issues.
     for polling_location in polling_location_list:
         success = False
         # Get the address for this polling place, and then retrieve the ballot from Google Civic API

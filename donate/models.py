@@ -242,7 +242,7 @@ class DonationManager(models.Model):
         except DonationManager.MultipleObjectsReturned as e:
             handle_record_found_more_than_one_exception(e, logger=logger)
             success = False
-            status += 'MULTIPLE_MATCHING_SUBSCRIPTION_PLANS_FOUND'
+            status += 'MULTIPLE_MATCHING_SUBSCRIPTION_PLANS_FOUND '
             exception_multiple_object_returned = True
 
         except stripe.error.StripeError:
@@ -681,9 +681,9 @@ class DonationManager(models.Model):
     def update_journal_entry_for_refund(charge, voter_we_vote_id, refund):
         if refund and refund['amount'] > 0 and refund['status'] == "succeeded":
             row = DonationJournal.objects.get(charge_id__iexact=charge, voter_we_vote_id__iexact=voter_we_vote_id)
-            row.status = textwrap.shorten(" CHARGE_REFUND_REQUESTED" + "_" + str(refund['created']) + "_" + \
+            row.status = textwrap.shorten(row.status + " CHARGE_REFUND_REQUESTED" + "_" + str(refund['created']) + "_" + \
                          refund['currency'] + "_" + str(refund['amount']) + "_REFUND_ID" + \
-                         refund['id'] + " " + row.status, width=255, placeholder="...")
+                         refund['id'] + " ", width=255, placeholder="...")
             row.amount_refunded = refund['amount']
             row.stripe_status = "refund pending"
             row.save()
@@ -699,7 +699,7 @@ class DonationManager(models.Model):
     @staticmethod
     def update_journal_entry_for_already_refunded(charge, voter_we_vote_id):
         row = DonationJournal.objects.get(charge_id__iexact=charge, voter_we_vote_id__iexact=voter_we_vote_id)
-        row.status = textwrap.shorten("CHARGE_WAS_ALREADY_REFUNDED_" + str(datetime.utcnow()) + " " + row.status,
+        row.status = textwrap.shorten(row.status + "CHARGE_WAS_ALREADY_REFUNDED_" + str(datetime.utcnow()) + " ",
                                       width=255, placeholder="...")
         row.amount_refunded = row.amount
         row.stripe_status = "refunded"
@@ -714,7 +714,7 @@ class DonationManager(models.Model):
         print("update_journal_entry_for_refund_completed: " + charge)
         try:
             row = DonationJournal.objects.get(charge_id=charge)
-            row.status = textwrap.shorten("CHARGE_REFUNDED_" + str(datetime.utcnow()) + " " + row.status, width=255,
+            row.status = textwrap.shorten(row.status + "CHARGE_REFUNDED_" + str(datetime.utcnow()) + " ", width=255,
                                           placeholder="...")
             row.stripe_status = "refunded"
             row.save()

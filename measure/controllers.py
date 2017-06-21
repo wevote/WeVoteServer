@@ -11,7 +11,8 @@ from election.models import ElectionManager
 import json
 import requests
 import wevote_functions.admin
-from wevote_functions.functions import convert_state_code_to_state_text, positive_value_exists
+from wevote_functions.functions import convert_state_code_to_state_text, positive_value_exists, \
+    process_request_from_master
 
 logger = wevote_functions.admin.get_logger(__name__)
 
@@ -109,22 +110,26 @@ def measures_import_from_master_server(request, google_civic_election_id, state_
     Get the json data, and either create new entries or update existing
     :return:
     """
-    # Request json file from We Vote servers
-    messages.add_message(request, messages.INFO, "Loading Measures from We Vote Master servers")
-    logger.info("Loading Measures from We Vote Master servers")
-    request = requests.get(MEASURES_SYNC_URL, params={
-        "key": WE_VOTE_API_KEY,  # This comes from an environment variable
-        "format":   'json',
-        "google_civic_election_id": google_civic_election_id,
-        "state_code": state_code,
-    })
-    structured_json = json.loads(request.text)
-    results = filter_measures_structured_json_for_local_duplicates(structured_json)
-    filtered_structured_json = results['structured_json']
-    duplicates_removed = results['duplicates_removed']
+    import_results, structured_json = process_request_from_master(
+        request, "Loading Measures from We Vote Master servers",
+        MEASURES_SYNC_URL, {
+            "key": WE_VOTE_API_KEY,
+            "format": 'json',
+            "google_civic_election_id": google_civic_election_id,
+            "state_code": state_code,
+        }
+    )
 
-    import_results = measures_import_from_structured_json(filtered_structured_json)
-    import_results['duplicates_removed'] = duplicates_removed
+    if import_results['success']:
+        results = filter_measures_structured_json_for_local_duplicates(structured_json)
+        filtered_structured_json = results['structured_json']
+        duplicates_removed = results['duplicates_removed']
+
+        import_results = measures_import_from_structured_json(filtered_structured_json)
+        import_results['duplicates_removed'] = duplicates_removed
+    else:
+        if "MISSING" in import_results['status']:
+            import_results['status'] += ", This election may not have any measures."
 
     return import_results
 

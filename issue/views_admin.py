@@ -87,7 +87,6 @@ def issues_import_from_master_server_view(request):
     else:
         messages.add_message(request, messages.INFO, 'Issues import completed. '
                                                      'Saved: {saved}, Updated: {updated}, '
-                                                     'Master data not imported (local duplicates found): '
                                                      'Not processed: {not_processed}'
                                                      ''.format(saved=results['issues_saved'],
                                                                updated=results['issues_updated'],
@@ -415,9 +414,8 @@ def organization_link_to_issue_import_from_master_server_view(request):
         messages.add_message(request, messages.ERROR, results['status'])
     else:
         messages.add_message(request, messages.INFO,
-                             'organizationLinkToIssue import completed. '
+                             'Organization Links import completed. '
                              'Saved: {saved}, Updated: {updated}, '
-                             'Master data not imported (local duplicates found): '
                              'Not processed: {not_processed}'
                              ''.format(saved=results['organization_link_to_issue_saved'],
                                        updated=results['organization_link_to_issue_updated'],

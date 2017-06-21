@@ -24,7 +24,7 @@ import requests
 from voter.models import fetch_voter_id_from_voter_device_link, VoterManager
 from voter_guide.models import ORGANIZATION, PUBLIC_FIGURE, VOTER, UNKNOWN_VOTER_GUIDE, VoterGuideManager
 import wevote_functions.admin
-from wevote_functions.functions import convert_to_int, is_voter_device_id_valid, positive_value_exists
+from wevote_functions.functions import is_voter_device_id_valid, positive_value_exists, process_request_from_master
 
 logger = wevote_functions.admin.get_logger(__name__)
 
@@ -735,6 +735,7 @@ def position_retrieve_for_api(position_we_vote_id, voter_device_id):  # position
             'is_information_only':              False,
             'organization_we_vote_id':  '',
             'google_civic_election_id': '',
+            'state_code':               '',
             'voter_id':                 0,
             'office_we_vote_id':        '',
             'candidate_we_vote_id':     '',
@@ -783,6 +784,7 @@ def position_retrieve_for_api(position_we_vote_id, voter_device_id):  # position
             'is_information_only':      results['is_information_only'],
             'organization_we_vote_id':  position.organization_we_vote_id,
             'google_civic_election_id': position.google_civic_election_id,
+            'state_code':               position.state_code,
             'voter_id':                 position.voter_id,
             'office_we_vote_id':        '',  # position.office_we_vote_id,
             'candidate_we_vote_id':     position.candidate_campaign_we_vote_id,
@@ -816,6 +818,7 @@ def position_retrieve_for_api(position_we_vote_id, voter_device_id):  # position
             'is_information_only':      False,
             'organization_we_vote_id':  '',
             'google_civic_election_id': '',
+            'state_code':               '',
             'voter_id':                 0,
             'office_we_vote_id':        '',
             'candidate_we_vote_id':     '',
@@ -837,6 +840,7 @@ def position_save_for_api(  # positionSave
         public_figure_we_vote_id,
         voter_we_vote_id,
         google_civic_election_id,
+        state_code,
         ballot_item_display_name,
         office_we_vote_id,
         candidate_we_vote_id,
@@ -885,7 +889,7 @@ def position_save_for_api(  # positionSave
             'is_public_position':       False,
             'organization_we_vote_id':  organization_we_vote_id,
             'google_civic_election_id': google_civic_election_id,
-            'state_code':               '',
+            'state_code':               state_code,
             'voter_id':                 0,
             'office_we_vote_id':        office_we_vote_id,
             'candidate_we_vote_id':     candidate_we_vote_id,
@@ -918,7 +922,7 @@ def position_save_for_api(  # positionSave
             'is_public_position':       False,
             'organization_we_vote_id':  organization_we_vote_id,
             'google_civic_election_id': google_civic_election_id,
-            'state_code':               '',
+            'state_code':               state_code,
             'voter_id':                 0,
             'office_we_vote_id':        office_we_vote_id,
             'candidate_we_vote_id':     candidate_we_vote_id,
@@ -932,7 +936,8 @@ def position_save_for_api(  # positionSave
         return results
 
     # Look up the state_code from the election
-    state_code = fetch_election_state(google_civic_election_id)
+    if not positive_value_exists(state_code):
+        state_code = fetch_election_state(google_civic_election_id)
 
     position_manager = PositionManager()
     save_results = position_manager.update_or_create_position(
@@ -1008,6 +1013,7 @@ def position_save_for_api(  # positionSave
             'is_public_position':       False,
             'organization_we_vote_id':  organization_we_vote_id,
             'google_civic_election_id': google_civic_election_id,
+            'state_code':               state_code,
             'voter_id':                 0,
             'office_we_vote_id':        office_we_vote_id,
             'candidate_we_vote_id':     candidate_we_vote_id,
@@ -1501,11 +1507,12 @@ def position_list_for_opinion_maker_for_api(voter_device_id,  # positionListForO
 
             position_list_raw = position_list_manager.retrieve_all_positions_for_organization(
                     organization_id, organization_we_vote_id, stance_we_are_looking_for, friends_vs_public,
-                    filter_for_voter, filter_out_voter, voter_device_id, google_civic_election_id, state_code)
+                    filter_for_voter, filter_out_voter, voter_device_id, google_civic_election_id)
         else:
             opinion_maker_id = organization_id
             opinion_maker_we_vote_id = organization_we_vote_id
     elif kind_of_opinion_maker == PUBLIC_FIGURE:
+        # TODO retrieve_all_positions_for_public_figure is just a stub, and doesn't do anything.  The list is empty.
         position_list_raw = position_list_manager.retrieve_all_positions_for_public_figure(
                 public_figure_id, public_figure_we_vote_id, stance_we_are_looking_for,
                 filter_for_voter, filter_out_voter, voter_device_id, google_civic_election_id, state_code)
@@ -1651,6 +1658,7 @@ def position_list_for_opinion_maker_for_api(voter_device_id,  # positionListForO
                 'vote_smart_rating':                    one_position.vote_smart_rating,
                 'vote_smart_time_span':                 one_position.vote_smart_time_span,
                 'google_civic_election_id':             one_position.google_civic_election_id,
+                'state_code':                           one_position.state_code,
                 'more_info_url':                        one_position.more_info_url,
                 'statement_text':                       one_position.statement_text,
                 'last_updated':                         one_position.last_updated(),
@@ -1660,6 +1668,12 @@ def position_list_for_opinion_maker_for_api(voter_device_id,  # positionListForO
             if positive_value_exists(one_position.google_civic_election_id) \
                     and one_position.google_civic_election_id not in all_elections_that_have_positions:
                 all_elections_that_have_positions.append(one_position.google_civic_election_id)
+
+            if positive_value_exists(one_position.state_code) \
+                    and one_position.state_code not in all_elections_that_have_positions:
+                all_elections_that_have_positions.append(one_position.state_code)
+                if not positive_value_exists(state_code):
+                    state_code = one_position.state_code
 
     # Now change the sort order
     if len(position_list):
@@ -1674,7 +1688,7 @@ def position_list_for_opinion_maker_for_api(voter_device_id,  # positionListForO
         for one_google_civic_election_id in all_elections_that_have_positions:
             if not voter_guide_manager.voter_guide_exists(opinion_maker_we_vote_id, one_google_civic_election_id):
                 voter_guide_manager.update_or_create_organization_voter_guide_by_election_id(
-                    opinion_maker_we_vote_id, one_google_civic_election_id)
+                    opinion_maker_we_vote_id, one_google_civic_election_id, state_code)
 
     status += ' POSITION_LIST_FOR_OPINION_MAKER_SUCCEEDED'
     success = True
@@ -1731,10 +1745,10 @@ def position_list_for_voter_for_api(voter_device_id,
             'count':                            0,
             'friends_vs_public':                friends_vs_public,
             'google_civic_election_id':         google_civic_election_id,
+            'state_code':                       state_code,
             'position_list':                    position_list,
             'show_all_other_elections':         show_all_other_elections,
             'show_only_this_election':          show_only_this_election,
-            'state_code':                       state_code,
             'voter_we_vote_id':                 voter_we_vote_id,
             'voter_display_name':               voter_display_name,
             'voter_image_url_https_large':      voter_image_url_https_large,
@@ -1754,10 +1768,10 @@ def position_list_for_voter_for_api(voter_device_id,
             'count':                            0,
             'friends_vs_public':                friends_vs_public,
             'google_civic_election_id':         google_civic_election_id,
+            'state_code':                       state_code,
             'position_list':                    position_list,
             'show_all_other_elections':         show_all_other_elections,
             'show_only_this_election':          show_only_this_election,
-            'state_code':                       state_code,
             'voter_we_vote_id':                 voter_we_vote_id,
             'voter_display_name':               voter_display_name,
             'voter_image_url_https_large':      voter_image_url_https_large,
@@ -1783,7 +1797,7 @@ def position_list_for_voter_for_api(voter_device_id,
 
     position_list_results = position_list_manager.retrieve_all_positions_for_voter(
         voter.id, voter.we_vote_id, stance_we_are_looking_for, friends_vs_public, google_civic_election_id,
-        this_election_vs_others, state_code)
+        this_election_vs_others)
     if position_list_results['position_list_found']:
         position_list_retrieved = position_list_results['position_list']
     else:
@@ -1856,11 +1870,14 @@ def position_list_for_voter_for_api(voter_device_id,
                 'is_public_position':                   one_position.is_public_position,
                 'speaker_display_name':                 one_position.speaker_display_name,  # Voter name
                 'google_civic_election_id':             one_position.google_civic_election_id,
+                'state_code':                           one_position.state_code,
                 'more_info_url':                        one_position.more_info_url,
                 'statement_text':                       one_position.statement_text,
                 'last_updated':                         one_position.last_updated(),
             }
             position_list.append(one_position_dict_for_api)
+            if not positive_value_exists(state_code):
+                state_code = one_position.state_code
 
     status += ' POSITION_LIST_FOR_VOTER_SUCCEEDED'
     success = True
@@ -1870,10 +1887,10 @@ def position_list_for_voter_for_api(voter_device_id,
         'count':                            len(position_list),
         'friends_vs_public':                friends_vs_public,
         'google_civic_election_id':         google_civic_election_id,
+        'state_code':                       state_code,
         'position_list':                    position_list,
         'show_all_other_elections':         show_all_other_elections,
         'show_only_this_election':          show_only_this_election,
-        'state_code':                       state_code,
         'voter_we_vote_id':                 voter_we_vote_id,
         'voter_display_name':               voter_display_name,
         'voter_image_url_https_large':      voter_image_url_https_large,
@@ -1902,22 +1919,23 @@ def positions_import_from_master_server(request, google_civic_election_id=''):
     Get the json data, and either create new entries or update existing
     :return:
     """
-    messages.add_message(request, messages.INFO, "Loading Positions from We Vote Master servers")
-    logger.info("Loading Positions from We Vote Master servers")
-    # Request json file from We Vote servers
-    request = requests.get(POSITIONS_SYNC_URL, params={
-        "key":                      WE_VOTE_API_KEY,  # This comes from an environment variable
-        "format":                   'json',
-        "google_civic_election_id": google_civic_election_id,
-    })
-    structured_json = json.loads(request.text)
 
-    results = filter_positions_structured_json_for_local_duplicates(structured_json)
-    filtered_structured_json = results['structured_json']
-    duplicates_removed = results['duplicates_removed']
+    import_results, structured_json = process_request_from_master(
+        request, "Loading Positions from We Vote Master servers",
+        POSITIONS_SYNC_URL, {
+            "key":                      WE_VOTE_API_KEY,  # This comes from an environment variable
+            "format":                   'json',
+            "google_civic_election_id": google_civic_election_id,
+        }
+    )
 
-    import_results = positions_import_from_structured_json(filtered_structured_json)
-    import_results['duplicates_removed'] = duplicates_removed
+    if import_results['success']:
+        results = filter_positions_structured_json_for_local_duplicates(structured_json)
+        filtered_structured_json = results['structured_json']
+        duplicates_removed = results['duplicates_removed']
+
+        import_results = positions_import_from_structured_json(filtered_structured_json)
+        import_results['duplicates_removed'] = duplicates_removed
 
     return import_results
 
@@ -2000,6 +2018,7 @@ def positions_import_from_structured_json(structured_json):
         except PositionEntered.DoesNotExist as e:
             pass
         except Exception as e:
+            print("exception thrown in positions_import_from_structured_json" + e)
             pass
 
         # We need to look up the local organization_id and store for internal use
@@ -2024,6 +2043,8 @@ def positions_import_from_structured_json(structured_json):
                 one_position["candidate_campaign_we_vote_id"])
             if not positive_value_exists(candidate_campaign_id):
                 # If an id does not exist, then we don't have this candidate locally
+                print("positions_import did not find a candidate_campaign_id for candidate_campaign_we_vote_id: " +
+                      one_position["candidate_campaign_we_vote_id"])
                 positions_not_processed += 1
                 continue
         elif positive_value_exists(one_position["contest_measure_we_vote_id"]):
@@ -2032,6 +2053,8 @@ def positions_import_from_structured_json(structured_json):
                 one_position["contest_measure_we_vote_id"])
             if not positive_value_exists(contest_measure_id):
                 # If an id does not exist, then we don't have this measure locally
+                print("positions_import did not find a contest_measure_id for contest_measure_we_vote_id: " +
+                      one_position["contest_measure_we_vote_id"])
                 positions_not_processed += 1
                 continue
 
@@ -2070,6 +2093,7 @@ def positions_import_from_structured_json(structured_json):
                 position_on_stage.date_entered = one_position["date_entered"]
                 position_on_stage.google_civic_candidate_name = google_civic_candidate_name
                 position_on_stage.google_civic_election_id = one_position["google_civic_election_id"]
+                position_on_stage.state_code = one_position["state_code"]
                 position_on_stage.more_info_url = one_position["more_info_url"]
                 position_on_stage.organization_id = organization_id
                 position_on_stage.organization_we_vote_id = one_position["organization_we_vote_id"]
@@ -2089,6 +2113,7 @@ def positions_import_from_structured_json(structured_json):
                     date_entered=one_position["date_entered"],
                     google_civic_candidate_name=google_civic_candidate_name,
                     google_civic_election_id=one_position["google_civic_election_id"],
+                    state_code=one_position["state_code"],
                     more_info_url=one_position["more_info_url"],
                     organization_id=organization_id,
                     organization_we_vote_id=one_position["organization_we_vote_id"],
@@ -2177,6 +2202,7 @@ def voter_position_retrieve_for_api(voter_device_id, office_we_vote_id, candidat
             'is_oppose':                False,
             'is_information_only':      False,
             'google_civic_election_id': '',
+            'state_code':               '',
             'office_we_vote_id':        office_we_vote_id,
             'candidate_we_vote_id':     candidate_we_vote_id,
             'measure_we_vote_id':       measure_we_vote_id,
@@ -2212,6 +2238,7 @@ def voter_position_retrieve_for_api(voter_device_id, office_we_vote_id, candidat
             'is_oppose':                False,
             'is_information_only':      False,
             'google_civic_election_id': '',
+            'state_code':               '',
             'office_we_vote_id':        office_we_vote_id,
             'candidate_we_vote_id':     candidate_we_vote_id,
             'measure_we_vote_id':       measure_we_vote_id,
@@ -2256,6 +2283,7 @@ def voter_position_retrieve_for_api(voter_device_id, office_we_vote_id, candidat
             'is_oppose':                results['is_oppose'],
             'is_information_only':      results['is_information_only'],
             'google_civic_election_id': position.google_civic_election_id,
+            'state_code':               position.state_code,
             'office_we_vote_id':        position.contest_office_we_vote_id,
             'candidate_we_vote_id':     position.candidate_campaign_we_vote_id,
             'measure_we_vote_id':       position.contest_measure_we_vote_id,
@@ -2284,6 +2312,7 @@ def voter_position_retrieve_for_api(voter_device_id, office_we_vote_id, candidat
             'is_oppose':                False,
             'is_information_only':      False,
             'google_civic_election_id': '',
+            'state_code':               '',
             'office_we_vote_id':        office_we_vote_id,
             'candidate_we_vote_id':     candidate_we_vote_id,
             'measure_we_vote_id':       measure_we_vote_id,

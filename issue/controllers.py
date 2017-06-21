@@ -10,7 +10,7 @@ from exception.models import handle_exception
 import json
 import requests
 import wevote_functions.admin
-from wevote_functions.functions import positive_value_exists
+from wevote_functions.functions import positive_value_exists, process_request_from_master
 
 logger = wevote_functions.admin.get_logger(__name__)
 
@@ -24,15 +24,15 @@ def issues_import_from_master_server(request):
     Get the json data, and either create new entries or update existing
     :return:
     """
-    messages.add_message(request, messages.INFO, "Loading Issues from We Vote Master servers")
-    logger.info("Loading Issues from We Vote Master servers")
-    # Request json file from We Vote servers
-    request = requests.get(ISSUES_SYNC_URL, params={
-        "key": WE_VOTE_API_KEY,  # This comes from an environment variable
-    })
-    structured_json = json.loads(request.text)
+    import_results, structured_json = process_request_from_master(
+        request, "Loading Issues from We Vote Master servers",
+        ISSUES_SYNC_URL, {
+            "key": WE_VOTE_API_KEY,
+        }
+    )
 
-    import_results = issues_import_from_structured_json(structured_json)
+    if import_results['success']:
+        import_results = issues_import_from_structured_json(structured_json)
 
     return import_results
 
@@ -239,15 +239,15 @@ def organization_link_to_issue_import_from_master_server(request):
     Get the json data, and either create new entries or update existing
     :return:
     """
-    messages.add_message(request, messages.INFO, "Loading organizationLinkToIssue data from We Vote Master servers")
-    logger.info("Loading organizationLinkToIssue from We Vote Master servers")
-    # Request json file from We Vote servers
-    link_request = requests.get(ORGANIZATION_LINK_TO_ISSUE_SYNC_URL, params={
-        "key": WE_VOTE_API_KEY,  # This comes from an environment variable
-    })
-    structured_json = json.loads(link_request.text)
+    import_results, structured_json = process_request_from_master(
+        request, "Loading Organization's Links To Issues data from We Vote Master servers",
+        ORGANIZATION_LINK_TO_ISSUE_SYNC_URL, {
+            "key": WE_VOTE_API_KEY,
+        }
+    )
 
-    import_results = organization_link_to_issue_import_from_structured_json(structured_json)
+    if import_results['success']:
+        import_results = organization_link_to_issue_import_from_structured_json(structured_json)
 
     return import_results
 

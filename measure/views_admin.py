@@ -65,9 +65,12 @@ def measures_sync_out_view(request):
 
 
 @login_required
-def measures_import_from_master_server_view(request):
+def measures_import_from_master_server_view(request):  # GET '/m/import/?google_civic_election_id=nnn&state_code=xx'
     google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
     state_code = request.GET.get('state_code', '')
+
+    if not positive_value_exists(google_civic_election_id):
+        logger.error("measures_import_from_master_server_view did not receive a google_civic_election_id", {}, {})
 
     results = measures_import_from_master_server(request, google_civic_election_id, state_code)
 
@@ -76,7 +79,7 @@ def measures_import_from_master_server_view(request):
     else:
         messages.add_message(request, messages.INFO, 'Measures import completed. '
                                                      'Saved: {saved}, Updated: {updated}, '
-                                                     'Master data not imported (local duplicates found): '
+                                                     'Duplicates skipped: '
                                                      '{duplicates_removed}, '
                                                      'Not processed: {not_processed}'
                                                      ''.format(saved=results['saved'],
@@ -299,7 +302,8 @@ def measure_edit_process_view(request):
             messages.add_message(request, messages.ERROR, 'Could not save measure.')
 
     return HttpResponseRedirect(reverse('measure:measure_list', args=()) +
-                                "?google_civic_election_id=" + str(google_civic_election_id))
+                                "?google_civic_election_id=" + str(google_civic_election_id) +
+                                "&state_code=" + str(state_code))
 
 
 @login_required
