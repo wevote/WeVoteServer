@@ -154,7 +154,7 @@ def process_candidates_from_structured_json(
 def process_contest_office_from_structured_json(
         one_contest_office_structured_json, google_civic_election_id, state_code, ocd_division_id, local_ballot_order,
         voter_id, polling_location_we_vote_id):
-    logger.debug("General contest_type", {}, {})
+    logger.debug("General contest_type")
 
     # Protect against the case where this is NOT an office
     if 'candidates' not in one_contest_office_structured_json:

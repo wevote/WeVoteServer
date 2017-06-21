@@ -586,7 +586,7 @@ class DonationManager(models.Model):
             # The not-loggedin-voter rarely has made a donation, so this is not a problem
             status += " NO-DONATIONS-TO-MOVE-FROM-" + \
                       voter_we_vote_id + "-TO-" + to_voter_we_vote_id + " "
-            logger.debug("move_donations_between_donors 1:" + status, {}, {})
+            logger.debug("move_donations_between_donors 1:" + status)
             results = {
                 'status': status,
                 'success': False,
