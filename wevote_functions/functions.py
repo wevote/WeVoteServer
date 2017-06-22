@@ -624,7 +624,6 @@ def process_request_from_master(request, message_text, get_url, get_params):
 
     messages.add_message(request, messages.INFO, message_text)
     logger.info(message_text)
-    print(message_text)
 
     response = requests.get(get_url, get_params)
 

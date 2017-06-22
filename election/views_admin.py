@@ -608,7 +608,7 @@ def elections_import_from_master_server_view(request):
     google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
     state_code = request.GET.get('state_code', '')
 
-    results = elections_import_from_master_server()
+    results = elections_import_from_master_server(request)
 
     if not results['success']:
         messages.add_message(request, messages.ERROR, results['status'])

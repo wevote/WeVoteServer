@@ -195,6 +195,7 @@ def donation_with_stripe_for_api(request, token, email, donation_amount, monthly
                                     error_message=error_from_json['message'])
         status = textwrap.shorten(donation_status + " " + status, width=255, placeholder="...")
         error_message = translate_stripe_error_to_voter_explanation_text(e.http_status, error_from_json['type'])
+        logger.error("donation_with_stripe_for_api, CardError: " + error_message, {}, {})
         # error_text_description = donation_status
     except stripe.error.StripeError as e:
         body = e.json_body
@@ -205,16 +206,17 @@ def donation_with_stripe_for_api(request, token, email, donation_amount, monthly
                                     error_message=error_from_json['message'])
         status = textwrap.shorten(donation_status + " " + status, width=255, placeholder="...")
         error_message = translate_stripe_error_to_voter_explanation_text(e.http_status, error_from_json['type'])
-        print(donation_status)
+        logger.error("donation_with_stripe_for_api, StripeError : " + donation_status, {}, {})
     except Exception as err:
         # Something else happened, completely unrelated to Stripe
         donation_status = "A_NON_STRIPE_ERROR_OCCURRED "
-        print("donation_with_stripe_for_api threw " + str(err))
+        logger.error("donation_with_stripe_for_api threw " + str(err), {}, {})
         status = textwrap.shorten(donation_status + " " + status, width=255, placeholder="...")
         error_message = 'Your payment was unsuccessful. Please try again later.'
     if "already has the maximum 25 current subscriptions" in status:
         error_message = \
             "No more than 25 active subscriptions are allowed, please delete a subscription before adding another."
+        logger.debug("donation_with_stripe_for_api: " + error_message)
 
     # action_result should be CANCEL_REQUEST_FAILED, CANCEL_REQUEST_SUCCEEDED or DONATION_PROCESSED_SUCCESSFULLY
     action_result = donation_status
@@ -347,8 +349,7 @@ def donation_process_stripe_webhook_event(event):
     :param event:
     :return:
     """
-    print("donation_process_stripe_webhook_event received: " + event.type)
-    logger.debug("donation_process_stripe_webhook_event received: " + event.type)
+    logger.info("WEBHOOK received: donation_process_stripe_webhook_event: " + event.type)
 
     if event['type'] == 'charge.succeeded':
         return donation_process_charge(event)
@@ -361,8 +362,7 @@ def donation_process_stripe_webhook_event(event):
     elif event['type'] == 'charge.refunded':
         return donation_process_refund_payment(event)
     else:
-        print("donation_process_stripe_webhook_event Stripe event ignored: " + event.type)
-        logger.info("donation_process_stripe_webhook_event Stripe event ignored: " + event.type)
+        logger.info("WEBHOOK ignored: donation_process_stripe_webhook_event: " + event.type)
         return
 
 
@@ -523,7 +523,7 @@ def donation_process_subscription_payment(event):
 def donation_process_refund_payment(event):
     # The Stripe webhook has sent a refund event "charge.refunded"
     success = False
-    print("donation_process_refund_payment: " + json.dumps(event))
+    logger.debug("donation_process_refund_payment: " + json.dumps(event))
     dataobject = event['data']['object']
     charge = dataobject['id']
     paid = dataobject['paid']  # boolean
