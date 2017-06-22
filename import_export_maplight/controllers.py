@@ -57,8 +57,7 @@ def import_maplight_from_json(request):
                             politicians_running_for_one_contest_array = json.load(json_data)
                     except Exception as e:
                         logger.error("File {file_path} not found.".format(
-                            file_path=json_file_with_the_data_from_this_contest
-                        ))
+                            file_path=json_file_with_the_data_from_this_contest), {}, {})
                         # Don't try to process the file if it doesn't exist, but go to the next entry
                         continue
 

@@ -181,7 +181,6 @@ class DonationManager(models.Model):
                 stripe_customer_id_queryset = DonateLinkToVoter.objects.filter(
                     voter_we_vote_id__iexact=voter_we_vote_id).values()
                 stripe_customer_id = stripe_customer_id_queryset[0]['stripe_customer_id']
-                # print("model stripe_customer_id_query " + stripe_customer_id)
                 if positive_value_exists(stripe_customer_id):
                     success = True
                     status = "STRIPE_CUSTOMER_ID_RETRIEVED"
@@ -238,7 +237,7 @@ class DonationManager(models.Model):
             plan_id_query = stripe.Plan.retrieve(recurring_donation_plan_id)
             if positive_value_exists(plan_id_query.id):
                 stripe_plan_id = plan_id_query.id
-                print("plan_id_query.id " + plan_id_query.id)
+                logger.debug("Stripe, plan_id_query.id " + plan_id_query.id)
         except DonationManager.MultipleObjectsReturned as e:
             handle_record_found_more_than_one_exception(e, logger=logger)
             success = False
@@ -398,7 +397,7 @@ class DonationManager(models.Model):
                 body = e.json_body
                 err = body['error']
                 status = "STRIPE_ERROR_IS_" + err['message'] + "_END"
-                print("create_recurring_donation StripeError: " + status)
+                logger.error("create_recurring_donation StripeError: " + status, {}, {})
 
                 results = {
                     'success': False,
@@ -580,7 +579,7 @@ class DonationManager(models.Model):
             rows.save()
             status = "move_donations_between_donors MOVED-DONATIONS-FROM-" + \
                      voter_we_vote_id + "-TO-" + to_voter_we_vote_id + " "
-            print(status)
+            logger.debug(status)
 
         except DonationJournal.DoesNotExist:
             # The not-loggedin-voter rarely has made a donation, so this is not a problem
@@ -628,9 +627,9 @@ class DonationManager(models.Model):
                     row_id = row.id
         except DonationJournal.DoesNotExist:
             logger.error("check_for_subscription_in_db_without_card_info row does not exist for stripe customer" +
-                         customer)
+                         customer, {}, {})
         except Exception as e:
-            print("check_for_subscription_in_db_without_card_info Exception " + str(e))
+            logger.error("check_for_subscription_in_db_without_card_info Exception " + str(e), {}, {})
 
         return row_id
 
@@ -649,8 +648,8 @@ class DonationManager(models.Model):
             row.exp_year = exp_year
             row.funding = funding
             row.save()
-#            print("update_subscription_in_db row=" + row_id + ", plan_id=" + row.subscription_plan_id +
-#                  ", amount=" + str(amount) )
+            logger.debug("update_subscription_in_db row=" + row_id + ", plan_id=" + row.subscription_plan_id +
+                         ", amount=" + str(amount))
         except Exception as err:
             logger.error("update_subscription_in_db: " + str(err), {}, {})
 
@@ -671,7 +670,7 @@ class DonationManager(models.Model):
             return ""
 
         except DonationJournal.DoesNotExist:
-            print("find_we_vote_voter_id_for_stripe_customer row does not exist")
+            logger.error("find_we_vote_voter_id_for_stripe_customer row does not exist", {}, {})
         except Exception as e:
             logger.error("find_we_vote_voter_id_for_stripe_customer: " + str(e), {}, {})
 
@@ -681,19 +680,18 @@ class DonationManager(models.Model):
     def update_journal_entry_for_refund(charge, voter_we_vote_id, refund):
         if refund and refund['amount'] > 0 and refund['status'] == "succeeded":
             row = DonationJournal.objects.get(charge_id__iexact=charge, voter_we_vote_id__iexact=voter_we_vote_id)
-            row.status = textwrap.shorten(row.status + " CHARGE_REFUND_REQUESTED" + "_" + str(refund['created']) + "_" + \
-                         refund['currency'] + "_" + str(refund['amount']) + "_REFUND_ID" + \
-                         refund['id'] + " ", width=255, placeholder="...")
+            row.status = textwrap.shorten(row.status + " CHARGE_REFUND_REQUESTED" + "_" + str(refund['created']) +
+                                          "_" + refund['currency'] + "_" + str(refund['amount']) + "_REFUND_ID" +
+                                          refund['id'] + " ", width=255, placeholder="...")
             row.amount_refunded = refund['amount']
             row.stripe_status = "refund pending"
             row.save()
-            print("update_journal_entry_for_refund for charge " + charge)
-            print(row.status)
+            logger.debug("update_journal_entry_for_refund for charge " + charge + ", with status: " + row.status)
 
             return "True"
 
         logger.error("update_journal_entry_for_refund bad charge or refund for charge_id " + charge +
-                     " and voter_we_vote_id " + voter_we_vote_id)
+                     " and voter_we_vote_id " + voter_we_vote_id, {}, {})
         return "False"
 
     @staticmethod
@@ -704,24 +702,23 @@ class DonationManager(models.Model):
         row.amount_refunded = row.amount
         row.stripe_status = "refunded"
         row.save()
-        print("update_journal_entry_for_refund_completed for charge " + charge)
-        print(row.status)
+        logger.debug("update_journal_entry_for_refund_completed for charge " + charge + ", with status: " + row.status)
 
         return "True"
 
     @staticmethod
     def update_journal_entry_for_refund_completed(charge):
-        print("update_journal_entry_for_refund_completed: " + charge)
+        logger.debug("update_journal_entry_for_refund_completed: " + charge)
         try:
             row = DonationJournal.objects.get(charge_id=charge)
             row.status = textwrap.shorten(row.status + "CHARGE_REFUNDED_" + str(datetime.utcnow()) + " ", width=255,
                                           placeholder="...")
             row.stripe_status = "refunded"
             row.save()
-            print("update_journal_entry_for_refund_completed for charge " + charge)
-            print(row.status)
+            logger.debug("update_journal_entry_for_refund_completed for charge " + charge + ", with status: " +
+                         row.status)
             return "True"
 
         except DonationJournal.DoesNotExist:
-            print("update_journal_entry_for_refund_completed row does not exist for charge " + charge)
+            logger.error("update_journal_entry_for_refund_completed row does not exist for charge " + charge, {}, {})
         return "False"
