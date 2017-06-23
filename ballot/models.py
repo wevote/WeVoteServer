@@ -296,7 +296,7 @@ class BallotItemManager(models.Model):
             except BallotItemManager.MultipleObjectsReturned as e:
                 handle_record_found_more_than_one_exception(e, logger=logger)
                 success = False
-                status = 'MULTIPLE_MATCHING_BALLOT_ITEMS_FOUND-POLLING_LOCATION'
+                status = 'MULTIPLE_MATCHING_BALLOT_ITEMS_FOUND-POLLING_LOCATION '
                 exception_multiple_object_returned = True
 
         results = {
@@ -380,12 +380,12 @@ class BallotItemListManager(models.Model):
 
             if positive_value_exists(ballot_item_list):
                 ballot_item_list_found = True
-                status = 'BALLOT_ITEMS_FOUND'
+                status = 'BALLOT_ITEMS_FOUND '
             else:
-                status = 'NO_BALLOT_ITEMS_FOUND, not positive_value_exists'
+                status = 'NO_BALLOT_ITEMS_FOUND, not positive_value_exists '
         except BallotItem.DoesNotExist:
             # No ballot items found. Not a problem.
-            status = 'NO_BALLOT_ITEMS_FOUND'
+            status = 'NO_BALLOT_ITEMS_FOUND '
             ballot_item_list = []
         except Exception as e:
             handle_exception(e, logger=logger)
@@ -413,12 +413,12 @@ class BallotItemListManager(models.Model):
 
             if len(ballot_item_list):
                 ballot_item_list_found = True
-                status = 'BALLOT_ITEMS_FOUND, retrieve_all_ballot_items_for_voter'
+                status = 'BALLOT_ITEMS_FOUND, retrieve_all_ballot_items_for_voter '
             else:
-                status = 'NO_BALLOT_ITEMS_FOUND_0'
+                status = 'NO_BALLOT_ITEMS_FOUND_0 '
         except BallotItem.DoesNotExist:
             # No ballot items found. Not a problem.
-            status = 'NO_BALLOT_ITEMS_FOUND_DoesNotExist'
+            status = 'NO_BALLOT_ITEMS_FOUND_DoesNotExist '
             ballot_item_list = []
         except Exception as e:
             handle_exception(e, logger=logger)
@@ -449,12 +449,12 @@ class BallotItemListManager(models.Model):
 
             if len(ballot_item_list):
                 ballot_item_list_found = True
-                status = 'BALLOT_ITEMS_FOUND, retrieve_all_ballot_items_for_polling_location'
+                status = 'BALLOT_ITEMS_FOUND, retrieve_all_ballot_items_for_polling_location '
             else:
-                status = 'NO_BALLOT_ITEMS_FOUND, retrieve_all_ballot_items_for_polling_location'
+                status = 'NO_BALLOT_ITEMS_FOUND, retrieve_all_ballot_items_for_polling_location '
         except BallotItem.DoesNotExist:
             # No ballot items found. Not a problem.
-            status = 'NO_BALLOT_ITEMS_FOUND_DoesNotExist, retrieve_all_ballot_items_for_polling_location'
+            status = 'NO_BALLOT_ITEMS_FOUND_DoesNotExist, retrieve_all_ballot_items_for_polling_location '
             ballot_item_list = []
         except Exception as e:
             handle_exception(e, logger=logger)
@@ -611,14 +611,14 @@ class BallotItemListManager(models.Model):
 
             if len(ballot_item_list_objects):
                 ballot_item_list_found = True
-                status = 'DUPLICATE_BALLOT_ITEMS_RETRIEVED'
+                status = 'DUPLICATE_BALLOT_ITEMS_RETRIEVED '
                 success = True
             else:
-                status = 'NO_DUPLICATE_BALLOT_ITEMS_RETRIEVED'
+                status = 'NO_DUPLICATE_BALLOT_ITEMS_RETRIEVED '
                 success = True
         except BallotItem.DoesNotExist:
             # No ballot_items found. Not a problem.
-            status = 'NO_DUPLICATE_BALLOT_ITEMS_FOUND_DoesNotExist'
+            status = 'NO_DUPLICATE_BALLOT_ITEMS_FOUND_DoesNotExist '
             ballot_item_list_objects = []
             success = True
         except Exception as e:
@@ -971,9 +971,10 @@ class BallotReturnedManager(models.Model):
 
         ballot = None
         if location is None:
-            status += 'Could not find location matching "{}" '.format(text_for_map_search)
-            # If Geocoder is not able to give us a location, If the use enters the address as
-            # "city_name, state_code" eg: "Sunnyvale, CA", try to parse the entry and get ballot data for that location
+            status += 'Geocoder could not find location matching "{}". Trying City, State. '.format(text_for_map_search)
+            # If Geocoder is not able to give us a location, look to see if their voter entered their address as
+            # "city_name, state_code" eg: "Sunnyvale, CA". If so, try to parse the entry and get ballot data
+            # for that location
             address = text_for_map_search
             if positive_value_exists(state_code):
                 state = state_code.upper()
@@ -983,26 +984,37 @@ class BallotReturnedManager(models.Model):
             city = address.split(', ')[-2]
             city = city.lower()
 
-            if state in STATE_CODE_MAP.keys():
-                ballot_returned_query = BallotReturned.objects.filter(normalized_state=state)
-                ballot = ballot_returned_query.filter(normalized_city=city).first()
+            ballot_returned_query = BallotReturned.objects.all()
+            if positive_value_exists(state):
+                ballot_returned_query = ballot_returned_query.filter(normalized_state__iexact=state)
+            if positive_value_exists(city):
+                ballot_returned_query = ballot_returned_query.filter(normalized_city__iexact=city)
+            ballot = ballot_returned_query.first()
         else:
+            # If here, then the geocoder successfully found the address
+            status += 'GEOCODER_FOUND_LOCATION '
             address = location.address
             # address has format "line_1, state zip, USA"
-            state = address.split(', ')[-2][:2]
-            ballot = BallotReturned.objects. \
-                exclude(polling_location_we_vote_id=None). \
-                filter(normalized_state=state). \
-                annotate(distance=(F('latitude') - location.latitude) ** 2 +
-                                  (F('longitude') - location.longitude) ** 2). \
-                order_by('distance').first()
+            ballot_returned_query = BallotReturned.objects.all()
+            ballot_returned_query = ballot_returned_query.exclude(polling_location_we_vote_id=None)
+            if positive_value_exists(state_code):
+                # If a state_code was passed into this function...
+                ballot_returned_query = ballot_returned_query.filter(normalized_state__iexact=state_code)
+                state = state_code
+            else:
+                state = address.split(', ')[-2][:2]
+                if positive_value_exists(state):
+                    ballot_returned_query = ballot_returned_query.filter(normalized_state__iexact=state)
+            ballot_returned_query = ballot_returned_query.annotate(distance=(F('latitude') - location.latitude) ** 2 +
+                                                                            (F('longitude') - location.longitude) ** 2)
+            ballot = ballot_returned_query.order_by('distance').first()
 
         if ballot is not None:
             ballot_returned = ballot
             ballot_returned_found = True
-            status += 'Ballot returned found.'
+            status += 'BALLOT_RETURNED_FOUND '
         else:
-            status += 'No stored ballot matches the state {}.'.format(state)
+            status += 'NO_STORED_BALLOT_MATCHES_STATE {}. '.format(state)
 
         return {
             'status':                   status,
@@ -1021,10 +1033,10 @@ class BallotReturnedManager(models.Model):
 
         if not google_civic_election_id:
             success = False
-            status = 'MISSING_GOOGLE_CIVIC_ELECTION_ID-update_or_create_ballot_returned'
+            status = 'MISSING_GOOGLE_CIVIC_ELECTION_ID-update_or_create_ballot_returned '
         elif (not polling_location_we_vote_id) and (not voter_id):
             success = False
-            status = 'MISSING_BALLOT_RETURNED_POLLING_LOCATION_AND_VOTER_ID-update_or_create_ballot_returned'
+            status = 'MISSING_BALLOT_RETURNED_POLLING_LOCATION_AND_VOTER_ID-update_or_create_ballot_returned '
         else:
             try:
                 ballot_returned, new_ballot_returned_created = BallotReturned.objects.get_or_create(
@@ -1057,15 +1069,15 @@ class BallotReturnedManager(models.Model):
 
                 if new_ballot_returned_created:
                     success = True
-                    status = 'BALLOT_RETURNED_CREATED'
+                    status = 'BALLOT_RETURNED_CREATED '
                 else:
                     success = True
-                    status = 'BALLOT_RETURNED_UPDATED'
+                    status = 'BALLOT_RETURNED_UPDATED '
 
             except BallotReturned.MultipleObjectsReturned as e:
                 handle_record_found_more_than_one_exception(e, logger=logger)
                 success = False
-                status = 'MULTIPLE_MATCHING_BALLOT_RETURNED_FOUND'
+                status = 'MULTIPLE_MATCHING_BALLOT_RETURNED_FOUND '
                 exception_multiple_object_returned = True
 
         results = {
@@ -1567,6 +1579,7 @@ def copy_existing_ballot_items_from_stored_ballot(voter_id, text_for_map_search,
     :param voter_id:
     :param text_for_map_search:
     :param google_civic_election_id:
+    :param state_code:
     :return:
     """
     #

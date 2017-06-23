@@ -252,11 +252,16 @@ class VoterGuideManager(models.Manager):
 
     def voter_guide_exists(self, organization_we_vote_id, google_civic_election_id):
         voter_guide_found = False
+        google_civic_election_id = int(google_civic_election_id)
+
+        if not positive_value_exists(organization_we_vote_id) or not positive_value_exists(google_civic_election_id):
+            return False
+
         try:
             if positive_value_exists(organization_we_vote_id) and positive_value_exists(google_civic_election_id):
-                voter_guide_on_stage = VoterGuide.objects.filter(google_civic_election_id=google_civic_election_id,
-                                                                 organization_we_vote_id=organization_we_vote_id)
-                voter_guide_found = True if voter_guide_on_stage.count() > 0 else False
+                voter_guide_query = VoterGuide.objects.filter(google_civic_election_id=google_civic_election_id,
+                                                              organization_we_vote_id__iexact=organization_we_vote_id)
+                voter_guide_found = True if voter_guide_query.count() > 0 else False
         except VoterGuide.MultipleObjectsReturned as e:
             voter_guide_found = True
         except VoterGuide.DoesNotExist:
@@ -286,25 +291,25 @@ class VoterGuideManager(models.Manager):
             elif positive_value_exists(organization_we_vote_id) and positive_value_exists(google_civic_election_id):
                 status = "ERROR_RETRIEVING_VOTER_GUIDE_WITH_ORGANIZATION_WE_VOTE_ID"  # Set this in case the get fails
                 voter_guide_on_stage = VoterGuide.objects.get(google_civic_election_id=google_civic_election_id,
-                                                              organization_we_vote_id=organization_we_vote_id)
+                                                              organization_we_vote_id__iexact=organization_we_vote_id)
                 voter_guide_on_stage_id = voter_guide_on_stage.id
                 status = "VOTER_GUIDE_FOUND_WITH_ORGANIZATION_WE_VOTE_ID"
             elif positive_value_exists(organization_we_vote_id) and positive_value_exists(vote_smart_time_span):
                 status = "ERROR_RETRIEVING_VOTER_GUIDE_WITH_ORGANIZATION_WE_VOTE_ID_AND_TIME_SPAN"
                 voter_guide_on_stage = VoterGuide.objects.get(vote_smart_time_span=vote_smart_time_span,
-                                                              organization_we_vote_id=organization_we_vote_id)
+                                                              organization_we_vote_id__iexact=organization_we_vote_id)
                 voter_guide_on_stage_id = voter_guide_on_stage.id
                 status = "VOTER_GUIDE_FOUND_WITH_ORGANIZATION_WE_VOTE_ID_AND_TIME_SPAN"
             elif positive_value_exists(public_figure_we_vote_id) and positive_value_exists(google_civic_election_id):
                 status = "ERROR_RETRIEVING_VOTER_GUIDE_WITH_PUBLIC_FIGURE_WE_VOTE_ID"  # Set this in case the get fails
                 voter_guide_on_stage = VoterGuide.objects.get(google_civic_election_id=google_civic_election_id,
-                                                              public_figure_we_vote_id=public_figure_we_vote_id)
+                                                              public_figure_we_vote_id__iexact=public_figure_we_vote_id)
                 voter_guide_on_stage_id = voter_guide_on_stage.id
                 status = "VOTER_GUIDE_FOUND_WITH_PUBLIC_FIGURE_WE_VOTE_ID"
             elif positive_value_exists(owner_we_vote_id) and positive_value_exists(google_civic_election_id):
                 status = "ERROR_RETRIEVING_VOTER_GUIDE_WITH_VOTER_WE_VOTE_ID"  # Set this in case the get fails
                 voter_guide_on_stage = VoterGuide.objects.get(google_civic_election_id=google_civic_election_id,
-                                                              owner_we_vote_id=owner_we_vote_id)
+                                                              owner_we_vote_id__iexact=owner_we_vote_id)
                 voter_guide_on_stage_id = voter_guide_on_stage.id
                 status = "VOTER_GUIDE_FOUND_WITH_VOTER_WE_VOTE_ID"
             else:
@@ -343,7 +348,7 @@ class VoterGuideManager(models.Manager):
         for time_span in TIME_SPAN_LIST:
             voter_guide_by_time_span_results = voter_guide_manager.retrieve_voter_guide(
                 vote_smart_time_span=time_span,
-                organization_we_vote_id=organization_we_vote_id)
+                organization_we_vote_id__iexact=organization_we_vote_id)
             if voter_guide_by_time_span_results['voter_guide_found']:
                 voter_guide_found = True
                 voter_guide = voter_guide_by_time_span_results['voter_guide']
@@ -363,7 +368,7 @@ class VoterGuideManager(models.Manager):
             for one_election in election_list:
                 voter_guide_results = voter_guide_manager.retrieve_voter_guide(
                     google_civic_election_id=one_election.google_civic_election_id,
-                    organization_we_vote_id=organization_we_vote_id)
+                    organization_we_vote_id__iexact=organization_we_vote_id)
                 if voter_guide_results['voter_guide_found']:
                     voter_guide_found = True
                     voter_guide = voter_guide_results['voter_guide']
@@ -948,7 +953,7 @@ class VoterGuideListManager(models.Model):
             filter_list = Q()
             for item in orgs_we_need_found_by_position_and_time_span_list_of_dicts:
                 filter_list |= Q(vote_smart_time_span=item['vote_smart_time_span'],
-                                 organization_we_vote_id=item['organization_we_vote_id'])
+                                 organization_we_vote_id__iexact=item['organization_we_vote_id'])
             voter_guide_queryset = voter_guide_queryset.filter(filter_list)
 
             if search_string:
@@ -1305,7 +1310,7 @@ class VoterGuidePossibilityManager(models.Manager):
                 status = "ERROR_RETRIEVING_VOTER_GUIDE_POSSIBILITY_WITH_ORGANIZATION_WE_VOTE_ID"
                 voter_guide_possibility_on_stage = VoterGuidePossibility.objects.get(
                     google_civic_election_id=google_civic_election_id,
-                    organization_we_vote_id=organization_we_vote_id)
+                    organization_we_vote_id__iexact=organization_we_vote_id)
                 voter_guide_possibility_on_stage_id = voter_guide_possibility_on_stage.id
                 status = "VOTER_GUIDE_POSSIBILITY_FOUND_WITH_ORGANIZATION_WE_VOTE_ID"
                 success = True
@@ -1314,7 +1319,7 @@ class VoterGuidePossibilityManager(models.Manager):
                 status = "ERROR_RETRIEVING_VOTER_GUIDE_POSSIBILITY_WITH_PUBLIC_FIGURE_WE_VOTE_ID"
                 voter_guide_possibility_on_stage = VoterGuidePossibility.objects.get(
                     google_civic_election_id=google_civic_election_id,
-                    public_figure_we_vote_id=public_figure_we_vote_id)
+                    public_figure_we_vote_id__iexact=public_figure_we_vote_id)
                 voter_guide_possibility_on_stage_id = voter_guide_possibility_on_stage.id
                 status = "VOTER_GUIDE_POSSIBILITY_FOUND_WITH_PUBLIC_FIGURE_WE_VOTE_ID"
                 success = True
@@ -1323,7 +1328,7 @@ class VoterGuidePossibilityManager(models.Manager):
                 status = "ERROR_RETRIEVING_VOTER_GUIDE_POSSIBILITY_WITH_VOTER_WE_VOTE_ID"
                 voter_guide_possibility_on_stage = VoterGuidePossibility.objects.get(
                     google_civic_election_id=google_civic_election_id,
-                    owner_we_vote_id=owner_we_vote_id)
+                    owner_we_vote_id__iexact=owner_we_vote_id)
                 voter_guide_possibility_on_stage_id = voter_guide_possibility_on_stage.id
                 status = "VOTER_GUIDE_POSSIBILITY_FOUND_WITH_VOTER_WE_VOTE_ID"
                 success = True

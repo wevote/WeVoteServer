@@ -1669,12 +1669,6 @@ def position_list_for_opinion_maker_for_api(voter_device_id,  # positionListForO
                     and one_position.google_civic_election_id not in all_elections_that_have_positions:
                 all_elections_that_have_positions.append(one_position.google_civic_election_id)
 
-            if positive_value_exists(one_position.state_code) \
-                    and one_position.state_code not in all_elections_that_have_positions:
-                all_elections_that_have_positions.append(one_position.state_code)
-                if not positive_value_exists(state_code):
-                    state_code = one_position.state_code
-
     # Now change the sort order
     if len(position_list):
         sorted_position_list = sorted(position_list, key=itemgetter('ballot_item_display_name'))
