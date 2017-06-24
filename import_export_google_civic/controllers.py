@@ -840,6 +840,7 @@ def voter_ballot_items_retrieve_from_google_civic_for_api(
                 polling_location_retrieved = True
                 success = True
 
+            # Contests usually will be 'General', 'Primary', or 'Run-off' for contests with candidates.
             if one_ballot_results['contests_retrieved']:
                 contests_retrieved = True
 

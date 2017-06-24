@@ -1045,6 +1045,10 @@ class BallotReturnedManager(models.Model):
                     voter_id=voter_id
                 )
 
+                if not positive_value_exists(ballot_returned.google_civic_election_id):
+                    ballot_returned.google_civic_election_id = google_civic_election_id;
+                if not positive_value_exists(ballot_returned.voter_id):
+                    ballot_returned.voter_id = voter_id;
                 if election_date is not False:
                     ballot_returned.election_date = election_date
                 if election_description_text is not False:
@@ -1061,6 +1065,7 @@ class BallotReturnedManager(models.Model):
                     ballot_returned.normalized_line2 = normalized_line2
                 if normalized_state is not False:
                     ballot_returned.normalized_state = normalized_state
+                    ballot_returned.state_code = normalized_state
                 if normalized_zip is not False:
                     ballot_returned.normalized_zip = normalized_zip
                 if text_for_map_search is not False:

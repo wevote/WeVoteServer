@@ -144,6 +144,7 @@ def ballot_returned_import_from_master_server_view(request):
     google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
     state_code = request.GET.get('state_code', '')
 
+    print("Importing ballot returned from master server")
     results = ballot_returned_import_from_master_server(request, google_civic_election_id)
 
     if not results['success']:

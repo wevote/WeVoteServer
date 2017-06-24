@@ -103,6 +103,9 @@ def ballot_returned_import_from_master_server(request, google_civic_election_id)
         }
     )
 
+    print("... the master server returned " + str(len(structured_json)) + " polling locations for election " +
+          str(google_civic_election_id))
+
     if import_results['success']:
         results = filter_ballot_returned_structured_json_for_local_duplicates(structured_json)
         filtered_structured_json = results['structured_json']
@@ -190,6 +193,9 @@ def filter_ballot_returned_structured_json_for_local_duplicates(structured_json)
             duplicates_removed += 1
         else:
             filtered_structured_json.append(one_ballot_returned)
+        processed = duplicates_removed + len(filtered_structured_json)
+        if processed % 5000 == 0:
+            print("... pre-processed " + str(processed) + " ballot returned imports")
 
     ballot_returned_results = {
         'success':              True,
@@ -341,6 +347,10 @@ def ballot_returned_import_from_structured_json(structured_json):
                 ballot_returned_updated += 1
         else:
             ballot_returned_not_processed += 1
+        processed = ballot_returned_saved + ballot_returned_updated + ballot_returned_not_processed
+        if processed % 5000 == 0:
+            print("... processed " + str(processed) + " ballot returned imports")
+
 
     status = "BALLOT_RETURNED_IMPORT_PROCESS_COMPLETED"
 
