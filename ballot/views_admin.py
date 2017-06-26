@@ -410,6 +410,7 @@ def ballot_item_list_edit_process_view(request):
                 location = google_client.geocode(ballot_returned.text_for_map_search)
                 if location is None:
                     status = 'Could not find location matching "{}"'.format(ballot_returned.text_for_map_search)
+                    logger.debug(status)
                 else:
                     ballot_returned.latitude = location.latitude
                     ballot_returned.longitude = location.longitude

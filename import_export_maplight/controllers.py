@@ -20,7 +20,6 @@ def import_maplight_from_json(request):
     if load_from_url:
         # Request json file from Maplight servers
         logger.debug("TO BE IMPLEMENTED: Load Maplight JSON from url")
-        # dry note: if we implement this, do it with process_request_from_master
         # request = requests. get(VOTER_INFO_URL, params={
         #     "key": GOOGLE_CIVIC_API_KEY,  # This comes from an environment variable
         #     "address": "254 Hartford Street San Francisco CA",

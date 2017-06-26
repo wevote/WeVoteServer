@@ -648,7 +648,7 @@ class DonationManager(models.Model):
             row.exp_year = exp_year
             row.funding = funding
             row.save()
-            logger.debug("update_subscription_in_db row=" + row_id + ", plan_id=" + row.subscription_plan_id +
+            logger.debug("update_subscription_in_db row=" + str(row_id) + ", plan_id=" + str(row.subscription_plan_id) +
                          ", amount=" + str(amount))
         except Exception as err:
             logger.error("update_subscription_in_db: " + str(err), {}, {})

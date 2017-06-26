@@ -621,7 +621,8 @@ def process_request_from_master(request, message_text, get_url, get_params):
     :param get_params:
     :return: structured_json and import_results
     """
-
+    if 'google_civic_election_id' in get_params:
+        message_text += " for google_civic_election_id " + str(get_params['google_civic_election_id'])
     messages.add_message(request, messages.INFO, message_text)
     logger.info(message_text)
 
@@ -638,5 +639,11 @@ def process_request_from_master(request, message_text, get_url, get_params):
             'success': True,
             'status': "",
         }
+
+    if 'google_civic_election_id' in get_params:
+        print("... the master server returned " + str(len(structured_json)) + " items.  Election " +
+              str(get_params['google_civic_election_id']))
+    else:
+        print("... the master server returned " + str(len(structured_json)) + " items.")
 
     return import_results, structured_json
