@@ -20,7 +20,6 @@ def import_maplight_from_json(request):
     if load_from_url:
         # Request json file from Maplight servers
         logger.debug("TO BE IMPLEMENTED: Load Maplight JSON from url")
-        # dry note: if we implement this, do it with process_request_from_master
         # request = requests. get(VOTER_INFO_URL, params={
         #     "key": GOOGLE_CIVIC_API_KEY,  # This comes from an environment variable
         #     "address": "254 Hartford Street San Francisco CA",
@@ -57,8 +56,7 @@ def import_maplight_from_json(request):
                             politicians_running_for_one_contest_array = json.load(json_data)
                     except Exception as e:
                         logger.error("File {file_path} not found.".format(
-                            file_path=json_file_with_the_data_from_this_contest
-                        ))
+                            file_path=json_file_with_the_data_from_this_contest), {}, {})
                         # Don't try to process the file if it doesn't exist, but go to the next entry
                         continue
 

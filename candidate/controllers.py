@@ -52,7 +52,7 @@ def candidates_import_from_master_server(request, google_civic_election_id='', s
         {
             "key": WE_VOTE_API_KEY,  # This comes from an environment variable
             "format": 'json',
-            "google_civic_election_id": google_civic_election_id,
+            "google_civic_election_id": str(google_civic_election_id),
             "state_code": state_code,
         }
     )
@@ -222,10 +222,10 @@ def filter_candidates_structured_json_for_local_duplicates(structured_json):
             duplicates_removed += 1
         else:
             filtered_structured_json.append(one_candidate)
+
         processed += 1
-        if processed % 1000 == 0:
-            print("Candidates processed = " + str(processed) + " of " + str(len(structured_json)))
-            logger.debug("Candidates processed = " + str(processed) + " of " + str(len(structured_json)))
+        if not processed % 10000:
+            print("... candidates checked for duplicates: " + str(processed) + " of " + str(len(structured_json)))
 
     candidates_results = {
         'success':              True,
@@ -335,6 +335,10 @@ def candidates_import_from_structured_json(structured_json):
                 candidates_saved += 1
             else:
                 candidates_updated += 1
+
+        processed = candidates_not_processed + candidates_saved + candidates_updated
+        if not processed % 10000:
+            print("... candidates processed for update/create: " + str(processed) + " of " + str(len(structured_json)))
 
     candidates_results = {
         'success':          True,

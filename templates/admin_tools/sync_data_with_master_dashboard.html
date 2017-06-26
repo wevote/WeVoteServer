@@ -130,7 +130,7 @@
                 Retrieve Polling Locations</a>
             {% if state_code %} for the state {{ state_code }}{% else %} for ALL states{% endif %}
         </td>
-        <td>The list of known polling locations.  &#34;All states&#34; can take more than 15 minutes to load.</td>
+        <td>The list of known polling locations.  &#34;All states&#34; can take more than 30 minutes to load.</td>
     </tr>
 
 
@@ -152,7 +152,7 @@
                 Retrieve Saved Ballots</a>
             {% if google_civic_election_id|convert_to_int > 0 %} for election {{ google_civic_election_id }}{% else %} for ALL elections{% endif %}
         </td>
-        <td>Polling locations for a specific election and date</td>
+        <td>Polling locations for a specific election and date. Can take an hour to load, for a national election.</td>
     </tr>
 
     <tr><td><h4>Voter Guides</h4></td></tr>

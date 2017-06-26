@@ -144,6 +144,7 @@ def ballot_returned_import_from_master_server_view(request):
     google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
     state_code = request.GET.get('state_code', '')
 
+    print("Importing ballot returned from master server")
     results = ballot_returned_import_from_master_server(request, google_civic_election_id)
 
     if not results['success']:
@@ -409,6 +410,7 @@ def ballot_item_list_edit_process_view(request):
                 location = google_client.geocode(ballot_returned.text_for_map_search)
                 if location is None:
                     status = 'Could not find location matching "{}"'.format(ballot_returned.text_for_map_search)
+                    logger.debug(status)
                 else:
                     ballot_returned.latitude = location.latitude
                     ballot_returned.longitude = location.longitude

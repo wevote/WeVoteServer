@@ -125,7 +125,7 @@ def voter_guides_import_from_master_server(request, google_civic_election_id):
         VOTER_GUIDES_SYNC_URL, {
             "key":                      WE_VOTE_API_KEY,  # This comes from an environment variable
             "format":                   'json',
-            "google_civic_election_id": google_civic_election_id,
+            "google_civic_election_id": str(google_civic_election_id),
         }
     )
 

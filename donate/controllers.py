@@ -185,6 +185,8 @@ def donation_with_stripe_for_api(request, token, email, donation_amount, monthly
             id_card = charge['source']['id']
             stripe_object = charge['source']['object']
             stripe_status = charge['status']
+            logger.debug("Stripe charge successful: " + charge_id + ", amount: " + str(amount) + ", voter_we_vote_id:" +
+                         voter_we_vote_id)
 
     except stripe.error.CardError as e:
         body = e.json_body
@@ -255,6 +257,8 @@ def donation_with_stripe_for_api(request, token, email, donation_amount, monthly
                                                            subscription_ended_at, not_loggedin_voter_we_vote_id)
         donation_entry_saved = donation_journal_entry['success']
         status = textwrap.shorten(donation_journal_entry['status'] + " " + status, width=255, placeholder="...")
+        logger.debug("Stripe subscription created successfully: " + subscription_id + ", amount: " + str(amount) +
+                     ", voter_we_vote_id:" + voter_we_vote_id)
 
     results = {
         'status': status,
@@ -383,7 +387,7 @@ def donation_process_charge(event):           # 'charge.succeeded'
             voter_we_vote_id = charge['metadata']['voter_we_vote_id']
             if voter_we_vote_id:
                 # Has our metadata?  Then we have already made a journal entry at the time of the donation
-                print("Stripe 'charge.succeeded' received for a PAYMENT_FROM_UI -- ignored, charge = " + charge)
+                logger.info("Stripe 'charge.succeeded' received for a PAYMENT_FROM_UI -- ignored, charge = " + charge)
                 return None
         except Exception:
             voter_we_vote_id = DonationManager.find_we_vote_voter_id_for_stripe_customer(str(charge['customer']))
@@ -404,6 +408,9 @@ def donation_process_charge(event):           # 'charge.succeeded'
                                                           source['exp_month'], source['exp_year'],
                                                           int(source['last4']), charge['source']['id'], event['id'],
                                                           charge['status'], "", 'no', None, None, None, None, None)
+            logger.debug("Stripe subscription payment from webhook: " + str(charge['customer']) + ", amount: " +
+                         str(charge['amount']) + ", last4:" + str(source['last4']))
+
 
     except stripe.error.StripeError as e:
         body = e.json_body

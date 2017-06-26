@@ -8,23 +8,22 @@ from .models import BallotItemListManager, BallotItemManager, BallotReturnedList
 from candidate.models import CandidateCampaignListManager
 from config.base import get_environment_variable
 from datetime import datetime
-from django.contrib import messages
 from election.models import ElectionManager
 from exception.models import handle_exception
 from import_export_google_civic.controllers import voter_ballot_items_retrieve_from_google_civic_for_api
-import json
 from measure.models import ContestMeasureList
 from office.models import ContestOfficeListManager
 from polling_location.models import PollingLocationManager
-import requests
 from voter.models import BALLOT_ADDRESS, VoterAddressManager, \
     VoterDeviceLinkManager
 import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, positive_value_exists, process_request_from_master
+from geopy.geocoders import get_geocoder_for_service
 
 logger = wevote_functions.admin.get_logger(__name__)
 
 GOOGLE_CIVIC_API_KEY = get_environment_variable("GOOGLE_CIVIC_API_KEY")
+GOOGLE_MAPS_API_KEY = get_environment_variable("GOOGLE_MAPS_API_KEY")
 WE_VOTE_API_KEY = get_environment_variable("WE_VOTE_API_KEY")
 BALLOT_ITEMS_SYNC_URL = get_environment_variable("BALLOT_ITEMS_SYNC_URL")
 BALLOT_RETURNED_SYNC_URL = get_environment_variable("BALLOT_RETURNED_SYNC_URL")
@@ -37,14 +36,13 @@ def ballot_items_import_from_master_server(request, google_civic_election_id, st
     """
     # Request json file from We Vote servers
 
-    structured_json = None
     params = { "key":  WE_VOTE_API_KEY, }  # This comes from an environment variable}
 
     if positive_value_exists(google_civic_election_id) and positive_value_exists(state_code):
-        params.update({"google_civic_election_id": google_civic_election_id,
+        params.update({"google_civic_election_id": str(google_civic_election_id),
                        "state_code": state_code, })
     elif positive_value_exists(google_civic_election_id):
-        params.update({"google_civic_election_id": google_civic_election_id, })
+        params.update({"google_civic_election_id": str(google_civic_election_id), })
     elif positive_value_exists(state_code):
         params.update({ "state_code": state_code, })
     else:
@@ -99,9 +97,12 @@ def ballot_returned_import_from_master_server(request, google_civic_election_id)
         {
             "key": WE_VOTE_API_KEY,  # This comes from an environment variable
             "format": 'json',
-            "google_civic_election_id": google_civic_election_id,
+            "google_civic_election_id": str(google_civic_election_id),
         }
     )
+
+    print("... the master server returned " + str(len(structured_json)) + " polling locations for election " +
+          str(google_civic_election_id))
 
     if import_results['success']:
         results = filter_ballot_returned_structured_json_for_local_duplicates(structured_json)
@@ -153,6 +154,10 @@ def filter_ballot_items_structured_json_for_local_duplicates(structured_json):
         else:
             filtered_structured_json.append(one_ballot_item)
 
+        count = duplicates_removed + len(filtered_structured_json)
+        if not count % 10000:
+            print("... ballot items checked for duplicates: " + str(count) + " of " + str(len(structured_json)))
+
     ballot_items_results = {
         'success':              True,
         'status':               "FILTER_BALLOT_ITEMS_FOR_DUPLICATES_PROCESS_COMPLETE",
@@ -190,6 +195,14 @@ def filter_ballot_returned_structured_json_for_local_duplicates(structured_json)
             duplicates_removed += 1
         else:
             filtered_structured_json.append(one_ballot_returned)
+        processed = duplicates_removed + len(filtered_structured_json)
+        if processed % 5000 == 0:
+            print("... pre-processed " + str(processed) + " ballot returned imports")
+
+        processed = duplicates_removed + len(filtered_structured_json)
+        if not processed % 10000:
+            print("... ballots returned, checked for duplicates: " + str(processed) + " of " +
+                  str(len(structured_json)))
 
     ballot_returned_results = {
         'success':              True,
@@ -262,6 +275,11 @@ def ballot_items_import_from_structured_json(structured_json):
                 ballot_items_updated += 1
         else:
             ballot_items_not_processed += 1
+
+        count = ballot_items_saved + ballot_items_updated
+        if not count % 10000:
+            print("... processed for update/create: " + str(count) + " of " + str(len(structured_json)))
+
     ballot_items_results = {
         'success': True,
         'status': "ballot_items_IMPORT_PROCESS_COMPLETE",
@@ -322,6 +340,11 @@ def ballot_returned_import_from_structured_json(structured_json):
                 if 'normalized_zip' in one_ballot_returned else False
             text_for_map_search = one_ballot_returned['text_for_map_search'] \
                 if 'text_for_map_search' in one_ballot_returned else False
+            if latitude == False or latitude == None or longitude == False or longitude == None:
+                if text_for_map_search == False:
+                    logger.warn("Bad data received in ballot_returned_import_from_structured_json:" + str(one_ballot_returned))
+                else:
+                    latitude, longitude = heal_geo_coordinates(text_for_map_search)
 
             results = ballot_returned_manager.update_or_create_ballot_returned(
                 polling_location_we_vote_id, voter_id, google_civic_election_id, election_date,
@@ -341,6 +364,14 @@ def ballot_returned_import_from_structured_json(structured_json):
                 ballot_returned_updated += 1
         else:
             ballot_returned_not_processed += 1
+        processed = ballot_returned_saved + ballot_returned_updated + ballot_returned_not_processed
+        if processed % 5000 == 0:
+            print("... processed " + str(processed) + " ballot returned imports")
+
+
+        processed = ballot_returned_saved + ballot_returned_updated + ballot_returned_not_processed
+        if not processed % 10000:
+            print("... ballots returned, processed for update/create: " + str(processed) + " of " + str(len(structured_json)))
 
     status = "BALLOT_RETURNED_IMPORT_PROCESS_COMPLETED"
 
@@ -353,6 +384,18 @@ def ballot_returned_import_from_structured_json(structured_json):
     }
     return ballot_returned_results
 
+def heal_geo_coordinates(text_for_map_search):
+    longitude = None
+    latitude = None
+    google_client = get_geocoder_for_service('google')(GOOGLE_MAPS_API_KEY)
+    location = google_client.geocode(text_for_map_search)
+    if location is None:
+        status = 'Could not find location matching "{}"'.format(text_for_map_search)
+        logger.debug(status)
+    else:
+       latitude = location.latitude
+       longitude = location.longitude
+    return latitude, longitude
 
 def figure_out_google_civic_election_id_voter_is_watching(voter_device_id):
     status = ''

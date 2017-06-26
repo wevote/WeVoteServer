@@ -40,7 +40,7 @@ def offices_import_from_master_server(request, google_civic_election_id='', stat
         OFFICES_SYNC_URL, {
             "key": WE_VOTE_API_KEY,
             "format": 'json',
-            "google_civic_election_id": google_civic_election_id,
+            "google_civic_election_id": str(google_civic_election_id),
             "state_code": state_code,
         }
     )

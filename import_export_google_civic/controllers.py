@@ -643,6 +643,8 @@ def store_one_ballot_from_google_civic_api(one_ballot_json, voter_id=0, polling_
         polling_location = results['polling_location']
         polling_location_latitude = polling_location.latitude
         polling_location_longitude = polling_location.longitude
+    else:
+        logger.info("No location found for " + str(results))
 
     if success and positive_value_exists(voter_address_dict) and not is_test_election:
         ballot_returned_manager = BallotReturnedManager()
@@ -659,6 +661,7 @@ def store_one_ballot_from_google_civic_api(one_ballot_json, voter_id=0, polling_
                     voter_address_dict,
                     election_date_text, election_description_text,
                     google_civic_election_id, state_code, voter_id, '')
+                # TODO: 6/25/17, If we store a ballot without latidude and longitude, it will not be found by a geo search.  Is this intentional?  Does the data have value?
                 ballot_returned_found = create_results['ballot_returned_found']
                 ballot_returned = create_results['ballot_returned']
         if positive_value_exists(polling_location_we_vote_id) and positive_value_exists(google_civic_election_id):
@@ -678,6 +681,7 @@ def store_one_ballot_from_google_civic_api(one_ballot_json, voter_id=0, polling_
                     polling_location_latitude, polling_location_longitude)
                 ballot_returned_found = create_results['ballot_returned_found']
                 ballot_returned = create_results['ballot_returned']
+
         # Currently we don't report the success or failure of storing ballot_returned
 
     results = {
@@ -840,6 +844,7 @@ def voter_ballot_items_retrieve_from_google_civic_for_api(
                 polling_location_retrieved = True
                 success = True
 
+            # Contests usually will be 'General', 'Primary', or 'Run-off' for contests with candidates.
             if one_ballot_results['contests_retrieved']:
                 contests_retrieved = True
 
