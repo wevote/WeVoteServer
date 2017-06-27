@@ -8,16 +8,18 @@
 
 Mac instructions (Based on [this](http://joebergantine.com/blog/2015/apr/30/installing-python-2-and-python-3-alongside-each-ot/))
 
-Install the latest Python 3.x from package: https://www.python.org/downloads/ 
+Install the latest Python 3.x from package: https://www.python.org/downloads/  
+(Install 3.6.1 or higher, since Python 3.6 has a known issue)
+
 This allows you to run python3 and pip3. 
-(Software gets installed into /Library/Frameworks/Python.framework/Versions/3.5/bin/.)
+(Software gets installed into /Library/Frameworks/Python.framework/Versions/3.6/bin/.)
 
     $ pip3 install --user virtualenv
     $ vim ~/.bash_profile
 
 Add the following to .bash_profile, save and quit:
 
-    alias virtualenv3='~/Library/Python/3.5/bin/virtualenv'
+    alias virtualenv3='~/Library/Python/3.6/bin/virtualenv'
 
 Update the current Terminal window to use the alias you just saved:
 
@@ -28,12 +30,12 @@ outside of "PythonProjects" folder:
 
     $ mkdir /Users/<YOUR NAME HERE>/PythonEnvironments/
     $ cd /Users/<YOUR NAME HERE>/PythonEnvironments/
-    $ virtualenv3 WeVoteServer3.5
+    $ virtualenv3 WeVoteServer3.6
 
 Now activate this new virtual environment for WeVoteServer:
 
     $ cd /Users/<YOUR NAME HERE>/PythonProjects/WeVoteServer/
-    $ source /Users/<YOUR NAME HERE>/PythonEnvironments/WeVoteServer3.5/bin/activate
+    $ source /Users/<YOUR NAME HERE>/PythonEnvironments/WeVoteServer3.6/bin/activate
     (WeVoteServer) $ export PATH="/Applications/Postgres.app/Contents/Versions/latest/bin:$PATH"
     
 If you need to upgrade your Python version later (Macintosh), this command does it:
