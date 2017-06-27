@@ -70,7 +70,7 @@ def measures_import_from_master_server_view(request):  # GET '/m/import/?google_
     state_code = request.GET.get('state_code', '')
 
     if not positive_value_exists(google_civic_election_id):
-        logger.error("measures_import_from_master_server_view did not receive a google_civic_election_id", {}, {})
+        logger.error("measures_import_from_master_server_view did not receive a google_civic_election_id")
 
     results = measures_import_from_master_server(request, google_civic_election_id, state_code)
 

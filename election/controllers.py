@@ -22,7 +22,7 @@ def election_remote_retrieve():
     error = structured_json.get('error', {})
     errors = error.get('errors', {})
     if not retrieve_results['success'] or len('errors'):  # Success refers to http success, not an error free response
-        logger.error("Loading Election from Google Civic failed: " + json.dumps(errors), {}, {})
+        logger.error("Loading Election from Google Civic failed: " + json.dumps(errors))
         results = {
             'success':  False,
             'status':   retrieve_results['status']
