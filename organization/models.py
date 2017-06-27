@@ -183,12 +183,12 @@ class OrganizationManager(models.Manager):
             error_result = True
             exception_multiple_object_returned = True
             status = "ERROR_MORE_THAN_ONE_ORGANIZATION_FOUND"
-            # logger.warn("Organization.MultipleObjectsReturned")
+            # logger.warning("Organization.MultipleObjectsReturned")
         except Organization.DoesNotExist:
             error_result = True
             exception_does_not_exist = True
             status += ", ORGANIZATION_NOT_FOUND"
-            # logger.warn("Organization.DoesNotExist")
+            # logger.warning("Organization.DoesNotExist")
 
         organization_on_stage_found = True if organization_on_stage_id > 0 else False
         results = {
@@ -640,7 +640,7 @@ class OrganizationManager(models.Manager):
                                     found_with_status = "FOUND_WITH_FACEBOOK_LINK_TO_VOTER"
                                 except Organization.MultipleObjectsReturned as e:
                                     exception_multiple_object_returned = True
-                                    logger.warn("Organization.MultipleObjectsReturned FACEBOOK_LINK_TO_VOTER")
+                                    logger.warning("Organization.MultipleObjectsReturned FACEBOOK_LINK_TO_VOTER")
                                 except Organization.DoesNotExist as e:
                                     # Not a problem -- an organization matching this facebook_id wasn't found
                                     exception_does_not_exist = True
@@ -655,7 +655,7 @@ class OrganizationManager(models.Manager):
                     except Organization.MultipleObjectsReturned as e:
                         handle_record_found_more_than_one_exception(e, logger)
                         exception_multiple_object_returned = True
-                        logger.warn("Organization.MultipleObjectsReturned facebook_id")
+                        logger.warning("Organization.MultipleObjectsReturned facebook_id")
                     except Organization.DoesNotExist as e:
                         # Not a problem -- an organization matching this facebook_id wasn't found
                         exception_does_not_exist = True
@@ -670,7 +670,7 @@ class OrganizationManager(models.Manager):
                     except Organization.MultipleObjectsReturned as e:
                         handle_record_found_more_than_one_exception(e, logger)
                         exception_multiple_object_returned = True
-                        logger.warn("Organization.MultipleObjectsReturned organization_website")
+                        logger.warning("Organization.MultipleObjectsReturned organization_website")
                     except Organization.DoesNotExist as e:
                         # Not a problem -- an organization matching this organization_website wasn't found
                         exception_does_not_exist = True
@@ -685,7 +685,7 @@ class OrganizationManager(models.Manager):
                     except Organization.MultipleObjectsReturned as e:
                         handle_record_found_more_than_one_exception(e, logger)
                         exception_multiple_object_returned = True
-                        logger.warn("Organization.MultipleObjectsReturned organization_twitter_handle")
+                        logger.warning("Organization.MultipleObjectsReturned organization_twitter_handle")
                     except Organization.DoesNotExist as e:
                         # Not a problem -- an organization matching this twitter handle wasn't found
                         exception_does_not_exist = True

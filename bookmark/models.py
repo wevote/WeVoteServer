@@ -165,7 +165,7 @@ class BookmarkItemManager(models.Model):
                 status = 'FAILED_TO_UPDATE ' + bookmark_status
                 handle_record_not_saved_exception(e, logger=logger, exception_message_optional=status)
         elif results['MultipleObjectsReturned']:
-            logger.warn("bookmark_item: delete all but one and take it over?")
+            logger.warning("bookmark_item: delete all but one and take it over?")
             status = 'TOGGLE_ITEM_BOOKMARKED MultipleObjectsReturned ' + bookmark_status
         elif results['DoesNotExist']:
             try:

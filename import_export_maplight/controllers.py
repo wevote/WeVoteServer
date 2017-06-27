@@ -128,7 +128,7 @@ def import_maplight_contest_office_candidates_from_array(politicians_running_for
             one_politician_array['candidate_id'])
 
         if maplight_candidate.id:
-            logger.warn(u"Candidate {display_name} previously saved".format(
+            logger.warning(u"Candidate {display_name} previously saved".format(
                 display_name=maplight_candidate.display_name
             ))
         else:

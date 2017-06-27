@@ -156,7 +156,7 @@ class FollowIssueManager(models.Model):
                 status = 'FAILED_TO_UPDATE ' + following_status
                 handle_record_not_saved_exception(e, logger=logger, exception_message_optional=status)
         elif results['MultipleObjectsReturned']:
-            logger.warn("follow_issue: delete all but one and take it over?")
+            logger.warning("follow_issue: delete all but one and take it over?")
             status = 'TOGGLE_FOLLOWING MultipleObjectsReturned ' + following_status
         elif results['DoesNotExist']:
             try:
@@ -575,7 +575,7 @@ class FollowOrganizationManager(models.Model):
                 status = 'FAILED_TO_UPDATE ' + following_status
                 handle_record_not_saved_exception(e, logger=logger, exception_message_optional=status)
         elif results['MultipleObjectsReturned']:
-            logger.warn("follow_organization: delete all but one and take it over?")
+            logger.warning("follow_organization: delete all but one and take it over?")
             status = 'TOGGLE_FOLLOWING MultipleObjectsReturned ' + following_status
         elif results['DoesNotExist']:
             try:

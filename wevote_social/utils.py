@@ -152,7 +152,7 @@ def social_user(backend, uid, details, user=None, *args, **kwargs):
 def switch_user(backend, switch_user=False, user=None, social=None, *args, **kwargs):
 
     if switch_user and social:
-        logger.warn('[authplus.social_pipeline.switch_user] switch to user %s' % user.email)
+        logger.warning('[authplus.social_pipeline.switch_user] switch to user %s' % user.email)
 
         # Do we have a voter who's twitter_id matches the incoming user_id?
         # Is social.user_id the Twitter id?

@@ -342,7 +342,7 @@ def ballot_returned_import_from_structured_json(structured_json):
                 if 'text_for_map_search' in one_ballot_returned else False
             if latitude == False or latitude == None or longitude == False or longitude == None:
                 if text_for_map_search == False:
-                    logger.warn("Bad data received in ballot_returned_import_from_structured_json:" + str(one_ballot_returned))
+                    logger.warning("Bad data received in ballot_returned_import_from_structured_json:" + str(one_ballot_returned))
                 else:
                     latitude, longitude = heal_geo_coordinates(text_for_map_search)
 
