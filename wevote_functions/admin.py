@@ -51,10 +51,10 @@ def get_logger(name):
             if isinstance(level, int):
                 logger.level = level
             elif not _only_log_once:
-                logger.error("LOG_FILE_LEVEL is invalid", {}, {})  # setup_logging hasn't run yet so just to the console
+                logger.error("LOG_FILE_LEVEL is invalid")  # setup_logging hasn't run yet so just to the console
                 _only_log_once = True
         elif not _only_log_once:
-            logger.error("LOG_FILE_LEVEL is not set", {}, {})  # setup_logging() hasn't run yet, so just to the console
+            logger.error("LOG_FILE_LEVEL is not set")  # setup_logging() hasn't run yet, so just to the console
             _only_log_once = True
 
     return logger

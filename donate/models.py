@@ -397,7 +397,7 @@ class DonationManager(models.Model):
                 body = e.json_body
                 err = body['error']
                 status = "STRIPE_ERROR_IS_" + err['message'] + "_END"
-                logger.error("create_recurring_donation StripeError: " + status, {}, {})
+                logger.error("create_recurring_donation StripeError: " + status)
 
                 results = {
                     'success': False,
@@ -551,8 +551,8 @@ class DonationManager(models.Model):
             subscription_row.save()
 
         except DonationJournal.DoesNotExist:
-            logger.error("mark_subscription_canceled_or_ended: Subscription " + subscription_id + " with customer_id " + customer_id + " does not exist",
-                         {}, {})
+            logger.error("mark_subscription_canceled_or_ended: Subscription " + subscription_id + " with customer_id " +
+                         customer_id + " does not exist")
             return False
 
         except Exception as e:
@@ -596,7 +596,7 @@ class DonationManager(models.Model):
 
         except Exception as e:
             status += " EXCEPTION-IN-move_donations_between_donors "
-            logger.error("move_donations_between_donors 2:" + status, {}, {})
+            logger.error("move_donations_between_donors 2:" + status)
             results = {
                 'status': status,
                 'success': False,
@@ -627,9 +627,9 @@ class DonationManager(models.Model):
                     row_id = row.id
         except DonationJournal.DoesNotExist:
             logger.error("check_for_subscription_in_db_without_card_info row does not exist for stripe customer" +
-                         customer, {}, {})
+                         customer)
         except Exception as e:
-            logger.error("check_for_subscription_in_db_without_card_info Exception " + str(e), {}, {})
+            logger.error("check_for_subscription_in_db_without_card_info Exception " + str(e))
 
         return row_id
 
@@ -651,7 +651,7 @@ class DonationManager(models.Model):
             logger.debug("update_subscription_in_db row=" + str(row_id) + ", plan_id=" + str(row.subscription_plan_id) +
                          ", amount=" + str(amount))
         except Exception as err:
-            logger.error("update_subscription_in_db: " + str(err), {}, {})
+            logger.error("update_subscription_in_db: " + str(err))
 
         return
 
@@ -670,9 +670,9 @@ class DonationManager(models.Model):
             return ""
 
         except DonationJournal.DoesNotExist:
-            logger.error("find_we_vote_voter_id_for_stripe_customer row does not exist", {}, {})
+            logger.error("find_we_vote_voter_id_for_stripe_customer row does not exist")
         except Exception as e:
-            logger.error("find_we_vote_voter_id_for_stripe_customer: " + str(e), {}, {})
+            logger.error("find_we_vote_voter_id_for_stripe_customer: " + str(e))
 
         return ""
 
@@ -691,7 +691,7 @@ class DonationManager(models.Model):
             return "True"
 
         logger.error("update_journal_entry_for_refund bad charge or refund for charge_id " + charge +
-                     " and voter_we_vote_id " + voter_we_vote_id, {}, {})
+                     " and voter_we_vote_id " + voter_we_vote_id)
         return "False"
 
     @staticmethod
@@ -720,5 +720,5 @@ class DonationManager(models.Model):
             return "True"
 
         except DonationJournal.DoesNotExist:
-            logger.error("update_journal_entry_for_refund_completed row does not exist for charge " + charge, {}, {})
+            logger.error("update_journal_entry_for_refund_completed row does not exist for charge " + charge)
         return "False"

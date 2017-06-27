@@ -74,21 +74,21 @@ def transfer_maplight_data_to_we_vote_tables(request):
             one_candidate_from_maplight_table.candidate_id)
 
         if not results['success']:
-            logger.warn(u"Candidate NOT found by MapLight id: {name}".format(
+            logger.warning(u"Candidate NOT found by MapLight id: {name}".format(
                 name=one_candidate_from_maplight_table.candidate_id
             ))
             results = candidate_campaign_manager.retrieve_candidate_campaign_from_candidate_name(
                 one_candidate_from_maplight_table.display_name)
 
             if not results['success']:
-                logger.warn(u"Candidate NOT found by display_name: {name}".format(
+                logger.warning(u"Candidate NOT found by display_name: {name}".format(
                     name=one_candidate_from_maplight_table.display_name
                 ))
                 results = candidate_campaign_manager.retrieve_candidate_campaign_from_candidate_name(
                     one_candidate_from_maplight_table.original_name)
 
                 if not results['success']:
-                    logger.warn(u"Candidate NOT found by original_name: {name}".format(
+                    logger.warning(u"Candidate NOT found by original_name: {name}".format(
                         name=one_candidate_from_maplight_table.original_name
                     ))
 
@@ -103,7 +103,7 @@ def transfer_maplight_data_to_we_vote_tables(request):
                         results = candidate_campaign_manager.retrieve_candidate_campaign_from_candidate_name(
                             one_mapping_google_civic_name)
                     if not results['success'] or not positive_value_exists(one_mapping_google_civic_name):
-                        logger.warn(u"Candidate NOT found by mapping to google_civic name: {name}".format(
+                        logger.warning(u"Candidate NOT found by mapping to google_civic name: {name}".format(
                             name=one_mapping_google_civic_name
                         ))
 

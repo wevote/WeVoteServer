@@ -56,7 +56,7 @@ def import_maplight_from_json(request):
                             politicians_running_for_one_contest_array = json.load(json_data)
                     except Exception as e:
                         logger.error("File {file_path} not found.".format(
-                            file_path=json_file_with_the_data_from_this_contest), {}, {})
+                            file_path=json_file_with_the_data_from_this_contest))
                         # Don't try to process the file if it doesn't exist, but go to the next entry
                         continue
 
@@ -128,7 +128,7 @@ def import_maplight_contest_office_candidates_from_array(politicians_running_for
             one_politician_array['candidate_id'])
 
         if maplight_candidate.id:
-            logger.warn(u"Candidate {display_name} previously saved".format(
+            logger.warning(u"Candidate {display_name} previously saved".format(
                 display_name=maplight_candidate.display_name
             ))
         else:

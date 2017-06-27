@@ -595,7 +595,7 @@ class OrganizationLinkToIssueManager(models.Model):
                 status = 'FAILED_TO_UPDATE ' + str(link_active)
                 handle_record_not_saved_exception(e, logger=logger, exception_message_optional=status)
         elif results['MultipleObjectsReturned']:
-            logger.warn("link_issue: delete all but one and take it over?")
+            logger.warning("link_issue: delete all but one and take it over?")
             status = 'TOGGLE_LINKING MultipleObjectsReturned ' + str(link_active)
         elif results['DoesNotExist']:
             try:
