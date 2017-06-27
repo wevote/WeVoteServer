@@ -147,12 +147,18 @@ def donation_stripe_webhook_view(request):
         return HttpResponse(status=400)
 
     except stripe.error.SignatureVerificationError as err:
-        logger.error("donation_stripe_webhook_view, Stripe returned SignatureVerificationError: " + err._message,
+        logger.error("donation_stripe_webhook_view, Stripe returned SignatureVerificationError: " + str(err),
                      {}, {})
+        # Temporary test logging for master server 6/27/17
+        logger.debug("Temporary test logging for master server 6/27/17 - debug")
+        logger.info("Temporary test logging for master server 6/27/17 - info")
+        logger.warn("Temporary test logging for master server 6/27/17 - warn")
+        # End Temporary test logging for master server 6/27/17
+
         return HttpResponse(status=400)
 
     except Exception as err:
-        logger.error("donation_stripe_webhook_view: " + err, {}, {})
+        logger.error("donation_stripe_webhook_view: " + str(err), {}, {})
         return HttpResponse(status=400)
 
     donation_process_stripe_webhook_event(event)
