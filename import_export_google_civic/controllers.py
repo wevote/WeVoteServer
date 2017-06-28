@@ -459,44 +459,24 @@ def retrieve_one_ballot_from_google_civic_api(text_for_map_search, incoming_goog
     # logger.info("Loading ballot for one address from voterInfoQuery from Google servers")
     print("retrieving one ballot for " + str(incoming_google_civic_election_id))
     if positive_value_exists(use_test_election):
-        logger.debug("retrieve_one_ballot_from_google_civic_api parms: " + json.dumps({
-            "key": GOOGLE_CIVIC_API_KEY,
-            "address": text_for_map_search,
-            "electionId": 2000,  # The Google Civic API Test election
-        }))
         response = requests.get(VOTER_INFO_URL, params={
             "key": GOOGLE_CIVIC_API_KEY,
             "address": text_for_map_search,
             "electionId": 2000,  # The Google Civic API Test election
         })
     elif positive_value_exists(incoming_google_civic_election_id):
-        logger.debug("retrieve_one_ballot_from_google_civic_api parms: " + json.dumps({
-            "key": GOOGLE_CIVIC_API_KEY,
-            "address": text_for_map_search,
-            "electionId": incoming_google_civic_election_id,
-        }))
         response = requests.get(VOTER_INFO_URL, params={
             "key": GOOGLE_CIVIC_API_KEY,
             "address": text_for_map_search,
             "electionId": incoming_google_civic_election_id,
         })
     else:
-        logger.debug("retrieve_one_ballot_from_google_civic_api parms: " + json.dumps({
-            "key": GOOGLE_CIVIC_API_KEY,
-            "address": text_for_map_search,
-        }))
         response = requests.get(VOTER_INFO_URL, params={
             "key": GOOGLE_CIVIC_API_KEY,
             "address": text_for_map_search,
         })
 
     structured_json = json.loads(response.text)
-
-    # Temporary debugging for the app servers 6/27/17
-    logger.debug("retrieve_one_ballot_from_google_civic_api structured_json: " + json.dumps(structured_json))
-    logger.debug("retrieve_one_ballot_from_google_civic_api parms: " + json.dumps(structured_json))
-    # End of Temporary debugging for the app servers 6/27/17
-
     if 'success' in structured_json and structured_json['success'] == False:
         import_results = {
             'success': False,
@@ -524,12 +504,7 @@ def retrieve_one_ballot_from_google_civic_api(text_for_map_search, incoming_goog
     error = structured_json.get('error', {})
     errors = error.get('errors', {})
     if len(errors):
-        logger.info("retrieve_one_ballot_from_google_civic_api failed 1: " + json.dumps(error))
-
-        if 'message' in errors:
-            logger.info("retrieve_one_ballot_from_google_civic_api failed 2: " + errors['message'])
-        else:
-            logger.info("retrieve_one_ballot_from_google_civic_api failed.")
+        logger.debug("retrieve_one_ballot_from_google_civic_api failed: " + str(errors))
 
     if 'election' in structured_json:
         if 'id' in structured_json['election']:
