@@ -1065,6 +1065,7 @@ def create_batch_row_action_candidate(batch_description, batch_header_map, one_b
     }
     return results
 
+
 def import_elected_office_entry(batch_header_id, batch_row_id, create_entry_flag=False, update_entry_flag=False):
     """
     Import batch_rows for elected office, CREATE or ADD_TO_EXISTING
