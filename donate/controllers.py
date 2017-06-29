@@ -518,11 +518,14 @@ def donation_process_subscription_payment(event):
         exp_month = source['exp_month']
         exp_year = source['exp_year']
         funding = source['funding']
+        last4 = source['last4']
 
         DonationManager.update_subscription_in_db(row_id, amount, currency, id_card, address_zip, brand, country,
-                                                  exp_month, exp_year, funding)
+                                                  exp_month, exp_year, last4, funding)
     except Exception as err:
         logger.error("donation_process_subscription_payment: " + str(err))
+
+    #DonationManager.update_last_charged_field(plan_id)
 
     return None
 

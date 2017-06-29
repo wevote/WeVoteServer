@@ -9,6 +9,8 @@ import wevote_functions.admin
 from wevote_functions.functions import positive_value_exists
 import stripe
 import textwrap
+import time
+
 
 logger = wevote_functions.admin.get_logger(__name__)
 
@@ -122,7 +124,7 @@ class DonationJournal(models.Model):
                                      null=True, blank=True)
     status = models.CharField(verbose_name="our generated status message", max_length=255, default="", null=True,
                               blank=True)
-    subscription_plan_id = models.CharField(verbose_name="stripe subscription plan id", max_length=32, default="",
+    subscription_plan_id = models.CharField(verbose_name="stripe subscription plan id", max_length=64, default="",
                                             unique=False, null=True, blank=True)
     subscription_created_at = models.DateTimeField(verbose_name="stripe subscription creation timestamp",
                                                    auto_now=False, auto_now_add=False, null=True)
@@ -132,6 +134,8 @@ class DonationJournal(models.Model):
                                                  auto_now_add=False, null=True)
     ip_address = models.GenericIPAddressField(verbose_name="user ip address", protocol='both', unpack_ipv4=False,
                                               null=True, blank=True, unique=False)
+    last_charged = models.DateTimeField(verbose_name="stripe subscription most recent charge timestamp", auto_now=False,
+                                   auto_now_add=False, null=True)
 
 
 class DonationManager(models.Model):
@@ -201,7 +205,7 @@ class DonationManager(models.Model):
     @staticmethod
     def retrieve_or_create_recurring_donation_plan(voter_we_vote_id, donation_amount):
         """
-
+        June 2017, we create these records, but never read them
         :param donation_amount:
         :return:
         """
@@ -364,6 +368,10 @@ class DonationManager(models.Model):
         # subscription_entry = object
         subscription = object
         success = False
+
+        # timestamp = str(time.time()).split('.')[0]
+        # donation_plan_id = voter_we_vote_id + "-" + str(donation_amount) + '-monthly-' + timestamp
+
         donation_plan_id = voter_we_vote_id +"-monthly-" + str(donation_amount)
 
         donation_plan_id_query = self.retrieve_or_create_recurring_donation_plan(voter_we_vote_id, donation_amount)
@@ -635,7 +643,7 @@ class DonationManager(models.Model):
 
     @staticmethod
     def update_subscription_in_db(row_id, amount, currency, id_card, address_zip, brand, country, exp_month, exp_year,
-                                  funding):
+                                  last4, funding):
         try:
             row = DonationJournal.objects.get(id=row_id)
             row.amount = amount
@@ -646,6 +654,7 @@ class DonationManager(models.Model):
             row.country = country
             row.exp_month = exp_month
             row.exp_year = exp_year
+            row.last4 = last4
             row.funding = funding
             row.save()
             logger.debug("update_subscription_in_db row=" + str(row_id) + ", plan_id=" + str(row.subscription_plan_id) +
