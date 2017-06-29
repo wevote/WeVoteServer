@@ -2,8 +2,8 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
-from .controllers import issues_import_from_master_server, issues_retrieve_for_api, \
-    organization_link_to_issue_import_from_master_server
+from .controllers import issues_import_from_master_server, issues_retrieve_for_api,\
+    retrieve_issues_to_follow_for_api, organization_link_to_issue_import_from_master_server
 from .models import Issue, MOST_LINKED_ORGANIZATIONS, OrganizationLinkToIssue
 from admin_tools.views import redirect_to_sign_in_page
 from django.db.models import Q
@@ -17,7 +17,7 @@ from exception.models import handle_record_found_more_than_one_exception
 from position.models import PositionListManager
 from voter.models import voter_has_authority
 import wevote_functions.admin
-from wevote_functions.functions import convert_to_int, positive_value_exists
+from wevote_functions.functions import convert_to_int, positive_value_exists, get_voter_device_id
 from django.http import HttpResponse
 import json
 
@@ -70,9 +70,19 @@ def issues_sync_out_view(request):  # issuesSyncOut
 
 
 def issues_retrieve_view(request):  # issuesRetrieve
+    voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
     sort_formula = request.GET.get('sort_formula', MOST_LINKED_ORGANIZATIONS)
-    results = issues_retrieve_for_api(sort_formula)
-    return results
+    voter_issues_only = request.GET.get('voter_issues_only', False)
+    include_voter_follow_status = request.GET.get('include_voter_follow_status', False)
+    http_response = issues_retrieve_for_api(voter_device_id, sort_formula, voter_issues_only, include_voter_follow_status)
+    return http_response
+
+
+def retrieve_issues_to_follow_view(request):  # retrieveIssuesToFollow
+    voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
+    sort_formula = request.GET.get('sort_formula', MOST_LINKED_ORGANIZATIONS)
+    http_response = retrieve_issues_to_follow_for_api(voter_device_id, sort_formula)
+    return http_response
 
 
 @login_required

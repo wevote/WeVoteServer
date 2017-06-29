@@ -421,7 +421,7 @@ def voter_guides_to_follow_retrieve_for_api(voter_device_id,  # voterGuidesToFol
         else:
             follow_issue_list_manager = FollowIssueList()
             issue_list_for_voter = follow_issue_list_manager. \
-                retrieve_follow_issue_by_voter_we_vote_id(voter_we_vote_id)
+                retrieve_follow_issue_list_by_voter_we_vote_id(voter_we_vote_id)
             issue_list_for_voter = list(issue_list_for_voter)
             issue_we_vote_id_list_for_voter = []
             for issue in issue_list_for_voter:
@@ -432,8 +432,9 @@ def voter_guides_to_follow_retrieve_for_api(voter_device_id,  # voterGuidesToFol
                 retrieve_organization_we_vote_id_list_from_issue_we_vote_id_list(issue_we_vote_id_list_for_voter)
             organization_we_vote_id_list_result = organization_we_vote_id_list_result[
                 'organization_we_vote_id_list']
-            for we_vote_id in organization_we_vote_id_list_result:
-                organization_we_vote_id_list_for_voter_issues.append(we_vote_id['organization_we_vote_id'])
+            for organization_we_vote_id_object in organization_we_vote_id_list_result:
+                organization_we_vote_id = organization_we_vote_id_object['organization_we_vote_id']
+                organization_we_vote_id_list_for_voter_issues.append(organization_we_vote_id)
 
     voter_guide_list = []
     voter_guides = []
@@ -622,8 +623,10 @@ def voter_guides_to_follow_retrieve_for_api(voter_device_id,  # voterGuidesToFol
 
 
 def retrieve_voter_guides_to_follow_by_ballot_item(voter_id, kind_of_ballot_item, ballot_item_we_vote_id,
-                                                   search_string, filter_voter_guides_by_issue=False,
+                                                   search_string, filter_voter_guides_by_issue=None,
                                                    organization_we_vote_id_list_for_voter_issues=None):
+    if filter_voter_guides_by_issue is None:
+        filter_voter_guides_by_issue = False
     voter_guide_list_found = False
     retrieve_public_positions = True  # The alternate is positions for friends-only. Since this method returns positions
     # to follow, we never need to return friend's positions here
@@ -712,7 +715,7 @@ def retrieve_voter_guides_to_follow_by_ballot_item(voter_id, kind_of_ballot_item
     results = {
         'success':                      success,
         'status':                       status,
-        'search_string':              search_string,
+        'search_string':                search_string,
         'voter_guide_list_found':       voter_guide_list_found,
         'voter_guide_list':             voter_guide_list,
     }

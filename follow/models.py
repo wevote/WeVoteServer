@@ -349,18 +349,35 @@ class FollowIssueList(models.Model):
     A way to retrieve all of the follow_issue information
     """
 
-    def fetch_follow_issue_by_voter_id_count(self, voter_id):
-        follow_issue_list = self.retrieve_follow_issue_by_voter_id(voter_id)
-        return len(follow_issue_list)
-
-    def retrieve_follow_issue_by_voter_we_vote_id(self, voter_we_vote_id):
-        # Retrieve a list of follow_issue entries for this voter
+    def fetch_follow_issue_count_by_voter_we_vote_id(self, voter_we_vote_id, following_status=None):
         follow_issue_list_found = False
-        following_status = FOLLOWING
+        if following_status is None:
+            following_status = FOLLOWING
+        follow_issue_list_length = 0
+        try:
+            follow_issue_list_query = FollowIssue.objects.all()
+            follow_issue_list_query = follow_issue_list_query.filter(voter_we_vote_id__iexact=voter_we_vote_id)
+            follow_issue_list_query = follow_issue_list_query.filter(following_status=following_status)
+            follow_issue_list_length = follow_issue_list_query.count()
+
+        except Exception as e:
+            handle_record_not_found_exception(e, logger=logger)
+
+        return follow_issue_list_length
+
+    def retrieve_follow_issue_list_by_voter_we_vote_id(self, voter_we_vote_id, following_status=None):
+        """
+        Retrieve a list of follow_issue entries for this voter
+        :param voter_we_vote_id: 
+        :return: a list of follow_issue objects for the voter_we_vote_id
+        """
+        follow_issue_list_found = False
+        if following_status is None:
+            following_status = FOLLOWING
         follow_issue_list = {}
         try:
             follow_issue_list_query = FollowIssue.objects.all()
-            follow_issue_list_query = follow_issue_list_query.filter(voter_we_vote_id=voter_we_vote_id)
+            follow_issue_list_query = follow_issue_list_query.filter(voter_we_vote_id__iexact=voter_we_vote_id)
             follow_issue_list = follow_issue_list_query.filter(following_status=following_status)
             if len(follow_issue_list):
                 follow_issue_list_found = True
@@ -373,82 +390,63 @@ class FollowIssueList(models.Model):
             follow_issue_list = {}
             return follow_issue_list
 
-    def retrieve_ignore_issue_by_voter_id(self, voter_id):
-        # Retrieve a list of follow_issue entries for this voter
-        follow_issue_list_found = False
-        following_status = FOLLOW_IGNORE
-        follow_issue_list = {}
+    def retrieve_follow_issue_we_vote_id_list_by_voter_we_vote_id(self, voter_we_vote_id, following_status=None):
+        follow_issue_we_vote_id_list = []
+        if following_status is None:
+            following_status = FOLLOWING
+
         try:
-            follow_issue_list = FollowIssue.objects.all()
-            follow_issue_list = follow_issue_list.filter(voter_id=voter_id)
-            follow_issue_list = follow_issue_list.filter(following_status=following_status)
-            if len(follow_issue_list):
-                follow_issue_list_found = True
+            follow_issue_list_query = FollowIssue.objects.all()
+            follow_issue_list_query = follow_issue_list_query.filter(voter_we_vote_id__iexact=voter_we_vote_id)
+            follow_issue_list_query = follow_issue_list_query.filter(following_status=following_status)
+            follow_issue_list_query = follow_issue_list_query.values("issue_we_vote_id").distinct()
+            follow_issue_we_vote_id_list_result = list(follow_issue_list_query)
+
         except Exception as e:
             handle_record_not_found_exception(e, logger=logger)
 
-        if follow_issue_list_found:
-            return follow_issue_list
-        else:
-            follow_issue_list = {}
-            return follow_issue_list
+        for query in follow_issue_we_vote_id_list_result:
+            follow_issue_we_vote_id_list.append(query["issue_we_vote_id"])
 
-    def retrieve_follow_issue_by_voter_id_simple_id_array(self, voter_id, return_we_vote_id=False):
-        follow_issue_list_manager = FollowIssueList()
-        follow_issue_list = \
-            follow_issue_list_manager.retrieve_follow_issue_by_voter_id(
-                voter_id, auto_followed_from_twitter_suggestion)
-        follow_issue_list_simple_array = []
-        if len(follow_issue_list):
-            for follow_issue in follow_issue_list:
-                if return_we_vote_id:
-                    follow_issue_list_simple_array.append(follow_issue.issue_we_vote_id)
-                else:
-                    follow_issue_list_simple_array.append(follow_issue.issue_id)
-        return follow_issue_list_simple_array
+        return follow_issue_we_vote_id_list
 
-    def retrieve_ignore_issue_by_voter_id_simple_id_array(self, voter_id, return_we_vote_id=False):
-        follow_issue_list_manager = FollowIssueList()
-        ignore_issue_list = \
-            follow_issue_list_manager.retrieve_ignore_issue_by_voter_id(voter_id)
-        ignore_issue_list_simple_array = []
-        if len(ignore_issue_list):
-            for ignore_issue in ignore_issue_list:
-                if return_we_vote_id:
-                    ignore_issue_list_simple_array.append(ignore_issue.issue_we_vote_id)
-                else:
-                    ignore_issue_list_simple_array.append(ignore_issue.issue_id)
-        return ignore_issue_list_simple_array
+    def fetch_ignore_issue_count_by_voter_we_vote_id(self, voter_we_vote_id):
+        ignore_issue_list_found = False
+        following_status = FOLLOW_IGNORE
+        return self.fetch_follow_issue_count_by_voter_we_vote_id(voter_we_vote_id, following_status)
 
-    def retrieve_follow_issue_by_issue_id(self, issue_id):
-        # Retrieve a list of follow_issue entries for this issue
-        follow_issue_list_found = False
+    def retrieve_ignore_issue_list_by_voter_we_vote_id(self, voter_we_vote_id):
+        ignore_issue_list_found = False
+        following_status = FOLLOW_IGNORE
+        return self.retrieve_follow_issue_list_by_voter_we_vote_id(voter_we_vote_id, FOLLOW_IGNORE)
+
+    def retrieve_ignore_issue_we_vote_id_list_by_voter_we_vote_id(self, voter_we_vote_id):
+        ignore_issue_we_vote_id_list = []
+        following_status = FOLLOW_IGNORE
+        return self.retrieve_follow_issue_we_vote_id_list_by_voter_we_vote_id(voter_we_vote_id, following_status)
+
+    # The following methods are not in use yet
+    def retrieve_follow_issue_list_by_issue_id(self, issue_id):
+        issue_we_vote_id = None
         following_status = FOLLOWING
+        retrieve_follow_issue_list(issue_id, issue_we_vote_id, following_status)
+
+    def retrieve_follow_issue_list_by_issue_we_vote_id(self, issue_we_vote_id):
+        issue_id = None
+        following_status = FOLLOWING
+        retrieve_follow_issue_list(issue_id, issue_we_vote_id, following_status)
+
+    def retrieve_follow_issue_list(self, issue_id, issue_we_vote_id, following_status):
+        follow_issue_list_found = False
         follow_issue_list = {}
         try:
             follow_issue_list = FollowIssue.objects.all()
-            follow_issue_list = follow_issue_list.filter(issue_id=issue_id)
-            follow_issue_list = follow_issue_list.filter(following_status=following_status)
-            if len(follow_issue_list):
-                follow_issue_list_found = True
-        except Exception as e:
-            pass
-
-        if follow_issue_list_found:
-            return follow_issue_list
-        else:
-            follow_issue_list = {}
-            return follow_issue_list
-
-    def retrieve_follow_issue_by_issue_we_vote_id(self, issue_we_vote_id):
-        # Retrieve a list of follow_issue entries for this issue
-        follow_issue_list_found = False
-        following_status = FOLLOWING
-        follow_issue_list = {}
-        try:
-            follow_issue_list = FollowIssue.objects.all()
-            follow_issue_list = follow_issue_list.filter(issue_we_vote_id=issue_we_vote_id)
-            follow_issue_list = follow_issue_list.filter(following_status=following_status)
+            if positive_value_exists(issue_id):
+                follow_issue_list = follow_issue_list.filter(issue_id=issue_id)
+            else:
+                follow_issue_list = follow_issue_list.filter(issue_we_vote_id__iexact=issue_we_vote_id)
+            if positive_value_exists(following_status):
+                follow_issue_list = follow_issue_list.filter(following_status=following_status)
             if len(follow_issue_list):
                 follow_issue_list_found = True
         except Exception as e:
