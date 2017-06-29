@@ -15,7 +15,7 @@ from apis_v1.views import views_docs, views_ballot, views_candidate, views_donat
 from ballot.views_admin import ballot_items_sync_out_view, ballot_returned_sync_out_view
 from candidate.views_admin import candidates_sync_out_view
 from election.views_admin import elections_sync_out_view
-from issue.views_admin import issues_sync_out_view, issue_list_view, issues_retrieve_view, \
+from issue.views_admin import issues_sync_out_view, issues_retrieve_view, retrieve_issues_to_follow_view, \
     organization_link_to_issue_sync_out_view
 from measure.views_admin import measures_sync_out_view
 from office.views_admin import offices_sync_out_view
@@ -105,6 +105,7 @@ urlpatterns = [
     url(r'^positionSupportCountForBallotItem/',
         views_position.position_support_count_for_ballot_item_view, name='positionSupportCountForBallotItemView'),
     url(r'^quickInfoRetrieve/', views_misc.quick_info_retrieve_view, name='quickInfoRetrieveView'),
+    url(r'^retrieveIssuesToFollow/', retrieve_issues_to_follow_view, name='retrieveIssuesToFollowView'),
     url(r'^searchAll/', views_misc.search_all_view, name='searchAllView'),
     url(r'^twitterIdentityRetrieve/', views_twitter.twitter_identity_retrieve_view, name='twitterIdentityRetrieveView'),
     url(r'^twitterSignInRequestAccessToken/',
@@ -267,6 +268,8 @@ urlpatterns = [
     url(r'^docs/positionSupportCountForBallotItem/',
         views_docs.position_support_count_for_ballot_item_doc_view, name='positionSupportCountForBallotItemDocs'),
     url(r'^docs/quickInfoRetrieve/$', views_docs.quick_info_retrieve_doc_view, name='quickInfoRetrieveDocs'),
+    url(r'^docs/retrieveIssuesToFollow/', views_docs.retrieve_issues_to_follow_doc_view,
+        name='retrieveIssuesToFollowDocs'),
     url(r'^docs/searchAll/$',
         views_docs.search_all_doc_view, name='searchAllDocs'),
     url(r'^docs/twitterIdentityRetrieve/$',

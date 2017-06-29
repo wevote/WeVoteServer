@@ -9,6 +9,8 @@ from django.http import HttpResponse
 from exception.models import handle_exception
 import json
 import requests
+from follow.models import FollowIssueList
+from voter.models import fetch_voter_we_vote_id_from_voter_device_link
 import wevote_functions.admin
 from wevote_functions.functions import positive_value_exists, process_request_from_master
 
@@ -188,7 +190,8 @@ def issue_retrieve_for_api(issue_id, issue_we_vote_id):  # issueRetrieve
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 
 
-def issues_retrieve_for_api(sort_formula):  # issuesRetrieve
+def issues_retrieve_for_api(voter_device_id, sort_formula, voter_issues_only=None,
+                            include_voter_follow_status=None):  # issuesRetrieve
     """
     Used by the api
     :return:
@@ -197,9 +200,41 @@ def issues_retrieve_for_api(sort_formula):  # issuesRetrieve
 
     issue_list = []
     issues_to_display = []
+    follow_issue_we_vote_id_list_for_voter = []
+    ignore_issue_we_vote_id_list_for_voter = []
+
+    if voter_issues_only is None:
+        voter_issues_only = False
+    if include_voter_follow_status is None:
+        include_voter_follow_status = False
+
+    if positive_value_exists(voter_issues_only) or positive_value_exists(include_voter_follow_status):
+        voter_we_vote_id = fetch_voter_we_vote_id_from_voter_device_link(voter_device_id)
+        if not positive_value_exists(voter_we_vote_id):
+            status = 'FAILED issues_retrieve VOTER_WE_VOTE_ID_COULD_NOT_BE_FETCHED'
+            json_data = {
+                'status': status,
+                'success': False,
+                'voter_issues_only': voter_issues_only,
+                'include_voter_follow_status': include_voter_follow_status,
+                'issue_list': [],
+            }
+            return HttpResponse(json.dumps(json_data), content_type='application/json')
+
+        follow_issue_list_manager = FollowIssueList()
+        follow_issue_we_vote_id_list_for_voter = follow_issue_list_manager.\
+            retrieve_follow_issue_we_vote_id_list_by_voter_we_vote_id(voter_we_vote_id)
+
+        if positive_value_exists(include_voter_follow_status):
+            ignore_issue_we_vote_id_list_for_voter = follow_issue_list_manager. \
+                retrieve_ignore_issue_we_vote_id_list_by_voter_we_vote_id(voter_we_vote_id)
+
     try:
         issue_list_object = IssueListManager()
-        results = issue_list_object.retrieve_issues(sort_formula)
+        if positive_value_exists(voter_issues_only):
+            results = issue_list_object.retrieve_issues(sort_formula, follow_issue_we_vote_id_list_for_voter)
+        else:
+            results = issue_list_object.retrieve_issues(sort_formula)
         success = results['success']
         status = results['status']
         issue_list = results['issue_list']
@@ -211,14 +246,95 @@ def issues_retrieve_for_api(sort_formula):  # issuesRetrieve
 
     if success:
         for issue in issue_list:
+            if positive_value_exists(include_voter_follow_status):
+                is_issue_followed = issue.we_vote_id in follow_issue_we_vote_id_list_for_voter
+                is_issue_ignored = issue.we_vote_id in ignore_issue_we_vote_id_list_for_voter
+            else:
+                is_issue_followed = False
+                is_issue_ignored = False
             one_issue = {
                 'issue_we_vote_id':         issue.we_vote_id,
                 'issue_name':               issue.issue_name,
+                'issue_description':        issue.issue_description,
+                'issue_photo_url_large':    issue.we_vote_hosted_image_url_large,
+                'issue_photo_url_medium':   issue.we_vote_hosted_image_url_medium,
+                'issue_photo_url_tiny':     issue.we_vote_hosted_image_url_tiny,
+                'is_issue_followed':        is_issue_followed,
+                'is_issue_ignored':         is_issue_ignored,
+            }
+            issues_to_display.append(one_issue)
+
+        json_data = {
+            'status':                       status,
+            'success':                      True,
+            'voter_issues_only':            voter_issues_only,
+            'include_voter_follow_status':  include_voter_follow_status,
+            'issue_list':                   issues_to_display,
+        }
+    else:
+        json_data = {
+            'status':                       status,
+            'success':                      False,
+            'voter_issues_only':            voter_issues_only,
+            'include_voter_follow_status':  include_voter_follow_status,
+            'issue_list':                   [],
+        }
+
+    return HttpResponse(json.dumps(json_data), content_type='application/json')
+
+
+def retrieve_issues_to_follow_for_api(voter_device_id, sort_formula):  # retrieveIssuesToFollow
+    """
+    Used by the api
+    :return:
+    """
+
+    issue_list = []
+    issues_to_display = []
+
+    voter_we_vote_id = fetch_voter_we_vote_id_from_voter_device_link(voter_device_id)
+    if not positive_value_exists(voter_we_vote_id):
+        status = 'FAILED retrieve_issues_to_follow VOTER_WE_VOTE_ID_COULD_NOT_BE_FETCHED'
+        json_data = {
+            'status': status,
+            'success': False,
+            'issue_list': [],
+        }
+        return HttpResponse(json.dumps(json_data), content_type='application/json')
+
+    follow_issue_list_manager = FollowIssueList()
+    follow_issue_we_vote_id_list_for_voter = follow_issue_list_manager.\
+        retrieve_follow_issue_we_vote_id_list_by_voter_we_vote_id(voter_we_vote_id)
+    ignore_issue_we_vote_id_list_for_voter = follow_issue_list_manager. \
+        retrieve_ignore_issue_we_vote_id_list_by_voter_we_vote_id(voter_we_vote_id)
+    issue_we_vote_id_list_to_exclude = follow_issue_we_vote_id_list_for_voter + ignore_issue_we_vote_id_list_for_voter
+
+    try:
+        issue_list_object = IssueListManager()
+        issue_we_vote_id_list_to_filter = None
+        results = issue_list_object.retrieve_issues(sort_formula, issue_we_vote_id_list_to_filter,
+                                                    issue_we_vote_id_list_to_exclude)
+        success = results['success']
+        status = results['status']
+        issue_list = results['issue_list']
+    except Exception as e:
+        status = 'FAILED retrieve_issues_to_follow ' \
+                 '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
+        handle_exception(e, logger=logger, exception_message=status)
+        success = False
+
+    if success:
+        for issue in issue_list:
+            one_issue = {
+                'issue_we_vote_id':         issue.we_vote_id,
+                'issue_name':               issue.issue_name,
+                'issue_description':        issue.issue_description,
                 'issue_photo_url_large':    issue.we_vote_hosted_image_url_large,
                 'issue_photo_url_medium':   issue.we_vote_hosted_image_url_medium,
                 'issue_photo_url_tiny':     issue.we_vote_hosted_image_url_tiny,
             }
-            issues_to_display.append(one_issue.copy())
+            issues_to_display.append(one_issue)
+
         json_data = {
             'status':                   status,
             'success':                  True,

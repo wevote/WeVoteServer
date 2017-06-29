@@ -57,18 +57,24 @@ class IssueListManager(models.Model):
     This is a class to make it easy to retrieve lists of Issues
     """
 
-    def retrieve_issues(self, sort_formula=MOST_LINKED_ORGANIZATIONS):
+    def retrieve_issues(self, sort_formula=MOST_LINKED_ORGANIZATIONS, issue_we_vote_id_list_to_filter=None,
+                        issue_we_vote_id_list_to_exclude=None):
         issue_list = []
         issue_list_found = False
 
         try:
             issue_queryset = Issue.objects.all()
+            if positive_value_exists(issue_we_vote_id_list_to_filter):
+                issue_queryset = issue_queryset.filter(we_vote_id__in=issue_we_vote_id_list_to_filter)
+            if positive_value_exists(issue_we_vote_id_list_to_exclude):
+                issue_queryset = issue_queryset.exclude(we_vote_id__in=issue_we_vote_id_list_to_exclude)
             if sort_formula == MOST_LINKED_ORGANIZATIONS:
                 issue_queryset = issue_queryset.order_by('-issue_followers_count')
             elif sort_formula == ALPHABETICAL_ASCENDING:
                 issue_queryset = issue_queryset.order_by('issue_name')
             else:
                 issue_queryset = issue_queryset.order_by('issue_name')
+
             issue_list = list(issue_queryset)
 
             if len(issue_list):
@@ -76,6 +82,7 @@ class IssueListManager(models.Model):
                 status = 'ISSUES_RETRIEVED'
             else:
                 status = 'NO_ISSUES_RETRIEVED'
+
         except Issue.DoesNotExist:
             # No issues found. Not a problem.
             status = 'NO_ISSUES_FOUND'
