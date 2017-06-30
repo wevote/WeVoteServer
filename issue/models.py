@@ -69,7 +69,7 @@ class IssueListManager(models.Model):
             if positive_value_exists(issue_we_vote_id_list_to_exclude):
                 issue_queryset = issue_queryset.exclude(we_vote_id__in=issue_we_vote_id_list_to_exclude)
             if sort_formula == MOST_LINKED_ORGANIZATIONS:
-                issue_queryset = issue_queryset.order_by('-issue_followers_count')
+                issue_queryset = issue_queryset.order_by('-linked_organization_count')
             elif sort_formula == ALPHABETICAL_ASCENDING:
                 issue_queryset = issue_queryset.order_by('issue_name')
             else:

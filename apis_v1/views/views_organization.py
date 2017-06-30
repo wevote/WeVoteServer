@@ -31,8 +31,10 @@ def organization_follow_api_view(request):
     voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
     organization_id = request.GET.get('organization_id', 0)
     organization_we_vote_id = request.GET.get('organization_we_vote_id', '')
+    organization_follow_based_on_issue = request.GET.get('organization_follow_based_on_issue', False)
     return organization_follow(voter_device_id=voter_device_id, organization_id=organization_id,
-                               organization_we_vote_id=organization_we_vote_id)
+                               organization_we_vote_id=organization_we_vote_id,
+                               organization_follow_based_on_issue=organization_follow_based_on_issue)
 
 
 def organization_stop_following_api_view(request):
@@ -217,7 +219,7 @@ def organizations_followed_retrieve_api_view(request):
     auto_followed_from_twitter_suggestion = request.GET.get('auto_followed_from_twitter_suggestion', False)
     return organizations_followed_retrieve_for_api(voter_device_id=voter_device_id,
                                                    maximum_number_to_retrieve=maximum_number_to_retrieve,
-                                                   auto_followed_from_twitter_suggestio=
+                                                   auto_followed_from_twitter_suggestion=
                                                    auto_followed_from_twitter_suggestion)
 
 
