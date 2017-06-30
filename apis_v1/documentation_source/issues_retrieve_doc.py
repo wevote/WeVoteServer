@@ -9,6 +9,11 @@ def issues_retrieve_doc_template_values(url_root):
     """
     optional_query_parameter_list = [
         {
+            'name': 'voter_device_id',
+            'value': 'string',  # boolean, integer, long, string
+            'description': 'An 88 character unique identifier linked to a voter record on the server',
+        },
+        {
             'name':         'sort_formula',
             'value':        'string',  # boolean, integer, long, string
             'description':  'Default is MOST_LINKED_ORGANIZATIONS '
