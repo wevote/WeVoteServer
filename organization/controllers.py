@@ -244,13 +244,18 @@ def transfer_to_organization_if_missing(from_organization, to_organization, fiel
     return save_to_organization
 
 
-def organization_follow_all(voter_device_id, organization_id, organization_we_vote_id, follow_kind=FOLLOWING):
+def organization_follow_all(voter_device_id, organization_id, organization_we_vote_id, follow_kind=FOLLOWING,
+                            organization_follow_based_on_issue=None):
+    if organization_follow_based_on_issue is None:
+        organization_follow_based_on_issue = False
+
     if not positive_value_exists(voter_device_id):
         json_data = {
             'status': 'VALID_VOTER_DEVICE_ID_MISSING',
             'success': False,
             'voter_device_id': voter_device_id,
             'organization_id': organization_id,
+            'organization_follow_based_on_issue': organization_follow_based_on_issue,
         }
         return HttpResponse(json.dumps(json_data), content_type='application/json')
 
@@ -261,6 +266,7 @@ def organization_follow_all(voter_device_id, organization_id, organization_we_vo
             'success': False,
             'voter_device_id': voter_device_id,
             'organization_id': organization_id,
+            'organization_follow_based_on_issue': organization_follow_based_on_issue,
         }
         return HttpResponse(json.dumps(json_data), content_type='application/json')
 
@@ -272,6 +278,7 @@ def organization_follow_all(voter_device_id, organization_id, organization_we_vo
             'success': False,
             'voter_device_id': voter_device_id,
             'organization_id': organization_id,
+            'organization_follow_based_on_issue': organization_follow_based_on_issue,
         }
         return HttpResponse(json.dumps(json_data), content_type='application/json')
 
@@ -285,6 +292,7 @@ def organization_follow_all(voter_device_id, organization_id, organization_we_vo
             'success': False,
             'voter_device_id': voter_device_id,
             'organization_id': organization_id,
+            'organization_follow_based_on_issue': organization_follow_based_on_issue,
         }
         return HttpResponse(json.dumps(json_data), content_type='application/json')
 
@@ -338,6 +346,7 @@ def organization_follow_all(voter_device_id, organization_id, organization_we_vo
         'voter_device_id': voter_device_id,
         'organization_id': organization_id,
         'organization_we_vote_id': organization_we_vote_id,
+        'organization_follow_based_on_issue': organization_follow_based_on_issue,
     }
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 

@@ -31,6 +31,12 @@ def organization_follow_doc_template_values(url_root):
             'value':        'string (from post, cookie, or get (in that order))',  # boolean, integer, long, string
             'description':  'The unique key provided to any organization using the WeVoteServer APIs',
         },
+        {
+            'name':         'organization_follow_based_on_issue',
+            'value':        'boolean',  # boolean, integer, long, string
+            'description':  'This value holds information for the web-app about how to retrieve voterguides after '
+                            'this api call, False by default',
+        },
     ]
     optional_query_parameter_list = [
     ]
@@ -68,6 +74,7 @@ def organization_follow_doc_template_values(url_root):
                    '  "voter_device_id": string (88 characters long),\n' \
                    '  "organization_id": integer,\n' \
                    '  "organization_we_vote_id": string,\n' \
+                   '  "organization_follow_based_on_issue": boolean,\n' \
                    '}'
 
     template_values = {
