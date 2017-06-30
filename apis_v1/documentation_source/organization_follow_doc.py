@@ -34,7 +34,7 @@ def organization_follow_doc_template_values(url_root):
         {
             'name':         'organization_follow_based_on_issue',
             'value':        'boolean',  # boolean, integer, long, string
-            'description':  'This value holds information for the web-app about how to retrieve voterguides after'
+            'description':  'This value holds information for the web-app about how to retrieve voterguides after '
                             'this api call, False by default',
         },
     ]
