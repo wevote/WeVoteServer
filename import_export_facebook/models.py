@@ -453,6 +453,9 @@ class FacebookManager(models.Model):
             facebook_user_id = facebook_link_to_voter.facebook_user_id
         return facebook_user_id
 
+    def retrieve_facebook_link_to_voter_from_facebook_id(self, facebook_user_id):
+        return self.retrieve_facebook_link_to_voter(facebook_user_id)
+
     def retrieve_facebook_link_to_voter_from_voter_we_vote_id(self, voter_we_vote_id):
         facebook_user_id = 0
         facebook_secret_key = ""
@@ -705,7 +708,7 @@ class FacebookManager(models.Model):
 
     def retrieve_facebook_user_by_facebook_user_id(self, facebook_user_id):
         """
-        Reterive facebook user from FacebookUser table.
+        Retrieve facebook user from FacebookUser table.
         :param facebook_user_id:
         :return:
         """

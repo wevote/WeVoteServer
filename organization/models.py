@@ -467,6 +467,11 @@ class OrganizationManager(models.Manager):
                     organization.organization_website = twitter_user.twitter_url
                     organization.twitter_name = twitter_user.twitter_name
                     organization.save()
+
+                    organization_list_manager = OrganizationListManager()
+                    repair_results = organization_list_manager.repair_twitter_related_organization_caching(
+                        twitter_link_to_organization.twitter_id)
+
                 except Exception as e:
                     pass
         return organization
@@ -1108,7 +1113,9 @@ class OrganizationListManager(models.Manager):
                 #                     [Q(organization_name__icontains=word) for word in organization_name_list])
                 filters.append(new_filter)
 
-            if positive_value_exists(organization_twitter_handle):  # TODO DALE TwitterLinkToOrganization instead?
+            # The master organization twitter_handle data is in TwitterLinkToOrganization but we try to keep
+            # organization_twitter_handle up-to-date for rapid searches like this.
+            if positive_value_exists(organization_twitter_handle):
                 new_filter = Q(organization_twitter_handle__icontains=organization_twitter_handle)
                 filters.append(new_filter)
 
@@ -1178,6 +1185,136 @@ class OrganizationListManager(models.Manager):
             'success':              success,
             'organizations_found':  organizations_found,
             'organizations_list':   organization_list_for_json,
+        }
+        return results
+
+    def repair_twitter_related_organization_caching(self, twitter_user_id):
+        """
+        Since cached twitter values are used by the WebApp to determine security settings, we want to
+        make sure this cached twitter data is up-to-date.
+        :param twitter_user_id:
+        :return:
+        """
+        status = ""
+        success = False
+        filters = []
+        organization_list_found = False
+        organization_list_objects = []
+
+        if not positive_value_exists(twitter_user_id):
+            status += "TWITTER_USER_ID_NOT_INCLUDED "
+            error_results = {
+                'status':               status,
+                'success':              success,
+            }
+            return error_results
+
+        twitter_user_manager = TwitterUserManager()
+        twitter_link_results = twitter_user_manager.retrieve_twitter_link_to_organization_from_twitter_user_id(
+            twitter_user_id)
+        if not twitter_link_results['twitter_link_to_organization_found']:
+            # We don't have an official TwitterLinkToOrganization, so we don't want to clean up any caching
+            status += "TWITTER_LINK_TO_ORGANIZATION_NOT_FOUND-CACHING_REPAIR_NOT_EXECUTED "
+        else:
+            # Is there an official TwitterLinkToOrganization for this Twitter account? If so, update the information.
+            twitter_link_to_organization = twitter_link_results['twitter_link_to_organization']
+
+            twitter_results = \
+                twitter_user_manager.retrieve_twitter_user_locally_or_remotely(twitter_link_to_organization.twitter_id)
+
+            if not twitter_results['twitter_user_found']:
+                status += "TWITTER_USER_NOT_FOUND "
+            else:
+                twitter_user = twitter_results['twitter_user']
+
+                # Loop through all of the organizations that have any of these fields set:
+                # - organization.twitter_user_id
+                # - organization.organization_twitter_handle
+                try:
+                    organization_queryset = Organization.objects.all()
+
+                    # We want to find organizations with *any* of these values
+                    new_filter = Q(twitter_user_id=twitter_user_id)
+                    filters.append(new_filter)
+
+                    if positive_value_exists(twitter_user.twitter_handle):
+                        new_filter = Q(organization_twitter_handle__iexact=twitter_user.twitter_handle)
+                        filters.append(new_filter)
+
+                    # Add the first query
+                    if len(filters):
+                        final_filters = filters.pop()
+
+                        # ...and "OR" the remaining items in the list
+                        for item in filters:
+                            final_filters |= item
+
+                        organization_queryset = organization_queryset.filter(final_filters)
+
+                    organization_list_objects = list(organization_queryset)
+
+                    if len(organization_list_objects):
+                        organization_list_found = True
+                        status += 'TWITTER_RELATED_ORGANIZATIONS_RETRIEVED '
+                        success = True
+                    else:
+                        status += 'NO_TWITTER_RELATED_ORGANIZATIONS_RETRIEVED1 '
+                        success = True
+                except Organization.DoesNotExist:
+                    # No organizations found. Not a problem.
+                    status += 'NO_TWITTER_RELATED_ORGANIZATIONS_RETRIEVED2 '
+                    organization_list_objects = []
+                    success = True
+                except Exception as e:
+                    handle_exception(e, logger=logger)
+                    status = 'FAILED repair_twitter_related_organization_caching ' \
+                             '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
+                    success = False
+
+                if organization_list_found:
+                    # Loop through all organizations found with twitter_user_id and organization_twitter_handle
+                    # If not the official TwitterLinkToOrganization, then clear out those values.
+                    for organization in organization_list_objects:
+                        if organization.we_vote_id != twitter_link_to_organization.organization_we_vote_id:
+                            try:
+                                organization.twitter_user_id = 0
+                                organization.organization_twitter_handle = ""
+                                organization.save()
+                                status += "CLEARED_TWITTER_VALUES-organization.we_vote_id " \
+                                          "" + organization.we_vote_id + " "
+                            except Exception as e:
+                                status += "COULD_NOT_CLEAR_TWITTER_VALUES-organization.we_vote_id " \
+                                          "" + organization.we_vote_id + " "
+
+                # Now make sure that the organization table has values for the organization linked with the
+                # official TwitterLinkToOrganization
+                organization_manager = OrganizationManager()
+                organization_results = organization_manager.retrieve_organization_from_we_vote_id(
+                    twitter_link_to_organization.organization_we_vote_id)
+                if not organization_results['organization_found']:
+                    status += "COULD_NOT_UPDATE_LINKED_ORGANIZATION "
+                else:
+                    linked_organization = organization_results['organization']
+                    try:
+                        save_organization = False
+                        if linked_organization.twitter_user_id != twitter_user_id:
+                            linked_organization.twitter_user_id = twitter_user_id
+                            save_organization = True
+                        if linked_organization.organization_twitter_handle != twitter_user.twitter_handle:
+                            linked_organization.organization_twitter_handle = twitter_user.twitter_handle
+                            save_organization = True
+                        if save_organization:
+                            linked_organization.save()
+                            status += "SAVED_LINKED_ORGANIZATION "
+                        else:
+                            status += "NO_NEED_TO_SAVE_LINKED_ORGANIZATION "
+
+                    except Exception as e:
+                        status += "COULD_NOT_SAVE_LINKED_ORGANIZATION "
+
+        results = {
+            'status': status,
+            'success': success,
         }
         return results
 
@@ -1260,9 +1397,16 @@ class OrganizationListManager(models.Manager):
                 twitter_id = 0
                 delete_results = twitter_user_manager.delete_twitter_link_to_organization(
                     twitter_id, twitter_link_to_organization.organization_we_vote_id)
+
+                if delete_results['twitter_link_to_organization_deleted']:
+                    organization_list_manager = OrganizationListManager()
+                    repair_results = organization_list_manager.repair_twitter_related_organization_caching(
+                        twitter_link_to_organization.twitter_id)
+                    status += repair_results['status']
+
                 organization_list_found = False
                 success = True
-                status = "ORGANIZATION_NOT_FOUND_FROM_TWITTER_LINK_TO_ORGANIZATION-DELETED_BAD_LINK"
+                status += "ORGANIZATION_NOT_FOUND_FROM_TWITTER_LINK_TO_ORGANIZATION-DELETED_BAD_LINK"
         else:
             try:
                 organization_queryset = Organization.objects.all()
