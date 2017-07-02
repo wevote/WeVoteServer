@@ -16,7 +16,7 @@ from import_export_facebook.models import FacebookManager
 from import_export_twitter.models import TwitterAuthManager
 import json
 from organization.controllers import move_organization_to_another_complete
-from organization.models import OrganizationManager
+from organization.models import OrganizationListManager, OrganizationManager
 from position.controllers import duplicate_positions_to_another_voter, move_positions_to_another_voter
 from twitter.models import TwitterLinkToOrganization, TwitterLinkToVoter, TwitterUserManager
 from voter_guide.controllers import duplicate_voter_guides
@@ -705,6 +705,10 @@ def voter_merge_two_accounts_for_api(  # voterMergeTwoAccounts
     elif positive_value_exists(twitter_secret_key):
         twitter_user_manager = TwitterUserManager()
         twitter_link_to_voter = TwitterLinkToVoter()
+
+        twitter_link_to_organization = TwitterLinkToOrganization()
+        repair_twitter_related_organization_caching_now = False
+
         twitter_user_results = twitter_user_manager.retrieve_twitter_link_to_voter_from_twitter_secret_key(
             twitter_secret_key)
         if twitter_user_results['twitter_link_to_voter_found']:
@@ -715,6 +719,10 @@ def voter_merge_two_accounts_for_api(  # voterMergeTwoAccounts
             if twitter_owner_voter_results['voter_found']:
                 twitter_owner_voter_found = True
                 twitter_owner_voter = twitter_owner_voter_results['voter']
+                # And make sure we don't have multiple voters using same twitter_id (since we have TwitterLinkToVoter)
+                repair_results = voter_manager.repair_twitter_related_voter_caching(
+                    twitter_link_to_voter.twitter_id)
+                status += repair_results['status']
 
         if not twitter_owner_voter_found:
             # Since we are in the "voterMergeTwoAccounts" we don't want to try to create
@@ -788,7 +796,7 @@ def voter_merge_two_accounts_for_api(  # voterMergeTwoAccounts
                 # Make sure the twitter_id in twitter_link_to_voter matches the one in twitter_link_to_organization
                 if twitter_link_to_voter.twitter_id == twitter_link_to_organization.twitter_id:
                     # We are happy
-                    pass
+                    repair_twitter_related_organization_caching_now = True
                 else:
                     # We are here, so we know that we found a twitter_link_to_organization, but it doesn't match
                     # the org linked to this voter. So we want to merge these two organizations.
@@ -816,6 +824,7 @@ def voter_merge_two_accounts_for_api(  # voterMergeTwoAccounts
                                 twitter_owner_voter.linked_organization_we_vote_id = \
                                     twitter_link_to_organization.organization_we_vote_id
                                 twitter_owner_voter.save()
+                                repair_twitter_related_organization_caching_now = True
                             except Exception as e:
                                 status += "UNABLE_TO_UPDATE_LINKED_ORGANIZATION_WE_VOTE_ID "
             else:
@@ -852,6 +861,7 @@ def voter_merge_two_accounts_for_api(  # voterMergeTwoAccounts
                                 twitter_owner_voter.linked_organization_we_vote_id = \
                                     twitter_link_to_organization.organization_we_vote_id
                                 twitter_owner_voter.save()
+                                repair_twitter_related_organization_caching_now = True
                             except Exception as e:
                                 status += "UNABLE_TO_UPDATE_LINKED_ORGANIZATION_WE_VOTE_ID "
                 else:
@@ -860,6 +870,7 @@ def voter_merge_two_accounts_for_api(  # voterMergeTwoAccounts
                     results = twitter_user_manager.create_twitter_link_to_organization(
                         twitter_link_to_voter.twitter_id, twitter_owner_voter.linked_organization_we_vote_id)
                     if results['twitter_link_to_organization_saved']:
+                        repair_twitter_related_organization_caching_now = True
                         status += "TwitterLinkToOrganization_CREATED "
                     else:
                         status += "TwitterLinkToOrganization_NOT_CREATED "
@@ -875,6 +886,7 @@ def voter_merge_two_accounts_for_api(  # voterMergeTwoAccounts
                     twitter_owner_voter.linked_organization_we_vote_id = \
                         twitter_link_to_organization.organization_we_vote_id
                     twitter_owner_voter.save()
+                    repair_twitter_related_organization_caching_now = True
                 except Exception as e:
                     status += "UNABLE_TO_TWITTER_LINK_ORGANIZATION_TO_VOTER "
             else:
@@ -899,6 +911,7 @@ def voter_merge_two_accounts_for_api(  # voterMergeTwoAccounts
                         results = twitter_user_manager.create_twitter_link_to_organization(
                             twitter_link_to_voter.twitter_id, twitter_owner_voter.linked_organization_we_vote_id)
                         if results['twitter_link_to_organization_saved']:
+                            repair_twitter_related_organization_caching_now = True
                             status += "TwitterLinkToOrganization_CREATED_AFTER_ORGANIZATION_CREATE "
                         else:
                             status += "TwitterLinkToOrganization_NOT_CREATED_AFTER_ORGANIZATION_CREATE "
@@ -907,6 +920,12 @@ def voter_merge_two_accounts_for_api(  # voterMergeTwoAccounts
 
         # Make sure we end up with the organization referred to in twitter_link_to_organization ends up as
         # voter.linked_organization_we_vote_id
+
+        if repair_twitter_related_organization_caching_now:
+            organization_list_manager = OrganizationListManager()
+            repair_results = organization_list_manager.repair_twitter_related_organization_caching(
+                twitter_link_to_organization.twitter_id)
+            status += repair_results['status']
 
         # Now we have voter (from voter_device_id) and email_owner_voter (from email_secret_key)
         # We are going to make the email_owner_voter the new master
@@ -1176,6 +1195,8 @@ def voter_retrieve_for_api(voter_device_id):  # voterRetrieve
     voter_manager = VoterManager()
     voter_id = 0
     voter_created = False
+    twitter_link_to_voter = TwitterLinkToVoter()
+    repair_twitter_link_to_voter_caching_now = False
 
     if positive_value_exists(voter_device_id):
         # If a voter_device_id is passed in that isn't valid, we want to throw an error
@@ -1282,6 +1303,7 @@ def voter_retrieve_for_api(voter_device_id):  # voterRetrieve
                         voter.twitter_screen_name = ""
                         voter.save()
                         status += "VOTER_TWITTER_CLEARED1 "
+                        repair_twitter_link_to_voter_caching_now = True
                     except Exception as e:
                         status += "UNABLE_TO_CLEAR_TWITTER_SCREEN_NAME1 "
 
@@ -1340,6 +1362,7 @@ def voter_retrieve_for_api(voter_device_id):  # voterRetrieve
 
                             if value_to_save:
                                 voter.save()
+                                repair_twitter_link_to_voter_caching_now = True
                         except Exception as e:
                             status += "UNABLE_TO_SAVE_VOTER_TWITTER_CACHED_INFO "
 
@@ -1390,11 +1413,25 @@ def voter_retrieve_for_api(voter_device_id):  # voterRetrieve
                             voter.save()
 
                             if create_twitter_link_to_organization:
-                                twitter_user_manager.create_twitter_link_to_organization(
+                                create_results = twitter_user_manager.create_twitter_link_to_organization(
                                     twitter_link_to_voter_twitter_id, organization.we_vote_id)
+
+                                if create_results['twitter_link_to_organization_saved']:
+                                    twitter_link_to_organization = create_results['twitter_link_to_organization']
+                                    organization_list_manager = OrganizationListManager()
+                                    repair_results = \
+                                        organization_list_manager.repair_twitter_related_organization_caching(
+                                            twitter_link_to_organization.twitter_id)
+                                    status += repair_results['status']
 
                         except Exception as e:
                             status += "UNABLE_TO_CREATE_NEW_ORGANIZATION_TO_VOTER_FROM_RETRIEVE_VOTER "
+
+        if repair_twitter_link_to_voter_caching_now:
+            # If here then we know that we have a twitter_link_to_voter, and there was some data cleanup done
+            repair_results = voter_manager.repair_twitter_related_voter_caching(
+                twitter_link_to_voter.twitter_id)
+            status += repair_results['status']
 
         donation_list = donation_history_for_a_voter(voter.we_vote_id)
         json_data = {
@@ -1796,6 +1833,8 @@ def voter_sign_out_for_api(voter_device_id, sign_out_all_devices=False):  # vote
 def voter_split_into_two_accounts_for_api(voter_device_id, split_off_twitter):  # voterSplitIntoTwoAccounts
     success = False
     status = ""
+    repair_twitter_related_voter_caching_now = False
+    repair_twitter_related_organization_caching_now = False
 
     voter_device_link_manager = VoterDeviceLinkManager()
     voter_device_link_results = voter_device_link_manager.retrieve_voter_device_link(voter_device_id)
@@ -1903,6 +1942,7 @@ def voter_split_into_two_accounts_for_api(voter_device_id, split_off_twitter):  
     try:
         twitter_link_to_voter.voter_we_vote_id = to_voter.we_vote_id
         twitter_link_to_voter.save()
+        repair_twitter_related_voter_caching_now = True
         twitter_link_moved = True
     except Exception as e:
         status += "VOTER_SPLIT_INTO_TWO_ACCOUNTS_TWITTER_LINK_TO_VOTER_NOT_CREATED "
@@ -2024,12 +2064,16 @@ def voter_split_into_two_accounts_for_api(voter_device_id, split_off_twitter):  
                     try:
                         twitter_link_to_organization.organization_we_vote_id = to_voter_linked_organization_we_vote_id
                         twitter_link_to_organization.save()
+                        repair_twitter_related_organization_caching_now = True
                     except Exception as e:
                         status += "UNABLE_TO_SAVE_TWITTER_LINK_TO_ORGANIZATION "
                 else:
                     results = twitter_user_manager.create_twitter_link_to_organization(
                         twitter_link_to_voter_twitter_id, to_voter_linked_organization_we_vote_id)
                     status += results['status']
+                    if results['twitter_link_to_organization_found']:
+                        twitter_link_to_organization = results['twitter_link_to_organization']
+                        repair_twitter_related_organization_caching_now = True
 
                 # Update the link to the organization on the from_voter
                 try:
@@ -2056,6 +2100,19 @@ def voter_split_into_two_accounts_for_api(voter_device_id, split_off_twitter):  
             'split_off_twitter': split_off_twitter,
         }
         return error_results
+
+    if repair_twitter_related_voter_caching_now:
+        # And make sure we don't have multiple voters using same twitter_id (once there is a TwitterLinkToVoter)
+        repair_results = voter_manager.repair_twitter_related_voter_caching(
+            twitter_link_to_voter.twitter_id)
+        status += repair_results['status']
+
+    # Make sure to clean up the twitter information in the organization table
+    if repair_twitter_related_organization_caching_now:
+        organization_list_manager = OrganizationListManager()
+        repair_results = organization_list_manager.repair_twitter_related_organization_caching(
+            twitter_link_to_organization.twitter_id)
+        status += repair_results['status']
 
     # Duplicate VoterAddress (we are not currently bringing over ballot_items)
     voter_address_manager = VoterAddressManager()

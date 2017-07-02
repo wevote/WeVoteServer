@@ -178,8 +178,6 @@ class TwitterUserManager(models.Model):
             twitter_link_to_voter_saved = True
             success = True
             status = "TWITTER_LINK_TO_VOTER_CREATED"
-
-            # TODO DALE Remove voter.twitter_id value here?
         except Exception as e:
             twitter_link_to_voter_saved = False
             twitter_link_to_voter = TwitterLinkToVoter()
@@ -867,6 +865,7 @@ class TwitterUserManager(models.Model):
             return twitter_save_results
 
     def delete_twitter_link_to_organization(self, twitter_id, organization_we_vote_id):
+        status = ""
         twitter_id = convert_to_int(twitter_id)
         twitter_link_to_organization_deleted = False
 
@@ -877,6 +876,7 @@ class TwitterUserManager(models.Model):
                     twitter_link_to_organization = results['twitter_link_to_organization']
                     twitter_link_to_organization.delete()
                     twitter_link_to_organization_deleted = True
+
             elif positive_value_exists(organization_we_vote_id):
                 results = self.retrieve_twitter_link_to_organization_from_organization_we_vote_id(
                     organization_we_vote_id)
@@ -884,10 +884,12 @@ class TwitterUserManager(models.Model):
                     twitter_link_to_organization = results['twitter_link_to_organization']
                     twitter_link_to_organization.delete()
                     twitter_link_to_organization_deleted = True
+
         except Exception as e:
             pass
 
         results = {
+            'status':                               status,
             'success':                              twitter_link_to_organization_deleted,
             'twitter_link_to_organization_deleted': twitter_link_to_organization_deleted,
         }

@@ -380,6 +380,7 @@ def voter_facebook_sign_in_retrieve_for_api(voter_device_id):  # voterFacebookSi
     :return:
     """
     voter_manager = VoterManager()
+    repair_facebook_related_voter_caching_now = False
     voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id)
     voter_id = voter_results['voter_id']
     if not positive_value_exists(voter_id):
@@ -491,6 +492,7 @@ def voter_facebook_sign_in_retrieve_for_api(voter_device_id):  # voterFacebookSi
         status += " " + facebook_link_results['status']
         voter_we_vote_id_attached_to_facebook = facebook_link_to_voter.voter_we_vote_id
         facebook_secret_key = facebook_link_to_voter.secret_key
+        repair_facebook_related_voter_caching_now = True
     else:
         # See if we need to heal the data - look in the voter table for any records with a facebook_user_id
         voter_results = voter_manager.retrieve_voter_by_facebook_id_old(facebook_auth_response.facebook_user_id)
@@ -501,6 +503,11 @@ def voter_facebook_sign_in_retrieve_for_api(voter_device_id):  # voterFacebookSi
                 save_results = facebook_manager.create_facebook_link_to_voter(
                     facebook_auth_response.facebook_user_id, voter_we_vote_id_attached_to_facebook)
                 status += " " + save_results['status']
+                facebook_link_results = facebook_manager.retrieve_facebook_link_to_voter(
+                    facebook_auth_response.facebook_user_id)
+                if facebook_link_results['facebook_link_to_voter_found']:
+                    facebook_link_to_voter = facebook_link_results['facebook_link_to_voter']
+                    repair_facebook_related_voter_caching_now = True
 
     voter_we_vote_id_attached_to_facebook_email = ""
     if not voter_we_vote_id_attached_to_facebook:
@@ -603,6 +610,10 @@ def voter_facebook_sign_in_retrieve_for_api(voter_device_id):  # voterFacebookSi
                             status += " FACEBOOK_SAVE_TO_CURRENT_ACCOUNT_VOTER_DEVICE_LINK_UPDATED"
         else:
             voter_we_vote_id_attached_to_facebook_email = ""
+
+    if repair_facebook_related_voter_caching_now:
+        repair_results = voter_manager.repair_facebook_related_voter_caching(facebook_auth_response.facebook_user_id)
+        status += repair_results['status']
 
     if positive_value_exists(voter_we_vote_id_attached_to_facebook):
         existing_facebook_account_found = True

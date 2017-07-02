@@ -15,7 +15,7 @@ from image.controllers import TWITTER, cache_original_and_resized_image
 from import_export_twitter.models import TwitterAuthManager
 from organization.controllers import move_organization_to_another_complete, \
     update_social_media_statistics_in_other_tables
-from organization.models import Organization, OrganizationManager
+from organization.models import Organization, OrganizationListManager, OrganizationManager
 import re
 from socket import timeout
 import tweepy
@@ -1119,6 +1119,7 @@ def twitter_sign_in_retrieve_for_api(voter_device_id):  # twitterSignInRetrieve
     twitter_secret_key = ""
     existing_twitter_account_found = False
     voter_we_vote_id_attached_to_twitter = ""
+    repair_twitter_related_voter_caching_now = False
 
     twitter_link_results = twitter_user_manager.retrieve_twitter_link_to_voter(twitter_auth_response.twitter_id)
     if twitter_link_results['twitter_link_to_voter_found']:
@@ -1127,10 +1128,9 @@ def twitter_sign_in_retrieve_for_api(voter_device_id):  # twitterSignInRetrieve
         voter_we_vote_id_attached_to_twitter = twitter_link_to_voter.voter_we_vote_id
         twitter_secret_key = twitter_link_to_voter.secret_key
         existing_twitter_account_found = True
-        # TODO DALE Remove all remaining voter.twitter_id values
+        repair_twitter_related_voter_caching_now = True
     else:
-        # See if we need to heal the data - look in the voter table for any records with a twitter_user_id
-        voter_manager = VoterManager()
+        # Look in the voter table for any records with a twitter_id and link to the first one
         voter_results = voter_manager.retrieve_voter_by_twitter_id_old(twitter_auth_response.twitter_id)
         if voter_results['voter_found']:
             voter_with_twitter_id = voter_results['voter']
@@ -1140,8 +1140,20 @@ def twitter_sign_in_retrieve_for_api(voter_device_id):  # twitterSignInRetrieve
                     twitter_auth_response.twitter_id, voter_we_vote_id_attached_to_twitter)
                 status += " " + save_results['status']
                 if save_results['success']:
-                    # TODO DALE Remove all remaining voter.twitter_id values
-                    pass
+                    repair_twitter_related_voter_caching_now = True
+
+    if twitter_auth_response.twitter_id:
+        # We do this here as part of the Twitter sign in process, to make sure we don't have multiple organizations
+        #  using the same twitter_id (once there is a TwitterLinkToOrganization).
+        organization_list_manager = OrganizationListManager()
+        repair_results = organization_list_manager.repair_twitter_related_organization_caching(
+            twitter_auth_response.twitter_id)
+        status += repair_results['status']
+        if repair_twitter_related_voter_caching_now:
+            # And make sure we don't have multiple voters using same twitter_id (once there is a TwitterLinkToVoter)
+            repair_results = voter_manager.repair_twitter_related_voter_caching(
+                twitter_auth_response.twitter_id)
+            status += repair_results['status']
 
     if positive_value_exists(voter_we_vote_id_attached_to_twitter):
         voter_we_vote_id_for_cache = voter_we_vote_id_attached_to_twitter
@@ -1265,6 +1277,8 @@ def voter_twitter_save_to_current_account_for_api(voter_device_id):  # voterTwit
     status = ""
     success = False
     twitter_account_created = False
+    twitter_link_to_organization_exists = False
+    twitter_link_to_organization_twitter_id = 0
 
     # Get voter_id from the voter_device_id
     results = is_voter_device_id_valid(voter_device_id)
@@ -1355,6 +1369,8 @@ def voter_twitter_save_to_current_account_for_api(voter_device_id):  # voterTwit
     twitter_results = twitter_user_manager.retrieve_twitter_link_to_organization(voter.we_vote_id)
     if twitter_results['twitter_link_to_organization_found']:
         twitter_link_to_organization = twitter_results['twitter_link_to_organization']
+        twitter_link_to_organization_exists = True
+        twitter_link_to_organization_twitter_id = twitter_link_to_organization.twitter_id
 
         # If here, we know that this organization is not linked to another voter, so we can update the
         #  voter to connect to this organization
@@ -1426,10 +1442,18 @@ def voter_twitter_save_to_current_account_for_api(voter_device_id):  # voterTwit
                     twitter_auth_response.twitter_id, voter.linked_organization_we_vote_id)
                 if results['twitter_link_to_organization_saved']:
                     status += "TwitterLinkToOrganization_CREATED_AFTER_ORGANIZATION_CREATE "
+                    twitter_link_to_organization_exists = True
+                    twitter_link_to_organization_twitter_id = twitter_auth_response.twitter_id
                 else:
                     status += "TwitterLinkToOrganization_NOT_CREATED_AFTER_ORGANIZATION_CREATE "
             except Exception as e:
                 status += "UNABLE_TO_UPDATE_VOTER_LINKED_ORGANIZATION_WE_VOTE_ID_OR_CREATE_TWITTER_LINK_TO_ORG "
+
+    if twitter_link_to_organization_exists:
+        organization_list_manager = OrganizationListManager()
+        repair_results = organization_list_manager.repair_twitter_related_organization_caching(
+            twitter_link_to_organization_twitter_id)
+        status += repair_results['status']
 
     results = {
         'success':                  success,

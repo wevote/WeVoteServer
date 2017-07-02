@@ -12,7 +12,7 @@ from import_export_facebook.models import FacebookManager
 from twitter.models import TwitterUserManager
 from validate_email import validate_email
 import wevote_functions.admin
-from wevote_functions.functions import convert_to_int, generate_voter_device_id, get_voter_device_id, \
+from wevote_functions.functions import convert_to_int, generate_voter_device_id, \
     get_voter_api_device_id, positive_value_exists
 from wevote_settings.models import fetch_next_we_vote_id_last_voter_integer, fetch_site_unique_id_prefix
 
@@ -349,6 +349,252 @@ class VoterManager(BaseUserManager):
         except AttributeError:
             return False
 
+    def repair_facebook_related_voter_caching(self, facebook_id):
+        """
+        Since cached facebook values are occasionally used, we want to
+        make sure this cached facebook data is up-to-date.
+        :param facebook_id:
+        :return:
+        """
+        status = ""
+        success = False
+        filters = []
+        voter_list_found = False
+        voter_list_objects = []
+
+        if not positive_value_exists(facebook_id):
+            status += "FACEBOOK_ID_NOT_INCLUDED "
+            error_results = {
+                'status':               status,
+                'success':              success,
+            }
+            return error_results
+
+        facebook_manager = FacebookManager()
+        facebook_link_results = facebook_manager.retrieve_facebook_link_to_voter_from_facebook_id(
+            facebook_id)
+        if not facebook_link_results['facebook_link_to_voter_found']:
+            # We don't have an official FacebookLinkToVoter, so we don't want to clean up any caching
+            status += "FACEBOOK_LINK_TO_VOTER_NOT_FOUND-CACHING_REPAIR_NOT_EXECUTED "
+        else:
+            # Is there an official FacebookLinkToVoter for this Twitter account? If so, update the information.
+            facebook_link_to_voter = facebook_link_results['facebook_link_to_voter']
+
+            # Loop through all of the voters that have any of these fields set:
+            # - voter.facebook_id
+            # - voter.fb_username -- possibly in future. Not supported now
+            try:
+                voter_queryset = Voter.objects.all()
+
+                # We want to find voters with *any* of these values
+                new_filter = Q(facebook_id=facebook_id)
+                filters.append(new_filter)
+
+                # if positive_value_exists(facebook_user.fb_username):
+                #     new_filter = Q(fb_username__iexact=facebook_user.fb_username)
+                #     filters.append(new_filter)
+
+                # Add the first query
+                if len(filters):
+                    final_filters = filters.pop()
+
+                    # ...and "OR" the remaining items in the list
+                    for item in filters:
+                        final_filters |= item
+
+                    voter_queryset = voter_queryset.filter(final_filters)
+
+                voter_list_objects = list(voter_queryset)
+
+                if len(voter_list_objects):
+                    voter_list_found = True
+                    status += 'FACEBOOK_RELATED_VOTERS_RETRIEVED '
+                    success = True
+                else:
+                    status += 'NO_FACEBOOK_RELATED_VOTERS_RETRIEVED1 '
+                    success = True
+            except Voter.DoesNotExist:
+                # No voters found. Not a problem.
+                status += 'NO_FACEBOOK_RELATED_VOTERS_RETRIEVED2 '
+                voter_list_objects = []
+                success = True
+            except Exception as e:
+                handle_exception(e, logger=logger)
+                status = 'FAILED repair_facebook_related_voter_caching ' \
+                         '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
+                success = False
+
+            if voter_list_found:
+                # Loop through all voters found with facebook_id
+                # If not the official FacebookLinkToVoter, then clear out those values.
+                for voter in voter_list_objects:
+                    if voter.we_vote_id != facebook_link_to_voter.voter_we_vote_id:
+                        try:
+                            voter.facebook_id = 0
+                            voter.save()
+                            status += "CLEARED_FACEBOOK_VALUES-voter.we_vote_id " \
+                                      "" + voter.we_vote_id + " "
+                        except Exception as e:
+                            status += "COULD_NOT_CLEAR_FACEBOOK_VALUES-voter.we_vote_id " \
+                                      "" + voter.we_vote_id + " "
+
+            # Now make sure that the voter table has values for the voter linked with the
+            # official FacebookLinkToVoter
+            voter_results = self.retrieve_voter_by_we_vote_id(
+                facebook_link_to_voter.voter_we_vote_id)
+            if not voter_results['voter_found']:
+                status += "COULD_NOT_UPDATE_LINKED_VOTER "
+            else:
+                linked_voter = voter_results['voter']
+                try:
+                    save_voter = False
+                    if linked_voter.facebook_id != facebook_id:
+                        linked_voter.facebook_id = facebook_id
+                        save_voter = True
+                    if save_voter:
+                        linked_voter.save()
+                        status += "SAVED_LINKED_VOTER "
+                    else:
+                        status += "NO_NEED_TO_SAVE_LINKED_VOTER "
+
+                except Exception as e:
+                    status += "COULD_NOT_SAVE_LINKED_VOTER "
+
+        results = {
+            'status': status,
+            'success': success,
+        }
+        return results
+
+    def repair_twitter_related_voter_caching(self, twitter_user_id):
+        """
+        Since cached twitter values are occasionally used, we want to
+        make sure this cached twitter data is up-to-date.
+        :param twitter_user_id:
+        :return:
+        """
+        status = ""
+        success = False
+        filters = []
+        voter_list_found = False
+        voter_list_objects = []
+
+        if not positive_value_exists(twitter_user_id):
+            status += "TWITTER_USER_ID_NOT_INCLUDED "
+            error_results = {
+                'status':               status,
+                'success':              success,
+            }
+            return error_results
+
+        twitter_user_manager = TwitterUserManager()
+        twitter_link_results = twitter_user_manager.retrieve_twitter_link_to_voter_from_twitter_user_id(
+            twitter_user_id)
+        if not twitter_link_results['twitter_link_to_voter_found']:
+            # We don't have an official TwitterLinkToVoter, so we don't want to clean up any caching
+            status += "TWITTER_LINK_TO_VOTER_NOT_FOUND-CACHING_REPAIR_NOT_EXECUTED "
+        else:
+            # Is there an official TwitterLinkToVoter for this Twitter account? If so, update the information.
+            twitter_link_to_voter = twitter_link_results['twitter_link_to_voter']
+
+            twitter_results = \
+                twitter_user_manager.retrieve_twitter_user_locally_or_remotely(twitter_link_to_voter.twitter_id)
+
+            if not twitter_results['twitter_user_found']:
+                status += "TWITTER_USER_NOT_FOUND "
+            else:
+                twitter_user = twitter_results['twitter_user']
+
+                # Loop through all of the voters that have any of these fields set:
+                # - voter.twitter_id
+                # - voter.twitter_screen_name
+                try:
+                    voter_queryset = Voter.objects.all()
+
+                    # We want to find voters with *any* of these values
+                    new_filter = Q(twitter_id=twitter_user_id)
+                    filters.append(new_filter)
+
+                    if positive_value_exists(twitter_user.twitter_handle):
+                        new_filter = Q(twitter_screen_name__iexact=twitter_user.twitter_handle)
+                        filters.append(new_filter)
+
+                    # Add the first query
+                    if len(filters):
+                        final_filters = filters.pop()
+
+                        # ...and "OR" the remaining items in the list
+                        for item in filters:
+                            final_filters |= item
+
+                        voter_queryset = voter_queryset.filter(final_filters)
+
+                    voter_list_objects = list(voter_queryset)
+
+                    if len(voter_list_objects):
+                        voter_list_found = True
+                        status += 'TWITTER_RELATED_VOTERS_RETRIEVED '
+                        success = True
+                    else:
+                        status += 'NO_TWITTER_RELATED_VOTERS_RETRIEVED1 '
+                        success = True
+                except Voter.DoesNotExist:
+                    # No voters found. Not a problem.
+                    status += 'NO_TWITTER_RELATED_VOTERS_RETRIEVED2 '
+                    voter_list_objects = []
+                    success = True
+                except Exception as e:
+                    handle_exception(e, logger=logger)
+                    status = 'FAILED repair_twitter_related_voter_caching ' \
+                             '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
+                    success = False
+
+                if voter_list_found:
+                    # Loop through all voters found with twitter_id and twitter_screen_name
+                    # If not the official TwitterLinkToVoter, then clear out those values.
+                    for voter in voter_list_objects:
+                        if voter.we_vote_id != twitter_link_to_voter.voter_we_vote_id:
+                            try:
+                                voter.twitter_id = 0
+                                voter.twitter_screen_name = ""
+                                voter.save()
+                                status += "CLEARED_TWITTER_VALUES-voter.we_vote_id " \
+                                          "" + voter.we_vote_id + " "
+                            except Exception as e:
+                                status += "COULD_NOT_CLEAR_TWITTER_VALUES-voter.we_vote_id " \
+                                          "" + voter.we_vote_id + " "
+
+                # Now make sure that the voter table has values for the voter linked with the
+                # official TwitterLinkToVoter
+                voter_results = self.retrieve_voter_by_we_vote_id(
+                    twitter_link_to_voter.voter_we_vote_id)
+                if not voter_results['voter_found']:
+                    status += "COULD_NOT_UPDATE_LINKED_VOTER "
+                else:
+                    linked_voter = voter_results['voter']
+                    try:
+                        save_voter = False
+                        if linked_voter.twitter_id != twitter_user_id:
+                            linked_voter.twitter_id = twitter_user_id
+                            save_voter = True
+                        if linked_voter.twitter_screen_name != twitter_user.twitter_handle:
+                            linked_voter.twitter_screen_name = twitter_user.twitter_handle
+                            save_voter = True
+                        if save_voter:
+                            linked_voter.save()
+                            status += "SAVED_LINKED_VOTER "
+                        else:
+                            status += "NO_NEED_TO_SAVE_LINKED_VOTER "
+
+                    except Exception as e:
+                        status += "COULD_NOT_SAVE_LINKED_VOTER "
+
+        results = {
+            'status': status,
+            'success': success,
+        }
+        return results
+
     def retrieve_voter_by_id(self, voter_id):
         email = ''
         voter_we_vote_id = ''
@@ -506,7 +752,7 @@ class VoterManager(BaseUserManager):
             elif positive_value_exists(facebook_id):
                 # 2016-11-22 This is only used to heal data. When retrieving by facebook_id,
                 # we use the FacebookLinkToVoter table
-                # TODO DALE Remove voter.facebook_id value - We are removing direct retrieve based on this field
+                # We try to keep voter.facebook_id up-to-date for rapid retrieve, but it is cached data and not master
                 voter_on_stage = Voter.objects.get(
                     facebook_id=facebook_id)
                 # If still here, we found an existing voter
@@ -516,7 +762,7 @@ class VoterManager(BaseUserManager):
             elif positive_value_exists(twitter_id):
                 # 2016-11-22 This is only used to heal data. When retrieving by twitter_id,
                 # we use the TwitterLinkToVoter table
-                # TODO DALE Remove voter.twitter_id value - We are removing direct retrieve based on this field
+                # We try to keep voter.twitter_id up-to-date for rapid retrieve, but it is cached data and not master
                 # We put this in an extra try block because there might be multiple voters with twitter_id
                 try:
                     voter_on_stage = Voter.objects.get(
@@ -681,7 +927,7 @@ class VoterManager(BaseUserManager):
         """
         try:
             voter_to_save = False
-            # TODO DALE Remove voter.twitter_id value
+            # We try to keep voter.twitter_id up-to-date for rapid retrieve, but it is cached data and not master
             if hasattr(twitter_user_object, "id") and positive_value_exists(twitter_user_object.id):
                 voter.twitter_id = twitter_user_object.id
                 voter_to_save = True
@@ -750,7 +996,7 @@ class VoterManager(BaseUserManager):
         """
         try:
             voter_to_save = False
-            # TODO DALE Remove voter.twitter_id value
+            # We try to keep voter.twitter_id up-to-date for rapid retrieve, but it is cached data and not master
             if hasattr(twitter_auth_response, "twitter_id") and positive_value_exists(twitter_auth_response.twitter_id):
                 voter.twitter_id = twitter_auth_response.twitter_id
                 voter_to_save = True
