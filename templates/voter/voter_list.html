@@ -23,10 +23,12 @@
             <td>We Vote ID</td>
             <td>You</td>
             <td>Where</td>
-            <td>FB?</td>
-            <td>Tw? (OLD)</td>
+            <td>FB ID (cached)</td>
+            <td>FB username</td>
+            <td>Tw (cached)</td>
 {#            <td>TwitterLinkToVoter</td> 2017-3-29 Not working#}
             <td>Email</td>
+            <td>Org we_vote_id</td>
             <td>Admin</td>
             <td>Verified Volunteer</td>
             <td>Voter Images</td>
@@ -51,7 +53,13 @@
             </td>
             <!-- Facebook? //-->
             <td>
-            {% if voter.fb_username %}Y{% else %}{% endif %}
+            {{ voter.facebook_id|default_if_none:"" }}
+            </td>
+            <td>
+            <!-- If we don't have a cached facebook_id, then fb_username is leftover //-->
+                <span {% if not voter.facebook_id %}style="text-decoration: line-through"{% endif %}>
+                {% if voter.fb_username %}{{ voter.fb_username }}{% else %}{% endif %}
+                </span>
             </td>
             <!-- Twitter? OLD //-->
             <td>
@@ -69,6 +77,12 @@
             <!-- Email //-->
             <td>
             {% if voter.email %}{{ voter.email }}{% else %}{% endif %}
+            {% if voter.facebook_email %}fb:&nbsp;{{ voter.facebook_email|default_if_none:"" }}{% else %}{% endif %}
+
+            </td>
+            <!-- Voter Linked Org //-->
+            <td>
+            {{ voter.linked_organization_we_vote_id|default_if_none:"" }}
             </td>
             <!-- Is site administrator? //-->
             <td>

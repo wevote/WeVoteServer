@@ -520,7 +520,8 @@ class FollowOrganizationManager(models.Model):
         following_status = FOLLOWING
         follow_organization_manager = FollowOrganizationManager()
         return follow_organization_manager.toggle_voter_following_organization(
-            voter_id, organization_id, organization_we_vote_id, voter_linked_organization_we_vote_id, following_status, auto_followed_from_twitter_suggestion)
+            voter_id, organization_id, organization_we_vote_id, voter_linked_organization_we_vote_id, following_status,
+            auto_followed_from_twitter_suggestion)
 
     def toggle_off_voter_following_organization(self, voter_id, organization_id, organization_we_vote_id,
                                                 voter_linked_organization_we_vote_id):
@@ -563,6 +564,7 @@ class FollowOrganizationManager(models.Model):
                 else:
                     follow_organization_on_stage.following_status = following_status
                     follow_organization_on_stage.auto_followed_from_twitter_suggestion = False
+                follow_organization_on_stage.voter_linked_organization_we_vote_id = voter_linked_organization_we_vote_id
                 # We don't need to update here because set set auto_now=True in the field
                 # follow_organization_on_stage.date_last_changed =
                 follow_organization_on_stage.save()
@@ -608,11 +610,12 @@ class FollowOrganizationManager(models.Model):
             status = results['status']
 
         results = {
-            'success':                      True if follow_organization_on_stage_found else False,
-            'status':                       status,
-            'follow_organization_found':    follow_organization_on_stage_found,
-            'follow_organization_id':       follow_organization_on_stage_id,
-            'follow_organization':          follow_organization_on_stage,
+            'success':                              True if follow_organization_on_stage_found else False,
+            'status':                               status,
+            'follow_organization_found':            follow_organization_on_stage_found,
+            'follow_organization_id':               follow_organization_on_stage_id,
+            'follow_organization':                  follow_organization_on_stage,
+            'voter_linked_organization_we_vote_id': voter_linked_organization_we_vote_id,
         }
         return results
 
@@ -822,16 +825,16 @@ class FollowOrganizationList(models.Model):
             follow_organization_list = {}
             return follow_organization_list
 
-    def retrieve_follow_organization_by_own_organization_we_vote_id(self, voter_linked_organization_we_vote_id,
-                                                                auto_followed_from_twitter_suggestion=False):
+    def retrieve_follow_organization_by_own_organization_we_vote_id(self, organization_we_vote_id,
+                                                                    auto_followed_from_twitter_suggestion=False):
         # Retrieve a list of followed organizations entries by voter_linked_organization_we_vote_id for voter guides
         follow_organization_list_found = False
         following_status = FOLLOWING
-        follow_organization_list = {}
+        follow_organization_list = []
         try:
             follow_organization_list = FollowOrganization.objects.all()
             follow_organization_list = follow_organization_list.filter(
-                voter_linked_organization_we_vote_id=voter_linked_organization_we_vote_id)
+                voter_linked_organization_we_vote_id=organization_we_vote_id)
             follow_organization_list = follow_organization_list.filter(following_status=following_status)
             if auto_followed_from_twitter_suggestion:
                 follow_organization_list = follow_organization_list.filter(
@@ -844,7 +847,7 @@ class FollowOrganizationList(models.Model):
         if follow_organization_list_found:
             return follow_organization_list
         else:
-            follow_organization_list = {}
+            follow_organization_list = []
             return follow_organization_list
 
     def retrieve_ignore_organization_by_voter_id(self, voter_id):
@@ -875,7 +878,21 @@ class FollowOrganizationList(models.Model):
                 voter_id, auto_followed_from_twitter_suggestion)
         follow_organization_list_simple_array = []
         if len(follow_organization_list):
+            voter_manager = VoterManager()
+            voter_linked_organization_we_vote_id = \
+                voter_manager.fetch_linked_organization_we_vote_id_from_local_id(voter_id)
             for follow_organization in follow_organization_list:
+                # Heal the data by making sure the voter's linked_organization_we_vote_id exists and is accurate
+                if positive_value_exists(voter_linked_organization_we_vote_id) \
+                    and voter_linked_organization_we_vote_id != \
+                                follow_organization.voter_linked_organization_we_vote_id:
+                    try:
+                        follow_organization.voter_linked_organization_we_vote_id = voter_linked_organization_we_vote_id
+                        follow_organization.save()
+                    except Exception as e:
+                        status = 'FAILED_TO_UPDATE_FOLLOW_ISSUE-voter_id ' + str(voter_id)
+                        handle_record_not_saved_exception(e, logger=logger, exception_message_optional=status)
+
                 if return_we_vote_id:
                     follow_organization_list_simple_array.append(follow_organization.organization_we_vote_id)
                 else:
@@ -883,12 +900,12 @@ class FollowOrganizationList(models.Model):
         return follow_organization_list_simple_array
 
     def retrieve_followed_organization_by_organization_we_vote_id_simple_id_array(
-            self, voter_linked_organization_we_vote_id, return_we_vote_id=False,
+            self, organization_we_vote_id, return_we_vote_id=False,
             auto_followed_from_twitter_suggestion=False):
         follow_organization_list_manager = FollowOrganizationList()
         follow_organization_list = \
             follow_organization_list_manager.retrieve_follow_organization_by_own_organization_we_vote_id(
-                voter_linked_organization_we_vote_id, auto_followed_from_twitter_suggestion)
+                organization_we_vote_id, auto_followed_from_twitter_suggestion)
         follow_organization_list_simple_array = []
         if len(follow_organization_list):
             for follow_organization in follow_organization_list:

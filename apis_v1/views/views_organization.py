@@ -27,7 +27,7 @@ def organization_count_view(request):
     return organization_count()
 
 
-def organization_follow_api_view(request):
+def organization_follow_api_view(request):  # organizationFollow
     voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
     organization_id = request.GET.get('organization_id', 0)
     organization_we_vote_id = request.GET.get('organization_we_vote_id', '')
@@ -37,7 +37,7 @@ def organization_follow_api_view(request):
                                organization_follow_based_on_issue=organization_follow_based_on_issue)
 
 
-def organization_stop_following_api_view(request):
+def organization_stop_following_api_view(request):  # organizationStopFollowing
     voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
     organization_id = request.GET.get('organization_id', 0)
     organization_we_vote_id = request.GET.get('organization_we_vote_id', '')
@@ -45,7 +45,7 @@ def organization_stop_following_api_view(request):
                                        organization_we_vote_id=organization_we_vote_id)
 
 
-def organization_follow_ignore_api_view(request):
+def organization_follow_ignore_api_view(request):  # organizationFollowIgnore
     voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
     organization_id = request.GET.get('organization_id', 0)
     organization_we_vote_id = request.GET.get('organization_we_vote_id', '')

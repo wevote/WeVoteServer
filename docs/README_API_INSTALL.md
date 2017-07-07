@@ -25,6 +25,8 @@ and you should allocate 2 CPUs and 4 GB RAM to the virtual machine.
 
 6. [Set up Initial Data](README_API_INSTALL_SETUP_DATA.md)
 
+[Troubleshooting](README_INSTALLATION_TROUBLESHOOTING.md)
+
 [Working with WeVoteServer day-to-day](README_WORKING_WITH_WE_VOTE_SERVER.md)
 
 [Back to root README](../README.md)
