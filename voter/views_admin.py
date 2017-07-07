@@ -739,8 +739,8 @@ def voter_list_view(request):
     voter_id = convert_to_int(voter_id)
 
     messages_on_stage = get_messages(request)
-    voter_list = Voter.objects.order_by('-is_admin', '-is_verified_volunteer', 'facebook_email', 'twitter_screen_name',
-                                        'last_name', 'first_name')
+    voter_list = Voter.objects.order_by('-is_admin', '-is_verified_volunteer', 'email', 'twitter_screen_name',
+                                        'linked_organization_we_vote_id', 'facebook_email', 'last_name', 'first_name')
     voter_list = voter_list[:200]
 
     template_values = {

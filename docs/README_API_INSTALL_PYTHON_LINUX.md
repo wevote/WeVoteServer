@@ -14,18 +14,10 @@ Perhaps the most flexible way to install Django on your system is with the virtu
 We will begin by installing pip from the Ubuntu repositories. Refresh your local package index before starting:
 
     $ sudo apt-get update
-    
-If you plan on using version 2 of Python, you can install pip by typing:
-
-    $ sudo apt-get install python-pip
 
 If, instead, you plan on using version 3 of Python, you can install pip by typing:
 
     $ sudo apt-get install python3-pip
-    
-Once pip is installed, you can use it to install the virtualenv package. If you installed the Python 2 pip, you can type:
-
-    $ sudo pip install virtualenv
 
 If you installed the Python 3 version of pip, you should type this instead:
 
@@ -50,14 +42,14 @@ Now activate this new virtual environment for WeVoteServer:
 
 ## Installing Python 3 on Linux
 
-    (WeVoteServer) $ pip install django-toolbelt
-    (WeVoteServer) $ pip install --upgrade pip
-    (WeVoteServer) $ pip install -r requirements.txt
+    (WeVoteServer) $ pip3 install django-toolbelt
+    (WeVoteServer) $ pip3 install --upgrade pip
+    (WeVoteServer) $ pip3 install -r requirements.txt
     (WeVoteServer) $ python3 -m pip install pyopenssl pyasn1 ndg-httpsclient
 
 Test with this command:
     
-    (WeVoteServer) $ python manage.py runserver
+    (WeVoteServer) $ python3 manage.py runserver
 
     
 [NEXT: 4. Set up Initial Data](README_API_INSTALL_SETUP_DATA.md)

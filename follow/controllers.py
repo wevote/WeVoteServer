@@ -26,9 +26,13 @@ def duplicate_follow_entries_to_another_voter(from_voter_id, from_voter_we_vote_
     follow_entries_duplicated = 0
     follow_entries_not_duplicated = 0
     organization_manager = OrganizationManager()
+    voter_manager = VoterManager()
     follow_organization_list = FollowOrganizationList()
     follow_organization_manager = FollowOrganizationManager()
     from_follow_list = follow_organization_list.retrieve_follow_organization_by_voter_id(from_voter_id)
+
+    to_voter_linked_organization_we_vote_id = \
+        voter_manager.fetch_linked_organization_we_vote_id_from_local_id(to_voter_id)
 
     for from_follow_entry in from_follow_list:
         heal_data = False
@@ -41,6 +45,10 @@ def duplicate_follow_entries_to_another_voter(from_voter_id, from_voter_we_vote_
             from_follow_entry.organization_we_vote_id = organization_manager.fetch_we_vote_id_from_local_id(
                 from_follow_entry.organization_id)
             heal_data = True
+        if not positive_value_exists(from_follow_entry.voter_linked_organization_we_vote_id):
+            from_follow_entry.voter_linked_organization_we_vote_id = \
+                voter_manager.fetch_linked_organization_we_vote_id_from_local_id(from_voter_id)
+            heal_data = True
 
         if heal_data:
             try:
@@ -52,13 +60,15 @@ def duplicate_follow_entries_to_another_voter(from_voter_id, from_voter_we_vote_
         existing_entry_results = follow_organization_manager.retrieve_follow_organization(
             0, to_voter_id, from_follow_entry.organization_id, from_follow_entry.organization_we_vote_id)
         if not existing_entry_results['follow_organization_found']:
-            # Change the voter_id and voter_we_vote_id
+            # Change the voter_id and voter_linked_organization_we_vote_id, and then save a new entry.
+            #  This will not overwrite existing from_follow_entry.
             try:
                 from_follow_entry.id = None  # Reset the id so a new entry is created
                 from_follow_entry.pk = None
                 from_follow_entry.voter_id = to_voter_id
                 # We don't currently store follow entries by we_vote_id
                 # from_follow_entry.voter_we_vote_id = to_voter_we_vote_id
+                from_follow_entry.voter_linked_organization_we_vote_id = to_voter_linked_organization_we_vote_id
                 from_follow_entry.save()
                 follow_entries_duplicated += 1
             except Exception as e:
@@ -224,7 +234,7 @@ def voter_issue_follow_for_api(voter_device_id, issue_we_vote_id, follow_value, 
                                                                            issue_we_vote_id)
         elif ignore_value:
             result = follow_issue_manager.toggle_ignore_voter_following_issue(voter_we_vote_id, issue_id,
-                                                                            issue_we_vote_id)
+                                                                              issue_we_vote_id)
 
     if not result:
         new_result = {

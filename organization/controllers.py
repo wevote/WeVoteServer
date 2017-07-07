@@ -256,6 +256,7 @@ def organization_follow_all(voter_device_id, organization_id, organization_we_vo
             'voter_device_id': voter_device_id,
             'organization_id': organization_id,
             'organization_follow_based_on_issue': organization_follow_based_on_issue,
+            'voter_linked_organization_we_vote_id': "",
         }
         return HttpResponse(json.dumps(json_data), content_type='application/json')
 
@@ -267,6 +268,7 @@ def organization_follow_all(voter_device_id, organization_id, organization_we_vo
             'voter_device_id': voter_device_id,
             'organization_id': organization_id,
             'organization_follow_based_on_issue': organization_follow_based_on_issue,
+            'voter_linked_organization_we_vote_id': "",
         }
         return HttpResponse(json.dumps(json_data), content_type='application/json')
 
@@ -279,6 +281,7 @@ def organization_follow_all(voter_device_id, organization_id, organization_we_vo
             'voter_device_id': voter_device_id,
             'organization_id': organization_id,
             'organization_follow_based_on_issue': organization_follow_based_on_issue,
+            'voter_linked_organization_we_vote_id': "",
         }
         return HttpResponse(json.dumps(json_data), content_type='application/json')
 
@@ -293,6 +296,7 @@ def organization_follow_all(voter_device_id, organization_id, organization_we_vo
             'voter_device_id': voter_device_id,
             'organization_id': organization_id,
             'organization_follow_based_on_issue': organization_follow_based_on_issue,
+            'voter_linked_organization_we_vote_id': voter_linked_organization_we_vote_id,
         }
         return HttpResponse(json.dumps(json_data), content_type='application/json')
 
@@ -347,6 +351,7 @@ def organization_follow_all(voter_device_id, organization_id, organization_we_vo
         'organization_id': organization_id,
         'organization_we_vote_id': organization_we_vote_id,
         'organization_follow_based_on_issue': organization_follow_based_on_issue,
+        'voter_linked_organization_we_vote_id': voter_linked_organization_we_vote_id,
     }
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 

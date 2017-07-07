@@ -971,7 +971,8 @@ def retrieve_voter_guides_to_follow_generic_for_api(voter_id, search_string, fil
 
 def voter_guides_followed_retrieve_for_api(voter_device_id, maximum_number_to_retrieve=0):
     """
-    Start with the organizations followed and return a list of voter_guides. voterGuidesFollowedRetrieve
+    voter_guides_followed_retrieve_for_api(voter_device_id, maximum_number_to_retrieve=0)  # voterGuidesFollowedRetrieve
+    Start with the organizations followed and return a list of voter_guides.
     See also organizations_followed_for_api, which returns a list of organizations.
 
     :param voter_device_id:
@@ -1050,7 +1051,7 @@ def voter_guides_followed_retrieve_for_api(voter_device_id, maximum_number_to_re
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 
 
-def voter_guides_followed_by_organization_retrieve_for_api(voter_device_id,
+def voter_guides_followed_by_organization_retrieve_for_api(voter_device_id,  # voterGuidesFollowedByOrganizationRetrieve
                                                            voter_linked_organization_we_vote_id,
                                                            maximum_number_to_retrieve=0):
     """
@@ -1064,22 +1065,24 @@ def voter_guides_followed_by_organization_retrieve_for_api(voter_device_id,
     """
     if not positive_value_exists(voter_device_id):
         json_data = {
-            'status': 'VALID_VOTER_DEVICE_ID_MISSING',
-            'success': False,
-            'voter_device_id': voter_device_id,
-            'maximum_number_to_retrieve': maximum_number_to_retrieve,
-            'voter_guides': [],
+            'status':                       'VALID_VOTER_DEVICE_ID_MISSING',
+            'success':                      False,
+            'voter_device_id':              voter_device_id,
+            'maximum_number_to_retrieve':   maximum_number_to_retrieve,
+            'voter_guides':                 [],
+            'organization_we_vote_id':      voter_linked_organization_we_vote_id
         }
         return HttpResponse(json.dumps(json_data), content_type='application/json')
 
     voter_id = fetch_voter_id_from_voter_device_link(voter_device_id)
     if not positive_value_exists(voter_id):
         json_data = {
-            'status': 'VALID_VOTER_ID_MISSING',
-            'success': False,
-            'voter_device_id': voter_device_id,
-            'maximum_number_to_retrieve': maximum_number_to_retrieve,
-            'voter_guides': [],
+            'status':                       'VALID_VOTER_ID_MISSING',
+            'success':                      False,
+            'voter_device_id':              voter_device_id,
+            'maximum_number_to_retrieve':   maximum_number_to_retrieve,
+            'voter_guides':                 [],
+            'organization_we_vote_id':      voter_linked_organization_we_vote_id
         }
         return HttpResponse(json.dumps(json_data), content_type='application/json')
 
@@ -1087,11 +1090,12 @@ def voter_guides_followed_by_organization_retrieve_for_api(voter_device_id,
     results = voter_manager.retrieve_voter_by_id(voter_id)
     if not results['voter_found']:
         json_data = {
-            'status': 'VOTER_NOT_FOUND',
-            'success': False,
-            'voter_device_id': voter_device_id,
-            'maximum_number_to_retrieve': maximum_number_to_retrieve,
-            'voter_guides': [],
+            'status':                       'VOTER_NOT_FOUND',
+            'success':                      False,
+            'voter_device_id':              voter_device_id,
+            'maximum_number_to_retrieve':   maximum_number_to_retrieve,
+            'voter_guides':                 [],
+            'organization_we_vote_id':      voter_linked_organization_we_vote_id
         }
         return HttpResponse(json.dumps(json_data), content_type='application/json')
 
@@ -1170,17 +1174,18 @@ def voter_guides_followed_by_organization_retrieve_for_api(voter_device_id,
         success = False
 
     json_data = {
-        'status': status,
-        'success': success,
-        'voter_device_id': voter_device_id,
-        'maximum_number_to_retrieve': maximum_number_to_retrieve,
-        'voter_guides': voter_guides,
+        'status':                       status,
+        'success':                      success,
+        'voter_device_id':              voter_device_id,
+        'maximum_number_to_retrieve':   maximum_number_to_retrieve,
+        'voter_guides':                 voter_guides,
+        'organization_we_vote_id':      voter_linked_organization_we_vote_id
     }
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 
 
 def voter_guide_followers_retrieve_for_api(voter_device_id, organization_we_vote_id,
-                                            maximum_number_to_retrieve=0):
+                                           maximum_number_to_retrieve=0):
     """
     Start with the organizations followed and return a list of voter_guides. voterGuidesFollowedByOrganizationRetrieve
     See also organizations_followed_for_api, which returns a list of organizations.
@@ -1268,7 +1273,7 @@ def voter_guide_followers_retrieve_for_api(voter_device_id, organization_we_vote
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 
 
-def retrieve_voter_guides_followed(voter_id):  # voterGuidesFollowedRetrieve
+def retrieve_voter_guides_followed(voter_id):
     voter_guide_list_found = False
 
     follow_organization_list_manager = FollowOrganizationList()
@@ -1301,11 +1306,11 @@ def retrieve_voter_guides_followed(voter_id):  # voterGuidesFollowedRetrieve
     return results
 
 
-def retrieve_voter_guides_followed_by_organization_we_vote_id(voter_linked_organization_we_vote_id):
-    # voterGuidesFollowedByOrganizationRetrieve
+def retrieve_voter_guides_followed_by_organization_we_vote_id(organization_we_vote_id):
+    # retrieve_voter_guides_followed_by_organization_we_vote_id() voterGuidesFollowedByOrganizationRetrieve
     """
     Retrieve voter guide followed by an organization with organization_we_vote_id
-    :param voter_linked_organization_we_vote_id:
+    :param organization_we_vote_id:
     :return:
     """
     voter_guide_list_found = False
@@ -1314,7 +1319,7 @@ def retrieve_voter_guides_followed_by_organization_we_vote_id(voter_linked_organ
     return_we_vote_id = True
     organization_we_vote_ids_followed = \
         follow_organization_list_manager.retrieve_followed_organization_by_organization_we_vote_id_simple_id_array(
-            voter_linked_organization_we_vote_id, return_we_vote_id)
+            organization_we_vote_id, return_we_vote_id)
 
     voter_guide_list_object = VoterGuideListManager()
     results = voter_guide_list_object.retrieve_voter_guides_by_organization_list(

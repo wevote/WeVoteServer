@@ -18,8 +18,14 @@ from wevote_settings.models import fetch_next_we_vote_id_last_voter_integer, fet
 
 
 logger = wevote_functions.admin.get_logger(__name__)
-SUPPORT_OPPOSE_MODAL_SHOWN = 1
-BALLOT_INTRO_MODAL_SHOWN = 2
+SUPPORT_OPPOSE_MODAL_SHOWN = 1  # When this bit is set, we know the voter has seen the initial support/oppose modal
+BALLOT_INTRO_MODAL_SHOWN = 2  # When this bit is set, we know the voter has seen the initial ballot introduction modal
+BALLOT_INTRO_ISSUES_COMPLETED = 4  # When this bit is set, the voter follows at least one issue (no need for intro)
+BALLOT_INTRO_ORGANIZATIONS_COMPLETED = 8  # ...the voter follows at least one organization (no need for intro)
+BALLOT_INTRO_POSITIONS_COMPLETED = 16  # ...the voter has taken at least one position (no need for intro)
+BALLOT_INTRO_FRIENDS_COMPLETED = 32  # ...the voter has reached out to at least one friend (no need for intro)
+BALLOT_INTRO_SHARE_COMPLETED = 64  # ...the voter has shared at least one item (no need for intro)
+BALLOT_INTRO_VOTE_COMPLETED = 128  # ...the voter learned about casting their vote (no need for intro)
 
 
 # This way of extending the base user described here:
@@ -265,6 +271,14 @@ class VoterManager(BaseUserManager):
             voter_twitter_handle = ''
 
         return voter_twitter_handle
+
+    def fetch_linked_organization_we_vote_id_from_local_id(self, voter_id):
+        results = self.retrieve_voter_by_id(voter_id)
+        if results['voter_found']:
+            voter = results['voter']
+            return voter.linked_organization_we_vote_id
+        else:
+            return None
 
     def fetch_voter_count_with_sign_in(self):
         or_filter = True
@@ -1707,11 +1721,27 @@ class Voter(AbstractBaseUser):
     def unset_interface_status_flags(self, flag_integer_to_unset):
         self.interface_status_flags = ~flag_integer_to_unset & self.interface_status_flags
 
+    def is_interface_status_flag_set(self, flag_integer):
+        """
+        Is the interface_status flag (or flags) specified by flag_integer set for this voter?
+        :param flag_integer:
+        :return:
+        """
+        return flag_integer & self.interface_status_flags
+
     def set_notification_settings_flags(self, notification_flag_integer_to_set):
         self.notification_settings_flags = notification_flag_integer_to_set | self.notification_settings_flags
 
     def unset_notification_settings_flags(self, notification_flag_integer_to_unset):
         self.notification_settings_flags = ~notification_flag_integer_to_unset & self.notification_settings_flags
+
+    def is_notification_status_flag_set(self, flag_integer):
+        """
+        Is the notification_status flag (or flags) specified by flag_integer set for this voter?
+        :param flag_integer:
+        :return:
+        """
+        return flag_integer & self.notification_settings_flags
 
 
 class VoterDeviceLink(models.Model):

@@ -35,14 +35,6 @@
              </div>
           </div>
       </div>
-      <div class="devsite-collapsible-section">
-        <div class="devsite-header-background devsite-full-site-width">
-        <div class="devsite-doc-set-nav-row devsite-full-site-width">
-              <li class="devsite-doc-set-nav-tab-container">
-              </li>
-         </div>
-         </div>
-      </div>
   </header>
 
 
@@ -51,55 +43,11 @@
 
 <div class="devsite-main-content clearfix">
 <a href="{% url 'apis_v1:apisIndex'%}">< back to index</a>
-<h1 class="devsite-page-title" itemprop="name">
-<p>
-    {{ api_introduction|safe }}
-    {% load template_filters %}
-
-        <form name="{{ api_name }}" method="{% if get_or_post == "GET" %}get{% else %}post{% endif %}" action="{% url try_now_link %}" target="_blank">
-        {% csrf_token %}
-            {% for query_parameter in required_query_parameter_list %}
-                {% if query_parameter.name != 'api_key' %}
-                    {% if query_parameter.value == 'string' or query_parameter.value == 'integer' or query_parameter.value == 'long' %}
-                    {{ query_parameter.name }}: <input type="text" name="{{ query_parameter.name }}" maxlength="255" size="30"
-                        {% if query_parameter.name in try_now_link_variables_dict %}
-                              value="{{ try_now_link_variables_dict|get_value_from_dict:query_parameter.name }}"
-                        {% elif query_parameter.name == 'voter_device_id' %}
-                              value="{{ voter_api_device_id }}"
-                        {% endif %}>
-                    {% elif query_parameter.value == 'boolean' %}
-                        {{ query_parameter.name }}: <br />
-                        <input type="radio" name="{{ query_parameter.name }}" value="true" > True<br />
-                        <input type="radio" name="{{ query_parameter.name }}" value="false" > False
-                    {% endif %}
-                    <br />
-                {% endif %}
-            {% endfor %}
-            {% for query_parameter in optional_query_parameter_list %}
-                {% if query_parameter.name != 'api_key' %}
-                    {% if query_parameter.value == 'string' or query_parameter.value == 'integer' or query_parameter.value == 'long' %}
-                    {{ query_parameter.name }}: <input  type="text" name="{{ query_parameter.name }}" maxlength="255" size="30"
-                        {% if query_parameter.name in try_now_link_variables_dict %}
-                              value="{{ try_now_link_variables_dict|get_value_from_dict:query_parameter.name }}"
-                        {% elif query_parameter.name == 'voter_device_id' %}
-                              value="{{ voter_api_device_id }}"
-                        {% endif %}>
-                    {% elif query_parameter.value == 'boolean' %}
-                        {{ query_parameter.name }}: <br />
-                        <input type="radio" name="{{ query_parameter.name }}" value="true" > True<br />
-                        <input type="radio" name="{{ query_parameter.name }}" value="false" > False
-                    {% endif %}
-                    <br />
-                {% endif %}
-            {% endfor %}
-    <br>
-            <input type="submit" value="Try it now">
-        </form>
-    </p>
+{#<h1 class="devsite-page-title" itemprop="name"></h1>#}
 
 <br>
 <h2>HTTP request</h2>
-<p>{{ get_or_post }} {{ url_root }}/apis/v1/{{ api_slug }}</p>
+<p>{{ get_or_post }} {{ url_root }}/apis/v1/{{ api_slug }} (<a href="#tryitnow">Jump to "Try It Now"</a>)</p>
 
 
 {% if required_query_parameter_list %}
@@ -169,6 +117,77 @@
         {% endfor %}
     </table>
 {% endif %}
+<a name="tryitnow"></a>
+<br />
+
+<h3>Try It Now: API Variables</h3>
+<p>
+    {{ api_introduction|safe }}
+    {% load template_filters %}
+
+        <form name="{{ api_name }}" method="{% if get_or_post == "GET" %}get{% else %}post{% endif %}" action="{% url try_now_link %}" target="_blank">
+        {% csrf_token %}
+            <table>
+                <tr>
+                    <td>Parameter name</td>
+                    <td>Value</td>
+                    <td>&nbsp;</td>
+                </tr>
+            {% for query_parameter in required_query_parameter_list %}
+                {% if query_parameter.name != 'api_key' %}
+                    {% if query_parameter.value == 'string' or query_parameter.value == 'integer' or query_parameter.value == 'long' %}
+                        <tr>
+                            <td>{{ query_parameter.name }}: </td>
+                            <td colspan="2">
+                                <input type="text" name="{{ query_parameter.name }}" maxlength="255" size="30"
+                                {% if query_parameter.name in try_now_link_variables_dict %}
+                                      value="{{ try_now_link_variables_dict|get_value_from_dict:query_parameter.name }}"
+                                {% elif query_parameter.name == 'voter_device_id' %}
+                                      value="{{ voter_api_device_id }}"
+                                {% endif %}>
+                            </td>
+                        </tr>
+                    {% elif query_parameter.value == 'boolean' %}
+                        <tr>
+                            <td>{{ query_parameter.name }}: </td>
+                            <td colspan="2">
+                                <input type="radio" name="{{ query_parameter.name }}" value="true" > True<br />
+                                <input type="radio" name="{{ query_parameter.name }}" value="false" > False
+                            </td>
+                        </tr>
+                    {% endif %}
+                {% endif %}
+            {% endfor %}
+            {% for query_parameter in optional_query_parameter_list %}
+                {% if query_parameter.name != 'api_key' %}
+                    {% if query_parameter.value == 'string' or query_parameter.value == 'integer' or query_parameter.value == 'long' %}
+                        <tr>
+                            <td>{{ query_parameter.name }}: </td>
+                            <td colspan="2">
+                                <input  type="text" name="{{ query_parameter.name }}" maxlength="255" size="30"
+                                {% if query_parameter.name in try_now_link_variables_dict %}
+                                      value="{{ try_now_link_variables_dict|get_value_from_dict:query_parameter.name }}"
+                                {% elif query_parameter.name == 'voter_device_id' %}
+                                      value="{{ voter_api_device_id }}"
+                                {% endif %}>
+                            </td>
+                        </tr>
+                    {% elif query_parameter.value == 'boolean' %}
+                        <tr>
+                            <td>{{ query_parameter.name }}: </td>
+                            <td colspan="2">
+                                <input type="radio" name="{{ query_parameter.name }}" value="true" > True<br />
+                                <input type="radio" name="{{ query_parameter.name }}" value="false" > False
+                            </td>
+                        </tr>
+                    {% endif %}
+                {% endif %}
+            {% endfor %}
+            </table>
+    <br>
+            <input type="submit" value="Try it now"> (opens in new window)
+        </form>
+    </p>
 
 </body>
 </html>

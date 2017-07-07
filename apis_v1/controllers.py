@@ -36,7 +36,7 @@ def organization_count():
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 
 
-def organization_follow(voter_device_id, organization_id=0, organization_we_vote_id='',
+def organization_follow(voter_device_id, organization_id=0, organization_we_vote_id='',  # organizationFollow
                         organization_follow_based_on_issue=None):
     """
     Save that the voter wants to follow this org
