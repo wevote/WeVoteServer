@@ -3,7 +3,7 @@
 # -*- coding: UTF-8 -*-
 
 from django.db import models
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from exception.models import handle_exception, handle_record_found_more_than_one_exception
 import wevote_functions.admin
 from wevote_functions.functions import positive_value_exists
@@ -135,7 +135,25 @@ class DonationJournal(models.Model):
     ip_address = models.GenericIPAddressField(verbose_name="user ip address", protocol='both', unpack_ipv4=False,
                                               null=True, blank=True, unique=False)
     last_charged = models.DateTimeField(verbose_name="stripe subscription most recent charge timestamp", auto_now=False,
-                                   auto_now_add=False, null=True)
+                                        auto_now_add=False, null=True)
+
+
+class DonationInvoice(models.Model):
+    """
+    This is a generated table that caches donation invoices, since they contain both the invoice id and subscription id
+    that is necessary to associate the charge succeeded stripe event with a subscription
+    """
+    subscription_id = models.CharField(verbose_name="unique stripe subscription id",
+                                  max_length=64, default="", null=True, blank=True)
+    donation_plan_id = models.CharField(verbose_name=
+        "plan id for one voter and an amount, can have duplicates if voter has multiple subscriptions for the same amount",
+                                        default="", max_length=255, null=False, blank=False)
+    invoice_id = models.CharField(verbose_name="unique stripe invoice id for one payment",
+                                  max_length=64, default="", null=True, blank=True)
+    invoice_date = models.DateTimeField(verbose_name="creation date for this stripe invoice", auto_now=False,
+                              auto_now_add=False, null=True)
+    stripe_customer_id = models.CharField(verbose_name="stripe unique customer id", max_length=32,
+                                          unique=False, null=False, blank=False)
 
 
 class DonationManager(models.Model):
@@ -143,7 +161,6 @@ class DonationManager(models.Model):
     def create_donate_link_to_voter(stripe_customer_id, voter_we_vote_id):
         """"
 
-        :param self:
         :param stripe_customer_id:
         :param voter_we_vote_id:
         :return:
@@ -250,7 +267,6 @@ class DonationManager(models.Model):
 
         except stripe.error.StripeError:
             pass
-            # TODO specific error handling
 
         if not positive_value_exists(stripe_plan_id):
             # if plan doesn't exist in stripe, we need to create it (note it's already been created in database)
@@ -365,14 +381,8 @@ class DonationManager(models.Model):
         :param email:
         :return:
         """
-        # subscription_entry = object
-        subscription = object
-        success = False
 
-        # timestamp = str(time.time()).split('.')[0]
-        # donation_plan_id = voter_we_vote_id + "-" + str(donation_amount) + '-monthly-' + timestamp
-
-        donation_plan_id = voter_we_vote_id +"-monthly-" + str(donation_amount)
+        donation_plan_id = voter_we_vote_id + "-monthly-" + str(donation_amount)
 
         donation_plan_id_query = self.retrieve_or_create_recurring_donation_plan(voter_we_vote_id, donation_amount)
         if donation_plan_id_query['success']:
@@ -731,3 +741,77 @@ class DonationManager(models.Model):
         except DonationJournal.DoesNotExist:
             logger.error("update_journal_entry_for_refund_completed row does not exist for charge " + charge)
         return "False"
+
+    @staticmethod
+    def update_donation_invoice(subscription_id, donation_plan_id, invoice_id, invoice_date, customer_id):
+        """
+        Store the invoice for later use, when the charge.succeeded comes through
+        :param subscription_id:
+        :param donation_plan_id:
+        :param invoice_id:
+        :param invoice_date:
+        :param customer_id:
+        :return:
+        """
+        debug = logger.debug("update_donation_invoice: " + donation_plan_id + " " + subscription_id + " " + invoice_id)
+
+        try:
+            new_invoice_entry = DonationInvoice.objects.create(
+                subscription_id=subscription_id, donation_plan_id=donation_plan_id, invoice_id=invoice_id,
+                invoice_date=invoice_date, stripe_customer_id=customer_id)
+
+            success = True
+            status = 'NEW_INVOICE_ENTRY_SAVED'
+
+        except Exception as e:
+            success = False
+
+        saved_results = {
+            'success': success,
+            'status': status,
+            'history_entry_saved': new_invoice_entry
+        }
+        return saved_results
+
+    @staticmethod
+    def update_subscription_with_latest_charge_date(invoice_id, invoice_date):
+        """
+        Get the last_charged into the subscription row in the DonationJournal
+        :param: invoice_id:
+        :param invoice_date:
+        :return:
+        """
+
+        # First find the subscription_id from the cached invoices
+        row_invoice = DonationInvoice.objects.get(invoice_id=invoice_id)
+        try:
+            subscription_id = row_invoice.subscription_id
+        except Exception as e:
+            # Sometimes the payment, comes a second before the invoice (yuck), so try one more time in 10 seconds
+            logger.debug("update_subscription_with_latest_charge_date: trying again after 10 sec for " + invoice_id)
+            time.sleep(10)
+            row_invoice = DonationInvoice.objects.get(invoice_id=invoice_id)
+            subscription_id = row_invoice.subscription_id
+
+        try:
+            # Then find the subscription in the DonationJournal row that matches the subscription_id
+            row_subscription = DonationJournal.objects.get(subscription_id=subscription_id,
+                                                           record_enum="SUBSCRIPTION_SETUP_AND_INITIAL")
+            row_subscription.last_charged = datetime.fromtimestamp(invoice_date, timezone.utc)
+            row_subscription.save()
+            logger.debug("update_subscription_with_latest_charge_date: " + invoice_id + " " +
+                        subscription_id + "  journal row: " + str(row_subscription.id))
+
+            # Finally, remove older invoice records ... the invoice records are only needed for a minute or two.
+            # Save 10 days worth of invoice, in case we need to diagnose a problem.
+            how_many_days= 10
+            queryset = DonationInvoice.objects.filter(invoice_date__lte=datetime.fromtimestamp(
+                int(time.time()), timezone.utc) - timedelta(days=how_many_days))
+            logger.info("update_subscription_with_latest_charge_date: DELETED " + str(queryset.count()) +
+                        " invoice rows that were older than " + str(how_many_days) + " days old.")
+            queryset.delete()
+
+        except Exception as e:
+            handle_exception(e, logger=logger,
+                             exception_message="update_subscription_with_latest_charge_date" + str(e))
+        return
