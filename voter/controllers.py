@@ -18,6 +18,7 @@ import json
 from organization.controllers import move_organization_to_another_complete
 from organization.models import OrganizationListManager, OrganizationManager
 from position.controllers import duplicate_positions_to_another_voter, move_positions_to_another_voter
+from position.models import PositionListManager
 from twitter.models import TwitterLinkToOrganization, TwitterLinkToVoter, TwitterUserManager
 from voter_guide.controllers import duplicate_voter_guides
 import wevote_functions.admin
@@ -1105,13 +1106,18 @@ def voter_merge_two_accounts_for_api(  # voterMergeTwoAccounts
         success = True
         status += " MERGE_TWO_ACCOUNTS_VOTER_DEVICE_LINK_UPDATED"
 
+    # Data healing scripts
+    position_list_manager = PositionListManager()
+    repair_results = position_list_manager.repair_all_positions_for_voter(new_owner_voter.id)
+    status += repair_results['status']
+
     results = {
-        'status': status,
-        'success': success,
-        'voter_device_id': voter_device_id,
-        'current_voter_found': current_voter_found,
-        'email_owner_voter_found': email_owner_voter_found,
-        'facebook_owner_voter_found': facebook_owner_voter_found,
+        'status':                       status,
+        'success':                      success,
+        'voter_device_id':              voter_device_id,
+        'current_voter_found':          current_voter_found,
+        'email_owner_voter_found':      email_owner_voter_found,
+        'facebook_owner_voter_found':   facebook_owner_voter_found,
         'invitation_owner_voter_found': invitation_owner_voter_found,
     }
 
