@@ -37,10 +37,6 @@ def duplicate_follow_entries_to_another_voter(from_voter_id, from_voter_we_vote_
     for from_follow_entry in from_follow_list:
         heal_data = False
         # See if we need to heal the data
-        if positive_value_exists(from_voter_we_vote_id) and \
-                not positive_value_exists(from_follow_entry.voter_we_vote_id):
-            from_follow_entry.voter_we_vote_id = from_voter_we_vote_id
-            heal_data = True
         if not positive_value_exists(from_follow_entry.organization_we_vote_id):
             from_follow_entry.organization_we_vote_id = organization_manager.fetch_we_vote_id_from_local_id(
                 from_follow_entry.organization_id)
@@ -67,7 +63,6 @@ def duplicate_follow_entries_to_another_voter(from_voter_id, from_voter_we_vote_
                 from_follow_entry.pk = None
                 from_follow_entry.voter_id = to_voter_id
                 # We don't currently store follow entries by we_vote_id
-                # from_follow_entry.voter_we_vote_id = to_voter_we_vote_id
                 from_follow_entry.voter_linked_organization_we_vote_id = to_voter_linked_organization_we_vote_id
                 from_follow_entry.save()
                 follow_entries_duplicated += 1
@@ -140,11 +135,6 @@ def duplicate_organization_followers_to_another_organization(from_organization_i
     for from_follow_entry in from_follow_list:
         heal_data = False
         # See if we need to heal the data
-        if positive_value_exists(from_follow_entry.voter_id) and \
-                not positive_value_exists(from_follow_entry.voter_we_vote_id):
-            from_follow_entry.voter_we_vote_id = \
-                voter_manager.fetch_we_vote_id_from_local_id(from_follow_entry.voter_id)
-            heal_data = True
         if not positive_value_exists(from_follow_entry.organization_we_vote_id):
             from_follow_entry.organization_we_vote_id = organization_manager.fetch_we_vote_id_from_local_id(
                 from_follow_entry.organization_id)
@@ -175,11 +165,6 @@ def duplicate_organization_followers_to_another_organization(from_organization_i
     for from_follow_entry in from_follow_list:
         heal_data = False
         # See if we need to heal the data
-        if positive_value_exists(from_follow_entry.voter_id) and \
-                not positive_value_exists(from_follow_entry.voter_we_vote_id):
-            from_follow_entry.voter_we_vote_id = \
-                voter_manager.fetch_we_vote_id_from_local_id(from_follow_entry.voter_id)
-            heal_data = True
         if not positive_value_exists(from_follow_entry.organization_we_vote_id):
             from_follow_entry.organization_we_vote_id = organization_manager.fetch_we_vote_id_from_local_id(
                 from_follow_entry.organization_id)

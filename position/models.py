@@ -3905,8 +3905,6 @@ class PositionManager(models.Model):
 
                 voter_manager = VoterManager()
                 results = voter_manager.retrieve_voter_by_id(voter_id)
-                voter_we_vote_id = ""
-                linked_organization_we_vote_id = ""
                 if results['voter_found']:
                     voter = results['voter']
                     voter_we_vote_id = voter.we_vote_id
