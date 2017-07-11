@@ -341,6 +341,7 @@ def donation_history_for_a_voter(voter_we_vote_id):
                 'subscription_canceled_at': str(donation_row.subscription_canceled_at),
                 'subscription_ended_at': str(donation_row.subscription_ended_at),
                 'refund_days_limit': refund_days,
+                'last_charged': str(donation_row.last_charged),
             }
             simple_donation_list.append(json_data)
 
@@ -354,6 +355,7 @@ def donation_process_stripe_webhook_event(event):
     :return:
     """
     logger.info("WEBHOOK received: donation_process_stripe_webhook_event: " + event.type)
+    # write_event_to_local_file(event);
 
     if event['type'] == 'charge.succeeded':
         return donation_process_charge(event)
@@ -365,9 +367,18 @@ def donation_process_stripe_webhook_event(event):
         return donation_process_subscription_payment(event)
     elif event['type'] == 'charge.refunded':
         return donation_process_refund_payment(event)
-    else:
-        logger.info("WEBHOOK ignored: donation_process_stripe_webhook_event: " + event.type)
-        return
+    elif event['type'] == 'invoice.created':
+        return donation_process_invoice_created(event)
+
+    logger.info("WEBHOOK ignored: donation_process_stripe_webhook_event: " + event.type)
+    return
+
+
+def write_event_to_local_file(event):
+    target = open(event['type'] + "-" + str(datetime.now()) + ".txt", 'w')
+    target.write(str(event))
+    target.close()
+    return
 
 
 def donation_process_charge(event):           # 'charge.succeeded'
@@ -410,7 +421,7 @@ def donation_process_charge(event):           # 'charge.succeeded'
                                                           charge['status'], "", 'no', None, None, None, None, None)
             logger.debug("Stripe subscription payment from webhook: " + str(charge['customer']) + ", amount: " +
                          str(charge['amount']) + ", last4:" + str(source['last4']))
-
+            DonationManager.update_subscription_with_latest_charge_date(charge['invoice'], charge['created'])
 
     except stripe.error.StripeError as e:
         body = e.json_body
@@ -454,14 +465,13 @@ def donation_process_subscription_updated(event):
     return donation_process_subscription_deleted(event)
 
 
-# Within a session, if the voter donates before logging in, the donations will be created under a new unique
-# voter_we_vote_id.  Subsequently when they login, their proper voter_we_vote_id will come into effect.  If we did not
-# call this method before the end of the session, those "un-logged-in" donations would not be associated with the voter.
-# Unfortuately at this time "un-logged-in" donations created in a session that was ended before logging in will not
-# be associated with the correct voter -- we could do this in the future by doing something with email addresses.
 def move_donation_info_to_another_voter(from_voter, to_voter):
     """
-
+    Within a session, if the voter donates before logging in, the donations will be created under a new unique
+    voter_we_vote_id.  Subsequently when they login, their proper voter_we_vote_id will come into effect.  If we did not
+    call this method before the end of the session, those "un-logged-in" donations would not be associated with the voter.
+    Unfortuately at this time "un-logged-in" donations created in a session that was ended before logging in will not
+    be associated with the correct voter -- we could do this in the future by doing something with email addresses.
     :param from_voter:
     :param to_voter:
     :return:
@@ -491,11 +501,6 @@ def move_donation_info_to_another_voter(from_voter, to_voter):
 
 # see https://stripe.com/docs/subscriptions/lifecycle
 def donation_process_subscription_payment(event):
-    # timestamp = str(datetime.now())
-    # target = open("subscription_payment-" + timestamp + ".txt", 'w')
-    # target.write(str(event))
-    # target.close()
-
     dataobject = event['data']['object']
     amount = dataobject['amount_due']
     currency = dataobject['currency']
@@ -525,8 +530,6 @@ def donation_process_subscription_payment(event):
     except Exception as err:
         logger.error("donation_process_subscription_payment: " + str(err))
 
-    #DonationManager.update_last_charged_field(plan_id)
-
     return None
 
 
@@ -542,6 +545,32 @@ def donation_process_refund_payment(event):
 
     return success
 
+
+def donation_process_invoice_created(event):
+    """
+    The only way to associate an incoming automatic payment for a subscription payment
+    'invoice.payment_succeeded' is to cache the invoice id number and subscription id when the
+    invoice created event arrives.  Then when the 'invoice.payment_succeeded' arrives a few seconds
+    later, we can update the subscription 'last_charged' field since we will have cached the
+    subscription id
+    :param event: The Stripe event
+    :return:
+    """
+
+    try:
+        dataobject = event['data']['object']
+        customer_id = dataobject['customer']
+        plan = dataobject['lines']['data'][0]['plan']
+        donation_plan_id = plan['id']
+        subscription_id = dataobject['subscription']
+        invoice_id = dataobject['id']
+        invoice_date = datetime.fromtimestamp(dataobject['date'], timezone.utc)
+        return DonationManager.update_donation_invoice(subscription_id, donation_plan_id, invoice_id,
+                                                       invoice_date, customer_id)
+    except Exception as e:
+        logger.error("donation_process_invoice_created threw " + str(e))
+
+    return
 
 def donation_refund_for_api(request, charge, voter_we_vote_id):
     # The WebApp has requested a refund
