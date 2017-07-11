@@ -178,12 +178,12 @@ class VoterManager(BaseUserManager):
             voter.pk = None
             voter.we_vote_id = None  # Clear out existing we_vote_id
             voter.generate_new_we_vote_id()
-            voter.email = ""
+            voter.email = None
             voter.email_ownership_is_verified = False
             voter.facebook_id = None
             voter.facebook_email = None
             voter.fb_username = None
-            voter.linked_organization_we_vote_id = ""
+            voter.linked_organization_we_vote_id = None
             voter.primary_email_we_vote_id = None
             voter.save()
             status += "DUPLICATE_VOTER_SUCCESSFUL"
