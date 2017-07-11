@@ -12,8 +12,7 @@ from django.http import HttpResponse
 from follow.models import FollowOrganizationList
 import json
 from position.models import SUPPORT, OPPOSE, PositionManager, PositionListManager
-from voter.models import fetch_voter_id_from_voter_device_link, VoterAddressManager, VoterDeviceLinkManager, \
-    VoterManager
+from voter.models import fetch_voter_id_from_voter_device_link, VoterManager
 import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, is_voter_device_id_valid, positive_value_exists
 
