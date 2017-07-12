@@ -8,10 +8,13 @@ import xml.etree.ElementTree as ElementTree
 from party.controllers import party_import_from_xml_data
 from .models import CandidateSelection
 from exception.models import handle_exception
+from wevote_functions.functions import positive_value_exists
+from exception.models import handle_record_found_more_than_one_exception
 
 logger = wevote_functions.admin.get_logger(__name__)
 
 CTCL_SAMPLE_XML_FILE = "import_export_ctcl/import_data/GoogleCivic.Sample.xml"
+
 
 # Deprecated function, currently not used
 def import_ctcl_from_xml(request):
@@ -129,6 +132,7 @@ def create_candidate_selection_rows(xml_root, batch_set_id=0):
     # of VipObject
     candidate_selection_xml_node = xml_root.findall('CandidateSelection')
     candidate_selection = ''
+    number_of_batch_rows = 0
 
     for one_candidate_selection in candidate_selection_xml_node:
         # look for relevant information under CandidateSelection: id, CandidateIds
@@ -148,14 +152,14 @@ def create_candidate_selection_rows(xml_root, batch_set_id=0):
         contest_office_id = contest_office_id_node.text
 
         try:
-            candidate_selection = CandidateSelection.objects.create( batch_set_id=batch_set_id,
-                                                                     candidate_selection_id=candidate_selection_id,
-                                                                     contest_office_id=contest_office_id,
-                )
+            candidate_selection = CandidateSelection.objects.create(batch_set_id=batch_set_id,
+                                                                    candidate_selection_id=candidate_selection_id,
+                                                                    contest_office_id=contest_office_id)
             if candidate_selection:
                 candidate_selection_created = True
                 success = True
                 status = "CANDIDATE_SELECTION_CREATED"
+                number_of_batch_rows += 1
         except Exception as e:
             candidate_selection_created = False
             candidate_selection = CandidateSelection()
@@ -167,6 +171,55 @@ def create_candidate_selection_rows(xml_root, batch_set_id=0):
         'success':                      success,
         'status':                       status,
         'candidate_selection_created':  candidate_selection_created,
-        'candidate_selection':          candidate_selection
+        'candidate_selection':          candidate_selection,
+        'number_of_batch_rows':         number_of_batch_rows
     }
+    return results
+
+
+def retrieve_candidate_from_candidate_selection(candidate_selection_id, batch_set_id):
+    """
+    Given candidate_selection_id, get corresponding candidate name
+    :param candidate_selection_id: 
+    :param batch_set_id:
+    :return: 
+    """
+    results = ''
+    candidate_id = ''
+    candidate_id_found = False
+
+    if not candidate_selection_id or not positive_value_exists(batch_set_id):
+        candidate_selection_item = CandidateSelection()
+        results = {
+        'candidate_id_found':   candidate_id_found,
+        'candidate_selection':  candidate_selection_item,
+
+        }
+        return results
+
+    # Look up CandidateSelection table with candidate_selection_id
+    try:
+        candidate_selection_query = CandidateSelection.objects.all()
+        candidate_selection_item = candidate_selection_query.get(candidate_selection_id=candidate_selection_id,
+                                                                 batch_set_id=batch_set_id)
+        if candidate_selection_item:
+            candidate_id_found = True
+
+    except CandidateSelection.MultipleObjectsReturned as e:
+        candidate_selection_item = CandidateSelection()
+        handle_record_found_more_than_one_exception(e, logger)
+
+        status = "ERROR_MORE_THAN_ONE_CANDIDATE_SELECTION_FOUND"
+
+    except CandidateSelection.DoesNotExist:
+        status = "CANDIDATE_SELECTION_DOES_NOT_EXIST"
+        candidate_selection_item = CandidateSelection()
+        # handle_exception(e, logger=logger, exception_message=status)
+
+    # return candidate_selection_item
+    results = {
+        'candidate_id_found': candidate_id_found,
+        'candidate_selection':       candidate_selection_item,
+    }
+
     return results

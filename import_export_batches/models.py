@@ -5,7 +5,7 @@
 from ballot.models import MEASURE, CANDIDATE, POLITICIAN
 from party.controllers import retrieve_all_party_names_and_ids_api, party_import_from_xml_data
 from electoral_district.controllers import electoral_district_import_from_xml_data
-from import_export_ctcl.controllers import create_candidate_selection_rows
+from import_export_ctcl.controllers import create_candidate_selection_rows, retrieve_candidate_from_candidate_selection
 import codecs
 import csv
 from django.db import models
@@ -504,6 +504,33 @@ class BatchManager(models.Model):
             index_number += 1
         return ""
 
+    def retrieve_column_name_from_batch_row(self, batch_header_name_we_want, batch_header_map):
+        """
+        Given column name from batch_header_map, retrieve equivalent column name from batch row
+        :param batch_header_name_we_want: 
+        :param batch_header_map: 
+        :param batch_rows_to_lookup: 
+        :return: 
+        """
+        index_number = 0
+        batch_header_name_we_want = batch_header_name_we_want.lower()
+        number_of_columns = 50
+        while index_number < number_of_columns:
+            index_number_string = "00" + str(index_number)
+            index_number_string = index_number_string[-3:]
+            batch_header_map_attribute_name = "batch_header_map_" + index_number_string
+            # If this position in the batch_header_map matches the batch_header_name_we_want, then we know what column
+            # to look in within one_batch_row for the value, eg: batch_header_map_000 --> measure_batch_id
+            value_from_batch_header_map = getattr(batch_header_map, batch_header_map_attribute_name)
+            if value_from_batch_header_map is None:
+                # Break out when we stop getting batch_header_map values
+                return ""
+            if batch_header_name_we_want == value_from_batch_header_map.lower():
+                one_batch_row_attribute_name = "batch_row_" + index_number_string
+                return one_batch_row_attribute_name
+            index_number += 1
+        return ""
+
     def find_file_type(self, batch_uri):
         """
         Determines the file type based on file extension. If no known extension, it gets the file type information from
@@ -887,10 +914,10 @@ class BatchManager(models.Model):
         status = ''
         limit_for_testing = 5
 
-        ballot_selection_id_key_list = ['ballot_selection_id_1', 'ballot_selection_id_2', 'ballot_selection_id_3',
-                                    'ballot_selection_id_4', 'ballot_selection_id_5', 'ballot_selection_id_6',
-                                    'ballot_selection_id_7', 'ballot_selection_id_8', 'ballot_selection_id_9',
-                                    'ballot_selection_id_10']
+        candidate_selection_id_key_list = ['candidate_selection_id_1', 'candidate_selection_id_2', 'candidate_selection_id_3',
+                                    'candidate_selection_id_4', 'candidate_selection_id_5', 'candidate_selection_id_6',
+                                    'candidate_selection_id_7', 'candidate_selection_id_8', 'candidate_selection_id_9',
+                                    'candidate_selection_id_10']
         # Look for CandidateContest and create the batch_header first. CandidateContest is the direct child node
         # of VipObject
         contest_office_xml_node = xml_root.findall('CandidateContest')
@@ -940,8 +967,18 @@ class BatchManager(models.Model):
                     ballot_selection_ids_value_list = ballot_selection_ids_str.split()
                     # for len in ballot_selection_ids_list words,
                     # Assuming that there are maximum 10 ballot selection ids for a given contest office
-                    ballot_selection_ids_dict = dict(zip(ballot_selection_id_key_list, ballot_selection_ids_value_list))
+                    ballot_selection_ids_dict = dict(zip(candidate_selection_id_key_list, ballot_selection_ids_value_list))
 
+                    # move this to batchrowactionContestOffice create if we run into performance/load issue
+                    candidate_selection_list = []
+                    for key, value in ballot_selection_ids_dict.items():
+                        results = retrieve_candidate_from_candidate_selection(value, batch_set_id)
+                        if results['candidate_id_found']:
+                            candidate_selection_item = results['candidate_selection']
+                            candidate_value = candidate_selection_item.contest_office_id
+                            candidate_selection_list.append(candidate_value)
+
+                    candidate_selection_ids_dict = dict(zip(candidate_selection_id_key_list, candidate_selection_list))
             if first_line:
                 first_line = False
                 try:
@@ -953,16 +990,16 @@ class BatchManager(models.Model):
                         batch_header_column_004='VotesAllowed',
                         batch_header_column_005='NumberElected',
                         batch_header_column_006='other::ctcl-uuid',
-                        batch_header_column_007='BallotSelectionId1',
-                        batch_header_column_008='BallotSelectionId2',
-                        batch_header_column_009='BallotSelectionId3',
-                        batch_header_column_010='BallotSelectionId4',
-                        batch_header_column_011='BallotSelectionId5',
-                        batch_header_column_012='BallotSelectionId6',
-                        batch_header_column_013='BallotSelectionId7',
-                        batch_header_column_014='BallotSelectionId8',
-                        batch_header_column_015='BallotSelectionId9',
-                        batch_header_column_016='BallotSelectionId10',
+                        batch_header_column_007='CandidateSelectionId1',
+                        batch_header_column_008='CandidateSelectionId2',
+                        batch_header_column_009='CandidateSelectionId3',
+                        batch_header_column_010='CandidateSelectionId4',
+                        batch_header_column_011='CandidateSelectionId5',
+                        batch_header_column_012='CandidateSelectionId6',
+                        batch_header_column_013='CandidateSelectionId7',
+                        batch_header_column_014='CandidateSelectionId8',
+                        batch_header_column_015='CandidateSelectionId9',
+                        batch_header_column_016='CandidateSelectionId10',
                     )
                     batch_header_id = batch_header.id
 
@@ -977,16 +1014,16 @@ class BatchManager(models.Model):
                             batch_header_map_004='contest_office_votes_allowed',
                             batch_header_map_005='contest_office_number_elected',
                             batch_header_map_006='contest_office_ctcl_uuid',
-                            batch_header_map_007='ballot_selection_id1',
-                            batch_header_map_008='ballot_selection_id2',
-                            batch_header_map_009='ballot_selection_id3',
-                            batch_header_map_010='ballot_selection_id4',
-                            batch_header_map_011='ballot_selection_id5',
-                            batch_header_map_012='ballot_selection_id6',
-                            batch_header_map_013='ballot_selection_id7',
-                            batch_header_map_014='ballot_selection_id8',
-                            batch_header_map_015='ballot_selection_id9',
-                            batch_header_map_016='ballot_selection_id10',
+                            batch_header_map_007='candidate_selection_id1',
+                            batch_header_map_008='candidate_selection_id2',
+                            batch_header_map_009='candidate_selection_id3',
+                            batch_header_map_010='candidate_selection_id4',
+                            batch_header_map_011='candidate_selection_id5',
+                            batch_header_map_012='candidate_selection_id6',
+                            batch_header_map_013='candidate_selection_id7',
+                            batch_header_map_014='candidate_selection_id8',
+                            batch_header_map_015='candidate_selection_id9',
+                            batch_header_map_016='candidate_selection_id10',
                         )
                         batch_header_map_id = batch_header_map.id
                         status += " BATCH_HEADER_MAP_SAVED"
@@ -1030,16 +1067,16 @@ class BatchManager(models.Model):
                         batch_row_004=contest_office_votes_allowed,
                         batch_row_005=contest_office_number_elected,
                         batch_row_006=ctcl_uuid,
-                        batch_row_007=ballot_selection_ids_dict.get('ballot_selection_id_1', ''),
-                        batch_row_008=ballot_selection_ids_dict.get('ballot_selection_id_2',''),
-                        batch_row_009=ballot_selection_ids_dict.get('ballot_selection_id_3',''),
-                        batch_row_010=ballot_selection_ids_dict.get('ballot_selection_id_4',''),
-                        batch_row_011=ballot_selection_ids_dict.get('ballot_selection_id_5',''),
-                        batch_row_012=ballot_selection_ids_dict.get('ballot_selection_id_6',''),
-                        batch_row_013=ballot_selection_ids_dict.get('ballot_selection_id_7',''),
-                        batch_row_014=ballot_selection_ids_dict.get('ballot_selection_id_8',''),
-                        batch_row_015=ballot_selection_ids_dict.get('ballot_selection_id_9',''),
-                        batch_row_016=ballot_selection_ids_dict.get('ballot_selection_id_10',''),
+                        batch_row_007=candidate_selection_ids_dict.get('candidate_selection_id_1', ''),
+                        batch_row_008=candidate_selection_ids_dict.get('candidate_selection_id_2',''),
+                        batch_row_009=candidate_selection_ids_dict.get('candidate_selection_id_3',''),
+                        batch_row_010=candidate_selection_ids_dict.get('candidate_selection_id_4',''),
+                        batch_row_011=candidate_selection_ids_dict.get('candidate_selection_id_5',''),
+                        batch_row_012=candidate_selection_ids_dict.get('candidate_selection_id_6',''),
+                        batch_row_013=candidate_selection_ids_dict.get('candidate_selection_id_7',''),
+                        batch_row_014=candidate_selection_ids_dict.get('candidate_selection_id_8',''),
+                        batch_row_015=candidate_selection_ids_dict.get('candidate_selection_id_9',''),
+                        batch_row_016=candidate_selection_ids_dict.get('candidate_selection_id_10',''),
                     )
                     number_of_batch_rows += 1
                 except Exception as e:
@@ -1434,7 +1471,6 @@ class BatchManager(models.Model):
         }
         return results
 
-
     def create_batch_set_vip_xml(self, batch_uri, google_civic_election_id, organization_we_vote_id):
         """
         Retrieves CTCL Batch Set data from an xml file - Measure, Office, Candidate, Politician
@@ -1613,6 +1649,8 @@ class BatchManager(models.Model):
         """
         elected_office_name = ''
         batch_header_id = 0
+        # From batch_description, get the header_id using batch_set_id
+        # batch_header_id = get_batch_header_id_from_batch_description(batch_set_id, ELECTED_OFFICE)
         try:
             if positive_value_exists(batch_set_id):
                 batch_description_on_stage = BatchDescription.objects.get(batch_set_id=batch_set_id,
@@ -1622,20 +1660,28 @@ class BatchManager(models.Model):
         except BatchDescription.DoesNotExist:
                 elected_office_name = ''
                 pass
+
+        # Lookup BatchRow with given header_id and elected_office_ctcl_id. But before doing that, we need to get batch
+        # row column name that matches 'elected_office_batch_id'
         try:
             batch_manager = BatchManager()
             if positive_value_exists(batch_header_id) and elected_office_ctcl_id:
-                # TODO column name for elected_office_ctcl_id is hardcoded as batch_row_000 for now. Find a way to get
-                # the column name with given value
                 batch_header_map = BatchHeaderMap.objects.get(batch_header_id=batch_header_id)
 
+                # Get the column name in BatchRow that stores elected_office_batch_id - id taken from batch_header_map
+                # eg: batch_row_000 -> elected_office_batch_id
+                elected_office_id_column_name = batch_manager.retrieve_column_name_from_batch_row(
+                    "elected_office_batch_id", batch_header_map)
+
+                # we found batch row column name corresponding to elected_office_batch_id, now look up batch_row table
+                # with given batch_header_id and elected_office_batch_id (batch_row_00)
                 batch_row_on_stage = BatchRow.objects.get(batch_header_id=batch_header_id,
-                                                               batch_row_000=elected_office_ctcl_id)
+                                                          **{ elected_office_id_column_name: elected_office_ctcl_id})
+                # we know the batch row, next retrieve value for elected_office_name eg: off1 -> NC State Senator
                 elected_office_name = batch_manager.retrieve_value_from_batch_row('elected_office_name',
                                                                                   batch_header_map, batch_row_on_stage)
-                # elected_office_name = batch_row_on_stage.batch_row_001
 
-        except BatchRowActionElectedOffice.DoesNotExist:
+        except BatchRow.DoesNotExist:
             elected_office_name = ''
 
         return elected_office_name
@@ -2007,7 +2053,26 @@ class BatchRowActionContestOffice(models.Model):
                               blank=True)
     elected_office_name = models.CharField(verbose_name="name of the elected office", max_length=255, null=True,
                                            blank=True, default=None)
-
+    candidate_selection_id1 = models.CharField(verbose_name="temporary id of candidate selection 1", max_length=255,
+                                               null=True, blank=True, default=None)
+    candidate_selection_id2 = models.CharField(verbose_name="temporary id of candidate selection 2", max_length=255,
+                                               null=True, blank=True, default=None)
+    candidate_selection_id3= models.CharField(verbose_name="temporary id of candidate selection 3", max_length=255,
+                                               null=True, blank=True, default=None)
+    candidate_selection_id4 = models.CharField(verbose_name="temporary id of candidate selection 4", max_length=255,
+                                               null=True, blank=True, default=None)
+    candidate_selection_id5 = models.CharField(verbose_name="temporary id of candidate selection 5", max_length=255,
+                                               null=True, blank=True, default=None)
+    candidate_selection_id6 = models.CharField(verbose_name="temporary id of candidate selection 6", max_length=255,
+                                               null=True, blank=True, default=None)
+    candidate_selection_id7 = models.CharField(verbose_name="temporary id of candidate selection 7", max_length=255,
+                                               null=True, blank=True, default=None)
+    candidate_selection_id8 = models.CharField(verbose_name="temporary id of candidate selection 8", max_length=255,
+                                               null=True, blank=True, default=None)
+    candidate_selection_id9 = models.CharField(verbose_name="temporary id of candidate selection 9", max_length=255,
+                                               null=True, blank=True, default=None)
+    candidate_selection_id10 = models.CharField(verbose_name="temporary id of candidate selection 10", max_length=255,
+                                                null=True, blank=True, default=None)
 
 class BatchRowActionElectedOffice(models.Model):
     """
