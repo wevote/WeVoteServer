@@ -652,7 +652,7 @@ def store_one_ballot_from_google_civic_api(one_ballot_json, voter_id=0, polling_
             results = ballot_returned_manager.retrieve_ballot_returned_from_voter_id(voter_id, google_civic_election_id)
             if results['ballot_returned_found']:
                 update_results = ballot_returned_manager.update_ballot_returned_with_normalized_values(
-                    voter_address_dict, state_code, results['ballot_returned'],
+                    voter_address_dict, results['ballot_returned'],
                     polling_location_latitude, polling_location_longitude)
                 ballot_returned_found = True  # If the update fails, we just return the original ballot_returned object
                 ballot_returned = update_results['ballot_returned']
@@ -660,8 +660,12 @@ def store_one_ballot_from_google_civic_api(one_ballot_json, voter_id=0, polling_
                 create_results = ballot_returned_manager.create_ballot_returned_with_normalized_values(
                     voter_address_dict,
                     election_date_text, election_description_text,
-                    google_civic_election_id, state_code, voter_id, '')
-                # TODO: 6/25/17, If we store a ballot without latidude and longitude, it will not be found by a geo search.  Is this intentional?  Does the data have value?
+                    google_civic_election_id, voter_id, '')
+                # We store ballot_returned entries without latitude and longitude here.
+                # These entries will not be found by a geo search until we augment them with latitude and longitude
+                #  which we do at a later state. We do not do the latitude/longitude lookup here because the number
+                #  of geocode lookups we can do is limited, and we want to manage our "lookup" budget separate
+                #  from this function.
                 ballot_returned_found = create_results['ballot_returned_found']
                 ballot_returned = create_results['ballot_returned']
         if positive_value_exists(polling_location_we_vote_id) and positive_value_exists(google_civic_election_id):
@@ -669,15 +673,16 @@ def store_one_ballot_from_google_civic_api(one_ballot_json, voter_id=0, polling_
                 polling_location_we_vote_id, google_civic_election_id)
             if results['ballot_returned_found']:
                 update_results = ballot_returned_manager.update_ballot_returned_with_normalized_values(
-                    voter_address_dict, state_code, results['ballot_returned'],
+                    voter_address_dict, results['ballot_returned'],
                     polling_location_latitude, polling_location_longitude)
                 ballot_returned_found = True  # If the update fails, we just return the original ballot_returned object
                 ballot_returned = update_results['ballot_returned']
             else:
+                voter_id = 0
                 create_results = ballot_returned_manager.create_ballot_returned_with_normalized_values(
                     voter_address_dict,
                     election_date_text, election_description_text,
-                    google_civic_election_id, state_code, 0, polling_location_we_vote_id,
+                    google_civic_election_id, voter_id, polling_location_we_vote_id,
                     polling_location_latitude, polling_location_longitude)
                 ballot_returned_found = create_results['ballot_returned_found']
                 ballot_returned = create_results['ballot_returned']
@@ -758,22 +763,32 @@ def voter_ballot_items_retrieve_from_google_civic_for_api(
     # Confirm that we have a Google Civic API Key (GOOGLE_CIVIC_API_KEY)
     if not positive_value_exists(GOOGLE_CIVIC_API_KEY):
         results = {
-            'status': 'NO_GOOGLE_CIVIC_API_KEY ',
-            'success': False,
-            'voter_device_id': voter_device_id,
-            'google_civic_election_id': 0,
-            'text_for_map_search': text_for_map_search,
+            'status':                       'NO_GOOGLE_CIVIC_API_KEY ',
+            'success':                      False,
+            'voter_device_id':              voter_device_id,
+            'google_civic_election_id':     0,
+            'text_for_map_search':          text_for_map_search,
+            'election_date_text':           "",
+            'election_description_text':    "",
+            'election_data_retrieved':      False,
+            'polling_location_retrieved':   False,
+            'contests_retrieved':           False,
         }
         return results
 
     # Confirm that we have the URL where we retrieve voter ballots (VOTER_INFO_URL)
     if not positive_value_exists(VOTER_INFO_URL):
         results = {
-            'status': 'MISSING VOTER_INFO_URL in config/environment_variables.json ',
-            'success': False,
-            'voter_device_id': voter_device_id,
-            'google_civic_election_id': 0,
-            'text_for_map_search': text_for_map_search,
+            'status':                       'MISSING VOTER_INFO_URL in config/environment_variables.json ',
+            'success':                      False,
+            'voter_device_id':              voter_device_id,
+            'google_civic_election_id':     0,
+            'text_for_map_search':          text_for_map_search,
+            'election_date_text':           "",
+            'election_description_text':    "",
+            'election_data_retrieved':      False,
+            'polling_location_retrieved':   False,
+            'contests_retrieved':           False,
         }
         return results
 
@@ -781,27 +796,35 @@ def voter_ballot_items_retrieve_from_google_civic_for_api(
     results = is_voter_device_id_valid(voter_device_id)
     if not results['success']:
         results = {
-            'status': 'VALID_VOTER_DEVICE_ID_MISSING ',
-            'success': False,
-            'voter_device_id': voter_device_id,
-            'google_civic_election_id': 0,
-            'text_for_map_search': text_for_map_search,
+            'status':                       'VALID_VOTER_DEVICE_ID_MISSING ',
+            'success':                      False,
+            'voter_device_id':              voter_device_id,
+            'google_civic_election_id':     0,
+            'text_for_map_search':          text_for_map_search,
+            'election_date_text':           "",
+            'election_description_text':    "",
+            'election_data_retrieved':      False,
+            'polling_location_retrieved':   False,
+            'contests_retrieved':           False,
         }
         return results
 
     voter_id = fetch_voter_id_from_voter_device_link(voter_device_id)
     if not positive_value_exists(voter_id):
         results = {
-            'status': "VALID_VOTER_ID_MISSING ",
-            'success': False,
-            'voter_device_id': voter_device_id,
-            'google_civic_election_id': 0,
-            'text_for_map_search': text_for_map_search,
+            'status':                       "VALID_VOTER_ID_MISSING ",
+            'success':                      False,
+            'voter_device_id':              voter_device_id,
+            'google_civic_election_id':     0,
+            'text_for_map_search':          text_for_map_search,
+            'election_date_text':           "",
+            'election_description_text':    "",
+            'election_data_retrieved':      False,
+            'polling_location_retrieved':   False,
+            'contests_retrieved':           False,
         }
         return results
 
-    google_civic_election_id = 0  # = 5000  # TODO DALE TESTING A PROBLEM - when we remove this, update
-    #  retrieve_one_ballot_from_google_civic_api to go back for a second look once we have google_civic_election_id
     status = ''
     success = False
     election_date_text = ''
@@ -814,18 +837,7 @@ def voter_ballot_items_retrieve_from_google_civic_for_api(
         voter_address_manager = VoterAddressManager()
         text_for_map_search = voter_address_manager.retrieve_ballot_map_text_from_voter_id(voter_id)
 
-    # We want to remove all prior ballot items, so we make room for store_one_ballot_from_google_civic_api to save
-    #  ballot items
-    # 6/12/17: google_civic_election_id will always be 0 at this point, so next 8 lines are never executed
-    if positive_value_exists(google_civic_election_id):
-        voter_ballot_saved_manager = VoterBallotSavedManager()
-        voter_ballot_saved_results = voter_ballot_saved_manager.delete_voter_ballot_saved(
-            0, voter_id, google_civic_election_id)
-
-        ballot_item_list_manager = BallotItemListManager()
-        # We include a google_civic_election_id, so only the ballot info for this election is removed
-        ballot_item_list_manager.delete_all_ballot_items_for_voter(voter_id, google_civic_election_id)
-
+    google_civic_election_id = 0
     if positive_value_exists(text_for_map_search):
         one_ballot_results = retrieve_one_ballot_from_google_civic_api(
             text_for_map_search, google_civic_election_id, use_test_election)
@@ -850,10 +862,18 @@ def voter_ballot_items_retrieve_from_google_civic_for_api(
 
                 # Now that we know we have new ballot data, we need to delete prior ballot data for this election
                 # because when we change voterAddress, we usually get different ballot items
-                ballot_item_list_manager = BallotItemListManager()
                 # We include a google_civic_election_id, so only the ballot info for this election is removed
                 google_civic_election_id_to_delete = one_ballot_json['election']['id']  # '0' would mean "delete all"
                 if positive_value_exists(google_civic_election_id_to_delete) and positive_value_exists(voter_id):
+                    # Remove all prior ballot items, so we make room for store_one_ballot_from_google_civic_api to save
+                    #  ballot items
+                    voter_ballot_saved_manager = VoterBallotSavedManager()
+                    ballot_item_list_manager = BallotItemListManager()
+
+                    voter_ballot_saved_id = 0
+                    voter_ballot_saved_results = voter_ballot_saved_manager.delete_voter_ballot_saved(
+                        voter_ballot_saved_id, voter_id, google_civic_election_id_to_delete)
+
                     ballot_item_list_manager.delete_all_ballot_items_for_voter(
                         voter_id, google_civic_election_id_to_delete)
 
@@ -884,16 +904,16 @@ def voter_ballot_items_retrieve_from_google_civic_for_api(
     # so that during our initial user testing, ballot data is returned in areas where elections don't currently exist
 
     results = {
-        'success': success,
-        'status': status,
-        'voter_device_id': voter_device_id,
-        'google_civic_election_id': google_civic_election_id,
-        'text_for_map_search': text_for_map_search,
-        'election_date_text': election_date_text,
-        'election_description_text': election_description_text,
-        'election_data_retrieved': election_data_retrieved,
-        'polling_location_retrieved': polling_location_retrieved,
-        'contests_retrieved': contests_retrieved,
+        'success':                      success,
+        'status':                       status,
+        'voter_device_id':              voter_device_id,
+        'google_civic_election_id':     google_civic_election_id,
+        'text_for_map_search':          text_for_map_search,
+        'election_date_text':           election_date_text,
+        'election_description_text':    election_description_text,
+        'election_data_retrieved':      election_data_retrieved,
+        'polling_location_retrieved':   polling_location_retrieved,
+        'contests_retrieved':           contests_retrieved,
     }
     return results
 
