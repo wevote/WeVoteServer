@@ -130,6 +130,8 @@ class BallotItemManager(models.Model):
             status = 'MISSING_VOTER_ID '
         else:
             try:
+                # Retrieve list of ballot_items that match
+
                 # Use get_or_create to see if a ballot item exists
                 create_values = {
                     # Values we search against
@@ -651,7 +653,7 @@ class BallotReturned(models.Model):
     # The unique ID of this election. (Provided by Google Civic)
     google_civic_election_id = models.PositiveIntegerField(
         verbose_name="google civic election id", default=0, null=False)
-    state_code = models.CharField(verbose_name="state the ballot item is related to", max_length=2, null=True)
+    # state_code = models.CharField(verbose_name="state the ballot item is related to", max_length=2, null=True)
 
     election_description_text = models.CharField(max_length=255, blank=False, null=False,
                                                  verbose_name='text label for this election')
@@ -736,7 +738,7 @@ class BallotReturnedManager(models.Model):
                 ballot_returned_id = ballot_returned.id
                 ballot_returned_found = True if positive_value_exists(ballot_returned_id) else False
                 success = True
-                status = "BALLOT_RETURNED_FOUND_FROM_VOTER_ID"
+                status = "BALLOT_RETURNED_FOUND_FROM_VOTER_ID "
             elif positive_value_exists(voter_id) and positive_value_exists(google_civic_election_id):
                 ballot_returned = BallotReturned.objects.get(voter_id=voter_id,
                                                              google_civic_election_id=google_civic_election_id)
@@ -744,7 +746,7 @@ class BallotReturnedManager(models.Model):
                 ballot_returned_id = ballot_returned.id
                 ballot_returned_found = True if positive_value_exists(ballot_returned_id) else False
                 success = True
-                status = "BALLOT_RETURNED_FOUND_FROM_VOTER_ID"
+                status = "BALLOT_RETURNED_FOUND_FROM_VOTER_ID "
             elif positive_value_exists(polling_location_we_vote_id) and positive_value_exists(google_civic_election_id):
                 ballot_returned = BallotReturned.objects.get(polling_location_we_vote_id=polling_location_we_vote_id,
                                                              google_civic_election_id=google_civic_election_id)
@@ -752,16 +754,16 @@ class BallotReturnedManager(models.Model):
                 ballot_returned_id = ballot_returned.id
                 ballot_returned_found = True if positive_value_exists(ballot_returned_id) else False
                 success = True
-                status = "BALLOT_RETURNED_FOUND_FROM_POLLING_LOCATION_WE_VOTE_ID"
+                status = "BALLOT_RETURNED_FOUND_FROM_POLLING_LOCATION_WE_VOTE_ID "
             else:
                 ballot_returned_found = False
                 success = False
-                status = "COULD_NOT_RETRIEVE_BALLOT_RETURNED-MISSING_VARIABLES"
+                status = "COULD_NOT_RETRIEVE_BALLOT_RETURNED-MISSING_VARIABLES "
 
         except BallotReturned.MultipleObjectsReturned as e:
             exception_multiple_object_returned = True
             success = False
-            status = "MULTIPLE_BALLOT_RETURNED-MUST_DELETE_ALL"
+            status = "MULTIPLE_BALLOT_RETURNED-MUST_DELETE_ALL "
         except BallotReturned.DoesNotExist:
             exception_does_not_exist = True
             success = True
@@ -779,7 +781,7 @@ class BallotReturnedManager(models.Model):
 
     def create_ballot_returned_with_normalized_values(self, google_civic_address_dict,
                                                       election_date_text, election_description_text,
-                                                      google_civic_election_id, state_code,
+                                                      google_civic_election_id,
                                                       voter_id=0, polling_location_we_vote_id='',
                                                       latitude='', longitude=''):
         # Protect against ever saving test elections in the BallotReturned table
@@ -797,14 +799,12 @@ class BallotReturnedManager(models.Model):
             ballot_returned_id = 0
             if positive_value_exists(voter_id) and positive_value_exists(google_civic_election_id):
                 ballot_returned = BallotReturned.objects.create(google_civic_election_id=google_civic_election_id,
-                                                                state_code=state_code,
                                                                 voter_id=voter_id,
                                                                 election_date=election_date_text,
                                                                 election_description_text=election_description_text)
                 ballot_returned_id = ballot_returned.id
             elif positive_value_exists(polling_location_we_vote_id) and positive_value_exists(google_civic_election_id):
                 ballot_returned = BallotReturned.objects.create(google_civic_election_id=google_civic_election_id,
-                                                                state_code=state_code,
                                                                 polling_location_we_vote_id=polling_location_we_vote_id,
                                                                 election_date=election_date_text,
                                                                 election_description_text=election_description_text)
@@ -855,7 +855,7 @@ class BallotReturnedManager(models.Model):
         }
         return results
 
-    def is_ballot_returned_different(self, google_civic_address_dict, state_code, ballot_returned):
+    def is_ballot_returned_different(self, google_civic_address_dict, ballot_returned):
         if 'line1' in google_civic_address_dict:
             if not ballot_returned.normalized_line1 == google_civic_address_dict['line1']:
                 return True
@@ -877,15 +877,13 @@ class BallotReturnedManager(models.Model):
             return True
         if not positive_value_exists(ballot_returned.text_for_map_search):
             return True
-        if not positive_value_exists(ballot_returned.state_code) or not ballot_returned.state_code == state_code:
-            return True
         return False
 
-    def update_ballot_returned_with_normalized_values(self, google_civic_address_dict, state_code, ballot_returned,
+    def update_ballot_returned_with_normalized_values(self, google_civic_address_dict, ballot_returned,
                                                       latitude='', longitude=''):
         try:
             text_for_map_search = ''
-            if self.is_ballot_returned_different(google_civic_address_dict, state_code, ballot_returned):
+            if self.is_ballot_returned_different(google_civic_address_dict, ballot_returned):
                 if 'line1' in google_civic_address_dict:
                     ballot_returned.normalized_line1 = google_civic_address_dict['line1']
                     text_for_map_search += ballot_returned.normalized_line1 + ", "
@@ -902,8 +900,6 @@ class BallotReturnedManager(models.Model):
                 if latitude or longitude:
                     ballot_returned.latitude = latitude
                     ballot_returned.longitude = longitude
-                if positive_value_exists(state_code):
-                    ballot_returned.state_code = state_code
 
                 ballot_returned.text_for_map_search = text_for_map_search
 
@@ -925,14 +921,13 @@ class BallotReturnedManager(models.Model):
         }
         return results
 
-    def find_closest_ballot_returned(self, text_for_map_search, google_civic_election_id=0, state_code=''):
+    def find_closest_ballot_returned(self, text_for_map_search, google_civic_election_id=0):
         """
         We search for the closest address for this election in the ballot_returned table. We never have to worry
         about test elections being returned with this routine, because we don't store ballot_returned entries for
         test elections.
         :param text_for_map_search:
         :param google_civic_election_id:
-        :param state_code:
         :return:
         """
         ballot_returned_found = False
@@ -978,17 +973,14 @@ class BallotReturnedManager(models.Model):
             # "city_name, state_code" eg: "Sunnyvale, CA". If so, try to parse the entry and get ballot data
             # for that location
             address = text_for_map_search
-            if positive_value_exists(state_code):
-                state = state_code.upper()
-            else:
-                state = address.split(', ')[-1]
-                state = state.upper()
+            state_code = address.split(', ')[-1]
+            state_code = state_code.upper()
             city = address.split(', ')[-2]
             city = city.lower()
 
             ballot_returned_query = BallotReturned.objects.all()
-            if positive_value_exists(state):
-                ballot_returned_query = ballot_returned_query.filter(normalized_state__iexact=state)
+            if positive_value_exists(state_code):
+                ballot_returned_query = ballot_returned_query.filter(normalized_state__iexact=state_code)
             if positive_value_exists(city):
                 ballot_returned_query = ballot_returned_query.filter(normalized_city__iexact=city)
             ballot = ballot_returned_query.first()
@@ -999,14 +991,9 @@ class BallotReturnedManager(models.Model):
             # address has format "line_1, state zip, USA"
             ballot_returned_query = BallotReturned.objects.all()
             ballot_returned_query = ballot_returned_query.exclude(polling_location_we_vote_id=None)
+            state_code = address.split(', ')[-2][:2]
             if positive_value_exists(state_code):
-                # If a state_code was passed into this function...
                 ballot_returned_query = ballot_returned_query.filter(normalized_state__iexact=state_code)
-                state = state_code
-            else:
-                state = address.split(', ')[-2][:2]
-                if positive_value_exists(state):
-                    ballot_returned_query = ballot_returned_query.filter(normalized_state__iexact=state)
             ballot_returned_query = ballot_returned_query.annotate(distance=(F('latitude') - location.latitude) ** 2 +
                                                                             (F('longitude') - location.longitude) ** 2)
             ballot = ballot_returned_query.order_by('distance').first()
@@ -1016,7 +1003,7 @@ class BallotReturnedManager(models.Model):
             ballot_returned_found = True
             status += 'BALLOT_RETURNED_FOUND '
         else:
-            status += 'NO_STORED_BALLOT_MATCHES_STATE {}. '.format(state)
+            status += 'NO_STORED_BALLOT_MATCHES_STATE {}. '.format(state_code)
 
         return {
             'status':                   status,
@@ -1050,7 +1037,7 @@ class BallotReturnedManager(models.Model):
                 if not positive_value_exists(ballot_returned.google_civic_election_id):
                     ballot_returned.google_civic_election_id = google_civic_election_id;
                 if not positive_value_exists(ballot_returned.voter_id):
-                    ballot_returned.voter_id = voter_id;
+                    ballot_returned.voter_id = voter_id
                 if election_date is not False:
                     ballot_returned.election_date = election_date
                 if election_description_text is not False:
@@ -1579,8 +1566,7 @@ class VoterBallotSavedManager(models.Model):
         return results
 
 
-def copy_existing_ballot_items_from_stored_ballot(voter_id, text_for_map_search, google_civic_election_id=0,
-                                                  state_code=''):
+def copy_existing_ballot_items_from_stored_ballot(voter_id, text_for_map_search, google_civic_election_id=0):
     """
     We are looking for the most recent ballot near this voter. We may or may not have a google_civic_election_id
     :param voter_id:
@@ -1591,8 +1577,7 @@ def copy_existing_ballot_items_from_stored_ballot(voter_id, text_for_map_search,
     """
     #
     ballot_returned_manager = BallotReturnedManager()
-    find_results = ballot_returned_manager.find_closest_ballot_returned(text_for_map_search, google_civic_election_id,
-                                                                        state_code)
+    find_results = ballot_returned_manager.find_closest_ballot_returned(text_for_map_search, google_civic_election_id)
     status = find_results['status']
 
     if not find_results['ballot_returned_found']:
@@ -1610,9 +1595,21 @@ def copy_existing_ballot_items_from_stored_ballot(voter_id, text_for_map_search,
         }
         return error_results
 
-    # A ballot at a nearby address was found. Copy it for the voter.
+    # A ballot at a nearby address was found.
     ballot_returned = find_results['ballot_returned']
+
+    # Remove all prior ballot items, so we make room for copy_ballot_items to save ballot items
+    voter_ballot_saved_manager = VoterBallotSavedManager()
     ballot_item_list_manager = BallotItemListManager()
+    if positive_value_exists(ballot_returned.google_civic_election_id):
+        voter_ballot_saved_id = 0
+        voter_ballot_saved_results = voter_ballot_saved_manager.delete_voter_ballot_saved(
+            voter_ballot_saved_id, voter_id, ballot_returned.google_civic_election_id)
+
+        # We include a google_civic_election_id, so only the ballot info for this election is removed
+        ballot_item_list_manager.delete_all_ballot_items_for_voter(voter_id, google_civic_election_id)
+
+    # ...and then copy it for the voter.
     copy_item_results = ballot_item_list_manager.copy_ballot_items(ballot_returned, voter_id)
     status += copy_item_results['status']
 
@@ -1636,7 +1633,7 @@ def copy_existing_ballot_items_from_stored_ballot(voter_id, text_for_map_search,
     results = {
         'voter_id':                             voter_id,
         'google_civic_election_id':             ballot_returned.google_civic_election_id,
-        'state_code':                           ballot_returned.state_code,
+        'state_code':                           ballot_returned.normalized_state,
         'election_date_text':                   ballot_returned.election_date_text(),
         'election_description_text':            ballot_returned.election_description_text,
         'text_for_map_search':                  text_for_map_search,
