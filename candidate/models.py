@@ -1228,7 +1228,7 @@ class CandidateCampaignManager(models.Model):
         existing_candidate_entry = ''
 
         try:
-            existing_candidate_entry = CandidateCampaign.objects.get(we_vote_id=candidate_we_vote_id)
+            existing_candidate_entry = CandidateCampaign.objects.get(we_vote_id__iexact=candidate_we_vote_id)
             if existing_candidate_entry:
                 # found the existing entry, update the values
                 existing_candidate_entry.candidate_name = candidate_name

@@ -480,7 +480,7 @@ class ContestMeasureManager(models.Model):
         existing_measure_entry = ''
 
         try:
-            existing_measure_entry = ContestMeasure.objects.get(we_vote_id=measure_we_vote_id)
+            existing_measure_entry = ContestMeasure.objects.get(we_vote_id__iexact=measure_we_vote_id)
             if existing_measure_entry:
                 # found the existing entry, update the values
                 existing_measure_entry.measure_title = measure_title

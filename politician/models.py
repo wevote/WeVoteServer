@@ -595,7 +595,7 @@ class PoliticianManager(models.Model):
         existing_politician_entry = ''
 
         try:
-            existing_politician_entry = Politician.objects.get(we_vote_id=politician_we_vote_id)
+            existing_politician_entry = Politician.objects.get(we_vote_id__iexact=politician_we_vote_id)
             if existing_politician_entry:
                 # found the existing entry, update the values
                 existing_politician_entry.politician_name = politician_name
