@@ -468,7 +468,7 @@ class ContestOfficeManager(models.Model):
         existing_contest_office_entry = ''
 
         try:
-            existing_contest_office_entry = ContestOffice.objects.get(we_vote_id=contest_office_we_vote_id)
+            existing_contest_office_entry = ContestOffice.objects.get(we_vote_id__iexact=contest_office_we_vote_id)
             if existing_contest_office_entry:
                 # found the existing entry, update the values
                 existing_contest_office_entry.office_name = contest_office_name
@@ -1100,7 +1100,7 @@ class ElectedOfficeManager(models.Model):
         existing_elected_office_entry = ''
 
         try:
-            existing_elected_office_entry = ElectedOffice.objects.get(we_vote_id=elected_office_we_vote_id)
+            existing_elected_office_entry = ElectedOffice.objects.get(we_vote_id__iexact=elected_office_we_vote_id)
             if existing_elected_office_entry:
                 # found the existing entry, update the values
                 existing_elected_office_entry.elected_office_name = elected_office_name

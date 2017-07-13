@@ -311,8 +311,8 @@ def create_batch_row_action_measure(batch_description, batch_header_map, one_bat
         # Check if measure_title, state_code match exists in BatchRowActionMeasure for this header_id
         existing_batch_row_action_measure_query = BatchRowActionMeasure.objects.all()
         existing_batch_row_action_measure_query = existing_batch_row_action_measure_query.filter(
-            batch_header_id=batch_description.batch_header_id, measure_title=measure_title,
-            state_code=state_code, google_civic_election_id=google_civic_election_id)
+            batch_header_id=batch_description.batch_header_id, measure_title__iexact=measure_title,
+            state_code__iexact=state_code, google_civic_election_id=google_civic_election_id)
         existing_batch_row_action_measure_list = list(existing_batch_row_action_measure_query)
         number_of_existing_entries = len(existing_batch_row_action_measure_list)
         if not number_of_existing_entries:
@@ -476,8 +476,8 @@ def create_batch_row_action_elected_office(batch_description, batch_header_map, 
         # for this header_id (Duplicate entries in the same data set
         existing_batch_row_action_elected_office_query = BatchRowActionElectedOffice.objects.all()
         existing_batch_row_action_elected_office_query = existing_batch_row_action_elected_office_query.filter(
-            batch_header_id=batch_description.batch_header_id, elected_office_name=elected_office_name,
-            state_code=state_code, google_civic_election_id=google_civic_election_id)
+            batch_header_id=batch_description.batch_header_id, elected_office_name__iexact=elected_office_name,
+            state_code__iexact=state_code, google_civic_election_id=google_civic_election_id)
         existing_batch_row_action_elected_office_list = list(existing_batch_row_action_elected_office_query)
         number_of_existing_entries = len(existing_batch_row_action_elected_office_list)
         if not number_of_existing_entries:
@@ -668,8 +668,8 @@ def create_batch_row_action_contest_office(batch_description, batch_header_map, 
         # for this header_id (Duplicate entries in the same data set
         existing_batch_row_action_contest_office_query = BatchRowActionContestOffice.objects.all()
         existing_batch_row_action_contest_office_query = existing_batch_row_action_contest_office_query.filter(
-            batch_header_id=batch_description.batch_header_id, contest_office_name=contest_office_name,
-            state_code=state_code, google_civic_election_id=google_civic_election_id)
+            batch_header_id=batch_description.batch_header_id, contest_office_name__iexact=contest_office_name,
+            state_code__iexact=state_code, google_civic_election_id=google_civic_election_id)
         existing_batch_row_action_contest_office_list = list(existing_batch_row_action_contest_office_query)
         number_of_existing_entries = len(existing_batch_row_action_contest_office_list)
         if not number_of_existing_entries:
@@ -881,7 +881,7 @@ def create_batch_row_action_politician(batch_description, batch_header_map, one_
         # for this header_id (Duplicate entries in the same data set
         existing_batch_row_action_politician_query = BatchRowActionPolitician.objects.all()
         existing_batch_row_action_politician_query = existing_batch_row_action_politician_query.filter(
-            batch_header_id=batch_description.batch_header_id, politician_name=politician_name)
+            batch_header_id=batch_description.batch_header_id, politician_name__iexact=politician_name)
         existing_batch_row_action_politician_list = list(existing_batch_row_action_politician_query)
         number_of_existing_entries = len(existing_batch_row_action_politician_list)
         if not number_of_existing_entries:
@@ -1028,7 +1028,8 @@ def create_batch_row_action_candidate(batch_description, batch_header_map, one_b
             positive_value_exists(state_code):
         try:
             candidate_query = CandidateCampaign.objects.all()
-            candidate_query = candidate_query.filter(candidate_name__iexact=candidate_name, state_code=state_code,
+            candidate_query = candidate_query.filter(candidate_name__iexact=candidate_name,
+                                                     state_code__iexact=state_code,
                                                      google_civic_election_id=google_civic_election_id)
 
             candidate_item_list = list(candidate_query)
@@ -1064,8 +1065,8 @@ def create_batch_row_action_candidate(batch_description, batch_header_map, one_b
         # for this header_id (Duplicate entries in the same data set
         existing_batch_row_action_candidate_query = BatchRowActionCandidate.objects.all()
         existing_batch_row_action_candidate_query = existing_batch_row_action_candidate_query.filter(
-            batch_header_id=batch_description.batch_header_id, candidate_name=candidate_name, state_code=state_code,
-            google_civic_election_id=google_civic_election_id)
+            batch_header_id=batch_description.batch_header_id, candidate_name__iexact=candidate_name,
+            state_code__iexact=state_code, google_civic_election_id=google_civic_election_id)
         existing_batch_row_action_candidate_list = list(existing_batch_row_action_candidate_query)
         number_of_existing_entries = len(existing_batch_row_action_candidate_list)
         if not number_of_existing_entries:
