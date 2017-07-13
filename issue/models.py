@@ -58,15 +58,28 @@ class IssueListManager(models.Model):
     """
 
     def retrieve_issues(self, sort_formula=MOST_LINKED_ORGANIZATIONS, issue_we_vote_id_list_to_filter=None,
-                        issue_we_vote_id_list_to_exclude=None):
+                        issue_we_vote_id_list_to_exclude=None, require_filter_or_exclude=False):
         issue_list = []
         issue_list_found = False
+        my_list = []
+        success = False
+
+        if require_filter_or_exclude and issue_we_vote_id_list_to_filter is None and \
+                issue_we_vote_id_list_to_exclude is None:
+            status = 'RETRIEVE_ISSUE_FILTERS_NOT_FOUND'
+            results = {
+                'success':          success,
+                'status':           status,
+                'issue_list_found': issue_list_found,
+                'issue_list':       issue_list,
+            }
+            return results
 
         try:
             issue_queryset = Issue.objects.all()
-            if positive_value_exists(issue_we_vote_id_list_to_filter):
+            if issue_we_vote_id_list_to_filter is not None:
                 issue_queryset = issue_queryset.filter(we_vote_id__in=issue_we_vote_id_list_to_filter)
-            if positive_value_exists(issue_we_vote_id_list_to_exclude):
+            if issue_we_vote_id_list_to_exclude is not None:
                 issue_queryset = issue_queryset.exclude(we_vote_id__in=issue_we_vote_id_list_to_exclude)
             if sort_formula == MOST_LINKED_ORGANIZATIONS:
                 issue_queryset = issue_queryset.order_by('-linked_organization_count')
@@ -82,18 +95,19 @@ class IssueListManager(models.Model):
                 status = 'ISSUES_RETRIEVED'
             else:
                 status = 'NO_ISSUES_RETRIEVED'
-
+            success = True
         except Issue.DoesNotExist:
             # No issues found. Not a problem.
             status = 'NO_ISSUES_FOUND'
             issue_list = []
+            success = True
         except Exception as e:
             handle_exception(e, logger=logger)
             status = 'FAILED retrieve_all_issues_for_office ' \
                      '{error} [type: {error_type}]'.format(error=e.message, error_type=type(e))
 
         results = {
-            'success':              True if issue_list_found else False,
+            'success':              success,
             'status':               status,
             'issue_list_found':     issue_list_found,
             'issue_list':           issue_list,
