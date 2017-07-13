@@ -58,15 +58,27 @@ class IssueListManager(models.Model):
     """
 
     def retrieve_issues(self, sort_formula=MOST_LINKED_ORGANIZATIONS, issue_we_vote_id_list_to_filter=None,
-                        issue_we_vote_id_list_to_exclude=None):
+                        issue_we_vote_id_list_to_exclude=None, require_filter_or_exclude=False):
         issue_list = []
         issue_list_found = False
+        my_list = []
+
+        if require_filter_or_exclude and issue_we_vote_id_list_to_filter is None and \
+                issue_we_vote_id_list_to_exclude is None:
+            status = 'RETRIEVE_ISSUE_FILTERS_NOT_FOUND'
+            results = {
+                'success':          True if issue_list_found else False,
+                'status':           status,
+                'issue_list_found': issue_list_found,
+                'issue_list':       issue_list,
+            }
+            return results
 
         try:
             issue_queryset = Issue.objects.all()
-            if positive_value_exists(issue_we_vote_id_list_to_filter):
+            if issue_we_vote_id_list_to_filter is not None:
                 issue_queryset = issue_queryset.filter(we_vote_id__in=issue_we_vote_id_list_to_filter)
-            if positive_value_exists(issue_we_vote_id_list_to_exclude):
+            if issue_we_vote_id_list_to_exclude is not None:
                 issue_queryset = issue_queryset.exclude(we_vote_id__in=issue_we_vote_id_list_to_exclude)
             if sort_formula == MOST_LINKED_ORGANIZATIONS:
                 issue_queryset = issue_queryset.order_by('-linked_organization_count')
