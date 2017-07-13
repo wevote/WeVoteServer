@@ -1161,7 +1161,7 @@ class CandidateCampaignManager(models.Model):
         return candidate_object
 
     def create_candidate_row_entry(self, candidate_name, candidate_party_name, candidate_is_top_ticket, ctcl_uuid,
-                                   google_civic_election_id):
+                                   google_civic_election_id, state_code):
         """
         Create CandidateCampaign table entry with CandidateCampaign details 
         :param candidate_name: 
@@ -1169,6 +1169,7 @@ class CandidateCampaignManager(models.Model):
         :param candidate_is_top_ticket: 
         :param ctcl_uuid: 
         :param google_civic_election_id: 
+        :param state_code:
         :return: 
         """
         success = False
@@ -1181,7 +1182,8 @@ class CandidateCampaignManager(models.Model):
             new_candidate = CandidateCampaign.objects.create(candidate_name=candidate_name, party=candidate_party_name,
                                                              candidate_is_top_ticket=candidate_is_top_ticket,
                                                              ctcl_uuid=ctcl_uuid,
-                                                             google_civic_election_id=google_civic_election_id)
+                                                             google_civic_election_id=google_civic_election_id,
+                                                             state_code=state_code)
             if new_candidate:
                 success = True
                 status = "CANDIDATE_CREATED"
@@ -1205,7 +1207,7 @@ class CandidateCampaignManager(models.Model):
         return results
 
     def update_candidate_row_entry(self, candidate_name,candidate_party_name,candidate_is_top_ticket, ctcl_uuid,
-                                   google_civic_election_id,candidate_we_vote_id):
+                                   google_civic_election_id, state_code, candidate_we_vote_id):
         """
         Update CandidateCampaign table entry with matching we_vote_id
         :param candidate_name: 
@@ -1213,6 +1215,7 @@ class CandidateCampaignManager(models.Model):
         :param candidate_is_top_ticket: 
         :param ctcl_uuid: 
         :param google_civic_election_id: 
+        :param state_code: 
         :param candidate_we_vote_id: 
         :return: 
         """
@@ -1233,6 +1236,7 @@ class CandidateCampaignManager(models.Model):
                 existing_candidate_entry.google_civic_election_id = google_civic_election_id
                 existing_candidate_entry.is_top_ticket = candidate_is_top_ticket
                 existing_candidate_entry.ctcl_uuid = ctcl_uuid
+                existing_candidate_entry.state_code = state_code
                 # now go ahead and save this entry (update)
                 existing_candidate_entry.save()
                 candidate_updated = True
