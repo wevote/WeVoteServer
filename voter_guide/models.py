@@ -348,7 +348,7 @@ class VoterGuideManager(models.Manager):
         for time_span in TIME_SPAN_LIST:
             voter_guide_by_time_span_results = voter_guide_manager.retrieve_voter_guide(
                 vote_smart_time_span=time_span,
-                organization_we_vote_id__iexact=organization_we_vote_id)
+                organization_we_vote_id=organization_we_vote_id)
             if voter_guide_by_time_span_results['voter_guide_found']:
                 voter_guide_found = True
                 voter_guide = voter_guide_by_time_span_results['voter_guide']
@@ -368,7 +368,7 @@ class VoterGuideManager(models.Manager):
             for one_election in election_list:
                 voter_guide_results = voter_guide_manager.retrieve_voter_guide(
                     google_civic_election_id=one_election.google_civic_election_id,
-                    organization_we_vote_id__iexact=organization_we_vote_id)
+                    organization_we_vote_id=organization_we_vote_id)
                 if voter_guide_results['voter_guide_found']:
                     voter_guide_found = True
                     voter_guide = voter_guide_results['voter_guide']
