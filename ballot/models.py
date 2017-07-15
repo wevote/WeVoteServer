@@ -402,7 +402,7 @@ class BallotItemListManager(models.Model):
         }
         return results
 
-    def retrieve_ballot_items_for_election_lacking_state(self, google_civic_election_id, number_to_retrieve=5000):
+    def retrieve_ballot_items_for_election_lacking_state(self, google_civic_election_id, number_to_retrieve=50000):
         ballot_item_list = []
         ballot_item_list_found = False
         try:
