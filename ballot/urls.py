@@ -20,6 +20,7 @@ urlpatterns = [
         views_admin.ballot_item_list_by_polling_location_edit_view,
         name='ballot_item_list_by_polling_location_edit'),
     url(r'^list_edit_process/$', views_admin.ballot_item_list_edit_process_view, name='ballot_item_list_edit_process'),
+    url(r'^ballot_items_repair/$', views_admin.ballot_items_repair_view, name='ballot_items_repair'),
     url(r'^update_ballot_returned_latitude_and_longitude/$',
         views_admin.update_ballot_returned_with_latitude_and_longitude_view,
         name='update_ballot_returned_latitude_and_longitude'),

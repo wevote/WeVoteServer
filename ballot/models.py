@@ -402,6 +402,64 @@ class BallotItemListManager(models.Model):
         }
         return results
 
+    def retrieve_ballot_items_for_election_lacking_state(self, google_civic_election_id, number_to_retrieve=1000):
+        ballot_item_list = []
+        ballot_item_list_found = False
+        try:
+            ballot_item_queryset = BallotItem.objects.order_by('local_ballot_order', 'google_ballot_placement')
+            ballot_item_queryset = ballot_item_queryset.filter(google_civic_election_id=google_civic_election_id)
+            ballot_item_queryset = ballot_item_queryset.filter(state_code=None)
+            ballot_item_list = list(ballot_item_queryset[:number_to_retrieve])
+
+            if positive_value_exists(ballot_item_list):
+                ballot_item_list_found = True
+                status = 'BALLOT_ITEMS_FOUND_WITHOUT_STATE '
+            else:
+                status = 'NO_BALLOT_ITEMS_WITHOUT_STATE_FOUND, not positive_value_exists '
+        except BallotItem.DoesNotExist:
+            # No ballot items found. Not a problem.
+            status = 'NO_BALLOT_ITEMS_WITHOUT_STATE_FOUND '
+            ballot_item_list = []
+        except Exception as e:
+            handle_exception(e, logger=logger)
+            status = 'FAILED retrieve_ballot_items_for_election_lacking_state ' \
+                     '{error} [type: {error_type}]'.format(error=e.message, error_type=type(e))
+
+        results = {
+            'success':                  True if ballot_item_list_found else False,
+            'status':                   status,
+            'ballot_item_list_found':   ballot_item_list_found,
+            'ballot_item_list':         ballot_item_list,
+        }
+        return results
+
+    def count_ballot_items_for_election_lacking_state(self, google_civic_election_id):
+        ballot_item_list_count = 0
+        success = False
+        try:
+            ballot_item_queryset = BallotItem.objects.order_by('local_ballot_order', 'google_ballot_placement')
+            ballot_item_queryset = ballot_item_queryset.filter(google_civic_election_id=google_civic_election_id)
+            ballot_item_queryset = ballot_item_queryset.filter(state_code=None)
+            ballot_item_list_count = ballot_item_queryset.count()
+
+            status = 'BALLOT_ITEMS_WITHOUT_STATE_FOUND '
+            success = True
+        except BallotItem.DoesNotExist:
+            # No ballot items found. Not a problem.
+            status = 'NO_BALLOT_ITEMS_WITHOUT_STATE_FOUND '
+            success = True
+        except Exception as e:
+            handle_exception(e, logger=logger)
+            status = 'FAILED retrieve_ballot_items_for_election_lacking_state ' \
+                     '{error} [type: {error_type}]'.format(error=e.message, error_type=type(e))
+
+        results = {
+            'success':                  success,
+            'status':                   status,
+            'ballot_item_list_count':   ballot_item_list_count,
+        }
+        return results
+
     def retrieve_all_ballot_items_for_voter(self, voter_id, google_civic_election_id):
         polling_location_we_vote_id = ''
         ballot_item_list = []

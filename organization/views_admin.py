@@ -458,8 +458,13 @@ def organization_edit_process_view(request):
         if results['election_found']:
             election = results['election']
             voter_guide_manager = VoterGuideManager()
+            if positive_value_exists(state_served_code):
+                state_code = state_served_code
+            else:
+                state_code = ""
+
             results = voter_guide_manager.update_or_create_organization_voter_guide_by_election_id(
-                organization_we_vote_id, google_civic_election_id)
+                organization_we_vote_id, google_civic_election_id, state_code)
             if results['voter_guide_saved']:
                 messages.add_message(request, messages.INFO, 'Voter guide for {election_name} election saved.'
                                                              ''.format(election_name=election.election_name))
@@ -469,7 +474,7 @@ def organization_edit_process_view(request):
     organization_follow_issues_we_vote_id_list_prior_to_update = link_issue_list_manager.\
         fetch_issue_we_vote_id_list_by_organization_we_vote_id(organization_we_vote_id)
     link_issue_manager = OrganizationLinkToIssueManager()
-    issue_id=0
+    issue_id = 0
 
     if positive_value_exists(organization_link_issue_we_vote_ids) or \
             positive_value_exists(organization_follow_issues_we_vote_id_list_prior_to_update):

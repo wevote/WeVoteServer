@@ -13,6 +13,11 @@ def ballot_returned_sync_out_doc_template_values(url_root):
             'value':        'integer',  # boolean, integer, long, string
             'description':  'Limit the ballot_returned entries retrieved to those for this google_civic_election_id.',
         },
+        {
+            'name':         'state_code',
+            'value':        'string',  # boolean, integer, long, string
+            'description':  'Limit the ballot_returned entries retrieved to those in a particular state.',
+        },
     ]
 
     potential_status_codes_list = [
@@ -26,6 +31,7 @@ def ballot_returned_sync_out_doc_template_values(url_root):
                    '  "election_date": string,\n' \
                    '  "election_description_text": string,\n' \
                    '  "google_civic_election_id": string,\n' \
+                   '  "state_code": string,\n' \
                    '  "latitude": string,\n' \
                    '  "longitude": string,\n' \
                    '  "normalized_line1": string,\n' \
@@ -39,7 +45,7 @@ def ballot_returned_sync_out_doc_template_values(url_root):
 
     template_values = {
         'api_name': 'ballotReturnedSyncOut',
-        'api_slug': 'ballotReturnedSyncOut/?format=json',
+        'api_slug': 'ballotReturnedSyncOut',
         'api_introduction':
             "",
         'try_now_link': 'apis_v1:ballotReturnedSyncOutView',

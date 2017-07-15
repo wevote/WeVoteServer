@@ -2,7 +2,8 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
-from .controllers import ballot_items_import_from_master_server, ballot_returned_import_from_master_server
+from .controllers import ballot_items_import_from_master_server, ballot_returned_import_from_master_server, \
+    repair_ballot_items_for_election
 from .models import BallotItem, BallotItemListManager, BallotItemManager, BallotReturned, BallotReturnedManager
 from admin_tools.views import redirect_to_sign_in_page
 from candidate.models import CandidateCampaignListManager
@@ -74,8 +75,16 @@ def ballot_items_sync_out_view(request):
 # This page does not need to be protected.
 # class BallotReturnedSyncOutView(APIView):
 #     def get(self, request, format=None):
-def ballot_returned_sync_out_view(request):
+def ballot_returned_sync_out_view(request):  # ballotReturnedSyncOut
     google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
+    state_code = request.GET.get('state_code', '')
+
+    if not positive_value_exists(google_civic_election_id) and not positive_value_exists(state_code):
+        json_data = {
+            'success': False,
+            'status': 'BALLOT_RETURNED_LIST_MISSING-google_civic_election_id or state_code required'
+        }
+        return HttpResponse(json.dumps(json_data), content_type='application/json')
 
     try:
         ballot_returned_list = BallotReturned.objects.all()
@@ -84,6 +93,8 @@ def ballot_returned_sync_out_view(request):
         ballot_returned_list = ballot_returned_list.exclude(polling_location_we_vote_id__iexact='')
         if positive_value_exists(google_civic_election_id):
             ballot_returned_list = ballot_returned_list.filter(google_civic_election_id=google_civic_election_id)
+        if positive_value_exists(state_code):
+            ballot_returned_list = ballot_returned_list.filter(normalized_state__iexact=state_code)
 
         # serializer = BallotReturnedSerializer(ballot_returned_list, many=True)
         # return Response(serializer.data)
@@ -145,7 +156,7 @@ def ballot_returned_import_from_master_server_view(request):
     state_code = request.GET.get('state_code', '')
 
     print("Importing ballot returned from master server")
-    results = ballot_returned_import_from_master_server(request, google_civic_election_id)
+    results = ballot_returned_import_from_master_server(request, google_civic_election_id, state_code)
 
     if not results['success']:
         messages.add_message(request, messages.ERROR, results['status'])
@@ -469,6 +480,33 @@ def ballot_item_list_edit_process_view(request):
                                 "&polling_location_city=" + polling_location_city +
                                 "&polling_location_zip=" + str(polling_location_zip)
                                 )
+
+
+@login_required
+def ballot_items_repair_view(request):
+    authority_required = {'admin'}  # admin, verified_volunteer
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
+    # We can accept either, but give preference to polling_location_id
+    local_election_id = request.GET.get('local_election_id', 0)
+    local_election_id = convert_to_int(local_election_id)
+    google_civic_election_id = request.GET.get('google_civic_election_id', 0)
+    google_civic_election_id = convert_to_int(google_civic_election_id)
+    state_code = request.GET.get('state_code', '')
+
+    if not positive_value_exists(google_civic_election_id):
+        messages.add_message(request, messages.ERROR, 'Either google_civic_election_id or state_code required.')
+        return HttpResponseRedirect(reverse('election:election_summary', args=(local_election_id,)) +
+                                    "?google_civic_election_id=" + str(google_civic_election_id) +
+                                    "&state_code=" + str(state_code))
+
+    results = repair_ballot_items_for_election(google_civic_election_id)
+    messages.add_message(request, messages.INFO, results['status'])
+
+    return HttpResponseRedirect(reverse('election:election_summary', args=(local_election_id,)) +
+                                "?google_civic_election_id=" + str(google_civic_election_id) +
+                                "&state_code=" + str(state_code))
 
 
 @login_required

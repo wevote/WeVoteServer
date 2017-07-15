@@ -11,8 +11,8 @@ from datetime import datetime
 from election.models import ElectionManager
 from exception.models import handle_exception
 from import_export_google_civic.controllers import voter_ballot_items_retrieve_from_google_civic_for_api
-from measure.models import ContestMeasureList
-from office.models import ContestOfficeListManager
+from measure.models import ContestMeasureList, ContestMeasureManager
+from office.models import ContestOfficeManager, ContestOfficeListManager
 from polling_location.models import PollingLocationManager
 from voter.models import BALLOT_ADDRESS, VoterAddressManager, \
     VoterDeviceLinkManager
@@ -81,13 +81,14 @@ def ballot_items_import_from_master_server(request, google_civic_election_id, st
     return import_results
 
 
-def ballot_returned_import_from_master_server(request, google_civic_election_id):
+def ballot_returned_import_from_master_server(request, google_civic_election_id, state_code):
     """
     Get the json data, and either create new entries or update existing
     Request json file from We Vote servers
 
     :param request:
     :param google_civic_election_id:
+    :param state_code:
     :return:
     """
 
@@ -98,11 +99,12 @@ def ballot_returned_import_from_master_server(request, google_civic_election_id)
             "key": WE_VOTE_API_KEY,  # This comes from an environment variable
             "format": 'json',
             "google_civic_election_id": str(google_civic_election_id),
+            "state_code": str(state_code),
         }
     )
 
     print("... the master server returned " + str(len(structured_json)) + " polling locations for election " +
-          str(google_civic_election_id))
+          str(google_civic_election_id) + " in state " + str(state_code))
 
     if import_results['success']:
         results = filter_ballot_returned_structured_json_for_local_duplicates(structured_json)
@@ -397,6 +399,7 @@ def heal_geo_coordinates(text_for_map_search):
        longitude = location.longitude
     return latitude, longitude
 
+
 def figure_out_google_civic_election_id_voter_is_watching(voter_device_id):
     status = ''
 
@@ -467,6 +470,75 @@ def figure_out_google_civic_election_id_voter_is_watching(voter_device_id):
         'voter_address_object_found': voter_address_results['voter_address_found'],
         'voter_ballot_saved_found': choose_election_results['voter_ballot_saved_found'],
         'google_civic_election_id': choose_election_results['google_civic_election_id'],
+    }
+    return results
+
+
+def repair_ballot_items_for_election(google_civic_election_id):
+    saved_count = 0
+    state_code_not_found_count = 0
+    error_count = 0
+    success = True
+    office_manager = ContestOfficeManager()
+    measure_manager = ContestMeasureManager()
+    state_code_from_election = ""
+
+    ballot_item_list_manager = BallotItemListManager()
+    results = ballot_item_list_manager.retrieve_ballot_items_for_election_lacking_state(google_civic_election_id)
+
+    if results['ballot_item_list_found']:
+        ballot_item_list = results['ballot_item_list']
+
+        election_manager = ElectionManager()
+        election_results = election_manager.retrieve_election(google_civic_election_id)
+        if election_results['election_found']:
+            election = election_results['election']
+            state_code_from_election = election.get_election_state()
+
+        for one_ballot_item in ballot_item_list:
+            state_code_from_office_or_measure = ""
+            save_ballot_item = False
+            if not positive_value_exists(state_code_from_election):
+                # If here, look up the state code by from the office or measure
+                if positive_value_exists(one_ballot_item.contest_office_we_vote_id):
+                    state_code_from_office_or_measure = office_manager.fetch_state_code_from_we_vote_id(
+                        one_ballot_item.contest_office_we_vote_id)
+                elif positive_value_exists(one_ballot_item.contest_measure_we_vote_id):
+                    state_code_from_office_or_measure = measure_manager.fetch_state_code_from_we_vote_id(
+                        one_ballot_item.contest_measure_we_vote_id)
+            try:
+                # Heal the data
+                if positive_value_exists(state_code_from_office_or_measure):
+                    one_ballot_item.state_code = state_code_from_office_or_measure
+                    save_ballot_item = True
+                elif positive_value_exists(state_code_from_election):
+                    one_ballot_item.state_code = state_code_from_election
+                    save_ballot_item = True
+
+                if save_ballot_item:
+                    one_ballot_item.save()
+                    saved_count += 1
+                else:
+                    state_code_not_found_count += 1
+            except Exception as e:
+                error_count += 1
+
+    if positive_value_exists(saved_count):
+        success = True
+
+    count_results = ballot_item_list_manager.count_ballot_items_for_election_lacking_state(google_civic_election_id)
+    ballot_item_list_count = count_results['ballot_item_list_count']
+
+    status = "REPAIR_BALLOT_ITEMS, total count that need repair: {ballot_item_list_count}, " \
+             "saved_count: {saved_count}, " \
+             "state_code_not_found_count: {state_code_not_found_count}, " \
+             "error_count: {error_count} ".format(ballot_item_list_count=ballot_item_list_count,
+                                                  saved_count=saved_count,
+                                                  state_code_not_found_count=state_code_not_found_count,
+                                                  error_count=error_count)
+    results = {
+        'status': status,
+        'success': success,
     }
     return results
 

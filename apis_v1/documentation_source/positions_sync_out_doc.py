@@ -13,6 +13,11 @@ def positions_sync_out_doc_template_values(url_root):
             'value':        'integer',  # boolean, integer, long, string
             'description':  'The election for which we want positions.',
         },
+        {
+            'name':         'state_code',
+            'value':        'string',  # boolean, integer, long, string
+            'description':  'Limit the positions entries retrieved to those in a particular state.',
+        },
     ]
     optional_query_parameter_list = [
     ]

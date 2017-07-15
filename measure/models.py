@@ -417,6 +417,26 @@ class ContestMeasureManager(models.Model):
 
         return contest_measure_id
 
+    def fetch_state_code_from_we_vote_id(self, contest_measure_we_vote_id):
+        """
+        Take in contest_measure_we_vote_id and return return the state_code
+        :param contest_measure_we_vote_id:
+        :return:
+        """
+        state_code = ""
+        try:
+            if positive_value_exists(contest_measure_we_vote_id):
+                contest_measure_on_stage = ContestMeasure.objects.get(we_vote_id=contest_measure_we_vote_id)
+                state_code = contest_measure_on_stage.state_code
+
+        except ContestMeasure.MultipleObjectsReturned as e:
+            handle_record_found_more_than_one_exception(e, logger=logger)
+
+        except ContestMeasure.DoesNotExist:
+            pass
+
+        return state_code
+
     def create_measure_row_entry(self, measure_title, measure_subtitle, measure_text, state_code, ctcl_uuid,
                                         google_civic_election_id):
         """

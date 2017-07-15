@@ -13,6 +13,11 @@ def candidates_sync_out_doc_template_values(url_root):
             'value':        'integer',  # boolean, integer, long, string
             'description':  'Limit the candidates retrieved to those for this google_civic_election_id.',
         },
+        {
+            'name':         'state_code',
+            'value':        'string',  # boolean, integer, long, string
+            'description':  'Limit the candidates entries retrieved to those in a particular state.',
+        },
     ]
 
     potential_status_codes_list = [

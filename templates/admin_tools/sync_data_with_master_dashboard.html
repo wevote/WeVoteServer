@@ -61,6 +61,8 @@
             <a href="{% url 'office:offices_import_from_master_server' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
                 Retrieve Offices</a>
             {% if google_civic_election_id|convert_to_int > 0 %} for election {{ google_civic_election_id }}{% else %} for ALL elections{% endif %}
+            {% if state_code %} for the state {{ state_code }}{% else %} for ALL states{% endif %}
+            &nbsp;&nbsp;
         </td>
         <td>The list of elected offices, like &#34;Governor State of Virginia&#34;, one entry for each polling location</td>
     </tr>
@@ -71,8 +73,10 @@
             <a href="{% url 'candidate:candidates_import_from_master_server' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
                 Retrieve Candidates</a>
             {% if google_civic_election_id|convert_to_int > 0 %} for election {{ google_civic_election_id }}{% else %} for ALL elections{% endif %}
+            {% if state_code %} for the state {{ state_code }}{% else %} for ALL states{% endif %}
+            &nbsp;&nbsp;
         </td>
-        <td>The list of candidates for office)</td>
+        <td>The list of candidates running for office</td>
     </tr>
 
     <tr><td><h4>Measures</h4></td></tr>
@@ -81,8 +85,10 @@
             <a href="{% url 'measure:measures_import_from_master_server' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
                 Retrieve Measures</a>
             {% if google_civic_election_id|convert_to_int > 0 %} for election {{ google_civic_election_id }}{% else %} for ALL elections{% endif %}
+            {% if state_code %} for the state {{ state_code }}{% else %} for ALL states{% endif %}
+            &nbsp;&nbsp;
         </td>
-        <td>The list of unique measures, like &#34;Measure BB - Berkeley&#34;)</td>
+        <td>The list of unique measures, like &#34;Measure BB - Berkeley&#34;</td>
     </tr>
 
     <tr><td><h4>Issues</h4></td></tr>
@@ -119,6 +125,8 @@
             <a href="{% url 'position:positions_import_from_master_server' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
                 Retrieve Positions</a>
             for election {{ google_civic_election_id }}{% else %} (Cannot retrieve Positions without election id){% endif %}
+            {% if state_code %} for the state {{ state_code }}{% else %} for ALL states{% endif %}
+            &nbsp;&nbsp;
         </td>
         <td>The list of positions on measures and candidates, that organizations have made</td>
     </tr>
@@ -140,6 +148,7 @@
             <a href="{% url 'ballot:ballot_items_import_from_master_server' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
                 Retrieve Saved Ballot Items</a>
             {% if google_civic_election_id|convert_to_int > 0 %} for election {{ google_civic_election_id }}{% else %} for ALL elections{% endif %}
+            {% if state_code %} for the state {{ state_code }}{% else %} for ALL states{% endif %}
             &nbsp;&nbsp;
         </td>
         <td>The list unique elected offices, like &#34;Governor State of Virginia&#34;  <br/>Some of our older data has no state_codes, so if you get no results try with &#34;All states&#34;</td>
