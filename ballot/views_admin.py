@@ -32,7 +32,7 @@ logger = wevote_functions.admin.get_logger(__name__)
 
 
 # This page does not need to be protected.
-def ballot_items_sync_out_view(request):
+def ballot_items_sync_out_view(request):  # ballotItemsSyncOut
     google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
     state_code = request.GET.get('state_code', False)
 
@@ -358,6 +358,8 @@ def ballot_item_list_edit_process_view(request):
             if results['polling_location_found']:
                 polling_location = results['polling_location']
                 polling_location_found = True
+                if not positive_value_exists(state_code):
+                    state_code = polling_location.state
         else:
             # Create new ballot_returned entry
             # election must be found
@@ -436,15 +438,19 @@ def ballot_item_list_edit_process_view(request):
         if results['contest_office_found']:
             contest_office = results['contest_office']
             ballot_item_display_name = contest_office.office_name
-
             google_ballot_placement = 0
             measure_subtitle = ''
             local_ballot_order = contest_office1_order if positive_value_exists(contest_office1_order) else 0
+            contest_measure_id = 0
+            contest_measure_we_vote_id = ""
+            if not positive_value_exists(state_code):
+                state_code = contest_office.state_code
 
             results = ballot_item_manager.update_or_create_ballot_item_for_polling_location(
                 polling_location.we_vote_id, google_civic_election_id, google_ballot_placement,
                 ballot_item_display_name, measure_subtitle, local_ballot_order,
-                contest_office.id, contest_office.we_vote_id, state_code)
+                contest_office.id, contest_office.we_vote_id,
+                contest_measure_id, contest_measure_we_vote_id, state_code)
 
             if results['new_ballot_item_created']:
                 messages.add_message(request, messages.INFO, 'Office 1 added.')
@@ -463,12 +469,15 @@ def ballot_item_list_edit_process_view(request):
             contest_office_id = 0
             contest_office_we_vote_id = ''
             local_ballot_order = 0
+            if not positive_value_exists(state_code):
+                state_code = contest_measure.state_code
 
             ballot_item_manager.update_or_create_ballot_item_for_polling_location(
                 polling_location.we_vote_id, google_civic_election_id, google_ballot_placement,
                 ballot_item_display_name, contest_measure.measure_subtitle, local_ballot_order,
                 contest_office_id, contest_office_we_vote_id,
-                contest_measure.id, state_code)
+                contest_measure.id, contest_measure.we_vote_id, state_code)
+
     except Exception as e:
         messages.add_message(request, messages.ERROR, 'Could not save ballot_returned.')
 

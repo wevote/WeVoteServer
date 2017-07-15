@@ -402,13 +402,19 @@ class BallotItemListManager(models.Model):
         }
         return results
 
-    def retrieve_ballot_items_for_election_lacking_state(self, google_civic_election_id, number_to_retrieve=50000):
+    def retrieve_ballot_items_for_election_lacking_state(self, google_civic_election_id, number_to_retrieve=5000):
+        """
+
+        :param google_civic_election_id:
+        :param number_to_retrieve: Repairing 1000 ballot items takes about 9 seconds.
+        :return:
+        """
         ballot_item_list = []
         ballot_item_list_found = False
         try:
             ballot_item_queryset = BallotItem.objects.order_by('local_ballot_order', 'google_ballot_placement')
             ballot_item_queryset = ballot_item_queryset.filter(google_civic_election_id=google_civic_election_id)
-            ballot_item_queryset = ballot_item_queryset.filter(state_code=None)
+            ballot_item_queryset = ballot_item_queryset.filter(Q(state_code=None) | Q(state_code=""))
             ballot_item_list = list(ballot_item_queryset[:number_to_retrieve])
 
             if positive_value_exists(ballot_item_list):
@@ -439,7 +445,7 @@ class BallotItemListManager(models.Model):
         try:
             ballot_item_queryset = BallotItem.objects.order_by('local_ballot_order', 'google_ballot_placement')
             ballot_item_queryset = ballot_item_queryset.filter(google_civic_election_id=google_civic_election_id)
-            ballot_item_queryset = ballot_item_queryset.filter(state_code=None)
+            ballot_item_queryset = ballot_item_queryset.filter(Q(state_code=None) | Q(state_code=""))
             ballot_item_list_count = ballot_item_queryset.count()
 
             status = 'BALLOT_ITEMS_WITHOUT_STATE_FOUND '
@@ -572,8 +578,7 @@ class BallotItemListManager(models.Model):
 
         for ballot_item in ballot_item_list:
             create_results = ballot_item_manager.update_or_create_ballot_item_for_voter(
-                to_voter_id, ballot_returned.google_civic_election_id,
-                ballot_item.google_ballot_placement,
+                to_voter_id, ballot_returned.google_civic_election_id, ballot_item.google_ballot_placement,
                 ballot_item.ballot_item_display_name, ballot_item.measure_subtitle, ballot_item.local_ballot_order,
                 ballot_item.contest_office_id, ballot_item.contest_office_we_vote_id,
                 ballot_item.contest_measure_id, ballot_item.contest_measure_we_vote_id, ballot_item.state_code)

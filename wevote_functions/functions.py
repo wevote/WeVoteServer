@@ -625,9 +625,8 @@ def process_request_from_master(request, message_text, get_url, get_params):
         message_text += " for google_civic_election_id " + str(get_params['google_civic_election_id'])
     messages.add_message(request, messages.INFO, message_text)
     logger.info(message_text)
-    print(message_text)
 
-    response = requests.get(get_url, get_params)
+    response = requests.get(get_url, params=get_params)
 
     structured_json = json.loads(response.text)
     if 'success' in structured_json and not structured_json['success']:

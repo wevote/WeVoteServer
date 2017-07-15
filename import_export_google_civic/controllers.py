@@ -331,10 +331,13 @@ def process_contest_office_from_structured_json(
             and positive_value_exists(contest_office_id):
         ballot_item_manager = BallotItemManager()
         measure_subtitle = ""
+        contest_measure_id = 0
+        contest_measure_we_vote_id = ""
         ballot_item_manager.update_or_create_ballot_item_for_voter(
-            voter_id, google_civic_election_id, google_ballot_placement, ballot_item_display_name,
-            measure_subtitle, local_ballot_order, contest_office_id, contest_office_we_vote_id, state_code)
-        # We leave off these and rely on default empty values: contest_measure_id, contest_measure_we_vote_id
+            voter_id, google_civic_election_id, google_ballot_placement,
+            ballot_item_display_name, measure_subtitle, local_ballot_order,
+            contest_office_id, contest_office_we_vote_id,
+            contest_measure_id, contest_measure_we_vote_id, state_code)
 
     # If this is a polling location, we want to save the ballot information for it so we can use it as reference
     #  for nearby voters (when we don't have their full address)
@@ -342,10 +345,13 @@ def process_contest_office_from_structured_json(
             and positive_value_exists(contest_office_id):
         ballot_item_manager = BallotItemManager()
         measure_subtitle = ""
+        contest_measure_id = 0
+        contest_measure_we_vote_id = ""
         ballot_item_manager.update_or_create_ballot_item_for_polling_location(
-            polling_location_we_vote_id, google_civic_election_id, google_ballot_placement, ballot_item_display_name,
-            measure_subtitle, local_ballot_order, contest_office_id, contest_office_we_vote_id, state_code)
-        # We leave off these and rely on default empty values: contest_measure_id, contest_measure_we_vote_id
+            polling_location_we_vote_id, google_civic_election_id, google_ballot_placement,
+            ballot_item_display_name, measure_subtitle, local_ballot_order,
+            contest_office_id, contest_office_we_vote_id,
+            contest_measure_id, contest_measure_we_vote_id, state_code)
 
     # Note: We do not need to connect the candidates with the voter here for a ballot item  # TODO DALE Actually we do
     # For VT, They don't have a district id, so all candidates were lumped together.
@@ -1036,8 +1042,7 @@ def process_contest_referendum_from_structured_json(
             contest_office_we_vote_id = ''
             ballot_item_manager.update_or_create_ballot_item_for_polling_location(
                 polling_location_we_vote_id, google_civic_election_id, google_ballot_placement,
-                ballot_item_display_name, measure_subtitle,
-                local_ballot_order,
+                ballot_item_display_name, measure_subtitle, local_ballot_order,
                 contest_office_id, contest_office_we_vote_id,
                 contest_measure_id, contest_measure_we_vote_id, state_code)
 
