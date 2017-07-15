@@ -139,7 +139,6 @@ urlpatterns = [
     url(r'^voterEmailAddressSave/', views_voter.voter_email_address_save_view, name='voterEmailAddressSaveView'),
     url(r'^voterEmailAddressSignIn/', views_voter.voter_email_address_sign_in_view, name='voterEmailAddressSignInView'),
     url(r'^voterEmailAddressVerify/', views_voter.voter_email_address_verify_view, name='voterEmailAddressVerifyView'),
-    url(r'^voterExport/', views_voter.VoterExportView.as_view(), name='voterExportView'),
     url(r'^voterFacebookSaveToCurrentAccount/',
         views_facebook.voter_facebook_save_to_current_account_view, name='voterFacebookSaveToCurrentAccountView'),
     url(r'^voterFacebookSignInRetrieve/',

@@ -4,7 +4,6 @@
 
 from .controllers import election_remote_retrieve, elections_import_from_master_server, elections_sync_out_list_for_api
 from .models import Election
-from .serializers import ElectionSerializer
 from admin_tools.views import redirect_to_sign_in_page
 from ballot.models import BallotItemListManager, BallotReturnedListManager, BallotReturnedManager
 from candidate.models import CandidateCampaignListManager
@@ -579,8 +578,6 @@ def elections_sync_out_view(request):
         return HttpResponse(json.dumps(json_data), content_type='application/json')
     else:
         election_list = results['election_list']
-        # serializer = ElectionSerializer(election_list, many=True)
-        # return Response(serializer.data)
         election_list_dict = election_list.values('google_civic_election_id', 'election_name', 'election_day_text',
                                                   'ocd_division_id', 'state_code')
         if election_list_dict:
@@ -593,14 +590,6 @@ def elections_sync_out_view(request):
                 'voter_device_id': voter_device_id
             }
             return HttpResponse(json.dumps(json_data), content_type='application/json')
-
-
-# This page does not need to be protected.
-class ExportElectionDataView(APIView):
-    def get(self, request, format=None):
-        election_list = Election.objects.all()
-        serializer = ElectionSerializer(election_list, many=True)
-        return Response(serializer.data)
 
 
 @login_required

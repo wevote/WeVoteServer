@@ -1112,7 +1112,6 @@ class BallotReturnedManager(models.Model):
                     ballot_returned.normalized_line2 = normalized_line2
                 if normalized_state is not False:
                     ballot_returned.normalized_state = normalized_state
-                    ballot_returned.state_code = normalized_state
                 if normalized_zip is not False:
                     ballot_returned.normalized_zip = normalized_zip
                 if text_for_map_search is not False:

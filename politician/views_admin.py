@@ -3,8 +3,8 @@
 # -*- coding: UTF-8 -*-
 
 from .models import Politician, PoliticianManager
-from .serializers import PoliticianSerializer
 from admin_tools.views import redirect_to_sign_in_page
+from candidate.controllers import candidates_import_from_master_server
 from candidate.models import CandidateCampaign
 from office.models import ContestOffice, ContestOfficeManager
 from django.db.models import Q
@@ -38,19 +38,6 @@ from wevote_functions.functions import convert_to_int, convert_to_political_part
 
 
 logger = wevote_functions.admin.get_logger(__name__)
-
-
-# This page does not need to be protected.
-class PoliticiansSyncOutView(APIView):
-    def get(self, request, format=None):
-        state_code = request.GET.get('state_code', '')
-
-        politician_list = Politician.objects.all()
-        if positive_value_exists(state_code):
-            politician_list = politician_list.filter(state_code__iexact=state_code)
-
-        serializer = PoliticianSerializer(politician_list, many=True)
-        return Response(serializer.data)
 
 
 @login_required

@@ -7,7 +7,6 @@ from .models import LANGUAGE_CHOICES, QuickInfo, QuickInfoManager, \
     SPANISH, ENGLISH, TAGALOG, VIETNAMESE, CHINESE, \
     NOT_SPECIFIED
 from ballot.models import OFFICE, CANDIDATE, POLITICIAN, MEASURE, KIND_OF_BALLOT_ITEM_CHOICES
-from .serializers import QuickInfoSerializer, QuickInfoMasterSerializer
 from admin_tools.views import redirect_to_sign_in_page
 from candidate.models import CandidateCampaign, CandidateCampaignManager
 from django.http import HttpResponseRedirect
@@ -20,30 +19,12 @@ from election.models import Election
 from exception.models import handle_record_found_more_than_one_exception
 from measure.models import ContestMeasure, ContestMeasureManager
 from office.models import ContestOffice, ContestOfficeManager
-from rest_framework.views import APIView
-from rest_framework.response import Response
 from voter.models import voter_has_authority
 import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, positive_value_exists
 
 
 logger = wevote_functions.admin.get_logger(__name__)
-
-
-# This page does not need to be protected.
-# NOTE: login_required() throws an error. Needs to be figured out if we ever want to secure this page.
-class ExportQuickInfoDataView(APIView):
-    def get(self, request, format=None):
-        quick_info_list = QuickInfo.objects.all()
-        serializer = QuickInfoSerializer(quick_info_list, many=True)
-        return Response(serializer.data)
-
-
-class ExportQuickInfoMasterDataView(APIView):
-    def get(self, request, format=None):
-        quick_info_master_list = QuickInfoMaster.objects.all()
-        serializer = QuickInfoMasterSerializer(quick_info_master_list, many=True)
-        return Response(serializer.data)
 
 
 @login_required
