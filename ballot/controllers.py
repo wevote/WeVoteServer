@@ -36,15 +36,22 @@ def ballot_items_import_from_master_server(request, google_civic_election_id, st
     """
     # Request json file from We Vote servers
 
-    params = { "key":  WE_VOTE_API_KEY, }  # This comes from an environment variable}
-
     if positive_value_exists(google_civic_election_id) and positive_value_exists(state_code):
-        params.update({"google_civic_election_id": str(google_civic_election_id),
-                       "state_code": state_code, })
+        params = {
+            "key":                      WE_VOTE_API_KEY,
+            "google_civic_election_id": str(google_civic_election_id),
+            "state_code":               state_code,
+        }
     elif positive_value_exists(google_civic_election_id):
-        params.update({"google_civic_election_id": str(google_civic_election_id), })
+        params = {
+            "key":                      WE_VOTE_API_KEY,
+            "google_civic_election_id": str(google_civic_election_id)
+        }
     elif positive_value_exists(state_code):
-        params.update({ "state_code": state_code, })
+        params = {
+            "key":                      WE_VOTE_API_KEY,
+            "state_code":               state_code,
+        }
     else:
         import_results = {
             'success': False,
