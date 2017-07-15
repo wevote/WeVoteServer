@@ -30,9 +30,6 @@
     {% endfor %}
     </table>
     <p></p>
-    <p>
-        <a href="{% url 'election:election_export' %}?format=json" target="_blank" >Export Elections</a>
-    </p>
 {% else %}
     <p>(no elections found)</p>
 {% endif %}

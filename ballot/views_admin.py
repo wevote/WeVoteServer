@@ -406,7 +406,6 @@ def ballot_item_list_edit_process_view(request):
                 normalized_state=polling_location.state,
                 normalized_zip=polling_location.get_formatted_zip(),
                 text_for_map_search=polling_location.get_text_for_map_search(),
-                state_code=state_code,
             )
             ballot_returned.save()
             ballot_returned_id = ballot_returned.id

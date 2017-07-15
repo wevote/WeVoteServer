@@ -10,5 +10,4 @@ from . import views_admin
 
 
 urlpatterns = [
-    url(r'^export/', views_admin.ExportFollowOrganizationDataView.as_view(), name='follow_organization_export'),
 ]

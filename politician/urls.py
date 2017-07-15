@@ -9,7 +9,6 @@ from django.conf.urls import url
 urlpatterns = [
     url(r'^$', views_admin.politician_list_view, name='politician_list',),
     url(r'^edit_process/$', views_admin.politician_edit_process_view, name='politician_edit_process'),
-    url(r'^export/', views_admin.PoliticiansSyncOutView.as_view(), name='politicians_export'),
     url(r'^delete/', views_admin.politician_delete_process_view, name='politician_delete_process'),
     # url(r'^import/$',
     #     views_admin.politicians_import_from_master_server_view, name='politicians_import_from_master_server'),

@@ -33,7 +33,6 @@ from voter.controllers import voter_address_retrieve_for_api, voter_create_for_a
     voter_split_into_two_accounts_for_api
 from voter.models import BALLOT_ADDRESS, fetch_voter_id_from_voter_device_link, VoterAddress, \
     VoterAddressManager, VoterDeviceLink, VoterDeviceLinkManager, VoterManager
-from voter.serializers import VoterSerializer
 from voter_guide.controllers import voter_guide_possibility_retrieve_for_api, voter_guide_possibility_save_for_api, \
     voter_guides_followed_retrieve_for_api, voter_guides_ignored_retrieve_for_api, \
     voter_guides_to_follow_retrieve_for_api, voter_guides_followed_by_organization_retrieve_for_api, \
@@ -1174,26 +1173,6 @@ def voter_split_into_two_accounts_view(request):  # voterSplitIntoTwoAccounts
         'voter_device_id':                  voter_device_id,
     }
     return HttpResponse(json.dumps(json_data), content_type='application/json')
-
-
-class VoterExportView(APIView):
-    """
-    Export raw voter data to JSON format
-    """
-    def get(self, request):  # Removed: , format=None
-        voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
-        results = voter_retrieve_list_for_api(voter_device_id)
-
-        if 'success' not in results:
-            json_data = results['json_data']
-            return HttpResponse(json.dumps(json_data), content_type='application/json')
-        elif not results['success']:
-            json_data = results['json_data']
-            return HttpResponse(json.dumps(json_data), content_type='application/json')
-        else:
-            voter_list = results['voter_list']
-            serializer = VoterSerializer(voter_list, many=True)
-            return Response(serializer.data)
 
 
 def voter_retrieve_view(request):  # voterRetrieve
