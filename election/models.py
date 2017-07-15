@@ -81,15 +81,18 @@ class ElectionManager(models.Model):
             success = False
             status = 'MISSING_ELECTION_NAME'
         else:
+            if not positive_value_exists(state_code) and positive_value_exists(ocd_division_id):
+                state_code = extract_state_from_ocd_division_id(ocd_division_id)
+
             try:
                 updated_values = {
                     # Values we search against
                     'google_civic_election_id': google_civic_election_id,
                     # The rest of the values
-                    'election_name': election_name,
-                    'election_day_text': election_day_text,
-                    'ocd_division_id': ocd_division_id,
-                    'state_code': state_code,
+                    'election_name':            election_name,
+                    'election_day_text':        election_day_text,
+                    'ocd_division_id':          ocd_division_id,
+                    'state_code':               state_code,
                 }
                 election_on_stage, new_election_created = Election.objects.update_or_create(
                     google_civic_election_id=google_civic_election_id, defaults=updated_values)
@@ -121,6 +124,7 @@ class ElectionManager(models.Model):
         except Election.DoesNotExist as e:
             status = 'NO_ELECTIONS_FOUND'
             success = True
+            election_list = []
 
         results = {
             'success':          success,

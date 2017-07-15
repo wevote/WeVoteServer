@@ -991,7 +991,7 @@ def voter_stop_supporting_save(voter_device_id, candidate_id, candidate_we_vote_
             measure_id = contest_measure_manager.fetch_contest_measure_id_from_we_vote_id(measure_we_vote_id)
 
         results = position_manager.toggle_off_voter_support_for_contest_measure(voter_id, measure_id)
-        status = "STOP_SUPPORTING_MEASURE" + results['status']
+        status = "STOP_SUPPORTING_MEASURE " + results['status']
         success = results['success']
 
         json_data = {
