@@ -594,6 +594,27 @@ class VoterManager(BaseUserManager):
                         if linked_voter.twitter_screen_name != twitter_user.twitter_handle:
                             linked_voter.twitter_screen_name = twitter_user.twitter_handle
                             save_voter = True
+                        if linked_voter.twitter_name != twitter_user.twitter_name:
+                            linked_voter.twitter_name = twitter_user.twitter_name
+                            save_voter = True
+                        if linked_voter.twitter_profile_image_url_https != twitter_user.twitter_profile_image_url_https:
+                            linked_voter.twitter_profile_image_url_https = twitter_user.twitter_profile_image_url_https
+                            save_voter = True
+                        if linked_voter.we_vote_hosted_profile_image_url_large != \
+                                twitter_user.we_vote_hosted_profile_image_url_large:
+                            linked_voter.we_vote_hosted_profile_image_url_large = \
+                                twitter_user.we_vote_hosted_profile_image_url_large
+                            save_voter = True
+                        if linked_voter.we_vote_hosted_profile_image_url_medium != \
+                                twitter_user.we_vote_hosted_profile_image_url_medium:
+                            linked_voter.we_vote_hosted_profile_image_url_medium = \
+                                twitter_user.we_vote_hosted_profile_image_url_medium
+                            save_voter = True
+                        if linked_voter.we_vote_hosted_profile_image_url_tiny != \
+                                twitter_user.we_vote_hosted_profile_image_url_tiny:
+                            linked_voter.we_vote_hosted_profile_image_url_tiny = \
+                                twitter_user.we_vote_hosted_profile_image_url_tiny
+                            save_voter = True
                         if save_voter:
                             linked_voter.save()
                             status += "SAVED_LINKED_VOTER "
