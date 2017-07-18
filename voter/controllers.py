@@ -1323,6 +1323,7 @@ def voter_retrieve_for_api(voter_device_id):  # voterRetrieve
                     try:
                         voter.linked_organization_we_vote_id = twitter_link_to_organization_we_vote_id
                         voter.save()
+                        repair_twitter_link_to_voter_caching_now = True
                         status += "VOTER_LINKED_ORGANIZATION_FIXED "
                     except Exception as e:
                         status += "VOTER_LINKED_ORGANIZATION_COULD_NOT_BE_FIXED "

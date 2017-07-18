@@ -350,7 +350,7 @@ def donation_history_for_a_voter(voter_we_vote_id):
 
 def donation_process_stripe_webhook_event(event):
     """
-    NOTE: These are the only five events that we handle from the webhook
+    NOTE: These are the only six events that we handle from the webhook
     :param event:
     :return:
     """
