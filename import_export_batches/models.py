@@ -760,6 +760,7 @@ class BatchManager(models.Model):
         success = False
         status = ''
         limit_for_testing = 5
+        batch_header_id = 0
 
         # Look for Office and create the batch_header first. Office is the direct child node
         # of VipObject
@@ -913,6 +914,7 @@ class BatchManager(models.Model):
         success = False
         status = ''
         limit_for_testing = 5
+        batch_header_id = 0
 
         candidate_selection_id_key_list = ['candidate_selection_id_1', 'candidate_selection_id_2', 'candidate_selection_id_3',
                                     'candidate_selection_id_4', 'candidate_selection_id_5', 'candidate_selection_id_6',
@@ -1110,6 +1112,7 @@ class BatchManager(models.Model):
         success = False
         status = ''
         limit_for_testing = 5
+        batch_header_id = 0
 
         # Get party names and their corresponding party ids
         party_details_list = retrieve_all_party_names_and_ids_api()
@@ -1334,6 +1337,7 @@ class BatchManager(models.Model):
         success = False
         status = ''
         limit_for_testing = 5
+        batch_header_id = 0
 
         # Call party api to get corresponding party name from party id
         party_details_list = retrieve_all_party_names_and_ids_api()
@@ -1471,6 +1475,354 @@ class BatchManager(models.Model):
         }
         return results
 
+    def store_state_data_from_xml(self, batch_uri, google_civic_election_id, organization_we_vote_id, xml_root,
+                                  batch_set_id=0):
+        """
+        Retrieves state data from CTCL xml file
+        :param batch_uri:
+        :param google_civic_election_id:
+        :param organization_we_vote_id:
+        :param xml_root:
+        :param batch_set_id
+        :return:
+        """
+        # This state is not used right now. Parsing it for future reference
+        # Process VIP State data
+        number_of_batch_rows = 0
+        first_line = True
+        success = False
+        status = ''
+        limit_for_testing = 5
+        batch_header_id = 0
+
+        # Look for State and create the batch_header first. State is the direct child node of VipObject
+        # TODO Will this be a single node object or will there be multiple state nodes in a CTCL XML?
+        state_xml_node = xml_root.findall('State')
+        for one_state in state_xml_node:
+            state_name = None
+            if number_of_batch_rows >= limit_for_testing:
+                break
+
+            # look for relevant child nodes under State: id, ocd-id, Name
+            state_id = one_state.attrib['id']
+
+            state_name_node = one_state.find('./Name')
+            if state_name_node is not None:
+                state_name = state_name_node.text
+
+            ocd_id_node = one_state.find("./ExternalIdentifiers/ExternalIdentifier/[Type='ocd-id']")
+            if ocd_id_node is not None:
+                ocd_id = one_state.find("./ExternalIdentifiers/ExternalIdentifier/[Type='ocd-id']/Value").text
+            else:
+                ocd_id = ''
+
+            if first_line:
+                first_line = False
+                try:
+                    batch_header = BatchHeader.objects.create(
+                        batch_header_column_000='id',
+                        batch_header_column_001='Name',
+                        batch_header_column_002='other::ocd-id',
+                    )
+                    batch_header_id = batch_header.id
+
+                    if positive_value_exists(batch_header_id):
+                        # Save an initial BatchHeaderMap
+                        batch_header_map = BatchHeaderMap.objects.create(
+                            batch_header_id=batch_header_id,
+                            batch_header_map_000='state_id',
+                            batch_header_map_001='state_name',
+                            batch_header_map_002='ocd_id',
+                        )
+                        batch_header_map_id = batch_header_map.id
+                        status += " BATCH_HEADER_MAP_SAVED"
+
+                    if positive_value_exists(batch_header_id) and positive_value_exists(batch_header_map_id):
+                        # Now save the BatchDescription
+                        batch_name = "STATE " + " batch_header_id: " + str(batch_header_id)
+                        batch_description_text = ""
+                        batch_description = BatchDescription.objects.create(
+                            batch_header_id=batch_header_id,
+                            batch_header_map_id=batch_header_map_id,
+                            batch_name=batch_name,
+                            batch_description_text=batch_description_text,
+                            google_civic_election_id=google_civic_election_id,
+                            kind_of_batch='STATE',
+                            organization_we_vote_id=organization_we_vote_id,
+                            source_uri=batch_uri,
+                            batch_set_id=batch_set_id,
+                        )
+                        status += " BATCH_DESCRIPTION_SAVED"
+                        success = True
+                except Exception as e:
+                    # Stop trying to save rows -- break out of the for loop
+                    batch_header_id = 0
+                    status += " EXCEPTION_BATCH_HEADER"
+                    handle_exception(e, logger=logger, exception_message=status)
+                    break
+            if not positive_value_exists(batch_header_id):
+                break
+
+            # check for state_id or name AND ocd_id
+            if positive_value_exists(state_id) and (positive_value_exists(state_name)):
+                try:
+                    batch_row = BatchRow.objects.create(
+                        batch_header_id=batch_header_id,
+                        batch_row_000=state_id,
+                        batch_row_001=state_name,
+                        batch_row_002=ocd_id,
+                    )
+                    number_of_batch_rows += 1
+                except Exception as e:
+                    # Stop trying to save rows -- break out of the for loop
+                    status += " EXCEPTION_BATCH_ROW"
+                    handle_exception(e, logger=logger, exception_message=status)
+                    success = False
+
+                    break
+        results = {
+            'success': success,
+            'status': status,
+            'batch_header_id': batch_header_id,
+            'batch_saved': success,
+            'number_of_batch_rows': number_of_batch_rows,
+        }
+        return results
+
+    def store_election_metadata_from_xml(self, batch_uri, google_civic_election_id, organization_we_vote_id, xml_root,
+                                         batch_set_id=0):
+        """
+        Retrieves election metadata from CTCL xml file
+        :param batch_uri:
+        :param google_civic_election_id:
+        :param organization_we_vote_id:
+        :param xml_root:
+        :param batch_set_id
+        :return:
+        """
+        # This election metadata is not used right now. Parsing it for future reference
+        # Process VIP Election metadata
+        success = False
+        status = ''
+        batch_header_id = 0
+
+        # Look for Election and create the batch_header first. Election is the direct child node of VipObject
+        election_xml_node = xml_root.find('Election')
+        election_date_str = None
+
+        # look for relevant child nodes under Election: id, Date, StateId
+        if not election_xml_node:
+            results = {
+                'success': success,
+                'status': "STORE_ELECTION_METADATA_FROM_XML-ELECTION_NODE_NOT_FOUND",
+                'batch_header_id': batch_header_id,
+                'batch_saved': success,
+            }
+            return results
+
+        election_id = election_xml_node.attrib['id']
+
+        election_date_xml_node = election_xml_node.find('./Date')
+        if election_date_xml_node is not None:
+            election_date = election_date_xml_node.text
+
+        state_id_node = election_xml_node.find("./StateId")
+        if state_id_node is not None:
+            state_id = state_id_node.text
+        else:
+            state_id = ''
+
+        try:
+            batch_header = BatchHeader.objects.create(
+                batch_header_column_000='id',
+                batch_header_column_001='Date',
+                batch_header_column_002='StateId',
+            )
+            batch_header_id = batch_header.id
+
+            if positive_value_exists(batch_header_id):
+                # Save an initial BatchHeaderMap
+                batch_header_map = BatchHeaderMap.objects.create(
+                    batch_header_id=batch_header_id,
+                    batch_header_map_000='election_id',
+                    batch_header_map_001='election_date',
+                    batch_header_map_002='state_id',
+                )
+                batch_header_map_id = batch_header_map.id
+                status += " BATCH_HEADER_MAP_SAVED"
+
+            if positive_value_exists(batch_header_id) and positive_value_exists(batch_header_map_id):
+                # Now save the BatchDescription
+                batch_name = "ELECTION " + " batch_header_id: " + str(batch_header_id)
+                batch_description_text = ""
+                batch_description = BatchDescription.objects.create(
+                    batch_header_id=batch_header_id,
+                    batch_header_map_id=batch_header_map_id,
+                    batch_name=batch_name,
+                    batch_description_text=batch_description_text,
+                    google_civic_election_id=google_civic_election_id,
+                    kind_of_batch='ELECTION',
+                    organization_we_vote_id=organization_we_vote_id,
+                    source_uri=batch_uri,
+                    batch_set_id=batch_set_id,
+                )
+                status += " BATCH_DESCRIPTION_SAVED"
+                success = True
+        except Exception as e:
+            # Stop trying to save rows -- break out of the for loop
+            batch_header_id = 0
+            status += " EXCEPTION_BATCH_HEADER"
+            handle_exception(e, logger=logger, exception_message=status)
+
+        # check for state_id or name AND ocd_id
+        if positive_value_exists(election_id) and positive_value_exists(election_date) and \
+                positive_value_exists(state_id):
+            try:
+                batch_row = BatchRow.objects.create(
+                    batch_header_id=batch_header_id,
+                    batch_row_000=election_id,
+                    batch_row_001=election_date,
+                    batch_row_002=state_id,
+                )
+            except Exception as e:
+                # Stop trying to save rows -- break out of the for loop
+                status += " EXCEPTION_BATCH_ROW"
+                handle_exception(e, logger=logger, exception_message=status)
+                success = False
+
+        results = {
+            'success': success,
+            'status': status,
+            'batch_header_id': batch_header_id,
+            'batch_saved': success,
+        }
+        return results
+
+    def store_source_metadata_from_xml(self, batch_uri, google_civic_election_id, organization_we_vote_id, xml_root,
+                                         batch_set_id=0):
+        """
+        Retrieves source metadata from CTCL xml file
+        :param batch_uri:
+        :param google_civic_election_id:
+        :param organization_we_vote_id:
+        :param xml_root:
+        :param batch_set_id
+        :return:
+        """
+        # This source data is not used for now. Parsing it for future reference
+        # Process VIP Source metadata
+        success = False
+        status = ''
+        batch_header_id = 0
+
+        # Look for Source and create the batch_header first. Election is the direct child node of VipObject
+        source_xml_node = xml_root.find('Source')
+        source_date_str = None
+
+        if not source_xml_node:
+            results = {
+                'success': success,
+                'status': "STORE_SOURCE_METADATA_FROM_XML-SOURCE_NODE_NOT_FOUND",
+                'batch_header_id': batch_header_id,
+                'batch_saved': success,
+            }
+            return results
+
+        # look for relevant child nodes under Source: id, DateTime, Name, OrganizationUri, VipId
+        source_id = source_xml_node.attrib['id']
+
+        source_datetime_xml_node = source_xml_node.find('./DateTime')
+        if source_datetime_xml_node is not None:
+            source_datetime = source_datetime_xml_node.text
+
+        source_name_node = source_xml_node.find("./Name")
+        if source_name_node is not None:
+            source_name = source_xml_node.text
+        else:
+            source_name = ''
+
+        organization_uri_node = source_xml_node.find("./OrganizationUri")
+        if organization_uri_node is not None:
+            organization_uri = source_xml_node.text
+
+        vip_id_node = source_xml_node.find("./VipId")
+        if vip_id_node is not None:
+            vip_id = source_xml_node.text
+        else:
+            vip_id = ''
+
+        try:
+            batch_header = BatchHeader.objects.create(
+                batch_header_column_000='id',
+                batch_header_column_001='DateTime',
+                batch_header_column_002='Name',
+                batch_header_column_003='OrganizationUri',
+                batch_header_column_004='VipId',
+            )
+            batch_header_id = batch_header.id
+
+            if positive_value_exists(batch_header_id):
+                # Save an initial BatchHeaderMap
+                batch_header_map = BatchHeaderMap.objects.create(
+                    batch_header_id=batch_header_id,
+                    batch_header_map_000='source_id',
+                    batch_header_map_001='source_datetime',
+                    batch_header_map_002='source_name',
+                    batch_header_map_003='organization_uri',
+                    batch_header_map_004='vip_id'
+                )
+                batch_header_map_id = batch_header_map.id
+                status += " BATCH_HEADER_MAP_SAVED"
+
+            if positive_value_exists(batch_header_id) and positive_value_exists(batch_header_map_id):
+                # Now save the BatchDescription
+                batch_name = "SOURCE " + " batch_header_id: " + str(batch_header_id)
+                batch_description_text = ""
+                batch_description = BatchDescription.objects.create(
+                    batch_header_id=batch_header_id,
+                    batch_header_map_id=batch_header_map_id,
+                    batch_name=batch_name,
+                    batch_description_text=batch_description_text,
+                    google_civic_election_id=google_civic_election_id,
+                    kind_of_batch='SOURCE',
+                    organization_we_vote_id=organization_we_vote_id,
+                    source_uri=batch_uri,
+                    batch_set_id=batch_set_id,
+                )
+                status += " BATCH_DESCRIPTION_SAVED"
+                success = True
+        except Exception as e:
+            # Stop trying to save rows -- break out of the for loop
+            batch_header_id = 0
+            status += " EXCEPTION_BATCH_HEADER"
+            handle_exception(e, logger=logger, exception_message=status)
+
+        # check for state_id or name AND ocd_id
+        if positive_value_exists(source_id) and positive_value_exists(source_datetime) and \
+                positive_value_exists(source_name) and positive_value_exists(organization_uri):
+            try:
+                batch_row = BatchRow.objects.create(
+                    batch_header_id=batch_header_id,
+                    batch_row_000=source_id,
+                    batch_row_001=source_datetime,
+                    batch_row_002=source_name,
+                    batch_row_003=organization_uri,
+                    batch_row_004=vip_id
+                )
+            except Exception as e:
+                # Stop trying to save rows -- break out of the for loop
+                status += " EXCEPTION_BATCH_ROW"
+                handle_exception(e, logger=logger, exception_message=status)
+                success = False
+
+        results = {
+            'success': success,
+            'status': status,
+            'batch_header_id': batch_header_id,
+            'batch_saved': success,
+        }
+        return results
+
     def create_batch_set_vip_xml(self, batch_uri, google_civic_election_id, organization_we_vote_id):
         """
         Retrieves CTCL Batch Set data from an xml file - Measure, Office, Candidate, Politician
@@ -1556,16 +1908,8 @@ class BatchManager(models.Model):
             #     }
             #     return results
 
-            # look for different data sets in the XML file - Measure, ElectedOffice, ContestOffice, Candidate,
-            # Politician
-            results = self.store_measure_xml(batch_uri, google_civic_election_id, organization_we_vote_id, xml_root,
-                                             batch_set_id)
-            if results['success']:
-                # Measure data found
-                status += 'CREATE_BATCH_SET_MEASURE_DATA_FOUND'
-                number_of_batch_rows += results['number_of_batch_rows']
-                success = True
-
+            # look for different data sets in the XML file - ElectedOffice, ContestOffice, Candidate, Politician,
+            # Measure
             results = self.store_elected_office_xml(batch_uri, google_civic_election_id, organization_we_vote_id,
                                                     xml_root, batch_set_id)
             if results['success']:
@@ -1586,6 +1930,13 @@ class BatchManager(models.Model):
                 status += 'CREATE_BATCH_SET_CONTEST_OFFICE_DATA_FOUND'
                 number_of_batch_rows += results['number_of_batch_rows']
 
+            results = self.store_politician_xml(batch_uri, google_civic_election_id, organization_we_vote_id, xml_root,
+                                                batch_set_id)
+            if results['success']:
+                # Politician data found
+                status += 'CREATE_BATCH_SET_POLITICIAN_DATA_FOUND'
+                number_of_batch_rows += results['number_of_batch_rows']
+
             results = self.store_candidate_xml(batch_uri, google_civic_election_id, organization_we_vote_id, xml_root,
                                                batch_set_id)
             if results['success']:
@@ -1593,12 +1944,36 @@ class BatchManager(models.Model):
                 status += 'CREATE_BATCH_SET_CANDIDATE_DATA_FOUND'
                 number_of_batch_rows += results['number_of_batch_rows']
 
-            results = self.store_politician_xml(batch_uri, google_civic_election_id, organization_we_vote_id, xml_root,
-                                                batch_set_id)
+            results = self.store_measure_xml(batch_uri, google_civic_election_id, organization_we_vote_id, xml_root,
+                                             batch_set_id)
             if results['success']:
-                # Politician data found
-                status += 'CREATE_BATCH_SET_POLITICIAN_DATA_FOUND'
+                # Measure data found
+                status += 'CREATE_BATCH_SET_MEASURE_DATA_FOUND'
                 number_of_batch_rows += results['number_of_batch_rows']
+                success = True
+
+            results = self.store_state_data_from_xml(batch_uri, google_civic_election_id, organization_we_vote_id,
+                                                     xml_root, batch_set_id)
+            if results['success']:
+                # Measure data found
+                status += 'CREATE_BATCH_SET_STATE_DATA_FOUND'
+                number_of_batch_rows += results['number_of_batch_rows']
+                success = True
+
+            results = self.store_election_metadata_from_xml(batch_uri, google_civic_election_id,
+                                                            organization_we_vote_id, xml_root, batch_set_id)
+            if results['success']:
+                # Measure data found
+                status += 'CREATE_BATCH_SET_ELECTION_METADATA_FOUND'
+                number_of_batch_rows += 1
+                success = True
+            results = self.store_source_metadata_from_xml(batch_uri, google_civic_election_id, organization_we_vote_id,
+                                                          xml_root, batch_set_id)
+            if results['success']:
+                # Measure data found
+                status += 'CREATE_BATCH_SET_SOURCE_METADATA_FOUND'
+                number_of_batch_rows += 1
+                success = True
             else:
                 results = {
                     'success': False,
@@ -1685,6 +2060,39 @@ class BatchManager(models.Model):
             elected_office_name = ''
 
         return elected_office_name
+
+    def fetch_state_code_from_person_id_in_candidate(self, person_id, batch_set_id):
+        """
+        Take in person_id, batch_set_id, look up BatchRowActionCandidate and return state_code
+        :param person_id: 
+        :param batch_header_id: 
+        :return: 
+        """
+        state_code = ''
+        batch_header_id = 0
+        # From batch_description, get the header_id using batch_set_id
+        # batch_header_id = get_batch_header_id_from_batch_description(batch_set_id, CANDIDATE)
+        try:
+            if positive_value_exists(batch_set_id):
+                batch_description_on_stage = BatchDescription.objects.get(batch_set_id=batch_set_id,
+                                                                          kind_of_batch=CANDIDATE)
+                if batch_description_on_stage:
+                    batch_header_id = batch_description_on_stage.batch_header_id
+        except BatchDescription.DoesNotExist:
+            pass
+
+        try:
+            if positive_value_exists(batch_header_id) and person_id is not None:
+                batchrowaction_candidate = BatchRowActionCandidate.objects.get(batch_header_id=batch_header_id,
+                                                                               candidate_person_id=person_id)
+
+                if batchrowaction_candidate is not None:
+                    state_code = batchrowaction_candidate.state_code
+
+        except BatchRowActionCandidate.DoesNotExist:
+            state_code = ''
+
+        return state_code
 
 
 class BatchSet(models.Model):

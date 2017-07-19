@@ -18,12 +18,12 @@
             <th>Batch Name</th>
             <th>Action</th>
             <th>Election</th>
-            <th>Analyzed</th>
-            <th>Processed</th>
-            <th>Total Records</th>
+            <th>Batch Rows Imported</th>
+            <th>Batch Rows Analyzed</th>
             <th>Date Created</th>
-            <th>Action Rows Created</th>
-            <th>Action Rows Updated</th>
+            <th>Batch Row Actions-To Create</th>
+            <th>Batch Row Actions-To Update</th>
+            <th>Batch Row Actions-Duplicate</th>
         </tr>
     {% for one_batch in batch_list %}
         <tr>
@@ -40,10 +40,10 @@
             </td>
             <td>{{ one_batch.rows_analyzed }}</td>
             <td>{{ one_batch.rows_processed }}</td>
-            <td>{{ one_batch.total_rows }}</td>
             <td>{{ one_batch.date_created }}</td>
             <td>{{ one_batch.number_of_batch_actions_created }}</td>
             <td>{{ one_batch.number_of_table_rows_updated }}</td>
+            <td>{{ one_batch.number_of_batch_actions_duplicate }}</td>
         </tr>
     {% endfor %}
     </table>
