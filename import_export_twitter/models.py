@@ -3,7 +3,11 @@
 # -*- coding: UTF-8 -*-
 
 from django.db import models
-from wevote_functions.functions import generate_random_string, positive_value_exists
+from wevote_functions.functions import positive_value_exists
+import wevote_functions.admin
+
+logger = wevote_functions.admin.get_logger(__name__)
+
 
 # See also WeVoteServer/twitter/models.py for routines that manage internal twitter data
 
@@ -134,7 +138,8 @@ class TwitterAuthManager(models.Model):
         }
         return results
 
-    def save_twitter_auth_values(self, twitter_auth_response, twitter_user_object):
+    @staticmethod
+    def save_twitter_auth_values(twitter_auth_response, twitter_user_object):
         """
         This is used to store the cached values in the TwitterAuthResponse record during authentication.
         Please also see voter/models.py VoterManager->save_twitter_user_values
@@ -166,12 +171,17 @@ class TwitterAuthManager(models.Model):
                 twitter_auth_value_to_save = True
             # 'url': 'http://www.carbonize.co.kr',
             # 'time_zone': 'Seoul',
+            if hasattr(twitter_user_object, "profile_banner_url") and \
+                    positive_value_exists(twitter_user_object.profile_banner_url):
+                twitter_auth_response.profile_banner_url = twitter_user_object.profile_banner_url
+                twitter_auth_value_to_save = True
             if twitter_auth_value_to_save:
                 twitter_auth_response.save()
             success = True
             status = "SAVED_TWITTER_AUTH_VALUES"
         except Exception as e:
             status = "UNABLE_TO_SAVE_TWITTER_AUTH_VALUES"
+            logger.error("save_twitter_auth_values threw " + str(e))
             success = False
 
         results = {
