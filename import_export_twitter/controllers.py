@@ -1211,6 +1211,20 @@ def twitter_sign_in_retrieve_for_api(voter_device_id):  # twitterSignInRetrieve
         'we_vote_hosted_profile_image_url_medium':  we_vote_hosted_profile_image_url_medium,
         'we_vote_hosted_profile_image_url_tiny':    we_vote_hosted_profile_image_url_tiny,
     }
+
+
+    if success:
+        twitter_profile_banner_url_https = ""
+        try:
+            twitter_profile_banner_url_https = twitter_user_results['twitter_user'].twitter_profile_banner_url_https
+        except Exception:
+            pass
+
+        OrganizationManager.update_organization_single_voter_data(twitter_auth_response.twitter_id,
+                                                                  we_vote_hosted_profile_image_url_large,
+                                                                  we_vote_hosted_profile_image_url_medium,
+                                                                  we_vote_hosted_profile_image_url_tiny,
+                                                                  twitter_profile_banner_url_https)
     return json_data
 
 

@@ -1029,6 +1029,38 @@ class OrganizationManager(models.Manager):
         }
         return results
 
+    @staticmethod
+    def update_organization_single_voter_data(twitter_user_id,
+                                              we_vote_hosted_profile_image_url_large,
+                                              we_vote_hosted_profile_image_url_medium,
+                                              we_vote_hosted_profile_image_url_tiny,
+                                              twitter_profile_banner_url_https):
+        """
+        Make a best effort to update the organization for a single voter with twitter images
+        :param twitter_user_id:
+        :param we_vote_hosted_profile_image_url_large:
+        :param we_vote_hosted_profile_image_url_medium:
+        :param we_vote_hosted_profile_image_url_tiny:
+        :param twitter_profile_banner_url_https:
+        :return: True/False
+        """
+
+        organization_manager = OrganizationManager()
+        results = organization_manager.retrieve_organization(0, '', '', twitter_user_id)
+
+        if not results['organization_found']:
+            logger.info("update_organization_single_voter_data was not able to find " + twitter_user_id)
+            return False
+
+        organization = results['organization']
+
+        organization.twitter_profile_banner_url_https = twitter_profile_banner_url_https
+        organization.we_vote_hosted_profile_image_url_large = we_vote_hosted_profile_image_url_large
+        organization.we_vote_hosted_profile_image_url_medium = we_vote_hosted_profile_image_url_medium
+        organization.we_vote_hosted_profile_image_url_tiny = we_vote_hosted_profile_image_url_tiny
+        organization.save()
+        return True
+
     def clear_organization_twitter_details(self, organization):
         """
         Update an organization entry with details retrieved from the Twitter API.
