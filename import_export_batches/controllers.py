@@ -781,6 +781,7 @@ def create_batch_row_action_politician(batch_description, batch_header_map, one_
     batch_row_action_politician_status = ''
     status = ''
     politician_we_vote_id = ''
+    state_code = ''
 
     # Find the column in the incoming batch_row with the header == politician_full_name
     politician_name = batch_manager.retrieve_value_from_batch_row("politician_full_name", batch_header_map,
@@ -806,6 +807,13 @@ def create_batch_row_action_politician(batch_description, batch_header_map, one_
     # extract twitter handle from politician_twitter_url
     politician_twitter_handle = extract_twitter_handle_from_text_string(politician_twitter_url)
 
+    # BatchRowActionCandidate has personId which is politician id. Match id with personId from Candidate and get the
+    # state_code from BatchRowActionCandidate
+    person_id = batch_manager.retrieve_value_from_batch_row("politician_batch_id", batch_header_map, one_batch_row)
+    # get batch_set_id from batch_description
+    batch_set_id = batch_description.batch_set_id
+    # Lookup BatchRowActionCandidate with matching batch_set_id and person_id and get state code
+    state_code = batch_manager.fetch_state_code_from_person_id_in_candidate(person_id, batch_set_id)
     kind_of_action = 'TBD'
     single_politician_found = False
     multiple_politicians_found = False
