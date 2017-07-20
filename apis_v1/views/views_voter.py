@@ -47,7 +47,7 @@ logger = wevote_functions.admin.get_logger(__name__)
 WE_VOTE_SERVER_ROOT_URL = get_environment_variable("WE_VOTE_SERVER_ROOT_URL")
 
 
-def voter_address_retrieve_view(request):  # voterAddressRetrieveView
+def voter_address_retrieve_view(request):  # voterAddressRetrieve
     """
     Retrieve an address for this voter so we can figure out which ballot to display
     :param request:
@@ -347,7 +347,8 @@ def voter_address_save_view(request):  # voterAddressSave
     # Save the address value, and clear out ballot_saved information
     voter_address_manager = VoterAddressManager()
     voter_address_save_results = voter_address_manager.update_or_create_voter_address(
-        voter_id, BALLOT_ADDRESS, text_for_map_search)
+        voter_id, BALLOT_ADDRESS, text_for_map_search)  # TODO DALE 2017-07-17 This needs a fresh look:
+    # , google_civic_election_id
 
     # If simple_save is passed in only save address and then send response (you must pass in a google_civic_election_id)
     if positive_value_exists(simple_save and google_civic_election_id > 0):

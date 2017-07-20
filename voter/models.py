@@ -2239,12 +2239,13 @@ class VoterAddressManager(models.Model):
             text_for_map_search = voter_address.text_for_map_search
         return text_for_map_search
 
-    def update_or_create_voter_address(self, voter_id, address_type, raw_address_text):
+    def update_or_create_voter_address(self, voter_id, address_type, raw_address_text, google_civic_election_id=False):
         """
         NOTE: This approach won't support multiple FORMER_BALLOT_ADDRESS
         :param voter_id:
         :param address_type:
         :param raw_address_text:
+        :param google_civic_election_id:
         :return:
         """
         status = ''
@@ -2252,6 +2253,7 @@ class VoterAddressManager(models.Model):
         new_address_created = False
         voter_address_on_stage = None
         voter_address_on_stage_found = False
+        google_civic_election_id = google_civic_election_id if positive_value_exists(google_civic_election_id) else 0
 
         if positive_value_exists(voter_id) and address_type in (BALLOT_ADDRESS, MAILING_ADDRESS, FORMER_BALLOT_ADDRESS):
             try:
@@ -2270,7 +2272,7 @@ class VoterAddressManager(models.Model):
                     'normalized_zip':           None,
                     # We clear out former values for these so voter_ballot_items_retrieve_for_api resets them
                     'refreshed_from_google':    False,
-                    'google_civic_election_id': 0,
+                    'google_civic_election_id': google_civic_election_id,
                     'election_day_text':        '',
                 }
 

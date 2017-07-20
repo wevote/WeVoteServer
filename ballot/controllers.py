@@ -67,7 +67,7 @@ def ballot_items_import_from_master_server(request, google_civic_election_id, st
         return import_results
 
     try:
-        if 'success' in structured_json: # On error, you get: {'success': False, 'status': 'BALLOT_ITEM_LIST_MISSING'}
+        if 'success' in structured_json:  # On error, you get: {'success': False, 'status': 'BALLOT_ITEM_LIST_MISSING'}
             import_results = {
                 'success': False,
                 'status': structured_json['status'] + ": Did you set the correct state for syncing this election?",
@@ -321,13 +321,15 @@ def ballot_returned_import_from_structured_json(structured_json):
 
         if positive_value_exists(google_civic_election_id) and (positive_value_exists(polling_location_we_vote_id) or
                                                                 positive_value_exists(voter_id)):
-            # Make sure we have a local polling_location
+            proceed_to_update_or_create = True
+
+            # Here we check for a local polling_location. We used to require the polling location be found,
+            #  but no longer.
             results = polling_location_manager.retrieve_polling_location_by_id(0, polling_location_we_vote_id)
             if results['polling_location_found']:
-                proceed_to_update_or_create = True
+                polling_location_found = True
             else:
-                # We don't want to save a ballot_returned entry if the polling location wasn't stored locally
-                proceed_to_update_or_create = False
+                polling_location_found = False
         else:
             proceed_to_update_or_create = False
 
@@ -349,9 +351,10 @@ def ballot_returned_import_from_structured_json(structured_json):
                 if 'normalized_zip' in one_ballot_returned else False
             text_for_map_search = one_ballot_returned['text_for_map_search'] \
                 if 'text_for_map_search' in one_ballot_returned else False
-            if latitude == False or latitude == None or longitude == False or longitude == None:
-                if text_for_map_search == False:
-                    logger.warning("Bad data received in ballot_returned_import_from_structured_json:" + str(one_ballot_returned))
+            if latitude is False or latitude is None or longitude is False or longitude is None:
+                if text_for_map_search is False:
+                    logger.warning("Bad data received in ballot_returned_import_from_structured_json:" +
+                                   str(one_ballot_returned))
                 else:
                     latitude, longitude = heal_geo_coordinates(text_for_map_search)
 
@@ -377,7 +380,6 @@ def ballot_returned_import_from_structured_json(structured_json):
         if processed % 5000 == 0:
             print("... processed " + str(processed) + " ballot returned imports")
 
-
         processed = ballot_returned_saved + ballot_returned_updated + ballot_returned_not_processed
         if not processed % 10000:
             print("... ballots returned, processed for update/create: " + str(processed) + " of " + str(len(structured_json)))
@@ -392,6 +394,7 @@ def ballot_returned_import_from_structured_json(structured_json):
         'not_processed':    ballot_returned_not_processed,
     }
     return ballot_returned_results
+
 
 def heal_geo_coordinates(text_for_map_search):
     longitude = None

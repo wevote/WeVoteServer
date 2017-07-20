@@ -245,9 +245,11 @@ class BallotItemManager(models.Model):
         elif not polling_location_we_vote_id:
             success = False
             status = 'MISSING_POLLING_LOCATION_WE_VOTE_ID'
-        elif not polling_location_found:
-            success = False
-            status = 'MISSING_POLLING_LOCATION_LOCALLY'
+        # Note from Dale: 2017-7-15 I think we want to allow ballot items to be saved even if the local
+        #  We Vote Server doesn't have a matching polling location yet.
+        # elif not polling_location_found:
+        #     success = False
+        #     status = 'MISSING_POLLING_LOCATION_LOCALLY'
         else:
             try:
                 # Use get_or_create to see if a ballot item exists
