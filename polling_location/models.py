@@ -188,7 +188,7 @@ class PollingLocationManager(models.Model):
                 polling_location = PollingLocation.objects.get(id=polling_location_id)
                 polling_location_found = True if polling_location.id else False
             elif positive_value_exists(polling_location_we_vote_id):
-                polling_location = PollingLocation.objects.get(we_vote_id=polling_location_we_vote_id)
+                polling_location = PollingLocation.objects.get(we_vote_id__iexact=polling_location_we_vote_id)
                 polling_location_found = True if polling_location.id else False
             else:
                 polling_location_found = False
