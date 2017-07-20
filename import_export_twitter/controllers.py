@@ -1014,6 +1014,11 @@ def twitter_sign_in_request_voter_info_for_api(voter_device_id, return_url):
 def twitter_sign_in_retrieve_for_api(voter_device_id):  # twitterSignInRetrieve
     """
     We are asking for the results of the most recent Twitter authentication
+
+    July 2017: We want the TwitterUser class/table to be the authoritative source of twitter info, ideally
+    TwitterUser feeds the duplicated columns in voter, organization, candidate, etc.
+    Unfortunately Django Auth, pre-populates voter with some key info first, which is fine, but makes it less clean.
+
     :param voter_device_id:
     :return:
     """
@@ -1084,8 +1089,9 @@ def twitter_sign_in_retrieve_for_api(voter_device_id):  # twitterSignInRetrieve
 
     success = True
     twitter_auth_response = auth_response_results['twitter_auth_response']
+    twitter_id = twitter_auth_response.twitter_id
 
-    if not twitter_auth_response.twitter_id:
+    if not twitter_id:
         success = False
         error_results = {
             'success':                                  success,
@@ -1121,7 +1127,7 @@ def twitter_sign_in_retrieve_for_api(voter_device_id):  # twitterSignInRetrieve
     voter_we_vote_id_attached_to_twitter = ""
     repair_twitter_related_voter_caching_now = False
 
-    twitter_link_results = twitter_user_manager.retrieve_twitter_link_to_voter(twitter_auth_response.twitter_id)
+    twitter_link_results = twitter_user_manager.retrieve_twitter_link_to_voter(twitter_id)
     if twitter_link_results['twitter_link_to_voter_found']:
         twitter_link_to_voter = twitter_link_results['twitter_link_to_voter']
         status += " " + twitter_link_results['status']
@@ -1131,28 +1137,28 @@ def twitter_sign_in_retrieve_for_api(voter_device_id):  # twitterSignInRetrieve
         repair_twitter_related_voter_caching_now = True
     else:
         # Look in the voter table for any records with a twitter_id and link to the first one
-        voter_results = voter_manager.retrieve_voter_by_twitter_id_old(twitter_auth_response.twitter_id)
+        voter_results = voter_manager.retrieve_voter_by_twitter_id_old(twitter_id)
         if voter_results['voter_found']:
             voter_with_twitter_id = voter_results['voter']
             voter_we_vote_id_attached_to_twitter = voter_with_twitter_id.we_vote_id
             if positive_value_exists(voter_we_vote_id_attached_to_twitter):
                 save_results = twitter_user_manager.create_twitter_link_to_voter(
-                    twitter_auth_response.twitter_id, voter_we_vote_id_attached_to_twitter)
+                    twitter_id, voter_we_vote_id_attached_to_twitter)
                 status += " " + save_results['status']
                 if save_results['success']:
                     repair_twitter_related_voter_caching_now = True
 
-    if twitter_auth_response.twitter_id:
+    if twitter_id:
         # We do this here as part of the Twitter sign in process, to make sure we don't have multiple organizations
         #  using the same twitter_id (once there is a TwitterLinkToOrganization).
         organization_list_manager = OrganizationListManager()
         repair_results = organization_list_manager.repair_twitter_related_organization_caching(
-            twitter_auth_response.twitter_id)
+            twitter_id)
         status += repair_results['status']
         if repair_twitter_related_voter_caching_now:
             # And make sure we don't have multiple voters using same twitter_id (once there is a TwitterLinkToVoter)
             repair_results = voter_manager.repair_twitter_related_voter_caching(
-                twitter_auth_response.twitter_id)
+                twitter_id)
             status += repair_results['status']
 
     if positive_value_exists(voter_we_vote_id_attached_to_twitter):
@@ -1162,7 +1168,7 @@ def twitter_sign_in_retrieve_for_api(voter_device_id):  # twitterSignInRetrieve
     # Cache original and resized images
     cache_results = cache_original_and_resized_image(
         voter_we_vote_id=voter_we_vote_id_for_cache,
-        twitter_id=twitter_auth_response.twitter_id, twitter_screen_name=twitter_auth_response.twitter_screen_name,
+        twitter_id=twitter_id, twitter_screen_name=twitter_auth_response.twitter_screen_name,
         twitter_profile_image_url_https=twitter_auth_response.twitter_profile_image_url_https,
         image_source=TWITTER)
     cached_twitter_profile_image_url_https = cache_results['cached_twitter_profile_image_url_https']
@@ -1170,13 +1176,13 @@ def twitter_sign_in_retrieve_for_api(voter_device_id):  # twitterSignInRetrieve
     we_vote_hosted_profile_image_url_medium = cache_results['we_vote_hosted_profile_image_url_medium']
     we_vote_hosted_profile_image_url_tiny = cache_results['we_vote_hosted_profile_image_url_tiny']
     twitter_user_details_dict = {
-        'id':                       twitter_auth_response.twitter_id,
+        'id':                       twitter_id,
         'name':                     twitter_auth_response.twitter_name,
         'screen_name':              twitter_auth_response.twitter_screen_name,
         'profile_image_url_https':  twitter_auth_response.twitter_profile_image_url_https,
     }
     twitter_user_results = twitter_user_manager.update_or_create_twitter_user(
-        twitter_user_details_dict, twitter_auth_response.twitter_id,
+        twitter_user_details_dict, twitter_id,
         cached_twitter_profile_image_url_https=cached_twitter_profile_image_url_https,
         we_vote_hosted_profile_image_url_large=we_vote_hosted_profile_image_url_large,
         we_vote_hosted_profile_image_url_medium=we_vote_hosted_profile_image_url_medium,
@@ -1187,6 +1193,19 @@ def twitter_sign_in_retrieve_for_api(voter_device_id):  # twitterSignInRetrieve
     else:
         twitter_profile_image_url_https = twitter_auth_response.twitter_profile_image_url_https
 
+
+    if success:
+        twitter_profile_banner_url_https = ""
+        try:
+            twitter_profile_banner_url_https = twitter_user_results['twitter_user'].twitter_profile_banner_url_https
+        except Exception:
+            pass
+
+        OrganizationManager.update_organization_single_voter_data(twitter_id,
+                                                                  we_vote_hosted_profile_image_url_large,
+                                                                  we_vote_hosted_profile_image_url_medium,
+                                                                  we_vote_hosted_profile_image_url_tiny,
+                                                                  twitter_profile_banner_url_https)
     json_data = {
         'success':                                  success,
         'status':                                   status,
@@ -1201,7 +1220,7 @@ def twitter_sign_in_retrieve_for_api(voter_device_id):  # twitterSignInRetrieve
         'twitter_secret_key':                       twitter_secret_key,
         'twitter_access_secret':                    twitter_auth_response.twitter_access_secret,
         'twitter_access_token':                     twitter_auth_response.twitter_access_token,
-        'twitter_id':                               twitter_auth_response.twitter_id,
+        'twitter_id':                               twitter_id,
         'twitter_name':                             twitter_auth_response.twitter_name,
         'twitter_profile_image_url_https':          twitter_profile_image_url_https,
         'twitter_request_secret':                   twitter_auth_response.twitter_request_secret,
@@ -1212,19 +1231,6 @@ def twitter_sign_in_retrieve_for_api(voter_device_id):  # twitterSignInRetrieve
         'we_vote_hosted_profile_image_url_tiny':    we_vote_hosted_profile_image_url_tiny,
     }
 
-
-    if success:
-        twitter_profile_banner_url_https = ""
-        try:
-            twitter_profile_banner_url_https = twitter_user_results['twitter_user'].twitter_profile_banner_url_https
-        except Exception:
-            pass
-
-        OrganizationManager.update_organization_single_voter_data(twitter_auth_response.twitter_id,
-                                                                  we_vote_hosted_profile_image_url_large,
-                                                                  we_vote_hosted_profile_image_url_medium,
-                                                                  we_vote_hosted_profile_image_url_tiny,
-                                                                  twitter_profile_banner_url_https)
     return json_data
 
 
@@ -1438,7 +1444,7 @@ def voter_twitter_save_to_current_account_for_api(voter_device_id):  # voterTwit
             organization_manager = OrganizationManager()
             create_results = organization_manager.create_organization(
                 organization_name, organization_website, organization_twitter_handle,
-                organization_email, organization_facebook, organization_image)
+                organization_email, organization_facebook, organization_image, twitter_auth_response.twitter_id)
             if create_results['organization_created']:
                 # Add value to twitter_owner_voter.linked_organization_we_vote_id when done.
                 new_organization = create_results['organization']

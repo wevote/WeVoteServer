@@ -32,7 +32,7 @@ class VoterGuideManager(models.Manager):
     A class for working with the VoterGuide model
     """
     def update_or_create_organization_voter_guide_by_election_id(self, organization_we_vote_id,
-                                                                 google_civic_election_id, state_code):
+                                                                 google_civic_election_id, state_code=''):
         """
         This creates voter_guides, and also refreshes voter guides with updated organization data
         """
@@ -70,6 +70,9 @@ class VoterGuideManager(models.Manager):
                         'twitter_followers_count':  organization.twitter_followers_count,
                         'display_name':             organization.organization_name,
                         'state_code':               state_code,
+                        'we_vote_hosted_profile_image_url_large':  organization.we_vote_hosted_profile_image_url_large,
+                        'we_vote_hosted_profile_image_url_medium': organization.we_vote_hosted_profile_image_url_medium,
+                        'we_vote_hosted_profile_image_url_tiny':   organization.we_vote_hosted_profile_image_url_tiny,
                     }
                     voter_guide_on_stage, new_voter_guide_created = VoterGuide.objects.update_or_create(
                         google_civic_election_id__exact=google_civic_election_id,
