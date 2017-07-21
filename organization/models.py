@@ -56,19 +56,57 @@ class OrganizationManager(models.Manager):
         return organization
 
     def create_organization(self, organization_name, organization_website='', organization_twitter_handle='',
-                            organization_email='', organization_facebook='', organization_image=''):
+                            organization_email='', organization_facebook='', organization_image='', twitter_id=''):
         try:
             if not positive_value_exists(organization_name):
                 organization_name = ""
             if organization_twitter_handle is False or organization_twitter_handle == 'False':
                 organization_twitter_handle = ""
             # TODO DALE We should stop saving organization_twitter_handle without saving a TwitterLinkToOrganization
-            organization = Organization.create(organization_name=organization_name,
-                                               organization_website=organization_website,
-                                               organization_twitter_handle=organization_twitter_handle,
-                                               organization_email=organization_email,
-                                               organization_facebook=organization_facebook,
-                                               organization_image=organization_image)
+
+            twitter_user = None
+            if positive_value_exists(twitter_id):
+                twitter_user = self.get_twitter_user(twitter_id)
+            if twitter_user is not None:
+                # twitter_user is the authoritative source for this data
+                organization_twitter_handle = twitter_user.twitter_handle
+                twitter_user_id = twitter_user.twitter_id
+                twitter_name = twitter_user.twitter_name
+                twitter_location = twitter_user.twitter_location
+                twitter_followers_count = twitter_user.twitter_followers_count
+                twitter_profile_image_url_https = twitter_user.twitter_profile_background_image_url_https
+                twitter_profile_background_image_url_https = twitter_user.twitter_profile_background_image_url_https
+                twitter_profile_banner_url_https = twitter_user.twitter_profile_banner_url_https
+                twitter_description = twitter_user.twitter_description
+                we_vote_hosted_profile_image_url_large = twitter_user.we_vote_hosted_profile_image_url_large
+                we_vote_hosted_profile_image_url_medium = twitter_user.we_vote_hosted_profile_image_url_medium
+                we_vote_hosted_profile_image_url_tiny = twitter_user.we_vote_hosted_profile_image_url_tiny
+                organization = Organization.create(
+                    organization_name=organization_name,
+                    organization_website=organization_website,
+                    organization_twitter_handle=organization_twitter_handle,
+                    organization_email=organization_email,
+                    organization_facebook=organization_facebook,
+                    organization_image=organization_image,
+                    twitter_user_id=twitter_user_id,
+                    twitter_name=twitter_name,
+                    twitter_location=twitter_location,
+                    twitter_followers_count=twitter_followers_count,
+                    twitter_profile_image_url_https=twitter_profile_image_url_https,
+                    twitter_profile_background_image_url_https=twitter_profile_background_image_url_https,
+                    twitter_profile_banner_url_https=twitter_profile_banner_url_https,
+                    twitter_description=twitter_description,
+                    we_vote_hosted_profile_image_url_large=we_vote_hosted_profile_image_url_large,
+                    we_vote_hosted_profile_image_url_medium=we_vote_hosted_profile_image_url_medium,
+                    we_vote_hosted_profile_image_url_tiny=we_vote_hosted_profile_image_url_tiny)
+            else:
+                organization = Organization.create(
+                    organization_name=organization_name,
+                    organization_website=organization_website,
+                    organization_twitter_handle=organization_twitter_handle,
+                    organization_email=organization_email,
+                    organization_facebook=organization_facebook,
+                    organization_image=organization_image)
             organization.save()  # We do this so the we_vote_id is created
             status = "CREATE_ORGANIZATION_SUCCESSFUL"
             success = True
@@ -86,6 +124,15 @@ class OrganizationManager(models.Manager):
             'organization_created': organization_created,
         }
         return results
+
+    @staticmethod
+    def get_twitter_user(twitter_id):
+        twitter_user_manager = TwitterUserManager()
+
+        twitter_user_results = twitter_user_manager.retrieve_twitter_user(twitter_id)
+        if twitter_user_results['twitter_user_found']:
+            return twitter_user_results['twitter_user']
+        return None
 
     def duplicate_organization_destination_twitter(self, organization):
         """
@@ -1049,16 +1096,21 @@ class OrganizationManager(models.Manager):
         results = organization_manager.retrieve_organization(0, '', '', twitter_user_id)
 
         if not results['organization_found']:
-            logger.info("update_organization_single_voter_data was not able to find " + twitter_user_id)
+            logger.info("update_organization_single_voter_data was not able to find " + str(twitter_user_id))
             return False
+        try:
+            organization = results['organization']
 
-        organization = results['organization']
+            organization.twitter_profile_banner_url_https = twitter_profile_banner_url_https
+            organization.we_vote_hosted_profile_image_url_large = we_vote_hosted_profile_image_url_large
+            organization.we_vote_hosted_profile_image_url_medium = we_vote_hosted_profile_image_url_medium
+            organization.we_vote_hosted_profile_image_url_tiny = we_vote_hosted_profile_image_url_tiny
+            organization.save()
 
-        organization.twitter_profile_banner_url_https = twitter_profile_banner_url_https
-        organization.we_vote_hosted_profile_image_url_large = we_vote_hosted_profile_image_url_large
-        organization.we_vote_hosted_profile_image_url_medium = we_vote_hosted_profile_image_url_medium
-        organization.we_vote_hosted_profile_image_url_tiny = we_vote_hosted_profile_image_url_tiny
-        organization.save()
+        except Exception as e:
+            handle_exception(e, logger=logger,
+                             exception_message="exception thrown in update_organization_single_voter_data")
+
         return True
 
     def clear_organization_twitter_details(self, organization):
@@ -1710,7 +1762,12 @@ class Organization(models.Model):
 
     @classmethod
     def create(cls, organization_name, organization_website, organization_twitter_handle, organization_email,
-               organization_facebook, organization_image):
+               organization_facebook, organization_image, twitter_user_id=None, twitter_name=None,
+               twitter_location=None, twitter_followers_count=None, twitter_profile_image_url_https=None,
+               twitter_profile_background_image_url_https=None, twitter_profile_banner_url_https=None,
+               twitter_description=None, we_vote_hosted_profile_image_url_large=None,
+               we_vote_hosted_profile_image_url_medium=None, we_vote_hosted_profile_image_url_tiny=None):
+
         if organization_twitter_handle is False or organization_twitter_handle == 'False':
             organization_twitter_handle = ""
 
@@ -1719,7 +1776,19 @@ class Organization(models.Model):
                            organization_twitter_handle=organization_twitter_handle,
                            organization_email=organization_email,
                            organization_facebook=organization_facebook,
-                           organization_image=organization_image)
+                           organization_image=organization_image,
+                           twitter_user_id=twitter_user_id,
+                           twitter_name=twitter_name,
+                           twitter_location=twitter_location,
+                           twitter_followers_count=twitter_followers_count,
+                           twitter_profile_image_url_https=twitter_profile_image_url_https,
+                           twitter_profile_background_image_url_https=twitter_profile_background_image_url_https,
+                           twitter_profile_banner_url_https=twitter_profile_banner_url_https,
+                           twitter_description=twitter_description,
+                           we_vote_hosted_profile_image_url_large=we_vote_hosted_profile_image_url_large,
+                           we_vote_hosted_profile_image_url_medium=we_vote_hosted_profile_image_url_medium,
+                           we_vote_hosted_profile_image_url_tiny=we_vote_hosted_profile_image_url_tiny)
+
         return organization
 
     # We override the save function so we can auto-generate we_vote_id
