@@ -61,12 +61,14 @@ For mac:
     (WeVoteServer) $ pip install -r requirements.txt
     (WeVoteServer) $ python3 -m pip install pyopenssl pyasn1 ndg-httpsclient
 
-Test with this command:
+Test with these commands:
     
+    (WeVoteServer) $ python manage.py makemigrations
+    (WeVoteServer) $ python manage.py migrate
     (WeVoteServer) $ python manage.py runserver
  
 
-[NEXT: 4. Set up Initial Data](README_API_INSTALL_SETUP_DATA.md)
+[NEXT: 4. Set up Environment](README_API_INSTALL_SETUP_ENVIRONMENT.md)
 
 [Working with WeVoteServer day-to-day](README_WORKING_WITH_WE_VOTE_SERVER.md)
 
