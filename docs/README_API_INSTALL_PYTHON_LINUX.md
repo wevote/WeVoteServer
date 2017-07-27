@@ -49,11 +49,13 @@ Now activate this new virtual environment for WeVoteServer:
 
 Test with this command:
     
+    (WeVoteServer) $ python manage.py makemigrations
+    (WeVoteServer) $ python manage.py migrate
     (WeVoteServer) $ python3 manage.py runserver
 
     
-[NEXT: 4. Set up Initial Data](README_API_INSTALL_SETUP_DATA.md)
-    
+[NEXT: 4. Set up Environment](README_API_INSTALL_SETUP_ENVIRONMENT.md)
+
 [Working with WeVoteServer day-to-day](README_WORKING_WITH_WE_VOTE_SERVER.md)
 
 [Back to Install Table of Contents](README_API_INSTALL.md)
