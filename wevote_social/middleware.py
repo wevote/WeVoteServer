@@ -8,10 +8,9 @@ from django.http import HttpResponse
 from wevote_social.facebook import FacebookAPI
 from social import exceptions as social_exceptions
 from social.apps.django_app.middleware import SocialAuthExceptionMiddleware
-from django.core.urlresolvers import reverse
-from django.contrib import messages
-from django.http import HttpResponseRedirect
-from wevote_functions.functions import get_voter_api_device_id, positive_value_exists
+import wevote_functions.admin
+
+logger = wevote_functions.admin.get_logger(__name__)
 
 
 class SocialMiddleware(object):
@@ -38,4 +37,30 @@ class WeVoteSocialAuthExceptionMiddleware(SocialAuthExceptionMiddleware):
             else:
                 raise exception
         else:
+            error_exception = ""
+            print_path = ""
+            try:
+                error_exception = exception.args[0]
+            except Exception as e1:
+                pass
+
+            if len(error_exception) == 0:
+                try:
+                    error_exception = exception.message
+                except Exception as e2:
+                    error_exception = "Failure in exception processing in our middleware"
+                    print(error_exception)
+
+            try:
+                print_path = request.path
+            except Exception as e2:
+                pass
+
+            error_string = 'WeVoteSocialAuthExceptionMiddleware threw {error} [type: {error_type}]'.format(
+                error=error_exception, error_type=type(exception))
+            print("Exception redirected to http response by middleware: ", error_string, " at ", print_path)
+            # July 2017, we really want to log this to disk, so that it can be discovered by Splunk, but for now we
+            # print it to the console for developers, and the following logger sends the message to the http out stream,
+            # which will only be discovered by a developer using the JavaScript debugger.
+            logger.error(error_string)
             raise exception

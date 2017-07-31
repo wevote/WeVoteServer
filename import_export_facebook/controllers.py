@@ -98,8 +98,10 @@ def voter_facebook_save_to_current_account_for_api(voter_device_id):  # voterFac
         voter_we_vote_id=voter.we_vote_id,
         facebook_user_id=facebook_auth_response.facebook_user_id,
         facebook_profile_image_url_https=facebook_auth_response.facebook_profile_image_url_https,
+        facebook_background_image_url_https=facebook_auth_response.facebook_background_image_url_https,
         image_source=FACEBOOK)
     cached_facebook_profile_image_url_https = cache_results['cached_facebook_profile_image_url_https']
+    # cached_facebook_background_image_url_https is cached, but is not stored in voter_voter
     we_vote_hosted_profile_image_url_large = cache_results['we_vote_hosted_profile_image_url_large']
     we_vote_hosted_profile_image_url_medium = cache_results['we_vote_hosted_profile_image_url_medium']
     we_vote_hosted_profile_image_url_tiny = cache_results['we_vote_hosted_profile_image_url_tiny']
@@ -250,15 +252,15 @@ def facebook_friends_action_for_api(voter_device_id):   # facebookFriendsAction
             facebook_user_location_name = facebook_user_entry['facebook_user_location_name']
             facebook_user_gender = facebook_user_entry['facebook_user_gender']
             facebook_user_birthday = facebook_user_entry['facebook_user_birthday']
-            facebook_user_cover_source = facebook_user_entry['facebook_background_image_url_https']
-            facebook_user_profile_url_https = facebook_user_entry['facebook_user_profile_url_https']
+            facebook_profile_image_url_https = facebook_user_entry['facebook_profile_image_url_https']
+            facebook_background_image_url_https = facebook_user_entry['facebook_background_image_url_https']
             facebook_user_about = facebook_user_entry['facebook_user_about']
             facebook_user_is_verified = facebook_user_entry['facebook_user_is_verified']
             facebook_user_friend_total_count = facebook_user_entry['facebook_user_friend_total_count']
             facebook_user_results = facebook_manager.create_or_update_facebook_user(
                 facebook_user_id, facebook_user_first_name, facebook_user_middle_name, facebook_user_last_name,
                 facebook_user_name, facebook_user_location_id, facebook_user_location_name, facebook_user_gender,
-                facebook_user_birthday, facebook_user_cover_source, facebook_user_profile_url_https,
+                facebook_user_birthday, facebook_profile_image_url_https, facebook_background_image_url_https,
                 facebook_user_about, facebook_user_is_verified, facebook_user_friend_total_count)
             status += ' ' + facebook_user_results['status']
             success = facebook_user_results['success']
@@ -406,6 +408,7 @@ def voter_facebook_sign_in_retrieve_for_api(voter_device_id):  # voterFacebookSi
             'facebook_middle_name':                     "",
             'facebook_last_name':                       "",
             'facebook_profile_image_url_https':         "",
+            'facebook_background_image_url_https':      "",
             'we_vote_hosted_profile_image_url_large':   "",
             'we_vote_hosted_profile_image_url_medium':  "",
             'we_vote_hosted_profile_image_url_tiny':    ""
@@ -441,6 +444,7 @@ def voter_facebook_sign_in_retrieve_for_api(voter_device_id):  # voterFacebookSi
             'facebook_middle_name':                     "",
             'facebook_last_name':                       "",
             'facebook_profile_image_url_https':         "",
+            'facebook_background_image_url_https':      "",
             'we_vote_hosted_profile_image_url_large':   "",
             'we_vote_hosted_profile_image_url_medium':  "",
             'we_vote_hosted_profile_image_url_tiny':    ""
@@ -473,6 +477,7 @@ def voter_facebook_sign_in_retrieve_for_api(voter_device_id):  # voterFacebookSi
             'facebook_middle_name':                     "",
             'facebook_last_name':                       "",
             'facebook_profile_image_url_https':         "",
+            'facebook_background_image_url_https':      "",
             'we_vote_hosted_profile_image_url_large':   "",
             'we_vote_hosted_profile_image_url_medium':  "",
             'we_vote_hosted_profile_image_url_tiny':    ""
@@ -630,8 +635,10 @@ def voter_facebook_sign_in_retrieve_for_api(voter_device_id):  # voterFacebookSi
         voter_we_vote_id=voter_we_vote_id_for_cache,
         facebook_user_id=facebook_auth_response.facebook_user_id,
         facebook_profile_image_url_https=facebook_auth_response.facebook_profile_image_url_https,
+        facebook_background_image_url_https=facebook_auth_response.facebook_background_image_url_https,
         image_source=FACEBOOK)
     cached_facebook_profile_image_url_https = cache_results['cached_facebook_profile_image_url_https']
+    cached_facebook_background_image_url_https = cache_results['cached_facebook_background_image_url_https']
     we_vote_hosted_profile_image_url_large = cache_results['we_vote_hosted_profile_image_url_large']
     we_vote_hosted_profile_image_url_medium = cache_results['we_vote_hosted_profile_image_url_medium']
     we_vote_hosted_profile_image_url_tiny = cache_results['we_vote_hosted_profile_image_url_tiny']
@@ -641,13 +648,20 @@ def voter_facebook_sign_in_retrieve_for_api(voter_device_id):  # voterFacebookSi
     else:
         facebook_profile_image_url_https = facebook_auth_response.facebook_profile_image_url_https
 
+    if positive_value_exists(cached_facebook_background_image_url_https):
+        facebook_background_image_url_https = cached_facebook_background_image_url_https
+    else:
+        facebook_background_image_url_https = facebook_auth_response.facebook_background_image_url_https
+
     facebook_user_results = facebook_manager.create_or_update_facebook_user(
         facebook_auth_response.facebook_user_id, facebook_auth_response.facebook_first_name,
         facebook_auth_response.facebook_middle_name, facebook_auth_response.facebook_last_name,
-        facebook_user_profile_url_https=facebook_profile_image_url_https,
+        facebook_profile_image_url_https=facebook_profile_image_url_https,
+        facebook_background_image_url_https=facebook_background_image_url_https,
         we_vote_hosted_profile_image_url_large=we_vote_hosted_profile_image_url_large,
         we_vote_hosted_profile_image_url_medium=we_vote_hosted_profile_image_url_medium,
-        we_vote_hosted_profile_image_url_tiny=we_vote_hosted_profile_image_url_tiny)
+        we_vote_hosted_profile_image_url_tiny=we_vote_hosted_profile_image_url_tiny,
+        facebook_email=facebook_auth_response.facebook_email)
     status += facebook_user_results['status']
 
     json_data = {
@@ -671,6 +685,7 @@ def voter_facebook_sign_in_retrieve_for_api(voter_device_id):  # voterFacebookSi
         'facebook_middle_name':                     facebook_auth_response.facebook_middle_name,
         'facebook_last_name':                       facebook_auth_response.facebook_last_name,
         'facebook_profile_image_url_https':         facebook_profile_image_url_https,
+        'facebook_background_image_url_https':      facebook_background_image_url_https,
         'we_vote_hosted_profile_image_url_large':   we_vote_hosted_profile_image_url_large,
         'we_vote_hosted_profile_image_url_medium':  we_vote_hosted_profile_image_url_medium,
         'we_vote_hosted_profile_image_url_tiny':    we_vote_hosted_profile_image_url_tiny
@@ -685,7 +700,7 @@ def voter_facebook_sign_in_save_for_api(voter_device_id,  # voterFacebookSignInS
                                         save_profile_data,
                                         facebook_email, facebook_first_name, facebook_middle_name, facebook_last_name,
                                         save_photo_data,
-                                        facebook_profile_image_url_https):
+                                        facebook_profile_image_url_https, facebook_background_image_url_https):
     """
 
     :param voter_device_id:
@@ -701,6 +716,7 @@ def voter_facebook_sign_in_save_for_api(voter_device_id,  # voterFacebookSignInS
     :param facebook_last_name:
     :param save_photo_data:
     :param facebook_profile_image_url_https:
+    :param facebook_background_image_url_https:
     :return:
     """
     status = ""
@@ -736,7 +752,7 @@ def voter_facebook_sign_in_save_for_api(voter_device_id,  # voterFacebookSignInS
         voter_device_id, facebook_access_token, facebook_user_id, facebook_expires_in,
         facebook_signed_request,
         facebook_email, facebook_first_name, facebook_middle_name, facebook_last_name,
-        facebook_profile_image_url_https)
+        facebook_profile_image_url_https, facebook_background_image_url_https)
     # Look to see if there is an EmailAddress entry for the incoming text_for_email_address or email_we_vote_id
     if not auth_data_results['facebook_auth_response_saved']:
         error_results = {

@@ -680,6 +680,7 @@ def voter_facebook_sign_in_save_view(request):  # voterFacebookSignInSave
     facebook_middle_name = request.GET.get('facebook_middle_name', '')
     facebook_last_name = request.GET.get('facebook_last_name', '')
     facebook_profile_image_url_https = request.GET.get('facebook_profile_image_url_https', '')
+    facebook_background_image_url_https = request.GET.get('facebook_background_image_url_https', '')
 
     results = voter_facebook_sign_in_save_for_api(voter_device_id=voter_device_id,
                                                   save_auth_data=save_auth_data,
@@ -694,6 +695,7 @@ def voter_facebook_sign_in_save_view(request):  # voterFacebookSignInSave
                                                   facebook_last_name=facebook_last_name,
                                                   save_photo_data=save_photo_data,
                                                   facebook_profile_image_url_https=facebook_profile_image_url_https,
+                                                  facebook_background_image_url_https=facebook_background_image_url_https,
                                                   )
 
     json_data = {

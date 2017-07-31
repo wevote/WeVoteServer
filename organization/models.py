@@ -81,6 +81,7 @@ class OrganizationManager(models.Manager):
                 we_vote_hosted_profile_image_url_large = twitter_user.we_vote_hosted_profile_image_url_large
                 we_vote_hosted_profile_image_url_medium = twitter_user.we_vote_hosted_profile_image_url_medium
                 we_vote_hosted_profile_image_url_tiny = twitter_user.we_vote_hosted_profile_image_url_tiny
+                count = twitter_followers_count if twitter_followers_count else None
                 organization = Organization.create(
                     organization_name=organization_name,
                     organization_website=organization_website,
@@ -91,7 +92,7 @@ class OrganizationManager(models.Manager):
                     twitter_user_id=twitter_user_id,
                     twitter_name=twitter_name,
                     twitter_location=twitter_location,
-                    twitter_followers_count=twitter_followers_count,
+                    twitter_followers_count=count,
                     twitter_profile_image_url_https=twitter_profile_image_url_https,
                     twitter_profile_background_image_url_https=twitter_profile_background_image_url_https,
                     twitter_profile_banner_url_https=twitter_profile_banner_url_https,
@@ -533,11 +534,29 @@ class OrganizationManager(models.Manager):
                                       organization_facebook=False, organization_image=False,
                                       refresh_from_twitter=False,
                                       facebook_id=False, facebook_email=False,
-                                      facebook_profile_image_url_https=False
+                                      facebook_profile_image_url_https=False,
+                                      facebook_background_image_url_https=False,
                                       ):
         """
         Either update or create an organization entry.
+        :param organization_id:
+        :param we_vote_id:
+        :param organization_website_search:
+        :param organization_twitter_search:
+        :param organization_name:
+        :param organization_website:
+        :param organization_twitter_handle:
+        :param organization_email:
+        :param organization_facebook:
+        :param organization_image:
+        :param refresh_from_twitter:
+        :param facebook_id:
+        :param facebook_email:
+        :param facebook_profile_image_url_https:
+        :param facebook_background_image_url_https:
+        :return:
         """
+
         exception_does_not_exist = False
         exception_multiple_object_returned = False
         organization_on_stage_found = False
@@ -659,10 +678,27 @@ class OrganizationManager(models.Manager):
                     if twitter_location:
                         organization_on_stage.twitter_location = twitter_location
 
+                if facebook_id or facebook_email or facebook_profile_image_url_https or \
+                        facebook_background_image_url_https:
+                    value_changed = True
+                    status += " FACEBOOK_VALUES_TO_BE_ADDED"
+                    if facebook_id:
+                        organization_on_stage.facebook_id = facebook_id
+                    if facebook_email:
+                        organization_on_stage.facebook_email = facebook_email
+                    if facebook_profile_image_url_https:
+                        organization_on_stage.facebook_profile_image_url_https = facebook_profile_image_url_https
+                    if facebook_background_image_url_https:
+                        organization_on_stage.facebook_background_image_url_https = \
+                            facebook_background_image_url_https
+
                 if value_changed:
-                    organization_on_stage.save()
-                    success = True
-                    status = "SAVED_WITH_ORG_ID_OR_WE_VOTE_ID"
+                    try:
+                        organization_on_stage.save()
+                        success = True
+                        status = "SAVED_WITH_ORG_ID_OR_WE_VOTE_ID"
+                    except Exception as e:
+                        logger.error("organization_on_stage.save() failed to save #1")
                 else:
                     success = True
                     status = "NO_CHANGES_SAVED_WITH_ORG_ID_OR_WE_VOTE_ID"
@@ -820,9 +856,13 @@ class OrganizationManager(models.Manager):
                             organization_on_stage.twitter_location = twitter_location
 
                     if value_changed:
-                        organization_on_stage.save()
-                        success = True
-                        status = found_with_status + " SAVED"
+                        try:
+                            organization_on_stage.save()
+                            success = True
+                            status = found_with_status + " SAVED"
+                        except Exception as e:
+                            logger.error("organization_on_stage.save() failed to save #2")
+
                     else:
                         success = True
                         status = found_with_status + " NO_CHANGES_SAVED"
@@ -891,7 +931,8 @@ class OrganizationManager(models.Manager):
                         if twitter_location:
                             organization_on_stage.twitter_location = twitter_location
 
-                    if facebook_id or facebook_email or facebook_profile_image_url_https:
+                    if facebook_id or facebook_email or facebook_profile_image_url_https or \
+                            facebook_background_image_url_https:
                         value_changed = True
                         status += " FACEBOOK_VALUES_TO_BE_ADDED"
                         if facebook_id:
@@ -900,10 +941,16 @@ class OrganizationManager(models.Manager):
                             organization_on_stage.facebook_email = facebook_email
                         if facebook_profile_image_url_https:
                             organization_on_stage.facebook_profile_image_url_https = facebook_profile_image_url_https
+                        if facebook_background_image_url_https:
+                            organization_on_stage.facebook_background_image_url_https = \
+                                facebook_background_image_url_https
 
                     if value_changed:
-                        organization_on_stage.save()
-                        status += " EXTRA_VALUES_SAVED"
+                        try:
+                            organization_on_stage.save()
+                            status += " EXTRA_VALUES_SAVED"
+                        except Exception as e:
+                            logger.error("organization_on_stage.save() failed to save #3")
                     else:
                         status += " EXTRA_VALUES_NOT_SAVED"
 
@@ -1156,7 +1203,7 @@ class OrganizationManager(models.Manager):
                     organization.delete()
                     organization_deleted = True
         except Exception as e:
-            handle_exception(e, logger=logger)
+            handle_exception(e, logger=logger, exception_message="exception thrown in delete_organization")
 
         results = {
             'success':              organization_deleted,
@@ -1259,7 +1306,8 @@ class OrganizationListManager(models.Manager):
             success = True  # We are still successful if no organizations are found
         except Exception as e:
             organizations_found = False
-            handle_exception(e, logger=logger)
+            handle_exception(e, logger=logger,
+                             exception_message="exception thrown in organization_search_find_any_possibilities")
             status = 'FAILED organization_search_find_any_possibilities ' \
                      '{error} [type: {error_type}]'.format(error=e.message, error_type=type(e))
             success = False
@@ -1350,7 +1398,9 @@ class OrganizationListManager(models.Manager):
                     organization_list_objects = []
                     success = True
                 except Exception as e:
-                    handle_exception(e, logger=logger)
+                    handle_exception(e, logger=logger,
+                                     exception_message=
+                                     "exception thrown in repair_twitter_related_organization_caching")
                     status = 'FAILED repair_twitter_related_organization_caching ' \
                              '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
                     success = False
@@ -1514,7 +1564,8 @@ class OrganizationListManager(models.Manager):
                 organization_list_objects = []
                 success = True
             except Exception as e:
-                handle_exception(e, logger=logger)
+                handle_exception(e, logger=logger, exception_message=
+                    "exception thrown in retrieve_organizations_from_non_unique_identifiers")
                 status = 'FAILED retrieve_organizations_from_non_unique_identifiers ' \
                          '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
                 success = False
@@ -1578,7 +1629,8 @@ class OrganizationListManager(models.Manager):
             organization_list_objects = []
             success = True
         except Exception as e:
-            handle_exception(e, logger=logger)
+            handle_exception(e, logger=logger,
+                             exception_message="exception thrown in retrieve_possible_duplicate_organizations")
             status = 'FAILED retrieve_possible_duplicate_organizations ' \
                      '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
             success = False
@@ -1684,7 +1736,10 @@ class Organization(models.Model):
     facebook_email = models.EmailField(verbose_name='facebook email address', max_length=255, unique=False,
                                        null=True, blank=True)
     fb_username = models.CharField(unique=True, max_length=20, validators=[alphanumeric], null=True)
-    facebook_profile_image_url_https = models.URLField(verbose_name='url of image from facebook', blank=True, null=True)
+    facebook_profile_image_url_https = models.URLField(verbose_name='url of image from facebook',
+                                                       blank=True, null=True)
+    facebook_background_image_url_https = models.URLField(verbose_name='url of cover image from facebook',
+                                                          blank=True, null=True)
 
     # Twitter information
     twitter_user_id = models.BigIntegerField(verbose_name="twitter id", null=True, blank=True)
