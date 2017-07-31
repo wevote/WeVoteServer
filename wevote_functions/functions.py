@@ -625,6 +625,7 @@ def process_request_from_master(request, message_text, get_url, get_params):
         message_text += " for google_civic_election_id " + str(get_params['google_civic_election_id'])
     messages.add_message(request, messages.INFO, message_text)
     logger.info(message_text)
+    print(message_text)  # Please don't remove this line
 
     response = requests.get(get_url, params=get_params)
 
@@ -642,8 +643,8 @@ def process_request_from_master(request, message_text, get_url, get_params):
 
     if 'google_civic_election_id' in get_params:
         print("... the master server returned " + str(len(structured_json)) + " items.  Election " +
-              str(get_params['google_civic_election_id']))
+              str(get_params['google_civic_election_id']))  # Please don't remove this line
     else:
-        print("... the master server returned " + str(len(structured_json)) + " items.")
+        print("... the master server returned " + str(len(structured_json)) + " items.") # Please don't remove this line
 
     return import_results, structured_json

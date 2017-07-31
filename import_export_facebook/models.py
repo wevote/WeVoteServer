@@ -6,7 +6,11 @@ from django.core.validators import RegexValidator
 from django.db import models
 from email_outbound.models import SEND_STATUS_CHOICES, TO_BE_PROCESSED
 from wevote_functions.functions import generate_random_string, positive_value_exists, convert_to_int
+from exception.models import handle_exception
+import wevote_functions.admin
 import facebook
+
+logger = wevote_functions.admin.get_logger(__name__)
 
 FRIEND_INVITATION_FACEBOOK_TEMPLATE = 'FRIEND_INVITATION_FACEBOOK_TEMPLATE'
 GENERIC_EMAIL_FACEBOOK_TEMPLATE = 'GENERIC_EMAIL_FACEBOOK_TEMPLATE'
@@ -40,7 +44,12 @@ class FacebookAuthResponse(models.Model):
         verbose_name="first_name from Facebook", max_length=255, null=True, blank=True, unique=False)
     facebook_last_name = models.CharField(
         verbose_name="first_name from Facebook", max_length=255, null=True, blank=True, unique=False)
-    facebook_profile_image_url_https = models.URLField(verbose_name='url of image from facebook', blank=True, null=True)
+    facebook_profile_image_url_https = models.URLField(
+        verbose_name='url of voter&apos;s image from facebook', blank=True, null=True)
+    facebook_background_image_url_https = models.URLField(
+        verbose_name='url of voter&apos;s background &apos;cover&apos; image from facebook \
+        (like the twitter banner photo)', \
+        blank=True, null=True)
 
     def get_full_name(self):
         full_name = self.facebook_first_name if positive_value_exists(self.facebook_first_name) else ''
@@ -95,6 +104,8 @@ class FacebookUser(models.Model):
         verbose_name="User's first_name from Facebook", max_length=255, null=True, blank=True, unique=False)
     facebook_user_middle_name = models.CharField(
         verbose_name="User's middle_name from Facebook", max_length=255, null=True, blank=True, unique=False)
+    facebook_email = models.EmailField(verbose_name='facebook email address', max_length=255, unique=False,
+                                       null=True, blank=True)
     facebook_user_location_id = models.BigIntegerField(
         verbose_name="location id of Facebook user", null=True, unique=False)
     facebook_user_location_name = models.CharField(
@@ -105,9 +116,10 @@ class FacebookUser(models.Model):
         verbose_name="User's birthday from Facebook", max_length=255, null=True, blank=True, unique=False)
     facebook_user_last_name = models.CharField(
         verbose_name="User's last_name from Facebook", max_length=255, null=True, blank=True, unique=False)
-    facebook_background_image_url_https = models.URLField(verbose_name='url of cover image from facebook', blank=True, null=True)
-    facebook_profile_image_url_https = models.URLField(verbose_name='url of cover image from facebook',
-                                                      blank=True, null=True)
+    facebook_profile_image_url_https = models.URLField(verbose_name='url of voter image from facebook',
+                                                       blank=True, null=True)
+    facebook_background_image_url_https = models.URLField(verbose_name='url of cover image from facebook',
+                                                          blank=True, null=True)
     we_vote_hosted_profile_image_url_large = models.URLField(verbose_name='we vote hosted large image url',
                                                              blank=True, null=True)
     we_vote_hosted_profile_image_url_medium = models.URLField(verbose_name='we vote hosted medium image url',
@@ -154,6 +166,7 @@ class FacebookManager(models.Model):
             facebook_link_to_voter = FacebookLinkToVoter()
             success = False
             status = "FACEBOOK_LINK_TO_VOTER_NOT_CREATED"
+            handle_exception(e, logger=logger, exception_message=status)
 
         results = {
             'success':                      success,
@@ -167,7 +180,22 @@ class FacebookManager(models.Model):
             self, voter_device_id, facebook_access_token, facebook_user_id, facebook_expires_in,
             facebook_signed_request,
             facebook_email, facebook_first_name, facebook_middle_name, facebook_last_name,
-            facebook_profile_image_url_https):
+            facebook_profile_image_url_https, facebook_background_image_url_https):
+        """
+
+        :param voter_device_id:
+        :param facebook_access_token:
+        :param facebook_user_id:
+        :param facebook_expires_in:
+        :param facebook_signed_request:
+        :param facebook_email:
+        :param facebook_first_name:
+        :param facebook_middle_name:
+        :param facebook_last_name:
+        :param facebook_profile_image_url_https:
+        :param facebook_background_image_url_https:
+        :return:
+        """
 
         defaults = {
             "voter_device_id": voter_device_id,
@@ -190,10 +218,13 @@ class FacebookManager(models.Model):
             defaults["facebook_last_name"] = facebook_last_name
         if positive_value_exists(facebook_profile_image_url_https):
             defaults["facebook_profile_image_url_https"] = facebook_profile_image_url_https
+        if positive_value_exists(facebook_background_image_url_https):
+            defaults["facebook_background_image_url_https"] = facebook_background_image_url_https
 
         try:
             facebook_auth_response, created = FacebookAuthResponse.objects.update_or_create(
                 voter_device_id__iexact=voter_device_id,
+                facebook_user_id=facebook_user_id,
                 defaults=defaults,
             )
             facebook_auth_response_saved = True
@@ -205,6 +236,7 @@ class FacebookManager(models.Model):
             success = False
             created = False
             status = "FACEBOOK_AUTH_RESPONSE_NOT_UPDATED_OR_CREATED"
+            handle_exception(e, logger=logger, exception_message=status)
 
         results = {
             'success': success,
@@ -251,34 +283,36 @@ class FacebookManager(models.Model):
     def create_or_update_facebook_user(self, facebook_user_id, facebook_user_first_name, facebook_user_middle_name,
                                        facebook_user_last_name, facebook_user_name=None, facebook_user_location_id=None,
                                        facebook_user_location_name=None, facebook_user_gender=None,
-                                       facebook_user_birthday=None, facebook_user_cover_source=None,
-                                       facebook_user_profile_url_https=None, facebook_user_about=None,
+                                       facebook_user_birthday=None, facebook_profile_image_url_https=None,
+                                       facebook_background_image_url_https=None,facebook_user_about=None,
                                        facebook_user_is_verified=False, facebook_user_friend_total_count=None,
                                        we_vote_hosted_profile_image_url_large=None,
                                        we_vote_hosted_profile_image_url_medium=None,
-                                       we_vote_hosted_profile_image_url_tiny=None):
+                                       we_vote_hosted_profile_image_url_tiny=None,
+                                       facebook_email=None):
         """
         We use this subroutine to create or update FacebookUser table with my friends details.
         :param facebook_user_id:
-        :param facebook_user_name:
         :param facebook_user_first_name:
         :param facebook_user_middle_name:
         :param facebook_user_last_name:
+        :param facebook_user_name:
         :param facebook_user_location_id:
         :param facebook_user_location_name:
         :param facebook_user_gender:
         :param facebook_user_birthday:
-        :param facebook_user_cover_source:
-        :param facebook_user_profile_url_https:
+        :param facebook_profile_image_url_https:
+        :param facebook_background_image_url_https:
         :param facebook_user_about:
         :param facebook_user_is_verified:
         :param facebook_user_friend_total_count:
         :param we_vote_hosted_profile_image_url_large:
         :param we_vote_hosted_profile_image_url_medium:
-        :param we_vote_hosted_profile_image_url_tiny
+        :param we_vote_hosted_profile_image_url_tiny:
+        :param facebook_email:
         :return:
         """
-        facebook_user = FacebookUser()
+
         try:
             # for facebook_user_entry in facebook_users:
             facebook_user, created = FacebookUser.objects.update_or_create(
@@ -289,12 +323,13 @@ class FacebookManager(models.Model):
                     'facebook_user_first_name':                 facebook_user_first_name,
                     'facebook_user_middle_name':                facebook_user_middle_name,
                     'facebook_user_last_name':                  facebook_user_last_name,
+                    'facebook_email':                           facebook_email,
                     'facebook_user_location_id':                facebook_user_location_id,
                     'facebook_user_location_name':              facebook_user_location_name,
                     'facebook_user_gender':                     facebook_user_gender,
                     'facebook_user_birthday':                   facebook_user_birthday,
-                    'facebook_background_image_url_https':      facebook_user_cover_source,
-                    'facebook_profile_image_url_https':         facebook_user_profile_url_https,
+                    'facebook_profile_image_url_https':         facebook_profile_image_url_https,
+                    'facebook_background_image_url_https':      facebook_background_image_url_https,
                     'facebook_user_about':                      facebook_user_about,
                     'facebook_user_is_verified':                facebook_user_is_verified,
                     'facebook_user_friend_total_count':         facebook_user_friend_total_count,
@@ -311,6 +346,8 @@ class FacebookManager(models.Model):
             facebook_user = FacebookUser()
             success = False
             status = " FACEBOOK_USER_NOT_CREATED"
+            handle_exception(e, logger=logger, exception_message=status)
+
         results = {
             'success':              success,
             'status':               status,
@@ -327,7 +364,15 @@ class FacebookManager(models.Model):
                                      we_vote_hosted_profile_image_url_tiny=False):
         """
         Update an facebook user entry with cached image urls
+        :param facebook_user:
+        :param cached_facebook_profile_image_url_https:
+        :param cached_facebook_background_image_url_https:
+        :param we_vote_hosted_profile_image_url_large:
+        :param we_vote_hosted_profile_image_url_medium:
+        :param we_vote_hosted_profile_image_url_tiny:
+        :return:
         """
+
         success = False
         status = "ENTERING_UPDATE_FACEBOOK_USER_DETAILS"
         values_changed = False
@@ -395,6 +440,7 @@ class FacebookManager(models.Model):
             facebook_auth_response_found = False
             success = False
             status = 'FAILED retrieve_facebook_auth_response'
+            handle_exception(e, logger=logger, exception_message=status)
 
         results = {
             'success': success,
@@ -435,6 +481,7 @@ class FacebookManager(models.Model):
             facebook_auth_response_found = False
             success = False
             status = 'FAILED retrieve_facebook_auth_response'
+            handle_exception(e, logger=logger, exception_message=status)
 
         results = {
             'success':                      success,
@@ -514,6 +561,7 @@ class FacebookManager(models.Model):
             facebook_link_to_voter_found = False
             success = False
             status = 'FAILED retrieve_facebook_link_to_voter'
+            handle_exception(e, logger=logger, exception_message=status)
 
         results = {
             'success': success,
@@ -556,13 +604,14 @@ class FacebookManager(models.Model):
         facebook_friend_dict['facebook_user_birthday'] = (facebook_friend_api_details_entry.get('birthday')
                                                           if 'birthday' in facebook_friend_api_details_entry.keys()
                                                           else "")
+        facebook_friend_dict['facebook_profile_image_url_https'] = \
+            (facebook_friend_api_details_entry.get(
+                'picture').get('data').get('url') if 'picture' in facebook_friend_api_details_entry.keys() and
+             facebook_friend_api_details_entry.get('picture', {}).get('data', {}).get('url', {}) else "")
         facebook_friend_dict['facebook_background_image_url_https'] = \
             (facebook_friend_api_details_entry.get('cover').get('source')
              if 'cover' in facebook_friend_api_details_entry.keys() and
                 facebook_friend_api_details_entry.get('cover', {}).get('source', {}) else "")
-        facebook_friend_dict['facebook_user_profile_url_https'] = (facebook_friend_api_details_entry.get('picture').get(
-            'data').get('url') if 'picture' in facebook_friend_api_details_entry.keys() and
-            facebook_friend_api_details_entry.get('picture', {}).get('data', {}).get('url', {}) else "")
         facebook_friend_dict['facebook_user_about'] = (facebook_friend_api_details_entry.get('about')
                                                        if 'about' in facebook_friend_api_details_entry.keys() else "")
         facebook_friend_dict['facebook_user_is_verified'] = (facebook_friend_api_details_entry.get('is_verified')
@@ -643,6 +692,7 @@ class FacebookManager(models.Model):
             success = False
             status += " " + "FACEBOOK_FRIENDS_LIST_NOT_FOUND"
             facebook_friends_list_found = False
+            handle_exception(e, logger=logger, exception_message=status)
 
         results = {
             'success':                          success,
@@ -697,6 +747,7 @@ class FacebookManager(models.Model):
             success = False
             facebook_friends_of_me_list_found = False
             status += ' FAILED retrieve_facebook_friends_of_me_list FacebookFriendsOfMe '
+            handle_exception(e, logger=logger, exception_message=status)
 
         results = {
             'success':                              success,
@@ -730,6 +781,7 @@ class FacebookManager(models.Model):
             success = False
             facebook_user_found = False
             status += ' FAILED retrieve_facebook_user FacebookUser '
+            handle_exception(e, logger=logger, exception_message=status)
 
         results = {
             'success':                     success,

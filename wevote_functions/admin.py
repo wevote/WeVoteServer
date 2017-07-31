@@ -10,6 +10,7 @@ import logging
 import logging.handlers
 import os
 import socket
+import sys
 from config.base import get_environment_variable, convert_logging_level
 
 
@@ -89,3 +90,18 @@ def setup_logging(
         _fh.setLevel(file_level)
         _fh.setFormatter(formatter)
         logging.getLogger('').addHandler(_fh)
+
+
+def catch_unhandled_exceptions(exc_type, exc_value, exc_traceback):
+    #Ignore KeyboardInterrupt so a console python program can exit with Ctrl + C.
+    if issubclass(exc_type, KeyboardInterrupt):
+        sys.__excepthook__(exc_type, exc_value, exc_traceback)
+        return
+
+    print("Uncaught exception:::", exc_type, exc_value)
+    logger = logging.getLogger(__name__)
+    logger.error("Uncaught exception:", exc_type, exc_value)
+                 #exc_info=(exc_type, exc_value, exc_traceback))
+
+# New in July 2017
+sys.excepthook = catch_unhandled_exceptions

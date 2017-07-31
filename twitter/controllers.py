@@ -24,6 +24,7 @@ def twitter_identity_retrieve_for_api(twitter_handle, voter_device_id=''):  # tw
     we_vote_hosted_profile_image_url_large = ''
     we_vote_hosted_profile_image_url_medium = ''
     we_vote_hosted_profile_image_url_tiny = ''
+    twitter_profile_banner_url_https = ''
     twitter_user_website = ''
     twitter_name = ''
 
@@ -84,6 +85,7 @@ def twitter_identity_retrieve_for_api(twitter_handle, voter_device_id=''):  # tw
             we_vote_hosted_profile_image_url_large = one_organization.we_vote_hosted_profile_image_url_large
             we_vote_hosted_profile_image_url_medium = one_organization.we_vote_hosted_profile_image_url_medium
             we_vote_hosted_profile_image_url_tiny = one_organization.we_vote_hosted_profile_image_url_tiny
+            twitter_profile_banner_url_https = one_organization.twitter_profile_banner_url_https
             twitter_user_website = one_organization.organization_website
             twitter_name = one_organization.twitter_name
 
@@ -102,6 +104,7 @@ def twitter_identity_retrieve_for_api(twitter_handle, voter_device_id=''):  # tw
             we_vote_hosted_profile_image_url_large = twitter_user.we_vote_hosted_profile_image_url_large
             we_vote_hosted_profile_image_url_medium = twitter_user.we_vote_hosted_profile_image_url_medium
             we_vote_hosted_profile_image_url_tiny = twitter_user.we_vote_hosted_profile_image_url_tiny
+            twitter_profile_banner_url_https = twitter_user.twitter_profile_banner_url_https
             twitter_user_website = twitter_user.twitter_url
             twitter_name = twitter_user.twitter_name
             kind_of_owner = "TWITTER_HANDLE_NOT_FOUND_IN_WE_VOTE"
@@ -122,6 +125,7 @@ def twitter_identity_retrieve_for_api(twitter_handle, voter_device_id=''):  # tw
         'we_vote_hosted_profile_image_url_large':   we_vote_hosted_profile_image_url_large,
         'we_vote_hosted_profile_image_url_medium':  we_vote_hosted_profile_image_url_medium,
         'we_vote_hosted_profile_image_url_tiny':    we_vote_hosted_profile_image_url_tiny,
+        'twitter_profile_banner_url_https':         twitter_profile_banner_url_https,
         'twitter_user_website':                     twitter_user_website,
         'twitter_name':                             twitter_name,
     }

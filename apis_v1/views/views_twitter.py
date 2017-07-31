@@ -58,6 +58,7 @@ def twitter_identity_retrieve_view(request):  # twitterIdentityRetrieve
         'we_vote_hosted_profile_image_url_large':   results['we_vote_hosted_profile_image_url_large'],
         'we_vote_hosted_profile_image_url_medium':  results['we_vote_hosted_profile_image_url_medium'],
         'we_vote_hosted_profile_image_url_tiny':    results['we_vote_hosted_profile_image_url_tiny'],
+        'twitter_profile_banner_url_https':         results['twitter_profile_banner_url_https'],
         'twitter_user_website':                     results['twitter_user_website'],
         'twitter_name':                             results['twitter_name'],
         }

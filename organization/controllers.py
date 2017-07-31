@@ -4,17 +4,15 @@
 
 from .models import OrganizationListManager, OrganizationManager
 from config.base import get_environment_variable
-from django.contrib import messages
 from django.http import HttpResponse
 from exception.models import handle_record_not_found_exception
-from follow.controllers import move_follow_entries_to_another_voter, move_organization_followers_to_another_organization
+from follow.controllers import move_organization_followers_to_another_organization
 from follow.models import FollowOrganizationManager, FollowOrganizationList, FOLLOW_IGNORE, FOLLOWING, STOP_FOLLOWING
 from import_export_facebook.models import FacebookManager
 import json
 from organization.models import Organization
-from position.controllers import move_positions_to_another_organization, move_positions_to_another_voter
+from position.controllers import move_positions_to_another_organization
 from position.models import PositionListManager
-import requests
 from twitter.models import TwitterUserManager
 from voter.models import fetch_voter_id_from_voter_device_link, VoterManager, Voter
 from voter_guide.models import VoterGuide, VoterGuideManager
@@ -721,11 +719,17 @@ def organizations_import_from_structured_json(structured_json):
     return organizations_results
 
 
-# We retrieve from only one of the two possible variables
-def organization_retrieve_for_api(organization_id, organization_we_vote_id):  # organizationRetrieve
+def organization_retrieve_for_api(organization_id, organization_we_vote_id, voter_device_id):  #
+    """
+    Called from organizationRetrieve api
+    :param organization_id:
+    :param organization_we_vote_id:
+    :param voter_device_id:
+    :return:
+    """
     organization_id = convert_to_int(organization_id)
 
-    we_vote_id = organization_we_vote_id.strip().lower()
+    organization_we_vote_id = organization_we_vote_id.strip().lower()
     if not positive_value_exists(organization_id) and not positive_value_exists(organization_we_vote_id):
         json_data = {
             'status':                           "ORGANIZATION_RETRIEVE_BOTH_IDS_MISSING",
@@ -759,11 +763,55 @@ def organization_retrieve_for_api(organization_id, organization_we_vote_id):  # 
             position_list_manager = PositionListManager()
             position_list_manager.refresh_cached_position_info_for_organization(organization_we_vote_id)
 
+        we_vote_hosted_profile_image_url_large = organization.we_vote_hosted_profile_image_url_large if \
+            positive_value_exists(organization.we_vote_hosted_profile_image_url_large) else \
+            organization.organization_photo_url()
+        organization_banner_url = organization.twitter_profile_banner_url_https if \
+            positive_value_exists(organization.twitter_profile_banner_url_https) else '',
+
+        # Heal Facebook data
+        auth_response_results = FacebookManager().retrieve_facebook_auth_response(voter_device_id)
+        if auth_response_results['facebook_auth_response_found']:
+            facebook_auth_response = auth_response_results['facebook_auth_response']
+            facebook_user_results = FacebookManager().retrieve_facebook_user_by_facebook_user_id(
+                facebook_auth_response.facebook_user_id)
+            if facebook_user_results['facebook_user_found']:
+                facebook_user = facebook_user_results['facebook_user']
+
+                if not positive_value_exists(organization.facebook_id) or \
+                        not positive_value_exists(organization.facebook_background_image_url_https):
+                    try:
+                        organization_manager.update_or_create_organization(
+                            organization.id,
+                            we_vote_id=organization_we_vote_id,
+                            organization_website_search=None,
+                            organization_twitter_search=None,
+                            facebook_id=facebook_user.facebook_user_id,
+                            facebook_email=facebook_user.facebook_email,
+                            facebook_profile_image_url_https=facebook_user.facebook_profile_image_url_https,
+                            facebook_background_image_url_https=facebook_user.facebook_background_image_url_https
+                        )
+                    except Exception as e:
+                        logger.error('FAILED organization_manager.update_or_create_organization. '
+                                     '{error} [type: {error_type}]'.format(error=e, error_type=type(e)))
+
+                try:
+                    voter_manager = VoterManager()
+                    voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id)
+                    voter = voter_results['voter']
+                    we_vote_id = voter.we_vote_id
+                    if facebook_user and voter.signed_in_facebook:
+                        we_vote_hosted_profile_image_url_large = facebook_user.facebook_profile_image_url_https
+                        organization_banner_url = facebook_user.facebook_background_image_url_https
+                except Exception as e:
+                    logger.error('FAILED to load voter in organization_manager.update_or_create_organization. ' \
+                                 '{error} [type: {error_type}]'.format(error=e, error_type=type(e)))
+
         json_data = {
             'success': True,
             'status': results['status'],
             'organization_id': organization.id,
-            'organization_we_vote_id': organization.we_vote_id,
+            'organization_we_vote_id': organization.we_vote_id,  # this is the we_vote_id for this organization
             'organization_name':
                 organization.organization_name if positive_value_exists(organization.organization_name) else '',
             'organization_website': organization.organization_website if positive_value_exists(
@@ -783,13 +831,10 @@ def organization_retrieve_for_api(organization_id, organization_we_vote_id):  # 
                 organization.organization_facebook if positive_value_exists(organization.organization_facebook) else '',
             'facebook_id':
                 organization.facebook_id if positive_value_exists(organization.facebook_id) else 0,
-            'organization_photo_url_large': organization.we_vote_hosted_profile_image_url_large
-                if positive_value_exists(organization.we_vote_hosted_profile_image_url_large)
-                else organization.organization_photo_url(),
+            'organization_photo_url_large': we_vote_hosted_profile_image_url_large,
             'organization_photo_url_medium': organization.we_vote_hosted_profile_image_url_medium,
-            'organization_photo_url_tiny':  organization.we_vote_hosted_profile_image_url_tiny,
-            'organization_banner_url':      organization.twitter_profile_banner_url_https if positive_value_exists(
-                organization.twitter_profile_banner_url_https) else '',
+            'organization_photo_url_tiny': organization.we_vote_hosted_profile_image_url_tiny,
+            'organization_banner_url': organization_banner_url,
         }
         return HttpResponse(json.dumps(json_data), content_type='application/json')
     else:
@@ -797,7 +842,7 @@ def organization_retrieve_for_api(organization_id, organization_we_vote_id):  # 
             'status':                           results['status'],
             'success':                          False,
             'organization_id':                  organization_id,
-            'organization_we_vote_id':          we_vote_id,
+            'organization_we_vote_id':          organization_we_vote_id,
             'organization_name':                '',
             'organization_email':               '',
             'organization_website':             '',
@@ -902,6 +947,10 @@ def organization_save_for_api(voter_device_id, organization_id, organization_we_
         voter_found = False
         voter = Voter()
 
+    facebook_background_image_url_https = False
+    facebook_manager = FacebookManager()
+    facebook_auth_response = facebook_manager.retrieve_facebook_auth_response(voter_device_id)
+
     if organization_name is False:
         # If the variable comes in as a literal value "False" then don't create an organization_name
         pass
@@ -918,9 +967,16 @@ def organization_save_for_api(voter_device_id, organization_id, organization_we_
 
             # If not, check the FacebookAuthResponse table
             if not positive_value_exists(organization_name):
-                facebook_manager = FacebookManager()
-                facebook_auth_response = facebook_manager.retrieve_facebook_auth_response(voter_device_id)
                 organization_name = facebook_auth_response.get_full_name()
+
+    # Piece all the data together, the authoritative source if not in a parameter is facebook_user
+    if facebook_auth_response:
+        if not positive_value_exists(facebook_profile_image_url_https):
+            facebook_profile_image_url_https = facebook_auth_response.facebook_profile_image_url_https
+        if not positive_value_exists(facebook_background_image_url_https):
+            facebook_background_image_url_https = facebook_auth_response.facebook_background_image_url_https
+        if not positive_value_exists(facebook_email):
+            facebook_email = facebook_auth_response.facebook_email
 
     organization_manager = OrganizationManager()
     save_results = organization_manager.update_or_create_organization(
@@ -932,6 +988,7 @@ def organization_save_for_api(voter_device_id, organization_id, organization_we_
         refresh_from_twitter=refresh_from_twitter,
         facebook_id=facebook_id, facebook_email=facebook_email,
         facebook_profile_image_url_https=facebook_profile_image_url_https,
+        facebook_background_image_url_https=facebook_background_image_url_https,
     )
 
     success = save_results['success']
