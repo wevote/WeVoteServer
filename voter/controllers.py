@@ -1436,6 +1436,7 @@ def voter_retrieve_for_api(voter_device_id):  # voterRetrieve
                             status += "UNABLE_TO_CREATE_NEW_ORGANIZATION_TO_VOTER_FROM_RETRIEVE_VOTER "
 
         # Heal Facebook data
+        # TODO DALE This needs deeper code review
         auth_response_results = FacebookManager().retrieve_facebook_auth_response(voter_device_id)
         if auth_response_results['facebook_auth_response_found']:
             facebook_auth_response = auth_response_results['facebook_auth_response']
@@ -1464,12 +1465,13 @@ def voter_retrieve_for_api(voter_device_id):  # voterRetrieve
                     logger.error('FAILED organization_manager.update_or_create_organization. '
                                  '{error} [type: {error_type}]'.format(error=e, error_type=type(e)))
 
-
         if repair_twitter_link_to_voter_caching_now:
             # If here then we know that we have a twitter_link_to_voter, and there was some data cleanup done
             repair_results = voter_manager.repair_twitter_related_voter_caching(
                 twitter_link_to_voter.twitter_id)
             status += repair_results['status']
+
+        # TODO DALE: Add if repair_facebook_link_to_voter_caching_now
 
         donation_list = donation_history_for_a_voter(voter.we_vote_id)
         json_data = {

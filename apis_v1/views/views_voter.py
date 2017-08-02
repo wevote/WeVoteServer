@@ -745,10 +745,13 @@ def voter_guides_followed_retrieve_view(request):  # voterGuidesFollowedRetrieve
 
 def voter_guides_followed_by_organization_retrieve_view(request):
     voter_linked_organization_we_vote_id = request.GET.get('organization_we_vote_id', '')
+    filter_by_this_google_civic_election_id = request.GET.get('filter_by_this_google_civic_election_id', '')
     voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
     maximum_number_to_retrieve = get_maximum_number_to_retrieve_from_request(request)
     return voter_guides_followed_by_organization_retrieve_for_api(
-        voter_device_id, voter_linked_organization_we_vote_id=voter_linked_organization_we_vote_id,
+        voter_device_id,
+        voter_linked_organization_we_vote_id=voter_linked_organization_we_vote_id,
+        filter_by_this_google_civic_election_id=filter_by_this_google_civic_election_id,
         maximum_number_to_retrieve=maximum_number_to_retrieve)
 
 
