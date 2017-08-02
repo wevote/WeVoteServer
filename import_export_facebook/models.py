@@ -224,7 +224,6 @@ class FacebookManager(models.Model):
         try:
             facebook_auth_response, created = FacebookAuthResponse.objects.update_or_create(
                 voter_device_id__iexact=voter_device_id,
-                facebook_user_id=facebook_user_id,
                 defaults=defaults,
             )
             facebook_auth_response_saved = True
@@ -267,11 +266,13 @@ class FacebookManager(models.Model):
             facebook_friends_of_me_saved = True
             success = True
             status = "FACEBOOK_FRIENDS_OF_ME_CREATED"
-        except Exception:
+        except Exception as e:
             facebook_friends_of_me_saved = False
             facebook_friends_of_me = FacebookFriendsOfMe()
             success = False
             status = "FACEBOOK_FRIENDS_OF_ME_NOT_CREATED"
+            handle_exception(e, logger=logger, exception_message=status)
+
         results = {
             'success':                      success,
             'status':                       status,
@@ -693,6 +694,8 @@ class FacebookManager(models.Model):
             status += " " + "FACEBOOK_FRIENDS_LIST_NOT_FOUND"
             facebook_friends_list_found = False
             handle_exception(e, logger=logger, exception_message=status)
+            logger.error("retrieve_facebook_friends_from_facebook caught: " + e.type + " -- " + e.message)
+
 
         results = {
             'success':                          success,

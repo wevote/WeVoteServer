@@ -769,7 +769,8 @@ def organization_retrieve_for_api(organization_id, organization_we_vote_id, vote
         organization_banner_url = organization.twitter_profile_banner_url_https if \
             positive_value_exists(organization.twitter_profile_banner_url_https) else '',
 
-        # Heal Facebook data
+        # If signed in with Facebook credentials AND this organization's we_vote_id is the same as this voter's
+        # we_vote_id, then display the voter's Facebook "cover" (banner) instead of their Twitter banner image
         auth_response_results = FacebookManager().retrieve_facebook_auth_response(voter_device_id)
         if auth_response_results['facebook_auth_response_found']:
             facebook_auth_response = auth_response_results['facebook_auth_response']
@@ -777,34 +778,16 @@ def organization_retrieve_for_api(organization_id, organization_we_vote_id, vote
                 facebook_auth_response.facebook_user_id)
             if facebook_user_results['facebook_user_found']:
                 facebook_user = facebook_user_results['facebook_user']
-
-                if not positive_value_exists(organization.facebook_id) or \
-                        not positive_value_exists(organization.facebook_background_image_url_https):
-                    try:
-                        organization_manager.update_or_create_organization(
-                            organization.id,
-                            we_vote_id=organization_we_vote_id,
-                            organization_website_search=None,
-                            organization_twitter_search=None,
-                            facebook_id=facebook_user.facebook_user_id,
-                            facebook_email=facebook_user.facebook_email,
-                            facebook_profile_image_url_https=facebook_user.facebook_profile_image_url_https,
-                            facebook_background_image_url_https=facebook_user.facebook_background_image_url_https
-                        )
-                    except Exception as e:
-                        logger.error('FAILED organization_manager.update_or_create_organization. '
-                                     '{error} [type: {error_type}]'.format(error=e, error_type=type(e)))
-
                 try:
                     voter_manager = VoterManager()
                     voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id)
                     voter = voter_results['voter']
                     we_vote_id = voter.we_vote_id
-                    if facebook_user and voter.signed_in_facebook:
+                    if facebook_user and voter.signed_in_facebook() and voter.linked_organization_we_vote_id== organization.we_vote_id:
                         we_vote_hosted_profile_image_url_large = facebook_user.facebook_profile_image_url_https
                         organization_banner_url = facebook_user.facebook_background_image_url_https
                 except Exception as e:
-                    logger.error('FAILED to load voter in organization_manager.update_or_create_organization. ' \
+                    logger.error('FAILED to load voter in organization_retrieve_for_api. ' \
                                  '{error} [type: {error_type}]'.format(error=e, error_type=type(e)))
 
         json_data = {

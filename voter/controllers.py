@@ -1435,6 +1435,36 @@ def voter_retrieve_for_api(voter_device_id):  # voterRetrieve
                         except Exception as e:
                             status += "UNABLE_TO_CREATE_NEW_ORGANIZATION_TO_VOTER_FROM_RETRIEVE_VOTER "
 
+        # Heal Facebook data
+        auth_response_results = FacebookManager().retrieve_facebook_auth_response(voter_device_id)
+        if auth_response_results['facebook_auth_response_found']:
+            facebook_auth_response = auth_response_results['facebook_auth_response']
+            facebook_user_results = FacebookManager().retrieve_facebook_user_by_facebook_user_id(
+                facebook_auth_response.facebook_user_id)
+            if facebook_user_results['facebook_user_found']:
+                facebook_user = facebook_user_results['facebook_user']
+
+                organization_dict = \
+                    OrganizationManager().retrieve_organization_from_we_vote_id(voter.linked_organization_we_vote_id)
+                try:
+                    organization = organization_dict['organization']
+                    if not positive_value_exists(organization.facebook_id) or \
+                            not positive_value_exists(organization.facebook_background_image_url_https):
+                        organization_manager.update_or_create_organization(
+                            organization.id,
+                            we_vote_id=organization.we_vote_id,
+                            organization_website_search=None,
+                            organization_twitter_search=None,
+                            facebook_id=facebook_user.facebook_user_id,
+                            facebook_email=facebook_user.facebook_email,
+                            facebook_profile_image_url_https=facebook_user.facebook_profile_image_url_https,
+                            facebook_background_image_url_https=facebook_user.facebook_background_image_url_https
+                        )
+                except Exception as e:
+                    logger.error('FAILED organization_manager.update_or_create_organization. '
+                                 '{error} [type: {error_type}]'.format(error=e, error_type=type(e)))
+
+
         if repair_twitter_link_to_voter_caching_now:
             # If here then we know that we have a twitter_link_to_voter, and there was some data cleanup done
             repair_results = voter_manager.repair_twitter_related_voter_caching(
