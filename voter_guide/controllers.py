@@ -1053,6 +1053,7 @@ def voter_guides_followed_retrieve_for_api(voter_device_id, maximum_number_to_re
 
 def voter_guides_followed_by_organization_retrieve_for_api(voter_device_id,  # voterGuidesFollowedByOrganizationRetrieve
                                                            voter_linked_organization_we_vote_id,
+                                                           filter_by_this_google_civic_election_id=False,
                                                            maximum_number_to_retrieve=0):
     """
     Start with the organizations followed and return a list of voter_guides. voterGuidesFollowedByOrganizationRetrieve
@@ -1060,6 +1061,7 @@ def voter_guides_followed_by_organization_retrieve_for_api(voter_device_id,  # v
 
     :param voter_device_id:
     :param voter_linked_organization_we_vote_id:
+    :param filter_by_this_google_civic_election_id:
     :param maximum_number_to_retrieve:
     :return:
     """
@@ -1070,7 +1072,8 @@ def voter_guides_followed_by_organization_retrieve_for_api(voter_device_id,  # v
             'voter_device_id':              voter_device_id,
             'maximum_number_to_retrieve':   maximum_number_to_retrieve,
             'voter_guides':                 [],
-            'organization_we_vote_id':      voter_linked_organization_we_vote_id
+            'organization_we_vote_id':      voter_linked_organization_we_vote_id,
+            'filter_by_this_google_civic_election_id':  filter_by_this_google_civic_election_id
         }
         return HttpResponse(json.dumps(json_data), content_type='application/json')
 
@@ -1082,7 +1085,8 @@ def voter_guides_followed_by_organization_retrieve_for_api(voter_device_id,  # v
             'voter_device_id':              voter_device_id,
             'maximum_number_to_retrieve':   maximum_number_to_retrieve,
             'voter_guides':                 [],
-            'organization_we_vote_id':      voter_linked_organization_we_vote_id
+            'organization_we_vote_id':      voter_linked_organization_we_vote_id,
+            'filter_by_this_google_civic_election_id':  filter_by_this_google_civic_election_id
         }
         return HttpResponse(json.dumps(json_data), content_type='application/json')
 
@@ -1095,7 +1099,8 @@ def voter_guides_followed_by_organization_retrieve_for_api(voter_device_id,  # v
             'voter_device_id':              voter_device_id,
             'maximum_number_to_retrieve':   maximum_number_to_retrieve,
             'voter_guides':                 [],
-            'organization_we_vote_id':      voter_linked_organization_we_vote_id
+            'organization_we_vote_id':      voter_linked_organization_we_vote_id,
+            'filter_by_this_google_civic_election_id':  filter_by_this_google_civic_election_id
         }
         return HttpResponse(json.dumps(json_data), content_type='application/json')
 
@@ -1132,7 +1137,8 @@ def voter_guides_followed_by_organization_retrieve_for_api(voter_device_id,  # v
         friends_we_vote_id_list = friend_results['friends_we_vote_id_list']
     """
 
-    results = retrieve_voter_guides_followed_by_organization_we_vote_id(voter_linked_organization_we_vote_id)
+    results = retrieve_voter_guides_followed_by_organization_we_vote_id(voter_linked_organization_we_vote_id,
+                                                                        filter_by_this_google_civic_election_id)
     status = results['status']
     voter_guide_list = results['voter_guide_list']
     voter_guides = []
@@ -1179,7 +1185,8 @@ def voter_guides_followed_by_organization_retrieve_for_api(voter_device_id,  # v
         'voter_device_id':              voter_device_id,
         'maximum_number_to_retrieve':   maximum_number_to_retrieve,
         'voter_guides':                 voter_guides,
-        'organization_we_vote_id':      voter_linked_organization_we_vote_id
+        'organization_we_vote_id':      voter_linked_organization_we_vote_id,
+        'filter_by_this_google_civic_election_id':  filter_by_this_google_civic_election_id
     }
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 
@@ -1306,11 +1313,13 @@ def retrieve_voter_guides_followed(voter_id):
     return results
 
 
-def retrieve_voter_guides_followed_by_organization_we_vote_id(organization_we_vote_id):
+def retrieve_voter_guides_followed_by_organization_we_vote_id(organization_we_vote_id,
+                                                              filter_by_this_google_civic_election_id=False):
     # retrieve_voter_guides_followed_by_organization_we_vote_id() voterGuidesFollowedByOrganizationRetrieve
     """
     Retrieve voter guide followed by an organization with organization_we_vote_id
     :param organization_we_vote_id:
+    :param filter_by_this_google_civic_election_id:
     :return:
     """
     voter_guide_list_found = False
@@ -1323,7 +1332,7 @@ def retrieve_voter_guides_followed_by_organization_we_vote_id(organization_we_vo
 
     voter_guide_list_object = VoterGuideListManager()
     results = voter_guide_list_object.retrieve_voter_guides_by_organization_list(
-        organization_we_vote_ids_followed)
+        organization_we_vote_ids_followed, filter_by_this_google_civic_election_id)
 
     voter_guide_list = []
     if results['voter_guide_list_found']:

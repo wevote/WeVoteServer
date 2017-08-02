@@ -758,7 +758,8 @@ class VoterGuideListManager(models.Model):
         }
         return results
 
-    def retrieve_voter_guides_by_organization_list(self, organization_we_vote_ids_followed_by_voter):
+    def retrieve_voter_guides_by_organization_list(self, organization_we_vote_ids_followed_by_voter,
+                                                   filter_by_this_google_civic_election_id=False):
         voter_guide_list = []
         voter_guide_list_found = False
 
@@ -788,6 +789,9 @@ class VoterGuideListManager(models.Model):
             voter_guide_queryset = VoterGuide.objects.all()
             voter_guide_queryset = voter_guide_queryset.filter(
                 organization_we_vote_id__in=organization_we_vote_ids_followed_by_voter)
+            if filter_by_this_google_civic_election_id:
+                voter_guide_queryset = voter_guide_queryset.filter(
+                    google_civic_election_id=filter_by_this_google_civic_election_id)
             voter_guide_queryset = voter_guide_queryset.order_by('-twitter_followers_count')
             voter_guide_list = voter_guide_queryset
 

@@ -285,7 +285,7 @@ class FacebookManager(models.Model):
                                        facebook_user_last_name, facebook_user_name=None, facebook_user_location_id=None,
                                        facebook_user_location_name=None, facebook_user_gender=None,
                                        facebook_user_birthday=None, facebook_profile_image_url_https=None,
-                                       facebook_background_image_url_https=None,facebook_user_about=None,
+                                       facebook_background_image_url_https=None, facebook_user_about=None,
                                        facebook_user_is_verified=False, facebook_user_friend_total_count=None,
                                        we_vote_hosted_profile_image_url_large=None,
                                        we_vote_hosted_profile_image_url_medium=None,

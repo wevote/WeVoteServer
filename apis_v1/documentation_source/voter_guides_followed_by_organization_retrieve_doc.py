@@ -21,9 +21,14 @@ def voter_guides_followed_by_organization_retrieve_doc_template_values(url_root)
     ]
     optional_query_parameter_list = [
         {
-            'name':         'maximum_number_to_retrieve',
+            'name':         'filter_by_this_google_civic_election_id',
             'value':        'integer',  # boolean, integer, long, string
-            'description':  'Defaults to 20 voter guides. Enter a value to set your own limit.',
+            'description':  'Limit the list of voter guides that the org is following to only those for this election.',
+        },
+        {
+            'name': 'maximum_number_to_retrieve',
+            'value': 'integer',  # boolean, integer, long, string
+            'description': 'Defaults to 20 voter guides. Enter a value to set your own limit.',
         },
     ]
 
