@@ -56,7 +56,7 @@ def voter_facebook_save_to_current_account_for_api(voter_device_id):  # voterFac
     voter = results['voter']
 
     facebook_manager = FacebookManager()
-    facebook_results = facebook_manager.retrieve_facebook_link_to_voter(voter.we_vote_id)
+    facebook_results = facebook_manager.retrieve_facebook_link_to_voter(voter_we_vote_id=voter.we_vote_id)
     if facebook_results['facebook_link_to_voter_found']:
         error_results = {
             'status':                   "FACEBOOK_OWNER_VOTER_FOUND_WHEN_NOT_EXPECTED",

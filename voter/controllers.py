@@ -1451,7 +1451,7 @@ def voter_retrieve_for_api(voter_device_id):  # voterRetrieve
                     organization = organization_dict['organization']
                     if not positive_value_exists(organization.facebook_id) or \
                             not positive_value_exists(organization.facebook_background_image_url_https):
-                        organization_manager.update_or_create_organization(
+                        OrganizationManager().update_or_create_organization(
                             organization.id,
                             we_vote_id=organization.we_vote_id,
                             organization_website_search=None,
