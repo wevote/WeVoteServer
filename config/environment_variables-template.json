@@ -109,5 +109,8 @@
   "PROFILE_IMAGE_LARGE_WIDTH":      "200",
   "PROFILE_IMAGE_LARGE_HEIGHT":     "200",
 
+  "_comment":                       "When SERVER_IN_DEBUG_MODE=false, STATIC_URL must be defined to serve static files.",
+  "STATIC_URL":                     "/static/",
+
   "_comment":                       "End of json_environment_variables.json"
 }
