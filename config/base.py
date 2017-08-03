@@ -189,9 +189,13 @@ USE_TZ = True
 AUTH_USER_MODEL = 'voter.Voter'
 
 # Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/1.8/howto/static-files/
+# https://docs.djangoproject.com/en/1.11/howto/static-files/ calls loading static files from the project
+# "grossly inefficient and probably insecure, so it is unsuitable for production", but we only use it (August 2017) to
+# serve apis_v1.css for the admin console.
+# If we ever care, there is a better way: https://docs.djangoproject.com/en/1.11/howto/static-files/deployment/
 STATIC_URL = '/static/'
-STATIC_ROOT = os.path.join(PROJECT_PATH, "static", "static")  # Django Cookbook
+STATIC_ROOT = os.path.join(PROJECT_PATH, "static", "static") if DEBUG else \
+    os.path.join(PROJECT_PATH, "apis_v1", "static") # Django Cookbook
 MEDIA_URL = '/media/'  # Django Cookbook
 MEDIA_ROOT = os.path.join(PROJECT_PATH, "static", "media")  # Django Cookbook
 
