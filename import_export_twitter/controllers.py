@@ -1170,8 +1170,10 @@ def twitter_sign_in_retrieve_for_api(voter_device_id):  # twitterSignInRetrieve
         voter_we_vote_id=voter_we_vote_id_for_cache,
         twitter_id=twitter_id, twitter_screen_name=twitter_auth_response.twitter_screen_name,
         twitter_profile_image_url_https=twitter_auth_response.twitter_profile_image_url_https,
+        twitter_profile_banner_url_https=twitter_auth_response.twitter_profile_banner_url_https,
         image_source=TWITTER)
     cached_twitter_profile_image_url_https = cache_results['cached_twitter_profile_image_url_https']
+    cached_twitter_profile_banner_url_https = cache_results['cached_twitter_profile_banner_url_https']
     we_vote_hosted_profile_image_url_large = cache_results['we_vote_hosted_profile_image_url_large']
     we_vote_hosted_profile_image_url_medium = cache_results['we_vote_hosted_profile_image_url_medium']
     we_vote_hosted_profile_image_url_tiny = cache_results['we_vote_hosted_profile_image_url_tiny']
@@ -1184,9 +1186,11 @@ def twitter_sign_in_retrieve_for_api(voter_device_id):  # twitterSignInRetrieve
     twitter_user_results = twitter_user_manager.update_or_create_twitter_user(
         twitter_user_details_dict, twitter_id,
         cached_twitter_profile_image_url_https=cached_twitter_profile_image_url_https,
+        cached_twitter_profile_banner_url_https=cached_twitter_profile_banner_url_https,
         we_vote_hosted_profile_image_url_large=we_vote_hosted_profile_image_url_large,
         we_vote_hosted_profile_image_url_medium=we_vote_hosted_profile_image_url_medium,
         we_vote_hosted_profile_image_url_tiny=we_vote_hosted_profile_image_url_tiny)
+
     status += twitter_user_results['status']
     if positive_value_exists(cached_twitter_profile_image_url_https):
         twitter_profile_image_url_https = cached_twitter_profile_image_url_https
@@ -1201,11 +1205,17 @@ def twitter_sign_in_retrieve_for_api(voter_device_id):  # twitterSignInRetrieve
         except Exception:
             pass
 
-        OrganizationManager.update_organization_single_voter_data(twitter_id,
-                                                                  we_vote_hosted_profile_image_url_large,
-                                                                  we_vote_hosted_profile_image_url_medium,
-                                                                  we_vote_hosted_profile_image_url_tiny,
-                                                                  twitter_profile_banner_url_https)
+        try:
+            OrganizationManager.update_organization_single_voter_data(twitter_id,
+                                                                      we_vote_hosted_profile_image_url_large,
+                                                                      we_vote_hosted_profile_image_url_medium,
+                                                                      we_vote_hosted_profile_image_url_tiny,
+                                                                      twitter_profile_banner_url_https)
+        except Exception as e:
+            logger.error('twitter_sign_in_retrieve_for_api caught exception calling '
+                         'update_organization_single_voter_data: '
+                         '{error} [type: {error_type}]'.format(error=e, error_type=type(e)))
+
     json_data = {
         'success':                                  success,
         'status':                                   status,

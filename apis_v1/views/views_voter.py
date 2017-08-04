@@ -755,7 +755,7 @@ def voter_guides_followed_by_organization_retrieve_view(request):
         maximum_number_to_retrieve=maximum_number_to_retrieve)
 
 
-def voter_guide_followers_retrieve_view(request):
+def voter_guide_followers_retrieve_view(request):  # voterGuideFollowersRetrieve
     organization_we_vote_id = request.GET.get('organization_we_vote_id', '')
     voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
     maximum_number_to_retrieve = get_maximum_number_to_retrieve_from_request(request)

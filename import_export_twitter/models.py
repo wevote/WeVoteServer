@@ -40,7 +40,7 @@ class TwitterAuthResponse(models.Model):
                                            max_length=255, null=True, unique=False)
     twitter_name = models.CharField(verbose_name="display name from twitter", max_length=255, null=True, blank=True)
     twitter_profile_image_url_https = models.URLField(verbose_name='url of logo from twitter', blank=True, null=True)
-
+    twitter_profile_banner_url_https = models.URLField(verbose_name='url of banner from twitter', blank=True, null=True)
     twitter_request_token = models.TextField(verbose_name='twitter request token', null=True, blank=True)
     twitter_request_secret = models.TextField(verbose_name='twitter request secret', null=True, blank=True)
     twitter_access_token = models.TextField(verbose_name='twitter access token', null=True, blank=True)
@@ -88,6 +88,8 @@ class TwitterAuthManager(models.Model):
             success = False
             created = False
             status = "TWITTER_AUTH_RESPONSE_NOT_UPDATED_OR_CREATED"
+            logger.error("update_or_create_twitter_auth_response threw " + str(e))
+
 
         results = {
             'success': success,
@@ -173,7 +175,7 @@ class TwitterAuthManager(models.Model):
             # 'time_zone': 'Seoul',
             if hasattr(twitter_user_object, "profile_banner_url") and \
                     positive_value_exists(twitter_user_object.profile_banner_url):
-                twitter_auth_response.profile_banner_url = twitter_user_object.profile_banner_url
+                twitter_auth_response.twitter_profile_banner_url_https = twitter_user_object.profile_banner_url
                 twitter_auth_value_to_save = True
             if twitter_auth_value_to_save:
                 twitter_auth_response.save()
