@@ -56,11 +56,6 @@ class WeVoteSocialAuthExceptionMiddleware(SocialAuthExceptionMiddleware):
             except Exception as e2:
                 pass
 
-            error_string = 'WeVoteSocialAuthExceptionMiddleware threw {error} [type: {error_type}]'.format(
-                error=error_exception, error_type=type(exception))
-            print("Exception redirected to http response by middleware: ", error_string, " at ", print_path)
-            # July 2017, we really want to log this to disk, so that it can be discovered by Splunk, but for now we
-            # print it to the console for developers, and the following logger sends the message to the http out stream,
-            # which will only be discovered by a developer using the JavaScript debugger.
-            logger.error(error_string)
+            logger.error('WeVoteSocialAuthExceptionMiddleware threw {error} [type: {error_type}]'.format(
+                error=error_exception, error_type=type(exception)))
             raise exception
