@@ -73,7 +73,8 @@ class OrganizationManager(models.Manager):
                 twitter_user_id = twitter_user.twitter_id
                 twitter_name = twitter_user.twitter_name
                 twitter_location = twitter_user.twitter_location
-                twitter_followers_count = twitter_user.twitter_followers_count
+                twitter_followers_count = twitter_user.twitter_followers_count if \
+                    positive_value_exists(twitter_user.twitter_followers_count) else 0
                 twitter_profile_image_url_https = twitter_user.twitter_profile_background_image_url_https
                 twitter_profile_background_image_url_https = twitter_user.twitter_profile_background_image_url_https
                 twitter_profile_banner_url_https = twitter_user.twitter_profile_banner_url_https
@@ -81,7 +82,6 @@ class OrganizationManager(models.Manager):
                 we_vote_hosted_profile_image_url_large = twitter_user.we_vote_hosted_profile_image_url_large
                 we_vote_hosted_profile_image_url_medium = twitter_user.we_vote_hosted_profile_image_url_medium
                 we_vote_hosted_profile_image_url_tiny = twitter_user.we_vote_hosted_profile_image_url_tiny
-                count = twitter_followers_count if twitter_followers_count else None
                 organization = Organization.create(
                     organization_name=organization_name,
                     organization_website=organization_website,
@@ -92,7 +92,7 @@ class OrganizationManager(models.Manager):
                     twitter_user_id=twitter_user_id,
                     twitter_name=twitter_name,
                     twitter_location=twitter_location,
-                    twitter_followers_count=count,
+                    twitter_followers_count=twitter_followers_count,
                     twitter_profile_image_url_https=twitter_profile_image_url_https,
                     twitter_profile_background_image_url_https=twitter_profile_background_image_url_https,
                     twitter_profile_banner_url_https=twitter_profile_banner_url_https,
@@ -510,7 +510,8 @@ class OrganizationManager(models.Manager):
                 try:
                     organization.organization_name = twitter_user.twitter_name
                     organization.twitter_description = twitter_user.twitter_description
-                    organization.twitter_followers_count = twitter_user.twitter_followers_count
+                    organization.twitter_followers_count = twitter_user.twitter_followers_count if \
+                        positive_value_exists(twitter_user.twitter_followers_count) else 0
                     organization.twitter_profile_image_url_https = twitter_user.twitter_profile_image_url_https
                     organization.organization_website = twitter_user.twitter_url
                     organization.twitter_name = twitter_user.twitter_name
@@ -1818,7 +1819,7 @@ class Organization(models.Model):
     @classmethod
     def create(cls, organization_name, organization_website, organization_twitter_handle, organization_email,
                organization_facebook, organization_image, twitter_user_id=None, twitter_name=None,
-               twitter_location=None, twitter_followers_count=None, twitter_profile_image_url_https=None,
+               twitter_location=None, twitter_followers_count=0, twitter_profile_image_url_https=None,
                twitter_profile_background_image_url_https=None, twitter_profile_banner_url_https=None,
                twitter_description=None, we_vote_hosted_profile_image_url_large=None,
                we_vote_hosted_profile_image_url_medium=None, we_vote_hosted_profile_image_url_tiny=None):

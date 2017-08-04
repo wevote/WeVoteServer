@@ -685,7 +685,8 @@ class FacebookManager(models.Model):
                         if facebook_friends_friend_dict not in facebook_suggested_friends_list:
                             facebook_suggested_friends_list.append(facebook_friends_friend_dict)
 
-
+            if facebook_friends_api_details.get('data', []).__len__() == 0:
+                logger.debug("retrieve_facebook_friends_from_facebook  received zero friends from the API")
             success = True
             status += " " + "FACEBOOK_FRIENDS_LIST_FOUND"
             facebook_friends_list_found = True
