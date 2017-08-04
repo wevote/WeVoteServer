@@ -1191,7 +1191,7 @@ def voter_guides_followed_by_organization_retrieve_for_api(voter_device_id,  # v
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 
 
-def voter_guide_followers_retrieve_for_api(voter_device_id, organization_we_vote_id,
+def voter_guide_followers_retrieve_for_api(voter_device_id, organization_we_vote_id,  # voterGuideFollowersRetrieve
                                            maximum_number_to_retrieve=0):
     """
     Start with the organizations followed and return a list of voter_guides. voterGuidesFollowedByOrganizationRetrieve
@@ -1204,22 +1204,24 @@ def voter_guide_followers_retrieve_for_api(voter_device_id, organization_we_vote
     """
     if not positive_value_exists(voter_device_id):
         json_data = {
-            'status': 'VALID_VOTER_DEVICE_ID_MISSING',
-            'success': False,
-            'voter_device_id': voter_device_id,
-            'maximum_number_to_retrieve': maximum_number_to_retrieve,
-            'voter_guides': [],
+            'status':                       'VALID_VOTER_DEVICE_ID_MISSING',
+            'success':                      False,
+            'voter_device_id':              voter_device_id,
+            'organization_we_vote_id':      organization_we_vote_id,
+            'maximum_number_to_retrieve':   maximum_number_to_retrieve,
+            'voter_guides':                 [],
         }
         return HttpResponse(json.dumps(json_data), content_type='application/json')
 
     voter_id = fetch_voter_id_from_voter_device_link(voter_device_id)
     if not positive_value_exists(voter_id):
         json_data = {
-            'status': 'VALID_VOTER_ID_MISSING',
-            'success': False,
-            'voter_device_id': voter_device_id,
-            'maximum_number_to_retrieve': maximum_number_to_retrieve,
-            'voter_guides': [],
+            'status':                       'VALID_VOTER_ID_MISSING',
+            'success':                      False,
+            'voter_device_id':              voter_device_id,
+            'organization_we_vote_id':      organization_we_vote_id,
+            'maximum_number_to_retrieve':   maximum_number_to_retrieve,
+            'voter_guides':                 [],
         }
         return HttpResponse(json.dumps(json_data), content_type='application/json')
 
@@ -1227,11 +1229,12 @@ def voter_guide_followers_retrieve_for_api(voter_device_id, organization_we_vote
     results = voter_manager.retrieve_voter_by_id(voter_id)
     if not results['voter_found']:
         json_data = {
-            'status': 'VOTER_NOT_FOUND',
-            'success': False,
-            'voter_device_id': voter_device_id,
-            'maximum_number_to_retrieve': maximum_number_to_retrieve,
-            'voter_guides': [],
+            'status':                       'VOTER_NOT_FOUND',
+            'success':                      False,
+            'voter_device_id':              voter_device_id,
+            'organization_we_vote_id':      organization_we_vote_id,
+            'maximum_number_to_retrieve':   maximum_number_to_retrieve,
+            'voter_guides':                 [],
         }
         return HttpResponse(json.dumps(json_data), content_type='application/json')
 
@@ -1245,8 +1248,8 @@ def voter_guide_followers_retrieve_for_api(voter_device_id, organization_we_vote
             one_voter_guide = {
                 'voter_guide_display_name':     voter_guide.organization_name,
                 'voter_guide_image_url_large':  voter_guide.we_vote_hosted_profile_image_url_large
-                    if positive_value_exists(voter_guide.we_vote_hosted_profile_image_url_large)
-                    else voter_guide.organization_photo_url(),
+                if positive_value_exists(voter_guide.we_vote_hosted_profile_image_url_large)
+                else voter_guide.organization_photo_url(),
                 'voter_guide_image_url_medium': voter_guide.we_vote_hosted_profile_image_url_medium,
                 'voter_guide_image_url_tiny':   voter_guide.we_vote_hosted_profile_image_url_tiny,
                 'organization_we_vote_id':      voter_guide.we_vote_id,
@@ -1271,11 +1274,12 @@ def voter_guide_followers_retrieve_for_api(voter_device_id, organization_we_vote
         success = False
 
     json_data = {
-        'status': status,
-        'success': success,
-        'voter_device_id': voter_device_id,
-        'maximum_number_to_retrieve': maximum_number_to_retrieve,
-        'voter_guides': voter_guides,
+        'status':                       status,
+        'success':                      success,
+        'voter_device_id':              voter_device_id,
+        'organization_we_vote_id':      organization_we_vote_id,
+        'maximum_number_to_retrieve':   maximum_number_to_retrieve,
+        'voter_guides':                 voter_guides,
     }
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 
