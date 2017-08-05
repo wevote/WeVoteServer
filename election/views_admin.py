@@ -337,7 +337,7 @@ def election_edit_process_view(request):
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
-    election_local_id = convert_to_int(request.POST.get('election_local_id', 0))
+    election_local_id = convert_to_int(request.POST.get('election_id', 0))
     election_name = request.POST.get('election_name', False)
     election_day_text = request.POST.get('election_day_text', False)
     state_code = request.POST.get('state_code', False)
@@ -360,6 +360,14 @@ def election_edit_process_view(request):
             if convert_to_int(election_on_stage.google_civic_election_id) < 1000000:
                 # If here, this is an election created by Google Civic and we limit what fields to update
                 # Update
+                if election_name is not False:
+                    election_on_stage.election_name = election_name
+                    election_changed = True
+
+                if election_day_text is not False:
+                    election_on_stage.election_day_text = election_day_text
+                    election_changed = True
+
                 if state_code is not False:
                     election_on_stage.state_code = state_code
                     election_changed = True

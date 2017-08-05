@@ -26,11 +26,11 @@
             <td>Election Name:</td>
             <td>
 {% if election %}
-    {% if election.google_civic_election_id|convert_to_int < 1000000 %}{# If we have an id issued by Google, don't allow the name to be edited. #}
-        {{ election.election_name }}
-    {% else %}
+{#    {% if election.google_civic_election_id|convert_to_int < 1000000 %}{# If we have an id issued by Google, don't allow the name to be edited. #}
+{#        {{ election.election_name }}#}
+{#    {% else %}#}
         <input type="text" name="election_name" id="election_name_id" value="{{ election.election_name|default_if_none:"" }}" /><br />
-    {% endif %}
+{#    {% endif %}#}
 {% else %}
      <input type="text" name="election_name" id="election_name_id" value="" /><br />
 {% endif %}</td>
@@ -39,11 +39,11 @@
             <td>Day of Election:</td>
             <td>
 {% if election %}
-    {% if election.google_civic_election_id|convert_to_int < 1000000 %}{# If we have an id issued by Google, don't allow the election_day_text to be edited. #}
-        {{ election.election_day_text }}
-    {% else %}
+{#    {% if election.google_civic_election_id|convert_to_int < 1000000 %}{# If we have an id issued by Google, don't allow the election_day_text to be edited. #}
+{#        {{ election.election_day_text }}#}
+{#    {% else %}#}
         <input type="text" name="election_day_text" id="election_day_text_id" value="{% if election %}{{ election.election_day_text|default_if_none:"" }}{% endif %}" /> (Format: "2016-04-26")<br />
-    {% endif %}
+{#    {% endif %}#}
 {% else %}
     <input type="text" name="election_day_text" id="election_day_text_id" value="" /> (Format: "2016-04-26")<br />
 {% endif %}</td>

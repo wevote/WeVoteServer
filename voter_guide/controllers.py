@@ -1245,6 +1245,11 @@ def voter_guide_followers_retrieve_for_api(voter_device_id, organization_we_vote
     if results['organization_list_found']:
         number_added_to_list = 0
         for voter_guide in voter_guide_list:
+            date_last_changed = voter_guide.date_last_changed
+            if positive_value_exists(date_last_changed):
+                last_updated = date_last_changed.strftime('%Y-%m-%d %H:%M')
+            else:
+                last_updated = ""
             one_voter_guide = {
                 'voter_guide_display_name':     voter_guide.organization_name,
                 'voter_guide_image_url_large':  voter_guide.we_vote_hosted_profile_image_url_large
@@ -1256,7 +1261,7 @@ def voter_guide_followers_retrieve_for_api(voter_device_id, organization_we_vote
                 'twitter_description':          voter_guide.twitter_description,
                 'twitter_followers_count':      voter_guide.twitter_followers_count,
                 'twitter_handle':               voter_guide.organization_twitter_handle,
-                'last_updated':                 voter_guide.date_last_changed.strftime('%Y-%m-%d %H:%M'),
+                'last_updated':                 last_updated,
             }
             voter_guides.append(one_voter_guide.copy())
             if positive_value_exists(maximum_number_to_retrieve):
