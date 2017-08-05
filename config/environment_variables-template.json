@@ -35,6 +35,7 @@
   "_comment":                       "sendgrid-django API settings",
   "EMAIL_BACKEND":                  "sgbackend.SendGridBackend",
   "SENDGRID_API_KEY":               "",
+  "ADMINS":                         "",
 
   "_comment":                       "import_export",
   "WE_VOTE_API_KEY":                "",
