@@ -308,11 +308,11 @@ SOCIAL_AUTH_PIPELINE = (
 
 EMAIL_BACKEND = get_environment_variable("EMAIL_BACKEND")
 SENDGRID_API_KEY = get_environment_variable("SENDGRID_API_KEY")
-ADMIN_EMAIL_ADDRESSES = get_environment_variable("ADMIN_EMAIL_ADDRESSES")
-# Expecting a space delimited string of emails like "jane@wevote.us" or "jane@wevote.us bill@wevote.us"
-ADMIN_EMAIL_ADDRESSES_ARRAY = []
-if ADMIN_EMAIL_ADDRESSES:
-    ADMIN_EMAIL_ADDRESSES_ARRAY = [[email.split('@')[0], email] for email in ADMIN_EMAIL_ADDRESSES.split()]
+# ADMIN_EMAIL_ADDRESSES = get_environment_variable("ADMIN_EMAIL_ADDRESSES")
+# # Expecting a space delimited string of emails like "jane@wevote.us" or "jane@wevote.us bill@wevote.us"
+# ADMIN_EMAIL_ADDRESSES_ARRAY = []
+# if ADMIN_EMAIL_ADDRESSES:
+#     ADMIN_EMAIL_ADDRESSES_ARRAY = [[email.split('@')[0], email] for email in ADMIN_EMAIL_ADDRESSES.split()]
 
 
 # ########## Logging configurations ###########
