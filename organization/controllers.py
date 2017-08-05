@@ -719,12 +719,14 @@ def organizations_import_from_structured_json(structured_json):
     return organizations_results
 
 
-def organization_retrieve_for_api(organization_id, organization_we_vote_id, voter_device_id):  #
+def organization_retrieve_for_api(organization_id, organization_we_vote_id, voter_device_id,
+                                  display_facebook_banner):  #
     """
     Called from organizationRetrieve api
     :param organization_id:
     :param organization_we_vote_id:
     :param voter_device_id:
+    :param display_facebook_banner:
     :return:
     """
     organization_id = convert_to_int(organization_id)
@@ -763,34 +765,15 @@ def organization_retrieve_for_api(organization_id, organization_we_vote_id, vote
             position_list_manager = PositionListManager()
             position_list_manager.refresh_cached_position_info_for_organization(organization_we_vote_id)
 
-        we_vote_hosted_profile_image_url_large = organization.we_vote_hosted_profile_image_url_large if \
-            positive_value_exists(organization.we_vote_hosted_profile_image_url_large) else \
-            organization.organization_photo_url()
-        organization_banner_url = organization.twitter_profile_banner_url_https if \
-            positive_value_exists(organization.twitter_profile_banner_url_https) else '',
-
-        # NOTE FROM DALE: We don't want to add these database calls here -- we want to only rely on
-        #  values cached in the organization table.
-        # # If signed in with Facebook credentials AND this organization's we_vote_id is the same as this voter's
-        # # we_vote_id, then display the voter's Facebook "cover" (banner) instead of their Twitter banner image
-        # auth_response_results = FacebookManager().retrieve_facebook_auth_response(voter_device_id)
-        # if auth_response_results['facebook_auth_response_found']:
-        #     facebook_auth_response = auth_response_results['facebook_auth_response']
-        #     facebook_user_results = FacebookManager().retrieve_facebook_user_by_facebook_user_id(
-        #         facebook_auth_response.facebook_user_id)
-        #     if facebook_user_results['facebook_user_found']:
-        #         facebook_user = facebook_user_results['facebook_user']
-        #         try:
-        #             voter_manager = VoterManager()
-        #             voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id)
-        #             voter = voter_results['voter']
-        #             we_vote_id = voter.we_vote_id
-        #             if facebook_user and voter.signed_in_facebook() and voter.linked_organization_we_vote_id== organization.we_vote_id:
-        #                 we_vote_hosted_profile_image_url_large = facebook_user.facebook_profile_image_url_https
-        #                 organization_banner_url = facebook_user.facebook_background_image_url_https
-        #         except Exception as e:
-        #             logger.error('FAILED to load voter in organization_retrieve_for_api. ' \
-        #                          '{error} [type: {error_type}]'.format(error=e, error_type=type(e)))
+        if positive_value_exists(display_facebook_banner):
+            we_vote_hosted_profile_image_url_large = organization.facebook_profile_image_url_https
+            organization_banner_url = organization.facebook_background_image_url_https
+        else:
+            we_vote_hosted_profile_image_url_large = organization.we_vote_hosted_profile_image_url_large if \
+                positive_value_exists(organization.we_vote_hosted_profile_image_url_large) else \
+                organization.organization_photo_url()
+            organization_banner_url = organization.twitter_profile_banner_url_https if \
+                                          positive_value_exists(organization.twitter_profile_banner_url_https) else '',
 
         json_data = {
             'success': True,

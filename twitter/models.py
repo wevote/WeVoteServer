@@ -735,6 +735,8 @@ class TwitterUserManager(models.Model):
         except Exception as e:
             success = False
             twitter_user_found = False
+            logger.error("save_new_twitter_user_from_twitter_json caught: ", e.message)
+
             status = 'FAILED_TO_CREATE_NEW_TWITTER_USER'
             twitter_user_on_stage = TwitterUser()
 
