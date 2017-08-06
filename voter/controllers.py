@@ -1204,6 +1204,7 @@ def voter_retrieve_for_api(voter_device_id):  # voterRetrieve
     voter_created = False
     twitter_link_to_voter = TwitterLinkToVoter()
     repair_twitter_link_to_voter_caching_now = False
+    repair_facebook_link_to_voter_caching_now = False
 
     if positive_value_exists(voter_device_id):
         # If a voter_device_id is passed in that isn't valid, we want to throw an error
@@ -1283,10 +1284,10 @@ def voter_retrieve_for_api(voter_device_id):  # voterRetrieve
         else:
             status = 'VOTER_FOUND '
 
-        twitter_user_manager = TwitterUserManager()
-        twitter_link_results = twitter_user_manager.retrieve_twitter_link_to_voter(0, voter.we_vote_id)
         twitter_link_to_voter_twitter_id = 0
         if voter.is_signed_in():
+            twitter_user_manager = TwitterUserManager()
+            twitter_link_results = twitter_user_manager.retrieve_twitter_link_to_voter(0, voter.we_vote_id)
             if twitter_link_results['twitter_link_to_voter_found']:
                 twitter_link_to_voter = twitter_link_results['twitter_link_to_voter']
                 twitter_link_to_voter_twitter_id = twitter_link_to_voter.twitter_id
@@ -1435,35 +1436,52 @@ def voter_retrieve_for_api(voter_device_id):  # voterRetrieve
                         except Exception as e:
                             status += "UNABLE_TO_CREATE_NEW_ORGANIZATION_TO_VOTER_FROM_RETRIEVE_VOTER "
 
-        # Heal Facebook data
-        # TODO DALE This needs deeper code review
-        auth_response_results = FacebookManager().retrieve_facebook_auth_response(voter_device_id)
-        if auth_response_results['facebook_auth_response_found']:
-            facebook_auth_response = auth_response_results['facebook_auth_response']
-            facebook_user_results = FacebookManager().retrieve_facebook_user_by_facebook_user_id(
-                facebook_auth_response.facebook_user_id)
-            if facebook_user_results['facebook_user_found']:
-                facebook_user = facebook_user_results['facebook_user']
+            # Check to see if there is a FacebookLinkToVoter for this voter, and if so, see if we need to make
+            #  organization update with latest Facebook data
+            facebook_manager = FacebookManager()
+            facebook_link_results = facebook_manager.retrieve_facebook_link_to_voter_from_voter_we_vote_id(
+                voter.we_vote_id)
+            if facebook_link_results['facebook_link_to_voter_found']:
+                facebook_link_to_voter = facebook_link_results['facebook_link_to_voter']
+                facebook_link_to_voter_facebook_user_id = facebook_link_to_voter.facebook_user_id
+                if positive_value_exists(facebook_link_to_voter_facebook_user_id):
+                    facebook_user_results = FacebookManager().retrieve_facebook_user_by_facebook_user_id(
+                        facebook_link_to_voter_facebook_user_id)
+                    if facebook_user_results['facebook_user_found']:
+                        facebook_user = facebook_user_results['facebook_user']
 
-                organization_dict = \
-                    OrganizationManager().retrieve_organization_from_we_vote_id(voter.linked_organization_we_vote_id)
-                try:
-                    organization = organization_dict['organization']
-                    if not positive_value_exists(organization.facebook_id) or \
-                            not positive_value_exists(organization.facebook_background_image_url_https):
-                        OrganizationManager().update_or_create_organization(
-                            organization.id,
-                            we_vote_id=organization.we_vote_id,
-                            organization_website_search=None,
-                            organization_twitter_search=None,
-                            facebook_id=facebook_user.facebook_user_id,
-                            facebook_email=facebook_user.facebook_email,
-                            facebook_profile_image_url_https=facebook_user.facebook_profile_image_url_https,
-                            facebook_background_image_url_https=facebook_user.facebook_background_image_url_https
-                        )
-                except Exception as e:
-                    logger.error('FAILED organization_manager.update_or_create_organization. '
-                                 '{error} [type: {error_type}]'.format(error=e, error_type=type(e)))
+                        organization_results = \
+                            OrganizationManager().retrieve_organization_from_we_vote_id(
+                                voter.linked_organization_we_vote_id)
+                        if organization_results['organization_found']:
+                            try:
+                                organization = organization_results['organization']
+                                save_organization = False
+                                # Look at the linked_organization for the voter and update with latest
+                                if positive_value_exists(facebook_user.facebook_profile_image_url_https) and \
+                                        not positive_value_exists(organization.facebook_profile_image_url_https):
+                                    organization.facebook_profile_image_url_https = \
+                                        facebook_user.facebook_profile_image_url_https
+                                    save_organization = True
+                                if positive_value_exists(facebook_user.facebook_background_image_url_https) and \
+                                        not positive_value_exists(organization.facebook_background_image_url_https):
+                                    organization.facebook_background_image_url_https = \
+                                        facebook_user.facebook_background_image_url_https
+                                    save_organization = True
+                                if positive_value_exists(facebook_user.facebook_user_id) and \
+                                        not positive_value_exists(organization.facebook_id):
+                                    organization.facebook_id = facebook_user.facebook_user_id
+                                    save_organization = True
+                                if positive_value_exists(facebook_user.facebook_email) and \
+                                        not positive_value_exists(organization.facebook_email):
+                                    organization.facebook_email = facebook_user.facebook_email
+                                    save_organization = True
+                                if save_organization:
+                                    repair_facebook_link_to_voter_caching_now = True
+                                    organization.save()
+                            except Exception as e:
+                                logger.error('FAILED organization_manager.update_or_create_organization. '
+                                             '{error} [type: {error_type}]'.format(error=e, error_type=type(e)))
 
         if repair_twitter_link_to_voter_caching_now:
             # If here then we know that we have a twitter_link_to_voter, and there was some data cleanup done

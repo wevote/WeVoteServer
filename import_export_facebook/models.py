@@ -48,8 +48,7 @@ class FacebookAuthResponse(models.Model):
         verbose_name='url of voter&apos;s image from facebook', blank=True, null=True)
     facebook_background_image_url_https = models.URLField(
         verbose_name='url of voter&apos;s background &apos;cover&apos; image from facebook \
-        (like the twitter banner photo)', \
-        blank=True, null=True)
+        (like the twitter banner photo)', blank=True, null=True)
 
     def get_full_name(self):
         full_name = self.facebook_first_name if positive_value_exists(self.facebook_first_name) else ''
