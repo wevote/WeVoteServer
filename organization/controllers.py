@@ -719,14 +719,12 @@ def organizations_import_from_structured_json(structured_json):
     return organizations_results
 
 
-def organization_retrieve_for_api(organization_id, organization_we_vote_id, voter_device_id,
-                                  display_facebook_banner):  #
+def organization_retrieve_for_api(organization_id, organization_we_vote_id, voter_device_id):  #
     """
     Called from organizationRetrieve api
     :param organization_id:
     :param organization_we_vote_id:
     :param voter_device_id:
-    :param display_facebook_banner:
     :return:
     """
     organization_id = convert_to_int(organization_id)
@@ -765,15 +763,23 @@ def organization_retrieve_for_api(organization_id, organization_we_vote_id, vote
             position_list_manager = PositionListManager()
             position_list_manager.refresh_cached_position_info_for_organization(organization_we_vote_id)
 
-        if positive_value_exists(display_facebook_banner):
-            we_vote_hosted_profile_image_url_large = organization.facebook_profile_image_url_https
-            organization_banner_url = organization.facebook_background_image_url_https
+        we_vote_hosted_profile_image_url_large = organization.we_vote_hosted_profile_image_url_large if \
+            positive_value_exists(organization.we_vote_hosted_profile_image_url_large) else \
+            organization.organization_photo_url()
+        # To discuss: we_vote_hosted_profile_image_url_large = organization.facebook_profile_image_url_https
+
+        # Favor the Twitter banner if we have that
+        if positive_value_exists(organization.twitter_profile_banner_url_https):
+            organization_banner_url = organization.twitter_profile_banner_url_https
         else:
-            we_vote_hosted_profile_image_url_large = organization.we_vote_hosted_profile_image_url_large if \
-                positive_value_exists(organization.we_vote_hosted_profile_image_url_large) else \
-                organization.organization_photo_url()
-            organization_banner_url = organization.twitter_profile_banner_url_https if \
-                                          positive_value_exists(organization.twitter_profile_banner_url_https) else '',
+            organization_banner_url = organization.facebook_background_image_url_https,
+
+        if isinstance(organization_banner_url, list):
+            # If a list, just return the first one
+            organization_banner_url = organization_banner_url.pop()
+        elif isinstance(organization_banner_url, tuple):
+            # If a tuple, just return the first one
+            organization_banner_url = organization_banner_url[0]
 
         json_data = {
             'success': True,
