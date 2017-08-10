@@ -443,3 +443,46 @@ def organization_link_to_issue_import_from_structured_json(structured_json):
         'organization_link_to_issue_not_processed': organization_link_to_issue_not_processed,
     }
     return issues_results
+
+
+def retrieve_issue_we_vote_ids_linked_to_organization(organization_we_vote_id):
+    issue_we_vote_ids = []
+    if positive_value_exists(organization_we_vote_id):
+        issue_we_vote_ids_queryset = OrganizationLinkToIssue.objects.all()
+        issue_we_vote_ids_queryset = issue_we_vote_ids_queryset.\
+            filter(organization_we_vote_id__iexact=organization_we_vote_id)
+        issue_we_vote_ids_queryset = issue_we_vote_ids_queryset. \
+            filter(link_active=True)
+        issue_we_vote_ids_queryset = issue_we_vote_ids_queryset.\
+            only('issue_we_vote_id')
+        issue_we_vote_ids_queryset = list(issue_we_vote_ids_queryset)
+
+    for issue in issue_we_vote_ids_queryset:
+        issue_we_vote_ids.append(issue.issue_we_vote_id)
+    return issue_we_vote_ids
+
+
+def retrieve_issues_linked_to_organization(organization_we_vote_id):
+    issue_we_vote_ids_linked = retrieve_issue_we_vote_ids_linked_to_organization(organization_we_vote_id)
+    issue_list_manager = IssueListManager()
+    sort_formula = None
+    issue_we_vote_id_list_to_exclude = None
+    require_filter_or_exclude = True
+    issues_linked_result = issue_list_manager.retrieve_issues(sort_formula, issue_we_vote_ids_linked,
+                                                     issue_we_vote_id_list_to_exclude, require_filter_or_exclude)
+
+    issues_linked = []
+    if issues_linked_result['issue_list_found']:
+        for issue in issues_linked_result['issue_list']:
+            one_issue = {
+                'issue_we_vote_id':         issue.we_vote_id,
+                'issue_name':               issue.issue_name,
+                'issue_description':        issue.issue_description,
+                'issue_photo_url_large':    issue.we_vote_hosted_image_url_large,
+                'issue_photo_url_medium':   issue.we_vote_hosted_image_url_medium,
+                'issue_photo_url_tiny':     issue.we_vote_hosted_image_url_tiny,
+            }
+            issues_linked.append(one_issue)
+
+    issues_linked_result['issue_list'] = issues_linked
+    return issues_linked_result

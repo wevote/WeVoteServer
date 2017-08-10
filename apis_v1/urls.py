@@ -16,7 +16,7 @@ from ballot.views_admin import ballot_items_sync_out_view, ballot_returned_sync_
 from candidate.views_admin import candidates_sync_out_view
 from election.views_admin import elections_sync_out_view
 from issue.views_admin import issues_sync_out_view, issues_retrieve_view, retrieve_issues_to_follow_view, \
-    organization_link_to_issue_sync_out_view
+    organization_link_to_issue_sync_out_view, issues_linked_to_organization_view
 from measure.views_admin import measures_sync_out_view
 from office.views_admin import offices_sync_out_view
 from organization.views_admin import organizations_sync_out_view
@@ -57,6 +57,8 @@ urlpatterns = [
     url(r'^friendInviteResponse/', views_friend.friend_invite_response_view, name='friendInviteResponseView'),
     url(r'^friendList/', views_friend.friend_list_view, name='friendListView'),
     url(r'^issueFollow/', views_voter.voter_issue_follow_view, name='issueFollowView'),
+    url(r'^issuesLinkedToOrganization/', issues_linked_to_organization_view,
+        name='issuesLinkedToOrganizationView'),
     url(r'^issuesRetrieve/', issues_retrieve_view, name='issuesRetrieveView'),
     url(r'^issuesSyncOut/', issues_sync_out_view, name='issuesSyncOutView'),
     url(r'^measureRetrieve/', views_misc.measure_retrieve_view, name='measureRetrieveView'),
@@ -220,6 +222,8 @@ urlpatterns = [
     url(r'^docs/friendList/$', views_docs.friend_list_doc_view, name='friendListDocs'),
     url(r'^docs/issuesRetrieve/$', views_docs.issues_retrieve_doc_view, name='issuesRetrieveDocs'),
     url(r'^docs/issuesSyncOut/$', views_docs.issues_sync_out_doc_view, name='issuesSyncOutDocs'),
+    url(r'^docs/issuesLinkedToOrganization/', views_docs.issues_linked_to_organization_doc_view,
+        name='issuesLinkedToOrganizationDocs'),
     url(r'^docs/measureRetrieve/$', views_docs.measure_retrieve_doc_view, name='measureRetrieveDocs'),
     url(r'^docs/measuresSyncOut/$', views_docs.measures_sync_out_doc_view, name='measuresSyncOutDocs'),
     url(r'^docs/officeRetrieve/$', views_docs.office_retrieve_doc_view, name='officeRetrieveDocs'),
