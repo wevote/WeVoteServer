@@ -477,7 +477,7 @@ def organization_link_to_issue_sync_out_view(request):  # organizationLinkToIssu
 
 def issues_linked_to_organization_view(request):
     organization_we_vote_id = request.GET.get('organization_we_vote_id')
-    issues_linked_result = retrieve_issues_linked_to_organization(organization_we_vote_id)
+    issues_linked_result = retrieve_issues_linked_to_organization_for_api(organization_we_vote_id)
 
     success = False
     status = issues_linked_result['status']
@@ -494,6 +494,20 @@ def issues_linked_to_organization_view(request):
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 
 
-def issues_to_be_linked_to_organization_view(request):
-    # TODO: To be implemented
-    pass
+def issues_to_link_to_for_organization_view(request):
+    organization_we_vote_id = request.GET.get('organization_we_vote_id')
+    issues_linked_result = retrieve_issues_not_linked_to_organization_for_api(organization_we_vote_id)
+
+    success = False
+    status = issues_linked_result['status']
+    issues_to_be_linked_to = []
+    if issues_linked_result['success'] and issues_linked_result['issue_list_found']:
+        success = True
+        issues_to_be_linked_to = issues_linked_result['issue_list']
+
+    json_data = {
+        'success': success,
+        'status': status,
+        'issue_list': issues_to_be_linked_to,
+    }
+    return HttpResponse(json.dumps(json_data), content_type='application/json')

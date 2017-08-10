@@ -10,6 +10,7 @@ from exception.models import handle_exception
 import json
 import requests
 from follow.models import FollowIssueList
+from issue.models import OrganizationLinkToIssueList
 from voter.models import fetch_voter_we_vote_id_from_voter_device_link
 import wevote_functions.admin
 from wevote_functions.functions import positive_value_exists, process_request_from_master
@@ -445,31 +446,17 @@ def organization_link_to_issue_import_from_structured_json(structured_json):
     return issues_results
 
 
-def retrieve_issue_we_vote_ids_linked_to_organization(organization_we_vote_id):
-    issue_we_vote_ids = []
-    if positive_value_exists(organization_we_vote_id):
-        issue_we_vote_ids_queryset = OrganizationLinkToIssue.objects.all()
-        issue_we_vote_ids_queryset = issue_we_vote_ids_queryset.\
-            filter(organization_we_vote_id__iexact=organization_we_vote_id)
-        issue_we_vote_ids_queryset = issue_we_vote_ids_queryset. \
-            filter(link_active=True)
-        issue_we_vote_ids_queryset = issue_we_vote_ids_queryset.\
-            only('issue_we_vote_id')
-        issue_we_vote_ids_queryset = list(issue_we_vote_ids_queryset)
+def retrieve_issues_linked_to_organization_for_api(organization_we_vote_id):
+    organization_link_to_issue_list = OrganizationLinkToIssueList()
+    issue_we_vote_ids_linked = organization_link_to_issue_list. \
+        fetch_issue_we_vote_id_list_by_organization_we_vote_id(organization_we_vote_id)
 
-    for issue in issue_we_vote_ids_queryset:
-        issue_we_vote_ids.append(issue.issue_we_vote_id)
-    return issue_we_vote_ids
-
-
-def retrieve_issues_linked_to_organization(organization_we_vote_id):
-    issue_we_vote_ids_linked = retrieve_issue_we_vote_ids_linked_to_organization(organization_we_vote_id)
     issue_list_manager = IssueListManager()
     sort_formula = None
-    issue_we_vote_id_list_to_exclude = None
+    empty_issue_we_vote_id_list_to_exclude = None
     require_filter_or_exclude = True
-    issues_linked_result = issue_list_manager.retrieve_issues(sort_formula, issue_we_vote_ids_linked,
-                                                     issue_we_vote_id_list_to_exclude, require_filter_or_exclude)
+    issues_linked_result = issue_list_manager.retrieve_issues(
+        sort_formula, issue_we_vote_ids_linked, empty_issue_we_vote_id_list_to_exclude, require_filter_or_exclude)
 
     issues_linked = []
     if issues_linked_result['issue_list_found']:
@@ -485,4 +472,33 @@ def retrieve_issues_linked_to_organization(organization_we_vote_id):
             issues_linked.append(one_issue)
 
     issues_linked_result['issue_list'] = issues_linked
+    return issues_linked_result
+
+
+def retrieve_issues_not_linked_to_organization_for_api(organization_we_vote_id):
+    organization_link_to_issue_list = OrganizationLinkToIssueList()
+    issue_we_vote_ids_linked = organization_link_to_issue_list. \
+        fetch_issue_we_vote_id_list_by_organization_we_vote_id(organization_we_vote_id)
+
+    issue_list_manager = IssueListManager()
+    sort_formula = None
+    empty_issue_we_vote_id_list_to_filter = None
+    require_filter_or_exclude = True
+    issues_linked_result = issue_list_manager.retrieve_issues(
+        sort_formula, empty_issue_we_vote_id_list_to_filter, issue_we_vote_ids_linked, require_filter_or_exclude)
+
+    issues_not_linked = []
+    if issues_linked_result['issue_list_found']:
+        for issue in issues_linked_result['issue_list']:
+            one_issue = {
+                'issue_we_vote_id':         issue.we_vote_id,
+                'issue_name':               issue.issue_name,
+                'issue_description':        issue.issue_description,
+                'issue_photo_url_large':    issue.we_vote_hosted_image_url_large,
+                'issue_photo_url_medium':   issue.we_vote_hosted_image_url_medium,
+                'issue_photo_url_tiny':     issue.we_vote_hosted_image_url_tiny,
+            }
+            issues_not_linked.append(one_issue)
+
+    issues_linked_result['issue_list'] = issues_not_linked
     return issues_linked_result
