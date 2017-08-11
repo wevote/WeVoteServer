@@ -14,6 +14,19 @@
 <br />
 <a href="{% url 'image:cache_images_locally_for_all_voters' %}">Cache images locally for all voters</a>
 
+<form name="voter_search_form" method="get" action="{% url 'voter:voter_list' %}">
+    {% csrf_token %}
+
+
+{% if voter_search or issues_selected %}
+    <a href="{% url 'voter:voter_list' %}">
+         clear search</a>&nbsp;
+{% endif %}
+    <input type="text" name="voter_search" id="voter_search_id" value="{{ voter_search }}" />
+    <input type="submit" value="Search for Voter" />
+</form>
+
+
 {% if voter_list %}
     <table border="1" cellpadding="10">
         <tr>
