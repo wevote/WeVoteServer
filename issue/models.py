@@ -548,24 +548,25 @@ class OrganizationLinkToIssueManager(models.Model):
     def __unicode__(self):
         return "OrganizationLinkToIssueManager"
 
-    # TODO: reason needs to be modified when used by WebApp
-    def link_organization_to_issue(self, organization_we_vote_id, issue_id, issue_we_vote_id):
+    def link_organization_to_issue(self, organization_we_vote_id, issue_id, issue_we_vote_id, reason_for_link=None):
         link_active = True
         link_blocked = False
+        if reason_for_link is None:
+            reason_for_link = LINKED_BY_WE_VOTE
         reason_for_block = None
         return self.toggle_issue_link(organization_we_vote_id, issue_id, issue_we_vote_id, link_active, link_blocked,
-                                      LINKED_BY_WE_VOTE, reason_for_block)
+                                      reason_for_link, reason_for_block)
 
-    def unlink_organization_to_issue(self, organization_we_vote_id, issue_id, issue_we_vote_id):
+    def unlink_organization_to_issue(self, organization_we_vote_id, issue_id, issue_we_vote_id, reason_for_unlink=None):
         link_active = False
         link_blocked = False
-        reason = NO_REASON
+        reason_for_link = NO_REASON
         reason_for_block = None
         return self.toggle_issue_link(organization_we_vote_id, issue_id, issue_we_vote_id, link_active, link_blocked,
-                                      reason, reason_for_block)
+                                      reason_for_link, reason_for_block)
 
     def toggle_issue_link(self, organization_we_vote_id, issue_id, issue_we_vote_id, link_active, link_blocked,
-                          reason=None, reason_for_block=None):
+                          reason_for_link=None, reason_for_block=None):
 
         link_issue_on_stage_found = False
         link_issue_on_stage_we_vote_id = 0
@@ -577,12 +578,12 @@ class OrganizationLinkToIssueManager(models.Model):
                 'success': True if link_issue_on_stage_found else False,
                 'status': 'Insufficient inputs to toggle issue link, try passing ids for organization and issue ',
                 'link_issue_found': link_issue_on_stage_found,
-                'link_issue_id': link_issue_on_stage_we_vote_id,
+                'issue_we_vote_id': link_issue_on_stage_we_vote_id,
                 'link_issue': link_issue_on_stage,
             }
             return results
 
-        # Does a link_issue entry exist from this voter already exist?
+        # Does a link_issue entry exist from this organization already?
         link_issue_id = 0
         results = self.retrieve_issue_link(link_issue_id, organization_we_vote_id, issue_id, issue_we_vote_id)
 
@@ -601,8 +602,8 @@ class OrganizationLinkToIssueManager(models.Model):
                 #         follow_issue_on_stage.link_active = link_active
                 # else:
                 link_issue_on_stage.link_active = link_active
-                if positive_value_exists(reason) and link_active:
-                    link_issue_on_stage.reason_for_link = reason
+                if positive_value_exists(reason_for_link) and link_active:
+                    link_issue_on_stage.reason_for_link = reason_for_link
                 elif positive_value_exists(reason_for_block) and not link_active:
                     link_issue_on_stage.reason_link_is_blocked = reason_for_block
                 link_issue_on_stage.auto_linked_from_twitter_suggestion = False
@@ -629,13 +630,13 @@ class OrganizationLinkToIssueManager(models.Model):
                     results = issue_manager.retrieve_issue(0, issue_we_vote_id)
                 if results['issue_found']:
                     issue = results['issue']
-                    if positive_value_exists(organization_we_vote_id) and positive_value_exists(reason):
+                    if positive_value_exists(organization_we_vote_id) and positive_value_exists(reason_for_link):
                         link_issue_on_stage = OrganizationLinkToIssue(
                             organization_we_vote_id=organization_we_vote_id,
                             issue_id=issue.id,
                             issue_we_vote_id=issue.we_vote_id,
                             link_active=link_active,
-                            reason_for_link=reason,
+                            reason_for_link=reason_for_link,
                         )
                     elif positive_value_exists(organization_we_vote_id) and positive_value_exists(reason_for_block):
                         link_issue_on_stage = OrganizationLinkToIssue(
@@ -663,7 +664,7 @@ class OrganizationLinkToIssueManager(models.Model):
             'success': True if link_issue_on_stage_found else False,
             'status': status,
             'link_issue_found': link_issue_on_stage_found,
-            'link_issue_id': link_issue_on_stage_we_vote_id,
+            'issue_we_vote_id': link_issue_on_stage_we_vote_id,
             'link_issue': link_issue_on_stage,
         }
         return results
