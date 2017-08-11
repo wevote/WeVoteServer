@@ -632,6 +632,16 @@
         <td></td>
         <td>Retrieves list of issues that are linked to the Organization</td>
     </tr>
+    <tr>
+        <td><a href="{% url 'apis_v1:issuesToLinkToForOrganizationDocs' %}">issuesToLinkToForOrganization</a></td>
+        <td></td>
+        <td>Retrieves list of issues that the Organization is not linked to already</td>
+    </tr>
+    <tr>
+        <td><a href="{% url 'apis_v1:organizationLinkToIssueDocs' %}">organizationLinkToIssue</a></td>
+        <td></td>
+        <td>Links or unlinks an Organization to an Issue</td>
+    </tr>
     {###  ###}
     <tr>
         <td colspan="3"><strong>Voter Friends</strong></td>

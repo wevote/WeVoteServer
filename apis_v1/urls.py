@@ -11,12 +11,12 @@ from django.conf.urls import url
 from django.conf.urls.static import static
 
 from apis_v1.views import views_docs, views_ballot, views_candidate, views_donation, views_facebook, views_friend, \
-    views_misc, views_organization, views_position, views_twitter, views_voter
+    views_issues, views_misc, views_organization, views_position, views_twitter, views_voter
 from ballot.views_admin import ballot_items_sync_out_view, ballot_returned_sync_out_view
 from candidate.views_admin import candidates_sync_out_view
 from election.views_admin import elections_sync_out_view
 from issue.views_admin import issues_sync_out_view, issues_retrieve_view, retrieve_issues_to_follow_view, \
-    organization_link_to_issue_sync_out_view, issues_linked_to_organization_view
+    organization_link_to_issue_sync_out_view
 from measure.views_admin import measures_sync_out_view
 from office.views_admin import offices_sync_out_view
 from organization.views_admin import organizations_sync_out_view
@@ -57,8 +57,10 @@ urlpatterns = [
     url(r'^friendInviteResponse/', views_friend.friend_invite_response_view, name='friendInviteResponseView'),
     url(r'^friendList/', views_friend.friend_list_view, name='friendListView'),
     url(r'^issueFollow/', views_voter.voter_issue_follow_view, name='issueFollowView'),
-    url(r'^issuesLinkedToOrganization/', issues_linked_to_organization_view,
+    url(r'^issuesLinkedToOrganization/', views_issues.issues_linked_to_organization_view,
         name='issuesLinkedToOrganizationView'),
+    url(r'^issuesToLinkToForOrganization/', views_issues.issues_to_link_to_for_organization_view,
+        name='issuesToLinkToForOrganizationView'),
     url(r'^issuesRetrieve/', issues_retrieve_view, name='issuesRetrieveView'),
     url(r'^issuesSyncOut/', issues_sync_out_view, name='issuesSyncOutView'),
     url(r'^measureRetrieve/', views_misc.measure_retrieve_view, name='measureRetrieveView'),
@@ -71,6 +73,7 @@ urlpatterns = [
         name='organizationFollowIgnoreView'),
     url(r'^organizationLinkToIssueSyncOut/',
         organization_link_to_issue_sync_out_view, name='organizationLinkToIssueSyncOutView'),
+    url(r'^organizationLinkToIssue/', views_issues.organization_link_to_issue_view, name='organizationLinkToIssueView'),
     url(r'^organizationRetrieve/', views_organization.organization_retrieve_view, name='organizationRetrieveView'),
     url(r'^organizationSave/', views_organization.organization_save_view, name='organizationSaveView'),
     url(r'^organizationSearch/', views_organization.organization_search_view, name='organizationSearchView'),
@@ -224,6 +227,8 @@ urlpatterns = [
     url(r'^docs/issuesSyncOut/$', views_docs.issues_sync_out_doc_view, name='issuesSyncOutDocs'),
     url(r'^docs/issuesLinkedToOrganization/', views_docs.issues_linked_to_organization_doc_view,
         name='issuesLinkedToOrganizationDocs'),
+    url(r'^docs/issuesToLinkToForOrganization/', views_docs.issues_to_link_to_for_organization_doc_view,
+        name='issuesToLinkToForOrganizationDocs'),
     url(r'^docs/measureRetrieve/$', views_docs.measure_retrieve_doc_view, name='measureRetrieveDocs'),
     url(r'^docs/measuresSyncOut/$', views_docs.measures_sync_out_doc_view, name='measuresSyncOutDocs'),
     url(r'^docs/officeRetrieve/$', views_docs.office_retrieve_doc_view, name='officeRetrieveDocs'),
@@ -234,6 +239,8 @@ urlpatterns = [
         views_docs.organization_follow_ignore_doc_view, name='organizationFollowIgnoreDocs'),
     url(r'^docs/organizationLinkToIssueSyncOut/$',
         views_docs.organization_link_to_issue_sync_out_doc_view, name='organizationLinkToIssueSyncOutDocs'),
+    url(r'^docs/organizationLinkToIssue/', views_docs.organization_link_to_issue_doc_view,
+        name='organizationLinkToIssueDocs'),
     url(r'^docs/organizationRetrieve/$', views_docs.organization_retrieve_doc_view, name='organizationRetrieveDocs'),
     url(r'^docs/organizationSave/$', views_docs.organization_save_doc_view, name='organizationSaveDocs'),
     url(r'^docs/organizationSearch/$', views_docs.organization_search_doc_view, name='organizationSearchDocs'),
