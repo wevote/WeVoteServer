@@ -734,19 +734,52 @@ def voter_list_view(request):
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
+    voter_search = request.GET.get('voter_search', '')
     voter_api_device_id = get_voter_api_device_id(request)  # We look in the cookies for voter_api_device_id
     voter_id = fetch_voter_id_from_voter_device_link(voter_api_device_id)
     voter_id = convert_to_int(voter_id)
 
     messages_on_stage = get_messages(request)
-    voter_list = Voter.objects.order_by('-is_admin', '-is_verified_volunteer', 'email', 'twitter_screen_name',
-                                        'linked_organization_we_vote_id', 'facebook_email', 'last_name', 'first_name')
+    if positive_value_exists(voter_search):
+        voter_list = Voter.objects.all()
+        filters = []
+        new_filter = Q(first_name__icontains=voter_search)
+        filters.append(new_filter)
+
+        new_filter = Q(last_name__icontains=voter_search)
+        filters.append(new_filter)
+
+        new_filter = Q(we_vote_id__icontains=voter_search)
+        filters.append(new_filter)
+
+        new_filter = Q(email__icontains=voter_search)
+        filters.append(new_filter)
+
+        new_filter = Q(middle_name__icontains=voter_search)
+        filters.append(new_filter)
+
+        new_filter = Q(twitter_screen_name__icontains=voter_search)
+        filters.append(new_filter)
+
+        # Add the first query
+        if len(filters):
+            final_filters = filters.pop()
+
+            # ...and "OR" the remaining items in the list
+            for item in filters:
+                final_filters |= item
+
+            voter_list = voter_list.filter(final_filters)
+    else:
+        voter_list = Voter.objects.order_by('-is_admin', '-is_verified_volunteer', 'email', 'twitter_screen_name',
+                                            'linked_organization_we_vote_id', 'facebook_email', 'last_name', 'first_name')
     voter_list = voter_list[:200]
 
     template_values = {
         'messages_on_stage': messages_on_stage,
         'voter_list': voter_list,
         'voter_id_signed_in': voter_id,
+        'voter_search': voter_search,
     }
     return render(request, 'voter/voter_list.html', template_values)
 
