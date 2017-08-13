@@ -1,0 +1,11 @@
+{# templates/import_export_batches/batch_import_keys_dropdown.html #}
+<select id="{{ select_name }}" name="{{ select_name }}" class="form-control">
+    <option value="" {% if "" == batch_header_map_row %} selected="selected"{% endif %}>
+        -- We Vote Header Options --</option>
+    {% for batch_import_key, batch_import_description in batch_import_keys_accepted %}
+        <option value="{{ batch_import_key }}"
+                {% if batch_import_key|lower == batch_header_map_row|lower %} selected="selected"{% endif %}
+        >
+            {{ batch_import_description }}</option>
+    {% endfor %}
+</select>

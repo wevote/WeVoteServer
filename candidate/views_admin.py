@@ -159,7 +159,6 @@ def candidate_list_view(request):
     state_list = STATE_CODE_MAP
     sorted_state_list = sorted(state_list.items())
 
-
     candidate_list = []
     candidate_list_count = 0
 

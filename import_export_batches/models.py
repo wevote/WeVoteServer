@@ -38,8 +38,10 @@ KIND_OF_BATCH_CHOICES = (
 
 TO_BE_DETERMINED = 'TBD'
 DO_NOT_PROCESS = 'DO_NOT_PROCESS'
+CLEAN_DATA_MANUALLY = 'CLEAN_DATA_MANUALLY'
 CREATE = 'CREATE'
 ADD_TO_EXISTING = 'ADD_TO_EXISTING'
+QUERY_ERROR = 'QUERY_ERROR'
 
 KIND_OF_ACTION_CHOICES = (
     (TO_BE_DETERMINED,  'TBD'),
@@ -49,6 +51,24 @@ KIND_OF_ACTION_CHOICES = (
 )
 
 BATCH_SET_SOURCE_CTCL = 'CTCL'
+
+BATCH_IMPORT_KEYS_ACCEPTED_FOR_ORGANIZATIONS = {
+    'organization_address': 'organization_address',
+    'organization_city': 'organization_city',
+    'organization_contact_name': 'organization_contact_name',
+    'organization_facebook': 'organization_facebook',
+    'organization_instagram': 'organization_instagram',
+    'organization_name': 'organization_name',
+    'organization_phone1': 'organization_phone1',
+    'organization_phone2': 'organization_phone2',
+    'organization_state': 'organization_state',
+    'organization_twitter_handle': 'organization_twitter_handle',
+    'organization_website': 'organization_website',
+    'organization_we_vote_id': 'organization_we_vote_id',
+    'organization_zip': 'organization_zip',
+    'organization_type': 'organization_type',
+    'state_served_code': 'state_served_code',
+}
 
 logger = wevote_functions.admin.get_logger(__name__)
 
@@ -60,12 +80,58 @@ def get_value_if_index_in_list(incoming_list, index):
         return ""
 
 
+def get_header_map_value_if_index_in_list(incoming_list, index, kind_of_batch=""):
+    try:
+        # The header_value is a value like "Organization Name" or "Street Address"
+        original_header_value = incoming_list[index]
+        original_header_value_str = str(original_header_value)
+        original_header_value_str = original_header_value_str.lower()
+
+        # We want to check to see if there is a suggested We Vote header for this value
+        batch_manager = BatchManager()
+        header_value_recognized_by_we_vote = batch_manager.fetch_batch_header_translation_suggestion(
+            kind_of_batch, original_header_value_str)
+
+        if positive_value_exists(header_value_recognized_by_we_vote):
+            return header_value_recognized_by_we_vote
+        else:
+            return original_header_value_str
+    except IndexError:
+        return ""
+
+
 class BatchManager(models.Model):
 
     def __unicode__(self):
         return "BatchManager"
 
-    def create_batch(self, batch_uri, kind_of_batch, google_civic_election_id, organization_we_vote_id):
+        pass
+
+    def create_batch_from_uri(self, batch_uri, kind_of_batch, google_civic_election_id, organization_we_vote_id):
+        # Retrieve the CSV
+        response = urllib.request.urlopen(batch_uri)
+        csv_data = csv.reader(codecs.iterdecode(response, 'utf-8'))
+        return self.create_batch_from_csv_data(
+            csv_data, kind_of_batch, google_civic_election_id, organization_we_vote_id)
+
+    def create_batch_from_local_file_upload(
+            self, batch_file, kind_of_batch, google_civic_election_id, organization_we_vote_id):
+        if batch_file.content_type == 'text/csv':
+            csv_data = csv.reader(codecs.iterdecode(batch_file, 'utf-8'), delimiter=',')
+            return self.create_batch_from_csv_data(
+                csv_data, kind_of_batch, google_civic_election_id, organization_we_vote_id)
+
+        status = "CREATE_BATCH_FILETYPE_NOT_RECOGNIZED"
+        results = {
+            'success': False,
+            'status': status,
+            'batch_header_id': 0,
+            'batch_saved': False,
+            'number_of_batch_rows': 0,
+        }
+        return results
+
+    def create_batch_from_csv_data(self, csv_data, kind_of_batch, google_civic_election_id, organization_we_vote_id):
         first_line = True
         success = False
         status = ""
@@ -81,9 +147,6 @@ class BatchManager(models.Model):
         # structured_json = json.loads(incoming_data)
         # for one_entry in structured_json:
 
-        # Retrieve the CSV
-        response = urllib.request.urlopen(batch_uri)
-        csv_data = csv.reader(codecs.iterdecode(response, 'utf-8'))
         batch_header_id = 0
         batch_header_map_id = 0
         for line in csv_data:
@@ -100,7 +163,7 @@ class BatchManager(models.Model):
                         batch_header_column_006=get_value_if_index_in_list(line, 6),
                         batch_header_column_007=get_value_if_index_in_list(line, 7),
                         batch_header_column_008=get_value_if_index_in_list(line, 8),
-                        batch_header_column_009=get_value_if_index_in_list(line, 8),
+                        batch_header_column_009=get_value_if_index_in_list(line, 9),
                         batch_header_column_010=get_value_if_index_in_list(line, 10),
                         batch_header_column_011=get_value_if_index_in_list(line, 11),
                         batch_header_column_012=get_value_if_index_in_list(line, 12),
@@ -147,59 +210,61 @@ class BatchManager(models.Model):
 
                     if positive_value_exists(batch_header_id):
                         # Save an initial BatchHeaderMap
+
+                        # For each line, check for translation suggestions
                         batch_header_map = BatchHeaderMap.objects.create(
                             batch_header_id=batch_header_id,
-                            batch_header_map_000=get_value_if_index_in_list(line, 0),
-                            batch_header_map_001=get_value_if_index_in_list(line, 1),
-                            batch_header_map_002=get_value_if_index_in_list(line, 2),
-                            batch_header_map_003=get_value_if_index_in_list(line, 3),
-                            batch_header_map_004=get_value_if_index_in_list(line, 4),
-                            batch_header_map_005=get_value_if_index_in_list(line, 5),
-                            batch_header_map_006=get_value_if_index_in_list(line, 6),
-                            batch_header_map_007=get_value_if_index_in_list(line, 7),
-                            batch_header_map_008=get_value_if_index_in_list(line, 8),
-                            batch_header_map_009=get_value_if_index_in_list(line, 8),
-                            batch_header_map_010=get_value_if_index_in_list(line, 10),
-                            batch_header_map_011=get_value_if_index_in_list(line, 11),
-                            batch_header_map_012=get_value_if_index_in_list(line, 12),
-                            batch_header_map_013=get_value_if_index_in_list(line, 13),
-                            batch_header_map_014=get_value_if_index_in_list(line, 14),
-                            batch_header_map_015=get_value_if_index_in_list(line, 15),
-                            batch_header_map_016=get_value_if_index_in_list(line, 16),
-                            batch_header_map_017=get_value_if_index_in_list(line, 17),
-                            batch_header_map_018=get_value_if_index_in_list(line, 18),
-                            batch_header_map_019=get_value_if_index_in_list(line, 19),
-                            batch_header_map_020=get_value_if_index_in_list(line, 20),
-                            batch_header_map_021=get_value_if_index_in_list(line, 21),
-                            batch_header_map_022=get_value_if_index_in_list(line, 22),
-                            batch_header_map_023=get_value_if_index_in_list(line, 23),
-                            batch_header_map_024=get_value_if_index_in_list(line, 24),
-                            batch_header_map_025=get_value_if_index_in_list(line, 25),
-                            batch_header_map_026=get_value_if_index_in_list(line, 26),
-                            batch_header_map_027=get_value_if_index_in_list(line, 27),
-                            batch_header_map_028=get_value_if_index_in_list(line, 28),
-                            batch_header_map_029=get_value_if_index_in_list(line, 29),
-                            batch_header_map_030=get_value_if_index_in_list(line, 30),
-                            batch_header_map_031=get_value_if_index_in_list(line, 31),
-                            batch_header_map_032=get_value_if_index_in_list(line, 32),
-                            batch_header_map_033=get_value_if_index_in_list(line, 33),
-                            batch_header_map_034=get_value_if_index_in_list(line, 34),
-                            batch_header_map_035=get_value_if_index_in_list(line, 35),
-                            batch_header_map_036=get_value_if_index_in_list(line, 36),
-                            batch_header_map_037=get_value_if_index_in_list(line, 37),
-                            batch_header_map_038=get_value_if_index_in_list(line, 38),
-                            batch_header_map_039=get_value_if_index_in_list(line, 39),
-                            batch_header_map_040=get_value_if_index_in_list(line, 40),
-                            batch_header_map_041=get_value_if_index_in_list(line, 41),
-                            batch_header_map_042=get_value_if_index_in_list(line, 42),
-                            batch_header_map_043=get_value_if_index_in_list(line, 43),
-                            batch_header_map_044=get_value_if_index_in_list(line, 44),
-                            batch_header_map_045=get_value_if_index_in_list(line, 45),
-                            batch_header_map_046=get_value_if_index_in_list(line, 46),
-                            batch_header_map_047=get_value_if_index_in_list(line, 47),
-                            batch_header_map_048=get_value_if_index_in_list(line, 48),
-                            batch_header_map_049=get_value_if_index_in_list(line, 49),
-                            batch_header_map_050=get_value_if_index_in_list(line, 50),
+                            batch_header_map_000=get_header_map_value_if_index_in_list(line, 0, kind_of_batch),
+                            batch_header_map_001=get_header_map_value_if_index_in_list(line, 1, kind_of_batch),
+                            batch_header_map_002=get_header_map_value_if_index_in_list(line, 2, kind_of_batch),
+                            batch_header_map_003=get_header_map_value_if_index_in_list(line, 3, kind_of_batch),
+                            batch_header_map_004=get_header_map_value_if_index_in_list(line, 4, kind_of_batch),
+                            batch_header_map_005=get_header_map_value_if_index_in_list(line, 5, kind_of_batch),
+                            batch_header_map_006=get_header_map_value_if_index_in_list(line, 6, kind_of_batch),
+                            batch_header_map_007=get_header_map_value_if_index_in_list(line, 7, kind_of_batch),
+                            batch_header_map_008=get_header_map_value_if_index_in_list(line, 8, kind_of_batch),
+                            batch_header_map_009=get_header_map_value_if_index_in_list(line, 9, kind_of_batch),
+                            batch_header_map_010=get_header_map_value_if_index_in_list(line, 10, kind_of_batch),
+                            batch_header_map_011=get_header_map_value_if_index_in_list(line, 11, kind_of_batch),
+                            batch_header_map_012=get_header_map_value_if_index_in_list(line, 12, kind_of_batch),
+                            batch_header_map_013=get_header_map_value_if_index_in_list(line, 13, kind_of_batch),
+                            batch_header_map_014=get_header_map_value_if_index_in_list(line, 14, kind_of_batch),
+                            batch_header_map_015=get_header_map_value_if_index_in_list(line, 15, kind_of_batch),
+                            batch_header_map_016=get_header_map_value_if_index_in_list(line, 16, kind_of_batch),
+                            batch_header_map_017=get_header_map_value_if_index_in_list(line, 17, kind_of_batch),
+                            batch_header_map_018=get_header_map_value_if_index_in_list(line, 18, kind_of_batch),
+                            batch_header_map_019=get_header_map_value_if_index_in_list(line, 19, kind_of_batch),
+                            batch_header_map_020=get_header_map_value_if_index_in_list(line, 20, kind_of_batch),
+                            batch_header_map_021=get_header_map_value_if_index_in_list(line, 21, kind_of_batch),
+                            batch_header_map_022=get_header_map_value_if_index_in_list(line, 22, kind_of_batch),
+                            batch_header_map_023=get_header_map_value_if_index_in_list(line, 23, kind_of_batch),
+                            batch_header_map_024=get_header_map_value_if_index_in_list(line, 24, kind_of_batch),
+                            batch_header_map_025=get_header_map_value_if_index_in_list(line, 25, kind_of_batch),
+                            batch_header_map_026=get_header_map_value_if_index_in_list(line, 26, kind_of_batch),
+                            batch_header_map_027=get_header_map_value_if_index_in_list(line, 27, kind_of_batch),
+                            batch_header_map_028=get_header_map_value_if_index_in_list(line, 28, kind_of_batch),
+                            batch_header_map_029=get_header_map_value_if_index_in_list(line, 29, kind_of_batch),
+                            batch_header_map_030=get_header_map_value_if_index_in_list(line, 30, kind_of_batch),
+                            batch_header_map_031=get_header_map_value_if_index_in_list(line, 31, kind_of_batch),
+                            batch_header_map_032=get_header_map_value_if_index_in_list(line, 32, kind_of_batch),
+                            batch_header_map_033=get_header_map_value_if_index_in_list(line, 33, kind_of_batch),
+                            batch_header_map_034=get_header_map_value_if_index_in_list(line, 34, kind_of_batch),
+                            batch_header_map_035=get_header_map_value_if_index_in_list(line, 35, kind_of_batch),
+                            batch_header_map_036=get_header_map_value_if_index_in_list(line, 36, kind_of_batch),
+                            batch_header_map_037=get_header_map_value_if_index_in_list(line, 37, kind_of_batch),
+                            batch_header_map_038=get_header_map_value_if_index_in_list(line, 38, kind_of_batch),
+                            batch_header_map_039=get_header_map_value_if_index_in_list(line, 39, kind_of_batch),
+                            batch_header_map_040=get_header_map_value_if_index_in_list(line, 40, kind_of_batch),
+                            batch_header_map_041=get_header_map_value_if_index_in_list(line, 41, kind_of_batch),
+                            batch_header_map_042=get_header_map_value_if_index_in_list(line, 42, kind_of_batch),
+                            batch_header_map_043=get_header_map_value_if_index_in_list(line, 43, kind_of_batch),
+                            batch_header_map_044=get_header_map_value_if_index_in_list(line, 44, kind_of_batch),
+                            batch_header_map_045=get_header_map_value_if_index_in_list(line, 45, kind_of_batch),
+                            batch_header_map_046=get_header_map_value_if_index_in_list(line, 46, kind_of_batch),
+                            batch_header_map_047=get_header_map_value_if_index_in_list(line, 47, kind_of_batch),
+                            batch_header_map_048=get_header_map_value_if_index_in_list(line, 48, kind_of_batch),
+                            batch_header_map_049=get_header_map_value_if_index_in_list(line, 49, kind_of_batch),
+                            batch_header_map_050=get_header_map_value_if_index_in_list(line, 50, kind_of_batch),
                         )
                         batch_header_map_id = batch_header_map.id
                         status += " BATCH_HEADER_MAP_SAVED"
@@ -216,7 +281,7 @@ class BatchManager(models.Model):
                             google_civic_election_id=google_civic_election_id,
                             kind_of_batch=kind_of_batch,
                             organization_we_vote_id=organization_we_vote_id,
-                            source_uri=batch_uri,
+                            # source_uri=batch_uri,
                             )
                         status += " BATCH_DESCRIPTION_SAVED"
                         success = True
@@ -242,7 +307,7 @@ class BatchManager(models.Model):
                             batch_row_006=get_value_if_index_in_list(line, 6),
                             batch_row_007=get_value_if_index_in_list(line, 7),
                             batch_row_008=get_value_if_index_in_list(line, 8),
-                            batch_row_009=get_value_if_index_in_list(line, 8),
+                            batch_row_009=get_value_if_index_in_list(line, 9),
                             batch_row_010=get_value_if_index_in_list(line, 10),
                             batch_row_011=get_value_if_index_in_list(line, 11),
                             batch_row_012=get_value_if_index_in_list(line, 12),
@@ -297,6 +362,159 @@ class BatchManager(models.Model):
             'batch_header_id':      batch_header_id,
             'batch_saved':          success,
             'number_of_batch_rows': number_of_batch_rows,
+        }
+        return results
+
+    def create_batch_header_translation_suggestion(
+            self, kind_of_batch, header_value_recognized_by_we_vote, incoming_alternate_header_value):
+        """
+
+        :param kind_of_batch:
+        :param header_value_recognized_by_we_vote:
+        :param incoming_alternate_header_value:
+        :return:
+        """
+        success = False
+        status = ""
+
+        if not positive_value_exists(kind_of_batch) or not positive_value_exists(header_value_recognized_by_we_vote) \
+                or not positive_value_exists(incoming_alternate_header_value):
+            status += "CREATE_BATCH_HEADER_TRANSLATION_SUGGESTION-MISSING_REQUIRED_VARIABLE "
+            results = {
+                'success': success,
+                'status': status,
+            }
+            return results
+
+        try:
+            header_value_recognized_by_we_vote = header_value_recognized_by_we_vote.lower()
+            incoming_alternate_header_value = incoming_alternate_header_value.lower()
+            batch_header_translation_suggestion, created = BatchHeaderTranslationSuggestion.objects.update_or_create(
+                kind_of_batch=kind_of_batch,
+                header_value_recognized_by_we_vote=header_value_recognized_by_we_vote,
+                incoming_alternate_header_value=incoming_alternate_header_value)
+            success = True
+            status += "BATCH_HEADER_TRANSLATION_SUGGESTION_SAVED "
+        except Exception as e:
+            success = False
+            status += "BATCH_HEADER_TRANSLATION_SUGGESTION_SAVE_FAILED "
+
+        results = {
+            'success': success,
+            'status': status,
+        }
+        return results
+
+    def retrieve_batch_header_translation_suggestion(self, kind_of_batch, incoming_alternate_header_value):
+        """
+        We are looking at one header value from a file imported by an admin or volunteer. We want to see if
+        there are any suggestions for headers already recognized by We Vote. Ex/ "Organization" -> "organization_name"
+        :param kind_of_batch:
+        :param incoming_alternate_header_value:
+        :return:
+        """
+        success = False
+        status = ""
+        batch_header_translation_suggestion_found = False
+
+        if not positive_value_exists(kind_of_batch) or not positive_value_exists(incoming_alternate_header_value):
+            status += "RETRIEVE_BATCH_HEADER_TRANSLATION_SUGGESTION-MISSING_REQUIRED_VARIABLE "
+            results = {
+                'success':                                      success,
+                'status':                                       status,
+                'batch_header_translation_suggestion':          BatchHeaderTranslationSuggestion(),
+                'batch_header_translation_suggestion_found':    batch_header_translation_suggestion_found,
+            }
+            return results
+
+        try:
+            # Note that we don't care about case sensitivity when we search for the alternate value
+            batch_header_translation_suggestion = BatchHeaderTranslationSuggestion.objects.get(
+                kind_of_batch=kind_of_batch,
+                incoming_alternate_header_value__iexact=incoming_alternate_header_value)
+            batch_header_translation_suggestion_found = True
+            success = True
+            status += "BATCH_HEADER_TRANSLATION_SUGGESTION_SAVED "
+        except Exception as e:
+            batch_header_translation_suggestion = BatchHeaderTranslationSuggestion()
+            success = False
+            status += "BATCH_HEADER_TRANSLATION_SUGGESTION_SAVE_FAILED "
+
+        results = {
+            'success':                                      success,
+            'status':                                       status,
+            'batch_header_translation_suggestion':          batch_header_translation_suggestion,
+            'batch_header_translation_suggestion_found':    batch_header_translation_suggestion_found,
+        }
+        return results
+
+    def create_batch_row_translation_map(  # TODO This hasn't been built
+            self, kind_of_batch, header_value_recognized_by_we_vote, incoming_alternate_header_value):
+        success = False
+        status = ""
+
+        if not positive_value_exists(kind_of_batch) or not positive_value_exists(header_value_recognized_by_we_vote) \
+                or not positive_value_exists(incoming_alternate_header_value):
+            status += "CREATE_BATCH_HEADER_TRANSLATION_SUGGESTION-MISSING_REQUIRED_VARIABLE "
+            results = {
+                'success': success,
+                'status': status,
+            }
+            return results
+
+        try:
+            header_value_recognized_by_we_vote = header_value_recognized_by_we_vote.lower()
+            incoming_alternate_header_value = incoming_alternate_header_value.lower()
+            batch_header_translation_suggestion, created = BatchHeaderTranslationSuggestion.objects.update_or_create(
+                kind_of_batch=kind_of_batch,
+                header_value_recognized_by_we_vote=header_value_recognized_by_we_vote,
+                incoming_alternate_header_value=incoming_alternate_header_value)
+            success = True
+            status += "BATCH_HEADER_TRANSLATION_SUGGESTION_SAVED "
+        except Exception as e:
+            success = False
+            status += "BATCH_HEADER_TRANSLATION_SUGGESTION_SAVE_FAILED "
+
+        results = {
+            'success': success,
+            'status': status,
+        }
+        return results
+
+    def retrieve_batch_row_translation_map(self, kind_of_batch, incoming_alternate_header_value):
+        # TODO This hasn't been built yet
+        success = False
+        status = ""
+        batch_header_translation_suggestion_found = False
+
+        if not positive_value_exists(kind_of_batch) or not positive_value_exists(incoming_alternate_header_value):
+            status += "RETRIEVE_BATCH_HEADER_TRANSLATION_SUGGESTION-MISSING_REQUIRED_VARIABLE "
+            results = {
+                'success':                                      success,
+                'status':                                       status,
+                'batch_header_translation_suggestion':          BatchHeaderTranslationSuggestion(),
+                'batch_header_translation_suggestion_found':    batch_header_translation_suggestion_found,
+            }
+            return results
+
+        try:
+            # Note that we don't care about case sensitivity when we search for the alternate value
+            batch_header_translation_suggestion = BatchHeaderTranslationSuggestion.objects.get(
+                kind_of_batch=kind_of_batch,
+                incoming_alternate_header_value__iexact=incoming_alternate_header_value)
+            batch_header_translation_suggestion_found = True
+            success = True
+            status += "BATCH_HEADER_TRANSLATION_SUGGESTION_SAVED "
+        except Exception as e:
+            batch_header_translation_suggestion = BatchHeaderTranslationSuggestion()
+            success = False
+            status += "BATCH_HEADER_TRANSLATION_SUGGESTION_SAVE_FAILED "
+
+        results = {
+            'success':                                      success,
+            'status':                                       status,
+            'batch_header_translation_suggestion':          batch_header_translation_suggestion,
+            'batch_header_translation_suggestion_found':    batch_header_translation_suggestion_found,
         }
         return results
 
@@ -1999,6 +2217,7 @@ class BatchManager(models.Model):
         :param header_id: 
         :return: 
         """
+        number_of_batch_action_rows = 0
         if positive_value_exists(header_id):
             if kind_of_batch == MEASURE:
                 number_of_batch_action_rows = BatchRowActionMeasure.objects.filter(batch_header_id=header_id).count()
@@ -2016,11 +2235,33 @@ class BatchManager(models.Model):
                 number_of_batch_action_rows = 0
         return number_of_batch_action_rows
 
+    def fetch_batch_header_translation_suggestion(self, kind_of_batch, alternate_header_value):
+        """
+        We are looking at one header value from a file imported by an admin or volunteer. We want to see if
+        there are any suggestions for headers already recognized by We Vote.
+        :param kind_of_batch:
+        :param alternate_header_value:
+        :return:
+        """
+        results = self.retrieve_batch_header_translation_suggestion(kind_of_batch, alternate_header_value)
+        if results['batch_header_translation_suggestion_found']:
+            batch_header_translation_suggestion = results['batch_header_translation_suggestion']
+            return batch_header_translation_suggestion.header_value_recognized_by_we_vote
+        return ""
+
+    def fetch_batch_row_translation_map(self, kind_of_batch, alternate_header_value):  # TODO This hasn't been built
+        results = self.retrieve_batch_row_translation_map(kind_of_batch, alternate_header_value)
+        if results['batch_header_translation_suggestion_found']:
+            batch_header_translation_suggestion = results['batch_header_translation_suggestion']
+            return batch_header_translation_suggestion.header_value_recognized_by_we_vote
+        return ""
+
     def fetch_elected_office_name_from_elected_office_ctcl_id(self, elected_office_ctcl_id, batch_set_id):
         """
-        Take in elected_office_ctcl_id, look up BatchRow and return elected_office_name
+        Take in elected_office_ctcl_id and batch_set_id, look up BatchRow and return elected_office_name
         :param elected_office_ctcl_id: 
-        :return: 
+        :param batch_set_id:
+        :return:
         """
         elected_office_name = ''
         batch_header_id = 0
@@ -2803,6 +3044,10 @@ class BatchRowActionOrganization(models.Model):
                                                        blank=True, null=True)
     twitter_description = models.CharField(verbose_name="Text description of this organization from twitter.",
                                            max_length=255, null=True, blank=True)
+
+    # Instagram
+    organization_instagram_handle = models.CharField(
+        verbose_name='organization instagram screen_name', max_length=255, null=True, unique=False)
 
     wikipedia_page_id = models.BigIntegerField(verbose_name="pageid", null=True, blank=True)
     wikipedia_page_title = models.CharField(
