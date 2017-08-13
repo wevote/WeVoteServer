@@ -113,7 +113,7 @@
             {% if batch_header_map.batch_header_map_011 %}<td>{{ one_batch_row.batch_row_011 }}</td>{% endif %}
             {% if batch_header_map.batch_header_map_012 %}<td>{{ one_batch_row.batch_row_012 }}</td>{% endif %}
             {% if batch_header_map.batch_header_map_013 %}<td>{{ one_batch_row.batch_row_013 }}</td>{% endif %}
-            <td>    <a href="{% url 'import_export_batches:batch_action_list_process' %}?batch_header_id={{ batch_header_id }}&batch_row_id={{ one_batch_row.id }}">
+            <td>    <a href="{% url 'import_export_batches:batch_action_list_analyze_process' %}?batch_header_id={{ batch_header_id }}&batch_row_id={{ one_batch_row.id }}">
                 Analyze</a>
             </td>
         </tr>

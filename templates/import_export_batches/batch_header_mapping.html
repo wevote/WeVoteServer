@@ -1,0 +1,302 @@
+{# templates/import_export_batches/batch_header_mapping.html #}
+{% extends "template_base.html" %}
+
+{% block title %}List of Batches{% endblock %}
+
+{% block content %}
+{% load template_filters %}
+{% if batch_set_id %}
+    <p><a href="{% url 'import_export_batches:batch_set_batch_list' %}?batch_set_id={{ batch_set_id }}&google_civic_election_id={{ google_civic_election_id }}">
+            Back to Batch Set</a></p>
+{% else %}
+<p><a href="{% url 'import_export_batches:batch_list' %}?kind_of_batch={{ kind_of_batch }}&google_civic_election_id={{ google_civic_election_id }}">< Back to Batch List</a></p>
+{% endif %}
+
+<h1>
+{% if kind_of_batch == "MEASURE" %}
+    Measure Header Mapping
+{% elif kind_of_batch == "ELECTED_OFFICE" %}
+    Elected Office Header Mapping
+{% elif kind_of_batch == "CONTEST_OFFICE" %}
+    Contest Office Header Mapping
+{% elif kind_of_batch == "CANDIDATE" %}
+    Candidate Header Mapping
+{% elif kind_of_batch == "ORGANIZATION" %}
+    Organization Header Mapping
+{% elif kind_of_batch == "POSITION" %}
+    Position Header Mapping
+{% elif kind_of_batch == "POLITICIAN" %}
+    Politician Header Mapping
+{% else %}
+    Kind of data not recognized: Please STOP
+{% endif %}
+: {{ batch_description.batch_name }}
+</h1>
+<form action="{% url 'import_export_batches:batch_header_mapping_process' %}" method="get" class="form-horizontal">
+    {% csrf_token %}
+    <input type="hidden" name="batch_header_id" value="{{ batch_header_id }}">
+
+    {% if election_list %}
+    <div class="form-group">
+        <label for="google_civic_election_id" class="col-sm-3 control-label">Election</label>
+        <div class="col-sm-8">
+            {% for election in election_list %}
+                {% if election.google_civic_election_id|slugify == batch_description.google_civic_election_id|slugify %}
+                    {{ election.election_name }} - {{ election.google_civic_election_id }} - {{ election.election_day_text }}
+                {% endif %}
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}{# End of if election_list #}
+
+{% if batch_header_map %}
+    <table class="table table-condensed">
+        <tr>
+            <th>Incoming Header</th>
+            <th>We Vote Header</th>
+            <th>Sample 1</th>
+            <th>Sample 2</th>
+            <th>Sample 3</th>
+        </tr>
+        <tr>
+            <td>{{ batch_header.batch_header_column_000 }}</td>
+            <td>
+{% include "import_export_batches/batch_import_keys_dropdown.html" with select_name="batch_header_map_000" batch_header_map_row=batch_header_map.batch_header_map_000 %}
+            </td>
+            {% for one_entry in batch_row_list %}
+            <td>{{ one_entry.batch_row_000 }}</td>
+            {% endfor %}
+        </tr>
+        <tr>
+            <td>{{ batch_header.batch_header_column_001 }}</td>
+            <td>
+{% include "import_export_batches/batch_import_keys_dropdown.html" with select_name="batch_header_map_001" batch_header_map_row=batch_header_map.batch_header_map_001 %}
+            </td>
+            {% for one_entry in batch_row_list %}
+            <td>{{ one_entry.batch_row_001 }}</td>
+            {% endfor %}
+        </tr>
+        <tr>
+            <td>{{ batch_header.batch_header_column_002 }}</td>
+            <td>
+{% include "import_export_batches/batch_import_keys_dropdown.html" with select_name="batch_header_map_002" batch_header_map_row=batch_header_map.batch_header_map_002 %}
+            </td>
+            {% for one_entry in batch_row_list %}
+            <td>{{ one_entry.batch_row_002 }}</td>
+            {% endfor %}
+        </tr>
+        <tr>
+            <td>{{ batch_header.batch_header_column_003 }}</td>
+            <td>
+{% include "import_export_batches/batch_import_keys_dropdown.html" with select_name="batch_header_map_003" batch_header_map_row=batch_header_map.batch_header_map_003 %}
+            </td>
+            {% for one_entry in batch_row_list %}
+            <td>{{ one_entry.batch_row_003 }}</td>
+            {% endfor %}
+        </tr>
+        <tr>
+            <td>{{ batch_header.batch_header_column_004 }}</td>
+            <td>
+{% include "import_export_batches/batch_import_keys_dropdown.html" with select_name="batch_header_map_004" batch_header_map_row=batch_header_map.batch_header_map_004 %}
+            </td>
+            {% for one_entry in batch_row_list %}
+            <td>{{ one_entry.batch_row_004 }}</td>
+            {% endfor %}
+        </tr>
+        <tr>
+            <td>{{ batch_header.batch_header_column_005 }}</td>
+            <td>
+{% include "import_export_batches/batch_import_keys_dropdown.html" with select_name="batch_header_map_005" batch_header_map_row=batch_header_map.batch_header_map_005 %}
+            </td>
+            {% for one_entry in batch_row_list %}
+            <td>{{ one_entry.batch_row_005 }}</td>
+            {% endfor %}
+        </tr>
+        <tr>
+            <td>{{ batch_header.batch_header_column_006 }}</td>
+            <td>
+{% include "import_export_batches/batch_import_keys_dropdown.html" with select_name="batch_header_map_006" batch_header_map_row=batch_header_map.batch_header_map_006 %}
+            </td>
+            {% for one_entry in batch_row_list %}
+            <td>{{ one_entry.batch_row_006 }}</td>
+            {% endfor %}
+        </tr>
+        <tr>
+            <td>{{ batch_header.batch_header_column_007 }}</td>
+            <td>
+{% include "import_export_batches/batch_import_keys_dropdown.html" with select_name="batch_header_map_007" batch_header_map_row=batch_header_map.batch_header_map_007 %}
+            </td>
+            {% for one_entry in batch_row_list %}
+            <td>{{ one_entry.batch_row_007 }}</td>
+            {% endfor %}
+        </tr>
+        <tr>
+            <td>{{ batch_header.batch_header_column_008 }}</td>
+            <td>
+{% include "import_export_batches/batch_import_keys_dropdown.html" with select_name="batch_header_map_008" batch_header_map_row=batch_header_map.batch_header_map_008 %}
+            </td>
+            {% for one_entry in batch_row_list %}
+            <td>{{ one_entry.batch_row_008 }}</td>
+            {% endfor %}
+        </tr>
+        <tr>
+            <td>{{ batch_header.batch_header_column_009 }}</td>
+            <td>
+{% include "import_export_batches/batch_import_keys_dropdown.html" with select_name="batch_header_map_009" batch_header_map_row=batch_header_map.batch_header_map_009 %}
+            </td>
+            {% for one_entry in batch_row_list %}
+            <td>{{ one_entry.batch_row_009 }}</td>
+            {% endfor %}
+        </tr>
+        <tr>
+            <td>{{ batch_header.batch_header_column_010 }}</td>
+            <td>
+{% include "import_export_batches/batch_import_keys_dropdown.html" with select_name="batch_header_map_010" batch_header_map_row=batch_header_map.batch_header_map_010 %}
+            </td>
+            {% for one_entry in batch_row_list %}
+            <td>{{ one_entry.batch_row_010 }}</td>
+            {% endfor %}
+        </tr>
+    {% if batch_header.batch_header_column_011 %}
+        <tr>
+            <td>{{ batch_header.batch_header_column_011 }}</td>
+            <td>
+{% include "import_export_batches/batch_import_keys_dropdown.html" with select_name="batch_header_map_011" batch_header_map_row=batch_header_map.batch_header_map_011 %}
+            </td>
+            {% for one_entry in batch_row_list %}
+            <td>{{ one_entry.batch_row_011 }}</td>
+            {% endfor %}
+        </tr>
+    {% endif %}
+    {% if batch_header.batch_header_column_012 %}
+        <tr>
+            <td>{{ batch_header.batch_header_column_012 }}</td>
+            <td>
+{% include "import_export_batches/batch_import_keys_dropdown.html" with select_name="batch_header_map_012" batch_header_map_row=batch_header_map.batch_header_map_012 %}
+            </td>
+            {% for one_entry in batch_row_list %}
+            <td>{{ one_entry.batch_row_012 }}</td>
+            {% endfor %}
+        </tr>
+    {% endif %}
+    {% if batch_header.batch_header_column_013 %}
+        <tr>
+            <td>{{ batch_header.batch_header_column_013 }}</td>
+            <td>
+{% include "import_export_batches/batch_import_keys_dropdown.html" with select_name="batch_header_map_013" batch_header_map_row=batch_header_map.batch_header_map_013 %}
+            </td>
+            {% for one_entry in batch_row_list %}
+            <td>{{ one_entry.batch_row_013 }}</td>
+            {% endfor %}
+        </tr>
+    {% endif %}
+    {% if batch_header.batch_header_column_014 %}
+        <tr>
+            <td>{{ batch_header.batch_header_column_014 }}</td>
+            <td>
+{% include "import_export_batches/batch_import_keys_dropdown.html" with select_name="batch_header_map_014" batch_header_map_row=batch_header_map.batch_header_map_014 %}
+            </td>
+            {% for one_entry in batch_row_list %}
+            <td>{{ one_entry.batch_row_014 }}</td>
+            {% endfor %}
+        </tr>
+    {% endif %}
+    {% if batch_header.batch_header_column_015 %}
+        <tr>
+            <td>{{ batch_header.batch_header_column_015 }}</td>
+            <td>
+{% include "import_export_batches/batch_import_keys_dropdown.html" with select_name="batch_header_map_015" batch_header_map_row=batch_header_map.batch_header_map_015 %}
+            </td>
+            {% for one_entry in batch_row_list %}
+            <td>{{ one_entry.batch_row_015 }}</td>
+            {% endfor %}
+        </tr>
+    {% endif %}
+    {% if batch_header.batch_header_column_016 %}
+        <tr>
+            <td>{{ batch_header.batch_header_column_016 }}</td>
+            <td>
+{% include "import_export_batches/batch_import_keys_dropdown.html" with select_name="batch_header_map_016" batch_header_map_row=batch_header_map.batch_header_map_016 %}
+            </td>
+            {% for one_entry in batch_row_list %}
+            <td>{{ one_entry.batch_row_016 }}</td>
+            {% endfor %}
+        </tr>
+    {% endif %}
+    {% if batch_header.batch_header_column_017 %}
+        <tr>
+            <td>{{ batch_header.batch_header_column_017 }}</td>
+            <td>
+{% include "import_export_batches/batch_import_keys_dropdown.html" with select_name="batch_header_map_017" batch_header_map_row=batch_header_map.batch_header_map_017 %}
+            </td>
+            {% for one_entry in batch_row_list %}
+            <td>{{ one_entry.batch_row_017 }}</td>
+            {% endfor %}
+        </tr>
+    {% endif %}
+    {% if batch_header.batch_header_column_018 %}
+        <tr>
+            <td>{{ batch_header.batch_header_column_018 }}</td>
+            <td>
+{% include "import_export_batches/batch_import_keys_dropdown.html" with select_name="batch_header_map_018" batch_header_map_row=batch_header_map.batch_header_map_018 %}
+            </td>
+            {% for one_entry in batch_row_list %}
+            <td>{{ one_entry.batch_row_018 }}</td>
+            {% endfor %}
+        </tr>
+    {% endif %}
+    {% if batch_header.batch_header_column_019 %}
+        <tr>
+            <td>{{ batch_header.batch_header_column_019 }}</td>
+            <td>
+{% include "import_export_batches/batch_import_keys_dropdown.html" with select_name="batch_header_map_019" batch_header_map_row=batch_header_map.batch_header_map_019 %}
+            </td>
+            {% for one_entry in batch_row_list %}
+            <td>{{ one_entry.batch_row_019 }}</td>
+            {% endfor %}
+        </tr>
+    {% endif %}
+    {% if batch_header.batch_header_column_020 %}
+        <tr>
+            <td>{{ batch_header.batch_header_column_020 }}</td>
+            <td>
+{% include "import_export_batches/batch_import_keys_dropdown.html" with select_name="batch_header_map_020" batch_header_map_row=batch_header_map.batch_header_map_020 %}
+            </td>
+            {% for one_entry in batch_row_list %}
+            <td>{{ one_entry.batch_row_020 }}</td>
+            {% endfor %}
+        </tr>
+    {% endif %}
+    </table>
+
+    <p></p>
+
+{% else %}
+    <br />
+    <br />
+    <br />
+    <div>
+        <p>(no batch header found)</p>
+    </div>
+{% endif %}
+
+    <div class="form-group">
+        <label for="create_actions_button_id" class="col-sm-3 control-label"></label>
+        <div class="col-sm-8">
+            <a href="{% url 'import_export_batches:batch_action_list' %}?batch_header_id={{ batch_header_id }}&kind_of_batch={{ kind_of_batch }}&google_civic_election_id={{ google_civic_election_id }}">cancel</a>
+            &nbsp;&nbsp;
+            <button type="submit" id="save_header_mapping_button_id" name="save_header_mapping_button" class="btn btn-default" value={{ kind_of_batch }}>Save Mapping</button>
+        </div>
+    </div>
+</form>
+
+
+    <script>
+        $(function() {
+            $('#google_civic_election_id').change(function() {
+                this.form.submit();
+            });
+        });
+    </script>
+
+{% endblock %}

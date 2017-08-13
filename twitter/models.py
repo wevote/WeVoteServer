@@ -240,6 +240,14 @@ class TwitterUserManager(models.Model):
             voter_twitter_id = twitter_link_to_voter.fetch_twitter_id_locally_or_remotely()
         return voter_twitter_id
 
+    def fetch_twitter_id_from_twitter_handle(self, twitter_handle):
+        twitter_user_id = 0
+        results = self.retrieve_twitter_user(twitter_user_id, twitter_handle)
+        if results['twitter_user_found']:
+            twitter_user = results['twitter_user']
+            return twitter_user.twitter_id
+        return 0
+
     def retrieve_twitter_link_to_organization_from_organization_we_vote_id(self, organization_we_vote_id):
         twitter_user_id = 0
         return self.retrieve_twitter_link_to_organization(twitter_user_id, organization_we_vote_id)
@@ -275,7 +283,7 @@ class TwitterUserManager(models.Model):
                 twitter_link_to_organization_found = False
                 success = False
                 status = "RETRIEVE_TWITTER_LINK_TO_ORGANIZATION_VARIABLES_MISSING"
-        except TwitterLinkToVoter.DoesNotExist:
+        except TwitterLinkToOrganization.DoesNotExist:
             twitter_link_to_organization_found = False
             success = True
             status = "RETRIEVE_TWITTER_LINK_TO_ORGANIZATION_NOT_FOUND"

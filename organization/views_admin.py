@@ -131,15 +131,15 @@ def organization_list_view(request):
         organization_list_query = organization_list_query.filter(state_served_code__iexact=organization_state_code)
 
     # Retrieve all issues
-    issue_list = []
     issues_selected = False
-    issue_list_manager = IssueListManager()
-    issue_list_results = issue_list_manager.retrieve_issues()
-    if issue_list_results["issue_list_found"]:
-        issue_list = issue_list_results["issue_list"]
-        if positive_value_exists(selected_issue_vote_id_list):
-            issues_selected = True
-            new_issue_list = []
+    issue_list = []
+    if positive_value_exists(selected_issue_vote_id_list):
+        issues_selected = True
+        new_issue_list = []
+        issue_list_manager = IssueListManager()
+        issue_list_results = issue_list_manager.retrieve_issues()
+        if issue_list_results["issue_list_found"]:
+            issue_list = issue_list_results["issue_list"]
             for issue in issue_list:
                 if issue.we_vote_id in selected_issue_vote_id_list:
                     issue.selected = True
@@ -202,8 +202,9 @@ def organization_list_view(request):
 
             # NOTE this is "exclude"
             organization_list_query = organization_list_query.exclude(final_filters)
-        organization_list_query = organization_list_query[:1000]
 
+    # Limit to only showing 1000 on screen
+    organization_list_query = organization_list_query[:1000]
     organization_list = organization_list_query
 
     state_list = STATE_CODE_MAP

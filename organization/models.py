@@ -62,7 +62,9 @@ class OrganizationManager(models.Manager):
                 organization_name = ""
             if organization_twitter_handle is False or organization_twitter_handle == 'False':
                 organization_twitter_handle = ""
-            # TODO DALE We should stop saving organization_twitter_handle without saving a TwitterLinkToOrganization
+            # External to this function, we should be setting up TwitterLinkToOrganization entry tying the
+            #  organization_twitter_handle to the new organization's we_vote_id (assuming a link to another
+            #  organization doesn't already exist.
 
             twitter_user = None
             if positive_value_exists(twitter_id):
@@ -1760,6 +1762,11 @@ class Organization(models.Model):
                                                        blank=True, null=True)
     twitter_description = models.CharField(verbose_name="Text description of this organization from twitter.",
                                            max_length=255, null=True, blank=True)
+
+    # Instagram
+    organization_instagram_handle = models.CharField(
+        verbose_name='organization instagram screen_name', max_length=255, null=True, unique=False)
+
     we_vote_hosted_profile_image_url_large = models.URLField(verbose_name='we vote hosted large image url',
                                                               blank=True, null=True)
     we_vote_hosted_profile_image_url_medium = models.URLField(verbose_name='we vote hosted medium image url',
@@ -1791,8 +1798,12 @@ class Organization(models.Model):
     def organization_photo_url(self):
         if positive_value_exists(self.organization_image):
             return self.organization_image
+        elif positive_value_exists(self.we_vote_hosted_profile_image_url_large):
+            return self.we_vote_hosted_profile_image_url_large
         elif positive_value_exists(self.twitter_profile_image_url_https):
             return self.twitter_profile_image_url_https_bigger()
+        elif positive_value_exists(self.facebook_profile_image_url_https):
+            return self.facebook_profile_image_url_https
         elif positive_value_exists(self.wikipedia_photo_url):
             return self.wikipedia_photo_url
         return ''

@@ -459,7 +459,7 @@ def send_to_one_friend(voter_device_id, sender_voter, send_now, sender_email_wit
         "recipient_name":               recipient_name,
         "recipient_voter_email":        recipient_voter_email,
         "see_all_friend_requests_url":  WEB_APP_ROOT_URL + "/more/network",
-        "confirm_friend_request_url":   WEB_APP_ROOT_URL + "/more/network/" + invitation_secret_key,
+        "confirm_friend_request_url":   WEB_APP_ROOT_URL + "/more/network/key/" + invitation_secret_key,
         "recipient_unsubscribe_url":    WEB_APP_ROOT_URL + "/unsubscribe?email_key=1234",
         "email_open_url":               WE_VOTE_SERVER_ROOT_URL + "/apis/v1/emailOpen?email_key=1234",
     }
@@ -1122,7 +1122,7 @@ def friend_invitation_by_we_vote_id_send_for_api(voter_device_id, other_voter_we
                 "recipient_name":               recipient_name,
                 "recipient_voter_email":        recipient_voter_email,
                 "see_all_friend_requests_url":  WEB_APP_ROOT_URL + "/more/network",
-                "confirm_friend_request_url":   WEB_APP_ROOT_URL + "/more/network/" + invitation_secret_key,
+                "confirm_friend_request_url":   WEB_APP_ROOT_URL + "/more/network/key/" + invitation_secret_key,
                 "recipient_unsubscribe_url":    WEB_APP_ROOT_URL + "/unsubscribe?email_key=1234",
                 "email_open_url":               WE_VOTE_SERVER_ROOT_URL + "/apis/v1/emailOpen?email_key=1234",
             }
