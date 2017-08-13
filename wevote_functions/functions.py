@@ -398,6 +398,7 @@ def extract_twitter_handle_from_text_string(twitter_text_string):
     twitter_text_string = twitter_text_string.replace("twitter.com", "")
     twitter_text_string = twitter_text_string.replace("@", "")
     twitter_text_string = twitter_text_string.replace("/", "")
+    twitter_text_string = twitter_text_string.split("?", 1)[0]  # Remove everything after first "?" (including "?")
     return twitter_text_string
 
 

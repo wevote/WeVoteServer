@@ -570,46 +570,46 @@ def batch_header_mapping_process_view(request):
     return HttpResponseRedirect(reverse('import_export_batches:batch_action_list', args=()) +
                                 "?kind_of_batch=" + str(kind_of_batch) +
                                 "&batch_header_id=" + str(batch_header_id))
-
-
-@login_required
-def batch_action_list_import_create_or_update_rows(request):
-    """
-    Work with the BatchRows and BatchActionXXXs of an existing batch
-    :param request:
-    :return:
-    """
-    authority_required = {'verified_volunteer'}  # admin, verified_volunteer
-    if not voter_has_authority(request, authority_required):
-        return redirect_to_sign_in_page(request, authority_required)
-
-    batch_header_id = convert_to_int(request.GET.get('batch_header_id', 0))
-    batch_row_id = convert_to_int(request.GET.get('batch_row_id', 0))
-    kind_of_batch = request.GET.get('kind_of_batch', '')
-    create_actions_button = request.GET.get('create_actions_button', '')
-    # TODO use create_actions_button to set create_entry_flag to true
-    # if create_actions_button in (MEASURE, ELECTED_OFFICE, CANDIDATE, ORGANIZATION_WORD, POSITION, POLITICIAN):
-    #     create_entry_flag = True
-    # Analyze the data based on the kind of data
-    # batch_manager = BatchManager()
-    # results = batch_manager.create_batch_row_actions(batch_header_id)
-    # create_entry_flag = False
-    # update_entry_flag = False
-
-    if kind_of_batch == ELECTED_OFFICE:
-        results = import_create_or_update_elected_office_entry(batch_header_id, batch_row_id)
-        if results['success']:
-            messages.add_message(request, messages.INFO, 'ElectedOffice: Created:{created},  Updated:{updated} '
-                                                         ''.format(created=results['number_of_elected_offices_created'],
-                                                                   updated=results['number_of_elected_offices_updated'])
-                                 )
-        else:
-            messages.add_message(request, messages.ERROR, 'ElectedOffice create failed.')
-            return HttpResponseRedirect(reverse('import_export_batches:batch_list', args=()))
-
-    return HttpResponseRedirect(reverse('import_export_batches:batch_action_list', args=()) +
-                                "?kind_of_batch=" + str(kind_of_batch) +
-                                "&batch_header_id=" + str(batch_header_id))
+#
+#
+# @login_required
+# def batch_action_list_import_create_or_update_rows(request):
+#     """
+#     Work with the BatchRows and BatchActionXXXs of an existing batch
+#     :param request:
+#     :return:
+#     """
+#     authority_required = {'verified_volunteer'}  # admin, verified_volunteer
+#     if not voter_has_authority(request, authority_required):
+#         return redirect_to_sign_in_page(request, authority_required)
+#
+#     batch_header_id = convert_to_int(request.GET.get('batch_header_id', 0))
+#     batch_row_id = convert_to_int(request.GET.get('batch_row_id', 0))
+#     kind_of_batch = request.GET.get('kind_of_batch', '')
+#     create_actions_button = request.GET.get('create_actions_button', '')
+#     # TODO use create_actions_button to set create_entry_flag to true
+#     # if create_actions_button in (MEASURE, ELECTED_OFFICE, CANDIDATE, ORGANIZATION_WORD, POSITION, POLITICIAN):
+#     #     create_entry_flag = True
+#     # Analyze the data based on the kind of data
+#     # batch_manager = BatchManager()
+#     # results = batch_manager.create_batch_row_actions(batch_header_id)
+#     # create_entry_flag = False
+#     # update_entry_flag = False
+#
+#     if kind_of_batch == ELECTED_OFFICE:
+#         results = import_create_or_update_elected_office_entry(batch_header_id, batch_row_id)
+#         if results['success']:
+#             messages.add_message(request, messages.INFO, 'ElectedOffice: Created:{created},  Updated:{updated} '
+#                                                          ''.format(created=results['number_of_elected_offices_created'],
+#                                                                    updated=results['number_of_elected_offices_updated'])
+#                                  )
+#         else:
+#             messages.add_message(request, messages.ERROR, 'ElectedOffice create failed.')
+#             return HttpResponseRedirect(reverse('import_export_batches:batch_list', args=()))
+#
+#     return HttpResponseRedirect(reverse('import_export_batches:batch_action_list', args=()) +
+#                                 "?kind_of_batch=" + str(kind_of_batch) +
+#                                 "&batch_header_id=" + str(batch_header_id))
 
 
 @login_required
@@ -655,33 +655,30 @@ def batch_action_list_create_or_update_process_view(request):
 
     if batch_header_map_found and batch_row_list_found:
         results = import_data_from_batch_row_actions(kind_of_batch, kind_of_action, batch_header_id, batch_row_id)
-        if results['success']:
-            if kind_of_action == CREATE:
+
+        if kind_of_action == CREATE:
+            if results['success']:
                 messages.add_message(request, messages.INFO,
-                                     'Batch kind:{kind_of_batch}, ' 'Created:{created} '
+                                     'Kind of Batch: {kind_of_batch}, ' 'Number Created: {created} '
                                      ''.format(kind_of_batch=kind_of_batch,
                                                created=results['number_of_table_rows_created']))
-            elif kind_of_action == ADD_TO_EXISTING:
-                messages.add_message(request, messages.INFO,
-                                     'Batch kind:{kind_of_batch}, ' 'Updated:{updated} '
-                                     ''.format(kind_of_batch=kind_of_batch,
-                                               updated=results['number_of_table_rows_updated']))
-        else:
-            if kind_of_action == CREATE:
-                # messages.add_message(request, messages.ERROR, 'Batch kind:{batch} create failed.',
-                #                      ''.format(batch=kind_of_batch))
+            else:
                 messages.add_message(request, messages.ERROR, 'Batch kind: {kind_of_batch} create failed: {status}'
                                                               ''.format(kind_of_batch=kind_of_batch,
                                                                         status=results['status']))
-
-            elif kind_of_action == ADD_TO_EXISTING:
+        elif kind_of_action == ADD_TO_EXISTING:
+            if results['success']:
+                messages.add_message(request, messages.INFO,
+                                     'Kind of Batch: {kind_of_batch}, ' 'Number Updated: {updated} '
+                                     ''.format(kind_of_batch=kind_of_batch,
+                                               updated=results['number_of_table_rows_updated']))
+            else:
                 messages.add_message(request, messages.ERROR, 'Batch kind: {kind_of_batch} update failed.'
                                                               ''.format(kind_of_batch=kind_of_batch))
-            else:
-                # messages.add_message(request, messages.ERROR, results['status'])
-                messages.add_message(request, messages.ERROR, 'Batch kind: {kind_of_batch} import failed: {status}'
-                                                              ''.format(kind_of_batch=kind_of_batch,
-                                                                        status=results['status']))
+        else:
+            messages.add_message(request, messages.ERROR, 'Batch kind: {kind_of_batch} import status: {status}'
+                                                          ''.format(kind_of_batch=kind_of_batch,
+                                                                    status=results['status']))
             return HttpResponseRedirect(reverse('import_export_batches:batch_list', args=()))
 
     return HttpResponseRedirect(reverse('import_export_batches:batch_action_list', args=()) +
