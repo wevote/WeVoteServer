@@ -253,7 +253,7 @@ def create_batch_row_action_organization(batch_description, batch_header_map, on
         "organization_state", batch_header_map, one_batch_row)
     organization_zip = batch_manager.retrieve_value_from_batch_row(
         "organization_zip", batch_header_map, one_batch_row)
-    state_served_code = batch_manager.retrieve_value_from_batch_row("state_code", batch_header_map, one_batch_row)
+    state_served_code = batch_manager.retrieve_value_from_batch_row("state_served_code", batch_header_map, one_batch_row)
     organization_type = batch_manager.retrieve_value_from_batch_row(
         "organization_type", batch_header_map, one_batch_row)
     organization_contact_name = batch_manager.retrieve_value_from_batch_row(
