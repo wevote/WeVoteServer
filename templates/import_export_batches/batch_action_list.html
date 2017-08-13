@@ -160,6 +160,7 @@
                         <th>website</th>
                         <th>type</th>
                         <th>state_served_code</th>
+                        <th>contact</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -204,6 +205,7 @@
                         <td>{{ one_batch_row.batch_row_action.organization_website|default_if_none:"" }}</td>
                         <td>{{ one_batch_row.batch_row_action.organization_type|default_if_none:"" }}</td>
                         <td>{{ one_batch_row.batch_row_action.state_served_code|default_if_none:"" }}</td>
+                        <td>{{ one_batch_row.batch_row_action.organization_contact_name|default_if_none:"" }}</td>
                     </tr>
                     {% if one_batch_row.batch_row_action.alert_exists %}
                     <tr class="table-success">

@@ -744,7 +744,7 @@ def create_batch_row_action_contest_office(batch_description, batch_header_map, 
     candidate_selection_id9 = batch_manager.retrieve_value_from_batch_row("candidate_selection_id9", batch_header_map,
                                                                           one_batch_row)
     candidate_selection_id10 = batch_manager.retrieve_value_from_batch_row("candidate_selection_id10", batch_header_map,
-                                                                          one_batch_row)
+                                                                           one_batch_row)
 
     batch_set_id = batch_description.batch_set_id
 
@@ -2371,10 +2371,10 @@ def import_organization_data_from_batch_row_actions(
             # error handling
             status += "IMPORT_ORGANIZATION_ENTRY-KIND_OF_ACTION_MISSING"
             results = {
-                'success':                       success,
-                'status':                        status,
-                'number_of_organizations_created':    number_of_organizations_created,
-                'number_of_organizations_updated':    number_of_organizations_updated
+                'success':                          success,
+                'status':                           status,
+                'number_of_organizations_created':  number_of_organizations_created,
+                'number_of_organizations_updated':  number_of_organizations_updated
             }
             return results
 
@@ -2395,6 +2395,9 @@ def import_organization_data_from_batch_row_actions(
             'number_of_organizations_updated':    number_of_organizations_updated
         }
         return results
+
+    if update_entry_flag:
+        status += "ORGANIZATION_UPDATE_NOT_WORKING YET "
 
     organization_manager = OrganizationManager()
     twitter_user_manager = TwitterUserManager()
@@ -2475,17 +2478,17 @@ def import_organization_data_from_batch_row_actions(
             # This is error, it shouldn't reach here, we are handling CREATE or UPDATE entries only.
             status += "IMPORT_ORGANIZATION_ENTRY:NO_CREATE_OR_UPDATE_ERROR "
             results = {
-                'success':                      success,
-                'status':                       status,
-                'number_of_organizations_created':   number_of_organizations_created,
-                'number_of_organizations_updated':   number_of_organizations_updated,
+                'success':                          success,
+                'status':                           status,
+                'number_of_organizations_created':  number_of_organizations_created,
+                'number_of_organizations_updated':  number_of_organizations_updated,
             }
             return results
 
     if number_of_organizations_created:
-        status += "IMPORT_ORGANIZATION_ENTRY:ORGANIZATION_CREATED "
+        status += "IMPORT_ORGANIZATION_ENTRY: ORGANIZATIONS_CREATED "
     elif number_of_organizations_updated:
-        status += "IMPORT_ORGANIZATION_ENTRY:ORGANIZATION_UPDATED "
+        status += "IMPORT_ORGANIZATION_ENTRY: ORGANIZATIONS_UPDATED "
 
     results = {
         'success':                       success,
@@ -2701,11 +2704,11 @@ def import_data_from_batch_row_actions(kind_of_batch, kind_of_action, batch_head
         # this is error
         status += 'IMPORT_BATCH_ACTION_ROWS_INCORRECT_ACTION '
         results = {
-            'success': success,
-            'status': status,
-            'batch_header_id': batch_header_id,
-            'kind_of_batch': kind_of_batch,
-            'table_rows_created': success,
+            'success':                      success,
+            'status':                       status,
+            'batch_header_id':              batch_header_id,
+            'kind_of_batch':                kind_of_batch,
+            'table_rows_created':           success,
             'number_of_table_rows_created': number_of_table_rows_created,
             'number_of_table_rows_updated': number_of_table_rows_updated
         }

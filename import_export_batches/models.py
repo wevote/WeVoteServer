@@ -136,8 +136,7 @@ class BatchManager(models.Model):
         success = False
         status = ""
         number_of_batch_rows = 0
-
-        limit_for_testing = 5
+        # limit_for_testing = 5
 
         # Retrieve from JSON
         # request = Request(batch_uri, headers={'User-Agent': 'Mozilla/5.0'})
@@ -292,8 +291,8 @@ class BatchManager(models.Model):
                     handle_exception(e, logger=logger, exception_message=status)
                     break
             else:
-                if number_of_batch_rows >= limit_for_testing:
-                    break
+                # if number_of_batch_rows >= limit_for_testing:
+                #     break
                 if positive_value_exists(batch_header_id):
                     try:
                         batch_row = BatchRow.objects.create(
@@ -353,7 +352,7 @@ class BatchManager(models.Model):
                         number_of_batch_rows += 1
                     except Exception as e:
                         # Stop trying to save rows -- break out of the for loop
-                        status += " EXCEPTION_BATCH_ROW"
+                        status += "EXCEPTION_BATCH_ROW "
                         break
 
         results = {
@@ -679,7 +678,7 @@ class BatchManager(models.Model):
 
         try:
             batch_row_action_candidate = BatchRowActionCandidate.objects.get(batch_header_id=batch_header_id,
-                                                                           batch_row_id=batch_row_id)
+                                                                             batch_row_id=batch_row_id)
             batch_row_action_found = True
             success = True
             status = "BATCH_ROW_ACTION_CANDIDATE_RETRIEVED"
