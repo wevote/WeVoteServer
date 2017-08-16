@@ -470,6 +470,7 @@ class CandidateCampaign(models.Model):
     # CTCL candidate data fields
     ctcl_uuid = models.CharField(verbose_name="ctcl uuid", max_length=80, null=True, blank=True)
     candidate_is_top_ticket = models.BooleanField(verbose_name="candidate is top ticket", default=False)
+    candidate_is_incumbent = models.BooleanField(verbose_name="candidate is the current incumbent", default=False)
 
     def election(self):
         try:
