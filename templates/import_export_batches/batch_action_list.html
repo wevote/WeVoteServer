@@ -139,7 +139,152 @@
         <tr>
             <td>&nbsp;</td>
             <td colspan="50"><table class="table table-condensed table-bordered">
-            {% if one_batch_row.kind_of_batch == "ORGANIZATION" %}
+            {% if one_batch_row.kind_of_batch == "CANDIDATE" %}
+            {# ### CANDIDATE ### #}
+                <tr>
+                    <th></th>
+                    <th>candidate_name</th>
+                    <th>candidate_party_name</th>
+                    <th>state_code</th>
+                    <th>ALERTS</th>
+                    <th>ACTIONS</th>
+                </tr>
+                <tr>
+                    <td>analysis:</td>
+                    <td>{{ one_batch_row.batch_row_action.candidate_name}}</td>
+                    <td>{{ one_batch_row.batch_row_action.party }}</td>
+                    <td>{{ one_batch_row.batch_row_action.state_code }}</td>
+                    <td></td>
+                    <td>{{ one_batch_row.batch_row_action.kind_of_action }}</td>
+                </tr>
+            {% elif one_batch_row.kind_of_batch == "CONTEST_OFFICE" %}
+            {# ### CONTEST_OFFICE ### #}
+                <thead>
+                    <tr class="{% if one_batch_row.batch_row_action.kind_of_action == "CREATE" %}
+                    table-success
+                    {% elif one_batch_row.batch_row_action.kind_of_action == "ADD_TO_EXISTING" %}
+                    table-warning
+                    {% endif %}">
+                        <th></th>
+                        <th>office name</th>
+                        <th>state_code</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="{% if one_batch_row.batch_row_action.kind_of_action == "CREATE" %}
+                    table-success
+                    {% elif one_batch_row.batch_row_action.kind_of_action == "ADD_TO_EXISTING" %}
+                    table-warning
+                    {% endif %}">
+                        <td>
+                            {# Based on the results of analysis, show button to do the action #}
+    {% if one_batch_row.batch_row_action.kind_of_action == "CREATE" %}
+    <form action="{% url 'import_export_batches:batch_action_list_create_or_update_process' %}" method="get" class="form-horizontal">
+        {% csrf_token %}
+        <input type="hidden" name="kind_of_batch" value="CONTEST_OFFICE">
+        <input type="hidden" name="batch_header_id" value="{{ one_batch_row.batch_header_id }}">
+        <input type="hidden" name="batch_row_id" value="{{ one_batch_row.id }}">
+        <input type="hidden" name="kind_of_action" value="{{ one_batch_row.batch_row_action.kind_of_action }}">
+        <label for="create_actions_button_id" class="col-sm-3 control-label"></label>
+        <button type="submit" id="create_batch_row_action_id_id" name="create_batch_row_action_id" class="btn btn-default" value={{ one_batch_row.batch_row_action.id }}>Create</button>
+    </form>
+    {% elif one_batch_row.batch_row_action.kind_of_action == "ADD_TO_EXISTING" %}
+    <form action="{% url 'import_export_batches:batch_action_list_create_or_update_process' %}" method="get" class="form-horizontal">
+        {% csrf_token %}
+        <input type="hidden" name="kind_of_batch" value="CONTEST_OFFICE">
+        <input type="hidden" name="batch_header_id" value="{{ one_batch_row.batch_header_id }}">
+        <input type="hidden" name="batch_row_id" value="{{ one_batch_row.id }}">
+        <input type="hidden" name="kind_of_action" value="{{ one_batch_row.batch_row_action.kind_of_action }}">
+        <label for="create_actions_button_id" class="col-sm-3 control-label"></label>
+        <button type="submit" id="create_batch_row_action_id_id" name="create_batch_row_action_id" class="btn btn-default" value={{ one_batch_row.batch_row_action.id }}>UPDATE</button>
+        {{ one_batch_row.batch_row_action.contest_office_we_vote_id }}
+    </form>
+    {% else %}
+        {{ one_batch_row.batch_row_action.kind_of_action }}
+    {% endif %}
+                        </td>
+                        <td>{{ one_batch_row.batch_row_action.contest_office_name|default_if_none:"" }}</td>
+                        <td>{{ one_batch_row.batch_row_action.state_code|default_if_none:"" }}</td>
+                    </tr>
+                    {% if one_batch_row.batch_row_action.alert_exists %}
+                    <tr class="table-success">
+                        <td colspan="20">ALERTS:</td>
+                    </tr>
+                    {% endif %}
+                </tbody>
+            {% elif one_batch_row.kind_of_batch == "ELECTED_OFFICE" %}
+            {# ### ELECTED_OFFICE ### #}
+                <thead>
+                    <tr class="{% if one_batch_row.batch_row_action.kind_of_action == "CREATE" %}
+                    table-success
+                    {% elif one_batch_row.batch_row_action.kind_of_action == "ADD_TO_EXISTING" %}
+                    table-warning
+                    {% endif %}">
+                        <th></th>
+                        <th>name</th>
+                        <th>state_code</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="{% if one_batch_row.batch_row_action.kind_of_action == "CREATE" %}
+                    table-success
+                    {% elif one_batch_row.batch_row_action.kind_of_action == "ADD_TO_EXISTING" %}
+                    table-warning
+                    {% endif %}">
+                        <td>
+                            {# Based on the results of analysis, show button to do the action #}
+    {% if one_batch_row.batch_row_action.kind_of_action == "CREATE" %}
+    <form action="{% url 'import_export_batches:batch_action_list_create_or_update_process' %}" method="get" class="form-horizontal">
+        {% csrf_token %}
+        <input type="hidden" name="kind_of_batch" value="ELECTED_OFFICE">
+        <input type="hidden" name="batch_header_id" value="{{ one_batch_row.batch_header_id }}">
+        <input type="hidden" name="batch_row_id" value="{{ one_batch_row.id }}">
+        <input type="hidden" name="kind_of_action" value="{{ one_batch_row.batch_row_action.kind_of_action }}">
+        <label for="create_actions_button_id" class="col-sm-3 control-label"></label>
+        <button type="submit" id="create_batch_row_action_id_id" name="create_batch_row_action_id" class="btn btn-default" value={{ one_batch_row.batch_row_action.id }}>Create</button>
+    </form>
+    {% elif one_batch_row.batch_row_action.kind_of_action == "ADD_TO_EXISTING" %}
+    <form action="{% url 'import_export_batches:batch_action_list_create_or_update_process' %}" method="get" class="form-horizontal">
+        {% csrf_token %}
+        <input type="hidden" name="kind_of_batch" value="ELECTED_OFFICE">
+        <input type="hidden" name="batch_header_id" value="{{ one_batch_row.batch_header_id }}">
+        <input type="hidden" name="batch_row_id" value="{{ one_batch_row.id }}">
+        <input type="hidden" name="kind_of_action" value="{{ one_batch_row.batch_row_action.kind_of_action }}">
+        <label for="create_actions_button_id" class="col-sm-3 control-label"></label>
+        <button type="submit" id="create_batch_row_action_id_id" name="create_batch_row_action_id" class="btn btn-default" value={{ one_batch_row.batch_row_action.id }}>UPDATE</button>
+    </form>
+    {% else %}
+        {{ one_batch_row.batch_row_action.kind_of_action }}
+    {% endif %}
+                        </td>
+                        <td>{{ one_batch_row.batch_row_action.elected_office_name|default_if_none:"" }}</td>
+                        <td>{{ one_batch_row.batch_row_action.state_code|default_if_none:"" }}</td>
+                    </tr>
+                    {% if one_batch_row.batch_row_action.alert_exists %}
+                    <tr class="table-success">
+                        <td colspan="20">ALERTS:</td>
+                    </tr>
+                    {% endif %}
+                </tbody>
+            {% elif one_batch_row.kind_of_batch == "MEASURE" %}
+            {# ### MEASURE ### #}
+                <tr>
+                    <th></th>
+                    <th>measure_title</th>
+                    <th>measure_subtitle</th>
+                    <th>state_code</th>
+                    <th>ALERTS</th>
+                    <th>ACTIONS</th>
+                </tr>
+                <tr>
+                    <td>analysis:</td>
+                    <td>{{ one_batch_row.batch_row_action.measure_title}}</td>
+                    <td>{{ one_batch_row.batch_row_action.measure_subtitle}}</td>
+                    <td>{{ one_batch_row.batch_row_action.state_code }}</td>
+                    <td></td>
+                    <td>{{ one_batch_row.batch_row_action.kind_of_action }}</td>
+                </tr>
+            {% elif one_batch_row.kind_of_batch == "ORGANIZATION" %}
             {# ### ORGANIZATION ### #}
                 <thead>
                     <tr class="{% if one_batch_row.batch_row_action.kind_of_action == "CREATE" %}
@@ -189,8 +334,11 @@
         <input type="hidden" name="batch_row_id" value="{{ one_batch_row.id }}">
         <input type="hidden" name="kind_of_action" value="{{ one_batch_row.batch_row_action.kind_of_action }}">
         <label for="create_actions_button_id" class="col-sm-3 control-label"></label>
-        <button type="submit" id="create_batch_row_action_id_id" name="create_batch_row_action_id" class="btn btn-default" value={{ one_batch_row.batch_row_action.id }}>UPDATE</button>
+        <button type="submit" id="create_batch_row_action_id_id" name="create_batch_row_action_id" class="btn btn-default" value={{ one_batch_row.batch_row_action.id }}>Update</button>
+        {{ one_batch_row.batch_row_action.organization_we_vote_id }}
     </form>
+    {% else %}
+        {{ one_batch_row.batch_row_action.kind_of_action }}
     {% endif %}
                         </td>
                         <td>{{ one_batch_row.batch_row_action.organization_name|default_if_none:"" }}</td>
@@ -213,77 +361,7 @@
                     </tr>
                     {% endif %}
                 </tbody>
-            {% elif one_batch_row.kind_of_batch == "MEASURE" %}
-            {# ### MEASURE### #}
-                <tr>
-                    <th></th>
-                    <th>measure_title</th>
-                    <th>measure_subtitle</th>
-                    <th>state_code</th>
-                    <th>ALERTS</th>
-                    <th>ACTIONS</th>
-                </tr>
-                <tr>
-                    <td>analysis:</td>
-                    <td>{{ one_batch_row.batch_row_action.measure_title}}</td>
-                    <td>{{ one_batch_row.batch_row_action.measure_subtitle}}</td>
-                    <td>{{ one_batch_row.batch_row_action.state_code }}</td>
-                    <td></td>
-                    <td>{{ one_batch_row.batch_row_action.kind_of_action }}</td>
-                </tr>
-            {% elif one_batch_row.kind_of_batch == "ELECTED_OFFICE" %}
-            {# ### OFFICE### #}
-                <tr>
-                    <th></th>
-                    <th>elected_office_name</th>
-                    <th>state_code</th>
-                    <th>ALERTS</th>
-                    <th>ACTIONS</th>
-                    <th>Import</th>
-                </tr>
-                <tr>
-                    <td>analysis:</td>
-                    <td>{{ one_batch_row.batch_row_action.elected_office_name}}</td>
-                    <td>{{ one_batch_row.batch_row_action.state_code }}</td>
-                    <td></td>
-                    <td>{{ one_batch_row.batch_row_action.kind_of_action }}</td>
-                    <td><a href="{% url 'import_export_batches:batch_action_list_create_or_update_process' %}?kind_of_batch=ELECTED_OFFICE&batch_header_id={{ batch_header_id }}&batch_row_id={{ one_batch_row.id }}">Import into ElectedOffice Table</a></td>
-                </tr>
-            {% elif one_batch_row.kind_of_batch == "CONTEST_OFFICE" %}
-            {# ### MEASURE### #}
-                <tr>
-                    <th></th>
-                    <th>contest_office_name</th>
-                    <th>state_code</th>
-                    <th>ALERTS</th>
-                    <th>ACTIONS</th>
-                </tr>
-                <tr>
-                    <td>analysis:</td>
-                    <td>{{ one_batch_row.batch_row_action.contest_office_name}}</td>
-                    <td>{{ one_batch_row.batch_row_action.state_code }}</td>
-                    <td></td>
-                    <td>{{ one_batch_row.batch_row_action.kind_of_action }}</td>
-                </tr>
-                {% elif one_batch_row.kind_of_batch == "CANDIDATE" %}
-            {# ### CANDIDATE### #}
-                <tr>
-                    <th></th>
-                    <th>candidate_name</th>
-                    <th>candidate_party_name</th>
-                    <th>state_code</th>
-                    <th>ALERTS</th>
-                    <th>ACTIONS</th>
-                </tr>
-                <tr>
-                    <td>analysis:</td>
-                    <td>{{ one_batch_row.batch_row_action.candidate_name}}</td>
-                    <td>{{ one_batch_row.batch_row_action.party }}</td>
-                    <td>{{ one_batch_row.batch_row_action.state_code }}</td>
-                    <td></td>
-                    <td>{{ one_batch_row.batch_row_action.kind_of_action }}</td>
-                </tr>
-                {% elif one_batch_row.kind_of_batch == "POLITICIAN" %}
+            {% elif one_batch_row.kind_of_batch == "POLITICIAN" %}
             {# ### POLITICIAN### #}
                 <tr>
                     <th></th>
@@ -302,6 +380,58 @@
                     <td>{{ one_batch_row.batch_row_action.kind_of_action }}</td>
                 </tr>
 
+            {% elif one_batch_row.kind_of_batch == "POSITION" %}
+            {# ### POSITION ### #}
+                <thead>
+                    <tr class="{% if one_batch_row.batch_row_action.kind_of_action == "CREATE" %}
+                    table-success
+                    {% elif one_batch_row.batch_row_action.kind_of_action == "ADD_TO_EXISTING" %}
+                    table-warning
+                    {% endif %}">
+                        <th></th>
+                        <th>ballot item name</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="{% if one_batch_row.batch_row_action.kind_of_action == "CREATE" %}
+                    table-success
+                    {% elif one_batch_row.batch_row_action.kind_of_action == "ADD_TO_EXISTING" %}
+                    table-warning
+                    {% endif %}">
+                        <td>
+                            {# Based on the results of analysis, show button to do the action #}
+    {% if one_batch_row.batch_row_action.kind_of_action == "CREATE" %}
+    <form action="{% url 'import_export_batches:batch_action_list_create_or_update_process' %}" method="get" class="form-horizontal">
+        {% csrf_token %}
+        <input type="hidden" name="kind_of_batch" value="POSITION">
+        <input type="hidden" name="batch_header_id" value="{{ one_batch_row.batch_header_id }}">
+        <input type="hidden" name="batch_row_id" value="{{ one_batch_row.id }}">
+        <input type="hidden" name="kind_of_action" value="{{ one_batch_row.batch_row_action.kind_of_action }}">
+        <label for="create_actions_button_id" class="col-sm-3 control-label"></label>
+        <button type="submit" id="create_batch_row_action_id_id" name="create_batch_row_action_id" class="btn btn-default" value={{ one_batch_row.batch_row_action.id }}>Create</button>
+    </form>
+    {% elif one_batch_row.batch_row_action.kind_of_action == "ADD_TO_EXISTING" %}
+    <form action="{% url 'import_export_batches:batch_action_list_create_or_update_process' %}" method="get" class="form-horizontal">
+        {% csrf_token %}
+        <input type="hidden" name="kind_of_batch" value="POSITION">
+        <input type="hidden" name="batch_header_id" value="{{ one_batch_row.batch_header_id }}">
+        <input type="hidden" name="batch_row_id" value="{{ one_batch_row.id }}">
+        <input type="hidden" name="kind_of_action" value="{{ one_batch_row.batch_row_action.kind_of_action }}">
+        <label for="create_actions_button_id" class="col-sm-3 control-label"></label>
+        <button type="submit" id="create_batch_row_action_id_id" name="create_batch_row_action_id" class="btn btn-default" value={{ one_batch_row.batch_row_action.id }}>UPDATE</button>
+    </form>
+    {% else %}
+        {{ one_batch_row.batch_row_action.kind_of_action }}
+    {% endif %}
+                        </td>
+                        <td>{{ one_batch_row.batch_row_action.ballot_item_display_name|default_if_none:"" }}</td>
+                    </tr>
+                    {% if one_batch_row.batch_row_action.alert_exists %}
+                    <tr class="table-success">
+                        <td colspan="20">ALERTS:</td>
+                    </tr>
+                    {% endif %}
+                </tbody>
             {% endif %}
             </table></td>
         </tr>

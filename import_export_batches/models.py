@@ -52,6 +52,60 @@ KIND_OF_ACTION_CHOICES = (
 
 BATCH_SET_SOURCE_CTCL = 'CTCL'
 
+
+BATCH_IMPORT_KEYS_ACCEPTED_FOR_CANDIDATES = {
+    'candidate_name': 'candidate_name',
+    'candidate_ctcl_uuid': 'candidate_ctcl_uuid',
+    'candidate_person_id': 'candidate_person_id',
+    'candidate_is_top_ticket': 'candidate_is_top_ticket',
+    'candidate_is_incumbent': 'candidate_is_incumbent',
+    'candidate_party_name': 'candidate_party_name',
+    'candidate_batch_id': 'candidate_batch_id',
+}
+
+BATCH_IMPORT_KEYS_ACCEPTED_FOR_CONTEST_OFFICES = {
+    'contest_office_name': 'contest_office_name',
+    'electoral_district_id': 'electoral_district_id',
+    'contest_office_batch_id': 'contest_office_batch_id',
+    'contest_office_ctcl_uuid': 'contest_office_ctcl_uuid',
+    'contest_office_votes_allowed': 'contest_office_votes_allowed',
+    'contest_office_number_elected': 'contest_office_number_elected',
+    'elected_office_id': 'elected_office_id',
+    'candidate_selection_id1': 'candidate_selection_id1',
+    'candidate_selection_id2': 'candidate_selection_id2',
+    'candidate_selection_id3': 'candidate_selection_id3',
+    'candidate_selection_id4': 'candidate_selection_id4',
+    'candidate_selection_id5': 'candidate_selection_id5',
+    'candidate_selection_id6': 'candidate_selection_id6',
+    'candidate_selection_id7': 'candidate_selection_id7',
+    'candidate_selection_id8': 'candidate_selection_id8',
+    'candidate_selection_id9': 'candidate_selection_id9',
+    'candidate_selection_id10': 'candidate_selection_id10',
+    'state_code': 'state_code',
+}
+
+BATCH_IMPORT_KEYS_ACCEPTED_FOR_ELECTED_OFFICES = {
+    'elected_office_name': 'elected_office_name',
+    'electoral_district_id': 'electoral_district_id',
+    'state_code': 'state_code',
+    'elected_office_ctcl_uuid': 'elected_office_ctcl_uuid',
+    'elected_office_description': 'elected_office_description',
+    'elected_office_is_partisan': 'elected_office_is_partisan',
+    'elected_office_name_es': 'elected_office_name_es',
+    'elected_office_description_es': 'elected_office_description_es',
+    'elected_office_batch_id': 'elected_office_batch_id',
+}
+
+BATCH_IMPORT_KEYS_ACCEPTED_FOR_MEASURES = {
+    'measure_title': 'measure_title',
+    'electoral_district_id': 'electoral_district_id',
+    'state_code': 'state_code',
+    'measure_name': 'measure_name',
+    'measure_text': 'measure_text',
+    'measure_sub_title': 'measure_sub_title',
+    'ctcl_uuid': 'ctcl_uuid',
+}
+
 BATCH_IMPORT_KEYS_ACCEPTED_FOR_ORGANIZATIONS = {
     'organization_address': 'organization_address',
     'organization_city': 'organization_city',
@@ -69,6 +123,27 @@ BATCH_IMPORT_KEYS_ACCEPTED_FOR_ORGANIZATIONS = {
     'organization_type': 'organization_type',
     'state_served_code': 'state_served_code',
 }
+BATCH_IMPORT_KEYS_ACCEPTED_FOR_POLITICIANS = {
+    'politician_full_name': 'politician_full_name',
+    'politician_ctcl_uuid': 'politician_ctcl_uuid',
+    'politician_twitter_url': 'politician_twitter_url',
+    'politician_facebook_id': 'politician_facebook_id',
+    'politician_party_name': 'politician_party_name',
+    'politician_first_name': 'politician_first_name',
+    'politician_middle_name': 'politician_middle_name',
+    'politician_last_name': 'politician_last_name',
+    'politician_website_url': 'politician_website_url',
+    'politician_email_address': 'politician_email_address',
+    'politician_youtube_id': 'politician_youtube_id',
+    'politician_googleplus_id': 'politician_googleplus_id',
+    'politician_phone_number': 'politician_phone_number',
+    'politician_batch_id': 'politician_batch_id',
+}
+
+BATCH_IMPORT_KEYS_ACCEPTED_FOR_POSITIONS = {
+    'organization_address': 'organization_address',
+}
+
 
 logger = wevote_functions.admin.get_logger(__name__)
 
@@ -645,7 +720,7 @@ class BatchManager(models.Model):
 
         try:
             batch_row_action_politician = BatchRowActionPolitician.objects.get(batch_header_id=batch_header_id,
-                                                                           batch_row_id=batch_row_id)
+                                                                               batch_row_id=batch_row_id)
             batch_row_action_found = True
             success = True
             status = "BATCH_ROW_ACTION_POLITICIAN_RETRIEVED"
@@ -665,6 +740,39 @@ class BatchManager(models.Model):
             'status':                       status,
             'batch_row_action_found':       batch_row_action_found,
             'batch_row_action_politician':  batch_row_action_politician,
+        }
+        return results
+
+    def retrieve_batch_row_action_position(self, batch_header_id, batch_row_id):
+        """
+        Retrieves data from BatchRowActionPosition table
+        :param batch_header_id:
+        :param batch_row_id:
+        :return:
+        """
+
+        try:
+            batch_row_action_position = BatchRowActionPosition.objects.get(batch_header_id=batch_header_id,
+                                                                           batch_row_id=batch_row_id)
+            batch_row_action_found = True
+            success = True
+            status = "BATCH_ROW_ACTION_POLITICIAN_RETRIEVED"
+        except BatchRowActionPosition.DoesNotExist:
+            batch_row_action_position = BatchRowActionPosition()
+            batch_row_action_found = False
+            success = True
+            status = "BATCH_ROW_ACTION_POLITICIAN_NOT_FOUND"
+        except Exception as e:
+            batch_row_action_position = BatchRowActionPosition()
+            batch_row_action_found = False
+            success = False
+            status = "BATCH_ROW_ACTION_POLITICIAN_RETRIEVE_ERROR"
+
+        results = {
+            'success':                      success,
+            'status':                       status,
+            'batch_row_action_found':       batch_row_action_found,
+            'batch_row_action_position':    batch_row_action_position,
         }
         return results
 
@@ -771,6 +879,21 @@ class BatchManager(models.Model):
             file.close()
 
         return filetype
+
+    def find_possible_matches(self, kind_of_batch, batch_row_name, incoming_batch_row_value,
+                              google_civic_election_id, state_code):
+        if kind_of_batch == CONTEST_OFFICE:
+            # TODO DALE
+            pass
+        possible_matches = {
+            'New York City Mayor': 'New York City Mayor'
+        }
+
+        results = {
+            'possible_matches_found': True,
+            'possible_matches': possible_matches
+        }
+        return results
 
     def create_batch_vip_xml(self, batch_uri, kind_of_batch, google_civic_election_id, organization_we_vote_id):
         """
@@ -2248,8 +2371,9 @@ class BatchManager(models.Model):
             return batch_header_translation_suggestion.header_value_recognized_by_we_vote
         return ""
 
-    def fetch_batch_row_translation_map(self, kind_of_batch, alternate_header_value):  # TODO This hasn't been built
-        results = self.retrieve_batch_row_translation_map(kind_of_batch, alternate_header_value)
+    # TODO This hasn't been built
+    def fetch_batch_row_translation_map(self, kind_of_batch, batch_row_name, incoming_alternate_row_value):
+        results = self.retrieve_batch_row_translation_map(kind_of_batch, incoming_alternate_row_value)
         if results['batch_header_translation_suggestion_found']:
             batch_header_translation_suggestion = results['batch_header_translation_suggestion']
             return batch_header_translation_suggestion.header_value_recognized_by_we_vote
@@ -2560,6 +2684,8 @@ class BatchRowTranslationMap(models.Model):
     """
     # Are we translating for a Measure, Office, Candidate, or Organization
     kind_of_batch = models.CharField(max_length=32, choices=KIND_OF_BATCH_CHOICES, default=MEASURE)
+    # What is the name of the row? (ex/ contest_office_name)
+    batch_row_name = models.CharField(verbose_name="name of the the row", max_length=255, null=True, blank=True)
     google_civic_election_id = models.PositiveIntegerField(
         verbose_name="google civic election id", default=0, null=True, blank=True)
     row_value_recognized_by_we_vote = models.TextField(null=True, blank=True)
@@ -2622,7 +2748,8 @@ class BatchRowActionMeasure(models.Model):
         verbose_name="Page title on Ballotpedia", max_length=255, null=True, blank=True)
     ballotpedia_photo_url = models.URLField(verbose_name='url of ballotpedia logo', blank=True, null=True)
     ctcl_uuid = models.CharField(verbose_name="ctcl uuid", max_length=80, null=True, blank=True)
-    status = models.CharField(verbose_name="batch row action measure status", max_length=80, null=True, blank=True)
+
+    status = models.TextField(verbose_name="batch row action measure status", null=True, blank=True, default="")
 
 
 class BatchRowActionContestOffice(models.Model):
@@ -2640,6 +2767,9 @@ class BatchRowActionContestOffice(models.Model):
     # The name of the office for this contest.
     contest_office_name = models.CharField(verbose_name="name of the contest office", max_length=255, null=False,
                                            blank=False)
+    # TODO: Was the original contest_office_name replaced with a mapped value from BatchRowTranslationMap?
+    # contest_office_name_mapped = models.BooleanField(verbose_name='office name was replaced', default=False)
+
     # The offices' name as passed over by Google Civic. We save this so we can match to this office even
     # if we edit the office's name locally.
     google_civic_office_name = models.CharField(verbose_name="office name exactly as received from google civic",
@@ -2697,8 +2827,6 @@ class BatchRowActionContestOffice(models.Model):
     # "Yes" or "No" depending on whether this a contest being held outside the normal election cycle.
     special = models.CharField(verbose_name="google civic primary party", max_length=255, null=True, blank=True)
     ctcl_uuid = models.CharField(verbose_name="ctcl uuid", max_length=80, null=True, blank=True)
-    status = models.CharField(verbose_name="batch row action contest office status", max_length=80, null=True,
-                              blank=True)
     elected_office_name = models.CharField(verbose_name="name of the elected office", max_length=255, null=True,
                                            blank=True, default=None)
     candidate_selection_id1 = models.CharField(verbose_name="temporary id of candidate selection 1", max_length=255,
@@ -2721,6 +2849,9 @@ class BatchRowActionContestOffice(models.Model):
                                                null=True, blank=True, default=None)
     candidate_selection_id10 = models.CharField(verbose_name="temporary id of candidate selection 10", max_length=255,
                                                 null=True, blank=True, default=None)
+
+    status = models.TextField(verbose_name="batch row action contest office status", null=True, blank=True, default="")
+
 
 class BatchRowActionElectedOffice(models.Model):
     """
@@ -2802,9 +2933,10 @@ class BatchRowActionElectedOffice(models.Model):
     elected_office_description_es = models.CharField(verbose_name="office description spanish", max_length=255,
                                                      null=True, blank=True)
     elected_office_is_partisan = models.BooleanField(verbose_name='office is_partisan', default=False)
-    status = models.CharField(verbose_name="batch row action office status", max_length=80, null=True, blank=True)
     elected_office_ctcl_id = models.CharField(verbose_name="we vote permanent id for this elected office",
                                               max_length=255, default=None, null=True, blank=True)
+
+    status = models.TextField(verbose_name="batch row action elected office status", null=True, blank=True, default="")
 
 
 class BatchRowActionPolitician(models.Model):
@@ -2869,7 +3001,6 @@ class BatchRowActionPolitician(models.Model):
                                                               blank=True, null=True)
     we_vote_hosted_profile_image_url_tiny = models.URLField(verbose_name='we vote hosted tiny image url', blank=True,
                                                             null=True)
-    status = models.CharField(verbose_name="batch row action politician status", max_length=80, null=True, blank=True)
     ctcl_uuid = models.CharField(verbose_name="ctcl uuid", max_length=80, null=True, blank=True)
     politician_facebook_id = models.CharField(verbose_name='politician facebook user name', max_length=255, null=True,
                                               unique=False)
@@ -2881,6 +3012,9 @@ class BatchRowActionPolitician(models.Model):
                                              unique=False)
     politician_email_address = models.CharField(verbose_name='politician email address', max_length=80, null=True,
                                                 unique=False)
+
+    status = models.TextField(verbose_name="batch row action politician status", null=True, blank=True, default="")
+
 
 class BatchRowActionCandidate(models.Model):
     """
@@ -2977,10 +3111,11 @@ class BatchRowActionCandidate(models.Model):
     # Official Statement from Candidate in Ballot Guide
     ballot_guide_official_statement = models.TextField(verbose_name="official candidate statement from ballot guide",
                                                        null=True, blank=True, default="")
-    status = models.CharField(verbose_name="batch row action candidate status", max_length=80, null=True, blank=True)
     ctcl_uuid = models.CharField(verbose_name="ctcl uuid", max_length=80, null=True, blank=True)
     candidate_is_top_ticket = models.BooleanField(verbose_name="candidate is top ticket", default=False)
     candidate_person_id = models.CharField(verbose_name="candidate person id", max_length=255, null=True, blank=True)
+
+    status = models.TextField(verbose_name="batch row action candidate status", null=True, blank=True, default="")
 
 
 class BatchRowActionOrganization(models.Model):
@@ -3062,6 +3197,8 @@ class BatchRowActionOrganization(models.Model):
 
     organization_type = models.CharField(
         verbose_name="type of org", max_length=1, choices=ORGANIZATION_TYPE_CHOICES, default=UNKNOWN)
+
+    status = models.TextField(verbose_name="batch row action organization status", null=True, blank=True, default="")
 
 
 class BatchRowActionPosition(models.Model):
@@ -3193,3 +3330,5 @@ class BatchRowActionPosition(models.Model):
     organization_certified = models.BooleanField(default=False)
     # Was this position certified by an official We Vote volunteer?
     volunteer_certified = models.BooleanField(default=False)
+
+    status = models.TextField(verbose_name="batch row action position status", null=True, blank=True, default="")

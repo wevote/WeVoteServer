@@ -3,8 +3,12 @@
 # -*- coding: UTF-8 -*-
 
 from .models import BatchDescription, BatchHeader, BatchHeaderMap, BatchManager, BatchRow, BatchSet, \
-    CONTEST_OFFICE, ELECTED_OFFICE, BATCH_IMPORT_KEYS_ACCEPTED_FOR_ORGANIZATIONS, CREATE, ADD_TO_EXISTING, \
-    QUERY_ERROR, TO_BE_DETERMINED
+    CONTEST_OFFICE, ELECTED_OFFICE, \
+    BATCH_IMPORT_KEYS_ACCEPTED_FOR_CANDIDATES, BATCH_IMPORT_KEYS_ACCEPTED_FOR_CONTEST_OFFICES, \
+    BATCH_IMPORT_KEYS_ACCEPTED_FOR_ELECTED_OFFICES, BATCH_IMPORT_KEYS_ACCEPTED_FOR_MEASURES, \
+    BATCH_IMPORT_KEYS_ACCEPTED_FOR_ORGANIZATIONS, BATCH_IMPORT_KEYS_ACCEPTED_FOR_POLITICIANS, \
+    BATCH_IMPORT_KEYS_ACCEPTED_FOR_POSITIONS, \
+    CREATE, ADD_TO_EXISTING, QUERY_ERROR, TO_BE_DETERMINED
 from .controllers import create_batch_header_translation_suggestions, create_batch_row_actions, \
     create_or_update_batch_header_mapping, \
     import_data_from_batch_row_actions, import_create_or_update_elected_office_entry
@@ -76,7 +80,7 @@ def batch_list_view(request):
         batch_list_found = False
         pass
 
-    if kind_of_batch == ORGANIZATION_WORD:
+    if kind_of_batch == ORGANIZATION_WORD or kind_of_batch == ELECTED_OFFICE or kind_of_batch == POLITICIAN:
         # We do not want to ask the person importing the file for an election, because it isn't used
         ask_for_election = False
         election_list = []
@@ -266,31 +270,11 @@ def batch_action_list_view(request):
     batch_manager = BatchManager()
     if batch_list_found:
         for one_batch_row in batch_row_list:
-            if kind_of_batch == ORGANIZATION_WORD:
-                existing_results = batch_manager.retrieve_batch_row_action_organization(batch_header_id,
-                                                                                        one_batch_row.id)
+            if kind_of_batch == CANDIDATE:
+                existing_results = batch_manager.retrieve_batch_row_action_candidate(batch_header_id, one_batch_row.id)
                 if existing_results['batch_row_action_found']:
-                    one_batch_row.batch_row_action = existing_results['batch_row_action_organization']
-                    one_batch_row.kind_of_batch = ORGANIZATION_WORD
-                    one_batch_row.batch_row_action_exists = True
-                else:
-                    one_batch_row.batch_row_action_exists = False
-                modified_batch_row_list.append(one_batch_row)
-            elif kind_of_batch == MEASURE:
-                existing_results = batch_manager.retrieve_batch_row_action_measure(batch_header_id, one_batch_row.id)
-                if existing_results['batch_row_action_found']:
-                    one_batch_row.batch_row_action = existing_results['batch_row_action_measure']
-                    one_batch_row.kind_of_batch = MEASURE
-                    one_batch_row.batch_row_action_exists = True
-                else:
-                    one_batch_row.batch_row_action_exists = False
-                modified_batch_row_list.append(one_batch_row)
-            elif kind_of_batch == ELECTED_OFFICE:
-                existing_results = batch_manager.retrieve_batch_row_action_elected_office(batch_header_id,
-                                                                                          one_batch_row.id)
-                if existing_results['batch_row_action_found']:
-                    one_batch_row.batch_row_action = existing_results['batch_row_action_elected_office']
-                    one_batch_row.kind_of_batch = ELECTED_OFFICE
+                    one_batch_row.batch_row_action = existing_results['batch_row_action_candidate']
+                    one_batch_row.kind_of_batch = CANDIDATE
                     one_batch_row.batch_row_action_exists = True
                 else:
                     one_batch_row.batch_row_action_exists = False
@@ -305,6 +289,35 @@ def batch_action_list_view(request):
                 else:
                     one_batch_row.batch_row_action_exists = False
                 modified_batch_row_list.append(one_batch_row)
+            elif kind_of_batch == ELECTED_OFFICE:
+                existing_results = batch_manager.retrieve_batch_row_action_elected_office(batch_header_id,
+                                                                                          one_batch_row.id)
+                if existing_results['batch_row_action_found']:
+                    one_batch_row.batch_row_action = existing_results['batch_row_action_elected_office']
+                    one_batch_row.kind_of_batch = ELECTED_OFFICE
+                    one_batch_row.batch_row_action_exists = True
+                else:
+                    one_batch_row.batch_row_action_exists = False
+                modified_batch_row_list.append(one_batch_row)
+            elif kind_of_batch == MEASURE:
+                existing_results = batch_manager.retrieve_batch_row_action_measure(batch_header_id, one_batch_row.id)
+                if existing_results['batch_row_action_found']:
+                    one_batch_row.batch_row_action = existing_results['batch_row_action_measure']
+                    one_batch_row.kind_of_batch = MEASURE
+                    one_batch_row.batch_row_action_exists = True
+                else:
+                    one_batch_row.batch_row_action_exists = False
+                modified_batch_row_list.append(one_batch_row)
+            elif kind_of_batch == ORGANIZATION_WORD:
+                existing_results = batch_manager.retrieve_batch_row_action_organization(batch_header_id,
+                                                                                        one_batch_row.id)
+                if existing_results['batch_row_action_found']:
+                    one_batch_row.batch_row_action = existing_results['batch_row_action_organization']
+                    one_batch_row.kind_of_batch = ORGANIZATION_WORD
+                    one_batch_row.batch_row_action_exists = True
+                else:
+                    one_batch_row.batch_row_action_exists = False
+                modified_batch_row_list.append(one_batch_row)
             elif kind_of_batch == POLITICIAN:
                 existing_results = batch_manager.retrieve_batch_row_action_politician(batch_header_id, one_batch_row.id)
                 if existing_results['batch_row_action_found']:
@@ -314,11 +327,11 @@ def batch_action_list_view(request):
                 else:
                     one_batch_row.batch_row_action_exists = False
                 modified_batch_row_list.append(one_batch_row)
-            elif kind_of_batch == CANDIDATE:
-                existing_results = batch_manager.retrieve_batch_row_action_candidate(batch_header_id, one_batch_row.id)
+            elif kind_of_batch == POSITION:
+                existing_results = batch_manager.retrieve_batch_row_action_position(batch_header_id, one_batch_row.id)
                 if existing_results['batch_row_action_found']:
-                    one_batch_row.batch_row_action = existing_results['batch_row_action_candidate']
-                    one_batch_row.kind_of_batch = CANDIDATE
+                    one_batch_row.batch_row_action = existing_results['batch_row_action_position']
+                    one_batch_row.kind_of_batch = POSITION
                     one_batch_row.batch_row_action_exists = True
                 else:
                     one_batch_row.batch_row_action_exists = False
@@ -441,8 +454,20 @@ def batch_header_mapping_view(request):
         # This is fine
         batch_header_map = BatchHeaderMap()
 
-    if kind_of_batch == ORGANIZATION_WORD:
+    if kind_of_batch == CANDIDATE:
+        batch_import_keys_accepted = BATCH_IMPORT_KEYS_ACCEPTED_FOR_CANDIDATES
+    elif kind_of_batch == CONTEST_OFFICE:
+        batch_import_keys_accepted = BATCH_IMPORT_KEYS_ACCEPTED_FOR_CONTEST_OFFICES
+    elif kind_of_batch == ELECTED_OFFICE:
+        batch_import_keys_accepted = BATCH_IMPORT_KEYS_ACCEPTED_FOR_ELECTED_OFFICES
+    elif kind_of_batch == MEASURE:
+        batch_import_keys_accepted = BATCH_IMPORT_KEYS_ACCEPTED_FOR_MEASURES
+    elif kind_of_batch == ORGANIZATION_WORD:
         batch_import_keys_accepted = BATCH_IMPORT_KEYS_ACCEPTED_FOR_ORGANIZATIONS
+    elif kind_of_batch == POLITICIAN:
+        batch_import_keys_accepted = BATCH_IMPORT_KEYS_ACCEPTED_FOR_POLITICIANS
+    elif kind_of_batch == POSITION:
+        batch_import_keys_accepted = BATCH_IMPORT_KEYS_ACCEPTED_FOR_POSITIONS
     else:
         batch_import_keys_accepted = {}
 
@@ -570,46 +595,6 @@ def batch_header_mapping_process_view(request):
     return HttpResponseRedirect(reverse('import_export_batches:batch_action_list', args=()) +
                                 "?kind_of_batch=" + str(kind_of_batch) +
                                 "&batch_header_id=" + str(batch_header_id))
-#
-#
-# @login_required
-# def batch_action_list_import_create_or_update_rows(request):
-#     """
-#     Work with the BatchRows and BatchActionXXXs of an existing batch
-#     :param request:
-#     :return:
-#     """
-#     authority_required = {'verified_volunteer'}  # admin, verified_volunteer
-#     if not voter_has_authority(request, authority_required):
-#         return redirect_to_sign_in_page(request, authority_required)
-#
-#     batch_header_id = convert_to_int(request.GET.get('batch_header_id', 0))
-#     batch_row_id = convert_to_int(request.GET.get('batch_row_id', 0))
-#     kind_of_batch = request.GET.get('kind_of_batch', '')
-#     create_actions_button = request.GET.get('create_actions_button', '')
-#     # TODO use create_actions_button to set create_entry_flag to true
-#     # if create_actions_button in (MEASURE, ELECTED_OFFICE, CANDIDATE, ORGANIZATION_WORD, POSITION, POLITICIAN):
-#     #     create_entry_flag = True
-#     # Analyze the data based on the kind of data
-#     # batch_manager = BatchManager()
-#     # results = batch_manager.create_batch_row_actions(batch_header_id)
-#     # create_entry_flag = False
-#     # update_entry_flag = False
-#
-#     if kind_of_batch == ELECTED_OFFICE:
-#         results = import_create_or_update_elected_office_entry(batch_header_id, batch_row_id)
-#         if results['success']:
-#             messages.add_message(request, messages.INFO, 'ElectedOffice: Created:{created},  Updated:{updated} '
-#                                                          ''.format(created=results['number_of_elected_offices_created'],
-#                                                                    updated=results['number_of_elected_offices_updated'])
-#                                  )
-#         else:
-#             messages.add_message(request, messages.ERROR, 'ElectedOffice create failed.')
-#             return HttpResponseRedirect(reverse('import_export_batches:batch_list', args=()))
-#
-#     return HttpResponseRedirect(reverse('import_export_batches:batch_action_list', args=()) +
-#                                 "?kind_of_batch=" + str(kind_of_batch) +
-#                                 "&batch_header_id=" + str(batch_header_id))
 
 
 @login_required
