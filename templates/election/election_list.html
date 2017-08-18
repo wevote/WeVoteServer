@@ -10,6 +10,19 @@
 <p><a href="{% url 'election:election_remote_retrieve' %}">Retrieve all elections</a>.
     <a href="https://votinginfoproject.org/news/vip-continues-support-elections-throughout-2017/" target="_blank">VIP elections supported.</a></p>
 
+<form name="election_search_form" method="get" action="{% url 'election:election_list' %}">
+    {% csrf_token %}
+
+
+{% if election_search %}
+    <a href="{% url 'election:election_list' %}">
+         clear search</a>&nbsp;
+{% endif %}
+    <input type="text" name="election_search" id="election_search_id" value="{{ election_search }}" />
+    <input type="submit" value="Search" />
+</form>
+
+
 {% if election_list %}
     <table border="1" cellpadding="10">
         <tr>
@@ -17,6 +30,7 @@
             <td>Election Name</td>
             <td>Date</td>
             <td>Google Civic ID</td>
+            <td>State Code</td>
             <td>&nbsp;</td>
         </tr>
     {% for election in election_list %}
@@ -25,6 +39,7 @@
             <td><a href="{% url 'election:election_summary' election.id %}">{{ election.election_name }}</a></td>
             <td>{{ election.election_day_text }}</td>
             <td align="middle">{{ election.google_civic_election_id }}</td>
+            <td align="middle">{{ election.state_code }}</td>
             <td><a href="{% url 'election:election_edit' election.id %}" style="font-size: .65em">(edit)</a></td>
         </tr>
     {% endfor %}

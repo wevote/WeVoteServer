@@ -12,6 +12,7 @@ from django.core.urlresolvers import reverse
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.messages import get_messages
+from django.db.models import Q
 from django.shortcuts import render
 from election.models import ElectionManager
 from exception.models import handle_record_found_more_than_one_exception, handle_record_not_found_exception, \
@@ -418,14 +419,41 @@ def election_list_view(request):
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
+    election_search = request.GET.get('election_search', '')
     messages_on_stage = get_messages(request)
     election_list_query = Election.objects.all()
     election_list_query = election_list_query.order_by('election_day_text').reverse()
-    election_list = election_list_query
+
+    if positive_value_exists(election_search):
+        filters = []
+        new_filter = Q(election_name__icontains=election_search)
+        filters.append(new_filter)
+
+        new_filter = Q(election_day_text__icontains=election_search)
+        filters.append(new_filter)
+
+        new_filter = Q(google_civic_election_id__icontains=election_search)
+        filters.append(new_filter)
+
+        new_filter = Q(state_code__icontains=election_search)
+        filters.append(new_filter)
+
+        # Add the first query
+        if len(filters):
+            final_filters = filters.pop()
+
+            # ...and "OR" the remaining items in the list
+            for item in filters:
+                final_filters |= item
+
+            election_list_query = election_list_query.filter(final_filters)
+
+    election_list = election_list_query[:200]
 
     template_values = {
         'messages_on_stage': messages_on_stage,
         'election_list': election_list,
+        'election_search': election_search,
     }
     return render(request, 'election/election_list.html', template_values)
 
