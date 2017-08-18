@@ -29,6 +29,18 @@
     <p><a href="{% url 'admin_tools:sync_dashboard' %}?state_code={{ polling_location_state }}" target="_blank">
         Go to "Import Polling Locations From Master Server" Page</a></p>
 
+<form name="voter_search_form" method="get" action="{% url 'polling_location:polling_location_list' %}">
+    {% csrf_token %}
+
+
+{% if polling_location_search or issues_selected %}
+    <a href="{% url 'polling_location:polling_location_list' %}">
+         clear search</a>&nbsp;
+{% endif %}
+    <input type="text" name="polling_location_search" id="polling_location_id" value="{{ polling_location_search }}" />
+    <input type="submit" value="Search for Polling Location" />
+</form>
+
 {% if state_list %}
     <form name="polling_location_state_form" method="get" action="{% url 'polling_location:polling_location_list' %}">
         {% csrf_token %}
