@@ -10,6 +10,7 @@ from django.core.urlresolvers import reverse
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.messages import get_messages
+from django.db.models import Q
 from django.shortcuts import render
 from exception.models import handle_record_found_more_than_one_exception, handle_record_not_found_exception, \
     handle_record_not_saved_exception
@@ -247,23 +248,56 @@ def polling_location_list_view(request):
 
     google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
     polling_location_state = request.GET.get('polling_location_state')
+    polling_location_search = request.GET.get('polling_location_search')
+
     no_limit = False
 
     polling_location_count_query = PollingLocation.objects.all()
+    polling_location_query = PollingLocation.objects.all()
+
     if positive_value_exists(polling_location_state):
         polling_location_count_query = polling_location_count_query.filter(state__iexact=polling_location_state)
+        polling_location_query = polling_location_query.filter(state__iexact=polling_location_state)
+
+    if positive_value_exists(polling_location_search):
+        filters = []
+        new_filter = Q(zip_long__icontains=polling_location_search)
+        filters.append(new_filter)
+        #
+        # new_filter = Q(last_name__icontains=polling_location_search)
+        # filters.append(new_filter)
+        #
+        # new_filter = Q(we_vote_id__icontains=polling_location_search)
+        # filters.append(new_filter)
+        #
+        # new_filter = Q(email__icontains=polling_location_search)
+        # filters.append(new_filter)
+        #
+        # new_filter = Q(middle_name__icontains=polling_location_search)
+        # filters.append(new_filter)
+        #
+        # new_filter = Q(twitter_screen_name__icontains=polling_location_search)
+        # filters.append(new_filter)
+        #
+        # Add the first query
+        if len(filters):
+            final_filters = filters.pop()
+
+            # ...and "OR" the remaining items in the list
+            for item in filters:
+                final_filters |= item
+
+            polling_location_count_query = polling_location_count_query.filter(final_filters)
+            polling_location_query = polling_location_query.filter(final_filters)
+
     polling_location_count = polling_location_count_query.count()
     messages.add_message(request, messages.INFO, '{polling_location_count} polling locations found.'.format(
         polling_location_count=polling_location_count))
 
-    polling_location_query = PollingLocation.objects.all()
-    if positive_value_exists(polling_location_state):
-        polling_location_query = polling_location_query.filter(state__iexact=polling_location_state)
     if no_limit:
-        polling_location_query = polling_location_query.order_by('location_name')
+        polling_location_list = polling_location_query.order_by('location_name')
     else:
-        polling_location_query = polling_location_query.order_by('location_name')[:100]
-    polling_location_list = polling_location_query
+        polling_location_list = polling_location_query.order_by('location_name')[:100]
 
     state_list = STATE_LIST_IMPORT
     sorted_state_list = sorted(state_list.items())
@@ -276,6 +310,7 @@ def polling_location_list_view(request):
         'polling_location_list':    polling_location_list,
         'polling_location_count':   polling_location_count,
         'polling_location_state':   polling_location_state,
+        'polling_location_search':   polling_location_search,
         'state_list':               sorted_state_list,
     }
     return render(request, 'polling_location/polling_location_list.html', template_values)
