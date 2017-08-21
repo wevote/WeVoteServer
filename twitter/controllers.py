@@ -36,15 +36,18 @@ def twitter_identity_retrieve_for_api(twitter_handle, voter_device_id=''):  # tw
 
     # Check Candidate table
     if not positive_value_exists(owner_found):
+        # Find out the election the voter is looking at
+        results = figure_out_google_civic_election_id_voter_is_watching(voter_device_id)
+        if positive_value_exists(results['google_civic_election_id']):
+            google_civic_election_id_voter_is_watching = results['google_civic_election_id']
+        state_code = ""
+        candidate_name = ""
+
         candidate_list_manager = CandidateCampaignListManager()
-        candidate_results = candidate_list_manager.retrieve_candidates_from_non_unique_identifiers(twitter_handle)
+        candidate_results = candidate_list_manager.retrieve_candidates_from_non_unique_identifiers(
+            google_civic_election_id_voter_is_watching, state_code, twitter_handle, candidate_name)
         if candidate_results['candidate_list_found']:
             candidate_list = candidate_results['candidate_list']
-
-            # Find out the election the voter is looking at
-            results = figure_out_google_civic_election_id_voter_is_watching(voter_device_id)
-            if positive_value_exists(results['google_civic_election_id']):
-                google_civic_election_id_voter_is_watching = results['google_civic_election_id']
 
             # ...and then find the candidate entry for that election
             most_recent_candidate = candidate_list[0]

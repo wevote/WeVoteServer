@@ -594,6 +594,54 @@ class ContestMeasureList(models.Model):
         }
         return results
 
+    def retrieve_measures_from_non_unique_identifiers(self, google_civic_election_id, state_code,
+                                                      contest_measure_title):
+        keep_looking_for_duplicates = True
+        measure = ContestMeasure()
+        measure_found = False
+        measure_list = []
+        measure_list_found = False
+        multiple_entries_found = False
+        success = False
+        status = ""
+
+        if keep_looking_for_duplicates:
+            # Search by Candidate name exact match
+            try:
+                measure_query = ContestMeasure.objects.all()
+                measure_query = measure_query.filter(measure_title__iexact=contest_measure_title,
+                                                     state_code__iexact=state_code,
+                                                     google_civic_election_id=google_civic_election_id)
+
+                measure_list = list(measure_query)
+                if len(measure_list):
+                    # entry exists
+                    status += 'MEASURE_ENTRY_EXISTS '
+                    success = True
+                    # if a single entry matches, update that entry
+                    if len(measure_list) == 1:
+                        measure = measure_list[0]
+                        measure_found = True
+                        keep_looking_for_duplicates = False
+                    else:
+                        keep_looking_for_duplicates = False
+                        multiple_entries_found = True
+                        # more than one entry found with a match in CandidateCampaign
+            except ContestMeasure.DoesNotExist:
+                status += "BATCH_ROW_ACTION_MEASURE_NOT_FOUND "
+
+        results = {
+            'success':                  success,
+            'status':                   status,
+            'google_civic_election_id': google_civic_election_id,
+            'measure_found':            measure_found,
+            'measure':                  measure,
+            'measure_list_found':       measure_list_found,
+            'measure_list':             measure_list,
+            'multiple_entries_found':   multiple_entries_found,
+        }
+        return results
+
     def retrieve_possible_duplicate_measures(self, measure_title, google_civic_election_id, measure_url, maplight_id,
                                              vote_smart_id,
                                              we_vote_id_from_master=''):

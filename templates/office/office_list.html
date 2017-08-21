@@ -4,7 +4,12 @@
 {% block title %}Offices{% endblock %}
 
 {%  block content %}
-<a href="{% url 'admin_tools:admin_home' %}?google_civic_election_id={{ google_civic_election_id }}">< Back to Admin Home</a>
+<p><a href="{% url 'admin_tools:admin_home' %}?google_civic_election_id={{ google_civic_election_id }}">< Back to Admin Home</a></p>
+
+<p><a href="{% url 'import_export_batches:batch_list' %}?kind_of_batch=CONTEST_OFFICE&google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}"
+      target="_blank">
+        Import New Offices ></a> (open in new window)
+</p>
 
 <h1>Offices</h1>
 
@@ -71,12 +76,12 @@
             <td>{{ office.id }}</td>
             <td>{{ office.we_vote_id }}</td>
             <td><a href="{% url 'office:office_summary' office.id %}">{{ office.office_name }}
-                {% if office.district_id %}
-                    - District {{ office.district_id }}
-                {% endif %}
-                {% if office.state_code %}
-                    - {{ office.state_code }}
-                {% endif %}
+{#                {% if office.district_id %}#}
+{#                    - District {{ office.district_id }}#}
+{#                {% endif %}#}
+{#                {% if office.state_code %}#}
+{#                    - {{ office.state_code }}#}
+{#                {% endif %}#}
             </a></td>
             <td>{{ office.state_code }}</td>
             <td>{{ office.district_id|default_if_none:"" }}</td>

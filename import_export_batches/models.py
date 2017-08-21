@@ -39,15 +39,16 @@ KIND_OF_BATCH_CHOICES = (
 TO_BE_DETERMINED = 'TBD'
 DO_NOT_PROCESS = 'DO_NOT_PROCESS'
 CLEAN_DATA_MANUALLY = 'CLEAN_DATA_MANUALLY'
-CREATE = 'CREATE'
-ADD_TO_EXISTING = 'ADD_TO_EXISTING'
-QUERY_ERROR = 'QUERY_ERROR'
+IMPORT_CREATE = 'IMPORT_CREATE'
+IMPORT_ADD_TO_EXISTING = 'IMPORT_ADD_TO_EXISTING'
+IMPORT_DATA_ALREADY_MATCHING = 'IMPORT_DATA_ALREADY_MATCHING'
+IMPORT_QUERY_ERROR = 'IMPORT_QUERY_ERROR'
 
 KIND_OF_ACTION_CHOICES = (
     (TO_BE_DETERMINED,  'TBD'),
     (DO_NOT_PROCESS,    'Do not process'),
-    (CREATE,            'Create'),
-    (ADD_TO_EXISTING,   'Add to Existing'),
+    (IMPORT_CREATE,            'Create'),
+    (IMPORT_ADD_TO_EXISTING,   'Add to Existing'),
 )
 
 BATCH_SET_SOURCE_CTCL = 'CTCL'
@@ -61,6 +62,12 @@ BATCH_IMPORT_KEYS_ACCEPTED_FOR_CANDIDATES = {
     'candidate_is_incumbent': 'candidate_is_incumbent',
     'candidate_party_name': 'candidate_party_name',
     'candidate_batch_id': 'candidate_batch_id',
+    'candidate_twitter_handle': 'candidate_twitter_handle',
+    'candidate_url': 'candidate_url (website)',
+    'facebook_url': 'facebook_url',
+    'state_code': 'state_code',
+    'contest_office_we_vote_id': 'contest_office_we_vote_id',
+    'contest_office_name': 'contest_office_name',
 }
 
 BATCH_IMPORT_KEYS_ACCEPTED_FOR_CONTEST_OFFICES = {
@@ -141,7 +148,19 @@ BATCH_IMPORT_KEYS_ACCEPTED_FOR_POLITICIANS = {
 }
 
 BATCH_IMPORT_KEYS_ACCEPTED_FOR_POSITIONS = {
-    'organization_address': 'organization_address',
+    'position_we_vote_id': 'position_we_vote_id',
+    'candidate_name': 'candidate_name',
+    'candidate_twitter_handle': 'candidate_twitter_handle',
+    'contest_office_name': 'contest_office_name',
+    'contest_measure_title': 'contest_measure_title',
+    'stance': 'stance (SUPPORT or OPPOSE)',
+    'support': 'support (TRUE or FALSE)',
+    'oppose': 'oppose (TRUE or FALSE)',
+    'statement_text': 'statement_text',
+    'state_code': 'state_code',
+    'organization_name': 'organization_name',
+    'organization_we_vote_id': 'organization_we_vote_id',
+    'organization_twitter_handle': 'organization_twitter_handle (position owner)',
 }
 
 
@@ -450,32 +469,66 @@ class BatchManager(models.Model):
         """
         success = False
         status = ""
+        suggestion_created = False
+        suggestion_updated = False
+        header_value_recognized_by_we_vote = header_value_recognized_by_we_vote.lower()
+        incoming_alternate_header_value = incoming_alternate_header_value.lower()
 
         if not positive_value_exists(kind_of_batch) or not positive_value_exists(header_value_recognized_by_we_vote) \
                 or not positive_value_exists(incoming_alternate_header_value):
             status += "CREATE_BATCH_HEADER_TRANSLATION_SUGGESTION-MISSING_REQUIRED_VARIABLE "
             results = {
+                'success':              success,
+                'status':               status,
+                'suggestion_created':   suggestion_created,
+                'suggestion_updated':   suggestion_updated,
+            }
+            return results
+
+        if kind_of_batch == CANDIDATE:
+            batch_import_keys_accepted = BATCH_IMPORT_KEYS_ACCEPTED_FOR_CANDIDATES
+        elif kind_of_batch == CONTEST_OFFICE:
+            batch_import_keys_accepted = BATCH_IMPORT_KEYS_ACCEPTED_FOR_CONTEST_OFFICES
+        elif kind_of_batch == ELECTED_OFFICE:
+            batch_import_keys_accepted = BATCH_IMPORT_KEYS_ACCEPTED_FOR_ELECTED_OFFICES
+        elif kind_of_batch == MEASURE:
+            batch_import_keys_accepted = BATCH_IMPORT_KEYS_ACCEPTED_FOR_MEASURES
+        elif kind_of_batch == ORGANIZATION_WORD:
+            batch_import_keys_accepted = BATCH_IMPORT_KEYS_ACCEPTED_FOR_ORGANIZATIONS
+        elif kind_of_batch == POLITICIAN:
+            batch_import_keys_accepted = BATCH_IMPORT_KEYS_ACCEPTED_FOR_POLITICIANS
+        elif kind_of_batch == POSITION:
+            batch_import_keys_accepted = BATCH_IMPORT_KEYS_ACCEPTED_FOR_POSITIONS
+        else:
+            batch_import_keys_accepted = {}
+        if incoming_alternate_header_value in batch_import_keys_accepted:
+            success = True
+            status += "SUGGESTION_IS_BATCH_IMPORT_KEY "
+            results = {
                 'success': success,
                 'status': status,
+                'suggestion_created': suggestion_created,
+                'suggestion_updated': suggestion_updated,
             }
             return results
 
         try:
-            header_value_recognized_by_we_vote = header_value_recognized_by_we_vote.lower()
-            incoming_alternate_header_value = incoming_alternate_header_value.lower()
-            batch_header_translation_suggestion, created = BatchHeaderTranslationSuggestion.objects.update_or_create(
+            batch_header_translation_suggestion, suggestion_created = BatchHeaderTranslationSuggestion.objects.update_or_create(
                 kind_of_batch=kind_of_batch,
                 header_value_recognized_by_we_vote=header_value_recognized_by_we_vote,
                 incoming_alternate_header_value=incoming_alternate_header_value)
             success = True
+
             status += "BATCH_HEADER_TRANSLATION_SUGGESTION_SAVED "
         except Exception as e:
             success = False
             status += "BATCH_HEADER_TRANSLATION_SUGGESTION_SAVE_FAILED "
 
         results = {
-            'success': success,
-            'status': status,
+            'success':              success,
+            'status':               status,
+            'suggestion_created':   suggestion_created,
+            'suggestion_updated':   suggestion_updated,
         }
         return results
 
@@ -756,17 +809,17 @@ class BatchManager(models.Model):
                                                                            batch_row_id=batch_row_id)
             batch_row_action_found = True
             success = True
-            status = "BATCH_ROW_ACTION_POLITICIAN_RETRIEVED"
+            status = "BATCH_ROW_ACTION_POSITION_RETRIEVED"
         except BatchRowActionPosition.DoesNotExist:
             batch_row_action_position = BatchRowActionPosition()
             batch_row_action_found = False
             success = True
-            status = "BATCH_ROW_ACTION_POLITICIAN_NOT_FOUND"
+            status = "BATCH_ROW_ACTION_POSITION_NOT_FOUND"
         except Exception as e:
             batch_row_action_position = BatchRowActionPosition()
             batch_row_action_found = False
             success = False
-            status = "BATCH_ROW_ACTION_POLITICIAN_RETRIEVE_ERROR"
+            status = "BATCH_ROW_ACTION_POSITION_RETRIEVE_ERROR"
 
         results = {
             'success':                      success,
@@ -2698,7 +2751,7 @@ class BatchRowActionMeasure(models.Model):
     """
     batch_header_id = models.PositiveIntegerField(verbose_name="unique id of header row", unique=False, null=False)
     batch_row_id = models.PositiveIntegerField(verbose_name="unique id of batch row", unique=True, null=False)
-    kind_of_action = models.CharField(max_length=16, choices=KIND_OF_ACTION_CHOICES, default=TO_BE_DETERMINED)
+    kind_of_action = models.CharField(max_length=40, choices=KIND_OF_ACTION_CHOICES, default=TO_BE_DETERMINED)
 
     # Fields from ContestMeasure
     measure_we_vote_id = models.CharField(
@@ -2758,7 +2811,7 @@ class BatchRowActionContestOffice(models.Model):
     """
     batch_header_id = models.PositiveIntegerField(verbose_name="unique id of header row", unique=False, null=False)
     batch_row_id = models.PositiveIntegerField(verbose_name="unique id of batch row", unique=False, null=False)
-    kind_of_action = models.CharField(max_length=16, choices=KIND_OF_ACTION_CHOICES, default=TO_BE_DETERMINED)
+    kind_of_action = models.CharField(max_length=40, choices=KIND_OF_ACTION_CHOICES, default=TO_BE_DETERMINED)
 
     # Fields from ContestOffice
     contest_office_we_vote_id = models.CharField(
@@ -2859,7 +2912,7 @@ class BatchRowActionElectedOffice(models.Model):
     """
     batch_header_id = models.PositiveIntegerField(verbose_name="unique id of header row", unique=False, null=False)
     batch_row_id = models.PositiveIntegerField(verbose_name="unique id of batch row", unique=False, null=False)
-    kind_of_action = models.CharField(max_length=16, choices=KIND_OF_ACTION_CHOICES, default=TO_BE_DETERMINED)
+    kind_of_action = models.CharField(max_length=40, choices=KIND_OF_ACTION_CHOICES, default=TO_BE_DETERMINED)
 
     # Fields from ElectedOffice
     elected_office_we_vote_id = models.CharField(
@@ -2945,11 +2998,11 @@ class BatchRowActionPolitician(models.Model):
     """
     batch_header_id = models.PositiveIntegerField(verbose_name="unique id of header row", unique=False, null=False)
     batch_row_id = models.PositiveIntegerField(verbose_name="unique id of batch row", unique=False, null=False)
-    kind_of_action = models.CharField(max_length=16, choices=KIND_OF_ACTION_CHOICES, default=TO_BE_DETERMINED)
+    kind_of_action = models.CharField(max_length=40, choices=KIND_OF_ACTION_CHOICES, default=TO_BE_DETERMINED)
 
     # Fields from Politician
     politician_we_vote_id = models.CharField(verbose_name="we vote permanent id of this politician", max_length=255,
-                                              default=None, null=True, blank=True, unique=True)
+                                            default=None, null=True, blank=True, unique=True)
     # See this url for properties: https://docs.python.org/2/library/functions.html#property
     first_name = models.CharField(verbose_name="first name", max_length=255, default=None, null=True, blank=True)
     middle_name = models.CharField(verbose_name="middle name", max_length=255, default=None, null=True, blank=True)
@@ -3022,7 +3075,7 @@ class BatchRowActionCandidate(models.Model):
     """
     batch_header_id = models.PositiveIntegerField(verbose_name="unique id of header row", unique=False, null=False)
     batch_row_id = models.PositiveIntegerField(verbose_name="unique id of batch row", unique=False, null=False)
-    kind_of_action = models.CharField(max_length=16, choices=KIND_OF_ACTION_CHOICES, default=TO_BE_DETERMINED)
+    kind_of_action = models.CharField(max_length=40, choices=KIND_OF_ACTION_CHOICES, default=TO_BE_DETERMINED)
 
     # Fields from Candidate
     candidate_we_vote_id = models.CharField(
@@ -3113,6 +3166,9 @@ class BatchRowActionCandidate(models.Model):
                                                        null=True, blank=True, default="")
     ctcl_uuid = models.CharField(verbose_name="ctcl uuid", max_length=80, null=True, blank=True)
     candidate_is_top_ticket = models.BooleanField(verbose_name="candidate is top ticket", default=False)
+    candidate_is_incumbent = models.BooleanField(verbose_name="candidate is currently in the office", default=False)
+
+    # From VIP standard format
     candidate_person_id = models.CharField(verbose_name="candidate person id", max_length=255, null=True, blank=True)
 
     status = models.TextField(verbose_name="batch row action candidate status", null=True, blank=True, default="")
@@ -3124,7 +3180,7 @@ class BatchRowActionOrganization(models.Model):
     """
     batch_header_id = models.PositiveIntegerField(verbose_name="unique id of header row", unique=False, null=False)
     batch_row_id = models.PositiveIntegerField(verbose_name="unique id of batch row", unique=False, null=False)
-    kind_of_action = models.CharField(max_length=16, choices=KIND_OF_ACTION_CHOICES, default=TO_BE_DETERMINED)
+    kind_of_action = models.CharField(max_length=40, choices=KIND_OF_ACTION_CHOICES, default=TO_BE_DETERMINED)
 
     # Fields from Organization
     organization_we_vote_id = models.CharField(
@@ -3207,7 +3263,7 @@ class BatchRowActionPosition(models.Model):
     """
     batch_header_id = models.PositiveIntegerField(verbose_name="unique id of header row", unique=False, null=False)
     batch_row_id = models.PositiveIntegerField(verbose_name="unique id of batch row", unique=False, null=False)
-    kind_of_action = models.CharField(max_length=16, choices=KIND_OF_ACTION_CHOICES, default=TO_BE_DETERMINED)
+    kind_of_action = models.CharField(max_length=40, choices=KIND_OF_ACTION_CHOICES, default=TO_BE_DETERMINED)
 
     # Fields from Position
     position_we_vote_id = models.CharField(

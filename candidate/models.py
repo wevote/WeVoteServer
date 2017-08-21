@@ -327,44 +327,112 @@ class CandidateCampaignListManager(models.Model):
         }
         return results
 
-    def retrieve_candidates_from_non_unique_identifiers(self, twitter_handle, google_civic_election_id=0):
+    def retrieve_candidates_from_non_unique_identifiers(self, google_civic_election_id, state_code,
+                                                        candidate_twitter_handle, candidate_name):
+        keep_looking_for_duplicates = True
+        candidate = CandidateCampaign()
+        candidate_found = False
         candidate_list_objects = []
         candidate_list_found = False
-        twitter_handle_filtered = extract_twitter_handle_from_text_string(twitter_handle)
+        multiple_entries_found = False
+        candidate_twitter_handle = extract_twitter_handle_from_text_string(candidate_twitter_handle)
+        success = False
+        status = ""
 
-        try:
-            candidate_queryset = CandidateCampaign.objects.all()
-            candidate_queryset = candidate_queryset.filter(candidate_twitter_handle__iexact=twitter_handle_filtered)
-            if positive_value_exists(google_civic_election_id):
-                candidate_queryset = candidate_queryset.filter(google_civic_election_id=google_civic_election_id)
-            candidate_queryset = candidate_queryset.order_by('-id')
+        if keep_looking_for_duplicates and positive_value_exists(candidate_twitter_handle):
+            try:
+                candidate_query = CandidateCampaign.objects.all()
+                candidate_query = candidate_query.filter(candidate_twitter_handle__iexact=candidate_twitter_handle,
+                                                         google_civic_election_id=google_civic_election_id)
+                if positive_value_exists(state_code):
+                    candidate_query = candidate_query.filter(state_code__iexact=state_code)
 
-            candidate_list_objects = candidate_queryset
+                candidate_list = list(candidate_query)
+                if len(candidate_list):
+                    # At least one entry exists
+                    status += 'BATCH_ROW_ACTION_CANDIDATE_LIST_RETRIEVED '
+                    # if a single entry matches, update that entry
+                    if len(candidate_list) == 1:
+                        multiple_entries_found = False
+                        candidate = candidate_list[0]
+                        candidate_found = True
+                        keep_looking_for_duplicates = False
+                    else:
+                        # more than one entry found
+                        multiple_entries_found = True
+                        keep_looking_for_duplicates = False  # Deal with multiple Twitter duplicates manually
+            except CandidateCampaign.DoesNotExist:
+                # success = True
+                status += "BATCH_ROW_ACTION_EXISTING_CANDIDATE_NOT_FOUND "
+            except Exception as e:
+                keep_looking_for_duplicates = False
+                pass
+        # twitter handle does not exist, next look up against other data that might match
 
-            if len(candidate_list_objects):
-                candidate_list_found = True
-                status = 'CANDIDATES_RETRIEVED_FROM_TWITTER_HANDLE'
-                success = True
-            else:
-                status = 'NO_CANDIDATES_RETRIEVED_FROM_TWITTER_HANDLE'
-                success = True
-        except CandidateCampaign.DoesNotExist:
-            # No candidates found. Not a problem.
-            status = 'NO_CANDIDATES_FOUND_FROM_TWITTER_HANDLE_DoesNotExist'
-            candidate_list_objects = []
-            success = True
-        except Exception as e:
-            handle_exception(e, logger=logger)
-            status = 'FAILED retrieve_candidates_from_non_unique_identifiers ' \
-                     '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
-            success = False
+        if keep_looking_for_duplicates and positive_value_exists(candidate_name):
+            # Search by Candidate name exact match
+            try:
+                candidate_query = CandidateCampaign.objects.all(candidate_name)
+                candidate_query = candidate_query.filter(candidate_name__iexact=candidate_name,
+                                                         google_civic_election_id=google_civic_election_id)
+                if positive_value_exists(state_code):
+                    candidate_query = candidate_query.filter(state_code__iexact=state_code)
+
+                candidate_list = list(candidate_query)
+                if len(candidate_list):
+                    # entry exists
+                    status += 'CANDIDATE_ENTRY_EXISTS '
+                    success = True
+                    # if a single entry matches, update that entry
+                    if len(candidate_list) == 1:
+                        candidate = candidate_list[0]
+                        candidate_found = True
+                        keep_looking_for_duplicates = False
+                    else:
+                        # more than one entry found with a match in CandidateCampaign
+                        keep_looking_for_duplicates = False
+                        multiple_entries_found = True
+            except CandidateCampaign.DoesNotExist:
+                status += "BATCH_ROW_ACTION_CANDIDATE_NOT_FOUND "
+
+        if keep_looking_for_duplicates and positive_value_exists(candidate_name):
+            # Search for Candidate(s) that contains the same first and last names
+            try:
+                candidate_query = CandidateCampaign.objects.all()
+                candidate_query = candidate_query.filter(google_civic_election_id=google_civic_election_id)
+                if positive_value_exists(state_code):
+                    candidate_query = candidate_query.filter(state_code__iexact=state_code)
+                first_name = extract_first_name_from_full_name(candidate_name)
+                candidate_query = candidate_query.filter(candidate_name__icontains=first_name)
+                last_name = extract_last_name_from_full_name(candidate_name)
+                candidate_query = candidate_query.filter(candidate_name__icontains=last_name)
+
+                candidate_list = list(candidate_query)
+                if len(candidate_list):
+                    # entry exists
+                    status += 'CANDIDATE_ENTRY_EXISTS '
+                    success = True
+                    # if a single entry matches, update that entry
+                    if len(candidate_list) == 1:
+                        candidate = candidate_list[0]
+                        candidate_found = True
+                        keep_looking_for_duplicates = False
+                    else:
+                        # more than one entry found with a match in CandidateCampaign
+                        keep_looking_for_duplicates = False
+                        multiple_entries_found = True
+            except CandidateCampaign.DoesNotExist:
+                status += "BATCH_ROW_ACTION_CANDIDATE_NOT_FOUND "
 
         results = {
             'success':                  success,
             'status':                   status,
             'google_civic_election_id': google_civic_election_id,
+            'candidate_found':          candidate_found,
+            'candidate':                candidate,
             'candidate_list_found':     candidate_list_found,
             'candidate_list':           candidate_list_objects,
+            'multiple_entries_found':   multiple_entries_found,
         }
         return results
 
@@ -429,9 +497,9 @@ class CandidateCampaign(models.Model):
     candidate_twitter_handle = models.CharField(
         verbose_name='candidate twitter screen_name', max_length=255, null=True, unique=False)
     twitter_name = models.CharField(
-        verbose_name="org name from twitter", max_length=255, null=True, blank=True)
+        verbose_name="candidate plain text name from twitter", max_length=255, null=True, blank=True)
     twitter_location = models.CharField(
-        verbose_name="org location from twitter", max_length=255, null=True, blank=True)
+        verbose_name="candidate location from twitter", max_length=255, null=True, blank=True)
     twitter_followers_count = models.IntegerField(verbose_name="number of twitter followers",
                                                   null=False, blank=True, default=0)
     twitter_profile_image_url_https = models.URLField(verbose_name='url of logo from twitter', blank=True, null=True)
@@ -1060,10 +1128,10 @@ class CandidateCampaignManager(models.Model):
                     values_changed = True
             if positive_value_exists(we_vote_hosted_profile_image_url_large):
                 candidate.we_vote_hosted_profile_image_url_large = we_vote_hosted_profile_image_url_large
-                values_changed=True
+                values_changed = True
             if positive_value_exists(we_vote_hosted_profile_image_url_medium):
                 candidate.we_vote_hosted_profile_image_url_medium = we_vote_hosted_profile_image_url_medium
-                values_changed=True
+                values_changed = True
             if positive_value_exists(we_vote_hosted_profile_image_url_tiny):
                 candidate.we_vote_hosted_profile_image_url_tiny = we_vote_hosted_profile_image_url_tiny
                 values_changed = True
@@ -1129,7 +1197,7 @@ class CandidateCampaignManager(models.Model):
         :param candidate_object:
         :return:
         """
-        candidate_change = False
+        values_changed = False
 
         if not positive_value_exists(candidate_object.contest_office_id) \
                 or not positive_value_exists(candidate_object.contest_office_we_vote_id) \
@@ -1148,30 +1216,24 @@ class CandidateCampaignManager(models.Model):
                 office_object = results['contest_office']
                 if not positive_value_exists(candidate_object.contest_office_id):
                     candidate_object.contest_office_id = office_object.id
-                    candidate_change = True
+                    values_changed = True
                 if not positive_value_exists(candidate_object.contest_office_we_vote_id):
                     candidate_object.contest_office_we_vote_id = office_object.we_vote_id
-                    candidate_change = True
+                    values_changed = True
                 if not positive_value_exists(candidate_object.contest_office_name):
                     candidate_object.contest_office_name = office_object.office_name
-                    candidate_change = True
+                    values_changed = True
 
-        if candidate_change:
+        if values_changed:
             candidate_object.save()
 
         return candidate_object
 
-    def create_candidate_row_entry(self, candidate_name, candidate_party_name, candidate_is_top_ticket, ctcl_uuid,
-                                   google_civic_election_id, state_code):
+    def create_candidate_row_entry(self, update_values):
         """
         Create CandidateCampaign table entry with CandidateCampaign details 
-        :param candidate_name: 
-        :param candidate_party_name: 
-        :param candidate_is_top_ticket: 
-        :param ctcl_uuid: 
-        :param google_civic_election_id: 
-        :param state_code:
-        :return: 
+        :param update_values:
+        :return:
         """
         success = False
         status = ""
@@ -1179,24 +1241,81 @@ class CandidateCampaignManager(models.Model):
         new_candidate_created = False
         new_candidate = ''
 
+        # Variables we accept
+        candidate_name = update_values['candidate_name'] if 'candidate_name' in update_values else ''
+        contest_office_we_vote_id = update_values['contest_office_we_vote_id'] \
+            if 'contest_office_we_vote_id' in update_values else False
+        contest_office_id = update_values['contest_office_id'] \
+            if 'contest_office_id' in update_values else False
+        contest_office_name = update_values['contest_office_name'] \
+            if 'contest_office_name' in update_values else False
+        candidate_party_name = update_values['party'] if 'party' in update_values else ''
+        candidate_is_incumbent = update_values['candidate_is_incumbent'] \
+            if 'candidate_is_incumbent' in update_values else False
+        candidate_is_top_ticket = update_values['candidate_is_top_ticket'] \
+            if 'candidate_is_top_ticket' in update_values else False
+        ctcl_uuid = update_values['ctcl_uuid'] if 'ctcl_uuid' in update_values else ''
+        google_civic_election_id = update_values['google_civic_election_id'] \
+            if 'google_civic_election_id' in update_values else ''
+        state_code = update_values['state_code'] if 'state_code' in update_values else ''
+        candidate_twitter_handle = update_values['candidate_twitter_handle'] \
+            if 'candidate_twitter_handle' in update_values else ''
+        candidate_url = update_values['candidate_url'] \
+            if 'candidate_url' in update_values else ''
+        facebook_url = update_values['facebook_url'] \
+            if 'facebook_url' in update_values else ''
+
+        if not positive_value_exists(candidate_name) or not positive_value_exists(contest_office_we_vote_id) \
+                or not positive_value_exists(contest_office_id) \
+                or not positive_value_exists(google_civic_election_id) or not positive_value_exists(state_code):
+            # If we don't have the minimum values required to create a candidate, then don't proceed
+            status += "CREATE_CANDIDATE_ROW "
+            results = {
+                    'success':                  success,
+                    'status':                   status,
+                    'new_candidate_created':    new_candidate_created,
+                    'candidate_updated':        candidate_updated,
+                    'new_candidate':            new_candidate,
+                }
+            return results
+
         try:
-            new_candidate = CandidateCampaign.objects.create(candidate_name=candidate_name, party=candidate_party_name,
-                                                             candidate_is_top_ticket=candidate_is_top_ticket,
-                                                             ctcl_uuid=ctcl_uuid,
+            new_candidate = CandidateCampaign.objects.create(candidate_name=candidate_name,
+                                                             contest_office_we_vote_id=contest_office_we_vote_id,
                                                              google_civic_election_id=google_civic_election_id,
                                                              state_code=state_code)
             if new_candidate:
                 success = True
-                status = "CANDIDATE_CREATED"
+                status += "CANDIDATE_CREATED "
                 new_candidate_created = True
             else:
                 success = False
-                status = "CANDIDATE_CREATE_FAILED"
+                status += "CANDIDATE_CREATE_FAILED "
         except Exception as e:
             success = False
             new_candidate_created = False
-            status = "CANDIDATE_RETRIEVE_ERROR"
+            status += "CANDIDATE_CREATE_ERROR "
             handle_exception(e, logger=logger, exception_message=status)
+
+        if new_candidate_created:
+            try:
+                new_candidate.contest_office_id = contest_office_id
+                new_candidate.contest_office_name = contest_office_name
+                new_candidate.party = candidate_party_name
+                new_candidate.ctcl_uuid = ctcl_uuid
+                new_candidate.candidate_is_incumbent = candidate_is_incumbent
+                new_candidate.candidate_is_top_ticket = candidate_is_top_ticket
+                new_candidate.candidate_twitter_handle = candidate_twitter_handle
+                new_candidate.candidate_url = candidate_url
+                new_candidate.facebook_url = facebook_url
+                new_candidate.save()
+
+                status += "CANDIDATE_CREATE_THEN_UPDATE_SUCCESS "
+            except Exception as e:
+                success = False
+                new_candidate_created = False
+                status += "CANDIDATE_CREATE_THEN_UPDATE_ERROR "
+                handle_exception(e, logger=logger, exception_message=status)
 
         results = {
                 'success':                  success,
@@ -1207,42 +1326,74 @@ class CandidateCampaignManager(models.Model):
             }
         return results
 
-    def update_candidate_row_entry(self, candidate_name,candidate_party_name,candidate_is_top_ticket, ctcl_uuid,
-                                   google_civic_election_id, state_code, candidate_we_vote_id):
+    def update_candidate_row_entry(self, candidate_we_vote_id, update_values):
         """
         Update CandidateCampaign table entry with matching we_vote_id
-        :param candidate_name: 
-        :param candidate_party_name: 
-        :param candidate_is_top_ticket: 
-        :param ctcl_uuid: 
-        :param google_civic_election_id: 
-        :param state_code: 
-        :param candidate_we_vote_id: 
-        :return: 
+        :param candidate_we_vote_id:
+        :param update_values:
+        :return:
         """
 
         success = False
         status = ""
         candidate_updated = False
-        # new_candidate_created = False
-        # new_candidate = ''
         existing_candidate_entry = ''
 
         try:
             existing_candidate_entry = CandidateCampaign.objects.get(we_vote_id__iexact=candidate_we_vote_id)
+            values_changed = False
+
             if existing_candidate_entry:
                 # found the existing entry, update the values
-                existing_candidate_entry.candidate_name = candidate_name
-                existing_candidate_entry.party = candidate_party_name
-                existing_candidate_entry.google_civic_election_id = google_civic_election_id
-                existing_candidate_entry.is_top_ticket = candidate_is_top_ticket
-                existing_candidate_entry.ctcl_uuid = ctcl_uuid
-                existing_candidate_entry.state_code = state_code
+                if 'candidate_name' in update_values:
+                    existing_candidate_entry.candidate_name = update_values['candidate_name']
+                    values_changed = True
+                if 'party' in update_values:
+                    existing_candidate_entry.party = update_values['party']
+                    values_changed = True
+                if 'contest_office_we_vote_id' in update_values:
+                    existing_candidate_entry.contest_office_we_vote_id = update_values['contest_office_we_vote_id']
+                    values_changed = True
+                if 'contest_office_id' in update_values:
+                    existing_candidate_entry.contest_office_id = update_values['contest_office_id']
+                    values_changed = True
+                if 'contest_office_name' in update_values:
+                    existing_candidate_entry.contest_office_name = update_values['contest_office_name']
+                    values_changed = True
+                if 'google_civic_election_id' in update_values:
+                    existing_candidate_entry.google_civic_election_id = update_values['google_civic_election_id']
+                    values_changed = True
+                if 'candidate_is_incumbent' in update_values:
+                    existing_candidate_entry.candidate_is_incumbent = update_values['candidate_is_incumbent']
+                    values_changed = True
+                if 'candidate_is_top_ticket' in update_values:
+                    existing_candidate_entry.is_top_ticket = update_values['candidate_is_top_ticket']
+                    values_changed = True
+                if 'ctcl_uuid' in update_values:
+                    existing_candidate_entry.ctcl_uuid = update_values['ctcl_uuid']
+                    values_changed = True
+                if 'state_code' in update_values:
+                    existing_candidate_entry.state_code = update_values['state_code']
+                    values_changed = True
+                if 'candidate_twitter_handle' in update_values:
+                    existing_candidate_entry.candidate_twitter_handle = update_values['candidate_twitter_handle']
+                    values_changed = True
+                if 'candidate_url' in update_values:
+                    existing_candidate_entry.candidate_url = update_values['candidate_url']
+                    values_changed = True
+                if 'facebook_url' in update_values:
+                    existing_candidate_entry.facebook_url = update_values['facebook_url']
+                    values_changed = True
                 # now go ahead and save this entry (update)
-                existing_candidate_entry.save()
-                candidate_updated = True
-                success = True
-                status = "CANDIDATE_UPDATED"
+                if values_changed:
+                    existing_candidate_entry.save()
+                    candidate_updated = True
+                    success = True
+                    status = "CANDIDATE_UPDATED"
+                else:
+                    candidate_updated = False
+                    success = True
+                    status = "CANDIDATE_NOT_UPDATED-NO_CHANGES "
         except Exception as e:
             success = False
             candidate_updated = False

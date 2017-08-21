@@ -5,25 +5,28 @@
 from ballot.models import MEASURE, CANDIDATE, POLITICIAN
 from .models import BatchManager, BatchDescription, BatchHeaderMap, BatchRow, BatchRowActionOrganization, \
     BatchRowActionMeasure, BatchRowActionElectedOffice, BatchRowActionContestOffice, BatchRowActionPolitician, \
-    BatchRowActionCandidate, \
+    BatchRowActionCandidate, BatchRowActionPosition, \
     CLEAN_DATA_MANUALLY, CONTEST_OFFICE, ELECTED_OFFICE, POSITION, \
-    CREATE, ADD_TO_EXISTING, QUERY_ERROR, \
+    IMPORT_CREATE, IMPORT_ADD_TO_EXISTING, IMPORT_DATA_ALREADY_MATCHING, IMPORT_QUERY_ERROR, \
     TO_BE_DETERMINED, DO_NOT_PROCESS, \
     BATCH_IMPORT_KEYS_ACCEPTED_FOR_CANDIDATES, BATCH_IMPORT_KEYS_ACCEPTED_FOR_CONTEST_OFFICES, \
     BATCH_IMPORT_KEYS_ACCEPTED_FOR_ELECTED_OFFICES, BATCH_IMPORT_KEYS_ACCEPTED_FOR_MEASURES, \
     BATCH_IMPORT_KEYS_ACCEPTED_FOR_ORGANIZATIONS, BATCH_IMPORT_KEYS_ACCEPTED_FOR_POLITICIANS, \
     BATCH_IMPORT_KEYS_ACCEPTED_FOR_POSITIONS
-from candidate.models import CandidateCampaign, CandidateCampaignManager
+from candidate.models import CandidateCampaign, CandidateCampaignListManager, CandidateCampaignManager
 from django.db.models import Q
 from electoral_district.controllers import retrieve_electoral_district
 from election.models import ElectionManager
 from exception.models import handle_exception
-from measure.models import ContestMeasure, ContestMeasureManager
-from office.models import ContestOffice, ContestOfficeManager, ElectedOffice, ElectedOfficeManager
-from organization.models import Organization, OrganizationManager, \
+from wevote_functions.functions import extract_first_name_from_full_name, extract_last_name_from_full_name
+from measure.models import ContestMeasure, ContestMeasureManager, ContestMeasureList
+from office.models import ContestOffice, ContestOfficeListManager, ContestOfficeManager, \
+    ElectedOffice, ElectedOfficeManager
+from organization.models import Organization, OrganizationListManager, OrganizationManager, \
     NONPROFIT_501C3, NONPROFIT_501C4, POLITICAL_ACTION_COMMITTEE, \
     CORPORATION, NEWS_CORPORATION, UNKNOWN
 from politician.models import Politician, PoliticianManager
+from position.models import PositionManager, INFORMATION_ONLY, OPPOSE, SUPPORT
 from twitter.models import TwitterUserManager
 from voter_guide.models import ORGANIZATION_WORD
 import wevote_functions.admin
@@ -85,7 +88,7 @@ def create_batch_row_actions(batch_header_id, batch_row_id):
             batch_header_map = BatchHeaderMap()
 
     batch_row_list = []
-    batch_row_list_found = False
+    batch_row_action_list_found = False
     if batch_header_map_found:
         try:
             batch_row_list = BatchRow.objects.all()
@@ -94,20 +97,20 @@ def create_batch_row_actions(batch_header_id, batch_row_id):
                 batch_row_list = batch_row_list.filter(id=batch_row_id)
 
             if len(batch_row_list):
-                batch_row_list_found = True
+                batch_row_action_list_found = True
         except BatchRow.DoesNotExist:
             # This is fine
             pass
 
-    if batch_description_found and batch_header_map_found and batch_row_list_found:
+    if batch_description_found and batch_header_map_found and batch_row_action_list_found:
         for one_batch_row in batch_row_list:
             if kind_of_batch == CANDIDATE:
                 results = create_batch_row_action_candidate(batch_description, batch_header_map, one_batch_row)
 
-                if results['action_candidate_updated']:
+                if results['batch_row_action_updated']:
                     number_of_batch_actions_updated += 1
                     success = True
-                elif results['new_action_candidate_created']:
+                elif results['batch_row_action_created']:
                     # for now, do not handle batch_row_action_candidate data
                     # batch_row_action_candidate = results['batch_row_action_candidate']
                     number_of_batch_actions_created += 1
@@ -171,10 +174,10 @@ def create_batch_row_actions(batch_header_id, batch_row_id):
             elif kind_of_batch == POSITION:
                 results = create_batch_row_action_position(batch_description, batch_header_map, one_batch_row)
 
-                if results['action_position_updated']:
+                if results['batch_row_action_updated']:
                     number_of_batch_actions_updated += 1
                     success = True
-                elif results['new_action_position_created']:
+                elif results['batch_row_action_created']:
                     # for now, do not handle batch_row_action_politician data
                     # batch_row_action_politician = results['batch_row_action_politician']
                     number_of_batch_actions_created += 1
@@ -280,46 +283,31 @@ def create_batch_row_action_organization(batch_description, batch_header_map, on
     if positive_value_exists(organization_we_vote_id):
         # If here, then we are updating an existing known record
         keep_looking_for_duplicates = False
-        kind_of_action = ADD_TO_EXISTING
-        # TODO We want to search the Organization table for the existing record with this organization_we_vote_id
-        #  and describe what we will be updating.
+        organization_manager = OrganizationManager()
+        organization_results = organization_manager.retrieve_organization_from_we_vote_id(organization_we_vote_id)
+        if organization_results['organization_found']:
+            organization = organization_results['organization']
+            kind_of_action = IMPORT_ADD_TO_EXISTING
+        else:
+            kind_of_action = CLEAN_DATA_MANUALLY
+            status += "ORGANIZATION_NOT_FOUND_BY_WE_VOTE_ID "
 
-    if keep_looking_for_duplicates and positive_value_exists(organization_twitter_handle):
-        try:
-            organization_query = Organization.objects.all()
-            organization_query = organization_query.filter(
-                organization_twitter_handle__iexact=organization_twitter_handle)
+    if positive_value_exists(keep_looking_for_duplicates):
+        organization_list_manager = OrganizationListManager()
+        matching_results = organization_list_manager.retrieve_organizations_from_non_unique_identifiers(
+            organization_twitter_handle)
 
-            organization_list = list(organization_query)
-            if len(organization_list):
-                # At least one entry exists
-                status += 'BATCH_ROW_ACTION_ORGANIZATION_LIST_RETRIEVED '
-                batch_row_action_found = True
-                # if a single entry matches, update that entry
-                if len(organization_list) == 1:
-                    kind_of_action = ADD_TO_EXISTING
-                    single_entry_found = True
-                    multiple_entries_found = False
-                    organization_we_vote_id = organization_list.first().we_vote_id
-                else:
-                    # more than one entry found with a match in Organization
-                    kind_of_action = CLEAN_DATA_MANUALLY
-                    single_entry_found = False
-                    multiple_entries_found = True
-                    keep_looking_for_duplicates = False  # Deal with multiple Twitter duplicates manually
-            else:
-                kind_of_action = CREATE
-                single_entry_found = False
-        except Organization.DoesNotExist:
-            batch_row_action_found = False
-            # success = True
-            status += "BATCH_ROW_ACTION_EXISTING_ORGANIZATION_NOT_FOUND "
-            kind_of_action = TO_BE_DETERMINED  # We want to use other criteria to see if there is a duplicate
-        except Exception as e:
-            keep_looking_for_duplicates = False
-            kind_of_action = QUERY_ERROR
-            pass
-    # twitter handle does not exist, next look up against other data that might match
+        if matching_results['organization_found']:
+            organization = matching_results['organization']
+            organization_we_vote_id = organization.we_vote_id
+            kind_of_action = IMPORT_ADD_TO_EXISTING
+        elif matching_results['multiple_entries_found']:
+            kind_of_action = CLEAN_DATA_MANUALLY
+            status += "MULTIPLE_ORGANIZATIONS_FOUND "
+        elif not matching_results['success']:
+            kind_of_action = IMPORT_QUERY_ERROR
+        else:
+            kind_of_action == IMPORT_CREATE
 
     # Transform data to our constants: BatchRowTranslationMap
     # ORGANIZATION_TYPE_CHOICES = (
@@ -433,13 +421,13 @@ def create_batch_row_action_measure(batch_description, batch_header_map, one_bat
                 batch_row_action_measure = contest_measure_item_list
                 # if a single entry matches, update that entry
                 if len(contest_measure_item_list) == 1:
-                    kind_of_action = ADD_TO_EXISTING
-                    measure_we_vote_id = contest_measure_query.first().we_vote_id
+                    kind_of_action = IMPORT_ADD_TO_EXISTING
+                    measure_we_vote_id = contest_measure_item_list[0].we_vote_id
                 else:
                     # more than one entry found with a match in ContestMeasure
                     kind_of_action = 'DO_NOT_PROCESS'
             else:
-                kind_of_action = CREATE
+                kind_of_action = IMPORT_CREATE
         except ContestMeasure.DoesNotExist:
             batch_row_action_measure = BatchRowActionMeasure()
             # batch_row_action_found = False
@@ -598,14 +586,14 @@ def create_batch_row_action_elected_office(batch_description, batch_header_map, 
                 # success = True
                 # if a single entry matches, update that entry
                 if len(elected_office_item_list) == 1:
-                    kind_of_action = ADD_TO_EXISTING
-                    elected_office_we_vote_id = elected_office_query.first().we_vote_id
+                    kind_of_action = IMPORT_ADD_TO_EXISTING
+                    elected_office_we_vote_id = elected_office_item_list[0].we_vote_id
                 else:
                     # more than one entry found with a match in ElectedOffice
                     kind_of_action = 'DO_NOT_PROCESS'
                     # elected_office_we_vote_id = elected_office_item_list.values('elected_office_we_vote_id')
             else:
-                kind_of_action = CREATE
+                kind_of_action = IMPORT_CREATE
         except ElectedOffice.DoesNotExist:
             batch_row_action_elected_office = BatchRowActionElectedOffice()
             batch_row_action_found = False
@@ -717,10 +705,10 @@ def create_batch_row_action_contest_office(batch_description, batch_header_map, 
     batch_row_action_updated = False
     batch_row_action_created = False
     state_code = ''
-    batch_row_action_contest_office_status = ''
     contest_office_name_mapped = False
     status = ''
     success = False
+    kind_of_action = TO_BE_DETERMINED
 
     # Does a BatchRowActionContestOffice entry already exist?
     # We want to start with the BatchRowAction... entry first so we can record our findings line by line while
@@ -738,12 +726,12 @@ def create_batch_row_action_contest_office(batch_description, batch_header_map, 
                 batch_row_id=one_batch_row.id,
             )
             batch_row_action_created = True
-            status = "BATCH_ROW_ACTION_CONTEST_OFFICE_CREATED"
+            status += "BATCH_ROW_ACTION_CONTEST_OFFICE_CREATED "
         except Exception as e:
             batch_row_action_created = False
             batch_row_action_contest_office = BatchRowActionContestOffice()
             success = False
-            status = "BATCH_ROW_ACTION_CONTEST_OFFICE_NOT_CREATED"
+            status += "BATCH_ROW_ACTION_CONTEST_OFFICE_NOT_CREATED "
 
             results = {
                 'success': success,
@@ -752,9 +740,6 @@ def create_batch_row_action_contest_office(batch_description, batch_header_map, 
                 'batch_row_action_created': batch_row_action_created,
                 'batch_row_action_contest_office': batch_row_action_contest_office,
             }
-            # 'new_action_contest_office_created':    new_action_contest_office_created,
-            # 'action_contest_office_updated':        action_contest_office_updated,
-            # 'batch_row_action_contest_office':      batch_row_action_contest_office,
             return results
 
     # NOTE: If you add incoming header names here, make sure to update BATCH_IMPORT_KEYS_ACCEPTED_FOR_CONTEST_OFFICES
@@ -780,7 +765,7 @@ def create_batch_row_action_contest_office(batch_description, batch_header_map, 
                 state_code = election.state_code
         else:
             # state_code = ''
-            batch_row_action_contest_office_status = 'ELECTORAL_DISTRICT_NOT_FOUND'
+            status = 'ELECTORAL_DISTRICT_NOT_FOUND'
             kind_of_action = 'TBD'
 
     # Find the column in the incoming batch_row with the header == contest_office_name
@@ -826,81 +811,45 @@ def create_batch_row_action_contest_office(batch_description, batch_header_map, 
     # Look up ContestOffice to see if an entry exists
     # contest_office = ContestOffice()
     keep_looking_for_duplicates = True
+    contest_office_manager = ContestOfficeManager()
     if positive_value_exists(contest_office_we_vote_id):
         # If here, then we are updating an existing known record
         keep_looking_for_duplicates = False
-        kind_of_action = ADD_TO_EXISTING
-        # TODO We want to search the ContestOffice table for the existing record with this organization_we_vote_id
-        #  and describe what we will be updating.
+        kind_of_action = IMPORT_ADD_TO_EXISTING
+        results = contest_office_manager.retrieve_contest_office_from_we_vote_id(contest_office_we_vote_id)
+        if results['contest_office_found']:
+            contest_office = results['contest_office']
+            contest_office_name = contest_office.office_name
 
     # These three parameters are needed to look up in ContestOffice table for a match
     if keep_looking_for_duplicates:
         if not positive_value_exists(contest_office_name) or not positive_value_exists(state_code) or not \
                 positive_value_exists(google_civic_election_id):
             kind_of_action = TO_BE_DETERMINED
-            batch_row_action_contest_office_status += "INSUFFICIENT_DATA_FOR_BATCH_ROW_ACTION_CONTEST_OFFICE_CREATE "
+            status += "INSUFFICIENT_DATA_FOR_BATCH_ROW_ACTION_CONTEST_OFFICE_CREATE "
             keep_looking_for_duplicates = False
 
-    # These three parameters are needed to look up in ContestOffice table for a match
     if keep_looking_for_duplicates:
-        try:
-            contest_office_query = ContestOffice.objects.all()
-            # TODO Is there a way to filter with "dash" insensitivity? - vs --
-            contest_office_query = contest_office_query.filter(office_name__iexact=contest_office_name,
-                                                               state_code__iexact=state_code,
-                                                               google_civic_election_id=google_civic_election_id)
-
-            contest_office_item_list = list(contest_office_query)
-            if len(contest_office_item_list):
-                keep_looking_for_duplicates = False
-                batch_row_action_contest_office_status += 'CREATE_BATCH_ROW_ACTION_CONTEST_OFFICE-ROW_RETRIEVED '
-                # if a single entry matches, update that entry
-                if len(contest_office_item_list) == 1:
-                    kind_of_action = ADD_TO_EXISTING
-                    contest_office_we_vote_id = contest_office_query.first().we_vote_id
-                else:
-                    # more than one entry found with a match in ContestOffice
-                    kind_of_action = DO_NOT_PROCESS
-            else:
-                # Existing entry couldn't be found in the contest office table. We should keep looking for
-                #  close matches
-                pass
-        except ContestOffice.DoesNotExist:
-            # Existing entry couldn't be found in the contest office table. We should keep looking for
-            #  close matches
-            pass
-
-    # TODO To build
-    # if keep_looking_for_duplicates:
-    #     # Check to see if we have a BatchRowTranslationMap for the value in contest_office_name
-    #     kind_of_batch = CONTEST_OFFICE
-    #     batch_row_name = "contest_office_name"
-    #     incoming_batch_row_value = contest_office_name
-    #     mapped_value = batch_manager.fetch_batch_row_translation_map(kind_of_batch, batch_row_name,
-    #                                                                  incoming_batch_row_value)
-    #     if positive_value_exists(mapped_value):
-    #         # Replace existing value with the
-    #         contest_office_name = mapped_value
-    #         contest_office_name_mapped = True
-    #         kind_of_action = ADD_TO_EXISTING
-    #         keep_looking_for_duplicates = False
-    #
-    # if keep_looking_for_duplicates:
-    #     # Are there similar office names that we might want to map this value to?
-    #     kind_of_batch = CONTEST_OFFICE
-    #     batch_row_name = "contest_office_name"
-    #     incoming_batch_row_value = contest_office_name
-    #     office_results = batch_manager.find_possible_matches(kind_of_batch, batch_row_name, incoming_batch_row_value,
-    #                                                          google_civic_election_id, state_code)
-    #     if office_results['possible_matches_found']:
-    #         pass
-    #
-    #     kind_of_action = TO_BE_DETERMINED
-    #     batch_row_action_contest_office_status += "INSUFFICIENT_DATA_FOR_BATCH_ROW_ACTION_CONTEST_OFFICE_CREATE "
+        contest_office_list_manager = ContestOfficeListManager()
+        matching_results = contest_office_list_manager.retrieve_contest_offices_from_non_unique_identifiers(
+            contest_office_name, google_civic_election_id, state_code)
+        if matching_results['contest_office_found']:
+            contest_office = matching_results['contest_office']
+            contest_office_name = contest_office.office_name
+            contest_office_we_vote_id = contest_office.we_vote_id
+            kind_of_action = IMPORT_ADD_TO_EXISTING
+            keep_looking_for_duplicates = False
+        elif matching_results['contest_office_list_found']:
+            kind_of_action = TO_BE_DETERMINED
+            keep_looking_for_duplicates = False
+        elif not matching_results['success']:
+            kind_of_action = TO_BE_DETERMINED
+            status += matching_results['status']
+            keep_looking_for_duplicates = False
 
     if keep_looking_for_duplicates:
-        kind_of_action = CREATE
-        batch_row_action_contest_office_status += "EXISTING_CONTEST_OFFICE_ENTRY_NOT_FOUND-CREATE "
+        kind_of_action = IMPORT_CREATE
+        status += "EXISTING_CONTEST_OFFICE_ENTRY_NOT_FOUND-CREATE "
 
     # Now save the data
     try:
@@ -914,7 +863,7 @@ def create_batch_row_action_contest_office(batch_description, batch_header_map, 
         batch_row_action_contest_office.kind_of_action = kind_of_action
         batch_row_action_contest_office.contest_office_we_vote_id = contest_office_we_vote_id
         batch_row_action_contest_office.google_civic_election_id = google_civic_election_id
-        batch_row_action_contest_office.status = batch_row_action_contest_office_status
+        batch_row_action_contest_office.status = status
         batch_row_action_contest_office.candidate_selection_id1 = candidate_selection_id1
         batch_row_action_contest_office.candidate_selection_id2 = candidate_selection_id2
         batch_row_action_contest_office.candidate_selection_id3 = candidate_selection_id3
@@ -1011,15 +960,15 @@ def create_batch_row_action_politician(batch_description, batch_header_map, one_
                 # success = True
                 # if a single entry matches, update that entry
                 if len(politician_item_list) == 1:
-                    kind_of_action = ADD_TO_EXISTING
+                    kind_of_action = IMPORT_ADD_TO_EXISTING
                     single_politician_found = True
-                    politician_we_vote_id = politician_query.first().we_vote_id
+                    politician_we_vote_id = politician_item_list[0].we_vote_id
                 else:
                     # more than one entry found with a match in Politician
                     kind_of_action = 'DO_NOT_PROCESS'
                     multiple_politicians_found = True
             else:
-                # kind_of_action = CREATE
+                # kind_of_action = IMPORT_CREATE
                 single_politician_found = False
         except Politician.DoesNotExist:
             batch_row_action_politician = BatchRowActionPolitician()
@@ -1043,7 +992,7 @@ def create_batch_row_action_politician(batch_description, batch_header_map, one_
                 # if a single entry matches, update that entry
                 if len(politician_item_list) == 1:
                     single_politician_found = True
-                    kind_of_action = ADD_TO_EXISTING
+                    kind_of_action = IMPORT_ADD_TO_EXISTING
                 else:
                     # more than one entry found with a match in Politician
                     kind_of_action = 'DO_NOT_PROCESS'
@@ -1061,7 +1010,7 @@ def create_batch_row_action_politician(batch_description, batch_header_map, one_
         kind_of_action = 'TBD'
         batch_row_action_politician_status = "INSUFFICIENT_DATA_FOR_BATCH_ROW_ACTION_POLITICIAN_CREATE"
     if not single_politician_found and not multiple_politicians_found:
-        kind_of_action = CREATE
+        kind_of_action = IMPORT_CREATE
 
     try:
         # Check if politician_name, state_code match exists in BatchRowActionElectedOffice
@@ -1165,173 +1114,204 @@ def create_batch_row_action_candidate(batch_description, batch_header_map, one_b
     """
     batch_manager = BatchManager()
 
-    new_action_candidate_created = False
-    action_candidate_updated = False
-    state_code = ''
-    batch_row_action_candidate_status = ''
-    candidate_we_vote_id = ''
-    success = False
+    batch_row_action_created = True
+    batch_row_action_updated = False
     status = ''
+    success = False
+    candidate_found = False
+    candidate_contest_office_we_vote_id = ""
+    contest_office_found = False
+    contest_office_we_vote_id = ""
+
+    # Does a BatchRowActionCandidate entry already exist?
+    # We want to start with the BatchRowAction... entry first so we can record our findings line by line while
+    #  we are checking for existing duplicate data
+    existing_results = batch_manager.retrieve_batch_row_action_candidate(
+        batch_description.batch_header_id, one_batch_row.id)
+    if existing_results['batch_row_action_found']:
+        batch_row_action_candidate = existing_results['batch_row_action_candidate']
+        batch_row_action_updated = True
+    else:
+        # If a BatchRowActionCandidate entry does not exist, create one
+        try:
+            batch_row_action_candidate = BatchRowActionCandidate.objects.create(
+                batch_header_id=batch_description.batch_header_id,
+                batch_row_id=one_batch_row.id,
+            )
+            batch_row_action_created = True
+            status = "BATCH_ROW_ACTION_CANDIDATE_CREATED"
+        except Exception as e:
+            batch_row_action_created = False
+            batch_row_action_candidate = BatchRowActionCandidate()
+            success = False
+            status += "BATCH_ROW_ACTION_CANDIDATE_NOT_CREATED"
+
+            results = {
+                'success': success,
+                'status': status,
+                'batch_row_action_updated': batch_row_action_updated,
+                'batch_row_action_created': batch_row_action_created,
+                'batch_row_action_candidate': batch_row_action_candidate,
+            }
+            return results
 
     # NOTE: If you add incoming header names here, make sure to update BATCH_IMPORT_KEYS_ACCEPTED_FOR_CANDIDATES
 
     # Find the column in the incoming batch_row with the header == candidate_name
+    candidate_we_vote_id = batch_manager.retrieve_value_from_batch_row(
+        "candidate_we_vote_id", batch_header_map, one_batch_row)
     candidate_name = batch_manager.retrieve_value_from_batch_row("candidate_name", batch_header_map, one_batch_row)
     google_civic_election_id = str(batch_description.google_civic_election_id)
-
     ctcl_uuid = batch_manager.retrieve_value_from_batch_row("candidate_ctcl_uuid", batch_header_map, one_batch_row)
-
-    candidate_person_id = batch_manager.retrieve_value_from_batch_row("candidate_person_id", batch_header_map,
-                                                                      one_batch_row)
-    candidate_is_top_ticket = batch_manager.retrieve_value_from_batch_row("candidate_is_top_ticket", batch_header_map,
-                                                                          one_batch_row)
-    candidate_party_name = batch_manager.retrieve_value_from_batch_row("candidate_party_name", batch_header_map,
-                                                                       one_batch_row)
-    candidate_temp_id = batch_manager.retrieve_value_from_batch_row("candidate_batch_id", batch_header_map,
-                                                                    one_batch_row)
+    candidate_person_id = batch_manager.retrieve_value_from_batch_row(
+        "candidate_person_id", batch_header_map, one_batch_row)
+    contest_office_name = batch_manager.retrieve_value_from_batch_row(
+        "contest_office_name", batch_header_map, one_batch_row)
+    candidate_is_top_ticket = batch_manager.retrieve_value_from_batch_row(
+        "candidate_is_top_ticket", batch_header_map, one_batch_row)
+    candidate_is_incumbent = batch_manager.retrieve_value_from_batch_row(
+        "candidate_is_incumbent", batch_header_map, one_batch_row)
+    candidate_party_name = batch_manager.retrieve_value_from_batch_row(
+        "candidate_party_name", batch_header_map, one_batch_row)
+    candidate_twitter_handle_raw = batch_manager.retrieve_value_from_batch_row(
+        "candidate_twitter_handle", batch_header_map, one_batch_row)
+    candidate_twitter_handle = extract_twitter_handle_from_text_string(candidate_twitter_handle_raw)
+    candidate_url = batch_manager.retrieve_value_from_batch_row("candidate_url", batch_header_map, one_batch_row)
+    facebook_url = batch_manager.retrieve_value_from_batch_row("facebook_url", batch_header_map, one_batch_row)
+    state_code = batch_manager.retrieve_value_from_batch_row("state_code", batch_header_map, one_batch_row)
+    candidate_temp_id = batch_manager.retrieve_value_from_batch_row(
+        "candidate_batch_id", batch_header_map, one_batch_row)  # TODO Is the name transformation correct?
 
     # get batch_set_id from batch_description
     batch_set_id = str(batch_description.batch_set_id)
-    # Look up batch_description with the given batch_set_id and kind_of_batch as CONTEST_OFFICE, get batch_header_id
-    batch_header_id = get_batch_header_id_from_batch_description(batch_set_id, CONTEST_OFFICE)
+    # Look up batch_description with the given batch_set_id and kind_of_batch as CANDIDATE, get batch_header_id
+    batch_header_id = get_batch_header_id_from_batch_description(batch_set_id, CANDIDATE)
+
+    # state_code lookup from the election
+    if positive_value_exists(google_civic_election_id) and not positive_value_exists(state_code):
+        # Check to see if there is a state served for the election
+        election_manager = ElectionManager()
+        results = election_manager.retrieve_election(google_civic_election_id)
+        if results['election_found']:
+            election = results['election']
+            state_code = election.state_code
 
     # state code look up: BatchRowActionContestOffice entry stores candidate_selection_ids.
     #  Get the state code from matching
     # candidate_selection_id BatchRowActionContestOffice entry. Eg: looking for 'can1' in candidate_selection_ids 1-10
-    try:
-        batch_row_action_contest_office_query = BatchRowActionContestOffice.objects.all()
-        batch_row_action_contest_office_query = batch_row_action_contest_office_query.filter(
-            Q(batch_header_id=batch_header_id) & Q(candidate_selection_id1=candidate_temp_id) |
-            Q(candidate_selection_id2=candidate_temp_id) | Q(candidate_selection_id3=candidate_temp_id) |
-            Q(candidate_selection_id4=candidate_temp_id) | Q(candidate_selection_id5=candidate_temp_id) |
-            Q(candidate_selection_id6=candidate_temp_id) | Q(candidate_selection_id7=candidate_temp_id) |
-            Q(candidate_selection_id8=candidate_temp_id) | Q(candidate_selection_id9=candidate_temp_id) |
-            Q(candidate_selection_id10=candidate_temp_id))
-        batch_row_action_contest_office_list = list(batch_row_action_contest_office_query)
-        if len(batch_row_action_contest_office_list):
-            state_code = batch_row_action_contest_office_query.first().state_code
-    except BatchRowActionContestOffice.DoesNotExist:
-        status = "BATCH_ROW_ACTION_CANDIDATE-CONTEST_OFFICE_NOT_FOUND"
-        pass
+    if positive_value_exists(candidate_temp_id) and not positive_value_exists(state_code):
+        try:
+            batch_row_action_contest_office_query = BatchRowActionContestOffice.objects.all()
+            batch_row_action_contest_office_query = batch_row_action_contest_office_query.filter(
+                Q(batch_header_id=batch_header_id) & Q(candidate_selection_id1=candidate_temp_id) |
+                Q(candidate_selection_id2=candidate_temp_id) | Q(candidate_selection_id3=candidate_temp_id) |
+                Q(candidate_selection_id4=candidate_temp_id) | Q(candidate_selection_id5=candidate_temp_id) |
+                Q(candidate_selection_id6=candidate_temp_id) | Q(candidate_selection_id7=candidate_temp_id) |
+                Q(candidate_selection_id8=candidate_temp_id) | Q(candidate_selection_id9=candidate_temp_id) |
+                Q(candidate_selection_id10=candidate_temp_id))
+            batch_row_action_contest_office_list = list(batch_row_action_contest_office_query)
+            if len(batch_row_action_contest_office_list):
+                state_code = batch_row_action_contest_office_list[0].state_code
+        except BatchRowActionContestOffice.DoesNotExist:
+            status = "BATCH_ROW_ACTION_CANDIDATE-CONTEST_OFFICE_NOT_FOUND"
+            pass
+
     # Look up CandidateCampaign to see if an entry exists
     # These three parameters are needed to look up in ElectedOffice table for a match
-    if positive_value_exists(candidate_name) and positive_value_exists(google_civic_election_id) and \
-            positive_value_exists(state_code):
-        try:
-            candidate_query = CandidateCampaign.objects.all()
-            candidate_query = candidate_query.filter(candidate_name__iexact=candidate_name,
-                                                     state_code__iexact=state_code,
-                                                     google_civic_election_id=google_civic_election_id)
+    keep_looking_for_duplicates = True
+    kind_of_action = TO_BE_DETERMINED
+    if positive_value_exists(candidate_we_vote_id):
+        # If here, then we are updating an existing known record
+        keep_looking_for_duplicates = False
+        kind_of_action = IMPORT_ADD_TO_EXISTING
+        # TODO We want to search the Candidate table for the existing record with this candidate_we_vote_id
+        # candidate_found = True
 
-            candidate_item_list = list(candidate_query)
-            if len(candidate_item_list):
-                # entry exists
-                batch_row_action_candidate_status = 'CANDIDATE_ENTRY_EXISTS'
-                batch_row_action_found = True
-                new_action_candidate_created = False
-                # success = True
-                # if a single entry matches, update that entry
-                if len(candidate_item_list) == 1:
-                    kind_of_action = ADD_TO_EXISTING
-                    candidate_we_vote_id = candidate_query.first().we_vote_id
-                else:
-                    # more than one entry found with a match in CandidateCampaign
-                    kind_of_action = 'DO_NOT_PROCESS'
-                    # candidate_we_vote_id = candidate_item_list.values('candidate_we_vote_id')
-            else:
-                kind_of_action = CREATE
-        except CandidateCampaign.DoesNotExist:
-            batch_row_action_candidate = BatchRowActionCandidate()
-            batch_row_action_found = False
-            # success = True
-            batch_row_action_candidate_status = "BATCH_ROW_ACTION_CANDIDATE_NOT_FOUND"
-            kind_of_action = 'TBD'
-    else:
-        kind_of_action = 'TBD'
-        batch_row_action_candidate_status = "INSUFFICIENT_DATA_FOR_BATCH_ROW_ACTION_CANDIDATE_CREATE"
+    if keep_looking_for_duplicates:
+        candidate_campaign_list_manager = CandidateCampaignListManager()
+        matching_results = candidate_campaign_list_manager.retrieve_candidates_from_non_unique_identifiers(
+            google_civic_election_id, state_code, candidate_twitter_handle, candidate_name)
+
+        if matching_results['candidate_found']:
+            candidate = matching_results['candidate']
+            candidate_found = True
+            candidate_we_vote_id = candidate.we_vote_id
+            contest_office_we_vote_id = candidate.contest_office_we_vote_id
+            kind_of_action = IMPORT_ADD_TO_EXISTING
+        elif matching_results['multiple_entries_found']:
+            kind_of_action = CLEAN_DATA_MANUALLY
+            status += "MULTIPLE_ORGANIZATIONS_FOUND "
+        elif not matching_results['success']:
+            kind_of_action = IMPORT_QUERY_ERROR
+        else:
+            kind_of_action = IMPORT_CREATE
+
+    contest_office_we_vote_id = ""
+    contest_office_id = 0
+    if contest_office_we_vote_id:
+        # Look up the contest_office information
+        contest_manager = ContestOfficeManager()
+        contest_results = contest_manager.retrieve_contest_office_from_we_vote_id(contest_office_we_vote_id)
+        if contest_results['contest_office_found']:
+            contest_office = contest_results['contest_office']
+            contest_office_name = contest_office.office_name
+            contest_office_we_vote_id = contest_office.we_vote_id
+            contest_office_id = contest_office.id
+            contest_office_found = True
+
+    if not positive_value_exists(contest_office_found):
+        # Find the office even though we haven't found candidate
+        contest_office_list_manager = ContestOfficeListManager()
+        matching_results = contest_office_list_manager.retrieve_contest_offices_from_non_unique_identifiers(
+                contest_office_name, google_civic_election_id, state_code)
+        if matching_results['contest_office_found']:
+            contest_office = matching_results['contest_office']
+            contest_office_name = contest_office.office_name
+            contest_office_we_vote_id = contest_office.we_vote_id
+            contest_office_id = contest_office.id
+        else:
+            if kind_of_action == IMPORT_CREATE:
+                # We should not create without a valid office entry
+                kind_of_action = TO_BE_DETERMINED
+
+    # TODO Other checks:
+    #   Does the office match?
+
     # Create a new entry in BatchRowActionCandidate
     try:
-
-        # Check if candidate_name match exists in BatchRowActionCandidate
-        # for this header_id (Duplicate entries in the same data set
-        existing_batch_row_action_candidate_query = BatchRowActionCandidate.objects.all()
-        existing_batch_row_action_candidate_query = existing_batch_row_action_candidate_query.filter(
-            batch_header_id=batch_description.batch_header_id, candidate_name__iexact=candidate_name,
-            state_code__iexact=state_code, google_civic_election_id=google_civic_election_id)
-        existing_batch_row_action_candidate_list = list(existing_batch_row_action_candidate_query)
-        number_of_existing_entries = len(existing_batch_row_action_candidate_list)
-        if not number_of_existing_entries:
-            # no entry exists, create one
-            updated_values = {
-                'candidate_name': candidate_name,
-                'candidate_person_id': candidate_person_id,
-                'ctcl_uuid': ctcl_uuid,
-                'state_code': state_code,
-                'candidate_is_top_ticket': candidate_is_top_ticket,
-                'candidate_we_vote_id': candidate_we_vote_id,
-                'kind_of_action': kind_of_action,
-                'google_civic_election_id': google_civic_election_id,
-                'status': batch_row_action_candidate_status,
-                'party': candidate_party_name,
-            }
-
-            batch_row_action_candidate, new_action_candidate_created = BatchRowActionCandidate.objects.\
-                update_or_create(batch_header_id=batch_description.batch_header_id, batch_row_id=one_batch_row.id,
-                                 defaults=updated_values)
-            success = True
-            status += "CREATE_BATCH_ROW_ACTION_CANDIDATE-BATCH_ROW_ACTION_CANDIDATE_CREATED"
-        else:
-            # # if batch_header_id is same then it is a duplicate entry?
-            existing_candidate_entry = existing_batch_row_action_candidate_query.first()
-            if one_batch_row.id != existing_candidate_entry.batch_row_id:
-                # duplicate entry, create a new entry but set kind_of_action as DO_NOT_PROCESS and
-                # set status as duplicate
-                # kind_of_action = 'DO_NOT_PROCESS'
-                updated_values = {
-                    'candidate_name': candidate_name,
-                    'candidate_person_id': candidate_person_id,
-                    'ctcl_uuid': ctcl_uuid,
-                    'state_code': state_code,
-                    'candidate_is_top_ticket': candidate_is_top_ticket,
-                    'candidate_we_vote_id': candidate_we_vote_id,
-                    'kind_of_action': 'DO_NOT_PROCESS',
-                    'google_civic_election_id': google_civic_election_id,
-                    'status': 'DUPLICATE_CANDIDATE_ENTRY',
-                    'party': candidate_party_name,
-                }
-
-                batch_row_action_candidate, new_action_candidate_created = \
-                    BatchRowActionCandidate.objects.update_or_create(
-                        batch_header_id=batch_description.batch_header_id, batch_row_id=one_batch_row.id,
-                        defaults=updated_values)
-                status += 'CREATE_BATCH_ROW_ACTION_CANDIDATE-BATCH_ROW_ACTION_CANDIDATE_DUPLICATE_ENTRIES'
-                success = True
-                action_candidate_updated = True
-                # this is a duplicate entry, mark it's kind_of_action as DO_NOT_PROCESS and status as duplicate
-            else:
-                # existing entry but not duplicate
-                status += 'BATCH_ROW_ACTION_CANDIDATE_ENTRY_EXISTS'
-                success = True
-                batch_row_action_candidate = existing_candidate_entry
+        batch_row_action_candidate.candidate_we_vote_id = candidate_we_vote_id
+        batch_row_action_candidate.candidate_name = candidate_name
+        batch_row_action_candidate.candidate_person_id = candidate_person_id
+        batch_row_action_candidate.ctcl_uuid = ctcl_uuid
+        batch_row_action_candidate.state_code = state_code
+        batch_row_action_candidate.candidate_is_top_ticket = candidate_is_top_ticket
+        batch_row_action_candidate.kind_of_action = kind_of_action
+        batch_row_action_candidate.google_civic_election_id = google_civic_election_id
+        batch_row_action_candidate.status = status
+        batch_row_action_candidate.party = candidate_party_name
+        batch_row_action_candidate.contest_office_name = contest_office_name
+        batch_row_action_candidate.contest_office_we_vote_id = contest_office_we_vote_id
+        batch_row_action_candidate.contest_office_id = contest_office_id
+        batch_row_action_candidate.candidate_is_incumbent = candidate_is_incumbent
+        batch_row_action_candidate.candidate_twitter_handle = candidate_twitter_handle
+        batch_row_action_candidate.candidate_url = candidate_url
+        batch_row_action_candidate.facebook_url = facebook_url
+        batch_row_action_candidate.save()
     except Exception as e:
-        batch_row_action_candidate = BatchRowActionCandidate()
-        batch_row_action_found = False
         success = False
-        new_action_candidate_created = False
-        status = "CREATE_BATCH_ROW_ACTION_CANDIDATE_BATCH_ROW_ACTION_CANDIDATE_RETRIEVE_ERROR"
-        handle_exception(e, logger=logger, exception_message=status)
+        status += "BATCH_ROW_ACTION_CANDIDATE_UNABLE_TO_SAVE "
 
     results = {
         'success':                      success,
         'status':                       status,
-        'new_action_candidate_created': new_action_candidate_created,
-        'action_candidate_updated':     action_candidate_updated,
+        'batch_row_action_updated':     batch_row_action_updated,
+        'batch_row_action_created':     batch_row_action_created,
         'batch_row_action_candidate':   batch_row_action_candidate,
     }
     return results
 
 
-def create_batch_row_action_position(batch_description, batch_header_map, one_batch_row):  # TODO DALE Convert to position
+def create_batch_row_action_position(batch_description, batch_header_map, one_batch_row):
     """
 
     :param batch_description:
@@ -1342,22 +1322,34 @@ def create_batch_row_action_position(batch_description, batch_header_map, one_ba
     batch_manager = BatchManager()
     success = False
     status = ""
+    organization_found = False
+    organization_id = 0
     batch_row_action_updated = False
     batch_row_action_created = False
     kind_of_action = ""
+    keep_looking_for_duplicates = True
+    candidate_found = False
+    candidate_we_vote_id = ""
+    candidate_id = 0
+    contest_office_found = False
+    contest_office_we_vote_id = ""
+    contest_office_id = 0
+    measure_found = False
+    measure_we_vote_id = ""
+    measure_id = 0
 
-    # Does a BatchRowActionOrganization entry already exist?
+    # Does a BatchRowActionPosition entry already exist?
     # We want to start with the BatchRowAction... entry first so we can record our findings line by line while
     #  we are checking for existing duplicate data
-    existing_results = batch_manager.retrieve_batch_row_action_organization(
+    existing_results = batch_manager.retrieve_batch_row_action_position(
         batch_description.batch_header_id, one_batch_row.id)
     if existing_results['batch_row_action_found']:
-        batch_row_action_organization = existing_results['batch_row_action_organization']
+        batch_row_action_position = existing_results['batch_row_action_position']
         batch_row_action_updated = True
     else:
         # If a BatchRowActionOrganization entry does not exist, create one
         try:
-            batch_row_action_organization = BatchRowActionOrganization.objects.create(
+            batch_row_action_position = BatchRowActionPosition.objects.create(
                 batch_header_id=batch_description.batch_header_id,
                 batch_row_id=one_batch_row.id,
             )
@@ -1366,7 +1358,7 @@ def create_batch_row_action_position(batch_description, batch_header_map, one_ba
             status = "BATCH_ROW_ACTION_ORGANIZATION_CREATED"
         except Exception as e:
             batch_row_action_created = False
-            batch_row_action_organization = BatchRowActionOrganization()
+            batch_row_action_position = BatchRowActionPosition()
             success = False
             status = "BATCH_ROW_ACTION_ORGANIZATION_NOT_CREATED"
 
@@ -1375,145 +1367,227 @@ def create_batch_row_action_position(batch_description, batch_header_map, one_ba
                 'status': status,
                 'batch_row_action_updated': batch_row_action_updated,
                 'batch_row_action_created': batch_row_action_created,
-                'batch_row_action_organization': batch_row_action_organization,
+                'batch_row_action_position': batch_row_action_position,
             }
             return results
 
     # NOTE: If you add incoming header names here, make sure to update BATCH_IMPORT_KEYS_ACCEPTED_FOR_POSITIONS
 
-    # Find the column in the incoming batch_row with the header title specified (ex/ "organization_name"
-    organization_we_vote_id = batch_manager.retrieve_value_from_batch_row(
-        "organization_we_vote_id", batch_header_map, one_batch_row)
+    position_we_vote_id = batch_manager.retrieve_value_from_batch_row(
+        "position_we_vote_id", batch_header_map, one_batch_row)
+    candidate_name = batch_manager.retrieve_value_from_batch_row(
+        "candidate_name", batch_header_map, one_batch_row)
+    candidate_twitter_handle_raw = batch_manager.retrieve_value_from_batch_row(
+        "candidate_twitter_handle", batch_header_map, one_batch_row)
+    candidate_twitter_handle = extract_twitter_handle_from_text_string(candidate_twitter_handle_raw)
+    contest_office_name = batch_manager.retrieve_value_from_batch_row(
+        "contest_office_name", batch_header_map, one_batch_row)
+    contest_measure_title = batch_manager.retrieve_value_from_batch_row(
+        "contest_measure_title", batch_header_map, one_batch_row)
+    statement_text = batch_manager.retrieve_value_from_batch_row("statement_text", batch_header_map, one_batch_row)
+    stance = batch_manager.retrieve_value_from_batch_row("stance", batch_header_map, one_batch_row)
+    if stance.lower() not in ('info_only', 'no_stance', 'oppose', 'percent_rating', 'still_deciding', 'support'):
+        support = batch_manager.retrieve_value_from_batch_row("support", batch_header_map, one_batch_row)
+        oppose = batch_manager.retrieve_value_from_batch_row("oppose", batch_header_map, one_batch_row)
+        if positive_value_exists(oppose):
+            stance = OPPOSE
+        elif positive_value_exists(support):
+            stance = SUPPORT
+        elif positive_value_exists(statement_text):
+            stance = INFORMATION_ONLY
+        else:
+            # If no stance was provided, and no statement_text, we default to a "Support" stance
+            stance = SUPPORT
+
     organization_name = batch_manager.retrieve_value_from_batch_row(
         "organization_name", batch_header_map, one_batch_row)
+    organization_we_vote_id = batch_manager.retrieve_value_from_batch_row(
+        "organization_we_vote_id", batch_header_map, one_batch_row)
     organization_twitter_handle_raw = batch_manager.retrieve_value_from_batch_row(
         "organization_twitter_handle", batch_header_map, one_batch_row)
     organization_twitter_handle = extract_twitter_handle_from_text_string(organization_twitter_handle_raw)
-    organization_facebook = batch_manager.retrieve_value_from_batch_row(
-        "organization_facebook", batch_header_map, one_batch_row)
-    organization_instagram = batch_manager.retrieve_value_from_batch_row(
-        "organization_instagram", batch_header_map, one_batch_row)
-    organization_website = batch_manager.retrieve_value_from_batch_row(
-        "organization_website", batch_header_map, one_batch_row)
-    organization_phone1 = batch_manager.retrieve_value_from_batch_row(
-        "organization_phone1", batch_header_map, one_batch_row)
-    organization_address = batch_manager.retrieve_value_from_batch_row(
-        "organization_address", batch_header_map, one_batch_row)
-    organization_city = batch_manager.retrieve_value_from_batch_row(
-        "organization_city", batch_header_map, one_batch_row)
-    organization_state = batch_manager.retrieve_value_from_batch_row(
-        "organization_state", batch_header_map, one_batch_row)
-    organization_zip = batch_manager.retrieve_value_from_batch_row(
-        "organization_zip", batch_header_map, one_batch_row)
-    state_served_code = batch_manager.retrieve_value_from_batch_row("state_served_code", batch_header_map, one_batch_row)
-    organization_type = batch_manager.retrieve_value_from_batch_row(
-        "organization_type", batch_header_map, one_batch_row)
-    organization_contact_name = batch_manager.retrieve_value_from_batch_row(
-        "organization_contact_name", batch_header_map, one_batch_row)
+    google_civic_election_id = str(batch_description.google_civic_election_id)
+    state_code = batch_manager.retrieve_value_from_batch_row("state_code", batch_header_map, one_batch_row)
+    if positive_value_exists(google_civic_election_id) and not positive_value_exists(state_code):
+        # Check to see if there is a state served for the election
+        election_manager = ElectionManager()
+        results = election_manager.retrieve_election(google_civic_election_id)
+        if results['election_found']:
+            election = results['election']
+            state_code = election.state_code
 
-    # Now check for warnings (like "this is a duplicate"). If warnings are found,
-    # add the warning to batch_row_action_organization entry
-    # batch_row_action_organization.kind_of_action = "TEST"
-    keep_looking_for_duplicates = True
+    # Find the organization
     if positive_value_exists(organization_we_vote_id):
         # If here, then we are updating an existing known record
+        organization_manager = OrganizationManager()
+        organization_results = organization_manager.retrieve_organization_from_we_vote_id(organization_we_vote_id)
+        if organization_results['organization_found']:
+            organization_found = True
+            organization = organization_results['organization']
+            organization_we_vote_id = organization.we_vote_id
+            organization_id = organization.id
+            organization_name = organization.organization_name
+        else:
+            status += "ORGANIZATION_NOT_FOUND_BY_WE_VOTE_ID "
+
+    if not organization_found and positive_value_exists(organization_twitter_handle):
+        organization_list_manager = OrganizationListManager()
+        matching_results = organization_list_manager.retrieve_organizations_from_non_unique_identifiers(
+            organization_twitter_handle)
+
+        if matching_results['organization_found']:
+            organization_found = True
+            organization = matching_results['organization']
+            organization_we_vote_id = organization.we_vote_id
+            organization_id = organization.id
+            organization_name = organization.organization_name
+        elif matching_results['multiple_entries_found']:
+            status += "MULTIPLE_ORGANIZATIONS_FOUND "
+        else:
+            status += matching_results['status']
+
+    position_manager = PositionManager()
+    if positive_value_exists(position_we_vote_id):
+        # If here, then we are updating an existing known record
         keep_looking_for_duplicates = False
-        kind_of_action = ADD_TO_EXISTING
-        # TODO We want to search the Organization table for the existing record with this organization_we_vote_id
-        #  and describe what we will be updating.
+        kind_of_action = IMPORT_ADD_TO_EXISTING
+        position_results = position_manager.retrieve_position_from_we_vote_id(position_we_vote_id)
+        if position_results['position_found']:
+            position = position_results['position']
 
-    if keep_looking_for_duplicates and positive_value_exists(organization_twitter_handle):
-        try:
-            organization_query = Organization.objects.all()
-            organization_query = organization_query.filter(
-                organization_twitter_handle__iexact=organization_twitter_handle)
+    if not organization_found:
+        # If an organization is not found, there is no use trying to find the position
+        keep_looking_for_duplicates = False
 
-            organization_list = list(organization_query)
-            if len(organization_list):
-                # At least one entry exists
-                status += 'BATCH_ROW_ACTION_ORGANIZATION_LIST_RETRIEVED '
-                batch_row_action_found = True
-                # if a single entry matches, update that entry
-                if len(organization_list) == 1:
-                    kind_of_action = ADD_TO_EXISTING
-                    single_entry_found = True
-                    multiple_entries_found = False
-                    organization_we_vote_id = organization_list.first().we_vote_id
-                else:
-                    # more than one entry found with a match in Organization
-                    kind_of_action = CLEAN_DATA_MANUALLY
-                    single_entry_found = False
-                    multiple_entries_found = True
-                    keep_looking_for_duplicates = False  # Deal with multiple Twitter duplicates manually
-            else:
-                kind_of_action = CREATE
-                single_entry_found = False
-        except Organization.DoesNotExist:
-            batch_row_action_found = False
-            # success = True
-            status += "BATCH_ROW_ACTION_EXISTING_ORGANIZATION_NOT_FOUND "
-            kind_of_action = TO_BE_DETERMINED  # We want to use other criteria to see if there is a duplicate
-        except Exception as e:
-            keep_looking_for_duplicates = False
-            kind_of_action = QUERY_ERROR
+    # By here, we should have the organization (owner of the position) and the election
+    # NEXT: figure out what candidate/office the endorsement is for
+    if positive_value_exists(candidate_twitter_handle) or positive_value_exists(candidate_name):
+        candidate_campaign_list_manager = CandidateCampaignListManager()
+        matching_results = candidate_campaign_list_manager.retrieve_candidates_from_non_unique_identifiers(
+            google_civic_election_id, state_code, candidate_twitter_handle, candidate_name)
+
+        if matching_results['candidate_found']:
+            candidate = matching_results['candidate']
+            candidate_found = True
+            candidate_we_vote_id = candidate.we_vote_id
+            candidate_id = candidate.id
+            contest_office_we_vote_id = candidate.contest_office_we_vote_id
+            contest_office_id = candidate.contest_office_id
+        elif matching_results['multiple_entries_found']:
+            status += "MULTIPLE_ORGANIZATIONS_FOUND "
+        elif not matching_results['success']:
+            status += matching_results['status']
+        else:
             pass
-    # twitter handle does not exist, next look up against other data that might match
+    elif positive_value_exists(contest_measure_title):
+        contest_measure_list_manager = ContestMeasureList()
+        matching_results = contest_measure_list_manager.retrieve_measures_from_non_unique_identifiers(
+            google_civic_election_id, state_code, contest_measure_title)
 
-    # Transform data to our constants: BatchRowTranslationMap
-    # ORGANIZATION_TYPE_CHOICES = (
-    #     (NONPROFIT_501C3, 'Nonprofit 501c3'),
-    #     (NONPROFIT_501C4, 'Nonprofit 501c4'),
-    #     (POLITICAL_ACTION_COMMITTEE, 'Political Action Committee'),
-    #     (CORPORATION, 'Corporation'),
-    #     (NEWS_CORPORATION, 'News Corporation'),
-    #     (UNKNOWN, 'Unknown'),
-    # )
-    organization_type_transformed = UNKNOWN  # Default to this
-    if organization_type.lower() == "c3":
-        organization_type_transformed = NONPROFIT_501C3
-    elif organization_type.lower() == "c4":
-        organization_type_transformed = NONPROFIT_501C4
+        if matching_results['measure_found']:
+            measure = matching_results['measure']
+            measure_found = True
+            measure_we_vote_id = measure.we_vote_id
+            measure_id = measure.id
+        elif matching_results['multiple_entries_found']:
+            status += "MULTIPLE_ORGANIZATIONS_FOUND "
+        elif not matching_results['success']:
+            status += matching_results['status']
+        else:
+            pass
+
+    if keep_looking_for_duplicates:
+        if candidate_found and organization_found:
+            position_results = \
+                position_manager.retrieve_organization_candidate_campaign_position_with_we_vote_id(
+                    organization_id, candidate_we_vote_id, google_civic_election_id)
+            if position_results['position_found']:
+                position = position_results['position']
+                position_we_vote_id = position.position_we_vote_id
+        elif measure_found and organization_found:
+            position_results = \
+                position_manager.retrieve_organization_contest_measure_position_with_we_vote_id(
+                    organization_id, measure_we_vote_id, google_civic_election_id)
+            if position_results['position_found']:
+                position = position_results['position']
+                position_we_vote_id = position.position_we_vote_id
+
+    if not positive_value_exists(contest_office_we_vote_id):
+        # Find the office even though we haven't found candidate
+        contest_office_list_manager = ContestOfficeListManager()
+        matching_results = contest_office_list_manager.retrieve_contest_offices_from_non_unique_identifiers(
+            contest_office_name, google_civic_election_id, state_code)
+        if matching_results['contest_office_found']:
+            contest_office = matching_results['contest_office']
+            contest_office_name = contest_office.office_name
+            contest_office_we_vote_id = contest_office.we_vote_id
+            contest_office_id = contest_office.id
+
+    if candidate_found or candidate_name:
+        ballot_item_display_name = candidate_name
+        variables_found_to_create_position = positive_value_exists(ballot_item_display_name) \
+            and positive_value_exists(contest_office_name) \
+            and positive_value_exists(contest_office_we_vote_id) \
+            and positive_value_exists(organization_name) \
+            and positive_value_exists(organization_we_vote_id) \
+            and positive_value_exists(stance)
+    else:
+        ballot_item_display_name = contest_measure_title
+        variables_found_to_create_position = positive_value_exists(ballot_item_display_name) \
+            and positive_value_exists(contest_measure_we_vote_id) \
+            and positive_value_exists(organization_name) \
+            and positive_value_exists(organization_we_vote_id) \
+            and positive_value_exists(stance)
+
+    if positive_value_exists(position_we_vote_id):
+        kind_of_action = IMPORT_ADD_TO_EXISTING
+    elif positive_value_exists(variables_found_to_create_position):
+        kind_of_action = IMPORT_CREATE
+    else:
+        kind_of_action = TO_BE_DETERMINED
 
     try:
-        batch_row_action_organization.organization_we_vote_id = organization_we_vote_id
-        batch_row_action_organization.organization_name = organization_name
-        batch_row_action_organization.organization_twitter_handle = organization_twitter_handle
-        batch_row_action_organization.organization_facebook = organization_facebook
-        batch_row_action_organization.organization_instagram_handle = organization_instagram
-        batch_row_action_organization.organization_website = organization_website
-        batch_row_action_organization.organization_phone1 = organization_phone1
-        batch_row_action_organization.organization_address = organization_address
-        batch_row_action_organization.organization_city = organization_city
-        batch_row_action_organization.organization_state = organization_state
-        batch_row_action_organization.organization_zip = organization_zip
-        batch_row_action_organization.state_served_code = state_served_code
-        batch_row_action_organization.organization_type = organization_type_transformed
-        batch_row_action_organization.organization_contact_name = organization_contact_name
-        batch_row_action_organization.kind_of_action = kind_of_action
-        batch_row_action_organization.save()
+        batch_row_action_position.position_we_vote_id = position_we_vote_id
+        batch_row_action_position.ballot_item_display_name = ballot_item_display_name
+        batch_row_action_position.candidate_campaign_we_vote_id = candidate_we_vote_id
+        batch_row_action_position.candidate_campaign_id = candidate_id
+        batch_row_action_position.contest_office_name = contest_office_name
+        batch_row_action_position.contest_office_we_vote_id = contest_office_we_vote_id
+        batch_row_action_position.contest_office_id = contest_office_id
+        batch_row_action_position.contest_measure_we_vote_id = measure_we_vote_id
+        batch_row_action_position.contest_measure_id = measure_id
+        batch_row_action_position.stance = stance
+        batch_row_action_position.statement_text = statement_text
+        batch_row_action_position.state_code = state_code
+        batch_row_action_position.speaker_display_name = organization_name
+        batch_row_action_position.speaker_twitter_handle = organization_twitter_handle
+        batch_row_action_position.organization_id = organization_id
+        batch_row_action_position.organization_we_vote_id = organization_we_vote_id
+        batch_row_action_position.kind_of_action = kind_of_action
+        batch_row_action_position.save()
         success = True
     except Exception as e:
         success = False
-        status += "BATCH_ROW_ACTION_ORGANIZATION_UNABLE_TO_SAVE "
+        status += "BATCH_ROW_ACTION_POSITION_UNABLE_TO_SAVE "
 
     results = {
         'success': success,
         'status': status,
         'batch_row_action_created': batch_row_action_created,
         'batch_row_action_updated': batch_row_action_updated,
-        'batch_row_action_organization': batch_row_action_organization,
+        'batch_row_action_position': batch_row_action_position,
     }
     return results
 
 
 def import_elected_office_data_from_batch_row_actions(batch_header_id, batch_row_id, create_entry_flag=False, update_entry_flag=False):
     """
-    Import batch_rows for elected office, CREATE or ADD_TO_EXISTING
+    Import batch_rows for elected office, IMPORT_CREATE or IMPORT_ADD_TO_EXISTING
     Process batch row entries in order to create or update ElectedOffice entries
     :param batch_header_id: 
     :param batch_row_id: 
-    :param create_entry_flag: set to True for CREATE
-    :param update_entry_flag: set to True for ADD_TO_EXISTING
+    :param create_entry_flag: set to True for IMPORT_CREATE
+    :param update_entry_flag: set to True for IMPORT_ADD_TO_EXISTING
     :return: 
     """
     success = False
@@ -1573,7 +1647,7 @@ def import_elected_office_data_from_batch_row_actions(batch_header_id, batch_row
         }
         return results
 
-    batch_row_list_found = False
+    batch_row_action_list_found = False
     try:
         batch_row_action_list = BatchRowActionElectedOffice.objects.all()
         batch_row_action_list = batch_row_action_list.filter(batch_header_id=batch_header_id)
@@ -1581,11 +1655,11 @@ def import_elected_office_data_from_batch_row_actions(batch_header_id, batch_row
             batch_row_action_list = batch_row_action_list.filter(batch_row_id=batch_row_id)
 
         if positive_value_exists(create_entry_flag):
-            batch_row_action_list = batch_row_action_list.filter(kind_of_action=CREATE)
-            kind_of_action = CREATE
+            batch_row_action_list = batch_row_action_list.filter(kind_of_action=IMPORT_CREATE)
+            kind_of_action = IMPORT_CREATE
         elif positive_value_exists(update_entry_flag):
-            batch_row_action_list = batch_row_action_list.filter(kind_of_action=ADD_TO_EXISTING)
-            kind_of_action = ADD_TO_EXISTING
+            batch_row_action_list = batch_row_action_list.filter(kind_of_action=IMPORT_ADD_TO_EXISTING)
+            kind_of_action = IMPORT_ADD_TO_EXISTING
         else:
             # error handling
             status += "IMPORT_ELECTED_OFFICE_ENTRY-KIND_OF_ACTION_MISSING"
@@ -1646,7 +1720,7 @@ def import_elected_office_data_from_batch_row_actions(batch_header_id, batch_row
                     success = True
                     # now update BatchRowActionElectedOffice table entry
                     try:
-                        one_batch_row_action.kind_of_action = ADD_TO_EXISTING
+                        one_batch_row_action.kind_of_action = IMPORT_ADD_TO_EXISTING
                         new_elected_office = results['new_elected_office']
                         one_batch_row_action.elected_office_we_vote_id = new_elected_office.we_vote_id
                         one_batch_row_action.save()
@@ -1667,7 +1741,7 @@ def import_elected_office_data_from_batch_row_actions(batch_header_id, batch_row
                     number_of_elected_offices_updated += 1
                     success = True
             else:
-                # This is error, it shouldn't reach here, we are handling CREATE or UPDATE entries only.
+                # This is error, it shouldn't reach here, we are handling IMPORT_CREATE or UPDATE entries only.
                 status += "IMPORT_ELECTED_OFFICE_ENTRY:NO_CREATE_OR_UPDATE_ERROR"
                 results = {
                     'success':                              success,
@@ -1775,87 +1849,87 @@ def create_batch_header_translation_suggestions(batch_header, kind_of_batch, inc
             # We deal with empty values and make values lowercase within this function
             results = batch_manager.create_batch_header_translation_suggestion(
                 kind_of_batch, incoming_header_map_values['batch_header_map_000'], batch_header.batch_header_column_000)
-            suggestions_created = suggestions_created + 1 if results['success'] else suggestions_created
+            suggestions_created = suggestions_created + 1 if results['suggestion_created'] else suggestions_created
         if incoming_header_map_values['batch_header_map_001'] in batch_import_keys_accepted_dict:
             results = batch_manager.create_batch_header_translation_suggestion(
                 kind_of_batch, incoming_header_map_values['batch_header_map_001'], batch_header.batch_header_column_001)
-            suggestions_created = suggestions_created + 1 if results['success'] else suggestions_created
+            suggestions_created = suggestions_created + 1 if results['suggestion_created'] else suggestions_created
         if incoming_header_map_values['batch_header_map_002'] in batch_import_keys_accepted_dict:
             results = batch_manager.create_batch_header_translation_suggestion(
                 kind_of_batch, incoming_header_map_values['batch_header_map_002'], batch_header.batch_header_column_002)
-            suggestions_created = suggestions_created + 1 if results['success'] else suggestions_created
+            suggestions_created = suggestions_created + 1 if results['suggestion_created'] else suggestions_created
         if incoming_header_map_values['batch_header_map_003'] in batch_import_keys_accepted_dict:
             results = batch_manager.create_batch_header_translation_suggestion(
                 kind_of_batch, incoming_header_map_values['batch_header_map_003'], batch_header.batch_header_column_003)
-            suggestions_created = suggestions_created + 1 if results['success'] else suggestions_created
+            suggestions_created = suggestions_created + 1 if results['suggestion_created'] else suggestions_created
         if incoming_header_map_values['batch_header_map_004'] in batch_import_keys_accepted_dict:
             results = batch_manager.create_batch_header_translation_suggestion(
                 kind_of_batch, incoming_header_map_values['batch_header_map_004'], batch_header.batch_header_column_004)
-            suggestions_created = suggestions_created + 1 if results['success'] else suggestions_created
+            suggestions_created = suggestions_created + 1 if results['suggestion_created'] else suggestions_created
         if incoming_header_map_values['batch_header_map_005'] in batch_import_keys_accepted_dict:
             batch_manager.create_batch_header_translation_suggestion(
                 kind_of_batch, incoming_header_map_values['batch_header_map_005'], batch_header.batch_header_column_005)
-        suggestions_created = suggestions_created + 1 if results['success'] else suggestions_created
+        suggestions_created = suggestions_created + 1 if results['suggestion_created'] else suggestions_created
         if incoming_header_map_values['batch_header_map_006'] in batch_import_keys_accepted_dict:
             results = batch_manager.create_batch_header_translation_suggestion(
                 kind_of_batch, incoming_header_map_values['batch_header_map_006'], batch_header.batch_header_column_006)
-            suggestions_created = suggestions_created + 1 if results['success'] else suggestions_created
+            suggestions_created = suggestions_created + 1 if results['suggestion_created'] else suggestions_created
         if incoming_header_map_values['batch_header_map_007'] in batch_import_keys_accepted_dict:
             results = batch_manager.create_batch_header_translation_suggestion(
                 kind_of_batch, incoming_header_map_values['batch_header_map_007'], batch_header.batch_header_column_007)
-            suggestions_created = suggestions_created + 1 if results['success'] else suggestions_created
+            suggestions_created = suggestions_created + 1 if results['suggestion_created'] else suggestions_created
         if incoming_header_map_values['batch_header_map_008'] in batch_import_keys_accepted_dict:
             results = batch_manager.create_batch_header_translation_suggestion(
                 kind_of_batch, incoming_header_map_values['batch_header_map_008'], batch_header.batch_header_column_008)
-            suggestions_created = suggestions_created + 1 if results['success'] else suggestions_created
+            suggestions_created = suggestions_created + 1 if results['suggestion_created'] else suggestions_created
         if incoming_header_map_values['batch_header_map_009'] in batch_import_keys_accepted_dict:
             results = batch_manager.create_batch_header_translation_suggestion(
                 kind_of_batch, incoming_header_map_values['batch_header_map_009'], batch_header.batch_header_column_009)
-            suggestions_created = suggestions_created + 1 if results['success'] else suggestions_created
+            suggestions_created = suggestions_created + 1 if results['suggestion_created'] else suggestions_created
         if incoming_header_map_values['batch_header_map_010'] in batch_import_keys_accepted_dict:
             results = batch_manager.create_batch_header_translation_suggestion(
                 kind_of_batch, incoming_header_map_values['batch_header_map_010'], batch_header.batch_header_column_010)
-            suggestions_created = suggestions_created + 1 if results['success'] else suggestions_created
+            suggestions_created = suggestions_created + 1 if results['suggestion_created'] else suggestions_created
         if incoming_header_map_values['batch_header_map_011'] in batch_import_keys_accepted_dict:
             results = batch_manager.create_batch_header_translation_suggestion(
                 kind_of_batch, incoming_header_map_values['batch_header_map_011'], batch_header.batch_header_column_011)
-            suggestions_created = suggestions_created + 1 if results['success'] else suggestions_created
+            suggestions_created = suggestions_created + 1 if results['suggestion_created'] else suggestions_created
         if incoming_header_map_values['batch_header_map_012'] in batch_import_keys_accepted_dict:
             results = batch_manager.create_batch_header_translation_suggestion(
                 kind_of_batch, incoming_header_map_values['batch_header_map_012'], batch_header.batch_header_column_012)
-            suggestions_created = suggestions_created + 1 if results['success'] else suggestions_created
+            suggestions_created = suggestions_created + 1 if results['suggestion_created'] else suggestions_created
         if incoming_header_map_values['batch_header_map_013'] in batch_import_keys_accepted_dict:
             results = batch_manager.create_batch_header_translation_suggestion(
                 kind_of_batch, incoming_header_map_values['batch_header_map_013'], batch_header.batch_header_column_013)
-            suggestions_created = suggestions_created + 1 if results['success'] else suggestions_created
+            suggestions_created = suggestions_created + 1 if results['suggestion_created'] else suggestions_created
         if incoming_header_map_values['batch_header_map_014'] in batch_import_keys_accepted_dict:
             results = batch_manager.create_batch_header_translation_suggestion(
                 kind_of_batch, incoming_header_map_values['batch_header_map_014'], batch_header.batch_header_column_014)
-            suggestions_created = suggestions_created + 1 if results['success'] else suggestions_created
+            suggestions_created = suggestions_created + 1 if results['suggestion_created'] else suggestions_created
         if incoming_header_map_values['batch_header_map_015'] in batch_import_keys_accepted_dict:
             results = batch_manager.create_batch_header_translation_suggestion(
                 kind_of_batch, incoming_header_map_values['batch_header_map_015'], batch_header.batch_header_column_015)
-            suggestions_created = suggestions_created + 1 if results['success'] else suggestions_created
+            suggestions_created = suggestions_created + 1 if results['suggestion_created'] else suggestions_created
         if incoming_header_map_values['batch_header_map_016'] in batch_import_keys_accepted_dict:
             results = batch_manager.create_batch_header_translation_suggestion(
                 kind_of_batch, incoming_header_map_values['batch_header_map_016'], batch_header.batch_header_column_016)
-            suggestions_created = suggestions_created + 1 if results['success'] else suggestions_created
+            suggestions_created = suggestions_created + 1 if results['suggestion_created'] else suggestions_created
         if incoming_header_map_values['batch_header_map_017'] in batch_import_keys_accepted_dict:
             results = batch_manager.create_batch_header_translation_suggestion(
                 kind_of_batch, incoming_header_map_values['batch_header_map_017'], batch_header.batch_header_column_017)
-            suggestions_created = suggestions_created + 1 if results['success'] else suggestions_created
+            suggestions_created = suggestions_created + 1 if results['suggestion_created'] else suggestions_created
         if incoming_header_map_values['batch_header_map_018'] in batch_import_keys_accepted_dict:
             results = batch_manager.create_batch_header_translation_suggestion(
                 kind_of_batch, incoming_header_map_values['batch_header_map_018'], batch_header.batch_header_column_018)
-            suggestions_created = suggestions_created + 1 if results['success'] else suggestions_created
+            suggestions_created = suggestions_created + 1 if results['suggestion_created'] else suggestions_created
         if incoming_header_map_values['batch_header_map_019'] in batch_import_keys_accepted_dict:
             results = batch_manager.create_batch_header_translation_suggestion(
                 kind_of_batch, incoming_header_map_values['batch_header_map_019'], batch_header.batch_header_column_019)
-            suggestions_created = suggestions_created + 1 if results['success'] else suggestions_created
+            suggestions_created = suggestions_created + 1 if results['suggestion_created'] else suggestions_created
         if incoming_header_map_values['batch_header_map_020'] in batch_import_keys_accepted_dict:
             results = batch_manager.create_batch_header_translation_suggestion(
                 kind_of_batch, incoming_header_map_values['batch_header_map_020'], batch_header.batch_header_column_020)
-            suggestions_created = suggestions_created + 1 if results['success'] else suggestions_created
+            suggestions_created = suggestions_created + 1 if results['suggestion_created'] else suggestions_created
 
     results = {
         'success':              success,
@@ -1865,14 +1939,15 @@ def create_batch_header_translation_suggestions(batch_header, kind_of_batch, inc
     return results
 
 
-def import_contest_office_data_from_batch_row_actions(batch_header_id, batch_row_id, create_entry_flag=False, update_entry_flag=False):
+def import_contest_office_data_from_batch_row_actions(
+        batch_header_id, batch_row_id, create_entry_flag=False, update_entry_flag=False):
     """
-    Import batch_rows for contest office, CREATE or ADD_TO_EXISTING
+    Import batch_rows for contest office, IMPORT_CREATE or IMPORT_ADD_TO_EXISTING
     Process batch row entries in order to create or update ContestOffice entries
     :param batch_header_id: 
     :param batch_row_id: 
-    :param create_entry_flag: set to True for CREATE
-    :param update_entry_flag: set to True for ADD_TO_EXISTING
+    :param create_entry_flag: set to True for IMPORT_CREATE
+    :param update_entry_flag: set to True for IMPORT_ADD_TO_EXISTING
     :return: 
     """
     success = False
@@ -1932,7 +2007,7 @@ def import_contest_office_data_from_batch_row_actions(batch_header_id, batch_row
         }
         return results
 
-    batch_row_list_found = False
+    batch_row_action_list_found = False
     try:
         batch_row_action_list = BatchRowActionContestOffice.objects.all()
         batch_row_action_list = batch_row_action_list.filter(batch_header_id=batch_header_id)
@@ -1940,11 +2015,11 @@ def import_contest_office_data_from_batch_row_actions(batch_header_id, batch_row
             batch_row_action_list = batch_row_action_list.filter(batch_row_id=batch_row_id)
 
         if positive_value_exists(create_entry_flag):
-            batch_row_action_list = batch_row_action_list.filter(kind_of_action=CREATE)
-            kind_of_action = CREATE
+            batch_row_action_list = batch_row_action_list.filter(kind_of_action=IMPORT_CREATE)
+            kind_of_action = IMPORT_CREATE
         elif positive_value_exists(update_entry_flag):
-            batch_row_action_list = batch_row_action_list.filter(kind_of_action=ADD_TO_EXISTING)
-            kind_of_action = ADD_TO_EXISTING
+            batch_row_action_list = batch_row_action_list.filter(kind_of_action=IMPORT_ADD_TO_EXISTING)
+            kind_of_action = IMPORT_ADD_TO_EXISTING
         else:
             # error handling
             status += "IMPORT_CONTEST_OFFICE_ENTRY-KIND_OF_ACTION_MISSING"
@@ -1986,8 +2061,7 @@ def import_contest_office_data_from_batch_row_actions(batch_header_id, batch_row
         contest_office_number_elected = one_batch_row_action.number_elected
         state_code = one_batch_row_action.state_code
 
-        # Look up ContestOffice to see if an entry exists
-        # These five parameters are needed to look up in ContestOffice table for a match
+        # These five parameters are minimum variables required for the ContestOffice table
         if positive_value_exists(contest_office_name) and positive_value_exists(state_code) and \
                 positive_value_exists(google_civic_election_id):
             contest_office_manager = ContestOfficeManager()
@@ -2000,9 +2074,9 @@ def import_contest_office_data_from_batch_row_actions(batch_header_id, batch_row
                 if results['new_contest_office_created']:
                     number_of_contest_offices_created += 1
                     success = True
-                    # now update BatchRowActionContestOffice table entry
+                    # now update BatchRowActionContestOffice table entry with the results of this action
                     try:
-                        one_batch_row_action.kind_of_action = ADD_TO_EXISTING
+                        one_batch_row_action.kind_of_action = IMPORT_ADD_TO_EXISTING
                         new_contest_office = results['new_contest_office']
                         one_batch_row_action.contest_office_we_vote_id = new_contest_office.we_vote_id
                         one_batch_row_action.save()
@@ -2022,8 +2096,18 @@ def import_contest_office_data_from_batch_row_actions(batch_header_id, batch_row
                 if results['contest_office_updated']:
                     number_of_contest_offices_updated += 1
                     success = True
+                    # now update BatchRowActionContestOffice table entry with the results of this action
+                    try:
+                        one_batch_row_action.kind_of_action = IMPORT_ADD_TO_EXISTING
+                        new_contest_office = results['new_contest_office']
+                        one_batch_row_action.contest_office_we_vote_id = new_contest_office.we_vote_id
+                        one_batch_row_action.save()
+                    except Exception as e:
+                        success = False
+                        status += "CONTEST_OFFICE_RETRIEVE_ERROR"
+                        handle_exception(e, logger=logger, exception_message=status)
             else:
-                # This is error, it shouldn't reach here, we are handling CREATE or UPDATE entries only.
+                # This is error, it shouldn't reach here, we are handling IMPORT_CREATE or UPDATE entries only.
                 status += "IMPORT_CONTEST_OFFICE_ENTRY:NO_CREATE_OR_UPDATE_ERROR"
                 results = {
                     'success':                              success,
@@ -2051,12 +2135,12 @@ def import_contest_office_data_from_batch_row_actions(batch_header_id, batch_row
 
 def import_measure_data_from_batch_row_actions(batch_header_id, batch_row_id, create_entry_flag=False, update_entry_flag=False):
     """
-    Import batch_rows for measure, CREATE or ADD_TO_EXISTING
+    Import batch_rows for measure, IMPORT_CREATE or IMPORT_ADD_TO_EXISTING
     Process batch row entries in order to create or update contestmeasure entries
     :param batch_header_id: 
     :param batch_row_id: 
-    :param create_entry_flag: set to True for CREATE
-    :param update_entry_flag: set to True for ADD_TO_EXISTING
+    :param create_entry_flag: set to True for IMPORT_CREATE
+    :param update_entry_flag: set to True for IMPORT_ADD_TO_EXISTING
     :return: 
     """
     success = False
@@ -2116,7 +2200,7 @@ def import_measure_data_from_batch_row_actions(batch_header_id, batch_row_id, cr
         }
         return results
 
-    batch_row_list_found = False
+    batch_row_action_list_found = False
     try:
         batch_row_action_list = BatchRowActionMeasure.objects.all()
         batch_row_action_list = batch_row_action_list.filter(batch_header_id=batch_header_id)
@@ -2124,11 +2208,11 @@ def import_measure_data_from_batch_row_actions(batch_header_id, batch_row_id, cr
             batch_row_action_list = batch_row_action_list.filter(batch_row_id=batch_row_id)
 
         if positive_value_exists(create_entry_flag):
-            batch_row_action_list = batch_row_action_list.filter(kind_of_action=CREATE)
-            kind_of_action = CREATE
+            batch_row_action_list = batch_row_action_list.filter(kind_of_action=IMPORT_CREATE)
+            kind_of_action = IMPORT_CREATE
         elif positive_value_exists(update_entry_flag):
-            batch_row_action_list = batch_row_action_list.filter(kind_of_action=ADD_TO_EXISTING)
-            kind_of_action = ADD_TO_EXISTING
+            batch_row_action_list = batch_row_action_list.filter(kind_of_action=IMPORT_ADD_TO_EXISTING)
+            kind_of_action = IMPORT_ADD_TO_EXISTING
         else:
             # error handling
             status += "IMPORT_MEASURE_ENTRY-KIND_OF_ACTION_MISSING"
@@ -2184,7 +2268,7 @@ def import_measure_data_from_batch_row_actions(batch_header_id, batch_row_id, cr
                     success = True
                     # now update BatchRowActionMeasure table entry
                     try:
-                        one_batch_row_action.kind_of_action = ADD_TO_EXISTING
+                        one_batch_row_action.kind_of_action = IMPORT_ADD_TO_EXISTING
                         new_measure = results['new_measure']
                         one_batch_row_action.measure_we_vote_id = new_measure.we_vote_id
                         one_batch_row_action.save()
@@ -2201,7 +2285,7 @@ def import_measure_data_from_batch_row_actions(batch_header_id, batch_row_id, cr
                     number_of_measures_updated += 1
                     success = True
             else:
-                # This is error, it shouldn't reach here, we are handling CREATE or UPDATE entries only.
+                # This is error, it shouldn't reach here, we are handling IMPORT_CREATE or UPDATE entries only.
                 status += "IMPORT_MEASURE_ENTRY:NO_CREATE_OR_UPDATE_ERROR"
                 results = {
                     'success':                      success,
@@ -2227,24 +2311,22 @@ def import_measure_data_from_batch_row_actions(batch_header_id, batch_row_id, cr
     return results
 
 
-def import_candidate_data_from_batch_row_actions(batch_header_id, batch_row_id, create_entry_flag=False, update_entry_flag=False):
+def import_candidate_data_from_batch_row_actions(batch_header_id, batch_row_id, create_entry_flag=False,
+                                                 update_entry_flag=False):
     """
-    Import batch_rows for candidate, CREATE or ADD_TO_EXISTING
+    Import batch_rows for candidate, IMPORT_CREATE or IMPORT_ADD_TO_EXISTING
     Process batch row entries in order to create or update CandidateCampaign entries
     :param batch_header_id: 
     :param batch_row_id: 
-    :param create_entry_flag: set to True for CREATE
-    :param update_entry_flag: set to True for ADD_TO_EXISTING
+    :param create_entry_flag: set to True for IMPORT_CREATE
+    :param update_entry_flag: set to True for IMPORT_ADD_TO_EXISTING
     :return: 
     """
     success = False
     status = ""
     number_of_candidates_created = 0
     number_of_candidates_updated = 0
-    kind_of_batch = ""
     new_candidate = ''
-    new_candidate_created = False
-    batch_row_action_list_found = False
 
     if not positive_value_exists(batch_header_id):
         status = "IMPORT_CANDIDATE_ENTRY-BATCH_HEADER_ID_MISSING"
@@ -2294,7 +2376,7 @@ def import_candidate_data_from_batch_row_actions(batch_header_id, batch_row_id, 
         }
         return results
 
-    batch_row_list_found = False
+    batch_row_action_list_found = False
     try:
         batch_row_action_list = BatchRowActionCandidate.objects.all()
         batch_row_action_list = batch_row_action_list.filter(batch_header_id=batch_header_id)
@@ -2302,11 +2384,11 @@ def import_candidate_data_from_batch_row_actions(batch_header_id, batch_row_id, 
             batch_row_action_list = batch_row_action_list.filter(batch_row_id=batch_row_id)
 
         if positive_value_exists(create_entry_flag):
-            batch_row_action_list = batch_row_action_list.filter(kind_of_action=CREATE)
-            kind_of_action = CREATE
+            batch_row_action_list = batch_row_action_list.filter(kind_of_action=IMPORT_CREATE)
+            kind_of_action = IMPORT_CREATE
         elif positive_value_exists(update_entry_flag):
-            batch_row_action_list = batch_row_action_list.filter(kind_of_action=ADD_TO_EXISTING)
-            kind_of_action = ADD_TO_EXISTING
+            batch_row_action_list = batch_row_action_list.filter(kind_of_action=IMPORT_ADD_TO_EXISTING)
+            kind_of_action = IMPORT_ADD_TO_EXISTING
         else:
             # error handling
             status += "IMPORT_CANDIDATE_ENTRY-KIND_OF_ACTION_MISSING"
@@ -2326,8 +2408,6 @@ def import_candidate_data_from_batch_row_actions(batch_header_id, batch_row_id, 
         batch_row_action_list_found = False
         pass
 
-    # batch_manager = BatchManager()
-
     if not batch_row_action_list_found:
         status += "IMPORT_CANDIDATE_ENTRY-BATCH_ROW_ACTION_LIST_MISSING"
         results = {
@@ -2339,31 +2419,52 @@ def import_candidate_data_from_batch_row_actions(batch_header_id, batch_row_id, 
         return results
 
     for one_batch_row_action in batch_row_action_list:
-
-        # Find the column in the incoming batch_row with the header == candidate_name
-        candidate_name = one_batch_row_action.candidate_name
         candidate_person_id = one_batch_row_action.candidate_person_id
         google_civic_election_id = str(batch_description.google_civic_election_id)
-        ctcl_uuid = one_batch_row_action.ctcl_uuid
-        candidate_party_name = one_batch_row_action.party
-        candidate_is_top_ticket = one_batch_row_action.candidate_is_top_ticket
-        state_code = one_batch_row_action.state_code
 
-        # Look up CandidateCampaign to see if an entry exists
-        # These five parameters are needed to look up in CandidateCampaign table for a match
-        if positive_value_exists(candidate_name) and positive_value_exists(google_civic_election_id) and \
-                positive_value_exists(state_code):
-            candidate_manager = CandidateCampaignManager()
-            if create_entry_flag:
-                results = candidate_manager.create_candidate_row_entry(candidate_name, candidate_party_name,
-                                                                       candidate_is_top_ticket, ctcl_uuid,
-                                                                       google_civic_election_id, state_code)
+        # These update values are using the field names in the CandidateCampaign class
+        update_values = {}
+        # We only want to add data, not remove any
+        if positive_value_exists(one_batch_row_action.candidate_name):
+            update_values['candidate_name'] = one_batch_row_action.candidate_name
+        if positive_value_exists(one_batch_row_action.contest_office_we_vote_id):
+            update_values['contest_office_we_vote_id'] = one_batch_row_action.contest_office_we_vote_id
+        if positive_value_exists(one_batch_row_action.contest_office_id):
+            update_values['contest_office_id'] = one_batch_row_action.contest_office_id
+        if positive_value_exists(one_batch_row_action.contest_office_name):
+            update_values['contest_office_name'] = one_batch_row_action.contest_office_name
+        if positive_value_exists(one_batch_row_action.party):
+            update_values['party'] = one_batch_row_action.party
+        if positive_value_exists(one_batch_row_action.candidate_is_incumbent):
+            update_values['candidate_is_incumbent'] = one_batch_row_action.candidate_is_incumbent
+        if positive_value_exists(one_batch_row_action.candidate_is_top_ticket):
+            update_values['candidate_is_top_ticket'] = one_batch_row_action.candidate_is_top_ticket
+        if positive_value_exists(one_batch_row_action.ctcl_uuid):
+            update_values['ctcl_uuid'] = one_batch_row_action.ctcl_uuid
+        if positive_value_exists(google_civic_election_id):
+            update_values['google_civic_election_id'] = google_civic_election_id
+        if positive_value_exists(one_batch_row_action.state_code):
+            update_values['state_code'] = one_batch_row_action.state_code
+        if positive_value_exists(one_batch_row_action.candidate_twitter_handle):
+            update_values['candidate_twitter_handle'] = one_batch_row_action.candidate_twitter_handle
+        if positive_value_exists(one_batch_row_action.candidate_url):
+            update_values['candidate_url'] = one_batch_row_action.candidate_url
+        if positive_value_exists(one_batch_row_action.facebook_url):
+            update_values['facebook_url'] = one_batch_row_action.facebook_url
+
+        candidate_manager = CandidateCampaignManager()
+        if create_entry_flag:
+            # These parameters are required to create a CandidateCampaign entry
+            if positive_value_exists(one_batch_row_action.candidate_name) \
+                    and positive_value_exists(google_civic_election_id) and \
+                    positive_value_exists(one_batch_row_action.state_code):
+                results = candidate_manager.create_candidate_row_entry(update_values)
                 if results['new_candidate_created']:
                     number_of_candidates_created += 1
                     success = True
                     # now update BatchRowActionCandidate table entry
                     try:
-                        one_batch_row_action.kind_of_action = ADD_TO_EXISTING
+                        one_batch_row_action.kind_of_action = IMPORT_ADD_TO_EXISTING
                         new_candidate = results['new_candidate']
                         one_batch_row_action.candidate_we_vote_id = new_candidate.we_vote_id
                         one_batch_row_action.save()
@@ -2371,26 +2472,24 @@ def import_candidate_data_from_batch_row_actions(batch_header_id, batch_row_id, 
                         success = False
                         status += "CANDIDATE_RETRIEVE_ERROR"
                         handle_exception(e, logger=logger, exception_message=status)
-            elif update_entry_flag:
-                candidate_we_vote_id = one_batch_row_action.candidate_we_vote_id
-                results = candidate_manager.update_candidate_row_entry(candidate_name,candidate_party_name,
-                                                                            candidate_is_top_ticket, ctcl_uuid,
-                                                                            google_civic_election_id, state_code,
-                                                                            candidate_we_vote_id)
-                if results['candidate_updated']:
-                    number_of_candidates_updated += 1
-                    success = True
-            else:
-                # This is error, it shouldn't reach here, we are handling CREATE or UPDATE entries only.
-                status += "IMPORT_CANDIDATE_ENTRY:NO_CREATE_OR_UPDATE_ERROR"
-                results = {
-                    'success':                          success,
-                    'status':                           status,
-                    'number_of_candidates_created':     number_of_candidates_created,
-                    'number_of_candidates_updated':     number_of_candidates_updated,
-                    'new_candidate':                    new_candidate,
-                }
-                return results
+        elif update_entry_flag:
+            candidate_we_vote_id = one_batch_row_action.candidate_we_vote_id
+
+            results = candidate_manager.update_candidate_row_entry(candidate_we_vote_id, update_values)
+            if results['candidate_updated']:
+                number_of_candidates_updated += 1
+                success = True
+        else:
+            # This is error, it shouldn't reach here, we are handling IMPORT_CREATE or UPDATE entries only.
+            status += "IMPORT_CANDIDATE_ENTRY:NO_CREATE_OR_UPDATE_ERROR"
+            results = {
+                'success':                          success,
+                'status':                           status,
+                'number_of_candidates_created':     number_of_candidates_created,
+                'number_of_candidates_updated':     number_of_candidates_updated,
+                'new_candidate':                    new_candidate,
+            }
+            return results
 
     if number_of_candidates_created:
         status += "IMPORT_CANDIDATE_ENTRY:ELECTED_OFFICE_CREATED"
@@ -2407,14 +2506,15 @@ def import_candidate_data_from_batch_row_actions(batch_header_id, batch_row_id, 
     return results
 
 
-def import_politician_data_from_batch_row_actions(batch_header_id, batch_row_id, create_entry_flag=False, update_entry_flag=False):
+def import_politician_data_from_batch_row_actions(batch_header_id, batch_row_id, create_entry_flag=False,
+                                                  update_entry_flag=False):
     """
-    Import batch_rows for politician, CREATE or ADD_TO_EXISTING
+    Import batch_rows for politician, IMPORT_CREATE or IMPORT_ADD_TO_EXISTING
     Process batch row entries in order to create or update Politician entries
     :param batch_header_id: 
     :param batch_row_id: 
-    :param create_entry_flag: set to True for CREATE
-    :param update_entry_flag: set to True for ADD_TO_EXISTING
+    :param create_entry_flag: set to True for IMPORT_CREATE
+    :param update_entry_flag: set to True for IMPORT_ADD_TO_EXISTING
     :return: 
     """
     success = False
@@ -2474,7 +2574,7 @@ def import_politician_data_from_batch_row_actions(batch_header_id, batch_row_id,
         }
         return results
 
-    batch_row_list_found = False
+    batch_row_action_list_found = False
     try:
         batch_row_action_list = BatchRowActionPolitician.objects.all()
         batch_row_action_list = batch_row_action_list.filter(batch_header_id=batch_header_id)
@@ -2482,11 +2582,11 @@ def import_politician_data_from_batch_row_actions(batch_header_id, batch_row_id,
             batch_row_action_list = batch_row_action_list.filter(batch_row_id=batch_row_id)
 
         if positive_value_exists(create_entry_flag):
-            batch_row_action_list = batch_row_action_list.filter(kind_of_action=CREATE)
-            kind_of_action = CREATE
+            batch_row_action_list = batch_row_action_list.filter(kind_of_action=IMPORT_CREATE)
+            kind_of_action = IMPORT_CREATE
         elif positive_value_exists(update_entry_flag):
-            batch_row_action_list = batch_row_action_list.filter(kind_of_action=ADD_TO_EXISTING)
-            kind_of_action = ADD_TO_EXISTING
+            batch_row_action_list = batch_row_action_list.filter(kind_of_action=IMPORT_ADD_TO_EXISTING)
+            kind_of_action = IMPORT_ADD_TO_EXISTING
         else:
             # error handling
             status += "IMPORT_POLITICIAN_ENTRY-KIND_OF_ACTION_MISSING"
@@ -2554,7 +2654,7 @@ def import_politician_data_from_batch_row_actions(batch_header_id, batch_row_id,
                     success = True
                     # now update BatchRowActionPolitician table entry
                     try:
-                        one_batch_row_action.kind_of_action = ADD_TO_EXISTING
+                        one_batch_row_action.kind_of_action = IMPORT_ADD_TO_EXISTING
                         new_politician = results['new_politician']
                         one_batch_row_action.politician_we_vote_id = new_politician.we_vote_id
                         one_batch_row_action.save()
@@ -2578,7 +2678,7 @@ def import_politician_data_from_batch_row_actions(batch_header_id, batch_row_id,
                     number_of_politicians_updated += 1
                     success = True
             else:
-                # This is error, it shouldn't reach here, we are handling CREATE or UPDATE entries only.
+                # This is error, it shouldn't reach here, we are handling IMPORT_CREATE or UPDATE entries only.
                 status += "IMPORT_POLITICIAN_ENTRY:NO_CREATE_OR_UPDATE_ERROR"
                 results = {
                     'success':                          success,
@@ -2629,9 +2729,9 @@ def import_organization_data_from_batch_row_actions(
             batch_row_action_list = batch_row_action_list.filter(batch_row_id=batch_row_id)
 
         if positive_value_exists(create_entry_flag):
-            batch_row_action_list = batch_row_action_list.filter(kind_of_action=CREATE)
+            batch_row_action_list = batch_row_action_list.filter(kind_of_action=IMPORT_CREATE)
         elif positive_value_exists(update_entry_flag):
-            batch_row_action_list = batch_row_action_list.filter(kind_of_action=ADD_TO_EXISTING)
+            batch_row_action_list = batch_row_action_list.filter(kind_of_action=IMPORT_ADD_TO_EXISTING)
         else:
             # error handling
             status += "IMPORT_ORGANIZATION_ENTRY-KIND_OF_ACTION_MISSING"
@@ -2698,7 +2798,7 @@ def import_organization_data_from_batch_row_actions(
 
             # now update BatchRowActionOrganization table entry
             try:
-                one_batch_row_action.kind_of_action = ADD_TO_EXISTING
+                one_batch_row_action.kind_of_action = IMPORT_ADD_TO_EXISTING
                 one_batch_row_action.organization_we_vote_id = organization.we_vote_id
                 one_batch_row_action.save()
             except Exception as e:
@@ -2740,7 +2840,7 @@ def import_organization_data_from_batch_row_actions(
             #     number_of_organizations_updated += 1
             #     success = True
         else:
-            # This is error, it shouldn't reach here, we are handling CREATE or UPDATE entries only.
+            # This is error, it shouldn't reach here, we are handling IMPORT_CREATE or UPDATE entries only.
             status += "IMPORT_ORGANIZATION_ENTRY:NO_CREATE_OR_UPDATE_ERROR "
             results = {
                 'success':                          success,
@@ -2789,9 +2889,9 @@ def import_position_data_from_batch_row_actions(  # TODO DALE Convert for positi
             batch_row_action_list = batch_row_action_list.filter(batch_row_id=batch_row_id)
 
         if positive_value_exists(create_entry_flag):
-            batch_row_action_list = batch_row_action_list.filter(kind_of_action=CREATE)
+            batch_row_action_list = batch_row_action_list.filter(kind_of_action=IMPORT_CREATE)
         elif positive_value_exists(update_entry_flag):
-            batch_row_action_list = batch_row_action_list.filter(kind_of_action=ADD_TO_EXISTING)
+            batch_row_action_list = batch_row_action_list.filter(kind_of_action=IMPORT_ADD_TO_EXISTING)
         else:
             # error handling
             status += "IMPORT_ORGANIZATION_ENTRY-KIND_OF_ACTION_MISSING"
@@ -2858,7 +2958,7 @@ def import_position_data_from_batch_row_actions(  # TODO DALE Convert for positi
 
             # now update BatchRowActionOrganization table entry
             try:
-                one_batch_row_action.kind_of_action = ADD_TO_EXISTING
+                one_batch_row_action.kind_of_action = IMPORT_ADD_TO_EXISTING
                 one_batch_row_action.organization_we_vote_id = organization.we_vote_id
                 one_batch_row_action.save()
             except Exception as e:
@@ -2900,7 +3000,7 @@ def import_position_data_from_batch_row_actions(  # TODO DALE Convert for positi
             #     number_of_organizations_updated += 1
             #     success = True
         else:
-            # This is error, it shouldn't reach here, we are handling CREATE or UPDATE entries only.
+            # This is error, it shouldn't reach here, we are handling IMPORT_CREATE or UPDATE entries only.
             status += "IMPORT_ORGANIZATION_ENTRY:NO_CREATE_OR_UPDATE_ERROR "
             results = {
                 'success':                          success,
@@ -3001,7 +3101,7 @@ def import_create_or_update_elected_office_entry(batch_header_id, batch_row_id):
         if len(batch_row_action_elected_office_list):
             batch_row_action_list_found = True
             # TODO assumption is that length of this list is going to be one, single record match
-            batch_row_action_elected_office = batch_row_action_elected_office_list.first()
+            batch_row_action_elected_office = batch_row_action_elected_office_list[0]
     except BatchRowActionElectedOffice.DoesNotExist:
         # batch_row_action_list = []
         batch_row_action_list_found = False
@@ -3033,9 +3133,9 @@ def import_create_or_update_elected_office_entry(batch_header_id, batch_row_id):
         # Look up ElectedOffice to see if an entry exists
 
         kind_of_action = batch_row_action_elected_office.kind_of_action
-        # Only add entries with kind_of_action set to either CREATE or ADD_TO_EXISTING.
+        # Only add entries with kind_of_action set to either IMPORT_CREATE or IMPORT_ADD_TO_EXISTING.
         elected_office_manager = ElectedOfficeManager()
-        if kind_of_action == CREATE:
+        if kind_of_action == IMPORT_CREATE:
             # call create_elected_office_row_entry
             results = elected_office_manager.create_elected_office_row_entry(elected_office_name, state_code,
                                                                              elected_office_description, ctcl_uuid,
@@ -3048,7 +3148,7 @@ def import_create_or_update_elected_office_entry(batch_header_id, batch_row_id):
 
                 # now update BatchRowActionElectedOffice table entry
                 try:
-                    batch_row_action_elected_office.kind_of_action = ADD_TO_EXISTING
+                    batch_row_action_elected_office.kind_of_action = IMPORT_ADD_TO_EXISTING
                     batch_row_action_elected_office.elected_office_we_vote_id = \
                         results['new_elected_office'].we_vote_id
                     batch_row_action_elected_office.save()
@@ -3057,7 +3157,7 @@ def import_create_or_update_elected_office_entry(batch_header_id, batch_row_id):
                     new_elected_office_created = False
                     status += "IMPORT_UPDATE_OR_CREATE_ELECTED_OFFICE_ENTRY-ELECTED_OFFICE_RETRIEVE_ERROR"
                     handle_exception(e, logger=logger, exception_message=status)
-        elif kind_of_action == ADD_TO_EXISTING:
+        elif kind_of_action == IMPORT_ADD_TO_EXISTING:
             # call update_elected_office_row_entry
             elected_office_we_vote_id = batch_row_action_elected_office.elected_office_we_vote_id
             results = elected_office_manager.update_elected_office_row_entry(elected_office_name, state_code,
@@ -3106,7 +3206,7 @@ def import_create_or_update_elected_office_entry(batch_header_id, batch_row_id):
 def import_data_from_batch_row_actions(kind_of_batch, kind_of_action, batch_header_id, batch_row_id=0):
     """
     Cycle through batch_row_action entries for one kind_of_batch + kind_of_action + batch_header_id, OR
-    for one particular batch_row_id. The kind_of_action is either CREATE or ADD_TO_EXISTING.
+    for one particular batch_row_id. The kind_of_action is either IMPORT_CREATE or IMPORT_ADD_TO_EXISTING.
     :param kind_of_batch:
     :param kind_of_action:
     :param batch_header_id:
@@ -3121,9 +3221,9 @@ def import_data_from_batch_row_actions(kind_of_batch, kind_of_action, batch_head
     update_flag = False
 
     # for one_batch_row in batch_row_list:
-    if kind_of_action == CREATE:
+    if kind_of_action == IMPORT_CREATE:
         create_flag = True
-    elif kind_of_action == ADD_TO_EXISTING:
+    elif kind_of_action == IMPORT_ADD_TO_EXISTING:
         update_flag = True
     else:
         # this is error

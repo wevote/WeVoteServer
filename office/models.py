@@ -650,6 +650,86 @@ class ContestOfficeListManager(models.Model):
         }
         return results
 
+    def retrieve_contest_offices_from_non_unique_identifiers(
+            self, contest_office_name, google_civic_election_id, state_code):
+        keep_looking_for_duplicates = True
+        success = False
+        contest_office = ContestOffice()
+        contest_office_found = False
+        contest_office_list = []
+        contest_office_list_found = False
+        multiple_entries_found = False
+        status = ""
+
+        try:
+            contest_office_query = ContestOffice.objects.all()
+            # TODO Is there a way to filter with "dash" insensitivity? - vs --
+            contest_office_query = contest_office_query.filter(office_name__iexact=contest_office_name,
+                                                               state_code__iexact=state_code,
+                                                               google_civic_election_id=google_civic_election_id)
+
+            contest_office_list = list(contest_office_query)
+            if len(contest_office_list):
+                keep_looking_for_duplicates = False
+                # if a single entry matches, update that entry
+                if len(contest_office_list) == 1:
+                    status += 'CREATE_BATCH_ROW_ACTION_CONTEST_OFFICE-SINGLE_ROW_RETRIEVED '
+                    contest_office = contest_office_list[0]
+                    contest_office_found = True
+                    contest_office_list_found = True
+                else:
+                    # more than one entry found with a match in ContestOffice
+                    contest_office_list_found = True
+                    multiple_entries_found = True
+                    status += 'CREATE_BATCH_ROW_ACTION_CONTEST_OFFICE-MULTIPLE_ROWS_RETRIEVED '
+            else:
+                # Existing entry couldn't be found in the contest office table. We should keep looking for
+                #  close matches
+                pass
+        except ContestOffice.DoesNotExist:
+            # Existing entry couldn't be found in the contest office table. We should keep looking for
+            #  close matches
+            pass
+
+        # TODO To build
+        # if keep_looking_for_duplicates:
+        #     # Check to see if we have a BatchRowTranslationMap for the value in contest_office_name
+        #     kind_of_batch = CONTEST_OFFICE
+        #     batch_row_name = "contest_office_name"
+        #     incoming_batch_row_value = contest_office_name
+        #     mapped_value = batch_manager.fetch_batch_row_translation_map(kind_of_batch, batch_row_name,
+        #                                                                  incoming_batch_row_value)
+        #     if positive_value_exists(mapped_value):
+        #         # Replace existing value with the
+        #         contest_office_name = mapped_value
+        #         contest_office_name_mapped = True
+        #         kind_of_action = IMPORT_ADD_TO_EXISTING
+        #         keep_looking_for_duplicates = False
+        #
+        # if keep_looking_for_duplicates:
+        #     # Are there similar office names that we might want to map this value to?
+        #     kind_of_batch = CONTEST_OFFICE
+        #     batch_row_name = "contest_office_name"
+        #     incoming_batch_row_value = contest_office_name
+        #     office_results = batch_manager.find_possible_matches(kind_of_batch, batch_row_name,
+        # incoming_batch_row_value,
+        #                                                          google_civic_election_id, state_code)
+        #     if office_results['possible_matches_found']:
+        #         pass
+        #
+        #     kind_of_action = TO_BE_DETERMINED
+        #     batch_row_action_contest_office_status += "INSUFFICIENT_DATA_FOR_BATCH_ROW_ACTION_CONTEST_OFFICE_CREATE "
+        results = {
+            'success':                      success,
+            'status':                       status,
+            'contest_office_found':         contest_office_found,
+            'contest_office':               contest_office,
+            'contest_office_list_found':    contest_office_list_found,
+            'contest_office_list':          contest_office_list,
+            'multiple_entries_found':       multiple_entries_found,
+        }
+        return results
+
 
 class ElectedOffice(models.Model):
     # The we_vote_id identifier is unique across all We Vote sites, and allows us to share our data with other
