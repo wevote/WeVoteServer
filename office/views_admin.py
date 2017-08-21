@@ -107,6 +107,9 @@ def office_list_view(request):
             updated_office_list.append(office)
 
             office_list_count = len(updated_office_list)
+            if office_list_count >= 500:
+                # Limit to showing only 500
+                break
 
     election_list = Election.objects.order_by('-election_day_text')
 

@@ -6,6 +6,11 @@
 {%  block content %}
 <a href="{% url 'admin_tools:admin_home' %}?google_civic_election_id={{ google_civic_election_id }}">< Back to Admin Home</a>
 
+<p><a href="{% url 'import_export_batches:batch_list' %}?kind_of_batch=ORGANIZATION&google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}"
+      target="_blank">
+        Import New Organizations ></a> (open in new window)
+</p>
+
 <h1>Organizations</h1>
 
     <p>Jump to:

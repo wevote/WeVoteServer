@@ -245,7 +245,6 @@ class BallotItemManager(models.Model):
         elif not polling_location_we_vote_id:
             success = False
             status = 'MISSING_POLLING_LOCATION_WE_VOTE_ID'
-        # Note from Dale: 2017-7-15 I think we want to allow ballot items to be saved even if the local
         #  We Vote Server doesn't have a matching polling location yet.
         # elif not polling_location_found:
         #     success = False
@@ -310,36 +309,6 @@ class BallotItemManager(models.Model):
             'new_ballot_item_created':  new_ballot_item_created,
         }
         return results
-
-    # 6/17/17, this method is not called from anywhere, so I commented it out
-    # def retrieve_ballot_item_for_voter(self, voter_id, google_civic_election_id, google_civic_district_ocd_id):
-    #     exception_does_not_exist = False
-    #     exception_multiple_object_returned = False
-    #     google_civic_ballot_item_on_stage = BallotItem()
-    #     google_civic_ballot_item_id = 0
-    #
-    #     if positive_value_exists(voter_id) and positive_value_exists(google_civic_election_id) and \
-    #             positive_value_exists(google_civic_district_ocd_id):
-    #         try:
-    #             google_civic_ballot_item_on_stage = BallotItem.objects.get(
-    #                 voter_id__exact=voter_id,
-    #                 google_civic_election_id__exact=google_civic_election_id,
-    #                 district_ocd_id=google_civic_district_ocd_id,  # TODO This needs to be rethunk
-    #             )
-    #             google_civic_ballot_item_id = google_civic_ballot_item_on_stage.id
-    #         except BallotItem.MultipleObjectsReturned as e:
-    #             handle_record_found_more_than_one_exception(e, logger=logger)
-    #             exception_multiple_object_returned = True
-    #         except BallotItem.DoesNotExist:
-    #             exception_does_not_exist = True
-    #
-    #     results = {
-    #         'success':                  True if google_civic_ballot_item_id > 0 else False,
-    #         'DoesNotExist':             exception_does_not_exist,
-    #         'MultipleObjectsReturned':  exception_multiple_object_returned,
-    #         'google_civic_ballot_item': google_civic_ballot_item_on_stage,
-    #     }
-    #     return results
 
 
 class BallotItemListManager(models.Model):

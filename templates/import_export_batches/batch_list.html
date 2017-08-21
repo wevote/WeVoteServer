@@ -1,11 +1,48 @@
 {# templates/import_export_batches/batch_list.html #}
 {% extends "template_base.html" %}
 
-{% block title %}List of Batches{% endblock %}
+{% block title %}
+{% if kind_of_batch == "CANDIDATE" %}
+    Import Candidates
+{% elif kind_of_batch == "CONTEST_OFFICE" %}
+    Import Contest Offices
+{% elif kind_of_batch == "ELECTED_OFFICE" %}
+    Import Elected Offices
+{% elif kind_of_batch == "MEASURE" %}
+    Import Measures
+{% elif kind_of_batch == "ORGANIZATION" %}
+    Import Organizations
+{% elif kind_of_batch == "POLITICIAN" %}
+    Import Politicians
+{% elif kind_of_batch == "POSITION" %}
+    Import Positions
+{% else %}
+    List of Batches
+{% endif %}
+{% endblock %}
 
 {%  block content %}
 {% load template_filters %}
 <p><a href="{% url 'import_export_batches:batches_home' %}?google_civic_election_id={{ google_civic_election_id }}">< Back to Import Batches Index</a></p>
+
+{% if kind_of_batch == "CANDIDATE" %}
+    <p><a href="{% url 'candidate:candidate_list' %}?kind_of_batch={{ kind_of_batch }}&google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}"
+          target="_blank">Current Candidates{% if google_civic_election_id > 0 %} for this Election{% endif %} ></a> (in new window)</p>
+{% elif kind_of_batch == "CONTEST_OFFICE" %}
+    <p><a href="{% url 'office:office_list' %}?kind_of_batch={{ kind_of_batch }}&google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}"
+          target="_blank">Current Offices{% if google_civic_election_id > 0 %} for this Election{% endif %} ></a> (in new window)</p>
+{% elif kind_of_batch == "ELECTED_OFFICE" %}
+{% elif kind_of_batch == "MEASURE" %}
+    <p><a href="{% url 'measure:measure_list' %}?kind_of_batch={{ kind_of_batch }}&google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}"
+          target="_blank">Current Measures{% if google_civic_election_id > 0 %} for this Election{% endif %} ></a> (in new window)</p>
+{% elif kind_of_batch == "ORGANIZATION" %}
+    <p><a href="{% url 'organization:organization_list' %}?kind_of_batch={{ kind_of_batch }}&google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}"
+          target="_blank">Current Organizations{% if google_civic_election_id > 0 %} for this Election{% endif %} ></a> (in new window)</p>
+{% elif kind_of_batch == "POLITICIAN" %}
+{% elif kind_of_batch == "POSITION" %}
+    <p><a href="{% url 'position:position_list' %}?kind_of_batch={{ kind_of_batch }}&google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}"
+          target="_blank">Current Positions{% if google_civic_election_id > 0 %} for this Election{% endif %} ></a> (in new window)</p>
+{% endif %}
 
 
 {% if not kind_of_batch %}
@@ -67,6 +104,16 @@
             </div>
         </div>
         {% endif %}{# End of if election_list #}
+
+        {% if kind_of_batch == "POSITION" %}
+        <div class="form-group">
+            <label for="position_owner_organization_we_vote_id_id" class="col-sm-3 control-label">Position Owner organization_we_vote_id</label>
+            <div class="col-sm-8">
+                <input type="text" name="position_owner_organization_we_vote_id" id="position_owner_organization_we_vote_id_id" class="form-control"
+                       value="{{ position_owner_organization_we_vote_id }}" />
+            </div>
+        </div>
+        {% endif %}
 
         <div class="form-group">
             <label for="batch_file_id" class="col-sm-3 control-label">Upload File</label>

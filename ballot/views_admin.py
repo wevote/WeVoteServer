@@ -259,6 +259,8 @@ def ballot_item_list_edit_view(request, ballot_returned_id, polling_location_we_
     ballot_item_list = []
     ballot_item_list_modified = []
     candidate_campaign_list_manager = CandidateCampaignListManager()
+    contest_office_we_vote_ids_already_on_ballot = []
+    contest_offices_to_choose_list = []
     if ballot_returned_found:
         # Get a list of ballot_items stored at this location
         ballot_item_list_manager = BallotItemListManager()
@@ -271,6 +273,7 @@ def ballot_item_list_edit_view(request, ballot_returned_id, polling_location_we_
                 for one_ballot_item in ballot_item_list:
                     one_ballot_item.candidates_string = ""
                     if positive_value_exists(one_ballot_item.contest_office_we_vote_id):
+                        contest_office_we_vote_ids_already_on_ballot.append(one_ballot_item.contest_office_we_vote_id)
                         candidate_results = candidate_campaign_list_manager.retrieve_all_candidates_for_office(
                             0, one_ballot_item.contest_office_we_vote_id)
                         if candidate_results['candidate_list_found']:
@@ -279,6 +282,11 @@ def ballot_item_list_edit_view(request, ballot_returned_id, polling_location_we_
                                 one_ballot_item.candidates_string += one_candidate.display_candidate_name() + ", "
                     ballot_item_list_modified.append(one_ballot_item)
 
+    # Remove the offices that are already attached to this ballot location
+    for one_contest_office in contest_office_list:
+        if one_contest_office.we_vote_id not in contest_office_we_vote_ids_already_on_ballot:
+            contest_offices_to_choose_list.append(one_contest_office)
+
     template_values = {
         'messages_on_stage':            messages_on_stage,
         'ballot_returned':              ballot_returned,
@@ -286,6 +294,7 @@ def ballot_item_list_edit_view(request, ballot_returned_id, polling_location_we_
         'election':                     election,
         'measure_list':                 contest_measure_list,
         'office_list':                  contest_office_list,
+        'contest_offices_to_choose_list':   contest_offices_to_choose_list,
         'polling_location_we_vote_id':  polling_location_we_vote_id,
         'polling_location_found':       polling_location_found,
         'polling_location':             polling_location,
@@ -350,6 +359,8 @@ def ballot_item_list_edit_process_view(request):
             if results['election_found']:
                 election = results['election']
                 election_local_id = election.id
+                if not positive_value_exists(state_code):
+                    state_code = election.state_code
 
             # polling_location must be found
             # We cannot change a polling location once saved, so we ignore the incoming polling_location_id here

@@ -8,7 +8,7 @@ from .models import BatchDescription, BatchHeader, BatchHeaderMap, BatchManager,
     BATCH_IMPORT_KEYS_ACCEPTED_FOR_ELECTED_OFFICES, BATCH_IMPORT_KEYS_ACCEPTED_FOR_MEASURES, \
     BATCH_IMPORT_KEYS_ACCEPTED_FOR_ORGANIZATIONS, BATCH_IMPORT_KEYS_ACCEPTED_FOR_POLITICIANS, \
     BATCH_IMPORT_KEYS_ACCEPTED_FOR_POSITIONS, \
-    CREATE, ADD_TO_EXISTING, QUERY_ERROR, TO_BE_DETERMINED
+    IMPORT_CREATE, IMPORT_ADD_TO_EXISTING, IMPORT_QUERY_ERROR, TO_BE_DETERMINED
 from .controllers import create_batch_header_translation_suggestions, create_batch_row_actions, \
     create_or_update_batch_header_mapping, \
     import_data_from_batch_row_actions, import_create_or_update_elected_office_entry
@@ -97,7 +97,7 @@ def batch_list_view(request):
             'kind_of_batch':            kind_of_batch,
             'batch_file':               batch_file,
             'batch_uri':                batch_uri,
-            'google_civic_election_id': google_civic_election_id,
+            'google_civic_election_id': convert_to_int(google_civic_election_id),
         }
     else:
         template_values = {
@@ -107,7 +107,7 @@ def batch_list_view(request):
             'kind_of_batch':            kind_of_batch,
             'batch_file':               batch_file,
             'batch_uri':                batch_uri,
-            'google_civic_election_id': google_civic_election_id,
+            'google_civic_election_id': convert_to_int(google_civic_election_id),
         }
     return render(request, 'import_export_batches/batch_list.html', template_values)
 
@@ -219,6 +219,7 @@ def batch_action_list_view(request):
 
     batch_header_id = convert_to_int(request.GET.get('batch_header_id', 0))
     kind_of_batch = request.GET.get('kind_of_batch', '')
+    position_owner_organization_we_vote_id = request.GET.get('position_owner_organization_we_vote_id', '')
 
     if not positive_value_exists(batch_header_id):
         messages.add_message(request, messages.ERROR, 'Batch_header_id required.')
@@ -232,6 +233,7 @@ def batch_action_list_view(request):
         batch_description = BatchDescription.objects.get(batch_header_id=batch_header_id)
         batch_description_found = True
         batch_set_id = batch_description.batch_set_id
+        google_civic_election_id = batch_description.google_civic_election_id
     except BatchDescription.DoesNotExist:
         # This is fine
         batch_description = BatchDescription()
@@ -337,7 +339,8 @@ def batch_action_list_view(request):
                     one_batch_row.batch_row_action_exists = False
                 modified_batch_row_list.append(one_batch_row)
 
-    election_list = Election.objects.order_by('-election_day_text')
+    election_query = Election.objects.order_by('-election_day_text')
+    election_list = list(election_query)
     messages_on_stage = get_messages(request)
 
     if batch_set_id:
@@ -352,6 +355,7 @@ def batch_action_list_view(request):
             'election_list': election_list,
             'kind_of_batch': kind_of_batch,
             'google_civic_election_id': google_civic_election_id,
+            'position_owner_organization_we_vote_id': position_owner_organization_we_vote_id,
         }
     else:
         template_values = {
@@ -364,6 +368,7 @@ def batch_action_list_view(request):
             'election_list':            election_list,
             'kind_of_batch':            kind_of_batch,
             'google_civic_election_id': google_civic_election_id,
+            'position_owner_organization_we_vote_id': position_owner_organization_we_vote_id,
         }
     return render(request, 'import_export_batches/batch_action_list.html', template_values)
 
@@ -641,7 +646,7 @@ def batch_action_list_create_or_update_process_view(request):
     if batch_header_map_found and batch_row_list_found:
         results = import_data_from_batch_row_actions(kind_of_batch, kind_of_action, batch_header_id, batch_row_id)
 
-        if kind_of_action == CREATE:
+        if kind_of_action == IMPORT_CREATE:
             if results['success']:
                 messages.add_message(request, messages.INFO,
                                      'Kind of Batch: {kind_of_batch}, ' 'Number Created: {created} '
@@ -651,7 +656,7 @@ def batch_action_list_create_or_update_process_view(request):
                 messages.add_message(request, messages.ERROR, 'Batch kind: {kind_of_batch} create failed: {status}'
                                                               ''.format(kind_of_batch=kind_of_batch,
                                                                         status=results['status']))
-        elif kind_of_action == ADD_TO_EXISTING:
+        elif kind_of_action == IMPORT_ADD_TO_EXISTING:
             if results['success']:
                 messages.add_message(request, messages.INFO,
                                      'Kind of Batch: {kind_of_batch}, ' 'Number Updated: {updated} '

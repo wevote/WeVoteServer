@@ -97,13 +97,13 @@
 {# If here, we are looking at a We Vote election - 2016-08-10 This filter turned off for now #}
  {% endif %}
    {# ################################### #}
-    {% if office_list %}
+    {% if contest_offices_to_choose_list %}
         <h5>Add New Office</h5>
         {# Office Option 1 #}
         <label for="contest_office1_id_id">New Office</label>
         <select id="contest_office1_id_id" name="contest_office1_id">
             <option value="0" >-- Choose Office --</option>
-        {% for office in office_list %}
+        {% for office in contest_offices_to_choose_list %}
             <option value="{{ office.id }}">{{ office.office_name }}
                 {% if office.district_id %}
                     - District {{ office.district_id }}

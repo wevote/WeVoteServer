@@ -1,7 +1,25 @@
 {# templates/import_export_batches/batch_header_mapping.html #}
 {% extends "template_base.html" %}
 
-{% block title %}List of Batches{% endblock %}
+{% block title %}
+    {% if kind_of_batch == "MEASURE" %}
+        Measure Header Mapping
+    {% elif kind_of_batch == "ELECTED_OFFICE" %}
+        Elected Office Header Mapping
+    {% elif kind_of_batch == "CONTEST_OFFICE" %}
+        Contest Office Header Mapping
+    {% elif kind_of_batch == "CANDIDATE" %}
+        Candidate Header Mapping
+    {% elif kind_of_batch == "ORGANIZATION" %}
+        Organization Header Mapping
+    {% elif kind_of_batch == "POSITION" %}
+        Position Header Mapping
+    {% elif kind_of_batch == "POLITICIAN" %}
+        Politician Header Mapping
+    {% else %}
+        Header Mapping
+    {% endif %}
+{% endblock %}
 
 {% block content %}
 {% load template_filters %}

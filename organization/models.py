@@ -1508,8 +1508,12 @@ class OrganizationListManager(models.Manager):
         return results
 
     def retrieve_organizations_from_non_unique_identifiers(self, twitter_handle):
-        organization_list_objects = []
+        keep_looking_for_duplicates = True
+        organization_list = []
         organization_list_found = False
+        organization_found = False
+        multiple_entries_found = False
+        organization = Organization()
         success = False
         status = ""
         twitter_handle_filtered = extract_twitter_handle_from_text_string(twitter_handle)
@@ -1525,8 +1529,10 @@ class OrganizationListManager(models.Manager):
                 twitter_link_to_organization.organization_we_vote_id)
             if organization_results['organization_found']:
                 organization = organization_results['organization']
+                organization_found = True
+                keep_looking_for_duplicates = False
                 organization_list_found = True
-                organization_list_objects.append(organization)
+                organization_list.append(organization)
                 success = True
                 status = "ORGANIZATION_FOUND_FROM_TWITTER_LINK_TO_ORGANIZATION"
             else:
@@ -1552,32 +1558,49 @@ class OrganizationListManager(models.Manager):
                 # If multiple organizations claim the same Twitter handle, select the one with... ??
                 # organization_queryset = organization_queryset.order_by('-twitter_followers_count')
 
-                organization_list_objects = organization_queryset
+                organization_list = list(organization_queryset)
 
-                if len(organization_list_objects):
-                    organization_list_found = True
-                    status = 'ORGANIZATIONS_RETRIEVED_FROM_TWITTER_HANDLE'
-                    success = True
+                if len(organization_list):
+                    if len(organization_list) == 1:
+                        status += 'BATCH_ROW_ACTION_ORGANIZATION_RETRIEVED '
+                        organization_list_found = True
+                        organization_found = True
+                        multiple_entries_found = False
+                        organization = organization_list[0]
+                        keep_looking_for_duplicates = False
+                    else:
+                        organization_list_found = True
+                        multiple_entries_found = True
+                        status += 'ORGANIZATIONS_RETRIEVED_FROM_TWITTER_HANDLE '
+                        success = True
                 else:
-                    status = 'NO_ORGANIZATIONS_RETRIEVED_FROM_TWITTER_HANDLE'
+                    status += 'NO_ORGANIZATIONS_RETRIEVED_FROM_TWITTER_HANDLE '
                     success = True
             except Organization.DoesNotExist:
                 # No organizations found. Not a problem.
-                status = 'NO_ORGANIZATIONS_FOUND_FROM_TWITTER_HANDLE_DoesNotExist'
-                organization_list_objects = []
+                status += 'NO_ORGANIZATIONS_FOUND_FROM_TWITTER_HANDLE_DoesNotExist'
+                organization_list = []
+                multiple_entries_found = False
                 success = True
             except Exception as e:
-                handle_exception(e, logger=logger, exception_message=
-                    "exception thrown in retrieve_organizations_from_non_unique_identifiers")
+                handle_exception(e, logger=logger,
+                                 exception_message="exception thrown in retrieve_organizations_"
+                                                   "from_non_unique_identifiers")
                 status = 'FAILED retrieve_organizations_from_non_unique_identifiers ' \
                          '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
                 success = False
+                organization_list = []
+                multiple_entries_found = False
+                keep_looking_for_duplicates = False
 
         results = {
             'success':                  success,
             'status':                   status,
             'organization_list_found':  organization_list_found,
-            'organization_list':        organization_list_objects,
+            'organization_list':        organization_list,
+            'organization_found':       organization_found,
+            'organization':             organization,
+            'multiple_entries_found':   multiple_entries_found,
         }
         return results
 
