@@ -46,9 +46,10 @@ def organization_follow(voter_device_id, organization_id=0, organization_we_vote
     :param organization_follow_based_on_issue: 
     :return: 
     """
-    return organization_follow_all(voter_device_id, organization_id, organization_we_vote_id,
-                                   follow_kind=FOLLOWING,
-                                   organization_follow_based_on_issue=organization_follow_based_on_issue)
+    json_data = organization_follow_all(voter_device_id, organization_id, organization_we_vote_id,
+                                        follow_kind=FOLLOWING,
+                                        organization_follow_based_on_issue=organization_follow_based_on_issue)
+    return HttpResponse(json.dumps(json_data), content_type='application/json')
 
 
 def organization_stop_following(voter_device_id, organization_id=0, organization_we_vote_id=''):

@@ -256,7 +256,7 @@ def organization_follow_all(voter_device_id, organization_id, organization_we_vo
             'organization_follow_based_on_issue': organization_follow_based_on_issue,
             'voter_linked_organization_we_vote_id': "",
         }
-        return HttpResponse(json.dumps(json_data), content_type='application/json')
+        return json_data
 
     voter_id = fetch_voter_id_from_voter_device_link(voter_device_id)
     if not positive_value_exists(voter_id):
@@ -268,7 +268,7 @@ def organization_follow_all(voter_device_id, organization_id, organization_we_vo
             'organization_follow_based_on_issue': organization_follow_based_on_issue,
             'voter_linked_organization_we_vote_id': "",
         }
-        return HttpResponse(json.dumps(json_data), content_type='application/json')
+        return json_data
 
     voter_manager = VoterManager()
     results = voter_manager.retrieve_voter_by_id(voter_id)
@@ -281,7 +281,7 @@ def organization_follow_all(voter_device_id, organization_id, organization_we_vo
             'organization_follow_based_on_issue': organization_follow_based_on_issue,
             'voter_linked_organization_we_vote_id': "",
         }
-        return HttpResponse(json.dumps(json_data), content_type='application/json')
+        return json_data
 
     voter = results['voter']
     voter_linked_organization_we_vote_id = voter.linked_organization_we_vote_id
@@ -296,7 +296,7 @@ def organization_follow_all(voter_device_id, organization_id, organization_we_vo
             'organization_follow_based_on_issue': organization_follow_based_on_issue,
             'voter_linked_organization_we_vote_id': voter_linked_organization_we_vote_id,
         }
-        return HttpResponse(json.dumps(json_data), content_type='application/json')
+        return json_data
 
     if follow_kind == FOLLOWING:
         follow_organization_manager = FollowOrganizationManager()
@@ -351,7 +351,7 @@ def organization_follow_all(voter_device_id, organization_id, organization_we_vo
         'organization_follow_based_on_issue': organization_follow_based_on_issue,
         'voter_linked_organization_we_vote_id': voter_linked_organization_we_vote_id,
     }
-    return HttpResponse(json.dumps(json_data), content_type='application/json')
+    return json_data
 
 
 def organizations_followed_retrieve_for_api(voter_device_id, maximum_number_to_retrieve=0,
