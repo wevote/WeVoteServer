@@ -184,10 +184,14 @@
             {# ####################################### #}
                 <thead>
                     <tr class="{% if one_batch_row.batch_row_action.kind_of_action == "IMPORT_CREATE" %}
-                    table-success
-                    {% elif one_batch_row.batch_row_action.kind_of_action == "IMPORT_ADD_TO_EXISTING" %}
-                    table-warning
-                    {% endif %}">
+                        table-success
+                        {% elif one_batch_row.batch_row_action.kind_of_action == "IMPORT_ADD_TO_EXISTING" %}
+                        table-warning
+                        {% elif one_batch_row.batch_row_action.kind_of_action == "IMPORT_TO_BE_DETERMINED" %}
+                        table-danger
+                        {% elif one_batch_row.batch_row_action.kind_of_action == "IMPORT_QUERY_ERROR" %}
+                        table-danger
+                        {% endif %}">
                         <th></th>
                         <th>candidate name</th>
                         <th>office name</th>
@@ -201,10 +205,14 @@
                 </thead>
                 <tbody>
                     <tr class="{% if one_batch_row.batch_row_action.kind_of_action == "IMPORT_CREATE" %}
-                    table-success
-                    {% elif one_batch_row.batch_row_action.kind_of_action == "IMPORT_ADD_TO_EXISTING" %}
-                    table-warning
-                    {% endif %}">
+                        table-success
+                        {% elif one_batch_row.batch_row_action.kind_of_action == "IMPORT_ADD_TO_EXISTING" %}
+                        table-warning
+                        {% elif one_batch_row.batch_row_action.kind_of_action == "IMPORT_TO_BE_DETERMINED" %}
+                        table-danger
+                        {% elif one_batch_row.batch_row_action.kind_of_action == "IMPORT_QUERY_ERROR" %}
+                        table-danger
+                        {% endif %}">
                         <td>
                             {# Based on the results of analysis, show button to do the action #}
                             {% if one_batch_row.batch_row_action.kind_of_action == "IMPORT_CREATE" %}
@@ -246,9 +254,17 @@
                         <td>{{ one_batch_row.batch_row_action.candidate_url|default_if_none:"" }}</td>
                         <td>{{ one_batch_row.batch_row_action.candidate_is_incumbent|default_if_none:"" }}</td>
                     </tr>
-                    {% if one_batch_row.batch_row_action.alert_exists %}
-                    <tr class="table-success">
-                        <td colspan="20">ALERTS:</td>
+                    {% if one_batch_row.batch_row_action.status %}
+                    <tr class="{% if one_batch_row.batch_row_action.kind_of_action == "IMPORT_CREATE" %}
+                        table-success
+                        {% elif one_batch_row.batch_row_action.kind_of_action == "IMPORT_ADD_TO_EXISTING" %}
+                        table-warning
+                        {% elif one_batch_row.batch_row_action.kind_of_action == "IMPORT_TO_BE_DETERMINED" %}
+                        table-danger
+                        {% elif one_batch_row.batch_row_action.kind_of_action == "IMPORT_QUERY_ERROR" %}
+                        table-danger
+                        {% endif %}">
+                        <td colspan="20">STATUS: {{ one_batch_row.batch_row_action.status }}</td>
                     </tr>
                     {% endif %}
                 </tbody>
@@ -258,21 +274,30 @@
             {# ####################################### #}
                 <thead>
                     <tr class="{% if one_batch_row.batch_row_action.kind_of_action == "IMPORT_CREATE" %}
-                    table-success
-                    {% elif one_batch_row.batch_row_action.kind_of_action == "IMPORT_ADD_TO_EXISTING" %}
-                    table-warning
-                    {% endif %}">
+                        table-success
+                        {% elif one_batch_row.batch_row_action.kind_of_action == "IMPORT_ADD_TO_EXISTING" %}
+                        table-warning
+                        {% elif one_batch_row.batch_row_action.kind_of_action == "IMPORT_TO_BE_DETERMINED" %}
+                        table-danger
+                        {% elif one_batch_row.batch_row_action.kind_of_action == "IMPORT_QUERY_ERROR" %}
+                        table-danger
+                        {% endif %}">
                         <th></th>
                         <th>office name</th>
+                        <th>election</th>
                         <th>state_code</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr class="{% if one_batch_row.batch_row_action.kind_of_action == "IMPORT_CREATE" %}
-                    table-success
-                    {% elif one_batch_row.batch_row_action.kind_of_action == "IMPORT_ADD_TO_EXISTING" %}
-                    table-warning
-                    {% endif %}">
+                        table-success
+                        {% elif one_batch_row.batch_row_action.kind_of_action == "IMPORT_ADD_TO_EXISTING" %}
+                        table-warning
+                        {% elif one_batch_row.batch_row_action.kind_of_action == "IMPORT_TO_BE_DETERMINED" %}
+                        table-danger
+                        {% elif one_batch_row.batch_row_action.kind_of_action == "IMPORT_QUERY_ERROR" %}
+                        table-danger
+                        {% endif %}">
                         <td>
                             {# Based on the results of analysis, show button to do the action #}
                             {% if one_batch_row.batch_row_action.kind_of_action == "IMPORT_CREATE" %}
@@ -300,12 +325,25 @@
                                 {{ one_batch_row.batch_row_action.kind_of_action }}
                             {% endif %}
                         </td>
-                        <td>{{ one_batch_row.batch_row_action.contest_office_name|default_if_none:"" }}</td>
+                        <td>{{ one_batch_row.batch_row_action.contest_office_name|default_if_none:"" }}
+                            {% if one_batch_row.batch_row_action.contest_office_we_vote_id %}
+                            <span> ({{ one_batch_row.batch_row_action.contest_office_we_vote_id|default_if_none:"" }})</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ one_batch_row.batch_row_action.google_civic_election_id|default_if_none:"" }}</td>
                         <td>{{ one_batch_row.batch_row_action.state_code|default_if_none:"" }}</td>
                     </tr>
-                    {% if one_batch_row.batch_row_action.alert_exists %}
-                    <tr class="table-success">
-                        <td colspan="20">ALERTS:</td>
+                    {% if one_batch_row.batch_row_action.status %}
+                    <tr class="{% if one_batch_row.batch_row_action.kind_of_action == "IMPORT_CREATE" %}
+                        table-success
+                        {% elif one_batch_row.batch_row_action.kind_of_action == "IMPORT_ADD_TO_EXISTING" %}
+                        table-warning
+                        {% elif one_batch_row.batch_row_action.kind_of_action == "IMPORT_TO_BE_DETERMINED" %}
+                        table-danger
+                        {% elif one_batch_row.batch_row_action.kind_of_action == "IMPORT_QUERY_ERROR" %}
+                        table-danger
+                        {% endif %}">
+                        <td colspan="20">STATUS: {{ one_batch_row.batch_row_action.status }}</td>
                     </tr>
                     {% endif %}
                 </tbody>
@@ -318,6 +356,10 @@
                     table-success
                     {% elif one_batch_row.batch_row_action.kind_of_action == "IMPORT_ADD_TO_EXISTING" %}
                     table-warning
+                    {% elif one_batch_row.batch_row_action.kind_of_action == "IMPORT_TO_BE_DETERMINED" %}
+                    table-danger
+                    {% elif one_batch_row.batch_row_action.kind_of_action == "IMPORT_QUERY_ERROR" %}
+                    table-danger
                     {% endif %}">
                         <th></th>
                         <th>name</th>
@@ -329,6 +371,10 @@
                     table-success
                     {% elif one_batch_row.batch_row_action.kind_of_action == "IMPORT_ADD_TO_EXISTING" %}
                     table-warning
+                    {% elif one_batch_row.batch_row_action.kind_of_action == "IMPORT_TO_BE_DETERMINED" %}
+                    table-danger
+                    {% elif one_batch_row.batch_row_action.kind_of_action == "IMPORT_QUERY_ERROR" %}
+                    table-danger
                     {% endif %}">
                         <td>
                             {# Based on the results of analysis, show button to do the action #}
@@ -391,10 +437,14 @@
             {# ####################################### #}
                 <thead>
                     <tr class="{% if one_batch_row.batch_row_action.kind_of_action == "IMPORT_CREATE" %}
-                    table-success
-                    {% elif one_batch_row.batch_row_action.kind_of_action == "IMPORT_ADD_TO_EXISTING" %}
-                    table-warning
-                    {% endif %}">
+                        table-success
+                        {% elif one_batch_row.batch_row_action.kind_of_action == "IMPORT_ADD_TO_EXISTING" %}
+                        table-warning
+                        {% elif one_batch_row.batch_row_action.kind_of_action == "IMPORT_TO_BE_DETERMINED" %}
+                        table-danger
+                        {% elif one_batch_row.batch_row_action.kind_of_action == "IMPORT_QUERY_ERROR" %}
+                        table-danger
+                        {% endif %}">
                         <th></th>
                         <th>name</th>
                         <th>twitter</th>
@@ -413,10 +463,14 @@
                 </thead>
                 <tbody>
                     <tr class="{% if one_batch_row.batch_row_action.kind_of_action == "IMPORT_CREATE" %}
-                    table-success
-                    {% elif one_batch_row.batch_row_action.kind_of_action == "IMPORT_ADD_TO_EXISTING" %}
-                    table-warning
-                    {% endif %}">
+                        table-success
+                        {% elif one_batch_row.batch_row_action.kind_of_action == "IMPORT_ADD_TO_EXISTING" %}
+                        table-warning
+                        {% elif one_batch_row.batch_row_action.kind_of_action == "IMPORT_TO_BE_DETERMINED" %}
+                        table-danger
+                        {% elif one_batch_row.batch_row_action.kind_of_action == "IMPORT_QUERY_ERROR" %}
+                        table-danger
+                        {% endif %}">
                         <td>
                             {# Based on the results of analysis, show button to do the action #}
                             {% if one_batch_row.batch_row_action.kind_of_action == "IMPORT_CREATE" %}
@@ -466,7 +520,7 @@
                 </tbody>
             {% elif one_batch_row.kind_of_batch == "POLITICIAN" %}
             {# ####################################### #}
-            {# ### POLITICIAN### #}
+            {# ### POLITICIAN ### #}
             {# ####################################### #}
                 <tr>
                     <th></th>
@@ -491,10 +545,14 @@
             {# ####################################### #}
                 <thead>
                     <tr class="{% if one_batch_row.batch_row_action.kind_of_action == "IMPORT_CREATE" %}
-                    table-success
-                    {% elif one_batch_row.batch_row_action.kind_of_action == "IMPORT_ADD_TO_EXISTING" %}
-                    table-warning
-                    {% endif %}">
+                        table-success
+                        {% elif one_batch_row.batch_row_action.kind_of_action == "IMPORT_ADD_TO_EXISTING" %}
+                        table-warning
+                        {% elif one_batch_row.batch_row_action.kind_of_action == "IMPORT_TO_BE_DETERMINED" %}
+                        table-danger
+                        {% elif one_batch_row.batch_row_action.kind_of_action == "IMPORT_QUERY_ERROR" %}
+                        table-danger
+                        {% endif %}">
                         <th></th>
                         <th>ballot item name</th>
                         <th>office</th>
@@ -502,14 +560,19 @@
                         <th>speaker_twitter</th>
                         <th>stance</th>
                         <th>statement</th>
+                        <th>more_info_url</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr class="{% if one_batch_row.batch_row_action.kind_of_action == "IMPORT_CREATE" %}
-                    table-success
-                    {% elif one_batch_row.batch_row_action.kind_of_action == "IMPORT_ADD_TO_EXISTING" %}
-                    table-warning
-                    {% endif %}">
+                        table-success
+                        {% elif one_batch_row.batch_row_action.kind_of_action == "IMPORT_ADD_TO_EXISTING" %}
+                        table-warning
+                        {% elif one_batch_row.batch_row_action.kind_of_action == "IMPORT_TO_BE_DETERMINED" %}
+                        table-danger
+                        {% elif one_batch_row.batch_row_action.kind_of_action == "IMPORT_QUERY_ERROR" %}
+                        table-danger
+                        {% endif %}">
                         <td>
                             {# Based on the results of analysis, show button to do the action #}
                             {% if one_batch_row.batch_row_action.kind_of_action == "IMPORT_CREATE" %}
@@ -542,6 +605,7 @@
                         <td>{{ one_batch_row.batch_row_action.speaker_twitter_handle|default_if_none:"" }}</td>
                         <td>{{ one_batch_row.batch_row_action.stance|default_if_none:"" }}</td>
                         <td>{{ one_batch_row.batch_row_action.statement_text|default_if_none:"" }}</td>
+                        <td>{{ one_batch_row.batch_row_action.more_info_url|default_if_none:"" }}</td>
                     </tr>
                     {% if one_batch_row.batch_row_action.alert_exists %}
                     <tr class="table-success">

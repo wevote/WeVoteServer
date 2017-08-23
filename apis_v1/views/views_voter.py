@@ -420,7 +420,7 @@ def voter_ballot_items_retrieve_view(request):  # voterBallotItemsRetrieve
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 
 
-def voter_ballot_items_retrieve_from_google_civic_view(request):
+def voter_ballot_items_retrieve_from_google_civic_view(request):  # voterBallotItemsRetrieveFromGoogleCivic
     voter_device_id = get_voter_device_id(request)
     text_for_map_search = request.GET.get('text_for_map_search', '')
     use_test_election = request.GET.get('use_test_election', False)
@@ -466,7 +466,7 @@ def voter_ballot_items_retrieve_from_google_civic_view(request):
     return HttpResponse(json.dumps(results), content_type='application/json')
 
 
-def voter_ballot_list_retrieve_view(request):
+def voter_ballot_list_retrieve_view(request):  # voterBallotListRetrieve
     """
     (voterBallotListRetrieve) Retrieve a list of election ballots per voter_id.
     :param request:
@@ -504,7 +504,7 @@ def voter_ballot_list_retrieve_view(request):
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 
 
-def voter_count_view(request):
+def voter_count_view(request):  # voterCount
     return voter_count()
 
 
@@ -682,21 +682,22 @@ def voter_facebook_sign_in_save_view(request):  # voterFacebookSignInSave
     facebook_profile_image_url_https = request.GET.get('facebook_profile_image_url_https', '')
     facebook_background_image_url_https = request.GET.get('facebook_background_image_url_https', '')
 
-    results = voter_facebook_sign_in_save_for_api(voter_device_id=voter_device_id,
-                                                  save_auth_data=save_auth_data,
-                                                  facebook_access_token=facebook_access_token,
-                                                  facebook_user_id=facebook_user_id,
-                                                  facebook_expires_in=facebook_expires_in,
-                                                  facebook_signed_request=facebook_signed_request,
-                                                  save_profile_data=save_profile_data,
-                                                  facebook_email=facebook_email,
-                                                  facebook_first_name=facebook_first_name,
-                                                  facebook_middle_name=facebook_middle_name,
-                                                  facebook_last_name=facebook_last_name,
-                                                  save_photo_data=save_photo_data,
-                                                  facebook_profile_image_url_https=facebook_profile_image_url_https,
-                                                  facebook_background_image_url_https=facebook_background_image_url_https,
-                                                  )
+    results = voter_facebook_sign_in_save_for_api(
+        voter_device_id=voter_device_id,
+        save_auth_data=save_auth_data,
+        facebook_access_token=facebook_access_token,
+        facebook_user_id=facebook_user_id,
+        facebook_expires_in=facebook_expires_in,
+        facebook_signed_request=facebook_signed_request,
+        save_profile_data=save_profile_data,
+        facebook_email=facebook_email,
+        facebook_first_name=facebook_first_name,
+        facebook_middle_name=facebook_middle_name,
+        facebook_last_name=facebook_last_name,
+        save_photo_data=save_photo_data,
+        facebook_profile_image_url_https=facebook_profile_image_url_https,
+        facebook_background_image_url_https=facebook_background_image_url_https,
+        )
 
     json_data = {
         'status':                   results['status'],
@@ -712,7 +713,7 @@ def voter_facebook_sign_in_save_view(request):  # voterFacebookSignInSave
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 
 
-def voter_guide_possibility_retrieve_view(request):
+def voter_guide_possibility_retrieve_view(request):  # voterGuidePossibilityRetrieve
     """
     Retrieve a previously saved website that may contain a voter guide (voterGuidePossibilityRetrieve)
     :param request:
@@ -724,7 +725,7 @@ def voter_guide_possibility_retrieve_view(request):
                                                     voter_guide_possibility_url=voter_guide_possibility_url)
 
 
-def voter_guide_possibility_save_view(request):
+def voter_guide_possibility_save_view(request):  # voterGuidePossibilitySave
     """
     Save a website that may contain a voter guide (voterGuidePossibilitySave)
     :param request:
@@ -754,7 +755,7 @@ def voter_follow_all_organizations_followed_by_organization_view(request):
         maximum_number_to_follow=maximum_number_to_follow)
 
 
-def voter_guides_followed_by_organization_retrieve_view(request):
+def voter_guides_followed_by_organization_retrieve_view(request):  # voterGuidesFollowedByOrganizationRetrieve
     voter_linked_organization_we_vote_id = request.GET.get('organization_we_vote_id', '')
     filter_by_this_google_civic_election_id = request.GET.get('filter_by_this_google_civic_election_id', '')
     voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
@@ -853,7 +854,7 @@ def voter_guides_to_follow_retrieve_view(request):  # voterGuidesToFollowRetriev
     return HttpResponse(json.dumps(results['json_data']), content_type='application/json')
 
 
-def voter_issue_follow_view(request):
+def voter_issue_follow_view(request):  # issueFollow
     voter_device_id = request.GET.get('voter_device_id', False)
     issue_we_vote_id = request.GET.get('issue_we_vote_id', False)
     follow_value = request.GET.get('follow', False)
@@ -873,7 +874,7 @@ def voter_issue_follow_view(request):
                                       ignore_value=ignore_value)
 
 
-def voter_location_retrieve_from_ip_view(request):  # GeoIP geo location
+def voter_location_retrieve_from_ip_view(request):  # voterLocationRetrieveFromIP - GeoIP geo location
     """
     Take the IP address and return a location (voterLocationRetrieveFromIP)
     :param request:
@@ -920,7 +921,7 @@ def voter_merge_two_accounts_view(request):  # voterMergeTwoAccounts
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 
 
-def voter_photo_save_view(request):
+def voter_photo_save_view(request):  # voterPhotoSave
     """
     Save or update a photo for this voter
     :param request:

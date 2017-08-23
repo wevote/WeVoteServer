@@ -677,19 +677,21 @@ class ContestOfficeListManager(models.Model):
                     contest_office = contest_office_list[0]
                     contest_office_found = True
                     contest_office_list_found = True
+                    success = True
                 else:
                     # more than one entry found with a match in ContestOffice
                     contest_office_list_found = True
                     multiple_entries_found = True
                     status += 'CREATE_BATCH_ROW_ACTION_CONTEST_OFFICE-MULTIPLE_ROWS_RETRIEVED '
+                    success = True
             else:
                 # Existing entry couldn't be found in the contest office table. We should keep looking for
                 #  close matches
-                pass
+                success = True
         except ContestOffice.DoesNotExist:
             # Existing entry couldn't be found in the contest office table. We should keep looking for
             #  close matches
-            pass
+            success = True
 
         # TODO To build
         # if keep_looking_for_duplicates:
@@ -717,7 +719,7 @@ class ContestOfficeListManager(models.Model):
         #     if office_results['possible_matches_found']:
         #         pass
         #
-        #     kind_of_action = TO_BE_DETERMINED
+        #     kind_of_action = IMPORT_TO_BE_DETERMINED
         #     batch_row_action_contest_office_status += "INSUFFICIENT_DATA_FOR_BATCH_ROW_ACTION_CONTEST_OFFICE_CREATE "
         results = {
             'success':                      success,

@@ -2431,7 +2431,7 @@ class PositionManager(models.Model):
             }
             return results
 
-        # Now that we've checked to see that there isn't an entry from the other table, create a new on
+        # Now that we've checked to see that there isn't an entry from the other table, create a new one
         try:
             # Create new
             ballot_item_display_name = ""
@@ -4734,14 +4734,8 @@ class PositionManager(models.Model):
                             google_civic_election_id)
                         if results['position_found']:
                             position_on_stage = results['position']
-
-                        # position_on_stage = position_on_stage_starter.objects.get(
-                        #     candidate_campaign_we_vote_id=candidate_we_vote_id,
-                        #     organization_we_vote_id=organization_we_vote_id,
-                        #     google_civic_election_id=google_civic_election_id
-                        # )
-                        position_on_stage_found = True
-                        found_with_status = "FOUND_WITH_CANDIDATE_AND_ORGANIZATION_WE_VOTE_ID"
+                            position_on_stage_found = True
+                            found_with_status = "FOUND_WITH_CANDIDATE_AND_ORGANIZATION_WE_VOTE_ID"
                     except MultipleObjectsReturned as e:
                         handle_record_found_more_than_one_exception(e, logger)
                         exception_multiple_object_returned = True
@@ -4876,13 +4870,8 @@ class PositionManager(models.Model):
                         )
                         if results['position_found']:
                             position_on_stage = results['position']
-                        # position_on_stage = position_on_stage_starter.objects.get(
-                        #     contest_office_we_vote_id=office_we_vote_id,
-                        #     organization_we_vote_id=organization_we_vote_id,
-                        #     google_civic_election_id=google_civic_election_id
-                        # )
-                        position_on_stage_found = True
-                        found_with_status = "FOUND_WITH_OFFICE_AND_ORGANIZATION_WE_VOTE_ID"
+                            position_on_stage_found = True
+                            found_with_status = "FOUND_WITH_OFFICE_AND_ORGANIZATION_WE_VOTE_ID"
                     except MultipleObjectsReturned as e:
                         handle_record_found_more_than_one_exception(e, logger)
                         exception_multiple_object_returned = True
@@ -4926,13 +4915,8 @@ class PositionManager(models.Model):
                         )
                         if results['position_found']:
                             position_on_stage = results['position']
-                        # position_on_stage = position_on_stage_starter.objects.get(
-                        #     candidate_campaign_we_vote_id=candidate_we_vote_id,
-                        #     public_figure_we_vote_id=public_figure_we_vote_id,
-                        #     google_civic_election_id=google_civic_election_id
-                        # )
-                        position_on_stage_found = False  # TODO Update when working
-                        found_with_status = "FOUND_WITH_CANDIDATE_AND_PUBLIC_FIGURE_WE_VOTE_ID"
+                            position_on_stage_found = False  # TODO Update when working
+                            found_with_status = "FOUND_WITH_CANDIDATE_AND_PUBLIC_FIGURE_WE_VOTE_ID"
                     except MultipleObjectsReturned as e:
                         handle_record_found_more_than_one_exception(e, logger)
                         exception_multiple_object_returned = True
@@ -5017,13 +5001,8 @@ class PositionManager(models.Model):
                         )
                         if results['position_found']:
                             position_on_stage = results['position']
-                        # position_on_stage = position_on_stage_starter.objects.get(
-                        #     candidate_campaign_we_vote_id=candidate_we_vote_id,
-                        #     voter_we_vote_id=voter_we_vote_id,
-                        #     google_civic_election_id=google_civic_election_id
-                        # )
-                        position_on_stage_found = True
-                        found_with_status = "FOUND_WITH_CANDIDATE_AND_VOTER_WE_VOTE_ID"
+                            position_on_stage_found = True
+                            found_with_status = "FOUND_WITH_CANDIDATE_AND_VOTER_WE_VOTE_ID"
                     except MultipleObjectsReturned as e:
                         handle_record_found_more_than_one_exception(e, logger)
                         exception_multiple_object_returned = True
@@ -5064,13 +5043,8 @@ class PositionManager(models.Model):
                         )
                         if results['position_found']:
                             position_on_stage = results['position']
-                        # position_on_stage = position_on_stage_starter.objects.get(
-                        #     contest_measure_we_vote_id=measure_we_vote_id,
-                        #     voter_we_vote_id=voter_we_vote_id,
-                        #     google_civic_election_id=google_civic_election_id
-                        # )
-                        position_on_stage_found = True
-                        found_with_status = "FOUND_WITH_MEASURE_AND_VOTER_WE_VOTE_ID"
+                            position_on_stage_found = True
+                            found_with_status = "FOUND_WITH_MEASURE_AND_VOTER_WE_VOTE_ID"
                     except MultipleObjectsReturned as e:
                         handle_record_found_more_than_one_exception(e, logger)
                         exception_multiple_object_returned = True
@@ -5110,13 +5084,8 @@ class PositionManager(models.Model):
                         )
                         if results['position_found']:
                             position_on_stage = results['position']
-                        # position_on_stage = position_on_stage_starter.objects.get(
-                        #     contest_office_we_vote_id=office_we_vote_id,
-                        #     voter_we_vote_id=voter_we_vote_id,
-                        #     google_civic_election_id=google_civic_election_id
-                        # )
-                        position_on_stage_found = True
-                        found_with_status = "FOUND_WITH_OFFICE_AND_VOTER_WE_VOTE_ID"
+                            position_on_stage_found = True
+                            found_with_status = "FOUND_WITH_OFFICE_AND_VOTER_WE_VOTE_ID"
                     except MultipleObjectsReturned as e:
                         handle_record_found_more_than_one_exception(e, logger)
                         exception_multiple_object_returned = True
@@ -5240,22 +5209,20 @@ class PositionManager(models.Model):
                 # public_figure_we_vote_id or candidate_we_vote_id. For now (2016-8-17) we assume organization
                 voter_manager = VoterManager()
                 results = voter_manager.retrieve_voter_by_we_vote_id(voter_we_vote_id)
-                organization_id = 0
-                organization_we_vote_id = ""
                 voter_id = 0
                 if results['voter_found']:
                     voter = results['voter']
                     voter_id = voter.id
                     organization_we_vote_id = voter.linked_organization_we_vote_id
-                    if positive_value_exists(organization_we_vote_id):
-                        # Look up the organization_id
-                        organization_manager = OrganizationManager()
-                        organization_results = organization_manager.retrieve_organization_from_we_vote_id(
-                            voter.linked_organization_we_vote_id)
-                        if organization_results['organization_found']:
-                            organization = organization_results['organization']
-                            organization_id = organization.id
-                            speaker_display_name = organization.organization_name
+                if positive_value_exists(organization_we_vote_id):
+                    # Look up the organization_id
+                    organization_manager = OrganizationManager()
+                    organization_results = organization_manager.retrieve_organization_from_we_vote_id(
+                        organization_we_vote_id)
+                    if organization_results['organization_found']:
+                        organization = organization_results['organization']
+                        organization_id = organization.id
+                        speaker_display_name = organization.organization_name
 
                 position_on_stage = position_on_stage_starter.objects.create(
                     organization_we_vote_id=organization_we_vote_id,
