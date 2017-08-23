@@ -11,6 +11,7 @@ from django.core.urlresolvers import reverse
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.messages import get_messages
+from django.db.models import Q
 from django.shortcuts import render
 from election.models import Election
 from exception.models import handle_record_found_more_than_one_exception,\
@@ -108,6 +109,29 @@ def measure_list_view(request):
             measure_list = measure_list.filter(google_civic_election_id=google_civic_election_id)
         if positive_value_exists(state_code):
             measure_list = measure_list.filter(state_code__iexact=state_code)
+        measure_search = request.GET.get('measure_search', '')
+
+        if positive_value_exists(measure_search):
+            filters = []
+            new_filter = Q(state_code__icontains=measure_search)
+            filters.append(new_filter)
+
+            new_filter = Q(we_vote_id__icontains=measure_search)
+            filters.append(new_filter)
+
+            new_filter = Q(measure_title__icontains=measure_search)
+            filters.append(new_filter)
+
+            # Add the first query
+            if len(filters):
+                final_filters = filters.pop()
+
+                # ...and "OR" the remaining items in the list
+                for item in filters:
+                    final_filters |= item
+
+                measure_list = measure_list.filter(final_filters)
+
         measure_list_count = measure_list.count()
 
         if positive_value_exists(google_civic_election_id):
@@ -133,7 +157,7 @@ def measure_list_view(request):
 
     except ContestMeasure.DoesNotExist:
         # This is fine
-        measure_list_modified = ContestMeasure()
+        measure_list_modified = []
         pass
 
     election_list = Election.objects.order_by('-election_day_text')
@@ -155,6 +179,7 @@ def measure_list_view(request):
         'election_list':            election_list,
         'state_code':               state_code,
         'state_list':               sorted_state_list,
+        'measure_search':           measure_search,
         'google_civic_election_id': google_civic_election_id,
     }
     return render(request, 'measure/measure_list.html', template_values)

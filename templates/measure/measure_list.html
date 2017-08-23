@@ -57,6 +57,18 @@
     {% endif %}
 {% endif %}{# End of if state_list #}
 
+<form name="measure_search_form" method="get" action="{% url 'measure:measure_list' %}">
+    {% csrf_token %}
+
+
+{% if measure_search or issues_selected %}
+    <a href="{% url 'measure:measure_list' %}">
+         clear search</a>&nbsp;
+{% endif %}
+    <input type="text" name="measure_search" id="measure_id" value="{{ measure_search|default_if_none:"" }}" />
+    <input type="submit" value="Search for measure" />
+</form>
+
 {% if measure_list %}
     <table border="1" cellpadding="5" cellspacing="5">
         <tr>
