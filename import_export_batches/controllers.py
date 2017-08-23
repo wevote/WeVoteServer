@@ -8,7 +8,7 @@ from .models import BatchManager, BatchDescription, BatchHeaderMap, BatchRow, Ba
     BatchRowActionCandidate, BatchRowActionPosition, \
     CLEAN_DATA_MANUALLY, CONTEST_OFFICE, ELECTED_OFFICE, POSITION, \
     IMPORT_CREATE, IMPORT_ADD_TO_EXISTING, IMPORT_DATA_ALREADY_MATCHING, IMPORT_QUERY_ERROR, \
-    TO_BE_DETERMINED, DO_NOT_PROCESS, \
+    IMPORT_TO_BE_DETERMINED, DO_NOT_PROCESS, \
     BATCH_IMPORT_KEYS_ACCEPTED_FOR_CANDIDATES, BATCH_IMPORT_KEYS_ACCEPTED_FOR_CONTEST_OFFICES, \
     BATCH_IMPORT_KEYS_ACCEPTED_FOR_ELECTED_OFFICES, BATCH_IMPORT_KEYS_ACCEPTED_FOR_MEASURES, \
     BATCH_IMPORT_KEYS_ACCEPTED_FOR_ORGANIZATIONS, BATCH_IMPORT_KEYS_ACCEPTED_FOR_POLITICIANS, \
@@ -708,7 +708,7 @@ def create_batch_row_action_contest_office(batch_description, batch_header_map, 
     contest_office_name_mapped = False
     status = ''
     success = False
-    kind_of_action = TO_BE_DETERMINED
+    kind_of_action = IMPORT_TO_BE_DETERMINED
 
     # Does a BatchRowActionContestOffice entry already exist?
     # We want to start with the BatchRowAction... entry first so we can record our findings line by line while
@@ -825,7 +825,7 @@ def create_batch_row_action_contest_office(batch_description, batch_header_map, 
     if keep_looking_for_duplicates:
         if not positive_value_exists(contest_office_name) or not positive_value_exists(state_code) or not \
                 positive_value_exists(google_civic_election_id):
-            kind_of_action = TO_BE_DETERMINED
+            kind_of_action = IMPORT_TO_BE_DETERMINED
             status += "INSUFFICIENT_DATA_FOR_BATCH_ROW_ACTION_CONTEST_OFFICE_CREATE "
             keep_looking_for_duplicates = False
 
@@ -840,16 +840,22 @@ def create_batch_row_action_contest_office(batch_description, batch_header_map, 
             kind_of_action = IMPORT_ADD_TO_EXISTING
             keep_looking_for_duplicates = False
         elif matching_results['contest_office_list_found']:
-            kind_of_action = TO_BE_DETERMINED
+            kind_of_action = IMPORT_TO_BE_DETERMINED
             keep_looking_for_duplicates = False
         elif not matching_results['success']:
-            kind_of_action = TO_BE_DETERMINED
+            kind_of_action = IMPORT_TO_BE_DETERMINED
             status += matching_results['status']
             keep_looking_for_duplicates = False
+        else:
+            pass
 
     if keep_looking_for_duplicates:
-        kind_of_action = IMPORT_CREATE
-        status += "EXISTING_CONTEST_OFFICE_ENTRY_NOT_FOUND-CREATE "
+        if positive_value_exists(contest_office_name) and positive_value_exists(state_code) and \
+                positive_value_exists(google_civic_election_id):
+            pass
+        else:
+            kind_of_action = IMPORT_TO_BE_DETERMINED
+            status += "COULD_NOT_CREATE_CONTEST_OFFICE_ENTRY-MISSING_REQUIRED_VARIABLES "
 
     # Now save the data
     try:
@@ -1139,12 +1145,12 @@ def create_batch_row_action_candidate(batch_description, batch_header_map, one_b
                 batch_row_id=one_batch_row.id,
             )
             batch_row_action_created = True
-            status = "BATCH_ROW_ACTION_CANDIDATE_CREATED"
+            status += "BATCH_ROW_ACTION_CANDIDATE_CREATED "
         except Exception as e:
             batch_row_action_created = False
             batch_row_action_candidate = BatchRowActionCandidate()
             success = False
-            status += "BATCH_ROW_ACTION_CANDIDATE_NOT_CREATED"
+            status += "BATCH_ROW_ACTION_CANDIDATE_NOT_CREATED "
 
             results = {
                 'success': success,
@@ -1219,7 +1225,7 @@ def create_batch_row_action_candidate(batch_description, batch_header_map, one_b
     # Look up CandidateCampaign to see if an entry exists
     # These three parameters are needed to look up in ElectedOffice table for a match
     keep_looking_for_duplicates = True
-    kind_of_action = TO_BE_DETERMINED
+    kind_of_action = IMPORT_TO_BE_DETERMINED
     if positive_value_exists(candidate_we_vote_id):
         # If here, then we are updating an existing known record
         keep_looking_for_duplicates = False
@@ -1235,6 +1241,7 @@ def create_batch_row_action_candidate(batch_description, batch_header_map, one_b
         if matching_results['candidate_found']:
             candidate = matching_results['candidate']
             candidate_found = True
+            keep_looking_for_duplicates = False
             candidate_we_vote_id = candidate.we_vote_id
             contest_office_we_vote_id = candidate.contest_office_we_vote_id
             kind_of_action = IMPORT_ADD_TO_EXISTING
@@ -1246,7 +1253,6 @@ def create_batch_row_action_candidate(batch_description, batch_header_map, one_b
         else:
             kind_of_action = IMPORT_CREATE
 
-    contest_office_we_vote_id = ""
     contest_office_id = 0
     if contest_office_we_vote_id:
         # Look up the contest_office information
@@ -1272,10 +1278,17 @@ def create_batch_row_action_candidate(batch_description, batch_header_map, one_b
         else:
             if kind_of_action == IMPORT_CREATE:
                 # We should not create without a valid office entry
-                kind_of_action = TO_BE_DETERMINED
+                kind_of_action = IMPORT_TO_BE_DETERMINED
 
     # TODO Other checks:
     #   Does the office match?
+
+    # If we are missing required variables, don't create
+    if kind_of_action == IMPORT_CREATE:
+        if not positive_value_exists(candidate_name) or not positive_value_exists(state_code) or not \
+                positive_value_exists(google_civic_election_id) or not positive_value_exists(contest_office_we_vote_id):
+            kind_of_action = IMPORT_TO_BE_DETERMINED
+            status += "COULD_NOT_CREATE_CONTEST_OFFICE_ENTRY-MISSING_REQUIRED_VARIABLES "
 
     # Create a new entry in BatchRowActionCandidate
     try:
@@ -1335,8 +1348,8 @@ def create_batch_row_action_position(batch_description, batch_header_map, one_ba
     contest_office_we_vote_id = ""
     contest_office_id = 0
     measure_found = False
-    measure_we_vote_id = ""
-    measure_id = 0
+    contest_measure_we_vote_id = ""
+    contest_measure_id = 0
 
     # Does a BatchRowActionPosition entry already exist?
     # We want to start with the BatchRowAction... entry first so we can record our findings line by line while
@@ -1384,6 +1397,7 @@ def create_batch_row_action_position(batch_description, batch_header_map, one_ba
         "contest_office_name", batch_header_map, one_batch_row)
     contest_measure_title = batch_manager.retrieve_value_from_batch_row(
         "contest_measure_title", batch_header_map, one_batch_row)
+    more_info_url = batch_manager.retrieve_value_from_batch_row("more_info_url", batch_header_map, one_batch_row)
     statement_text = batch_manager.retrieve_value_from_batch_row("statement_text", batch_header_map, one_batch_row)
     stance = batch_manager.retrieve_value_from_batch_row("stance", batch_header_map, one_batch_row)
     if stance.lower() not in ('info_only', 'no_stance', 'oppose', 'percent_rating', 'still_deciding', 'support'):
@@ -1487,8 +1501,8 @@ def create_batch_row_action_position(batch_description, batch_header_map, one_ba
         if matching_results['measure_found']:
             measure = matching_results['measure']
             measure_found = True
-            measure_we_vote_id = measure.we_vote_id
-            measure_id = measure.id
+            contest_measure_we_vote_id = measure.we_vote_id
+            contest_measure_id = measure.id
         elif matching_results['multiple_entries_found']:
             status += "MULTIPLE_ORGANIZATIONS_FOUND "
         elif not matching_results['success']:
@@ -1544,26 +1558,43 @@ def create_batch_row_action_position(batch_description, batch_header_map, one_ba
     elif positive_value_exists(variables_found_to_create_position):
         kind_of_action = IMPORT_CREATE
     else:
-        kind_of_action = TO_BE_DETERMINED
+        kind_of_action = IMPORT_TO_BE_DETERMINED
 
     try:
+        # position_we_vote_id,
+        # organization_we_vote_id = one_batch_row_action.organization_we_vote_id,
+        # google_civic_election_id = one_batch_row_action.google_civic_election_id,
+        # state_code = one_batch_row_action.state_code,
+        # ballot_item_display_name = one_batch_row_action.ballot_item_display_name,
+        # office_we_vote_id = one_batch_row_action.contest_office_we_vote_id,
+        # candidate_we_vote_id = one_batch_row_action.candidate_campaign_we_vote_id,
+        # measure_we_vote_id = one_batch_row_action.contest_measure_we_vote_id,
+        # stance = one_batch_row_action.stance,
+        # set_as_public_position = True,
+        # statement_text = one_batch_row_action.statement_text,
+        # statement_html = one_batch_row_action.statement_html,
+        # more_info_url = one_batch_row_action.more_info_url)
+
         batch_row_action_position.position_we_vote_id = position_we_vote_id
         batch_row_action_position.ballot_item_display_name = ballot_item_display_name
         batch_row_action_position.candidate_campaign_we_vote_id = candidate_we_vote_id
-        batch_row_action_position.candidate_campaign_id = candidate_id
+        # batch_row_action_position.candidate_campaign_id = candidate_id
         batch_row_action_position.contest_office_name = contest_office_name
         batch_row_action_position.contest_office_we_vote_id = contest_office_we_vote_id
-        batch_row_action_position.contest_office_id = contest_office_id
-        batch_row_action_position.contest_measure_we_vote_id = measure_we_vote_id
-        batch_row_action_position.contest_measure_id = measure_id
+        # batch_row_action_position.contest_office_id = contest_office_id
+        batch_row_action_position.contest_measure_we_vote_id = contest_measure_we_vote_id
+        # batch_row_action_position.contest_measure_id = contest_measure_id
+        batch_row_action_position.google_civic_election_id = google_civic_election_id
+        batch_row_action_position.more_info_url = more_info_url
         batch_row_action_position.stance = stance
         batch_row_action_position.statement_text = statement_text
         batch_row_action_position.state_code = state_code
-        batch_row_action_position.speaker_display_name = organization_name
-        batch_row_action_position.speaker_twitter_handle = organization_twitter_handle
-        batch_row_action_position.organization_id = organization_id
+        # batch_row_action_position.speaker_display_name = organization_name
+        # batch_row_action_position.speaker_twitter_handle = organization_twitter_handle
+        # batch_row_action_position.organization_id = organization_id
         batch_row_action_position.organization_we_vote_id = organization_we_vote_id
         batch_row_action_position.kind_of_action = kind_of_action
+        batch_row_action_position.status = status
         batch_row_action_position.save()
         success = True
     except Exception as e:
@@ -2458,6 +2489,9 @@ def import_candidate_data_from_batch_row_actions(batch_header_id, batch_row_id, 
             if positive_value_exists(one_batch_row_action.candidate_name) \
                     and positive_value_exists(google_civic_election_id) and \
                     positive_value_exists(one_batch_row_action.state_code):
+                # Check to see if anyone else is using the Twitter handle
+
+
                 results = candidate_manager.create_candidate_row_entry(update_values)
                 if results['new_candidate_created']:
                     number_of_candidates_created += 1
@@ -2864,26 +2898,26 @@ def import_organization_data_from_batch_row_actions(
     return results
 
 
-def import_position_data_from_batch_row_actions(  # TODO DALE Convert for positions
+def import_position_data_from_batch_row_actions(
         batch_header_id, batch_row_id, create_entry_flag=False, update_entry_flag=False):
     success = False
     status = ""
-    number_of_organizations_created = 0
-    number_of_organizations_updated = 0
+    number_of_positions_created = 0
+    number_of_positions_updated = 0
     batch_row_action_list_found = False
 
     if not positive_value_exists(batch_header_id):
-        status = "IMPORT_ORGANIZATION_ENTRY-BATCH_HEADER_ID_MISSING"
+        status = "IMPORT_POSITION_ENTRY-BATCH_HEADER_ID_MISSING"
         results = {
             'success':                       success,
             'status':                        status,
-            'number_of_organizations_created':    number_of_organizations_created,
-            'number_of_organizations_updated':    number_of_organizations_updated
+            'number_of_positions_created':    number_of_positions_created,
+            'number_of_positions_updated':    number_of_positions_updated
         }
         return results
 
     try:
-        batch_row_action_list = BatchRowActionOrganization.objects.all()
+        batch_row_action_list = BatchRowActionPosition.objects.all()
         batch_row_action_list = batch_row_action_list.filter(batch_header_id=batch_header_id)
         if positive_value_exists(batch_row_id):
             batch_row_action_list = batch_row_action_list.filter(batch_row_id=batch_row_id)
@@ -2894,102 +2928,79 @@ def import_position_data_from_batch_row_actions(  # TODO DALE Convert for positi
             batch_row_action_list = batch_row_action_list.filter(kind_of_action=IMPORT_ADD_TO_EXISTING)
         else:
             # error handling
-            status += "IMPORT_ORGANIZATION_ENTRY-KIND_OF_ACTION_MISSING"
+            status += "IMPORT_POSITION_ENTRY-KIND_OF_ACTION_MISSING"
             results = {
                 'success':                          success,
                 'status':                           status,
-                'number_of_organizations_created':  number_of_organizations_created,
-                'number_of_organizations_updated':  number_of_organizations_updated
+                'number_of_positions_created':  number_of_positions_created,
+                'number_of_positions_updated':  number_of_positions_updated
             }
             return results
 
         if len(batch_row_action_list):
             batch_row_action_list_found = True
 
-    except BatchRowActionOrganization.DoesNotExist:
+    except BatchRowActionPosition.DoesNotExist:
         batch_row_action_list = []
         batch_row_action_list_found = False
         pass
 
     if not batch_row_action_list_found:
-        status += "IMPORT_ORGANIZATION_ENTRY-BATCH_ROW_ACTION_LIST_MISSING"
+        status += "IMPORT_POSITION_ENTRY-BATCH_ROW_ACTION_LIST_MISSING"
         results = {
             'success':                       success,
             'status':                        status,
-            'number_of_organizations_created':    number_of_organizations_created,
-            'number_of_organizations_updated':    number_of_organizations_updated
+            'number_of_positions_created':    number_of_positions_created,
+            'number_of_positions_updated':    number_of_positions_updated
         }
         return results
 
     if update_entry_flag:
-        status += "ORGANIZATION_UPDATE_NOT_WORKING YET "
+        status += "POSITION_UPDATE_NOT_WORKING YET "
 
-    organization_manager = OrganizationManager()
-    twitter_user_manager = TwitterUserManager()
+    position_manager = PositionManager()
     for one_batch_row_action in batch_row_action_list:
         if create_entry_flag:
-            twitter_link_to_organization_exists = False
-            twitter_id_for_new_organization = 0
-            temp_org_image = ""
-            if one_batch_row_action.organization_twitter_handle:
-                twitter_retrieve_results = \
-                    twitter_user_manager.retrieve_twitter_link_to_organization_from_twitter_handle(
-                        one_batch_row_action.organization_twitter_handle)
-                if twitter_retrieve_results['twitter_link_to_organization_found']:
-                    # twitter_link_to_organization = twitter_retrieve_results['twitter_link_to_organization']
-                    twitter_link_to_organization_exists = True  # Twitter handle already taken
-                else:
-                    # If a twitter_link_to_organization is NOT found, we look up the twitter_id and use it when
-                    #  creating the org so we pull over the twitter data (like twitter_description)
-                    twitter_id_for_new_organization = twitter_user_manager.fetch_twitter_id_from_twitter_handle(
-                        one_batch_row_action.organization_twitter_handle)
+            position_we_vote_id = ""
+            results = position_manager.update_or_create_position(
+                position_we_vote_id,
+                organization_we_vote_id=one_batch_row_action.organization_we_vote_id,
+                google_civic_election_id=one_batch_row_action.google_civic_election_id,
+                state_code=one_batch_row_action.state_code,
+                ballot_item_display_name=one_batch_row_action.ballot_item_display_name,
+                candidate_we_vote_id=one_batch_row_action.candidate_campaign_we_vote_id,
+                measure_we_vote_id=one_batch_row_action.contest_measure_we_vote_id,
+                stance=one_batch_row_action.stance,
+                set_as_public_position=True,
+                statement_text=one_batch_row_action.statement_text,
+                statement_html=one_batch_row_action.statement_html,
+                more_info_url=one_batch_row_action.more_info_url)
+            # office_we_vote_id = one_batch_row_action.contest_office_we_vote_id,
 
-            results = organization_manager.create_organization(
-                one_batch_row_action.organization_name, one_batch_row_action.organization_website,
-                one_batch_row_action.organization_twitter_handle, one_batch_row_action.organization_email,
-                one_batch_row_action.organization_facebook, temp_org_image, twitter_id_for_new_organization)
-
-            if not results['organization_created']:
+            if not results['new_position_created']:
                 continue
 
-            number_of_organizations_created += 1
-            organization = results['organization']
+            number_of_positions_created += 1
+            position = results['position']
             success = True
 
-            # now update BatchRowActionOrganization table entry
+            # now update BatchRowActionPosition table entry
             try:
                 one_batch_row_action.kind_of_action = IMPORT_ADD_TO_EXISTING
-                one_batch_row_action.organization_we_vote_id = organization.we_vote_id
+                one_batch_row_action.position_we_vote_id = position.we_vote_id
                 one_batch_row_action.save()
             except Exception as e:
                 success = False
-                status += "BATCH_ROW_ACTION_ORGANIZATION_SAVE_ERROR "
+                status += "BATCH_ROW_ACTION_POSITION_SAVE_ERROR "
                 handle_exception(e, logger=logger, exception_message=status)
 
-            if positive_value_exists(one_batch_row_action.organization_twitter_handle) and not \
-                    twitter_link_to_organization_exists:
-                # Create TwitterLinkToOrganization
-                if not positive_value_exists(twitter_id_for_new_organization):
-                    twitter_id_for_new_organization = twitter_user_manager.fetch_twitter_id_from_twitter_handle(
-                        one_batch_row_action.organization_twitter_handle)
-                if positive_value_exists(twitter_id_for_new_organization):
-                    results = twitter_user_manager.create_twitter_link_to_organization(
-                        twitter_id_for_new_organization, organization.we_vote_id)
-
-            try:
-                # Now update organization with additional fields
-                organization.organization_instagram_handle = one_batch_row_action.organization_instagram_handle
-                organization.organization_address = one_batch_row_action.organization_address
-                organization.organization_city = one_batch_row_action.organization_city
-                organization.organization_state = one_batch_row_action.organization_state
-                organization.organization_zip = one_batch_row_action.organization_zip
-                organization.organization_phone1 = one_batch_row_action.organization_phone1
-                organization.organization_type = one_batch_row_action.organization_type
-                organization.state_served_code = one_batch_row_action.state_served_code
-                organization.organization_contact_name = one_batch_row_action.organization_contact_name
-                organization.save()
-            except Exception as e:
-                pass
+            # try:
+            #     # Now update position with additional fields
+            #     position.organization_instagram_handle = one_batch_row_action.organization_instagram_handle
+            #     position.organization_contact_name = one_batch_row_action.organization_contact_name
+            #     position.save()
+            # except Exception as e:
+            #     pass
         elif update_entry_flag:
             pass
             # organization_we_vote_id = one_batch_row_action.organization_we_vote_id
@@ -3001,25 +3012,25 @@ def import_position_data_from_batch_row_actions(  # TODO DALE Convert for positi
             #     success = True
         else:
             # This is error, it shouldn't reach here, we are handling IMPORT_CREATE or UPDATE entries only.
-            status += "IMPORT_ORGANIZATION_ENTRY:NO_CREATE_OR_UPDATE_ERROR "
+            status += "IMPORT_POSITION_ENTRY:NO_CREATE_OR_UPDATE_ERROR "
             results = {
                 'success':                          success,
                 'status':                           status,
-                'number_of_organizations_created':  number_of_organizations_created,
-                'number_of_organizations_updated':  number_of_organizations_updated,
+                'number_of_positions_created':  number_of_positions_created,
+                'number_of_positions_updated':  number_of_positions_updated,
             }
             return results
 
-    if number_of_organizations_created:
-        status += "IMPORT_ORGANIZATION_ENTRY: ORGANIZATIONS_CREATED "
-    elif number_of_organizations_updated:
-        status += "IMPORT_ORGANIZATION_ENTRY: ORGANIZATIONS_UPDATED "
+    if number_of_positions_created:
+        status += "IMPORT_POSITION_ENTRY: POSITIONS_CREATED "
+    elif number_of_positions_updated:
+        status += "IMPORT_POSITION_ENTRY: POSITIONS_UPDATED "
 
     results = {
         'success':                       success,
         'status':                        status,
-        'number_of_organizations_created':    number_of_organizations_created,
-        'number_of_organizations_updated':    number_of_organizations_updated,
+        'number_of_positions_created':    number_of_positions_created,
+        'number_of_positions_updated':    number_of_positions_updated,
     }
     return results
 
@@ -3311,12 +3322,12 @@ def import_data_from_batch_row_actions(kind_of_batch, kind_of_action, batch_head
         results = import_position_data_from_batch_row_actions(batch_header_id, batch_row_id, create_flag, update_flag)
         status += results['status']
         if results['success']:
-            if results['number_of_politicians_created']:
+            if results['number_of_positions_created']:
                 # for now, do not handle batch_row_action_politician data
                 # batch_row_action_politician = results['batch_row_action_politician']
-                number_of_table_rows_created = results['number_of_politicians_created']
-            elif results['number_of_politicians_updated']:
-                number_of_table_rows_updated = results['number_of_politicians_updated']
+                number_of_table_rows_created = results['number_of_positions_created']
+            elif results['number_of_positions_updated']:
+                number_of_table_rows_updated = results['number_of_positions_updated']
             success = True
 
     results = {

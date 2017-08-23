@@ -8,7 +8,7 @@ from .models import BatchDescription, BatchHeader, BatchHeaderMap, BatchManager,
     BATCH_IMPORT_KEYS_ACCEPTED_FOR_ELECTED_OFFICES, BATCH_IMPORT_KEYS_ACCEPTED_FOR_MEASURES, \
     BATCH_IMPORT_KEYS_ACCEPTED_FOR_ORGANIZATIONS, BATCH_IMPORT_KEYS_ACCEPTED_FOR_POLITICIANS, \
     BATCH_IMPORT_KEYS_ACCEPTED_FOR_POSITIONS, \
-    IMPORT_CREATE, IMPORT_ADD_TO_EXISTING, IMPORT_QUERY_ERROR, TO_BE_DETERMINED
+    IMPORT_CREATE, IMPORT_ADD_TO_EXISTING, IMPORT_QUERY_ERROR, IMPORT_TO_BE_DETERMINED
 from .controllers import create_batch_header_translation_suggestions, create_batch_row_actions, \
     create_or_update_batch_header_mapping, \
     import_data_from_batch_row_actions, import_create_or_update_elected_office_entry
@@ -663,7 +663,8 @@ def batch_action_list_create_or_update_process_view(request):
                                      ''.format(kind_of_batch=kind_of_batch,
                                                updated=results['number_of_table_rows_updated']))
             else:
-                messages.add_message(request, messages.ERROR, 'Batch kind: {kind_of_batch} update failed.'
+                messages.add_message(request, messages.ERROR, 'Batch kind: {kind_of_batch} update failed--'
+                                                              'UPDATE may not be supported yet.'
                                                               ''.format(kind_of_batch=kind_of_batch))
         else:
             messages.add_message(request, messages.ERROR, 'Batch kind: {kind_of_batch} import status: {status}'

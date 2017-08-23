@@ -36,7 +36,7 @@ KIND_OF_BATCH_CHOICES = (
     (POLITICIAN, 'Politician'),
 )
 
-TO_BE_DETERMINED = 'TBD'
+IMPORT_TO_BE_DETERMINED = 'IMPORT_TO_BE_DETERMINED'
 DO_NOT_PROCESS = 'DO_NOT_PROCESS'
 CLEAN_DATA_MANUALLY = 'CLEAN_DATA_MANUALLY'
 IMPORT_CREATE = 'IMPORT_CREATE'
@@ -45,7 +45,7 @@ IMPORT_DATA_ALREADY_MATCHING = 'IMPORT_DATA_ALREADY_MATCHING'
 IMPORT_QUERY_ERROR = 'IMPORT_QUERY_ERROR'
 
 KIND_OF_ACTION_CHOICES = (
-    (TO_BE_DETERMINED,  'TBD'),
+    (IMPORT_TO_BE_DETERMINED,  'To Be Determined'),
     (DO_NOT_PROCESS,    'Do not process'),
     (IMPORT_CREATE,            'Create'),
     (IMPORT_ADD_TO_EXISTING,   'Add to Existing'),
@@ -153,6 +153,7 @@ BATCH_IMPORT_KEYS_ACCEPTED_FOR_POSITIONS = {
     'candidate_twitter_handle': 'candidate_twitter_handle',
     'contest_office_name': 'contest_office_name',
     'contest_measure_title': 'contest_measure_title',
+    'more_info_url': 'more_info_url',
     'stance': 'stance (SUPPORT or OPPOSE)',
     'support': 'support (TRUE or FALSE)',
     'oppose': 'oppose (TRUE or FALSE)',
@@ -2751,7 +2752,7 @@ class BatchRowActionMeasure(models.Model):
     """
     batch_header_id = models.PositiveIntegerField(verbose_name="unique id of header row", unique=False, null=False)
     batch_row_id = models.PositiveIntegerField(verbose_name="unique id of batch row", unique=True, null=False)
-    kind_of_action = models.CharField(max_length=40, choices=KIND_OF_ACTION_CHOICES, default=TO_BE_DETERMINED)
+    kind_of_action = models.CharField(max_length=40, choices=KIND_OF_ACTION_CHOICES, default=IMPORT_TO_BE_DETERMINED)
 
     # Fields from ContestMeasure
     measure_we_vote_id = models.CharField(
@@ -2811,7 +2812,7 @@ class BatchRowActionContestOffice(models.Model):
     """
     batch_header_id = models.PositiveIntegerField(verbose_name="unique id of header row", unique=False, null=False)
     batch_row_id = models.PositiveIntegerField(verbose_name="unique id of batch row", unique=False, null=False)
-    kind_of_action = models.CharField(max_length=40, choices=KIND_OF_ACTION_CHOICES, default=TO_BE_DETERMINED)
+    kind_of_action = models.CharField(max_length=40, choices=KIND_OF_ACTION_CHOICES, default=IMPORT_TO_BE_DETERMINED)
 
     # Fields from ContestOffice
     contest_office_we_vote_id = models.CharField(
@@ -2912,7 +2913,7 @@ class BatchRowActionElectedOffice(models.Model):
     """
     batch_header_id = models.PositiveIntegerField(verbose_name="unique id of header row", unique=False, null=False)
     batch_row_id = models.PositiveIntegerField(verbose_name="unique id of batch row", unique=False, null=False)
-    kind_of_action = models.CharField(max_length=40, choices=KIND_OF_ACTION_CHOICES, default=TO_BE_DETERMINED)
+    kind_of_action = models.CharField(max_length=40, choices=KIND_OF_ACTION_CHOICES, default=IMPORT_TO_BE_DETERMINED)
 
     # Fields from ElectedOffice
     elected_office_we_vote_id = models.CharField(
@@ -2998,7 +2999,7 @@ class BatchRowActionPolitician(models.Model):
     """
     batch_header_id = models.PositiveIntegerField(verbose_name="unique id of header row", unique=False, null=False)
     batch_row_id = models.PositiveIntegerField(verbose_name="unique id of batch row", unique=False, null=False)
-    kind_of_action = models.CharField(max_length=40, choices=KIND_OF_ACTION_CHOICES, default=TO_BE_DETERMINED)
+    kind_of_action = models.CharField(max_length=40, choices=KIND_OF_ACTION_CHOICES, default=IMPORT_TO_BE_DETERMINED)
 
     # Fields from Politician
     politician_we_vote_id = models.CharField(verbose_name="we vote permanent id of this politician", max_length=255,
@@ -3075,7 +3076,7 @@ class BatchRowActionCandidate(models.Model):
     """
     batch_header_id = models.PositiveIntegerField(verbose_name="unique id of header row", unique=False, null=False)
     batch_row_id = models.PositiveIntegerField(verbose_name="unique id of batch row", unique=False, null=False)
-    kind_of_action = models.CharField(max_length=40, choices=KIND_OF_ACTION_CHOICES, default=TO_BE_DETERMINED)
+    kind_of_action = models.CharField(max_length=40, choices=KIND_OF_ACTION_CHOICES, default=IMPORT_TO_BE_DETERMINED)
 
     # Fields from Candidate
     candidate_we_vote_id = models.CharField(
@@ -3180,7 +3181,7 @@ class BatchRowActionOrganization(models.Model):
     """
     batch_header_id = models.PositiveIntegerField(verbose_name="unique id of header row", unique=False, null=False)
     batch_row_id = models.PositiveIntegerField(verbose_name="unique id of batch row", unique=False, null=False)
-    kind_of_action = models.CharField(max_length=40, choices=KIND_OF_ACTION_CHOICES, default=TO_BE_DETERMINED)
+    kind_of_action = models.CharField(max_length=40, choices=KIND_OF_ACTION_CHOICES, default=IMPORT_TO_BE_DETERMINED)
 
     # Fields from Organization
     organization_we_vote_id = models.CharField(
@@ -3263,7 +3264,7 @@ class BatchRowActionPosition(models.Model):
     """
     batch_header_id = models.PositiveIntegerField(verbose_name="unique id of header row", unique=False, null=False)
     batch_row_id = models.PositiveIntegerField(verbose_name="unique id of batch row", unique=False, null=False)
-    kind_of_action = models.CharField(max_length=40, choices=KIND_OF_ACTION_CHOICES, default=TO_BE_DETERMINED)
+    kind_of_action = models.CharField(max_length=40, choices=KIND_OF_ACTION_CHOICES, default=IMPORT_TO_BE_DETERMINED)
 
     # Fields from Position
     position_we_vote_id = models.CharField(

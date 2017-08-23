@@ -372,7 +372,7 @@ class CandidateCampaignListManager(models.Model):
         if keep_looking_for_duplicates and positive_value_exists(candidate_name):
             # Search by Candidate name exact match
             try:
-                candidate_query = CandidateCampaign.objects.all(candidate_name)
+                candidate_query = CandidateCampaign.objects.all()
                 candidate_query = candidate_query.filter(candidate_name__iexact=candidate_name,
                                                          google_civic_election_id=google_civic_election_id)
                 if positive_value_exists(state_code):
@@ -421,8 +421,11 @@ class CandidateCampaignListManager(models.Model):
                         # more than one entry found with a match in CandidateCampaign
                         keep_looking_for_duplicates = False
                         multiple_entries_found = True
+                else:
+                    success = True
             except CandidateCampaign.DoesNotExist:
                 status += "BATCH_ROW_ACTION_CANDIDATE_NOT_FOUND "
+                success = True
 
         results = {
             'success':                  success,
