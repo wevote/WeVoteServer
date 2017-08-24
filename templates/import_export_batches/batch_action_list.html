@@ -137,9 +137,10 @@
 {% if batch_row_list %}
     <table class="table table-condensed">
         <tr>
-            <th>&nbsp;</th>
-            <th>{{ batch_header_map.batch_header_map_000 }}<br />
-            <a href="{% url 'import_export_batches:batch_header_mapping' %}?batch_header_id={{ batch_header_id }}&google_civic_election_id={{ google_civic_election_id }}">(edit&nbsp;header&nbsp;map)</a></th>
+            <th>
+                <a href="{% url 'import_export_batches:batch_header_mapping' %}?batch_header_id={{ batch_header_id }}&google_civic_election_id={{ google_civic_election_id }}">(edit header&nbsp;map)</a>
+            </th>
+            <th>{{ batch_header_map.batch_header_map_000 }}</th>
             <th>{{ batch_header_map.batch_header_map_001 }}</th>
             <th>{{ batch_header_map.batch_header_map_002 }}</th>
             {% if batch_header_map.batch_header_map_003 %}<th>{{ batch_header_map.batch_header_map_003 }}</th>{% endif %}
@@ -153,26 +154,40 @@
             {% if batch_header_map.batch_header_map_011 %}<th>{{ batch_header_map.batch_header_map_011 }}</th>{% endif %}
             {% if batch_header_map.batch_header_map_012 %}<th>{{ batch_header_map.batch_header_map_012 }}</th>{% endif %}
             {% if batch_header_map.batch_header_map_013 %}<th>{{ batch_header_map.batch_header_map_013 }}</th>{% endif %}
+            {% if batch_header_map.batch_header_map_014 %}<th>{{ batch_header_map.batch_header_map_014 }}</th>{% endif %}
+            {% if batch_header_map.batch_header_map_015 %}<th>{{ batch_header_map.batch_header_map_015 }}</th>{% endif %}
+            {% if batch_header_map.batch_header_map_016 %}<th>{{ batch_header_map.batch_header_map_016 }}</th>{% endif %}
+            {% if batch_header_map.batch_header_map_017 %}<th>{{ batch_header_map.batch_header_map_017 }}</th>{% endif %}
+            {% if batch_header_map.batch_header_map_018 %}<th>{{ batch_header_map.batch_header_map_018 }}</th>{% endif %}
+            {% if batch_header_map.batch_header_map_019 %}<th>{{ batch_header_map.batch_header_map_019 }}</th>{% endif %}
+            {% if batch_header_map.batch_header_map_020 %}<th>{{ batch_header_map.batch_header_map_020 }}</th>{% endif %}
         </tr>
     {% for one_batch_row in batch_row_list %}
         <tr>
             <td><a href="{% url 'import_export_batches:batch_action_list_analyze_process' %}?batch_header_id={{ batch_header_id }}&batch_row_id={{ one_batch_row.id }}">
                 Analyze</a>
             </td>
-            <td>{{ one_batch_row.batch_row_000 }}</td>
-            <td>{{ one_batch_row.batch_row_001 }}</td>
-            <td>{{ one_batch_row.batch_row_002 }}</td>
-            {% if batch_header_map.batch_header_map_003 %}<td>{{ one_batch_row.batch_row_003 }}</td>{% endif %}
-            {% if batch_header_map.batch_header_map_004 %}<td>{{ one_batch_row.batch_row_004 }}</td>{% endif %}
-            {% if batch_header_map.batch_header_map_005 %}<td>{{ one_batch_row.batch_row_005 }}</td>{% endif %}
-            {% if batch_header_map.batch_header_map_006 %}<td>{{ one_batch_row.batch_row_006 }}</td>{% endif %}
-            {% if batch_header_map.batch_header_map_007 %}<td>{{ one_batch_row.batch_row_007 }}</td>{% endif %}
-            {% if batch_header_map.batch_header_map_008 %}<td>{{ one_batch_row.batch_row_008 }}</td>{% endif %}
-            {% if batch_header_map.batch_header_map_009 %}<td>{{ one_batch_row.batch_row_009 }}</td>{% endif %}
-            {% if batch_header_map.batch_header_map_010 %}<td>{{ one_batch_row.batch_row_010 }}</td>{% endif %}
-            {% if batch_header_map.batch_header_map_011 %}<td>{{ one_batch_row.batch_row_011 }}</td>{% endif %}
-            {% if batch_header_map.batch_header_map_012 %}<td>{{ one_batch_row.batch_row_012 }}</td>{% endif %}
-            {% if batch_header_map.batch_header_map_013 %}<td>{{ one_batch_row.batch_row_013 }}</td>{% endif %}
+            <td>{{ one_batch_row.batch_row_000|truncatechars:255 }}</td>
+            <td>{{ one_batch_row.batch_row_001|truncatechars:255 }}</td>
+            <td>{{ one_batch_row.batch_row_002|truncatechars:255 }}</td>
+            {% if batch_header_map.batch_header_map_003 %}<td>{{ one_batch_row.batch_row_003|truncatechars:255 }}</td>{% endif %}
+            {% if batch_header_map.batch_header_map_004 %}<td>{{ one_batch_row.batch_row_004|truncatechars:255 }}</td>{% endif %}
+            {% if batch_header_map.batch_header_map_005 %}<td>{{ one_batch_row.batch_row_005|truncatechars:255 }}</td>{% endif %}
+            {% if batch_header_map.batch_header_map_006 %}<td>{{ one_batch_row.batch_row_006|truncatechars:255 }}</td>{% endif %}
+            {% if batch_header_map.batch_header_map_007 %}<td>{{ one_batch_row.batch_row_007|truncatechars:255 }}</td>{% endif %}
+            {% if batch_header_map.batch_header_map_008 %}<td>{{ one_batch_row.batch_row_008|truncatechars:255 }}</td>{% endif %}
+            {% if batch_header_map.batch_header_map_009 %}<td>{{ one_batch_row.batch_row_009|truncatechars:255 }}</td>{% endif %}
+            {% if batch_header_map.batch_header_map_010 %}<td>{{ one_batch_row.batch_row_010|truncatechars:255 }}</td>{% endif %}
+            {% if batch_header_map.batch_header_map_011 %}<td>{{ one_batch_row.batch_row_011|truncatechars:255 }}</td>{% endif %}
+            {% if batch_header_map.batch_header_map_012 %}<td>{{ one_batch_row.batch_row_012|truncatechars:255 }}</td>{% endif %}
+            {% if batch_header_map.batch_header_map_013 %}<td>{{ one_batch_row.batch_row_013|truncatechars:255 }}</td>{% endif %}
+            {% if batch_header_map.batch_header_map_014 %}<td>{{ one_batch_row.batch_row_014|truncatechars:255 }}</td>{% endif %}
+            {% if batch_header_map.batch_header_map_015 %}<td>{{ one_batch_row.batch_row_015|truncatechars:255 }}</td>{% endif %}
+            {% if batch_header_map.batch_header_map_016 %}<td>{{ one_batch_row.batch_row_016|truncatechars:255 }}</td>{% endif %}
+            {% if batch_header_map.batch_header_map_017 %}<td>{{ one_batch_row.batch_row_017|truncatechars:255 }}</td>{% endif %}
+            {% if batch_header_map.batch_header_map_018 %}<td>{{ one_batch_row.batch_row_018|truncatechars:255 }}</td>{% endif %}
+            {% if batch_header_map.batch_header_map_019 %}<td>{{ one_batch_row.batch_row_019|truncatechars:255 }}</td>{% endif %}
+            {% if batch_header_map.batch_header_map_020 %}<td>{{ one_batch_row.batch_row_020|truncatechars:255 }}</td>{% endif %}
         </tr>
         {% if one_batch_row.batch_row_action_exists %}
         <tr>
@@ -405,9 +420,17 @@
                         <td>{{ one_batch_row.batch_row_action.elected_office_name|default_if_none:"" }}</td>
                         <td>{{ one_batch_row.batch_row_action.state_code|default_if_none:"" }}</td>
                     </tr>
-                    {% if one_batch_row.batch_row_action.alert_exists %}
-                    <tr class="table-success">
-                        <td colspan="20">ALERTS:</td>
+                    {% if one_batch_row.batch_row_action.status %}
+                    <tr class="{% if one_batch_row.batch_row_action.kind_of_action == "IMPORT_CREATE" %}
+                        table-success
+                        {% elif one_batch_row.batch_row_action.kind_of_action == "IMPORT_ADD_TO_EXISTING" %}
+                        table-warning
+                        {% elif one_batch_row.batch_row_action.kind_of_action == "IMPORT_TO_BE_DETERMINED" %}
+                        table-danger
+                        {% elif one_batch_row.batch_row_action.kind_of_action == "IMPORT_QUERY_ERROR" %}
+                        table-danger
+                        {% endif %}">
+                        <td colspan="20">STATUS: {{ one_batch_row.batch_row_action.status }}</td>
                     </tr>
                     {% endif %}
                 </tbody>
@@ -512,9 +535,17 @@
                         <td>{{ one_batch_row.batch_row_action.state_served_code|default_if_none:"" }}</td>
                         <td>{{ one_batch_row.batch_row_action.organization_contact_name|default_if_none:"" }}</td>
                     </tr>
-                    {% if one_batch_row.batch_row_action.alert_exists %}
-                    <tr class="table-success">
-                        <td colspan="20">ALERTS:</td>
+                    {% if one_batch_row.batch_row_action.status %}
+                    <tr class="{% if one_batch_row.batch_row_action.kind_of_action == "IMPORT_CREATE" %}
+                        table-success
+                        {% elif one_batch_row.batch_row_action.kind_of_action == "IMPORT_ADD_TO_EXISTING" %}
+                        table-warning
+                        {% elif one_batch_row.batch_row_action.kind_of_action == "IMPORT_TO_BE_DETERMINED" %}
+                        table-danger
+                        {% elif one_batch_row.batch_row_action.kind_of_action == "IMPORT_QUERY_ERROR" %}
+                        table-danger
+                        {% endif %}">
+                        <td colspan="20">STATUS: {{ one_batch_row.batch_row_action.status }}</td>
                     </tr>
                     {% endif %}
                 </tbody>
@@ -599,17 +630,37 @@
                                 {{ one_batch_row.batch_row_action.kind_of_action }}
                             {% endif %}
                         </td>
-                        <td>{{ one_batch_row.batch_row_action.ballot_item_display_name|default_if_none:"" }}</td>
-                        <td>{{ one_batch_row.batch_row_action.contest_office_name|default_if_none:"" }}</td>
+                        <td>
+                            {{ one_batch_row.batch_row_action.ballot_item_display_name|default_if_none:"" }}
+                            {% if one_batch_row.batch_row_action.candidate_campaign_we_vote_id %}
+                                ({{ one_batch_row.batch_row_action.candidate_campaign_we_vote_id }})
+                            {% elif one_batch_row.batch_row_action.contest_measure_we_vote_id %}
+                                ({{ one_batch_row.batch_row_action.contest_measure_we_vote_id }})
+                            {% endif %}
+                        </td>
+                        <td>
+                            {{ one_batch_row.batch_row_action.contest_office_name|default_if_none:"" }}
+                            {% if one_batch_row.batch_row_action.contest_office_we_vote_id %}
+                                ({{ one_batch_row.batch_row_action.contest_office_we_vote_id }})
+                            {% endif %}
+                        </td>
                         <td>{{ one_batch_row.batch_row_action.speaker_display_name|default_if_none:"" }}</td>
                         <td>{{ one_batch_row.batch_row_action.speaker_twitter_handle|default_if_none:"" }}</td>
                         <td>{{ one_batch_row.batch_row_action.stance|default_if_none:"" }}</td>
-                        <td>{{ one_batch_row.batch_row_action.statement_text|default_if_none:"" }}</td>
+                        <td>{{ one_batch_row.batch_row_action.statement_text|default_if_none:""|truncatechars:255 }}</td>
                         <td>{{ one_batch_row.batch_row_action.more_info_url|default_if_none:"" }}</td>
                     </tr>
-                    {% if one_batch_row.batch_row_action.alert_exists %}
-                    <tr class="table-success">
-                        <td colspan="20">ALERTS:</td>
+                    {% if one_batch_row.batch_row_action.status %}
+                    <tr class="{% if one_batch_row.batch_row_action.kind_of_action == "IMPORT_CREATE" %}
+                        table-success
+                        {% elif one_batch_row.batch_row_action.kind_of_action == "IMPORT_ADD_TO_EXISTING" %}
+                        table-warning
+                        {% elif one_batch_row.batch_row_action.kind_of_action == "IMPORT_TO_BE_DETERMINED" %}
+                        table-danger
+                        {% elif one_batch_row.batch_row_action.kind_of_action == "IMPORT_QUERY_ERROR" %}
+                        table-danger
+                        {% endif %}">
+                        <td colspan="20">STATUS: {{ one_batch_row.batch_row_action.status }}</td>
                     </tr>
                     {% endif %}
                 </tbody>

@@ -219,6 +219,7 @@ def create_batch_row_action_organization(batch_description, batch_header_map, on
     if existing_results['batch_row_action_found']:
         batch_row_action_organization = existing_results['batch_row_action_organization']
         batch_row_action_updated = True
+        status += "BATCH_ROW_ACTION_ORGANIZATION_UPDATE "
     else:
         # If a BatchRowActionOrganization entry does not exist, create one
         try:
@@ -228,12 +229,12 @@ def create_batch_row_action_organization(batch_description, batch_header_map, on
             )
             batch_row_action_created = True
             success = True
-            status = "BATCH_ROW_ACTION_ORGANIZATION_CREATED"
+            status += "BATCH_ROW_ACTION_ORGANIZATION_CREATE "
         except Exception as e:
             batch_row_action_created = False
             batch_row_action_organization = BatchRowActionOrganization()
             success = False
-            status = "BATCH_ROW_ACTION_ORGANIZATION_NOT_CREATED"
+            status += "BATCH_ROW_ACTION_ORGANIZATION_NOT_CREATED "
 
             results = {
                 'success': success,
@@ -1517,11 +1518,11 @@ def create_batch_row_action_position(batch_description, batch_header_map, one_ba
                     organization_id, candidate_we_vote_id, google_civic_election_id)
             if position_results['position_found']:
                 position = position_results['position']
-                position_we_vote_id = position.position_we_vote_id
+                position_we_vote_id = position.we_vote_id
         elif measure_found and organization_found:
             position_results = \
                 position_manager.retrieve_organization_contest_measure_position_with_we_vote_id(
-                    organization_id, measure_we_vote_id, google_civic_election_id)
+                    organization_id, contest_measure_we_vote_id, google_civic_election_id)
             if position_results['position_found']:
                 position = position_results['position']
                 position_we_vote_id = position.position_we_vote_id
@@ -1537,21 +1538,31 @@ def create_batch_row_action_position(batch_description, batch_header_map, one_ba
             contest_office_we_vote_id = contest_office.we_vote_id
             contest_office_id = contest_office.id
 
-    if candidate_found or candidate_name:
+    if candidate_name:
         ballot_item_display_name = candidate_name
+        # Note organization_name becomes speaker_display_name below
         variables_found_to_create_position = positive_value_exists(ballot_item_display_name) \
+            and positive_value_exists(candidate_found) \
             and positive_value_exists(contest_office_name) \
             and positive_value_exists(contest_office_we_vote_id) \
             and positive_value_exists(organization_name) \
             and positive_value_exists(organization_we_vote_id) \
             and positive_value_exists(stance)
-    else:
+        if not variables_found_to_create_position:
+            status += "CANDIDATE-MISSING_VARIABLES_REQUIRED_TO_CREATE "
+    elif contest_measure_title:
         ballot_item_display_name = contest_measure_title
+        # Note organization_name becomes speaker_display_name below
         variables_found_to_create_position = positive_value_exists(ballot_item_display_name) \
             and positive_value_exists(contest_measure_we_vote_id) \
             and positive_value_exists(organization_name) \
             and positive_value_exists(organization_we_vote_id) \
             and positive_value_exists(stance)
+        if not variables_found_to_create_position:
+            status += "MEASURE-MISSING_VARIABLES_REQUIRED_TO_CREATE "
+    else:
+        variables_found_to_create_position = False
+        status += "MISSING_CANDIDATE_OR_MEASURE_REQUIRED_TO_CREATE "
 
     if positive_value_exists(position_we_vote_id):
         kind_of_action = IMPORT_ADD_TO_EXISTING
@@ -1561,20 +1572,6 @@ def create_batch_row_action_position(batch_description, batch_header_map, one_ba
         kind_of_action = IMPORT_TO_BE_DETERMINED
 
     try:
-        # position_we_vote_id,
-        # organization_we_vote_id = one_batch_row_action.organization_we_vote_id,
-        # google_civic_election_id = one_batch_row_action.google_civic_election_id,
-        # state_code = one_batch_row_action.state_code,
-        # ballot_item_display_name = one_batch_row_action.ballot_item_display_name,
-        # office_we_vote_id = one_batch_row_action.contest_office_we_vote_id,
-        # candidate_we_vote_id = one_batch_row_action.candidate_campaign_we_vote_id,
-        # measure_we_vote_id = one_batch_row_action.contest_measure_we_vote_id,
-        # stance = one_batch_row_action.stance,
-        # set_as_public_position = True,
-        # statement_text = one_batch_row_action.statement_text,
-        # statement_html = one_batch_row_action.statement_html,
-        # more_info_url = one_batch_row_action.more_info_url)
-
         batch_row_action_position.position_we_vote_id = position_we_vote_id
         batch_row_action_position.ballot_item_display_name = ballot_item_display_name
         batch_row_action_position.candidate_campaign_we_vote_id = candidate_we_vote_id
@@ -1589,8 +1586,8 @@ def create_batch_row_action_position(batch_description, batch_header_map, one_ba
         batch_row_action_position.stance = stance
         batch_row_action_position.statement_text = statement_text
         batch_row_action_position.state_code = state_code
-        # batch_row_action_position.speaker_display_name = organization_name
-        # batch_row_action_position.speaker_twitter_handle = organization_twitter_handle
+        batch_row_action_position.speaker_display_name = organization_name
+        batch_row_action_position.speaker_twitter_handle = organization_twitter_handle
         # batch_row_action_position.organization_id = organization_id
         batch_row_action_position.organization_we_vote_id = organization_we_vote_id
         batch_row_action_position.kind_of_action = kind_of_action
