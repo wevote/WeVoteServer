@@ -621,10 +621,20 @@ class FacebookManager(models.Model):
 
     def retrieve_facebook_friends_from_facebook(self, voter_device_id):
         """
+        NOTE August 2017:  The facebook "friends" API call when called from the server now only returns that subset of
+        your facebook friends who are already on WeVote, it will not show your friends who do not have the facebook app
+        on their facebook settings page.  It is unclear if this code even works at all.  The code that does the job is
+        in the WebApp using the "games" api "invitiable_friends" call.
+        If having problems see the note in client side WebApp FacebookInvitableFriends.jsx
+
+        Technical discussion:  https://stackoverflow.com/questions/23417356
+
         We use this routine to retrieve my facebook friends details and updating FacebookFriendsOfMe table
         :param voter_device_id:
         :return: facebook_friends_list
         """
+        # TODO: August 2017, Does this code which is called on each Facebook login, have any value?
+
         success = False
         status = ''
         facebook_friends_list_found = False
