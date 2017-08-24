@@ -647,7 +647,7 @@
                         <td>{{ one_batch_row.batch_row_action.speaker_display_name|default_if_none:"" }}</td>
                         <td>{{ one_batch_row.batch_row_action.speaker_twitter_handle|default_if_none:"" }}</td>
                         <td>{{ one_batch_row.batch_row_action.stance|default_if_none:"" }}</td>
-                        <td>{{ one_batch_row.batch_row_action.statement_text|default_if_none:""|truncatechars:255 }}</td>
+                        <td>{{ one_batch_row.batch_row_action.statement_text|default_if_none:""|truncatechars:125 }}</td>
                         <td>{{ one_batch_row.batch_row_action.more_info_url|default_if_none:"" }}</td>
                     </tr>
                     {% if one_batch_row.batch_row_action.status %}
