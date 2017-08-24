@@ -60,8 +60,9 @@ def organization_stop_following(voter_device_id, organization_id=0, organization
     :param organization_we_vote_id
     :return:
     """
-    return organization_follow_all(voter_device_id, organization_id, organization_we_vote_id,
-                                   follow_kind=STOP_FOLLOWING)
+    json_data = organization_follow_all(voter_device_id, organization_id, organization_we_vote_id,
+                                        follow_kind=STOP_FOLLOWING)
+    return HttpResponse(json.dumps(json_data), content_type='application/json')
 
 
 def organization_follow_ignore(voter_device_id, organization_id=0, organization_we_vote_id=''):
@@ -72,8 +73,9 @@ def organization_follow_ignore(voter_device_id, organization_id=0, organization_
     :param organization_we_vote_id
     :return:
     """
-    return organization_follow_all(voter_device_id, organization_id, organization_we_vote_id,
-                                   follow_kind=FOLLOW_IGNORE)
+    json_data = organization_follow_all(voter_device_id, organization_id, organization_we_vote_id,
+                                        follow_kind=FOLLOW_IGNORE)
+    return HttpResponse(json.dumps(json_data), content_type='application/json')
 
 
 def voter_count():

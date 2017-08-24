@@ -206,15 +206,17 @@ class BatchManager(models.Model):
         # Retrieve the CSV
         response = urllib.request.urlopen(batch_uri)
         csv_data = csv.reader(codecs.iterdecode(response, 'utf-8'))
+        batch_file_name = ""
         return self.create_batch_from_csv_data(
-            csv_data, kind_of_batch, google_civic_election_id, organization_we_vote_id)
+            batch_file_name, csv_data, kind_of_batch, google_civic_election_id, organization_we_vote_id)
 
     def create_batch_from_local_file_upload(
             self, batch_file, kind_of_batch, google_civic_election_id, organization_we_vote_id):
         if batch_file.content_type == 'text/csv':
             csv_data = csv.reader(codecs.iterdecode(batch_file, 'utf-8'), delimiter=',')
+            batch_file_name = batch_file.name
             return self.create_batch_from_csv_data(
-                csv_data, kind_of_batch, google_civic_election_id, organization_we_vote_id)
+                batch_file_name, csv_data, kind_of_batch, google_civic_election_id, organization_we_vote_id)
 
         status = "CREATE_BATCH_FILETYPE_NOT_RECOGNIZED"
         results = {
@@ -226,7 +228,7 @@ class BatchManager(models.Model):
         }
         return results
 
-    def create_batch_from_csv_data(self, csv_data, kind_of_batch, google_civic_election_id, organization_we_vote_id):
+    def create_batch_from_csv_data(self, file_name, csv_data, kind_of_batch, google_civic_election_id, organization_we_vote_id):
         first_line = True
         success = False
         status = ""
@@ -365,7 +367,10 @@ class BatchManager(models.Model):
 
                     if positive_value_exists(batch_header_id) and positive_value_exists(batch_header_map_id):
                         # Now save the BatchDescription
-                        batch_name = kind_of_batch + " batch_header_id: " + str(batch_header_id)
+                        if positive_value_exists(file_name):
+                            batch_name = str(batch_header_id) + ": " + file_name
+                        if not positive_value_exists(batch_name):
+                            batch_name = str(batch_header_id) + ": " + kind_of_batch
                         batch_description_text = ""
                         batch_description = BatchDescription.objects.create(
                             batch_header_id=batch_header_id,
@@ -2544,6 +2549,7 @@ class BatchDescription(models.Model):
         verbose_name="if for positions, the organization's we vote id", max_length=255, null=True, blank=True)
     batch_description_text = models.CharField(max_length=255)
     source_uri = models.URLField(blank=True, null=True, verbose_name='uri where data is coming from')
+    date_created = models.DateTimeField(verbose_name='date first saved', null=True, auto_now=True)
 
 
 class BatchHeader(models.Model):

@@ -172,6 +172,7 @@ def batch_list_process_view(request):
             election = results['election']
             election_name = election.election_name
 
+    batch_header_id = 0
     if positive_value_exists(import_batch_button):  # If the button was pressed...
         batch_manager = BatchManager()
 
@@ -181,6 +182,7 @@ def batch_list_process_view(request):
             if results['batch_saved']:
                 messages.add_message(request, messages.INFO, 'Import batch for {election_name} election saved.'
                                                              ''.format(election_name=election_name))
+                batch_header_id = results['batch_header_id']
             else:
                 messages.add_message(request, messages.ERROR, results['status'])
         elif positive_value_exists(batch_uri):
@@ -197,13 +199,23 @@ def batch_list_process_view(request):
             if results['batch_saved']:
                 messages.add_message(request, messages.INFO, 'Import batch for {election_name} election saved.'
                                                              ''.format(election_name=election_name))
+                batch_header_id = results['batch_header_id']
             else:
                 messages.add_message(request, messages.ERROR, results['status'])
 
-    return HttpResponseRedirect(reverse('import_export_batches:batch_list', args=()) +
-                                "?kind_of_batch=" + str(kind_of_batch) +
-                                "&google_civic_election_id=" + str(google_civic_election_id) +
-                                "&batch_uri=" + batch_uri_encoded)
+    if positive_value_exists(batch_header_id):
+        # Go straight to the new batch
+        return HttpResponseRedirect(reverse('import_export_batches:batch_action_list', args=()) +
+                                    "?batch_header_id=" + str(batch_header_id) +
+                                    "&kind_of_batch=" + str(kind_of_batch) +
+                                    "&google_civic_election_id=" + str(google_civic_election_id) +
+                                    "&batch_uri=" + batch_uri_encoded)
+    else:
+        # Go to the batch listing page
+        return HttpResponseRedirect(reverse('import_export_batches:batch_list', args=()) +
+                                    "?kind_of_batch=" + str(kind_of_batch) +
+                                    "&google_civic_election_id=" + str(google_civic_election_id) +
+                                    "&batch_uri=" + batch_uri_encoded)
 
 
 @login_required
