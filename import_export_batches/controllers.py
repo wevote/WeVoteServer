@@ -848,13 +848,12 @@ def create_batch_row_action_contest_office(batch_description, batch_header_map, 
             status += matching_results['status']
             keep_looking_for_duplicates = False
         else:
-            pass
+            kind_of_action = IMPORT_CREATE
 
-    if keep_looking_for_duplicates:
-        if positive_value_exists(contest_office_name) and positive_value_exists(state_code) and \
+    # If we are missing required variables, don't create
+    if kind_of_action == IMPORT_CREATE:
+        if not positive_value_exists(contest_office_name) or not positive_value_exists(state_code) or not \
                 positive_value_exists(google_civic_election_id):
-            pass
-        else:
             kind_of_action = IMPORT_TO_BE_DETERMINED
             status += "COULD_NOT_CREATE_CONTEST_OFFICE_ENTRY-MISSING_REQUIRED_VARIABLES "
 
@@ -1289,7 +1288,7 @@ def create_batch_row_action_candidate(batch_description, batch_header_map, one_b
         if not positive_value_exists(candidate_name) or not positive_value_exists(state_code) or not \
                 positive_value_exists(google_civic_election_id) or not positive_value_exists(contest_office_we_vote_id):
             kind_of_action = IMPORT_TO_BE_DETERMINED
-            status += "COULD_NOT_CREATE_CONTEST_OFFICE_ENTRY-MISSING_REQUIRED_VARIABLES "
+            status += "COULD_NOT_CREATE_CANDIDATE_ENTRY-MISSING_REQUIRED_VARIABLES "
 
     # Create a new entry in BatchRowActionCandidate
     try:
