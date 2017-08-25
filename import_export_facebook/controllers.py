@@ -194,137 +194,139 @@ def voter_facebook_save_to_current_account_for_api(voter_device_id):  # voterFac
     return results
 
 
-def facebook_friends_action_for_api(voter_device_id):   # facebookFriendsAction
-    """
-    :param voter_device_id:
-    :return:
-    """
-    status = ''
-    success = False
-    facebook_suggested_friends_list = []
-    facebook_friends_list = []
-    facebook_friend_suggestion_found = False
-    facebook_suggested_friend_count = 0
-    # Get voter_id from the voter_device_id
-    results = is_voter_device_id_valid(voter_device_id)
-    if not results['success']:
-        error_results = {
-            'status':                           "VALID_VOTER_DEVICE_ID_MISSING",
-            'success':                          success,
-            'voter_device_id':                  voter_device_id,
-            'facebook_friend_suggestion_found': facebook_friend_suggestion_found,
-            'facebook_suggested_friend_count':  facebook_suggested_friend_count,
-            'facebook_suggested_friends_list':  facebook_suggested_friends_list,
-            'facebook_friends_list':            facebook_friends_list
-        }
-        return error_results
-
-    facebook_manager = FacebookManager()
-    auth_response_results = facebook_manager.retrieve_facebook_auth_response(voter_device_id)
-    if not auth_response_results['facebook_auth_response_found']:
-        error_results = {
-            'status':                           "FACEBOOK_AUTH_RESPONSE_NOT_FOUND",
-            'success':                          success,
-            'voter_device_id':                  voter_device_id,
-            'facebook_friend_suggestion_found': facebook_friend_suggestion_found,
-            'facebook_suggested_friend_count':  facebook_suggested_friend_count,
-            'facebook_suggested_friends_list':  facebook_suggested_friends_list,
-            'facebook_friends_list':            facebook_friends_list
-        }
-        return error_results
-
-    we_vote_image_manager = WeVoteImageManager()
-    facebook_friends_from_facebook_results = facebook_manager.retrieve_facebook_friends_from_facebook(voter_device_id)
-    facebook_suggested_friends_list = facebook_friends_from_facebook_results['facebook_suggested_friends_list']
-    facebook_friends_list = facebook_friends_from_facebook_results['facebook_friends_list']
-    facebook_users_list = facebook_friends_list + facebook_suggested_friends_list
-    status += facebook_friends_from_facebook_results['status']
-    success = facebook_friends_from_facebook_results['success']
-    if facebook_friends_from_facebook_results['facebook_friends_list_found']:
-        # Update FacebookUser table with all users
-        for facebook_user_entry in facebook_users_list:
-            facebook_user_id = facebook_user_entry['facebook_user_id']
-            facebook_user_name = facebook_user_entry['facebook_user_name']
-            facebook_user_first_name = facebook_user_entry['facebook_user_first_name']
-            facebook_user_middle_name = facebook_user_entry['facebook_user_middle_name']
-            facebook_user_last_name = facebook_user_entry['facebook_user_last_name']
-            facebook_user_location_id = facebook_user_entry['facebook_user_location_id']
-            facebook_user_location_name = facebook_user_entry['facebook_user_location_name']
-            facebook_user_gender = facebook_user_entry['facebook_user_gender']
-            facebook_user_birthday = facebook_user_entry['facebook_user_birthday']
-            facebook_profile_image_url_https = facebook_user_entry['facebook_profile_image_url_https']
-            facebook_background_image_url_https = facebook_user_entry['facebook_background_image_url_https']
-            facebook_user_about = facebook_user_entry['facebook_user_about']
-            facebook_user_is_verified = facebook_user_entry['facebook_user_is_verified']
-            facebook_user_friend_total_count = facebook_user_entry['facebook_user_friend_total_count']
-            facebook_user_results = facebook_manager.create_or_update_facebook_user(
-                facebook_user_id, facebook_user_first_name, facebook_user_middle_name, facebook_user_last_name,
-                facebook_user_name, facebook_user_location_id, facebook_user_location_name, facebook_user_gender,
-                facebook_user_birthday, facebook_profile_image_url_https, facebook_background_image_url_https,
-                facebook_user_about, facebook_user_is_verified, facebook_user_friend_total_count)
-            status += ' ' + facebook_user_results['status']
-            success = facebook_user_results['success']
-
-    # finding facebook_link_to_voter for all users and then updating SuggestedFriend table
-    facebook_auth_response = auth_response_results['facebook_auth_response']
-    facebook_suggested_friends_list = facebook_manager.remove_my_facebook_entry_from_suggested_friends_list(
-        facebook_suggested_friends_list, facebook_auth_response.facebook_user_id)
-    my_facebook_link_to_voter_results = facebook_manager.retrieve_facebook_link_to_voter(
-        facebook_auth_response.facebook_user_id)
-    status += ' ' + my_facebook_link_to_voter_results['status']
-    if my_facebook_link_to_voter_results['facebook_link_to_voter_found']:
-        friend_manager = FriendManager()
-        viewer_voter_we_vote_id = my_facebook_link_to_voter_results['facebook_link_to_voter'].voter_we_vote_id
-        # Update the facebook user with cached original and resized image urls
-        facebook_user_results = facebook_manager.retrieve_facebook_user_by_facebook_user_id(
-            facebook_auth_response.facebook_user_id)
-        if facebook_user_results['facebook_user_found']:
-            facebook_user = facebook_user_results['facebook_user']
-            # Cache original and resized images
-            cache_results = cache_original_and_resized_image(
-                voter_we_vote_id=viewer_voter_we_vote_id,
-                facebook_user_id=facebook_user.facebook_user_id,
-                facebook_profile_image_url_https=facebook_user.facebook_profile_image_url_https,
-                facebook_background_image_url_https=facebook_user.facebook_background_image_url_https,
-                image_source=FACEBOOK)
-            cached_facebook_profile_image_url_https = cache_results['cached_facebook_profile_image_url_https']
-            cached_facebook_background_image_url_https = cache_results['cached_facebook_background_image_url_https']
-            we_vote_hosted_profile_image_url_large = cache_results['we_vote_hosted_profile_image_url_large']
-            we_vote_hosted_profile_image_url_medium = cache_results['we_vote_hosted_profile_image_url_medium']
-            we_vote_hosted_profile_image_url_tiny = cache_results['we_vote_hosted_profile_image_url_tiny']
-            facebook_user_update_results = facebook_manager.update_facebook_user_details(
-                facebook_user, cached_facebook_profile_image_url_https, cached_facebook_background_image_url_https,
-                we_vote_hosted_profile_image_url_large, we_vote_hosted_profile_image_url_medium,
-                we_vote_hosted_profile_image_url_tiny)
-            status += facebook_user_update_results['status']
-        for facebook_user_entry in facebook_users_list:
-            facebook_user_link_to_voter_results = facebook_manager.retrieve_facebook_link_to_voter(
-                facebook_user_entry['facebook_user_id'])
-            status += ' ' + facebook_user_link_to_voter_results['status']
-            if facebook_user_link_to_voter_results['facebook_link_to_voter_found']:
-                viewee_voter_we_vote_id = facebook_user_link_to_voter_results['facebook_link_to_voter'].voter_we_vote_id
-                # Are they already friends?
-                already_friend_results = friend_manager.retrieve_current_friend(viewer_voter_we_vote_id,
-                                                                                viewee_voter_we_vote_id)
-                if not already_friend_results['current_friend_found']:
-                    update_suggested_friend_results = friend_manager.create_or_update_suggested_friend(
-                        viewer_voter_we_vote_id, viewee_voter_we_vote_id)
-                    facebook_suggested_friend_count += 1
-                    facebook_friend_suggestion_found = update_suggested_friend_results['success']
-    else:
-        # TODO if facebook_link_to_voter does not exist then check how to add those friends in SuggestedFriend
-        pass
-
-    results = {
-        'status':                           status,
-        'success':                          success,
-        'voter_device_id':                  voter_device_id,
-        'facebook_friend_suggestion_found': facebook_friend_suggestion_found,
-        'facebook_suggested_friend_count':  facebook_suggested_friend_count,
-        'facebook_suggested_friends_list':  facebook_suggested_friends_list,
-        'facebook_friends_list':            facebook_friends_list
-    }
-    return results
+# August 24, 2017: We now use the Facebook "games" api "invitable_friends" data on the fly from the webapp, and no
+# longer attempt to use the more limited "friends" api call from the server
+# def facebook_friends_action_for_api(voter_device_id):   # facebookFriendsAction
+#     """
+#     :param voter_device_id:
+#     :return:
+#     """
+#     status = ''
+#     success = False
+#     facebook_suggested_friends_list = []
+#     facebook_friends_list = []
+#     facebook_friend_suggestion_found = False
+#     facebook_suggested_friend_count = 0
+#     # Get voter_id from the voter_device_id
+#     results = is_voter_device_id_valid(voter_device_id)
+#     if not results['success']:
+#         error_results = {
+#             'status':                           "VALID_VOTER_DEVICE_ID_MISSING",
+#             'success':                          success,
+#             'voter_device_id':                  voter_device_id,
+#             'facebook_friend_suggestion_found': facebook_friend_suggestion_found,
+#             'facebook_suggested_friend_count':  facebook_suggested_friend_count,
+#             'facebook_suggested_friends_list':  facebook_suggested_friends_list,
+#             'facebook_friends_list':            facebook_friends_list
+#         }
+#         return error_results
+#
+#     facebook_manager = FacebookManager()
+#     auth_response_results = facebook_manager.retrieve_facebook_auth_response(voter_device_id)
+#     if not auth_response_results['facebook_auth_response_found']:
+#         error_results = {
+#             'status':                           "FACEBOOK_AUTH_RESPONSE_NOT_FOUND",
+#             'success':                          success,
+#             'voter_device_id':                  voter_device_id,
+#             'facebook_friend_suggestion_found': facebook_friend_suggestion_found,
+#             'facebook_suggested_friend_count':  facebook_suggested_friend_count,
+#             'facebook_suggested_friends_list':  facebook_suggested_friends_list,
+#             'facebook_friends_list':            facebook_friends_list
+#         }
+#         return error_results
+#
+#     we_vote_image_manager = WeVoteImageManager()
+#     facebook_friends_from_facebook_results = facebook_manager.retrieve_facebook_friends_from_facebook(voter_device_id)
+#     facebook_suggested_friends_list = facebook_friends_from_facebook_results['facebook_suggested_friends_list']
+#     facebook_friends_list = facebook_friends_from_facebook_results['facebook_friends_list']
+#     facebook_users_list = facebook_friends_list + facebook_suggested_friends_list
+#     status += facebook_friends_from_facebook_results['status']
+#     success = facebook_friends_from_facebook_results['success']
+#     if facebook_friends_from_facebook_results['facebook_friends_list_found']:
+#         # Update FacebookUser table with all users
+#         for facebook_user_entry in facebook_users_list:
+#             facebook_user_id = facebook_user_entry['facebook_user_id']
+#             facebook_user_name = facebook_user_entry['facebook_user_name']
+#             facebook_user_first_name = facebook_user_entry['facebook_user_first_name']
+#             facebook_user_middle_name = facebook_user_entry['facebook_user_middle_name']
+#             facebook_user_last_name = facebook_user_entry['facebook_user_last_name']
+#             facebook_user_location_id = facebook_user_entry['facebook_user_location_id']
+#             facebook_user_location_name = facebook_user_entry['facebook_user_location_name']
+#             facebook_user_gender = facebook_user_entry['facebook_user_gender']
+#             facebook_user_birthday = facebook_user_entry['facebook_user_birthday']
+#             facebook_profile_image_url_https = facebook_user_entry['facebook_profile_image_url_https']
+#             facebook_background_image_url_https = facebook_user_entry['facebook_background_image_url_https']
+#             facebook_user_about = facebook_user_entry['facebook_user_about']
+#             facebook_user_is_verified = facebook_user_entry['facebook_user_is_verified']
+#             facebook_user_friend_total_count = facebook_user_entry['facebook_user_friend_total_count']
+#             facebook_user_results = facebook_manager.create_or_update_facebook_user(
+#                 facebook_user_id, facebook_user_first_name, facebook_user_middle_name, facebook_user_last_name,
+#                 facebook_user_name, facebook_user_location_id, facebook_user_location_name, facebook_user_gender,
+#                 facebook_user_birthday, facebook_profile_image_url_https, facebook_background_image_url_https,
+#                 facebook_user_about, facebook_user_is_verified, facebook_user_friend_total_count)
+#             status += ' ' + facebook_user_results['status']
+#             success = facebook_user_results['success']
+#
+#     # finding facebook_link_to_voter for all users and then updating SuggestedFriend table
+#     facebook_auth_response = auth_response_results['facebook_auth_response']
+#     facebook_suggested_friends_list = facebook_manager.remove_my_facebook_entry_from_suggested_friends_list(
+#         facebook_suggested_friends_list, facebook_auth_response.facebook_user_id)
+#     my_facebook_link_to_voter_results = facebook_manager.retrieve_facebook_link_to_voter(
+#         facebook_auth_response.facebook_user_id)
+#     status += ' ' + my_facebook_link_to_voter_results['status']
+#     if my_facebook_link_to_voter_results['facebook_link_to_voter_found']:
+#         friend_manager = FriendManager()
+#         viewer_voter_we_vote_id = my_facebook_link_to_voter_results['facebook_link_to_voter'].voter_we_vote_id
+#         # Update the facebook user with cached original and resized image urls
+#         facebook_user_results = facebook_manager.retrieve_facebook_user_by_facebook_user_id(
+#             facebook_auth_response.facebook_user_id)
+#         if facebook_user_results['facebook_user_found']:
+#             facebook_user = facebook_user_results['facebook_user']
+#             # Cache original and resized images
+#             cache_results = cache_original_and_resized_image(
+#                 voter_we_vote_id=viewer_voter_we_vote_id,
+#                 facebook_user_id=facebook_user.facebook_user_id,
+#                 facebook_profile_image_url_https=facebook_user.facebook_profile_image_url_https,
+#                 facebook_background_image_url_https=facebook_user.facebook_background_image_url_https,
+#                 image_source=FACEBOOK)
+#             cached_facebook_profile_image_url_https = cache_results['cached_facebook_profile_image_url_https']
+#             cached_facebook_background_image_url_https = cache_results['cached_facebook_background_image_url_https']
+#             we_vote_hosted_profile_image_url_large = cache_results['we_vote_hosted_profile_image_url_large']
+#             we_vote_hosted_profile_image_url_medium = cache_results['we_vote_hosted_profile_image_url_medium']
+#             we_vote_hosted_profile_image_url_tiny = cache_results['we_vote_hosted_profile_image_url_tiny']
+#             facebook_user_update_results = facebook_manager.update_facebook_user_details(
+#                 facebook_user, cached_facebook_profile_image_url_https, cached_facebook_background_image_url_https,
+#                 we_vote_hosted_profile_image_url_large, we_vote_hosted_profile_image_url_medium,
+#                 we_vote_hosted_profile_image_url_tiny)
+#             status += facebook_user_update_results['status']
+#         for facebook_user_entry in facebook_users_list:
+#             facebook_user_link_to_voter_results = facebook_manager.retrieve_facebook_link_to_voter(
+#                 facebook_user_entry['facebook_user_id'])
+#             status += ' ' + facebook_user_link_to_voter_results['status']
+#             if facebook_user_link_to_voter_results['facebook_link_to_voter_found']:
+#                 viewee_voter_we_vote_id = facebook_user_link_to_voter_results['facebook_link_to_voter'].voter_we_vote_id
+#                 # Are they already friends?
+#                 already_friend_results = friend_manager.retrieve_current_friend(viewer_voter_we_vote_id,
+#                                                                                 viewee_voter_we_vote_id)
+#                 if not already_friend_results['current_friend_found']:
+#                     update_suggested_friend_results = friend_manager.create_or_update_suggested_friend(
+#                         viewer_voter_we_vote_id, viewee_voter_we_vote_id)
+#                     facebook_suggested_friend_count += 1
+#                     facebook_friend_suggestion_found = update_suggested_friend_results['success']
+#     else:
+#         # TODO if facebook_link_to_voter does not exist then check how to add those friends in SuggestedFriend
+#         pass
+#
+#     results = {
+#         'status':                           status,
+#         'success':                          success,
+#         'voter_device_id':                  voter_device_id,
+#         'facebook_friend_suggestion_found': facebook_friend_suggestion_found,
+#         'facebook_suggested_friend_count':  facebook_suggested_friend_count,
+#         'facebook_suggested_friends_list':  facebook_suggested_friends_list,
+#         'facebook_friends_list':            facebook_friends_list
+#     }
+#     return results
 
 
 def facebook_disconnect_for_api(voter_device_id):  # facebookDisconnect
