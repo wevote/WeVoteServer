@@ -24,6 +24,7 @@ def issues_to_link_to_for_organization_doc_template_values(url_root):
     api_response = '[{\n' \
                    '  "success": boolean,\n' \
                    '  "status": string,\n' \
+                   '  "organization_we_vote_id": string,\n' \
                    '  "issue_list": list\n' \
                    '   [\n' \
                    '     "issue_we_vote_id": string,\n' \

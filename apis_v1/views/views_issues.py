@@ -30,6 +30,7 @@ def issues_linked_to_organization_view(request):
     json_data = {
         'success': success,
         'status': status,
+        'organization_we_vote_id': organization_we_vote_id,
         'issue_list': issues_linked,
     }
     return HttpResponse(json.dumps(json_data), content_type='application/json')
@@ -49,6 +50,7 @@ def issues_to_link_to_for_organization_view(request):
     json_data = {
         'success': success,
         'status': status,
+        'organization_we_vote_id': organization_we_vote_id,
         'issue_list': issues_to_be_linked_to,
     }
     return HttpResponse(json.dumps(json_data), content_type='application/json')
@@ -107,6 +109,7 @@ def organization_link_to_issue_view(request):
             'reason_link_is_blocked': link_issue_from_result.reason_link_is_blocked
         }
         organization_linked_to_issue = link_issue_from_result.link_active
+    link_result['organization_we_vote_id'] = organization_we_vote_id
     link_result['organization_linked_to_issue'] = organization_linked_to_issue
     link_result['link_issue'] = link_issue_on_stage
     return HttpResponse(json.dumps(link_result), content_type='application/json')
