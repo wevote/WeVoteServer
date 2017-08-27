@@ -15,10 +15,10 @@ DEBUG = get_environment_variable('SERVER_IN_DEBUG_MODE')
 # https://docs.djangoproject.com/en/1.8/ref/settings/#databases
 
 # Multiple Databases
-# DATABASE_NAME
+# See https://docs.djangoproject.com/en/1.10/topics/db/multi-db/#defining-your-databases
+# August 2017: Not setting DATABASE_ROUTERS at this time, instead going with ".using('readonly')" on individual queries
 
 DATABASES = {
-    # social graph & voter specific info
     'default': {
         'ENGINE':   get_environment_variable('DATABASE_ENGINE'),
         'NAME':     get_environment_variable('DATABASE_NAME'),
@@ -26,9 +26,15 @@ DATABASES = {
         'PASSWORD': get_environment_variable('DATABASE_PASSWORD'),
         'HOST':     get_environment_variable('DATABASE_HOST'),  # localhost
         'PORT':     get_environment_variable('DATABASE_PORT'),  # 5432
+    },
+    'readonly': {
+        'ENGINE': get_environment_variable('DATABASE_ENGINE_READONLY'),
+        'NAME': get_environment_variable('DATABASE_NAME_READONLY'),
+        'USER': get_environment_variable('DATABASE_USER_READONLY'),
+        'PASSWORD': get_environment_variable('DATABASE_PASSWORD_READONLY'),
+        'HOST': get_environment_variable('DATABASE_HOST_READONLY'),
+        'PORT': get_environment_variable('DATABASE_PORT_READONLY'),
     }
-    # ballot, organizations & opinions
-    # search
 }
 
 ALLOWED_HOSTS = ['*']
