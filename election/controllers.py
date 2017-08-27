@@ -144,7 +144,8 @@ def elections_sync_out_list_for_api(voter_device_id):
     #     return results
     #
 
-    election_list = Election.objects.all()
+    # Get the election list using the readonly DB server
+    election_list = Election.objects.using('readonly').all()
 
     if len(election_list):
         results = {

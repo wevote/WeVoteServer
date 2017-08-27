@@ -4,13 +4,21 @@
   "WEB_APP_ROOT_URL":               "https://WeVote.US",
   "SERVER_IN_DEBUG_MODE":           true,
 
-  "_comment":                       "local.py settings, including database",
+  "_comment":                       "read/write database settings for local.py",
   "DATABASE_ENGINE":                "django.db.backends.postgresql_psycopg2",
   "DATABASE_NAME":                  "WeVoteServerDB",
   "DATABASE_USER":                  "postgres",
   "DATABASE_PASSWORD":              "",
   "DATABASE_HOST":                  "",
   "DATABASE_PORT":                  "",
+
+  "_comment":                       "read-only database settings for local.py",
+  "DATABASE_ENGINE_READONLY":       "django.db.backends.postgresql_psycopg2",
+  "DATABASE_NAME_READONLY":         "WeVoteServerDB",
+  "DATABASE_USER_READONLY":         "postgres",
+  "DATABASE_PASSWORD_READONLY":     "",
+  "DATABASE_HOST_READONLY":         "",
+  "DATABASE_PORT_READONLY":         "",
 
   "_comment":                       "The connection string for Elastic Search database",
   "ELASTIC_SEARCH_CONNECTION_STRING": "",
