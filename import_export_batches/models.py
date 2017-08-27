@@ -870,7 +870,7 @@ class BatchManager(models.Model):
 
     def retrieve_value_from_batch_row(self, batch_header_name_we_want, batch_header_map, one_batch_row):
         index_number = 0
-        batch_header_name_we_want = batch_header_name_we_want.lower()
+        batch_header_name_we_want = batch_header_name_we_want.lower().strip()
         number_of_columns = 50
         while index_number < number_of_columns:
             index_number_string = "00" + str(index_number)
@@ -882,9 +882,13 @@ class BatchManager(models.Model):
             if value_from_batch_header_map is None:
                 # Break out when we stop getting batch_header_map values
                 return ""
-            if batch_header_name_we_want == value_from_batch_header_map.lower():
+            if batch_header_name_we_want == value_from_batch_header_map.lower().strip():
                 one_batch_row_attribute_name = "batch_row_" + index_number_string
-                return getattr(one_batch_row, one_batch_row_attribute_name)
+                value_from_batch_row = getattr(one_batch_row, one_batch_row_attribute_name)
+                if isinstance(value_from_batch_row, str):
+                    return value_from_batch_row.strip()
+                else:
+                    return value_from_batch_row
             index_number += 1
         return ""
 
@@ -893,11 +897,10 @@ class BatchManager(models.Model):
         Given column name from batch_header_map, retrieve equivalent column name from batch row
         :param batch_header_name_we_want: 
         :param batch_header_map: 
-        :param batch_rows_to_lookup: 
-        :return: 
+        :return:
         """
         index_number = 0
-        batch_header_name_we_want = batch_header_name_we_want.lower()
+        batch_header_name_we_want = batch_header_name_we_want.lower().strip()
         number_of_columns = 50
         while index_number < number_of_columns:
             index_number_string = "00" + str(index_number)
@@ -909,7 +912,7 @@ class BatchManager(models.Model):
             if value_from_batch_header_map is None:
                 # Break out when we stop getting batch_header_map values
                 return ""
-            if batch_header_name_we_want == value_from_batch_header_map.lower():
+            if batch_header_name_we_want == value_from_batch_header_map.lower().strip():
                 one_batch_row_attribute_name = "batch_row_" + index_number_string
                 return one_batch_row_attribute_name
             index_number += 1

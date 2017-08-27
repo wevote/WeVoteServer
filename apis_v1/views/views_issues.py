@@ -16,15 +16,14 @@ logger = wevote_functions.admin.get_logger(__name__)
 WE_VOTE_SERVER_ROOT_URL = get_environment_variable("WE_VOTE_SERVER_ROOT_URL")
 
 
-def issues_linked_to_organization_view(request):
+def issues_linked_to_organization_view(request):  # issuesLinkedToOrganization
     organization_we_vote_id = request.GET.get('organization_we_vote_id')
     issues_linked_result = retrieve_issues_linked_to_organization_for_api(organization_we_vote_id)
 
-    success = False
     status = issues_linked_result['status']
+    success = issues_linked_result['success']
     issues_linked = []
-    if issues_linked_result['success'] and issues_linked_result['issue_list_found']:
-        success = True
+    if issues_linked_result['issue_list_found']:
         issues_linked = issues_linked_result['issue_list']
 
     json_data = {
@@ -36,15 +35,14 @@ def issues_linked_to_organization_view(request):
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 
 
-def issues_to_link_to_for_organization_view(request):
+def issues_to_link_to_for_organization_view(request):  # issuesToLinkToForOrganization
     organization_we_vote_id = request.GET.get('organization_we_vote_id')
     issues_linked_result = retrieve_issues_not_linked_to_organization_for_api(organization_we_vote_id)
 
-    success = False
     status = issues_linked_result['status']
+    success = issues_linked_result['success']
     issues_to_be_linked_to = []
-    if issues_linked_result['success'] and issues_linked_result['issue_list_found']:
-        success = True
+    if issues_linked_result['issue_list_found']:
         issues_to_be_linked_to = issues_linked_result['issue_list']
 
     json_data = {

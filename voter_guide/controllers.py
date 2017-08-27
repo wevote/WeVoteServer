@@ -1029,6 +1029,7 @@ def voter_guides_followed_retrieve_for_api(voter_device_id, maximum_number_to_re
                 'last_updated':                 voter_guide.last_updated.strftime('%Y-%m-%d %H:%M'),
             }
             voter_guides.append(one_voter_guide.copy())
+            # If we have passed in a limit (that is not zero), honor it
             if positive_value_exists(maximum_number_to_retrieve):
                 number_added_to_list += 1
                 if number_added_to_list >= maximum_number_to_retrieve:
