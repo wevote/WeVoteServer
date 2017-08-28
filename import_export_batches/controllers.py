@@ -1530,7 +1530,7 @@ def create_batch_row_action_position(batch_description, batch_header_map, one_ba
         contest_office_manager = ContestOfficeManager()
         office_results = contest_office_manager.retrieve_contest_office_from_we_vote_id(contest_office_we_vote_id)
         if office_results['contest_office_found']:
-            contest_office = matching_results['contest_office']
+            contest_office = office_results['contest_office']
             contest_office_name = contest_office.office_name
             contest_office_we_vote_id = contest_office.we_vote_id
             contest_office_id = contest_office.id
