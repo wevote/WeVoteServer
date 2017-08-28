@@ -739,7 +739,7 @@ def organization_delete_existing_position_process_form_view(request, organizatio
 
     messages.add_message(request, messages.INFO,
                          'Position deleted.')
-    return HttpResponseRedirect(reverse('organization:organization_position_edit', args=([organization_id])))
+    return HttpResponseRedirect(reverse('organization:organization_position_list', args=([organization_id])))
 
 
 @login_required
