@@ -30,7 +30,7 @@ logger = wevote_functions.admin.get_logger(__name__)
 # NOTE: @login_required() throws an error. Needs to be figured out if we ever want to secure this page.
 # class OfficesSyncOutView(APIView):
 #     def get(self, request, format=None):
-def offices_sync_out_view(request):
+def offices_sync_out_view(request):  # officesSyncOut
     google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
     state_code = request.GET.get('state_code', '')
 

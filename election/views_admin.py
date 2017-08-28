@@ -596,7 +596,7 @@ def election_summary_view(request, election_local_id):
     return render(request, 'election/election_summary.html', template_values)
 
 
-def elections_sync_out_view(request):
+def elections_sync_out_view(request):  # electionsSyncOut
     voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
     results = elections_sync_out_list_for_api(voter_device_id)
 

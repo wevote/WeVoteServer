@@ -144,12 +144,16 @@ def elections_sync_out_list_for_api(voter_device_id):
     #     return results
     #
 
-    # Get the election list using the readonly DB server
-    election_list = Election.objects.using('readonly').all()
+    try:
+        # Get the election list using the readonly DB server
+        election_list = Election.objects.using('readonly').all()
+        success = True
+    except Exception as e:
+        success = False
 
-    if len(election_list):
+    if success:
         results = {
-            'success': True,
+            'success': success,
             'election_list': election_list,
         }
         return results
@@ -176,7 +180,7 @@ def elections_sync_out_list_for_api(voter_device_id):
         'voter_device_id': voter_device_id,
     }
     results = {
-        'success': False,
+        'success': success,
         'json_data': json_data,
     }
     return results

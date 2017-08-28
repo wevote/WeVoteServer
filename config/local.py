@@ -28,12 +28,12 @@ DATABASES = {
         'PORT':     get_environment_variable('DATABASE_PORT'),  # 5432
     },
     'readonly': {
-        'ENGINE': get_environment_variable('DATABASE_ENGINE_READONLY'),
-        'NAME': get_environment_variable('DATABASE_NAME_READONLY'),
-        'USER': get_environment_variable('DATABASE_USER_READONLY'),
+        'ENGINE':   get_environment_variable('DATABASE_ENGINE_READONLY'),
+        'NAME':     get_environment_variable('DATABASE_NAME_READONLY'),
+        'USER':     get_environment_variable('DATABASE_USER_READONLY'),
         'PASSWORD': get_environment_variable('DATABASE_PASSWORD_READONLY'),
-        'HOST': get_environment_variable('DATABASE_HOST_READONLY'),
-        'PORT': get_environment_variable('DATABASE_PORT_READONLY'),
+        'HOST':     get_environment_variable('DATABASE_HOST_READONLY'),
+        'PORT':     get_environment_variable('DATABASE_PORT_READONLY'),
     }
 }
 

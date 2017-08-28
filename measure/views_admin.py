@@ -29,7 +29,7 @@ logger = wevote_functions.admin.get_logger(__name__)
 # This page does not need to be protected.
 # class MeasuresSyncOutView(APIView):
 #     def get(self, request, format=None):
-def measures_sync_out_view(request):
+def measures_sync_out_view(request):  # measuresSyncOut
     google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
     state_code = request.GET.get('state_code', '')
 

@@ -26,18 +26,13 @@ logger = wevote_functions.admin.get_logger(__name__)
 
 
 # This page does not need to be protected.
-# NOTE: login_required() throws an error. Needs to be figured out if we ever want to secure this page.
-# class PositionsSyncOutView(APIView):
-#     def get(self, request, format=None):
-def positions_sync_out_view(request):
+def positions_sync_out_view(request):  # positionsSyncOut
     google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
 
     position_list_manager = PositionListManager()
     public_only = True
     position_list = position_list_manager.retrieve_all_positions_for_election(google_civic_election_id, ANY_STANCE,
                                                                               public_only)
-    # serializer = PositionSerializer(position_list, many=True)
-    # return Response(serializer.data)
 
     if position_list:
         # convert datetime to str for date_entered and date_last_changed columns

@@ -42,20 +42,13 @@ logger = wevote_functions.admin.get_logger(__name__)
 
 
 # This page does not need to be protected.
-# class OrganizationsSyncOutView(APIView):
-#     def __str__(self):
-#         return str("")
-#
-#     def get(self, request, format=None):
-def organizations_sync_out_view(request):
+def organizations_sync_out_view(request):  # organizationsSyncOut
     state_served_code = request.GET.get('state_served_code', '')
 
     try:
         organization_list = Organization.objects.all()
         if positive_value_exists(state_served_code):
             organization_list = organization_list.filter(state_served_code__iexact=state_served_code)
-        # serializer = OrganizationSerializer(organization_list, many=True, allow_null=True)
-        # return Response(serializer.data)
         organization_list_dict = organization_list.values(
             'we_vote_id', 'organization_name', 'organization_type',
             'organization_description', 'state_served_code',

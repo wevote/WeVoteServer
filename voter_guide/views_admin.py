@@ -23,9 +23,7 @@ import json
 
 
 # This page does not need to be protected.
-# class VoterGuidesSyncOutView(APIView):
-#     def get(self, request, format=None):
-def voter_guides_sync_out_view(request):
+def voter_guides_sync_out_view(request):  # voterGuidesSyncOut
     google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
 
     try:
