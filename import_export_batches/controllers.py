@@ -1368,12 +1368,12 @@ def create_batch_row_action_position(batch_description, batch_header_map, one_ba
             )
             batch_row_action_created = True
             success = True
-            status = "BATCH_ROW_ACTION_ORGANIZATION_CREATED"
+            status = "BATCH_ROW_ACTION_ORGANIZATION_CREATED "
         except Exception as e:
             batch_row_action_created = False
             batch_row_action_position = BatchRowActionPosition()
             success = False
-            status = "BATCH_ROW_ACTION_ORGANIZATION_NOT_CREATED"
+            status = "BATCH_ROW_ACTION_ORGANIZATION_NOT_CREATED "
 
             results = {
                 'success': success,
@@ -1526,7 +1526,15 @@ def create_batch_row_action_position(batch_description, batch_header_map, one_ba
                 position = position_results['position']
                 position_we_vote_id = position.position_we_vote_id
 
-    if not positive_value_exists(contest_office_we_vote_id):
+    if positive_value_exists(contest_office_we_vote_id):
+        contest_office_manager = ContestOfficeManager()
+        office_results = contest_office_manager.retrieve_contest_office_from_we_vote_id(contest_office_we_vote_id)
+        if office_results['contest_office_found']:
+            contest_office = matching_results['contest_office']
+            contest_office_name = contest_office.office_name
+            contest_office_we_vote_id = contest_office.we_vote_id
+            contest_office_id = contest_office.id
+    else:
         # Find the office even though we haven't found candidate
         contest_office_list_manager = ContestOfficeListManager()
         matching_results = contest_office_list_manager.retrieve_contest_offices_from_non_unique_identifiers(

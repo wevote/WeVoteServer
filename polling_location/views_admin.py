@@ -85,9 +85,7 @@ STATE_LIST_IMPORT = {
 
 
 # This page does not need to be protected.
-# class PollingLocationsSyncOutView(APIView):
-#     def get(self, request, format=None):
-def polling_locations_sync_out_view(request):
+def polling_locations_sync_out_view(request):  # pollingLocationsSyncOut
     state = request.GET.get('state', '')
 
     try:
@@ -95,8 +93,6 @@ def polling_locations_sync_out_view(request):
         if positive_value_exists(state):
             polling_location_list = polling_location_list.filter(state__iexact=state)
 
-        # serializer = PollingLocationSerializer(polling_location_list, many=True)
-        # return Response(serializer.data)
         polling_location_list_dict = polling_location_list.values('we_vote_id', 'city', 'directions_text', 'line1',
                                                                   'line2', 'location_name', 'polling_hours_text',
                                                                   'polling_location_id', 'state', 'zip_long')
@@ -108,7 +104,7 @@ def polling_locations_sync_out_view(request):
 
     json_data = {
         'success': False,
-        'status': 'POLLING_LOCATTION_LIST_MISSING'
+        'status': 'POLLING_LOCATION_LIST_MISSING'
     }
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 
