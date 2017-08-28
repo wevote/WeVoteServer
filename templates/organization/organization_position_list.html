@@ -87,6 +87,7 @@
         <td>Election ID</td>
         <td>Election Date</td>
         <td>Rating Time Span</td>
+        <td>&nbsp;</td>
     </tr>
 
     {% for organization_position in organization_position_list %}
@@ -103,6 +104,9 @@
         <td>{{ organization_position.election.google_civic_election_id }}</td>
         <td>{{ organization_position.election.election_day_text }}</td>
         <td>{{ organization_position.vote_smart_time_span|default_if_none:"" }}</td>
+        <td><a href="{% url 'organization:organization_position_delete' organization.id organization_position.we_vote_id %}">
+            delete</a></td>
+
     </tr>
     {% endfor %}
 
