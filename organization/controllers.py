@@ -284,6 +284,7 @@ def organization_follow_all(voter_device_id, organization_id, organization_we_vo
         return json_data
 
     voter = results['voter']
+    voter_we_vote_id = voter.we_vote_id
     voter_linked_organization_we_vote_id = voter.linked_organization_we_vote_id
 
     organization_id = convert_to_int(organization_id)
@@ -298,8 +299,8 @@ def organization_follow_all(voter_device_id, organization_id, organization_we_vo
         }
         return json_data
 
+    follow_organization_manager = FollowOrganizationManager()
     if follow_kind == FOLLOWING:
-        follow_organization_manager = FollowOrganizationManager()
         results = follow_organization_manager.toggle_on_voter_following_organization(
             voter_id, organization_id, organization_we_vote_id, voter_linked_organization_we_vote_id)
         if results['follow_organization_found']:
@@ -313,7 +314,6 @@ def organization_follow_all(voter_device_id, organization_id, organization_we_vo
             success = False
 
     elif follow_kind == FOLLOW_IGNORE:
-        follow_organization_manager = FollowOrganizationManager()
         results = follow_organization_manager.toggle_ignore_voter_following_organization(
             voter_id, organization_id, organization_we_vote_id, voter_linked_organization_we_vote_id)
         if results['follow_organization_found']:
@@ -326,7 +326,6 @@ def organization_follow_all(voter_device_id, organization_id, organization_we_vo
             status = results['status']
             success = False
     elif follow_kind == STOP_FOLLOWING:
-        follow_organization_manager = FollowOrganizationManager()
         results = follow_organization_manager.toggle_off_voter_following_organization(
             voter_id, organization_id, organization_we_vote_id, voter_linked_organization_we_vote_id)
         if results['follow_organization_found']:
@@ -341,6 +340,13 @@ def organization_follow_all(voter_device_id, organization_id, organization_we_vo
     else:
         status = 'INCORRECT_FOLLOW_KIND'
         success = False
+
+    if positive_value_exists(voter_id):
+        number_of_organizations_followed = \
+            follow_organization_manager.fetch_number_of_organizations_followed(voter_id)
+
+        voter_manager = VoterManager()
+        voter_manager.update_organizations_interface_status(voter_we_vote_id, number_of_organizations_followed)
 
     json_data = {
         'status': status,

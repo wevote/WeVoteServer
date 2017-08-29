@@ -327,12 +327,14 @@ def retrieve_issues_to_follow_for_api(voter_device_id, sort_formula):  # retriev
     if success:
         for issue in issue_list:
             one_issue = {
-                'issue_we_vote_id':         issue.we_vote_id,
-                'issue_name':               issue.issue_name,
-                'issue_description':        issue.issue_description,
-                'issue_photo_url_large':    issue.we_vote_hosted_image_url_large,
-                'issue_photo_url_medium':   issue.we_vote_hosted_image_url_medium,
-                'issue_photo_url_tiny':     issue.we_vote_hosted_image_url_tiny,
+                'issue_we_vote_id':             issue.we_vote_id,
+                'issue_name':                   issue.issue_name,
+                'issue_description':            issue.issue_description,
+                'issue_photo_url_large':        issue.we_vote_hosted_image_url_large,
+                'issue_photo_url_medium':       issue.we_vote_hosted_image_url_medium,
+                'issue_photo_url_tiny':         issue.we_vote_hosted_image_url_tiny,
+                'linked_organization_count':    issue.linked_organization_count,
+                'issue_followers_count':        issue.issue_followers_count,
             }
             issues_to_display.append(one_issue)
 

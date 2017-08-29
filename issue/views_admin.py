@@ -120,7 +120,7 @@ def issue_list_view(request):
     issue_list_count = 0
 
     try:
-        issue_list = Issue.objects.all()
+        issue_list_query = Issue.objects.all()
 
         filters = []
         if positive_value_exists(issue_search):
@@ -141,14 +141,32 @@ def issue_list_view(request):
                 for item in filters:
                     final_filters |= item
 
-                issue_list = issue_list.filter(final_filters)
-        issue_list = issue_list.order_by('issue_name')
-        issue_list_count = issue_list.count()
+                    issue_list_query = issue_list_query.filter(final_filters)
+        issue_list_query = issue_list_query.order_by('issue_name')
+        issue_list_count = issue_list_query.count()
 
         if not positive_value_exists(show_all):
-            issue_list = issue_list[:200]
+            issue_list = issue_list_query[:200]
+        else:
+            issue_list = list(issue_list_query)
+
+        if issue_list_count:
+            altered_issue_list = []
+            organization_link_to_issue_list_manager = OrganizationLinkToIssueList()
+            # Update the linked_organization_count
+            for one_issue in issue_list:
+                one_issue.linked_organization_count = \
+                    organization_link_to_issue_list_manager.fetch_linked_organization_count(one_issue.we_vote_id)
+                try:
+                    one_issue.save()
+                except Exception as e:
+                    pass
+                altered_issue_list.append(one_issue)
+        else:
+            altered_issue_list = issue_list
     except Issue.DoesNotExist:
         # This is fine
+        altered_issue_list = []
         pass
 
     status_print_list = ""
@@ -161,7 +179,7 @@ def issue_list_view(request):
 
     template_values = {
         'messages_on_stage':        messages_on_stage,
-        'issue_list':               issue_list,
+        'issue_list':               altered_issue_list,
         'issue_search':             issue_search,
         'google_civic_election_id': google_civic_election_id,
         'state_code':               state_code,

@@ -27,6 +27,8 @@ BALLOT_INTRO_FRIENDS_COMPLETED = 32  # ...the voter has reached out to at least 
 BALLOT_INTRO_SHARE_COMPLETED = 64  # ...the voter has shared at least one item (no need for intro)
 BALLOT_INTRO_VOTE_COMPLETED = 128  # ...the voter learned about casting their vote (no need for intro)
 
+INTERFACE_STATUS_THRESHOLD_ISSUES_FOLLOWED = 5
+INTERFACE_STATUS_THRESHOLD_ORGANIZATIONS_FOLLOWED = 5
 
 # This way of extending the base user described here:
 # https://docs.djangoproject.com/en/1.8/topics/auth/customizing/#a-full-example
@@ -1129,6 +1131,85 @@ class VoterManager(BaseUserManager):
             'status':   status,
             'success':  success,
             'voter':    voter,
+        }
+        return results
+
+    def update_issues_interface_status(self, voter_we_vote_id, number_of_issues_followed):
+        """
+        Based on the number of issues the voter has followed, and set the
+        BALLOT_INTRO_ISSUES_COMPLETED interface_status_flag to true if 5 or more issues have been followed.
+        If not, set to false.
+
+        :param voter_we_vote_id:
+        :param number_of_issues_followed:
+        :return:
+        """
+        status = ""
+        success = False
+
+        results = self.retrieve_voter_by_we_vote_id(voter_we_vote_id)
+        if results['voter_found']:
+            voter = results['voter']
+
+            try:
+                # If the voter is currently following the required number of issues or greater, mark the
+                #  requirement as complete
+                if number_of_issues_followed >= INTERFACE_STATUS_THRESHOLD_ISSUES_FOLLOWED:
+                    # Update the setting if not true
+                    if not voter.is_interface_status_flag_set(BALLOT_INTRO_ISSUES_COMPLETED):
+                        voter.set_interface_status_flags(BALLOT_INTRO_ISSUES_COMPLETED)
+                        voter.save()
+                else:
+                    # Update the setting if true
+                    if voter.is_interface_status_flag_set(BALLOT_INTRO_ISSUES_COMPLETED):
+                        voter.unset_interface_status_flags(BALLOT_INTRO_ISSUES_COMPLETED)
+                        voter.save()
+                success = True
+            except Exception as e:
+                pass
+
+        results = {
+            'status': status,
+            'success': success,
+        }
+        return results
+
+    def update_organizations_interface_status(self, voter_we_vote_id, number_of_organizations_followed):
+        """
+        Based on the number of organizations the voter has followed, and set the
+        BALLOT_INTRO_ORGANIZATIONS_COMPLETED interface_status_flag to true if 5 or more issues have been followed.
+        If not, set to false.
+
+        :param voter_we_vote_id:
+        :param number_of_organizations_followed:
+        :return:
+        """
+        status = ""
+        success = False
+
+        results = self.retrieve_voter_by_we_vote_id(voter_we_vote_id)
+        if results['voter_found']:
+            voter = results['voter']
+
+            try:
+                # If the voter is currently following the required number of organizations or greater, mark the
+                #  requirement as complete
+                if number_of_organizations_followed >= INTERFACE_STATUS_THRESHOLD_ORGANIZATIONS_FOLLOWED:
+                    # Update the setting if flag is false
+                    if not voter.is_interface_status_flag_set(BALLOT_INTRO_ORGANIZATIONS_COMPLETED):
+                        voter.set_interface_status_flags(BALLOT_INTRO_ORGANIZATIONS_COMPLETED)
+                        voter.save()
+                else:
+                    # Update the setting if flag is true
+                    if voter.is_interface_status_flag_set(BALLOT_INTRO_ORGANIZATIONS_COMPLETED):
+                        voter.unset_interface_status_flags(BALLOT_INTRO_ORGANIZATIONS_COMPLETED)
+                success = True
+            except Exception as e:
+                pass
+
+        results = {
+            'status': status,
+            'success': success,
         }
         return results
 

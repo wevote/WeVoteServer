@@ -1036,10 +1036,10 @@ def voter_guides_followed_retrieve_for_api(voter_device_id, maximum_number_to_re
                     break
 
         if len(voter_guides):
-            status = 'VOTER_GUIDES_FOLLOWED_RETRIEVED'
+            status += 'VOTER_GUIDES_FOLLOWED_RETRIEVED '
             success = True
         else:
-            status = 'NO_VOTER_GUIDES_FOLLOWED_FOUND'
+            status += 'NO_VOTER_GUIDES_FOLLOWED_FOUND '
             success = True
     else:
         success = False
@@ -1280,10 +1280,10 @@ def voter_guides_followed_by_organization_retrieve_for_api(voter_device_id,  # v
                     break
 
         if len(voter_guides):
-            status = 'VOTER_GUIDES_FOLLOWED_RETRIEVED'
+            status += 'VOTER_GUIDES_FOLLOWED_BY_ORGANIZATION_RETRIEVED '
             success = True
         else:
-            status = 'NO_VOTER_GUIDES_FOLLOWED_FOUND'
+            status += 'NO_VOTER_GUIDES_FOLLOWED_BY_ORGANIZATION_FOUND '
             success = True
     else:
         success = False
@@ -1379,10 +1379,10 @@ def voter_guide_followers_retrieve_for_api(voter_device_id, organization_we_vote
                     break
 
         if len(voter_guides):
-            status = 'VOTER_GUIDES_FOLLOWED_RETRIEVED'
+            status += 'VOTER_GUIDE_FOLLOWERS_RETRIEVED '
             success = True
         else:
-            status = 'NO_VOTER_GUIDES_FOLLOWED_FOUND'
+            status += 'NO_VOTER_GUIDE_FOLLOWERS_FOUND '
             success = True
     else:
         success = False

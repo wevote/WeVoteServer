@@ -82,7 +82,8 @@ class IssueListManager(models.Model):
             if issue_we_vote_id_list_to_exclude is not None:
                 issue_queryset = issue_queryset.exclude(we_vote_id__in=issue_we_vote_id_list_to_exclude)
             if sort_formula == MOST_LINKED_ORGANIZATIONS:
-                issue_queryset = issue_queryset.order_by('-linked_organization_count')
+                issue_queryset = issue_queryset.order_by(
+                    '-linked_organization_count', 'we_vote_hosted_image_url_tiny', 'issue_name')
             elif sort_formula == ALPHABETICAL_ASCENDING:
                 issue_queryset = issue_queryset.order_by('issue_name')
             else:
@@ -444,7 +445,7 @@ class OrganizationLinkToIssueList(models.Model):
     # A way to retrieve all of the organization and issue linking information
 
     def retrieve_issue_list_by_organization_we_vote_id(self, organization_we_vote_id):
-        # Retrieve a list of issues linked to organization
+        # Retrieve a list of active issues linked to organization
         link_issue_list_found = False
         link_active = True
         link_issue_list = {}
@@ -485,7 +486,6 @@ class OrganizationLinkToIssueList(models.Model):
             link_issue_list = {}
             return link_issue_list
 
-
     def fetch_issue_we_vote_id_list_by_organization_we_vote_id(self, organization_we_vote_id):
         link_issue_we_vote_id_list = []
         link_issue_list = self.retrieve_issue_list_by_organization_we_vote_id(organization_we_vote_id)
@@ -508,6 +508,21 @@ class OrganizationLinkToIssueList(models.Model):
             pass
 
         return link_issue_list_count
+
+    def fetch_linked_organization_count(self, issue_we_vote_id):
+        number_of_organizations_following_this_issue = 0
+
+        try:
+            if positive_value_exists(issue_we_vote_id):
+                organization_link_to_issue_query = OrganizationLinkToIssue.objects.filter(
+                    issue_we_vote_id__iexact=issue_we_vote_id,
+                    link_active=True
+                )
+                number_of_organizations_following_this_issue = organization_link_to_issue_query.count()
+        except Exception as e:
+            pass
+
+        return number_of_organizations_following_this_issue
 
     def retrieve_organization_we_vote_id_list_from_issue_we_vote_id_list(self, issue_we_vote_id_list):
         organization_we_vote_id_list = []
@@ -548,25 +563,27 @@ class OrganizationLinkToIssueManager(models.Model):
     def __unicode__(self):
         return "OrganizationLinkToIssueManager"
 
-    def link_organization_to_issue(self, organization_we_vote_id, issue_id, issue_we_vote_id, reason_for_link=None):
+    def link_organization_to_issue(self, organization_we_vote_id, issue_id, issue_we_vote_id,
+                                   reason_for_link=NO_REASON):
         link_active = True
         link_blocked = False
         if reason_for_link is None:
             reason_for_link = LINKED_BY_WE_VOTE
-        reason_for_block = None
+        reason_for_block = NO_REASON
         return self.toggle_issue_link(organization_we_vote_id, issue_id, issue_we_vote_id, link_active, link_blocked,
                                       reason_for_link, reason_for_block)
 
-    def unlink_organization_to_issue(self, organization_we_vote_id, issue_id, issue_we_vote_id, reason_for_unlink=None):
+    def unlink_organization_to_issue(self, organization_we_vote_id, issue_id, issue_we_vote_id,
+                                     reason_for_unlink=NO_REASON):
         link_active = False
         link_blocked = False
         reason_for_link = NO_REASON
-        reason_for_block = None
+        reason_for_block = NO_REASON
         return self.toggle_issue_link(organization_we_vote_id, issue_id, issue_we_vote_id, link_active, link_blocked,
                                       reason_for_link, reason_for_block)
 
     def toggle_issue_link(self, organization_we_vote_id, issue_id, issue_we_vote_id, link_active, link_blocked,
-                          reason_for_link=None, reason_for_block=None):
+                          reason_for_link=NO_REASON, reason_for_block=NO_REASON):
 
         link_issue_on_stage_found = False
         link_issue_on_stage_we_vote_id = 0
@@ -583,6 +600,20 @@ class OrganizationLinkToIssueManager(models.Model):
             }
             return results
 
+        # First make sure that issue_id is for a valid issue
+        issue_manager = IssueManager()
+        if positive_value_exists(issue_id):
+            results = issue_manager.retrieve_issue(issue_id)
+        else:
+            results = issue_manager.retrieve_issue(0, issue_we_vote_id)
+        if results['issue_found']:
+            issue = results['issue']
+            issue_found = True
+            issue_we_vote_id = issue.we_vote_id
+            issue_id = issue.id
+        else:
+            issue_found = False
+
         # Does a link_issue entry exist from this organization already?
         link_issue_id = 0
         results = self.retrieve_issue_link(link_issue_id, organization_we_vote_id, issue_id, issue_we_vote_id)
@@ -592,19 +623,13 @@ class OrganizationLinkToIssueManager(models.Model):
 
             # Update this follow_issue entry with new values - we do not delete because we might be able to use
             try:
-                # if auto_followed_from_twitter_suggestion:
-                #     # If here we are auto-linking because the organizaiton is linked to this issue on Twitter
-                #     if follow_issue_on_stage.following_status == "UNLINKED" or \
-                #               follow_issue_on_stage.link_blocked
-                #         # Do not link this again
-                #         pass
-                #     else:
-                #         follow_issue_on_stage.link_active = link_active
-                # else:
                 link_issue_on_stage.link_active = link_active
-                if positive_value_exists(reason_for_link) and link_active:
+                link_issue_on_stage.link_blocked = link_blocked
+                if link_active:
                     link_issue_on_stage.reason_for_link = reason_for_link
-                elif positive_value_exists(reason_for_block) and not link_active:
+                    link_issue_on_stage.reason_link_is_blocked = NO_REASON
+                else:
+                    link_issue_on_stage.reason_for_link = NO_REASON
                     link_issue_on_stage.reason_link_is_blocked = reason_for_block
                 link_issue_on_stage.auto_linked_from_twitter_suggestion = False
                 # We don't need to update here because set set auto_now=True in the field
@@ -612,53 +637,53 @@ class OrganizationLinkToIssueManager(models.Model):
                 link_issue_on_stage.save()
                 link_issue_on_stage_we_vote_id = link_issue_on_stage.issue_we_vote_id
                 link_issue_on_stage_found = True
-                status = 'UPDATE ' + str(link_active)
+                status += 'UPDATE ' + str(link_active)
             except Exception as e:
-                status = 'FAILED_TO_UPDATE ' + str(link_active)
+                status += 'FAILED_TO_UPDATE ' + str(link_active)
                 handle_record_not_saved_exception(e, logger=logger, exception_message_optional=status)
         elif results['MultipleObjectsReturned']:
             logger.warning("link_issue: delete all but one and take it over?")
-            status = 'TOGGLE_LINKING MultipleObjectsReturned ' + str(link_active)
-        elif results['DoesNotExist']:
-            try:
-                # Create new link_issue entry
-                # First make sure that issue_id is for a valid issue
-                issue_manager = IssueManager()
-                if positive_value_exists(issue_id):
-                    results = issue_manager.retrieve_issue(issue_id)
-                else:
-                    results = issue_manager.retrieve_issue(0, issue_we_vote_id)
-                if results['issue_found']:
-                    issue = results['issue']
-                    if positive_value_exists(organization_we_vote_id) and positive_value_exists(reason_for_link):
-                        link_issue_on_stage = OrganizationLinkToIssue(
-                            organization_we_vote_id=organization_we_vote_id,
-                            issue_id=issue.id,
-                            issue_we_vote_id=issue.we_vote_id,
-                            link_active=link_active,
-                            reason_for_link=reason_for_link,
-                        )
-                    elif positive_value_exists(organization_we_vote_id) and positive_value_exists(reason_for_block):
-                        link_issue_on_stage = OrganizationLinkToIssue(
-                            organization_we_vote_id=organization_we_vote_id,
-                            issue_id=issue.id,
-                            issue_we_vote_id=issue.we_vote_id,
-                            link_blocked=link_blocked,
-                            reason_link_is_blocked=reason_for_block,
-                        )
-                    # if auto_linked_from_twitter_suggestion:
-                    #     link_issue_on_stage.auto_linked_from_twitter_suggestion = True
-                    link_issue_on_stage.save()
-                    link_issue_on_stage_we_vote_id = link_issue_on_stage.issue_we_vote_id
-                    link_issue_on_stage_found = True
-                    status = 'CREATE ' + str(link_active)
-                else:
-                    status = 'ISSUE_NOT_FOUND_ON_CREATE ' + str(link_active)
-            except Exception as e:
-                status = 'FAILED_TO_UPDATE ' + str(link_active)
-                handle_record_not_saved_exception(e, logger=logger, exception_message_optional=status)
+            status += 'TOGGLE_LINKING MultipleObjectsReturned ' + str(link_active)
         else:
-            status = results['status']
+            # Create new link_issue entry
+            if issue_found:
+                try:
+                    if positive_value_exists(organization_we_vote_id) \
+                            and positive_value_exists(issue_id) and positive_value_exists(issue_we_vote_id):
+                        link_issue_on_stage = OrganizationLinkToIssue(
+                            organization_we_vote_id=organization_we_vote_id,
+                            issue_id=issue_id,
+                            issue_we_vote_id=issue_we_vote_id,
+                        )
+                        link_issue_on_stage.link_active = link_active
+                        link_issue_on_stage.reason_for_link = reason_for_link
+                        link_issue_on_stage.link_blocked = link_blocked
+                        link_issue_on_stage.reason_for_block = reason_for_block
+
+                        link_issue_on_stage.save()
+                        link_issue_on_stage_we_vote_id = link_issue_on_stage.issue_we_vote_id
+                        link_issue_on_stage_found = True
+                        status += 'CREATE ' + str(link_active)
+                    else:
+                        status += "ORGANIZATION_LINK_TO_ISSUE_COULD_NOT_BE_CREATED-MISSING_ORGANIZATION "
+                except Exception as e:
+                    status = 'FAILED_TO_UPDATE ' + str(link_active)
+                    handle_record_not_saved_exception(e, logger=logger, exception_message_optional=status)
+
+            else:
+                status += 'ISSUE_NOT_FOUND_ON_CREATE ' + str(link_active)
+
+        if positive_value_exists(link_issue_on_stage_we_vote_id) and issue_found:
+            # If a link issue was saved, update the linked_organization_count
+            organization_link_issue_list_manager = OrganizationLinkToIssueList()
+            linked_organization_count = organization_link_issue_list_manager.fetch_linked_organization_count(
+                link_issue_on_stage_we_vote_id)
+            try:
+                issue.linked_organization_count = linked_organization_count
+                issue.save()
+                status += "LINKED_ORGANIZATION_COUNT_UPDATED "
+            except Exception as e:
+                pass
 
         results = {
             'success': True if link_issue_on_stage_found else False,

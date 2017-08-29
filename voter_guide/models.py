@@ -1012,8 +1012,12 @@ class VoterGuideListManager(models.Model):
                     organization_we_vote_id__in=organization_we_vote_ids_followed_or_ignored_by_voter)
 
             if search_string:
-                voter_guide_queryset = voter_guide_queryset.filter(Q(display_name__icontains=search_string) |
-                                                                   Q(twitter_handle__icontains=search_string))
+                # Each word in the search string can be anywhere in any field we search
+                data = search_string.split()  # split search_string into a list
+
+                for search_string_part in data:
+                    voter_guide_queryset = voter_guide_queryset.filter(Q(display_name__icontains=search_string_part) |
+                                                                       Q(twitter_handle__icontains=search_string_part))
 
             if sort_order == 'desc':
                 voter_guide_queryset = voter_guide_queryset.order_by('-' + sort_by)[:maximum_number_to_retrieve]
