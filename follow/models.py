@@ -89,6 +89,21 @@ class FollowIssueManager(models.Model):
     def __unicode__(self):
         return "FollowIssueManager"
 
+    def fetch_number_of_issues_followed(self, voter_we_vote_id):
+        number_of_issues_followed = 0
+
+        try:
+            if positive_value_exists(voter_we_vote_id):
+                follow_issue_query = FollowIssue.objects.filter(
+                    voter_we_vote_id__iexact=voter_we_vote_id,
+                    following_status=FOLLOWING
+                )
+                number_of_issues_followed = follow_issue_query.count()
+        except Exception as e:
+            pass
+
+        return number_of_issues_followed
+
     def toggle_on_voter_following_issue(self, voter_we_vote_id, issue_id, issue_we_vote_id):
         following_status = FOLLOWING
         follow_issue_manager = FollowIssueManager()
@@ -109,6 +124,7 @@ class FollowIssueManager(models.Model):
 
     def toggle_following_issue(self, voter_we_vote_id, issue_id, issue_we_vote_id, following_status):
         follow_issue_on_stage_found = False
+        follow_issue_changed = False
         follow_issue_on_stage_id = 0
         follow_issue_on_stage = FollowIssue()
         status = ''
@@ -124,7 +140,6 @@ class FollowIssueManager(models.Model):
             }
             return results
 
-
         # Does a follow_issue entry exist from this voter already exist?
         follow_issue_manager = FollowIssueManager()
         follow_issue_id = 0
@@ -136,19 +151,11 @@ class FollowIssueManager(models.Model):
 
             # Update this follow_issue entry with new values - we do not delete because we might be able to use
             try:
-                # if auto_followed_from_twitter_suggestion:
-                #     # If here we are auto-following because the voter follows this issue on Twitter
-                #     if follow_issue_on_stage.following_status == "STOP_FOLLOWING" or \
-                #                     follow_issue_on_stage.following_status == "FOLLOW_IGNORE":
-                #         # Do not follow again
-                #         pass
-                #     else:
-                #         follow_issue_on_stage.following_status = following_status
-                # else:
                 follow_issue_on_stage.following_status = following_status
                 # We don't need to update here because set set auto_now=True in the field
                 # follow_issue_on_stage.date_last_changed =
                 follow_issue_on_stage.save()
+                follow_issue_changed = True
                 follow_issue_on_stage_id = follow_issue_on_stage.id
                 follow_issue_on_stage_found = True
                 status = 'FOLLOW_STATUS_UPDATED_AS ' + following_status
@@ -178,6 +185,7 @@ class FollowIssueManager(models.Model):
                     # if auto_followed_from_twitter_suggestion:
                     #     follow_issue_on_stage.auto_followed_from_twitter_suggestion = True
                     follow_issue_on_stage.save()
+                    follow_issue_changed = True
                     follow_issue_on_stage_id = follow_issue_on_stage.id
                     follow_issue_on_stage_found = True
                     status = 'CREATE ' + following_status
@@ -513,6 +521,21 @@ class FollowOrganizationManager(models.Model):
 
     def __unicode__(self):
         return "FollowOrganizationManager"
+
+    def fetch_number_of_organizations_followed(self, voter_id):
+        number_of_organizations_followed = 0
+
+        try:
+            if positive_value_exists(voter_id):
+                follow_organization_query = FollowOrganization.objects.filter(
+                    voter_id=voter_id,
+                    following_status=FOLLOWING
+                )
+                number_of_organizations_followed = follow_organization_query.count()
+        except Exception as e:
+            pass
+
+        return number_of_organizations_followed
 
     def toggle_on_voter_following_organization(self, voter_id, organization_id, organization_we_vote_id,
                                                voter_linked_organization_we_vote_id,

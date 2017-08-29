@@ -1647,29 +1647,6 @@ def voter_update_view(request):  # voterUpdate
         or send_journal_list \
         else False
 
-    if not at_least_one_variable_has_changed:
-        json_data = {
-                'status':                           "MISSING_VARIABLE-NO_VARIABLES_PASSED_IN_TO_CHANGE",
-                'success':                          True,
-                'voter_device_id':                  voter_device_id,
-                'facebook_email':                   facebook_email,
-                'facebook_profile_image_url_https': facebook_profile_image_url_https,
-                'first_name':                       first_name,
-                'middle_name':                      middle_name,
-                'last_name':                        last_name,
-                'twitter_profile_image_url_https':  twitter_profile_image_url_https,
-                'voter_updated':                    voter_updated,
-                'interface_status_flags':           interface_status_flags,
-                'flag_integer_to_set':              flag_integer_to_set,
-                'flag_integer_to_unset':            flag_integer_to_unset,
-                'notification_settings_flags':      notification_settings_flags,
-                'notification_flag_integer_to_set': notification_flag_integer_to_set,
-                'notification_flag_integer_to_unset': notification_flag_integer_to_unset,
-                'voter_donation_history_list':      None,
-            }
-        response = HttpResponse(json.dumps(json_data), content_type='application/json')
-        return response
-
     voter_manager = VoterManager()
     voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id)
     voter_id = voter_results['voter_id']
@@ -1697,6 +1674,34 @@ def voter_update_view(request):  # voterUpdate
         return response
 
     voter = voter_results['voter']
+
+    # At this point, we have a valid voter
+    donation_list = donation_history_for_a_voter(voter.we_vote_id)
+
+    if not at_least_one_variable_has_changed:
+        # If here, we want to return the latest data from the voter object
+        json_data = {
+                'status':                           "MISSING_VARIABLE-NO_VARIABLES_PASSED_IN_TO_CHANGE",
+                'success':                          True,
+                'voter_device_id':                  voter_device_id,
+                'facebook_email':                   voter.facebook_email,
+                'facebook_profile_image_url_https': voter.facebook_profile_image_url_https,
+                'first_name':                       voter.first_name,
+                'middle_name':                      voter.middle_name,
+                'last_name':                        voter.last_name,
+                'twitter_profile_image_url_https':  voter.twitter_profile_image_url_https,
+                'voter_updated':                    voter_updated,
+                'interface_status_flags':           voter.interface_status_flags,
+                'flag_integer_to_set':              flag_integer_to_set,
+                'flag_integer_to_unset':            flag_integer_to_unset,
+                'notification_settings_flags':      voter.notification_settings_flags,
+                'notification_flag_integer_to_set': notification_flag_integer_to_set,
+                'notification_flag_integer_to_unset': notification_flag_integer_to_unset,
+                'voter_donation_history_list':      donation_list,
+            }
+        response = HttpResponse(json.dumps(json_data), content_type='application/json')
+        return response
+
     we_vote_hosted_profile_image_url_large = None
     we_vote_hosted_profile_image_url_medium = None
     we_vote_hosted_profile_image_url_tiny = None
@@ -1731,9 +1736,6 @@ def voter_update_view(request):  # voterUpdate
         we_vote_hosted_profile_image_url_tiny = cache_results['we_vote_hosted_profile_image_url_tiny']
         if positive_value_exists(cached_facebook_profile_image_url_https):
             facebook_profile_image_url_https = cached_facebook_profile_image_url_https
-
-    # At this point, we have a valid voter
-    donation_list = donation_history_for_a_voter(voter.we_vote_id)
 
     if positive_value_exists(voter.first_name) or positive_value_exists(voter.last_name):
         saved_first_or_last_name_exists = True

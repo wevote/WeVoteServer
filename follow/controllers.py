@@ -227,6 +227,12 @@ def voter_issue_follow_for_api(voter_device_id, issue_we_vote_id, follow_value, 
             'follow_issue_found': False,
         }
     else:
+        if positive_value_exists(voter_we_vote_id):
+            number_of_issues_followed = follow_issue_manager.fetch_number_of_issues_followed(voter_we_vote_id)
+
+            voter_manager = VoterManager()
+            voter_manager.update_issues_interface_status(voter_we_vote_id, number_of_issues_followed)
+
         new_result = {
             'success': result['success'],
             'status': result['status'],
