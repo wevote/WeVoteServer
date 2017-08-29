@@ -39,6 +39,7 @@ class VoterGuideManager(models.Manager):
         google_civic_election_id = convert_to_int(google_civic_election_id)
         voter_guide_owner_type = ORGANIZATION
         exception_multiple_object_returned = False
+        voter_guide_on_stage = None
         organization = Organization()
         organization_found = False
         new_voter_guide_created = False
@@ -98,6 +99,7 @@ class VoterGuideManager(models.Manager):
             'status':                   status,
             'MultipleObjectsReturned':  exception_multiple_object_returned,
             'voter_guide_saved':        success,
+            'voter_guide':              voter_guide_on_stage,
             'new_voter_guide_created':  new_voter_guide_created,
         }
         return results

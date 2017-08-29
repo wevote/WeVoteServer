@@ -99,7 +99,7 @@
         <a href="{% url 'voter_guide:generate_voter_guides' %}" >Generate Voter Guides</a>
     </p>
     <p>
-        <a href="{% url 'voter_guide:refresh_existing_voter_guides' %}" >Refresh Voter Guides</a>
+        <a href="{% url 'voter_guide:refresh_existing_voter_guides' %}?google_civic_election_id={{ google_civic_election_id }}" >Refresh Voter Guides</a>
     </p>
     <script>
         $(function() {
