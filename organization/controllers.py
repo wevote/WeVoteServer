@@ -8,10 +8,12 @@ from django.http import HttpResponse
 from exception.models import handle_record_not_found_exception
 from follow.controllers import move_organization_followers_to_another_organization
 from follow.models import FollowOrganizationManager, FollowOrganizationList, FOLLOW_IGNORE, FOLLOWING, STOP_FOLLOWING
+from image.controllers import retrieve_all_images_for_one_organization, cache_original_and_resized_image, TWITTER
 from import_export_facebook.models import FacebookManager
 import json
 from organization.models import Organization
-from position.controllers import move_positions_to_another_organization
+from position.controllers import move_positions_to_another_organization, update_position_for_friends_details_from_voter, \
+    update_position_entered_details_from_organization
 from position.models import PositionListManager
 from twitter.models import TwitterUserManager
 from voter.models import fetch_voter_id_from_voter_device_link, VoterManager, Voter
@@ -1129,6 +1131,94 @@ def organization_search_for_api(organization_name, organization_twitter_handle, 
             'organizations_list':   [],
         }
         return HttpResponse(json.dumps(json_data), content_type='application/json')
+
+
+def refresh_organization_data_from_master_table(organization_we_vote_id):
+    twitter_profile_image_url_https = None
+    twitter_profile_background_image_url_https = None
+    twitter_profile_banner_url_https = None
+    we_vote_hosted_profile_image_url_large = None
+    we_vote_hosted_profile_image_url_medium = None
+    we_vote_hosted_profile_image_url_tiny = None
+    twitter_json = {}
+
+    organization_manager = OrganizationManager()
+    twitter_user_manager = TwitterUserManager()
+    voter_manager = VoterManager()
+
+    results = organization_manager.retrieve_organization(0, organization_we_vote_id)
+    organization = results['organization']
+
+    # Retrieve voter data from Voter table
+    voter_results = voter_manager.retrieve_voter_by_organization_we_vote_id(organization_we_vote_id)
+
+    twitter_user_id = organization.twitter_user_id
+    twitter_link_to_org_results = twitter_user_manager.\
+        retrieve_twitter_link_to_organization_from_organization_we_vote_id(organization_we_vote_id)
+    if twitter_link_to_org_results['twitter_link_to_organization_found']:
+        twitter_user_id = twitter_link_to_org_results['twitter_link_to_organization'].twitter_id
+    else:
+        results = twitter_user_manager.retrieve_twitter_link_to_organization_from_twitter_user_id(twitter_user_id)
+        if results['twitter_link_to_organization_found']:
+            organization.twitter_user_id = ''
+            organization.save()
+        else:
+            twitter_user_manager.create_twitter_link_to_organization(twitter_user_id, organization_we_vote_id)
+
+    # Retrieve twitter user data from TwitterUser Table
+    twitter_user_results = twitter_user_manager.retrieve_twitter_user(twitter_user_id)
+    if twitter_user_results['twitter_user_found']:
+        twitter_user = twitter_user_results['twitter_user']
+        if twitter_user.twitter_handle != organization.organization_twitter_handle or \
+                twitter_user.twitter_name != organization.twitter_name or \
+                twitter_user.twitter_location != organization.twitter_location or \
+                twitter_user.twitter_followers_count != organization.twitter_followers_count or \
+                twitter_user.twitter_description != organization.twitter_description:
+            twitter_json = {
+                'id':               twitter_user.twitter_id,
+                'screen_name':      twitter_user.twitter_handle,
+                'name':             twitter_user.twitter_name,
+                'followers_count':  twitter_user.twitter_followers_count,
+                'location':         twitter_user.twitter_location,
+                'description':      twitter_user.twitter_description,
+            }
+
+    # Retrieve organization images data from WeVoteImage table
+    we_vote_image_list = retrieve_all_images_for_one_organization(organization.we_vote_id)
+    if len(we_vote_image_list):
+        # Retrieve all cached image for this organization
+        for we_vote_image in we_vote_image_list:
+            if we_vote_image.kind_of_image_twitter_profile:
+                if we_vote_image.kind_of_image_original:
+                    twitter_profile_image_url_https = we_vote_image.we_vote_image_url
+                if we_vote_image.kind_of_image_large:
+                    we_vote_hosted_profile_image_url_large = we_vote_image.we_vote_image_url
+                if we_vote_image.kind_of_image_medium:
+                    we_vote_hosted_profile_image_url_medium = we_vote_image.we_vote_image_url
+                if we_vote_image.kind_of_image_tiny:
+                    we_vote_hosted_profile_image_url_tiny = we_vote_image.we_vote_image_url
+            elif we_vote_image.kind_of_image_twitter_background and we_vote_image.kind_of_image_original:
+                twitter_profile_background_image_url_https = we_vote_image.we_vote_image_url
+            elif we_vote_image.kind_of_image_twitter_banner and we_vote_image.kind_of_image_original:
+                twitter_profile_banner_url_https = we_vote_image.we_vote_image_url
+
+    update_organization_results = organization_manager.update_organization_twitter_details(
+        organization, twitter_json, twitter_profile_image_url_https,
+        twitter_profile_background_image_url_https, twitter_profile_banner_url_https,
+        we_vote_hosted_profile_image_url_large, we_vote_hosted_profile_image_url_medium,
+        we_vote_hosted_profile_image_url_tiny)
+    return update_organization_results
+
+
+def push_organization_data_to_other_table_caches(organization_we_vote_id):
+    organization_manager = OrganizationManager()
+    results = organization_manager.retrieve_organization(0, organization_we_vote_id)
+    organization = results['organization']
+
+    save_voter_guide_from_organization_results = update_social_media_statistics_in_other_tables(
+        organization)
+
+    save_position_from_organization_results = update_position_entered_details_from_organization(organization)
 
 
 def retrieve_organizations_followed(voter_id, auto_followed_from_twitter_suggestion=False):

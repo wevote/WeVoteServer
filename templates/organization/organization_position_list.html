@@ -125,6 +125,11 @@
 
 {% endif %}
 
+<p>
+    <a href="{% url 'voter_guide:refresh_existing_voter_guides' %}?organization_we_vote_id={{ organization.we_vote_id }}&google_civic_election_id={{ google_civic_election_id }}" >Refresh Voter Guides</a>
+</p>
+
+
 
 {% if organization %}
     {% if organization.we_vote_hosted_profile_image_url_tiny %}
