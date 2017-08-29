@@ -49,6 +49,7 @@
         <tr>
             <td></td>
             <td>&nbsp;</td>
+            <td>&nbsp;</td>
             <td>Election</td>
             <td>Time Span</td>
             <td>Public<br />
@@ -60,6 +61,9 @@
     {% for voter_guide in voter_guide_list %}
         <tr>
             <td>{{ forloop.counter }}</td>
+            <td>{% if voter_guide.we_vote_hosted_profile_image_url_tiny %}
+                <a href="{% url 'organization:organization_position_list' voter_guide.organization.id %}?google_civic_election_id={{ google_civic_election_id }}">
+                    <img src="{{ voter_guide.we_vote_hosted_profile_image_url_tiny }}" width="24px" /></a>{% endif %}</td>
         {% if voter_guide.voter_guide_owner_type == voter_guide.ORGANIZATION %}
             <td>
             {% if voter_guide.organization %}

@@ -432,11 +432,8 @@ def voter_guides_to_follow_retrieve_for_api(voter_device_id,  # voterGuidesToFol
             link_issue_list = OrganizationLinkToIssueList()
             organization_we_vote_id_list_result = link_issue_list. \
                 retrieve_organization_we_vote_id_list_from_issue_we_vote_id_list(issue_we_vote_id_list_for_voter)
-            organization_we_vote_id_list_result = organization_we_vote_id_list_result[
-                'organization_we_vote_id_list']
-            for organization_we_vote_id_object in organization_we_vote_id_list_result:
-                organization_we_vote_id = organization_we_vote_id_object['organization_we_vote_id']
-                organization_we_vote_id_list_for_voter_issues.append(organization_we_vote_id)
+            organization_we_vote_id_list_for_voter_issues = \
+                organization_we_vote_id_list_result['organization_we_vote_id_list']
 
     voter_guide_list = []
     voter_guides = []
@@ -1511,7 +1508,7 @@ def retrieve_voter_guide_followers_by_organization_we_vote_id(organization_we_vo
             organization_we_vote_id, return_we_vote_id)
 
     organization_list_object = OrganizationListManager()
-    results = organization_list_object.retrieve_organizations_by_organization_list(
+    results = organization_list_object.retrieve_organizations_by_organization_we_vote_id_list(
         organization_we_vote_ids_followers)
 
     organization_list = []

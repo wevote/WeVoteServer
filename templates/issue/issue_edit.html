@@ -53,40 +53,46 @@
     {% endif %}
 {% else %}
 
-{# Only show other issues running for this office when we are entering a new issue #}
-{% if issue_list %}
-<h5>Existing Issues</h5>
-    <table border="1" cellpadding="5" cellspacing="5">
+{% endif %}{# End of if issue #}
+
+    {# Show all organizations linked to this issue #}
+{% if organization_list %}
+    <table cellpadding="5" cellspacing="5" border="1">
         <tr>
-            <td>&nbsp;</td>
-            <td>&nbsp;</td>
-            <td>Issue Name</td>
-            <td>Issue Description</td>
-            <td>&nbsp;</td>
+            <td></td>
+            <td></td>
+            <td>Organization</td>
+            <td>Twitter</td>
+            <td>Vote Smart ID</td>
+            <td>State</td>
+            <td>Wikipedia?</td>
+            <td></td>
         </tr>
-    {% for issue in issue_list %}
+    {% for organization in organization_list %}
         <tr>
             <td>{{ forloop.counter }}</td>
-            <td>
-                {% if issue.we_vote_hosted_image_url_tiny %}
-                <a href="{% url 'issue:issue_edit' issue.we_vote_id %}">
-                    <img src='{{ issue.we_vote_hosted_image_url_tiny }}' />
-                </a>
-                {% endif %}
+            <td>{% if organization.we_vote_hosted_profile_image_url_medium %}
+                <a href="{% url 'organization:organization_position_list' organization.id %}?google_civic_election_id={{ google_civic_election_id }}&candidate_we_vote_id={{ candidate_we_vote_id }}">
+                    <img src="{{ organization.we_vote_hosted_profile_image_url_medium }}" width="48px" /></a>{% endif %}</td>
+            <td><a href="{% url 'organization:organization_position_list' organization.id %}?google_civic_election_id={{ google_civic_election_id }}&candidate_we_vote_id={{ candidate_we_vote_id }}">
+                {{ organization.organization_name }}</a><br />
+                &nbsp;&nbsp;&nbsp;(<a href="{% url 'image:images_for_one_organization' organization.we_vote_id %}" target="_blank">See images</a> in new window)
             </td>
-            <td><a href="{% url 'issue:issue_edit' issue.we_vote_id %}">{{ issue.issue_name }}</a></td>
-            <td>{{ issue.issue_description }}</td>
-            <td><a href="{% url 'issue:issue_edit' issue.we_vote_id %}" style="font-size: .65em">(edit)</a></td>
+            <td>{% if organization.organization_twitter_handle %}{{ organization.organization_twitter_handle }} <br />
+                ({{ organization.twitter_followers_count }} followers){% endif %}</td>
+            <td>{% if organization.vote_smart_id %}{{ organization.vote_smart_id }}{% endif %}</td>
+            <td>{{ organization.state_served_code }}</td>
+            <td>{% if organization.wikipedia_page_id %}
+                <a href="{{ organization.generate_wikipedia_link }}" target="_blank">W yes</a>{% endif %}</td>
+            <td><a href="{% url 'organization:organization_edit' organization.id %}" style="font-size: .65em">{{ organization.we_vote_id }}</a></td>
         </tr>
     {% endfor %}
     </table>
-
     <p></p>
 {% else %}
-    {# Don't display anything if there aren't any other issues captured for this office yet #}
+    <p>(no organizations found)</p>
 {% endif %}
 
-{% endif %}{# End of if issue #}
 
 <script>
     $(function() {
