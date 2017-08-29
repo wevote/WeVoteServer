@@ -13,6 +13,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.messages import get_messages
 from django.shortcuts import render
 from exception.models import handle_record_found_more_than_one_exception
+from organization.models import OrganizationListManager
 from position.models import PositionListManager
 from voter.models import voter_has_authority
 import wevote_functions.admin
@@ -237,6 +238,7 @@ def issue_edit_view(request, issue_we_vote_id):
     messages_on_stage = get_messages(request)
     issue_on_stage_found = False
     issue_on_stage = Issue()
+    organization_list = []
 
     try:
         issue_on_stage = Issue.objects.get(we_vote_id__iexact=issue_we_vote_id)
@@ -257,16 +259,30 @@ def issue_edit_view(request, issue_we_vote_id):
         pass
 
     if issue_on_stage_found:
-        pass
+        issue_on_stage_list = []
+        issue_on_stage_list.append(issue_we_vote_id)
+        organization_link_to_issue_list_manager = OrganizationLinkToIssueList()
+        organization_results = \
+            organization_link_to_issue_list_manager.retrieve_organization_we_vote_id_list_from_issue_we_vote_id_list(
+                issue_on_stage_list)
+        if organization_results['organization_we_vote_id_list_found']:
+            organization_list_manager = OrganizationListManager()
+            organization_we_vote_id_list = organization_results['organization_we_vote_id_list']
+            organization_list_results = \
+                organization_list_manager.retrieve_organizations_by_organization_we_vote_id_list(
+                    organization_we_vote_id_list)
+            if organization_list_results['organization_list_found']:
+                organization_list = organization_list_results['organization_list']
 
     template_values = {
-        'messages_on_stage': messages_on_stage,
-        'issue_list': issue_list,
-        'issue': issue_on_stage,
-        'issue_name': issue_name,
-        'issue_description': issue_description,
+        'messages_on_stage':        messages_on_stage,
+        'issue_list':               issue_list,
+        'issue':                    issue_on_stage,
+        'issue_name':               issue_name,
+        'issue_description':        issue_description,
         'google_civic_election_id': google_civic_election_id,
-        'state_code': state_code,
+        'state_code':               state_code,
+        'organization_list':        organization_list,
     }
 
     return render(request, 'issue/issue_edit.html', template_values)

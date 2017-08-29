@@ -534,9 +534,11 @@ class OrganizationLinkToIssueList(models.Model):
             link_queryset = link_queryset.filter(issue_we_vote_id__in=issue_we_vote_id_list)
             link_queryset = link_queryset.filter(link_active=link_active)
             link_queryset = link_queryset.values('organization_we_vote_id').distinct()
-            organization_we_vote_id_list = list(link_queryset)
-            if len(organization_we_vote_id_list):
+            organization_link_to_issue_results = list(link_queryset)
+            if len(organization_link_to_issue_results):
                 organization_we_vote_id_list_found = True
+                for one_link in organization_link_to_issue_results:
+                    organization_we_vote_id_list.append(one_link['organization_we_vote_id'])
                 status = 'ORGANIZATION_WE_VOTE_ID_LIST_RETRIEVED'
             else:
                 status = 'NO_ORGANIZATION_WE_VOTE_IDS_RETRIEVED'
@@ -547,7 +549,7 @@ class OrganizationLinkToIssueList(models.Model):
         except Exception as e:
             handle_exception(e, logger=logger)
             status = 'FAILED retrieve_organization_we_vote_id_list' \
-                     '{error} [type: {error_type}]'.format(error=e.message, error_type=type(e))
+                     '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
 
         results = {
             'success': True if organization_we_vote_id_list else False,

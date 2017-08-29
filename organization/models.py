@@ -1669,11 +1669,11 @@ class OrganizationListManager(models.Manager):
         }
         return results
 
-    def retrieve_organizations_by_organization_list(self, followers_organization_we_vote_ids):
+    def retrieve_organizations_by_organization_we_vote_id_list(self, list_of_organization_we_vote_ids):
         organization_list = []
         organization_list_found = False
 
-        if not type(followers_organization_we_vote_ids) is list:
+        if not type(list_of_organization_we_vote_ids) is list:
             status = 'NO_ORGANIZATIONS_FOUND_MISSING_ORGANIZATION_LIST'
             success = False
             results = {
@@ -1684,7 +1684,7 @@ class OrganizationListManager(models.Manager):
             }
             return results
 
-        if not len(followers_organization_we_vote_ids):
+        if not len(list_of_organization_we_vote_ids):
             status = 'NO_ORGANIZATIONS_FOUND_NO_ORGANIZATIONS_IN_LIST'
             success = False
             results = {
@@ -1698,7 +1698,7 @@ class OrganizationListManager(models.Manager):
         try:
             organization_queryset = Organization.objects.all()
             organization_queryset = organization_queryset.filter(
-                we_vote_id__in=followers_organization_we_vote_ids)
+                we_vote_id__in=list_of_organization_we_vote_ids)
             organization_queryset = organization_queryset.order_by('-twitter_followers_count')
             organization_list = organization_queryset
 

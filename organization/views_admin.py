@@ -142,10 +142,7 @@ def organization_list_view(request):
             link_issue_list = OrganizationLinkToIssueList()
             organization_we_vote_id_list_result = link_issue_list.\
                 retrieve_organization_we_vote_id_list_from_issue_we_vote_id_list(selected_issue_vote_id_list)
-            organization_we_vote_id_list_result = organization_we_vote_id_list_result['organization_we_vote_id_list']
-            organization_we_vote_id_list = []
-            for we_vote_id in organization_we_vote_id_list_result:
-                organization_we_vote_id_list.append(we_vote_id['organization_we_vote_id'])
+            organization_we_vote_id_list = organization_we_vote_id_list_result['organization_we_vote_id_list']
             # we decided to not deal with case-insensitivity, in favor of using '__in'
             organization_list_query = organization_list_query.filter(we_vote_id__in=organization_we_vote_id_list)
 

@@ -96,36 +96,66 @@ def office_list_view(request):
     google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
     state_code = request.GET.get('state_code', '')
     show_all = request.GET.get('show_all', False)
+    office_search = request.GET.get('office_search', '')
 
-    office_list_manager = ContestOfficeListManager()
+    office_list_found = False
+    office_list = []
     updated_office_list = []
     office_list_count = 0
-    results = office_list_manager.retrieve_all_offices_for_upcoming_election(google_civic_election_id, state_code, True)
-    if results['office_list_found']:
-        office_list = results['office_list_objects']
+    try:
+        office_queryset = ContestOffice.objects.all()
+        if positive_value_exists(google_civic_election_id):
+            office_queryset = office_queryset.filter(google_civic_election_id=google_civic_election_id)
+        else:
+            # TODO Limit this search to upcoming_elections only
+            pass
+        if positive_value_exists(state_code):
+            office_queryset = office_queryset.filter(state_code__iexact=state_code)
+        office_queryset = office_queryset.order_by("office_name")
 
-        office_search = request.GET.get('office_search', '')
         if positive_value_exists(office_search):
-            filters = []
-            new_filter = Q(office_name__icontains=office_search)
-            filters.append(new_filter)
+            search_words = office_search.split()
+            for one_word in search_words:
+                filters = []  # Reset for each search word
+                new_filter = Q(office_name__icontains=one_word)
+                filters.append(new_filter)
 
-            new_filter = Q(we_vote_id__icontains=office_search)
-            filters.append(new_filter)
+                new_filter = Q(we_vote_id__icontains=one_word)
+                filters.append(new_filter)
 
-            new_filter = Q(wikipedia_id__icontains=office_search)
-            filters.append(new_filter)
+                new_filter = Q(wikipedia_id__icontains=one_word)
+                filters.append(new_filter)
 
-            # Add the first query
-            if len(filters):
-                final_filters = filters.pop()
+                # Add the first query
+                if len(filters):
+                    final_filters = filters.pop()
 
-                # ...and "OR" the remaining items in the list
-                for item in filters:
-                    final_filters |= item
+                    # ...and "OR" the remaining items in the list
+                    for item in filters:
+                        final_filters |= item
 
-                    office_list = office_list.filter(final_filters)
+                    office_queryset = office_queryset.filter(final_filters)
 
+        office_list = list(office_queryset)
+
+        if len(office_list):
+            office_list_found = True
+            status = 'OFFICES_RETRIEVED'
+            success = True
+        else:
+            status = 'NO_OFFICES_RETRIEVED'
+            success = True
+    except ContestOffice.DoesNotExist:
+        # No offices found. Not a problem.
+        status = 'NO_OFFICES_FOUND_DoesNotExist'
+        office_list = []
+        success = True
+    except Exception as e:
+        status = 'FAILED retrieve_all_offices_for_upcoming_election ' \
+                 '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
+        success = False
+
+    if office_list_found:
         for office in office_list:
             office.candidate_count = fetch_candidate_count_for_office(office.id)
             updated_office_list.append(office)
