@@ -57,7 +57,15 @@
         <a href="{% url 'office:office_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}&candidate_search={{ candidate_search }}&show_all=1">
             show all</a>
         {% endif %}
-    {% endif %}{# End of if state_list #}
+        {% endif %}
+        <br />
+        {% if office_search %}
+            <a href="{% url 'office:office_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
+                 clear search</a>&nbsp;
+        {% endif %}
+        <input type="text" name="office_search" id="office_search_id" value="{{ office_search }}" />
+        <input type="submit" value="Search for Office" />
+        {# End of if state_list #}
 
 {% if office_list %}
     <table border="1" cellpadding="5" cellspacing="5">

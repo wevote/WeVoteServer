@@ -12,6 +12,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.messages import get_messages
 from django.shortcuts import render
+from django.db.models import Q
 from election.models import Election, ElectionManager
 from exception.models import handle_record_found_more_than_one_exception,\
     handle_record_not_found_exception, handle_record_not_saved_exception
@@ -102,6 +103,29 @@ def office_list_view(request):
     results = office_list_manager.retrieve_all_offices_for_upcoming_election(google_civic_election_id, state_code, True)
     if results['office_list_found']:
         office_list = results['office_list_objects']
+
+        office_search = request.GET.get('office_search', '')
+        if positive_value_exists(office_search):
+            filters = []
+            new_filter = Q(office_name__icontains=office_search)
+            filters.append(new_filter)
+
+            new_filter = Q(we_vote_id__icontains=office_search)
+            filters.append(new_filter)
+
+            new_filter = Q(wikipedia_id__icontains=office_search)
+            filters.append(new_filter)
+
+            # Add the first query
+            if len(filters):
+                final_filters = filters.pop()
+
+                # ...and "OR" the remaining items in the list
+                for item in filters:
+                    final_filters |= item
+
+                    office_list = office_list.filter(final_filters)
+
         for office in office_list:
             office.candidate_count = fetch_candidate_count_for_office(office.id)
             updated_office_list.append(office)
@@ -127,6 +151,7 @@ def office_list_view(request):
     template_values = {
         'messages_on_stage':        messages_on_stage,
         'office_list':              updated_office_list,
+        'office_search':            office_search,
         'election_list':            election_list,
         'state_code':               state_code,
         'state_list':               sorted_state_list,
