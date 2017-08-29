@@ -241,7 +241,7 @@ def refresh_existing_voter_guides_view(request):
     # Cycle through existing voter_guides
     voter_guide_list_manager = VoterGuideListManager()
     voter_guide_manager = VoterGuideManager()
-    results = voter_guide_list_manager.retrieve_all_voter_guides()
+    results = voter_guide_list_manager.retrieve_all_voter_guides_order_by()
     if results['voter_guide_list_found']:
         voter_guide_list = results['voter_guide_list']
         for voter_guide in voter_guide_list:
@@ -284,7 +284,7 @@ def voter_guide_list_view(request):
 
     else:
         order_by = "google_civic_election_id"
-        results = voter_guide_list_object.retrieve_all_voter_guides(order_by)
+        results = voter_guide_list_object.retrieve_all_voter_guides_order_by(order_by)
 
         if results['success']:
             voter_guide_list = results['voter_guide_list']

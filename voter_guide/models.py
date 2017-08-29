@@ -1088,7 +1088,7 @@ class VoterGuideListManager(models.Model):
 
         return voter_guide_list_filtered
 
-    def retrieve_all_voter_guides(self, order_by=''):
+    def retrieve_all_voter_guides_order_by(self, order_by=''):
         voter_guide_list = []
         voter_guide_list_found = False
         try:
