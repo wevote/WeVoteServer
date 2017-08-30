@@ -80,29 +80,32 @@ def politician_list_view(request):
         if positive_value_exists(state_code):
             politician_list = politician_list.filter(state_code__iexact=state_code)
 
-        filters = []
         if positive_value_exists(politician_search):
-            new_filter = Q(politician_name__icontains=politician_search)
-            filters.append(new_filter)
+            search_words = politician_search.split()
+            for one_word in search_words:
+                filters = []
 
-            new_filter = Q(politician_twitter_handle__icontains=politician_search)
-            filters.append(new_filter)
+                new_filter = Q(politician_name__icontains=one_word)
+                filters.append(new_filter)
 
-            new_filter = Q(political_party__icontains=politician_search)
-            filters.append(new_filter)
+                new_filter = Q(politician_twitter_handle__icontains=one_word)
+                filters.append(new_filter)
 
-            new_filter = Q(we_vote_id__icontains=politician_search)
-            filters.append(new_filter)
+                new_filter = Q(political_party__icontains=one_word)
+                filters.append(new_filter)
 
-            # Add the first query
-            if len(filters):
-                final_filters = filters.pop()
+                new_filter = Q(we_vote_id__icontains=one_word)
+                filters.append(new_filter)
 
-                # ...and "OR" the remaining items in the list
-                for item in filters:
-                    final_filters |= item
+                # Add the first query
+                if len(filters):
+                    final_filters = filters.pop()
 
-                politician_list = politician_list.filter(final_filters)
+                    # ...and "OR" the remaining items in the list
+                    for item in filters:
+                        final_filters |= item
+
+                    politician_list = politician_list.filter(final_filters)
 
         politician_list = politician_list.order_by('politician_name')[:200]
     except ObjectDoesNotExist:
