@@ -8,6 +8,7 @@ from .controllers import cache_all_kind_of_images_locally_for_all_organizations,
     cache_and_create_resized_images_for_voter, create_resized_images_for_all_voters, \
     retrieve_all_images_for_one_candidate, retrieve_all_images_for_one_organization, retrieve_all_images_for_one_voter
 from admin_tools.views import redirect_to_sign_in_page
+from candidate.models import CandidateCampaignManager
 from django.contrib.auth.decorators import login_required
 from django.contrib.messages import get_messages
 from django.shortcuts import render
@@ -143,12 +144,20 @@ def images_for_one_candidate_view(request, candidate_we_vote_id):
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
+    if positive_value_exists(candidate_we_vote_id):
+        candidate_campaign_manager = CandidateCampaignManager()
+        candidate_campaign_results = candidate_campaign_manager.retrieve_candidate_campaign_from_we_vote_id(
+            candidate_we_vote_id)
+        if candidate_campaign_results['success']:
+            candidate_campaign = candidate_campaign_results['candidate_campaign']
+
     messages_on_stage = get_messages(request)
     we_vote_image_list = retrieve_all_images_for_one_candidate(candidate_we_vote_id)
     template_values = {
         'messages_on_stage':        messages_on_stage,
         'images_for_one_candidate': we_vote_image_list,
-        'candidate_we_vote_id':     candidate_we_vote_id
+        'candidate_we_vote_id':     candidate_we_vote_id,
+        'candidate_campaign':       candidate_campaign
     }
     return render(request, 'image/images_for_one_candidate.html', template_values)
 

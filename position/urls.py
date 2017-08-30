@@ -19,7 +19,8 @@ urlpatterns = [
     url(r'^(?P<position_we_vote_id>wv[\w]{2}pos[\w]+)/edit/$', views_admin.position_edit_view, name='position_edit'),
     url(r'^(?P<position_we_vote_id>wv[\w]{2}pos[\w]+)/summary/$',
         views_admin.position_summary_view, name='position_summary'),
-
+    url(r'^refresh_positions/', views_admin.refresh_positions_with_candidate_details_for_election_view,
+        name='refresh_positions_with_candidate_details_for_election')
     # # These pages are used to return the div popup page with details about all supporters, opposers, etc.
     # # Any position that this voter isn't already following
     # url(r'^cand/(?P<candidate_campaign_id>[0-9]+)/anyposition/$',

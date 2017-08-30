@@ -1230,7 +1230,7 @@ def refresh_organization_data_from_master_tables(organization_we_vote_id):
             twitter_profile_background_image_url_https, twitter_profile_banner_url_https,
             we_vote_hosted_profile_image_url_large, we_vote_hosted_profile_image_url_medium,
             we_vote_hosted_profile_image_url_tiny)
-
+        success = update_organization_results['success']
         status += update_organization_results['status']
 
     results = {

@@ -6,7 +6,7 @@ from .models import PositionEntered, PositionForFriends, PositionManager, Positi
     FRIENDS_AND_PUBLIC, FRIENDS_ONLY, PUBLIC_ONLY, SHOW_PUBLIC, THIS_ELECTION_ONLY, ALL_OTHER_ELECTIONS, \
     ALL_ELECTIONS, SUPPORT, OPPOSE, INFORMATION_ONLY, NO_STANCE
 from ballot.models import OFFICE, CANDIDATE, MEASURE
-from candidate.models import CandidateCampaignManager
+from candidate.models import CandidateCampaignManager, CandidateCampaignListManager
 from config.base import get_environment_variable
 from django.contrib import messages
 from django.db.models import Q
@@ -24,7 +24,8 @@ import requests
 from voter.models import fetch_voter_id_from_voter_device_link, VoterManager
 from voter_guide.models import ORGANIZATION, PUBLIC_FIGURE, VOTER, UNKNOWN_VOTER_GUIDE, VoterGuideManager
 import wevote_functions.admin
-from wevote_functions.functions import is_voter_device_id_valid, positive_value_exists, process_request_from_master
+from wevote_functions.functions import is_voter_device_id_valid, positive_value_exists, process_request_from_master, \
+    convert_to_int
 
 logger = wevote_functions.admin.get_logger(__name__)
 
@@ -2748,6 +2749,33 @@ def voter_position_visibility_save_for_api(  # voterPositionVisibilitySave
         return json_data
 
 
+def refresh_positions_with_candidate_details_for_election(google_civic_election_id, state_code):
+    update_all_positions_results = []
+    positions_updated_count = 0
+    google_civic_election_id = convert_to_int(google_civic_election_id)
+
+    candidate_list_manager = CandidateCampaignListManager()
+    return_list_of_objects = True
+    candidates_results = candidate_list_manager.retrieve_all_candidates_for_upcoming_election(
+        google_civic_election_id, state_code, return_list_of_objects)
+    if candidates_results['candidate_list_found']:
+        candidate_list = candidates_results['candidate_list_objects']
+
+        for candidate in candidate_list:
+            update_position_results = update_all_position_details_from_candidate(candidate)
+            positions_updated_count += update_position_results['positions_updated_count']
+            update_all_positions_results.append(update_position_results)
+
+    status = "POSITION_WITH_CANDIDATE_DETAILS_UPATED"
+    results = {
+        'success':                      True,
+        'status':                       status,
+        'positions_updated_count':      positions_updated_count,
+        'update_all_positions_results': update_all_positions_results,
+    }
+    return results
+
+
 def retrieve_ballot_item_we_vote_ids_for_organizations_to_follow(voter_id,
                                                                  organization_id, organization_we_vote_id,
                                                                  stance_we_are_looking_for=SUPPORT,
@@ -2919,7 +2947,10 @@ def update_all_position_details_from_candidate(candidate_campaign):
     """
     position_list_manager = PositionListManager()
     position_manager = PositionManager()
+    positions_updated_count = 0
+    positions_not_updated_count = 0
     update_all_position_image_urls_results = []
+    update_all_position_candidate_data_results = []
 
     retrieve_public_positions = True
     public_position_list = position_list_manager.retrieve_all_positions_for_candidate_campaign(
@@ -2928,6 +2959,13 @@ def update_all_position_details_from_candidate(candidate_campaign):
         update_position_image_urls_results = position_manager.update_position_image_urls_from_candidate(
             position_object, candidate_campaign)
         update_all_position_image_urls_results.append(update_position_image_urls_results)
+        update_position_candidate_data_results = position_manager.update_position_ballot_data_from_candidate(
+            position_object, candidate_campaign)
+        update_all_position_candidate_data_results.append(update_position_candidate_data_results)
+        if update_position_image_urls_results['success'] and update_position_candidate_data_results['success']:
+            positions_updated_count += 1
+        else:
+            positions_not_updated_count += 1
 
     retrieve_public_positions = False
     friends_position_list = position_list_manager.retrieve_all_positions_for_candidate_campaign(
@@ -2937,8 +2975,23 @@ def update_all_position_details_from_candidate(candidate_campaign):
         update_position_image_urls_results = position_manager.update_position_image_urls_from_candidate(
             position_object, candidate_campaign)
         update_all_position_image_urls_results.append(update_position_image_urls_results)
+        update_position_candidate_data_results = position_manager.update_position_ballot_data_from_candidate(
+            position_object, candidate_campaign)
+        update_all_position_candidate_data_results.append(update_position_candidate_data_results)
+        if update_position_image_urls_results['success'] and update_position_candidate_data_results['success']:
+            positions_updated_count += 1
+        else:
+            positions_not_updated_count += 1
 
-    return update_all_position_image_urls_results
+    update_all_position_results = [update_all_position_image_urls_results, update_all_position_candidate_data_results]
+
+    results = {
+        'success':                      True,
+        'positions_updated_count':      positions_updated_count,
+        'positions_not_updated_count':  positions_not_updated_count,
+        'update_all_position_results':  update_all_position_results
+    }
+    return results
 
 
 def update_position_entered_details_from_organization(organization):
@@ -2949,7 +3002,10 @@ def update_position_entered_details_from_organization(organization):
     """
     position_list_manager = PositionListManager()
     position_manager = PositionManager()
+    positions_updated_count = 0
+    positions_not_updated_count = 0
     update_all_position_image_urls_results = []
+    update_all_position_org_data_results = []
     stance_we_are_looking_for = ANY_STANCE
     friends_vs_public = PUBLIC_ONLY
 
@@ -2959,8 +3015,22 @@ def update_position_entered_details_from_organization(organization):
         update_position_image_urls_results = position_manager.update_position_image_urls_from_organization(
             position_object, organization)
         update_all_position_image_urls_results.append(update_position_image_urls_results)
+        update_position_org_data_results = position_manager.update_position_speaker_data_from_organization(
+            position_object, organization)
+        update_all_position_org_data_results.append(update_position_org_data_results)
+        if update_position_image_urls_results['success'] and update_position_org_data_results['success']:
+            positions_updated_count += 1
+        else:
+            positions_not_updated_count += 1
 
-    return update_all_position_image_urls_results
+    update_all_position_results = [update_all_position_image_urls_results, update_all_position_org_data_results]
+    results = {
+        'success':                      True,
+        'positions_updated_count':      positions_updated_count,
+        'positions_not_updated_count':  positions_not_updated_count,
+        'update_all_position_results':  update_all_position_results
+    }
+    return results
 
 
 def update_position_for_friends_details_from_voter(voter):

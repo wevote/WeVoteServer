@@ -9,6 +9,7 @@ from position.controllers import update_all_position_details_from_candidate, \
     update_position_entered_details_from_organization, update_position_for_friends_details_from_voter
 from voter_guide.models import VoterGuideManager
 from .functions import retrieve_twitter_user_info
+from candidate.controllers import refresh_candidate_data_from_master_tables
 from candidate.models import CandidateCampaignManager, CandidateCampaignListManager
 from config.base import get_environment_variable
 from image.controllers import TWITTER, cache_original_and_resized_image
@@ -531,6 +532,7 @@ def refresh_twitter_candidate_details_for_election(google_civic_election_id, sta
             if positive_value_exists(candidate.candidate_twitter_handle):
                 refresh_twitter_candidate_details(candidate)
                 profiles_refreshed_with_twitter_data += 1
+                refresh_candidate_results = refresh_candidate_data_from_master_tables(candidate.we_vote_id)
 
     status = "CANDIDATE_SOCIAL_MEDIA_RETRIEVED"
     results = {
