@@ -38,6 +38,13 @@
         {{ election.election_name }} - {{ election.google_civic_election_id }} - {{ election.election_day_text }}</option>
 {% endfor %}
     </select>
+    <br />
+    {% if voter_guide_search %}
+            <a href="{% url 'voter_guide:voter_guide_search' %}?google_civic_election_id={{ google_civic_election_id }}">
+                 clear search</a>&nbsp;
+        {% endif %}
+    <input type="text" name="voter_guide_search" id="voter_guide_search_id" value="{{ voter_guide_search }}" />
+    <input type="submit" value="Search for Voter Guides" />
     </form>
 
 {% else %}

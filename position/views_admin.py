@@ -12,6 +12,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.messages import get_messages
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
+from django.db.models import Q
 from election.models import Election
 from exception.models import handle_record_found_more_than_one_exception,\
     handle_record_not_found_exception, handle_record_not_saved_exception
@@ -106,21 +107,52 @@ def position_list_view(request):
 
     messages_on_stage = get_messages(request)
     google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
+    position_search = request.GET.get('position_search', '')
 
     position_list_manager = PositionListManager()
-
     if positive_value_exists(google_civic_election_id):
         public_only = True
         position_list = position_list_manager.retrieve_all_positions_for_election(google_civic_election_id, ANY_STANCE,
                                                                                   public_only)
     else:
-        position_list = PositionEntered.objects.order_by('we_vote_id')[:300]  # This order_by is temp
+        position_list = PositionEntered.objects.order_by('we_vote_id')  # This order_by is temp
 
+    if positive_value_exists(position_search):
+        search_words = position_search.split()
+        for one_word in search_words:
+            filters = []
+            new_filter = Q(state_code__icontains=one_word)
+            filters.append(new_filter)
+
+            new_filter = Q(we_vote_id__icontains=one_word)
+            filters.append(new_filter)
+
+            new_filter = Q(google_civic_measure_title__icontains=one_word)
+            filters.append(new_filter)
+
+            new_filter = Q(speaker_display_name__icontains=one_word)
+            filters.append(new_filter)
+
+            new_filter = Q(ballot_item_display_name__icontains=one_word)
+            filters.append(new_filter)
+
+            if len(filters):
+                final_filters = filters.pop()
+
+                # ...and "OR" the remaining items in the list
+                for item in filters:
+                    final_filters |= item
+
+                position_list = position_list.filter(final_filters)
+
+    if not positive_value_exists(google_civic_election_id):
+        position_list = position_list[: 300]
     election_list = Election.objects.order_by('-election_day_text')
 
     template_values = {
         'messages_on_stage': messages_on_stage,
         'position_list': position_list,
+        'position_search': position_search,
         'election_list': election_list,
         'google_civic_election_id': google_civic_election_id,
     }
