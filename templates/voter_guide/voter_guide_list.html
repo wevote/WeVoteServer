@@ -68,25 +68,28 @@
     {% for voter_guide in voter_guide_list %}
         <tr>
             <td>{{ forloop.counter }}</td>
-            <td>{% if voter_guide.we_vote_hosted_profile_image_url_tiny %}
-                <a href="{% url 'organization:organization_position_list' voter_guide.organization.id %}?google_civic_election_id={{ google_civic_election_id }}">
-                    <img src="{{ voter_guide.we_vote_hosted_profile_image_url_tiny }}" width="24px" /></a>{% endif %}</td>
         {% if voter_guide.voter_guide_owner_type == voter_guide.ORGANIZATION %}
-            <td>
             {% if voter_guide.organization %}
+                <td>{% if voter_guide.we_vote_hosted_profile_image_url_tiny %}
+                    <a href="{% url 'organization:organization_position_list' voter_guide.organization.id %}?google_civic_election_id={{ google_civic_election_id }}">
+                        <img src="{{ voter_guide.we_vote_hosted_profile_image_url_tiny }}" width="24px" /></a>{% endif %}</td>
+                <td>
                 <a href="{% url 'organization:organization_position_list' voter_guide.organization.id %}?google_civic_election_id={{ google_civic_election_id }}">
                 {% if voter_guide.organization.organization_name %}
                     {{ voter_guide.organization.organization_name }}
                 {% else %}(name missing){% endif %}</a>
-            {% else %}
-                (no org found)
-            {% endif %}
                 </td>
+            {% else %}
+                <td colspan="2">(no org found)</td>
+            {% endif %}
         {% elif voter_guide.voter_guide_owner_type == voter_guide.PUBLIC_FIGURE %}
+            <td></td>
             <td><a href="#">Public Figure</a></td>
         {% elif voter_guide.voter_guide_owner_type == voter_guide.VOTER %}
+            <td></td>
             <td><a href="#">Voter</a></td>
         {% else %}
+            <td></td>
             <td><a href="#">?Owner Type?</a></td>
         {% endif %}
             <td>{{ voter_guide.google_civic_election_id|default_if_none:"" }}</td>
