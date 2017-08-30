@@ -1,7 +1,7 @@
 {
   "_comment":                       "Note that WE_VOTE_SERVER_ROOT_URL should end without slash",
-  "WE_VOTE_SERVER_ROOT_URL":        "https://api.wevoteusa.org",
-  "WEB_APP_ROOT_URL":               "https://WeVote.US",
+  "WE_VOTE_SERVER_ROOT_URL":        "https://localhost:8889",
+  "WEB_APP_ROOT_URL":               "https://localhost:3000",
   "SERVER_IN_DEBUG_MODE":           true,
 
   "_comment":                       "read/write database settings for local.py",
