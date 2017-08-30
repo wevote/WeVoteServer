@@ -256,35 +256,39 @@ def polling_location_list_view(request):
         polling_location_query = polling_location_query.filter(state__iexact=polling_location_state)
 
     if positive_value_exists(polling_location_search):
-        filters = []
-        new_filter = Q(zip_long__icontains=polling_location_search)
-        filters.append(new_filter)
-        #
-        # new_filter = Q(last_name__icontains=polling_location_search)
-        # filters.append(new_filter)
-        #
-        # new_filter = Q(we_vote_id__icontains=polling_location_search)
-        # filters.append(new_filter)
-        #
-        # new_filter = Q(email__icontains=polling_location_search)
-        # filters.append(new_filter)
-        #
-        # new_filter = Q(middle_name__icontains=polling_location_search)
-        # filters.append(new_filter)
-        #
-        # new_filter = Q(twitter_screen_name__icontains=polling_location_search)
-        # filters.append(new_filter)
-        #
-        # Add the first query
-        if len(filters):
-            final_filters = filters.pop()
+        search_words = polling_location_search.split()
+        for one_word in search_words:
+            filters = []
+            new_filter = Q(zip_long__icontains=one_word)
+            filters.append(new_filter)
 
-            # ...and "OR" the remaining items in the list
-            for item in filters:
-                final_filters |= item
+            new_filter = Q(location_name__icontains=one_word)
+            filters.append(new_filter)
 
-            polling_location_count_query = polling_location_count_query.filter(final_filters)
-            polling_location_query = polling_location_query.filter(final_filters)
+            new_filter = Q(directions_text__icontains=one_word)
+            filters.append(new_filter)
+
+            new_filter = Q(city__icontains=one_word)
+            filters.append(new_filter)
+
+            new_filter = Q(zip_long__icontains=one_word)
+            filters.append(new_filter)
+
+            new_filter = Q(line1__icontains=one_word)
+            filters.append(new_filter)
+
+            new_filter = Q(line2__icontains=one_word)
+            filters.append(new_filter)
+
+            if len(filters):
+                final_filters = filters.pop()
+
+                # ...and "OR" the remaining items in the list
+                for item in filters:
+                    final_filters |= item
+
+                polling_location_count_query = polling_location_count_query.filter(final_filters)
+                polling_location_query = polling_location_query.filter(final_filters)
 
     polling_location_count = polling_location_count_query.count()
     messages.add_message(request, messages.INFO, '{polling_location_count} polling locations found.'.format(
