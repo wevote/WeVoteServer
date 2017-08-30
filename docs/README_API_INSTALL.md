@@ -9,6 +9,8 @@ You can build WeVoteServer as a Vagrant box using our
 Note that Ansible is straightforward to install on Mac and Linux hosts, but
 Windows isn't supported by Ansible. You may try to
 [install via Cygwin](https://www.jeffgeerling.com/blog/running-ansible-within-windows),
+or for Windows 10 or later,
+[install via the Windows 10 subsystem](https://www.jeffgeerling.com/blog/2017/using-ansible-through-windows-10s-subsystem-linux),
 at which point you should be able to proceed with the Ansible-Vagrant
 instructions.
 
