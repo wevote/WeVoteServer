@@ -11,6 +11,7 @@ from django.core.urlresolvers import reverse
 from django.contrib.messages import get_messages
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
+from django.db.models import Q
 from election.models import Election, ElectionManager, TIME_SPAN_LIST
 from organization.controllers import push_organization_data_to_other_table_caches, \
     refresh_organization_data_from_master_table
@@ -297,6 +298,7 @@ def voter_guide_list_view(request):
 
     google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
     state_code = request.GET.get('state_code', '')
+    voter_guide_search = request.GET.get('voter_guide_search', '')
 
     voter_guide_list = []
     voter_guide_list_object = VoterGuideListManager()
@@ -313,6 +315,36 @@ def voter_guide_list_view(request):
 
         if results['success']:
             voter_guide_list = results['voter_guide_list']
+
+    if positive_value_exists(voter_guide_search):
+        search_words = voter_guide_search.split()
+        for one_word in search_words:
+            filters = []
+
+            new_filter = Q(twitter_handle__icontains=one_word)
+            filters.append(new_filter)
+
+            new_filter = Q(owner_we_vote_id__icontains=one_word)
+            filters.append(new_filter)
+
+            new_filter = Q(state_code__icontains=one_word)
+            filters.append(new_filter)
+
+            new_filter = Q(public_figure_we_vote_id__icontains=one_word)
+            filters.append(new_filter)
+
+            new_filter = Q(display_name__icontains=one_word)
+            filters.append(new_filter)
+
+            # Add the first query
+            if len(filters):
+                final_filters = filters.pop()
+
+                # ...and "OR" the remaining items in the list
+                for item in filters:
+                    final_filters |= item
+
+                voter_guide_list = voter_guide_list.filter(final_filters)
 
     modified_voter_guide_list = []
     position_list_manager = PositionListManager()
