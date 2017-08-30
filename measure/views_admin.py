@@ -99,6 +99,7 @@ def measure_list_view(request):
 
     google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
     state_code = request.GET.get('state_code', '')
+    measure_search = request.GET.get('measure_search', '')
 
     measure_list_count = 0
     position_list_manager = PositionListManager()
@@ -109,28 +110,30 @@ def measure_list_view(request):
             measure_list = measure_list.filter(google_civic_election_id=google_civic_election_id)
         if positive_value_exists(state_code):
             measure_list = measure_list.filter(state_code__iexact=state_code)
-        measure_search = request.GET.get('measure_search', '')
 
         if positive_value_exists(measure_search):
-            filters = []
-            new_filter = Q(state_code__icontains=measure_search)
-            filters.append(new_filter)
+            search_words = measure_search.split()
+            for one_word in search_words:
+                filters = []
 
-            new_filter = Q(we_vote_id__icontains=measure_search)
-            filters.append(new_filter)
+                new_filter = Q(state_code__icontains=one_word)
+                filters.append(new_filter)
 
-            new_filter = Q(measure_title__icontains=measure_search)
-            filters.append(new_filter)
+                new_filter = Q(we_vote_id__icontains=one_word)
+                filters.append(new_filter)
 
-            # Add the first query
-            if len(filters):
-                final_filters = filters.pop()
+                new_filter = Q(measure_title__icontains=one_word)
+                filters.append(new_filter)
 
-                # ...and "OR" the remaining items in the list
-                for item in filters:
-                    final_filters |= item
+                # Add the first query
+                if len(filters):
+                    final_filters = filters.pop()
 
-                measure_list = measure_list.filter(final_filters)
+                    # ...and "OR" the remaining items in the list
+                    for item in filters:
+                        final_filters |= item
+
+                    measure_list = measure_list.filter(final_filters)
 
         measure_list_count = measure_list.count()
 
