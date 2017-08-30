@@ -1,7 +1,7 @@
 {
   "_comment":                       "Note that WE_VOTE_SERVER_ROOT_URL should end without slash",
-  "WE_VOTE_SERVER_ROOT_URL":        "https://api.wevoteusa.org",
-  "WEB_APP_ROOT_URL":               "https://WeVote.US",
+  "WE_VOTE_SERVER_ROOT_URL":        "https://localhost:8889",
+  "WEB_APP_ROOT_URL":               "http://localhost:3000",
   "SERVER_IN_DEBUG_MODE":           true,
 
   "_comment":                       "read/write database settings for local.py",
@@ -87,18 +87,18 @@
   "VOTING_INFO_PROJECT_SAMPLE_XML_FILE": "import_export_voting_info_project/import_data/sample_feed.xml",
 
   "_comment":                       "Login settings",
-  "LOGIN_URL":                      "https://api.wevoteusa.org/login/",
-  "LOGIN_ERROR_URL":                "https://api.wevoteusa.org/login/",
-  "LOGIN_REDIRECT_URL":             "https://api.wevoteusa.org/admin/",
+  "LOGIN_URL":                      "https://localhost:8889/login/",
+  "LOGIN_ERROR_URL":                "https://localhost:8889/login/",
+  "LOGIN_REDIRECT_URL":             "https://localhost:8889/admin/",
 
   "_comment":                       "Django social sign in",
   "SOCIAL_AUTH_FACEBOOK_KEY":       "",
   "SOCIAL_AUTH_FACEBOOK_SECRET":    "",
   "SOCIAL_AUTH_TWITTER_KEY":        "",
   "SOCIAL_AUTH_TWITTER_SECRET":     "",
-  "SOCIAL_AUTH_LOGIN_URL":          "https://api.wevoteusa.org/login/",
-  "SOCIAL_AUTH_LOGIN_ERROR_URL":    "https://api.wevoteusa.org/login/",
-  "SOCIAL_AUTH_LOGIN_REDIRECT_URL": "https://api.wevoteusa.org/voter/login_complete/",
+  "SOCIAL_AUTH_LOGIN_URL":          "https://localhost:8889/login/",
+  "SOCIAL_AUTH_LOGIN_ERROR_URL":    "https://localhost:8889/login/",
+  "SOCIAL_AUTH_LOGIN_REDIRECT_URL": "https://localhost:8889/voter/login_complete/",
 
   "_comment":                       "django secret key",
   "SECRET_KEY":                     "REALLYANYTHINGYOUWANT",

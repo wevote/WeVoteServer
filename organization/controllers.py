@@ -1133,7 +1133,7 @@ def organization_search_for_api(organization_name, organization_twitter_handle, 
         return HttpResponse(json.dumps(json_data), content_type='application/json')
 
 
-def refresh_organization_data_from_master_table(organization_we_vote_id):
+def refresh_organization_data_from_master_tables(organization_we_vote_id):
     twitter_profile_image_url_https = None
     twitter_profile_background_image_url_https = None
     twitter_profile_banner_url_https = None
@@ -1141,73 +1141,103 @@ def refresh_organization_data_from_master_table(organization_we_vote_id):
     we_vote_hosted_profile_image_url_medium = None
     we_vote_hosted_profile_image_url_tiny = None
     twitter_json = {}
+    success = False
+    status = ""
 
     organization_manager = OrganizationManager()
     twitter_user_manager = TwitterUserManager()
     voter_manager = VoterManager()
 
     results = organization_manager.retrieve_organization(0, organization_we_vote_id)
+    if not results['organization_found']:
+        status = "REFRESH_ORGANIZATION_FROM_MASTER_TABLES-ORGANIZATION_NOT_FOUND "
+        results = {
+            'success':                  False,
+            'status':                   status,
+        }
+        return results
+
     organization = results['organization']
 
     # Retrieve voter data from Voter table
     voter_results = voter_manager.retrieve_voter_by_organization_we_vote_id(organization_we_vote_id)
 
+    twitter_id_belongs_to_this_organization = True
     twitter_user_id = organization.twitter_user_id
     twitter_link_to_org_results = twitter_user_manager.\
         retrieve_twitter_link_to_organization_from_organization_we_vote_id(organization_we_vote_id)
     if twitter_link_to_org_results['twitter_link_to_organization_found']:
+        # If here, we have found a twitter_link_to_organization entry for this organization
         twitter_user_id = twitter_link_to_org_results['twitter_link_to_organization'].twitter_id
     else:
+        # If here, a twitter_link_to_organization entry was not found for the organization
+        # Is the twitter_user_id in use by any other group?
         results = twitter_user_manager.retrieve_twitter_link_to_organization_from_twitter_user_id(twitter_user_id)
         if results['twitter_link_to_organization_found']:
-            organization.twitter_user_id = ''
-            organization.save()
+            # If here, then we know that the Twitter id is being used by another group, so we want to wipe out the
+            # value from this organization.
+            twitter_id_belongs_to_this_organization = False
+            try:
+                organization.organization_twitter_handle = None
+                organization.twitter_user_id = None
+                organization.twitter_followers_count = 0
+                organization.save()
+            except Exception as e:
+                pass
         else:
             twitter_user_manager.create_twitter_link_to_organization(twitter_user_id, organization_we_vote_id)
 
     # Retrieve twitter user data from TwitterUser Table
-    twitter_user_results = twitter_user_manager.retrieve_twitter_user(twitter_user_id)
-    if twitter_user_results['twitter_user_found']:
-        twitter_user = twitter_user_results['twitter_user']
-        if twitter_user.twitter_handle != organization.organization_twitter_handle or \
-                twitter_user.twitter_name != organization.twitter_name or \
-                twitter_user.twitter_location != organization.twitter_location or \
-                twitter_user.twitter_followers_count != organization.twitter_followers_count or \
-                twitter_user.twitter_description != organization.twitter_description:
-            twitter_json = {
-                'id':               twitter_user.twitter_id,
-                'screen_name':      twitter_user.twitter_handle,
-                'name':             twitter_user.twitter_name,
-                'followers_count':  twitter_user.twitter_followers_count,
-                'location':         twitter_user.twitter_location,
-                'description':      twitter_user.twitter_description,
-            }
+    if twitter_id_belongs_to_this_organization:
+        twitter_user_results = twitter_user_manager.retrieve_twitter_user(twitter_user_id)
+        if twitter_user_results['twitter_user_found']:
+            twitter_user = twitter_user_results['twitter_user']
+            if twitter_user.twitter_handle != organization.organization_twitter_handle or \
+                    twitter_user.twitter_name != organization.twitter_name or \
+                    twitter_user.twitter_location != organization.twitter_location or \
+                    twitter_user.twitter_followers_count != organization.twitter_followers_count or \
+                    twitter_user.twitter_description != organization.twitter_description:
+                twitter_json = {
+                    'id':               twitter_user.twitter_id,
+                    'screen_name':      twitter_user.twitter_handle,
+                    'name':             twitter_user.twitter_name,
+                    'followers_count':  twitter_user.twitter_followers_count,
+                    'location':         twitter_user.twitter_location,
+                    'description':      twitter_user.twitter_description,
+                }
 
-    # Retrieve organization images data from WeVoteImage table
-    we_vote_image_list = retrieve_all_images_for_one_organization(organization.we_vote_id)
-    if len(we_vote_image_list):
-        # Retrieve all cached image for this organization
-        for we_vote_image in we_vote_image_list:
-            if we_vote_image.kind_of_image_twitter_profile:
-                if we_vote_image.kind_of_image_original:
-                    twitter_profile_image_url_https = we_vote_image.we_vote_image_url
-                if we_vote_image.kind_of_image_large:
-                    we_vote_hosted_profile_image_url_large = we_vote_image.we_vote_image_url
-                if we_vote_image.kind_of_image_medium:
-                    we_vote_hosted_profile_image_url_medium = we_vote_image.we_vote_image_url
-                if we_vote_image.kind_of_image_tiny:
-                    we_vote_hosted_profile_image_url_tiny = we_vote_image.we_vote_image_url
-            elif we_vote_image.kind_of_image_twitter_background and we_vote_image.kind_of_image_original:
-                twitter_profile_background_image_url_https = we_vote_image.we_vote_image_url
-            elif we_vote_image.kind_of_image_twitter_banner and we_vote_image.kind_of_image_original:
-                twitter_profile_banner_url_https = we_vote_image.we_vote_image_url
+        # Retrieve organization images data from WeVoteImage table
+        we_vote_image_list = retrieve_all_images_for_one_organization(organization.we_vote_id)
+        if len(we_vote_image_list):
+            # Retrieve all cached image for this organization
+            for we_vote_image in we_vote_image_list:
+                if we_vote_image.kind_of_image_twitter_profile:
+                    if we_vote_image.kind_of_image_original:
+                        twitter_profile_image_url_https = we_vote_image.we_vote_image_url
+                    if we_vote_image.kind_of_image_large:
+                        we_vote_hosted_profile_image_url_large = we_vote_image.we_vote_image_url
+                    if we_vote_image.kind_of_image_medium:
+                        we_vote_hosted_profile_image_url_medium = we_vote_image.we_vote_image_url
+                    if we_vote_image.kind_of_image_tiny:
+                        we_vote_hosted_profile_image_url_tiny = we_vote_image.we_vote_image_url
+                elif we_vote_image.kind_of_image_twitter_background and we_vote_image.kind_of_image_original:
+                    twitter_profile_background_image_url_https = we_vote_image.we_vote_image_url
+                elif we_vote_image.kind_of_image_twitter_banner and we_vote_image.kind_of_image_original:
+                    twitter_profile_banner_url_https = we_vote_image.we_vote_image_url
 
-    update_organization_results = organization_manager.update_organization_twitter_details(
-        organization, twitter_json, twitter_profile_image_url_https,
-        twitter_profile_background_image_url_https, twitter_profile_banner_url_https,
-        we_vote_hosted_profile_image_url_large, we_vote_hosted_profile_image_url_medium,
-        we_vote_hosted_profile_image_url_tiny)
-    return update_organization_results
+        update_organization_results = organization_manager.update_organization_twitter_details(
+            organization, twitter_json, twitter_profile_image_url_https,
+            twitter_profile_background_image_url_https, twitter_profile_banner_url_https,
+            we_vote_hosted_profile_image_url_large, we_vote_hosted_profile_image_url_medium,
+            we_vote_hosted_profile_image_url_tiny)
+
+        status += update_organization_results['status']
+
+    results = {
+        'success': success,
+        'status': status,
+    }
+    return results
 
 
 def push_organization_data_to_other_table_caches(organization_we_vote_id):

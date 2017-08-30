@@ -2,11 +2,27 @@
 
 [Back to root README](../README.md)
 
-## Installing WeVoteServer
+## Installing WeVoteServer: Vagrant and Ansible
 
-Please note: We do not support direct development on Windows. 
+You can build WeVoteServer as a Vagrant box using our
+[Ansible-Vagrant project](https://github.com/wevote/ansible-django-stack).
+Note that Ansible is straightforward to install on Mac and Linux hosts, but
+Windows isn't supported by Ansible. You may try to
+[install via Cygwin](https://www.jeffgeerling.com/blog/running-ansible-within-windows),
+or for Windows 10 or later,
+[install via the Windows 10 subsystem](https://www.jeffgeerling.com/blog/2017/using-ansible-through-windows-10s-subsystem-linux),
+at which point you should be able to proceed with the Ansible-Vagrant
+instructions.
+
+Alternatively, you can build the Vagrant image on a Mac or Linux machine, use
+[vagrant package](https://www.vagrantup.com/docs/cli/package.html) to export
+a portable box, and copy that to your Windows machine.
+
+## Installing WeVoteServer: Native development
+
+Please note: We do not support direct development on Windows.
 If you are using a Windows machine, we recommend setting up an [Oracle VirtualBox](https://www.virtualbox.org/wiki/Downloads)
-and installing within that. In our experience, a Windows machine should have 8 GB RAM (minimum), 
+and installing within that. In our experience, a Windows machine should have 8 GB RAM (minimum),
 and you should allocate 2 CPUs and 4 GB RAM to the virtual machine.
 
 1a. [Installing PostgreSQL on Mac](README_API_INSTALL_POSTGRES_MAC.md)

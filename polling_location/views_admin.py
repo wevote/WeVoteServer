@@ -259,7 +259,8 @@ def polling_location_list_view(request):
         search_words = polling_location_search.split()
         for one_word in search_words:
             filters = []
-            new_filter = Q(zip_long__icontains=one_word)
+
+            new_filter = Q(we_vote_id__icontains=one_word)
             filters.append(new_filter)
 
             new_filter = Q(location_name__icontains=one_word)
@@ -280,6 +281,7 @@ def polling_location_list_view(request):
             new_filter = Q(line2__icontains=one_word)
             filters.append(new_filter)
 
+            # Add the first query
             if len(filters):
                 final_filters = filters.pop()
 

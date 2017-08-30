@@ -14,7 +14,7 @@ from django.shortcuts import render
 from django.db.models import Q
 from election.models import Election, ElectionManager, TIME_SPAN_LIST
 from organization.controllers import push_organization_data_to_other_table_caches, \
-    refresh_organization_data_from_master_table
+    refresh_organization_data_from_master_tables
 from organization.models import Organization, OrganizationListManager
 from organization.views_admin import organization_edit_process_view
 from position.models import PositionEntered, PositionForFriends, PositionListManager
@@ -254,6 +254,11 @@ def refresh_existing_voter_guides_view(request):
         if results['voter_guide_saved']:
             voter_guide_list_found = True
             voter_guide_list.append(results['voter_guide'])
+    elif positive_value_exists(organization_we_vote_id):
+        results = voter_guide_list_manager.retrieve_all_voter_guides_by_organization_we_vote_id(organization_we_vote_id)
+        if results['voter_guide_list_found']:
+            voter_guide_list_found = True
+            voter_guide_list = results['voter_guide_list']
     elif positive_value_exists(google_civic_election_id):
         results = voter_guide_list_manager.retrieve_voter_guides_for_election(google_civic_election_id)
         if results['voter_guide_list_found']:
@@ -268,7 +273,7 @@ def refresh_existing_voter_guides_view(request):
     if voter_guide_list_found:
         for voter_guide in voter_guide_list:
             if positive_value_exists(voter_guide.organization_we_vote_id):
-                results = refresh_organization_data_from_master_table(voter_guide.organization_we_vote_id)
+                results = refresh_organization_data_from_master_tables(voter_guide.organization_we_vote_id)
                 if results['success']:
                     push_organization_data_to_other_table_caches(voter_guide.organization_we_vote_id)
                 if positive_value_exists(voter_guide.google_civic_election_id):
