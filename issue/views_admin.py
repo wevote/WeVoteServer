@@ -123,26 +123,29 @@ def issue_list_view(request):
     try:
         issue_list_query = Issue.objects.all()
 
-        filters = []
         if positive_value_exists(issue_search):
-            new_filter = Q(issue_name__icontains=issue_search)
-            filters.append(new_filter)
+            search_words = issue_search.split()
+            for one_word in search_words:
+                filters = []
+                new_filter = Q(issue_name__icontains=one_word)
+                filters.append(new_filter)
 
-            new_filter = Q(issue_description__icontains=issue_search)
-            filters.append(new_filter)
+                new_filter = Q(issue_description__icontains=one_word)
+                filters.append(new_filter)
 
-            new_filter = Q(we_vote_id__icontains=issue_search)
-            filters.append(new_filter)
+                new_filter = Q(we_vote_id__icontains=one_word)
+                filters.append(new_filter)
 
-            # Add the first query
-            if len(filters):
-                final_filters = filters.pop()
+                # Add the first query
+                if len(filters):
+                    final_filters = filters.pop()
 
-                # ...and "OR" the remaining items in the list
-                for item in filters:
-                    final_filters |= item
+                    # ...and "OR" the remaining items in the list
+                    for item in filters:
+                        final_filters |= item
 
                     issue_list_query = issue_list_query.filter(final_filters)
+
         issue_list_query = issue_list_query.order_by('issue_name')
         issue_list_count = issue_list_query.count()
 
