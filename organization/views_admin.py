@@ -147,28 +147,30 @@ def organization_list_view(request):
             organization_list_query = organization_list_query.filter(we_vote_id__in=organization_we_vote_id_list)
 
     if positive_value_exists(organization_search):
-        filters = []
-        new_filter = Q(organization_name__icontains=organization_search)
-        filters.append(new_filter)
+        search_words = organization_search.split()
+        for one_word in search_words:
+            filters = []
+            new_filter = Q(organization_name__icontains=one_word)
+            filters.append(new_filter)
 
-        new_filter = Q(organization_twitter_handle__icontains=organization_search)
-        filters.append(new_filter)
+            new_filter = Q(organization_twitter_handle__icontains=one_word)
+            filters.append(new_filter)
 
-        new_filter = Q(organization_website__icontains=organization_search)
-        filters.append(new_filter)
+            new_filter = Q(organization_website__icontains=one_word)
+            filters.append(new_filter)
 
-        new_filter = Q(we_vote_id__icontains=organization_search)
-        filters.append(new_filter)
+            new_filter = Q(we_vote_id__icontains=one_word)
+            filters.append(new_filter)
 
-        # Add the first query
-        if len(filters):
-            final_filters = filters.pop()
+            # Add the first query
+            if len(filters):
+                final_filters = filters.pop()
 
-            # ...and "OR" the remaining items in the list
-            for item in filters:
-                final_filters |= item
+                # ...and "OR" the remaining items in the list
+                for item in filters:
+                    final_filters |= item
 
-            organization_list_query = organization_list_query.filter(final_filters)
+                organization_list_query = organization_list_query.filter(final_filters)
     else:
         # This is the default organization list
         filters = []

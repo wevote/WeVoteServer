@@ -169,32 +169,35 @@ def candidate_list_view(request):
         if positive_value_exists(state_code):
             candidate_list = candidate_list.filter(state_code__iexact=state_code)
 
-        filters = []
         if positive_value_exists(candidate_search):
-            new_filter = Q(candidate_name__icontains=candidate_search)
-            filters.append(new_filter)
+            search_words = candidate_search.split()
+            for one_word in search_words:
+                filters = []
 
-            new_filter = Q(candidate_twitter_handle__icontains=candidate_search)
-            filters.append(new_filter)
+                new_filter = Q(candidate_name__icontains=one_word)
+                filters.append(new_filter)
 
-            new_filter = Q(candidate_url__icontains=candidate_search)
-            filters.append(new_filter)
+                new_filter = Q(candidate_twitter_handle__icontains=one_word)
+                filters.append(new_filter)
 
-            new_filter = Q(party__icontains=candidate_search)
-            filters.append(new_filter)
+                new_filter = Q(candidate_url__icontains=one_word)
+                filters.append(new_filter)
 
-            new_filter = Q(we_vote_id__icontains=candidate_search)
-            filters.append(new_filter)
+                new_filter = Q(party__icontains=one_word)
+                filters.append(new_filter)
 
-            # Add the first query
-            if len(filters):
-                final_filters = filters.pop()
+                new_filter = Q(we_vote_id__icontains=one_word)
+                filters.append(new_filter)
 
-                # ...and "OR" the remaining items in the list
-                for item in filters:
-                    final_filters |= item
+                # Add the first query
+                if len(filters):
+                    final_filters = filters.pop()
 
-                candidate_list = candidate_list.filter(final_filters)
+                    # ...and "OR" the remaining items in the list
+                    for item in filters:
+                        final_filters |= item
+
+                    candidate_list = candidate_list.filter(final_filters)
         candidate_list = candidate_list.order_by('candidate_name')
         candidate_list_count = candidate_list.count()
 
