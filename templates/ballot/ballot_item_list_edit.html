@@ -34,8 +34,12 @@
     <a href="{% url 'election:election_one_ballot_retrieve' election.id %}?ballot_returned_id={{ ballot_returned.id }}">
         Refresh data from Google Civic</a><br />
     {% for ballot_item in ballot_item_list %}
+        <div class="row">
+        <div class="col-sm-1">
+            <input type="text" class="form-control" name="local_ballot_order_{{ ballot_item.id }}" value="{{ ballot_item.local_ballot_order }}" />
+        </div>
         {% if ballot_item.contest_office_we_vote_id %}
-            {{ ballot_item.local_ballot_order }}: {{ ballot_item.ballot_item_display_name }}
+            {{ ballot_item.ballot_item_display_name }}
             (<a href="{% url 'office:office_summary' ballot_item.contest_office_id %}">
             {{ ballot_item.contest_office_we_vote_id }}
             </a>)
@@ -47,13 +51,14 @@
             {% endif %}
             <br />
         {% elif ballot_item.contest_measure_we_vote_id %}
-            {{ ballot_item.local_ballot_order }}: {{ ballot_item.ballot_item_display_name }} ({{ ballot_item.contest_measure_we_vote_id }})
+            {{ ballot_item.ballot_item_display_name }} ({{ ballot_item.contest_measure_we_vote_id }})
             {% if ballot_item.google_civic_election_id|convert_to_int >= 1000000 %}
             {# If here, this is a We Vote #}
                 - Delete
             {% endif %}
             <br />
         {% endif %}
+        </div>
     {% endfor %}{# for ballot_item in ballot_item_list #}
 
 {% else %}
@@ -68,7 +73,7 @@
             {% if polling_location.we_vote_id %}({{ polling_location.we_vote_id }}){% endif %}
         <br />
         <input type="hidden" name="polling_location_id" value="{{ polling_location.id }}">
-  {% else %}
+    {% else %}
         {# Choose polling location for this ballot_returned #}
         Search for City: <input type="text" name="polling_location_city" value="{{ polling_location_city }}" />
         or ZIP: <input type="text" name="polling_location_zip" value="{{ polling_location_zip }}" />

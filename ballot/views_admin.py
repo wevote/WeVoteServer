@@ -328,8 +328,6 @@ def ballot_item_list_edit_process_view(request):
     contest_office1_order = request.POST.get('contest_office1_order', 0)
     contest_measure1_id = request.POST.get('contest_measure1_id', 0)
 
-    election_local_id = 0
-
     # Find existing ballot_returned
     ballot_returned_found = False
     ballot_returned = BallotReturned()
@@ -339,6 +337,8 @@ def ballot_item_list_edit_process_view(request):
             if len(ballot_returned_query):
                 ballot_returned = ballot_returned_query[0]
                 ballot_returned_found = True
+                if not positive_value_exists(polling_location_id):
+                    polling_location_we_vote_id = ballot_returned.polling_location_we_vote_id
         except Exception as e:
             pass
 
@@ -368,6 +368,7 @@ def ballot_item_list_edit_process_view(request):
                 0, ballot_returned.polling_location_we_vote_id)
             if results['polling_location_found']:
                 polling_location = results['polling_location']
+                polling_location_we_vote_id = polling_location.we_vote_id
                 polling_location_found = True
                 if not positive_value_exists(state_code):
                     state_code = polling_location.state
@@ -395,6 +396,13 @@ def ballot_item_list_edit_process_view(request):
                 results = polling_location_manager.retrieve_polling_location_by_id(polling_location_id)
                 if results['polling_location_found']:
                     polling_location = results['polling_location']
+                    polling_location_we_vote_id = polling_location.we_vote_id
+                    polling_location_found = True
+            elif positive_value_exists(polling_location_we_vote_id):
+                results = polling_location_manager.retrieve_polling_location_by_id(0, polling_location_we_vote_id)
+                if results['polling_location_found']:
+                    polling_location = results['polling_location']
+                    polling_location_we_vote_id = polling_location.we_vote_id
                     polling_location_found = True
 
             if not polling_location_found:
@@ -441,9 +449,10 @@ def ballot_item_list_edit_process_view(request):
 
         # #######################################
         # Now create new ballot_item entries
+        ballot_item_manager = BallotItemManager()
+        ballot_item_list_manager = BallotItemListManager()
 
         # Contest Office 1
-        ballot_item_manager = BallotItemManager()
         contest_office_manager = ContestOfficeManager()
         results = contest_office_manager.retrieve_contest_office(contest_office1_id)
         if results['contest_office_found']:
@@ -469,7 +478,6 @@ def ballot_item_list_edit_process_view(request):
                 messages.add_message(request, messages.ERROR, 'Office 1 could not be added.')
 
         # Contest Measure 1
-        ballot_item_manager = BallotItemManager()
         contest_measure_manager = ContestMeasureManager()
         results = contest_measure_manager.retrieve_contest_measure(contest_measure1_id)
         if results['contest_measure_found']:
@@ -488,6 +496,22 @@ def ballot_item_list_edit_process_view(request):
                 ballot_item_display_name, contest_measure.measure_subtitle, local_ballot_order,
                 contest_office_id, contest_office_we_vote_id,
                 contest_measure.id, contest_measure.we_vote_id, state_code)
+
+        # Update the ballot item order
+        if positive_value_exists(polling_location_we_vote_id) and positive_value_exists(google_civic_election_id):
+            ballot_item_list_results = ballot_item_list_manager.retrieve_all_ballot_items_for_polling_location(
+                polling_location_we_vote_id, google_civic_election_id)
+            if ballot_item_list_results['ballot_item_list_found']:
+                ballot_item_list = ballot_item_list_results['ballot_item_list']
+                for one_ballot_item in ballot_item_list:
+                    try:
+                        # local_ballot_order_ + one_ballot_item.id
+                        local_ballot_order = request.POST['local_ballot_order_' + str(one_ballot_item.id)]
+                        if local_ballot_order:
+                            one_ballot_item.local_ballot_order = local_ballot_order
+                            one_ballot_item.save()
+                    except Exception as e:
+                        pass
 
     except Exception as e:
         messages.add_message(request, messages.ERROR, 'Could not save ballot_returned.')
