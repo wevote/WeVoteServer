@@ -147,7 +147,7 @@ def organization_list_view(request):
             organization_list_query = organization_list_query.filter(we_vote_id__in=organization_we_vote_id_list)
 
     if positive_value_exists(organization_search):
-        search_words = office_search.split()
+        search_words = organization_search.split()
         for one_word in search_words:
             filters = []
             new_filter = Q(organization_name__icontains=one_word)
