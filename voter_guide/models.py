@@ -448,6 +448,12 @@ class VoterGuideManager(models.Manager):
         if voter_guide.twitter_followers_count != organization.twitter_followers_count:
             voter_guide.twitter_followers_count = organization.twitter_followers_count
             values_changed = True
+        if voter_guide.twitter_description != organization.twitter_description:
+            voter_guide.twitter_description = organization.twitter_description
+            values_changed = True
+        if voter_guide.twitter_handle != organization.organization_twitter_handle:
+            voter_guide.twitter_handle = organization.organization_twitter_handle
+            values_changed = True
         if voter_guide.image_url != organization.organization_photo_url():
             voter_guide.image_url = organization.organization_photo_url()
             values_changed = True

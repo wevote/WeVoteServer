@@ -8,14 +8,17 @@ from config.base import get_environment_variable
 from django.contrib import messages
 from django.http import HttpResponse
 from exception.models import handle_exception
+from image.controllers import retrieve_all_images_for_one_candidate
 from import_export_vote_smart.controllers import retrieve_and_match_candidate_from_vote_smart, \
     retrieve_candidate_photo_from_vote_smart
 import json
 from office.models import ContestOfficeManager
 from politician.models import PoliticianManager
+from position.controllers import update_all_position_details_from_candidate
+from twitter.models import TwitterUserManager
 import requests
 import wevote_functions.admin
-from wevote_functions.functions import positive_value_exists, process_request_from_master
+from wevote_functions.functions import positive_value_exists, process_request_from_master, convert_to_int
 
 logger = wevote_functions.admin.get_logger(__name__)
 
@@ -533,6 +536,98 @@ def candidates_retrieve_for_api(office_id, office_we_vote_id):
         }
 
     return HttpResponse(json.dumps(json_data), content_type='application/json')
+
+
+def refresh_candidate_data_from_master_tables(candidate_we_vote_id):
+    # Pull from ContestOffice and TwitterUser tables and update CandidateCampaign table
+    twitter_profile_image_url_https = None
+    twitter_profile_background_image_url_https = None
+    twitter_profile_banner_url_https = None
+    we_vote_hosted_profile_image_url_large = None
+    we_vote_hosted_profile_image_url_medium = None
+    we_vote_hosted_profile_image_url_tiny = None
+    twitter_json = {}
+    status = ""
+
+    candidate_campaign_manager = CandidateCampaignManager()
+    twitter_user_manager = TwitterUserManager()
+
+    results = candidate_campaign_manager.retrieve_candidate_campaign_from_we_vote_id(candidate_we_vote_id)
+    if not results['candidate_campaign_found']:
+        status = "REFRESH_CANDIDATE_FROM_MASTER_TABLES-CANDIDATE_NOT_FOUND "
+        results = {
+            'success':                  False,
+            'status':                   status,
+        }
+        return results
+
+    candidate_campaign = results['candidate_campaign']
+
+    # Retrieve twitter user data from TwitterUser Table
+    twitter_user_id = candidate_campaign.twitter_user_id
+    twitter_user_results = twitter_user_manager.retrieve_twitter_user(twitter_user_id)
+    if twitter_user_results['twitter_user_found']:
+        twitter_user = twitter_user_results['twitter_user']
+        if twitter_user.twitter_handle != candidate_campaign.candidate_twitter_handle or \
+                twitter_user.twitter_name != candidate_campaign.twitter_name or \
+                twitter_user.twitter_location != candidate_campaign.twitter_location or \
+                twitter_user.twitter_followers_count != candidate_campaign.twitter_followers_count or \
+                twitter_user.twitter_description != candidate_campaign.twitter_description:
+            twitter_json = {
+                'id': twitter_user.twitter_id,
+                'screen_name': twitter_user.twitter_handle,
+                'name': twitter_user.twitter_name,
+                'followers_count': twitter_user.twitter_followers_count,
+                'location': twitter_user.twitter_location,
+                'description': twitter_user.twitter_description,
+            }
+
+    # Retrieve organization images data from WeVoteImage table
+    we_vote_image_list = retrieve_all_images_for_one_candidate(candidate_we_vote_id)
+    if len(we_vote_image_list):
+        # Retrieve all cached image for this organization
+        for we_vote_image in we_vote_image_list:
+            if we_vote_image.kind_of_image_twitter_profile:
+                if we_vote_image.kind_of_image_original:
+                    twitter_profile_image_url_https = we_vote_image.we_vote_image_url
+                if we_vote_image.kind_of_image_large:
+                    we_vote_hosted_profile_image_url_large = we_vote_image.we_vote_image_url
+                if we_vote_image.kind_of_image_medium:
+                    we_vote_hosted_profile_image_url_medium = we_vote_image.we_vote_image_url
+                if we_vote_image.kind_of_image_tiny:
+                    we_vote_hosted_profile_image_url_tiny = we_vote_image.we_vote_image_url
+            elif we_vote_image.kind_of_image_twitter_background and we_vote_image.kind_of_image_original:
+                twitter_profile_background_image_url_https = we_vote_image.we_vote_image_url
+            elif we_vote_image.kind_of_image_twitter_banner and we_vote_image.kind_of_image_original:
+                twitter_profile_banner_url_https = we_vote_image.we_vote_image_url
+
+    # Refresh twitter details in candidate campaign
+    update_candidate_results = candidate_campaign_manager.update_candidate_twitter_details(
+        candidate_campaign, twitter_json, twitter_profile_image_url_https,
+        twitter_profile_background_image_url_https, twitter_profile_banner_url_https,
+        we_vote_hosted_profile_image_url_large, we_vote_hosted_profile_image_url_medium,
+        we_vote_hosted_profile_image_url_tiny)
+    status += update_candidate_results['status']
+    success = update_candidate_results['success']
+
+    # Refresh contest office details in candidate campaign
+    update_candidate_contest_office_results = candidate_campaign_manager.refresh_cached_candidate_info(
+        candidate_campaign)
+    status += "REFRESHED_CANDIDATE_CAMPAIGN_FROM_CONTEST_OFFICE"
+
+    results = {
+        'success': success,
+        'status': status,
+    }
+    return results
+
+
+def push_candidate_data_to_other_table_caches(candidate_we_vote_id):
+    candidate_campaign_manager = CandidateCampaignManager()
+    results = candidate_campaign_manager.retrieve_candidate_campaign_from_we_vote_id(candidate_we_vote_id)
+    candidate_campaign = results['candidate_campaign']
+
+    save_position_from_candidate_results = update_all_position_details_from_candidate(candidate_campaign)
 
 
 def retrieve_candidate_photos(we_vote_candidate, force_retrieve=False):

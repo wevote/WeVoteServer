@@ -4512,6 +4512,74 @@ class PositionManager(models.Model):
         }
         return results
 
+    def update_position_ballot_data_from_candidate(self, position_object, candidate_campaign):
+        """
+        Update position_object with candidate data.
+        :param position_object:
+        :param candidate_campaign:
+        :return:
+        """
+        position_change = False
+        if positive_value_exists(candidate_campaign.candidate_name) and \
+                position_object.ballot_item_display_name != candidate_campaign.candidate_name:
+            position_object.ballot_item_display_name = candidate_campaign.candidate_name
+            position_change = True
+        if positive_value_exists(candidate_campaign.candidate_twitter_handle) and \
+                position_object.ballot_item_twitter_handle != candidate_campaign.candidate_twitter_handle:
+            position_object.ballot_item_twitter_handle = candidate_campaign.candidate_twitter_handle
+            position_change = True
+        if position_change:
+            try:
+                position_object.save()
+                success = True
+                status = "SAVED_POSITION_BALLOT_DATA_FROM_CANDIDATE"
+            except Exception as e:
+                success = False
+                status = 'NOT_SAVED_POSITION_BALLOT_DATA_FROM_CANDIDATE'
+        else:
+            success = True
+            status = "NO_CHANGES_SAVED_TO_POSITION_BALLOT_DATA"
+        results = {
+            'success':  success,
+            'status':   status,
+            'position': position_object
+        }
+        return results
+
+    def update_position_speaker_data_from_organization(self, position_object, organization):
+        """
+        Update position_object with organization data.
+        :param position_object:
+        :param organization:
+        :return:
+        """
+        position_change = False
+        if positive_value_exists(organization.organization_name) and \
+                position_object.speaker_display_name != organization.organization_name:
+            position_object.speaker_display_name = organization.organization_name
+            position_change = True
+        if positive_value_exists(organization.organization_twitter_handle) and \
+                position_object.speaker_twitter_handle != organization.organization_twitter_handle:
+            position_object.speaker_twitter_handle = organization.organization_twitter_handle
+            position_change = True
+        if position_change:
+            try:
+                position_object.save()
+                success = True
+                status = "SAVED_POSITION_SPEAKER_DATA_FROM_ORGANIZATION"
+            except Exception as e:
+                success = False
+                status = 'NOT_SAVED_POSITION_SPEAKER_DATA_FROM_ORGANIZATION'
+        else:
+            success = True
+            status = "NO_CHANGES_SAVED_TO_POSITION_SPEAKER_DATA"
+        results = {
+            'success':  success,
+            'status':   status,
+            'position': position_object
+        }
+        return results
+
     # We rely on this unique identifier: position_we_vote_id
     # Pass in a value if we want it saved. Pass in "False" if we want to leave it the same.
     def update_or_create_position(
