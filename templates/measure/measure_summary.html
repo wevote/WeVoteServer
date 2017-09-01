@@ -13,6 +13,8 @@
     <p>{{ measure.measure_subtitle }}</p>
     <p>{{ measure.measure_text }}</p>
     <p>Measure Website: <strong>{{ measure.measure_url }}</strong><br />
+    <a href="{% url 'position:refresh_positions_with_contest_measure_details_for_election' %}?measure_id={{ measure.id }}&measure_we_vote_id={{ measure.we_vote_id }}">
+        Refresh Positions</a><br />
     <a href="{% url 'measure:measure_edit' measure.id %}?google_civic_election_id={{ google_civic_election_id }}">edit</a>
     </p>
 

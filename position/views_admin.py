@@ -2,7 +2,9 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
-from .controllers import positions_import_from_master_server, refresh_positions_with_candidate_details_for_election
+from .controllers import positions_import_from_master_server, refresh_positions_with_candidate_details_for_election, \
+    refresh_positions_with_contest_office_details_for_election, \
+    refresh_positions_with_contest_measure_details_for_election
 from .models import ANY_STANCE, PositionEntered
 from admin_tools.views import redirect_to_sign_in_page
 from candidate.models import CandidateCampaign
@@ -16,6 +18,8 @@ from django.db.models import Q
 from election.models import Election
 from exception.models import handle_record_found_more_than_one_exception,\
     handle_record_not_found_exception, handle_record_not_saved_exception
+from measure.controllers import push_contest_measure_data_to_other_table_caches
+from office.controllers import push_contest_office_data_to_other_table_caches
 from position.models import PositionListManager
 from voter.models import voter_has_authority
 import wevote_functions.admin
@@ -284,7 +288,7 @@ def position_summary_view(request, position_we_vote_id):
 @login_required
 def refresh_positions_with_candidate_details_for_election_view(request):
     """
-
+    Refresh Positions with candidate details
     :param request:
     :return:
     """
@@ -309,6 +313,102 @@ def refresh_positions_with_candidate_details_for_election_view(request):
     return HttpResponseRedirect(reverse('candidate:candidate_list', args=()) +
                                 '?google_civic_election_id=' + str(google_civic_election_id) +
                                 '&state_code=' + str(state_code))
+
+
+@login_required
+def refresh_positions_with_contest_office_details_for_election_view(request):
+    """
+    Refresh positions with contest office details
+    :param request:
+    :return:
+    """
+    authority_required = {'verified_volunteer'}  # admin, verified_volunteer
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
+    google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
+    state_code = request.GET.get('state_code', '')
+
+    contest_office_id = request.GET.get('office_id', 0)
+    contest_office_we_vote_id = request.GET.get('office_we_vote_id', '')
+
+    if positive_value_exists(contest_office_id):
+        results = push_contest_office_data_to_other_table_caches(contest_office_id)
+    elif positive_value_exists(contest_office_we_vote_id):
+        results = push_contest_office_data_to_other_table_caches(contest_office_we_vote_id)
+    elif positive_value_exists(google_civic_election_id):
+        results = refresh_positions_with_contest_office_details_for_election(
+            google_civic_election_id=google_civic_election_id, state_code=state_code)
+    else:
+        results = refresh_positions_with_contest_office_details_for_election(
+            google_civic_election_id=google_civic_election_id, state_code=state_code)
+
+    if not results['success']:
+        messages.add_message(request, messages.INFO, results['status'])
+    else:
+        positions_updated_count = results['positions_updated_count']
+        messages.add_message(request, messages.INFO,
+                             "Social media retrieved. Positions refreshed: {update_all_positions_results_count},"
+                             .format(update_all_positions_results_count=positions_updated_count))
+
+    if positive_value_exists(google_civic_election_id):
+        return HttpResponseRedirect(reverse('office:office_list', args=()) +
+                                '?google_civic_election_id=' + str(google_civic_election_id) +
+                                '&state_code=' + str(state_code))
+    elif positive_value_exists(contest_office_id):
+        return HttpResponseRedirect(reverse('office:office_summary', args=(contest_office_id,)))
+    else:
+        return HttpResponseRedirect (reverse ('office:office_list', args=()) +
+                                     '?google_civic_election_id=' + str (google_civic_election_id) +
+                                     '&state_code=' + str (state_code))
+
+
+@login_required
+def refresh_positions_with_contest_measure_details_for_election_view(request):
+    """
+    Refresh positions with contest measure details
+    :param request:
+    :return:
+    """
+    authority_required = {'verified_volunteer'}  # admin, verified_volunteer
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
+    google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
+    state_code = request.GET.get('state_code', '')
+
+    contest_measure_id = request.GET.get('measure_id', 0)
+    contest_measure_we_vote_id = request.GET.get('measure_we_vote_id', '')
+
+    if positive_value_exists(contest_measure_id):
+        results = push_contest_measure_data_to_other_table_caches(contest_measure_id)
+    elif positive_value_exists(contest_measure_we_vote_id):
+        results = push_contest_measure_data_to_other_table_caches(contest_measure_we_vote_id)
+    elif positive_value_exists(google_civic_election_id):
+        results = refresh_positions_with_contest_measure_details_for_election(
+            google_civic_election_id=google_civic_election_id, state_code=state_code)
+    else:
+        results = refresh_positions_with_contest_measure_details_for_election(
+            google_civic_election_id=google_civic_election_id, state_code=state_code)
+
+    if not results['success']:
+        messages.add_message(request, messages.INFO, results['status'])
+    else:
+        positions_updated_count = results['positions_updated_count']
+        messages.add_message(request, messages.INFO,
+                             "Social media retrieved. Positions refreshed: {update_all_positions_results_count},"
+                             .format(update_all_positions_results_count=positions_updated_count))
+
+    if positive_value_exists(google_civic_election_id):
+        return HttpResponseRedirect(reverse('measure:measure_list', args=()) +
+                                '?google_civic_election_id=' + str(google_civic_election_id) +
+                                '&state_code=' + str(state_code))
+    elif positive_value_exists(contest_measure_id):
+        return HttpResponseRedirect(reverse('measure:measure_summary', args=(contest_measure_id,)))
+    else:
+        return HttpResponseRedirect (reverse ('measure:measure_list', args=()) +
+                                     '?google_civic_election_id=' + str (google_civic_election_id) +
+                                     '&state_code=' + str (state_code))
 
 
 @login_required

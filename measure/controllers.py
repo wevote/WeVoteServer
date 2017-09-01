@@ -9,6 +9,7 @@ from django.contrib import messages
 from django.http import HttpResponse
 from election.models import ElectionManager
 import json
+from position.controllers import update_all_position_details_from_contest_measure
 import requests
 import wevote_functions.admin
 from wevote_functions.functions import convert_state_code_to_state_text, positive_value_exists, \
@@ -256,3 +257,24 @@ def measures_import_from_structured_json(structured_json):
         'not_processed': measures_not_processed,
     }
     return measures_results
+
+
+def push_contest_measure_data_to_other_table_caches(contest_measure_id=0, contest_measure_we_vote_id=''):
+    contest_measure_manager = ContestMeasureManager()
+    if positive_value_exists(contest_measure_we_vote_id):
+        results = contest_measure_manager.retrieve_contest_measure_from_we_vote_id(contest_measure_we_vote_id)
+    elif positive_value_exists(contest_measure_id):
+        results = contest_measure_manager.retrieve_contest_measure_from_id(contest_measure_id)
+
+    if results['contest_measure_found']:
+        contest_measure = results['contest_measure']
+        save_position_from_measure_results = update_all_position_details_from_contest_measure(contest_measure)
+        return save_position_from_measure_results
+    else:
+        results = {
+            'success':                      False,
+            'positions_updated_count':      0,
+            'positions_not_updated_count':  0,
+            'update_all_position_results':  []
+        }
+        return results

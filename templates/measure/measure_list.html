@@ -27,6 +27,9 @@
 
     </p>
 
+<p><a href="{% url 'position:refresh_positions_with_contest_measure_details_for_election' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
+    Refresh Positions from Contest Measure info for this election</a></p>
+
     <form name="organization_position_choose_election" method="get" action="{% url 'measure:measure_list' %}">
     {% csrf_token %}
 {% if election_list %}
