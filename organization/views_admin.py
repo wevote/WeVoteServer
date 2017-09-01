@@ -568,6 +568,7 @@ def organization_position_list_view(request, organization_id):
                 'messages_on_stage':            messages_on_stage,
                 'organization':                 organization_on_stage,
                 'organization_position_list':   organization_position_list,
+                'organization_num_positions':   len(organization_position_list),
                 'election_list':                election_list,
                 'google_civic_election_id':     google_civic_election_id,
                 'candidate_we_vote_id':         candidate_we_vote_id,
@@ -689,6 +690,7 @@ def organization_position_new_view(request, organization_id):
             'google_civic_election_id':                     google_civic_election_id,
             'state_code':                                   state_code,
             'organization_position_list':                   organization_position_list,
+            'organization_num_positions':                   len(organization_position_list),
             'voter_authority':                              authority_results,
             # Incoming values from error state
             'candidate_and_measure_not_found':              candidate_and_measure_not_found,
