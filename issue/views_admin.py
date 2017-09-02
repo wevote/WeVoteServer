@@ -52,8 +52,8 @@ def issues_sync_out_view(request):  # issuesSyncOut
 
                 issue_list = issue_list.filter(final_filters)
 
-        issue_list_dict = issue_list.values('we_vote_id', 'issue_name', 'issue_description', 'issue_followers_count',
-                                            'linked_organization_count',
+        issue_list_dict = issue_list.values('we_vote_id', 'issue_name', 'issue_description', 'issue_image_url',
+                                            'issue_followers_count', 'linked_organization_count',
                                             'we_vote_hosted_image_url_large', 'we_vote_hosted_image_url_medium',
                                             'we_vote_hosted_image_url_tiny')
         if issue_list_dict:
@@ -203,6 +203,7 @@ def issue_new_view(request):
     # These variables are here because there was an error on the edit_process_view and the voter needs to try again
     issue_name = request.GET.get('issue_name', "")
     issue_description = request.GET.get('issue_description', "")
+    issue_image_url = request.GET.get('issue_image_url', "")
 
     # Its helpful to see existing issues when entering a new issue
     issue_list = []
@@ -219,6 +220,7 @@ def issue_new_view(request):
         'issue_list':           issue_list,
         'issue_name':           issue_name,
         'issue_description':    issue_description,
+        'issue_image_url':      issue_image_url,
         'google_civic_election_id': google_civic_election_id,
         'state_code': state_code,
     }
