@@ -15,18 +15,24 @@ import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, extract_twitter_handle_from_text_string, positive_value_exists
 from wevote_settings.models import fetch_next_we_vote_id_last_org_integer, fetch_site_unique_id_prefix
 
-NONPROFIT_501C3 = '3'
-NONPROFIT_501C4 = '4'
-POLITICAL_ACTION_COMMITTEE = 'P'
 CORPORATION = 'C'
-NEWS_CORPORATION = 'N'
+GROUP = 'G'  # Group of people (not an individual), but org status unknown
+INDIVIDUAL = 'I'  # One person
+NEWS_CORPORATION = 'NW'
+NONPROFIT = 'NP'
+NONPROFIT_501C3 = 'C3'
+NONPROFIT_501C4 = 'C4'
+POLITICAL_ACTION_COMMITTEE = 'P'
 UNKNOWN = 'U'
 ORGANIZATION_TYPE_CHOICES = (
+    (GROUP, 'Nonprofit'),
+    (NONPROFIT, 'Nonprofit'),
     (NONPROFIT_501C3, 'Nonprofit 501c3'),
     (NONPROFIT_501C4, 'Nonprofit 501c4'),
     (POLITICAL_ACTION_COMMITTEE, 'Political Action Committee'),
     (CORPORATION, 'Corporation'),
     (NEWS_CORPORATION, 'News Corporation'),
+    (INDIVIDUAL, 'One person'),
     (UNKNOWN, 'Unknown'),
 )
 
@@ -1810,7 +1816,7 @@ class Organization(models.Model):
     ballotpedia_photo_url = models.URLField(verbose_name='url of ballotpedia logo', blank=True, null=True)
 
     organization_type = models.CharField(
-        verbose_name="type of org", max_length=1, choices=ORGANIZATION_TYPE_CHOICES, default=UNKNOWN)
+        verbose_name="type of org", max_length=2, choices=ORGANIZATION_TYPE_CHOICES, default=UNKNOWN)
     date_last_changed = models.DateTimeField(verbose_name='date last changed', null=True, auto_now=True)
 
     organization_endorsements_api_url = models.URLField(verbose_name='url of endorsements importer', blank=True, null=True)

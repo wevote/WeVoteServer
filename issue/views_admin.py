@@ -237,6 +237,7 @@ def issue_edit_view(request, issue_we_vote_id):
     # These variables are here because there was an error on the edit_process_view and the voter needs to try again
     issue_name = request.GET.get('issue_name', False)
     issue_description = request.GET.get('issue_description', False)
+    issue_image_url = request.GET.get('issue_image_url', False)
 
     messages_on_stage = get_messages(request)
     issue_on_stage_found = False
@@ -283,6 +284,7 @@ def issue_edit_view(request, issue_we_vote_id):
         'issue':                    issue_on_stage,
         'issue_name':               issue_name,
         'issue_description':        issue_description,
+        'issue_image_url':          issue_image_url,
         'google_civic_election_id': google_civic_election_id,
         'state_code':               state_code,
         'organization_list':        organization_list,
@@ -308,6 +310,7 @@ def issue_edit_process_view(request):
     issue_we_vote_id = request.POST.get('issue_we_vote_id', False)
     issue_name = request.POST.get('issue_name', False)
     issue_description = request.POST.get('issue_description', False)
+    issue_image_url = request.POST.get('issue_image_url', False)
 
     # Check to see if this issue is already being used anywhere
     issue_on_stage_found = False
@@ -328,6 +331,8 @@ def issue_edit_process_view(request):
             issue_on_stage.issue_name = issue_name
         if issue_description is not False:
             issue_on_stage.issue_description = issue_description
+        if issue_image_url is not False:
+            issue_on_stage.issue_image_url = issue_image_url
 
         issue_on_stage.save()
 
@@ -339,6 +344,7 @@ def issue_edit_process_view(request):
             issue_on_stage = Issue(
                 issue_name=issue_name,
                 issue_description=issue_description,
+                issue_image_url=issue_image_url,
             )
             if issue_description is not False:
                 issue_on_stage.issue_description = issue_description

@@ -10,8 +10,8 @@ from django.conf import settings
 from django.conf.urls import url
 from django.conf.urls.static import static
 
-from apis_v1.views import views_docs, views_ballot, views_candidate, views_donation, views_facebook, views_friend, \
-    views_issues, views_misc, views_organization, views_position, views_twitter, views_voter
+from apis_v1.views import views_docs, views_analytics, views_ballot, views_candidate, views_donation, views_facebook, \
+    views_friend, views_issues, views_misc, views_organization, views_position, views_twitter, views_voter
 from ballot.views_admin import ballot_items_sync_out_view, ballot_returned_sync_out_view
 from candidate.views_admin import candidates_sync_out_view
 from election.views_admin import elections_sync_out_view
@@ -111,6 +111,7 @@ urlpatterns = [
         views_position.position_support_count_for_ballot_item_view, name='positionSupportCountForBallotItemView'),
     url(r'^quickInfoRetrieve/', views_misc.quick_info_retrieve_view, name='quickInfoRetrieveView'),
     url(r'^retrieveIssuesToFollow/', retrieve_issues_to_follow_view, name='retrieveIssuesToFollowView'),
+    url(r'^saveAnalyticsAction/', views_analytics.save_analytics_action_view, name='saveAnalyticsActionView'),
     url(r'^searchAll/', views_misc.search_all_view, name='searchAllView'),
     url(r'^twitterIdentityRetrieve/', views_twitter.twitter_identity_retrieve_view, name='twitterIdentityRetrieveView'),
     url(r'^twitterSignInRequestAccessToken/',
@@ -283,6 +284,8 @@ urlpatterns = [
     url(r'^docs/quickInfoRetrieve/$', views_docs.quick_info_retrieve_doc_view, name='quickInfoRetrieveDocs'),
     url(r'^docs/retrieveIssuesToFollow/', views_docs.retrieve_issues_to_follow_doc_view,
         name='retrieveIssuesToFollowDocs'),
+    url(r'^docs/saveAnalyticsAction/$',
+        views_docs.save_analytics_action_doc_view, name='saveAnalyticsActionDocs'),
     url(r'^docs/searchAll/$',
         views_docs.search_all_doc_view, name='searchAllDocs'),
     url(r'^docs/twitterIdentityRetrieve/$',
