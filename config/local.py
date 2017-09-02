@@ -34,6 +34,14 @@ DATABASES = {
         'PASSWORD': get_environment_variable('DATABASE_PASSWORD_READONLY'),
         'HOST':     get_environment_variable('DATABASE_HOST_READONLY'),
         'PORT':     get_environment_variable('DATABASE_PORT_READONLY'),
+    },
+    'analytics': {
+        'ENGINE':   get_environment_variable('DATABASE_ENGINE_ANALYTICS'),
+        'NAME':     get_environment_variable('DATABASE_NAME_ANALYTICS'),
+        'USER':     get_environment_variable('DATABASE_USER_ANALYTICS'),
+        'PASSWORD': get_environment_variable('DATABASE_PASSWORD_ANALYTICS'),
+        'HOST':     get_environment_variable('DATABASE_HOST_ANALYTICS'),
+        'PORT':     get_environment_variable('DATABASE_PORT_ANALYTICS'),
     }
 }
 

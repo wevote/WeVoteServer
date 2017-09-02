@@ -168,11 +168,12 @@ def issue_retrieve_for_api(issue_id, issue_we_vote_id):  # issueRetrieve
     if success:
         issue = results['issue']
         json_data = {
-            'status':                       status,
-            'success':                      True,
-            'we_vote_id':                   issue.we_vote_id,
-            'issue_name':     issue.issue_name,
-            'issue_description':              issue.issue_description,
+            'status':                   status,
+            'success':                  True,
+            'we_vote_id':               issue.we_vote_id,
+            'issue_name':               issue.issue_name,
+            'issue_description':        issue.issue_description,
+            'issue_image_url':          issue.issue_image_url,
             'issue_photo_url_large':    issue.we_vote_hosted_profile_image_url_large
                 if positive_value_exists(issue.we_vote_hosted_profile_image_url_large)
                 else issue.issue_photo_url(),
@@ -257,6 +258,7 @@ def issues_retrieve_for_api(voter_device_id, sort_formula, voter_issues_only=Non
                 'issue_we_vote_id':         issue.we_vote_id,
                 'issue_name':               issue.issue_name,
                 'issue_description':        issue.issue_description,
+                'issue_image_url':          issue.issue_image_url,
                 'issue_photo_url_large':    issue.we_vote_hosted_image_url_large,
                 'issue_photo_url_medium':   issue.we_vote_hosted_image_url_medium,
                 'issue_photo_url_tiny':     issue.we_vote_hosted_image_url_tiny,
@@ -330,6 +332,7 @@ def retrieve_issues_to_follow_for_api(voter_device_id, sort_formula):  # retriev
                 'issue_we_vote_id':             issue.we_vote_id,
                 'issue_name':                   issue.issue_name,
                 'issue_description':            issue.issue_description,
+                'issue_image_url':              issue.issue_image_url,
                 'issue_photo_url_large':        issue.we_vote_hosted_image_url_large,
                 'issue_photo_url_medium':       issue.we_vote_hosted_image_url_medium,
                 'issue_photo_url_tiny':         issue.we_vote_hosted_image_url_tiny,

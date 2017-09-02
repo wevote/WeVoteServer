@@ -78,6 +78,7 @@ INSTALLED_APPS = (
 
     # project specific
     'admin_tools',
+    'analytics',
     'apis_v1',
     'ballot',
     'bookmark',
@@ -177,7 +178,7 @@ WSGI_APPLICATION = 'config.wsgi.application'
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = get_environment_variable("TIME_ZONE")
 
 USE_I18N = True
 

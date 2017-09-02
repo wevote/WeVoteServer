@@ -161,6 +161,9 @@ class Issue(models.Model):
     linked_organization_count = models.PositiveIntegerField(verbose_name="number of organizations linked to the issue",
                                                         null=False, blank=True, default=0)
 
+    # A default image field for hard-coded local images
+    issue_image_url = models.TextField(
+        verbose_name='image url for issue', blank=True, null=True, default="")
     we_vote_hosted_image_url_large = models.URLField(
         verbose_name='we vote hosted large image url', blank=True, null=True)
     we_vote_hosted_image_url_medium = models.URLField(
