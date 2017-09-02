@@ -15,8 +15,8 @@ from election.models import fetch_election_state
 from exception.models import handle_record_not_saved_exception
 from follow.models import FollowOrganizationManager, FollowOrganizationList
 from friend.models import FriendManager
-from measure.models import ContestMeasureManager
-from office.models import ContestOfficeManager
+from measure.models import ContestMeasureManager, ContestMeasureList
+from office.models import ContestOfficeManager, ContestOfficeListManager
 from operator import itemgetter
 from organization.models import Organization, OrganizationManager
 import json
@@ -2776,6 +2776,60 @@ def refresh_positions_with_candidate_details_for_election(google_civic_election_
     return results
 
 
+def refresh_positions_with_contest_office_details_for_election(google_civic_election_id, state_code):
+    update_all_positions_results = []
+    positions_updated_count = 0
+    google_civic_election_id = convert_to_int(google_civic_election_id)
+
+    contest_office_list_manager = ContestOfficeListManager()
+    return_list_of_objects = True
+    contest_offices_results = contest_office_list_manager.retrieve_all_offices_for_upcoming_election(
+        google_civic_election_id, state_code, return_list_of_objects)
+    if contest_offices_results['office_list_found']:
+        office_list = contest_offices_results['office_list_objects']
+
+        for office in office_list:
+            update_position_results = update_all_position_details_from_contest_office(office)
+            positions_updated_count += update_position_results['positions_updated_count']
+            update_all_positions_results.append(update_position_results)
+
+    status = "POSITION_WITH_CONTEST_OFFICE_DETAILS_UPATED"
+    results = {
+        'success':                      True,
+        'status':                       status,
+        'positions_updated_count':      positions_updated_count,
+        'update_all_positions_results': update_all_positions_results,
+    }
+    return results
+
+
+def refresh_positions_with_contest_measure_details_for_election(google_civic_election_id, state_code):
+    update_all_positions_results = []
+    positions_updated_count = 0
+    google_civic_election_id = convert_to_int(google_civic_election_id)
+
+    contest_measure_list_manager = ContestMeasureList()
+    return_list_of_objects = True
+    contest_measures_results = contest_measure_list_manager.retrieve_all_measures_for_upcoming_election(
+        google_civic_election_id, state_code, return_list_of_objects)
+    if contest_measures_results['measure_list_found']:
+        measure_list = contest_measures_results['measure_list_objects']
+
+        for measure in measure_list:
+            update_position_results = update_all_position_details_from_contest_measure(measure)
+            positions_updated_count += update_position_results['positions_updated_count']
+            update_all_positions_results.append(update_position_results)
+
+    status = "POSITION_WITH_CONTEST_MEASURE_DETAILS_UPATED"
+    results = {
+        'success':                      True,
+        'status':                       status,
+        'positions_updated_count':      positions_updated_count,
+        'update_all_positions_results': update_all_positions_results,
+    }
+    return results
+
+
 def retrieve_ballot_item_we_vote_ids_for_organizations_to_follow(voter_id,
                                                                  organization_id, organization_we_vote_id,
                                                                  stance_we_are_looking_for=SUPPORT,
@@ -2990,6 +3044,102 @@ def update_all_position_details_from_candidate(candidate_campaign):
         'positions_updated_count':      positions_updated_count,
         'positions_not_updated_count':  positions_not_updated_count,
         'update_all_position_results':  update_all_position_results
+    }
+    return results
+
+
+def update_all_position_details_from_contest_office(contest_office):
+    """
+    Update all position office name in PositionEntered and PositionForFriends from contest office details
+    :param contest_office:
+    :return:
+    """
+    position_list_manager = PositionListManager()
+    position_manager = PositionManager()
+    positions_updated_count = 0
+    positions_not_updated_count = 0
+    update_all_position_office_data_results = []
+
+    retrieve_public_positions = True
+    stance_we_are_looking_for = ANY_STANCE
+    public_position_list = position_list_manager.retrieve_all_positions_for_contest_office(
+        retrieve_public_positions, contest_office.id, contest_office.we_vote_id,
+        stance_we_are_looking_for, most_recent_only=True)
+    for position_object in public_position_list:
+        update_position_office_data_results = position_manager.update_position_office_data_from_contest_office(
+            position_object, contest_office)
+        if update_position_office_data_results['success']:
+            positions_updated_count += 1
+        else:
+            positions_not_updated_count += 1
+        update_all_position_office_data_results.append(update_position_office_data_results)
+
+    retrieve_public_positions = False
+    friends_position_list = position_list_manager.retrieve_all_positions_for_contest_office(
+        retrieve_public_positions, contest_office.id, contest_office.we_vote_id,
+        stance_we_are_looking_for, most_recent_only=True)
+    for position_object in friends_position_list:
+        update_position_office_data_results = position_manager.update_position_office_data_from_contest_office(
+            position_object, contest_office)
+        if update_position_office_data_results['success']:
+            positions_updated_count += 1
+        else:
+            positions_not_updated_count += 1
+        update_all_position_office_data_results.append(update_position_office_data_results)
+
+    results = {
+        'success':                      True,
+        'positions_updated_count':      positions_updated_count,
+        'positions_not_updated_count':  positions_not_updated_count,
+        'update_all_position_results':  update_all_position_office_data_results
+    }
+    return results
+
+
+def update_all_position_details_from_contest_measure(contest_measure):
+    """
+    Update all position measure name in PositionEntered and PositionForFriends from contest measure details
+    :param contest_measure:
+    :return:
+    """
+    position_list_manager = PositionListManager()
+    position_manager = PositionManager()
+    positions_updated_count = 0
+    positions_not_updated_count = 0
+    update_all_position_measure_data_results = []
+
+    retrieve_public_positions = True
+    stance_we_are_looking_for = ANY_STANCE
+    public_position_list = position_list_manager.retrieve_all_positions_for_contest_measure(
+        retrieve_public_positions, contest_measure.id, contest_measure.we_vote_id,
+        stance_we_are_looking_for, most_recent_only=True)
+    for position_object in public_position_list:
+        update_position_measure_data_results = position_manager.update_position_measure_data_from_contest_measure(
+            position_object, contest_measure)
+        if update_position_measure_data_results['success']:
+            positions_updated_count += 1
+        else:
+            positions_not_updated_count += 1
+        update_all_position_measure_data_results.append(update_position_measure_data_results)
+
+    retrieve_public_positions = False
+    friends_position_list = position_list_manager.retrieve_all_positions_for_contest_measure(
+        retrieve_public_positions, contest_measure.id, contest_measure.we_vote_id,
+        stance_we_are_looking_for, most_recent_only=True)
+    for position_object in friends_position_list:
+        update_position_measure_data_results = position_manager.update_position_measure_data_from_contest_measure(
+            position_object, contest_measure)
+        if update_position_measure_data_results['success']:
+            positions_updated_count += 1
+        else:
+            positions_not_updated_count += 1
+        update_all_position_measure_data_results.append(update_position_measure_data_results)
+
+    results = {
+        'success':                      True,
+        'positions_updated_count':      positions_updated_count,
+        'positions_not_updated_count':  positions_not_updated_count,
+        'update_all_position_results':  update_all_position_measure_data_results
     }
     return results
 

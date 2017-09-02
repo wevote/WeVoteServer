@@ -1465,6 +1465,87 @@ class PositionListManager(models.Model):
             position_list_filtered = []
             return position_list_filtered
 
+    def retrieve_all_positions_for_contest_office(self, retrieve_public_positions,
+                                                  contest_office_id, contest_office_we_vote_id,
+                                                  stance_we_are_looking_for,
+                                                  most_recent_only=True, friends_we_vote_id_list=False):
+        if stance_we_are_looking_for not \
+                in(ANY_STANCE, SUPPORT, STILL_DECIDING, INFORMATION_ONLY, NO_STANCE, OPPOSE, PERCENT_RATING):
+            position_list = []
+            return position_list
+
+        # Note that one of the incoming options for stance_we_are_looking_for is 'ANY' which means we want to return
+        #  all stances
+
+        if not positive_value_exists(contest_office_id) and not \
+                positive_value_exists(contest_office_we_vote_id):
+            position_list = []
+            return position_list
+
+        # If retrieving PositionForFriends, make sure we have the necessary variables
+        if not retrieve_public_positions:
+            if not friends_we_vote_id_list:
+                position_list = []
+                return position_list
+            elif type(friends_we_vote_id_list) is list and len(friends_we_vote_id_list) == 0:
+                position_list = []
+                return position_list
+
+        # Retrieve the support positions for this contest_office_id
+        position_list = []
+        position_list_found = False
+        try:
+            if retrieve_public_positions:
+                position_list = PositionEntered.objects.order_by('date_entered')
+                retrieve_friends_positions = False
+            else:
+                position_list = PositionForFriends.objects.order_by('date_entered')
+                retrieve_friends_positions = True
+
+            if positive_value_exists(contest_office_we_vote_id):
+                position_list = position_list.filter(contest_office_we_vote_id__iexact=contest_office_we_vote_id)
+            else:
+                position_list = position_list.filter(contest_office_id=contest_office_id)
+            # SUPPORT, STILL_DECIDING, INFORMATION_ONLY, NO_STANCE, OPPOSE, PERCENT_RATING
+            if stance_we_are_looking_for != ANY_STANCE:
+                # If we passed in the stance "ANY" it means we want to not filter down the list
+                position_list = position_list.filter(stance=stance_we_are_looking_for)
+                # NOTE: We don't have a special case for
+                # "if stance_we_are_looking_for == SUPPORT or stance_we_are_looking_for == OPPOSE"
+                # for contest_office (like we do for candidate_campaign) because we don't have to deal with
+                # PERCENT_RATING data with measures
+            if retrieve_friends_positions and friends_we_vote_id_list is not False:
+                # Find positions from friends. Look for we_vote_id case insensitive.
+                we_vote_id_filter = Q()
+                for we_vote_id in friends_we_vote_id_list:
+                    we_vote_id_filter |= Q(voter_we_vote_id__iexact=we_vote_id)
+                position_list = position_list.filter(we_vote_id_filter)
+            # Limit to positions in the last x years - currently we are not limiting
+            # position_list = position_list.filter(election_id=election_id)
+
+            # We don't need to filter out the positions that have a percent rating that doesn't match
+            # the stance_we_are_looking_for (like we do for candidates)
+
+            if len(position_list):
+                position_list_found = True
+        except Exception as e:
+            handle_record_not_found_exception(e, logger=logger)
+
+        # If we have multiple positions for one org, we only want to show the most recent.
+        if most_recent_only:
+            if position_list_found:
+                position_list_filtered = self.remove_older_positions_for_each_org(position_list)
+            else:
+                position_list_filtered = []
+        else:
+            position_list_filtered = position_list
+
+        if position_list_found:
+            return position_list_filtered
+        else:
+            position_list_filtered = []
+            return position_list_filtered
+
     def refresh_cached_position_info_for_organization(self, organization_we_vote_id):
         position_manager = PositionManager()
         public_positions_list = PositionEntered.objects.all()
@@ -4539,6 +4620,82 @@ class PositionManager(models.Model):
         else:
             success = True
             status = "NO_CHANGES_SAVED_TO_POSITION_BALLOT_DATA"
+        results = {
+            'success':  success,
+            'status':   status,
+            'position': position_object
+        }
+        return results
+
+    def update_position_measure_data_from_contest_measure(self, position_object, contest_measure):
+        """
+        Update position_object with measure data.
+        :param position_object:
+        :param candidate_campaign:
+        :return:
+        """
+        position_change = False
+        if positive_value_exists(contest_measure.google_civic_measure_title) and \
+                position_object.google_civic_measure_title != contest_measure.google_civic_measure_title:
+            position_object.google_civic_measure_title = contest_measure.google_civic_measure_title
+            position_change = True
+        if positive_value_exists(contest_measure.we_vote_id) and \
+                position_object.contest_measure_we_vote_id != contest_measure.we_vote_id:
+            position_object.contest_measure_we_vote_id = contest_measure.we_vote_id
+            position_change = True
+        if positive_value_exists(contest_measure.id) and \
+                position_object.contest_measure_id != contest_measure.id:
+            position_object.contest_measure_id = contest_measure.id
+            position_change = True
+        if position_change:
+            try:
+                position_object.save()
+                success = True
+                status = "SAVED_POSITION_MEASURE_DATA_FROM_CONTEST_MEASURE"
+            except Exception as e:
+                success = False
+                status = 'NOT_SAVED_POSITION_MEASURE_DATA_FROM_CONTEST_MEASURE'
+        else:
+            success = True
+            status = "NO_CHANGES_SAVED_TO_POSITION_MEASURE_DATA"
+        results = {
+            'success':  success,
+            'status':   status,
+            'position': position_object
+        }
+        return results
+
+    def update_position_office_data_from_contest_office(self, position_object, contest_office):
+        """
+        Update position_object with office data.
+        :param position_object:
+        :param candidate_campaign:
+        :return:
+        """
+        position_change = False
+        if positive_value_exists(contest_office.office_name) and \
+                position_object.contest_office_name != contest_office.office_name:
+            position_object.contest_office_name = contest_office.office_name
+            position_change = True
+        if positive_value_exists(contest_office.we_vote_id) and \
+                position_object.contest_office_we_vote_id != contest_office.we_vote_id:
+            position_object.contest_office_we_vote_id = contest_office.we_vote_id
+            position_change = True
+        if positive_value_exists(contest_office.id) and \
+                position_object.contest_office_id != contest_office.id:
+            position_object.contest_office_id = contest_office.id
+            position_change = True
+        if position_change:
+            try:
+                position_object.save()
+                success = True
+                status = "SAVED_POSITION_OFFICE_DATA_FROM_CONTEST_OFFICE"
+            except Exception as e:
+                success = False
+                status = 'NOT_SAVED_POSITION_OFFICE_DATA_FROM_CONTEST_OFFICE'
+        else:
+            success = True
+            status = "NO_CHANGES_SAVED_TO_POSITION_OFFICE_DATA"
         results = {
             'success':  success,
             'status':   status,

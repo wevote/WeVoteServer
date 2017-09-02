@@ -8,6 +8,7 @@ from config.base import get_environment_variable
 from django.contrib import messages
 from django.http import HttpResponse
 import json
+from position.controllers import update_all_position_details_from_contest_office
 import requests
 import wevote_functions.admin
 from wevote_functions.functions import positive_value_exists, process_request_from_master
@@ -263,3 +264,24 @@ def office_retrieve_for_api(office_id, office_we_vote_id):
         }
 
     return HttpResponse(json.dumps(json_data), content_type='application/json')
+
+
+def push_contest_office_data_to_other_table_caches(contest_office_id=0, contest_office_we_vote_id=''):
+    contest_office_manager = ContestOfficeManager()
+    if positive_value_exists(contest_office_we_vote_id):
+        results = contest_office_manager.retrieve_contest_office_from_we_vote_id(contest_office_we_vote_id)
+    elif positive_value_exists(contest_office_id):
+        results = contest_office_manager.retrieve_contest_office_from_id(contest_office_id)
+
+    if results['contest_office_found']:
+        contest_office = results['contest_office']
+        save_position_from_office_results = update_all_position_details_from_contest_office(contest_office)
+        return save_position_from_office_results
+    else:
+        results = {
+            'success':                      False,
+            'positions_updated_count':      0,
+            'positions_not_updated_count':  0,
+            'update_all_position_results':  []
+        }
+        return results
