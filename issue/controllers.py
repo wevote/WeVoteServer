@@ -49,6 +49,7 @@ def issues_import_from_structured_json(structured_json):
         we_vote_id = one_issue["we_vote_id"] if "we_vote_id" in one_issue else False
         issue_name = one_issue["issue_name"] if "issue_name" in one_issue else False
         issue_description = one_issue["issue_description"] if "issue_description" in one_issue else False
+        issue_image_url = one_issue["issue_image_url"] if "issue_image_url" in one_issue else False
         issue_followers_count = one_issue["issue_followers_count"] if "issue_followers_count" in one_issue else False
         linked_organization_count = \
             one_issue["linked_organization_count"] if "linked_organization_count" in one_issue else False
@@ -95,6 +96,8 @@ def issues_import_from_structured_json(structured_json):
             # Now save all of the fields in common to updating an existing entry vs. creating a new entry
             if issue_description is not False:
                 issue_on_stage.issue_description = issue_description
+            if issue_image_url is not False:
+                issue_on_stage.issue_image_url = issue_image_url
             if issue_followers_count is not False:
                 issue_on_stage.issue_followers_count = issue_followers_count
             if linked_organization_count is not False:
