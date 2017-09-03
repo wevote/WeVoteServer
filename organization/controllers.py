@@ -365,8 +365,8 @@ def organization_follow_all(voter_device_id, organization_id, organization_we_vo
 def organizations_followed_retrieve_for_api(voter_device_id, maximum_number_to_retrieve=0,
                                             auto_followed_from_twitter_suggestion=False):
     """
-    Return a list of the organizations followed. See also voter_guides_followed_retrieve_for_api, which starts with
-    organizations followed, but returns data as a list of voter guides.
+    organizationsFollowedRetrieve Return a list of the organizations followed. See also voter_guides_followed_retrieve_for_api,
+    which starts with organizations followed, but returns data as a list of voter guides.
     :param voter_device_id:
     :param maximum_number_to_retrieve:
     :param auto_followed_from_twitter_suggestion:

@@ -243,7 +243,7 @@ def polling_location_list_view(request):
         return redirect_to_sign_in_page(request, authority_required)
 
     google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
-    polling_location_state = request.GET.get('polling_location_state')
+    state_code = request.GET.get('state_code')
     polling_location_search = request.GET.get('polling_location_search')
 
     no_limit = False
@@ -251,9 +251,9 @@ def polling_location_list_view(request):
     polling_location_count_query = PollingLocation.objects.all()
     polling_location_query = PollingLocation.objects.all()
 
-    if positive_value_exists(polling_location_state):
-        polling_location_count_query = polling_location_count_query.filter(state__iexact=polling_location_state)
-        polling_location_query = polling_location_query.filter(state__iexact=polling_location_state)
+    if positive_value_exists(state_code):
+        polling_location_count_query = polling_location_count_query.filter(state__iexact=state_code)
+        polling_location_query = polling_location_query.filter(state__iexact=state_code)
 
     if positive_value_exists(polling_location_search):
         search_words = polling_location_search.split()
@@ -311,8 +311,8 @@ def polling_location_list_view(request):
         'google_civic_election_id': google_civic_election_id,
         'polling_location_list':    polling_location_list,
         'polling_location_count':   polling_location_count,
-        'polling_location_state':   polling_location_state,
-        'polling_location_search':   polling_location_search,
+        'state_code':               state_code,
+        'polling_location_search':  polling_location_search,
         'state_list':               sorted_state_list,
     }
     return render(request, 'polling_location/polling_location_list.html', template_values)

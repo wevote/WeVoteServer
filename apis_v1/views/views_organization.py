@@ -217,7 +217,7 @@ def organization_suggestion_tasks_view(request):
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 
 
-def organizations_followed_retrieve_api_view(request):
+def organizations_followed_retrieve_api_view(request):  # organizationsFollowedRetrieve
     voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
     maximum_number_to_retrieve = get_maximum_number_to_retrieve_from_request(request)
     auto_followed_from_twitter_suggestion = request.GET.get('auto_followed_from_twitter_suggestion', False)

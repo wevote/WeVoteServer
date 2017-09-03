@@ -419,8 +419,12 @@ def election_list_view(request):
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
+    google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
+    state_code = request.GET.get('state_code', '')
     election_search = request.GET.get('election_search', '')
+
     messages_on_stage = get_messages(request)
+
     election_list_query = Election.objects.all()
     election_list_query = election_list_query.order_by('election_day_text').reverse()
 
@@ -451,9 +455,11 @@ def election_list_view(request):
     election_list = election_list_query[:200]
 
     template_values = {
-        'messages_on_stage': messages_on_stage,
-        'election_list': election_list,
-        'election_search': election_search,
+        'messages_on_stage':        messages_on_stage,
+        'election_list':            election_list,
+        'election_search':          election_search,
+        'google_civic_election_id': google_civic_election_id,
+        'state_code':               state_code,
     }
     return render(request, 'election/election_list.html', template_values)
 

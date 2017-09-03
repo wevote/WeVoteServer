@@ -57,11 +57,12 @@ def organizations_followed_retrieve_doc_template_values(url_root):
                    '   [\n' \
                    '     "organization_id": integer (the id of the organization found),\n' \
                    '     "organization_we_vote_id": string (the organization ' \
-                   '      identifier that moves server-to-server),\n' \
+                   'identifier that moves server-to-server),\n' \
                    '     "organization_name": string (value from Google),\n' \
                    '     "organization_website": string (website address),\n' \
                    '     "organization_twitter_handle": string (twitter address),\n' \
                    '     "twitter_followers_count": integer,\n' \
+                   '     "twitter_description": string,\n' \
                    '     "organization_email": string,\n' \
                    '     "organization_facebook": string,\n' \
                    '     "organization_photo_url_large": string,\n' \
