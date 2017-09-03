@@ -110,7 +110,7 @@ def organization_list_view(request):
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
-    organization_state_code = request.GET.get('organization_state', '')
+    state_code = request.GET.get('state_code', '')
     google_civic_election_id = request.GET.get('google_civic_election_id', '')
     candidate_we_vote_id = request.GET.get('candidate_we_vote_id', '')
     organization_search = request.GET.get('organization_search', '')
@@ -120,8 +120,8 @@ def organization_list_view(request):
     organization_list_query = Organization.objects.all()
     organization_list_query = organization_list_query.order_by('organization_name')
 
-    if positive_value_exists(organization_state_code):
-        organization_list_query = organization_list_query.filter(state_served_code__iexact=organization_state_code)
+    if positive_value_exists(state_code):
+        organization_list_query = organization_list_query.filter(state_served_code__iexact=state_code)
 
     # Retrieve all issues
     issues_selected = False
@@ -159,7 +159,13 @@ def organization_list_view(request):
             new_filter = Q(organization_website__icontains=one_word)
             filters.append(new_filter)
 
+            new_filter = Q(twitter_description__icontains=one_word)
+            filters.append(new_filter)
+
             new_filter = Q(we_vote_id__icontains=one_word)
+            filters.append(new_filter)
+
+            new_filter = Q(vote_smart_id_icontains=one_word)
             filters.append(new_filter)
 
             # Add the first query
@@ -210,7 +216,7 @@ def organization_list_view(request):
         'issues_selected':          issues_selected,
         'organization_list':        organization_list,
         'organization_search':      organization_search,
-        'organization_state':       organization_state_code,
+        'state_code':               state_code,
         'state_list':               sorted_state_list,
     }
     return render(request, 'organization/organization_list.html', template_values)

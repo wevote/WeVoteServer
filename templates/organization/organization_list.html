@@ -4,17 +4,9 @@
 {% block title %}Organizations{% endblock %}
 
 {%  block content %}
-<a href="{% url 'admin_tools:admin_home' %}?google_civic_election_id={{ google_civic_election_id }}">< Back to Admin Home</a>
-
-<p><a href="{% url 'import_export_batches:batch_list' %}?kind_of_batch=ORGANIZATION&google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}"
-      target="_blank">
-        Import New Organizations ></a> (open in new window)
-</p>
-
-<h1>Organizations</h1>
-
-    <p>Jump to:
-
+<p><a href="{% url 'admin_tools:admin_home' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">< Back to Admin Home</a></p>
+<p>Jump to:
+    <a href="{% url 'election:election_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">Elections</a> -
     <a href="{% url 'measure:measure_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">Measures</a> -
     <a href="{% url 'office:office_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">Offices</a> -
     <a href="{% url 'candidate:candidate_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">Candidates</a> -
@@ -23,9 +15,15 @@
     <a href="{% url 'organization:organization_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">Organizations</a> -
     <a href="{% url 'position:position_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">Public Opinions / Positions</a> -
     <a href="{% url 'voter_guide:voter_guide_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">Voter Guides</a> -
-    <a href="{% url 'polling_location:polling_location_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">Polling Locations</a></p>
+    <a href="{% url 'polling_location:polling_location_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">Polling Locations</a>
+</p>
 
-    </p>
+<h1>Organizations</h1>
+
+<p><a href="{% url 'import_export_batches:batch_list' %}?kind_of_batch=ORGANIZATION&google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}"
+      target="_blank">
+        Import New Organizations ></a> (open in new window)
+</p>
 
 <p><a href="{% url 'voter_guide:voter_guide_search' %}?google_civic_election_id={{ google_civic_election_id }}">
     Add New Organization / Voter Guide</a>.
@@ -36,25 +34,25 @@
 </p>
 
 <p>
-    <a href="{% url 'import_export_twitter:scrape_social_media_from_all_organizations' %}?organization_state={{ organization_state }}">
+    <a href="{% url 'import_export_twitter:scrape_social_media_from_all_organizations' %}?organization_state={{ state_code }}">
         Scrape org website for social media handles (only when data missing)</a>,
 
-    <a href="{% url 'import_export_twitter:retrieve_twitter_data_for_all_organizations' %}?organization_state={{ organization_state }}&first_retrieve_only=1">
+    <a href="{% url 'import_export_twitter:retrieve_twitter_data_for_all_organizations' %}?organization_state={{ state_code }}&first_retrieve_only=1">
         Retrieve all twitter data (only when data missing)</a>,
 
-    <a href="{% url 'import_export_wikipedia:import_all_organizations_logos' %}?organization_state={{ organization_state }}">Retrieve photos from Wikipedia</a>
+    <a href="{% url 'import_export_wikipedia:import_all_organizations_logos' %}?organization_state={{ state_code }}">Retrieve photos from Wikipedia</a>
 </p>
 
-<form name="organization_state_form" method="get" action="{% url 'organization:organization_list' %}">
+<form name="state_code_form" method="get" action="{% url 'organization:organization_list' %}">
     {% csrf_token %}
 
 {% if state_list %}
-    <select id="organization_state_id" name="organization_state">
-        <option value="" {% if '' == organization_state %} selected="selected"{% endif %}>
+    <select id="state_code_id" name="state_code">
+        <option value="" {% if '' == state_code %} selected="selected"{% endif %}>
             -- Filter by State Served --</option>
     {% for key, state in state_list %}
         <option value="{{ key }}"
-                {% if key|lower == organization_state|lower %} selected="selected"{% endif %}>
+                {% if key|lower == state_code|lower %} selected="selected"{% endif %}>
             {{ state }}</option>
     {% endfor %}
     </select>
@@ -72,8 +70,8 @@
 {% endif %}
     <br />
 
-{% if organization_search or issues_selected %}
-    <a href="{% url 'organization:organization_list' %}?organization_state={{ organization_state }}">
+{% if organization_search %}
+    <a href="{% url 'organization:organization_list' %}?state_code={{ state_code }}">
          clear search</a>&nbsp;
 {% endif %}
     <input type="text" name="organization_search" id="organization_search_id" value="{{ organization_search }}" />
@@ -128,7 +126,7 @@
 
     <script>
         $(function() {
-            $('#organization_state_id').change(function() {
+            $('#state_code_id').change(function() {
                 this.form.submit();
             });
         });

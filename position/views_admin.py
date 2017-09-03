@@ -111,6 +111,8 @@ def position_list_view(request):
 
     messages_on_stage = get_messages(request)
     google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
+    state_code = request.GET.get('state_code', '')
+
     position_search = request.GET.get('position_search', '')
 
     position_list_manager = PositionListManager()
@@ -154,11 +156,12 @@ def position_list_view(request):
     election_list = Election.objects.order_by('-election_day_text')
 
     template_values = {
-        'messages_on_stage': messages_on_stage,
-        'position_list': position_list,
-        'position_search': position_search,
-        'election_list': election_list,
+        'messages_on_stage':        messages_on_stage,
+        'position_list':            position_list,
+        'position_search':          position_search,
+        'election_list':            election_list,
         'google_civic_election_id': google_civic_election_id,
+        'state_code':               state_code,
     }
     return render(request, 'position/position_list.html', template_values)
 

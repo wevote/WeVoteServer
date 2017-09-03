@@ -180,10 +180,10 @@ def measure_list_view(request):
         'messages_on_stage':        messages_on_stage,
         'measure_list':             measure_list_modified,
         'election_list':            election_list,
-        'state_code':               state_code,
         'state_list':               sorted_state_list,
         'measure_search':           measure_search,
         'google_civic_election_id': google_civic_election_id,
+        'state_code':               state_code,
     }
     return render(request, 'measure/measure_list.html', template_values)
 

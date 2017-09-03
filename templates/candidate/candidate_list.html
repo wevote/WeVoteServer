@@ -5,17 +5,9 @@
 
 {%  block content %}
 {% load template_filters %}
-<a href="{% url 'admin_tools:admin_home' %}?google_civic_election_id={{ google_civic_election_id }}">< Back to Admin Home</a>
-
-<p><a href="{% url 'import_export_batches:batch_list' %}?kind_of_batch=CANDIDATE&google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}"
-      target="_blank">
-        Import New Candidates ></a> (open in new window)
-</p>
-
-<h1>Candidates</h1>
-
-    <p>Jump to:
-
+<p><a href="{% url 'admin_tools:admin_home' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">< Back to Admin Home</a></p>
+<p>Jump to:
+    <a href="{% url 'election:election_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">Elections</a> -
     <a href="{% url 'measure:measure_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">Measures</a> -
     <a href="{% url 'office:office_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">Offices</a> -
     <a href="{% url 'candidate:candidate_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">Candidates</a> -
@@ -24,9 +16,15 @@
     <a href="{% url 'organization:organization_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">Organizations</a> -
     <a href="{% url 'position:position_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">Public Opinions / Positions</a> -
     <a href="{% url 'voter_guide:voter_guide_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">Voter Guides</a> -
-    <a href="{% url 'polling_location:polling_location_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">Polling Locations</a></p>
+    <a href="{% url 'polling_location:polling_location_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">Polling Locations</a>
+</p>
 
-    </p>
+<h1>Candidates</h1>
+
+<p><a href="{% url 'import_export_batches:batch_list' %}?kind_of_batch=CANDIDATE&google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}"
+      target="_blank">
+        Import New Candidates ></a> (open in new window)
+</p>
 
 <form name="candidate_choose_election" method="get" action="{% url 'candidate:candidate_list' %}">
     {% csrf_token %}
