@@ -49,6 +49,10 @@ class FacebookAuthResponse(models.Model):
     facebook_background_image_url_https = models.URLField(
         verbose_name='url of voter&apos;s background &apos;cover&apos; image from facebook \
         (like the twitter banner photo)', blank=True, null=True)
+    facebook_background_image_offset_x = models.IntegerField(verbose_name="x offset of facebook cover image", default=0,
+                                                             null=True, blank=True)
+    facebook_background_image_offset_y = models.IntegerField(verbose_name="y offset of facebook cover image", default=0,
+                                                             null=True, blank=True)
 
     def get_full_name(self):
         full_name = self.facebook_first_name if positive_value_exists(self.facebook_first_name) else ''
@@ -119,6 +123,10 @@ class FacebookUser(models.Model):
                                                        blank=True, null=True)
     facebook_background_image_url_https = models.URLField(verbose_name='url of cover image from facebook',
                                                           blank=True, null=True)
+    facebook_background_image_offset_x = models.IntegerField(verbose_name="x offset of facebook cover image", default=0,
+                                                             null=True, blank=True)
+    facebook_background_image_offset_y = models.IntegerField(verbose_name="y offset of facebook cover image", default=0,
+                                                             null=True, blank=True)
     we_vote_hosted_profile_image_url_large = models.URLField(verbose_name='we vote hosted large image url',
                                                              blank=True, null=True)
     we_vote_hosted_profile_image_url_medium = models.URLField(verbose_name='we vote hosted medium image url',
@@ -179,7 +187,8 @@ class FacebookManager(models.Model):
             self, voter_device_id, facebook_access_token, facebook_user_id, facebook_expires_in,
             facebook_signed_request,
             facebook_email, facebook_first_name, facebook_middle_name, facebook_last_name,
-            facebook_profile_image_url_https, facebook_background_image_url_https):
+            facebook_profile_image_url_https, facebook_background_image_url_https,
+            facebook_background_image_offset_x, facebook_background_image_offset_y):
         """
 
         :param voter_device_id:
@@ -193,6 +202,8 @@ class FacebookManager(models.Model):
         :param facebook_last_name:
         :param facebook_profile_image_url_https:
         :param facebook_background_image_url_https:
+        :param facebook_background_image_offset_x:
+        :param facebook_background_image_offset_y:
         :return:
         """
 
@@ -219,6 +230,9 @@ class FacebookManager(models.Model):
             defaults["facebook_profile_image_url_https"] = facebook_profile_image_url_https
         if positive_value_exists(facebook_background_image_url_https):
             defaults["facebook_background_image_url_https"] = facebook_background_image_url_https
+            # A zero value for the offsets can be a valid value.  If we received an image, we also received the offsets.
+            defaults["facebook_background_image_offset_x"] = int(facebook_background_image_offset_x)
+            defaults["facebook_background_image_offset_y"] = int(facebook_background_image_offset_y)
 
         try:
             facebook_auth_response, created = FacebookAuthResponse.objects.update_or_create(

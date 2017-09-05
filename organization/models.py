@@ -206,7 +206,17 @@ class OrganizationManager(models.Manager):
         """
         return self.retrieve_organization(0, '', '', twitter_user_id)
 
-    def retrieve_organization(self, organization_id, we_vote_id=None, vote_smart_id=None, twitter_user_id=None):
+    def retrieve_organization(self, organization_id, we_vote_id=None, vote_smart_id=None, twitter_user_id=None,
+                              facebook_user_id=None):
+        """
+        Get an organization, based the passed in parameters
+        :param organization_id:
+        :param we_vote_id:
+        :param vote_smart_id:
+        :param twitter_user_id:
+        :param facebook_user_id:
+        :return: the matching organization object
+        """
         error_result = False
         exception_does_not_exist = False
         exception_multiple_object_returned = False
@@ -234,6 +244,12 @@ class OrganizationManager(models.Manager):
                 organization_on_stage = Organization.objects.get(twitter_user_id=twitter_user_id)
                 organization_on_stage_id = organization_on_stage.id
                 status = "ORGANIZATION_FOUND_WITH_TWITTER_ID"
+            elif positive_value_exists(facebook_user_id):
+                status = "ERROR_RETRIEVING_ORGANIZATION_WITH_FACEBOOK_ID"
+                # Unfortunately "facebook_user_id" is "facebook_id" in the Organization table
+                organization_on_stage = Organization.objects.get(facebook_id=facebook_user_id)
+                organization_on_stage_id = organization_on_stage.id
+                status = "ORGANIZATION_FOUND_WITH_FACEBOOK_ID"
         except Organization.MultipleObjectsReturned as e:
             handle_record_found_more_than_one_exception(e, logger)
             error_result = True
@@ -1825,6 +1841,10 @@ class Organization(models.Model):
         return str(self.organization_name)
 
     def organization_photo_url(self):
+        """
+        For an organization, this heirarchy determines which image gets displayed
+        :return: URL to the image to be displayed
+        """
         if positive_value_exists(self.organization_image):
             return self.organization_image
         elif positive_value_exists(self.we_vote_hosted_profile_image_url_large):

@@ -56,6 +56,6 @@ class WeVoteSocialAuthExceptionMiddleware(SocialAuthExceptionMiddleware):
             except Exception as e2:
                 pass
 
-            logger.error('WeVoteSocialAuthExceptionMiddleware threw {error} [type: {error_type}]'.format(
-                error=error_exception, error_type=type(exception)))
+            logger.error('From \'{path}\' caught \'{error}\', type: {error_type}'.format(
+                path=print_path, error=error_exception, error_type=type(exception)))
             raise exception
