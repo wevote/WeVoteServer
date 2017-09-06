@@ -638,6 +638,8 @@ def voter_facebook_sign_in_retrieve_for_api(voter_device_id):  # voterFacebookSi
         facebook_user_id=facebook_auth_response.facebook_user_id,
         facebook_profile_image_url_https=facebook_auth_response.facebook_profile_image_url_https,
         facebook_background_image_url_https=facebook_auth_response.facebook_background_image_url_https,
+        facebook_background_image_offset_x=facebook_auth_response.facebook_background_image_offset_x,
+        facebook_background_image_offset_y=facebook_auth_response.facebook_background_image_offset_y,
         image_source=FACEBOOK)
     cached_facebook_profile_image_url_https = cache_results['cached_facebook_profile_image_url_https']
     cached_facebook_background_image_url_https = cache_results['cached_facebook_background_image_url_https']
@@ -666,6 +668,12 @@ def voter_facebook_sign_in_retrieve_for_api(voter_device_id):  # voterFacebookSi
         facebook_email=facebook_auth_response.facebook_email)
     status += facebook_user_results['status']
 
+    update_organization_facebook_images(facebook_auth_response.facebook_user_id,
+                                        facebook_profile_image_url_https,
+                                        facebook_background_image_url_https)
+    middle_name = facebook_auth_response.facebook_middle_name if positive_value_exists(
+        facebook_auth_response.facebook_middle_name) else ""
+
     json_data = {
         'success':                                  success,
         'status':                                   status,
@@ -684,7 +692,7 @@ def voter_facebook_sign_in_retrieve_for_api(voter_device_id):  # voterFacebookSi
         'facebook_user_id':                         facebook_auth_response.facebook_user_id,
         'facebook_email':                           facebook_auth_response.facebook_email,
         'facebook_first_name':                      facebook_auth_response.facebook_first_name,
-        'facebook_middle_name':                     facebook_auth_response.facebook_middle_name,
+        'facebook_middle_name':                     middle_name,
         'facebook_last_name':                       facebook_auth_response.facebook_last_name,
         'facebook_profile_image_url_https':         facebook_profile_image_url_https,
         'facebook_background_image_url_https':      facebook_background_image_url_https,
@@ -695,6 +703,44 @@ def voter_facebook_sign_in_retrieve_for_api(voter_device_id):  # voterFacebookSi
     return json_data
 
 
+def update_organization_facebook_images(facebook_user_id, facebook_profile_image_url_https,
+                                        facebook_background_image_url_https):
+    """
+    Store the links to the cached facebook images in the Organization
+    :param facebook_user_id:
+    :param facebook_profile_image_url_https:
+    :param facebook_background_image_url_https:
+    :return:
+    """
+    organization_manager = OrganizationManager()
+    organization_id = 0
+    organization_results = organization_manager.retrieve_organization(organization_id=organization_id,
+                                                                      facebook_user_id=facebook_user_id)
+    if organization_results['success']:
+        organization = organization_results['organization']
+
+        organization_updated = False
+        if positive_value_exists(facebook_profile_image_url_https):
+            organization.facebook_profile_image_url_https = facebook_profile_image_url_https
+            organization_updated = True
+        if positive_value_exists(facebook_background_image_url_https):
+            organization.facebook_background_image_url_https = facebook_background_image_url_https
+            organization_updated = True
+
+        if organization_updated:
+            try:
+                organization.save()
+                logger.info("update_organization_facebook_images saved updated images for organization: " +
+                            organization.we_vote_id + ", facebook_id: " + str(organization.facebook_id))
+                return
+            except Exception as e:
+                logger.error("update_organization_facebook_images threw: " + str(e))
+        return
+    logger.error("update_organization_facebook_images unable to retrieve Organization with facebook_user_id: " +
+                 str(facebook_user_id))
+    return
+
+
 def voter_facebook_sign_in_save_for_api(voter_device_id,  # voterFacebookSignInSave
                                         save_auth_data,
                                         facebook_access_token, facebook_user_id, facebook_expires_in,
@@ -702,7 +748,8 @@ def voter_facebook_sign_in_save_for_api(voter_device_id,  # voterFacebookSignInS
                                         save_profile_data,
                                         facebook_email, facebook_first_name, facebook_middle_name, facebook_last_name,
                                         save_photo_data,
-                                        facebook_profile_image_url_https, facebook_background_image_url_https):
+                                        facebook_profile_image_url_https, facebook_background_image_url_https,
+                                        facebook_background_image_offset_x, facebook_background_image_offset_y):
     """
 
     :param voter_device_id:
@@ -719,6 +766,8 @@ def voter_facebook_sign_in_save_for_api(voter_device_id,  # voterFacebookSignInS
     :param save_photo_data:
     :param facebook_profile_image_url_https:
     :param facebook_background_image_url_https:
+    :param facebook_background_image_offset_x:
+    :param facebook_background_image_offset_y:
     :return:
     """
     status = ""
@@ -754,7 +803,8 @@ def voter_facebook_sign_in_save_for_api(voter_device_id,  # voterFacebookSignInS
         voter_device_id, facebook_access_token, facebook_user_id, facebook_expires_in,
         facebook_signed_request,
         facebook_email, facebook_first_name, facebook_middle_name, facebook_last_name,
-        facebook_profile_image_url_https, facebook_background_image_url_https)
+        facebook_profile_image_url_https, facebook_background_image_url_https,
+        facebook_background_image_offset_x, facebook_background_image_offset_y)
     # Look to see if there is an EmailAddress entry for the incoming text_for_email_address or email_we_vote_id
     if not auth_data_results['facebook_auth_response_saved']:
         error_results = {

@@ -771,16 +771,17 @@ def organization_retrieve_for_api(organization_id, organization_we_vote_id, vote
             position_list_manager = PositionListManager()
             position_list_manager.refresh_cached_position_info_for_organization(organization_we_vote_id)
 
+        # Favor the Twitter banner and profile image if they exist
+        # From Dale September 1, 2017:  Eventually we would like to let a person choose which they want to display,
+        # but for now Twitter always wins out.
         we_vote_hosted_profile_image_url_large = organization.we_vote_hosted_profile_image_url_large if \
             positive_value_exists(organization.we_vote_hosted_profile_image_url_large) else \
             organization.organization_photo_url()
-        # To discuss: we_vote_hosted_profile_image_url_large = organization.facebook_profile_image_url_https
 
-        # Favor the Twitter banner if we have that
         if positive_value_exists(organization.twitter_profile_banner_url_https):
             organization_banner_url = organization.twitter_profile_banner_url_https
         else:
-            organization_banner_url = organization.facebook_background_image_url_https,
+            organization_banner_url = organization.facebook_background_image_url_https
 
         if isinstance(organization_banner_url, list):
             # If a list, just return the first one
@@ -849,6 +850,7 @@ def organization_save_for_api(voter_device_id, organization_id, organization_we_
                               facebook_id, facebook_email, facebook_profile_image_url_https):
     """
     DALE NOTE: I believe we only use this to save an organization in order to link it to a voter
+    NOTE September 2017:  I think the note above is outdated, we now use this to store displayable organization data
     :param voter_device_id:
     :param organization_id:
     :param organization_we_vote_id:
@@ -951,12 +953,8 @@ def organization_save_for_api(voter_device_id, organization_id, organization_we_
             if not positive_value_exists(organization_name):
                 organization_name = facebook_auth_response.get_full_name()
 
-    # Piece all the data together, the authoritative source if not in a parameter is facebook_user
+    # Add in the facebook email if we have it
     if facebook_auth_response:
-        if not positive_value_exists(facebook_profile_image_url_https):
-            facebook_profile_image_url_https = facebook_auth_response.facebook_profile_image_url_https
-        if not positive_value_exists(facebook_background_image_url_https):
-            facebook_background_image_url_https = facebook_auth_response.facebook_background_image_url_https
         if not positive_value_exists(facebook_email):
             facebook_email = facebook_auth_response.facebook_email
 

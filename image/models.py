@@ -51,6 +51,10 @@ class WeVoteImage(models.Model):
                                                        blank=True, null=True)
     facebook_background_image_url_https = models.URLField(verbose_name='url of background image from facebook',
                                                           blank=True, null=True)
+    facebook_background_image_offset_x = models.IntegerField(verbose_name="x offset of facebook cover image", default=0,
+                                                             null=True, blank=True)
+    facebook_background_image_offset_y = models.IntegerField(verbose_name="y offset of facebook cover image", default=0,
+                                                             null=True, blank=True)
     maplight_id = models.BigIntegerField(verbose_name="maplight big integer id", null=True, blank=True)
     maplight_image_url_https = models.URLField(verbose_name='image url from maplight',
                                                blank=True, null=True)
@@ -125,13 +129,14 @@ class WeVoteImageManager(models.Model):
                              kind_of_image_facebook_profile=False, kind_of_image_facebook_background=False,
                              kind_of_image_maplight=False, kind_of_image_vote_smart=False,
                              kind_of_image_original=False, kind_of_image_large=False,
-                             kind_of_image_medium=False, kind_of_image_tiny=False):
+                             kind_of_image_medium=False, kind_of_image_tiny=False,
+                             facebook_background_image_offset_x=False, facebook_background_image_offset_y=False):
         """
-
+        Creates a we_vote_image object, which contains all the metadata, but not the image or a link to the image
+        :param google_civic_election_id:
         :param voter_we_vote_id:
         :param candidate_we_vote_id:
         :param organization_we_vote_id:
-        :param google_civic_election_id:
         :param kind_of_image_twitter_profile:
         :param kind_of_image_twitter_background:
         :param kind_of_image_twitter_banner:
@@ -143,6 +148,8 @@ class WeVoteImageManager(models.Model):
         :param kind_of_image_large:
         :param kind_of_image_medium:
         :param kind_of_image_tiny:
+        :param facebook_background_image_offset_x:
+        :param facebook_background_image_offset_y:
         :return:
         """
         we_vote_image = WeVoteImage()
@@ -163,6 +170,8 @@ class WeVoteImageManager(models.Model):
                 kind_of_image_large=kind_of_image_large,
                 kind_of_image_medium=kind_of_image_medium,
                 kind_of_image_tiny=kind_of_image_tiny,
+                facebook_background_image_offset_x=facebook_background_image_offset_x,
+                facebook_background_image_offset_y=facebook_background_image_offset_y
             )
             we_vote_image_saved = True
             success = True
@@ -869,21 +878,30 @@ class WeVoteImageManager(models.Model):
         }
         return results
 
-    def resize_we_vote_master_image(self, image_local_path, image_width, image_height, image_type):
+    def resize_we_vote_master_image(self, image_local_path, image_width, image_height, image_type,
+                                    image_offset_x, image_offset_y):
         """
         Resize image and save it to the same location
+        Note re the facebook background:  We are scaling and sizing here to match the size of the html pane on the
+        client, which is driven by the aspect ratio of the twitter banner.
         :param image_local_path:
         :param image_width:
         :param image_height:
         :param image_type:
+        :param image_offset_x:
+        :param image_offset_y:
         :return:
         """
         try:
             image_local_path = "/tmp/" + image_local_path
             image = Image.open(image_local_path)
-            if image_type == TWITTER_BACKGROUND_IMAGE_NAME or image_type == TWITTER_BANNER_IMAGE_NAME or \
-                    image_type == FACEBOOK_BACKGROUND_IMAGE_NAME:
+            if image_type == TWITTER_BACKGROUND_IMAGE_NAME or image_type == TWITTER_BANNER_IMAGE_NAME:
                 image = image.resize((image_width, image_height), Image.ANTIALIAS)
+            elif image_type == FACEBOOK_BACKGROUND_IMAGE_NAME:
+                centering_x = 0.5
+                centering_y = ((image.height - image_offset_y) * 0.5) / image.height
+                image = ImageOps.fit(image, (image_width, image_height), Image.ANTIALIAS,
+                                     centering=(centering_x, centering_y))
             else:
                 image = ImageOps.fit(image, (image_width, image_height), Image.ANTIALIAS, centering=(0.5, 0.5))
             image.save(image_local_path)
