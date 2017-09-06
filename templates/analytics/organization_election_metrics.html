@@ -1,0 +1,21 @@
+{# templates/analytics/organization_election_metrics.html #}
+{% extends "template_base.html" %}
+
+{% block title %}
+    Organization Election Metrics
+{% endblock %}
+
+{%  block content %}
+{% load template_filters %}
+<p><a href="{% url 'admin_tools:admin_home' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">< Back to Admin Home</a></p>
+<p><a href="{% url 'analytics:analytics_index' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">< Analytics Home</a></p>
+
+<h2>Organization Election Metrics</h2>
+    <p>
+        Show activity relating to one organization, for one election.<br />
+        <a href="{% url 'analytics:organization_election_metrics_process' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">Update Election</a>
+    </p>
+
+    {% include "analytics/organization_election_metrics_table.html" with organization_election_metrics_list=organization_election_metrics_list %}
+
+{% endblock %}

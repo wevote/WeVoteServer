@@ -1,0 +1,21 @@
+{# templates/analytics/sitewide_daily_metrics.html #}
+{% extends "template_base.html" %}
+
+{% block title %}
+    Sitewide Daily Metrics
+{% endblock %}
+
+{%  block content %}
+{% load template_filters %}
+<p><a href="{% url 'admin_tools:admin_home' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">< Back to Admin Home</a></p>
+<p><a href="{% url 'analytics:analytics_index' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">< Analytics Home</a></p>
+
+<h2>Sitewide Daily Metrics</h2>
+    <p>
+        Show activity day-to-day, across the entire site.<br />
+        <a href="{% url 'analytics:sitewide_daily_metrics_process' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">Process One Day</a>
+    </p>
+
+    {% include "analytics/sitewide_daily_metrics_table.html" with sitewide_daily_metrics_list=sitewide_daily_metrics_list %}
+
+{% endblock %}

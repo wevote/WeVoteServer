@@ -1,0 +1,59 @@
+{# templates/analytics/analytics_action_list.html #}
+{% extends "template_base.html" %}
+
+{% block title %}
+    Analytics Action
+{% endblock %}
+
+{%  block content %}
+{% load template_filters %}
+<p><a href="{% url 'admin_tools:admin_home' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">< Back to Admin Home</a></p>
+<p><a href="{% url 'analytics:analytics_index' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">< Analytics Home</a></p>
+
+<h2>Analytics Action</h2>
+    <p>
+        Show raw AnalyticsAction entries.
+    </p>
+
+<form name="analytics_form" method="get" action="{% url 'analytics:analytics_action_list' %}">
+{% csrf_token %}
+
+{% if analytics_action_search %}
+    <a href="{% url 'analytics:analytics_action_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
+         clear search</a>&nbsp;
+{% endif %}
+    <input type="text" name="analytics_action_search" id="analytics_action_search_id" value="{{ analytics_action_search }}" />
+    <input type="submit" value="Search" />
+
+</form>
+<table border="1" cellpadding="5" cellspacing="5" class="table">
+    <tr>
+        <th>#</th>
+        <th>action_constant</th>
+        <th>exact_time</th>
+        <th>date_as_integer</th>
+        <th>voter</th>
+        <th>organization</th>
+        <th>ballot_item_we_vote_id</th>
+        <th>google_civic_election_id</th>
+    </tr>
+{% for one_row in analytics_action_list %}
+    <tr>
+        <td>{{ forloop.counter }}</td>
+        <td>{{ one_row.display_action_constant_human_readable }}</td>
+        <td>{{ one_row.exact_time|default_if_none:"n/a" }}</td>
+        <td>{{ one_row.date_as_integer|default_if_none:"n/a" }}</td>
+        <td>{{ one_row.voter_we_vote_id|default_if_none:"n/a" }}</td>
+        <td>{{ one_row.organization.organization_name|default_if_none:"n/a" }} ({{ one_row.organization_we_vote_id|default_if_none:"n/a" }})</td>
+        <td>{{ one_row.ballot_item_we_vote_id|default_if_none:"n/a" }}</td>
+        <td>{{ one_row.google_civic_election_id|default_if_none:"n/a" }}</td>
+    </tr>
+{% endfor %}
+{% if not analytics_action_list %}
+    <tr>
+        <td colspan="23">No sitewide day-to-day metrics found for any organizations.</td>
+    </tr>
+{% endif %}
+</table>
+
+{% endblock %}
