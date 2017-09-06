@@ -231,8 +231,16 @@ class FacebookManager(models.Model):
         if positive_value_exists(facebook_background_image_url_https):
             defaults["facebook_background_image_url_https"] = facebook_background_image_url_https
             # A zero value for the offsets can be a valid value.  If we received an image, we also received the offsets.
-            defaults["facebook_background_image_offset_x"] = int(facebook_background_image_offset_x)
-            defaults["facebook_background_image_offset_y"] = int(facebook_background_image_offset_y)
+            if positive_value_exists(facebook_background_image_offset_x) \
+                    and facebook_background_image_offset_x != 'true':
+                defaults["facebook_background_image_offset_x"] = int(facebook_background_image_offset_x)
+            elif facebook_background_image_offset_x == 0:
+                defaults["facebook_background_image_offset_x"] = int(facebook_background_image_offset_x)
+            if positive_value_exists(facebook_background_image_offset_y) \
+                    and facebook_background_image_offset_y != 'true':
+                defaults["facebook_background_image_offset_y"] = int(facebook_background_image_offset_y)
+            elif facebook_background_image_offset_x == 0:
+                defaults["facebook_background_image_offset_x"] = int(facebook_background_image_offset_x)
 
         try:
             facebook_auth_response, created = FacebookAuthResponse.objects.update_or_create(

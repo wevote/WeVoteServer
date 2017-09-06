@@ -49,7 +49,12 @@
 {% if state_list %}
     <select id="state_code_id" name="state_code">
         <option value="" {% if '' == state_code %} selected="selected"{% endif %}>
-            -- Filter by State Served --</option>
+        {% if '' == state_code %}
+            -- Filter by State Served --
+        {% else %}
+            -- Show All States --
+        {% endif %}
+        </option>
     {% for key, state in state_list %}
         <option value="{{ key }}"
                 {% if key|lower == state_code|lower %} selected="selected"{% endif %}>
@@ -58,12 +63,16 @@
     </select>
 {% endif %}{# End of if state_list #}
 
-    <br />
 
 {% if organization_types %}
     <select id="organization_type_filter_id" name="organization_type_filter">
         <option value="" {% if '' ==  organization_type_filter %} selected="selected" {% endif %}>
-            -- Filter by Organization Type --</option>
+        {% if '' ==  organization_type_filter %}
+            -- Filter by Organization Type --
+        {% else %}
+            -- Show All Organization Types --
+        {% endif %}
+        </option>
     {% for key, organization_type in organization_types %}
         <option value="{{ key }}"
                 {% if key|lower == organization_type_filter|lower %} selected="selected"{% endif %}>
