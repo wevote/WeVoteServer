@@ -1,0 +1,21 @@
+{# templates/analytics/sitewide_election_metrics.html #}
+{% extends "template_base.html" %}
+
+{% block title %}
+    Sitewide Election Metrics
+{% endblock %}
+
+{%  block content %}
+{% load template_filters %}
+<p><a href="{% url 'admin_tools:admin_home' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">< Back to Admin Home</a></p>
+<p><a href="{% url 'analytics:analytics_index' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">< Analytics Home</a></p>
+
+<h2>Sitewide Election Metrics</h2>
+    <p>
+        Show activity relating to one election, for the entire site.<br />
+        <a href="{% url 'analytics:sitewide_election_metrics_process' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">Process Updates</a>
+    </p>
+
+    {% include "analytics/sitewide_election_metrics_table.html" with sitewide_election_metrics_list=sitewide_election_metrics_list %}
+
+{% endblock %}
