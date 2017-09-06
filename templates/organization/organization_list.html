@@ -60,6 +60,20 @@
 
     <br />
 
+{% if organization_types %}
+    <select id="organization_type_filter_id" name="organization_type_filter">
+        <option value="" {% if '' ==  organization_type_filter %} selected="selected" {% endif %}>
+            -- Filter by Organization Type --</option>
+    {% for key, organization_type in organization_types %}
+        <option value="{{ key }}"
+                {% if key|lower == organization_type_filter|lower %} selected="selected"{% endif %}>
+        {{ organization_type }}</option>
+    {% endfor %}
+    </select>
+{% endif %} {# End of if organization_types #}
+
+    <br />
+
 {% if issue_list %}
     <p>Issues to filter [OR] :
     {% for issue in issue_list %}
@@ -127,6 +141,9 @@
     <script>
         $(function() {
             $('#state_code_id').change(function() {
+                this.form.submit();
+            });
+            $('#organization_type_filter_id').change(function() {
                 this.form.submit();
             });
         });

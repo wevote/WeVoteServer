@@ -50,7 +50,11 @@
             &bullet; <td>{{ issue_name }}</td> &nbsp;
         {% endfor %}
     {% endif %}
-
+    <br />
+    Organization Type:
+    {% if organization_type_display_text %}
+        <td>{{ organization_type_display_text }}</td>
+    {% endif %}
     </p>
 <p>
     <a href="{% url 'import_export_wikipedia:import_organization_logo' organization.id %}">Retrieve photos from Wikipedia</a>,

@@ -19,7 +19,7 @@ from election.models import Election, ElectionManager
 from issue.models import ALPHABETICAL_ASCENDING, IssueListManager, IssueManager, \
     OrganizationLinkToIssueList, OrganizationLinkToIssueManager
 from measure.models import ContestMeasure, ContestMeasureList, ContestMeasureManager
-from organization.models import OrganizationListManager, OrganizationManager
+from organization.models import OrganizationListManager, OrganizationManager, ORGANIZATION_TYPE_MAP, UNKNOWN
 from position.models import PositionEntered, PositionManager, INFORMATION_ONLY, OPPOSE, \
     STILL_DECIDING, SUPPORT
 from voter.models import retrieve_voter_authority, voter_has_authority, VoterManager
@@ -114,6 +114,7 @@ def organization_list_view(request):
     google_civic_election_id = request.GET.get('google_civic_election_id', '')
     candidate_we_vote_id = request.GET.get('candidate_we_vote_id', '')
     organization_search = request.GET.get('organization_search', '')
+    organization_type_filter = request.GET.get('organization_type_filter', '')
     selected_issue_vote_id_list = request.GET.getlist('selected_issues', '')
 
     messages_on_stage = get_messages(request)
@@ -122,6 +123,8 @@ def organization_list_view(request):
 
     if positive_value_exists(state_code):
         organization_list_query = organization_list_query.filter(state_served_code__iexact=state_code)
+    if positive_value_exists(organization_type_filter):
+        organization_list_query = organization_list_query.filter(organization_type__iexact=organization_type_filter)
 
     # Retrieve all issues
     issues_selected = False
@@ -208,12 +211,17 @@ def organization_list_view(request):
     state_list = STATE_CODE_MAP
     sorted_state_list = sorted(state_list.items())
 
+    organization_types_map = ORGANIZATION_TYPE_MAP
+    organization_types_list = sorted(organization_types_map.items())
+
     template_values = {
         'messages_on_stage':        messages_on_stage,
         'candidate_we_vote_id':     candidate_we_vote_id,
         'google_civic_election_id': google_civic_election_id,
         'issue_list':               issue_list,
         'issues_selected':          issues_selected,
+        'organization_type_filter': organization_type_filter,
+        'organization_types':       organization_types_list,
         'organization_list':        organization_list,
         'organization_search':      organization_search,
         'state_code':               state_code,
@@ -258,6 +266,7 @@ def organization_edit_view(request, organization_id):
 
     # A positive value in google_civic_election_id means we want to create a voter guide for this org for this election
     google_civic_election_id = request.GET.get('google_civic_election_id', 0)
+    organization_type = request.GET.get('organization_type', UNKNOWN)
 
     messages_on_stage = get_messages(request)
     organization_id = convert_to_int(organization_id)
@@ -295,10 +304,14 @@ def organization_edit_view(request, organization_id):
     state_list = STATE_CODE_MAP
     sorted_state_list = sorted(state_list.items())
 
+    organization_types_map = ORGANIZATION_TYPE_MAP
+    organization_types_list = sorted(organization_types_map.items())
+
     if organization_on_stage_found:
         template_values = {
             'messages_on_stage':        messages_on_stage,
             'organization':             organization_on_stage,
+            'organization_types':       organization_types_list,
             'upcoming_election_list':   upcoming_election_list,
             'google_civic_election_id': google_civic_election_id,
             'state_list':               sorted_state_list,
@@ -337,6 +350,7 @@ def organization_edit_process_view(request):
     organization_endorsements_api_url = request.POST.get('organization_endorsements_api_url', False)
     state_served_code = request.POST.get('state_served_code', False)
     organization_link_issue_we_vote_ids = request.POST.getlist('selected_issues', False)
+    organization_type = request.POST.get('organization_type', False)
 
     # A positive value in google_civic_election_id or add_organization_button means we want to create a voter guide
     # for this org for this election
@@ -376,6 +390,8 @@ def organization_edit_process_view(request):
                 organization_on_stage.organization_endorsements_api_url = organization_endorsements_api_url
             if state_served_code is not False:
                 organization_on_stage.state_served_code = state_served_code
+            if organization_type is not False:
+                organization_on_stage.organization_type = organization_type
             organization_on_stage.save()
             organization_id = organization_on_stage.id
             organization_we_vote_id = organization_on_stage.we_vote_id
@@ -568,31 +584,21 @@ def organization_position_list_view(request, organization_id):
             one_position = position_manager.refresh_cached_position_info(one_position)
 
         election_list = Election.objects.order_by('-election_day_text')
-
-        if organization_position_list_found:
-            template_values = {
-                'messages_on_stage':            messages_on_stage,
-                'organization':                 organization_on_stage,
-                'organization_position_list':   organization_position_list,
-                'organization_num_positions':   len(organization_position_list),
-                'election_list':                election_list,
-                'google_civic_election_id':     google_civic_election_id,
-                'candidate_we_vote_id':         candidate_we_vote_id,
-                'voter':                        voter,
-                'issue_names_list':             issue_names_list,
-                'issue_blocked_names_list':     issue_blocked_names_list,
-            }
-        else:
-            template_values = {
-                'messages_on_stage':            messages_on_stage,
-                'organization':                 organization_on_stage,
-                'election_list':                election_list,
-                'google_civic_election_id':     google_civic_election_id,
-                'candidate_we_vote_id':         candidate_we_vote_id,
-                'voter':                        voter,
-                'issue_names_list':             issue_names_list,
-                'issue_blocked_names_list':     issue_blocked_names_list,
-            }
+        organization_type_display_text = ORGANIZATION_TYPE_MAP.get(organization_on_stage.organization_type,
+                                                                   ORGANIZATION_TYPE_MAP[UNKNOWN])
+        template_values = {
+            'messages_on_stage':                messages_on_stage,
+            'organization':                     organization_on_stage,
+            'organization_position_list':       organization_position_list,
+            'organization_num_positions':       len(organization_position_list),
+            'organization_type_display_text':   organization_type_display_text,
+            'election_list':                    election_list,
+            'google_civic_election_id':         google_civic_election_id,
+            'candidate_we_vote_id':             candidate_we_vote_id,
+            'voter':                            voter,
+            'issue_names_list':                 issue_names_list,
+            'issue_blocked_names_list':         issue_blocked_names_list,
+        }
     return render(request, 'organization/organization_position_list.html', template_values)
 
 

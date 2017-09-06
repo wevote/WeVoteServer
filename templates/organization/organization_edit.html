@@ -85,6 +85,25 @@ span.nobr { white-space: nowrap; }
 </div>
 {% endif %}{# End of if state_list #}
 
+
+{% if organization_types %}
+<div class="form-group">
+    <label for="organization_type_id" class="col-sm-3 control-label">Organization Type</label>
+    <div class="col-sm-8">
+        <select id="organization_type_id" name="organization_type" class="form-control">
+            <option value="" {% if '' ==  organization_type %} selected="selected" {% endif %}>
+                -- Filter by Organization Type --</option>
+        {% for key, organization_type in organization_types %}
+            <option value="{{ key }}"
+                    {% if key|lower == organization.organization_type|lower %} selected="selected"{% endif %}>
+            {{ organization_type }}</option>
+        {% endfor %}
+        </select>
+    </div>
+</div>
+{% endif %} {# End of if organization_types #}
+
+
 <div class="form-group">
     <label for="organization_twitter_handle_id" class="col-sm-3 control-label">Twitter Handle</label>
     <div class="col-sm-8">

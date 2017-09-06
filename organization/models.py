@@ -25,7 +25,7 @@ NONPROFIT_501C4 = 'C4'
 POLITICAL_ACTION_COMMITTEE = 'P'
 UNKNOWN = 'U'
 ORGANIZATION_TYPE_CHOICES = (
-    (GROUP, 'Nonprofit'),
+    (GROUP, 'Group'),
     (NONPROFIT, 'Nonprofit'),
     (NONPROFIT_501C3, 'Nonprofit 501c3'),
     (NONPROFIT_501C4, 'Nonprofit 501c4'),
@@ -35,6 +35,18 @@ ORGANIZATION_TYPE_CHOICES = (
     (INDIVIDUAL, 'One person'),
     (UNKNOWN, 'Unknown'),
 )
+
+ORGANIZATION_TYPE_MAP = {
+    GROUP:                      'Group',
+    NONPROFIT:                  'Nonprofit',
+    NONPROFIT_501C3:            'Nonprofit 501c3',
+    NONPROFIT_501C4:            'Nonprofit 501c4',
+    POLITICAL_ACTION_COMMITTEE: 'Political Action Committee',
+    CORPORATION:                'Corporation',
+    NEWS_CORPORATION:           'News Corporation',
+    INDIVIDUAL:                 'One person',
+    UNKNOWN:                    'Unknown',
+}
 
 alphanumeric = RegexValidator(r'^[0-9a-zA-Z]*$', message='Only alphanumeric characters are allowed.')
 
