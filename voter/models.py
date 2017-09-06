@@ -1213,6 +1213,47 @@ class VoterManager(BaseUserManager):
         }
         return results
 
+    def reset_voter_image_details(self, voter, twitter_profile_image_url_https=None,
+                                  facebook_profile_image_url_https=None):
+        """
+        Reset Voter image details from we voter image
+        :param voter:
+        :param twitter_profile_image_url_https:
+        :param facebook_profile_image_url_https:
+        :return:
+        """
+        value_changed = False
+        voter_results = self.retrieve_voter_by_we_vote_id(voter.we_vote_id)
+        voter = voter_results['voter']
+        if voter_results['voter_found']:
+            if positive_value_exists(twitter_profile_image_url_https):
+                voter.twitter_profile_image_url_https = twitter_profile_image_url_https
+                voter.we_vote_hosted_profile_image_url_large = ''
+                voter.we_vote_hosted_profile_image_url_medium = ''
+                voter.we_vote_hosted_profile_image_url_tiny = ''
+                value_changed = True
+            if positive_value_exists(facebook_profile_image_url_https):
+                voter.facebook_profile_image_url_https = facebook_profile_image_url_https
+                value_changed = True
+
+            if value_changed:
+                voter.save()
+                success = True
+                status = "RESET_VOTER_IMAGE_DETAILS"
+            else:
+                success = True
+                status = "NO_CHANGES_IN_VOTER_IMAGE_DETAILS"
+        else:
+            success = False
+            status = "VOTER_NOT_FOUND"
+
+        results = {
+            'success':  success,
+            'status':   status,
+            'voter':    voter
+        }
+        return results
+
     def update_voter_twitter_details(self, twitter_id, twitter_json,
                                      cached_twitter_profile_image_url_https,
                                      we_vote_hosted_profile_image_url_large,

@@ -14,13 +14,69 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
+from image.controllers import delete_cached_images_for_voter, delete_cached_images_for_candidate, \
+    delete_cached_images_for_organization
 from organization.controllers import update_social_media_statistics_in_other_tables
 from organization.models import OrganizationManager
-from voter.models import voter_has_authority
+from voter.models import voter_has_authority, VoterManager
 import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, positive_value_exists
 
 logger = wevote_functions.admin.get_logger(__name__)
+
+
+@login_required
+def delete_images_view(request):
+    authority_required = {'verified_volunteer'}  # admin, verified_volunteer
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
+    google_civic_election_id = request.GET.get('google_civic_election_id', 0)
+    candidate_id = request.GET.get('candidate_id', 0)
+    organization_id = request.GET.get('organization_id', 0)
+    voter_id = request.GET.get('voter_id', 0)
+
+    if positive_value_exists(candidate_id):
+        candidate_manager = CandidateCampaignManager()
+        results = candidate_manager.retrieve_candidate_campaign(candidate_id)
+        if not results['candidate_campaign_found']:
+            messages.add_message(request, messages.INFO, results['status'])
+            return HttpResponseRedirect(reverse('candidate:candidate_edit', args=(candidate_id,)) +
+                                        '?google_civic_election_id=' + str(google_civic_election_id))
+        candidate_campaign = results['candidate_campaign']
+        delete_image_results = delete_cached_images_for_candidate(candidate_campaign)
+    elif positive_value_exists(organization_id):
+        organization_manager = OrganizationManager()
+        results = organization_manager.retrieve_organization(organization_id)
+        if not results['organization_found']:
+            messages.add_message(request, messages.INFO, results['status'])
+            return HttpResponseRedirect(reverse('organization:organization_edit', args=(organization_id,)) +
+                                        '?google_civic_election_id=' + str(google_civic_election_id))
+        organization = results['organization']
+        delete_image_results = delete_cached_images_for_organization(organization)
+    elif positive_value_exists(voter_id):
+        voter_manager = VoterManager()
+        results = voter_manager.retrieve_voter_by_id(voter_id)
+        if not results['voter_found']:
+            messages.add_message(request, messages.INFO, results['status'])
+            return HttpResponseRedirect(reverse('candidate:candidate_edit', args=(candidate_id,)) +
+                                        '?google_civic_election_id=' + str(google_civic_election_id))
+        voter = results['voter']
+        delete_image_results = delete_cached_images_for_voter(voter)
+
+    delete_image_count = delete_image_results['delete_image_count']
+    not_deleted_image_count = delete_image_results['not_deleted_image_count']
+
+    messages.add_message(request, messages.INFO,
+                         "Images Deleted: {delete_image_count},"
+                         .format(delete_image_count=delete_image_count))
+    if positive_value_exists(candidate_id):
+        return HttpResponseRedirect(reverse('candidate:candidate_edit', args=(candidate_id,)))
+    elif positive_value_exists(organization_id):
+        return HttpResponseRedirect(reverse('organization:organization_position_list', args=(organization_id,)) +
+                                    '?google_civic_election_id=' + str(google_civic_election_id))
+    else:
+        return HttpResponseRedirect(reverse('voter:voter_list'))
 
 
 @login_required

@@ -667,6 +667,46 @@ class TwitterUserManager(models.Model):
         }
         return results
 
+    def reset_twitter_user_image_details(self, twitter_id, twitter_profile_image_url_https,
+                                         twitter_profile_background_image_url_https,
+                                         twitter_profile_banner_url_https):
+        """
+        Reset an twitter user entry with original image details from we vote image.
+        """
+        if positive_value_exists(twitter_id):
+            twitter_results = self.retrieve_twitter_user(twitter_id)
+            twitter_user_found = twitter_results['twitter_user_found']
+            twitter_user = twitter_results['twitter_user']
+            if twitter_user_found:
+                if positive_value_exists(twitter_profile_image_url_https):
+                    twitter_user.twitter_profile_image_url_https = twitter_profile_image_url_https
+                if positive_value_exists(twitter_profile_background_image_url_https):
+                    twitter_user.twitter_profile_background_image_url_https = twitter_profile_background_image_url_https
+                if positive_value_exists(twitter_profile_banner_url_https):
+                    twitter_user.twitter_profile_banner_url_https = twitter_profile_banner_url_https
+
+                twitter_user.we_vote_hosted_profile_image_url_large = ''
+                twitter_user.we_vote_hosted_profile_image_url_medium = ''
+                twitter_user.we_vote_hosted_profile_image_url_tiny = ''
+                twitter_user.save()
+
+                success = True
+                status = 'RESET_TWITTER_USER_IMAGE_DETAILS'
+            else:
+                success = False
+                status = 'TWITTER_USER_NOT_FOUND'
+        else:
+            success = False
+            status = 'TWITTER_ID_MISSING'
+            twitter_user = ''
+
+        results = {
+            'success':      success,
+            'status':       status,
+            'twitter_user': twitter_user,
+        }
+        return results
+
     def save_new_twitter_user_from_twitter_json(self, twitter_json, cached_twitter_profile_image_url_https=None,
                                                 cached_twitter_profile_background_image_url_https=None,
                                                 cached_twitter_profile_banner_url_https=None,

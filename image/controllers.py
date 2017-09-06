@@ -13,7 +13,11 @@ from django.db.models import Q
 from import_export_facebook.models import FacebookManager
 from import_export_twitter.functions import retrieve_twitter_user_info
 from organization.models import OrganizationManager
+from politician.models import PoliticianManager
+from position.controllers import reset_all_position_image_details_from_candidate, \
+    reset_position_for_friends_image_details_from_voter, reset_position_entered_image_details_from_organization
 from twitter.models import TwitterUserManager
+from voter_guide.models import VoterGuideManager
 from voter.models import VoterManager, VoterDeviceLinkManager, VoterAddressManager, VoterAddress, Voter
 from wevote_functions.functions import positive_value_exists, convert_to_int
 import requests
@@ -1162,6 +1166,257 @@ def create_resized_images_for_all_voters():
         create_resized_images_results = create_resized_image(we_vote_image)
         create_all_resized_images_results.append(create_resized_images_results)
     return create_all_resized_images_results
+
+
+def delete_cached_images_for_candidate(candidate):
+    original_twitter_profile_image_url_https = None
+    original_twitter_profile_background_image_url_https = None
+    original_twitter_profile_banner_url_https = None
+    delete_image_count = 0
+    not_deleted_image_count = 0
+
+    we_vote_image_list = retrieve_all_images_for_one_candidate(candidate.we_vote_id)
+    if len(we_vote_image_list) > 0:
+        we_vote_image_manager = WeVoteImageManager()
+        for we_vote_image in we_vote_image_list:
+            if we_vote_image.kind_of_image_twitter_profile and we_vote_image.kind_of_image_original and \
+                    we_vote_image.is_active_version:
+                original_twitter_profile_image_url_https = we_vote_image.twitter_profile_image_url_https
+            if we_vote_image.kind_of_image_twitter_background and we_vote_image.kind_of_image_original and \
+                    we_vote_image.is_active_version:
+                original_twitter_profile_background_image_url_https = \
+                    we_vote_image.twitter_profile_background_image_url_https
+            if we_vote_image.kind_of_image_twitter_banner and we_vote_image.kind_of_image_original and \
+                    we_vote_image.is_active_version:
+                original_twitter_profile_banner_url_https = we_vote_image.twitter_profile_banner_url_https
+
+        # Reset CandidateCampaign with original image details
+        candidate_campaign_manager = CandidateCampaignManager()
+        reset_candidate_image_results = candidate_campaign_manager.reset_candidate_image_details(
+            candidate, original_twitter_profile_image_url_https, original_twitter_profile_background_image_url_https,
+            original_twitter_profile_banner_url_https)
+
+        # Reset Twitter User Table with original image details
+        twitter_user_manager = TwitterUserManager()
+        reset_twitter_user_image_results = twitter_user_manager.reset_twitter_user_image_details(
+            candidate.twitter_user_id, original_twitter_profile_image_url_https,
+            original_twitter_profile_background_image_url_https, original_twitter_profile_banner_url_https)
+
+        # Reset Position Table with original image details
+        reset_position_image_results = reset_all_position_image_details_from_candidate(
+            candidate, original_twitter_profile_image_url_https)
+
+        # Reset Politician Table with original image details
+        politician_manager = PoliticianManager()
+        reset_politician_image_results = politician_manager.reset_politician_image_details_from_candidate(
+            candidate, original_twitter_profile_image_url_https, original_twitter_profile_background_image_url_https,
+            original_twitter_profile_banner_url_https)
+
+        if reset_candidate_image_results['success']:
+            for we_vote_image in we_vote_image_list:
+                # Delete image from AWS
+                image_deleted_from_aws = we_vote_image_manager.delete_image_from_aws(
+                    we_vote_image.we_vote_image_file_location)
+
+                delete_result = we_vote_image_manager.delete_we_vote_image(we_vote_image)
+                if delete_result['success']:
+                    delete_image_count += 1
+                else:
+                    not_deleted_image_count += 1
+
+        success = True
+        status = "DELETED_CACHED_IMAGES_FOR_CANDIDATE"
+    else:
+        success = False
+        status = "NO_IMAGE_FOUND_FOR_CANDIDATE"
+
+    results = {
+        'success':              success,
+        'status':               status,
+        'delete_image_count':   delete_image_count,
+        'not_deleted_image_count':  not_deleted_image_count,
+    }
+    return results
+
+
+def delete_cached_images_for_organization(organization):
+    original_twitter_profile_image_url_https = None
+    original_twitter_profile_background_image_url_https = None
+    original_twitter_profile_banner_url_https = None
+    original_facebook_profile_image_url_https = None
+    original_facebook_background_image_url_https = None
+    delete_image_count = 0
+    not_deleted_image_count = 0
+
+    we_vote_image_list = retrieve_all_images_for_one_organization(organization.we_vote_id)
+    if len(we_vote_image_list) > 0:
+        we_vote_image_manager = WeVoteImageManager()
+        for we_vote_image in we_vote_image_list:
+            if we_vote_image.kind_of_image_twitter_profile and we_vote_image.kind_of_image_original and \
+                    we_vote_image.is_active_version:
+                original_twitter_profile_image_url_https = we_vote_image.twitter_profile_image_url_https
+            if we_vote_image.kind_of_image_twitter_background and we_vote_image.kind_of_image_original and \
+                    we_vote_image.is_active_version:
+                original_twitter_profile_background_image_url_https = \
+                    we_vote_image.twitter_profile_background_image_url_https
+            if we_vote_image.kind_of_image_twitter_banner and we_vote_image.kind_of_image_original and \
+                    we_vote_image.is_active_version:
+                original_twitter_profile_banner_url_https = we_vote_image.twitter_profile_banner_url_https
+            if we_vote_image.kind_of_image_facebook_profile and we_vote_image.kind_of_image_original and \
+                    we_vote_image.is_active_version:
+                original_facebook_profile_image_url_https = we_vote_image.facebook_profile_image_url_https
+            if we_vote_image.kind_of_image_facebook_background and we_vote_image.kind_of_image_original and \
+                    we_vote_image.is_active_version:
+                original_facebook_background_image_url_https = we_vote_image.facebook_background_image_url_https
+
+        # Reset Organization with original image details
+        organization_manager = OrganizationManager()
+        reset_organization_image_results = organization_manager.reset_organization_image_details(
+            organization, original_twitter_profile_image_url_https, original_twitter_profile_background_image_url_https,
+            original_twitter_profile_banner_url_https, original_facebook_profile_image_url_https)
+
+        # Reset Twitter User Table with original image details
+        twitter_user_manager = TwitterUserManager()
+        reset_twitter_user_image_results = twitter_user_manager.reset_twitter_user_image_details(
+            organization.twitter_user_id, original_twitter_profile_image_url_https,
+            original_twitter_profile_background_image_url_https, original_twitter_profile_banner_url_https)
+
+        # Reset Position Table with original image details
+        reset_position_image_results = reset_position_entered_image_details_from_organization(
+            organization, original_twitter_profile_image_url_https, original_facebook_profile_image_url_https)
+
+        # Reset Voter Guide table with original image details
+        voter_guide_manager = VoterGuideManager()
+        reset_voter_guide_image_results = voter_guide_manager.reset_voter_guide_image_details(
+            organization, original_twitter_profile_image_url_https, original_facebook_profile_image_url_https)
+
+        # Reset Voter with original image details
+        voter_manager = VoterManager()
+        voter_results = voter_manager.retrieve_voter_by_organization_we_vote_id(organization.we_vote_id)
+        voter = voter_results['voter']
+        if voter_results['voter_found']:
+            reset_voter_image_results = voter_manager.reset_voter_image_details(
+                voter, original_twitter_profile_image_url_https, original_facebook_profile_image_url_https)
+
+        # Reset Facebook User Table with original image details
+        facebook_manager = FacebookManager()
+        reset_facebook_user_image_results = facebook_manager.reset_facebook_user_image_details(
+            organization.facebook_id, original_facebook_profile_image_url_https,
+            original_facebook_background_image_url_https)
+
+        if reset_organization_image_results['success']:
+            for we_vote_image in we_vote_image_list:
+                # Delete image from AWS
+                image_deleted_from_aws = we_vote_image_manager.delete_image_from_aws(
+                    we_vote_image.we_vote_image_file_location)
+
+                delete_result = we_vote_image_manager.delete_we_vote_image(we_vote_image)
+                if delete_result['success']:
+                    delete_image_count += 1
+                else:
+                    not_deleted_image_count += 1
+
+        success = True
+        status = "DELETED_CACHED_IMAGES_FOR_CANDIDATE"
+    else:
+        success = False
+        status = "NO_IMAGE_FOUND_FOR_CANDIDATE"
+
+    results = {
+        'success':                  success,
+        'status':                   status,
+        'delete_image_count':       delete_image_count,
+        'not_deleted_image_count':  not_deleted_image_count,
+    }
+    return results
+
+
+def delete_cached_images_for_voter(voter):
+    original_twitter_profile_image_url_https = None
+    original_twitter_profile_background_image_url_https = None
+    original_twitter_profile_banner_url_https = None
+    original_facebook_profile_image_url_https = None
+    original_facebook_background_image_url_https = None
+
+    delete_image_count = 0
+    not_deleted_image_count = 0
+
+    we_vote_image_list = retrieve_all_images_for_one_voter(voter.id)
+    if len(we_vote_image_list) > 0:
+        we_vote_image_manager = WeVoteImageManager()
+        for we_vote_image in we_vote_image_list:
+            if we_vote_image.kind_of_image_twitter_profile and we_vote_image.kind_of_image_original and \
+                    we_vote_image.is_active_version:
+                original_twitter_profile_image_url_https = we_vote_image.twitter_profile_image_url_https
+            if we_vote_image.kind_of_image_twitter_background and we_vote_image.kind_of_image_original and \
+                    we_vote_image.is_active_version:
+                original_twitter_profile_background_image_url_https = \
+                    we_vote_image.twitter_profile_background_image_url_https
+            if we_vote_image.kind_of_image_twitter_banner and we_vote_image.kind_of_image_original and \
+                    we_vote_image.is_active_version:
+                original_twitter_profile_banner_url_https = we_vote_image.twitter_profile_banner_url_https
+            if we_vote_image.kind_of_image_facebook_profile and we_vote_image.kind_of_image_original and \
+                    we_vote_image.is_active_version:
+                original_facebook_profile_image_url_https = we_vote_image.facebook_profile_image_url_https
+            if we_vote_image.kind_of_image_facebook_background and we_vote_image.kind_of_image_original and \
+                    we_vote_image.is_active_version:
+                original_facebook_background_image_url_https = we_vote_image.facebook_background_image_url_https
+
+        # Reset Voter with original image details
+        voter_manager = VoterManager()
+        reset_voter_image_results = voter_manager.reset_voter_image_details(
+            voter, original_twitter_profile_image_url_https, original_facebook_profile_image_url_https)
+
+        # Reset Twitter User Table with original image details
+        twitter_user_manager = TwitterUserManager()
+        reset_twitter_user_image_results = twitter_user_manager.reset_twitter_user_image_details(
+            voter.twitter_id, original_twitter_profile_image_url_https,
+            original_twitter_profile_background_image_url_https, original_twitter_profile_banner_url_https)
+
+        # Reset Organization with original image details
+        organization_manager = OrganizationManager()
+        organization_results = organization_manager.retrieve_organization(0, '', '', voter.twitter_id)
+        organization = organization_results['organization']
+        if organization_results['organization_found']:
+            reset_organization_image_results = organization_manager.reset_organization_image_details(
+                organization, original_twitter_profile_image_url_https,
+                original_twitter_profile_background_image_url_https, original_twitter_profile_banner_url_https,
+                original_facebook_profile_image_url_https)
+
+        # Reset Position Table with original image details
+        reset_position_image_results = reset_position_for_friends_image_details_from_voter(
+            voter, original_twitter_profile_image_url_https, original_facebook_profile_image_url_https)
+
+        # Reset Facebook User Table with original image details
+        facebook_manager = FacebookManager()
+        reset_facebook_user_image_results = facebook_manager.reset_facebook_user_image_details(
+            voter.facebook_id, original_facebook_profile_image_url_https, original_facebook_background_image_url_https)
+
+        if reset_voter_image_results['success']:
+            for we_vote_image in we_vote_image_list:
+                # Delete image from AWS
+                image_deleted_from_aws = we_vote_image_manager.delete_image_from_aws(
+                    we_vote_image.we_vote_image_file_location)
+
+                delete_result = we_vote_image_manager.delete_we_vote_image(we_vote_image)
+                if delete_result['success']:
+                    delete_image_count += 1
+                else:
+                    not_deleted_image_count += 1
+
+        success = True
+        status = "DELETED_CACHED_IMAGES_FOR_VOTER"
+    else:
+        success = False
+        status = "NO_IMAGE_FOUND_FOR_VOTER"
+
+    results = {
+        'success':                  success,
+        'status':                   status,
+        'delete_image_count':       delete_image_count,
+        'not_deleted_image_count':  not_deleted_image_count,
+    }
+    return results
 
 
 def retrieve_all_images_for_one_candidate(candidate_we_vote_id):

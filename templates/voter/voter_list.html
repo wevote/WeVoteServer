@@ -108,6 +108,8 @@
             <!-- See images //-->
             <td>
                 <a href="{% url 'image:images_for_one_voter' voter.id %}" target="_blank">See images</a>
+                <br \>
+                <a href="{% url 'import_export_twitter:delete_images_view' %}?voter_id={{voter.id}}">Delete images</a>
             </td>
         </tr>
     {% endfor %}

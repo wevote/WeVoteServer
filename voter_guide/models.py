@@ -394,6 +394,51 @@ class VoterGuideManager(models.Manager):
         }
         return results
 
+    def reset_voter_guide_image_details(self, organization, twitter_profile_image_url_https=None,
+                                        facebook_profile_image_url_https=None):
+        """
+        Reset Voter guide entry with original we vote image details
+        :param organization:
+        :param twitter_profile_image_url_https:
+        :param facebook_profile_image_url_https:
+        :return:
+        """
+        image_url = None
+        success = False
+        status = ""
+        voter_guide = VoterGuide()
+
+        if positive_value_exists(twitter_profile_image_url_https):
+            image_url = twitter_profile_image_url_https
+        elif positive_value_exists(facebook_profile_image_url_https):
+            image_url = facebook_profile_image_url_https
+        if organization:
+            voter_guide_list_manager = VoterGuideListManager()
+            results = voter_guide_list_manager.retrieve_all_voter_guides_by_organization_we_vote_id(
+                organization.we_vote_id)
+            voter_guide_list = results['voter_guide_list']
+            if positive_value_exists(results['voter_guide_list_found']):
+                for voter_guide in voter_guide_list:
+                    voter_guide.image_url = image_url
+                    voter_guide.we_vote_hosted_profile_image_url_large = ''
+                    voter_guide.we_vote_hosted_profile_image_url_medium = ''
+                    voter_guide.we_vote_hosted_profile_image_url_tiny = ''
+
+                    voter_guide.save()
+                    success = True
+                    status += " RESET_ORG_IMAGE_DETAILS-EARLIER VERSION"
+            else:
+                success = True
+                status += "NO_VOTER_GUIDES_FOUND_FOR_RESET_IMAGE_DETAILS"
+
+        results = {
+            'success':                  success,
+            'status':                   status,
+            'organization':             organization,
+            'voter_guide':              voter_guide,
+        }
+        return results
+
     def update_voter_guide_social_media_statistics(self, organization):
         """
         Update voter_guide entry with details retrieved from Twitter, Facebook, or ???

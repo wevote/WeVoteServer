@@ -118,7 +118,8 @@
         <input type="text" name="candidate_twitter_handle" id="candidate_twitter_handle_id" class="form-control"
                value="{% if candidate %}{{ candidate.candidate_twitter_handle|default_if_none:"" }}{% else %}{{ candidate_twitter_handle|default_if_none:"" }}{% endif %}" />
     {% if candidate.candidate_twitter_handle %}
-        (<a href="{% url 'import_export_twitter:refresh_twitter_candidate_details' candidate.id %}">refresh Twitter details</a>)<br />
+        (<a href="{% url 'import_export_twitter:refresh_twitter_candidate_details' candidate.id %}">refresh Twitter details</a>)
+        (<a href="{% url 'import_export_twitter:delete_images_view'%}?candidate_id={{ candidate.id }}">Delete Cached Images</a>)<br />
         Twitter Name: {{ candidate.twitter_name }}<br />
         Twitter Description: {{ candidate.twitter_description }}<br />
         Twitter Location: {{ candidate.twitter_location }}<br />

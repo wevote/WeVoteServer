@@ -306,6 +306,38 @@ class PoliticianManager(models.Model):
         }
         return results
 
+    def reset_politician_image_details_from_candidate(self, candidate, twitter_profile_image_url_https,
+                                                      twitter_profile_background_image_url_https,
+                                                      twitter_profile_banner_url_https):
+        """
+        Reset an Politician entry with original image details from we vote image.
+        :param candidate:
+        :param twitter_profile_image_url_https:
+        :param twitter_profile_background_image_url_https:
+        :param twitter_profile_banner_url_https:
+        :return:
+        """
+        politician_details = self.retrieve_politician(0, candidate.politician_we_vote_id)
+        politician = politician_details['politician']
+        if politician_details['success']:
+            politician.we_vote_hosted_profile_image_url_medium = ''
+            politician.we_vote_hosted_profile_image_url_large = ''
+            politician.we_vote_hosted_profile_image_url_tiny = ''
+
+            politician.save()
+            success = True
+            status = "RESET_POLITICIAN_IMAGE_DETAILS"
+        else:
+            success = False
+            status = "POLITICIAN_NOT_FOUND_IN_RESET_IMAGE_DETAILS"
+
+        results = {
+            'success':      success,
+            'status':       status,
+            'politician':   politician
+        }
+        return results
+
     def update_politician_details_from_candidate(self, candidate):
         """
         Update a politician entry with details retrieved from candidate

@@ -2993,6 +2993,41 @@ def retrieve_ballot_item_we_vote_ids_for_organizations_to_follow(voter_id,
     return results
 
 
+def reset_all_position_image_details_from_candidate(candidate_campaign, twitter_profile_image_url_https):
+    """
+    Reset all position image urls PositionEntered and PositionForFriends from candidate details
+    :param candidate_campaign:
+    :param twitter_profile_image_url_https
+    :return:
+    """
+    position_list_manager = PositionListManager()
+    position_manager = PositionManager()
+    reset_all_position_image_urls_results = []
+
+    retrieve_public_positions = True
+    public_position_list = position_list_manager.retrieve_all_positions_for_candidate_campaign(
+        retrieve_public_positions, candidate_campaign.id, candidate_campaign.we_vote_id)
+    for position_object in public_position_list:
+        reset_position_image_urls_results = position_manager.reset_position_image_details(
+            position_object, twitter_profile_image_url_https)
+        reset_all_position_image_urls_results.append(reset_position_image_urls_results)
+
+    retrieve_public_positions = False
+    friends_position_list = position_list_manager.retrieve_all_positions_for_candidate_campaign(
+        retrieve_public_positions, candidate_campaign.id, candidate_campaign.we_vote_id,
+        retrieve_all_admin_override=True)
+    for position_object in friends_position_list:
+        reset_position_image_urls_results = position_manager.reset_position_image_details(
+            position_object, twitter_profile_image_url_https)
+        reset_all_position_image_urls_results.append(reset_position_image_urls_results)
+
+    results = {
+        'success':                     True,
+        'reset_all_position_results':  reset_all_position_image_urls_results
+    }
+    return results
+
+
 def update_all_position_details_from_candidate(candidate_campaign):
     """
     Update all position image urls PositionEntered and PositionForFriends from candidate details
@@ -3144,6 +3179,40 @@ def update_all_position_details_from_contest_measure(contest_measure):
     return results
 
 
+def reset_position_entered_image_details_from_organization(organization, twitter_profile_image_url_https,
+                                                           facebook_profile_image_url_https):
+    """
+    Reset all position image urls in PositionEntered from organization details
+    :param organization:
+    :param twitter_profile_image_url_https:
+    :param facebook_profile_image_url_https:
+    :return:
+    """
+    position_list_manager = PositionListManager()
+    position_manager = PositionManager()
+    reset_all_position_org_data_results = []
+    stance_we_are_looking_for = ANY_STANCE
+    friends_vs_public = PUBLIC_ONLY
+    speaker_image_url_https = None
+    if positive_value_exists(twitter_profile_image_url_https):
+        speaker_image_url_https = twitter_profile_image_url_https
+    elif positive_value_exists(facebook_profile_image_url_https):
+        speaker_image_url_https = facebook_profile_image_url_https
+
+    public_position_list = position_list_manager.retrieve_all_positions_for_organization(
+        organization.id, organization.we_vote_id, stance_we_are_looking_for, friends_vs_public)
+    for position_object in public_position_list:
+        reset_position_image_urls_results = position_manager.reset_position_image_details(
+            position_object, speaker_image_url_https=speaker_image_url_https)
+        reset_all_position_org_data_results.append(reset_position_image_urls_results)
+
+    results = {
+        'success':                      True,
+        'reset_all_position_results':  reset_all_position_org_data_results
+    }
+    return results
+
+
 def update_position_entered_details_from_organization(organization):
     """
     Update all position image urls PositionEntered from organization details
@@ -3179,6 +3248,42 @@ def update_position_entered_details_from_organization(organization):
         'positions_updated_count':      positions_updated_count,
         'positions_not_updated_count':  positions_not_updated_count,
         'update_all_position_results':  update_all_position_results
+    }
+    return results
+
+
+def reset_position_for_friends_image_details_from_voter(voter, twitter_profile_image_url_https,
+                                                        facebook_profile_image_url_https):
+    """
+    Reset all position image urls in PositionForFriends from we vote image details
+    :param voter:
+    :param twitter_profile_image_url_https:
+    :param facebook_profile_image_url_https:
+    :return:
+    """
+    position_list_manager = PositionListManager()
+    position_manager = PositionManager()
+    stance_we_are_looking_for = ANY_STANCE
+    friends_vs_public = FRIENDS_ONLY
+    speaker_image_url_https = None
+    reset_all_position_image_urls_results = []
+    if positive_value_exists(twitter_profile_image_url_https):
+        speaker_image_url_https = twitter_profile_image_url_https
+    elif positive_value_exists(facebook_profile_image_url_https):
+        speaker_image_url_https = facebook_profile_image_url_https
+
+    positions_for_voter_results = position_list_manager.retrieve_all_positions_for_voter(
+        voter.id, voter.we_vote_id, stance_we_are_looking_for, friends_vs_public)
+    if positions_for_voter_results['position_list_found']:
+        friends_position_list = positions_for_voter_results['position_list']
+        for position_object in friends_position_list:
+
+            reset_position_image_urls_results = position_manager.reset_position_image_details(
+                position_object, speaker_image_url_https=speaker_image_url_https)
+            reset_all_position_image_urls_results.append(reset_position_image_urls_results)
+    results = {
+        'success':                      True,
+        'reset_all_position_results':   reset_all_position_image_urls_results
     }
     return results
 
