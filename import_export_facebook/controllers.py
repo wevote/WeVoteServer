@@ -379,7 +379,7 @@ def facebook_disconnect_for_api(voter_device_id):  # facebookDisconnect
 
 def voter_facebook_sign_in_retrieve_for_api(voter_device_id):  # voterFacebookSignInRetrieve
     """
-
+    After signing into facebook, retrieve the voter information for use in the WebApp
     :param voter_device_id:
     :return:
     """
@@ -671,9 +671,6 @@ def voter_facebook_sign_in_retrieve_for_api(voter_device_id):  # voterFacebookSi
     update_organization_facebook_images(facebook_auth_response.facebook_user_id,
                                         facebook_profile_image_url_https,
                                         facebook_background_image_url_https)
-    middle_name = facebook_auth_response.facebook_middle_name if positive_value_exists(
-        facebook_auth_response.facebook_middle_name) else ""
-
     json_data = {
         'success':                                  success,
         'status':                                   status,
@@ -690,10 +687,14 @@ def voter_facebook_sign_in_retrieve_for_api(voter_device_id):  # voterFacebookSi
         'facebook_access_token':                    facebook_auth_response.facebook_access_token,
         'facebook_signed_request':                  facebook_auth_response.facebook_signed_request,
         'facebook_user_id':                         facebook_auth_response.facebook_user_id,
-        'facebook_email':                           facebook_auth_response.facebook_email,
-        'facebook_first_name':                      facebook_auth_response.facebook_first_name,
-        'facebook_middle_name':                     middle_name,
-        'facebook_last_name':                       facebook_auth_response.facebook_last_name,
+        'facebook_email':                           facebook_auth_response.facebook_email if
+            positive_value_exists(facebook_auth_response.facebook_email) else "",
+        'facebook_first_name':                      facebook_auth_response.facebook_first_name if
+            positive_value_exists(facebook_auth_response.facebook_first_name) else "",
+        'facebook_middle_name':                     facebook_auth_response.facebook_middle_name if
+            positive_value_exists(facebook_auth_response.facebook_middle_name) else "",
+        'facebook_last_name':                       facebook_auth_response.facebook_last_name if
+            positive_value_exists(facebook_auth_response.facebook_last_name) else "",
         'facebook_profile_image_url_https':         facebook_profile_image_url_https,
         'facebook_background_image_url_https':      facebook_background_image_url_https,
         'we_vote_hosted_profile_image_url_large':   we_vote_hosted_profile_image_url_large,
