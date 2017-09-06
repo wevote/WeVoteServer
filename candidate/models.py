@@ -1163,6 +1163,36 @@ class CandidateCampaignManager(models.Model):
         }
         return results
 
+    def reset_candidate_image_details(self, candidate, twitter_profile_image_url_https,
+                                      twitter_profile_background_image_url_https,
+                                      twitter_profile_banner_url_https):
+        """
+        Reset an candidate entry with original image details from we vote image.
+        """
+        success = False
+        status = "ENTERING_RESET_CANDIDATE_IMAGE_DETAILS"
+
+        if candidate:
+            if positive_value_exists(twitter_profile_image_url_https):
+                candidate.twitter_profile_image_url_https = twitter_profile_image_url_https
+            if positive_value_exists(twitter_profile_background_image_url_https):
+                candidate.twitter_profile_background_image_url_https = twitter_profile_background_image_url_https
+            if positive_value_exists(twitter_profile_banner_url_https):
+                candidate.twitter_profile_banner_url_https = twitter_profile_banner_url_https
+            candidate.we_vote_hosted_profile_image_url_large = ''
+            candidate.we_vote_hosted_profile_image_url_medium = ''
+            candidate.we_vote_hosted_profile_image_url_tiny = ''
+            candidate.save()
+            success = True
+            status = "RESET_CANDIDATE_IMAGE_DETAILS"
+
+        results = {
+            'success':      success,
+            'status':       status,
+            'candidate':    candidate,
+        }
+        return results
+
     def clear_candidate_twitter_details(self, candidate):
         """
         Update an candidate entry with details retrieved from the Twitter API.

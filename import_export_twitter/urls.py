@@ -13,6 +13,8 @@ urlpatterns = [
     # views_admin
     url(r'^(?P<candidate_id>[0-9]+)/refresh_twitter_candidate_details/$',
         views_admin.refresh_twitter_candidate_details_view, name='refresh_twitter_candidate_details',),
+    url(r'^delete_images_view/$',
+        views_admin.delete_images_view, name='delete_images_view',),
     url(r'^(?P<election_id>[0-9]+)/refresh_twitter_candidate_details_for_election/$',
         views_admin.refresh_twitter_candidate_details_for_election_view,
         name='refresh_twitter_candidate_details_for_election',),

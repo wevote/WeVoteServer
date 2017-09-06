@@ -356,6 +356,47 @@ class FacebookManager(models.Model):
             }
         return results
 
+    def reset_facebook_user_image_details(self, facebook_user_id, facebook_profile_image_url_https,
+                                          facebook_background_image_url_https):
+        """
+         Reset an facebook user entry with original image details from we vote image.
+        :param facebook_user_id:
+        :param facebook_profile_image_url_https:
+        :param facebook_background_image_url_https:
+        :return:
+        """
+        success = False
+        status = "ENTERING_RESET_FACEBOOK_USER_IMAGE_DETAILS"
+        values_changed = False
+        facebook_user_results = self.retrieve_facebook_user_by_facebook_user_id(facebook_user_id)
+        facebook_user = facebook_user_results['facebook_user']
+        if facebook_user_results['facebook_user_found']:
+            if positive_value_exists(facebook_profile_image_url_https):
+                facebook_user.facebook_profile_image_url_https = facebook_profile_image_url_https
+                values_changed = True
+            if positive_value_exists(facebook_background_image_url_https):
+                facebook_user.facebook_background_image_url_https = facebook_background_image_url_https
+                values_changed = True
+
+            facebook_user.we_vote_hosted_profile_image_url_large = ''
+            facebook_user.we_vote_hosted_profile_image_url_medium = ''
+            facebook_user.we_vote_hosted_profile_image_url_tiny = ''
+
+            if values_changed:
+                facebook_user.save()
+                success = True
+                status = "RESET_FACEBOOK_USER_IMAGE_DETAILS"
+            else:
+                success = True
+                status = "NO_CHANGES_RESET_TO_FACEBOOK_USER_IMAGE_DETAILS"
+
+        results = {
+            'success':                  success,
+            'status':                   status,
+            'facebook_user':            facebook_user,
+        }
+        return results
+
     def update_facebook_user_details(self, facebook_user,
                                      cached_facebook_profile_image_url_https=False,
                                      cached_facebook_background_image_url_https=False,

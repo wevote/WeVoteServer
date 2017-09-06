@@ -4593,6 +4593,43 @@ class PositionManager(models.Model):
         }
         return results
 
+    def reset_position_image_details(self, position_object, ballot_item_image_url_https=None,
+                                     speaker_image_url_https=None):
+        """
+        Reset Position image details as per we vote image details
+        :param position_object:
+        :param ballot_item_image_url_https:
+        :param speaker_image_url_https:
+        :return:
+        """
+        position_change = False
+        if positive_value_exists(ballot_item_image_url_https):
+            position_object.ballot_item_image_url_https = ballot_item_image_url_https
+            position_object.ballot_item_image_url_https_large = ''
+            position_object.ballot_item_image_url_https_medium = ''
+            position_object.ballot_item_image_url_https_tiny = ''
+            position_change = True
+        if positive_value_exists(speaker_image_url_https):
+            position_object.speaker_image_url_https = speaker_image_url_https
+            position_object.speaker_image_url_https_large = ''
+            position_object.speaker_image_url_https_medium = ''
+            position_object.speaker_image_url_https_tiny = ''
+            position_change = True
+
+        if position_change:
+            position_object.save()
+            success = True
+            status = "RESET_POSITION_IMAGE_DETAILS"
+        else:
+            success = False
+            status = "NO_CHANGES_RESET_TO_POSITION_IMAGE_DETAILS"
+        results = {
+            'success':  success,
+            'status':   status,
+            'position': position_object
+        }
+        return results
+
     def update_position_ballot_data_from_candidate(self, position_object, candidate_campaign):
         """
         Update position_object with candidate data.

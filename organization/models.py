@@ -1169,6 +1169,40 @@ class OrganizationManager(models.Manager):
 
         return True
 
+    def reset_organization_image_details(self, organization, twitter_profile_image_url_https=None,
+                                         twitter_profile_background_image_url_https=None,
+                                         twitter_profile_banner_url_https=None, facebook_profile_image_url_https=None):
+        """
+        Reset an organization entry with original image details from we vote image.
+        """
+        success = False
+        status = "ENTERING_RESET_ORGANIZATION_IMAGE_DETAILS"
+
+        if organization:
+            if positive_value_exists(twitter_profile_image_url_https):
+                organization.twitter_profile_image_url_https = twitter_profile_image_url_https
+            if positive_value_exists(twitter_profile_background_image_url_https):
+                organization.twitter_profile_background_image_url_https = twitter_profile_background_image_url_https
+            if positive_value_exists(twitter_profile_banner_url_https):
+                organization.twitter_profile_banner_url_https = twitter_profile_banner_url_https
+
+            if positive_value_exists(facebook_profile_image_url_https):
+                organization.facebook_profile_image_url_https = facebook_profile_image_url_https
+
+            organization.we_vote_hosted_profile_image_url_large = ''
+            organization.we_vote_hosted_profile_image_url_medium = ''
+            organization.we_vote_hosted_profile_image_url_tiny = ''
+            organization.save()
+            success = True
+            status = "RESET_ORGANIZATION_IMAGE_DETAILS"
+
+        results = {
+            'success':      success,
+            'status':       status,
+            'organization': organization,
+        }
+        return results
+
     def clear_organization_twitter_details(self, organization):
         """
         Update an organization entry with details retrieved from the Twitter API.

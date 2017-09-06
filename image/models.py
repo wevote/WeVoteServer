@@ -202,6 +202,26 @@ class WeVoteImageManager(models.Model):
         }
         return results
 
+    def delete_image_from_aws(self, we_vote_image_file_location):
+        """
+        Delete image from aws
+        :param we_vote_image_file_location:
+        :return:
+        """
+        try:
+
+            client = boto3.client(AWS_STORAGE_SERVICE, region_name=AWS_REGION_NAME,
+                                  aws_access_key_id=AWS_ACCESS_KEY_ID,
+                                  aws_secret_access_key=AWS_SECRET_ACCESS_KEY)
+            client.delete_object(AWS_STORAGE_BUCKET_NAME, we_vote_image_file_location)
+            image_deleted_from_aws = True
+        except Exception as e:
+            image_deleted_from_aws = False
+            exception_message = "delete_image_from_aws failed"
+            handle_exception(e, logger=logger, exception_message=exception_message)
+
+        return image_deleted_from_aws
+
     def save_we_vote_image_facebook_info(self, we_vote_image, facebook_user_id, image_width, image_height,
                                          facebook_image_url_https, same_day_image_version,
                                          kind_of_image_facebook_profile,
