@@ -31,7 +31,8 @@ def analytics_index_view(request):
 
     sitewide_election_metrics_list = []
     try:
-        sitewide_election_metrics_query = SitewideElectionMetrics.objects.order_by('-election_day_text')
+        sitewide_election_metrics_query = SitewideElectionMetrics.objects.using('analytics')\
+            .order_by('-election_day_text')
         sitewide_election_metrics_query = sitewide_election_metrics_query[:3]
         sitewide_election_metrics_list = list(sitewide_election_metrics_query)
     except SitewideElectionMetrics.DoesNotExist:
@@ -40,7 +41,7 @@ def analytics_index_view(request):
 
     sitewide_daily_metrics_list = []
     try:
-        sitewide_daily_metrics_query = SitewideDailyMetrics.objects.order_by('-date_as_integer')
+        sitewide_daily_metrics_query = SitewideDailyMetrics.objects.using('analytics').order_by('-date_as_integer')
         sitewide_daily_metrics_query = sitewide_daily_metrics_query[:3]
         sitewide_daily_metrics_list = list(sitewide_daily_metrics_query)
     except SitewideDailyMetrics.DoesNotExist:
@@ -49,7 +50,8 @@ def analytics_index_view(request):
 
     organization_election_metrics_list = []
     try:
-        organization_election_metrics_query = OrganizationElectionMetrics.objects.order_by('-election_day_text')
+        organization_election_metrics_query = OrganizationElectionMetrics.objects.using('analytics').\
+            order_by('-election_day_text')
         organization_election_metrics_query = organization_election_metrics_query[:3]
         organization_election_metrics_list = list(organization_election_metrics_query)
     except OrganizationElectionMetrics.DoesNotExist:
@@ -123,7 +125,7 @@ def analytics_action_list_view(request):
 
     messages_on_stage = get_messages(request)
     try:
-        analytics_action_query = AnalyticsAction.objects.order_by('-id')
+        analytics_action_query = AnalyticsAction.objects.using('analytics').order_by('-id')
 
         if positive_value_exists(analytics_action_search):
             search_words = analytics_action_search.split()
@@ -184,7 +186,8 @@ def organization_daily_metrics_view(request):
 
     messages_on_stage = get_messages(request)
     try:
-        organization_daily_metrics_query = OrganizationDailyMetrics.objects.order_by('-date_as_integer')
+        organization_daily_metrics_query = OrganizationDailyMetrics.objects.using('analytics').\
+            order_by('-date_as_integer')
         organization_daily_metrics_list = list(organization_daily_metrics_query)
     except OrganizationDailyMetrics.DoesNotExist:
         # This is fine
@@ -249,7 +252,8 @@ def organization_election_metrics_view(request):
 
     organization_election_metrics_list = []
     try:
-        organization_election_metrics_query = OrganizationElectionMetrics.objects.order_by('-election_day_text')
+        organization_election_metrics_query = OrganizationElectionMetrics.objects.using('analytics').\
+            order_by('-election_day_text')
         organization_election_metrics_list = list(organization_election_metrics_query)
     except OrganizationElectionMetrics.DoesNotExist:
         # This is fine
@@ -318,7 +322,7 @@ def sitewide_daily_metrics_view(request):
 
     messages_on_stage = get_messages(request)
     try:
-        sitewide_daily_metrics_query = SitewideDailyMetrics.objects.order_by('-date_as_integer')
+        sitewide_daily_metrics_query = SitewideDailyMetrics.objects.using('analytics').order_by('-date_as_integer')
         sitewide_daily_metrics_list = list(sitewide_daily_metrics_query)
     except SitewideDailyMetrics.DoesNotExist:
         # This is fine
@@ -385,7 +389,8 @@ def sitewide_election_metrics_view(request):
 
     messages_on_stage = get_messages(request)
     try:
-        sitewide_election_metrics_query = SitewideElectionMetrics.objects.order_by('-election_day_text')
+        sitewide_election_metrics_query = SitewideElectionMetrics.objects.using('analytics').\
+            order_by('-election_day_text')
         sitewide_election_metrics_list = list(sitewide_election_metrics_query)
     except SitewideElectionMetrics.DoesNotExist:
         # This is fine

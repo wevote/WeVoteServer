@@ -24,7 +24,7 @@ from office.models import ContestOffice, ContestOfficeListManager, ContestOffice
     ElectedOffice, ElectedOfficeManager
 from organization.models import Organization, OrganizationListManager, OrganizationManager, \
     NONPROFIT_501C3, NONPROFIT_501C4, POLITICAL_ACTION_COMMITTEE, \
-    CORPORATION, NEWS_CORPORATION, UNKNOWN
+    CORPORATION, NEWS_ORGANIZATION, UNKNOWN
 from politician.models import Politician, PoliticianManager
 from position.models import PositionManager, INFORMATION_ONLY, OPPOSE, SUPPORT
 from twitter.models import TwitterUserManager
@@ -316,7 +316,7 @@ def create_batch_row_action_organization(batch_description, batch_header_map, on
     #     (NONPROFIT_501C4, 'Nonprofit 501c4'),
     #     (POLITICAL_ACTION_COMMITTEE, 'Political Action Committee'),
     #     (CORPORATION, 'Corporation'),
-    #     (NEWS_CORPORATION, 'News Corporation'),
+    #     (NEWS_ORGANIZATION, 'News Corporation'),
     #     (UNKNOWN, 'Unknown'),
     # )
     organization_type_transformed = UNKNOWN  # Default to this

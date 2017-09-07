@@ -18,34 +18,37 @@ from wevote_settings.models import fetch_next_we_vote_id_last_org_integer, fetch
 CORPORATION = 'C'
 GROUP = 'G'  # Group of people (not an individual), but org status unknown
 INDIVIDUAL = 'I'  # One person
-NEWS_CORPORATION = 'NW'
+NEWS_ORGANIZATION = 'NW'
 NONPROFIT = 'NP'
 NONPROFIT_501C3 = 'C3'
 NONPROFIT_501C4 = 'C4'
 POLITICAL_ACTION_COMMITTEE = 'P'
+PUBLIC_FIGURE = 'PF'
 UNKNOWN = 'U'
 ORGANIZATION_TYPE_CHOICES = (
+    (CORPORATION, 'Corporation'),
     (GROUP, 'Group'),
+    (INDIVIDUAL, 'Individual'),
+    (NEWS_ORGANIZATION, 'News Corporation'),
     (NONPROFIT, 'Nonprofit'),
     (NONPROFIT_501C3, 'Nonprofit 501c3'),
     (NONPROFIT_501C4, 'Nonprofit 501c4'),
     (POLITICAL_ACTION_COMMITTEE, 'Political Action Committee'),
-    (CORPORATION, 'Corporation'),
-    (NEWS_CORPORATION, 'News Corporation'),
-    (INDIVIDUAL, 'One person'),
-    (UNKNOWN, 'Unknown'),
+    (PUBLIC_FIGURE, 'Public Figure'),
+    (UNKNOWN, 'Unknown Type'),
 )
 
 ORGANIZATION_TYPE_MAP = {
+    CORPORATION:                'Corporation',
     GROUP:                      'Group',
-    NONPROFIT:                  'Nonprofit',
+    INDIVIDUAL:                 'Individual',
+    NEWS_ORGANIZATION:          'News Organization',
+    NONPROFIT:                  'Nonprofit (c?)',
     NONPROFIT_501C3:            'Nonprofit 501c3',
     NONPROFIT_501C4:            'Nonprofit 501c4',
     POLITICAL_ACTION_COMMITTEE: 'Political Action Committee',
-    CORPORATION:                'Corporation',
-    NEWS_CORPORATION:           'News Corporation',
-    INDIVIDUAL:                 'One person',
-    UNKNOWN:                    'Unknown',
+    PUBLIC_FIGURE:              'Public Figure',
+    UNKNOWN:                    'Unknown Type',
 }
 
 alphanumeric = RegexValidator(r'^[0-9a-zA-Z]*$', message='Only alphanumeric characters are allowed.')
@@ -2024,13 +2027,13 @@ class Organization(models.Model):
     def is_corporation(self):
         return self.organization_type in CORPORATION
 
-    def is_news_corporation(self):
-        return self.organization_type in NEWS_CORPORATION
+    def is_news_organization(self):
+        return self.organization_type in NEWS_ORGANIZATION
 
     def is_organization_type_specified(self):
         return self.organization_type in (
             NONPROFIT_501C3, NONPROFIT_501C4, POLITICAL_ACTION_COMMITTEE,
-            CORPORATION, NEWS_CORPORATION)
+            CORPORATION, NEWS_ORGANIZATION)
 
     def generate_facebook_link(self):
         if self.organization_facebook:
