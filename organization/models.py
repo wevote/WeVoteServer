@@ -218,15 +218,49 @@ class OrganizationManager(models.Manager):
         """
         return self.retrieve_organization(0, '', '', twitter_user_id)
 
-    def retrieve_organization(self, organization_id, we_vote_id=None, vote_smart_id=None, twitter_user_id=None,
-                              facebook_user_id=None):
+    def retrieve_organization_from_facebook_id(self, facebook_id):
+        status = ""
+        facebook_manager = FacebookManager()
+        results = facebook_manager.retrieve_facebook_link_to_voter_from_facebook_id(facebook_id)
+        if results['facebook_link_to_voter_found']:
+            facebook_link_to_voter = results['facebook_link_to_voter']
+            if positive_value_exists(facebook_link_to_voter.voter_we_vote_id):
+                voter_manager = VoterManager()
+                voter_results = voter_manager.retrieve_voter_by_we_vote_id(facebook_link_to_voter.voter_we_vote_id)
+                if voter_results['voter_found']:
+                    voter = voter_results['voter']
+                    if positive_value_exists(voter.linked_organization_we_vote_id):
+                        return self.retrieve_organization_from_we_vote_id(voter.linked_organization_we_vote_id)
+                    else:
+                        status += "RETRIEVE_ORGANIZATION_FROM_FACEBOOK_ID-MISSING_LINKED_ORGANIZATION_WE_VOTE_ID"
+                else:
+                    status += "RETRIEVE_ORGANIZATION_FROM_FACEBOOK_ID-MISSING_VOTER"
+            else:
+                status += "RETRIEVE_ORGANIZATION_FROM_FACEBOOK_ID-MISSING_LINK_TO_VOTER_WE_VOTE_ID"
+        else:
+            status += "RETRIEVE_ORGANIZATION_FROM_FACEBOOK_ID-MISSING_FACEBOOK_LINK_TO_VOTER"
+
+        # If here, we failed to find it
+        results = {
+            'success':                      False,
+            'status':                       status,
+            'organization_found':           False,
+            'organization_id':              0,
+            'we_vote_id':                   "",
+            'organization':                 Organization(),
+            'error_result':                 {},
+            'DoesNotExist':                 False,
+            'MultipleObjectsReturned':      False,
+        }
+        return results
+
+    def retrieve_organization(self, organization_id, we_vote_id=None, vote_smart_id=None, twitter_user_id=None):
         """
         Get an organization, based the passed in parameters
         :param organization_id:
         :param we_vote_id:
         :param vote_smart_id:
         :param twitter_user_id:
-        :param facebook_user_id:
         :return: the matching organization object
         """
         error_result = False
@@ -256,22 +290,17 @@ class OrganizationManager(models.Manager):
                 organization_on_stage = Organization.objects.get(twitter_user_id=twitter_user_id)
                 organization_on_stage_id = organization_on_stage.id
                 status = "ORGANIZATION_FOUND_WITH_TWITTER_ID"
-            elif positive_value_exists(facebook_user_id):
-                status = "ERROR_RETRIEVING_ORGANIZATION_WITH_FACEBOOK_ID"
-                # Unfortunately "facebook_user_id" is "facebook_id" in the Organization table
-                organization_on_stage = Organization.objects.get(facebook_id=facebook_user_id)
-                organization_on_stage_id = organization_on_stage.id
-                status = "ORGANIZATION_FOUND_WITH_FACEBOOK_ID"
         except Organization.MultipleObjectsReturned as e:
             handle_record_found_more_than_one_exception(e, logger)
             error_result = True
             exception_multiple_object_returned = True
             status = "ERROR_MORE_THAN_ONE_ORGANIZATION_FOUND"
             # logger.warning("Organization.MultipleObjectsReturned")
-        except Organization.DoesNotExist:
+        except Organization.DoesNotExist as e:
+            status += ", ORGANIZATION_NOT_FOUND"
+            handle_exception(e, logger=logger, exception_message=status)
             error_result = True
             exception_does_not_exist = True
-            status += ", ORGANIZATION_NOT_FOUND"
             # logger.warning("Organization.DoesNotExist")
 
         organization_on_stage_found = True if organization_on_stage_id > 0 else False
@@ -1902,6 +1931,12 @@ class Organization(models.Model):
         elif positive_value_exists(self.wikipedia_photo_url):
             return self.wikipedia_photo_url
         return ''
+
+    def organization_type_display(self):
+        if self.organization_type in ORGANIZATION_TYPE_MAP:
+            return ORGANIZATION_TYPE_MAP[self.organization_type]
+        else:
+            return self.organization_type
 
     def twitter_profile_image_url_https_bigger(self):
         if self.we_vote_hosted_profile_image_url_large:

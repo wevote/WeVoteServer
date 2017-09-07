@@ -671,6 +671,7 @@ def voter_facebook_sign_in_retrieve_for_api(voter_device_id):  # voterFacebookSi
     update_organization_facebook_images(facebook_auth_response.facebook_user_id,
                                         facebook_profile_image_url_https,
                                         facebook_background_image_url_https)
+
     json_data = {
         'success':                                  success,
         'status':                                   status,
@@ -688,13 +689,13 @@ def voter_facebook_sign_in_retrieve_for_api(voter_device_id):  # voterFacebookSi
         'facebook_signed_request':                  facebook_auth_response.facebook_signed_request,
         'facebook_user_id':                         facebook_auth_response.facebook_user_id,
         'facebook_email':                           facebook_auth_response.facebook_email if
-            positive_value_exists(facebook_auth_response.facebook_email) else "",
+        positive_value_exists(facebook_auth_response.facebook_email) else "",
         'facebook_first_name':                      facebook_auth_response.facebook_first_name if
-            positive_value_exists(facebook_auth_response.facebook_first_name) else "",
+        positive_value_exists(facebook_auth_response.facebook_first_name) else "",
         'facebook_middle_name':                     facebook_auth_response.facebook_middle_name if
-            positive_value_exists(facebook_auth_response.facebook_middle_name) else "",
+        positive_value_exists(facebook_auth_response.facebook_middle_name) else "",
         'facebook_last_name':                       facebook_auth_response.facebook_last_name if
-            positive_value_exists(facebook_auth_response.facebook_last_name) else "",
+        positive_value_exists(facebook_auth_response.facebook_last_name) else "",
         'facebook_profile_image_url_https':         facebook_profile_image_url_https,
         'facebook_background_image_url_https':      facebook_background_image_url_https,
         'we_vote_hosted_profile_image_url_large':   we_vote_hosted_profile_image_url_large,
@@ -714,9 +715,7 @@ def update_organization_facebook_images(facebook_user_id, facebook_profile_image
     :return:
     """
     organization_manager = OrganizationManager()
-    organization_id = 0
-    organization_results = organization_manager.retrieve_organization(organization_id=organization_id,
-                                                                      facebook_user_id=facebook_user_id)
+    organization_results = organization_manager.retrieve_organization_from_facebook_id(facebook_id=facebook_user_id)
     if organization_results['success']:
         organization = organization_results['organization']
 

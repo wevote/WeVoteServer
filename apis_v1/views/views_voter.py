@@ -146,6 +146,10 @@ def voter_address_retrieve_view(request):  # voterAddressRetrieve
         status += 'GUESS_IF_NO_ADDRESS_SAVED' + ", "
         # If here, we are going to guess at the voter's location based on IP address
         voter_location_results = voter_location_retrieve_from_ip_for_api(request)
+        # # TODO DALE TEMP
+        # voter_location_results['voter_location_found'] = True
+        # voter_location_results['voter_location'] = "New York, NY"
+        # voter_location_results['status'] = "TODO DALE Temp setting of voter_location to New York"
 
         if voter_location_results['voter_location_found']:
             status += 'VOTER_ADDRESS_RETRIEVE-VOTER_LOCATION_FOUND_FROM_IP '
@@ -240,7 +244,7 @@ def voter_address_retrieve_view(request):  # voterAddressRetrieve
                     'voter_device_id': voter_device_id,
                     'address_type': '',
                     'text_for_map_search': '',
-                    'google_civic_election_id': 0,
+                    'google_civic_election_id': google_civic_election_id,
                     'latitude': '',
                     'longitude': '',
                     'normalized_line1': '',
