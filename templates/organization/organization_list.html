@@ -109,6 +109,7 @@
             <td></td>
             <td>Organization</td>
             <td>Twitter</td>
+            <td>Type</td>
             <td>Vote Smart ID</td>
             <td>State</td>
             <td>Wikipedia?</td>
@@ -126,8 +127,9 @@
             </td>
             <td>{% if organization.organization_twitter_handle %}{{ organization.organization_twitter_handle }} <br />
                 ({{ organization.twitter_followers_count }} followers){% endif %}</td>
+            <td>{{ organization.organization_type_display }}</td>
             <td>{% if organization.vote_smart_id %}{{ organization.vote_smart_id }}{% endif %}</td>
-            <td>{{ organization.state_served_code }}</td>
+            <td>{{ organization.state_served_code|default_if_none:"" }}</td>
             <td>{% if organization.wikipedia_page_id %}
                 <a href="{{ organization.generate_wikipedia_link }}" target="_blank">W yes</a>{% endif %}</td>
             <td><a href="{% url 'organization:organization_edit' organization.id %}" style="font-size: .65em">{{ organization.we_vote_id }}</a></td>

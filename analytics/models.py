@@ -87,7 +87,7 @@ class AnalyticsAction(models.Model):
         if not self.google_civic_election_id:
             return
         try:
-            election = Election.objects.get(google_civic_election_id=self.google_civic_election_id)
+            election = Election.objects.using('readonly').get(google_civic_election_id=self.google_civic_election_id)
         except Election.MultipleObjectsReturned as e:
             logger.error("position.election Found multiple")
             return
@@ -97,7 +97,7 @@ class AnalyticsAction(models.Model):
 
     def organization(self):
         try:
-            organization = Organization.objects.get(we_vote_id=self.organization_we_vote_id)
+            organization = Organization.objects.using('readonly').get(we_vote_id=self.organization_we_vote_id)
         except Organization.MultipleObjectsReturned as e:
             logger.error("analytics.organization Found multiple")
             return
@@ -257,7 +257,7 @@ class AnalyticsManager(models.Model):
 
         if not missing_required_variables:
             try:
-                metrics_saved, created = OrganizationDailyMetrics.objects.update_or_create(
+                metrics_saved, created = OrganizationDailyMetrics.objects.using('analytics').update_or_create(
                     organization_we_vote_id=organization_we_vote_id,
                     date_as_integer=date_as_integer,
                     defaults=organization_daily_metrics_values
@@ -294,7 +294,7 @@ class AnalyticsManager(models.Model):
 
         if not missing_required_variables:
             try:
-                metrics_saved, created = OrganizationElectionMetrics.objects.update_or_create(
+                metrics_saved, created = OrganizationElectionMetrics.objects.using('analytics').update_or_create(
                     google_civic_election_id=google_civic_election_id,
                     organization_we_vote_id__iexact=organization_we_vote_id,
                     defaults=organization_election_metrics_values
@@ -321,7 +321,7 @@ class AnalyticsManager(models.Model):
             date_as_integer = sitewide_daily_metrics_values['date_as_integer']
 
             try:
-                metrics_saved, created = SitewideDailyMetrics.objects.update_or_create(
+                metrics_saved, created = SitewideDailyMetrics.objects.using('analytics').update_or_create(
                     date_as_integer=date_as_integer,
                     defaults=sitewide_daily_metrics_values
                 )
@@ -347,7 +347,7 @@ class AnalyticsManager(models.Model):
             google_civic_election_id = sitewide_election_metrics_values['google_civic_election_id']
 
             try:
-                metrics_saved, created = SitewideElectionMetrics.objects.update_or_create(
+                metrics_saved, created = SitewideElectionMetrics.objects.using('analytics').update_or_create(
                     google_civic_election_id=google_civic_election_id,
                     defaults=sitewide_election_metrics_values
                 )
@@ -431,7 +431,8 @@ class OrganizationElectionMetrics(models.Model):
         if not self.google_civic_election_id:
             return
         try:
-            election = Election.objects.get(google_civic_election_id=self.google_civic_election_id)
+            # We retrieve this from the read-only database (as opposed to the analytics database)
+            election = Election.objects.using('readonly').get(google_civic_election_id=self.google_civic_election_id)
         except Election.MultipleObjectsReturned as e:
             logger.error("position.election Found multiple")
             return
@@ -441,7 +442,7 @@ class OrganizationElectionMetrics(models.Model):
 
     def organization(self):
         try:
-            organization = Organization.objects.get(we_vote_id=self.organization_we_vote_id)
+            organization = Organization.objects.using('readonly').get(we_vote_id=self.organization_we_vote_id)
         except Organization.MultipleObjectsReturned as e:
             logger.error("analytics.organization Found multiple")
             return

@@ -19,6 +19,7 @@ from election.models import Election, ElectionManager
 from issue.models import ALPHABETICAL_ASCENDING, IssueListManager, IssueManager, \
     OrganizationLinkToIssueList, OrganizationLinkToIssueManager
 from measure.models import ContestMeasure, ContestMeasureList, ContestMeasureManager
+import operator
 from organization.models import OrganizationListManager, OrganizationManager, ORGANIZATION_TYPE_MAP, UNKNOWN
 from position.models import PositionEntered, PositionManager, INFORMATION_ONLY, OPPOSE, \
     STILL_DECIDING, SUPPORT
@@ -168,7 +169,7 @@ def organization_list_view(request):
             new_filter = Q(we_vote_id__icontains=one_word)
             filters.append(new_filter)
 
-            new_filter = Q(vote_smart_id_icontains=one_word)
+            new_filter = Q(vote_smart_id__icontains=one_word)
             filters.append(new_filter)
 
             # Add the first query
@@ -212,7 +213,8 @@ def organization_list_view(request):
     sorted_state_list = sorted(state_list.items())
 
     organization_types_map = ORGANIZATION_TYPE_MAP
-    organization_types_list = sorted(organization_types_map.items())
+    # Sort by organization_type value (instead of key)
+    organization_types_list = sorted(organization_types_map.items(), key=operator.itemgetter(1))
 
     template_values = {
         'messages_on_stage':        messages_on_stage,
@@ -305,7 +307,8 @@ def organization_edit_view(request, organization_id):
     sorted_state_list = sorted(state_list.items())
 
     organization_types_map = ORGANIZATION_TYPE_MAP
-    organization_types_list = sorted(organization_types_map.items())
+    # Sort by organization_type value (instead of key)
+    organization_types_list = sorted(organization_types_map.items(), key=operator.itemgetter(1))
 
     if organization_on_stage_found:
         template_values = {

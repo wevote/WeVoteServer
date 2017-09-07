@@ -146,6 +146,10 @@ def voter_address_retrieve_view(request):  # voterAddressRetrieve
         status += 'GUESS_IF_NO_ADDRESS_SAVED' + ", "
         # If here, we are going to guess at the voter's location based on IP address
         voter_location_results = voter_location_retrieve_from_ip_for_api(request)
+        # # TODO DALE TEMP
+        # voter_location_results['voter_location_found'] = True
+        # voter_location_results['voter_location'] = "New York, NY"
+        # voter_location_results['status'] = "TODO DALE Temp setting of voter_location to New York"
 
         if voter_location_results['voter_location_found']:
             status += 'VOTER_ADDRESS_RETRIEVE-VOTER_LOCATION_FOUND_FROM_IP '
@@ -240,7 +244,7 @@ def voter_address_retrieve_view(request):  # voterAddressRetrieve
                     'voter_device_id': voter_device_id,
                     'address_type': '',
                     'text_for_map_search': '',
-                    'google_civic_election_id': 0,
+                    'google_civic_election_id': google_civic_election_id,
                     'latitude': '',
                     'longitude': '',
                     'normalized_line1': '',
@@ -816,6 +820,9 @@ def voter_guides_to_follow_retrieve_view(request):  # voterGuidesToFollowRetriev
     use_test_election = False if use_test_election == 'False' else use_test_election
     maximum_number_to_retrieve = get_maximum_number_to_retrieve_from_request(request)
     filter_voter_guides_by_issue = request.GET.get('filter_voter_guides_by_issue', False)
+    # If we want to show voter guides associated with election first, but then show more after those are exhausted,
+    #  set add_voter_guides_not_from_election to True
+    add_voter_guides_not_from_election = request.GET.get('add_voter_guides_not_from_election', False)
 
     if filter_voter_guides_by_issue == 'true':
         filter_voter_guides_by_issue = True
@@ -854,7 +861,8 @@ def voter_guides_to_follow_retrieve_view(request):  # voterGuidesToFollowRetriev
 
     results = voter_guides_to_follow_retrieve_for_api(voter_device_id, kind_of_ballot_item, ballot_item_we_vote_id,
                                                       google_civic_election_id, search_string,
-                                                      maximum_number_to_retrieve, filter_voter_guides_by_issue)
+                                                      maximum_number_to_retrieve, filter_voter_guides_by_issue,
+                                                      add_voter_guides_not_from_election)
     return HttpResponse(json.dumps(results['json_data']), content_type='application/json')
 
 

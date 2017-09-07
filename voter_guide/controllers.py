@@ -360,7 +360,9 @@ def voter_guide_possibility_save_for_api(voter_device_id, voter_guide_possibilit
 def voter_guides_to_follow_retrieve_for_api(voter_device_id,  # voterGuidesToFollowRetrieve
                                             kind_of_ballot_item='', ballot_item_we_vote_id='',
                                             google_civic_election_id=0, search_string='',
-                                            maximum_number_to_retrieve=0, filter_voter_guides_by_issue=False):
+                                            maximum_number_to_retrieve=0, filter_voter_guides_by_issue=False,
+                                            add_voter_guides_not_from_election=False):
+    status = ""
     # Get voter_id from the voter_device_id so we can figure out which voter_guides to offer
     results = is_voter_device_id_valid(voter_device_id)
     if not results['success']:
@@ -444,7 +446,7 @@ def voter_guides_to_follow_retrieve_for_api(voter_device_id,  # voterGuidesToFol
                                                                      search_string, filter_voter_guides_by_issue,
                                                                      organization_we_vote_id_list_for_voter_issues, )
             success = results['success']
-            status = results['status']
+            status += results['status']
             voter_guide_list = results['voter_guide_list']
         elif positive_value_exists(google_civic_election_id):
             # This retrieve also does the reordering
@@ -457,6 +459,18 @@ def voter_guides_to_follow_retrieve_for_api(voter_device_id,  # voterGuidesToFol
             success = results['success']
             voter_guide_list = results['voter_guide_list']
             status = results['status'] + ", len(voter_guide_list): " + str(len(voter_guide_list)) + " "
+            if add_voter_guides_not_from_election:
+                status += "ADDING_VOTER_GUIDES_NOT_FROM_ELECTION "
+                non_election_results = retrieve_voter_guides_to_follow_generic_for_api(
+                    voter_id, search_string,
+                    filter_voter_guides_by_issue,
+                    organization_we_vote_id_list_for_voter_issues,
+                    maximum_number_to_retrieve,
+                    'twitter_followers_count', 'desc')
+                if non_election_results['success']:
+                    status += non_election_results['status']
+                    non_election_voter_guide_list = non_election_results['voter_guide_list']
+                    voter_guide_list = voter_guide_list + non_election_voter_guide_list
         else:
             results = retrieve_voter_guides_to_follow_generic_for_api(voter_id, search_string,
                                                                       filter_voter_guides_by_issue,
@@ -464,11 +478,11 @@ def voter_guides_to_follow_retrieve_for_api(voter_device_id,  # voterGuidesToFol
                                                                       maximum_number_to_retrieve,
                                                                       'twitter_followers_count', 'desc')
             success = results['success']
-            status = results['status']
+            status += results['status']
             voter_guide_list = results['voter_guide_list']
 
     except Exception as e:
-        status = 'FAILED voter_guides_to_follow_retrieve_for_api, retrieve_voter_guides_for_election ' \
+        status += 'FAILED voter_guides_to_follow_retrieve_for_api, retrieve_voter_guides_for_election ' \
                  '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
         success = False
 
@@ -953,7 +967,7 @@ def retrieve_voter_guides_to_follow_generic_for_api(voter_id, search_string, fil
         voter_guide_list = position_list_manager.remove_positions_unrelated_to_issues(
             voter_guide_list, organization_we_vote_id_list_for_voter_issues)
 
-    status = 'SUCCESSFUL_RETRIEVE_OF_VOTER_GUIDES_GENERIC'
+    status = 'SUCCESSFUL_RETRIEVE_OF_VOTER_GUIDES_GENERIC '
     success = True
 
     if len(voter_guide_list):
