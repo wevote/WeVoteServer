@@ -71,3 +71,5 @@ Now you're the `ubuntu` user, within `virtualenv`, and in the root application d
 - `./manage.py migrate`
 
 And so on.
+
+This is a test.
