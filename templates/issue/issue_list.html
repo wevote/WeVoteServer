@@ -68,6 +68,7 @@
             <td>&nbsp;</td>
             <td>&nbsp;</td>
             <td>Issue Name</td>
+            <td>Image Notes</td>
             <td>Linked Org Count</td>
             <td>Followers Count</td>
             <td>Issue Description</td>
@@ -76,13 +77,13 @@
         <tr>
             <td>{{ forloop.counter }}</td>
             <td>
-                {% if issue.issue_photo_url %}
-                <a href="{% url 'issue:issue_edit' issue.we_vote_id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
-                    <img src='{{ issue.issue_photo_url }}' height="25px" />
-                </a>
-                {% endif %}
             </td>
             <td><a href="{% url 'issue:issue_edit' issue.we_vote_id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">{{ issue.issue_name }}</a></td>
+            <td>
+                {% if issue.issue_image_url %}
+                local_image
+                {% endif %}
+            </td>
             <td>{{ issue.linked_organization_count }}</td>
             <td>{{ issue.issue_followers_count }}</td>
             <td>{{ issue.issue_description }}</td>

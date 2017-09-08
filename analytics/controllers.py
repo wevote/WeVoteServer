@@ -65,6 +65,14 @@ def save_analytics_action_for_api(action_constant, voter_we_vote_id, voter_id,
         if save_results['action_saved']:
             action = save_results['action']
             date_as_integer = action.date_as_integer
+            status += save_results['status']
+            success = save_results['success']
+        else:
+            status += "ACTION_VOTER_GUIDE_VISIT-NOT_SAVED "
+            success = False
+    else:
+        status += "NOT_SAVING_ACTION_CONSTANT_YET: " + ACTION_VOTER_GUIDE_VISIT + " "
+        success = False
 
     results = {
         'status':                   status,

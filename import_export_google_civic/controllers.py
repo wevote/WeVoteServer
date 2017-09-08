@@ -21,7 +21,7 @@ from polling_location.models import PollingLocationManager
 import requests
 from voter.models import fetch_voter_id_from_voter_device_link, VoterAddressManager
 from wevote_functions.functions import convert_state_text_to_state_code, convert_to_int, \
-    extract_state_from_ocd_division_id, is_voter_device_id_valid, logger, positive_value_exists
+    extract_state_from_ocd_division_id, is_voter_device_id_valid, logger, positive_value_exists, STATE_CODE_MAP
 
 GOOGLE_CIVIC_API_KEY = get_environment_variable("GOOGLE_CIVIC_API_KEY")
 ELECTION_QUERY_URL = get_environment_variable("ELECTION_QUERY_URL")
@@ -176,13 +176,13 @@ def process_contest_office_from_structured_json(
     if 'numberVotingFor' in one_contest_office_structured_json:
         number_voting_for = one_contest_office_structured_json['numberVotingFor']
     else:
-        number_voting_for = 1
+        number_voting_for = str(1)
 
     # The number of candidates that will be elected to office in this contest.
     if 'numberElected' in one_contest_office_structured_json:
         number_elected = one_contest_office_structured_json['numberElected']
     else:
-        number_elected = 1
+        number_elected = str(1)
 
     # These are several fields that are shared in common between offices and measures
     results = process_contest_common_fields_from_structured_json(one_contest_office_structured_json)
@@ -269,7 +269,14 @@ def process_contest_office_from_structured_json(
             'google_civic_election_id': google_civic_election_id,
         }
         if positive_value_exists(state_code):
-            updated_contest_office_values["state_code"] = state_code.lower()
+            state_code_for_error_checking = state_code.lower()
+            # Limit to 2 digits so we don't exceed the database limit
+            state_code_for_error_checking = state_code_for_error_checking[-2:]
+            # Make sure we recognize the state
+            list_of_states_matching = [key.lower() for key, value in STATE_CODE_MAP.items() if
+                                       state_code_for_error_checking in key.lower()]
+            state_code_for_error_checking = list_of_states_matching.pop()
+            updated_contest_office_values["state_code"] = state_code_for_error_checking
         if positive_value_exists(district_id):
             updated_contest_office_values["district_id"] = district_id
         if positive_value_exists(district_name):
@@ -429,7 +436,7 @@ def process_contests_from_structured_json(
         # Is the contest is a referendum/initiative/measure?
         if contest_type.lower() == 'referendum':  # Referendum
             process_contest_results = process_contest_referendum_from_structured_json(
-                one_contest, google_civic_election_id, ocd_division_id, local_ballot_order, state_code, voter_id,
+                one_contest, google_civic_election_id, state_code, ocd_division_id, local_ballot_order, voter_id,
                 polling_location_we_vote_id)
             if process_contest_results['saved']:
                 contests_saved += 1
@@ -440,7 +447,7 @@ def process_contests_from_structured_json(
         # All other contests are for an elected office
         else:
             process_contest_results = process_contest_office_from_structured_json(
-                one_contest, google_civic_election_id, ocd_division_id, local_ballot_order, state_code, voter_id,
+                one_contest, google_civic_election_id, state_code, ocd_division_id, local_ballot_order, voter_id,
                 polling_location_we_vote_id)
             if process_contest_results['saved']:
                 contests_saved += 1
@@ -506,6 +513,7 @@ def retrieve_one_ballot_from_google_civic_api(text_for_map_search, incoming_goog
     election_data_retrieved = False
     polling_location_retrieved = False
     contests_retrieved = False
+    election_administration_data_retrieved = False
     google_civic_election_id = 0
     error = structured_json.get('error', {})
     errors = error.get('errors', {})
@@ -535,11 +543,18 @@ def retrieve_one_ballot_from_google_civic_api(text_for_map_search, incoming_goog
             contests_retrieved = True
             success = True
 
+    if 'state' in structured_json:
+        if len(structured_json['state']) > 0:
+            if 'electionAdministrationBody' in structured_json['state'][0]:
+                election_administration_data_retrieved = True
+                success = True
+
     results = {
         'success': success,
         'election_data_retrieved': election_data_retrieved,
         'polling_location_retrieved': polling_location_retrieved,
         'contests_retrieved': contests_retrieved,
+        'election_administration_data_retrieved': election_administration_data_retrieved,
         'structured_json': structured_json,
     }
     return results
@@ -943,8 +958,8 @@ def voter_ballot_items_retrieve_from_google_civic_for_api(
 
 
 def process_contest_referendum_from_structured_json(
-        one_contest_referendum_structured_json, google_civic_election_id, ocd_division_id, local_ballot_order,
-        state_code, voter_id, polling_location_we_vote_id):
+        one_contest_referendum_structured_json, google_civic_election_id, state_code,
+        ocd_division_id, local_ballot_order, voter_id, polling_location_we_vote_id):
     """
     "referendumTitle": "Proposition 45",
     "referendumSubtitle": "Healthcare Insurance. Rate Changes. Initiative Statute.",
@@ -983,7 +998,14 @@ def process_contest_referendum_from_structured_json(
             'google_civic_election_id': google_civic_election_id,
         }
         if positive_value_exists(state_code):
-            updated_contest_measure_values["state_code"] = state_code.lower()
+            state_code_for_error_checking = state_code.lower()
+            # Limit to 2 digits so we don't exceed the database limit
+            state_code_for_error_checking = state_code_for_error_checking[-2:]
+            # Make sure we recognize the state
+            list_of_states_matching = [key.lower() for key, value in STATE_CODE_MAP.items() if
+                                       state_code_for_error_checking in key.lower()]
+            state_code_for_error_checking = list_of_states_matching.pop()
+            updated_contest_measure_values["state_code"] = state_code_for_error_checking
         if positive_value_exists(district_id):
             updated_contest_measure_values["district_id"] = district_id
         if positive_value_exists(district_name):
