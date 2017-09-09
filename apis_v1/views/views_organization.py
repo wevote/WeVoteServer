@@ -16,7 +16,8 @@ from organization.controllers import organization_retrieve_for_api, organization
     organization_search_for_api, organizations_followed_retrieve_for_api
 from voter.models import voter_has_authority, VoterManager
 import wevote_functions.admin
-from wevote_functions.functions import convert_to_int, get_voter_device_id, positive_value_exists
+from wevote_functions.functions import convert_to_int, get_voter_device_id, \
+    get_maximum_number_to_retrieve_from_request, positive_value_exists
 
 logger = wevote_functions.admin.get_logger(__name__)
 
@@ -225,16 +226,3 @@ def organizations_followed_retrieve_api_view(request):  # organizationsFollowedR
                                                    maximum_number_to_retrieve=maximum_number_to_retrieve,
                                                    auto_followed_from_twitter_suggestion=
                                                    auto_followed_from_twitter_suggestion)
-
-
-def get_maximum_number_to_retrieve_from_request(request):
-    if 'maximum_number_to_retrieve' in request.GET:
-        maximum_number_to_retrieve = request.GET['maximum_number_to_retrieve']
-    else:
-        maximum_number_to_retrieve = 40
-    if maximum_number_to_retrieve is "":
-        maximum_number_to_retrieve = 40
-    else:
-        maximum_number_to_retrieve = convert_to_int(maximum_number_to_retrieve)
-
-    return maximum_number_to_retrieve
