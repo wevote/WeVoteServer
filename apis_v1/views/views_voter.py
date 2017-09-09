@@ -38,8 +38,8 @@ from voter_guide.controllers import voter_guide_possibility_retrieve_for_api, vo
     voter_guides_to_follow_retrieve_for_api, voter_guides_followed_by_organization_retrieve_for_api, \
     voter_guide_followers_retrieve_for_api, voter_follow_all_organizations_followed_by_organization_for_api
 import wevote_functions.admin
-from wevote_functions.functions import convert_to_int, get_voter_device_id, is_voter_device_id_valid, \
-    positive_value_exists
+from wevote_functions.functions import convert_to_int, get_maximum_number_to_retrieve_from_request, \
+    get_voter_device_id, is_voter_device_id_valid, positive_value_exists
 from donate.controllers import donation_history_for_a_voter
 
 logger = wevote_functions.admin.get_logger(__name__)
@@ -782,19 +782,6 @@ def voter_guide_followers_retrieve_view(request):  # voterGuideFollowersRetrieve
     return voter_guide_followers_retrieve_for_api(
         voter_device_id, organization_we_vote_id=organization_we_vote_id,
         maximum_number_to_retrieve=maximum_number_to_retrieve)
-
-
-def get_maximum_number_to_retrieve_from_request(request):
-    if 'maximum_number_to_retrieve' in request.GET:
-        maximum_number_to_retrieve = request.GET['maximum_number_to_retrieve']
-    else:
-        maximum_number_to_retrieve = 40
-    if maximum_number_to_retrieve is "":
-        maximum_number_to_retrieve = 40
-    else:
-        maximum_number_to_retrieve = convert_to_int(maximum_number_to_retrieve)
-
-    return maximum_number_to_retrieve
 
 
 def voter_guides_ignored_retrieve_view(request):  # voterGuidesIgnoredRetrieve

@@ -513,15 +513,19 @@ def election_summary_view(request, election_local_id):
         return redirect_to_sign_in_page(request, authority_required)
 
     show_offices_and_candidates = request.GET.get('show_offices_and_candidates', False)
-
+    google_civic_election_id = request.GET.get('google_civic_election_id', 0)
     election_local_id = convert_to_int(election_local_id)
-    google_civic_election_id = ""
+
     election_on_stage_found = False
     election_on_stage = Election()
 
     try:
-        election_on_stage = Election.objects.get(id=election_local_id)
+        if positive_value_exists(election_local_id):
+            election_on_stage = Election.objects.get(id=election_local_id)
+        else:
+            election_on_stage = Election.objects.get(google_civic_election_id=google_civic_election_id)
         election_on_stage_found = True
+        election_local_id = election_on_stage.id
         google_civic_election_id = election_on_stage.google_civic_election_id
     except Election.MultipleObjectsReturned as e:
         handle_record_found_more_than_one_exception(e, logger=logger)
