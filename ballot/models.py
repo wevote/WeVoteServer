@@ -955,6 +955,24 @@ class BallotReturnedManager(models.Model):
         }
         return results
 
+    def fetch_most_recent_election_in_this_state(self, state_code):
+        """
+        Find the most recent election in the past that has at least one ballot at a polling location
+        :param state_code:
+        :return:
+        """
+        # TODO DALE Temporary hack - to be implemented
+        return 4389
+
+    def fetch_soonest_upcoming_election_in_this_state(self, state_code):
+        """
+        Find the soonest upcoming election in the future with at least one ballot at a polling location
+        :param state_code:
+        :return:
+        """
+        # TODO DALE Temporary hack - to be implemented
+        return 4389
+
     def find_closest_ballot_returned(self, text_for_map_search, google_civic_election_id=0):
         """
         We search for the closest address for this election in the ballot_returned table. We never have to worry
@@ -1028,6 +1046,18 @@ class BallotReturnedManager(models.Model):
             state_code = address.split(', ')[-2][:2]
             if positive_value_exists(state_code):
                 ballot_returned_query = ballot_returned_query.filter(normalized_state__iexact=state_code)
+                # If we have an active election coming up,
+                upcoming_google_civic_election_id = self.fetch_soonest_upcoming_election_in_this_state(state_code)
+                if positive_value_exists(upcoming_google_civic_election_id):
+                    # Limit the search to the next election with ballot items
+                    ballot_returned_query = ballot_returned_query.filter(
+                        google_civic_election_id=upcoming_google_civic_election_id)
+                else:
+                    past_google_civic_election_id = self.fetch_most_recent_election_in_this_state(state_code)
+                    if positive_value_exists(past_google_civic_election_id):
+                        # Limit the search to the most recent election with ballot items
+                        ballot_returned_query = ballot_returned_query.filter(
+                            google_civic_election_id=past_google_civic_election_id)
             ballot_returned_query = ballot_returned_query.annotate(distance=(F('latitude') - location.latitude) ** 2 +
                                                                             (F('longitude') - location.longitude) ** 2)
             ballot = ballot_returned_query.order_by('distance').first()

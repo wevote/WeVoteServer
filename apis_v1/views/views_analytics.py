@@ -81,9 +81,9 @@ def save_analytics_action_view(request):  # saveAnalyticsAction
         return HttpResponse(json.dumps(json_data), content_type='application/json')
 
     results = save_analytics_action_for_api(action_constant, voter_we_vote_id, voter_id,
-                                             organization_we_vote_id, organization_id,
-                                             google_civic_election_id, ballot_item_we_vote_id,
-                                             voter_device_id_for_storage)
+                                            organization_we_vote_id, organization_id,
+                                            google_civic_election_id, ballot_item_we_vote_id,
+                                            voter_device_id_for_storage)
 
     status += results['status']
     json_data = {
