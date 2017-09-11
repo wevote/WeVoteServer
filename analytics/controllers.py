@@ -6,7 +6,7 @@ from .models import AnalyticsCountManager, AnalyticsManager, ACTION_VOTER_GUIDE_
     ACTION_ORGANIZATION_FOLLOW, ACTION_ORGANIZATION_AUTO_FOLLOW, \
     ACTION_ISSUE_FOLLOW, ACTION_BALLOT_VISIT, \
     ACTION_POSITION_TAKEN, ACTION_VOTER_TWITTER_AUTH, ACTION_VOTER_FACEBOOK_AUTH, \
-    ACTION_WELCOME_ENTRY, ACTION_FRIEND_ENTRY
+    ACTION_WELCOME_ENTRY, ACTION_FRIEND_ENTRY, ACTIONS_THAT_REQUIRE_ORGANIZATION_IDS
 
 from config.base import get_environment_variable
 import wevote_functions.admin
@@ -25,26 +25,34 @@ def save_analytics_action_for_api(action_constant, voter_we_vote_id, voter_id,
     success = True
     status = "SAVE_ANALYTICS_ACTION "
     date_as_integer = 0
+    required_variables_missing = False
+
+    action_requires_organization_ids = True if action_constant in ACTIONS_THAT_REQUIRE_ORGANIZATION_IDS else False
 
     if not positive_value_exists(action_constant):
         success = False
+        required_variables_missing = True
         status += "MISSING_ACTION_CONSTANT "
     if not positive_value_exists(voter_we_vote_id):
         success = False
+        required_variables_missing = True
         status += "MISSING_VOTER_WE_VOTE_ID "
     if not positive_value_exists(voter_id):
         success = False
+        required_variables_missing = True
         status += "MISSING_VOTER_ID "
-    if action_constant == ACTION_VOTER_GUIDE_VISIT:
+    if action_requires_organization_ids:
         # For these actions, make sure we have organization ids
         if not positive_value_exists(organization_we_vote_id):
             success = False
+            required_variables_missing = True
             status += "MISSING_ORGANIZATION_WE_VOTE_ID "
         if not positive_value_exists(organization_id):
             success = False
+            required_variables_missing = True
             status += "MISSING_ORGANIZATION_ID "
 
-    if not success:
+    if required_variables_missing:
         results = {
             'status':                   status,
             'success':                  success,
@@ -58,20 +66,17 @@ def save_analytics_action_for_api(action_constant, voter_we_vote_id, voter_id,
         }
         return results
 
-    if action_constant == ACTION_VOTER_GUIDE_VISIT:
-        save_results = analytics_manager.save_action_voter_guide_visit(
-                voter_we_vote_id, voter_id, organization_we_vote_id, organization_id, google_civic_election_id,
-                ballot_item_we_vote_id, voter_device_id)
-        if save_results['action_saved']:
-            action = save_results['action']
-            date_as_integer = action.date_as_integer
-            status += save_results['status']
-            success = save_results['success']
-        else:
-            status += "ACTION_VOTER_GUIDE_VISIT-NOT_SAVED "
-            success = False
+    save_results = analytics_manager.save_action(
+            action_constant,
+            voter_we_vote_id, voter_id, organization_we_vote_id, organization_id, google_civic_election_id,
+            ballot_item_we_vote_id, voter_device_id)
+    if save_results['action_saved']:
+        action = save_results['action']
+        date_as_integer = action.date_as_integer
+        status += save_results['status']
+        success = save_results['success']
     else:
-        status += "NOT_SAVING_ACTION_CONSTANT_YET: " + ACTION_VOTER_GUIDE_VISIT + " "
+        status += "ACTION_VOTER_GUIDE_VISIT-NOT_SAVED "
         success = False
 
     results = {

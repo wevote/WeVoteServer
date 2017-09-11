@@ -20,6 +20,10 @@ ACTION_VOTER_TWITTER_AUTH = 8
 ACTION_VOTER_FACEBOOK_AUTH = 9
 ACTION_WELCOME_ENTRY = 10
 ACTION_FRIEND_ENTRY = 11
+ACTION_WELCOME_VISIT = 12
+
+ACTIONS_THAT_REQUIRE_ORGANIZATION_IDS = [ACTION_VOTER_GUIDE_VISIT]
+
 
 logger = wevote_functions.admin.get_logger(__name__)
 
@@ -170,7 +174,57 @@ class AnalyticsManager(models.Model):
             status += 'ACTION_TYPE1_SAVED '
         except Exception as e:
             success = False
-            status += 'MULTIPLE_MATCHING_ELECTIONS_FOUND'
+            status += 'COULD_NOT_SAVE_ACTION_TYPE1'
+
+        results = {
+            'success':      success,
+            'status':       status,
+            'action_saved': action_saved,
+            'action':       action,
+        }
+        return results
+
+    def create_action_type2(
+            self, action_constant, voter_we_vote_id, voter_id,
+            google_civic_election_id, voter_device_id=None):
+        """
+        Create AnalyticsAction data
+        """
+        success = True
+        status = "ACTION_CONSTANT:" + display_action_constant_human_readable(action_constant) + " "
+        action_saved = False
+        action = AnalyticsAction()
+        missing_required_variable = False
+
+        if not action_constant:
+            missing_required_variable = True
+            status += 'MISSING_ACTION_CONSTANT '
+        if not voter_we_vote_id:
+            missing_required_variable = True
+            status += 'MISSING_VOTER_WE_VOTE_ID '
+
+        if missing_required_variable:
+            results = {
+                'success': success,
+                'status': status,
+                'action_saved': action_saved,
+                'action': action,
+            }
+            return results
+
+        try:
+            action = AnalyticsAction.objects.using('analytics').create(
+                action_constant=action_constant,
+                voter_we_vote_id=voter_we_vote_id,
+                voter_id=voter_id,
+                google_civic_election_id=google_civic_election_id,
+            )
+            success = True
+            action_saved = True
+            status += 'ACTION_TYPE2_SAVED '
+        except Exception as e:
+            success = False
+            status += 'COULD_NOT_SAVE_ACTION_TYPE2'
 
         results = {
             'success':      success,
@@ -221,21 +275,15 @@ class AnalyticsManager(models.Model):
 
         # If either organization identifier comes in, make sure we have both
 
-        if action_constant == ACTION_VOTER_GUIDE_VISIT:
+        if action_constant in ACTIONS_THAT_REQUIRE_ORGANIZATION_IDS:
             # In the future we could reduce clutter in the AnalyticsAction table by only storing one entry per day
             return self.create_action_type1(action_constant, voter_we_vote_id, voter_id,
                                             organization_we_vote_id, organization_id, google_civic_election_id,
                                             voter_device_id)
-
-        success = False
-        status = "SAVE_ACTION-ACTION_NOT_FOUND "
-        results = {
-            'success':      success,
-            'status':       status,
-            'action_saved': False,
-            'action':       AnalyticsAction(),
-        }
-        return results
+        else:
+            return self.create_action_type2(action_constant, voter_we_vote_id, voter_id,
+                                            google_civic_election_id,
+                                            voter_device_id)
 
     def save_organization_daily_metrics_values(self, organization_daily_metrics_values):
         success = False
