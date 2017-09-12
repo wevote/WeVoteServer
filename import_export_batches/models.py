@@ -166,11 +166,12 @@ BATCH_IMPORT_KEYS_ACCEPTED_FOR_POSITIONS = {
     'organization_twitter_handle': 'organization_twitter_handle (position owner)',
 }
 
-BATCH_IMPORT_KEYS_ACCEPTED_FOR_IMPORT_BALLOT_ITEM = {
+BATCH_IMPORT_KEYS_ACCEPTED_FOR_BALLOT_ITEMS = {
     'polling_location_we_vote_id': 'polling_location_we_vote_id',
     'candidate_name': 'candidate_name',
     'candidate_twitter_handle': 'candidate_twitter_handle',
-    'measure_name': 'measure_name',
+    'contest_office_name': 'contest_office_name',
+    'contest_measure_name': 'contest_measure_name',
     'local_ballot_order': 'local_ballot_order',
 }
 
