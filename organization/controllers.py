@@ -3,6 +3,8 @@
 # -*- coding: UTF-8 -*-
 
 from .models import OrganizationListManager, OrganizationManager
+from analytics.models import ACTION_ORGANIZATION_FOLLOW, ACTION_ORGANIZATION_FOLLOW_IGNORE, \
+    ACTION_ORGANIZATION_STOP_FOLLOWING, AnalyticsManager
 from config.base import get_environment_variable
 from django.http import HttpResponse
 from exception.models import handle_record_not_found_exception
@@ -301,6 +303,7 @@ def organization_follow_all(voter_device_id, organization_id, organization_we_vo
         }
         return json_data
 
+    analytics_manager = AnalyticsManager()
     follow_organization_manager = FollowOrganizationManager()
     if follow_kind == FOLLOWING:
         results = follow_organization_manager.toggle_on_voter_following_organization(
@@ -311,6 +314,9 @@ def organization_follow_all(voter_device_id, organization_id, organization_we_vo
             follow_organization = results['follow_organization']
             organization_id = follow_organization.organization_id
             organization_we_vote_id = follow_organization.organization_we_vote_id
+            analytics_results = analytics_manager.save_action(
+                ACTION_ORGANIZATION_FOLLOW, voter_we_vote_id, voter_id,
+                organization_we_vote_id, organization_id)
         else:
             status = results['status']
             success = False
@@ -324,6 +330,9 @@ def organization_follow_all(voter_device_id, organization_id, organization_we_vo
             follow_organization = results['follow_organization']
             organization_id = follow_organization.organization_id
             organization_we_vote_id = follow_organization.organization_we_vote_id
+            analytics_results = analytics_manager.save_action(
+                ACTION_ORGANIZATION_FOLLOW_IGNORE, voter_we_vote_id, voter_id,
+                organization_we_vote_id, organization_id)
         else:
             status = results['status']
             success = False
@@ -336,6 +345,9 @@ def organization_follow_all(voter_device_id, organization_id, organization_we_vo
             follow_organization = results['follow_organization']
             organization_id = follow_organization.organization_id
             organization_we_vote_id = follow_organization.organization_we_vote_id
+            analytics_results = analytics_manager.save_action(
+                ACTION_ORGANIZATION_STOP_FOLLOWING, voter_we_vote_id, voter_id,
+                organization_we_vote_id, organization_id)
         else:
             status = results['status']
             success = False
