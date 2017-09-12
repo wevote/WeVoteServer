@@ -4,9 +4,9 @@
 
 from candidate.models import CandidateCampaign
 from config.base import get_environment_variable
-import datetime  # Note this is importing the module. "from datetime import datetime" imports the class
+from datetime import date, datetime, time
 from django.db import models
-from django.db.models import F, Q
+from django.db.models import F, Q, Count
 from election.models import ElectionManager
 from exception.models import handle_exception, handle_record_found_more_than_one_exception
 from geopy.geocoders import get_geocoder_for_service
@@ -955,23 +955,112 @@ class BallotReturnedManager(models.Model):
         }
         return results
 
-    def fetch_most_recent_election_in_this_state(self, state_code):
+    def fetch_last_election_in_this_state(self, state_code):
         """
-        Find the most recent election in the past that has at least one ballot at a polling location
+        Find the last election (in the past) that has at least one ballot at a polling location
         :param state_code:
         :return:
         """
-        # TODO DALE Temporary hack - to be implemented
-        return 4389
 
-    def fetch_soonest_upcoming_election_in_this_state(self, state_code):
+        if not positive_value_exists(state_code):
+            return 0
+
+        try:
+            ballot_returned_query = BallotReturned.objects.filter(normalized_state__iexact=state_code)
+            # Only return entries saved for polling_locations
+            ballot_returned_query = ballot_returned_query.exclude(polling_location_we_vote_id=None)
+            # Remove elections today and later
+            today = datetime.now().date()
+            today_start = datetime.combine(today, time())
+            ballot_returned_query = ballot_returned_query.exclude(election_date__gt=today_start)
+            # Show only the google_civic_election_id
+            ballot_returned_query = ballot_returned_query.values('google_civic_election_id')
+            # And only return one entry per google_civic_election_id, with the number of ballot_returned entries
+            ballot_returned_query = ballot_returned_query.annotate(
+                ballot_returned_count=Count('google_civic_election_id'))
+
+            ballot_returned_list = list(ballot_returned_query)
+        except Exception as e:
+            return 0
+
+        if len(ballot_returned_list) == 1:
+            # If there is only one election found, return that google_civic_election_id
+            for one_ballot_returned in ballot_returned_list:
+                return one_ballot_returned['google_civic_election_id']
+
+        # If there are more than one prior elections found, return the most recent one
+        election_manager = ElectionManager()
+        latest_election_date = None
+        latest_google_civic_election_id = 0
+        for one_ballot_returned in ballot_returned_list:
+            if positive_value_exists(one_ballot_returned['google_civic_election_id']):
+                election_results = election_manager.retrieve_election(one_ballot_returned['google_civic_election_id'])
+                if election_results['election_found']:
+                    election = election_results['election']
+                    if positive_value_exists(election.election_day_text):
+                        date_of_this_election = datetime.strptime(election.election_day_text, "%Y-%m-%d").date()
+                        if latest_election_date is None:
+                            latest_election_date = date_of_this_election
+                            latest_google_civic_election_id = election.google_civic_election_id
+                        else:
+                            if date_of_this_election > latest_election_date:
+                                latest_election_date = date_of_this_election
+                                latest_google_civic_election_id = election.google_civic_election_id
+
+        return latest_google_civic_election_id
+
+    def fetch_next_upcoming_election_in_this_state(self, state_code):
         """
         Find the soonest upcoming election in the future with at least one ballot at a polling location
         :param state_code:
         :return:
         """
-        # TODO DALE Temporary hack - to be implemented
-        return 4389
+        if not positive_value_exists(state_code):
+            return 0
+
+        try:
+            ballot_returned_query = BallotReturned.objects.filter(normalized_state__iexact=state_code)
+            # Only return entries saved for polling_locations
+            ballot_returned_query = ballot_returned_query.exclude(polling_location_we_vote_id=None)
+            # Remove elections prior to today
+            today = datetime.now().date()
+            today_start = datetime.combine(today, time())
+            ballot_returned_query = ballot_returned_query.exclude(election_date__lt=today_start)
+            # Show only the google_civic_election_id
+            ballot_returned_query = ballot_returned_query.values('google_civic_election_id')
+            # And only return one entry per google_civic_election_id, with the number of ballot_returned entries
+            ballot_returned_query = ballot_returned_query.annotate(
+                ballot_returned_count=Count('google_civic_election_id'))
+
+            ballot_returned_list = list(ballot_returned_query)
+        except Exception as e:
+            return 0
+
+        if len(ballot_returned_list) == 1:
+            # If there is only one election found, return that google_civic_election_id
+            for one_ballot_returned in ballot_returned_list:
+                return one_ballot_returned['google_civic_election_id']
+
+        # If there are more than one upcoming elections found, return the next one coming up
+        election_manager = ElectionManager()
+        earliest_election_date = None
+        earliest_google_civic_election_id = 0
+        for one_ballot_returned in ballot_returned_list:
+            if positive_value_exists(one_ballot_returned['google_civic_election_id']):
+                election_results = election_manager.retrieve_election(one_ballot_returned['google_civic_election_id'])
+                if election_results['election_found']:
+                    election = election_results['election']
+                    if positive_value_exists(election.election_day_text):
+                        date_of_this_election = datetime.strptime(election.election_day_text, "%Y-%m-%d").date()
+                        if earliest_election_date is None:
+                            earliest_election_date = date_of_this_election
+                            earliest_google_civic_election_id = election.google_civic_election_id
+                        else:
+                            if date_of_this_election < earliest_election_date:
+                                earliest_election_date = date_of_this_election
+                                earliest_google_civic_election_id = election.google_civic_election_id
+
+        return earliest_google_civic_election_id
 
     def find_closest_ballot_returned(self, text_for_map_search, google_civic_election_id=0):
         """
@@ -1047,13 +1136,13 @@ class BallotReturnedManager(models.Model):
             if positive_value_exists(state_code):
                 ballot_returned_query = ballot_returned_query.filter(normalized_state__iexact=state_code)
                 # If we have an active election coming up,
-                upcoming_google_civic_election_id = self.fetch_soonest_upcoming_election_in_this_state(state_code)
+                upcoming_google_civic_election_id = self.fetch_next_upcoming_election_in_this_state(state_code)
                 if positive_value_exists(upcoming_google_civic_election_id):
                     # Limit the search to the next election with ballot items
                     ballot_returned_query = ballot_returned_query.filter(
                         google_civic_election_id=upcoming_google_civic_election_id)
                 else:
-                    past_google_civic_election_id = self.fetch_most_recent_election_in_this_state(state_code)
+                    past_google_civic_election_id = self.fetch_last_election_in_this_state(state_code)
                     if positive_value_exists(past_google_civic_election_id):
                         # Limit the search to the most recent election with ballot items
                         ballot_returned_query = ballot_returned_query.filter(
@@ -1364,7 +1453,7 @@ class VoterBallotSaved(models.Model):
         max_length=255, default=None, null=True, blank=True, unique=False)
 
     def election_date_text(self):
-        if isinstance(self.election_date, datetime.date):
+        if isinstance(self.election_date, date):
             return self.election_date.strftime('%Y-%m-%d')
         elif self.election_date:
             return self.election_date

@@ -351,11 +351,12 @@ def voter_address_save_view(request):  # voterAddressSave
     # Save the address value, and clear out ballot_saved information
     voter_address_manager = VoterAddressManager()
     voter_address_save_results = voter_address_manager.update_or_create_voter_address(
-        voter_id, BALLOT_ADDRESS, text_for_map_search)  # TODO DALE 2017-07-17 This needs a fresh look:
+        voter_id, BALLOT_ADDRESS, text_for_map_search, google_civic_election_id)
+    # TODO DALE 2017-07-17 This needs a fresh look:
     # , google_civic_election_id
 
     # If simple_save is passed in only save address and then send response (you must pass in a google_civic_election_id)
-    if positive_value_exists(simple_save and google_civic_election_id > 0):
+    if positive_value_exists(simple_save) and positive_value_exists(google_civic_election_id):
         success = voter_address_save_results['success'] and voter_address_save_results['voter_address_found']
 
         json_data = {
@@ -363,7 +364,7 @@ def voter_address_save_view(request):  # voterAddressSave
             'success':              success,
             'voter_device_id':      voter_device_id,
             'text_for_map_search':  text_for_map_search,
-            'simple_save':          True,
+            'simple_save':          simple_save,
             'google_civic_election_id': google_civic_election_id
         }
         return HttpResponse(json.dumps(json_data), content_type='application/json')
@@ -380,7 +381,11 @@ def voter_address_save_view(request):  # voterAddressSave
 
         # Update voter_address with the google_civic_election_id retrieved from Google Civic
         # and clear out ballot_saved information IFF we got a valid google_civic_election_id back
-        google_civic_election_id = convert_to_int(google_retrieve_results['google_civic_election_id'])
+        if google_retrieve_results['google_civic_election_id']:
+            google_civic_election_id = convert_to_int(google_retrieve_results['google_civic_election_id'])
+        else:
+            # Leave google_civic_election_id as it was at the top of this function
+            pass
 
         # At this point proceed to update google_civic_election_id whether it is a positive integer or zero
         voter_address.google_civic_election_id = google_civic_election_id

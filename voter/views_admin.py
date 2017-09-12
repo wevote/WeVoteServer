@@ -242,7 +242,7 @@ def voter_edit_process_view(request):
 
 
 @login_required
-def voter_edit_view(request, voter_id):
+def voter_edit_view(request, voter_id=0, voter_we_vote_id=""):
     authority_required = {'admin'}  # admin, verified_volunteer
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
@@ -267,7 +267,10 @@ def voter_edit_view(request, voter_id):
     organization_manager = OrganizationManager()
     twitter_user_manager = TwitterUserManager()
     try:
-        voter_on_stage = Voter.objects.get(id=voter_id)
+        if positive_value_exists(voter_id):
+            voter_on_stage = Voter.objects.get(id=voter_id)
+        elif positive_value_exists(voter_we_vote_id):
+            voter_on_stage = Voter.objects.get(we_vote_id=voter_we_vote_id)
         voter_on_stage_found = True
     except Voter.MultipleObjectsReturned as e:
         handle_record_found_more_than_one_exception(e, logger=logger)

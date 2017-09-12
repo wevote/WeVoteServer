@@ -327,6 +327,7 @@ def ballot_item_list_edit_process_view(request):
     google_civic_election_id = request.POST.get('google_civic_election_id', 0)
     state_code = request.POST.get('state_code', '')
     polling_location_id = convert_to_int(request.POST.get('polling_location_id', 0))
+    polling_location_we_vote_id = ""
     polling_location_city = request.POST.get('polling_location_city', '')
     polling_location_zip = request.POST.get('polling_location_zip', '')
     contest_office1_id = request.POST.get('contest_office1_id', 0)

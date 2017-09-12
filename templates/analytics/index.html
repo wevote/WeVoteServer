@@ -40,13 +40,11 @@
 
 <p>
     <a href="{% url 'analytics:analytics_action_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
-    Raw Log
-    </a>,
+    Raw Log</a>,
     <a href="{% url 'analytics:update_election_summaries_process' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
-    Update Election Summaries
-    </a>
-
-
+    Update Election Summaries</a>
 </p>
+
+<p><a href="{% url 'admin_tools:statistics_summary' %}">Quick Statistics</a></p>
 
 {% endblock %}

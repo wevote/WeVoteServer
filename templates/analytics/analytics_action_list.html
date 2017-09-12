@@ -29,6 +29,7 @@
 <table border="1" cellpadding="5" cellspacing="5" class="table">
     <tr>
         <th>#</th>
+        <th>id</th>
         <th>action_constant</th>
         <th>exact_time</th>
         <th>date_as_integer</th>
@@ -40,11 +41,19 @@
 {% for one_row in analytics_action_list %}
     <tr>
         <td>{{ forloop.counter }}</td>
+        <td>{{ one_row.id }}</td>
         <td>{{ one_row.display_action_constant_human_readable }}</td>
         <td>{{ one_row.exact_time|default_if_none:"n/a" }}</td>
         <td>{{ one_row.date_as_integer|default_if_none:"n/a" }}</td>
-        <td>{{ one_row.voter_we_vote_id|default_if_none:"n/a" }}</td>
-        <td>{{ one_row.organization.organization_name|default_if_none:"n/a" }} ({{ one_row.organization_we_vote_id|default_if_none:"n/a" }})</td>
+        <td><a href="{% url 'voter:voter_edit_we_vote_id' one_row.voter_we_vote_id %}?google_civic_election_id={{ google_civic_election_id }}"
+               target="_blank">{{ one_row.voter_we_vote_id|default_if_none:"n/a" }}</a>
+        </td>
+        <td>{{ one_row.organization.organization_name|default_if_none:"n/a" }}
+            {% if one_row.organization_we_vote_id %}
+            (<a href="{% url 'organization:organization_edit_we_vote_id' one_row.organization_we_vote_id %}?google_civic_election_id={{ google_civic_election_id }}"
+               target="_blank">{{ one_row.organization_we_vote_id|default_if_none:"n/a" }}</a>)
+            {% endif %}
+        </td>
         <td>{{ one_row.ballot_item_we_vote_id|default_if_none:"n/a" }}</td>
         <td>{{ one_row.google_civic_election_id|default_if_none:"n/a" }}</td>
     </tr>

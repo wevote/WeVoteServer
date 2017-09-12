@@ -912,7 +912,7 @@ def voter_ballot_items_retrieve_from_google_civic_for_api(
                 success = False  # It is only successful if new ballot data is retrieved.
             else:
                 success = False
-            status += "GOOGLE_CIVIC_API_ERROR: " + one_ballot_results['structured_json']['error']['message']
+            status += "GOOGLE_CIVIC_API_ERROR: " + one_ballot_results['structured_json']['error']['message'] + " "
 
         else:
             status += 'UNABLE_TO-retrieve_one_ballot_from_google_civic_api'
