@@ -21,8 +21,15 @@ ACTION_VOTER_FACEBOOK_AUTH = 9
 ACTION_WELCOME_ENTRY = 10
 ACTION_FRIEND_ENTRY = 11
 ACTION_WELCOME_VISIT = 12
+ACTION_ORGANIZATION_FOLLOW_IGNORE = 13
+ACTION_ORGANIZATION_STOP_FOLLOWING = 14
+ACTION_ISSUE_FOLLOW_IGNORE = 15
+ACTION_ISSUE_STOP_FOLLOWING = 16
 
-ACTIONS_THAT_REQUIRE_ORGANIZATION_IDS = [ACTION_VOTER_GUIDE_VISIT]
+ACTIONS_THAT_REQUIRE_ORGANIZATION_IDS = \
+    [ACTION_ORGANIZATION_AUTO_FOLLOW,
+     ACTION_ORGANIZATION_FOLLOW, ACTION_ORGANIZATION_FOLLOW_IGNORE, ACTION_ORGANIZATION_STOP_FOLLOWING,
+     ACTION_VOTER_GUIDE_VISIT]
 
 
 logger = wevote_functions.admin.get_logger(__name__)
@@ -258,15 +265,9 @@ class AnalyticsManager(models.Model):
         }
         return results
 
-    def save_action_voter_guide_visit(
-            self, voter_we_vote_id, voter_id, organization_we_vote_id, organization_id, google_civic_election_id,
-            ballot_item_we_vote_id=None, voter_device_id=None):
-        return self.save_action(ACTION_VOTER_GUIDE_VISIT, voter_we_vote_id, voter_id,
-                                organization_we_vote_id, organization_id, google_civic_election_id,
-                                ballot_item_we_vote_id, voter_device_id)
-
     def save_action(self, action_constant, voter_we_vote_id, voter_id,
-                    organization_we_vote_id, organization_id, google_civic_election_id, ballot_item_we_vote_id,
+                    organization_we_vote_id="", organization_id=0,
+                    google_civic_election_id=0, ballot_item_we_vote_id="",
                     voter_device_id=None):
         # If a voter_device_id is passed in, it is because this action may be coming from
         #  https://analytics.wevoteusa.org and hasn't been authenticated yet
@@ -637,48 +638,37 @@ class SitewideElectionMetrics(models.Model):
 
 
 def display_action_constant_human_readable(action_constant):
-    if action_constant == ACTION_VOTER_GUIDE_VISIT:
-        return "ACTION_VOTER_GUIDE_VISIT"
-    if action_constant == ACTION_VOTER_GUIDE_ENTRY:
-        return "ACTION_VOTER_GUIDE_ENTRY"
-    if action_constant == ACTION_ORGANIZATION_FOLLOW:
-        return "ACTION_ORGANIZATION_FOLLOW"
-    if action_constant == ACTION_ORGANIZATION_AUTO_FOLLOW:
-        return "ACTION_ORGANIZATION_AUTO_FOLLOW"
-    if action_constant == ACTION_ISSUE_FOLLOW:
-        return "ACTION_ISSUE_FOLLOW"
     if action_constant == ACTION_BALLOT_VISIT:
         return "ACTION_BALLOT_VISIT"
-    if action_constant == ACTION_POSITION_TAKEN:
-        return "ACTION_POSITION_TAKEN"
-    if action_constant == ACTION_VOTER_TWITTER_AUTH:
-        return "ACTION_VOTER_TWITTER_AUTH"
-    if action_constant == ACTION_VOTER_FACEBOOK_AUTH:
-        return "ACTION_VOTER_FACEBOOK_AUTH"
-    if action_constant == ACTION_WELCOME_ENTRY:
-        return "ACTION_WELCOME_ENTRY"
     if action_constant == ACTION_FRIEND_ENTRY:
         return "ACTION_FRIEND_ENTRY"
+    if action_constant == ACTION_ISSUE_FOLLOW:
+        return "ACTION_ISSUE_FOLLOW"
+    if action_constant == ACTION_ISSUE_FOLLOW_IGNORE:
+        return "ACTION_ISSUE_FOLLOW_IGNORE"
+    if action_constant == ACTION_ISSUE_STOP_FOLLOWING:
+        return "ACTION_ISSUE_STOP_FOLLOWING"
+    if action_constant == ACTION_ORGANIZATION_AUTO_FOLLOW:
+        return "ACTION_ORGANIZATION_AUTO_FOLLOW"
+    if action_constant == ACTION_ORGANIZATION_FOLLOW:
+        return "ACTION_ORGANIZATION_FOLLOW"
+    if action_constant == ACTION_ORGANIZATION_FOLLOW_IGNORE:
+        return "ACTION_ORGANIZATION_FOLLOW_IGNORE"
+    if action_constant == ACTION_ORGANIZATION_STOP_FOLLOWING:
+        return "ACTION_ORGANIZATION_STOP_FOLLOWING"
+    if action_constant == ACTION_POSITION_TAKEN:
+        return "ACTION_POSITION_TAKEN"
+    if action_constant == ACTION_VOTER_FACEBOOK_AUTH:
+        return "ACTION_VOTER_FACEBOOK_AUTH"
+    if action_constant == ACTION_VOTER_GUIDE_ENTRY:
+        return "ACTION_VOTER_GUIDE_ENTRY"
+    if action_constant == ACTION_VOTER_GUIDE_VISIT:
+        return "ACTION_VOTER_GUIDE_VISIT"
+    if action_constant == ACTION_VOTER_TWITTER_AUTH:
+        return "ACTION_VOTER_TWITTER_AUTH"
+    if action_constant == ACTION_WELCOME_ENTRY:
+        return "ACTION_WELCOME_ENTRY"
     if action_constant == ACTION_WELCOME_VISIT:
         return "ACTION_WELCOME_VISIT"
 
     return "ACTION_CONSTANT:" + str(action_constant)
-
-
-def save_action_voter_guide_visit(
-        voter_we_vote_id, voter_id, organization_we_vote_id, organization_id, google_civic_election_id,
-        voter_device_id=None):
-    """
-    We break out this function so we can call it without creating a local analytics_manager
-    :param voter_we_vote_id:
-    :param voter_id:
-    :param organization_we_vote_id:
-    :param organization_id:
-    :param google_civic_election_id:
-    :param voter_device_id:
-    :return:
-    """
-    analytics_manager = AnalyticsManager()
-    return analytics_manager.save_action_voter_guide_visit(
-        voter_we_vote_id, voter_id,
-        organization_we_vote_id, organization_id, google_civic_election_id, voter_device_id)

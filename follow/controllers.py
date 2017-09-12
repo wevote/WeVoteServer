@@ -1,21 +1,23 @@
 # follow/controllers.py
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
-from django.http import HttpResponse
-from email_outbound.models import EmailManager
-import json
 
-from friend.models import FriendManager
 from .models import FollowOrganizationList, FollowOrganizationManager, UPDATE_SUGGESTIONS_FROM_TWITTER_IDS_I_FOLLOW, \
     UPDATE_SUGGESTIONS_FROM_WHAT_FRIEND_FOLLOWS, UPDATE_SUGGESTIONS_FROM_WHAT_FRIEND_FOLLOWS_ON_TWITTER, \
     UPDATE_SUGGESTIONS_FROM_WHAT_FRIENDS_FOLLOW, UPDATE_SUGGESTIONS_FROM_WHAT_FRIENDS_FOLLOW_ON_TWITTER, \
     UPDATE_SUGGESTIONS_ALL, FOLLOW_SUGGESTIONS_FROM_TWITTER_IDS_I_FOLLOW, FOLLOW_SUGGESTIONS_FROM_FRIENDS, \
     FollowIssueManager
+from analytics.models import ACTION_ISSUE_FOLLOW, ACTION_ISSUE_FOLLOW_IGNORE, \
+    ACTION_ISSUE_STOP_FOLLOWING, AnalyticsManager
+from django.http import HttpResponse
+from email_outbound.models import EmailManager
+from friend.models import FriendManager
+import json
 from organization.models import OrganizationManager
+from twitter.models import TwitterUserManager
 from voter.models import VoterManager, fetch_voter_we_vote_id_from_voter_device_link
 import wevote_functions.admin
 from wevote_functions.functions import is_voter_device_id_valid, positive_value_exists
-from twitter.models import TwitterUserManager
 
 logger = wevote_functions.admin.get_logger(__name__)
 
@@ -203,23 +205,33 @@ def duplicate_organization_followers_to_another_organization(from_organization_i
     return results
 
 
-def voter_issue_follow_for_api(voter_device_id, issue_we_vote_id, follow_value, ignore_value):
+def voter_issue_follow_for_api(voter_device_id, issue_we_vote_id, follow_value, ignore_value):  # issueFollow
     voter_we_vote_id = False
+    voter_id = 0
     issue_id = ''
     if positive_value_exists(voter_device_id):
-        voter_we_vote_id = fetch_voter_we_vote_id_from_voter_device_link(voter_device_id)
+        voter_manager = VoterManager()
+        voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id)
+        if voter_results['voter_found']:
+            voter = voter_results['voter']
+            voter_we_vote_id = voter.we_vote_id
+            voter_id = voter.id
     follow_issue_manager = FollowIssueManager()
     result = False
+    analytics_manager = AnalyticsManager()
     if positive_value_exists(voter_we_vote_id) and positive_value_exists(issue_we_vote_id):
         if follow_value:
             result = follow_issue_manager.toggle_on_voter_following_issue(voter_we_vote_id, issue_id,
                                                                           issue_we_vote_id)
+            analytics_results = analytics_manager.save_action(ACTION_ISSUE_FOLLOW, voter_we_vote_id, voter_id)
         elif not follow_value:
             result = follow_issue_manager.toggle_off_voter_following_issue(voter_we_vote_id, issue_id,
                                                                            issue_we_vote_id)
+            analytics_results = analytics_manager.save_action(ACTION_ISSUE_STOP_FOLLOWING, voter_we_vote_id, voter_id)
         elif ignore_value:
             result = follow_issue_manager.toggle_ignore_voter_following_issue(voter_we_vote_id, issue_id,
                                                                               issue_we_vote_id)
+            analytics_results = analytics_manager.save_action(ACTION_ISSUE_FOLLOW_IGNORE, voter_we_vote_id, voter_id)
 
     if not result:
         new_result = {

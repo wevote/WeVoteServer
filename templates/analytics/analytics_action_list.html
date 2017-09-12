@@ -10,22 +10,59 @@
 <p><a href="{% url 'admin_tools:admin_home' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">< Back to Admin Home</a></p>
 <p><a href="{% url 'analytics:analytics_index' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">< Analytics Home</a></p>
 
-<h2>Analytics Action</h2>
+<h2>Analytics Action
+    {% if voter_we_vote_id %}
+        for One Voter : {{ voter_we_vote_id }}
+    {% elif organization_we_vote_id %}
+        for One Organization : {{ organization_we_vote_id }}
+    {% endif %}
+</h2>
     <p>
+    {% if voter_we_vote_id %}
+        Show raw AnalyticsAction entries for one voter.
+        <a href="{% url 'analytics:analytics_action_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
+             show all</a>&nbsp;
+    {% elif organization_we_vote_id %}
+        Show raw AnalyticsAction entries for one organization.
+        <a href="{% url 'analytics:analytics_action_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
+             show all</a>&nbsp;
+    {% else %}
         Show raw AnalyticsAction entries.
+    {% endif %}
     </p>
 
-<form name="analytics_form" method="get" action="{% url 'analytics:analytics_action_list' %}">
-{% csrf_token %}
-
 {% if analytics_action_search %}
-    <a href="{% url 'analytics:analytics_action_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
-         clear search</a>&nbsp;
+    {% if voter_we_vote_id %}
+        <a href="{% url 'analytics:analytics_action_list' voter_we_vote_id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
+             clear search</a>&nbsp;
+    {% elif organization_we_vote_id %}
+        <a href="{% url 'analytics:analytics_action_list' organization_we_vote_id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
+             clear search</a>&nbsp;
+    {% else %}
+        <a href="{% url 'analytics:analytics_action_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
+             clear search</a>&nbsp;
+    {% endif %}
 {% endif %}
-    <input type="text" name="analytics_action_search" id="analytics_action_search_id" value="{{ analytics_action_search }}" />
-    <input type="submit" value="Search" />
 
-</form>
+{% if voter_we_vote_id %}
+    <form name="analytics_form" method="get" action="{% url 'analytics:analytics_action_list' voter_we_vote_id %}">
+        {% csrf_token %}
+        <input type="text" name="analytics_action_search" id="analytics_action_search_id" value="{{ analytics_action_search }}" />
+        <input type="submit" value="Search" />
+    </form>
+{% elif organization_we_vote_id %}
+    <form name="analytics_form" method="get" action="{% url 'analytics:analytics_action_list' organization_we_vote_id %}">
+        {% csrf_token %}
+        <input type="text" name="analytics_action_search" id="analytics_action_search_id" value="{{ analytics_action_search }}" />
+        <input type="submit" value="Search" />
+    </form>
+{% else %}
+    <form name="analytics_form" method="get" action="{% url 'analytics:analytics_action_list' %}">
+        {% csrf_token %}
+        <input type="text" name="analytics_action_search" id="analytics_action_search_id" value="{{ analytics_action_search }}" />
+        <input type="submit" value="Search" />
+    </form>
+{% endif %}
 <table border="1" cellpadding="5" cellspacing="5" class="table">
     <tr>
         <th>#</th>
@@ -45,13 +82,24 @@
         <td>{{ one_row.display_action_constant_human_readable }}</td>
         <td>{{ one_row.exact_time|default_if_none:"n/a" }}</td>
         <td>{{ one_row.date_as_integer|default_if_none:"n/a" }}</td>
-        <td><a href="{% url 'voter:voter_edit_we_vote_id' one_row.voter_we_vote_id %}?google_civic_election_id={{ google_civic_election_id }}"
-               target="_blank">{{ one_row.voter_we_vote_id|default_if_none:"n/a" }}</a>
+        <td>
+            {% if voter_we_vote_id or organization_we_vote_id %}
+                <a href="{% url 'voter:voter_edit_we_vote_id' one_row.voter_we_vote_id %}?google_civic_election_id={{ google_civic_election_id }}"
+                   target="_blank">{{ one_row.voter_we_vote_id|default_if_none:"n/a" }}</a>
+            {% else %}
+                <a href="{% url 'analytics:analytics_action_list' one_row.voter_we_vote_id %}?google_civic_election_id={{ google_civic_election_id }}"
+                   target="_blank">{{ one_row.voter_we_vote_id|default_if_none:"n/a" }}</a>
+            {% endif %}
         </td>
         <td>{{ one_row.organization.organization_name|default_if_none:"n/a" }}
             {% if one_row.organization_we_vote_id %}
-            (<a href="{% url 'organization:organization_edit_we_vote_id' one_row.organization_we_vote_id %}?google_civic_election_id={{ google_civic_election_id }}"
-               target="_blank">{{ one_row.organization_we_vote_id|default_if_none:"n/a" }}</a>)
+                {% if organization_we_vote_id or voter_we_vote_id %}
+                    (<a href="{% url 'organization:organization_we_vote_id_position_list' one_row.organization_we_vote_id %}?google_civic_election_id={{ google_civic_election_id }}"
+                       target="_blank">{{ one_row.organization_we_vote_id|default_if_none:"n/a" }}</a>)
+                {% else %}
+                    (<a href="{% url 'analytics:analytics_action_list' one_row.organization_we_vote_id %}?google_civic_election_id={{ google_civic_election_id }}"
+                       target="_blank">{{ one_row.organization_we_vote_id|default_if_none:"n/a" }}</a>)
+                {% endif %}
             {% endif %}
         </td>
         <td>{{ one_row.ballot_item_we_vote_id|default_if_none:"n/a" }}</td>
