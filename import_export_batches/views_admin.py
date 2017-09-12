@@ -213,12 +213,14 @@ def batch_list_process_view(request):
         return HttpResponseRedirect(reverse('import_export_batches:batch_action_list', args=()) +
                                     "?batch_header_id=" + str(batch_header_id) +
                                     "&kind_of_batch=" + str(kind_of_batch) +
+                                    "&polling_location_we_vote_id=" + str(polling_location_we_vote_id) +
                                     "&google_civic_election_id=" + str(google_civic_election_id) +
                                     "&batch_uri=" + batch_uri_encoded)
     else:
         # Go to the batch listing page
         return HttpResponseRedirect(reverse('import_export_batches:batch_list', args=()) +
                                     "?kind_of_batch=" + str(kind_of_batch) +
+                                    "&polling_location_we_vote_id=" + str(polling_location_we_vote_id) +
                                     "&google_civic_election_id=" + str(google_civic_election_id) +
                                     "&batch_uri=" + batch_uri_encoded)
 
