@@ -611,9 +611,9 @@
         <td>Provide another We Vote Server a complete listing of all public organization information.</td>
     </tr>
     <tr>
-        <td><a href="{% url 'apis_v1:issuesSyncOutDocs' %}">issuesSyncOut</a></td>
-        <td>c3</td>
-        <td>Provide another We Vote Server a complete listing of all issues.</td>
+        <td><a href="{% url 'apis_v1:issueFollowDocs' %}">issueFollow</a></td>
+        <td></td>
+        <td>Allow a voter to follow one issue.</td>
     </tr>
     <tr>
         <td><a href="{% url 'apis_v1:issuesRetrieveDocs' %}">issuesRetrieve</a></td>
@@ -621,8 +621,13 @@
         <td>Retrieve complete listing of all issues.</td>
     </tr>
     <tr>
-        <td><a href="{% url 'apis_v1:retrieveIssuesToFollowDocs' %}">retrieveIssuesToFollow</a></td>
+        <td><a href="{% url 'apis_v1:issuesSyncOutDocs' %}">issuesSyncOut</a></td>
         <td>c3</td>
+        <td>Provide another We Vote Server a complete listing of all issues.</td>
+    </tr>
+    <tr>
+        <td><a href="{% url 'apis_v1:retrieveIssuesToFollowDocs' %}">retrieveIssuesToFollow</a></td>
+        <td></td>
         <td>Retrieve listing of all issues for the voter to follow.</td>
     </tr>
     <tr>

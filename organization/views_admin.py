@@ -517,7 +517,7 @@ def organization_edit_process_view(request):
 
 
 @login_required
-def organization_position_list_view(request, organization_id):
+def organization_position_list_view(request, organization_id=0, organization_we_vote_id=""):
     authority_required = {'verified_volunteer'}  # admin, verified_volunteer
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
@@ -528,16 +528,19 @@ def organization_position_list_view(request, organization_id):
     candidate_we_vote_id = request.GET.get('candidate_we_vote_id', '')
 
     organization_on_stage = Organization()
-    organization_we_vote_id = ""
     organization_on_stage_found = False
     issue_names_list = []
     issue_blocked_names_list = []
     try:
-        organization_query = Organization.objects.filter(id=organization_id)
+        if positive_value_exists(organization_id):
+            organization_query = Organization.objects.filter(id=organization_id)
+        else:
+            organization_query = Organization.objects.filter(we_vote_id__iexact=organization_we_vote_id)
         if organization_query.count():
             organization_on_stage = organization_query[0]
             organization_on_stage_found = True
             organization_we_vote_id = organization_on_stage.we_vote_id
+            organization_id = organization_on_stage.id
     except Exception as e:
         handle_record_not_found_exception(e, logger=logger)
         organization_on_stage_found = False

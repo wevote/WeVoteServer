@@ -1102,11 +1102,11 @@ def data_cleanup_voter_list_analysis_view(request):
             if results['suggested_friend_created_count']:
                 suggested_friend_created_count += results['suggested_friend_created_count']
 
-    voter_list_with_sign_in_data = Voter.objects.order_by('-id', '-date_last_changed')
-    voter_list_with_sign_in_data = voter_list_with_sign_in_data.filter(
+    voter_list_with_sign_in_data_query = Voter.objects.order_by('-id', '-date_last_changed')
+    voter_list_with_sign_in_data_query = voter_list_with_sign_in_data_query.filter(
         ~Q(twitter_id=None) | ~Q(twitter_screen_name=None) | ~Q(email=None) | ~Q(facebook_id=None) |
         ~Q(fb_username=None) | ~Q(linked_organization_we_vote_id=None))
-    voter_list_with_sign_in_data = voter_list_with_sign_in_data
+    voter_list_with_sign_in_data = voter_list_with_sign_in_data_query[:100]
 
     voter_list_with_sign_in_data_updated = []
     number_of_voters_found = 0

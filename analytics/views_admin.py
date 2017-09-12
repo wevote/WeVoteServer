@@ -108,9 +108,12 @@ def organization_daily_metrics_process_view(request):
 
 
 @login_required
-def analytics_action_list_view(request):
+def analytics_action_list_view(request, voter_we_vote_id=False, organization_we_vote_id=False):
     """
+
     :param request:
+    :param voter_we_vote_id:
+    :param organization_we_vote_id:
     :return:
     """
     authority_required = {'verified_volunteer'}  # admin, verified_volunteer
@@ -126,6 +129,11 @@ def analytics_action_list_view(request):
     messages_on_stage = get_messages(request)
     try:
         analytics_action_query = AnalyticsAction.objects.using('analytics').order_by('-id')
+        if positive_value_exists(voter_we_vote_id):
+            analytics_action_query = analytics_action_query.filter(voter_we_vote_id__iexact=voter_we_vote_id)
+        if positive_value_exists(organization_we_vote_id):
+            analytics_action_query = analytics_action_query.filter(
+                organization_we_vote_id__iexact=organization_we_vote_id)
 
         if positive_value_exists(analytics_action_search):
             search_words = analytics_action_search.split()
@@ -153,7 +161,10 @@ def analytics_action_list_view(request):
 
                     analytics_action_query = analytics_action_query.filter(final_filters)
 
-        analytics_action_query = analytics_action_query[:50]
+        if positive_value_exists(voter_we_vote_id) or positive_value_exists(organization_we_vote_id):
+            analytics_action_query = analytics_action_query[:500]
+        else:
+            analytics_action_query = analytics_action_query[:100]
         analytics_action_list = list(analytics_action_query)
     except OrganizationDailyMetrics.DoesNotExist:
         # This is fine
@@ -165,6 +176,8 @@ def analytics_action_list_view(request):
         'analytics_action_search':  analytics_action_search,
         'google_civic_election_id': google_civic_election_id,
         'state_code':               state_code,
+        'organization_we_vote_id':  organization_we_vote_id,
+        'voter_we_vote_id':         voter_we_vote_id,
     }
     return render(request, 'analytics/analytics_action_list.html', template_values)
 
