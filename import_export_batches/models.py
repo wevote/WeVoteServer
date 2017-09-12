@@ -223,7 +223,7 @@ class BatchManager(models.Model):
 
     def create_batch_from_local_file_upload(
             self, batch_file, kind_of_batch, google_civic_election_id, organization_we_vote_id):
-        if batch_file.content_type == 'text/csv':
+        if (batch_file.content_type == 'text/csv') or (batch_file.content_type == 'application/vnd.ms-excel'):
             csv_data = csv.reader(codecs.iterdecode(batch_file, 'utf-8'), delimiter=',')
             batch_file_name = batch_file.name
             return self.create_batch_from_csv_data(
@@ -374,7 +374,7 @@ class BatchManager(models.Model):
                             batch_header_map_050=get_header_map_value_if_index_in_list(line, 50, kind_of_batch),
                         )
                         batch_header_map_id = batch_header_map.id
-                        status += " BATCH_HEADER_MAP_SAVED"
+                        status += "BATCH_HEADER_MAP_SAVED "
 
                     if positive_value_exists(batch_header_id) and positive_value_exists(batch_header_map_id):
                         # Now save the BatchDescription
@@ -393,12 +393,12 @@ class BatchManager(models.Model):
                             organization_we_vote_id=organization_we_vote_id,
                             # source_uri=batch_uri,
                             )
-                        status += " BATCH_DESCRIPTION_SAVED"
+                        status += "BATCH_DESCRIPTION_SAVED "
                         success = True
                 except Exception as e:
                     # Stop trying to save rows -- break out of the for loop
                     batch_header_id = 0
-                    status += " EXCEPTION_BATCH_HEADER"
+                    status += "EXCEPTION_BATCH_HEADER "
                     handle_exception(e, logger=logger, exception_message=status)
                     break
             else:
@@ -846,7 +846,7 @@ class BatchManager(models.Model):
         }
         return results
 
-    def retrieve_batch_row_action_ballot_ballot_item(self, batch_header_id, batch_row_id):
+    def retrieve_batch_row_action_ballot_item(self, batch_header_id, batch_row_id):
         """
         Retrieves data from BatchRowActionBallotItem table
         :param batch_header_id:
@@ -859,17 +859,17 @@ class BatchManager(models.Model):
                                                                                 batch_row_id=batch_row_id)
             batch_row_action_found = True
             success = True
-            status = "BATCH_ROW_ACTION_POSITION_RETRIEVED"
-        except BatchRowActionPosition.DoesNotExist:
-            batch_row_action_ballot_item = BatchRowActionPosition()
+            status = "BATCH_ROW_ACTION_BALLOT_ITEM_RETRIEVED "
+        except BatchRowActionBallotItem.DoesNotExist:
+            batch_row_action_ballot_item = BatchRowActionBallotItem()
             batch_row_action_found = False
             success = True
-            status = "BATCH_ROW_ACTION_POSITION_NOT_FOUND"
+            status = "BATCH_ROW_ACTION_BALLOT_ITEM_NOT_FOUND "
         except Exception as e:
-            batch_row_action_ballot_item = BatchRowActionPosition()
+            batch_row_action_ballot_item = BatchRowActionBallotItem()
             batch_row_action_found = False
             success = False
-            status = "BATCH_ROW_ACTION_POSITION_RETRIEVE_ERROR"
+            status = "BATCH_ROW_ACTION_BALLOT_ITEM_RETRIEVE_ERROR "
 
         results = {
             'success':                      success,
