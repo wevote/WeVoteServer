@@ -100,6 +100,8 @@ class AnalyticsAction(models.Model):
         return election
 
     def organization(self):
+        if not self.organization_we_vote_id:
+            return
         try:
             organization = Organization.objects.using('readonly').get(we_vote_id=self.organization_we_vote_id)
         except Organization.MultipleObjectsReturned as e:
@@ -657,6 +659,8 @@ def display_action_constant_human_readable(action_constant):
         return "ACTION_WELCOME_ENTRY"
     if action_constant == ACTION_FRIEND_ENTRY:
         return "ACTION_FRIEND_ENTRY"
+    if action_constant == ACTION_WELCOME_VISIT:
+        return "ACTION_WELCOME_VISIT"
 
     return "ACTION_CONSTANT:" + str(action_constant)
 

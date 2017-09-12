@@ -261,7 +261,7 @@ def organization_new_view(request):
 
 
 @login_required
-def organization_edit_view(request, organization_id):
+def organization_edit_view(request, organization_id=0, organization_we_vote_id=""):
     authority_required = {'verified_volunteer'}  # admin, verified_volunteer
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
@@ -277,7 +277,8 @@ def organization_edit_view(request, organization_id):
     organization_on_stage = Organization()
     state_served_code = ''
     new_issue_list = []
-    results = organization_manager.retrieve_organization(organization_id)
+    results = organization_manager.retrieve_organization(organization_id, organization_we_vote_id)
+
     if results['organization_found']:
         organization_on_stage = results['organization']
         state_served_code = organization_on_stage.state_served_code

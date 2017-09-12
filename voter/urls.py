@@ -16,5 +16,6 @@ urlpatterns = [
     url(r'^edit_process/$', views_admin.voter_edit_process_view, name='voter_edit_process'),
     url(r'^login_complete/$', views_admin.login_complete_view, name='login_complete_view'),
     url(r'^(?P<voter_id>[0-9]+)/edit/$', views_admin.voter_edit_view, name='voter_edit'),
+    url(r'^edit/(?P<voter_we_vote_id>wv[\w]{2}voter[\w]+)$', views_admin.voter_edit_view, name='voter_edit_we_vote_id'),
     url(r'^(?P<voter_id>[0-9]+)/summary/$', views_admin.voter_summary_view, name='voter_summary'),
 ]
