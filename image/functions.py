@@ -45,3 +45,30 @@ def analyze_remote_url(image_url_https):
         'image_format':                 image_format.lower() if image_format is not None else image_format
     }
     return results
+
+
+def analyze_image_file(image_file):
+    """
+    Analyse inMemoryUploadedFile object to get image properties
+    :param image_file:
+    :return:
+    """
+    image_format = None
+    image_height = None
+    image_width = None
+    image_url_valid = False
+    if image_file is not None:
+        image_url_valid = True
+        image = Image.open(image_file.file)
+        # When PIL opens image file, pointer will go to end of file so seeking it to 0 to access again
+        image_file.seek(0)
+        image_width, image_height = image.size
+        image_format = image.format
+
+    results = {
+        'image_url_valid':              image_url_valid,
+        'image_width':                  image_width,
+        'image_height':                 image_height,
+        'image_format':                 image_format.lower() if image_format is not None else image_format
+    }
+    return results

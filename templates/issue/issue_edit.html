@@ -12,7 +12,7 @@
 {% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
 
 
-<form action="{% url "issue:issue_edit_process" %}" method="post" class="form-horizontal">
+<form action="{% url "issue:issue_edit_process" %}" method="post" class="form-horizontal" enctype="multipart/form-data">
 {% csrf_token %}
 
 <input type="hidden" name="issue_we_vote_id" value="{% if issue %}{{ issue.we_vote_id }}{% else %}{% endif %}">
@@ -35,10 +35,10 @@
 </div>
 
 <div class="form-group">
-    <label for="issue_image_id" class="col-sm-3 control-label">Issue Image</label>
+    <label for="issue_image_file_id" class="col-sm-3 control-label">Issue Image</label>
     <div class="col-sm-8">
-        <input type="text" name="issue_image_url" id="issue_image_id" class="form-control"
-               value="{% if issue %}{{ issue.issue_image_url|default_if_none:"" }}{% else %}{{ issue_image_url|default_if_none:"" }}{% endif %}" />
+        <input type="file" name="issue_image_file" id="issue_image_file_id" class="form-control"
+               value="{{ issue_image_file }}" />
     </div>
 </div>
 
