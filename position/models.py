@@ -3,6 +3,7 @@
 # -*- coding: UTF-8 -*-
 # Diagrams here: https://docs.google.com/drawings/d/1DsPnl97GKe9f14h41RPeZDssDUztRETGkXGaolXCeyo/edit
 
+from analytics.models import ACTION_POSITION_TAKEN, AnalyticsManager
 from candidate.models import CandidateCampaign, CandidateCampaignManager, CandidateCampaignListManager
 from ballot.controllers import figure_out_google_civic_election_id_voter_is_watching
 from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
@@ -3954,6 +3955,10 @@ class PositionManager(models.Model):
                               candidate_campaign_id, contest_measure_id, is_public_position):
         voter_position_on_stage_found = False
         position_we_vote_id = ''
+        voter_we_vote_id = ''
+        google_civic_election_id = 0
+        candidate_campaign_we_vote_id = ""
+        contest_measure_we_vote_id = ""
         if voter_position_found:
             # Update this position with new values
             try:
@@ -3966,11 +3971,16 @@ class PositionManager(models.Model):
                             candidate_campaign_id)
                         if results['candidate_campaign_found']:
                             candidate_campaign = results['candidate_campaign']
+                            candidate_campaign_we_vote_id = candidate_campaign.we_vote_id
+                            google_civic_election_id = candidate_campaign.google_civic_election_id
                             voter_position_on_stage.candidate_campaign_we_vote_id = candidate_campaign.we_vote_id
                             voter_position_on_stage.google_civic_election_id = \
                                 candidate_campaign.google_civic_election_id
                             voter_position_on_stage.state_code = candidate_campaign.state_code
                             voter_position_on_stage.ballot_item_display_name = candidate_campaign.candidate_name
+                    else:
+                        candidate_campaign_we_vote_id = voter_position_on_stage.candidate_campaign_we_vote_id
+                        google_civic_election_id = voter_position_on_stage.google_civic_election_id
 
                 if voter_position_on_stage.contest_measure_id:
                     if not positive_value_exists(voter_position_on_stage.contest_measure_we_vote_id):
@@ -3979,10 +3989,15 @@ class PositionManager(models.Model):
                         results = contest_measure_manager.retrieve_contest_measure_from_id(contest_measure_id)
                         if results['contest_measure_found']:
                             contest_measure = results['contest_measure']
+                            contest_measure_we_vote_id = contest_measure.we_vote_id
+                            google_civic_election_id = contest_measure.google_civic_election_id
                             voter_position_on_stage.contest_measure_we_vote_id = contest_measure.we_vote_id
                             voter_position_on_stage.google_civic_election_id = contest_measure.google_civic_election_id
                             voter_position_on_stage.state_code = contest_measure.state_code
                             voter_position_on_stage.ballot_item_display_name = contest_measure.measure_title
+                    else:
+                        contest_measure_we_vote_id = voter_position_on_stage.contest_measure_we_vote_id
+                        google_civic_election_id = voter_position_on_stage.google_civic_election_id
 
                 voter_manager = VoterManager()
                 results = voter_manager.retrieve_voter_by_id(voter_id)
@@ -4105,6 +4120,21 @@ class PositionManager(models.Model):
             except Exception as e:
                 handle_record_not_saved_exception(e, logger=logger)
                 status = 'NEW_STANCE_COULD_NOT_BE_SAVED'
+
+        if voter_position_on_stage_found:
+            # If here, we are storing an analytics entry
+            organization_id_temp = 0
+            organization_we_vote_id_temp = ""
+            if positive_value_exists(candidate_campaign_we_vote_id):
+                ballot_item_we_vote_id = candidate_campaign_we_vote_id
+            elif positive_value_exists(contest_measure_we_vote_id):
+                ballot_item_we_vote_id = contest_measure_we_vote_id
+            else:
+                ballot_item_we_vote_id = ""
+            analytics_manager = AnalyticsManager()
+            analytics_results = analytics_manager.save_action(
+                ACTION_POSITION_TAKEN, voter_we_vote_id, voter_id, organization_we_vote_id_temp, organization_id_temp,
+                google_civic_election_id, ballot_item_we_vote_id)
 
         results = {
             'status':               status,
