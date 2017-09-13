@@ -16,6 +16,8 @@
     Import Politicians
 {% elif kind_of_batch == "POSITION" %}
     Import Positions
+{% elif kind_of_batch == "IMPORT_BALLOT_ITEM" %}
+    Import Ballot at One Location
 {% else %}
     List of Batches
 {% endif %}
@@ -42,6 +44,9 @@
 {% elif kind_of_batch == "POSITION" %}
     <p><a href="{% url 'position:position_list' %}?kind_of_batch={{ kind_of_batch }}&google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}"
           target="_blank">Current Positions{% if google_civic_election_id > 0 %} for this Election{% endif %} ></a> (in new window)</p>
+{% elif kind_of_batch == "IMPORT_BALLOT_ITEM" %}
+    <p><a href="{% url 'election:election_summary' 0 %}?kind_of_batch={{ kind_of_batch }}&google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}"
+          target="_blank">Current Ballots{% if google_civic_election_id > 0 %} for this Election{% endif %} ></a> (in new window)</p>
 {% endif %}
 
 
@@ -49,20 +54,22 @@
 <h1>Import Batches</h1>
     To import, you must choose the kind of data you are importing:
 
-    <a href="{% url 'import_export_batches:batch_list' %}?kind_of_batch=MEASURE&google_civic_election_id={{ google_civic_election_id }}">
+    <a href="{% url 'import_export_batches:batch_list' %}?kind_of_batch=MEASURE&google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
         Measure</a> -
-    <a href="{% url 'import_export_batches:batch_list' %}?kind_of_batch=ELECTED_OFFICE&google_civic_election_id={{ google_civic_election_id }}">
+    <a href="{% url 'import_export_batches:batch_list' %}?kind_of_batch=ELECTED_OFFICE&google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
         Elected Office</a> -
-    <a href="{% url 'import_export_batches:batch_list' %}?kind_of_batch=CONTEST_OFFICE&google_civic_election_id={{ google_civic_election_id }}">
+    <a href="{% url 'import_export_batches:batch_list' %}?kind_of_batch=CONTEST_OFFICE&google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
         Contest Office</a> -
-    <a href="{% url 'import_export_batches:batch_list' %}?kind_of_batch=CANDIDATE&google_civic_election_id={{ google_civic_election_id }}">
+    <a href="{% url 'import_export_batches:batch_list' %}?kind_of_batch=CANDIDATE&google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
         Candidate</a> -
-    <a href="{% url 'import_export_batches:batch_list' %}?kind_of_batch=ORGANIZATION&google_civic_election_id={{ google_civic_election_id }}">
+    <a href="{% url 'import_export_batches:batch_list' %}?kind_of_batch=ORGANIZATION&google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
         Organization</a> -
-    <a href="{% url 'import_export_batches:batch_list' %}?kind_of_batch=POSITION&google_civic_election_id={{ google_civic_election_id }}">
+    <a href="{% url 'import_export_batches:batch_list' %}?kind_of_batch=POSITION&google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
         Position</a> -
-    <a href="{% url 'import_export_batches:batch_list' %}?kind_of_batch=POLITICIAN&google_civic_election_id={{ google_civic_election_id }}">
-        Politician</a>
+    <a href="{% url 'import_export_batches:batch_list' %}?kind_of_batch=POLITICIAN&google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
+        Politician</a> -
+    <a href="{% url 'import_export_batches:batch_list' %}?kind_of_batch=IMPORT_BALLOT_ITEM&google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
+        Ballot at One Location</a>
 
 {% else %}
     <h1>
@@ -80,6 +87,8 @@
         Import Position Data in Bulk
     {% elif kind_of_batch == "POLITICIAN" %}
         Import Politician Data in Bulk
+    {% elif kind_of_batch == "IMPORT_BALLOT_ITEM" %}
+        Ballot at One Location
     {% else %}
         Kind of data not recognized: Please STOP
     {% endif %}
@@ -111,6 +120,16 @@
             <div class="col-sm-8">
                 <input type="text" name="position_owner_organization_we_vote_id" id="position_owner_organization_we_vote_id_id" class="form-control"
                        value="{{ position_owner_organization_we_vote_id }}" />
+            </div>
+        </div>
+        {% endif %}
+
+        {% if kind_of_batch == "IMPORT_BALLOT_ITEM" %}
+        <div class="form-group">
+            <label for="polling_location_we_vote_id_id" class="col-sm-3 control-label">polling_location_we_vote_id</label>
+            <div class="col-sm-8">
+                <input type="text" name="polling_location_we_vote_id" id="polling_location_we_vote_id_id" class="form-control"
+                       value="{{ polling_location_we_vote_id }}" />
             </div>
         </div>
         {% endif %}

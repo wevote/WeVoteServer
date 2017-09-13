@@ -49,12 +49,13 @@ def organization_follow(voter_device_id, organization_id=0, organization_we_vote
     json_data = organization_follow_all(voter_device_id, organization_id, organization_we_vote_id,
                                         follow_kind=FOLLOWING,
                                         organization_follow_based_on_issue=organization_follow_based_on_issue)
+
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 
 
 def organization_stop_following(voter_device_id, organization_id=0, organization_we_vote_id=''):
     """
-    Save that the voter wants to stop following this org
+    Save that the voter wants to stop following this org, organizationStopFollowing
     :param voter_device_id:
     :param organization_id:
     :param organization_we_vote_id
@@ -67,7 +68,7 @@ def organization_stop_following(voter_device_id, organization_id=0, organization
 
 def organization_follow_ignore(voter_device_id, organization_id=0, organization_we_vote_id=''):
     """
-    Save that the voter wants to ignore this org
+    Save that the voter wants to ignore this org, organizationFollowIgnore
     :param voter_device_id:
     :param organization_id:
     :param organization_we_vote_id

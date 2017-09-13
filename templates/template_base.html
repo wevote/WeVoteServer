@@ -34,6 +34,11 @@
     {# Display django.contrib.messages as Bootstrap alerts #}
     {% bootstrap_messages %}
 
+    <style>
+        .u-no-break { // Replacement for nobr and &nbsp;
+          white-space: nowrap;
+        }
+    </style>
 
     {% block js %}{% endblock %}
     {% block extrahead %}{% endblock %}

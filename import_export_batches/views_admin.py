@@ -3,11 +3,11 @@
 # -*- coding: UTF-8 -*-
 
 from .models import BatchDescription, BatchHeader, BatchHeaderMap, BatchManager, BatchRow, BatchSet, \
-    CONTEST_OFFICE, ELECTED_OFFICE, \
+    CONTEST_OFFICE, ELECTED_OFFICE, IMPORT_BALLOT_ITEM, \
     BATCH_IMPORT_KEYS_ACCEPTED_FOR_CANDIDATES, BATCH_IMPORT_KEYS_ACCEPTED_FOR_CONTEST_OFFICES, \
     BATCH_IMPORT_KEYS_ACCEPTED_FOR_ELECTED_OFFICES, BATCH_IMPORT_KEYS_ACCEPTED_FOR_MEASURES, \
     BATCH_IMPORT_KEYS_ACCEPTED_FOR_ORGANIZATIONS, BATCH_IMPORT_KEYS_ACCEPTED_FOR_POLITICIANS, \
-    BATCH_IMPORT_KEYS_ACCEPTED_FOR_POSITIONS, \
+    BATCH_IMPORT_KEYS_ACCEPTED_FOR_POSITIONS, BATCH_IMPORT_KEYS_ACCEPTED_FOR_BALLOT_ITEMS, \
     IMPORT_CREATE, IMPORT_ADD_TO_EXISTING, IMPORT_QUERY_ERROR, IMPORT_TO_BE_DETERMINED
 from .controllers import create_batch_header_translation_suggestions, create_batch_row_actions, \
     create_or_update_batch_header_mapping, \
@@ -63,6 +63,7 @@ def batch_list_view(request):
     batch_file = request.GET.get('batch_file', '')
     batch_uri = request.GET.get('batch_uri', '')
     google_civic_election_id = request.GET.get('google_civic_election_id', 0)
+    polling_location_we_vote_id = request.GET.get('polling_location_we_vote_id', '')
 
     messages_on_stage = get_messages(request)
     batch_list_found = False
@@ -76,7 +77,7 @@ def batch_list_view(request):
             batch_list_found = True
     except BatchDescription.DoesNotExist:
         # This is fine
-        batch_list = BatchDescription()
+        batch_list = []
         batch_list_found = False
         pass
 
@@ -88,27 +89,17 @@ def batch_list_view(request):
         ask_for_election = True
         election_list = Election.objects.order_by('-election_day_text')
 
-    if batch_list_found:
-        template_values = {
-            'messages_on_stage':        messages_on_stage,
-            'batch_list':               batch_list,
-            'ask_for_election':         ask_for_election,
-            'election_list':            election_list,
-            'kind_of_batch':            kind_of_batch,
-            'batch_file':               batch_file,
-            'batch_uri':                batch_uri,
-            'google_civic_election_id': convert_to_int(google_civic_election_id),
-        }
-    else:
-        template_values = {
-            'messages_on_stage':        messages_on_stage,
-            'ask_for_election':         ask_for_election,
-            'election_list':            election_list,
-            'kind_of_batch':            kind_of_batch,
-            'batch_file':               batch_file,
-            'batch_uri':                batch_uri,
-            'google_civic_election_id': convert_to_int(google_civic_election_id),
-        }
+    template_values = {
+        'messages_on_stage':        messages_on_stage,
+        'batch_list':               batch_list,
+        'ask_for_election':         ask_for_election,
+        'election_list':            election_list,
+        'kind_of_batch':            kind_of_batch,
+        'batch_file':               batch_file,
+        'batch_uri':                batch_uri,
+        'google_civic_election_id': convert_to_int(google_civic_election_id),
+        'polling_location_we_vote_id': polling_location_we_vote_id,
+    }
     return render(request, 'import_export_batches/batch_list.html', template_values)
 
 
@@ -127,8 +118,9 @@ def batch_list_process_view(request):
     batch_uri = request.POST.get('batch_uri', '')
     batch_uri_encoded = urlquote(batch_uri) if positive_value_exists(batch_uri) else ""
     google_civic_election_id = request.POST.get('google_civic_election_id', 0)
+    polling_location_we_vote_id = request.POST.get('polling_location_we_vote_id', "")
     if kind_of_batch not in (MEASURE, ELECTED_OFFICE, CONTEST_OFFICE, CANDIDATE, ORGANIZATION_WORD, POSITION,
-                             POLITICIAN):
+                             POLITICIAN, IMPORT_BALLOT_ITEM):
         messages.add_message(request, messages.ERROR, 'The kind_of_batch is required for a batch import.')
         return HttpResponseRedirect(reverse('import_export_batches:batch_list', args=()) +
                                     "?google_civic_election_id=" + str(google_civic_election_id) +
@@ -148,10 +140,11 @@ def batch_list_process_view(request):
             pass
 
     # Make sure we have a file to process
-    if kind_of_batch in ORGANIZATION_WORD and not batch_file:
+    if kind_of_batch in (ORGANIZATION_WORD, IMPORT_BALLOT_ITEM) and not batch_file:
         messages.add_message(request, messages.ERROR, 'Please select a file to import.')
         return HttpResponseRedirect(reverse('import_export_batches:batch_list', args=()) +
                                     "?kind_of_batch=" + str(kind_of_batch) +
+                                    "&polling_location_we_vote_id=" + str(polling_location_we_vote_id) +
                                     "&google_civic_election_id=" + str(google_civic_election_id) +
                                     "&batch_uri=" + batch_uri_encoded)
 
@@ -161,6 +154,18 @@ def batch_list_process_view(request):
                                                       'to choose an election.'.format(kind_of_batch=kind_of_batch))
         return HttpResponseRedirect(reverse('import_export_batches:batch_list', args=()) +
                                     "?kind_of_batch=" + str(kind_of_batch) +
+                                    "&polling_location_we_vote_id=" + str(polling_location_we_vote_id) +
+                                    "&google_civic_election_id=" + str(google_civic_election_id) +
+                                    "&batch_uri=" + batch_uri_encoded)
+
+    # Make sure we have a polling_location_we_vote_id
+    if kind_of_batch in IMPORT_BALLOT_ITEM and not positive_value_exists(polling_location_we_vote_id):
+        messages.add_message(request, messages.ERROR, 'This kind_of_batch (\"{kind_of_batch}\") requires you '
+                                                      'to choose a polling location.'
+                                                      ''.format(kind_of_batch=kind_of_batch))
+        return HttpResponseRedirect(reverse('import_export_batches:batch_list', args=()) +
+                                    "?kind_of_batch=" + str(kind_of_batch) +
+                                    "&polling_location_we_vote_id=" + str(polling_location_we_vote_id) +
                                     "&google_civic_election_id=" + str(google_civic_election_id) +
                                     "&batch_uri=" + batch_uri_encoded)
 
@@ -208,12 +213,14 @@ def batch_list_process_view(request):
         return HttpResponseRedirect(reverse('import_export_batches:batch_action_list', args=()) +
                                     "?batch_header_id=" + str(batch_header_id) +
                                     "&kind_of_batch=" + str(kind_of_batch) +
+                                    "&polling_location_we_vote_id=" + str(polling_location_we_vote_id) +
                                     "&google_civic_election_id=" + str(google_civic_election_id) +
                                     "&batch_uri=" + batch_uri_encoded)
     else:
         # Go to the batch listing page
         return HttpResponseRedirect(reverse('import_export_batches:batch_list', args=()) +
                                     "?kind_of_batch=" + str(kind_of_batch) +
+                                    "&polling_location_we_vote_id=" + str(polling_location_we_vote_id) +
                                     "&google_civic_election_id=" + str(google_civic_election_id) +
                                     "&batch_uri=" + batch_uri_encoded)
 
@@ -228,6 +235,8 @@ def batch_action_list_view(request):
     authority_required = {'verified_volunteer'}  # admin, verified_volunteer
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
+
+    batch_set_list = []
 
     batch_header_id = convert_to_int(request.GET.get('batch_header_id', 0))
     kind_of_batch = request.GET.get('kind_of_batch', '')
@@ -350,38 +359,34 @@ def batch_action_list_view(request):
                 else:
                     one_batch_row.batch_row_action_exists = False
                 modified_batch_row_list.append(one_batch_row)
+            elif kind_of_batch == IMPORT_BALLOT_ITEM:
+                existing_results = \
+                    batch_manager.retrieve_batch_row_action_ballot_item(batch_header_id, one_batch_row.id)
+                if existing_results['batch_row_action_found']:
+                    one_batch_row.batch_row_action = existing_results['batch_row_action_ballot_item']
+                    one_batch_row.kind_of_batch = IMPORT_BALLOT_ITEM
+                    one_batch_row.batch_row_action_exists = True
+                else:
+                    one_batch_row.batch_row_action_exists = False
+                modified_batch_row_list.append(one_batch_row)
 
     election_query = Election.objects.order_by('-election_day_text')
     election_list = list(election_query)
     messages_on_stage = get_messages(request)
 
-    if batch_set_id:
-        template_values = {
-            'messages_on_stage': messages_on_stage,
-            'batch_header_id': batch_header_id,
-            'batch_description': batch_description,
-            'batch_set_id': batch_set_id,
-            'batch_header_map': batch_header_map,
-            'batch_set_list': batch_set_list,
-            'batch_row_list': modified_batch_row_list,
-            'election_list': election_list,
-            'kind_of_batch': kind_of_batch,
-            'google_civic_election_id': google_civic_election_id,
-            'position_owner_organization_we_vote_id': position_owner_organization_we_vote_id,
-        }
-    else:
-        template_values = {
-            'messages_on_stage':        messages_on_stage,
-            'batch_header_id':          batch_header_id,
-            'batch_description':        batch_description,
-            'batch_set_id':             batch_set_id,
-            'batch_header_map':         batch_header_map,
-            'batch_row_list':           modified_batch_row_list,
-            'election_list':            election_list,
-            'kind_of_batch':            kind_of_batch,
-            'google_civic_election_id': google_civic_election_id,
-            'position_owner_organization_we_vote_id': position_owner_organization_we_vote_id,
-        }
+    template_values = {
+        'messages_on_stage':        messages_on_stage,
+        'batch_header_id':          batch_header_id,
+        'batch_description':        batch_description,
+        'batch_set_id':             batch_set_id,
+        'batch_header_map':         batch_header_map,
+        'batch_set_list':           batch_set_list,
+        'batch_row_list':           modified_batch_row_list,
+        'election_list':            election_list,
+        'kind_of_batch':            kind_of_batch,
+        'google_civic_election_id': google_civic_election_id,
+        'position_owner_organization_we_vote_id': position_owner_organization_we_vote_id,
+    }
     return render(request, 'import_export_batches/batch_action_list.html', template_values)
 
 
@@ -485,6 +490,8 @@ def batch_header_mapping_view(request):
         batch_import_keys_accepted = BATCH_IMPORT_KEYS_ACCEPTED_FOR_POLITICIANS
     elif kind_of_batch == POSITION:
         batch_import_keys_accepted = BATCH_IMPORT_KEYS_ACCEPTED_FOR_POSITIONS
+    elif kind_of_batch == IMPORT_BALLOT_ITEM:
+        batch_import_keys_accepted = BATCH_IMPORT_KEYS_ACCEPTED_FOR_BALLOT_ITEMS
     else:
         batch_import_keys_accepted = {}
 

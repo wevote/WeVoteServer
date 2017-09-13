@@ -102,6 +102,8 @@ def election_all_ballots_retrieve_view(request, election_local_id=0):
     ballots_retrieved = 0
     ballots_not_retrieved = 0
     ballots_with_contests_retrieved = 0
+    polling_locations_retrieved = 0
+    ballots_with_election_administration_data = 0
     # We used to only retrieve up to 500 locations from each state, but we don't limit now
     # # We retrieve 10% of the total polling locations, which should give us coverage of the entire election
     # number_of_polling_locations_to_retrieve = int(.1 * polling_location_count)
@@ -141,6 +143,12 @@ def election_all_ballots_retrieve_view(request, election_local_id=0):
         if one_ballot_results['contests_retrieved']:
             ballots_with_contests_retrieved += 1
 
+        if one_ballot_results['polling_location_retrieved']:
+            polling_locations_retrieved += 1
+
+        if one_ballot_results['election_administration_data_retrieved']:
+            ballots_with_election_administration_data += 1
+
         # We used to only retrieve up to 500 locations from each state, but we don't limit now
         # # Break out of this loop, assuming we have a minimum number of ballots with contests retrieved
         # #  If we don't achieve the minimum number of ballots_with_contests_retrieved, break out at the emergency level
@@ -149,14 +157,18 @@ def election_all_ballots_retrieve_view(request, election_local_id=0):
         #         ballots_with_contests_retrieved > 20) or emergency:
         #     break
 
+    total_retrieved = ballots_retrieved + ballots_not_retrieved
     if ballots_retrieved > 0:
-        total_retrieved = ballots_retrieved + ballots_not_retrieved
         messages.add_message(request, messages.INFO,
                              'Ballot data retrieved from Google Civic for the {election_name}. '
-                             '(ballots retrieved: {ballots_retrieved} '
+                             '(polling_locations_retrieved: {polling_locations_retrieved}, '
+                             'ballots_with_election_administration_data: {ballots_with_election_administration_data}, '
+                             'ballots retrieved: {ballots_retrieved}, '
                              '(with contests: {ballots_with_contests_retrieved}), '
                              'not retrieved: {ballots_not_retrieved}, '
                              'total: {total})'.format(
+                                 polling_locations_retrieved=polling_locations_retrieved,
+                                 ballots_with_election_administration_data=ballots_with_election_administration_data,
                                  ballots_retrieved=ballots_retrieved,
                                  ballots_not_retrieved=ballots_not_retrieved,
                                  ballots_with_contests_retrieved=ballots_with_contests_retrieved,
@@ -164,10 +176,20 @@ def election_all_ballots_retrieve_view(request, election_local_id=0):
                                  total=total_retrieved))
     else:
         messages.add_message(request, messages.ERROR,
-                             'Ballot data NOT retrieved from Google Civic for the {election_name}.'
-                             ' (not retrieved: {ballots_not_retrieved})'.format(
+                             'Ballot data NOT retrieved from Google Civic for the {election_name}. '
+                             '(polling_locations_retrieved: {polling_locations_retrieved}, '
+                             'ballots_with_election_administration_data: {ballots_with_election_administration_data}, '
+                             'ballots retrieved: {ballots_retrieved}, '
+                             '(with contests: {ballots_with_contests_retrieved}), '
+                             'not retrieved: {ballots_not_retrieved}, '
+                             'total: {total})'.format(
+                                 polling_locations_retrieved=polling_locations_retrieved,
+                                 ballots_with_election_administration_data=ballots_with_election_administration_data,
+                                 ballots_retrieved=ballots_retrieved,
                                  ballots_not_retrieved=ballots_not_retrieved,
-                                 election_name=election_on_stage.election_name))
+                                 ballots_with_contests_retrieved=ballots_with_contests_retrieved,
+                                 election_name=election_on_stage.election_name,
+                                 total=total_retrieved))
     return HttpResponseRedirect(reverse('election:election_summary', args=(election_local_id,)))
 
 
@@ -491,15 +513,19 @@ def election_summary_view(request, election_local_id):
         return redirect_to_sign_in_page(request, authority_required)
 
     show_offices_and_candidates = request.GET.get('show_offices_and_candidates', False)
-
+    google_civic_election_id = request.GET.get('google_civic_election_id', 0)
     election_local_id = convert_to_int(election_local_id)
-    google_civic_election_id = ""
+
     election_on_stage_found = False
     election_on_stage = Election()
 
     try:
-        election_on_stage = Election.objects.get(id=election_local_id)
+        if positive_value_exists(election_local_id):
+            election_on_stage = Election.objects.get(id=election_local_id)
+        else:
+            election_on_stage = Election.objects.get(google_civic_election_id=google_civic_election_id)
         election_on_stage_found = True
+        election_local_id = election_on_stage.id
         google_civic_election_id = election_on_stage.google_civic_election_id
     except Election.MultipleObjectsReturned as e:
         handle_record_found_more_than_one_exception(e, logger=logger)

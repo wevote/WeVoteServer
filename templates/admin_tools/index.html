@@ -38,22 +38,21 @@
         <a href="{% url 'polling_location:polling_location_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}"
             >Polling Locations</a>
     </p>
-    <p><a href="{% url 'quick_info:quick_info_list' %}">Quick Info</a></p>
+{#    <p><a href="{% url 'quick_info:quick_info_list' %}">Quick Info</a></p>#}
     <p><a href="https://developers.google.com/apis-explorer/#p/civicinfo/v2/civicinfo.elections.voterInfoQuery"
           target="_blank">One Ballot (Retrieve)</a></p>
 
 {# ################## #}
 <h2>Maintenance</h2>
-    <p><a href="{% url 'admin_tools:import_sample_data' %}"></a>
-        <a href="{% url 'admin_tools:sync_dashboard' %}">Sync Data with Master We Vote Servers</a></p>
+    <p><a href="{% url 'analytics:analytics_index' %}">Analytics</a></p>
     <p><a href="{% url 'voter:voter_list' %}">Voters</a></p>
     <p><a href="{% url 'import_export_batches:batches_home' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}"
         >Import Data in Batches</a></p>
-    <p><a href=""></a>Regions</p>
-    <p><a href=""></a>Translation Needed</p>
-    <p><a href="{% url 'admin_tools:statistics_summary' %}">Quick Statistics</a></p>
+{#    <p><a href=""></a>Regions</p>#}
+{#    <p><a href=""></a>Translation Needed</p>#}
     <p><a href="{% url 'admin_tools:data_cleanup' %}">Data Cleanup Routines</a></p>
     <p><a href="{% url 'apis_v1:apisIndex' %}" target="_blank">API Documentation</a></p>
+    <p><a href="{% url 'admin_tools:sync_dashboard' %}">Sync Data with Master We Vote Servers</a></p>
     {% if user and not user.is_anonymous %}
     <p>
             <span>Hello {{ user.get_full_name|default:"Voter" }}!</span>

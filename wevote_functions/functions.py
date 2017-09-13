@@ -413,6 +413,19 @@ def get_ip_from_headers(request):
         return request.META.get('REMOTE_ADDR')
 
 
+def get_maximum_number_to_retrieve_from_request(request):
+    if 'maximum_number_to_retrieve' in request.GET:
+        maximum_number_to_retrieve = request.GET['maximum_number_to_retrieve']
+    else:
+        maximum_number_to_retrieve = 0
+    if maximum_number_to_retrieve is "":
+        maximum_number_to_retrieve = 0
+    else:
+        maximum_number_to_retrieve = convert_to_int(maximum_number_to_retrieve)
+
+    return maximum_number_to_retrieve
+
+
 # http://stackoverflow.com/questions/1622793/django-cookies-how-can-i-set-them
 def set_cookie(response, cookie_name, cookie_value, days_expire=None):
     if days_expire is None:

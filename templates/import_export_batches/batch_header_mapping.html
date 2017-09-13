@@ -16,6 +16,8 @@
         Position Header Mapping
     {% elif kind_of_batch == "POLITICIAN" %}
         Politician Header Mapping
+    {% elif kind_of_batch == "IMPORT_BALLOT_ITEM" %}
+        Ballot Item Header Mapping
     {% else %}
         Header Mapping
     {% endif %}
@@ -45,6 +47,8 @@
     Position Header Mapping
 {% elif kind_of_batch == "POLITICIAN" %}
     Politician Header Mapping
+{% elif kind_of_batch == "IMPORT_BALLOT_ITEM" %}
+    Ballot Item Header Mapping
 {% else %}
     Kind of data not recognized: Please STOP
 {% endif %}

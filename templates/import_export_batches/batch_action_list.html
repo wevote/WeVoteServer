@@ -16,6 +16,8 @@
         Process Position Data
     {% elif kind_of_batch == "POLITICIAN" %}
         Process Politician Data
+    {% elif kind_of_batch == "IMPORT_BALLOT_ITEM" %}
+        Import Ballot at One Location
     {% else %}
         Process Data
     {% endif %}
@@ -48,6 +50,9 @@
 {% elif kind_of_batch == "POSITION" %}
     <p><a href="{% url 'position:position_list' %}?kind_of_batch={{ kind_of_batch }}&google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}"
           target="_blank">Current Positions{% if google_civic_election_id > 0 %} for this Election{% endif %} ></a> (in new window)</p>
+{% elif kind_of_batch == "IMPORT_BALLOT_ITEM" %}
+    <p><a href="{% url 'election:election_summary' 0 %}?kind_of_batch={{ kind_of_batch }}&google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}"
+          target="_blank">Current Ballots{% if google_civic_election_id > 0 %} for this Election{% endif %} ></a> (in new window)</p>
 {% endif %}
 
 
@@ -68,7 +73,9 @@
     <a href="{% url 'import_export_batches:batch_list' %}?kind_of_batch=POSITION&google_civic_election_id={{ google_civic_election_id }}">
         Position</a> -
     <a href="{% url 'import_export_batches:batch_list' %}?kind_of_batch=POLITICIAN&google_civic_election_id={{ google_civic_election_id }}">
-        Politician</a>
+        Politician</a> -
+    <a href="{% url 'import_export_batches:batch_list' %}?kind_of_batch=IMPORT_BALLOT_ITEM&google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
+        Ballot at One Location</a>
 
 {% else %}
     <h1>
@@ -86,6 +93,8 @@
         Process Position Data
     {% elif kind_of_batch == "POLITICIAN" %}
         Process Politician Data
+    {% elif kind_of_batch == "IMPORT_BALLOT_ITEM" %}
+        Ballot at One Location
     {% else %}
         Kind of data not recognized: Please STOP
     {% endif %}
@@ -95,9 +104,10 @@
         {% csrf_token %}
         <input type="hidden" name="kind_of_batch" value="{{ kind_of_batch }}">
         <input type="hidden" name="batch_header_id" value="{{ batch_header_id }}">
+        <input type="hidden" name="polling_location_we_vote_id" value="{{ polling_location_we_vote_id }}">
 
-        {% if election_list and election_list|length %}
         <div class="form-group">
+        {% if election_list and election_list|length %}
             <label for="google_civic_election_id" class="col-sm-3 control-label">Election</label>
             <div class="col-sm-8">
                 {% for election in election_list %}
@@ -106,8 +116,14 @@
                     {% endif %}
                 {% endfor %}
             </div>
-        </div>
         {% endif %}{# End of if election_list #}
+        {% if polling_location_we_vote_id %}
+            <label for="polling_location_we_vote_id" class="col-sm-3 control-label">Polling Location</label>
+            <div class="col-sm-8">
+                {{ polling_location_we_vote_id }}
+            </div>
+        {% endif %}{# End of if election_list #}
+        </div>
         <div class="form-group">
             <label for="create_actions_button_id" class="col-sm-3 control-label"></label>
             <div class="col-sm-8">
@@ -138,7 +154,7 @@
     <table class="table table-condensed">
         <tr>
             <th>
-                <a href="{% url 'import_export_batches:batch_header_mapping' %}?batch_header_id={{ batch_header_id }}&google_civic_election_id={{ google_civic_election_id }}">(edit header&nbsp;map)</a>
+                <a href="{% url 'import_export_batches:batch_header_mapping' %}?batch_header_id={{ batch_header_id }}&kind_of_batch={{ kind_of_batch }}&google_civic_election_id={{ google_civic_election_id }}">(edit header&nbsp;map)</a>
             </th>
             <th>{{ batch_header_map.batch_header_map_000 }}</th>
             <th>{{ batch_header_map.batch_header_map_001 }}</th>

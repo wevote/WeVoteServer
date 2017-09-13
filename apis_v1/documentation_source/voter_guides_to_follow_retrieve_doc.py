@@ -61,6 +61,12 @@ def voter_guides_to_follow_retrieve_doc_template_values(url_root):
             'value':        'boolean',  # boolean, integer, long, string
             'description':  'Filter the voter guides to contain organizations following the same issues as voter',
         },
+        {
+            'name':         'add_voter_guides_not_from_election',
+            'value':        'boolean',  # boolean, integer, long, string
+            'description':  'When requesting election-related voter guides, if this is true, add to the end '
+                            'of the list additional voter guides not related to the election.',
+        },
     ]
 
     potential_status_codes_list = [

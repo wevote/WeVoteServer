@@ -227,6 +227,7 @@ urlpatterns = [
         views_docs.friend_invitation_by_we_vote_id_send_doc_view, name='friendInvitationByWeVoteIdSendDocs'),
     url(r'^docs/friendInviteResponse/$', views_docs.friend_invite_response_doc_view, name='friendInviteResponseDocs'),
     url(r'^docs/friendList/$', views_docs.friend_list_doc_view, name='friendListDocs'),
+    url(r'^docs/issueFollow/$', views_docs.issue_follow_doc_view, name='issueFollowDocs'),
     url(r'^docs/issuesRetrieve/$', views_docs.issues_retrieve_doc_view, name='issuesRetrieveDocs'),
     url(r'^docs/issuesSyncOut/$', views_docs.issues_sync_out_doc_view, name='issuesSyncOutDocs'),
     url(r'^docs/issuesLinkedToOrganization/', views_docs.issues_linked_to_organization_doc_view,

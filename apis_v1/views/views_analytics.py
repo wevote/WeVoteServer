@@ -3,12 +3,7 @@
 # -*- coding: UTF-8 -*-
 
 from analytics.controllers import save_analytics_action_for_api
-from analytics.models import ACTION_VOTER_GUIDE_VISIT, ACTION_VOTER_GUIDE_ENTRY, \
-    ACTION_ORGANIZATION_FOLLOW, ACTION_ORGANIZATION_AUTO_FOLLOW, \
-    ACTION_ISSUE_FOLLOW, ACTION_BALLOT_VISIT, \
-    ACTION_POSITION_TAKEN, ACTION_VOTER_TWITTER_AUTH, ACTION_VOTER_FACEBOOK_AUTH, \
-    ACTION_WELCOME_ENTRY, ACTION_FRIEND_ENTRY
-
+from analytics.models import ACTIONS_THAT_REQUIRE_ORGANIZATION_IDS
 from config.base import get_environment_variable
 from django.http import HttpResponse
 import json
@@ -49,7 +44,8 @@ def save_analytics_action_view(request):  # saveAnalyticsAction
     else:
         voter_device_id_for_storage = voter_device_id
 
-    if action_constant == ACTION_VOTER_GUIDE_VISIT:
+    action_requires_organization_ids = True if action_constant in ACTIONS_THAT_REQUIRE_ORGANIZATION_IDS else False
+    if action_requires_organization_ids:
         # If here, make sure we have both organization ids
         organization_manager = OrganizationManager()
         if positive_value_exists(organization_we_vote_id) and not positive_value_exists(organization_id):
@@ -81,9 +77,9 @@ def save_analytics_action_view(request):  # saveAnalyticsAction
         return HttpResponse(json.dumps(json_data), content_type='application/json')
 
     results = save_analytics_action_for_api(action_constant, voter_we_vote_id, voter_id,
-                                             organization_we_vote_id, organization_id,
-                                             google_civic_election_id, ballot_item_we_vote_id,
-                                             voter_device_id_for_storage)
+                                            organization_we_vote_id, organization_id,
+                                            google_civic_election_id, ballot_item_we_vote_id,
+                                            voter_device_id_for_storage)
 
     status += results['status']
     json_data = {

@@ -14,9 +14,7 @@ or for Windows 10 or later,
 at which point you should be able to proceed with the Ansible-Vagrant
 instructions.
 
-Alternatively, you can build the Vagrant image on a Mac or Linux machine, use
-[vagrant package](https://www.vagrantup.com/docs/cli/package.html) to export
-a portable box, and copy that to your Windows machine.
+Alternatively, you can try the prebuilt Vagrant box, which lets you avoid Ansible setup entirely. [Using the prebuilt Vagrant box](README_API_INSTALL_VAGRANT_PREBUILT.md)
 
 ## Installing WeVoteServer: Native development
 

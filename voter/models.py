@@ -2,7 +2,7 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
-from django.db import models
+from django.db import (models, IntegrityError)
 from django.db.models import Q
 from django.contrib.auth.models import (BaseUserManager, AbstractBaseUser)  # PermissionsMixin
 from django.core.validators import RegexValidator
@@ -112,8 +112,9 @@ class VoterManager(BaseUserManager):
                 password_not_valid = True
             voter.save()
             voter_id = voter.id
-        except voter.IntegrityError as e:
+        except IntegrityError as e:
             handle_record_not_saved_exception(e, logger=logger)
+            logger.debug("create_voter IntegrityError exception 1 " + str(e))
             try:
                 # Trying to save again will increment the 'we_vote_id_last_voter_integer'
                 # by calling 'fetch_next_we_vote_id_last_voter_integer'
@@ -121,13 +122,17 @@ class VoterManager(BaseUserManager):
                 #  should look more closely at this
                 voter.save()
                 voter_id = voter.id
-            except voter.IntegrityError as e:
+            except IntegrityError as e:
                 handle_record_not_saved_exception(e, logger=logger)
+                logger.debug("create_voter IntegrityError exception 2 " + str(e))
             except Exception as e:
                 handle_record_not_saved_exception(e, logger=logger)
+                logger.debug("create_voter first general exception " + str(e))
+
 
         except Exception as e:
             handle_record_not_saved_exception(e, logger=logger)
+            logger.error("create_voter second exception" + str(e))
 
         results = {
             'email_not_valid':      email_not_valid,

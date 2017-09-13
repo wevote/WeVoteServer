@@ -23,6 +23,7 @@ from datetime import date
 
 import xml.etree.ElementTree as ElementTree
 
+IMPORT_BALLOT_ITEM = 'IMPORT_BALLOT_ITEM'
 CONTEST_OFFICE = 'CONTEST_OFFICE'
 ELECTED_OFFICE = 'ELECTED_OFFICE'
 
@@ -33,7 +34,8 @@ KIND_OF_BATCH_CHOICES = (
     (CANDIDATE,         'Candidate'),
     (ORGANIZATION_WORD, 'Organization'),
     (POSITION,          'Position'),
-    (POLITICIAN, 'Politician'),
+    (POLITICIAN,        'Politician'),
+    (IMPORT_BALLOT_ITEM,   'Ballot Returned'),
 )
 
 IMPORT_TO_BE_DETERMINED = 'IMPORT_TO_BE_DETERMINED'
@@ -164,6 +166,15 @@ BATCH_IMPORT_KEYS_ACCEPTED_FOR_POSITIONS = {
     'organization_twitter_handle': 'organization_twitter_handle (position owner)',
 }
 
+BATCH_IMPORT_KEYS_ACCEPTED_FOR_BALLOT_ITEMS = {
+    'polling_location_we_vote_id': 'polling_location_we_vote_id',
+    'candidate_name': 'candidate_name',
+    'candidate_twitter_handle': 'candidate_twitter_handle',
+    'contest_office_name': 'contest_office_name',
+    'contest_measure_name': 'contest_measure_name',
+    'local_ballot_order': 'local_ballot_order',
+}
+
 
 logger = wevote_functions.admin.get_logger(__name__)
 
@@ -212,7 +223,7 @@ class BatchManager(models.Model):
 
     def create_batch_from_local_file_upload(
             self, batch_file, kind_of_batch, google_civic_election_id, organization_we_vote_id):
-        if batch_file.content_type == 'text/csv':
+        if (batch_file.content_type == 'text/csv') or (batch_file.content_type == 'application/vnd.ms-excel'):
             csv_data = csv.reader(codecs.iterdecode(batch_file, 'utf-8'), delimiter=',')
             batch_file_name = batch_file.name
             return self.create_batch_from_csv_data(
@@ -363,7 +374,7 @@ class BatchManager(models.Model):
                             batch_header_map_050=get_header_map_value_if_index_in_list(line, 50, kind_of_batch),
                         )
                         batch_header_map_id = batch_header_map.id
-                        status += " BATCH_HEADER_MAP_SAVED"
+                        status += "BATCH_HEADER_MAP_SAVED "
 
                     if positive_value_exists(batch_header_id) and positive_value_exists(batch_header_map_id):
                         # Now save the BatchDescription
@@ -382,12 +393,12 @@ class BatchManager(models.Model):
                             organization_we_vote_id=organization_we_vote_id,
                             # source_uri=batch_uri,
                             )
-                        status += " BATCH_DESCRIPTION_SAVED"
+                        status += "BATCH_DESCRIPTION_SAVED "
                         success = True
                 except Exception as e:
                     # Stop trying to save rows -- break out of the for loop
                     batch_header_id = 0
-                    status += " EXCEPTION_BATCH_HEADER"
+                    status += "EXCEPTION_BATCH_HEADER "
                     handle_exception(e, logger=logger, exception_message=status)
                     break
             else:
@@ -505,6 +516,8 @@ class BatchManager(models.Model):
             batch_import_keys_accepted = BATCH_IMPORT_KEYS_ACCEPTED_FOR_POLITICIANS
         elif kind_of_batch == POSITION:
             batch_import_keys_accepted = BATCH_IMPORT_KEYS_ACCEPTED_FOR_POSITIONS
+        elif kind_of_batch == IMPORT_BALLOT_ITEM:
+            batch_import_keys_accepted = BATCH_IMPORT_KEYS_ACCEPTED_FOR_BALLOT_ITEMS
         else:
             batch_import_keys_accepted = {}
         if incoming_alternate_header_value in batch_import_keys_accepted:
@@ -832,6 +845,39 @@ class BatchManager(models.Model):
             'status':                       status,
             'batch_row_action_found':       batch_row_action_found,
             'batch_row_action_position':    batch_row_action_position,
+        }
+        return results
+
+    def retrieve_batch_row_action_ballot_item(self, batch_header_id, batch_row_id):
+        """
+        Retrieves data from BatchRowActionBallotItem table
+        :param batch_header_id:
+        :param batch_row_id:
+        :return:
+        """
+
+        try:
+            batch_row_action_ballot_item = BatchRowActionBallotItem.objects.get(batch_header_id=batch_header_id,
+                                                                                batch_row_id=batch_row_id)
+            batch_row_action_found = True
+            success = True
+            status = "BATCH_ROW_ACTION_BALLOT_ITEM_RETRIEVED "
+        except BatchRowActionBallotItem.DoesNotExist:
+            batch_row_action_ballot_item = BatchRowActionBallotItem()
+            batch_row_action_found = False
+            success = True
+            status = "BATCH_ROW_ACTION_BALLOT_ITEM_NOT_FOUND "
+        except Exception as e:
+            batch_row_action_ballot_item = BatchRowActionBallotItem()
+            batch_row_action_found = False
+            success = False
+            status = "BATCH_ROW_ACTION_BALLOT_ITEM_RETRIEVE_ERROR "
+
+        results = {
+            'success':                      success,
+            'status':                       status,
+            'batch_row_action_found':       batch_row_action_found,
+            'batch_row_action_ballot_item': batch_row_action_ballot_item,
         }
         return results
 
@@ -3398,3 +3444,54 @@ class BatchRowActionPosition(models.Model):
     volunteer_certified = models.BooleanField(default=False)
 
     status = models.TextField(verbose_name="batch row action position status", null=True, blank=True, default="")
+
+
+class BatchRowActionBallotItem(models.Model):
+    """
+    The definition of the action for importing one ballot item.
+    """
+    batch_header_id = models.PositiveIntegerField(verbose_name="unique id of header row", unique=False, null=False)
+    batch_row_id = models.PositiveIntegerField(verbose_name="unique id of batch row", unique=True, null=False)
+    kind_of_action = models.CharField(max_length=40, choices=KIND_OF_ACTION_CHOICES, default=IMPORT_TO_BE_DETERMINED)
+
+    # Fields from BallotItem
+    # The unique id of the voter for which this ballot was retrieved
+    voter_id = models.IntegerField(verbose_name="the voter unique id", default=0, null=False, blank=False)
+    # The polling location for which this ballot was retrieved
+    polling_location_we_vote_id = models.CharField(
+        verbose_name="we vote permanent id of the polling location", max_length=255, default=None, null=True,
+        blank=True, unique=False)
+
+    # The unique ID of this election. (Provided by Google Civic)
+    google_civic_election_id = models.CharField(verbose_name="google civic election id", max_length=20, null=False)
+    google_civic_election_id_new = models.PositiveIntegerField(
+        verbose_name="google civic election id", default=0, null=False)
+    state_code = models.CharField(verbose_name="state the ballot item is related to", max_length=2, null=True)
+
+    google_ballot_placement = models.BigIntegerField(
+        verbose_name="the order this item should appear on the ballot", null=True, blank=True, unique=False)
+    local_ballot_order = models.IntegerField(
+        verbose_name="locally calculated order this item should appear on the ballot", null=True, blank=True)
+
+    # The id for this contest office specific to this server.
+    contest_office_id = models.PositiveIntegerField(verbose_name="local id for this contest office", default=0,
+                                                    null=True, blank=True)
+    # The internal We Vote id for the ContestMeasure that this campaign taking a stance on
+    contest_office_we_vote_id = models.CharField(
+        verbose_name="we vote permanent id for this office", max_length=255, default=None, null=True,
+        blank=True, unique=False)
+    # The local database id for this measure, specific to this server.
+    contest_measure_id = models.PositiveIntegerField(
+        verbose_name="contest_measure unique id", default=0, null=True, blank=True)
+    # The internal We Vote id for the ContestMeasure that this campaign taking a stance on
+    contest_measure_we_vote_id = models.CharField(
+        verbose_name="we vote permanent id for this measure", max_length=255, default=None, null=True,
+        blank=True, unique=False)
+    # This is a sortable name, either the candidate name or the measure name
+    ballot_item_display_name = models.CharField(verbose_name="a label we can sort by", max_length=255, null=True,
+                                                blank=True)
+
+    measure_subtitle = models.TextField(verbose_name="google civic referendum subtitle",
+                                        null=True, blank=True, default="")
+
+    status = models.TextField(verbose_name="batch row action ballot item status", null=True, blank=True, default="")

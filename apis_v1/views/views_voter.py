@@ -38,8 +38,8 @@ from voter_guide.controllers import voter_guide_possibility_retrieve_for_api, vo
     voter_guides_to_follow_retrieve_for_api, voter_guides_followed_by_organization_retrieve_for_api, \
     voter_guide_followers_retrieve_for_api, voter_follow_all_organizations_followed_by_organization_for_api
 import wevote_functions.admin
-from wevote_functions.functions import convert_to_int, get_voter_device_id, is_voter_device_id_valid, \
-    positive_value_exists
+from wevote_functions.functions import convert_to_int, get_maximum_number_to_retrieve_from_request, \
+    get_voter_device_id, is_voter_device_id_valid, positive_value_exists
 from donate.controllers import donation_history_for_a_voter
 
 logger = wevote_functions.admin.get_logger(__name__)
@@ -146,6 +146,10 @@ def voter_address_retrieve_view(request):  # voterAddressRetrieve
         status += 'GUESS_IF_NO_ADDRESS_SAVED' + ", "
         # If here, we are going to guess at the voter's location based on IP address
         voter_location_results = voter_location_retrieve_from_ip_for_api(request)
+        # # TODO DALE TEMP
+        # voter_location_results['voter_location_found'] = True
+        # voter_location_results['voter_location'] = "New York, NY"
+        # voter_location_results['status'] = "TODO DALE Temp setting of voter_location to New York"
 
         if voter_location_results['voter_location_found']:
             status += 'VOTER_ADDRESS_RETRIEVE-VOTER_LOCATION_FOUND_FROM_IP '
@@ -240,7 +244,7 @@ def voter_address_retrieve_view(request):  # voterAddressRetrieve
                     'voter_device_id': voter_device_id,
                     'address_type': '',
                     'text_for_map_search': '',
-                    'google_civic_election_id': 0,
+                    'google_civic_election_id': google_civic_election_id,
                     'latitude': '',
                     'longitude': '',
                     'normalized_line1': '',
@@ -347,11 +351,12 @@ def voter_address_save_view(request):  # voterAddressSave
     # Save the address value, and clear out ballot_saved information
     voter_address_manager = VoterAddressManager()
     voter_address_save_results = voter_address_manager.update_or_create_voter_address(
-        voter_id, BALLOT_ADDRESS, text_for_map_search)  # TODO DALE 2017-07-17 This needs a fresh look:
+        voter_id, BALLOT_ADDRESS, text_for_map_search, google_civic_election_id)
+    # TODO DALE 2017-07-17 This needs a fresh look:
     # , google_civic_election_id
 
     # If simple_save is passed in only save address and then send response (you must pass in a google_civic_election_id)
-    if positive_value_exists(simple_save and google_civic_election_id > 0):
+    if positive_value_exists(simple_save) and positive_value_exists(google_civic_election_id):
         success = voter_address_save_results['success'] and voter_address_save_results['voter_address_found']
 
         json_data = {
@@ -359,7 +364,7 @@ def voter_address_save_view(request):  # voterAddressSave
             'success':              success,
             'voter_device_id':      voter_device_id,
             'text_for_map_search':  text_for_map_search,
-            'simple_save':          True,
+            'simple_save':          simple_save,
             'google_civic_election_id': google_civic_election_id
         }
         return HttpResponse(json.dumps(json_data), content_type='application/json')
@@ -376,7 +381,11 @@ def voter_address_save_view(request):  # voterAddressSave
 
         # Update voter_address with the google_civic_election_id retrieved from Google Civic
         # and clear out ballot_saved information IFF we got a valid google_civic_election_id back
-        google_civic_election_id = convert_to_int(google_retrieve_results['google_civic_election_id'])
+        if google_retrieve_results['google_civic_election_id']:
+            google_civic_election_id = convert_to_int(google_retrieve_results['google_civic_election_id'])
+        else:
+            # Leave google_civic_election_id as it was at the top of this function
+            pass
 
         # At this point proceed to update google_civic_election_id whether it is a positive integer or zero
         voter_address.google_civic_election_id = google_civic_election_id
@@ -780,19 +789,6 @@ def voter_guide_followers_retrieve_view(request):  # voterGuideFollowersRetrieve
         maximum_number_to_retrieve=maximum_number_to_retrieve)
 
 
-def get_maximum_number_to_retrieve_from_request(request):
-    if 'maximum_number_to_retrieve' in request.GET:
-        maximum_number_to_retrieve = request.GET['maximum_number_to_retrieve']
-    else:
-        maximum_number_to_retrieve = 40
-    if maximum_number_to_retrieve is "":
-        maximum_number_to_retrieve = 40
-    else:
-        maximum_number_to_retrieve = convert_to_int(maximum_number_to_retrieve)
-
-    return maximum_number_to_retrieve
-
-
 def voter_guides_ignored_retrieve_view(request):  # voterGuidesIgnoredRetrieve
     voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
     maximum_number_to_retrieve = get_maximum_number_to_retrieve_from_request(request)
@@ -816,6 +812,9 @@ def voter_guides_to_follow_retrieve_view(request):  # voterGuidesToFollowRetriev
     use_test_election = False if use_test_election == 'False' else use_test_election
     maximum_number_to_retrieve = get_maximum_number_to_retrieve_from_request(request)
     filter_voter_guides_by_issue = request.GET.get('filter_voter_guides_by_issue', False)
+    # If we want to show voter guides associated with election first, but then show more after those are exhausted,
+    #  set add_voter_guides_not_from_election to True
+    add_voter_guides_not_from_election = request.GET.get('add_voter_guides_not_from_election', False)
 
     if filter_voter_guides_by_issue == 'true':
         filter_voter_guides_by_issue = True
@@ -854,7 +853,8 @@ def voter_guides_to_follow_retrieve_view(request):  # voterGuidesToFollowRetriev
 
     results = voter_guides_to_follow_retrieve_for_api(voter_device_id, kind_of_ballot_item, ballot_item_we_vote_id,
                                                       google_civic_election_id, search_string,
-                                                      maximum_number_to_retrieve, filter_voter_guides_by_issue)
+                                                      maximum_number_to_retrieve, filter_voter_guides_by_issue,
+                                                      add_voter_guides_not_from_election)
     return HttpResponse(json.dumps(results['json_data']), content_type='application/json')
 
 

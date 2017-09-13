@@ -31,6 +31,7 @@ urlpatterns = [
     url(r'^admin/', include('admin_tools.urls', namespace="admin_tools")),
     url(r'^apis/v1/', include('apis_v1.urls', namespace="apis_v1")),
 
+    url(r'^a/', include('analytics.urls', namespace="analytics")),
     url(r'^b/', include('ballot.urls', namespace="ballot")),
     url(r'^bookmark/', include('bookmark.urls', namespace="bookmark")),
     url(r'^c/', include('candidate.urls', namespace="candidate")),

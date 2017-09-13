@@ -22,6 +22,10 @@ def voter_location_retrieve_from_ip_for_api(request, ip_address=''):
     if not positive_value_exists(ip_address):
         ip_address = get_ip_from_headers(request)
 
+    # For testing - NY IP Address
+    # if not positive_value_exists(ip_address):
+    #     ip_address = '108.46.177.24'
+
     if not positive_value_exists(ip_address):
         # return HttpResponse('missing ip_address request parameter', status=400)
         response_content = {
