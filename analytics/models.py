@@ -25,6 +25,26 @@ ACTION_ORGANIZATION_FOLLOW_IGNORE = 13
 ACTION_ORGANIZATION_STOP_FOLLOWING = 14
 ACTION_ISSUE_FOLLOW_IGNORE = 15
 ACTION_ISSUE_STOP_FOLLOWING = 16
+ACTION_MODAL_ISSUES = 17
+ACTION_MODAL_ORGANIZATIONS = 18
+ACTION_MODAL_POSITIONS = 19
+ACTION_MODAL_FRIENDS = 20
+ACTION_MODAL_SHARE = 21
+ACTION_MODAL_VOTE = 22
+ACTION_NETWORK = 23
+ACTION_FACEBOOK_INVITABLE_FRIENDS = 24
+ACTION_DONATE_VISIT = 25
+ACTION_ACCOUNT_PAGE = 26
+ACTION_INVITE_BY_EMAIL = 27
+ACTION_ABOUT_GETTING_STARTED = 28
+ACTION_ABOUT_VISION = 29
+ACTION_ABOUT_ORGANIZATION = 30
+ACTION_ABOUT_TEAM = 31
+ACTION_ABOUT_MOBILE = 32
+ACTION_OFFICE = 33
+ACTION_CANDIDATE = 34
+ACTION_VOTER_GUIDE_GET_STARTED = 35
+
 
 ACTIONS_THAT_REQUIRE_ORGANIZATION_IDS = \
     [ACTION_ORGANIZATION_AUTO_FOLLOW,
@@ -140,7 +160,8 @@ class AnalyticsManager(models.Model):
 
     def create_action_type1(
             self, action_constant, voter_we_vote_id, voter_id,
-            organization_we_vote_id, organization_id, google_civic_election_id, voter_device_id=None):
+            organization_we_vote_id, organization_id, google_civic_election_id,
+            ballot_item_we_vote_id="", voter_device_id=None):
         """
         Create AnalyticsAction data
         """
@@ -177,6 +198,7 @@ class AnalyticsManager(models.Model):
                 organization_we_vote_id=organization_we_vote_id,
                 organization_id=organization_id,
                 google_civic_election_id=google_civic_election_id,
+                ballot_item_we_vote_id=ballot_item_we_vote_id,
             )
             success = True
             action_saved = True
@@ -195,7 +217,7 @@ class AnalyticsManager(models.Model):
 
     def create_action_type2(
             self, action_constant, voter_we_vote_id, voter_id,
-            google_civic_election_id, voter_device_id=None):
+            google_civic_election_id, ballot_item_we_vote_id, voter_device_id=None):
         """
         Create AnalyticsAction data
         """
@@ -227,6 +249,7 @@ class AnalyticsManager(models.Model):
                 voter_we_vote_id=voter_we_vote_id,
                 voter_id=voter_id,
                 google_civic_election_id=google_civic_election_id,
+                ballot_item_we_vote_id=ballot_item_we_vote_id,
             )
             success = True
             action_saved = True
@@ -282,11 +305,11 @@ class AnalyticsManager(models.Model):
             # In the future we could reduce clutter in the AnalyticsAction table by only storing one entry per day
             return self.create_action_type1(action_constant, voter_we_vote_id, voter_id,
                                             organization_we_vote_id, organization_id, google_civic_election_id,
-                                            voter_device_id)
+                                            ballot_item_we_vote_id, voter_device_id)
         else:
             return self.create_action_type2(action_constant, voter_we_vote_id, voter_id,
                                             google_civic_election_id,
-                                            voter_device_id)
+                                            ballot_item_we_vote_id, voter_device_id)
 
     def save_organization_daily_metrics_values(self, organization_daily_metrics_values):
         success = False
@@ -638,37 +661,75 @@ class SitewideElectionMetrics(models.Model):
 
 
 def display_action_constant_human_readable(action_constant):
+    if action_constant == ACTION_ABOUT_GETTING_STARTED:
+        return "ABOUT_GETTING_STARTED"
+    if action_constant == ACTION_ABOUT_MOBILE:
+        return "ABOUT_MOBILE"
+    if action_constant == ACTION_ABOUT_ORGANIZATION:
+        return "ABOUT_ORGANIZATION"
+    if action_constant == ACTION_ABOUT_TEAM:
+        return "ABOUT_TEAM"
+    if action_constant == ACTION_ABOUT_VISION:
+        return "ABOUT_VISION"
+    if action_constant == ACTION_ACCOUNT_PAGE:
+        return "ACCOUNT_PAGE"
     if action_constant == ACTION_BALLOT_VISIT:
-        return "ACTION_BALLOT_VISIT"
+        return "BALLOT_VISIT"
+    if action_constant == ACTION_CANDIDATE:
+        return "CANDIDATE"
+    if action_constant == ACTION_DONATE_VISIT:
+        return "DONATE_VISIT"
+    if action_constant == ACTION_FACEBOOK_INVITABLE_FRIENDS:
+        return "FACEBOOK_INVITABLE_FRIENDS"
     if action_constant == ACTION_FRIEND_ENTRY:
-        return "ACTION_FRIEND_ENTRY"
+        return "FRIEND_ENTRY"
+    if action_constant == ACTION_INVITE_BY_EMAIL:
+        return "INVITE_BY_EMAIL"
     if action_constant == ACTION_ISSUE_FOLLOW:
-        return "ACTION_ISSUE_FOLLOW"
+        return "ISSUE_FOLLOW"
     if action_constant == ACTION_ISSUE_FOLLOW_IGNORE:
-        return "ACTION_ISSUE_FOLLOW_IGNORE"
+        return "ISSUE_FOLLOW_IGNORE"
     if action_constant == ACTION_ISSUE_STOP_FOLLOWING:
-        return "ACTION_ISSUE_STOP_FOLLOWING"
+        return "ISSUE_STOP_FOLLOWING"
+    if action_constant == ACTION_MODAL_ISSUES:
+        return "MODAL_ISSUES"
+    if action_constant == ACTION_MODAL_ORGANIZATIONS:
+        return "MODAL_ORGANIZATIONS"
+    if action_constant == ACTION_MODAL_POSITIONS:
+        return "MODAL_POSITIONS"
+    if action_constant == ACTION_MODAL_FRIENDS:
+        return "MODAL_FRIENDS"
+    if action_constant == ACTION_MODAL_SHARE:
+        return "MODAL_SHARE"
+    if action_constant == ACTION_MODAL_VOTE:
+        return "MODAL_VOTE"
+    if action_constant == ACTION_NETWORK:
+        return "NETWORK"
+    if action_constant == ACTION_OFFICE:
+        return "OFFICE"
     if action_constant == ACTION_ORGANIZATION_AUTO_FOLLOW:
-        return "ACTION_ORGANIZATION_AUTO_FOLLOW"
+        return "ORGANIZATION_AUTO_FOLLOW"
     if action_constant == ACTION_ORGANIZATION_FOLLOW:
-        return "ACTION_ORGANIZATION_FOLLOW"
+        return "ORGANIZATION_FOLLOW"
     if action_constant == ACTION_ORGANIZATION_FOLLOW_IGNORE:
-        return "ACTION_ORGANIZATION_FOLLOW_IGNORE"
+        return "ORGANIZATION_FOLLOW_IGNORE"
     if action_constant == ACTION_ORGANIZATION_STOP_FOLLOWING:
-        return "ACTION_ORGANIZATION_STOP_FOLLOWING"
+        return "ORGANIZATION_STOP_FOLLOWING"
     if action_constant == ACTION_POSITION_TAKEN:
-        return "ACTION_POSITION_TAKEN"
+        return "POSITION_TAKEN"
     if action_constant == ACTION_VOTER_FACEBOOK_AUTH:
-        return "ACTION_VOTER_FACEBOOK_AUTH"
+        return "VOTER_FACEBOOK_AUTH"
     if action_constant == ACTION_VOTER_GUIDE_ENTRY:
-        return "ACTION_VOTER_GUIDE_ENTRY"
+        return "VOTER_GUIDE_ENTRY"
+    if action_constant == ACTION_VOTER_GUIDE_GET_STARTED:
+        return "VOTER_GUIDE_GET_STARTED"
     if action_constant == ACTION_VOTER_GUIDE_VISIT:
-        return "ACTION_VOTER_GUIDE_VISIT"
+        return "VOTER_GUIDE_VISIT"
     if action_constant == ACTION_VOTER_TWITTER_AUTH:
-        return "ACTION_VOTER_TWITTER_AUTH"
+        return "VOTER_TWITTER_AUTH"
     if action_constant == ACTION_WELCOME_ENTRY:
-        return "ACTION_WELCOME_ENTRY"
+        return "WELCOME_ENTRY"
     if action_constant == ACTION_WELCOME_VISIT:
-        return "ACTION_WELCOME_VISIT"
+        return "WELCOME_VISIT"
 
     return "ACTION_CONSTANT:" + str(action_constant)
