@@ -243,8 +243,8 @@ def polling_location_list_view(request):
         return redirect_to_sign_in_page(request, authority_required)
 
     google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
-    state_code = request.GET.get('state_code')
-    polling_location_search = request.GET.get('polling_location_search')
+    state_code = request.GET.get('state_code', '')
+    polling_location_search = request.GET.get('polling_location_search', '')
 
     no_limit = False
 

@@ -7,7 +7,7 @@ from .models import BatchDescription, BatchHeader, BatchHeaderMap, BatchManager,
     BATCH_IMPORT_KEYS_ACCEPTED_FOR_CANDIDATES, BATCH_IMPORT_KEYS_ACCEPTED_FOR_CONTEST_OFFICES, \
     BATCH_IMPORT_KEYS_ACCEPTED_FOR_ELECTED_OFFICES, BATCH_IMPORT_KEYS_ACCEPTED_FOR_MEASURES, \
     BATCH_IMPORT_KEYS_ACCEPTED_FOR_ORGANIZATIONS, BATCH_IMPORT_KEYS_ACCEPTED_FOR_POLITICIANS, \
-    BATCH_IMPORT_KEYS_ACCEPTED_FOR_POSITIONS, \
+    BATCH_IMPORT_KEYS_ACCEPTED_FOR_POSITIONS, BATCH_IMPORT_KEYS_ACCEPTED_FOR_BALLOT_ITEMS, \
     IMPORT_CREATE, IMPORT_ADD_TO_EXISTING, IMPORT_QUERY_ERROR, IMPORT_TO_BE_DETERMINED
 from .controllers import create_batch_header_translation_suggestions, create_batch_row_actions, \
     create_or_update_batch_header_mapping, \
@@ -213,12 +213,14 @@ def batch_list_process_view(request):
         return HttpResponseRedirect(reverse('import_export_batches:batch_action_list', args=()) +
                                     "?batch_header_id=" + str(batch_header_id) +
                                     "&kind_of_batch=" + str(kind_of_batch) +
+                                    "&polling_location_we_vote_id=" + str(polling_location_we_vote_id) +
                                     "&google_civic_election_id=" + str(google_civic_election_id) +
                                     "&batch_uri=" + batch_uri_encoded)
     else:
         # Go to the batch listing page
         return HttpResponseRedirect(reverse('import_export_batches:batch_list', args=()) +
                                     "?kind_of_batch=" + str(kind_of_batch) +
+                                    "&polling_location_we_vote_id=" + str(polling_location_we_vote_id) +
                                     "&google_civic_election_id=" + str(google_civic_election_id) +
                                     "&batch_uri=" + batch_uri_encoded)
 
@@ -488,6 +490,8 @@ def batch_header_mapping_view(request):
         batch_import_keys_accepted = BATCH_IMPORT_KEYS_ACCEPTED_FOR_POLITICIANS
     elif kind_of_batch == POSITION:
         batch_import_keys_accepted = BATCH_IMPORT_KEYS_ACCEPTED_FOR_POSITIONS
+    elif kind_of_batch == IMPORT_BALLOT_ITEM:
+        batch_import_keys_accepted = BATCH_IMPORT_KEYS_ACCEPTED_FOR_BALLOT_ITEMS
     else:
         batch_import_keys_accepted = {}
 
