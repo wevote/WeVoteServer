@@ -6,13 +6,13 @@ from ballot.models import MEASURE, CANDIDATE, POLITICIAN
 from .models import BatchManager, BatchDescription, BatchHeaderMap, BatchRow, BatchRowActionOrganization, \
     BatchRowActionMeasure, BatchRowActionElectedOffice, BatchRowActionContestOffice, BatchRowActionPolitician, \
     BatchRowActionCandidate, BatchRowActionPosition, \
-    CLEAN_DATA_MANUALLY, CONTEST_OFFICE, ELECTED_OFFICE, POSITION, \
+    CLEAN_DATA_MANUALLY, CONTEST_OFFICE, ELECTED_OFFICE, IMPORT_BALLOT_ITEM, POSITION, \
     IMPORT_CREATE, IMPORT_ADD_TO_EXISTING, IMPORT_DATA_ALREADY_MATCHING, IMPORT_QUERY_ERROR, \
     IMPORT_TO_BE_DETERMINED, DO_NOT_PROCESS, \
     BATCH_IMPORT_KEYS_ACCEPTED_FOR_CANDIDATES, BATCH_IMPORT_KEYS_ACCEPTED_FOR_CONTEST_OFFICES, \
     BATCH_IMPORT_KEYS_ACCEPTED_FOR_ELECTED_OFFICES, BATCH_IMPORT_KEYS_ACCEPTED_FOR_MEASURES, \
     BATCH_IMPORT_KEYS_ACCEPTED_FOR_ORGANIZATIONS, BATCH_IMPORT_KEYS_ACCEPTED_FOR_POLITICIANS, \
-    BATCH_IMPORT_KEYS_ACCEPTED_FOR_POSITIONS
+    BATCH_IMPORT_KEYS_ACCEPTED_FOR_POSITIONS, BATCH_IMPORT_KEYS_ACCEPTED_FOR_BALLOT_ITEMS
 from candidate.models import CandidateCampaign, CandidateCampaignListManager, CandidateCampaignManager
 from django.db.models import Q
 from electoral_district.controllers import retrieve_electoral_district
@@ -2037,6 +2037,9 @@ def create_batch_header_translation_suggestions(batch_header, kind_of_batch, inc
     elif kind_of_batch == POSITION:
         kind_of_batch_recognized = True
         batch_import_keys_accepted_dict = BATCH_IMPORT_KEYS_ACCEPTED_FOR_POSITIONS
+    elif kind_of_batch == IMPORT_BALLOT_ITEM:
+        kind_of_batch_recognized = True
+        batch_import_keys_accepted_dict = BATCH_IMPORT_KEYS_ACCEPTED_FOR_BALLOT_ITEMS
     else:
         kind_of_batch_recognized = False
         batch_import_keys_accepted_dict = {}

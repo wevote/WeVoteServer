@@ -516,6 +516,8 @@ class BatchManager(models.Model):
             batch_import_keys_accepted = BATCH_IMPORT_KEYS_ACCEPTED_FOR_POLITICIANS
         elif kind_of_batch == POSITION:
             batch_import_keys_accepted = BATCH_IMPORT_KEYS_ACCEPTED_FOR_POSITIONS
+        elif kind_of_batch == IMPORT_BALLOT_ITEM:
+            batch_import_keys_accepted = BATCH_IMPORT_KEYS_ACCEPTED_FOR_BALLOT_ITEMS
         else:
             batch_import_keys_accepted = {}
         if incoming_alternate_header_value in batch_import_keys_accepted:
