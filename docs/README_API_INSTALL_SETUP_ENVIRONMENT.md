@@ -90,6 +90,14 @@ These errors won't prevent geoip from working.
 Run the command that downloads the GeoLite database from the WeVoteServer root folder:
 
     $ ./manage.py update_geoip_data
+    
+Mac: Install geoip locally:
+
+    $ brew install geoip
+    
+...or:
+
+    $ pip install geoip
 
 
 [NEXT: 5. Set up Database](README_API_INSTALL_SETUP_DATABASE.md)

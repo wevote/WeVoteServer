@@ -238,10 +238,11 @@ def issue_edit_view(request, issue_we_vote_id):
     google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
     state_code = request.GET.get('state_code', '')
 
-    # These variables are here because there was an error on the edit_process_view and the voter needs to try again
-    issue_name = request.GET.get('issue_name', False)
-    issue_description = request.GET.get('issue_description', False)
-    issue_image_url = request.GET.get('issue_image_url', False)
+    # These variables are here in case there was an error on the edit_process_view and the voter needs to try again
+    issue_name = request.GET.get('issue_name', '')
+    issue_description = request.GET.get('issue_description', '')
+    issue_image_url = request.GET.get('issue_image_url', '')
+    issue_image_file = request.GET.get('issue_image_file', '')
 
     messages_on_stage = get_messages(request)
     issue_on_stage_found = False
@@ -289,6 +290,7 @@ def issue_edit_view(request, issue_we_vote_id):
         'issue_name':               issue_name,
         'issue_description':        issue_description,
         'issue_image_url':          issue_image_url,
+        'issue_image_file':         issue_image_file,
         'google_civic_election_id': google_civic_election_id,
         'state_code':               state_code,
         'organization_list':        organization_list,
@@ -311,7 +313,7 @@ def issue_edit_process_view(request):
     google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
     state_code = request.GET.get('state_code', '')
 
-    issue_image_url = None
+    master_we_vote_hosted_image_url = None
     we_vote_hosted_image_url_large = None
     we_vote_hosted_image_url_medium = None
     we_vote_hosted_image_url_tiny = None
@@ -319,6 +321,7 @@ def issue_edit_process_view(request):
     issue_we_vote_id = request.POST.get('issue_we_vote_id', False)
     issue_name = request.POST.get('issue_name', False)
     issue_description = request.POST.get('issue_description', False)
+    issue_image_url = request.POST.get('issue_image_url', False)  # Maintain manual image entry for now
     try:
         if request.method == 'POST' and request.FILES['issue_image_file']:
             issue_image_file = request.FILES.get('issue_image_file')
@@ -331,38 +334,38 @@ def issue_edit_process_view(request):
                 google_civic_election_id = cached_master_we_vote_image.google_civic_election_id
                 we_vote_parent_image_id = cached_master_we_vote_image.id
                 image_format = cached_master_we_vote_image.we_vote_image_file_location.split(".")[-1]
-                issue_image_url = cached_master_we_vote_image.we_vote_image_url
+                master_we_vote_hosted_image_url = cached_master_we_vote_image.we_vote_image_url
                 cache_large_resized_image_results = cache_resized_image_locally(
-                    google_civic_election_id, issue_image_url, we_vote_parent_image_id,
+                    google_civic_election_id, master_we_vote_hosted_image_url, we_vote_parent_image_id,
                     issue_we_vote_id=issue_we_vote_id, image_format=image_format,
                     kind_of_image_issue=True, kind_of_image_large=True)
                 if cache_large_resized_image_results['success']:
                     cached_resized_image_results = we_vote_image_manager.retrieve_we_vote_image_from_url(
-                        issue_we_vote_id=issue_we_vote_id, issue_image_url_https=issue_image_url,
+                        issue_we_vote_id=issue_we_vote_id, issue_image_url_https=master_we_vote_hosted_image_url,
                         kind_of_image_large=True)
                     if cached_resized_image_results['success']:
                         we_vote_hosted_image_url_large = \
                             cached_resized_image_results['we_vote_image'].we_vote_image_url
 
                 cache_medium_resized_image_results = cache_resized_image_locally(
-                    google_civic_election_id, issue_image_url, we_vote_parent_image_id,
+                    google_civic_election_id, master_we_vote_hosted_image_url, we_vote_parent_image_id,
                     issue_we_vote_id=issue_we_vote_id, image_format=image_format,
                     kind_of_image_issue=True, kind_of_image_medium=True)
                 if cache_medium_resized_image_results['success']:
                     cached_resized_image_results = we_vote_image_manager.retrieve_we_vote_image_from_url(
-                        issue_we_vote_id=issue_we_vote_id, issue_image_url_https=issue_image_url,
+                        issue_we_vote_id=issue_we_vote_id, issue_image_url_https=master_we_vote_hosted_image_url,
                         kind_of_image_medium=True)
                     if cached_resized_image_results['success']:
                         we_vote_hosted_image_url_medium = \
                             cached_resized_image_results['we_vote_image'].we_vote_image_url
 
                 cache_tiny_resized_image_results = cache_resized_image_locally(
-                    google_civic_election_id, issue_image_url, we_vote_parent_image_id,
+                    google_civic_election_id, master_we_vote_hosted_image_url, we_vote_parent_image_id,
                     issue_we_vote_id=issue_we_vote_id, image_format=image_format,
                     kind_of_image_issue=True, kind_of_image_tiny=True)
-                if cache_large_resized_image_results['success']:
+                if cache_tiny_resized_image_results['success']:
                     cached_resized_image_results = we_vote_image_manager.retrieve_we_vote_image_from_url(
-                        issue_we_vote_id=issue_we_vote_id, issue_image_url_https=issue_image_url,
+                        issue_we_vote_id=issue_we_vote_id, issue_image_url_https=master_we_vote_hosted_image_url,
                         kind_of_image_tiny=True)
                     if cached_resized_image_results['success']:
                         we_vote_hosted_image_url_tiny = \
@@ -400,6 +403,7 @@ def issue_edit_process_view(request):
             issue_on_stage.we_vote_hosted_image_url_tiny = we_vote_hosted_image_url_tiny
 
         issue_on_stage.save()
+        issue_we_vote_id = issue_on_stage.we_vote_id
 
         messages.add_message(request, messages.INFO, 'Issue updated.')
     else:
@@ -408,15 +412,20 @@ def issue_edit_process_view(request):
         if required_issue_variables:
             issue_on_stage = Issue(
                 issue_name=issue_name,
-                issue_description=issue_description,
-                issue_image_url=issue_image_url,
-
             )
             if issue_description is not False:
                 issue_on_stage.issue_description = issue_description
+            if issue_image_url is not None:
+                issue_on_stage.issue_image_url = issue_image_url
+            if we_vote_hosted_image_url_large is not None:
+                issue_on_stage.we_vote_hosted_image_url_large = we_vote_hosted_image_url_large
+            if we_vote_hosted_image_url_medium is not None:
+                issue_on_stage.we_vote_hosted_image_url_medium = we_vote_hosted_image_url_medium
+            if we_vote_hosted_image_url_tiny is not None:
+                issue_on_stage.we_vote_hosted_image_url_tiny = we_vote_hosted_image_url_tiny
 
             issue_on_stage.save()
-            issue_id = issue_on_stage.we_vote_id
+            issue_we_vote_id = issue_on_stage.we_vote_id
             messages.add_message(request, messages.INFO, 'New issue saved.')
         else:
             messages.add_message(request, messages.INFO, 'Missing required variables.')

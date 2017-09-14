@@ -80,7 +80,9 @@
             </td>
             <td><a href="{% url 'issue:issue_edit' issue.we_vote_id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">{{ issue.issue_name }}</a></td>
             <td>
-                {% if issue.issue_image_url %}
+                {% if issue.we_vote_hosted_image_url_medium %}
+                AWS
+                {% elif issue.issue_image_url %}
                 local_image
                 {% endif %}
             </td>
