@@ -2648,3 +2648,17 @@ def voter_setup(request):
         'store_new_voter_api_device_id_in_cookie':  store_new_voter_api_device_id_in_cookie,
     }
     return final_results
+
+
+class VoterMetricsManager(models.Model):
+
+    def fetch_voter_entered_full_address(self, voter_id):
+        count_result = None
+        try:
+            count_query = VoterAddress.objects.using('readonly').all()
+            count_query = count_query.filter(voter_id=voter_id)
+            count_query = count_query.filter(refreshed_from_google=True)
+            count_result = count_query.count()
+        except Exception as e:
+            pass
+        return positive_value_exists(count_result)

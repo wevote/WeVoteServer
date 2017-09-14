@@ -7,14 +7,37 @@ from .models import AnalyticsCountManager, AnalyticsManager, ACTION_VOTER_GUIDE_
     ACTION_ISSUE_FOLLOW, ACTION_BALLOT_VISIT, \
     ACTION_POSITION_TAKEN, ACTION_VOTER_TWITTER_AUTH, ACTION_VOTER_FACEBOOK_AUTH, \
     ACTION_WELCOME_ENTRY, ACTION_FRIEND_ENTRY, ACTIONS_THAT_REQUIRE_ORGANIZATION_IDS
-
 from config.base import get_environment_variable
+from follow.models import FollowMetricsManager
+from position.models import PositionMetricsManager
+from voter.models import VoterManager, VoterMetricsManager
 import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, positive_value_exists
 
 logger = wevote_functions.admin.get_logger(__name__)
 
 WE_VOTE_API_KEY = get_environment_variable("WE_VOTE_API_KEY")
+
+
+def augment_voter_analytics_action_entries_without_election_id(look_for_changes_since_this_date):
+    """
+    Retrieve list of voters with AnalyticsAction entries that have an empty google_civic_election_id
+     and then loop through those entries to do the following:
+     1) Look for the oldest entry with an election_id
+     2) For that day, loop forward (while on the same day) and fill in the empty google_civic_election_ids
+        until we find a new election id
+     3) Then continue looping forward using the different election_id (while on the same day)
+     4) Mark all of the entries prior to the first election entry as NULL
+    :return:
+    """
+    status = ""
+    success = True
+
+    results = {
+        'status': status,
+        'success': success,
+    }
+    return results
 
 
 def save_analytics_action_for_api(action_constant, voter_we_vote_id, voter_id,
@@ -297,6 +320,78 @@ def calculate_sitewide_election_metrics(google_civic_election_id):
     return results
 
 
+def calculate_sitewide_voter_metrics_for_one_voter(voter_we_vote_id):
+    status = ""
+    success = False
+    voter_id = 0
+    signed_in_twitter = False
+    signed_in_facebook = False
+    signed_in_with_email = False
+    analytics_count_manager = AnalyticsCountManager()
+    follow_metrics_manager = FollowMetricsManager()
+    position_metrics_manager = PositionMetricsManager()
+    voter_metrics_manager = VoterMetricsManager()
+
+    voter_manager = VoterManager()
+    results = voter_manager.retrieve_voter_by_we_vote_id(voter_we_vote_id)
+    if results['voter_found']:
+        voter = results['voter']
+        voter_id = voter.id
+        signed_in_twitter = voter.signed_in_twitter()
+        signed_in_facebook = voter.signed_in_facebook()
+        signed_in_with_email = voter.signed_in_with_email()
+
+    actions_count = analytics_count_manager.fetch_voter_action_count(voter_we_vote_id)
+    seconds_on_site = None
+    elections_viewed = None
+    voter_guides_viewed = analytics_count_manager.fetch_voter_voter_guides_viewed(voter_we_vote_id)
+    ballot_visited = analytics_count_manager.fetch_voter_ballot_visited(voter_we_vote_id)
+    welcome_visited = analytics_count_manager.fetch_voter_welcome_visited(voter_we_vote_id)
+    entered_full_address = voter_metrics_manager.fetch_voter_entered_full_address(voter_id)
+    issues_followed = follow_metrics_manager.fetch_voter_issues_followed(voter_we_vote_id)
+    organizations_followed = follow_metrics_manager.fetch_voter_organizations_followed(voter_id)
+    time_until_sign_in = None
+    positions_entered_friends_only = position_metrics_manager.fetch_voter_positions_entered_friends_only(
+        voter_we_vote_id)
+    positions_entered_public = position_metrics_manager.fetch_voter_positions_entered_public(voter_we_vote_id)
+    comments_entered_friends_only = position_metrics_manager.fetch_voter_comments_entered_friends_only(
+        voter_we_vote_id)
+    comments_entered_public = position_metrics_manager.fetch_voter_comments_entered_public(voter_we_vote_id)
+    days_visited = analytics_count_manager.fetch_voter_days_visited(voter_we_vote_id)
+    last_action_date = analytics_count_manager.fetch_voter_last_action_date(voter_we_vote_id)
+
+    success = True
+
+    sitewide_voter_metrics_values = {
+        'voter_we_vote_id':         voter_we_vote_id,
+        'actions_count':            actions_count,
+        'seconds_on_site':          seconds_on_site,
+        'elections_viewed':         elections_viewed,
+        'voter_guides_viewed':      voter_guides_viewed,
+        'issues_followed':          issues_followed,
+        'organizations_followed':   organizations_followed,
+        'ballot_visited':           ballot_visited,
+        'welcome_visited':          welcome_visited,
+        'entered_full_address':     entered_full_address,
+        'time_until_sign_in':       time_until_sign_in,
+        'positions_entered_friends_only':   positions_entered_friends_only,
+        'positions_entered_public':         positions_entered_public,
+        'comments_entered_friends_only':    comments_entered_friends_only,
+        'comments_entered_public':          comments_entered_public,
+        'signed_in_twitter':        signed_in_twitter,
+        'signed_in_facebook':       signed_in_facebook,
+        'signed_in_with_email':     signed_in_with_email,
+        'days_visited':             days_visited,
+        'last_action_date': last_action_date,
+    }
+    results = {
+        'status':                           status,
+        'success':                          success,
+        'sitewide_voter_metrics_values':    sitewide_voter_metrics_values,
+    }
+    return results
+
+
 def save_organization_daily_metrics(organization_we_vote_id, date):
     status = ""
     success = False
@@ -375,6 +470,36 @@ def save_sitewide_election_metrics(google_civic_election_id):
             analytics_manager.save_sitewide_election_metrics_values(sitewide_election_metrics_values)
         status += update_results['status']
         success = update_results['success']
+
+    results = {
+        'status':   status,
+        'success':  success,
+    }
+    return results
+
+
+def save_sitewide_voter_metrics(look_for_changes_since_this_date_as_integer):
+    status = ""
+    success = False
+
+    results = augment_voter_analytics_action_entries_without_election_id(look_for_changes_since_this_date_as_integer)
+
+    analytics_manager = AnalyticsManager()
+    voter_list_results = analytics_manager.retrieve_voter_we_vote_id_list_with_changes_since(
+        look_for_changes_since_this_date_as_integer)
+    if voter_list_results['voter_we_vote_id_list_found']:
+        voter_we_vote_id_list = voter_list_results['voter_we_vote_id_list']
+        for voter_we_vote_id in voter_we_vote_id_list:
+            results = calculate_sitewide_voter_metrics_for_one_voter(voter_we_vote_id)
+            status += results['status']
+            if results['success']:
+                sitewide_voter_metrics_values = results['sitewide_voter_metrics_values']
+
+                analytics_manager = AnalyticsManager()
+                update_results = analytics_manager.save_sitewide_voter_metrics_values_for_one_voter(
+                    sitewide_voter_metrics_values)
+                status += update_results['status']
+                success = update_results['success']
 
     results = {
         'status':   status,

@@ -3,9 +3,9 @@
 # -*- coding: UTF-8 -*-
 
 from .controllers import save_organization_daily_metrics, save_organization_election_metrics, \
-    save_sitewide_daily_metrics, save_sitewide_election_metrics
+    save_sitewide_daily_metrics, save_sitewide_election_metrics, save_sitewide_voter_metrics
 from .models import AnalyticsAction, AnalyticsManager, OrganizationDailyMetrics, OrganizationElectionMetrics, \
-    SitewideDailyMetrics, SitewideElectionMetrics
+    SitewideDailyMetrics, SitewideElectionMetrics, SitewideVoterMetrics
 from admin_tools.views import redirect_to_sign_in_page
 from django.http import HttpResponseRedirect
 from django.core.urlresolvers import reverse
@@ -14,6 +14,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.messages import get_messages
 from django.db.models import Q
 from django.shortcuts import render
+from election.models import Election
 from voter.models import voter_has_authority
 import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, positive_value_exists
@@ -28,6 +29,7 @@ def analytics_index_view(request):
 
     google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
     state_code = request.GET.get('state_code', '')
+    date_to_process = convert_to_int(request.GET.get('date_to_process', 0))
 
     sitewide_election_metrics_list = []
     try:
@@ -58,16 +60,30 @@ def analytics_index_view(request):
         # This is fine
         pass
 
+    sitewide_voter_metrics_list = []
+    try:
+        sitewide_voter_metrics_query = SitewideVoterMetrics.objects.using('analytics').order_by('-last_action_date')
+        sitewide_voter_metrics_query = sitewide_voter_metrics_query[:3]
+        sitewide_voter_metrics_list = list(sitewide_voter_metrics_query)
+    except SitewideVoterMetrics.DoesNotExist:
+        # This is fine
+        pass
+
+    election_list = Election.objects.order_by('-election_day_text')
+
     messages_on_stage = get_messages(request)
 
     template_values = {
         'messages_on_stage':                            messages_on_stage,
         'sitewide_election_metrics_list':               sitewide_election_metrics_list,
         'sitewide_daily_metrics_list':                  sitewide_daily_metrics_list,
+        'sitewide_voter_metrics_list':                  sitewide_voter_metrics_list,
         'organization_election_metrics_list':           organization_election_metrics_list,
         'voter_allowed_to_see_organization_analytics':  voter_allowed_to_see_organization_analytics,
         'state_code':                                   state_code,
         'google_civic_election_id':                     google_civic_election_id,
+        'election_list':                                election_list,
+        'date_to_process':                              date_to_process,
     }
     return render(request, 'analytics/index.html', template_values)
 
@@ -94,13 +110,6 @@ def organization_daily_metrics_process_view(request):
                                     "&state_code=" + str(state_code))
 
     results = save_organization_daily_metrics(date_as_integer)
-    # kind_of_batch = results['kind_of_batch']
-    #
-    # messages.add_message(request, messages.INFO, 'Batch Actions:'
-    #                                              'Batch kind:{kind_of_batch}, '
-    #                                              'Created:{created} '
-    #                                              ''.format(kind_of_batch=kind_of_batch,
-    #                                                        created=results['number_of_batch_actions_created']))
 
     return HttpResponseRedirect(reverse('analytics:organization_daily_metrics', args=()) +
                                 "?google_civic_election_id=" + str(google_civic_election_id) +
@@ -164,7 +173,7 @@ def analytics_action_list_view(request, voter_we_vote_id=False, organization_we_
         if positive_value_exists(voter_we_vote_id) or positive_value_exists(organization_we_vote_id):
             analytics_action_query = analytics_action_query[:500]
         else:
-            analytics_action_query = analytics_action_query[:100]
+            analytics_action_query = analytics_action_query[:200]
         analytics_action_list = list(analytics_action_query)
     except OrganizationDailyMetrics.DoesNotExist:
         # This is fine
@@ -419,7 +428,7 @@ def sitewide_election_metrics_view(request):
 
 
 @login_required
-def update_election_summaries_process_view(request):
+def sitewide_voter_metrics_process_view(request):
     """
     :param request:
     :return:
@@ -430,30 +439,116 @@ def update_election_summaries_process_view(request):
 
     google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
     state_code = request.GET.get('state_code', '')
-    date = 20170905
+    look_for_changes_since_this_date_as_integer = convert_to_int(request.GET.get('date_as_integer', 0))
+
+    results = save_sitewide_voter_metrics(look_for_changes_since_this_date_as_integer)
+
+    return HttpResponseRedirect(reverse('analytics:sitewide_voter_metrics', args=()) +
+                                "?google_civic_election_id=" + str(google_civic_election_id) +
+                                "&state_code=" + str(state_code) +
+                                "&date_as_integer=" + str(look_for_changes_since_this_date_as_integer)
+                                )
+
+
+@login_required
+def sitewide_voter_metrics_view(request):
+    """
+    :param request:
+    :return:
+    """
+    authority_required = {'verified_volunteer'}  # admin, verified_volunteer
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
+    google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
+    state_code = request.GET.get('state_code', '')
+
+    sitewide_voter_metrics_list = []
+
+    messages_on_stage = get_messages(request)
+    try:
+        sitewide_voter_metrics_query = SitewideVoterMetrics.objects.using('analytics').order_by('-last_action_date')
+        sitewide_voter_metrics_list = list(sitewide_voter_metrics_query)
+    except SitewideVoterMetrics.DoesNotExist:
+        # This is fine
+        pass
+
+    template_values = {
+        'messages_on_stage':            messages_on_stage,
+        'sitewide_voter_metrics_list':  sitewide_voter_metrics_list,
+        'google_civic_election_id':     google_civic_election_id,
+        'state_code':                   state_code,
+    }
+    return render(request, 'analytics/sitewide_voter_metrics.html', template_values)
+
+
+@login_required
+def update_daily_metrics_process_view(request):
+    """
+    :param request:
+    :return:
+    """
+    authority_required = {'verified_volunteer'}  # admin, verified_volunteer
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
+    google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
+    state_code = request.GET.get('state_code', '')
+    date_to_process = convert_to_int(request.GET.get('date_to_process', 0))
 
     if not positive_value_exists(google_civic_election_id):
         messages.add_message(request, messages.ERROR, 'google_civic_election_id required.')
         return HttpResponseRedirect(reverse('analytics:analytics_index', args=()) +
                                     "?google_civic_election_id=" + str(google_civic_election_id) +
-                                    "&state_code=" + str(state_code))
+                                    "&state_code=" + str(state_code) +
+                                    "&date_to_process=" + str(date_to_process)
+                                    )
 
     analytics_manager = AnalyticsManager()
     results = analytics_manager.retrieve_organization_list_with_election_activity(google_civic_election_id)
-    if results['organization_list_found']:
-        organization_list = results['organization_list']
-        for organization in organization_list:
-            save_organization_election_metrics(google_civic_election_id, organization.we_vote_id)
-            save_organization_daily_metrics(organization.we_vote_id, date)
-
-    # kind_of_batch = results['kind_of_batch']
-    #
-    # messages.add_message(request, messages.INFO, 'Batch Actions:'
-    #                                              'Batch kind:{kind_of_batch}, '
-    #                                              'Created:{created} '
-    #                                              ''.format(kind_of_batch=kind_of_batch,
-    #                                                        created=results['number_of_batch_actions_created']))
+    if results['organization_we_vote_id_list_found']:
+        organization_we_vote_id_list = results['organization_we_vote_id_list']
+        for organization_we_vote_id in organization_we_vote_id_list:
+            save_organization_daily_metrics(organization_we_vote_id, date_to_process)
 
     return HttpResponseRedirect(reverse('analytics:analytics_index', args=()) +
                                 "?google_civic_election_id=" + str(google_civic_election_id) +
-                                "&state_code=" + str(state_code))
+                                "&state_code=" + str(state_code) +
+                                "&date_to_process=" + str(date_to_process)
+                                )
+
+
+@login_required
+def update_election_metrics_process_view(request):
+    """
+    :param request:
+    :return:
+    """
+    authority_required = {'verified_volunteer'}  # admin, verified_volunteer
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
+    google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
+    state_code = request.GET.get('state_code', '')
+    date_to_process = convert_to_int(request.GET.get('date_to_process', 0))
+
+    if not positive_value_exists(google_civic_election_id):
+        messages.add_message(request, messages.ERROR, 'google_civic_election_id required.')
+        return HttpResponseRedirect(reverse('analytics:analytics_index', args=()) +
+                                    "?google_civic_election_id=" + str(google_civic_election_id) +
+                                    "&state_code=" + str(state_code) +
+                                    "&date_to_process=" + str(date_to_process)
+                                    )
+
+    analytics_manager = AnalyticsManager()
+    results = analytics_manager.retrieve_organization_list_with_election_activity(google_civic_election_id)
+    if results['organization_we_vote_id_list_found']:
+        organization_we_vote_id_list = results['organization_we_vote_id_list']
+        for organization_we_vote_id in organization_we_vote_id_list:
+            save_organization_election_metrics(google_civic_election_id, organization_we_vote_id)
+
+    return HttpResponseRedirect(reverse('analytics:analytics_index', args=()) +
+                                "?google_civic_election_id=" + str(google_civic_election_id) +
+                                "&state_code=" + str(state_code) +
+                                "&date_to_process=" + str(date_to_process)
+                                )

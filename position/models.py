@@ -5804,3 +5804,51 @@ class PositionManager(models.Model):
             position_object.save()
 
         return position_object
+
+
+class PositionMetricsManager(models.Model):
+
+    def __unicode__(self):
+        return "PositionMetricsManager"
+
+    def fetch_voter_comments_entered_friends_only(self, voter_we_vote_id):
+        count_result = None
+        try:
+            count_query = PositionForFriends.objects.using('readonly').all()
+            count_query = count_query.filter(voter_we_vote_id__iexact=voter_we_vote_id)
+            count_query = count_query.exclude(statement_text=None)
+            count_result = count_query.count()
+        except Exception as e:
+            pass
+        return count_result
+
+    def fetch_voter_comments_entered_public(self, voter_we_vote_id):
+        count_result = None
+        try:
+            count_query = PositionEntered.objects.using('readonly').all()
+            count_query = count_query.filter(voter_we_vote_id__iexact=voter_we_vote_id)
+            count_query = count_query.exclude(statement_text=None)
+            count_result = count_query.count()
+        except Exception as e:
+            pass
+        return count_result
+
+    def fetch_voter_positions_entered_friends_only(self, voter_we_vote_id):
+        count_result = None
+        try:
+            count_query = PositionForFriends.objects.using('readonly').all()
+            count_query = count_query.filter(voter_we_vote_id__iexact=voter_we_vote_id)
+            count_result = count_query.count()
+        except Exception as e:
+            pass
+        return count_result
+
+    def fetch_voter_positions_entered_public(self, voter_we_vote_id):
+        count_result = None
+        try:
+            count_query = PositionEntered.objects.using('readonly').all()
+            count_query = count_query.filter(voter_we_vote_id__iexact=voter_we_vote_id)
+            count_result = count_query.count()
+        except Exception as e:
+            pass
+        return count_result

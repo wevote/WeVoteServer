@@ -352,6 +352,34 @@ class FollowIssueManager(models.Model):
         return results
 
 
+class FollowMetricsManager(models.Model):
+
+    def __unicode__(self):
+        return "FollowMetricsManager"
+
+    def fetch_voter_issues_followed(self, voter_we_vote_id):
+        count_result = None
+        try:
+            count_query = FollowIssue.objects.using('readonly').all()
+            count_query = count_query.filter(voter_we_vote_id__iexact=voter_we_vote_id)
+            count_query = count_query.filter(following_status=FOLLOWING)
+            count_result = count_query.count()
+        except Exception as e:
+            pass
+        return count_result
+
+    def fetch_voter_organizations_followed(self, voter_id):
+        count_result = None
+        try:
+            count_query = FollowOrganization.objects.using('readonly').all()
+            count_query = count_query.filter(voter_id=voter_id)
+            count_query = count_query.filter(following_status=FOLLOWING)
+            count_result = count_query.count()
+        except Exception as e:
+            pass
+        return count_result
+
+
 class FollowIssueList(models.Model):
     """
     A way to retrieve all of the follow_issue information

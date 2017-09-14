@@ -1,0 +1,58 @@
+{# templates/analytics/sitewide_voter_metrics_table.html #}
+
+<table border="1" cellpadding="5" cellspacing="5" class="table">
+{% for one_row in sitewide_voter_metrics_list %}
+{% if forloop.counter == 1 or forloop.counter|divisibleby:20 %}
+    <tr>
+        <th></th>
+        <th>Voter</th>
+        <th>Last Action</th>
+        <th>Actions Count</th>
+        <th>Days Visited</th>
+{#        <th>Seconds on Site</th>#}
+        <th>Welcome Visited</th>
+        <th>Ballot Visited</th>
+        <th>Voter Guides Viewed</th>
+        <th>Entered Full Address</th>
+        <th>Issues Followed</th>
+        <th>Orgs Followed</th>
+        <th>Friends Positions : Comments</th>
+        <th>Public Positions : Comments</th>
+        <th>Twitter</th>
+        <th>Facebook</th>
+        <th>Email Sign In</th>
+{#        <th>Time to Sign In</th>#}
+{#        <th>Elections</th>#}
+    </tr>
+{% endif %}
+    <tr>
+        <td>{{ forloop.counter }}</td>
+        <td>{{ one_row.voter_we_vote_id }}</td>
+        <td><span class="u-no-break">{{ one_row.last_action_date|default_if_none:"n/a" }}</span></td>
+        <td><a href="{% url 'analytics:analytics_action_list' one_row.voter_we_vote_id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}"
+               target="_blank"><span class="u-no-break">{{ one_row.actions_count }}</span></a></td>
+        <td><span class="u-no-break">{{ one_row.days_visited }}</span></td>
+{#        <td><span class="u-no-break">{{ one_row.seconds_on_site|default_if_none:"n/a" }}</span></td>#}
+        <td><span class="u-no-break">{% if one_row.welcome_visited %}yes{% endif %}</span></td>
+        <td><span class="u-no-break">{% if one_row.ballot_visited %}yes{% endif %}</span></td>
+        <td><span class="u-no-break">{% if one_row.voter_guides_viewed %}{{ one_row.voter_guides_viewed }}{% endif %}</span></td>
+        <td><span class="u-no-break">{% if one_row.entered_full_address %}{{ one_row.entered_full_address }}{% endif %}</span></td>
+        <td><span class="u-no-break">{% if one_row.issues_followed %}{{ one_row.issues_followed }}{% endif %}</span></td>
+        <td><span class="u-no-break">{% if one_row.organizations_followed %}{{ one_row.organizations_followed }}{% endif %}</span></td>
+        <td><span class="u-no-break">{% if one_row.positions_entered_friends_only or one_row.comments_entered_friends_only %}
+            {{ one_row.positions_entered_friends_only }} : {{ one_row.comments_entered_friends_only }}{% endif %}</span></td>
+        <td><span class="u-no-break">{% if one_row.positions_entered_public or one_row.comments_entered_public %}
+            {{ one_row.positions_entered_public }} : {{ one_row.comments_entered_public }}{% endif %}</span></td>
+        <td><span class="u-no-break">{% if one_row.signed_in_twitter %}yes{% endif %}</span></td>
+        <td><span class="u-no-break">{% if one_row.signed_in_facebook %}yes{% endif %}</span></td>
+        <td><span class="u-no-break">{% if one_row.signed_in_email %}yes{% endif %}</span></td>
+{#        <td><span class="u-no-break">{{ one_row.time_until_sign_in|default_if_none:"n/a" }}</span></td>#}
+{#        <td><span class="u-no-break">{{ one_row.elections_viewed|default_if_none:"n/a" }}</span></td>#}
+    </tr>
+{% endfor %}
+{% if not sitewide_voter_metrics_list %}
+    <tr>
+        <td colspan="23">No sitewide day-to-day metrics found for the entire site.</td>
+    </tr>
+{% endif %}
+</table>
