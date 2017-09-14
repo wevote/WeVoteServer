@@ -13,7 +13,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.messages import get_messages
 from django.shortcuts import render
 from exception.models import handle_record_found_more_than_one_exception
-from image.controllers import cache_issue_image_master, cache_resized_image_locally
+from image.controllers import cache_issue_image_master, cache_resized_image_locally, delete_cached_images_for_issue
 from image.models import WeVoteImageManager
 from organization.models import OrganizationListManager
 from position.models import PositionListManager
@@ -470,6 +470,41 @@ def issue_summary_view(request, issue_id):
             'messages_on_stage': messages_on_stage,
         }
     return render(request, 'issue/issue_summary.html', template_values)
+
+
+@login_required
+def issue_delete_images_view(request):
+    authority_required = {'verified_volunteer'}  # admin, verified_volunteer
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
+    google_civic_election_id = request.GET.get('google_civic_election_id', 0)
+    state_code = request.GET.get('state_code', '')
+    issue_we_vote_id = request.GET.get('issue_we_vote_id', '')
+    url_variables = "?google_civic_election_id=" + str(google_civic_election_id) + \
+                    "&state_code=" + str(state_code)
+
+    if not positive_value_exists(issue_we_vote_id):
+        return HttpResponseRedirect(reverse('issue:issue_new', args=()) +
+                                    url_variables)
+    else:
+        issue_manager = IssueManager()
+        results = issue_manager.retrieve_issue_from_we_vote_id(issue_we_vote_id)
+        if not results['issue_found']:
+            messages.add_message(request, messages.INFO, results['status'])
+            return HttpResponseRedirect(reverse('issue:issue_edit', args=(issue_we_vote_id,)) +
+                                        url_variables)
+        issue = results['issue']
+        delete_image_results = delete_cached_images_for_issue(issue)
+
+        delete_image_count = delete_image_results['delete_image_count']
+        not_deleted_image_count = delete_image_results['not_deleted_image_count']
+
+        messages.add_message(request, messages.INFO,
+                             "Images Deleted: {delete_image_count},"
+                             .format(delete_image_count=delete_image_count))
+        return HttpResponseRedirect(reverse('issue:issue_edit', args=(issue_we_vote_id,)) +
+                                    url_variables)
 
 
 @login_required

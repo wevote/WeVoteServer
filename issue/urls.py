@@ -11,6 +11,7 @@ urlpatterns = [
     url(r'^$', views_admin.issue_list_view, name='issue_list',),
     url(r'^edit_process/$', views_admin.issue_edit_process_view, name='issue_edit_process'),
     url(r'^delete/', views_admin.issue_delete_process_view, name='issue_delete_process'),
+    url(r'^delete_images/$', views_admin.issue_delete_images_view, name='issue_delete_images'),
     url(r'^import/$',
         views_admin.issues_import_from_master_server_view, name='issues_import_from_master_server'),
     url(r'^organization_link_import/$',

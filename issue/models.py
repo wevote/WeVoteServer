@@ -399,6 +399,29 @@ class IssueManager(models.Model):
         }
         return results
 
+    def reset_issue_image_details(self, issue, issue_image_url=''):
+        """
+        Reset an issue entry with original image details from we vote image.
+        """
+        success = False
+        status = "ENTERING_RESET_ISSUE_IMAGE_DETAILS"
+
+        if issue:
+            issue.issue_image_url = issue_image_url
+            issue.we_vote_hosted_image_url_large = None
+            issue.we_vote_hosted_image_url_medium = None
+            issue.we_vote_hosted_image_url_tiny = None
+            issue.save()
+            success = True
+            status = "RESET_ISSUE_IMAGE_DETAILS"
+
+        results = {
+            'success':      success,
+            'status':       status,
+            'candidate':    issue,
+        }
+        return results
+
 
 class OrganizationLinkToIssue(models.Model):
     # This class represent the link between an oraganization and an issue
