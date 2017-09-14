@@ -145,6 +145,32 @@ def migrate_remote_organization_image_urls_to_local_cache(organization_we_vote_i
     :param organization_we_vote_id:
     :return:
     """
+    """
+    1. retrieve_organization_from_we_vote_id
+        if organization_not_found:
+            return error
+    2. retrieve_twitter_link_to_organization_from_organization_we_vote_id
+        if twitter_link found:
+            Get Twitter id and other information
+        else:
+            return TWITTER_USER_DOES_NOT_EXIST
+    3. retrieve_latest_twitter_image_urls(twitter_id)   #All urls profile, banner, background
+            retrieve_twitter_image_urls_from_twitter
+            if image_url_not_found:
+                return TWITTER_URL_NOT_FOUND
+            else:
+                mark is_active_version to True for all types of images
+
+    4. for every image in [profile, background, banner]:
+        retrieve_cached_image(pass original image from step #3):
+        if latest twitter image is already cached:
+            return IMAGE_ALREADY_CACHED
+        else:
+            cache_image_locally
+
+        update_twitter_user_table
+
+    """
     cache_all_kind_of_images_results = {
         'organization_we_vote_id':          "",
         'cached_twitter_profile_image':     False,
@@ -1249,6 +1275,46 @@ def delete_cached_images_for_candidate(candidate):
     return results
 
 
+def delete_cached_images_for_issue(issue):
+    delete_image_count = 0
+    not_deleted_image_count = 0
+
+    we_vote_image_list = retrieve_all_images_for_one_issue(issue.we_vote_id)
+    if len(we_vote_image_list) > 0:
+        we_vote_image_manager = WeVoteImageManager()
+
+        # Reset Issue with original image details
+        issue_manager = IssueManager()
+        reset_candidate_image_results = issue_manager.reset_issue_image_details(
+            issue, issue_image_url='')
+
+        if reset_candidate_image_results['success']:
+            for we_vote_image in we_vote_image_list:
+                # Delete image from AWS
+                image_deleted_from_aws = we_vote_image_manager.delete_image_from_aws(
+                    we_vote_image.we_vote_image_file_location)
+
+                delete_result = we_vote_image_manager.delete_we_vote_image(we_vote_image)
+                if delete_result['success']:
+                    delete_image_count += 1
+                else:
+                    not_deleted_image_count += 1
+
+        success = True
+        status = "DELETED_CACHED_IMAGES_FOR_ISSUE"
+    else:
+        success = False
+        status = "NO_IMAGE_FOUND_FOR_ISSUE"
+
+    results = {
+        'success':                  success,
+        'status':                   status,
+        'delete_image_count':       delete_image_count,
+        'not_deleted_image_count':  not_deleted_image_count,
+    }
+    return results
+
+
 def delete_cached_images_for_organization(organization):
     original_twitter_profile_image_url_https = None
     original_twitter_profile_background_image_url_https = None
@@ -1431,7 +1497,7 @@ def delete_cached_images_for_voter(voter):
 
 def retrieve_all_images_for_one_candidate(candidate_we_vote_id):
     """
-    Show all resized images for one candidate
+    Retrieve all cached images for one candidate
     :param candidate_we_vote_id:
     :return:
     """
@@ -1440,7 +1506,7 @@ def retrieve_all_images_for_one_candidate(candidate_we_vote_id):
     we_vote_image_manager = WeVoteImageManager()
 
     if positive_value_exists(candidate_we_vote_id):
-        # if candidate_we_vote_id is defined then show resized images for that candidate only
+        # if candidate_we_vote_id is defined then retrieve cached images for that candidate only
         candidate_results = candidate_manager.retrieve_candidate_campaign_from_we_vote_id(candidate_we_vote_id)
         if candidate_results['candidate_campaign_found']:
             we_vote_image_list_results = we_vote_image_manager.\
@@ -1453,7 +1519,7 @@ def retrieve_all_images_for_one_candidate(candidate_we_vote_id):
 
 def retrieve_all_images_for_one_organization(organization_we_vote_id):
     """
-    Show all resized images for one organization
+    Retrieve all cached images for one organization
     :param organization_we_vote_id:
     :return:
     """
@@ -1462,7 +1528,7 @@ def retrieve_all_images_for_one_organization(organization_we_vote_id):
     we_vote_image_manager = WeVoteImageManager()
 
     if positive_value_exists(organization_we_vote_id):
-        # if candidate_we_vote_id is defined then show resized images for that candidate only
+        # if candidate_we_vote_id is defined then retrieve cached images for that candidate only
         organization_results = organization_manager.retrieve_organization_from_we_vote_id(organization_we_vote_id)
         if organization_results['organization_found']:
             we_vote_image_list_results = we_vote_image_manager.\
@@ -1528,9 +1594,28 @@ def cache_and_create_resized_images_for_voter(voter_id):
         return create_all_resized_images_results
 
 
+def retrieve_all_images_for_one_issue(issue_we_vote_id):
+    """
+    Retrieve all cached images for one issue
+    :param issue_we_vote_id:
+    :return:
+    """
+    we_vote_image_list = []
+    we_vote_image_manager = WeVoteImageManager()
+
+    if issue_we_vote_id:
+        # if issue_we_vote_id is defined then retrieve cached images for that issue only
+        we_vote_image_list_results = we_vote_image_manager.\
+            retrieve_we_vote_image_list_from_we_vote_id(issue_we_vote_id=issue_we_vote_id)
+        we_vote_image_list_query = we_vote_image_list_results['we_vote_image_list']
+        we_vote_image_list = list(we_vote_image_list_query)
+
+    return we_vote_image_list
+
+
 def retrieve_all_images_for_one_voter(voter_id):
     """
-    Show all resized images for one voter
+    Retrieve all cached images for one voter
     :param voter_id:
     :return:
     """
@@ -1539,7 +1624,7 @@ def retrieve_all_images_for_one_voter(voter_id):
     we_vote_image_manager = WeVoteImageManager()
 
     if voter_id:
-        # if voter_id is defined then show resized images for that voter only
+        # if voter_id is defined then retrieve cached images for that voter only
         voter_results = voter_manager.retrieve_voter_by_id(voter_id)
         if voter_results['success']:
             voter_we_vote_id = voter_results['voter'].we_vote_id
