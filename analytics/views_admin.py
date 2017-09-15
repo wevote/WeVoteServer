@@ -4,7 +4,8 @@
 
 from .controllers import save_organization_daily_metrics, save_organization_election_metrics, \
     save_sitewide_daily_metrics, save_sitewide_election_metrics, save_sitewide_voter_metrics
-from .models import AnalyticsAction, AnalyticsManager, OrganizationDailyMetrics, OrganizationElectionMetrics, \
+from .models import ACTION_WELCOME_VISIT, AnalyticsAction, AnalyticsManager, \
+    OrganizationDailyMetrics, OrganizationElectionMetrics, \
     SitewideDailyMetrics, SitewideElectionMetrics, SitewideVoterMetrics
 from admin_tools.views import redirect_to_sign_in_page
 from django.http import HttpResponseRedirect
@@ -63,6 +64,8 @@ def analytics_index_view(request):
     sitewide_voter_metrics_list = []
     try:
         sitewide_voter_metrics_query = SitewideVoterMetrics.objects.using('analytics').order_by('-last_action_date')
+        # Don't return the welcome page bounces
+        sitewide_voter_metrics_query = sitewide_voter_metrics_query.exclude(welcome_visited=1, actions_count=1)
         sitewide_voter_metrics_query = sitewide_voter_metrics_query[:3]
         sitewide_voter_metrics_list = list(sitewide_voter_metrics_query)
     except SitewideVoterMetrics.DoesNotExist:
@@ -465,13 +468,25 @@ def sitewide_voter_metrics_view(request):
 
     sitewide_voter_metrics_list = []
 
-    messages_on_stage = get_messages(request)
     try:
         sitewide_voter_metrics_query = SitewideVoterMetrics.objects.using('analytics').order_by('-last_action_date')
+        # Don't return the welcome page bounces
+        sitewide_voter_metrics_query = sitewide_voter_metrics_query.exclude(welcome_visited=1, actions_count=1)
         sitewide_voter_metrics_list = list(sitewide_voter_metrics_query)
+
+        # Count how many welcome page bounces are being removed
+        bounce_query = SitewideVoterMetrics.objects.using('analytics').all()
+        bounce_query = bounce_query.filter(welcome_visited=1, actions_count=1)
+        bounce_count = bounce_query.count()
+
+        if positive_value_exists(bounce_count):
+            messages.add_message(request, messages.INFO, str(bounce_count) + ' Welcome page bounces not shown.')
+
     except SitewideVoterMetrics.DoesNotExist:
         # This is fine
         pass
+
+    messages_on_stage = get_messages(request)
 
     template_values = {
         'messages_on_stage':            messages_on_stage,

@@ -216,6 +216,15 @@ def convert_to_political_party_constant(raw_party_incoming):
         return raw_party_incoming
 
 
+def convert_date_to_date_as_integer(date):
+    day_as_string = "{:d}{:02d}{:02d}".format(
+        date.year,
+        date.month,
+        date.day,
+    )
+    return convert_to_int(day_as_string)
+
+
 def extract_state_from_ocd_division_id(ocd_division_id):
     # Pull this from ocdDivisionId
     pieces = [piece.split(':', 1) for piece in ocd_division_id.split('/')]

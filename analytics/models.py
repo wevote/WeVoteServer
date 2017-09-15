@@ -812,7 +812,7 @@ class SitewideVoterMetrics(models.Model):
     signed_in_with_email = models.BooleanField(verbose_name='', default=False)
     seconds_on_site = models.PositiveIntegerField(verbose_name="all", null=True, unique=False)
     days_visited = models.PositiveIntegerField(verbose_name="all", null=True, unique=False)
-    last_action_date = models.DateTimeField(verbose_name='last action date and time', null=False, auto_now_add=True)
+    last_action_date = models.DateTimeField(verbose_name='last action date and time', null=True)
 
 
 def display_action_constant_human_readable(action_constant):
