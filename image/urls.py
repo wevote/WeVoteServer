@@ -11,7 +11,7 @@ urlpatterns = [
         name='cache_images_locally_for_all_organizations'),
     url(r'^cache_images_locally_for_all_voters/$', views_admin.cache_images_locally_for_all_voters_view,
         name='cache_images_locally_for_all_voters'),
-    url(r'^create_resized_images_for_all_organization/$', views_admin.create_resized_images_for_all_organizations_view,
+    url(r'^create_resized_images_for_all_organizations/$', views_admin.create_resized_images_for_all_organizations_view,
         name='create_resized_images_for_all_organizations'),
     url(r'^(?P<organization_we_vote_id>wv[\w]{2}org[\w]+)/create_resized_images_for_organization/$',
         views_admin.create_resized_images_for_organization_view, name='create_resized_images_for_organization'),

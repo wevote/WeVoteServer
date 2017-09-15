@@ -145,32 +145,6 @@ def migrate_remote_organization_image_urls_to_local_cache(organization_we_vote_i
     :param organization_we_vote_id:
     :return:
     """
-    """
-    1. retrieve_organization_from_we_vote_id
-        if organization_not_found:
-            return error
-    2. retrieve_twitter_link_to_organization_from_organization_we_vote_id
-        if twitter_link found:
-            Get Twitter id and other information
-        else:
-            return TWITTER_USER_DOES_NOT_EXIST
-    3. retrieve_latest_twitter_image_urls(twitter_id)   #All urls profile, banner, background
-            retrieve_twitter_image_urls_from_twitter
-            if image_url_not_found:
-                return TWITTER_URL_NOT_FOUND
-            else:
-                mark is_active_version to True for all types of images
-
-    4. for every image in [profile, background, banner]:
-        retrieve_cached_image(pass original image from step #3):
-        if latest twitter image is already cached:
-            return IMAGE_ALREADY_CACHED
-        else:
-            cache_image_locally
-
-        update_twitter_user_table
-
-    """
     cache_all_kind_of_images_results = {
         'organization_we_vote_id':          "",
         'cached_twitter_profile_image':     False,
@@ -716,9 +690,10 @@ def cache_image_locally(google_civic_election_id, image_url_https, voter_we_vote
 
     # Get today's cached images and their versions so that image version can be calculated
     cached_todays_we_vote_image_list_results = we_vote_image_manager.retrieve_todays_cached_we_vote_image_list(
-        voter_we_vote_id, candidate_we_vote_id, organization_we_vote_id, kind_of_image_twitter_profile,
-        kind_of_image_twitter_background, kind_of_image_twitter_banner, kind_of_image_facebook_profile,
-        kind_of_image_facebook_background, kind_of_image_maplight, kind_of_image_vote_smart, kind_of_image_original)
+        voter_we_vote_id, candidate_we_vote_id, organization_we_vote_id, issue_we_vote_id,
+        kind_of_image_twitter_profile, kind_of_image_twitter_background, kind_of_image_twitter_banner,
+        kind_of_image_facebook_profile, kind_of_image_facebook_background, kind_of_image_maplight,
+        kind_of_image_vote_smart, kind_of_image_issue, kind_of_image_original)
     for cached_we_vote_image in cached_todays_we_vote_image_list_results['we_vote_image_list']:
         if cached_we_vote_image.same_day_image_version:
             image_versions.append(cached_we_vote_image.same_day_image_version)
