@@ -112,12 +112,15 @@ class ElectionManager(models.Model):
         }
         return results
 
-    def retrieve_elections_by_date(self, include_test_election=False):
+    def retrieve_elections_by_date(self, newest_to_oldest=True, include_test_election=False):
         try:
             election_list_query = Election.objects.all()
             if not positive_value_exists(include_test_election):
                 election_list_query = election_list_query.exclude(google_civic_election_id=2000)
-            election_list_query = election_list_query.order_by('election_day_text').reverse()
+            election_list_query = election_list_query.order_by('election_day_text')
+            if newest_to_oldest:
+                # Typically we want the newest election displayed first, with the older elections later in the list
+                election_list_query = election_list_query.reverse()
             election_list = election_list_query
             status = 'ELECTIONS_FOUND'
             success = True
