@@ -147,9 +147,78 @@ class AnalyticsCountManager(models.Model):
         try:
             count_query = AnalyticsAction.objects.using('analytics').all()
             count_query = count_query.filter(action_constant=ACTION_VOTER_GUIDE_VISIT)
-            count_query = count_query.filter(organization_we_vote_id=organization_we_vote_id)
+            count_query = count_query.filter(organization_we_vote_id__iexact=organization_we_vote_id)
             count_query = count_query.filter(google_civic_election_id=google_civic_election_id)
             count_query = count_query.values('voter_we_vote_id').distinct()
+            count_result = count_query.count()
+        except Exception as e:
+            pass
+        return count_result
+
+    def fetch_voter_action_count(self, voter_we_vote_id):
+        count_result = None
+        try:
+            count_query = AnalyticsAction.objects.using('analytics').all()
+            count_query = count_query.filter(voter_we_vote_id__iexact=voter_we_vote_id)
+            count_result = count_query.count()
+        except Exception as e:
+            pass
+        return count_result
+
+    def fetch_voter_ballot_visited(self, voter_we_vote_id):
+        count_result = None
+        try:
+            count_query = AnalyticsAction.objects.using('analytics').all()
+            count_query = count_query.filter(voter_we_vote_id__iexact=voter_we_vote_id)
+            count_query = count_query.filter(action_constant=ACTION_BALLOT_VISIT)
+            count_result = count_query.count()
+        except Exception as e:
+            pass
+        return count_result
+
+    def fetch_voter_welcome_visited(self, voter_we_vote_id):
+        count_result = None
+        try:
+            count_query = AnalyticsAction.objects.using('analytics').all()
+            count_query = count_query.filter(voter_we_vote_id__iexact=voter_we_vote_id)
+            count_query = count_query.filter(action_constant=ACTION_WELCOME_VISIT)
+            count_result = count_query.count()
+        except Exception as e:
+            pass
+        return count_result
+
+    def fetch_voter_days_visited(self, voter_we_vote_id):
+        count_result = None
+        try:
+            count_query = AnalyticsAction.objects.using('analytics').all()
+            count_query = count_query.filter(voter_we_vote_id__iexact=voter_we_vote_id)
+            count_query = count_query.values('date_as_integer').distinct()
+            count_result = count_query.count()
+        except Exception as e:
+            pass
+        return count_result
+
+    def fetch_voter_last_action_date(self, voter_we_vote_id):
+        last_action_date = None
+        try:
+            fetch_query = AnalyticsAction.objects.using('analytics').all()
+            fetch_query = fetch_query.filter(voter_we_vote_id__iexact=voter_we_vote_id)
+            fetch_query = fetch_query.order_by('-id')
+            fetch_query = fetch_query[:1]
+            fetch_result = list(fetch_query)
+            analytics_action = fetch_result.pop()
+            last_action_date = analytics_action.exact_time
+        except Exception as e:
+            pass
+        return last_action_date
+
+    def fetch_voter_voter_guides_viewed(self, voter_we_vote_id):
+        count_result = 0
+        try:
+            count_query = AnalyticsAction.objects.using('analytics').all()
+            count_query = count_query.filter(voter_we_vote_id__iexact=voter_we_vote_id)
+            count_query = count_query.filter(action_constant=ACTION_VOTER_GUIDE_VISIT)
+            count_query = count_query.values('organization_we_vote_id').distinct()
             count_result = count_query.count()
         except Exception as e:
             pass
@@ -280,11 +349,44 @@ class AnalyticsManager(models.Model):
         except Exception as e:
             organization_list_found = False
 
+        modified_organization_list = []
+        for organization_dict in organization_list:
+            if positive_value_exists(organization_dict['organization_we_vote_id']):
+                modified_organization_list.append(organization_dict['organization_we_vote_id'])
+
         results = {
-            'success':                  success,
-            'status':                   status,
-            'organization_list':        organization_list,
-            'organization_list_found':  organization_list_found,
+            'success':                              success,
+            'status':                               status,
+            'organization_we_vote_id_list':         modified_organization_list,
+            'organization_we_vote_id_list_found':   organization_list_found,
+        }
+        return results
+
+    def retrieve_voter_we_vote_id_list_with_changes_since(self, date_as_integer=0):
+        success = False
+        status = ""
+        voter_list = []
+
+        try:
+            voter_list_query = AnalyticsAction.objects.using('analytics').all()
+            voter_list_query = voter_list_query.filter(date_as_integer__gte=date_as_integer)
+            voter_list_query = voter_list_query.values('voter_we_vote_id').distinct()
+            # voter_list_query = voter_list_query[:5]  # TEMP limit to 5
+            voter_list = list(voter_list_query)
+            voter_list_found = True
+        except Exception as e:
+            voter_list_found = False
+
+        modified_voter_list = []
+        for voter_dict in voter_list:
+            if positive_value_exists(voter_dict['voter_we_vote_id']):
+                modified_voter_list.append(voter_dict['voter_we_vote_id'])
+
+        results = {
+            'success':                              success,
+            'status':                               status,
+            'voter_we_vote_id_list':         modified_voter_list,
+            'voter_we_vote_id_list_found':   voter_list_found,
         }
         return results
 
@@ -428,6 +530,32 @@ class AnalyticsManager(models.Model):
             except Exception as e:
                 success = False
                 status += 'SITEWIDE_ELECTION_METRICS_UPDATE_OR_CREATE_FAILED '
+
+        results = {
+            'success': success,
+            'status': status,
+            'metrics_saved': metrics_saved,
+            'metrics': metrics,
+        }
+        return results
+
+    def save_sitewide_voter_metrics_values_for_one_voter(self, sitewide_voter_metrics_values):
+        success = False
+        status = ""
+        metrics_saved = False
+        metrics = SitewideVoterMetrics()
+
+        if positive_value_exists(sitewide_voter_metrics_values['voter_we_vote_id']):
+            voter_we_vote_id = sitewide_voter_metrics_values['voter_we_vote_id']
+
+            try:
+                metrics_saved, created = SitewideVoterMetrics.objects.using('analytics').update_or_create(
+                    voter_we_vote_id__iexact=voter_we_vote_id,
+                    defaults=sitewide_voter_metrics_values
+                )
+            except Exception as e:
+                success = False
+                status += 'SITEWIDE_VOTER_METRICS_UPDATE_OR_CREATE_FAILED '
 
         results = {
             'success': success,
@@ -658,6 +786,33 @@ class SitewideElectionMetrics(models.Model):
         )
         self.date_as_integer = convert_to_int(day_as_string)
         return
+
+
+class SitewideVoterMetrics(models.Model):
+    """
+    A single entry per voter summarizing all activity every done on We Vote
+    """
+    voter_we_vote_id = models.CharField(verbose_name="we vote permanent id",
+                                        max_length=255, default=None, null=True, blank=True, unique=False)
+    actions_count = models.PositiveIntegerField(verbose_name="all", null=True, unique=False)
+    elections_viewed = models.PositiveIntegerField(verbose_name="all", null=True, unique=False)
+    voter_guides_viewed = models.PositiveIntegerField(verbose_name="all", null=True, unique=False)
+    ballot_visited = models.PositiveIntegerField(verbose_name="all", null=True, unique=False)
+    welcome_visited = models.PositiveIntegerField(verbose_name="all", null=True, unique=False)
+    entered_full_address = models.PositiveIntegerField(verbose_name="all", null=True, unique=False)
+    issues_followed = models.PositiveIntegerField(verbose_name="all", null=True, unique=False)
+    organizations_followed = models.PositiveIntegerField(verbose_name="all", null=True, unique=False)
+    time_until_sign_in = models.PositiveIntegerField(verbose_name="all", null=True, unique=False)
+    positions_entered_friends_only = models.PositiveIntegerField(verbose_name="all", null=True, unique=False)
+    positions_entered_public = models.PositiveIntegerField(verbose_name="all", null=True, unique=False)
+    comments_entered_friends_only = models.PositiveIntegerField(verbose_name="all", null=True, unique=False)
+    comments_entered_public = models.PositiveIntegerField(verbose_name="all", null=True, unique=False)
+    signed_in_twitter = models.BooleanField(verbose_name='', default=False)
+    signed_in_facebook = models.BooleanField(verbose_name='', default=False)
+    signed_in_with_email = models.BooleanField(verbose_name='', default=False)
+    seconds_on_site = models.PositiveIntegerField(verbose_name="all", null=True, unique=False)
+    days_visited = models.PositiveIntegerField(verbose_name="all", null=True, unique=False)
+    last_action_date = models.DateTimeField(verbose_name='last action date and time', null=False, auto_now_add=True)
 
 
 def display_action_constant_human_readable(action_constant):

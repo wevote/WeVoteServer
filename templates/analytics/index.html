@@ -10,6 +10,10 @@
 <p><a href="{% url 'admin_tools:admin_home' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">< Back to Admin Home</a></p>
 
 <h1>We Vote Analytics</h1>
+<p>
+    <a href="{% url 'analytics:analytics_action_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
+    View Raw Log</a>
+</p>
 
 <h2>Sitewide Election Metrics</h2>
     <p>
@@ -38,13 +42,81 @@
     {% include "analytics/organization_election_metrics_table.html" %}
 {% endif %}
 
-<p>
-    <a href="{% url 'analytics:analytics_action_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
-    Raw Log</a>,
-    <a href="{% url 'analytics:update_election_summaries_process' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
-    Update Election Summaries</a>
-</p>
 
-<p><a href="{% url 'admin_tools:statistics_summary' %}">Quick Statistics</a></p>
+<h2>Voter Metrics</h2>
+    <p>
+        Show the most recent voters who have visited site and the major steps they've completed.
+        <a href="{% url 'analytics:sitewide_voter_metrics' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">see all</a>
+    </p>
+
+    {% include "analytics/sitewide_voter_metrics_table.html" with sitewide_voter_metrics_list=sitewide_voter_metrics_list %}
+
+
+<h2>Manually Update Metrics</h2>
+
+<form name="choose_election" method="get" action="{% url 'analytics:analytics_index' %}">
+    {% csrf_token %}
+    {% if election_list %}
+    <select id="google_civic_election_id" name="google_civic_election_id">
+        <option value="0" {% if 0 == google_civic_election_id|convert_to_int %} selected="selected"{% endif %}>
+            -- Filter by Election --</option>
+        {% for election in election_list %}
+        <option value="{{ election.google_civic_election_id }}"
+                {% if election.google_civic_election_id|slugify == google_civic_election_id|slugify %} selected="selected"{% endif %}>
+            {{ election.election_name }} - {{ election.google_civic_election_id }} - {{ election.election_day_text }}</option>
+        {% endfor %}
+    </select>
+    {% endif %}{# End of if election_list #}
+</form>
+
+<form name="update_election_metrics" method="get" action="{% url 'analytics:update_election_metrics_process' %}">
+    {% csrf_token %}
+    <input type="hidden" name="google_civic_election_id" value="{{ google_civic_election_id }}" />
+    <input type="hidden" name="state_code" value="{{ state_code }}" />
+
+    <div class="form-group">
+        <label for="update_election_metrics_button" class="col-sm-3 control-label">&nbsp;</label>
+        <div class="col-sm-8">
+            <button type="submit" class="btn btn-default" name="update_election_metrics_button">Update Election Metrics</button>
+        </div>
+    </div>
+</form>
+
+
+<div class="col-sm-12">
+    <h3>Daily Metrics</h3>
+</div>
+<form name="update_daily_metrics" method="get" action="{% url 'analytics:update_daily_metrics_process' %}">
+    {% csrf_token %}
+    <input type="hidden" name="google_civic_election_id" value="{{ google_civic_election_id }}" />
+    <input type="hidden" name="state_code" value="{{ state_code }}" />
+
+    <div class="form-group">
+        <label for="date_to_process" class="col-sm-3 control-label">Date YYYYMMDD</label>
+        <div class="col-sm-8">
+            <input type="text" name="date_to_process" id="date_to_process_id" class="form-control"
+                   value="{{ date_to_process }}" />
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label for="update_daily_metrics_button" class="col-sm-3 control-label">&nbsp;</label>
+        <div class="col-sm-8">
+            <button type="submit" class="btn btn-default" name="update_daily_metrics_button">Update Daily Metrics</button>
+        </div>
+    </div>
+</form>
+
+<div class="col-sm-12">
+    <p><a href="{% url 'admin_tools:statistics_summary' %}">Quick Statistics</a></p>
+</div>
+
+<script>
+    $(function() {
+        $('#google_civic_election_id').change(function() {
+            this.form.submit();
+        });
+    });
+</script>
 
 {% endblock %}

@@ -1285,8 +1285,7 @@ def delete_cached_images_for_issue(issue):
 
         # Reset Issue with original image details
         issue_manager = IssueManager()
-        reset_candidate_image_results = issue_manager.reset_issue_image_details(
-            issue, issue_image_url='')
+        reset_candidate_image_results = issue_manager.reset_issue_image_details(issue)
 
         if reset_candidate_image_results['success']:
             for we_vote_image in we_vote_image_list:

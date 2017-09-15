@@ -399,7 +399,7 @@ class IssueManager(models.Model):
         }
         return results
 
-    def reset_issue_image_details(self, issue, issue_image_url=''):
+    def reset_issue_image_details(self, issue, issue_image_url=False):
         """
         Reset an issue entry with original image details from we vote image.
         """
@@ -407,7 +407,8 @@ class IssueManager(models.Model):
         status = "ENTERING_RESET_ISSUE_IMAGE_DETAILS"
 
         if issue:
-            issue.issue_image_url = issue_image_url
+            if issue_image_url is not False:
+                issue.issue_image_url = issue_image_url
             issue.we_vote_hosted_image_url_large = None
             issue.we_vote_hosted_image_url_medium = None
             issue.we_vote_hosted_image_url_tiny = None
