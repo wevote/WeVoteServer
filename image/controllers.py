@@ -133,15 +133,100 @@ def cache_all_kind_of_images_locally_for_all_voters():
     voter_list = voter_list[:200]  # Limit to 200 for now
 
     for voter in voter_list:
-        cache_images_for_a_voter_results = migrate_remote_voter_image_urls_to_local_cache(voter.id)
+        cache_images_for_a_voter_results = cache_voter_master_images(voter.id)
         cache_images_locally_for_all_voters_results.append(cache_images_for_a_voter_results)
 
     return cache_images_locally_for_all_voters_results
 
 
-def migrate_remote_organization_image_urls_to_local_cache(organization_we_vote_id):
+def cache_image_if_not_cached(google_civic_election_id, image_url_https, voter_we_vote_id=None,
+                              candidate_we_vote_id=None, organization_we_vote_id=None, issue_we_vote_id=None,
+                              twitter_id=None, twitter_screen_name=None,
+                              facebook_user_id=None, maplight_id=None, vote_smart_id=None,
+                              is_active_version=False, kind_of_image_twitter_profile=False,
+                              kind_of_image_twitter_background=False, kind_of_image_twitter_banner=False,
+                              kind_of_image_facebook_profile=False, kind_of_image_facebook_background=False,
+                              kind_of_image_maplight=False, kind_of_image_vote_smart=False, kind_of_image_issue=False,
+                              kind_of_image_original=False, facebook_background_image_offset_x=None,
+                              facebook_background_image_offset_y=None):
     """
-    Cache all kind of images locally for an organization such as profile, background
+    Check if image is already cached or not. If not then cached it.
+    :param google_civic_election_id:
+    :param image_url_https:
+    :param voter_we_vote_id:
+    :param candidate_we_vote_id:
+    :param organization_we_vote_id:
+    :param issue_we_vote_id:
+    :param twitter_id:
+    :param twitter_screen_name:
+    :param facebook_user_id:
+    :param maplight_id:
+    :param vote_smart_id:
+    :param is_active_version:
+    :param kind_of_image_twitter_profile:
+    :param kind_of_image_twitter_background:
+    :param kind_of_image_twitter_banner:
+    :param kind_of_image_facebook_profile:
+    :param kind_of_image_facebook_background:
+    :param kind_of_image_maplight:
+    :param kind_of_image_vote_smart:
+    :param kind_of_image_issue:
+    :param kind_of_image_original:
+    :param facebook_background_image_offset_x:
+    :param facebook_background_image_offset_y:
+    :return:
+    """
+    we_vote_image_manager = WeVoteImageManager()
+    cached_we_vote_image_results = we_vote_image_manager.retrieve_recent_cached_we_vote_image(
+        voter_we_vote_id=voter_we_vote_id, candidate_we_vote_id=candidate_we_vote_id,
+        organization_we_vote_id=organization_we_vote_id, issue_we_vote_id=issue_we_vote_id,
+        kind_of_image_twitter_profile=kind_of_image_twitter_profile,
+        kind_of_image_twitter_background=kind_of_image_twitter_background,
+        kind_of_image_twitter_banner=kind_of_image_twitter_banner,
+        kind_of_image_facebook_profile=kind_of_image_facebook_profile,
+        kind_of_image_facebook_background=kind_of_image_facebook_background,
+        kind_of_image_maplight=kind_of_image_maplight, kind_of_image_vote_smart=kind_of_image_vote_smart,
+        kind_of_image_issue=kind_of_image_issue, kind_of_image_original=kind_of_image_original,
+        is_active_version=True)
+    if cached_we_vote_image_results['we_vote_image_found']:
+        cache_image_results = IMAGE_ALREADY_CACHED
+    else:
+        # Image is not cached so caching it
+        cache_image_locally_results = cache_image_locally(
+            google_civic_election_id, image_url_https, voter_we_vote_id=voter_we_vote_id,
+            candidate_we_vote_id=candidate_we_vote_id, organization_we_vote_id=organization_we_vote_id,
+            issue_we_vote_id=issue_we_vote_id, twitter_id=twitter_id, facebook_user_id=facebook_user_id,
+            maplight_id=maplight_id, vote_smart_id=vote_smart_id,
+            twitter_screen_name=twitter_screen_name, is_active_version=is_active_version,
+            kind_of_image_twitter_profile=kind_of_image_twitter_profile,
+            kind_of_image_twitter_background=kind_of_image_twitter_background,
+            kind_of_image_twitter_banner=kind_of_image_twitter_banner,
+            kind_of_image_facebook_profile=kind_of_image_facebook_profile,
+            kind_of_image_facebook_background=kind_of_image_facebook_background,
+            kind_of_image_maplight=kind_of_image_maplight, kind_of_image_vote_smart=kind_of_image_vote_smart,
+            kind_of_image_issue=kind_of_image_issue, kind_of_image_original=kind_of_image_original,
+            facebook_background_image_offset_x=facebook_background_image_offset_x,
+            facebook_background_image_offset_y=facebook_background_image_offset_y,
+        )
+        cache_image_results = cache_image_locally_results['success']
+
+        set_active_version_false_results = we_vote_image_manager.set_active_version_false_for_other_images(
+            voter_we_vote_id=voter_we_vote_id, candidate_we_vote_id=candidate_we_vote_id,
+            organization_we_vote_id=organization_we_vote_id, issue_we_vote_id=issue_we_vote_id,
+            image_url_https=image_url_https,
+            kind_of_image_twitter_profile=kind_of_image_twitter_profile,
+            kind_of_image_twitter_background=kind_of_image_twitter_background,
+            kind_of_image_twitter_banner=kind_of_image_twitter_banner,
+            kind_of_image_facebook_profile=kind_of_image_facebook_profile,
+            kind_of_image_facebook_background=kind_of_image_facebook_background,
+            kind_of_image_maplight=kind_of_image_maplight, kind_of_image_vote_smart=kind_of_image_vote_smart,
+            kind_of_image_issue=kind_of_image_issue)
+    return cache_image_results
+
+
+def cache_organization_master_images(organization_we_vote_id):
+    """
+    Cache all kind of master images for an organization such as profile, background
     :param organization_we_vote_id:
     :return:
     """
@@ -154,9 +239,7 @@ def migrate_remote_organization_image_urls_to_local_cache(organization_we_vote_i
         'cached_facebook_background_image': False
     }
     google_civic_election_id = 0
-    is_active_version = False
     twitter_id = None
-    we_vote_image_manager = WeVoteImageManager()
     organization_manager = OrganizationManager()
 
     organization_results = organization_manager.retrieve_organization_from_we_vote_id(organization_we_vote_id)
@@ -186,134 +269,46 @@ def migrate_remote_organization_image_urls_to_local_cache(organization_we_vote_i
             'cached_twitter_profile_image':     TWITTER_USER_DOES_NOT_EXIST,
             'cached_twitter_background_image':  TWITTER_USER_DOES_NOT_EXIST,
             'cached_twitter_banner_image':      TWITTER_USER_DOES_NOT_EXIST,
-            'cached_facebook_profile_image':    FACEBOOK_USER_DOES_NOT_EXIST,
-            'cached_facebook_background_image': FACEBOOK_USER_DOES_NOT_EXIST
         }
         return cache_all_kind_of_images_results
 
-    for kind_of_image in ALL_KIND_OF_IMAGE:
-        if kind_of_image == "kind_of_image_twitter_profile":
-            twitter_user, twitter_profile_image_url_https = retrieve_twitter_image_url(
-                twitter_id, kind_of_image_twitter_profile=True)
-            # get original image as by default twitter API return normal 48x48 image
-            twitter_profile_image_url_https = we_vote_image_manager.twitter_profile_image_url_https_original(
-                twitter_profile_image_url_https)
-            # If twitter image url not found in TwitterUser table then reaching out to twitter and getting new image
-            if not twitter_profile_image_url_https:
-                twitter_profile_image_url_https = retrieve_latest_twitter_image_url(
-                    twitter_id, twitter_screen_name, kind_of_image_twitter_profile=True)
-                if not twitter_profile_image_url_https:
-                    # new twitter profile image not found
-                    cache_all_kind_of_images_results['cached_twitter_profile_image'] = \
-                        TWITTER_URL_NOT_FOUND
-                    continue
-                is_active_version = True
+    # Retrieve latest twitter image urls from Twitter
+    latest_image_urls_results = retrieve_image_urls_from_twitter(twitter_id)
+    twitter_profile_image_url_https = latest_image_urls_results['latest_twitter_profile_image_url']
+    twitter_profile_background_image_url_https = latest_image_urls_results['latest_twitter_background_image_url']
+    twitter_profile_banner_url_https = latest_image_urls_results['latest_twitter_banner_image_url']
 
-            # Get cached profile images and check if this image is already cached or not
-            cached_we_vote_image_list_results = we_vote_image_manager.retrieve_cached_we_vote_image_list(
-                organization_we_vote_id=organization_we_vote_id, kind_of_image_twitter_profile=True,
-                kind_of_image_original=True)
-            for cached_we_vote_image in cached_we_vote_image_list_results['we_vote_image_list']:
-                # If image is already cached then no need to cache it again
-                if twitter_profile_image_url_https == cached_we_vote_image.twitter_profile_image_url_https or \
-                        twitter_profile_image_url_https == cached_we_vote_image.we_vote_image_url:
-                    cache_all_kind_of_images_results['cached_twitter_profile_image'] = \
-                        IMAGE_ALREADY_CACHED
-                    break
-            else:
-                # Image is not cached so caching it
-                cache_image_locally_results = cache_image_locally(google_civic_election_id,
-                                                                  twitter_profile_image_url_https,
-                                                                  organization_we_vote_id=organization_we_vote_id,
-                                                                  twitter_id=twitter_id,
-                                                                  twitter_screen_name=twitter_screen_name,
-                                                                  is_active_version=is_active_version,
-                                                                  kind_of_image_twitter_profile=True,
-                                                                  kind_of_image_original=True)
-                cache_all_kind_of_images_results['cached_twitter_profile_image'] = \
-                    cache_image_locally_results['success']
+    # Cache all images if not already cached
+    if not twitter_profile_image_url_https:
+        cache_all_kind_of_images_results['cached_twitter_profile_image'] = TWITTER_URL_NOT_FOUND
+    else:
+        cache_all_kind_of_images_results['cached_twitter_profile_image'] = cache_image_if_not_cached(
+            google_civic_election_id, twitter_profile_image_url_https, organization_we_vote_id=organization_we_vote_id,
+            twitter_id=twitter_id, twitter_screen_name=twitter_screen_name, is_active_version=True,
+            kind_of_image_twitter_profile=True, kind_of_image_original=True)
 
-        elif kind_of_image == "kind_of_image_twitter_background":
-            twitter_user, twitter_profile_background_image_url_https = retrieve_twitter_image_url(
-                twitter_id, kind_of_image_twitter_background=True)
-            # If twitter image url not found in TwitterUser table then reaching out to twitter and getting new image
-            if not twitter_profile_background_image_url_https:
-                twitter_profile_background_image_url_https = retrieve_latest_twitter_image_url(
-                    twitter_id, twitter_screen_name, kind_of_image_twitter_background=True)
-                if not twitter_profile_background_image_url_https:
-                    # new twitter profile image not found
-                    cache_all_kind_of_images_results['cached_twitter_background_image'] = \
-                        TWITTER_URL_NOT_FOUND
-                    continue
-                is_active_version = True
+    if not twitter_profile_background_image_url_https:
+        cache_all_kind_of_images_results['cached_twitter_background_image'] = TWITTER_URL_NOT_FOUND
+    else:
+        cache_all_kind_of_images_results['cached_twitter_background_image'] = cache_image_if_not_cached(
+            google_civic_election_id, twitter_profile_background_image_url_https,
+            organization_we_vote_id=organization_we_vote_id, twitter_id=twitter_id,
+            twitter_screen_name=twitter_screen_name, is_active_version=True,
+            kind_of_image_twitter_background=True, kind_of_image_original=True)
 
-            # Get cached profile images and check if this image is already cached or not
-            cached_we_vote_image_list_results = we_vote_image_manager.retrieve_cached_we_vote_image_list(
-                organization_we_vote_id=organization_we_vote_id, kind_of_image_twitter_background=True,
-                kind_of_image_original=True)
-            for cached_we_vote_image in cached_we_vote_image_list_results['we_vote_image_list']:
-                # If image is already cached then no need to cache it again
-                if twitter_profile_background_image_url_https == \
-                        cached_we_vote_image.twitter_profile_background_image_url_https or \
-                        twitter_profile_background_image_url_https == cached_we_vote_image.we_vote_image_url:
-                    cache_all_kind_of_images_results['cached_twitter_background_image'] = \
-                        IMAGE_ALREADY_CACHED
-                    break
-            else:
-                # Image is not cached so caching it
-                cache_image_locally_results = cache_image_locally(google_civic_election_id,
-                                                                  twitter_profile_background_image_url_https,
-                                                                  organization_we_vote_id=organization_we_vote_id,
-                                                                  twitter_id=twitter_id,
-                                                                  twitter_screen_name=twitter_screen_name,
-                                                                  is_active_version=is_active_version,
-                                                                  kind_of_image_twitter_background=True,
-                                                                  kind_of_image_original=True)
-                cache_all_kind_of_images_results['cached_twitter_background_image'] = \
-                    cache_image_locally_results['success']
-
-        elif kind_of_image == "kind_of_image_twitter_banner":
-            twitter_user, twitter_profile_banner_url_https = retrieve_twitter_image_url(
-                twitter_id, kind_of_image_twitter_banner=True)
-            # If twitter image url not found in TwitterUser table then reaching out to twitter and getting new image
-            if not twitter_profile_banner_url_https:
-                twitter_profile_banner_url_https = retrieve_latest_twitter_image_url(
-                    twitter_id, twitter_screen_name, kind_of_image_twitter_banner=True)
-                if not twitter_profile_banner_url_https:
-                    # new twitter profile image not found
-                    cache_all_kind_of_images_results['cached_twitter_banner_image'] = \
-                        TWITTER_URL_NOT_FOUND
-                    continue
-                is_active_version = True
-
-            # Get cached profile images and check if this image is already cached or not
-            cached_we_vote_image_list_results = we_vote_image_manager.retrieve_cached_we_vote_image_list(
-                organization_we_vote_id=organization_we_vote_id, kind_of_image_twitter_banner=True,
-                kind_of_image_original=True)
-            for cached_we_vote_image in cached_we_vote_image_list_results['we_vote_image_list']:
-                # If image is already cached then no need to cache it again
-                if twitter_profile_banner_url_https == cached_we_vote_image.twitter_profile_banner_url_https or \
-                        twitter_profile_banner_url_https == cached_we_vote_image.we_vote_image_url:
-                    cache_all_kind_of_images_results['cached_twitter_banner_image'] = \
-                        IMAGE_ALREADY_CACHED
-                    break
-            else:
-                # Image is not cached so caching it
-                cache_image_locally_results = cache_image_locally(google_civic_election_id,
-                                                                  twitter_profile_banner_url_https,
-                                                                  organization_we_vote_id=organization_we_vote_id,
-                                                                  twitter_id=twitter_id,
-                                                                  twitter_screen_name=twitter_screen_name,
-                                                                  is_active_version=is_active_version,
-                                                                  kind_of_image_twitter_banner=True,
-                                                                  kind_of_image_original=True)
-                cache_all_kind_of_images_results['cached_twitter_banner_image'] = \
-                    cache_image_locally_results['success']
+    if not twitter_profile_banner_url_https:
+        cache_all_kind_of_images_results['cached_twitter_banner_image'] = TWITTER_URL_NOT_FOUND
+    else:
+        cache_all_kind_of_images_results['cached_twitter_banner_image'] = cache_image_if_not_cached(
+            google_civic_election_id, twitter_profile_banner_url_https,
+            organization_we_vote_id=organization_we_vote_id, twitter_id=twitter_id,
+            twitter_screen_name=twitter_screen_name, is_active_version=True,
+            kind_of_image_twitter_banner=True, kind_of_image_original=True)
 
     return cache_all_kind_of_images_results
 
 
-def migrate_remote_voter_image_urls_to_local_cache(voter_id):
+def cache_voter_master_images(voter_id):
     """
     Cache all kind of images locally for a voter such as profile, background
     :param voter_id:
@@ -329,10 +324,8 @@ def migrate_remote_voter_image_urls_to_local_cache(voter_id):
         'cached_facebook_background_image': False
     }
     google_civic_election_id = 0
-    is_active_version = False
     twitter_id = None
     facebook_id = None
-    we_vote_image_manager = WeVoteImageManager()
     voter_address_manager = VoterAddressManager()
     voter_manager = VoterManager()
     voter_device_link_manager = VoterDeviceLinkManager()
@@ -394,183 +387,71 @@ def migrate_remote_voter_image_urls_to_local_cache(voter_id):
         }
         return cache_all_kind_of_images_results
 
-    for kind_of_image in ALL_KIND_OF_IMAGE:
-        if kind_of_image == "kind_of_image_twitter_profile":
-            twitter_user, twitter_profile_image_url_https = retrieve_twitter_image_url(
-                twitter_id, kind_of_image_twitter_profile=True)
-            # get original image as by default twitter API return normal 48x48 image
-            twitter_profile_image_url_https = we_vote_image_manager.twitter_profile_image_url_https_original(
-                twitter_profile_image_url_https)
-            # If twitter image url not found in TwitterUser table then reaching out to twitter and getting new image
-            if not twitter_profile_image_url_https:
-                twitter_profile_image_url_https = retrieve_latest_twitter_image_url(
-                    twitter_id, twitter_screen_name, kind_of_image_twitter_profile=True)
-                if not twitter_profile_image_url_https:
-                    # new twitter profile image not found
-                    cache_all_kind_of_images_results['cached_twitter_profile_image'] = \
-                        TWITTER_URL_NOT_FOUND
-                    continue
-                is_active_version = True
+    if not positive_value_exists(twitter_id):
+        cache_all_kind_of_images_results['cached_twitter_profile_image'] = TWITTER_USER_DOES_NOT_EXIST,
+        cache_all_kind_of_images_results['cached_twitter_background_image'] = TWITTER_USER_DOES_NOT_EXIST,
+        cache_all_kind_of_images_results['cached_twitter_banner_image'] = TWITTER_USER_DOES_NOT_EXIST,
+    else:
+        # Retrieve latest twitter image urls from Twitter
+        latest_image_urls_results = retrieve_image_urls_from_twitter(twitter_id)
+        twitter_profile_image_url_https = latest_image_urls_results['latest_twitter_profile_image_url']
+        twitter_profile_background_image_url_https = latest_image_urls_results['latest_twitter_background_image_url']
+        twitter_profile_banner_url_https = latest_image_urls_results['latest_twitter_banner_image_url']
 
-            # Get cached profile images and check if this image is already cached or not
-            cached_we_vote_image_list_results = we_vote_image_manager.retrieve_cached_we_vote_image_list(
-                voter_we_vote_id=voter.we_vote_id, kind_of_image_twitter_profile=True, kind_of_image_original=True)
-            for cached_we_vote_image in cached_we_vote_image_list_results['we_vote_image_list']:
-                # If image is already cached then no need to cache it again
-                if twitter_profile_image_url_https == cached_we_vote_image.twitter_profile_image_url_https or \
-                        twitter_profile_image_url_https == cached_we_vote_image.we_vote_image_url:
-                    cache_all_kind_of_images_results['cached_twitter_profile_image'] = \
-                        IMAGE_ALREADY_CACHED
-                    break
-            else:
-                # Image is not cached so caching it
-                cache_image_locally_results = cache_image_locally(google_civic_election_id,
-                                                                  twitter_profile_image_url_https,
-                                                                  voter_we_vote_id=voter.we_vote_id,
-                                                                  twitter_id=twitter_id,
-                                                                  twitter_screen_name=twitter_screen_name,
-                                                                  is_active_version=is_active_version,
-                                                                  kind_of_image_twitter_profile=True,
-                                                                  kind_of_image_original=True)
-                cache_all_kind_of_images_results['cached_twitter_profile_image'] = \
-                    cache_image_locally_results['success']
+        # Cache all images if not already cached
+        if not twitter_profile_image_url_https:
+            cache_all_kind_of_images_results['cached_twitter_profile_image'] = TWITTER_URL_NOT_FOUND
+        else:
+            cache_all_kind_of_images_results['cached_twitter_profile_image'] = cache_image_if_not_cached(
+                google_civic_election_id, twitter_profile_image_url_https,
+                voter_we_vote_id=voter.we_vote_id,
+                twitter_id=twitter_id, twitter_screen_name=twitter_screen_name, is_active_version=True,
+                kind_of_image_twitter_profile=True, kind_of_image_original=True)
 
-        elif kind_of_image == "kind_of_image_twitter_background":
-            twitter_user, twitter_profile_background_image_url_https = retrieve_twitter_image_url(
-                twitter_id, kind_of_image_twitter_background=True)
-            # If twitter image url not found in TwitterUser table then reaching out to twitter and getting new image
-            if not twitter_profile_background_image_url_https:
-                twitter_profile_background_image_url_https = retrieve_latest_twitter_image_url(
-                    twitter_id, twitter_screen_name, kind_of_image_twitter_background=True)
-                if not twitter_profile_background_image_url_https:
-                    # new twitter profile image not found
-                    cache_all_kind_of_images_results['cached_twitter_background_image'] = \
-                        TWITTER_URL_NOT_FOUND
-                    continue
-                is_active_version = True
+        if not twitter_profile_background_image_url_https:
+            cache_all_kind_of_images_results['cached_twitter_background_image'] = TWITTER_URL_NOT_FOUND
+        else:
+            cache_all_kind_of_images_results['cached_twitter_background_image'] = cache_image_if_not_cached(
+                google_civic_election_id, twitter_profile_background_image_url_https,
+                voter_we_vote_id=voter.we_vote_id, twitter_id=twitter_id,
+                twitter_screen_name=twitter_screen_name, is_active_version=True,
+                kind_of_image_twitter_background=True, kind_of_image_original=True)
 
-            # Get cached profile images and check if this image is already cached or not
-            cached_we_vote_image_list_results = we_vote_image_manager.retrieve_cached_we_vote_image_list(
-                voter_we_vote_id=voter.we_vote_id, kind_of_image_twitter_background=True, kind_of_image_original=True)
-            for cached_we_vote_image in cached_we_vote_image_list_results['we_vote_image_list']:
-                # If image is already cached then no need to cache it again
-                if twitter_profile_background_image_url_https == \
-                        cached_we_vote_image.twitter_profile_background_image_url_https or \
-                        twitter_profile_background_image_url_https == cached_we_vote_image.we_vote_image_url:
-                    cache_all_kind_of_images_results['cached_twitter_background_image'] = \
-                        IMAGE_ALREADY_CACHED
-                    break
-            else:
-                # Image is not cached so caching it
-                cache_image_locally_results = cache_image_locally(google_civic_election_id,
-                                                                  twitter_profile_background_image_url_https,
-                                                                  voter_we_vote_id=voter.we_vote_id,
-                                                                  twitter_id=twitter_id,
-                                                                  twitter_screen_name=twitter_screen_name,
-                                                                  is_active_version=is_active_version,
-                                                                  kind_of_image_twitter_background=True,
-                                                                  kind_of_image_original=True)
-                cache_all_kind_of_images_results['cached_twitter_background_image'] = \
-                    cache_image_locally_results['success']
+        if not twitter_profile_banner_url_https:
+            cache_all_kind_of_images_results['cached_twitter_banner_image'] = TWITTER_URL_NOT_FOUND
+        else:
+            cache_all_kind_of_images_results['cached_twitter_banner_image'] = cache_image_if_not_cached(
+                google_civic_election_id, twitter_profile_banner_url_https,
+                voter_we_vote_id=voter.we_vote_id, twitter_id=twitter_id,
+                twitter_screen_name=twitter_screen_name, is_active_version=True,
+                kind_of_image_twitter_banner=True, kind_of_image_original=True)
 
-        elif kind_of_image == "kind_of_image_twitter_banner":
-            twitter_user, twitter_profile_banner_url_https = retrieve_twitter_image_url(
-                twitter_id, kind_of_image_twitter_banner=True)
-            # If twitter image url not found in TwitterUser table then reaching out to twitter and getting new image
-            if not twitter_profile_banner_url_https:
-                twitter_profile_banner_url_https = retrieve_latest_twitter_image_url(
-                    twitter_id, twitter_screen_name, kind_of_image_twitter_banner=True)
-                if not twitter_profile_banner_url_https:
-                    # new twitter profile image not found
-                    cache_all_kind_of_images_results['cached_twitter_banner_image'] = \
-                        TWITTER_URL_NOT_FOUND
-                    continue
-                is_active_version = True
+    if not positive_value_exists(facebook_id):
+            cache_all_kind_of_images_results['cached_facebook_profile_image'] = TWITTER_USER_DOES_NOT_EXIST,
+            cache_all_kind_of_images_results['cached_facebook_background_image'] = TWITTER_USER_DOES_NOT_EXIST,
+    else:
+        # Retrieve latest facebook image urls from Facebook
+        latest_image_urls_results = retrieve_facebook_image_url(facebook_id)
+        facebook_profile_image_url_https = latest_image_urls_results['facebook_profile_image_url']
+        facebook_background_image_url_https = latest_image_urls_results['facebook_background_image_url']
 
-            # Get cached profile images and check if this image is already cached or not
-            cached_we_vote_image_list_results = we_vote_image_manager.retrieve_cached_we_vote_image_list(
-                voter_we_vote_id=voter.we_vote_id, kind_of_image_twitter_banner=True, kind_of_image_original=True)
-            for cached_we_vote_image in cached_we_vote_image_list_results['we_vote_image_list']:
-                # If image is already cached then no need to cache it again
-                if twitter_profile_banner_url_https == cached_we_vote_image.twitter_profile_banner_url_https or \
-                        twitter_profile_banner_url_https == cached_we_vote_image.we_vote_image_url:
-                    cache_all_kind_of_images_results['cached_twitter_banner_image'] = \
-                        IMAGE_ALREADY_CACHED
-                    break
-            else:
-                # Image is not cached so caching it
-                cache_image_locally_results = cache_image_locally(google_civic_election_id,
-                                                                  twitter_profile_banner_url_https,
-                                                                  voter_we_vote_id=voter.we_vote_id,
-                                                                  twitter_id=twitter_id,
-                                                                  twitter_screen_name=twitter_screen_name,
-                                                                  is_active_version=is_active_version,
-                                                                  kind_of_image_twitter_banner=True,
-                                                                  kind_of_image_original=True)
-                cache_all_kind_of_images_results['cached_twitter_banner_image'] = \
-                    cache_image_locally_results['success']
+        # Cache all images if not already cached
+        if not facebook_profile_image_url_https:
+            cache_all_kind_of_images_results['cached_facebook_profile_image'] = FACEBOOK_URL_NOT_FOUND
+        else:
+            cache_all_kind_of_images_results['cached_facebook_profile_image'] = cache_image_if_not_cached(
+                google_civic_election_id, facebook_profile_image_url_https,
+                voter_we_vote_id=voter.we_vote_id,
+                facebook_user_id=facebook_id, is_active_version=True,
+                kind_of_image_facebook_profile=True, kind_of_image_original=True)
 
-        elif kind_of_image == "kind_of_image_facebook_profile":
-            facebook_profile_image_url_https = retrieve_facebook_image_url(
-                facebook_id, kind_of_image_facebook_profile=True)
-            # If facebook image url not found locally then reach out to facebook and getting new image
-            if not facebook_profile_image_url_https:
-                # TODO need to find a way to get latest image
-                cache_all_kind_of_images_results['cached_facebook_profile_image'] = \
-                    FACEBOOK_URL_NOT_FOUND
-                continue
-            # Get cached profile images and check if this image is already cached or not
-            cached_we_vote_image_list_results = we_vote_image_manager.retrieve_cached_we_vote_image_list(
-                voter_we_vote_id=voter.we_vote_id, kind_of_image_facebook_profile=True, kind_of_image_original=True)
-            for cached_we_vote_image in cached_we_vote_image_list_results['we_vote_image_list']:
-                # If image is already cached then no need to cache it again
-                if facebook_profile_image_url_https == cached_we_vote_image.facebook_profile_image_url_https or \
-                        facebook_profile_image_url_https == cached_we_vote_image.we_vote_image_url:
-                    cache_all_kind_of_images_results['cached_facebook_profile_image'] = \
-                        IMAGE_ALREADY_CACHED
-                    break
-            else:
-                # Image is not cached so caching it
-                cache_image_locally_results = cache_image_locally(google_civic_election_id,
-                                                                  facebook_profile_image_url_https,
-                                                                  voter_we_vote_id=voter.we_vote_id,
-                                                                  facebook_user_id=facebook_id,
-                                                                  is_active_version=is_active_version,
-                                                                  kind_of_image_facebook_profile=True,
-                                                                  kind_of_image_original=True)
-                cache_all_kind_of_images_results['cached_facebook_profile_image'] = \
-                    cache_image_locally_results['success']
-
-        elif kind_of_image == "kind_of_image_facebook_background":
-            facebook_background_image_url_https = retrieve_facebook_image_url(
-                facebook_id, kind_of_image_facebook_background=True)
-            # If facebook image url not found then reaching out to facebook and getting new image
-            if not facebook_background_image_url_https:
-                # TODO need to find a way to get latest image
-                cache_all_kind_of_images_results['cached_facebook_background_image'] = \
-                    FACEBOOK_URL_NOT_FOUND
-                continue
-            # Get cached profile images and check if this image is already cached or not
-            cached_we_vote_image_list_results = we_vote_image_manager.retrieve_cached_we_vote_image_list(
-                voter_we_vote_id=voter.we_vote_id, kind_of_image_facebook_background=True, kind_of_image_original=True)
-            for cached_we_vote_image in cached_we_vote_image_list_results['we_vote_image_list']:
-                # If image is already cached then no need to cache it again
-                if facebook_background_image_url_https == cached_we_vote_image.facebook_background_image_url_https or \
-                        facebook_background_image_url_https == cached_we_vote_image.we_vote_image_url:
-                    cache_all_kind_of_images_results['cached_facebook_background_image'] = \
-                        IMAGE_ALREADY_CACHED
-                    break
-            else:
-                # Image is not cached so caching it
-                cache_image_locally_results = cache_image_locally(google_civic_election_id,
-                                                                  facebook_background_image_url_https,
-                                                                  voter_we_vote_id=voter.we_vote_id,
-                                                                  facebook_user_id=facebook_id,
-                                                                  is_active_version=is_active_version,
-                                                                  kind_of_image_facebook_background=True,
-                                                                  kind_of_image_original=True)
-                cache_all_kind_of_images_results['cached_facebook_background_image'] = \
-                    cache_image_locally_results['success']
+        if not facebook_background_image_url_https:
+            cache_all_kind_of_images_results['cached_facebook_background_image'] = FACEBOOK_URL_NOT_FOUND
+        else:
+            cache_all_kind_of_images_results['cached_facebook_background_image'] = cache_image_if_not_cached(
+                google_civic_election_id, facebook_background_image_url_https,
+                voter_we_vote_id=voter.we_vote_id, facebook_user_id=facebook_id,
+                is_active_version=True, kind_of_image_facebook_background=True, kind_of_image_original=True)
 
     return cache_all_kind_of_images_results
 
@@ -752,13 +633,9 @@ def cache_image_locally(google_civic_election_id, image_url_https, voter_we_vote
             we_vote_image_file_location = candidate_we_vote_id + "/" + we_vote_image_file_name
         elif organization_we_vote_id:
             we_vote_image_file_location = organization_we_vote_id + "/" + we_vote_image_file_name
+        else:
+            we_vote_image_file_location = we_vote_image_file_name
 
-        if not is_active_version:
-            is_active_version = check_source_image_active(analyze_source_images_results, kind_of_image_twitter_profile,
-                                                          kind_of_image_twitter_background,
-                                                          kind_of_image_twitter_banner, kind_of_image_facebook_profile,
-                                                          kind_of_image_facebook_background, kind_of_image_maplight,
-                                                          kind_of_image_vote_smart)
         image_stored_locally = we_vote_image_manager.store_image_locally(
             analyze_source_images_results['image_url_https'], we_vote_image_file_name)
 
@@ -837,38 +714,31 @@ def cache_image_locally(google_civic_election_id, image_url_https, voter_we_vote
     return results
 
 
-def retrieve_facebook_image_url(facebook_user_id, kind_of_image_facebook_profile=False,
-                                kind_of_image_facebook_background=False):
+def retrieve_facebook_image_url(facebook_user_id):
     """
-    Retrieve facebook image urls from FacebookAuthResponse and FacebookUser table.
+    Retrieve facebook profile url from Facebook and background url from FacebookUser table.
     :param facebook_user_id:
-    :param kind_of_image_facebook_profile:
-    :param kind_of_image_facebook_background:
     :return:
     """
-    facebook_image_url = None
+    results = {
+        'facebook_profile_image_url':       None,
+        'facebook_background_image_url':    None
+    }
     facebook_manager = FacebookManager()
 
-    if kind_of_image_facebook_profile:
-        facebook_auth_response_results = facebook_manager.\
-            retrieve_facebook_auth_response_from_facebook_id(facebook_user_id)
-        if facebook_auth_response_results['facebook_auth_response_found']:
-            facebook_image_url = facebook_auth_response_results['facebook_auth_response'].\
-                facebook_profile_image_url_https
-        else:
-            get_url = "https://graph.facebook.com/v2.7/{facebook_user_id}/picture?width=200&height=200"\
-                                  .format(facebook_user_id=facebook_user_id)
-            response = requests.get(get_url)
-            if response.status_code == HTTP_OK:
-                # new facebook profile image url found
-                facebook_image_url = response.url
+    get_url = "https://graph.facebook.com/v2.7/{facebook_user_id}/picture?width=200&height=200"\
+        .format(facebook_user_id=facebook_user_id)
+    response = requests.get(get_url)
+    if response.status_code == HTTP_OK:
+        # new facebook profile image url found
+        results['facebook_profile_image_url'] = response.url
 
-    elif kind_of_image_facebook_background:
-        facebook_user_results = facebook_manager.retrieve_facebook_user_by_facebook_user_id(facebook_user_id)
-        if facebook_user_results['facebook_user_found']:
-            facebook_image_url = facebook_user_results['facebook_user'].facebook_background_image_url_https
+    facebook_user_results = facebook_manager.retrieve_facebook_user_by_facebook_user_id(facebook_user_id)
+    if facebook_user_results['facebook_user_found']:
+        results['facebook_background_image_url'] = \
+            facebook_user_results['facebook_user'].facebook_background_image_url_https
 
-    return facebook_image_url
+    return results
 
 
 def retrieve_twitter_image_url(twitter_id, kind_of_image_twitter_profile=False,
@@ -896,51 +766,41 @@ def retrieve_twitter_image_url(twitter_id, kind_of_image_twitter_profile=False,
     return twitter_user_results['twitter_user'], twitter_image_url
 
 
-def retrieve_latest_twitter_image_url(twitter_id, twitter_screen_name, kind_of_image_twitter_profile=False,
-                                      kind_of_image_twitter_background=False,
-                                      kind_of_image_twitter_banner=False, size="original"):
+def retrieve_image_urls_from_twitter(twitter_id):
     """
-    Retrieve latest twitter background and banner image url from twitter API call and twitter profile image from a url
+    Retrieve latest twitter profile, background and banner image url from twitter API call
     :param twitter_id:
-    :param twitter_screen_name:
-    :param kind_of_image_twitter_profile:
-    :param kind_of_image_twitter_background:
-    :param kind_of_image_twitter_banner:
-    :param size:
     :return:
     """
-    latest_twitter_image_url = None
-    if kind_of_image_twitter_profile and twitter_screen_name and twitter_screen_name != "":
-        get_url = "https://twitter.com/{twitter_screen_name}/profile_image?size={size}" \
-            .format(twitter_screen_name=twitter_screen_name, size=size)
-        response = requests.get(get_url)
-        if response.status_code == HTTP_OK:
-            # new twitter profile image url found
-            latest_twitter_image_url = response.url
-        return latest_twitter_image_url
+    latest_twitter_profile_image_url = None
+    latest_twitter_background_image_url = None
+    latest_twitter_banner_image_url = None
 
     twitter_user_info_results = retrieve_twitter_user_info(twitter_id, twitter_handle='')
-    if kind_of_image_twitter_profile:
-        # if don't have twitter screen name then retrieve latest twitter info from twitter API
-        if 'profile_image_url_https' in twitter_user_info_results['twitter_json'] \
-                and twitter_user_info_results['twitter_json']['profile_image_url_https']:
-            # new twitter image url found
-            latest_twitter_image_url = twitter_user_info_results['twitter_json'][
-                'profile_image_url_https']
-    elif kind_of_image_twitter_background:
-        if 'profile_background_image_url_https' in twitter_user_info_results['twitter_json'] \
-                and twitter_user_info_results['twitter_json']['profile_background_image_url_https']:
-            # new twitter image url found
-            latest_twitter_image_url = twitter_user_info_results['twitter_json'][
-                'profile_background_image_url_https']
-    elif kind_of_image_twitter_banner:
-        if 'profile_banner_url' in twitter_user_info_results['twitter_json'] \
-                and twitter_user_info_results['twitter_json']['profile_banner_url']:
-            # new twitter image url found
-            latest_twitter_image_url = twitter_user_info_results['twitter_json'][
-                'profile_banner_url']
+    if 'profile_image_url_https' in twitter_user_info_results['twitter_json'] \
+            and twitter_user_info_results['twitter_json']['profile_image_url_https']:
+        # new twitter image url found
+        latest_twitter_profile_image_url = twitter_user_info_results['twitter_json'][
+            'profile_image_url_https']
 
-    return latest_twitter_image_url
+    if 'profile_background_image_url_https' in twitter_user_info_results['twitter_json'] \
+            and twitter_user_info_results['twitter_json']['profile_background_image_url_https']:
+        # new twitter image url found
+        latest_twitter_background_image_url = twitter_user_info_results['twitter_json'][
+            'profile_background_image_url_https']
+
+    if 'profile_banner_url' in twitter_user_info_results['twitter_json'] \
+            and twitter_user_info_results['twitter_json']['profile_banner_url']:
+        # new twitter image url found
+        latest_twitter_banner_image_url = twitter_user_info_results['twitter_json'][
+            'profile_banner_url']
+
+    results = {
+        'latest_twitter_profile_image_url':     latest_twitter_profile_image_url,
+        'latest_twitter_background_image_url':  latest_twitter_background_image_url,
+        'latest_twitter_banner_image_url':      latest_twitter_banner_image_url,
+    }
+    return results
 
 
 def analyze_source_images(twitter_id, twitter_screen_name, facebook_user_id, maplight_id, vote_smart_id,
@@ -965,118 +825,22 @@ def analyze_source_images(twitter_id, twitter_screen_name, facebook_user_id, map
     :return:
     """
     image_type = None
-
-    analyze_image_url_results = analyze_remote_url(image_url_https)
     if kind_of_image_twitter_profile:
         image_type = TWITTER_PROFILE_IMAGE_NAME
-        if not analyze_image_url_results['image_url_valid']:
-            # image url is broken so reaching out to Twitter and getting new image
-            image_url_https = retrieve_latest_twitter_image_url(
-                twitter_id, twitter_screen_name, kind_of_image_twitter_profile=True)
-            if not image_url_https:
-                # new twitter image url not found
-                error_results = {
-                    'twitter_id':                   twitter_id,
-                    'twitter_screen_name':          twitter_screen_name,
-                    'facebook_user_id':             facebook_user_id,
-                    'maplight_id':                  maplight_id,
-                    'vote_smart_id':                vote_smart_id,
-                    'image_url_https':              image_url_https,
-                    'image_type':                   image_type,
-                    'analyze_image_url_results':    analyze_image_url_results
-                }
-                return error_results
-
-            # new twitter image url found
-            analyze_image_url_results = analyze_remote_url(image_url_https)
-
     elif kind_of_image_twitter_background:
         image_type = TWITTER_BACKGROUND_IMAGE_NAME
-        if not analyze_image_url_results['image_url_valid']:
-            # image url is broken so reaching out to Twitter and getting new image
-            image_url_https = retrieve_latest_twitter_image_url(
-                twitter_id, twitter_screen_name, kind_of_image_twitter_background=True)
-            if not image_url_https:
-                # new twitter image url not found
-                error_results = {
-                    'twitter_id':                   twitter_id,
-                    'twitter_screen_name':          twitter_screen_name,
-                    'facebook_user_id':             facebook_user_id,
-                    'maplight_id':                  maplight_id,
-                    'vote_smart_id':                vote_smart_id,
-                    'image_url_https':              image_url_https,
-                    'image_type':                   image_type,
-                    'analyze_image_url_results':    analyze_image_url_results
-                }
-                return error_results
-
-            # new twitter image url found
-            analyze_image_url_results = analyze_remote_url(image_url_https)
-
     elif kind_of_image_twitter_banner:
         image_type = TWITTER_BANNER_IMAGE_NAME
-        if not analyze_image_url_results['image_url_valid']:
-            # image url is broken so reaching out to Twitter and getting new image
-            image_url_https = retrieve_latest_twitter_image_url(
-                twitter_id, twitter_screen_name, kind_of_image_twitter_background=True)
-            if not image_url_https:
-                # new twitter image url not found
-                error_results = {
-                    'twitter_id':                   twitter_id,
-                    'twitter_screen_name':          twitter_screen_name,
-                    'facebook_user_id':             facebook_user_id,
-                    'maplight_id':                  maplight_id,
-                    'vote_smart_id':                vote_smart_id,
-                    'image_url_https':              image_url_https,
-                    'image_type':                   image_type,
-                    'analyze_image_url_results':    analyze_image_url_results
-                }
-                return error_results
-
-            # new twitter image url found
-            analyze_image_url_results = analyze_remote_url(image_url_https)
-
     elif kind_of_image_facebook_profile:
         image_type = FACEBOOK_PROFILE_IMAGE_NAME
-        if not analyze_image_url_results['image_url_valid']:
-            get_url = "https://graph.facebook.com/v2.7/{facebook_user_id}/picture?width=200&height=200"\
-                                  .format(facebook_user_id=facebook_user_id)
-            response = requests.get(get_url)
-            if response.status_code == HTTP_OK:
-                # new facebook profile image url found
-                image_url_https = response.url
-                if not image_url_https:
-                    # new facebook image url not found
-                    error_results = {
-                        'twitter_id':                   twitter_id,
-                        'twitter_screen_name':          twitter_screen_name,
-                        'facebook_user_id':             facebook_user_id,
-                        'maplight_id':                  maplight_id,
-                        'vote_smart_id':                vote_smart_id,
-                        'image_url_https':              image_url_https,
-                        'image_type':                   image_type,
-                        'analyze_image_url_results':    analyze_image_url_results
-                    }
-                    return error_results
-                # new facebook image url found
-                analyze_image_url_results = analyze_remote_url(image_url_https)
-
     elif kind_of_image_facebook_background:
         image_type = FACEBOOK_BACKGROUND_IMAGE_NAME
-        if not analyze_image_url_results['image_url_valid']:
-            # TODO image url is broken so reaching out to facebook and getting new image
-            pass
     elif kind_of_image_maplight:
         image_type = MAPLIGHT_IMAGE_NAME
-        if not analyze_image_url_results['image_url_valid']:
-            # TODO image url is broken so reaching out to maplight and getting new image
-            pass
     elif kind_of_image_vote_smart:
         image_type = VOTE_SMART_IMAGE_NAME
-        if not analyze_image_url_results['image_url_valid']:
-            # TODO image url is broken so reaching out to vote smart and getting new image
-            pass
 
+    analyze_image_url_results = analyze_remote_url(image_url_https)
     results = {
         'twitter_id':                   twitter_id,
         'twitter_screen_name':          twitter_screen_name,
@@ -1088,63 +852,6 @@ def analyze_source_images(twitter_id, twitter_screen_name, facebook_user_id, map
         'analyze_image_url_results':    analyze_image_url_results
     }
     return results
-
-
-def check_source_image_active(analyze_source_images_results, kind_of_image_twitter_profile,
-                              kind_of_image_twitter_background, kind_of_image_twitter_banner,
-                              kind_of_image_facebook_profile, kind_of_image_facebook_background,
-                              kind_of_image_maplight, kind_of_image_vote_smart):
-    """
-    Check if this source image is latest image or old one
-    :param analyze_source_images_results:
-    :param kind_of_image_twitter_profile:
-    :param kind_of_image_twitter_background:
-    :param kind_of_image_twitter_banner:
-    :param kind_of_image_facebook_profile:
-    :param kind_of_image_facebook_background:
-    :param kind_of_image_maplight:
-    :param kind_of_image_vote_smart:
-    :return:
-    """
-    is_active_version = False
-    if kind_of_image_twitter_profile:
-        latest_twitter_profile_image_url_https = retrieve_latest_twitter_image_url(
-            analyze_source_images_results['twitter_id'], analyze_source_images_results['twitter_screen_name'],
-            kind_of_image_twitter_profile=True)
-        if latest_twitter_profile_image_url_https == \
-                analyze_source_images_results['image_url_https']:
-            is_active_version = True
-
-    elif kind_of_image_twitter_background:
-        latest_twitter_profile_background_image_url_https = retrieve_latest_twitter_image_url(
-            analyze_source_images_results['twitter_id'], analyze_source_images_results['twitter_screen_name'],
-            kind_of_image_twitter_background=True)
-        if latest_twitter_profile_background_image_url_https == \
-                analyze_source_images_results['image_url_https']:
-            is_active_version = True
-
-    elif kind_of_image_twitter_banner:
-        latest_twitter_profile_banner_url_https = retrieve_latest_twitter_image_url(
-            analyze_source_images_results['twitter_id'], analyze_source_images_results['twitter_screen_name'],
-            kind_of_image_twitter_banner=True)
-        if latest_twitter_profile_banner_url_https == \
-                analyze_source_images_results['image_url_https']:
-            is_active_version = True
-
-    elif kind_of_image_facebook_profile:
-        # TODO need to find if this facebook image is active or not
-        is_active_version = True
-    elif kind_of_image_facebook_background:
-        # TODO need to find if this facebook image is active or not
-        is_active_version = True
-    elif kind_of_image_maplight:
-        # TODO need to find if this maplight image is active or not
-        is_active_version = True
-    elif kind_of_image_vote_smart:
-        # TODO need to find if this vote smart image is active or not
-        is_active_version = True
-
-    return is_active_version
 
 
 def create_resized_images_for_all_organizations():
@@ -1260,7 +967,8 @@ def delete_cached_images_for_issue(issue):
 
         # Reset Issue with original image details
         issue_manager = IssueManager()
-        reset_candidate_image_results = issue_manager.reset_issue_image_details(issue)
+        reset_candidate_image_results = issue_manager.reset_issue_image_details(
+            issue, issue_image_url='')
 
         if reset_candidate_image_results['success']:
             for we_vote_image in we_vote_image_list:
@@ -1524,7 +1232,7 @@ def cache_and_create_resized_images_for_organization(organization_we_vote_id):
     we_vote_image_manager = WeVoteImageManager()
 
     # cache original image
-    cache_images_for_one_organization_results = migrate_remote_organization_image_urls_to_local_cache(
+    cache_images_for_one_organization_results = cache_organization_master_images(
         organization_we_vote_id)
 
     # create resized images for that organization only
@@ -1552,7 +1260,7 @@ def cache_and_create_resized_images_for_voter(voter_id):
     we_vote_image_manager = WeVoteImageManager()
 
     # cache original image
-    cache_images_for_a_voter_results = migrate_remote_voter_image_urls_to_local_cache(voter_id)
+    cache_images_for_a_voter_results = cache_voter_master_images(voter_id)
 
     # create resized images for that voter only
     voter_results = voter_manager.retrieve_voter_by_id(voter_id)
@@ -2316,7 +2024,7 @@ def cache_original_and_resized_image(twitter_id=None, twitter_screen_name=None,
 
     we_vote_image_manager = WeVoteImageManager()
     # caching refreshed new images to s3 aws
-    cache_images_results = migrate_latest_remote_image_urls_to_local_cache(
+    cache_master_images_results = cache_master_images(
         voter_id=voter_id, voter_we_vote_id=voter_we_vote_id,
         candidate_id=candidate_id, candidate_we_vote_id=candidate_we_vote_id,
         organization_id=organization_id, organization_we_vote_id=organization_we_vote_id,
@@ -2333,7 +2041,7 @@ def cache_original_and_resized_image(twitter_id=None, twitter_screen_name=None,
         vote_smart_id=vote_smart_id, vote_smart_image_url_https=vote_smart_image_url_https)
 
     # retrieve refreshed cache url
-    if cache_images_results['cached_twitter_profile_image']:
+    if cache_master_images_results['cached_twitter_profile_image']:
         cached_we_vote_image_results = we_vote_image_manager.retrieve_we_vote_image_from_url(
             voter_we_vote_id=voter_we_vote_id, candidate_we_vote_id=candidate_we_vote_id,
             organization_we_vote_id=organization_we_vote_id,
@@ -2374,7 +2082,7 @@ def cache_original_and_resized_image(twitter_id=None, twitter_screen_name=None,
                     cached_resized_we_vote_image = cached_resized_we_vote_image_results['we_vote_image']
                     we_vote_hosted_profile_image_url_tiny = cached_resized_we_vote_image.we_vote_image_url
 
-    if cache_images_results['cached_twitter_background_image']:
+    if cache_master_images_results['cached_twitter_background_image']:
         cached_we_vote_image_results = we_vote_image_manager.retrieve_we_vote_image_from_url(
             voter_we_vote_id=voter_we_vote_id, candidate_we_vote_id=candidate_we_vote_id,
             organization_we_vote_id=organization_we_vote_id,
@@ -2383,7 +2091,7 @@ def cache_original_and_resized_image(twitter_id=None, twitter_screen_name=None,
         if cached_we_vote_image_results['success']:
             cached_we_vote_image = cached_we_vote_image_results['we_vote_image']
             cached_twitter_profile_background_image_url_https = cached_we_vote_image.we_vote_image_url
-    if cache_images_results['cached_twitter_banner_image']:
+    if cache_master_images_results['cached_twitter_banner_image']:
         cached_we_vote_image_results = we_vote_image_manager.retrieve_we_vote_image_from_url(
             voter_we_vote_id=voter_we_vote_id, candidate_we_vote_id=candidate_we_vote_id,
             organization_we_vote_id=organization_we_vote_id,
@@ -2393,7 +2101,7 @@ def cache_original_and_resized_image(twitter_id=None, twitter_screen_name=None,
             cached_we_vote_image = cached_we_vote_image_results['we_vote_image']
             cached_twitter_profile_banner_url_https = cached_we_vote_image.we_vote_image_url
 
-    if cache_images_results['cached_facebook_profile_image']:
+    if cache_master_images_results['cached_facebook_profile_image']:
         cached_we_vote_image_results = we_vote_image_manager.retrieve_we_vote_image_from_url(
             voter_we_vote_id=voter_we_vote_id, candidate_we_vote_id=candidate_we_vote_id,
             organization_we_vote_id=organization_we_vote_id,
@@ -2434,7 +2142,7 @@ def cache_original_and_resized_image(twitter_id=None, twitter_screen_name=None,
                     cached_resized_we_vote_image = cached_resized_we_vote_image_results['we_vote_image']
                     we_vote_hosted_profile_image_url_tiny = cached_resized_we_vote_image.we_vote_image_url
 
-    if cache_images_results['cached_facebook_background_image']:
+    if cache_master_images_results['cached_facebook_background_image']:
         cached_we_vote_image_results = we_vote_image_manager.retrieve_we_vote_image_from_url(
             voter_we_vote_id=voter_we_vote_id, candidate_we_vote_id=candidate_we_vote_id,
             organization_we_vote_id=organization_we_vote_id,
@@ -2460,7 +2168,7 @@ def cache_original_and_resized_image(twitter_id=None, twitter_screen_name=None,
                     facebook_background_image_url_https = cached_resized_we_vote_image.we_vote_image_url
                     cached_facebook_background_image_url_https = facebook_background_image_url_https
     # retrieve refreshed cache url
-    if cache_images_results['cached_maplight_image']:
+    if cache_master_images_results['cached_maplight_image']:
         cached_we_vote_image_results = we_vote_image_manager.retrieve_we_vote_image_from_url(
             voter_we_vote_id=voter_we_vote_id, candidate_we_vote_id=candidate_we_vote_id,
             organization_we_vote_id=organization_we_vote_id,
@@ -2502,7 +2210,7 @@ def cache_original_and_resized_image(twitter_id=None, twitter_screen_name=None,
                     we_vote_hosted_profile_image_url_tiny = cached_resized_we_vote_image.we_vote_image_url
 
     # retrieve refreshed cache url
-    if cache_images_results['cached_vote_smart_image']:
+    if cache_master_images_results['cached_vote_smart_image']:
         cached_we_vote_image_results = we_vote_image_manager.retrieve_we_vote_image_from_url(
             voter_we_vote_id=voter_we_vote_id, candidate_we_vote_id=candidate_we_vote_id,
             organization_we_vote_id=organization_we_vote_id,
@@ -2558,20 +2266,15 @@ def cache_original_and_resized_image(twitter_id=None, twitter_screen_name=None,
     return results
 
 
-def migrate_latest_remote_image_urls_to_local_cache(twitter_id=None, twitter_screen_name=None,
-                                                    twitter_profile_image_url_https=None,
-                                                    twitter_profile_background_image_url_https=None,
-                                                    twitter_profile_banner_url_https=None,
-                                                    voter_id=None, voter_we_vote_id=None,
-                                                    candidate_id=None, candidate_we_vote_id=None,
-                                                    organization_id=None, organization_we_vote_id=None,
-                                                    image_source=None, facebook_user_id=None,
-                                                    facebook_profile_image_url_https=None,
-                                                    facebook_background_image_url_https=None,
-                                                    facebook_background_image_offset_x=None,
-                                                    facebook_background_image_offset_y=None,
-                                                    maplight_id=None, vote_smart_id=None,
-                                                    maplight_image_url_https=None, vote_smart_image_url_https=None):
+def cache_master_images(twitter_id=None, twitter_screen_name=None,
+                        twitter_profile_image_url_https=None, twitter_profile_background_image_url_https=None,
+                        twitter_profile_banner_url_https=None, voter_id=None, voter_we_vote_id=None,
+                        candidate_id=None, candidate_we_vote_id=None, organization_id=None,
+                        organization_we_vote_id=None, image_source=None, facebook_user_id=None,
+                        facebook_profile_image_url_https=None, facebook_background_image_url_https=None,
+                        facebook_background_image_offset_x=None, facebook_background_image_offset_y=None,
+                        maplight_id=None, vote_smart_id=None, maplight_image_url_https=None,
+                        vote_smart_image_url_https=None):
     """
     Cache all kind of images locally for a candidate or an organization such as profile, background
     :param twitter_id:
@@ -2614,7 +2317,6 @@ def migrate_latest_remote_image_urls_to_local_cache(twitter_id=None, twitter_scr
         'cached_vote_smart_image':          False,
     }
     google_civic_election_id = 0
-    is_active_version = True
     we_vote_image_manager = WeVoteImageManager()
 
     if not twitter_profile_image_url_https:
@@ -2673,229 +2375,59 @@ def migrate_latest_remote_image_urls_to_local_cache(twitter_id=None, twitter_scr
         }
         return cache_all_kind_of_images_results
 
-    for kind_of_image in ALL_KIND_OF_IMAGE:
-        if kind_of_image == "kind_of_image_twitter_profile" and twitter_profile_image_url_https:
-            # Get cached profile images and check if this image is already cached or not
-            cached_we_vote_image_list_results = we_vote_image_manager.retrieve_cached_we_vote_image_list(
-                voter_we_vote_id=voter_we_vote_id, candidate_we_vote_id=candidate_we_vote_id,
-                organization_we_vote_id=organization_we_vote_id,
-                kind_of_image_twitter_profile=True, kind_of_image_original=True)
-            this_image_not_cached = True
-            for cached_we_vote_image in cached_we_vote_image_list_results['we_vote_image_list']:
-                # If image is already cached then no need to cache it again
-                if twitter_profile_image_url_https == cached_we_vote_image.twitter_profile_image_url_https or \
-                        twitter_profile_image_url_https == cached_we_vote_image.we_vote_image_url:
-                    cache_all_kind_of_images_results['cached_twitter_profile_image'] = IMAGE_ALREADY_CACHED
-                    this_image_not_cached = False
-                    break
+    if twitter_profile_image_url_https:
+        cache_all_kind_of_images_results['cached_twitter_profile_image'] = cache_image_if_not_cached(
+            google_civic_election_id, twitter_profile_image_url_https, voter_we_vote_id=voter_we_vote_id,
+            candidate_we_vote_id=candidate_we_vote_id, organization_we_vote_id=organization_we_vote_id,
+            twitter_id=twitter_id, twitter_screen_name=twitter_screen_name, is_active_version=True,
+            kind_of_image_twitter_profile=True, kind_of_image_original=True)
 
-            if this_image_not_cached:
-                # Image is not cached so caching it
-                cache_image_locally_results = cache_image_locally(
-                    google_civic_election_id, twitter_profile_image_url_https,
-                    voter_we_vote_id=voter_we_vote_id, candidate_we_vote_id=candidate_we_vote_id,
-                    organization_we_vote_id=organization_we_vote_id,
-                    twitter_id=twitter_id, twitter_screen_name=twitter_screen_name,
-                    is_active_version=is_active_version, kind_of_image_twitter_profile=True,
-                    kind_of_image_original=True)
-                cache_all_kind_of_images_results['cached_twitter_profile_image'] = \
-                    cache_image_locally_results['success']
-                # set active version False for other master images for same candidate/organization
-                set_active_version_false_results = we_vote_image_manager.set_active_version_false_for_other_images(
-                    twitter_profile_image_url_https=twitter_profile_image_url_https, voter_we_vote_id=voter_we_vote_id,
-                    candidate_we_vote_id=candidate_we_vote_id, organization_we_vote_id=organization_we_vote_id,
-                    kind_of_image_twitter_profile=True)
+    if twitter_profile_background_image_url_https:
+        cache_all_kind_of_images_results['cached_twitter_background_image'] = cache_image_if_not_cached(
+            google_civic_election_id, twitter_profile_background_image_url_https,
+            voter_we_vote_id=voter_we_vote_id, candidate_we_vote_id=candidate_we_vote_id,
+            organization_we_vote_id=organization_we_vote_id, twitter_id=twitter_id,
+            twitter_screen_name=twitter_screen_name, is_active_version=True,
+            kind_of_image_twitter_background=True, kind_of_image_original=True)
 
-        elif kind_of_image == "kind_of_image_twitter_background" and twitter_profile_background_image_url_https:
-            # Get cached profile images and check if this image is already cached or not
-            cached_we_vote_image_list_results = we_vote_image_manager.retrieve_cached_we_vote_image_list(
-                voter_we_vote_id=voter_we_vote_id, candidate_we_vote_id=candidate_we_vote_id,
-                organization_we_vote_id=organization_we_vote_id,
-                kind_of_image_twitter_background=True, kind_of_image_original=True)
-            this_image_not_cached = True
-            for cached_we_vote_image in cached_we_vote_image_list_results['we_vote_image_list']:
-                # If image is already cached then no need to cache it again
-                if twitter_profile_background_image_url_https == \
-                        cached_we_vote_image.twitter_profile_background_image_url_https or \
-                        twitter_profile_background_image_url_https == cached_we_vote_image.we_vote_image_url:
-                    cache_all_kind_of_images_results['cached_twitter_background_image'] = IMAGE_ALREADY_CACHED
-                    this_image_not_cached = False
-                    break
+    if twitter_profile_banner_url_https:
+        cache_all_kind_of_images_results['cached_twitter_banner_image'] = cache_image_if_not_cached(
+            google_civic_election_id, twitter_profile_banner_url_https,
+            voter_we_vote_id=voter_we_vote_id, candidate_we_vote_id=candidate_we_vote_id,
+            organization_we_vote_id=organization_we_vote_id, twitter_id=twitter_id,
+            twitter_screen_name=twitter_screen_name, is_active_version=True,
+            kind_of_image_twitter_banner=True, kind_of_image_original=True)
 
-            if this_image_not_cached:
-                # Image is not cached so caching it
-                cache_image_locally_results = cache_image_locally(
-                    google_civic_election_id, twitter_profile_background_image_url_https,
-                    voter_we_vote_id=voter_we_vote_id, candidate_we_vote_id=candidate_we_vote_id,
-                    organization_we_vote_id=organization_we_vote_id,
-                    twitter_id=twitter_id, twitter_screen_name=twitter_screen_name,
-                    is_active_version=is_active_version, kind_of_image_twitter_background=True,
-                    kind_of_image_original=True)
-                cache_all_kind_of_images_results['cached_twitter_background_image'] = \
-                    cache_image_locally_results['success']
-                # set active version False for other master images for same candidate/organization
-                set_active_version_false_results = we_vote_image_manager.set_active_version_false_for_other_images(
-                    twitter_profile_background_image_url_https=twitter_profile_background_image_url_https,
-                    voter_we_vote_id=voter_we_vote_id, candidate_we_vote_id=candidate_we_vote_id,
-                    organization_we_vote_id=organization_we_vote_id, kind_of_image_twitter_background=True)
+    if facebook_profile_image_url_https:
+        cache_all_kind_of_images_results['cached_facebook_profile_image'] = cache_image_if_not_cached(
+            google_civic_election_id, facebook_profile_image_url_https,
+            voter_we_vote_id=voter_we_vote_id, candidate_we_vote_id=candidate_we_vote_id,
+            organization_we_vote_id=organization_we_vote_id, facebook_user_id=facebook_user_id,
+            is_active_version=True, kind_of_image_facebook_profile=True, kind_of_image_original=True)
 
-        elif kind_of_image == "kind_of_image_twitter_banner" and twitter_profile_banner_url_https:
-            # Get cached profile images and check if this image is already cached or not
-            cached_we_vote_image_list_results = we_vote_image_manager.retrieve_cached_we_vote_image_list(
-                voter_we_vote_id=voter_we_vote_id, candidate_we_vote_id=candidate_we_vote_id,
-                organization_we_vote_id=organization_we_vote_id,
-                kind_of_image_twitter_banner=True, kind_of_image_original=True)
-            this_image_not_cached = True
-            for cached_we_vote_image in cached_we_vote_image_list_results['we_vote_image_list']:
-                # If image is already cached then no need to cache it again
-                if twitter_profile_banner_url_https == cached_we_vote_image.twitter_profile_banner_url_https or \
-                        twitter_profile_banner_url_https == cached_we_vote_image.we_vote_image_url:
-                    cache_all_kind_of_images_results['cached_twitter_banner_image'] = IMAGE_ALREADY_CACHED
-                    this_image_not_cached = False
-                    break
+    if facebook_background_image_url_https:
+        cache_all_kind_of_images_results['cached_facebook_background_image'] = cache_image_if_not_cached(
+            google_civic_election_id, facebook_background_image_url_https,
+            voter_we_vote_id=voter_we_vote_id, candidate_we_vote_id=candidate_we_vote_id,
+            organization_we_vote_id=organization_we_vote_id, facebook_user_id=facebook_user_id,
+            is_active_version=True, kind_of_image_facebook_background=True,
+            facebook_background_image_offset_x=facebook_background_image_offset_x,
+            facebook_background_image_offset_y=facebook_background_image_offset_y,
+            kind_of_image_original=True)
 
-            if this_image_not_cached:
-                # Image is not cached so caching it
-                cache_image_locally_results = cache_image_locally(
-                    google_civic_election_id, twitter_profile_banner_url_https,
-                    voter_we_vote_id=voter_we_vote_id, candidate_we_vote_id=candidate_we_vote_id,
-                    organization_we_vote_id=organization_we_vote_id,
-                    twitter_id=twitter_id, twitter_screen_name=twitter_screen_name,
-                    is_active_version=is_active_version, kind_of_image_twitter_banner=True, kind_of_image_original=True)
-                cache_all_kind_of_images_results['cached_twitter_banner_image'] = cache_image_locally_results['success']
-                # set active version False for other master images for same candidate/organization
-                set_active_version_false_results = we_vote_image_manager.set_active_version_false_for_other_images(
-                    twitter_profile_banner_url_https=twitter_profile_banner_url_https,
-                    voter_we_vote_id=voter_we_vote_id, candidate_we_vote_id=candidate_we_vote_id,
-                    organization_we_vote_id=organization_we_vote_id, kind_of_image_twitter_banner=True)
+    if maplight_image_url_https:
+        cache_all_kind_of_images_results['cached_maplight_image'] = cache_image_if_not_cached(
+            google_civic_election_id, maplight_image_url_https,
+            voter_we_vote_id=voter_we_vote_id, candidate_we_vote_id=candidate_we_vote_id,
+            organization_we_vote_id=organization_we_vote_id, maplight_id=maplight_id,
+            is_active_version=True, kind_of_image_maplight=True, kind_of_image_original=True)
 
-        elif kind_of_image == "kind_of_image_facebook_profile" and facebook_profile_image_url_https:
-            # Get cached profile images and check if this image is already cached or not
-            cached_we_vote_image_list_results = we_vote_image_manager.retrieve_cached_we_vote_image_list(
-                voter_we_vote_id=voter_we_vote_id, candidate_we_vote_id=candidate_we_vote_id,
-                organization_we_vote_id=organization_we_vote_id,
-                kind_of_image_facebook_profile=True, kind_of_image_original=True)
-            this_image_not_cached = True
-            for cached_we_vote_image in cached_we_vote_image_list_results['we_vote_image_list']:
-                # If image is already cached then no need to cache it again
-                if facebook_profile_image_url_https == cached_we_vote_image.facebook_profile_image_url_https or \
-                        facebook_profile_image_url_https == cached_we_vote_image.we_vote_image_url:
-                    cache_all_kind_of_images_results['cached_facebook_profile_image'] = IMAGE_ALREADY_CACHED
-                    this_image_not_cached = False
-                    break
-
-            if this_image_not_cached:
-                # Image is not cached so caching it
-                cache_image_locally_results = cache_image_locally(
-                    google_civic_election_id, facebook_profile_image_url_https,
-                    voter_we_vote_id=voter_we_vote_id, candidate_we_vote_id=candidate_we_vote_id,
-                    organization_we_vote_id=organization_we_vote_id, facebook_user_id=facebook_user_id,
-                    is_active_version=is_active_version, kind_of_image_facebook_profile=True,
-                    kind_of_image_original=True)
-                cache_all_kind_of_images_results['cached_facebook_profile_image'] = \
-                    cache_image_locally_results['success']
-                # set active version False for other master images for same candidate/organization
-                set_active_version_false_results = we_vote_image_manager.set_active_version_false_for_other_images(
-                    facebook_profile_image_url_https=facebook_profile_image_url_https,
-                    voter_we_vote_id=voter_we_vote_id, candidate_we_vote_id=candidate_we_vote_id,
-                    organization_we_vote_id=organization_we_vote_id, kind_of_image_facebook_profile=True)
-
-        elif kind_of_image == "kind_of_image_facebook_background" and facebook_background_image_url_https:
-            # Get cached profile images and check if this image is already cached or not
-            cached_we_vote_image_list_results = we_vote_image_manager.retrieve_cached_we_vote_image_list(
-                voter_we_vote_id=voter_we_vote_id, candidate_we_vote_id=candidate_we_vote_id,
-                organization_we_vote_id=organization_we_vote_id,
-                kind_of_image_facebook_background=True, kind_of_image_original=True)
-            this_image_not_cached = True
-            for cached_we_vote_image in cached_we_vote_image_list_results['we_vote_image_list']:
-                # If image is already cached then no need to cache it again
-                if facebook_background_image_url_https == cached_we_vote_image.facebook_background_image_url_https or \
-                        facebook_background_image_url_https == cached_we_vote_image.we_vote_image_url:
-                    cache_all_kind_of_images_results['cached_facebook_background_image'] = IMAGE_ALREADY_CACHED
-                    this_image_not_cached = False
-                    break
-
-            if this_image_not_cached:
-                # Image is not cached so caching it
-                cache_image_locally_results = cache_image_locally(
-                    google_civic_election_id, facebook_background_image_url_https,
-                    facebook_background_image_offset_x=facebook_background_image_offset_x,
-                    facebook_background_image_offset_y=facebook_background_image_offset_y,
-                    voter_we_vote_id=voter_we_vote_id, candidate_we_vote_id=candidate_we_vote_id,
-                    organization_we_vote_id=organization_we_vote_id, facebook_user_id=facebook_user_id,
-                    is_active_version=is_active_version, kind_of_image_facebook_background=True,
-                    kind_of_image_original=True)
-                cache_all_kind_of_images_results['cached_facebook_background_image'] = \
-                    cache_image_locally_results['success']
-                # set active version False for other master images for same candidate/organization
-                set_active_version_false_results = we_vote_image_manager.set_active_version_false_for_other_images(
-                    facebook_background_image_url_https=facebook_background_image_url_https,
-                    voter_we_vote_id=voter_we_vote_id, candidate_we_vote_id=candidate_we_vote_id,
-                    organization_we_vote_id=organization_we_vote_id, kind_of_image_facebook_background=True)
-
-        elif kind_of_image == "kind_of_image_maplight" and maplight_image_url_https:
-            # Get cached profile images and check if this image is already cached or not
-            cached_we_vote_image_list_results = we_vote_image_manager.retrieve_cached_we_vote_image_list(
-                voter_we_vote_id=voter_we_vote_id, candidate_we_vote_id=candidate_we_vote_id,
-                organization_we_vote_id=organization_we_vote_id,
-                kind_of_image_maplight=True, kind_of_image_original=True)
-            this_image_not_cached = True
-            for cached_we_vote_image in cached_we_vote_image_list_results['we_vote_image_list']:
-                # If image is already cached then no need to cache it again
-                if maplight_image_url_https == cached_we_vote_image.maplight_image_url_https or \
-                        maplight_image_url_https == cached_we_vote_image.we_vote_image_url:
-                    cache_all_kind_of_images_results['cached_maplight_image'] = IMAGE_ALREADY_CACHED
-                    this_image_not_cached = False
-                    break
-
-            if this_image_not_cached:
-                # Image is not cached so caching it
-                cache_image_locally_results = cache_image_locally(
-                    google_civic_election_id, maplight_image_url_https,
-                    voter_we_vote_id=voter_we_vote_id, candidate_we_vote_id=candidate_we_vote_id,
-                    organization_we_vote_id=organization_we_vote_id,
-                    maplight_id=maplight_id,
-                    is_active_version=is_active_version, kind_of_image_maplight=True,
-                    kind_of_image_original=True)
-                cache_all_kind_of_images_results['cached_maplight_image'] = \
-                    cache_image_locally_results['success']
-                # set active version False for other master images for same candidate/organization
-                set_active_version_false_results = we_vote_image_manager.set_active_version_false_for_other_images(
-                    maplight_image_url_https=maplight_image_url_https, voter_we_vote_id=voter_we_vote_id,
-                    candidate_we_vote_id=candidate_we_vote_id, organization_we_vote_id=organization_we_vote_id,
-                    kind_of_image_maplight=True)
-
-        elif kind_of_image == "kind_of_image_vote_smart" and vote_smart_image_url_https:
-            # Get cached profile images and check if this image is already cached or not
-            cached_we_vote_image_list_results = we_vote_image_manager.retrieve_cached_we_vote_image_list(
-                voter_we_vote_id=voter_we_vote_id, candidate_we_vote_id=candidate_we_vote_id,
-                organization_we_vote_id=organization_we_vote_id,
-                kind_of_image_vote_smart=True, kind_of_image_original=True)
-            this_image_not_cached = True
-            for cached_we_vote_image in cached_we_vote_image_list_results['we_vote_image_list']:
-                # If image is already cached then no need to cache it again
-                if vote_smart_image_url_https == cached_we_vote_image.vote_smart_image_url_https or \
-                        vote_smart_image_url_https == cached_we_vote_image.we_vote_image_url:
-                    cache_all_kind_of_images_results['cached_vote_smart_image'] = IMAGE_ALREADY_CACHED
-                    this_image_not_cached = False
-                    break
-
-            if this_image_not_cached:
-                # Image is not cached so caching it
-                cache_image_locally_results = cache_image_locally(
-                    google_civic_election_id, vote_smart_image_url_https,
-                    voter_we_vote_id=voter_we_vote_id, candidate_we_vote_id=candidate_we_vote_id,
-                    organization_we_vote_id=organization_we_vote_id,
-                    vote_smart_id=vote_smart_id,
-                    is_active_version=is_active_version, kind_of_image_vote_smart=True,
-                    kind_of_image_original=True)
-                cache_all_kind_of_images_results['cached_vote_smart_image'] = \
-                    cache_image_locally_results['success']
-                # set active version False for other master images for same candidate/organization
-                set_active_version_false_results = we_vote_image_manager.set_active_version_false_for_other_images(
-                    vote_smart_image_url_https=vote_smart_image_url_https, voter_we_vote_id=voter_we_vote_id,
-                    candidate_we_vote_id=candidate_we_vote_id, organization_we_vote_id=organization_we_vote_id,
-                    kind_of_image_vote_smart=True)
+    if vote_smart_image_url_https:
+        cache_all_kind_of_images_results['cached_vote_smart_image'] = cache_image_if_not_cached(
+            google_civic_election_id, maplight_image_url_https,
+            voter_we_vote_id=voter_we_vote_id, candidate_we_vote_id=candidate_we_vote_id,
+            organization_we_vote_id=organization_we_vote_id, vote_smart_id=vote_smart_id,
+            is_active_version=True, kind_of_image_vote_smart=True, kind_of_image_original=True)
 
     return cache_all_kind_of_images_results
 
@@ -3049,7 +2581,7 @@ def cache_issue_image_master(google_civic_election_id, issue_image_file, issue_w
 
     # set active version False for other master images for same candidate/organization
     set_active_version_false_results = we_vote_image_manager.set_active_version_false_for_other_images(
-        issue_we_vote_id=issue_we_vote_id, issue_image_url_https=we_vote_image.we_vote_image_url,
+        issue_we_vote_id=issue_we_vote_id, image_url_https=we_vote_image.we_vote_image_url,
         kind_of_image_issue=True)
 
     results = {
