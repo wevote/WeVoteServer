@@ -33,7 +33,6 @@ def cache_images_locally_for_all_organizations_view(request):
     template_values = {
         'messages_on_stage':                    messages_on_stage,
         'cache_images_for_all_organizations':   cache_images_locally_for_all_organizations_results,
-        'voter_id_signed_in':                   voter_id
     }
     return render(request, 'image/cache_images_locally_for_all_organizations.html', template_values)
 

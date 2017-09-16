@@ -231,7 +231,7 @@ class WeVoteImageManager(models.Model):
             client = boto3.client(AWS_STORAGE_SERVICE, region_name=AWS_REGION_NAME,
                                   aws_access_key_id=AWS_ACCESS_KEY_ID,
                                   aws_secret_access_key=AWS_SECRET_ACCESS_KEY)
-            client.delete_object(AWS_STORAGE_BUCKET_NAME, we_vote_image_file_location)
+            client.delete_object(Bucket=AWS_STORAGE_BUCKET_NAME, Key=we_vote_image_file_location)
             image_deleted_from_aws = True
         except Exception as e:
             image_deleted_from_aws = False
@@ -496,13 +496,7 @@ class WeVoteImageManager(models.Model):
 
     def set_active_version_false_for_other_images(self, voter_we_vote_id=None, candidate_we_vote_id=None,
                                                   organization_we_vote_id=None, issue_we_vote_id=None,
-                                                  twitter_profile_image_url_https=None,
-                                                  twitter_profile_background_image_url_https=None,
-                                                  twitter_profile_banner_url_https=None,
-                                                  facebook_profile_image_url_https=None,
-                                                  facebook_background_image_url_https=None,
-                                                  maplight_image_url_https=None, vote_smart_image_url_https=None,
-                                                  issue_image_url_https=None,
+                                                  image_url_https=None,
                                                   kind_of_image_twitter_profile=False,
                                                   kind_of_image_twitter_background=False,
                                                   kind_of_image_twitter_banner=False,
@@ -515,14 +509,7 @@ class WeVoteImageManager(models.Model):
         :param candidate_we_vote_id:
         :param organization_we_vote_id:
         :param issue_we_vote_id:
-        :param twitter_profile_image_url_https:
-        :param twitter_profile_background_image_url_https:
-        :param twitter_profile_banner_url_https:
-        :param facebook_profile_image_url_https:
-        :param facebook_background_image_url_https:
-        :param maplight_image_url_https:
-        :param vote_smart_image_url_https:
-        :param issue_image_url_https:
+        :param image_url_https:
         :param kind_of_image_twitter_profile:
         :param kind_of_image_twitter_background:
         :param kind_of_image_twitter_banner:
@@ -547,16 +534,24 @@ class WeVoteImageManager(models.Model):
                 kind_of_image_maplight=kind_of_image_maplight, kind_of_image_vote_smart=kind_of_image_vote_smart,
                 kind_of_image_issue=kind_of_image_issue
             )
-            we_vote_image_list = we_vote_image_list.exclude(
-                twitter_profile_image_url_https=twitter_profile_image_url_https,
-                twitter_profile_background_image_url_https=twitter_profile_background_image_url_https,
-                twitter_profile_banner_url_https=twitter_profile_banner_url_https,
-                facebook_profile_image_url_https=facebook_profile_image_url_https,
-                facebook_background_image_url_https=facebook_background_image_url_https,
-                maplight_image_url_https=maplight_image_url_https,
-                vote_smart_image_url_https=vote_smart_image_url_https,
-                issue_image_url_https=issue_image_url_https
-            )
+
+            if kind_of_image_twitter_profile:
+                we_vote_image_list = we_vote_image_list.exclude(twitter_profile_image_url_https=image_url_https)
+            if kind_of_image_twitter_background:
+                we_vote_image_list = we_vote_image_list.exclude(
+                    twitter_profile_background_image_url_https=image_url_https)
+            if kind_of_image_twitter_banner:
+                we_vote_image_list = we_vote_image_list.exclude(twitter_profile_banner_url_https=image_url_https)
+            if kind_of_image_facebook_profile:
+                we_vote_image_list = we_vote_image_list.exclude(facebook_profile_image_url_https=image_url_https)
+            if kind_of_image_facebook_background:
+                we_vote_image_list = we_vote_image_list.exclude(facebook_background_image_url_https=image_url_https)
+            if kind_of_image_maplight:
+                we_vote_image_list = we_vote_image_list.exclude(maplight_image_url_https=image_url_https)
+            if kind_of_image_vote_smart:
+                we_vote_image_list = we_vote_image_list.exclude(vote_smart_image_url_https=image_url_https)
+            if kind_of_image_issue:
+                we_vote_image_list = we_vote_image_list.exclude(issue_image_url_https=image_url_https)
 
             for we_vote_image in we_vote_image_list:
                 we_vote_image.is_active_version = False
@@ -887,6 +882,83 @@ class WeVoteImageManager(models.Model):
             'status':                   status,
             'we_vote_image_list_found': we_vote_image_list_found,
             'we_vote_image_list':       we_vote_image_list
+        }
+        return results
+
+    def retrieve_recent_cached_we_vote_image(self, voter_we_vote_id=None, candidate_we_vote_id=None,
+                                             organization_we_vote_id=None, issue_we_vote_id=None,
+                                             kind_of_image_twitter_profile=False,
+                                             kind_of_image_twitter_background=False, kind_of_image_twitter_banner=False,
+                                             kind_of_image_facebook_profile=False,
+                                             kind_of_image_facebook_background=False,
+                                             kind_of_image_maplight=False, kind_of_image_vote_smart=False,
+                                             kind_of_image_issue=False, kind_of_image_original=False,
+                                             kind_of_image_large=False, kind_of_image_medium=False,
+                                             kind_of_image_tiny=False, is_active_version=True):
+        """
+        Retrieve cached we vote image list as per kind of image
+        :param voter_we_vote_id:
+        :param candidate_we_vote_id:
+        :param organization_we_vote_id
+        :param issue_we_vote_id:
+        :param kind_of_image_twitter_profile:
+        :param kind_of_image_twitter_background:
+        :param kind_of_image_twitter_banner:
+        :param kind_of_image_facebook_profile:
+        :param kind_of_image_facebook_background:
+        :param kind_of_image_maplight:
+        :param kind_of_image_vote_smart:
+        :param kind_of_image_issue:
+        :param kind_of_image_original:
+        :param kind_of_image_large:
+        :param kind_of_image_medium:
+        :param kind_of_image_tiny:
+        :param is_active_version:
+        :return:
+        """
+        we_vote_image_on_stage = WeVoteImage()
+        status = ""
+        try:
+            we_vote_image_on_stage = WeVoteImage.objects.get(
+                voter_we_vote_id__iexact=voter_we_vote_id,
+                candidate_we_vote_id__iexact=candidate_we_vote_id,
+                organization_we_vote_id__iexact=organization_we_vote_id,
+                issue_we_vote_id__iexact=issue_we_vote_id,
+                kind_of_image_twitter_profile=kind_of_image_twitter_profile,
+                kind_of_image_twitter_background=kind_of_image_twitter_background,
+                kind_of_image_twitter_banner=kind_of_image_twitter_banner,
+                kind_of_image_facebook_profile=kind_of_image_facebook_profile,
+                kind_of_image_facebook_background=kind_of_image_facebook_background,
+                kind_of_image_maplight=kind_of_image_maplight,
+                kind_of_image_vote_smart=kind_of_image_vote_smart,
+                kind_of_image_issue=kind_of_image_issue,
+                kind_of_image_original=kind_of_image_original,
+                kind_of_image_large=kind_of_image_large,
+                kind_of_image_medium=kind_of_image_medium,
+                kind_of_image_tiny=kind_of_image_tiny,
+                is_active_version=is_active_version)
+            success = True
+            we_vote_image_found = True
+            status += ' RECENT_CACHED_WE_VOTE_IMAGE_RETRIEVED '
+        except WeVoteImage.MultipleObjectsReturned as e:
+            handle_record_found_more_than_one_exception(e, logger=logger)
+            success = False
+            we_vote_image_found = False
+        except WeVoteImage.DoesNotExist as e:
+            status += " WE_VOTE_IMAGE_DOES_NOT_EXIST "
+            success = True
+            we_vote_image_found = False
+        except Exception as e:
+            status += " FAILED_TO RETRIEVE_RECENT_CACHED_WE_VOTE_IMAGE "
+            success = False
+            we_vote_image_found = False
+            handle_exception(e, logger=logger, exception_message=status)
+
+        results = {
+            'success':                  success,
+            'status':                   status,
+            'we_vote_image_found':      we_vote_image_found,
+            'we_vote_image':            we_vote_image_on_stage
         }
         return results
 
