@@ -72,8 +72,10 @@
         <th>date_as_integer</th>
         <th>voter</th>
         <th>organization</th>
-        <th>ballot_item_we_vote_id</th>
-        <th>google_civic_election_id</th>
+        <th>ballot_item we_vote_id</th>
+        <th>state code</th>
+        <th>google civic election id</th>
+        <th>first visit today</th>
     </tr>
 {% for one_row in analytics_action_list %}
     <tr>
@@ -103,7 +105,9 @@
             {% endif %}
         </td>
         <td>{{ one_row.ballot_item_we_vote_id|default_if_none:"n/a" }}</td>
+        <td>{{ one_row.state_code|default_if_none:"" }}</td>
         <td>{{ one_row.google_civic_election_id|default_if_none:"n/a" }}</td>
+        <td>{% if one_row.first_visit_today %}first{% endif %}</td>
     </tr>
 {% endfor %}
 {% if not analytics_action_list %}

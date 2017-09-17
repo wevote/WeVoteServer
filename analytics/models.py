@@ -72,6 +72,9 @@ class AnalyticsAction(models.Model):
         verbose_name="we vote permanent id", max_length=255, default=None, null=True, blank=True, unique=False)
     voter_id = models.PositiveIntegerField(verbose_name="voter internal id", null=True, unique=False)
 
+    state_code = models.CharField(
+        verbose_name="state_code", max_length=255, null=True, blank=True, unique=False)
+
     organization_we_vote_id = models.CharField(
         verbose_name="we vote permanent id", max_length=255, null=True, blank=True, unique=False)
     organization_id = models.PositiveIntegerField(null=True, blank=True)
@@ -82,6 +85,8 @@ class AnalyticsAction(models.Model):
     # The unique ID of this election. (Provided by Google Civic)
     google_civic_election_id = models.PositiveIntegerField(
         verbose_name="google civic election id", null=True, unique=False)
+    # This entry was the first entry on this day, used for tracking direct links to We Vote
+    first_visit_today = models.BooleanField(verbose_name='', default=False)
 
     # We only want to store voter_device_id if we haven't verified the session yet. Set to null once verified.
     voter_device_id = models.CharField(
@@ -149,6 +154,26 @@ class AnalyticsCountManager(models.Model):
             count_query = count_query.filter(action_constant=ACTION_VOTER_GUIDE_VISIT)
             count_query = count_query.filter(organization_we_vote_id__iexact=organization_we_vote_id)
             count_query = count_query.filter(google_civic_election_id=google_civic_election_id)
+            count_query = count_query.values('voter_we_vote_id').distinct()
+            count_result = count_query.count()
+        except Exception as e:
+            pass
+        return count_result
+
+    def fetch_visitors_first_visit_to_organization_in_election(self, organization_we_vote_id, google_civic_election_id):
+        """
+        Entries are marked "first_visit_today" if it is the first visit in one day
+        :param organization_we_vote_id:
+        :param google_civic_election_id:
+        :return:
+        """
+        count_result = None
+        try:
+            count_query = AnalyticsAction.objects.using('analytics').all()
+            count_query = count_query.filter(action_constant=ACTION_VOTER_GUIDE_VISIT)
+            count_query = count_query.filter(organization_we_vote_id__iexact=organization_we_vote_id)
+            count_query = count_query.filter(google_civic_election_id=google_civic_election_id)
+            count_query = count_query.filter(first_visit_today=True)
             count_query = count_query.values('voter_we_vote_id').distinct()
             count_result = count_query.count()
         except Exception as e:
@@ -228,7 +253,7 @@ class AnalyticsCountManager(models.Model):
 class AnalyticsManager(models.Model):
 
     def create_action_type1(
-            self, action_constant, voter_we_vote_id, voter_id,
+            self, action_constant, voter_we_vote_id, voter_id, state_code,
             organization_we_vote_id, organization_id, google_civic_election_id,
             ballot_item_we_vote_id="", voter_device_id=None):
         """
@@ -264,6 +289,7 @@ class AnalyticsManager(models.Model):
                 action_constant=action_constant,
                 voter_we_vote_id=voter_we_vote_id,
                 voter_id=voter_id,
+                state_code=state_code,
                 organization_we_vote_id=organization_we_vote_id,
                 organization_id=organization_id,
                 google_civic_election_id=google_civic_election_id,
@@ -285,7 +311,7 @@ class AnalyticsManager(models.Model):
         return results
 
     def create_action_type2(
-            self, action_constant, voter_we_vote_id, voter_id,
+            self, action_constant, voter_we_vote_id, voter_id, state_code,
             google_civic_election_id, ballot_item_we_vote_id, voter_device_id=None):
         """
         Create AnalyticsAction data
@@ -317,6 +343,7 @@ class AnalyticsManager(models.Model):
                 action_constant=action_constant,
                 voter_we_vote_id=voter_we_vote_id,
                 voter_id=voter_id,
+                state_code=state_code,
                 google_civic_election_id=google_civic_election_id,
                 ballot_item_we_vote_id=ballot_item_we_vote_id,
             )
@@ -332,6 +359,30 @@ class AnalyticsManager(models.Model):
             'status':       status,
             'action_saved': action_saved,
             'action':       action,
+        }
+        return results
+
+    def retrieve_analytics_action_list(self, voter_we_vote_id='', google_civic_election_id=0):
+        success = False
+        status = ""
+        analytics_action_list = []
+
+        try:
+            list_query = AnalyticsAction.objects.using('analytics').all()
+            if positive_value_exists(voter_we_vote_id):
+                list_query = list_query.filter(voter_we_vote_id__iexact=voter_we_vote_id)
+            if positive_value_exists(google_civic_election_id):
+                list_query = list_query.filter(google_civic_election_id=google_civic_election_id)
+            analytics_action_list = list(list_query)
+            analytics_action_list_found = True
+        except Exception as e:
+            analytics_action_list_found = False
+
+        results = {
+            'success':                      success,
+            'status':                       status,
+            'analytics_action_list':        analytics_action_list,
+            'analytics_action_list_found':  analytics_action_list_found,
         }
         return results
 
@@ -390,7 +441,7 @@ class AnalyticsManager(models.Model):
         }
         return results
 
-    def save_action(self, action_constant, voter_we_vote_id, voter_id,
+    def save_action(self, action_constant, voter_we_vote_id, voter_id, state_code,
                     organization_we_vote_id="", organization_id=0,
                     google_civic_election_id=0, ballot_item_we_vote_id="",
                     voter_device_id=None):
@@ -405,11 +456,11 @@ class AnalyticsManager(models.Model):
 
         if action_constant in ACTIONS_THAT_REQUIRE_ORGANIZATION_IDS:
             # In the future we could reduce clutter in the AnalyticsAction table by only storing one entry per day
-            return self.create_action_type1(action_constant, voter_we_vote_id, voter_id,
+            return self.create_action_type1(action_constant, voter_we_vote_id, voter_id, state_code,
                                             organization_we_vote_id, organization_id, google_civic_election_id,
                                             ballot_item_we_vote_id, voter_device_id)
         else:
-            return self.create_action_type2(action_constant, voter_we_vote_id, voter_id,
+            return self.create_action_type2(action_constant, voter_we_vote_id, voter_id, state_code,
                                             google_civic_election_id,
                                             ballot_item_we_vote_id, voter_device_id)
 
@@ -565,6 +616,74 @@ class AnalyticsManager(models.Model):
         }
         return results
 
+    def update_first_visit_today_for_all_voters_since_date(self, date_as_integer=0):
+        success = False
+        status = ""
+        distinct_days_list = []
+        first_visit_today_count = 0
+
+        # Get distinct days
+        try:
+            distinct_days_query = AnalyticsAction.objects.using('analytics').all()
+            distinct_days_query = distinct_days_query.filter(date_as_integer__gte=date_as_integer)
+            distinct_days_query = distinct_days_query.values('date_as_integer').distinct()
+            # distinct_days_query = distinct_days_query[:5]  # TEMP limit to 5
+            distinct_days_list = list(distinct_days_query)
+            distinct_days_found = True
+        except Exception as e:
+            distinct_days_found = False
+
+        simple_distinct_days_list = []
+        for day_dict in distinct_days_list:
+            if positive_value_exists(day_dict['date_as_integer']):
+                simple_distinct_days_list.append(day_dict['date_as_integer'])
+
+        # Loop through each day
+        for one_date_as_integer in simple_distinct_days_list:
+            # Get distinct voters on that day
+            voter_list = []
+            try:
+                voter_list_query = AnalyticsAction.objects.using('analytics').all()
+                voter_list_query = voter_list_query.filter(date_as_integer=one_date_as_integer)
+                voter_list_query = voter_list_query.values('voter_we_vote_id').distinct()
+                # voter_list_query = voter_list_query[:5]  # TEMP limit to 5
+                voter_list = list(voter_list_query)
+                voter_list_found = True
+            except Exception as e:
+                voter_list_found = False
+
+            simple_voter_list = []
+            for voter_dict in voter_list:
+                if positive_value_exists(voter_dict['voter_we_vote_id']):
+                    simple_voter_list.append(voter_dict['voter_we_vote_id'])
+
+            if not voter_list_found:
+                continue
+
+            # Loop through each voter per day, and update the first entry for that day with "first_visit_today=True"
+            for voter_we_vote_id in simple_voter_list:
+                try:
+                    first_visit_query = AnalyticsAction.objects.using('analytics').all()
+                    first_visit_query.order_by("id")  # order by oldest first
+                    first_visit_query = first_visit_query.filter(date_as_integer=one_date_as_integer)
+                    first_visit_query = first_visit_query.filter(voter_we_vote_id__iexact=voter_we_vote_id)
+                    analytics_action = first_visit_query.first()
+
+                    analytics_action.first_visit_today = True
+                    analytics_action.save()
+                    first_visit_saved = True
+                    first_visit_today_count += 1
+                except Exception as e:
+                    first_visit_found = False
+                    pass
+
+        results = {
+            'success':                  success,
+            'status':                   status,
+            'first_visit_today_count':  first_visit_today_count,
+        }
+        return results
+
 
 class OrganizationDailyMetrics(models.Model):
     """
@@ -643,15 +762,18 @@ class OrganizationElectionMetrics(models.Model):
         return election
 
     def organization(self):
-        try:
-            organization = Organization.objects.using('readonly').get(we_vote_id=self.organization_we_vote_id)
-        except Organization.MultipleObjectsReturned as e:
-            logger.error("analytics.organization Found multiple")
-            return
-        except Organization.DoesNotExist:
-            logger.error("analytics.organization did not find")
-            return
-        return organization
+        if positive_value_exists(self.organization_we_vote_id):
+            try:
+                organization = Organization.objects.using('readonly').get(we_vote_id=self.organization_we_vote_id)
+            except Organization.MultipleObjectsReturned as e:
+                logger.error("analytics.organization Found multiple")
+                return
+            except Organization.DoesNotExist:
+                logger.error("analytics.organization did not find")
+                return
+            return organization
+        else:
+            return Organization()
 
 
 class SitewideDailyMetrics(models.Model):

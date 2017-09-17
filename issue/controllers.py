@@ -9,7 +9,7 @@ from django.http import HttpResponse
 from exception.models import handle_exception
 import json
 import requests
-from follow.models import FollowIssueList
+from follow.models import FollowIssueList, FOLLOWING
 from issue.models import OrganizationLinkToIssueList
 from voter.models import fetch_voter_we_vote_id_from_voter_device_link
 import wevote_functions.admin
@@ -229,12 +229,12 @@ def issues_retrieve_for_api(voter_device_id, sort_formula, voter_issues_only=Non
             return HttpResponse(json.dumps(json_data), content_type='application/json')
 
         follow_issue_list_manager = FollowIssueList()
-        follow_issue_we_vote_id_list_for_voter = follow_issue_list_manager.\
-            retrieve_follow_issue_we_vote_id_list_by_voter_we_vote_id(voter_we_vote_id)
+        follow_issue_we_vote_id_list_for_voter = follow_issue_list_manager. \
+            retrieve_follow_issue_following_we_vote_id_list_by_voter_we_vote_id(voter_we_vote_id)
 
         if positive_value_exists(include_voter_follow_status):
             ignore_issue_we_vote_id_list_for_voter = follow_issue_list_manager. \
-                retrieve_ignore_issue_we_vote_id_list_by_voter_we_vote_id(voter_we_vote_id)
+                retrieve_follow_issue_ignore_we_vote_id_list_by_voter_we_vote_id(voter_we_vote_id)
 
     try:
         issue_list_object = IssueListManager()
@@ -313,10 +313,10 @@ def retrieve_issues_to_follow_for_api(voter_device_id, sort_formula):  # retriev
         return HttpResponse(json.dumps(json_data), content_type='application/json')
 
     follow_issue_list_manager = FollowIssueList()
-    follow_issue_we_vote_id_list_for_voter = follow_issue_list_manager.\
-        retrieve_follow_issue_we_vote_id_list_by_voter_we_vote_id(voter_we_vote_id)
+    follow_issue_we_vote_id_list_for_voter = follow_issue_list_manager. \
+        retrieve_follow_issue_following_we_vote_id_list_by_voter_we_vote_id(voter_we_vote_id)
     ignore_issue_we_vote_id_list_for_voter = follow_issue_list_manager. \
-        retrieve_ignore_issue_we_vote_id_list_by_voter_we_vote_id(voter_we_vote_id)
+        retrieve_follow_issue_ignore_we_vote_id_list_by_voter_we_vote_id(voter_we_vote_id)
     issue_we_vote_id_list_to_exclude = follow_issue_we_vote_id_list_for_voter + ignore_issue_we_vote_id_list_for_voter
 
     try:

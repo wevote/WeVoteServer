@@ -73,19 +73,6 @@
     {% endif %}{# End of if election_list #}
 </form>
 
-<form name="update_election_metrics" method="get" action="{% url 'analytics:update_election_metrics_process' %}">
-    {% csrf_token %}
-    <input type="hidden" name="google_civic_election_id" value="{{ google_civic_election_id }}" />
-    <input type="hidden" name="state_code" value="{{ state_code }}" />
-
-    <div class="form-group">
-        <label for="update_election_metrics_button" class="col-sm-3 control-label">&nbsp;</label>
-        <div class="col-sm-8">
-            <button type="submit" class="btn btn-default" name="update_election_metrics_button">Update Election Metrics</button>
-        </div>
-    </div>
-</form>
-
 
 <div class="col-sm-12">
     <h3>Daily Metrics</h3>

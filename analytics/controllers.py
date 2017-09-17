@@ -40,7 +40,7 @@ def augment_voter_analytics_action_entries_without_election_id(look_for_changes_
     return results
 
 
-def save_analytics_action_for_api(action_constant, voter_we_vote_id, voter_id,
+def save_analytics_action_for_api(action_constant, voter_we_vote_id, voter_id, state_code,
                                   organization_we_vote_id, organization_id,
                                   google_civic_election_id, ballot_item_we_vote_id=None,
                                   voter_device_id=None):  # saveAnalyticsAction
@@ -91,7 +91,8 @@ def save_analytics_action_for_api(action_constant, voter_we_vote_id, voter_id,
 
     save_results = analytics_manager.save_action(
             action_constant,
-            voter_we_vote_id, voter_id, organization_we_vote_id, organization_id, google_civic_election_id,
+            voter_we_vote_id, voter_id, state_code,
+            organization_we_vote_id, organization_id, google_civic_election_id,
             ballot_item_we_vote_id, voter_device_id)
     if save_results['action_saved']:
         action = save_results['action']
@@ -123,10 +124,10 @@ def calculate_organization_election_metrics(google_civic_election_id, organizati
     analytics_count_manager = AnalyticsCountManager()
 
     google_civic_election_id = convert_to_int(google_civic_election_id)
-    visitors_total = \
-        analytics_count_manager.fetch_visitors_to_organization_in_election(organization_we_vote_id,
-                                                                           google_civic_election_id)
-    voter_guide_entrants = None
+    visitors_total = analytics_count_manager.fetch_visitors_to_organization_in_election(
+        organization_we_vote_id, google_civic_election_id)
+    voter_guide_entrants = analytics_count_manager.fetch_visitors_first_visit_to_organization_in_election(
+        organization_we_vote_id, google_civic_election_id)
     new_followers = None
     new_autofollowers = None
     entrants_visited_ballot = None
@@ -392,6 +393,55 @@ def calculate_sitewide_voter_metrics_for_one_voter(voter_we_vote_id):
     return results
 
 
+def move_analytics_info_to_another_voter(from_voter_we_vote_id, to_voter_we_vote_id):
+    status = " MOVE_ANALYTICS_ACTION_DATA"
+    success = False
+    analytics_action_moved = 0
+    analytics_action_not_moved = 0
+
+    if not positive_value_exists(from_voter_we_vote_id) or not positive_value_exists(to_voter_we_vote_id):
+        status = "MOVE_ANALYTICS_ACTION-MISSING_FROM_OR_TO_VOTER_ID"
+        results = {
+            'status':                       status,
+            'success':                      success,
+            'from_voter_we_vote_id':        from_voter_we_vote_id,
+            'to_voter_we_vote_id':          to_voter_we_vote_id,
+            'analytics_action_moved':       analytics_action_moved,
+            'analytics_action_not_moved':   analytics_action_not_moved,
+        }
+        return results
+
+    analytics_manager = AnalyticsManager()
+    analytics_action_list_results = analytics_manager.retrieve_analytics_action_list(from_voter_we_vote_id)
+    if analytics_action_list_results['analytics_action_list_found']:
+        analytics_action_list = analytics_action_list_results['analytics_action_list']
+
+        for analytics_action_object in analytics_action_list:
+            # Change the voter_we_vote_id
+            try:
+                analytics_action_object.voter_we_vote_id = to_voter_we_vote_id
+                analytics_action_object.save()
+                analytics_action_moved += 1
+            except Exception as e:
+                analytics_action_not_moved += 1
+                status += "UNABLE_TO_SAVE_ANALYTICS_ACTION "
+
+        status += " MOVE_ANALYTICS_ACTION, moved: " + str(analytics_action_moved) + \
+                  ", not moved: " + str(analytics_action_not_moved)
+    else:
+        status += " " + analytics_action_list_results['status']
+
+    results = {
+        'status':                       status,
+        'success':                      success,
+        'from_voter_we_vote_id':        from_voter_we_vote_id,
+        'to_voter_we_vote_id':          to_voter_we_vote_id,
+        'analytics_action_moved':       analytics_action_moved,
+        'analytics_action_not_moved':   analytics_action_not_moved,
+    }
+    return results
+
+
 def save_organization_daily_metrics(organization_we_vote_id, date):
     status = ""
     success = False
@@ -481,6 +531,7 @@ def save_sitewide_election_metrics(google_civic_election_id):
 def save_sitewide_voter_metrics(look_for_changes_since_this_date_as_integer):
     status = ""
     success = False
+    sitewide_voter_metrics_updated = 0
 
     results = augment_voter_analytics_action_entries_without_election_id(look_for_changes_since_this_date_as_integer)
 
@@ -500,9 +551,12 @@ def save_sitewide_voter_metrics(look_for_changes_since_this_date_as_integer):
                     sitewide_voter_metrics_values)
                 status += update_results['status']
                 success = update_results['success']
+                if success:
+                    sitewide_voter_metrics_updated += 1
 
     results = {
         'status':   status,
         'success':  success,
+        'sitewide_voter_metrics_updated': sitewide_voter_metrics_updated,
     }
     return results

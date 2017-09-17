@@ -2,11 +2,14 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 from .models import BALLOT_ADDRESS, fetch_voter_id_from_voter_device_link, Voter, VoterAddressManager, \
-    VoterDeviceLinkManager, VoterManager
+    VoterDeviceLink, VoterDeviceLinkManager, VoterManager
 from django.http import HttpResponse
+from analytics.controllers import move_analytics_info_to_another_voter
 from email_outbound.controllers import move_email_address_entries_to_another_voter
 from email_outbound.models import EmailManager
-from follow.controllers import duplicate_follow_entries_to_another_voter, move_follow_entries_to_another_voter, \
+from follow.controllers import duplicate_follow_entries_to_another_voter, \
+    duplicate_follow_issue_entries_to_another_voter, \
+    move_follow_issue_entries_to_another_voter, move_follow_entries_to_another_voter, \
     duplicate_organization_followers_to_another_organization
 from friend.controllers import fetch_friend_invitation_recipient_voter_we_vote_id, friend_accepted_invitation_send, \
     move_friend_invitations_to_another_voter, move_friends_to_another_voter
@@ -1061,7 +1064,8 @@ def voter_merge_two_accounts_for_api(  # voterMergeTwoAccounts
     status += " " + move_follow_results['status']
 
     # Transfer the issues that the voter is following
-    # TODO Create move_follow_issue_entries_to_another_voter
+    move_follow_issue_results = move_follow_issue_entries_to_another_voter(from_voter_we_vote_id, to_voter_we_vote_id)
+    status += " " + move_follow_issue_results['status']
 
     # Make sure we bring over all emails from the from_voter over to the to_voter
     move_email_addresses_results = move_email_address_entries_to_another_voter(from_voter_we_vote_id,
@@ -1091,6 +1095,10 @@ def voter_merge_two_accounts_for_api(  # voterMergeTwoAccounts
     # are complicated.  See the comments in the donate/controllers.py
     move_donation_results = move_donation_info_to_another_voter(voter, new_owner_voter)
     status += " " + move_donation_results['status']
+
+    # Bring over Analytics information
+    move_analytics_results = move_analytics_info_to_another_voter(from_voter_we_vote_id, to_voter_we_vote_id)
+    status += " " + move_analytics_results['status']
 
     # Bring over the voter-table data
     merge_voter_accounts_results = merge_voter_accounts(voter, new_owner_voter)
@@ -1193,13 +1201,16 @@ def voter_photo_save_for_api(voter_device_id, facebook_profile_image_url_https, 
     return results
 
 
-def voter_retrieve_for_api(voter_device_id):  # voterRetrieve
+def voter_retrieve_for_api(voter_device_id, state_code_from_ip_address=''):  # voterRetrieve
     """
     Used by the api
     :param voter_device_id:
+    :param state_code_from_ip_address:
     :return:
     """
     voter_manager = VoterManager()
+    voter_device_link = VoterDeviceLink()
+    voter_device_link_manager = VoterDeviceLinkManager()
     voter_id = 0
     voter_created = False
     twitter_link_to_voter = TwitterLinkToVoter()
@@ -1216,10 +1227,15 @@ def voter_retrieve_for_api(voter_device_id):  # voterRetrieve
                     'voter_device_id':  voter_device_id,
                     'voter_created':    False,
                     'voter_found':      False,
-                }
+                    'state_code_from_ip_address': state_code_from_ip_address,
+            }
             return json_data
 
-        voter_id = fetch_voter_id_from_voter_device_link(voter_device_id)
+        voter_device_link_results = \
+            voter_device_link_manager.retrieve_voter_device_link_from_voter_device_id(voter_device_id)
+        if voter_device_link_results['voter_device_link_found']:
+            voter_device_link = voter_device_link_results['voter_device_link']
+            voter_id = voter_device_link.voter_id
         if not positive_value_exists(voter_id):
             json_data = {
                 'status':           "VOTER_NOT_FOUND_FROM_DEVICE_ID",
@@ -1227,6 +1243,7 @@ def voter_retrieve_for_api(voter_device_id):  # voterRetrieve
                 'voter_device_id':  voter_device_id,
                 'voter_created':    False,
                 'voter_found':      False,
+                'state_code_from_ip_address': state_code_from_ip_address,
             }
             return json_data
     else:
@@ -1244,6 +1261,7 @@ def voter_retrieve_for_api(voter_device_id):  # voterRetrieve
                 'voter_device_id':  voter_device_id,
                 'voter_created':    False,
                 'voter_found':      False,
+                'state_code_from_ip_address':   state_code_from_ip_address,
             }
             return json_data
 
@@ -1253,7 +1271,6 @@ def voter_retrieve_for_api(voter_device_id):  # voterRetrieve
             voter = results['voter']
 
             # Now save the voter_device_link
-            voter_device_link_manager = VoterDeviceLinkManager()
             results = voter_device_link_manager.save_new_voter_device_link(voter_device_id, voter.id)
 
             if results['voter_device_link_created']:
@@ -1271,6 +1288,7 @@ def voter_retrieve_for_api(voter_device_id):  # voterRetrieve
                 'voter_device_id':                  voter_device_id,
                 'voter_created':                    False,
                 'voter_found':                      False,
+                'state_code_from_ip_address':       state_code_from_ip_address,
             }
             return json_data
 
@@ -1283,6 +1301,11 @@ def voter_retrieve_for_api(voter_device_id):  # voterRetrieve
             status = 'VOTER_CREATED '
         else:
             status = 'VOTER_FOUND '
+
+        # Save state_code found via IP address
+        if positive_value_exists(state_code_from_ip_address):
+            voter_device_link_manager.update_voter_device_link_with_state_code(
+                voter_device_link, state_code_from_ip_address)
 
         twitter_link_to_voter_twitter_id = 0
         if voter.is_signed_in():
@@ -1524,7 +1547,8 @@ def voter_retrieve_for_api(voter_device_id):  # voterRetrieve
             'voter_photo_url_tiny':             voter.we_vote_hosted_profile_image_url_tiny,
             'voter_donation_history_list':      donation_list,
             'interface_status_flags':           voter.interface_status_flags,
-            'notification_settings_flags':      voter.notification_settings_flags
+            'notification_settings_flags':      voter.notification_settings_flags,
+            'state_code_from_ip_address':       state_code_from_ip_address,
         }
         return json_data
 
@@ -1560,7 +1584,8 @@ def voter_retrieve_for_api(voter_device_id):  # voterRetrieve
             'voter_photo_url_medium':           '',
             'voter_photo_url_tiny':             '',
             'interface_status_flags':           0,
-            'notification_settings_flags':        0
+            'notification_settings_flags':      0,
+            'state_code_from_ip_address':       state_code_from_ip_address,
         }
         return json_data
 
@@ -2189,8 +2214,10 @@ def voter_split_into_two_accounts_for_api(voter_device_id, split_off_twitter):  
         from_voter_id, from_voter_we_vote_id, to_voter_id, to_voter_we_vote_id)
     status += " " + duplicate_follow_entries_results['status']
 
-    # Transfer the issues that the voter is following
-    # TODO Create duplicate_follow_issue_entries_to_another_voter
+    # If from_voter is following issues, copy the follow_issue entries to the to_voter
+    duplicate_follow_issue_entries_results = duplicate_follow_issue_entries_to_another_voter(
+        from_voter_we_vote_id, to_voter_we_vote_id)
+    status += " " + duplicate_follow_issue_entries_results['status']
 
     # If from_voter has any position, duplicate positions from_voter to to_voter
     move_positions_results = duplicate_positions_to_another_voter(
