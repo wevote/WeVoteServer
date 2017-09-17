@@ -53,8 +53,19 @@ def voter_address_retrieve_view(request):  # voterAddressRetrieve
     :param request:
     :return:
     """
+    voter_address_manager = VoterAddressManager()
+    voter_device_link_manager = VoterDeviceLinkManager()
+
     voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
-    voter_id = fetch_voter_id_from_voter_device_link(voter_device_id)
+
+    voter_device_link_results = voter_device_link_manager.retrieve_voter_device_link(voter_device_id)
+    if voter_device_link_results['voter_device_link_found']:
+        voter_device_link = voter_device_link_results['voter_device_link']
+        voter_id = voter_device_link.voter_id
+    else:
+        voter_device_link = VoterDeviceLink()
+        voter_id = 0
+
     guess_if_no_address_saved = request.GET.get('guess_if_no_address_saved', True)
     if guess_if_no_address_saved == 'false':
         guess_if_no_address_saved = False
@@ -63,9 +74,6 @@ def voter_address_retrieve_view(request):  # voterAddressRetrieve
     elif guess_if_no_address_saved == '0':
         guess_if_no_address_saved = False
     status = ''
-
-    voter_address_manager = VoterAddressManager()
-    voter_device_link_manager = VoterDeviceLinkManager()
 
     voter_address_retrieve_results = voter_address_retrieve_for_api(voter_device_id)
 
@@ -77,12 +85,6 @@ def voter_address_retrieve_view(request):  # voterAddressRetrieve
             # This block of code helps us if the google_civic_election_id hasn't been saved in the voter_address table
             # We retrieve voter_device_link
             google_civic_election_id = 0
-
-        voter_device_link_results = voter_device_link_manager.retrieve_voter_device_link(voter_device_id)
-        if voter_device_link_results['voter_device_link_found']:
-            voter_device_link = voter_device_link_results['voter_device_link']
-        else:
-            voter_device_link = VoterDeviceLink()
 
         # Retrieve the voter_address
         voter_address_results = voter_address_manager.retrieve_ballot_address_from_voter_id(voter_id)
@@ -1204,7 +1206,13 @@ def voter_retrieve_view(request):  # voterRetrieve
     :return:
     """
     voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
-    results = voter_retrieve_for_api(voter_device_id=voter_device_id)
+
+    # Figure out the city & state from IP address
+    voter_location_results = voter_location_retrieve_from_ip_for_api(request)
+    state_code_from_ip_address = voter_location_results['region']
+
+    results = voter_retrieve_for_api(voter_device_id=voter_device_id,
+                                     state_code_from_ip_address=state_code_from_ip_address)
     return HttpResponse(json.dumps(results), content_type='application/json')
 
 

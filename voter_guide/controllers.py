@@ -424,8 +424,9 @@ def voter_guides_to_follow_retrieve_for_api(voter_device_id,  # voterGuidesToFol
             return results
         else:
             follow_issue_list_manager = FollowIssueList()
+            following_status = FOLLOWING
             issue_list_for_voter = follow_issue_list_manager. \
-                retrieve_follow_issue_list_by_voter_we_vote_id(voter_we_vote_id)
+                retrieve_follow_issue_list_by_voter_we_vote_id(voter_we_vote_id, following_status)
             issue_list_for_voter = list(issue_list_for_voter)
             issue_we_vote_id_list_for_voter = []
             for issue in issue_list_for_voter:

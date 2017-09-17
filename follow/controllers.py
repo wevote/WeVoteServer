@@ -3,14 +3,10 @@
 # -*- coding: UTF-8 -*-
 
 from .models import FollowOrganizationList, FollowOrganizationManager, UPDATE_SUGGESTIONS_FROM_TWITTER_IDS_I_FOLLOW, \
-    UPDATE_SUGGESTIONS_FROM_WHAT_FRIEND_FOLLOWS, UPDATE_SUGGESTIONS_FROM_WHAT_FRIEND_FOLLOWS_ON_TWITTER, \
-    UPDATE_SUGGESTIONS_FROM_WHAT_FRIENDS_FOLLOW, UPDATE_SUGGESTIONS_FROM_WHAT_FRIENDS_FOLLOW_ON_TWITTER, \
-    UPDATE_SUGGESTIONS_ALL, FOLLOW_SUGGESTIONS_FROM_TWITTER_IDS_I_FOLLOW, FOLLOW_SUGGESTIONS_FROM_FRIENDS, \
-    FollowIssueManager
+    FOLLOW_SUGGESTIONS_FROM_TWITTER_IDS_I_FOLLOW, FollowIssueList, FollowIssueManager, FOLLOWING
 from analytics.models import ACTION_ISSUE_FOLLOW, ACTION_ISSUE_FOLLOW_IGNORE, \
     ACTION_ISSUE_STOP_FOLLOWING, AnalyticsManager
 from django.http import HttpResponse
-from email_outbound.models import EmailManager
 from friend.models import FriendManager
 import json
 from organization.models import OrganizationManager
@@ -84,6 +80,39 @@ def duplicate_follow_entries_to_another_voter(from_voter_id, from_voter_we_vote_
     return results
 
 
+def duplicate_follow_issue_entries_to_another_voter(from_voter_we_vote_id, to_voter_we_vote_id):
+    status = ''
+    success = False
+    follow_issue_entries_duplicated = 0
+    follow_issue_entries_not_duplicated = 0
+    follow_issue_list = FollowIssueList()
+    from_follow_issue_list = follow_issue_list.retrieve_follow_issue_list_by_voter_we_vote_id(from_voter_we_vote_id)
+    to_follow_issue_we_vote_id_list = \
+        follow_issue_list.retrieve_follow_issue_we_vote_id_list_by_voter_we_vote_id(to_voter_we_vote_id)
+
+    for from_follow_issue_entry in from_follow_issue_list:
+        # See if the "to_voter" already has an entry for this issue
+        if from_follow_issue_entry.issue_we_vote_id not in to_follow_issue_we_vote_id_list:
+            # Change the from_voter_we_vote_id to to_voter_we_vote_id
+            try:
+                from_follow_issue_entry.id = None  # Reset the id so a new entry is created
+                from_follow_issue_entry.pk = None
+                from_follow_issue_entry.voter_we_vote_id = to_voter_we_vote_id
+                from_follow_issue_entry.save()
+                follow_issue_entries_duplicated += 1
+            except Exception as e:
+                follow_issue_entries_not_duplicated += 1
+    results = {
+        'status':                           status,
+        'success':                          success,
+        'from_voter_we_vote_id':            from_voter_we_vote_id,
+        'to_voter_we_vote_id':              to_voter_we_vote_id,
+        'follow_issue_entries_duplicated':  follow_issue_entries_duplicated,
+        'follow_issue_entries_not_duplicated':  follow_issue_entries_not_duplicated,
+    }
+    return results
+
+
 def move_follow_entries_to_another_voter(from_voter_id, to_voter_id, to_voter_we_vote_id):
     status = ''
     success = False
@@ -116,6 +145,59 @@ def move_follow_entries_to_another_voter(from_voter_id, to_voter_id, to_voter_we
         'to_voter_we_vote_id':      to_voter_we_vote_id,
         'follow_entries_moved':     follow_entries_moved,
         'follow_entries_not_moved': follow_entries_not_moved,
+    }
+    return results
+
+
+def move_follow_issue_entries_to_another_voter(from_voter_we_vote_id, to_voter_we_vote_id):
+    status = ''
+    success = False
+    follow_issue_entries_moved = 0
+    follow_issue_entries_not_moved = 0
+    follow_issue_list = FollowIssueList()
+    from_follow_issue_list = follow_issue_list.retrieve_follow_issue_list_by_voter_we_vote_id(from_voter_we_vote_id)
+    to_follow_issue_list = follow_issue_list.retrieve_follow_issue_list_by_voter_we_vote_id(to_voter_we_vote_id)
+    to_follow_issue_we_vote_id_list = \
+        follow_issue_list.retrieve_follow_issue_we_vote_id_list_by_voter_we_vote_id(to_voter_we_vote_id)
+
+    for from_follow_issue_entry in from_follow_issue_list:
+        # See if the "to_voter" already has an entry for this issue
+        if from_follow_issue_entry.issue_we_vote_id in to_follow_issue_we_vote_id_list:
+            # Find the entry in the to_follow_issue_list
+            for to_follow_issue_entry in to_follow_issue_list:
+                if to_follow_issue_entry.issue_we_vote_id == from_follow_issue_entry.issue_we_vote_id:
+                    # Change the following status if it is not already FOLLOWING
+                    if to_follow_issue_entry.following_status == FOLLOWING:
+                        # If the to_voter entry is already FOLLOWING, leave it
+                        continue
+                    else:
+                        # Update the to_follow_issue_entry with the following_status
+                        try:
+                            to_follow_issue_entry.following_status = from_follow_issue_entry.following_status
+                            to_follow_issue_entry.save()
+                            follow_issue_entries_moved += 1
+                        except Exception as e:
+                            follow_issue_entries_not_moved += 1
+                        continue
+
+        else:
+            # Change the from_voter_we_vote_id to to_voter_we_vote_id
+            try:
+                from_follow_issue_entry.voter_we_vote_id = to_voter_we_vote_id
+                # We don't currently store follow entries by we_vote_id
+                # from_follow_issue_entry.voter_we_vote_id = to_voter_we_vote_id
+                from_follow_issue_entry.save()
+                follow_issue_entries_moved += 1
+            except Exception as e:
+                follow_issue_entries_not_moved += 1
+
+    results = {
+        'status':                           status,
+        'success':                          success,
+        'from_voter_we_vote_id':            from_voter_we_vote_id,
+        'to_voter_we_vote_id':              to_voter_we_vote_id,
+        'follow_issue_entries_moved':       follow_issue_entries_moved,
+        'follow_issue_entries_not_moved':   follow_issue_entries_not_moved,
     }
     return results
 

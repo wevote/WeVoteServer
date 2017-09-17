@@ -13,7 +13,9 @@
 {% for one_row in organization_election_metrics_list %}
     <tr>
         <td>{{ one_row.election.election_name|default_if_none:"n/a" }} ({{ one_row.google_civic_election_id }})</td>
-        <td>{{ one_row.organization.organization_name|default_if_none:"n/a" }} ({{ one_row.organization_we_vote_id }})</td>
+        <td>{{ one_row.organization.organization_name|default_if_none:"n/a" }}
+            (<a href="{% url 'analytics:analytics_action_list' one_row.organization_we_vote_id %}?google_civic_election_id={{ google_civic_election_id }}"
+               target="_blank">{{ one_row.organization_we_vote_id|default_if_none:"n/a" }}</a>)</td>
         <td>{{ one_row.visitors_total|default_if_none:"n/a" }}</td>
         <td>{{ one_row.voter_guide_entrants|default_if_none:"n/a" }}</td>
         <td>new: {{ one_row.new_followers|default_if_none:"n/a" }}<br />

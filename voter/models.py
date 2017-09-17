@@ -1907,7 +1907,8 @@ class VoterDeviceLink(models.Model):
     # The unique ID of the election (provided by Google Civic) that the voter is looking at on this device
     google_civic_election_id = models.PositiveIntegerField(
         verbose_name="google civic election id", default=0, null=False)
-    state_code = models.CharField(verbose_name="us state the device is most recently active in", max_length=2, null=True)
+    state_code = models.CharField(verbose_name="us state the device is most recently active in",
+                                  max_length=255, null=True)
 
     def generate_voter_device_id(self):
         # A simple mapping to this function
@@ -2057,7 +2058,12 @@ class VoterDeviceLinkManager(models.Model):
         voter_object = None
         return self.update_voter_device_link(voter_device_link, voter_object, google_civic_election_id)
 
-    def update_voter_device_link(self, voter_device_link, voter_object=None, google_civic_election_id=0):
+    def update_voter_device_link_with_state_code(self, voter_device_link, state_code):
+        voter_object = None
+        google_civic_election_id = 0
+        return self.update_voter_device_link(voter_device_link, voter_object, google_civic_election_id, state_code)
+
+    def update_voter_device_link(self, voter_device_link, voter_object=None, google_civic_election_id=0, state_code=''):
         """
         Update existing voter_device_link with a new voter_id or google_civic_election_id
         """
@@ -2075,6 +2081,8 @@ class VoterDeviceLinkManager(models.Model):
                 elif google_civic_election_id == 0:
                     # If set literally to 0, save it
                     voter_device_link.google_civic_election_id = 0
+                if positive_value_exists(state_code):
+                    voter_device_link.state_code = state_code
                 voter_device_link.save()
 
                 voter_device_link_id = voter_device_link.id

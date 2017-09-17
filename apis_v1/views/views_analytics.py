@@ -24,11 +24,13 @@ def save_analytics_action_view(request):  # saveAnalyticsAction
     missing_required_variable = False
     voter_id = 0
     voter_we_vote_id = ""
+    state_code_from_ip_address = ""  # If a state_code is NOT passed in, we want to get the state_code from ip address
     voter_device_id_for_storage = ""
     date_as_integer = 0
 
     voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
     action_constant = convert_to_int(request.GET.get('action_constant', 0))
+    state_code = request.GET.get('state_code', '')  # If a state code is passed in, we want to use it
     google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
     organization_we_vote_id = request.GET.get('organization_we_vote_id', '')
     organization_id = convert_to_int(request.GET.get('organization_id', 0))
@@ -40,6 +42,7 @@ def save_analytics_action_view(request):  # saveAnalyticsAction
     if results['voter_device_link_found']:
         voter_device_link = results['voter_device_link']
         voter_id = voter_device_link.voter_id
+        state_code_from_ip_address = voter_device_link.state_code
         voter_we_vote_id = fetch_voter_we_vote_id_from_voter_id(voter_id)
     else:
         voter_device_id_for_storage = voter_device_id
@@ -62,12 +65,16 @@ def save_analytics_action_view(request):  # saveAnalyticsAction
             success = False
             missing_required_variable = True
 
+    if not positive_value_exists(state_code):
+        state_code = state_code_from_ip_address
+
     if missing_required_variable:
         json_data = {
             'status':                   status,
             'success':                  success,
             'voter_device_id':          voter_device_id,
             'action_constant':          action_constant,
+            'state_code':               state_code,
             'google_civic_election_id': google_civic_election_id,
             'organization_we_vote_id':  organization_we_vote_id,
             'ballot_item_we_vote_id':   ballot_item_we_vote_id,
@@ -76,7 +83,7 @@ def save_analytics_action_view(request):  # saveAnalyticsAction
         }
         return HttpResponse(json.dumps(json_data), content_type='application/json')
 
-    results = save_analytics_action_for_api(action_constant, voter_we_vote_id, voter_id,
+    results = save_analytics_action_for_api(action_constant, voter_we_vote_id, voter_id, state_code,
                                             organization_we_vote_id, organization_id,
                                             google_civic_election_id, ballot_item_we_vote_id,
                                             voter_device_id_for_storage)
@@ -87,6 +94,7 @@ def save_analytics_action_view(request):  # saveAnalyticsAction
         'success':                  results['success'],
         'voter_device_id':          voter_device_id,
         'action_constant':          action_constant,
+        'state_code':               state_code,
         'google_civic_election_id': google_civic_election_id,
         'organization_we_vote_id':  organization_we_vote_id,
         'ballot_item_we_vote_id':   ballot_item_we_vote_id,

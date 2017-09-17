@@ -29,12 +29,15 @@ def voter_location_retrieve_from_ip_for_api(request, ip_address=''):
     if not positive_value_exists(ip_address):
         # return HttpResponse('missing ip_address request parameter', status=400)
         response_content = {
-            'success': False,
-            'status': 'LOCATION_RETRIEVE_IP_ADDRESS_REQUEST_PARAMETER_MISSING',
+            'success':              False,
+            'status':               'LOCATION_RETRIEVE_IP_ADDRESS_REQUEST_PARAMETER_MISSING',
             'voter_location_found': False,
-            'voter_location': '',
-            'ip_address': ip_address,
-            'x_forwarded_for': x_forwarded_for,
+            'voter_location':       '',
+            'city':                 '',
+            'region':               '',
+            'postal_code':          '',
+            'ip_address':           ip_address,
+            'x_forwarded_for':      x_forwarded_for,
             'http_x_forwarded_for': http_x_forwarded_for,
         }
 
@@ -46,26 +49,35 @@ def voter_location_retrieve_from_ip_for_api(request, ip_address=''):
         # Consider this alternate way of responding to front end:
         # return HttpResponse('no matching location for IP address {}'.format(ip_address), status=400)
         response_content = {
-            'success': True,
-            'status': 'LOCATION_NOT_FOUND',
+            'success':              True,
+            'status':               'LOCATION_NOT_FOUND',
             'voter_location_found': False,
-            'voter_location': '',
-            'ip_address': ip_address,
-            'x_forwarded_for': x_forwarded_for,
+            'voter_location':       '',
+            'city':                 '',
+            'region':               '',
+            'postal_code':          '',
+            'ip_address':           ip_address,
+            'x_forwarded_for':      x_forwarded_for,
             'http_x_forwarded_for': http_x_forwarded_for,
         }
     else:
         voter_location = ''
+        city = ''
+        region = ''  # could be state_code
+        postal_code = ''
         if 'city' in location and location['city']:
+            city = location['city']
             voter_location += location['city']
             if ('region' in location and location['region']) or \
                     ('postal_code' in location and location['postal_code']):
                 voter_location += ', '
         if 'region' in location and location['region']:
+            region = location['region']
             voter_location += location['region']
             if 'postal_code' in location and location['postal_code']:
                 voter_location += ' '
         if 'postal_code' in location and location['postal_code']:
+            postal_code = location['postal_code']
             voter_location += location['postal_code']
         if positive_value_exists(voter_location):
             status = 'LOCATION_FOUND'
@@ -74,12 +86,15 @@ def voter_location_retrieve_from_ip_for_api(request, ip_address=''):
             status = 'IP_FOUND_BUT_LOCATION_NOT_RETURNED'
             voter_location_found = False
         response_content = {
-            'success': True,
-            'status': status,
+            'success':              True,
+            'status':               status,
             'voter_location_found': voter_location_found,
-            'voter_location': voter_location,
-            'ip_address': ip_address,
-            'x_forwarded_for': x_forwarded_for,
+            'voter_location':       voter_location,
+            'city':                 city,
+            'region':               region,
+            'postal_code':          postal_code,
+            'ip_address':           ip_address,
+            'x_forwarded_for':      x_forwarded_for,
             'http_x_forwarded_for': http_x_forwarded_for,
         }
 
