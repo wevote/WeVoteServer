@@ -106,11 +106,19 @@
                 {% else %}{% endif %}
             </td>
             <td>
-                {% if create_resized_images_for_a_voter.cached_facebook_background_image %}
-                    {{ create_resized_images_for_a_voter.cached_facebook_background_image }}
+                {% if create_resized_images_for_a_voter.cached_large_facebook_background_image %}
+                    {{ create_resized_images_for_a_voter.cached_large_facebook_background_image }}
+                {% else %}{% endif %}
+            <td>
+                {% if create_resized_images_for_a_voter.cached_medium_facebook_background_image %}
+                    {{ create_resized_images_for_a_voter.cached_medium_facebook_background_image }}
+                {% else %}{% endif %}
+            </td>            </td>
+            <td>
+                {% if create_resized_images_for_a_voter.cached_tiny_facebook_background_image %}
+                    {{ create_resized_images_for_a_voter.cached_tiny_facebook_background_image }}
                 {% else %}{% endif %}
             </td>
-
         </tr>
     {% endfor %}
 

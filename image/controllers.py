@@ -188,7 +188,18 @@ def cache_image_if_not_cached(google_civic_election_id, image_url_https, voter_w
         kind_of_image_maplight=kind_of_image_maplight, kind_of_image_vote_smart=kind_of_image_vote_smart,
         kind_of_image_issue=kind_of_image_issue, kind_of_image_original=kind_of_image_original,
         is_active_version=True)
-    if cached_we_vote_image_results['we_vote_image_found']:
+
+    # If recent cached image matches with the current one the image is already cached
+    cached_we_vote_image = cached_we_vote_image_results['we_vote_image']
+    if cached_we_vote_image_results['we_vote_image_found'] and \
+            image_url_https == cached_we_vote_image.twitter_profile_image_url_https or \
+            image_url_https == cached_we_vote_image.twitter_profile_background_image_url_https or \
+            image_url_https == cached_we_vote_image.twitter_profile_banner_url_https or \
+            image_url_https == cached_we_vote_image.facebook_profile_image_url_https or \
+            image_url_https == cached_we_vote_image.facebook_background_image_url_https or \
+            image_url_https == cached_we_vote_image.maplight_image_url_https or \
+            image_url_https == cached_we_vote_image.vote_smart_image_url_https or \
+            image_url_https == cached_we_vote_image.issue_image_url_https:
         cache_image_results = IMAGE_ALREADY_CACHED
     else:
         # Image is not cached so caching it
@@ -427,8 +438,8 @@ def cache_voter_master_images(voter_id):
                 kind_of_image_twitter_banner=True, kind_of_image_original=True)
 
     if not positive_value_exists(facebook_id):
-            cache_all_kind_of_images_results['cached_facebook_profile_image'] = TWITTER_USER_DOES_NOT_EXIST,
-            cache_all_kind_of_images_results['cached_facebook_background_image'] = TWITTER_USER_DOES_NOT_EXIST,
+        cache_all_kind_of_images_results['cached_facebook_profile_image'] = FACEBOOK_USER_DOES_NOT_EXIST,
+        cache_all_kind_of_images_results['cached_facebook_background_image'] = FACEBOOK_USER_DOES_NOT_EXIST,
     else:
         # Retrieve latest facebook image urls from Facebook
         latest_image_urls_results = retrieve_facebook_image_url(facebook_id)
