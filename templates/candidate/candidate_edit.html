@@ -126,6 +126,58 @@
         Twitter Followers: {{ candidate.twitter_followers_count }}<br />
     {% endif %}
     {% if candidate.twitter_url %}Twitter URL (from Google Civic): {{ candidate.twitter_url }}{% endif %}
+
+    (<a href="{% url 'twitter2:retrieve_possible_twitter_handles' candidate.we_vote_id %}">retrieve possible Twitter handles</a>)
+
+    <table border="1" cellpadding="5" cellspacing="5" class="table">
+        <tr>
+            <th>#</th>
+            <th>id</th>
+            <th>action_constant</th>
+            <th>exact_time</th>
+            <th>date_as_integer</th>
+            <th>voter</th>
+            <th>organization</th>
+            <th>ballot_item we_vote_id</th>
+            <th>state code</th>
+            <th>google civic election id</th>
+            <th>first visit today</th>
+        </tr>
+    {% for one_row in twitter_link_possibility_list %}
+        <tr>
+            <td>{{ forloop.counter }}</td>
+            <td>{{ one_row.id }}</td>
+            <td>{{ one_row.display_action_constant_human_readable }}</td>
+            <td>{{ one_row.exact_time|default_if_none:"n/a" }}</td>
+            <td>{{ one_row.date_as_integer|default_if_none:"n/a" }}</td>
+            <td>
+                {% if voter_we_vote_id or organization_we_vote_id %}
+                    <a href="{% url 'voter:voter_edit_we_vote_id' one_row.voter_we_vote_id %}?google_civic_election_id={{ google_civic_election_id }}"
+                       target="_blank">{{ one_row.voter_we_vote_id|default_if_none:"n/a" }}</a>
+                {% else %}
+                    <a href="{% url 'analytics:analytics_action_list' one_row.voter_we_vote_id %}?google_civic_election_id={{ google_civic_election_id }}"
+                       target="_blank">{{ one_row.voter_we_vote_id|default_if_none:"n/a" }}</a>
+                {% endif %}
+            </td>
+            <td>{{ one_row.organization.organization_name|default_if_none:"n/a" }}
+                {% if one_row.organization_we_vote_id %}
+                    {% if organization_we_vote_id or voter_we_vote_id %}
+                        (<a href="{% url 'organization:organization_we_vote_id_position_list' one_row.organization_we_vote_id %}?google_civic_election_id={{ google_civic_election_id }}"
+                           target="_blank">{{ one_row.organization_we_vote_id|default_if_none:"n/a" }}</a>)
+                    {% else %}
+                        (<a href="{% url 'analytics:analytics_action_list' one_row.organization_we_vote_id %}?google_civic_election_id={{ google_civic_election_id }}"
+                           target="_blank">{{ one_row.organization_we_vote_id|default_if_none:"n/a" }}</a>)
+                    {% endif %}
+                {% endif %}
+            </td>
+            <td>{{ one_row.ballot_item_we_vote_id|default_if_none:"n/a" }}</td>
+            <td>{{ one_row.state_code|default_if_none:"" }}</td>
+            <td>{{ one_row.google_civic_election_id|default_if_none:"n/a" }}</td>
+            <td>{% if one_row.first_visit_today %}first{% endif %}</td>
+        </tr>
+    {% endfor %}
+    </table>
+
     </div>
 </div>
 

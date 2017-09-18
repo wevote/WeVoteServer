@@ -64,6 +64,7 @@ urlpatterns = [
     # url('', include('wevote_social.urls', namespace='wevote_social')),
     url('social', include('social.apps.django_app.urls', namespace="social")),
     url(r'^twitter/', include('import_export_twitter.urls', namespace="twitter")),
+    url(r'^twitter2/', include('twitter.urls', namespace="twitter2")),
     url(r'^voter/', include('voter.urls', namespace="voter")),
     url(r'^vg/', include('voter_guide.urls', namespace="voter_guide")),
     # Authentication
