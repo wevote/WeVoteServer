@@ -22,6 +22,7 @@ from import_export_vote_smart.models import VoteSmartRatingOneCandidate
 from import_export_vote_smart.votesmart_local import VotesmartApiError
 from politician.models import PoliticianManager
 from position.models import PositionEntered, PositionListManager
+from twitter.models import TwitterLinkPossibility
 from voter.models import voter_has_authority
 import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, extract_twitter_handle_from_text_string, \
@@ -303,7 +304,7 @@ def candidate_new_view(request):
 
 
 @login_required
-def candidate_edit_view(request, candidate_id):
+def candidate_edit_view(request, candidate_id=0, candidate_campaign_we_vote_id=""):
     authority_required = {'verified_volunteer'}  # admin, verified_volunteer
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
@@ -327,8 +328,12 @@ def candidate_edit_view(request, candidate_id):
     google_civic_election_id = 0
 
     try:
-        candidate_on_stage = CandidateCampaign.objects.get(id=candidate_id)
+        if positive_value_exists(candidate_id):
+            candidate_on_stage = CandidateCampaign.objects.get(id=candidate_id)
+        else:
+            candidate_on_stage = CandidateCampaign.objects.get(we_vote_id=candidate_campaign_we_vote_id)
         candidate_on_stage_found = True
+        candidate_id = candidate_on_stage.id
         contest_office_id = candidate_on_stage.contest_office_id
         google_civic_election_id = candidate_on_stage.google_civic_election_id
     except CandidateCampaign.MultipleObjectsReturned as e:
@@ -373,6 +378,15 @@ def candidate_edit_view(request, candidate_id):
         # Was a candidate_merge_possibility_found?
         candidate_on_stage.candidate_merge_possibility_found = True  # TODO DALE Make dynamic
 
+        twitter_link_possibility_list = []
+        try:
+            twitter_possibility_query = TwitterLinkPossibility.objects.order_by('-likelihood_percentage')
+            twitter_possibility_query = twitter_possibility_query.filter(
+                candidate_campaign_we_vote_id=candidate_on_stage.we_vote_id)
+            twitter_link_possibility_list = list(twitter_possibility_query)
+        except Exception as e:
+            pass
+
         template_values = {
             'messages_on_stage':        messages_on_stage,
             'candidate':                candidate_on_stage,
@@ -382,6 +396,7 @@ def candidate_edit_view(request, candidate_id):
             'contest_office_id':        contest_office_id,
             'google_civic_election_id': google_civic_election_id,
             'state_code':               state_code,
+            'twitter_link_possibility_list':    twitter_link_possibility_list,
             # Incoming variables, not saved yet
             'candidate_name':                   candidate_name,
             'google_civic_candidate_name':      google_civic_candidate_name,

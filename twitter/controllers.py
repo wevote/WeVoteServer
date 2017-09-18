@@ -5,9 +5,44 @@
 # See also WeVoteServer/import_export_twitter/controllers.py for routines that manage incoming twitter data
 from .models import TwitterUserManager
 from ballot.controllers import figure_out_google_civic_election_id_voter_is_watching
-from candidate.models import CandidateCampaignListManager
+from candidate.models import CandidateCampaignManager, CandidateCampaignListManager
+from import_export_twitter.functions import retrieve_twitter_user_info, retrieve_twitter_user_possibilities
 from organization.models import OrganizationListManager
 from wevote_functions.functions import convert_to_int, positive_value_exists
+
+
+def retrieve_possible_twitter_handles(candidate_campaign):
+    status = ""
+    candidate_campaign_manager = CandidateCampaignManager()
+    twitter_user_manager = TwitterUserManager()
+
+    if not candidate_campaign:
+        status = "RETRIEVE_POSSIBLE_TWITTER_HANDLES-CANDIDATE_MISSING "
+        results = {
+            'success':                  False,
+            'status':                   status,
+        }
+        return results
+
+    status += "RETRIEVE_POSSIBLE_TWITTER_HANDLES-REACHING_OUT_TO_TWITTER "
+    # TODO Populate these variables from candidate_campaign
+    results = retrieve_twitter_user_possibilities(full_name, location)
+
+    if results['success']:
+        status += "RETRIEVE_POSSIBLE_TWITTER_HANDLES-RETRIEVED_FROM_TWITTER"
+        possible_twitter_handles_list = results['possible_twitter_handles_list']
+
+        for possibility_result in possible_twitter_handles_list:
+            # TODO For each result, save TwitterLinkPossibility
+            save_twitter_user_results = twitter_user_manager.update_or_create_twitter_link_possibility(
+                candidate_campaign.we_vote_id, possibility_result['twitter_json'],
+                possibility_result['search_term'], possibility_result['likelihood_percentage'])
+
+    results = {
+        'success':                  True,
+        'status':                   status,
+    }
+    return results
 
 
 def twitter_identity_retrieve_for_api(twitter_handle, voter_device_id=''):  # twitterIdentityRetrieve

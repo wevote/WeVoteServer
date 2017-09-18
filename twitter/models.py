@@ -95,6 +95,17 @@ class TwitterLinkToVoter(models.Model):
         return twitter_handle
 
 
+class TwitterLinkPossibility(models.Model):
+    """
+    These are Twitter Accounts that might match a candidate or organization
+    """
+    candidate_campaign_we_vote_id = models.CharField(verbose_name="candidate we vote id", max_length=255, unique=False)
+    twitter_id = models.BigIntegerField(verbose_name="twitter big integer id", null=False, unique=False)
+    search_term_used = models.CharField(verbose_name="", max_length=255, unique=False)
+    not_a_match = models.BooleanField(default=False, verbose_name="")
+    likelihood_percentage = models.IntegerField(verbose_name="", null=True, unique=False)
+
+
 class TwitterUser(models.Model):
     """
     We cache the Twitter info for one handle here.
