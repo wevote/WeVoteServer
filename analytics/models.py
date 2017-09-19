@@ -441,7 +441,7 @@ class AnalyticsManager(models.Model):
         }
         return results
 
-    def save_action(self, action_constant, voter_we_vote_id, voter_id, state_code,
+    def save_action(self, action_constant, voter_we_vote_id, voter_id, state_code="",
                     organization_we_vote_id="", organization_id=0,
                     google_civic_election_id=0, ballot_item_we_vote_id="",
                     voter_device_id=None):
