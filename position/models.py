@@ -4123,6 +4123,7 @@ class PositionManager(models.Model):
 
         if voter_position_on_stage_found:
             # If here, we are storing an analytics entry
+            state_code = ''
             organization_id_temp = 0
             organization_we_vote_id_temp = ""
             if positive_value_exists(candidate_campaign_we_vote_id):
@@ -4133,7 +4134,8 @@ class PositionManager(models.Model):
                 ballot_item_we_vote_id = ""
             analytics_manager = AnalyticsManager()
             analytics_results = analytics_manager.save_action(
-                ACTION_POSITION_TAKEN, voter_we_vote_id, voter_id, organization_we_vote_id_temp, organization_id_temp,
+                ACTION_POSITION_TAKEN, voter_we_vote_id, voter_id, state_code,
+                organization_we_vote_id_temp, organization_id_temp,
                 google_civic_election_id, ballot_item_we_vote_id)
 
         results = {

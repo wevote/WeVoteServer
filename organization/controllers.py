@@ -311,11 +311,12 @@ def organization_follow_all(voter_device_id, organization_id, organization_we_vo
         if results['follow_organization_found']:
             status = 'FOLLOWING'
             success = True
+            state_code = ''
             follow_organization = results['follow_organization']
             organization_id = follow_organization.organization_id
             organization_we_vote_id = follow_organization.organization_we_vote_id
             analytics_results = analytics_manager.save_action(
-                ACTION_ORGANIZATION_FOLLOW, voter_we_vote_id, voter_id,
+                ACTION_ORGANIZATION_FOLLOW, voter_we_vote_id, voter_id, state_code,
                 organization_we_vote_id, organization_id)
         else:
             status = results['status']
@@ -327,11 +328,12 @@ def organization_follow_all(voter_device_id, organization_id, organization_we_vo
         if results['follow_organization_found']:
             status = 'IGNORING'
             success = True
+            state_code = ''
             follow_organization = results['follow_organization']
             organization_id = follow_organization.organization_id
             organization_we_vote_id = follow_organization.organization_we_vote_id
             analytics_results = analytics_manager.save_action(
-                ACTION_ORGANIZATION_FOLLOW_IGNORE, voter_we_vote_id, voter_id,
+                ACTION_ORGANIZATION_FOLLOW_IGNORE, voter_we_vote_id, voter_id, state_code,
                 organization_we_vote_id, organization_id)
         else:
             status = results['status']
@@ -342,11 +344,12 @@ def organization_follow_all(voter_device_id, organization_id, organization_we_vo
         if results['follow_organization_found']:
             status = 'STOPPED_FOLLOWING'
             success = True
+            state_code = ''
             follow_organization = results['follow_organization']
             organization_id = follow_organization.organization_id
             organization_we_vote_id = follow_organization.organization_we_vote_id
             analytics_results = analytics_manager.save_action(
-                ACTION_ORGANIZATION_STOP_FOLLOWING, voter_we_vote_id, voter_id,
+                ACTION_ORGANIZATION_STOP_FOLLOWING, voter_we_vote_id, voter_id, state_code,
                 organization_we_vote_id, organization_id)
         else:
             status = results['status']
