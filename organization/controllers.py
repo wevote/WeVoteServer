@@ -10,7 +10,7 @@ from django.http import HttpResponse
 from exception.models import handle_record_not_found_exception
 from follow.controllers import move_organization_followers_to_another_organization
 from follow.models import FollowOrganizationManager, FollowOrganizationList, FOLLOW_IGNORE, FOLLOWING, STOP_FOLLOWING
-from image.controllers import retrieve_all_images_for_one_organization, cache_original_and_resized_image, TWITTER
+from image.controllers import retrieve_all_images_for_one_organization
 from import_export_facebook.models import FacebookManager
 import json
 from organization.models import Organization

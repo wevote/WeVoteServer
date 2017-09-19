@@ -2,7 +2,6 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
-from image.controllers import cache_original_and_resized_image, VOTE_SMART
 from .models import VoteSmartApiCounterManager, VoteSmartCandidate, VoteSmartCandidateManager, \
     vote_smart_candidate_object_filter, VoteSmartCandidateBio, vote_smart_candidate_bio_object_filter, \
     VoteSmartCategory, vote_smart_category_filter, \
@@ -17,6 +16,7 @@ from candidate.models import CandidateCampaignManager
 from config.base import get_environment_variable
 import copy
 from exception.models import handle_record_found_more_than_one_exception
+from image.controllers import VOTE_SMART, cache_master_and_resized_image
 from position.models import PositionManager, PERCENT_RATING
 import requests
 import wevote_functions.admin
@@ -185,7 +185,7 @@ def retrieve_candidate_photo_from_vote_smart(we_vote_candidate, force_retrieve=F
         if results['vote_smart_candidate_bio_found']:
             status += 'VOTE_SMART_CANDIDATE_BIO_MATCHED '
             vote_smart_candidate_bio = results['vote_smart_candidate_bio']
-            cache_results = cache_original_and_resized_image(
+            cache_results = cache_master_and_resized_image(
                 candidate_id=we_vote_candidate.id, candidate_we_vote_id=we_vote_candidate.we_vote_id,
                 vote_smart_id=we_vote_candidate.vote_smart_id,
                 vote_smart_image_url_https=vote_smart_candidate_bio.photo,

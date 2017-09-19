@@ -1,7 +1,7 @@
 # apis_v1/views/views_voter.py
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
-from image.controllers import cache_original_and_resized_image, TWITTER, FACEBOOK
+
 from apis_v1.controllers import voter_count
 from ballot.controllers import choose_election_from_existing_data, voter_ballot_items_retrieve_for_api
 from config.base import get_environment_variable
@@ -11,6 +11,7 @@ from email_outbound.controllers import voter_email_address_save_for_api, voter_e
 from wevote_functions.functions import extract_first_name_from_full_name, extract_last_name_from_full_name
 from follow.controllers import voter_issue_follow_for_api
 from geoip.controllers import voter_location_retrieve_from_ip_for_api
+from image.controllers import TWITTER, FACEBOOK, cache_master_and_resized_image
 from import_export_facebook.controllers import voter_facebook_sign_in_retrieve_for_api, \
     voter_facebook_sign_in_save_for_api
 from import_export_google_civic.controllers import voter_ballot_items_retrieve_from_google_civic_for_api
@@ -1721,7 +1722,7 @@ def voter_update_view(request):  # voterUpdate
     if twitter_profile_image_url_https:
         # Cache original and resized images
         # TODO: Replace voter.twitter_id with value from twitter link to voter
-        cache_results = cache_original_and_resized_image(
+        cache_results = cache_master_and_resized_image(
             voter_we_vote_id=voter.we_vote_id,
             twitter_id=voter.twitter_id,
             twitter_screen_name=voter.twitter_screen_name,
@@ -1737,7 +1738,7 @@ def voter_update_view(request):  # voterUpdate
     if facebook_profile_image_url_https:
         # Cache original and resized images
         # TODO: Replace voter.facebook_id with value from facebook link to voter
-        cache_results = cache_original_and_resized_image(
+        cache_results = cache_master_and_resized_image(
             voter_we_vote_id=voter.we_vote_id,
             facebook_user_id=voter.facebook_id,
             facebook_profile_image_url_https=facebook_profile_image_url_https,

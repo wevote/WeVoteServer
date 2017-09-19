@@ -12,7 +12,7 @@ from .functions import retrieve_twitter_user_info
 from candidate.controllers import refresh_candidate_data_from_master_tables
 from candidate.models import CandidateCampaignManager, CandidateCampaignListManager
 from config.base import get_environment_variable
-from image.controllers import TWITTER, cache_original_and_resized_image
+from image.controllers import TWITTER, cache_master_and_resized_image
 from import_export_twitter.models import TwitterAuthManager
 from organization.controllers import move_organization_to_another_complete, \
     update_social_media_statistics_in_other_tables
@@ -89,7 +89,7 @@ def refresh_twitter_candidate_details(candidate_campaign):
                 if 'profile_background_image_url_https' in results['twitter_json'] else None
             twitter_profile_banner_url_https = results['twitter_json']['profile_banner_url'] \
                 if 'profile_banner_url' in results['twitter_json'] else None
-            cache_results = cache_original_and_resized_image(
+            cache_results = cache_master_and_resized_image(
                 candidate_id=candidate_campaign.id, candidate_we_vote_id=candidate_campaign.we_vote_id,
                 twitter_id=candidate_campaign.twitter_user_id,
                 twitter_screen_name=candidate_campaign.candidate_twitter_handle,
@@ -168,7 +168,7 @@ def refresh_twitter_organization_details(organization):
             twitter_profile_banner_url_https = results['twitter_json']['profile_banner_url'] \
                 if 'profile_banner_url' in results['twitter_json'] else None
             # Cache original and resized images
-            cache_results = cache_original_and_resized_image(
+            cache_results = cache_master_and_resized_image(
                 organization_id=organization.id, organization_we_vote_id=organization.we_vote_id,
                 twitter_id=organization.twitter_user_id,
                 twitter_screen_name=organization.organization_twitter_handle,
@@ -1168,7 +1168,7 @@ def twitter_sign_in_retrieve_for_api(voter_device_id):  # twitterSignInRetrieve
     else:
         voter_we_vote_id_for_cache = voter_we_vote_id
     # Cache original and resized images
-    cache_results = cache_original_and_resized_image(
+    cache_results = cache_master_and_resized_image(
         voter_we_vote_id=voter_we_vote_id_for_cache,
         twitter_id=twitter_id, twitter_screen_name=twitter_auth_response.twitter_screen_name,
         twitter_profile_image_url_https=twitter_auth_response.twitter_profile_image_url_https,

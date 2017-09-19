@@ -14,7 +14,7 @@ from follow.controllers import duplicate_follow_entries_to_another_voter, \
 from friend.controllers import fetch_friend_invitation_recipient_voter_we_vote_id, friend_accepted_invitation_send, \
     move_friend_invitations_to_another_voter, move_friends_to_another_voter
 from friend.models import FriendManager
-from image.controllers import cache_original_and_resized_image, TWITTER, FACEBOOK
+from image.controllers import cache_master_and_resized_image, TWITTER, FACEBOOK
 from import_export_facebook.models import FacebookManager
 from import_export_twitter.models import TwitterAuthManager
 import json
@@ -639,7 +639,7 @@ def voter_merge_two_accounts_for_api(  # voterMergeTwoAccounts
                 return error_results
 
         # Cache original and resized images
-        cache_results = cache_original_and_resized_image(
+        cache_results = cache_master_and_resized_image(
             voter_we_vote_id=facebook_owner_voter.we_vote_id,
             facebook_user_id=facebook_auth_response.facebook_user_id,
             facebook_profile_image_url_https=facebook_auth_response.facebook_profile_image_url_https,
@@ -771,7 +771,7 @@ def voter_merge_two_accounts_for_api(  # voterMergeTwoAccounts
                 return error_results
 
         # Cache original and resized images
-        cache_results = cache_original_and_resized_image(
+        cache_results = cache_master_and_resized_image(
             voter_we_vote_id=twitter_owner_voter.we_vote_id,
             twitter_id=twitter_auth_response.twitter_id,
             twitter_screen_name=twitter_auth_response.twitter_screen_name,
