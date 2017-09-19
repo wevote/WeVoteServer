@@ -7,7 +7,7 @@ from email_outbound.models import EmailManager
 from follow.controllers import move_follow_entries_to_another_voter
 from friend.controllers import move_friend_invitations_to_another_voter, move_friends_to_another_voter
 from friend.models import FriendManager
-from image.controllers import FACEBOOK, cache_original_and_resized_image
+from image.controllers import FACEBOOK, cache_master_and_resized_image
 from image.models import WeVoteImageManager
 from import_export_facebook.models import FacebookManager
 from organization.controllers import move_organization_to_another_complete
@@ -94,7 +94,7 @@ def voter_facebook_save_to_current_account_for_api(voter_device_id):  # voterFac
     facebook_link_to_voter = link_results['facebook_link_to_voter']
 
     # Cache original and resized images
-    cache_results = cache_original_and_resized_image(
+    cache_results = cache_master_and_resized_image(
         voter_we_vote_id=voter.we_vote_id,
         facebook_user_id=facebook_auth_response.facebook_user_id,
         facebook_profile_image_url_https=facebook_auth_response.facebook_profile_image_url_https,
@@ -283,7 +283,7 @@ def voter_facebook_save_to_current_account_for_api(voter_device_id):  # voterFac
 #         if facebook_user_results['facebook_user_found']:
 #             facebook_user = facebook_user_results['facebook_user']
 #             # Cache original and resized images
-#             cache_results = cache_original_and_resized_image(
+#             cache_results = cache_master_and_resized_image(
 #                 voter_we_vote_id=viewer_voter_we_vote_id,
 #                 facebook_user_id=facebook_user.facebook_user_id,
 #                 facebook_profile_image_url_https=facebook_user.facebook_profile_image_url_https,
@@ -633,7 +633,7 @@ def voter_facebook_sign_in_retrieve_for_api(voter_device_id):  # voterFacebookSi
         voter_we_vote_id_for_cache = voter_we_vote_id
 
     # Cache original and resized images
-    cache_results = cache_original_and_resized_image(
+    cache_results = cache_master_and_resized_image(
         voter_we_vote_id=voter_we_vote_id_for_cache,
         facebook_user_id=facebook_auth_response.facebook_user_id,
         facebook_profile_image_url_https=facebook_auth_response.facebook_profile_image_url_https,
