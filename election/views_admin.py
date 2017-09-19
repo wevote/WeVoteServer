@@ -475,10 +475,17 @@ def election_list_view(request):
             election_list_query = election_list_query.filter(final_filters)
 
     election_list = election_list_query[:200]
+    election_list_modified = []
+    ballot_returned_list_manager = BallotReturnedListManager()
+    for election in election_list:
+        election.ballot_returned_count = \
+            ballot_returned_list_manager.fetch_ballot_returned_list_count_for_election(
+                election.google_civic_election_id, election.state_code)
+        election_list_modified.append(election)
 
     template_values = {
         'messages_on_stage':        messages_on_stage,
-        'election_list':            election_list,
+        'election_list':            election_list_modified,
         'election_search':          election_search,
         'google_civic_election_id': google_civic_election_id,
         'state_code':               state_code,
@@ -539,20 +546,20 @@ def election_summary_view(request, election_local_id):
     ballot_returned_list_manager = BallotReturnedListManager()
     candidate_campaign_list_manager = CandidateCampaignListManager()
 
-    state_list = STATE_CODE_MAP
-    state_list_modified = {}
-    for one_state_code, one_state_name in state_list.items():
-        ballot_returned_count = ballot_returned_list_manager.fetch_ballot_returned_list_count_for_election(
-            election_on_stage.google_civic_election_id, one_state_code)
-
-        state_name_modified = one_state_name
-        if positive_value_exists(ballot_returned_count):
-            state_name_modified += " - " + str(ballot_returned_count)
-        state_list_modified[one_state_code] = state_name_modified
-
-    sorted_state_list = sorted(state_list_modified.items())
-
     if election_on_stage_found:
+        state_list = STATE_CODE_MAP
+        state_list_modified = {}
+        for one_state_code, one_state_name in state_list.items():
+            ballot_returned_count = ballot_returned_list_manager.fetch_ballot_returned_list_count_for_election(
+                election_on_stage.google_civic_election_id, one_state_code)
+
+            state_name_modified = one_state_name
+            if positive_value_exists(ballot_returned_count):
+                state_name_modified += " - " + str(ballot_returned_count)
+            state_list_modified[one_state_code] = state_name_modified
+
+        sorted_state_list = sorted(state_list_modified.items())
+
         ballot_returned_list_results = ballot_returned_list_manager.retrieve_ballot_returned_list_for_election(
             election_on_stage.google_civic_election_id, state_code)
 
@@ -568,6 +575,8 @@ def election_summary_view(request, election_local_id):
         messages.add_message(request, messages.INFO, status_print_list)
         messages_on_stage = get_messages(request)
 
+        ballot_item_list_manager = BallotItemListManager()
+        ballot_returned_list_modified = []
         if show_offices_and_candidates:
             ballot_returned_list_modified = []
             # office_list_manager = ContestOfficeListManager()
@@ -576,12 +585,12 @@ def election_summary_view(request, election_local_id):
                 candidates_count = 0
                 offices_count = 0
                 if positive_value_exists(one_ballot_returned.polling_location_we_vote_id):
-                    ballot_item_manager = BallotItemListManager()
                     office_list = []
-                    results = ballot_item_manager.retrieve_all_ballot_items_for_polling_location(
+                    results = ballot_item_list_manager.retrieve_all_ballot_items_for_polling_location(
                         one_ballot_returned.polling_location_we_vote_id, google_civic_election_id)
                     if results['ballot_item_list_found']:
                         ballot_item_list = results['ballot_item_list']
+                        ballot_items_count = len(ballot_item_list)
                         for one_ballot_item in ballot_item_list:
                             if positive_value_exists(one_ballot_item.contest_office_we_vote_id):
                                 offices_count += 1
@@ -592,6 +601,7 @@ def election_summary_view(request, election_local_id):
                     one_ballot_returned.office_and_candidate_text = \
                         "offices: {offices_count}, candidates: {candidates_count}".format(
                             offices_count=offices_count, candidates_count=candidates_count)
+                    one_ballot_returned.ballot_items_count = ballot_items_count
 
                 # office_list_results = office_list_manager.retrieve_offices_by_list(
                 #     office_list, True)
@@ -608,7 +618,11 @@ def election_summary_view(request, election_local_id):
                 #             offices_count=offices_count, candidates_count=candidates_count)
                 ballot_returned_list_modified.append(one_ballot_returned)
         else:
-            ballot_returned_list_modified = ballot_returned_list
+            for one_ballot_returned in ballot_returned_list:
+                one_ballot_returned.ballot_items_count = \
+                    ballot_item_list_manager.fetch_ballot_item_list_count_for_ballot_returned(
+                        one_ballot_returned.polling_location_we_vote_id, one_ballot_returned.google_civic_election_id)
+                ballot_returned_list_modified.append(one_ballot_returned)
 
         template_values = {
             'ballot_returned_list': ballot_returned_list_modified,

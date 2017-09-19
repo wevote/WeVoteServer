@@ -159,6 +159,10 @@
 {% endif %}
 
     <br />
+    <a href="{% url 'ballot:ballot_returned_delete_process' ballot_returned.id %}">
+        Delete this Ballot Location and all Ballot Items</a><br />
+
+    <br />
     <p><a href="{% url 'election:election_summary' election.id %}">cancel</a>
     <input type="submit" value="{% if ballot_returned %}Update Ballot{% else %}Save New Ballot{% endif %}" /></p>
 </form>
