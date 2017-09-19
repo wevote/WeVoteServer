@@ -156,9 +156,20 @@
         <br />
     {% endif %}
 
+    {% if organization.we_vote_hosted_profile_image_url_large %}
+        we_vote_hosted_profile_image_url_large: {{ organization.we_vote_hosted_profile_image_url_large }}<br />
+        <br />
+    {% endif %}
+
     {% if organization.twitter_profile_banner_url_https %}
         twitter_profile_banner_url_https: {{ organization.twitter_profile_banner_url_https }}<br />
         <img src="{{ organization.twitter_profile_banner_url_https }}"><br />
+        <br />
+    {% endif %}
+
+    {% if organization.twitter_profile_background_image_url_https %}
+        twitter_profile_background_image_url_https: {{ organization.twitter_profile_background_image_url_https }}<br />
+        <img src="{{ organization.twitter_profile_background_image_url_https }}"><br />
         <br />
     {% endif %}
 
