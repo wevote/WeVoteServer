@@ -72,9 +72,74 @@ def ballot_items_sync_out_view(request):  # ballotItemsSyncOut
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 
 
+@login_required
+def ballot_returned_delete_process_view(request, ballot_returned_id):
+    authority_required = {'verified_volunteer'}  # admin, verified_volunteer
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
+    google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
+    state_code = request.GET.get('state_code', '')
+
+    success = False
+    ballot_returned_found = False
+    ballot_returned = BallotReturned()
+
+    ballot_returned_manager = BallotReturnedManager()
+    results = ballot_returned_manager.retrieve_existing_ballot_returned_by_identifier(ballot_returned_id)
+    if results['ballot_returned_found']:
+        ballot_returned = results['ballot_returned']
+        ballot_returned_found = True
+        # google_civic_election_id = ballot_returned.google_civic_election_id
+        # polling_location_we_vote_id = ballot_returned.polling_location_we_vote_id
+
+    if not ballot_returned_found:
+        messages.add_message(request, messages.ERROR, 'Could not find ballot_returned, id: ' + ballot_returned_id +
+                                                      '  -- required to delete this ballot location.')
+        return HttpResponseRedirect(reverse('ballot:ballot_item_list_edit', args=(ballot_returned_id,)) +
+                                    "?google_civic_election_id=" + str(google_civic_election_id) +
+                                    "&state_code=" + str(state_code)
+                                    )
+
+    # Get a list of ballot_items stored at this location
+    ballot_item_list_manager = BallotItemListManager()
+    ballot_items_delete_failed_count = 0
+    if positive_value_exists(ballot_returned.polling_location_we_vote_id) and \
+            positive_value_exists(ballot_returned.google_civic_election_id):
+        results = ballot_item_list_manager.retrieve_all_ballot_items_for_polling_location(
+            ballot_returned.polling_location_we_vote_id, ballot_returned.google_civic_election_id)
+        if results['ballot_item_list_found']:
+            ballot_item_list = results['ballot_item_list']
+            for one_ballot_item in ballot_item_list:
+                try:
+                    one_ballot_item.delete()
+                except Exception as e:
+                    ballot_items_delete_failed_count += 0
+
+    if not positive_value_exists(ballot_items_delete_failed_count):
+        google_civic_election_id = ballot_returned.google_civic_election_id
+        try:
+            ballot_returned.delete()
+            success = True
+        except Exception as e:
+            success = False
+
+    if success:
+        messages.add_message(request, messages.INFO, 'ballot_returned and ballot_items deleted.')
+        election_local_id = 0
+        return HttpResponseRedirect(reverse('election:election_summary', args=(election_local_id,)) +
+                                    "?google_civic_election_id=" + str(google_civic_election_id) +
+                                    "&state_code=" + str(state_code)
+                                    )
+    else:
+        messages.add_message(request, messages.ERROR, 'Could not delete.')
+        return HttpResponseRedirect(reverse('ballot:ballot_item_list_edit', args=(ballot_returned_id,)) +
+                                    "?google_civic_election_id=" + str(google_civic_election_id) +
+                                    "&state_code=" + str(state_code)
+                                    )
+
+
 # This page does not need to be protected.
-# class BallotReturnedSyncOutView(APIView):
-#     def get(self, request, format=None):
 def ballot_returned_sync_out_view(request):  # ballotReturnedSyncOut
     google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
     state_code = request.GET.get('state_code', '')

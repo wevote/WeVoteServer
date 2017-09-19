@@ -120,7 +120,7 @@ def organization_daily_metrics_process_view(request):
 
 
 @login_required
-def analytics_action_list_view(request, voter_we_vote_id=False, organization_we_vote_id=False):
+def analytics_action_list_view(request, voter_we_vote_id=False, organization_we_vote_id=False, incorrect_integer=0):
     """
 
     :param request:
@@ -497,7 +497,8 @@ def sitewide_voter_metrics_view(request):
         voters_shown_count = len(sitewide_voter_metrics_list)
 
         # Bounce rate
-        voter_bounce_rate = bounce_count / voters_shown_count
+        total_voters = voters_shown_count + bounce_count
+        voter_bounce_rate = bounce_count / total_voters
 
         messages.add_message(request, messages.INFO, str(voters_shown_count) + ' voters shown. ' +
                              str(bounce_count) + ' welcome page bounces not shown. ' +

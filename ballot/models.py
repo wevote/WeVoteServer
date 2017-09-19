@@ -525,6 +525,22 @@ class BallotItemListManager(models.Model):
                     return one_election.google_civic_election_id
         return 0
 
+    def fetch_ballot_item_list_count_for_ballot_returned(self, polling_location_we_vote_id, google_civic_election_id):
+        google_civic_election_id = convert_to_int(google_civic_election_id)
+        try:
+            ballot_item_queryset = BallotItem.objects.all()
+            ballot_item_queryset = ballot_item_queryset.filter(
+                polling_location_we_vote_id__iexact=polling_location_we_vote_id)
+            ballot_item_queryset = ballot_item_queryset.filter(google_civic_election_id=google_civic_election_id)
+            return ballot_item_queryset.count()
+        except BallotItem.DoesNotExist:
+            # No ballot items found. Not a problem.
+            pass
+        except Exception as e:
+            pass
+
+        return 0
+
     def copy_ballot_items(self, ballot_returned, to_voter_id):
         status = ""
         # Get all ballot items from the reference ballot_returned

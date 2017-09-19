@@ -44,6 +44,7 @@
             <td>Date</td>
             <td>Google Civic ID</td>
             <td>State Code</td>
+            <td>Ballot Locations</td>
             <td>&nbsp;</td>
         </tr>
     {% for election in election_list %}
@@ -53,6 +54,7 @@
             <td>{{ election.election_day_text }}</td>
             <td align="middle">{{ election.google_civic_election_id }}</td>
             <td align="middle">{{ election.state_code }}</td>
+            <td align="middle">{% if election.ballot_returned_count %}{{ election.ballot_returned_count|default_if_none:"" }}{% endif %}</td>
             <td><a href="{% url 'election:election_edit' election.id %}" style="font-size: .65em">(edit)</a></td>
         </tr>
     {% endfor %}
