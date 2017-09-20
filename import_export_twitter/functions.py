@@ -85,6 +85,17 @@ def retrieve_twitter_user_possibilities(full_name='', location=''):  # TODO Upda
 
     api = tweepy.API(auth)
 
+    # search for twitter users
+    search_results = api.search_users(full_name)
+    # possibly bounce up if there's a verified candidate? maybe just put them at the top of possibilities?
+    # verified = filter(search_results, lambda possible_candidate: possible_candidate.verified) looks cleaner?
+    verified = [candidate for candidate in search_results if candidate.verified]
+    search_results.sort(key=lambda possible_candidate: possible_candidate.followers_count, reverse=True)
+    denom = sum(candidate.followers_count for candidate in search_results)
+    possibility_percentages = [candidate.followers_count / denom for candidate in search_results]
+
+    # we probably need to wrap over the code at the bottom and chunk the elements through a function that does all of the below
+    import pdb; pdb.set_trace()
     # Strip out the twitter handles "False" or "None"
     if twitter_handle is False:
         twitter_handle = ''

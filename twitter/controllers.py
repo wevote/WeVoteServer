@@ -26,7 +26,7 @@ def retrieve_possible_twitter_handles(candidate_campaign):
 
     status += "RETRIEVE_POSSIBLE_TWITTER_HANDLES-REACHING_OUT_TO_TWITTER "
     # TODO Populate these variables from candidate_campaign
-    results = retrieve_twitter_user_possibilities(full_name, location)
+    results = retrieve_twitter_user_possibilities(candidate_campaign.candidate_name, candidate_campaign.state_code)
 
     if results['success']:
         status += "RETRIEVE_POSSIBLE_TWITTER_HANDLES-RETRIEVED_FROM_TWITTER"

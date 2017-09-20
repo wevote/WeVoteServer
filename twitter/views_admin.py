@@ -32,7 +32,7 @@ def retrieve_possible_twitter_handles_view(request, candidate_campaign_we_vote_i
     candidate_campaign = results['candidate_campaign']
 
     # TODO Uncomment this and work within here
-    # results = retrieve_possible_twitter_handles(candidate_campaign)
+    results = retrieve_possible_twitter_handles(candidate_campaign)
     number_of_possibilities_found = 0
     messages.add_message(request, messages.INFO, 'Number of possibilities found: ' + str(number_of_possibilities_found))
 
