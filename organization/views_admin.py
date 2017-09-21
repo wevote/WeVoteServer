@@ -517,7 +517,7 @@ def organization_edit_process_view(request):
 
 
 @login_required
-def organization_position_list_view(request, organization_id=0, organization_we_vote_id=""):
+def organization_position_list_view(request, organization_id=0, organization_we_vote_id="", incorrect_integer=0):
     authority_required = {'verified_volunteer'}  # admin, verified_volunteer
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)

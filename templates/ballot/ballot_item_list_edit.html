@@ -158,9 +158,11 @@
 {# If here, we are looking at a We Vote election (or new election) - 2016-08-10 This filter turned off for now #}
 {% endif %}
 
+{% if ballot_returned and ballot_returned.id %}
     <br />
     <a href="{% url 'ballot:ballot_returned_delete_process' ballot_returned.id %}">
         Delete this Ballot Location and all Ballot Items</a><br />
+{% endif %}
 
     <br />
     <p><a href="{% url 'election:election_summary' election.id %}">cancel</a>
