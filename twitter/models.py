@@ -138,6 +138,19 @@ class TwitterUserManager(models.Model):
     def __unicode__(self):
         return "TwitterUserManager"
 
+    def update_or_create_twitter_link_possibility(self, voter_we_vote_id, twitter_id, search_term, likelihood_percentage):
+        # if voter_we_vote_id exists already then we need to update the twitter link possibilities
+        # else we need to create
+        try:
+            twitter_link_possibility = TwitterLinkPossibility(candidate_campaign_we_vote_id=voter_we_vote_id,
+                    search_term_used=search_term,
+                    likelihood_percentage=likelihood_percentage,
+                    twitter_id=twitter_id)
+            twitter_link_possibility.save()
+        except Exception as e:
+            import pdb; pdb.set_trace()
+            pass
+
     def create_twitter_link_to_organization(self, twitter_id, organization_we_vote_id):
         if not positive_value_exists(twitter_id) or not \
                 positive_value_exists(organization_we_vote_id):
