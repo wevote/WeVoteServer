@@ -141,9 +141,9 @@ class FacebookUser(models.Model):
         verbose_name="total count of friends from facebook", null=True, unique=False)
 
 
-class FacebookFriendsOfMe(models.Model):
+class FacebookFriendsUsingWeVote(models.Model):
     """
-    My facebook friends ids, from the perspective of facebook id of me
+    My facebook friends ids who are already using Wvote App, from the perspective of facebook id of me
     """
     facebook_id_of_me = models.BigIntegerField(verbose_name="facebook id of viewer", null=False, unique=False)
     facebook_id_of_my_friend = models.BigIntegerField(verbose_name="facebook id of my friend", null=False, unique=False)
@@ -264,16 +264,15 @@ class FacebookManager(models.Model):
         }
         return results
 
-    def create_or_update_facebook_friends_of_me(self, facebook_id_of_me, facebook_id_of_my_friend):
+    def create_or_update_facebook_friends_using_we_vote(self, facebook_id_of_me, facebook_id_of_my_friend):
         """
-        We use this subroutine to create or update FacebookFriendsOfMe table with my friends facebook id.
+        We use this subroutine to create or update FacebookFriendsUsingWeVote table with my friends facebook id.
         :param facebook_id_of_me:
-        :param facebook_ids_of_my_friend:
+        :param facebook_id_of_my_friend:
         :return:
         """
-        facebook_friends_of_me = FacebookFriendsOfMe()
         try:
-            facebook_friends_of_me, created = FacebookFriendsOfMe.objects.update_or_create(
+            facebook_friends_using_we_vote, created = FacebookFriendsUsingWeVote.objects.update_or_create(
                 facebook_id_of_me=facebook_id_of_me,
                 facebook_id_of_my_friend=facebook_id_of_my_friend,
                 defaults={
@@ -281,21 +280,21 @@ class FacebookManager(models.Model):
                     'facebook_id_of_my_friend': facebook_id_of_my_friend
                 }
             )
-            facebook_friends_of_me_saved = True
+            facebook_friends_using_we_vote_saved = True
             success = True
-            status = "FACEBOOK_FRIENDS_OF_ME_CREATED"
+            status = "FACEBOOK_FRIENDS_USING_WE_VOTE_CREATED"
         except Exception as e:
-            facebook_friends_of_me_saved = False
-            facebook_friends_of_me = FacebookFriendsOfMe()
+            facebook_friends_using_we_vote_saved = False
+            facebook_friends_using_we_vote = FacebookFriendsUsingWeVote()
             success = False
-            status = "FACEBOOK_FRIENDS_OF_ME_NOT_CREATED"
+            status = "FACEBOOK_FRIENDS_USING_WE_VOTE_CREATED"
             handle_exception(e, logger=logger, exception_message=status)
 
         results = {
-            'success':                      success,
-            'status':                       status,
-            'facebook_friends_of_me_saved': facebook_friends_of_me_saved,
-            'facebook_friends_of_me':       facebook_friends_of_me,
+            'success':                              success,
+            'status':                               status,
+            'facebook_friends_using_we_vote_saved': facebook_friends_using_we_vote_saved,
+            'facebook_friends_using_we_vote':       facebook_friends_using_we_vote,
             }
         return results
 
@@ -664,10 +663,13 @@ class FacebookManager(models.Model):
         facebook_friend_dict['facebook_user_birthday'] = (facebook_friend_api_details_entry.get('birthday')
                                                           if 'birthday' in facebook_friend_api_details_entry.keys()
                                                           else "")
+        # is_silhouette is true for default image of facebook
         facebook_friend_dict['facebook_profile_image_url_https'] = \
             (facebook_friend_api_details_entry.get(
                 'picture').get('data').get('url') if 'picture' in facebook_friend_api_details_entry.keys() and
-             facebook_friend_api_details_entry.get('picture', {}).get('data', {}).get('url', {}) else "")
+                facebook_friend_api_details_entry.get('picture', {}).get('data', {}).get('url', {}) and
+                not facebook_friend_api_details_entry.get('picture', {}).get('data', {}).get('is_silhouette', True)
+                else "")
         facebook_friend_dict['facebook_background_image_url_https'] = \
             (facebook_friend_api_details_entry.get('cover').get('source')
              if 'cover' in facebook_friend_api_details_entry.keys() and
@@ -679,155 +681,138 @@ class FacebookManager(models.Model):
                                                              keys() else "")
         return facebook_friend_dict
 
-    # August 24, 2017: We now use the Facebook "games" api "invitable_friends" data on the fly from the webapp, and no
-    # longer attempt to use the more limited "friends" api call from the server
-    # def retrieve_facebook_friends_from_facebook(self, voter_device_id):
-    #     """
-    #     NOTE August 2017:  The facebook "friends" API call when called from the server now only returns that subset of
-    #     your facebook friends who are already on WeVote, it will not show your friends who do not have the facebook
-    #     app on their facebook settings page.  It is unclear if this code even works at all.  The code that does the
-    #     job is in the WebApp using the "games" api "invitiable_friends" call.
-    #     If having problems see the note in client side WebApp FacebookInvitableFriends.jsx
-    #
-    #     Technical discussion:  https://stackoverflow.com/questions/23417356
-    #
-    #     We use this routine to retrieve my facebook friends details and updating FacebookFriendsOfMe table
-    #     :param voter_device_id:
-    #     :return: facebook_friends_list
-    #     """
-    #
-    #     success = False
-    #     status = ''
-    #     facebook_friends_list_found = False
-    #     facebook_suggested_friends_list = []
-    #     facebook_friends_list = []
-    #     # required fields need to be updated in FacebookUser table
-    #     facebook_api_fields = "id, name, first_name, middle_name, last_name, location{id, name}, gender, birthday, " \
-    #                           "cover{source}, picture.width(200).height(200){url}, about, is_verified, " \
-    #                           "friends{id, name, first_name, middle_name, last_name, location{id, name}, gender, " \
-    #                           "birthday, cover{source}, picture.width(200).height(200){url}, about, is_verified} "
-    #     auth_response_results = self.retrieve_facebook_auth_response(voter_device_id)
-    #     if not auth_response_results['facebook_auth_response_found']:
-    #         error_results = {
-    #             'status':                           "FACEBOOK_AUTH_RESPONSE_NOT_FOUND",
-    #             'success':                          success,
-    #             'facebook_friends_list_found':      facebook_friends_list_found,
-    #             'facebook_suggested_friends_list':  facebook_suggested_friends_list,
-    #             'facebook_friends_list':            facebook_friends_list,
-    #         }
-    #         return error_results
-    #
-    #     facebook_auth_response = auth_response_results['facebook_auth_response']
-    #     try:
-    #         facebook_graph = facebook.GraphAPI(facebook_auth_response.facebook_access_token, version='2.7')
-    #         facebook_friends_api_details = facebook_graph.get_connections(id=facebook_auth_response.facebook_user_id,
-    #                                                                       connection_name="friends",
-    #                                                                       fields=facebook_api_fields)
-    #
-    #         # graph.get_connections returns three dictionary keys i.e. data, paging, summary,
-    #         # here data key contains list of friends with the given fields values and paging contains cursors positions
-    #         # and summary contains total_count of your friends, for ex:
-    #         # {"data": [{"name": "Micheal", "first_name": "Micheal", "id": "16086981492"},
-    #         # {"name": "John", "first_name": "John", "id": "1263984"],
-    #         # "paging": {"cursors": {"before": "QVFmc0QVBsZAk1KWmNwRVFoRzB1MGFDWlpoa3J0NFR6VTQZD",
-    #         # "after": "QVFIUlAzdGplaWV5YTZAmeUNCNzVuRk1iPZAnhUNjltUldoSjR5aWZAxdGJ2UktEUHQzNWpBeHRmcEkZD"}},
-    #         # "summary": {'total_count': 10}}
-    #         for facebook_friend_api_details_entry in facebook_friends_api_details.get('data', []):
-    #             # Extract required details for each facebook friend and then updating FacebookFriendsOfMe table
-    #             facebook_friend_dict = self.extract_facebook_details_data(facebook_friend_api_details_entry)
-    #             facebook_friend_dict['facebook_user_friend_total_count'] = (
-    #                 facebook_friend_api_details_entry.get('friends').get('summary').get('total_count')
-    #                 if facebook_friend_api_details_entry.get('friends', {}).get('summary', {}).get('total_count', {})
-    #                 else None)
-    #             if facebook_friend_dict not in facebook_friends_list:
-    #                 facebook_friends_list.append(facebook_friend_dict)
-    #             facebook_friends_saved_results = self.create_or_update_facebook_friends_of_me(
-    #                 facebook_auth_response.facebook_user_id, facebook_friend_dict.get('facebook_user_id'))
-    #             status += ' ' + facebook_friends_saved_results['status']
-    #
-    #             # Extract Friend's friend details
-    #             if facebook_friend_api_details_entry.get('friends', {}).get('data', []):
-    #                 for facebook_friends_friend_details_entry in \
-    #                         facebook_friend_api_details_entry.get('friends', {}).get('data', []):
-    #                     facebook_friends_friend_dict = self.extract_facebook_details_data(
-    #                         facebook_friends_friend_details_entry)
-    #                     facebook_friends_friend_dict['facebook_user_friend_total_count'] = None
-    #                     if facebook_friends_friend_dict not in facebook_suggested_friends_list:
-    #                         facebook_suggested_friends_list.append(facebook_friends_friend_dict)
-    #
-    #         if facebook_friends_api_details.get('data', []).__len__() == 0:
-    #             logger.debug("retrieve_facebook_friends_from_facebook  received zero friends from the API")
-    #         success = True
-    #         status += " " + "FACEBOOK_FRIENDS_LIST_FOUND"
-    #         facebook_friends_list_found = True
-    #     except Exception as e:
-    #         success = False
-    #         status += " " + "FACEBOOK_FRIENDS_LIST_NOT_FOUND"
-    #         facebook_friends_list_found = False
-    #         handle_exception(e, logger=logger, exception_message=status)
-    #         logger.error("retrieve_facebook_friends_from_facebook caught: " + e.type + " -- " + e.message)
-    #
-    #
-    #     results = {
-    #         'success':                          success,
-    #         'status':                           status,
-    #         'facebook_friends_list_found':      facebook_friends_list_found,
-    #         'facebook_suggested_friends_list':  facebook_suggested_friends_list,
-    #         'facebook_friends_list':            facebook_friends_list,
-    #     }
-    #     return results
-
-    def retrieve_facebook_friends_of_me_list(self, facebook_id_of_me):
+    def retrieve_facebook_friends_from_facebook(self, voter_device_id):
         """
-        Reterive my friends facebook ids from FacebookFriendsOfMe table.
+        This function is for getting facebook friends who are already using WeVote
+        NOTE August 2017:  The facebook "friends" API call when called from the server now only returns that subset of
+        your facebook friends who are already on WeVote, it will not show your friends who do not have the facebook
+        app on their facebook settings page.  It is unclear if this code even works at all.  The code that does the
+        job is in the WebApp using the "games" api "invitiable_friends" call.
+        If having problems see the note in client side WebApp FacebookInvitableFriends.jsx
+
+        Technical discussion:  https://stackoverflow.com/questions/23417356
+
+        We use this routine to retrieve my facebook friends details and updating FacebookFriendsUsingWeVote table
+        :param voter_device_id:
+        :return: facebook_friends_list
+        """
+
+        success = False
+        status = ''
+        facebook_friends_list_found = False
+        facebook_friends_list = []
+        facebook_api_fields = "id, name, first_name, middle_name, last_name, location{id, name}, gender, birthday, " \
+                              "cover{source}, picture.width(200).height(200){url, is_silhouette}, about, is_verified "
+
+        auth_response_results = self.retrieve_facebook_auth_response(voter_device_id)
+        if not auth_response_results['facebook_auth_response_found']:
+            error_results = {
+                'status':                           "FACEBOOK_AUTH_RESPONSE_NOT_FOUND",
+                'success':                          success,
+                'facebook_friends_list_found':      facebook_friends_list_found,
+                'facebook_friends_list': facebook_friends_list,
+            }
+            return error_results
+
+        facebook_auth_response = auth_response_results['facebook_auth_response']
+        try:
+            facebook_graph = facebook.GraphAPI(facebook_auth_response.facebook_access_token, version='2.7')
+            facebook_friends_api_details = facebook_graph.get_connections(id=facebook_auth_response.facebook_user_id,
+                                                                          connection_name="friends",
+                                                                          fields=facebook_api_fields)
+
+            # graph.get_connections returns three dictionary keys i.e. data, paging, summary,
+            # here data key contains list of friends with the given fields values and paging contains cursors positions
+            # and summary contains total_count of your friends, for ex:
+            # {"data": [{"name": "Micheal", "first_name": "Micheal", "id": "16086981492"},
+            # {"name": "John", "first_name": "John", "id": "1263984"],
+            # "paging": {"cursors": {"before": "QVFmc0QVBsZAk1KWmNwRVFoRzB1MGFDWlpoa3J0NFR6VTQZD",
+            # "after": "QVFIUlAzdGplaWV5YTZAmeUNCNzVuRk1iPZAnhUNjltUldoSjR5aWZAxdGJ2UktEUHQzNWpBeHRmcEkZD"}},
+            # "summary": {'total_count': 10}}
+            for facebook_friend_api_details_entry in facebook_friends_api_details.get('data', []):
+                # Extract required details for each facebook friend and then updating FacebookFriendsUsingWeVote table
+                facebook_friend_dict = self.extract_facebook_details_data(facebook_friend_api_details_entry)
+                facebook_friend_dict['facebook_user_friend_total_count'] = (
+                    facebook_friend_api_details_entry.get('friends').get('summary').get('total_count')
+                    if facebook_friend_api_details_entry.get('friends', {}).get('summary', {}).get('total_count', {})
+                    else None)
+                if facebook_friend_dict not in facebook_friends_list:
+                    facebook_friends_list.append(facebook_friend_dict)
+                facebook_friends_saved_results = self.create_or_update_facebook_friends_using_we_vote(
+                    facebook_auth_response.facebook_user_id, facebook_friend_dict.get('facebook_user_id'))
+                status += ' ' + facebook_friends_saved_results['status']
+
+            if facebook_friends_api_details.get('data', []).__len__() == 0:
+                logger.debug("retrieve_facebook_friends_from_facebook  received zero friends from the API")
+            success = True
+            status += " " + "FACEBOOK_FRIENDS_LIST_FOUND"
+            facebook_friends_list_found = True
+        except Exception as e:
+            success = False
+            status += " " + "FACEBOOK_FRIENDS_LIST_NOT_FOUND"
+            facebook_friends_list_found = False
+            handle_exception(e, logger=logger, exception_message=status)
+            logger.error("retrieve_facebook_friends_from_facebook caught: " + e)
+
+        results = {
+            'success':                          success,
+            'status':                           status,
+            'facebook_friends_list_found':      facebook_friends_list_found,
+            'facebook_friends_list':            facebook_friends_list,
+        }
+        return results
+
+    def retrieve_facebook_friends_using_we_vote_list(self, facebook_id_of_me):
+        """
+        Reterive my friends facebook ids from FacebookFriendsUsingWeVote table.
         :param facebook_id_of_me:
         :return:
         """
         status = ""
-        facebook_friends_of_me_list = []
+        facebook_friends_using_we_vote_list = []
 
         if not positive_value_exists(facebook_id_of_me):
             success = False
-            status = 'RETRIEVE_FACEBOOK_FRIENDS_OF_ME-MISSING_FACEBOOK_ID '
+            status = 'RETRIEVE_FACEBOOK_FRIENDS_USING_WE_VOTE-MISSING_FACEBOOK_ID '
             results = {
-                'success':                              success,
-                'status':                               status,
-                'facebook_friends_of_me_list_found':    False,
-                'facebook_friends_of_me_list':          [],
+                'success':                                      success,
+                'status':                                       status,
+                'facebook_friends_using_we_vote_list_found':    False,
+                'facebook_friends_using_we_vote_list':          [],
             }
             return results
 
         try:
-            facebook_friends_of_me_queryset = FacebookFriendsOfMe.objects.all()
-            facebook_friends_of_me_queryset = facebook_friends_of_me_queryset.filter(
+            facebook_friends_using_we_vote_queryset = FacebookFriendsUsingWeVote.objects.all()
+            facebook_friends_using_we_vote_queryset = facebook_friends_using_we_vote_queryset.filter(
                 facebook_id_of_me=facebook_id_of_me)
-            facebook_friends_of_me_list = facebook_friends_of_me_queryset
+            facebook_friends_using_we_vote_list = facebook_friends_using_we_vote_queryset
 
-            if len(facebook_friends_of_me_list):
+            if len(facebook_friends_using_we_vote_list):
                 success = True
-                facebook_friends_of_me_list_found = True
-                status += ' FACEBOOK_FRIENDS_OF_ME_LIST_RETRIEVED '
+                facebook_friends_using_we_vote_list_found = True
+                status += ' FACEBOOK_FRIENDS_USING_WE_VOTE_LIST_RETRIEVED '
             else:
                 success = True
-                facebook_friends_of_me_list_found = False
-                status += ' NO_FACEBOOK_FRIENDS_OF_ME_LIST_RETRIEVED '
-        except FacebookFriendsOfMe.DoesNotExist:
+                facebook_friends_using_we_vote_list_found = False
+                status += ' NO_FACEBOOK_FRIENDS_USING_WE_VOTE_LIST_RETRIEVED '
+        except FacebookFriendsUsingWeVote.DoesNotExist:
             # No data found. Not a problem.
             success = True
-            facebook_friends_of_me_list_found = False
-            status += ' NO_FACEBOOK_FRIENDS_OF_ME_LIST_RETRIEVED_DoesNotExist '
-            facebook_friends_of_me_list = []
+            facebook_friends_using_we_vote_list_found = False
+            status += ' NO_FACEBOOK_FRIENDS_USING_WE_VOTE_LIST_RETRIEVED_DoesNotExist '
+            facebook_friends_using_we_vote_list = []
         except Exception as e:
             success = False
-            facebook_friends_of_me_list_found = False
-            status += ' FAILED retrieve_facebook_friends_of_me_list FacebookFriendsOfMe '
+            facebook_friends_using_we_vote_list_found = False
+            status += ' FAILED retrieve_facebook_friends_using_we_vote_list FacebookFriendsUsingWeVote '
             handle_exception(e, logger=logger, exception_message=status)
 
         results = {
-            'success':                              success,
-            'status':                               status,
-            'facebook_friends_of_me_list_found':    facebook_friends_of_me_list_found,
-            'facebook_friends_of_me_list':          facebook_friends_of_me_list,
+            'success':                                      success,
+            'status':                                       status,
+            'facebook_friends_using_we_vote_list_found':    facebook_friends_using_we_vote_list_found,
+            'facebook_friends_using_we_vote_list':          facebook_friends_using_we_vote_list,
         }
         return results
 

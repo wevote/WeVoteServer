@@ -974,7 +974,7 @@ def friend_invitation_by_facebook_verify_for_api( voter_device_id, facebook_requ
         try:
             friend_invitation_facebook_link.invitation_status = ACCEPTED
             friend_invitation_facebook_link.deleted = True
-            friend_invitation_facebook_link.save ()
+            friend_invitation_facebook_link.save()
             success = True
             status = "INVITATION_FROM_FACEBOOK_UPDATED"
         except Exception as e:
