@@ -84,9 +84,7 @@ def retrieve_twitter_user_possibilities(full_name='', location=''):
     auth.set_access_token(TWITTER_ACCESS_TOKEN, TWITTER_ACCESS_TOKEN_SECRET)
     api = tweepy.API(auth)
     results = { 'possible_twitter_handles_list': [] }
-    search_results = api.search_users(full_name)
-    # possibly bounce up if there's a verified candidate? maybe just put them at the top of possibilities?
-    verified = [candidate for candidate in search_results if candidate.verified]
+    search_results = api.search_users(q=full_name, page=2)
     search_results.sort(key=lambda possible_candidate: possible_candidate.followers_count, reverse=True)
     denom = sum(candidate.followers_count for candidate in search_results)
     possibility_percentages = [candidate.followers_count / denom for candidate in search_results]
@@ -94,7 +92,7 @@ def retrieve_twitter_user_possibilities(full_name='', location=''):
     for possible_candidate_index in range(len(search_results)):
         current_candidate_twitter_info = {}
         current_candidate_twitter_info['search_term'] = full_name
-        current_candidate_twitter_info['likelihood_percentage'] = possibility_percentages[possible_candidate_index]
+        current_candidate_twitter_info['likelihood_percentage'] = int(possibility_percentages[possible_candidate_index] * 100)
         current_candidate_twitter_info['twitter_json'] = search_results[possible_candidate_index]._json
 
         results['possible_twitter_handles_list'].append(current_candidate_twitter_info)

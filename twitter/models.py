@@ -104,6 +104,15 @@ class TwitterLinkPossibility(models.Model):
     search_term_used = models.CharField(verbose_name="", max_length=255, unique=False)
     not_a_match = models.BooleanField(default=False, verbose_name="")
     likelihood_percentage = models.IntegerField(verbose_name="", null=True, unique=False)
+    twitter_handle = models.CharField(verbose_name='twitter screen name / handle',
+                                      max_length=255, null=False, unique=True)
+    twitter_profile_image_url_https = models.URLField(verbose_name='url of logo from twitter', blank=True, null=True)
+    twitter_description = models.CharField(verbose_name="Text description of this organization from twitter.",
+                                           max_length=255, null=True, blank=True)
+    twitter_url = models.URLField(blank=True, null=True, verbose_name='url of user\'s website')
+    twitter_location = models.CharField(verbose_name="location from twitter", max_length=255, null=True, blank=True)
+    twitter_followers_count = models.IntegerField(verbose_name="number of twitter followers",
+                                                  null=False, blank=True, default=0)
 
 
 class TwitterUser(models.Model):
@@ -138,18 +147,25 @@ class TwitterUserManager(models.Model):
     def __unicode__(self):
         return "TwitterUserManager"
 
-    def update_or_create_twitter_link_possibility(self, voter_we_vote_id, twitter_id, search_term, likelihood_percentage):
-        # if voter_we_vote_id exists already then we need to update the twitter link possibilities
-        # else we need to create
+    def update_or_create_twitter_link_possibility(self, voter_we_vote_id, twitter_json, search_term, likelihood_percentage):
         try:
-            twitter_link_possibility = TwitterLinkPossibility(candidate_campaign_we_vote_id=voter_we_vote_id,
-                    search_term_used=search_term,
-                    likelihood_percentage=likelihood_percentage,
-                    twitter_id=twitter_id)
-            twitter_link_possibility.save()
+            TwitterLinkPossibility.objects.update_or_create(candidate_campaign_we_vote_id=voter_we_vote_id,
+                    twitter_id=twitter_json['id'],
+                    twitter_handle=twitter_json['screen_name'],
+                    defaults={
+                        'likelihood_percentage': likelihood_percentage,
+                        'search_term_used': search_term,
+                        'twitter_description': twitter_json['description'],
+                        'twitter_profile_image_url_https': twitter_json['profile_image_url_https'],
+                        'twitter_url': twitter_json['url'],
+                        'twitter_location': twitter_json['location'],
+                        'twitter_followers_count': twitter_json['followers_count'],
+                        }
+                    )
+            status = "TWITTER_LINK_TO_POSSIBILITY_CREATED"
         except Exception as e:
             import pdb; pdb.set_trace()
-            pass
+            status = "TWITTER_LINK_TO_POSSIBILITY_NOT_CREATED"
 
     def create_twitter_link_to_organization(self, twitter_id, organization_we_vote_id):
         if not positive_value_exists(twitter_id) or not \

@@ -33,13 +33,15 @@ def retrieve_possible_twitter_handles(candidate_campaign):
 
         for possibility_result in possible_twitter_handles_list:
             save_twitter_user_results = twitter_user_manager.update_or_create_twitter_link_possibility(
-                candidate_campaign.we_vote_id, possibility_result['twitter_json']['id'],
+                candidate_campaign.we_vote_id, possibility_result['twitter_json'],
                 possibility_result['search_term'], possibility_result['likelihood_percentage'])
 
     results = {
         'success':                  True,
         'status':                   status,
+        'num_of_possibilities':     str(len(results['possible_twitter_handles_list'])),
     }
+
     return results
 
 
