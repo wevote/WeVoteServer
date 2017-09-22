@@ -46,8 +46,7 @@ def facebook_friends_action_doc_template_values(url_root):
         'api_name': 'facebookFriendsAction',
         'api_slug': 'facebookFriendsAction',
         'api_introduction':
-            "This will provide list of suggested facebook friends to follow. "
-            "These suggestions are generated from my facebook friends",
+            "This will provide list of facebook friends who are using wevote app.",
         'try_now_link': 'apis_v1:facebookFriendsActionView',
         'try_now_link_variables_dict': try_now_link_variables_dict,
         'url_root': url_root,
