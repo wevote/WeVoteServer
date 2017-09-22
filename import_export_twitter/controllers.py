@@ -16,7 +16,7 @@ from image.controllers import TWITTER, cache_master_and_resized_image
 from import_export_twitter.models import TwitterAuthManager
 from organization.controllers import move_organization_to_another_complete, \
     update_social_media_statistics_in_other_tables
-from organization.models import Organization, OrganizationListManager, OrganizationManager
+from organization.models import Organization, OrganizationListManager, OrganizationManager, INDIVIDUAL
 import re
 from socket import timeout
 import tweepy
@@ -1179,14 +1179,21 @@ def twitter_sign_in_retrieve_for_api(voter_device_id):  # twitterSignInRetrieve
     we_vote_hosted_profile_image_url_large = cache_results['we_vote_hosted_profile_image_url_large']
     we_vote_hosted_profile_image_url_medium = cache_results['we_vote_hosted_profile_image_url_medium']
     we_vote_hosted_profile_image_url_tiny = cache_results['we_vote_hosted_profile_image_url_tiny']
-    twitter_user_details_dict = {
-        'id':                       twitter_id,
-        'name':                     twitter_auth_response.twitter_name,
-        'screen_name':              twitter_auth_response.twitter_screen_name,
-        'profile_image_url_https':  twitter_auth_response.twitter_profile_image_url_https,
-    }
+
+    # Retrieve twitter user details from twitter
+    results = retrieve_twitter_user_info(twitter_id, twitter_auth_response.twitter_screen_name)
+    if not results['success']:
+        twitter_json = {
+            'id': twitter_id,
+            'name': twitter_auth_response.twitter_name,
+            'screen_name': twitter_auth_response.twitter_screen_name,
+            'profile_image_url_https': twitter_auth_response.twitter_profile_image_url_https,
+        }
+    else:
+        twitter_json = results['twitter_json']
+
     twitter_user_results = twitter_user_manager.update_or_create_twitter_user(
-        twitter_user_details_dict, twitter_id,
+        twitter_json, twitter_id,
         cached_twitter_profile_image_url_https=cached_twitter_profile_image_url_https,
         cached_twitter_profile_banner_url_https=cached_twitter_profile_banner_url_https,
         we_vote_hosted_profile_image_url_large=we_vote_hosted_profile_image_url_large,
@@ -1453,10 +1460,12 @@ def voter_twitter_save_to_current_account_for_api(voter_device_id):  # voterTwit
             organization_email = ""
             organization_facebook = ""
             organization_image = voter.voter_photo_url()
+            organization_type = INDIVIDUAL
             organization_manager = OrganizationManager()
             create_results = organization_manager.create_organization(
                 organization_name, organization_website, organization_twitter_handle,
-                organization_email, organization_facebook, organization_image, twitter_auth_response.twitter_id)
+                organization_email, organization_facebook, organization_image, twitter_auth_response.twitter_id,
+                organization_type)
             if create_results['organization_created']:
                 # Add value to twitter_owner_voter.linked_organization_we_vote_id when done.
                 new_organization = create_results['organization']

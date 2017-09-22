@@ -11,7 +11,7 @@ from email_outbound.models import EmailAddress, EmailManager, FRIEND_ACCEPTED_IN
     FRIEND_INVITATION_TEMPLATE, VERIFY_EMAIL_ADDRESS_TEMPLATE
 from import_export_facebook.models import FacebookManager
 import json
-from organization.models import OrganizationManager
+from organization.models import OrganizationManager, INDIVIDUAL
 from validate_email import validate_email
 from voter.models import Voter, VoterManager
 import wevote_functions.admin
@@ -737,13 +737,15 @@ def friend_invitation_by_email_verify_for_api(voter_device_id, invitation_secret
         organization_name = voter.get_full_name()
         organization_website = ""
         organization_twitter_handle = ""
+        organization_twitter_id = ""
         organization_email = ""
         organization_facebook = ""
         organization_image = voter.voter_photo_url()
+        organization_type = INDIVIDUAL
         organization_manager = OrganizationManager()
         create_results = organization_manager.create_organization(
             organization_name, organization_website, organization_twitter_handle,
-            organization_email, organization_facebook, organization_image)
+            organization_email, organization_facebook, organization_image, organization_twitter_id, organization_type)
         if create_results['organization_created']:
             # Add value to twitter_owner_voter.linked_organization_we_vote_id when done.
             organization = create_results['organization']

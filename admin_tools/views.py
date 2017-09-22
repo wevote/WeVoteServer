@@ -26,7 +26,7 @@ from measure.models import ContestMeasure, ContestMeasureManager
 from office.controllers import offices_import_from_sample_file
 from office.models import ContestOffice
 from organization.controllers import organizations_import_from_sample_file
-from organization.models import Organization, OrganizationManager
+from organization.models import Organization, OrganizationManager, INDIVIDUAL
 from polling_location.controllers import import_and_save_all_polling_locations_data
 from position.controllers import fetch_positions_count_for_this_voter, \
     find_organizations_referenced_in_positions_for_this_voter, positions_import_from_sample_file
@@ -915,12 +915,14 @@ def add_organization_to_position_owner_local(voter_id, one_position):
     organization_name = voter.get_full_name()
     organization_website = ""
     organization_twitter_handle = ""
+    organization_twitter_id = ""
     organization_email = ""
     organization_facebook = ""
+    organization_type = INDIVIDUAL
     organization_image = voter.voter_photo_url()
     create_results = organization_manager.create_organization(
         organization_name, organization_website, organization_twitter_handle,
-        organization_email, organization_facebook, organization_image)
+        organization_email, organization_facebook, organization_image, organization_twitter_id, organization_type)
     if create_results['organization_created']:
         organization = create_results['organization']
         try:

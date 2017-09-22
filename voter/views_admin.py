@@ -15,7 +15,7 @@ from django.shortcuts import render
 from exception.models import handle_record_found_more_than_one_exception, handle_record_not_found_exception, \
     handle_record_not_saved_exception
 from import_export_facebook.models import FacebookLinkToVoter, FacebookManager
-from organization.models import Organization, OrganizationManager
+from organization.models import Organization, OrganizationManager, INDIVIDUAL
 from position.controllers import merge_duplicate_positions_for_voter
 from position.models import PositionEntered, PositionForFriends
 from twitter.models import TwitterLinkToOrganization, TwitterLinkToVoter, TwitterUserManager
@@ -619,12 +619,15 @@ def voter_edit_view(request, voter_id=0, voter_we_vote_id=""):
                 organization_name = voter_on_stage.get_full_name()
                 organization_website = ""
                 organization_twitter_handle = ""
+                organization_twitter_id = ""
                 organization_email = ""
                 organization_facebook = ""
                 organization_image = voter_on_stage.voter_photo_url()
+                organization_type = INDIVIDUAL
                 create_results = organization_manager.create_organization(
                     organization_name, organization_website, organization_twitter_handle,
-                    organization_email, organization_facebook, organization_image)
+                    organization_email, organization_facebook, organization_image, organization_twitter_id,
+                    organization_type)
                 if create_results['organization_created']:
                     organization = create_results['organization']
                     try:
