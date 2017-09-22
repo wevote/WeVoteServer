@@ -14,6 +14,7 @@ from follow.controllers import organization_suggestion_tasks_for_api
 import json
 from organization.controllers import organization_retrieve_for_api, organization_save_for_api, \
     organization_search_for_api, organizations_followed_retrieve_for_api
+from organization.models import UNKNOWN
 from voter.models import voter_has_authority, VoterManager
 import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, get_voter_device_id, \
@@ -84,7 +85,7 @@ def organization_save_view(request):  # organizationSave
     organization_website = request.GET.get('organization_website', False)
     organization_facebook = request.GET.get('organization_facebook', False)
     organization_image = request.GET.get('organization_image', False)
-
+    organization_type = request.GET.get('organization_type', UNKNOWN)
     # We only want to allow save if either this is your organization (i.e., you have the Twitter handle)
     voter_owns_twitter_handle = False
     voter_owns_facebook_id = False
@@ -157,7 +158,7 @@ def organization_save_view(request):  # organizationSave
         organization_name=organization_name, organization_email=organization_email,
         organization_website=organization_website, organization_twitter_handle=organization_twitter_handle,
         organization_facebook=organization_facebook, organization_image=organization_image,
-        refresh_from_twitter=refresh_from_twitter,
+        organization_type=organization_type, refresh_from_twitter=refresh_from_twitter,
         facebook_id=facebook_id, facebook_email=facebook_email,
         facebook_profile_image_url_https=facebook_profile_image_url_https,
     )

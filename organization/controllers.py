@@ -860,7 +860,7 @@ def organization_retrieve_for_api(organization_id, organization_we_vote_id, vote
 def organization_save_for_api(voter_device_id, organization_id, organization_we_vote_id,   # organizationSave
                               organization_name,
                               organization_email, organization_website,
-                              organization_twitter_handle, organization_facebook, organization_image,
+                              organization_twitter_handle, organization_facebook, organization_image, organization_type,
                               refresh_from_twitter,
                               facebook_id, facebook_email, facebook_profile_image_url_https):
     """
@@ -875,6 +875,7 @@ def organization_save_for_api(voter_device_id, organization_id, organization_we_
     :param organization_twitter_handle:
     :param organization_facebook:
     :param organization_image:
+    :param organization_type
     :param refresh_from_twitter:
     :param facebook_id:
     :param facebook_email:
@@ -948,7 +949,8 @@ def organization_save_for_api(voter_device_id, organization_id, organization_we_
 
     facebook_background_image_url_https = False
     facebook_manager = FacebookManager()
-    facebook_auth_response = facebook_manager.retrieve_facebook_auth_response(voter_device_id)
+    facebook_auth_response_results = facebook_manager.retrieve_facebook_auth_response(voter_device_id)
+    facebook_auth_response = facebook_auth_response_results['facebook_auth_response']
 
     if organization_name is False:
         # If the variable comes in as a literal value "False" then don't create an organization_name
@@ -980,7 +982,7 @@ def organization_save_for_api(voter_device_id, organization_id, organization_we_
         organization_name=organization_name, organization_website=organization_website,
         organization_twitter_handle=organization_twitter_handle, organization_email=organization_email,
         organization_facebook=organization_facebook, organization_image=organization_image,
-        refresh_from_twitter=refresh_from_twitter,
+        organization_type=organization_type, refresh_from_twitter=refresh_from_twitter,
         facebook_id=facebook_id, facebook_email=facebook_email,
         facebook_profile_image_url_https=facebook_profile_image_url_https,
         facebook_background_image_url_https=facebook_background_image_url_https,

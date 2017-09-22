@@ -61,7 +61,8 @@ class OrganizationManager(models.Manager):
     A class for working with the Organization model
     """
     def create_organization_simple(self, organization_name, organization_website, organization_twitter_handle,
-                                   organization_email='', organization_facebook='', organization_image=''):
+                                   organization_email='', organization_facebook='', organization_image='',
+                                   organization_type=''):
         try:
             if organization_twitter_handle is False or organization_twitter_handle == 'False':
                 organization_twitter_handle = ""
@@ -70,14 +71,16 @@ class OrganizationManager(models.Manager):
                                        organization_twitter_handle=organization_twitter_handle,
                                        organization_email=organization_email,
                                        organization_facebook=organization_facebook,
-                                       organization_image=organization_image)
+                                       organization_image=organization_image,
+                                       organization_type=organization_type)
         except Exception as e:
             handle_record_not_saved_exception(e, logger=logger)
             organization = Organization
         return organization
 
     def create_organization(self, organization_name, organization_website='', organization_twitter_handle='',
-                            organization_email='', organization_facebook='', organization_image='', twitter_id=''):
+                            organization_email='', organization_facebook='', organization_image='', twitter_id='',
+                            organization_type=''):
         try:
             if not positive_value_exists(organization_name):
                 organization_name = ""
@@ -112,6 +115,7 @@ class OrganizationManager(models.Manager):
                     organization_email=organization_email,
                     organization_facebook=organization_facebook,
                     organization_image=organization_image,
+                    organization_type=organization_type,
                     twitter_user_id=twitter_user_id,
                     twitter_name=twitter_name,
                     twitter_location=twitter_location,
@@ -130,7 +134,8 @@ class OrganizationManager(models.Manager):
                     organization_twitter_handle=organization_twitter_handle,
                     organization_email=organization_email,
                     organization_facebook=organization_facebook,
-                    organization_image=organization_image)
+                    organization_image=organization_image,
+                    organization_type=organization_type)
             organization.save()  # We do this so the we_vote_id is created
             status = "CREATE_ORGANIZATION_SUCCESSFUL"
             success = True
@@ -509,13 +514,16 @@ class OrganizationManager(models.Manager):
             organization_name = voter.get_full_name()
             organization_website = ""
             organization_twitter_handle = ""
+            organization_twitter_id = ""
             organization_email = ""
             organization_facebook = ""
             organization_image = voter.voter_photo_url()
+            organization_type = INDIVIDUAL
             organization_manager = OrganizationManager()
             create_results = organization_manager.create_organization(
                 organization_name, organization_website, organization_twitter_handle,
-                organization_email, organization_facebook, organization_image)
+                organization_email, organization_facebook, organization_image, organization_twitter_id,
+                organization_type)
             if create_results['organization_created']:
                 # Add value to twitter_owner_voter.linked_organization_we_vote_id when done.
                 organization = create_results['organization']
@@ -601,7 +609,7 @@ class OrganizationManager(models.Manager):
                                       organization_name=False, organization_website=False,
                                       organization_twitter_handle=False, organization_email=False,
                                       organization_facebook=False, organization_image=False,
-                                      refresh_from_twitter=False,
+                                      organization_type=UNKNOWN, refresh_from_twitter=False,
                                       facebook_id=False, facebook_email=False,
                                       facebook_profile_image_url_https=False,
                                       facebook_background_image_url_https=False,
@@ -646,6 +654,7 @@ class OrganizationManager(models.Manager):
         organization_email = organization_email.strip() if organization_email else False
         organization_facebook = organization_facebook.strip() if organization_facebook else False
         organization_image = organization_image.strip() if organization_image else False
+        organization_type = organization_type.strip() if organization_type else UNKNOWN
 
         # Values that can only be updated by a refresh_from_twitter
         twitter_user_id = False
@@ -942,8 +951,8 @@ class OrganizationManager(models.Manager):
             try:
                 # Now that we have an organization to update, get supplemental data from Twitter if
                 # refresh_from_twitter is true
+                twitter_user_id = 0
                 if positive_value_exists(organization_twitter_handle) and refresh_from_twitter:
-                    twitter_user_id = 0
                     results = retrieve_twitter_user_info(twitter_user_id, organization_twitter_handle)
                     if results['success']:
                         twitter_json = results['twitter_json']
@@ -967,7 +976,8 @@ class OrganizationManager(models.Manager):
                 # If here, create new organization
                 results = Organization.objects.create_organization(organization_name, organization_website,
                                                                    organization_twitter_handle, organization_email,
-                                                                   organization_facebook, organization_image)
+                                                                   organization_facebook, organization_image,
+                                                                   twitter_user_id, organization_type)
                 if results['success']:
                     new_organization_created = True
                     success = True
@@ -1962,7 +1972,7 @@ class Organization(models.Model):
 
     @classmethod
     def create(cls, organization_name, organization_website, organization_twitter_handle, organization_email,
-               organization_facebook, organization_image, twitter_user_id=None, twitter_name=None,
+               organization_facebook, organization_image, organization_type, twitter_user_id=None, twitter_name=None,
                twitter_location=None, twitter_followers_count=0, twitter_profile_image_url_https=None,
                twitter_profile_background_image_url_https=None, twitter_profile_banner_url_https=None,
                twitter_description=None, we_vote_hosted_profile_image_url_large=None,
@@ -1977,6 +1987,7 @@ class Organization(models.Model):
                            organization_email=organization_email,
                            organization_facebook=organization_facebook,
                            organization_image=organization_image,
+                           organization_type=organization_type,
                            twitter_user_id=twitter_user_id,
                            twitter_name=twitter_name,
                            twitter_location=twitter_location,
