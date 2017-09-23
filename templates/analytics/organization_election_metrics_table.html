@@ -6,9 +6,11 @@
         <th>Org Name (ID)</th>
         <th>visitors total</th>
         <th>entered on voter guide</th>
+        <th>entrants visited ballot</th>
+        <th>entrants took position</th>
         <th>followers</th>
-        <th>entrants then visited ballot</th>
         <th>followers visited ballot</th>
+        <th>followers took position</th>
     </tr>
 {% for one_row in organization_election_metrics_list %}
     <tr>
@@ -18,10 +20,13 @@
                target="_blank">{{ one_row.organization_we_vote_id|default_if_none:"n/a" }}</a>)</td>
         <td>{{ one_row.visitors_total|default_if_none:"n/a" }}</td>
         <td>{{ one_row.voter_guide_entrants|default_if_none:"n/a" }}</td>
-        <td>new: {{ one_row.new_followers|default_if_none:"n/a" }}<br />
-            auto: {{ one_row.new_autofollowers|default_if_none:"n/a" }}</td>
         <td>{{ one_row.entrants_visited_ballot|default_if_none:"n/a" }}</td>
+        <td>{{ one_row.entrants_took_position|default_if_none:"n/a" }}</td>
+        <td>total: {{ one_row.followers_at_time_of_election|default_if_none:"n/a" }}
+            {% if one_row.new_followers %}<br />new: {{ one_row.new_followers|default_if_none:"n/a" }}{% endif %}
+            {% if one_row.new_autofollowers %}<br />auto: {{ one_row.new_autofollowers|default_if_none:"n/a" }}{% endif %}</td>
         <td>{{ one_row.followers_visited_ballot|default_if_none:"n/a" }}</td>
+        <td>{{ one_row.followers_took_position|default_if_none:"n/a" }}</td>
     </tr>
 {% endfor %}
 {% if not organization_election_metrics_list %}

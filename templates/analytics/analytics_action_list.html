@@ -117,4 +117,15 @@
 {% endif %}
 </table>
 
-{% endblock %}
+{% if voter_we_vote_id %}
+    For Testing:
+    <a href="{% url 'analytics:augment_voter_analytics_process' voter_we_vote_id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
+         Augment this voter's analytics</a>
+{% elif organization_we_vote_id %}
+    For Testing:
+    <a href="{% url 'analytics:organization_election_metrics_process' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}&organization_we_vote_id={{ organization_we_vote_id }}">
+         Update Election Metrics for this Organization for Election: {{ google_civic_election_id }}</a>
+{% endif %}
+<br />
+<br />
+{% endblock %}{% url 'analytics:organization_election_metrics' %}

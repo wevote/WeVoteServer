@@ -4,29 +4,39 @@
     <tr>
         <th>Election Name (ID)</th>
         <th>visitors_ total</th>
-        <th>authenticated_ visitors_ total</th>
+{#        <th>authenticated_ visitors_ total</th>#}
         <th>voter guides</th>
-        <th>organizations followed</th>
-        <th>organizations with positions</th>
-        <th>organization public positions</th>
-        <th>individuals with positions</th>
+        <th>public positions</th>
         <th>friends-only positions</th>
+        <th>voters that followed organizations</th>
+{#        <th>organizations followed</th>#}
+{#        <th>organizations with positions</th>#}
+{#        <th>organization public positions</th>#}
+{#        <th>individuals with positions</th>#}
     </tr>
 {% for one_row in sitewide_election_metrics_list %}
     <tr>
-        <td>{{ one_row.election_name }} (one_row.google_civic_election_id)</td>
+        <td>{{ one_row.election.election_name|default_if_none:"n/a" }} ({{ one_row.google_civic_election_id }})</td>
         <td>{{ one_row.visitors_total }}</td>
-        <td>{{ one_row.authenticated_visitors_total }}</td>
-        <td>viewed: {{ one_row.voter_guides_viewed }}<br />
-            first-view: {{ one_row.voter_guide_entrants }}</td>
-        <td>{{ one_row.organizations_followed }}<br />
-            auto: {{ one_row.organizations_autofollowed }}</td>
-        <td>{{ one_row.organizations_with_positions }}</td>
-        <td>{{ one_row.organization_public_positions }}</td>
-        <td>total: {{ one_row.individuals_with_positions }}<br />
-            public: {{ one_row.individuals_with_public_positions }}<br />
-            friends-only: {{ one_row.individuals_with_friends_only_positions }}</td>
-        <td>{{ one_row.friends_only_positions }}</td>
+{#        <td>{{ one_row.authenticated_visitors_total }}</td>#}
+        <td>viewed: {{ one_row.voter_guides_viewed|default_if_none:"n/a" }}
+{#            <br />#}
+{#            views: {{ one_row.voter_guide_views|default_if_none:"n/a" }}<br />#}
+{#            first-views: {{ one_row.voter_guide_entries|default_if_none:"n/a" }}#}
+        </td>
+        <td>public: {{ one_row.public_positions }}<br />
+            with comments: {{ one_row.public_positions_with_comments }}</td>
+        <td>friends only: {{ one_row.friends_only_positions }}<br />
+            with comments: {{ one_row.friends_only_positions_with_comments }}</td>
+        <td>followed: {{ one_row.unique_voters_that_followed_organizations|default_if_none:"n/a" }}<br />
+            auto-followed: {{ one_row.unique_voters_that_auto_followed_organizations|default_if_none:"n/a" }}</td>
+{#        <td>followed: {{ one_row.organizations_followed|default_if_none:"n/a" }}<br />#}
+{#            auto-followed: {{ one_row.organizations_autofollowed|default_if_none:"n/a" }}</td>#}
+{#        <td>{{ one_row.organizations_with_positions }}</td>#}
+{#        <td>{{ one_row.organization_public_positions }}</td>#}
+{#        <td>total: {{ one_row.individuals_with_positions }}<br />#}
+{#            public: {{ one_row.individuals_with_public_positions }}<br />#}
+{#            friends-only: {{ one_row.individuals_with_friends_only_positions }}</td>#}
     </tr>
 {% endfor %}
 {% if not sitewide_election_metrics_list %}

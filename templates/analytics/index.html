@@ -28,13 +28,13 @@
     {% include "analytics/sitewide_election_metrics_table.html" %}
 
 
-<h2>Sitewide Daily Metrics</h2>
-    <p>
-        Show activity day-to-day, across the entire site.
-        <a href="{% url 'analytics:sitewide_daily_metrics' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">see all</a>
-    </p>
-
-    {% include "analytics/sitewide_daily_metrics_table.html" with sitewide_daily_metrics_list=sitewide_daily_metrics_list %}
+{#<h2>Sitewide Daily Metrics</h2>#}
+{#    <p>#}
+{#        Show activity day-to-day, across the entire site.#}
+{#        <a href="{% url 'analytics:sitewide_daily_metrics' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">see all</a>#}
+{#    </p>#}
+{##}
+{#    {% include "analytics/sitewide_daily_metrics_table.html" with sitewide_daily_metrics_list=sitewide_daily_metrics_list %}#}
 
 {% if voter_allowed_to_see_organization_analytics %}
 <h2>Organization Election Metrics</h2>

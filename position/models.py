@@ -3,7 +3,8 @@
 # -*- coding: UTF-8 -*-
 # Diagrams here: https://docs.google.com/drawings/d/1DsPnl97GKe9f14h41RPeZDssDUztRETGkXGaolXCeyo/edit
 
-from analytics.models import ACTION_POSITION_TAKEN, AnalyticsManager
+from analytics.models import ACTION_ORGANIZATION_AUTO_FOLLOW, ACTION_POSITION_TAKEN, ACTION_VOTER_GUIDE_VISIT, \
+    AnalyticsAction, AnalyticsManager
 from candidate.models import CandidateCampaign, CandidateCampaignManager, CandidateCampaignListManager
 from ballot.controllers import figure_out_google_civic_election_id_voter_is_watching
 from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
@@ -5813,12 +5814,67 @@ class PositionMetricsManager(models.Model):
     def __unicode__(self):
         return "PositionMetricsManager"
 
+    def fetch_positions_public(self, google_civic_election_id=0):
+        count_result = None
+        try:
+            count_query = PositionEntered.objects.using('readonly').all()
+            if positive_value_exists(google_civic_election_id):
+                count_query = count_query.filter(google_civic_election_id=google_civic_election_id)
+            count_result = count_query.count()
+        except Exception as e:
+            pass
+        return count_result
+
+    def fetch_positions_public_with_comments(self, google_civic_election_id=0):
+        count_result = None
+        try:
+            count_query = PositionEntered.objects.using('readonly').all()
+            if positive_value_exists(google_civic_election_id):
+                count_query = count_query.filter(google_civic_election_id=google_civic_election_id)
+            count_query = count_query.exclude(
+                (Q(statement_text__isnull=True) | Q(statement_text__exact='')) &
+                (Q(statement_html__isnull=True) | Q(statement_html__exact=''))
+            )
+            count_result = count_query.count()
+        except Exception as e:
+            pass
+        return count_result
+
+    def fetch_positions_friends_only(self, google_civic_election_id=0):
+        count_result = None
+        try:
+            count_query = PositionForFriends.objects.using('readonly').all()
+            if positive_value_exists(google_civic_election_id):
+                count_query = count_query.filter(google_civic_election_id=google_civic_election_id)
+            count_result = count_query.count()
+        except Exception as e:
+            pass
+        return count_result
+
+    def fetch_positions_friends_only_with_comments(self, google_civic_election_id=0):
+        count_result = None
+        try:
+            count_query = PositionForFriends.objects.using('readonly').all()
+            if positive_value_exists(google_civic_election_id):
+                count_query = count_query.filter(google_civic_election_id=google_civic_election_id)
+            count_query = count_query.exclude(
+                (Q(statement_text__isnull=True) | Q(statement_text__exact='')) &
+                (Q(statement_html__isnull=True) | Q(statement_html__exact=''))
+            )
+            count_result = count_query.count()
+        except Exception as e:
+            pass
+        return count_result
+
     def fetch_voter_comments_entered_friends_only(self, voter_we_vote_id):
         count_result = None
         try:
             count_query = PositionForFriends.objects.using('readonly').all()
             count_query = count_query.filter(voter_we_vote_id__iexact=voter_we_vote_id)
-            count_query = count_query.exclude(statement_text=None)
+            count_query = count_query.exclude(
+                (Q(statement_text__isnull=True) | Q(statement_text__exact='')) &
+                (Q(statement_html__isnull=True) | Q(statement_html__exact=''))
+            )
             count_result = count_query.count()
         except Exception as e:
             pass
@@ -5829,7 +5885,10 @@ class PositionMetricsManager(models.Model):
         try:
             count_query = PositionEntered.objects.using('readonly').all()
             count_query = count_query.filter(voter_we_vote_id__iexact=voter_we_vote_id)
-            count_query = count_query.exclude(statement_text=None)
+            count_query = count_query.exclude(
+                (Q(statement_text__isnull=True) | Q(statement_text__exact='')) &
+                (Q(statement_html__isnull=True) | Q(statement_html__exact=''))
+            )
             count_result = count_query.count()
         except Exception as e:
             pass
@@ -5854,3 +5913,40 @@ class PositionMetricsManager(models.Model):
         except Exception as e:
             pass
         return count_result
+
+    def fetch_positions_count_for_this_voter(self, voter):
+
+        position_filters = []
+        final_position_filters = []
+        if positive_value_exists(voter.we_vote_id):
+            new_position_filter = Q(voter_we_vote_id__iexact=voter.we_vote_id)
+            position_filters.append(new_position_filter)
+        if positive_value_exists(voter.id):
+            new_position_filter = Q(voter_id=voter.id)
+            position_filters.append(new_position_filter)
+        if positive_value_exists(voter.linked_organization_we_vote_id):
+            new_position_filter = Q(organization_we_vote_id=voter.linked_organization_we_vote_id)
+            position_filters.append(new_position_filter)
+
+        if len(position_filters):
+            final_position_filters = position_filters.pop()
+
+            # ...and "OR" the remaining items in the list
+            for item in position_filters:
+                final_position_filters |= item
+
+        # PositionEntered
+        position_list_query = PositionEntered.objects.using('readonly').all()
+        position_list_query = position_list_query.filter(final_position_filters)
+
+        position_entered_count = position_list_query.count()
+
+        # PositionForFriends
+        position_list_query = PositionForFriends.objects.using('readonly').all()
+        position_list_query = position_list_query.filter(final_position_filters)
+
+        position_for_friends_count = position_list_query.count()
+
+        total_positions_count = position_entered_count + position_for_friends_count
+
+        return total_positions_count

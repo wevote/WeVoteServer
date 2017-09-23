@@ -11,11 +11,47 @@
 <p><a href="{% url 'analytics:analytics_index' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">< Analytics Home</a></p>
 
 <h2>Sitewide Election Metrics</h2>
-    <p>
-        Show activity relating to one election, for the entire site.<br />
-        <a href="{% url 'analytics:sitewide_election_metrics_process' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">Process Updates</a>
-    </p>
+<p>
+    Show activity relating to one election, for the entire site.
+</p>
 
-    {% include "analytics/sitewide_election_metrics_table.html" with sitewide_election_metrics_list=sitewide_election_metrics_list %}
+<form name="choose_election" method="get" action="{% url 'analytics:sitewide_election_metrics' %}">
+    {% csrf_token %}
+    <input type="hidden" name="state_code" value="{{ state_code }}" />
+    {% if election_list %}
+    <select id="google_civic_election_id" name="google_civic_election_id">
+        <option value="0" {% if 0 == google_civic_election_id|convert_to_int %} selected="selected"{% endif %}>
+            -- Filter by Election --</option>
+        {% for election in election_list %}
+        <option value="{{ election.google_civic_election_id }}"
+                {% if election.google_civic_election_id|slugify == google_civic_election_id|slugify %} selected="selected"{% endif %}>
+            {{ election.election_name }} - {{ election.google_civic_election_id }} - {{ election.election_day_text }}</option>
+        {% endfor %}
+    </select>
+    {% endif %}{# End of if election_list #}
+</form>
+
+<form name="sitewide_election_metrics" method="get" action="{% url 'analytics:sitewide_election_metrics_process' %}">
+    {% csrf_token %}
+    <input type="hidden" name="google_civic_election_id" value="{{ google_civic_election_id }}" />
+    <input type="hidden" name="state_code" value="{{ state_code }}" />
+
+    <div class="form-group">
+        <label for="organization_election_metrics_button" class="col-sm-3 control-label">&nbsp;</label>
+        <div class="col-sm-8">
+            <button type="submit" class="btn btn-default" name="organization_election_metrics_button">Update Election Metrics</button>
+        </div>
+    </div>
+</form>
+
+{% include "analytics/sitewide_election_metrics_table.html" with sitewide_election_metrics_list=sitewide_election_metrics_list %}
+
+<script>
+    $(function() {
+        $('#google_civic_election_id').change(function() {
+            this.form.submit();
+        });
+    });
+</script>
 
 {% endblock %}

@@ -111,44 +111,6 @@ def find_organizations_referenced_in_positions_for_this_voter(voter):
     return related_organizations
 
 
-def fetch_positions_count_for_this_voter(voter):
-
-    position_filters = []
-    final_position_filters = []
-    if positive_value_exists(voter.we_vote_id):
-        new_position_filter = Q(voter_we_vote_id__iexact=voter.we_vote_id)
-        position_filters.append(new_position_filter)
-    if positive_value_exists(voter.id):
-        new_position_filter = Q(voter_id=voter.id)
-        position_filters.append(new_position_filter)
-    if positive_value_exists(voter.linked_organization_we_vote_id):
-        new_position_filter = Q(organization_we_vote_id=voter.linked_organization_we_vote_id)
-        position_filters.append(new_position_filter)
-
-    if len(position_filters):
-        final_position_filters = position_filters.pop()
-
-        # ...and "OR" the remaining items in the list
-        for item in position_filters:
-            final_position_filters |= item
-
-    # PositionEntered
-    position_list_query = PositionEntered.objects.all()
-    position_list_query = position_list_query.filter(final_position_filters)
-
-    position_entered_count = position_list_query.count()
-
-    # PositionForFriends
-    position_list_query = PositionForFriends.objects.all()
-    position_list_query = position_list_query.filter(final_position_filters)
-
-    position_for_friends_count = position_list_query.count()
-
-    total_positions_count = position_entered_count + position_for_friends_count
-
-    return total_positions_count
-
-
 def merge_duplicate_positions_for_voter(position_list_for_one_voter):
 
     removed = []

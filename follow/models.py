@@ -2,11 +2,15 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
+from datetime import datetime, timedelta
 from django.db import models
+from django.utils.timezone import localtime, now
+from election.models import ElectionManager
 from exception.models import handle_record_found_more_than_one_exception,\
     handle_record_not_found_exception, handle_record_not_saved_exception
 from issue.models import IssueManager
 from organization.models import OrganizationManager
+import pytz
 import wevote_functions.admin
 from wevote_functions.functions import positive_value_exists
 from voter.models import VoterManager
@@ -88,21 +92,6 @@ class FollowIssueManager(models.Model):
 
     def __unicode__(self):
         return "FollowIssueManager"
-
-    def fetch_number_of_issues_followed(self, voter_we_vote_id):
-        number_of_issues_followed = 0
-
-        try:
-            if positive_value_exists(voter_we_vote_id):
-                follow_issue_query = FollowIssue.objects.filter(
-                    voter_we_vote_id__iexact=voter_we_vote_id,
-                    following_status=FOLLOWING
-                )
-                number_of_issues_followed = follow_issue_query.count()
-        except Exception as e:
-            pass
-
-        return number_of_issues_followed
 
     def toggle_on_voter_following_issue(self, voter_we_vote_id, issue_id, issue_we_vote_id):
         following_status = FOLLOWING
@@ -356,6 +345,46 @@ class FollowMetricsManager(models.Model):
 
     def __unicode__(self):
         return "FollowMetricsManager"
+
+    def fetch_number_of_issues_followed(self, voter_we_vote_id):
+        number_of_issues_followed = 0
+
+        try:
+            if positive_value_exists(voter_we_vote_id):
+                follow_issue_query = FollowIssue.objects.using('readonly').filter(
+                    voter_we_vote_id__iexact=voter_we_vote_id,
+                    following_status=FOLLOWING
+                )
+                number_of_issues_followed = follow_issue_query.count()
+        except Exception as e:
+            pass
+
+        return number_of_issues_followed
+
+    def fetch_organization_followers(self, organization_we_vote_id, google_civic_election_id=0):
+        count_result = None
+        try:
+            count_query = FollowOrganization.objects.using('readonly').all()
+            count_query = count_query.filter(organization_we_vote_id__iexact=organization_we_vote_id)
+            count_query = count_query.filter(following_status=FOLLOWING)
+            count_query = count_query.values("voter_id").distinct()
+            if positive_value_exists(google_civic_election_id):
+                election_manager = ElectionManager()
+                election_result = election_manager.retrieve_election(google_civic_election_id)
+                if election_result['election_found']:
+                    election = election_result['election']
+                    timezone = pytz.timezone("America/Los_Angeles")
+                    date_of_election = timezone.localize(datetime.strptime(election.election_day_text, "%Y-%m-%d"))
+                    date_of_election += timedelta(days=1)  # Add one day, to catch the entire election day
+                    # Find all of the follow entries before or on the day of the election
+                    count_query = count_query.filter(date_last_changed__lte=date_of_election)
+                else:
+                    # Failed retrieving date, so we return 0
+                    return 0
+            count_result = count_query.count()
+        except Exception as e:
+            pass
+        return count_result
 
     def fetch_voter_issues_followed(self, voter_we_vote_id):
         count_result = None
@@ -973,9 +1002,41 @@ class FollowOrganizationList(models.Model):
                     follow_organization_list_simple_array.append(follow_organization.organization_id)
         return follow_organization_list_simple_array
 
+    def fetch_followers_list_by_organization_we_vote_id(
+            self, organization_we_vote_id, return_voter_we_vote_id=False):
+        """
+        Fetch a list of the voter_id or voter_we_vote_id of followers of organization_we_vote_id.
+        :param organization_we_vote_id:
+        :param return_voter_we_vote_id:
+        :return:
+        """
+        follow_organization_list_manager = FollowOrganizationList()
+        followers_list = \
+            follow_organization_list_manager.retrieve_follow_organization_by_organization_we_vote_id(
+                organization_we_vote_id)
+        followers_list_simple_array = []
+        if len(followers_list):
+            voter_manager = VoterManager()
+            for follow_organization in followers_list:
+                if return_voter_we_vote_id:
+                    voter_we_vote_id = voter_manager.fetch_we_vote_id_from_local_id(follow_organization.voter_id)
+                    if positive_value_exists(voter_we_vote_id):
+                        followers_list_simple_array.append(voter_we_vote_id)
+                else:
+                    if positive_value_exists(follow_organization.voter_id):
+                        followers_list_simple_array.append(follow_organization.voter_id)
+        return followers_list_simple_array
+
     def retrieve_followers_organization_by_organization_we_vote_id_simple_id_array(
             self, organization_we_vote_id, return_we_vote_id=False,
             auto_followed_from_twitter_suggestion=False):
+        """
+        Retrieve the organization_id (or organization_we_vote_id) for each voter that follows organization_we_vote_id.
+        :param organization_we_vote_id:
+        :param return_we_vote_id:
+        :param auto_followed_from_twitter_suggestion:
+        :return:
+        """
         follow_organization_list_manager = FollowOrganizationList()
         followers_organization_list = \
             follow_organization_list_manager.retrieve_follow_organization_by_organization_we_vote_id(
@@ -984,8 +1045,9 @@ class FollowOrganizationList(models.Model):
         if len(followers_organization_list):
             for follow_organization in followers_organization_list:
                 if return_we_vote_id:
-                    followers_organization_list_simple_array.append(
-                        follow_organization.voter_linked_organization_we_vote_id)
+                    if positive_value_exists(follow_organization.voter_linked_organization_we_vote_id):
+                        followers_organization_list_simple_array.append(
+                            follow_organization.voter_linked_organization_we_vote_id)
                 else:
                     followers_organization_list_simple_array.append(follow_organization.organization_id)
         return followers_organization_list_simple_array

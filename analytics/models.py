@@ -3,14 +3,16 @@
 # -*- coding: UTF-8 -*-
 
 from django.db import models
+from django.db.models import Q
 from django.utils.timezone import localtime, now
 from election.models import Election
+from follow.models import FollowOrganizationList
 from organization.models import Organization
 import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, positive_value_exists
 
 ACTION_VOTER_GUIDE_VISIT = 1
-ACTION_VOTER_GUIDE_ENTRY = 2
+ACTION_VOTER_GUIDE_ENTRY = 2  # DEPRECATED: Now we use ACTION_VOTER_GUIDE_VISIT + first_visit
 ACTION_ORGANIZATION_FOLLOW = 3
 ACTION_ORGANIZATION_AUTO_FOLLOW = 4
 ACTION_ISSUE_FOLLOW = 5
@@ -147,6 +149,143 @@ class AnalyticsAction(models.Model):
 
 class AnalyticsCountManager(models.Model):
 
+    def fetch_organization_entrants_took_position(
+            self, organization_we_vote_id, google_civic_election_id=0):
+        """
+        Count the voters who entered on an organization's voter guide, and then took a position
+        :param organization_we_vote_id:
+        :param google_civic_election_id:
+        :return:
+        """
+
+        voters_who_visited_organization_first_simple_list = []
+        try:
+            first_visit_query = AnalyticsAction.objects.using('analytics').all()
+            first_visit_query = first_visit_query.filter(Q(action_constant=ACTION_VOTER_GUIDE_VISIT) |
+                                                         Q(action_constant=ACTION_ORGANIZATION_AUTO_FOLLOW))
+            first_visit_query = first_visit_query.filter(organization_we_vote_id__iexact=organization_we_vote_id)
+            if positive_value_exists(google_civic_election_id):
+                first_visit_query = first_visit_query.filter(google_civic_election_id=google_civic_election_id)
+            first_visit_query = first_visit_query.filter(first_visit_today=True)
+            first_visit_query = first_visit_query.values('voter_we_vote_id').distinct()
+            voters_who_visited_organization_first = list(first_visit_query)
+
+            for voter_dict in voters_who_visited_organization_first:
+                if positive_value_exists(voter_dict['voter_we_vote_id']):
+                    voters_who_visited_organization_first_simple_list.append(voter_dict['voter_we_vote_id'])
+
+        except Exception as e:
+            pass
+
+        if not len(voters_who_visited_organization_first_simple_list):
+            return 0
+
+        count_result = None
+        try:
+            count_query = AnalyticsAction.objects.using('analytics').all()
+            count_query = count_query.filter(action_constant=ACTION_POSITION_TAKEN)
+            if positive_value_exists(google_civic_election_id):
+                count_query = count_query.filter(google_civic_election_id=google_civic_election_id)
+            count_query = count_query.filter(voter_we_vote_id__in=voters_who_visited_organization_first_simple_list)
+            count_query = count_query.values('voter_we_vote_id').distinct()
+            count_result = count_query.count()
+        except Exception as e:
+            pass
+        return count_result
+
+    def fetch_organization_entrants_visited_ballot(
+            self, organization_we_vote_id, google_civic_election_id=0):
+        """
+        Count the voters who entered on an organization's voter guide, and then who proceeded to ballot
+        :param organization_we_vote_id:
+        :param google_civic_election_id:
+        :return:
+        """
+        voters_who_visited_organization_first_simple_list = []
+        try:
+            first_visit_query = AnalyticsAction.objects.using('analytics').all()
+            first_visit_query = first_visit_query.filter(Q(action_constant=ACTION_VOTER_GUIDE_VISIT) |
+                                                         Q(action_constant=ACTION_ORGANIZATION_AUTO_FOLLOW))
+            first_visit_query = first_visit_query.filter(organization_we_vote_id__iexact=organization_we_vote_id)
+            if positive_value_exists(google_civic_election_id):
+                first_visit_query = first_visit_query.filter(google_civic_election_id=google_civic_election_id)
+            first_visit_query = first_visit_query.filter(first_visit_today=True)
+            first_visit_query = first_visit_query.values('voter_we_vote_id').distinct()
+            voters_who_visited_organization_first = list(first_visit_query)
+
+            for voter_dict in voters_who_visited_organization_first:
+                if positive_value_exists(voter_dict['voter_we_vote_id']):
+                    voters_who_visited_organization_first_simple_list.append(voter_dict['voter_we_vote_id'])
+
+        except Exception as e:
+            pass
+
+        if not len(voters_who_visited_organization_first_simple_list):
+            return 0
+
+        count_result = None
+        try:
+            count_query = AnalyticsAction.objects.using('analytics').all()
+            count_query = count_query.filter(action_constant=ACTION_BALLOT_VISIT)
+            if positive_value_exists(google_civic_election_id):
+                count_query = count_query.filter(google_civic_election_id=google_civic_election_id)
+            count_query = count_query.filter(voter_we_vote_id__in=voters_who_visited_organization_first_simple_list)
+            count_query = count_query.values('voter_we_vote_id').distinct()
+            count_result = count_query.count()
+        except Exception as e:
+            pass
+        return count_result
+
+    def fetch_organization_followers_took_position(self, organization_we_vote_id, google_civic_election_id=0):
+        follow_organization_list = FollowOrganizationList()
+        return_voter_we_vote_id = True
+        voter_we_vote_ids_of_organization_followers = \
+            follow_organization_list.fetch_followers_list_by_organization_we_vote_id(
+                organization_we_vote_id, return_voter_we_vote_id)
+
+        count_result = None
+        try:
+            count_query = AnalyticsAction.objects.using('analytics').all()
+            count_query = count_query.filter(action_constant=ACTION_POSITION_TAKEN)
+            if positive_value_exists(google_civic_election_id):
+                count_query = count_query.filter(google_civic_election_id=google_civic_election_id)
+            count_query = count_query.filter(voter_we_vote_id__in=voter_we_vote_ids_of_organization_followers)
+            count_query = count_query.values('voter_we_vote_id').distinct()
+            count_result = count_query.count()
+        except Exception as e:
+            pass
+        return count_result
+
+    def fetch_organization_followers_visited_ballot(self, organization_we_vote_id, google_civic_election_id=0):
+        follow_organization_list = FollowOrganizationList()
+        return_voter_we_vote_id = True
+        voter_we_vote_ids_of_organization_followers = \
+            follow_organization_list.fetch_followers_list_by_organization_we_vote_id(
+                organization_we_vote_id, return_voter_we_vote_id)
+        count_result = None
+        try:
+            count_query = AnalyticsAction.objects.using('analytics').all()
+            count_query = count_query.filter(action_constant=ACTION_BALLOT_VISIT)
+            if positive_value_exists(google_civic_election_id):
+                count_query = count_query.filter(google_civic_election_id=google_civic_election_id)
+            count_query = count_query.filter(voter_we_vote_id__in=voter_we_vote_ids_of_organization_followers)
+            count_query = count_query.values('voter_we_vote_id').distinct()
+            count_result = count_query.count()
+        except Exception as e:
+            pass
+        return count_result
+
+    def fetch_visitors_in_election(self, google_civic_election_id):
+        count_result = None
+        try:
+            count_query = AnalyticsAction.objects.using('analytics').all()
+            count_query = count_query.filter(google_civic_election_id=google_civic_election_id)
+            count_query = count_query.values('voter_we_vote_id').distinct()
+            count_result = count_query.count()
+        except Exception as e:
+            pass
+        return count_result
+
     def fetch_visitors_to_organization_in_election(self, organization_we_vote_id, google_civic_election_id):
         count_result = None
         try:
@@ -170,10 +309,50 @@ class AnalyticsCountManager(models.Model):
         count_result = None
         try:
             count_query = AnalyticsAction.objects.using('analytics').all()
-            count_query = count_query.filter(action_constant=ACTION_VOTER_GUIDE_VISIT)
+            count_query = count_query.filter(Q(action_constant=ACTION_VOTER_GUIDE_VISIT) |
+                                             Q(action_constant=ACTION_ORGANIZATION_AUTO_FOLLOW))
             count_query = count_query.filter(organization_we_vote_id__iexact=organization_we_vote_id)
             count_query = count_query.filter(google_civic_election_id=google_civic_election_id)
             count_query = count_query.filter(first_visit_today=True)
+            count_query = count_query.values('voter_we_vote_id').distinct()
+            count_result = count_query.count()
+        except Exception as e:
+            pass
+        return count_result
+
+    def fetch_new_followers_in_election(self, google_civic_election_id, organization_we_vote_id=""):
+        """
+        :param organization_we_vote_id:
+        :param google_civic_election_id:
+        :return:
+        """
+        count_result = None
+        try:
+            count_query = AnalyticsAction.objects.using('analytics').all()
+            count_query = count_query.filter(Q(action_constant=ACTION_ORGANIZATION_FOLLOW) |
+                                             Q(action_constant=ACTION_ORGANIZATION_AUTO_FOLLOW))
+            if positive_value_exists(organization_we_vote_id):
+                count_query = count_query.filter(organization_we_vote_id__iexact=organization_we_vote_id)
+            count_query = count_query.filter(google_civic_election_id=google_civic_election_id)
+            count_query = count_query.values('voter_we_vote_id').distinct()
+            count_result = count_query.count()
+        except Exception as e:
+            pass
+        return count_result
+
+    def fetch_new_auto_followers_in_election(self, google_civic_election_id, organization_we_vote_id=""):
+        """
+        :param organization_we_vote_id:
+        :param google_civic_election_id:
+        :return:
+        """
+        count_result = None
+        try:
+            count_query = AnalyticsAction.objects.using('analytics').all()
+            count_query = count_query.filter(action_constant=ACTION_ORGANIZATION_AUTO_FOLLOW)
+            if positive_value_exists(organization_we_vote_id):
+                count_query = count_query.filter(organization_we_vote_id__iexact=organization_we_vote_id)
+            count_query = count_query.filter(google_civic_election_id=google_civic_election_id)
             count_query = count_query.values('voter_we_vote_id').distinct()
             count_result = count_query.count()
         except Exception as e:
@@ -242,6 +421,19 @@ class AnalyticsCountManager(models.Model):
         try:
             count_query = AnalyticsAction.objects.using('analytics').all()
             count_query = count_query.filter(voter_we_vote_id__iexact=voter_we_vote_id)
+            count_query = count_query.filter(action_constant=ACTION_VOTER_GUIDE_VISIT)
+            count_query = count_query.values('organization_we_vote_id').distinct()
+            count_result = count_query.count()
+        except Exception as e:
+            pass
+        return count_result
+
+    def fetch_voter_guides_viewed(self, google_civic_election_id=0):
+        count_result = 0
+        try:
+            count_query = AnalyticsAction.objects.using('analytics').all()
+            if positive_value_exists(google_civic_election_id):
+                count_query = count_query.filter(google_civic_election_id=google_civic_election_id)
             count_query = count_query.filter(action_constant=ACTION_VOTER_GUIDE_VISIT)
             count_query = count_query.values('organization_we_vote_id').distinct()
             count_result = count_query.count()
@@ -684,6 +876,48 @@ class AnalyticsManager(models.Model):
         }
         return results
 
+    def update_first_visit_today_for_one_voter(self, voter_we_vote_id):
+        success = False
+        status = ""
+        distinct_days_list = []
+        first_visit_today_count = 0
+
+        # Get distinct days
+        try:
+            distinct_days_query = AnalyticsAction.objects.using('analytics').all()
+            distinct_days_query = distinct_days_query.filter(voter_we_vote_id__iexact=voter_we_vote_id)
+            distinct_days_query = distinct_days_query.values('date_as_integer').distinct()
+            distinct_days_list = list(distinct_days_query)
+        except Exception as e:
+            pass
+
+        simple_distinct_days_list = []
+        for day_dict in distinct_days_list:
+            if positive_value_exists(day_dict['date_as_integer']):
+                simple_distinct_days_list.append(day_dict['date_as_integer'])
+
+        # Loop through each day
+        for one_date_as_integer in simple_distinct_days_list:
+            try:
+                first_visit_query = AnalyticsAction.objects.using('analytics').all()
+                first_visit_query.order_by("id")  # order by oldest first
+                first_visit_query = first_visit_query.filter(date_as_integer=one_date_as_integer)
+                first_visit_query = first_visit_query.filter(voter_we_vote_id__iexact=voter_we_vote_id)
+                analytics_action = first_visit_query.first()
+
+                analytics_action.first_visit_today = True
+                analytics_action.save()
+                first_visit_today_count += 1
+            except Exception as e:
+                pass
+
+        results = {
+            'success': success,
+            'status': status,
+            'first_visit_today_count': first_visit_today_count,
+        }
+        return results
+
 
 class OrganizationDailyMetrics(models.Model):
     """
@@ -741,12 +975,14 @@ class OrganizationElectionMetrics(models.Model):
     election_day_text = models.CharField(verbose_name="election day", max_length=255, null=True, blank=True)
     visitors_total = models.PositiveIntegerField(verbose_name="", null=True, unique=False)
     voter_guide_entrants = models.PositiveIntegerField(verbose_name="", null=True, unique=False)
-    new_followers = models.PositiveIntegerField(verbose_name="today",
-                                                      null=True, unique=False)
-    new_autofollowers = models.PositiveIntegerField(verbose_name="all",
-                                                      null=True, unique=False)
+    followers_at_time_of_election = models.PositiveIntegerField(verbose_name="", null=True, unique=False)
+    new_followers = models.PositiveIntegerField(verbose_name="", null=True, unique=False)
+    new_autofollowers = models.PositiveIntegerField(verbose_name="", null=True, unique=False)
     entrants_visited_ballot = models.PositiveIntegerField(verbose_name="", null=True, unique=False)
     followers_visited_ballot = models.PositiveIntegerField(verbose_name="", null=True, unique=False)
+
+    entrants_took_position = models.PositiveIntegerField(verbose_name="", null=True, unique=False)
+    followers_took_position = models.PositiveIntegerField(verbose_name="", null=True, unique=False)
 
     def election(self):
         if not self.google_civic_election_id:
@@ -755,7 +991,6 @@ class OrganizationElectionMetrics(models.Model):
             # We retrieve this from the read-only database (as opposed to the analytics database)
             election = Election.objects.using('readonly').get(google_civic_election_id=self.google_civic_election_id)
         except Election.MultipleObjectsReturned as e:
-            logger.error("position.election Found multiple")
             return
         except Election.DoesNotExist:
             return
@@ -870,12 +1105,18 @@ class SitewideElectionMetrics(models.Model):
         verbose_name="google civic election id", null=True, unique=False)
     election_day_text = models.CharField(verbose_name="election day", max_length=255, null=True, blank=True)
     visitors_total = models.PositiveIntegerField(verbose_name="", null=True, unique=False)
-    voter_guide_entrants = models.PositiveIntegerField(verbose_name="", null=True, unique=False)
-    voter_guides_viewed = models.PositiveIntegerField(verbose_name="number of voter guides viewed, this election",
-                                                            null=True, unique=False)
+    voter_guide_entries = models.PositiveIntegerField(verbose_name="", null=True, unique=False)
+    voter_guide_views = models.PositiveIntegerField(verbose_name="one person viewed one voter guide, this election",
+                                                    null=True, unique=False)
+    voter_guides_viewed = models.PositiveIntegerField(verbose_name="one org, seen at least once, this election",
+                                                      null=True, unique=False)
 
     issues_followed = models.PositiveIntegerField(verbose_name="follow issue connections, all time",
-                                                        null=True, unique=False)
+                                                  null=True, unique=False)
+
+    unique_voters_that_followed_organizations = models.PositiveIntegerField(verbose_name="", null=True, unique=False)
+    unique_voters_that_auto_followed_organizations = models.PositiveIntegerField(verbose_name="",
+                                                                                 null=True, unique=False)
     organizations_followed = models.PositiveIntegerField(verbose_name="voter follow organizations, today",
                                                                null=True, unique=False)
     organizations_autofollowed = models.PositiveIntegerField(verbose_name="autofollow organizations, today",
@@ -893,10 +1134,23 @@ class SitewideElectionMetrics(models.Model):
                                                                     null=True, unique=False)
     individuals_with_friends_only_positions = models.PositiveIntegerField(verbose_name="all",
                                                                           null=True, unique=False)
-    friends_only_positions = models.PositiveIntegerField(verbose_name="all",
-                                                         null=True, unique=False)
-    entered_full_address = models.PositiveIntegerField(verbose_name="all",
-                                                       null=True, unique=False)
+    public_positions = models.PositiveIntegerField(verbose_name="", null=True, unique=False)
+    public_positions_with_comments = models.PositiveIntegerField(verbose_name="", null=True, unique=False)
+    friends_only_positions = models.PositiveIntegerField(verbose_name="", null=True, unique=False)
+    friends_only_positions_with_comments = models.PositiveIntegerField(verbose_name="", null=True, unique=False)
+    entered_full_address = models.PositiveIntegerField(verbose_name="", null=True, unique=False)
+
+    def election(self):
+        if not self.google_civic_election_id:
+            return
+        try:
+            # We retrieve this from the read-only database (as opposed to the analytics database)
+            election = Election.objects.using('readonly').get(google_civic_election_id=self.google_civic_election_id)
+        except Election.MultipleObjectsReturned as e:
+            return
+        except Election.DoesNotExist:
+            return
+        return election
 
     def generate_date_as_integer(self):
         # We want to store the day as an integer for extremely quick database indexing and lookup
