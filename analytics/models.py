@@ -856,7 +856,7 @@ class AnalyticsManager(models.Model):
             for voter_we_vote_id in simple_voter_list:
                 try:
                     first_visit_query = AnalyticsAction.objects.using('analytics').all()
-                    first_visit_query.order_by("id")  # order by oldest first
+                    first_visit_query = first_visit_query.order_by("id")  # order by oldest first
                     first_visit_query = first_visit_query.filter(date_as_integer=one_date_as_integer)
                     first_visit_query = first_visit_query.filter(voter_we_vote_id__iexact=voter_we_vote_id)
                     analytics_action = first_visit_query.first()
@@ -900,7 +900,7 @@ class AnalyticsManager(models.Model):
         for one_date_as_integer in simple_distinct_days_list:
             try:
                 first_visit_query = AnalyticsAction.objects.using('analytics').all()
-                first_visit_query.order_by("id")  # order by oldest first
+                first_visit_query = first_visit_query.order_by("id")  # order by oldest first
                 first_visit_query = first_visit_query.filter(date_as_integer=one_date_as_integer)
                 first_visit_query = first_visit_query.filter(voter_we_vote_id__iexact=voter_we_vote_id)
                 analytics_action = first_visit_query.first()
