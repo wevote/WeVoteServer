@@ -3,7 +3,7 @@
 # -*- coding: UTF-8 -*-
 
 from .models import FollowOrganizationList, FollowOrganizationManager, UPDATE_SUGGESTIONS_FROM_TWITTER_IDS_I_FOLLOW, \
-    FOLLOW_SUGGESTIONS_FROM_TWITTER_IDS_I_FOLLOW, FollowIssueList, FollowIssueManager, FOLLOWING
+    FOLLOW_SUGGESTIONS_FROM_TWITTER_IDS_I_FOLLOW, FollowIssueList, FollowIssueManager, FOLLOWING, FollowMetricsManager
 from analytics.models import ACTION_ISSUE_FOLLOW, ACTION_ISSUE_FOLLOW_IGNORE, \
     ACTION_ISSUE_STOP_FOLLOWING, AnalyticsManager
 from django.http import HttpResponse
@@ -299,6 +299,7 @@ def voter_issue_follow_for_api(voter_device_id, issue_we_vote_id, follow_value, 
             voter_we_vote_id = voter.we_vote_id
             voter_id = voter.id
     follow_issue_manager = FollowIssueManager()
+    follow_metrics_manager = FollowMetricsManager()
     result = False
     analytics_manager = AnalyticsManager()
     if positive_value_exists(voter_we_vote_id) and positive_value_exists(issue_we_vote_id):
@@ -322,7 +323,7 @@ def voter_issue_follow_for_api(voter_device_id, issue_we_vote_id, follow_value, 
         }
     else:
         if positive_value_exists(voter_we_vote_id):
-            number_of_issues_followed = follow_issue_manager.fetch_number_of_issues_followed(voter_we_vote_id)
+            number_of_issues_followed = follow_metrics_manager.fetch_number_of_issues_followed(voter_we_vote_id)
 
             voter_manager = VoterManager()
             voter_manager.update_issues_interface_status(voter_we_vote_id, number_of_issues_followed)

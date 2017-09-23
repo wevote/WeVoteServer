@@ -28,9 +28,9 @@ from office.models import ContestOffice
 from organization.controllers import organizations_import_from_sample_file
 from organization.models import Organization, OrganizationManager, INDIVIDUAL
 from polling_location.controllers import import_and_save_all_polling_locations_data
-from position.controllers import fetch_positions_count_for_this_voter, \
-    find_organizations_referenced_in_positions_for_this_voter, positions_import_from_sample_file
-from position.models import PositionEntered, PositionForFriends
+from position.controllers import find_organizations_referenced_in_positions_for_this_voter, \
+    positions_import_from_sample_file
+from position.models import PositionEntered, PositionForFriends, PositionMetricsManager
 from twitter.models import TwitterLinkToOrganization, TwitterLinkToVoter, TwitterUserManager
 from voter.models import Voter, VoterAddress, VoterAddressManager, VoterDeviceLinkManager, VoterManager, \
     voter_has_authority, voter_setup
@@ -1086,6 +1086,7 @@ def data_cleanup_voter_list_analysis_view(request):
     facebook_manager = FacebookManager()
     twitter_user_manager = TwitterUserManager()
     friend_manager = FriendManager()
+    position_metrics_manager = PositionMetricsManager()
 
     suggested_friend_created_count = 0
     if updated_suggested_friends:
@@ -1258,7 +1259,8 @@ def data_cleanup_voter_list_analysis_view(request):
 
         one_linked_voter.links_to_other_organizations = \
             find_organizations_referenced_in_positions_for_this_voter(one_linked_voter)
-        one_linked_voter.positions_count = fetch_positions_count_for_this_voter(one_linked_voter)
+        one_linked_voter.positions_count = \
+            position_metrics_manager.fetch_positions_count_for_this_voter(one_linked_voter)
 
         email_address_list = EmailAddress.objects.all()
         email_address_list = email_address_list.filter(voter_we_vote_id__iexact=one_linked_voter.we_vote_id)

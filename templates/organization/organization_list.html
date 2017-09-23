@@ -34,13 +34,17 @@
 </p>
 
 <p>
-    <a href="{% url 'import_export_twitter:scrape_social_media_from_all_organizations' %}?organization_state={{ state_code }}">
+    <a href="{% url 'import_export_twitter:scrape_social_media_from_all_organizations' %}?organization_state={{ state_code }}&google_civic_election_id={{ google_civic_election_id }}">
         Scrape org website for social media handles (only when data missing)</a>,
 
-    <a href="{% url 'import_export_twitter:retrieve_twitter_data_for_all_organizations' %}?organization_state={{ state_code }}&first_retrieve_only=1">
+    <a href="{% url 'import_export_twitter:retrieve_twitter_data_for_all_organizations' %}?organization_state={{ state_code }}&first_retrieve_only=1&google_civic_election_id={{ google_civic_election_id }}">
         Retrieve all twitter data (only when data missing)</a>,
 
-    <a href="{% url 'import_export_wikipedia:import_all_organizations_logos' %}?organization_state={{ state_code }}">Retrieve photos from Wikipedia</a>
+    <a href="{% url 'import_export_wikipedia:import_all_organizations_logos' %}?organization_state={{ state_code }}&google_civic_election_id={{ google_civic_election_id }}">
+        Retrieve photos from Wikipedia</a>,
+
+    <a href="{% url 'follow:repair_follow_organization' %}?state_code={{ state_code }}&google_civic_election_id={{ google_civic_election_id }}">
+        Repair FollowOrganization data</a>
 </p>
 
 <form name="state_code_form" method="get" action="{% url 'organization:organization_list' %}">

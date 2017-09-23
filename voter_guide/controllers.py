@@ -1366,6 +1366,11 @@ def voter_guide_followers_retrieve_for_api(voter_device_id, organization_we_vote
     if results['organization_list_found']:
         number_added_to_list = 0
         for voter_guide in voter_guide_list:
+            if not positive_value_exists(voter_guide.organization_name):
+                continue
+            elif voter_guide.organization_name.startswith("Voter-"):
+                continue
+
             date_last_changed = voter_guide.date_last_changed
             if positive_value_exists(date_last_changed):
                 last_updated = date_last_changed.strftime('%Y-%m-%d %H:%M')
