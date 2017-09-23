@@ -89,8 +89,8 @@ def augment_one_voter_analytics_action_entries_without_election_id(voter_we_vote
     analytics_updated_count = 0
     try:
         voter_history_query = AnalyticsAction.objects.using('analytics').all()
-        voter_history_query.order_by("id")  # order by oldest first
         voter_history_query = voter_history_query.filter(voter_we_vote_id__iexact=voter_we_vote_id)
+        voter_history_query = voter_history_query.order_by("id")  # order by oldest first
         voter_history_list = list(voter_history_query)
     except Exception as e:
         pass
@@ -152,10 +152,6 @@ def augment_one_voter_analytics_action_entries_without_election_id(voter_we_vote
                         analytics_action.exact_time - datetime_of_last_analytics_action_entry
                     if time_passed_since_last_entry < one_week:
                         is_within_one_week = True
-
-                # if election_dates[latest_google_civic_election_id]:
-                #     election_plus_one_week = election_dates[latest_google_civic_election_id] + one_week
-                #     is_within_one_week = analytics_action.exact_time < election_plus_one_week
 
                 if is_within_one_week:
                     try:
