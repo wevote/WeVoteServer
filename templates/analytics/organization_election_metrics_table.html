@@ -4,7 +4,7 @@
     <tr>
         <th>Election Name (ID)</th>
         <th>Org Name (ID)</th>
-        <th>visitors total</th>
+        <th>visitors</th>
         <th>entered on voter guide</th>
         <th>entrants visited ballot</th>
         <th>entrants took position</th>
@@ -18,7 +18,10 @@
         <td>{{ one_row.organization.organization_name|default_if_none:"n/a" }}
             (<a href="{% url 'analytics:analytics_action_list' one_row.organization_we_vote_id %}?google_civic_election_id={{ google_civic_election_id }}"
                target="_blank">{{ one_row.organization_we_vote_id|default_if_none:"n/a" }}</a>)</td>
-        <td>{{ one_row.visitors_total|default_if_none:"n/a" }}</td>
+        <td>
+            all: {{ one_row.visitors_total|default_if_none:"n/a" }}
+            {% if one_row.authenticated_visitors_total %}<br />signed_in: {{ one_row.authenticated_visitors_total }}{% endif %}
+        </td>
         <td>{{ one_row.voter_guide_entrants|default_if_none:"n/a" }}</td>
         <td>{{ one_row.entrants_visited_ballot|default_if_none:"n/a" }}</td>
         <td>{{ one_row.entrants_took_position|default_if_none:"n/a" }}</td>

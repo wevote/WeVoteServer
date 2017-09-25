@@ -5,6 +5,9 @@ from .models import BALLOT_ADDRESS, fetch_voter_id_from_voter_device_link, Voter
     VoterDeviceLink, VoterDeviceLinkManager, VoterManager
 from django.http import HttpResponse
 from analytics.controllers import move_analytics_info_to_another_voter
+from analytics.models import AnalyticsManager, ACTION_FACEBOOK_AUTHENTICATION_EXISTS, ACTION_GOOGLE_AUTHENTICATION_EXISTS, \
+    ACTION_TWITTER_AUTHENTICATION_EXISTS, ACTION_EMAIL_AUTHENTICATION_EXISTS
+
 from email_outbound.controllers import move_email_address_entries_to_another_voter
 from email_outbound.models import EmailManager
 from follow.controllers import duplicate_follow_entries_to_another_voter, \
@@ -1521,6 +1524,22 @@ def voter_retrieve_for_api(voter_device_id, state_code_from_ip_address=''):  # v
             status += repair_results['status']
 
         # TODO DALE: Add if repair_facebook_link_to_voter_caching_now
+
+        analytics_manager = AnalyticsManager()
+        if voter.signed_in_facebook():
+            is_signed_in = True
+            analytics_manager.save_action(ACTION_FACEBOOK_AUTHENTICATION_EXISTS,
+                                          voter.we_vote_id, voter_id, is_signed_in)
+        if voter.signed_in_google():
+            is_signed_in = True
+            analytics_manager.save_action(ACTION_GOOGLE_AUTHENTICATION_EXISTS, voter.we_vote_id, voter_id, is_signed_in)
+        if voter.signed_in_twitter():
+            is_signed_in = True
+            analytics_manager.save_action(ACTION_TWITTER_AUTHENTICATION_EXISTS,
+                                          voter.we_vote_id, voter_id, is_signed_in)
+        if voter.signed_in_with_email():
+            is_signed_in = True
+            analytics_manager.save_action(ACTION_EMAIL_AUTHENTICATION_EXISTS, voter.we_vote_id, voter_id, is_signed_in)
 
         donation_list = donation_history_for_a_voter(voter.we_vote_id)
         json_data = {

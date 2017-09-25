@@ -6,44 +6,51 @@
         <th>visitors</th>
         <th>authenticated visitors</th>
         <th>ballots viewed today</th>
-        <th>voter guides</th>
-        <th>issues followed</th>
-        <th>organizations followed</th>
-        <th>organizations autofollowed</th>
-        <th>organizations with issues</th>
-        <th>issues linked</th>
-        <th>organizations with positions</th>
-        <th>organization public positions</th>
-        <th>individuals with positions</th>
-        <th>friends-only positions</th>
+        <th>voter guides viewed</th>
+{#        <th>issues followed</th>#}
+{#        <th>issue follows</th>#}
+{#        <th>organizations followed</th>#}
+{#        <th>organizations autofollowed</th>#}
+{#        <th>organizations with issues</th>#}
+{#        <th>issues linked</th>#}
+{#        <th>organizations with positions</th>#}
+{#        <th>organization public positions</th>#}
+{#        <th>individuals with positions</th>#}
+{#        <th>friends-only positions</th>#}
     </tr>
 {% for one_row in sitewide_daily_metrics_list %}
     <tr>
         <td>{{ one_row.date_as_integer }}</td>
-        <td><span class="u-no-break">total, all time: {{ one_row.visitors_total|default_if_none:"n/a" }}</span><br />
-            <span class="u-no-break">today: {{ one_row.visitors_today|default_if_none:"n/a" }}</span><br />
-            new: {{ one_row.new_visitors_today|default_if_none:"n/a" }}</td>
-        <td><span class="u-no-break">total, all time: {{ one_row.authenticated_visitors_total|default_if_none:"n/a" }}</span><br />
-            <span class="u-no-break">today: {{ one_row.authenticated_visitors_today|default_if_none:"n/a" }}</span><br />
-            new: {{ one_row.authenticated_new_visitors_today|default_if_none:"n/a" }}</td>
-        <td>{{ one_row.ballots_viewed_today|default_if_none:"n/a" }}</td>
+        <td>
+            <span class="u-no-break">total, all time: {{ one_row.visitors_total|default_if_none:"n/a" }}</span>
+            {% if one_row.visitors_today %}<br /><span class="u-no-break">today: {{ one_row.visitors_today }}</span>{% endif %}
+            {% if one_row.new_visitors_today %}<br />new: {{ one_row.new_visitors_today }}{% endif %}
+        </td>
+        <td>
+            <span class="u-no-break">total, all time: {{ one_row.authenticated_visitors_total|default_if_none:"n/a" }}</span>
+            {% if one_row.authenticated_visitors_today %}<br /><span class="u-no-break">today: {{ one_row.authenticated_visitors_today }}</span>{% endif %}
+            {% if one_row.authenticated_new_visitors_today %}<br />new: {{ one_row.authenticated_new_visitors_today }}{% endif %}
+        </td>
+        <td>{% if one_row.ballot_views_today %}{{ one_row.ballot_views_today }}{% endif %}</td>
         <td><span class="u-no-break">total, all time: {{ one_row.voter_guides_viewed_total|default_if_none:"n/a" }}</span><br />
             <span class="u-no-break">today: {{ one_row.voter_guides_viewed_today|default_if_none:"n/a" }}</span></td>
-        <td><span class="u-no-break">total, all time: {{ one_row.issues_followed_total|default_if_none:"n/a" }}</span><br />
-            <span class="u-no-break">today: {{ one_row.issues_followed_today|default_if_none:"n/a" }}</span></td>
-        <td><span class="u-no-break">total, all time: {{ one_row.organizations_followed_total|default_if_none:"n/a" }}</span><br />
-            <span class="u-no-break">today: {{ one_row.organizations_followed_today|default_if_none:"n/a" }}</span></td>
-        <td><span class="u-no-break">total, all time: {{ one_row.organizations_autofollowed_total|default_if_none:"n/a" }}</span><br />
-            <span class="u-no-break">today: {{ one_row.organizations_autofollowed_today|default_if_none:"n/a" }}</span></td>
-        <td>{{ one_row.organizations_with_linked_issues|default_if_none:"n/a" }}</td>
-        <td><span class="u-no-break">total, all time: {{ one_row.issues_linked_total|default_if_none:"n/a" }}</span><br />
-            <span class="u-no-break">today: {{ one_row.issues_linked_today|default_if_none:"n/a" }}</span></td>
-        <td>{{ one_row.organizations_with_positions|default_if_none:"n/a" }}</td>
-        <td>{{ one_row.organization_public_positions|default_if_none:"n/a" }}</td>
-        <td><span class="u-no-break">total: {{ one_row.individuals_with_positions|default_if_none:"n/a" }}</span><br />
-            <span class="u-no-break">public: {{ one_row.individuals_with_public_positions|default_if_none:"n/a" }}</span><br />
-            <span class="u-no-break">friends-only: {{ one_row.individuals_with_friends_only_positions|default_if_none:"n/a" }}</span></td>
-        <td>{{ one_row.friends_only_positions|default_if_none:"n/a" }}</td>
+{#        <td><span class="u-no-break">total, all time: {{ one_row.issues_followed_total|default_if_none:"n/a" }}</span><br />#}
+{#            <span class="u-no-break">today: {{ one_row.issues_followed_today|default_if_none:"n/a" }}</span></td>#}
+{#        <td><span class="u-no-break">total, all time: {{ one_row.issue_follows_total }}</span>#}
+{#            <br /><span class="u-no-break">today: {{ one_row.issue_follows_today }}</span></td>#}
+{#        <td><span class="u-no-break">total, all time: {{ one_row.organizations_followed_total|default_if_none:"n/a" }}</span><br />#}
+{#            <span class="u-no-break">today: {{ one_row.organizations_followed_today|default_if_none:"n/a" }}</span></td>#}
+{#        <td><span class="u-no-break">total, all time: {{ one_row.organizations_autofollowed_total|default_if_none:"n/a" }}</span><br />#}
+{#            <span class="u-no-break">today: {{ one_row.organizations_autofollowed_today|default_if_none:"n/a" }}</span></td>#}
+{#        <td>{{ one_row.organizations_with_linked_issues|default_if_none:"n/a" }}</td>#}
+{#        <td><span class="u-no-break">total, all time: {{ one_row.issues_linked_total|default_if_none:"n/a" }}</span><br />#}
+{#            <span class="u-no-break">today: {{ one_row.issues_linked_today|default_if_none:"n/a" }}</span></td>#}
+{#        <td>{{ one_row.organizations_with_positions|default_if_none:"n/a" }}</td>#}
+{#        <td>{{ one_row.organization_public_positions|default_if_none:"n/a" }}</td>#}
+{#        <td><span class="u-no-break">total: {{ one_row.individuals_with_positions|default_if_none:"n/a" }}</span><br />#}
+{#            <span class="u-no-break">public: {{ one_row.individuals_with_public_positions|default_if_none:"n/a" }}</span><br />#}
+{#            <span class="u-no-break">friends-only: {{ one_row.individuals_with_friends_only_positions|default_if_none:"n/a" }}</span></td>#}
+{#        <td>{{ one_row.friends_only_positions|default_if_none:"n/a" }}</td>#}
     </tr>
 {% endfor %}
 {% if not sitewide_daily_metrics_list %}

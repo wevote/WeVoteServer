@@ -71,6 +71,7 @@
         <th>exact_time</th>
         <th>date_as_integer</th>
         <th>voter</th>
+        <th>signed in</th>
         <th>organization</th>
         <th>ballot_item we_vote_id</th>
         <th>state code</th>
@@ -93,6 +94,7 @@
                    target="_blank">{{ one_row.voter_we_vote_id|default_if_none:"n/a" }}</a>
             {% endif %}
         </td>
+        <td>{% if one_row.is_signed_in %}yes{% endif %}</td>
         <td>{{ one_row.organization.organization_name|default_if_none:"n/a" }}
             {% if one_row.organization_we_vote_id %}
                 {% if organization_we_vote_id or voter_we_vote_id %}

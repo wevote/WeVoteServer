@@ -3957,6 +3957,7 @@ class PositionManager(models.Model):
         voter_position_on_stage_found = False
         position_we_vote_id = ''
         voter_we_vote_id = ''
+        is_signed_in = False
         google_civic_election_id = 0
         candidate_campaign_we_vote_id = ""
         contest_measure_we_vote_id = ""
@@ -4005,6 +4006,7 @@ class PositionManager(models.Model):
                 if results['voter_found']:
                     voter = results['voter']
                     voter_we_vote_id = voter.we_vote_id
+                    is_signed_in = voter.is_signed_in()
                     linked_organization_we_vote_id = voter.linked_organization_we_vote_id
                     # Heal the data: Make sure we have a voter_we_vote_id
                     voter_position_on_stage.voter_we_vote_id = voter_we_vote_id
@@ -4070,6 +4072,7 @@ class PositionManager(models.Model):
                 if results['voter_found']:
                     voter = results['voter']
                     voter_we_vote_id = voter.we_vote_id
+                    is_signed_in = voter.is_signed_in()
                     organization_we_vote_id = voter.linked_organization_we_vote_id
                     if positive_value_exists(organization_we_vote_id):
                         # Look up the organization_id
@@ -4135,7 +4138,7 @@ class PositionManager(models.Model):
                 ballot_item_we_vote_id = ""
             analytics_manager = AnalyticsManager()
             analytics_results = analytics_manager.save_action(
-                ACTION_POSITION_TAKEN, voter_we_vote_id, voter_id, state_code,
+                ACTION_POSITION_TAKEN, voter_we_vote_id, voter_id, is_signed_in, state_code,
                 organization_we_vote_id_temp, organization_id_temp,
                 google_civic_election_id, ballot_item_we_vote_id)
 

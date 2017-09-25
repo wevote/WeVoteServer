@@ -287,80 +287,6 @@ class VoterManager(BaseUserManager):
         else:
             return None
 
-    def fetch_voter_count_with_sign_in(self):
-        or_filter = True
-        has_twitter = True
-        has_facebook = True
-        has_email = False
-        has_verified_email = True
-        return self.fetch_voter_count(or_filter, has_twitter, has_facebook, has_email, has_verified_email)
-
-    def fetch_voter_count_with_twitter(self):
-        or_filter = True
-        has_twitter = True
-        has_facebook = False
-        has_email = False
-        has_verified_email = False
-        return self.fetch_voter_count(or_filter, has_twitter, has_facebook, has_email, has_verified_email)
-
-    def fetch_voter_count_with_facebook(self):
-        or_filter = True
-        has_twitter = False
-        has_facebook = True
-        has_email = False
-        has_verified_email = False
-        return self.fetch_voter_count(or_filter, has_twitter, has_facebook, has_email, has_verified_email)
-
-    def fetch_voter_count_with_verified_email(self):
-        or_filter = True
-        has_twitter = False
-        has_facebook = False
-        has_email = False
-        has_verified_email = True
-        return self.fetch_voter_count(or_filter, has_twitter, has_facebook, has_email, has_verified_email)
-
-    def fetch_voter_count(self, or_filter=True,
-                          has_twitter=False, has_facebook=False, has_email=False, has_verified_email=False,
-                          by_notification_settings=0, by_interface_status_flags=0):
-        voter_queryset = Voter.objects.all()
-
-        voter_raw_filters = []
-        if positive_value_exists(or_filter):
-            if positive_value_exists(has_twitter):
-                new_voter_filter = Q(twitter_id__isnull=False)
-                voter_raw_filters.append(new_voter_filter)
-                new_voter_filter = Q(twitter_id__gt=0)
-                voter_raw_filters.append(new_voter_filter)
-            if positive_value_exists(has_facebook):
-                new_voter_filter = Q(facebook_id__isnull=False)
-                voter_raw_filters.append(new_voter_filter)
-                new_voter_filter = Q(facebook_id__gt=0)
-                voter_raw_filters.append(new_voter_filter)
-            if positive_value_exists(has_verified_email):
-                new_voter_filter = Q(primary_email_we_vote_id__isnull=False)
-                voter_raw_filters.append(new_voter_filter)
-        else:
-            # Add "and" filter here
-            pass
-
-        if positive_value_exists(or_filter):
-            if len(voter_raw_filters):
-                final_voter_filters = voter_raw_filters.pop()
-
-                # ...and "OR" the remaining items in the list
-                for item in voter_raw_filters:
-                    final_voter_filters |= item
-
-                voter_queryset = voter_queryset.filter(final_voter_filters)
-
-        voter_count = 0
-        try:
-            voter_count = voter_queryset.count()
-        except Exception as e:
-            pass
-
-        return voter_count
-
     def this_voter_has_first_or_last_name_saved(self, voter):
         try:
             if positive_value_exists(voter.first_name) or positive_value_exists(voter.last_name):
@@ -2659,6 +2585,80 @@ def voter_setup(request):
 
 
 class VoterMetricsManager(models.Model):
+
+    def fetch_voter_count_with_sign_in(self):
+        or_filter = True
+        has_twitter = True
+        has_facebook = True
+        has_email = False
+        has_verified_email = True
+        return self.fetch_voter_count(or_filter, has_twitter, has_facebook, has_email, has_verified_email)
+
+    def fetch_voter_count_with_twitter(self):
+        or_filter = True
+        has_twitter = True
+        has_facebook = False
+        has_email = False
+        has_verified_email = False
+        return self.fetch_voter_count(or_filter, has_twitter, has_facebook, has_email, has_verified_email)
+
+    def fetch_voter_count_with_facebook(self):
+        or_filter = True
+        has_twitter = False
+        has_facebook = True
+        has_email = False
+        has_verified_email = False
+        return self.fetch_voter_count(or_filter, has_twitter, has_facebook, has_email, has_verified_email)
+
+    def fetch_voter_count_with_verified_email(self):
+        or_filter = True
+        has_twitter = False
+        has_facebook = False
+        has_email = False
+        has_verified_email = True
+        return self.fetch_voter_count(or_filter, has_twitter, has_facebook, has_email, has_verified_email)
+
+    def fetch_voter_count(self, or_filter=True,
+                          has_twitter=False, has_facebook=False, has_email=False, has_verified_email=False,
+                          by_notification_settings=0, by_interface_status_flags=0):
+        voter_queryset = Voter.objects.all()
+
+        voter_raw_filters = []
+        if positive_value_exists(or_filter):
+            if positive_value_exists(has_twitter):
+                new_voter_filter = Q(twitter_id__isnull=False)
+                voter_raw_filters.append(new_voter_filter)
+                new_voter_filter = Q(twitter_id__gt=0)
+                voter_raw_filters.append(new_voter_filter)
+            if positive_value_exists(has_facebook):
+                new_voter_filter = Q(facebook_id__isnull=False)
+                voter_raw_filters.append(new_voter_filter)
+                new_voter_filter = Q(facebook_id__gt=0)
+                voter_raw_filters.append(new_voter_filter)
+            if positive_value_exists(has_verified_email):
+                new_voter_filter = Q(primary_email_we_vote_id__isnull=False)
+                voter_raw_filters.append(new_voter_filter)
+        else:
+            # Add "and" filter here
+            pass
+
+        if positive_value_exists(or_filter):
+            if len(voter_raw_filters):
+                final_voter_filters = voter_raw_filters.pop()
+
+                # ...and "OR" the remaining items in the list
+                for item in voter_raw_filters:
+                    final_voter_filters |= item
+
+                voter_queryset = voter_queryset.filter(final_voter_filters)
+
+        voter_count = 0
+        try:
+            voter_count = voter_queryset.count()
+        except Exception as e:
+            pass
+
+        return voter_count
 
     def fetch_voter_entered_full_address(self, voter_id):
         count_result = None

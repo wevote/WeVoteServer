@@ -5,9 +5,10 @@
         <th>Month</th>
         <th>visitors</th>
         <th>authenticated visitors</th>
-        <th>ballots viewed this month</th>
+        <th>ballot views this month</th>
         <th>voter guides</th>
         <th>issues followed</th>
+        <th>issue follows</th>
         <th>organizations followed</th>
         <th>organizations autofollowed</th>
         <th>organizations with issues</th>
@@ -26,11 +27,13 @@
         <td>total, all time: {{ one_row.authenticated_visitors_total }}<br />
             this month: {{ one_row.authenticated_visitors_this_month }}<br />
             new: {{ one_row.authenticated_new_visitors_this_month }}</td>
-        <td>{{ one_row.ballots_viewed_this_month }}</td>
+        <td>{{ one_row.ballot_views_this_month }}</td>
         <td>total, all time: {{ one_row.voter_guides_viewed_total }}
             this month: {{ one_row.voter_guides_viewed_this_month }}</td>
         <td>total, all time: {{ one_row.issues_followed_total }}<br />
             this month: {{ one_row.issues_followed_this_month }}</td>
+        <td>total, all time: {{ one_row.issue_follows_total }}<br />
+            this month: {{ one_row.issue_follows_this_month }}</td>
         <td>total, all time: {{ one_row.organizations_followed_total }}<br />
             this month: {{ one_row.organizations_followed_this_month }}</td>
         <td>total, all time: {{ one_row.organizations_autofollowed_total }}<br />

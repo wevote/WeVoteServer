@@ -8,7 +8,7 @@ from config.base import get_environment_variable
 from django.http import HttpResponse
 import json
 from organization.models import OrganizationManager
-from voter.models import fetch_voter_we_vote_id_from_voter_id, VoterDeviceLinkManager
+from voter.models import VoterDeviceLinkManager, VoterManager
 import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, get_voter_device_id, is_voter_device_id_valid, \
     positive_value_exists
@@ -24,6 +24,7 @@ def save_analytics_action_view(request):  # saveAnalyticsAction
     missing_required_variable = False
     voter_id = 0
     voter_we_vote_id = ""
+    is_signed_in = False
     state_code_from_ip_address = ""  # If a state_code is NOT passed in, we want to get the state_code from ip address
     voter_device_id_for_storage = ""
     date_as_integer = 0
@@ -43,7 +44,12 @@ def save_analytics_action_view(request):  # saveAnalyticsAction
         voter_device_link = results['voter_device_link']
         voter_id = voter_device_link.voter_id
         state_code_from_ip_address = voter_device_link.state_code
-        voter_we_vote_id = fetch_voter_we_vote_id_from_voter_id(voter_id)
+        voter_manager = VoterManager()
+        voter_results = voter_manager.retrieve_voter_by_id(voter_id)
+        if positive_value_exists(voter_results['voter_found']):
+            voter = voter_results['voter']
+            voter_we_vote_id = voter.we_vote_id
+            is_signed_in = voter.is_signed_in()
     else:
         voter_device_id_for_storage = voter_device_id
 
@@ -75,15 +81,16 @@ def save_analytics_action_view(request):  # saveAnalyticsAction
             'voter_device_id':          voter_device_id,
             'action_constant':          action_constant,
             'state_code':               state_code,
+            'is_signed_in':             is_signed_in,
             'google_civic_election_id': google_civic_election_id,
             'organization_we_vote_id':  organization_we_vote_id,
-            'ballot_item_we_vote_id':   ballot_item_we_vote_id,
             'organization_id':          organization_id,
+            'ballot_item_we_vote_id':   ballot_item_we_vote_id,
             'date_as_integer':          date_as_integer
         }
         return HttpResponse(json.dumps(json_data), content_type='application/json')
 
-    results = save_analytics_action_for_api(action_constant, voter_we_vote_id, voter_id, state_code,
+    results = save_analytics_action_for_api(action_constant, voter_we_vote_id, voter_id, is_signed_in, state_code,
                                             organization_we_vote_id, organization_id,
                                             google_civic_election_id, ballot_item_we_vote_id,
                                             voter_device_id_for_storage)
@@ -95,10 +102,11 @@ def save_analytics_action_view(request):  # saveAnalyticsAction
         'voter_device_id':          voter_device_id,
         'action_constant':          action_constant,
         'state_code':               state_code,
+        'is_signed_in':             is_signed_in,
         'google_civic_election_id': google_civic_election_id,
         'organization_we_vote_id':  organization_we_vote_id,
-        'ballot_item_we_vote_id':   ballot_item_we_vote_id,
         'organization_id':          organization_id,
+        'ballot_item_we_vote_id':   ballot_item_we_vote_id,
         'date_as_integer':          results['date_as_integer']
     }
     return HttpResponse(json.dumps(json_data), content_type='application/json')

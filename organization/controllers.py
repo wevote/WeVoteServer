@@ -289,6 +289,7 @@ def organization_follow_all(voter_device_id, organization_id, organization_we_vo
 
     voter = results['voter']
     voter_we_vote_id = voter.we_vote_id
+    is_signed_in = voter.is_signed_in()
     voter_linked_organization_we_vote_id = voter.linked_organization_we_vote_id
 
     organization_id = convert_to_int(organization_id)
@@ -316,7 +317,7 @@ def organization_follow_all(voter_device_id, organization_id, organization_we_vo
             organization_id = follow_organization.organization_id
             organization_we_vote_id = follow_organization.organization_we_vote_id
             analytics_results = analytics_manager.save_action(
-                ACTION_ORGANIZATION_FOLLOW, voter_we_vote_id, voter_id, state_code,
+                ACTION_ORGANIZATION_FOLLOW, voter_we_vote_id, voter_id, is_signed_in, state_code,
                 organization_we_vote_id, organization_id)
         else:
             status = results['status']
@@ -333,7 +334,7 @@ def organization_follow_all(voter_device_id, organization_id, organization_we_vo
             organization_id = follow_organization.organization_id
             organization_we_vote_id = follow_organization.organization_we_vote_id
             analytics_results = analytics_manager.save_action(
-                ACTION_ORGANIZATION_FOLLOW_IGNORE, voter_we_vote_id, voter_id, state_code,
+                ACTION_ORGANIZATION_FOLLOW_IGNORE, voter_we_vote_id, voter_id, is_signed_in, state_code,
                 organization_we_vote_id, organization_id)
         else:
             status = results['status']
@@ -349,7 +350,7 @@ def organization_follow_all(voter_device_id, organization_id, organization_we_vo
             organization_id = follow_organization.organization_id
             organization_we_vote_id = follow_organization.organization_we_vote_id
             analytics_results = analytics_manager.save_action(
-                ACTION_ORGANIZATION_STOP_FOLLOWING, voter_we_vote_id, voter_id, state_code,
+                ACTION_ORGANIZATION_STOP_FOLLOWING, voter_we_vote_id, voter_id, is_signed_in, state_code,
                 organization_we_vote_id, organization_id)
         else:
             status = results['status']

@@ -32,7 +32,8 @@ from position.controllers import find_organizations_referenced_in_positions_for_
     positions_import_from_sample_file
 from position.models import PositionEntered, PositionForFriends, PositionMetricsManager
 from twitter.models import TwitterLinkToOrganization, TwitterLinkToVoter, TwitterUserManager
-from voter.models import Voter, VoterAddress, VoterAddressManager, VoterDeviceLinkManager, VoterManager, \
+from voter.models import Voter, VoterAddress, VoterAddressManager, VoterDeviceLinkManager, \
+    VoterManager, VoterMetricsManager, \
     voter_has_authority, voter_setup
 from wevote_functions.functions import convert_to_int, delete_voter_api_device_id_cookie, generate_voter_device_id, \
     get_voter_api_device_id, positive_value_exists, set_voter_api_device_id, STATE_CODE_MAP
@@ -64,11 +65,11 @@ def admin_home_view(request):
     google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
     state_code = request.GET.get('state_code', '')
 
-    voter_manager = VoterManager()
-    voter_accounts_count = voter_manager.fetch_voter_count_with_sign_in()
-    voter_twitter_accounts_count = voter_manager.fetch_voter_count_with_twitter()
-    voter_facebook_accounts_count = voter_manager.fetch_voter_count_with_facebook()
-    voter_email_accounts_count = voter_manager.fetch_voter_count_with_verified_email()
+    voter_metrics_manager = VoterMetricsManager()
+    voter_accounts_count = voter_metrics_manager.fetch_voter_count_with_sign_in()
+    voter_twitter_accounts_count = voter_metrics_manager.fetch_voter_count_with_twitter()
+    voter_facebook_accounts_count = voter_metrics_manager.fetch_voter_count_with_facebook()
+    voter_email_accounts_count = voter_metrics_manager.fetch_voter_count_with_verified_email()
 
     voter_address_manager = VoterAddressManager()
     voter_address_basic_count = voter_address_manager.fetch_address_basic_count()
