@@ -3,8 +3,7 @@
 <table border="1" cellpadding="5" cellspacing="5" class="table">
     <tr>
         <th>Election Name (ID)</th>
-        <th>visitors_ total</th>
-{#        <th>authenticated_ visitors_ total</th>#}
+        <th>visitors</th>
         <th>voter guides</th>
         <th>public positions</th>
         <th>friends-only positions</th>
@@ -17,8 +16,10 @@
 {% for one_row in sitewide_election_metrics_list %}
     <tr>
         <td>{{ one_row.election.election_name|default_if_none:"n/a" }} ({{ one_row.google_civic_election_id }})</td>
-        <td>{{ one_row.visitors_total }}</td>
-{#        <td>{{ one_row.authenticated_visitors_total }}</td>#}
+        <td>
+            all: {{ one_row.visitors_total }}
+            {% if one_row.authenticated_visitors_total %}<br />signed_in: {{ one_row.authenticated_visitors_total }}{% endif %}
+        </td>
         <td>viewed: {{ one_row.voter_guides_viewed|default_if_none:"n/a" }}
 {#            <br />#}
 {#            views: {{ one_row.voter_guide_views|default_if_none:"n/a" }}<br />#}

@@ -527,15 +527,15 @@ class FacebookManager(models.Model):
                 facebook_auth_response_id = facebook_auth_response.id
                 facebook_auth_response_found = True
                 success = True
-                status = "RETRIEVE_FACEBOOK_AUTH_RESPONSE_FOUND_BY_FACEBOOK_USER_ID"
+                status = "RETRIEVE_FACEBOOK_AUTH_RESPONSE_FOUND_BY_FACEBOOK_USER_ID "
             else:
                 facebook_auth_response_found = False
                 success = False
-                status = "RETRIEVE_FACEBOOK_AUTH_RESPONSE_VARIABLES_MISSING"
+                status = "RETRIEVE_FACEBOOK_AUTH_RESPONSE_VARIABLES_MISSING "
         except FacebookAuthResponse.DoesNotExist:
             facebook_auth_response_found = False
             success = True
-            status = "RETRIEVE_FACEBOOK_AUTH_RESPONSE_NOT_FOUND"
+            status = "RETRIEVE_FACEBOOK_AUTH_RESPONSE_NOT_FOUND "
         except Exception as e:
             facebook_auth_response_found = False
             success = False
@@ -591,7 +591,7 @@ class FacebookManager(models.Model):
                 facebook_link_to_voter_id = facebook_link_to_voter.id
                 facebook_link_to_voter_found = True
                 success = True
-                status = "RETRIEVE_FACEBOOK_LINK_TO_VOTER_FOUND_BY_FACEBOOK_USER_ID"
+                status = "RETRIEVE_FACEBOOK_LINK_TO_VOTER_FOUND_BY_FACEBOOK_USER_ID "
             elif positive_value_exists(voter_we_vote_id):
                 facebook_link_to_voter = FacebookLinkToVoter.objects.get(
                     voter_we_vote_id__iexact=voter_we_vote_id,
@@ -599,7 +599,7 @@ class FacebookManager(models.Model):
                 facebook_link_to_voter_id = facebook_link_to_voter.id
                 facebook_link_to_voter_found = True
                 success = True
-                status = "RETRIEVE_FACEBOOK_LINK_TO_VOTER_FOUND_BY_VOTER_WE_VOTE_ID"
+                status = "RETRIEVE_FACEBOOK_LINK_TO_VOTER_FOUND_BY_VOTER_WE_VOTE_ID "
             elif positive_value_exists(facebook_secret_key):
                 facebook_link_to_voter = FacebookLinkToVoter.objects.get(
                     secret_key=facebook_secret_key,
@@ -607,11 +607,11 @@ class FacebookManager(models.Model):
                 facebook_link_to_voter_id = facebook_link_to_voter.id
                 facebook_link_to_voter_found = True
                 success = True
-                status = "RETRIEVE_FACEBOOK_LINK_TO_VOTER_FOUND_BY_FACEBOOK_SECRET_KEY"
+                status = "RETRIEVE_FACEBOOK_LINK_TO_VOTER_FOUND_BY_FACEBOOK_SECRET_KEY "
             else:
                 facebook_link_to_voter_found = False
                 success = False
-                status = "RETRIEVE_FACEBOOK_LINK_TO_VOTER_VARIABLES_MISSING"
+                status = "RETRIEVE_FACEBOOK_LINK_TO_VOTER_VARIABLES_MISSING "
         except FacebookLinkToVoter.DoesNotExist:
             facebook_link_to_voter_found = False
             success = True
@@ -619,7 +619,7 @@ class FacebookManager(models.Model):
         except Exception as e:
             facebook_link_to_voter_found = False
             success = False
-            status = 'FAILED retrieve_facebook_link_to_voter'
+            status = 'FAILED retrieve_facebook_link_to_voter '
             handle_exception(e, logger=logger, exception_message=status)
 
         results = {

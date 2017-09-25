@@ -73,6 +73,8 @@ def save_analytics_action_doc_template_values(url_root):
                    '  "success": boolean,\n' \
                    '  "voter_device_id": string (88 characters long),\n' \
                    '  "action_constant": integer,\n' \
+                   '  "state_code": string,\n' \
+                   '  "is_signed_in": boolean,\n' \
                    '  "google_civic_election_id": integer,\n' \
                    '  "organization_we_vote_id": string,\n' \
                    '  "organization_id": integer,\n' \

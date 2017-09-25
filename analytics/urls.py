@@ -36,6 +36,4 @@ urlpatterns = [
     url(r'^sitewide_voter_metrics/$', views_admin.sitewide_voter_metrics_view, name='sitewide_voter_metrics'),
     url(r'^sitewide_voter_metrics_process/$',
         views_admin.sitewide_voter_metrics_process_view, name='sitewide_voter_metrics_process'),
-    url(r'^update_daily_metrics_process/$',
-        views_admin.update_daily_metrics_process_view, name='update_daily_metrics_process'),
 ]

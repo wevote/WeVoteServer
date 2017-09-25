@@ -7,7 +7,7 @@
         <th>authenticated visitors</th>
         <th>ballots viewed today</th>
         <th>voter guides</th>
-        <th>issues followed</th>
+        <th>issue follows</th>
         <th>organizations followed</th>
         <th>organizations autofollowed</th>
         <th>organizations with issues</th>
@@ -26,7 +26,7 @@
         <td><span class="u-no-break">total, all time: {{ one_row.authenticated_visitors_total|default_if_none:"n/a" }}</span><br />
             <span class="u-no-break">today: {{ one_row.authenticated_visitors_today|default_if_none:"n/a" }}</span><br />
             new: {{ one_row.authenticated_new_visitors_today|default_if_none:"n/a" }}</td>
-        <td>{{ one_row.ballots_viewed_today|default_if_none:"n/a" }}</td>
+        <td>{{ one_row.ballot_views_today|default_if_none:"n/a" }}</td>
         <td><span class="u-no-break">total, all time: {{ one_row.voter_guides_viewed_total|default_if_none:"n/a" }}</span><br />
             <span class="u-no-break">today: {{ one_row.voter_guides_viewed_today|default_if_none:"n/a" }}</span></td>
         <td><span class="u-no-break">total, all time: {{ one_row.issues_followed_total|default_if_none:"n/a" }}</span><br />

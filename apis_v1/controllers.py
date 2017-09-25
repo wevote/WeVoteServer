@@ -8,7 +8,7 @@ from follow.models import FOLLOW_IGNORE, FOLLOWING, STOP_FOLLOWING
 import json
 from organization.models import Organization
 from organization.controllers import organization_follow_all
-from voter.models import fetch_voter_id_from_voter_device_link, Voter, VoterManager
+from voter.models import fetch_voter_id_from_voter_device_link, Voter, VoterManager, VoterMetricsManager
 import wevote_functions.admin
 from wevote_functions.functions import is_voter_device_id_valid
 
@@ -80,8 +80,8 @@ def organization_follow_ignore(voter_device_id, organization_id=0, organization_
 
 
 def voter_count():
-    voter_manager = VoterManager()
-    voter_count_all = voter_manager.fetch_voter_count()
+    voter_metrics_manager = VoterMetricsManager()
+    voter_count_all = voter_metrics_manager.fetch_voter_count()
     success = True
 
     json_data = {

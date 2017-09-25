@@ -290,6 +290,7 @@ def duplicate_organization_followers_to_another_organization(from_organization_i
 def voter_issue_follow_for_api(voter_device_id, issue_we_vote_id, follow_value, ignore_value):  # issueFollow
     voter_we_vote_id = False
     voter_id = 0
+    is_signed_in = False
     issue_id = ''
     if positive_value_exists(voter_device_id):
         voter_manager = VoterManager()
@@ -298,6 +299,8 @@ def voter_issue_follow_for_api(voter_device_id, issue_we_vote_id, follow_value, 
             voter = voter_results['voter']
             voter_we_vote_id = voter.we_vote_id
             voter_id = voter.id
+            if voter.is_signed_in():
+                is_signed_in = True
     follow_issue_manager = FollowIssueManager()
     follow_metrics_manager = FollowMetricsManager()
     result = False
@@ -306,15 +309,18 @@ def voter_issue_follow_for_api(voter_device_id, issue_we_vote_id, follow_value, 
         if follow_value:
             result = follow_issue_manager.toggle_on_voter_following_issue(voter_we_vote_id, issue_id,
                                                                           issue_we_vote_id)
-            analytics_results = analytics_manager.save_action(ACTION_ISSUE_FOLLOW, voter_we_vote_id, voter_id)
+            analytics_results = analytics_manager.save_action(ACTION_ISSUE_FOLLOW,
+                                                              voter_we_vote_id, voter_id, is_signed_in)
         elif not follow_value:
             result = follow_issue_manager.toggle_off_voter_following_issue(voter_we_vote_id, issue_id,
                                                                            issue_we_vote_id)
-            analytics_results = analytics_manager.save_action(ACTION_ISSUE_STOP_FOLLOWING, voter_we_vote_id, voter_id)
+            analytics_results = analytics_manager.save_action(ACTION_ISSUE_STOP_FOLLOWING,
+                                                              voter_we_vote_id, voter_id, is_signed_in)
         elif ignore_value:
             result = follow_issue_manager.toggle_ignore_voter_following_issue(voter_we_vote_id, issue_id,
                                                                               issue_we_vote_id)
-            analytics_results = analytics_manager.save_action(ACTION_ISSUE_FOLLOW_IGNORE, voter_we_vote_id, voter_id)
+            analytics_results = analytics_manager.save_action(ACTION_ISSUE_FOLLOW_IGNORE,
+                                                              voter_we_vote_id, voter_id, is_signed_in)
 
     if not result:
         new_result = {

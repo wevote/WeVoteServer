@@ -40,13 +40,6 @@ def augment_voter_analytics_action_entries_without_election_id(date_as_integer):
     success = False
     status = ""
 
-    # Get distinct elections in this period of time so we can have access to election data
-    # timezone = pytz.timezone("America/Los_Angeles")
-    # election_dates = {
-    #     4389: timezone.localize(datetime.strptime("2017-09-12", "%Y-%m-%d")),
-    #     5000: timezone.localize(datetime.strptime("2016-11-08", "%Y-%m-%d")),
-    # }
-
     # Get distinct voters in the time period
     voter_list = []
     try:
@@ -82,14 +75,16 @@ def augment_voter_analytics_action_entries_without_election_id(date_as_integer):
     return results
 
 
-def augment_one_voter_analytics_action_entries_without_election_id(voter_we_vote_id):
-    success = False
+def augment_one_voter_analytics_action_entries_without_election_id(voter_we_vote_id, starting_analytics_action_id=0):
+    success = True
     status = ""
     voter_history_list = []
     analytics_updated_count = 0
     try:
         voter_history_query = AnalyticsAction.objects.using('analytics').all()
         voter_history_query = voter_history_query.filter(voter_we_vote_id__iexact=voter_we_vote_id)
+        if positive_value_exists(starting_analytics_action_id):
+            voter_history_query = voter_history_query.filter(id__gte=starting_analytics_action_id)
         voter_history_query = voter_history_query.order_by("id")  # order by oldest first
         voter_history_list = list(voter_history_query)
     except Exception as e:
@@ -129,8 +124,6 @@ def augment_one_voter_analytics_action_entries_without_election_id(voter_we_vote
     # Now "fill-in-the-gaps"
     leading_edge_google_civic_election_id = 0  # The very first google_civic_election_id found
     latest_google_civic_election_id = 0  # As we go from oldest-to-newest, update this to the next id found
-    leading_edge_state_code = ''
-    leading_edge_date_as_integer = 0
     analytics_action_list_before_first_election = []
     datetime_of_last_analytics_action_entry = None
     one_week = timedelta(days=7)
@@ -160,20 +153,17 @@ def augment_one_voter_analytics_action_entries_without_election_id(voter_we_vote
                         analytics_updated_count += 1
                     except Exception as e:
                         pass
+                else:
+                    # Recursively start up the process starting from this entry, and then break out of this loop
+                    new_starting_analytics_action_id = analytics_action.id
+                    results = augment_one_voter_analytics_action_entries_without_election_id(
+                        voter_we_vote_id, new_starting_analytics_action_id)
+                    analytics_updated_count += results['analytics_updated_count']
+                    break
             else:
                 # If here, we have not set the leading_edge_google_civic_election_id yet
                 #  so we want to save these entries into a "precursor" list
                 analytics_action_list_before_first_election.append(analytics_action)
-
-        if positive_value_exists(analytics_action.state_code):
-            if not positive_value_exists(leading_edge_state_code):
-                # Only set this once
-                leading_edge_state_code = analytics_action.state_code
-
-        if positive_value_exists(analytics_action.date_as_integer):
-            if not positive_value_exists(leading_edge_date_as_integer):
-                # Only set this once
-                leading_edge_date_as_integer = analytics_action.date_as_integer
 
         datetime_of_last_analytics_action_entry = analytics_action.exact_time
 
@@ -187,26 +177,8 @@ def augment_one_voter_analytics_action_entries_without_election_id(voter_we_vote
                     analytics_updated_count += 1
                 except Exception as e:
                     pass
+
     # 2017-09-21 As of now, we are not going to guess the election if there wasn't any election-related activity.
-    # elif positive_value_exists(leading_edge_state_code) and positive_value_exists(leading_edge_date_as_integer):
-    #     # Figure out the google_civic_election_id for state in question either 5 weeks before or 1 week after
-    #     possible_elections_in_state = {
-    #         20170911: 4389,
-    #         20170912: 4389,
-    #         20170913: 4389,
-    #         20170914: 4389,
-    #     }
-    #     most_likely_google_civic_election_id = possible_elections_in_state[leading_edge_date_as_integer]
-    #     if positive_value_exists(most_likely_google_civic_election_id):
-    #         for analytics_action in analytics_action_list_before_first_election:
-    #             # Loop through these and set to most_likely_google_civic_election_id
-    #             if not positive_value_exists(analytics_action.google_civic_election_id):  # Make sure it is empty
-    #                 try:
-    #                     analytics_action.google_civic_election_id = most_likely_google_civic_election_id
-    #                     analytics_action.save()
-    #                     analytics_updated_count += 1
-    #                 except Exception as e:
-    #                     pass
 
     results = {
         'success': success,
@@ -216,7 +188,7 @@ def augment_one_voter_analytics_action_entries_without_election_id(voter_we_vote
     return results
 
 
-def save_analytics_action_for_api(action_constant, voter_we_vote_id, voter_id, state_code,
+def save_analytics_action_for_api(action_constant, voter_we_vote_id, voter_id, is_signed_in, state_code,
                                   organization_we_vote_id, organization_id,
                                   google_civic_election_id, ballot_item_we_vote_id=None,
                                   voter_device_id=None):  # saveAnalyticsAction
@@ -257,6 +229,8 @@ def save_analytics_action_for_api(action_constant, voter_we_vote_id, voter_id, s
             'success':                  success,
             'voter_device_id':          voter_device_id,
             'action_constant':          action_constant,
+            'is_signed_in':             is_signed_in,
+            'state_code':               state_code,
             'google_civic_election_id': google_civic_election_id,
             'organization_we_vote_id':  organization_we_vote_id,
             'organization_id':          organization_id,
@@ -267,7 +241,7 @@ def save_analytics_action_for_api(action_constant, voter_we_vote_id, voter_id, s
 
     save_results = analytics_manager.save_action(
             action_constant,
-            voter_we_vote_id, voter_id, state_code,
+            voter_we_vote_id, voter_id, is_signed_in, state_code,
             organization_we_vote_id, organization_id, google_civic_election_id,
             ballot_item_we_vote_id, voter_device_id)
     if save_results['action_saved']:
@@ -284,6 +258,8 @@ def save_analytics_action_for_api(action_constant, voter_we_vote_id, voter_id, s
         'success':                  success,
         'voter_device_id':          voter_device_id,
         'action_constant':          action_constant,
+        'is_signed_in':             is_signed_in,
+        'state_code':               state_code,
         'google_civic_election_id': google_civic_election_id,
         'organization_we_vote_id':  organization_we_vote_id,
         'organization_id':          organization_id,
@@ -299,10 +275,13 @@ def calculate_organization_election_metrics(google_civic_election_id, organizati
 
     analytics_count_manager = AnalyticsCountManager()
     follow_count_manager = FollowMetricsManager()
+    limit_to_authenticated = True
 
     google_civic_election_id = convert_to_int(google_civic_election_id)
     visitors_total = analytics_count_manager.fetch_visitors_to_organization_in_election(
         organization_we_vote_id, google_civic_election_id)
+    authenticated_visitors_total = analytics_count_manager.fetch_visitors_to_organization_in_election(
+        organization_we_vote_id, google_civic_election_id, limit_to_authenticated)
     voter_guide_entrants = analytics_count_manager.fetch_visitors_first_visit_to_organization_in_election(
         organization_we_vote_id, google_civic_election_id)
     followers_at_time_of_election = follow_count_manager.fetch_organization_followers(
@@ -327,6 +306,7 @@ def calculate_organization_election_metrics(google_civic_election_id, organizati
         'google_civic_election_id': google_civic_election_id,
         'organization_we_vote_id':  organization_we_vote_id,
         'visitors_total':           visitors_total,
+        'authenticated_visitors_total':     authenticated_visitors_total,
         'voter_guide_entrants':     voter_guide_entrants,
         'followers_at_time_of_election':    followers_at_time_of_election,
         'new_followers':            new_followers,
@@ -388,22 +368,35 @@ def calculate_organization_daily_metrics(organization_we_vote_id, date):
     return results
 
 
-def calculate_sitewide_daily_metrics(date):
+def calculate_sitewide_daily_metrics(limit_to_one_date_as_integer):
     status = ""
     success = False
 
-    date_as_integer = convert_to_int(date)
-    visitors_total = None
-    visitors_today = None
+    analytics_count_manager = AnalyticsCountManager()
+    follow_count_manager = FollowMetricsManager()
+    google_civic_election_id_zero = 0
+    limit_to_authenticated = True
+    date_as_integer_zero = 0
+    limit_to_one_date_as_integer = convert_to_int(limit_to_one_date_as_integer)
+    count_through_this_date_as_integer = limit_to_one_date_as_integer
+
+    visitors_total = analytics_count_manager.fetch_visitors(
+        google_civic_election_id_zero, date_as_integer_zero, count_through_this_date_as_integer)
+    visitors_today = analytics_count_manager.fetch_visitors(google_civic_election_id_zero, limit_to_one_date_as_integer)
     new_visitors_today = None
     voter_guide_entrants_today = None
     welcome_page_entrants_today = None
     friend_entrants_today = None
-    authenticated_visitors_total = None
-    authenticated_visitors_today = None
-    ballots_viewed_today = None
-    voter_guides_viewed_total = None
-    voter_guides_viewed_today = None
+    authenticated_visitors_total = analytics_count_manager.fetch_visitors(
+        google_civic_election_id_zero, date_as_integer_zero, count_through_this_date_as_integer, limit_to_authenticated)
+    authenticated_visitors_today = analytics_count_manager.fetch_visitors(
+        google_civic_election_id_zero, limit_to_one_date_as_integer, date_as_integer_zero, limit_to_authenticated)
+    ballot_views_today = analytics_count_manager.fetch_ballot_views(
+        google_civic_election_id_zero, limit_to_one_date_as_integer)
+    voter_guides_viewed_total = analytics_count_manager.fetch_voter_guides_viewed(
+        google_civic_election_id_zero, date_as_integer_zero, count_through_this_date_as_integer)
+    voter_guides_viewed_today = analytics_count_manager.fetch_voter_guides_viewed(
+        google_civic_election_id_zero, limit_to_one_date_as_integer)
     issues_followed_total = None
     issues_followed_today = None
     organizations_followed_total = None
@@ -426,16 +419,16 @@ def calculate_sitewide_daily_metrics(date):
     success = True
 
     sitewide_daily_metrics_values = {
-        'date_as_integer':                          date_as_integer,
+        'date_as_integer':                          limit_to_one_date_as_integer,
         'visitors_total':                           visitors_total,
         'visitors_today':                           visitors_today,
         'new_visitors_today':                       new_visitors_today,
         'voter_guide_entrants_today':               voter_guide_entrants_today,
-        'welcome_page_entrants_today':               welcome_page_entrants_today,
-        'friend_entrants_today':                     friend_entrants_today,
+        'welcome_page_entrants_today':              welcome_page_entrants_today,
+        'friend_entrants_today':                    friend_entrants_today,
         'authenticated_visitors_total':             authenticated_visitors_total,
         'authenticated_visitors_today':             authenticated_visitors_today,
-        'ballots_viewed_today':                     ballots_viewed_today,
+        'ballot_views_today':                       ballot_views_today,
         'voter_guides_viewed_total':                voter_guides_viewed_total,
         'voter_guides_viewed_today':                voter_guides_viewed_today,
         'issues_followed_total':                    issues_followed_total,
@@ -475,7 +468,7 @@ def calculate_sitewide_election_metrics(google_civic_election_id):
     voter_metrics_manager = VoterMetricsManager()
 
     google_civic_election_id = convert_to_int(google_civic_election_id)
-    visitors_total = analytics_count_manager.fetch_visitors_in_election(google_civic_election_id)
+    visitors_total = analytics_count_manager.fetch_visitors(google_civic_election_id)
     voter_guide_entries = None
     voter_guide_views = None
     voter_guides_viewed = analytics_count_manager.fetch_voter_guides_viewed(google_civic_election_id)
@@ -699,23 +692,35 @@ def save_organization_election_metrics(google_civic_election_id, organization_we
     return results
 
 
-def save_sitewide_daily_metrics(date):
+def save_sitewide_daily_metrics(date_as_integer, date_as_integer_end=0):
     status = ""
     success = False
+    date_as_integer_list = []
 
-    results = calculate_sitewide_daily_metrics(date)
-    status += results['status']
-    if results['success']:
-        sitewide_daily_metrics_values = results['sitewide_daily_metrics_values']
+    analytics_manager = AnalyticsManager()
+    date_as_integer_results = \
+        analytics_manager.retrieve_list_of_dates_with_actions(date_as_integer, date_as_integer_end)
+    if positive_value_exists(date_as_integer_results['date_as_integer_list_found']):
+        date_as_integer_list = date_as_integer_results['date_as_integer_list']
 
-        analytics_manager = AnalyticsManager()
-        update_results = analytics_manager.save_sitewide_daily_metrics_values(sitewide_daily_metrics_values)
-        status += update_results['status']
-        success = update_results['success']
+    sitewide_daily_metrics_saved_count = 0
+    for one_date_as_integer in date_as_integer_list:
+        results = calculate_sitewide_daily_metrics(one_date_as_integer)
+        status += results['status']
+        if results['success']:
+            sitewide_daily_metrics_values = results['sitewide_daily_metrics_values']
+
+            analytics_manager = AnalyticsManager()
+            update_results = analytics_manager.save_sitewide_daily_metrics_values(sitewide_daily_metrics_values)
+            status += update_results['status']
+            success = update_results['success']
+            if positive_value_exists(update_results['sitewide_daily_metrics_saved']):
+                sitewide_daily_metrics_saved_count += 1
 
     results = {
-        'status':   status,
-        'success':  success,
+        'status':                           status,
+        'success':                          success,
+        'sitewide_daily_metrics_saved_count':   sitewide_daily_metrics_saved_count,
     }
     return results
 
