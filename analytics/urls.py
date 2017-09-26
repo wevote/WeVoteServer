@@ -19,6 +19,8 @@ urlpatterns = [
         views_admin.analytics_action_list_view, name='analytics_action_list'),
     url(r'^augment_voter_analytics_process/(?P<voter_we_vote_id>wv[\w]{2}voter[\w]+)/$',
         views_admin.augment_voter_analytics_process_view, name='augment_voter_analytics_process'),
+    url(r'^organization_analytics_index/$',
+        views_admin.organization_analytics_index_view, name='organization_analytics_index',),
     url(r'^organization_daily_metrics/$',
         views_admin.organization_daily_metrics_view, name='organization_daily_metrics'),
     url(r'^organization_daily_metrics_process/$',

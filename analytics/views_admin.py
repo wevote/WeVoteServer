@@ -10,6 +10,7 @@ from .models import ACTION_WELCOME_VISIT, AnalyticsAction, AnalyticsManager, \
     OrganizationDailyMetrics, OrganizationElectionMetrics, \
     SitewideDailyMetrics, SitewideElectionMetrics, SitewideVoterMetrics
 from admin_tools.views import redirect_to_sign_in_page
+from config.base import get_environment_variable
 from django.http import HttpResponseRedirect
 from django.core.urlresolvers import reverse
 from django.contrib import messages
@@ -23,6 +24,8 @@ import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, positive_value_exists
 
 logger = wevote_functions.admin.get_logger(__name__)
+
+WEB_APP_ROOT_URL = get_environment_variable("WEB_APP_ROOT_URL")
 
 
 # We do not protect much of our analytics results - They are open to the public
@@ -56,7 +59,7 @@ def analytics_index_view(request):
     organization_election_metrics_list = []
     try:
         organization_election_metrics_query = OrganizationElectionMetrics.objects.using('analytics').\
-            order_by('-election_day_text')
+            order_by('-followers_visited_ballot')
         organization_election_metrics_query = organization_election_metrics_query[:3]
         organization_election_metrics_list = list(organization_election_metrics_query)
     except OrganizationElectionMetrics.DoesNotExist:
@@ -80,6 +83,7 @@ def analytics_index_view(request):
 
     template_values = {
         'messages_on_stage':                            messages_on_stage,
+        'WEB_APP_ROOT_URL':                             WEB_APP_ROOT_URL,
         'sitewide_election_metrics_list':               sitewide_election_metrics_list,
         'sitewide_daily_metrics_list':                  sitewide_daily_metrics_list,
         'sitewide_voter_metrics_list':                  sitewide_voter_metrics_list,
@@ -94,6 +98,53 @@ def analytics_index_view(request):
 
 
 @login_required
+def organization_analytics_index_view(request):
+    authority_required = {'verified_volunteer'}  # admin, verified_volunteer
+    voter_allowed_to_see_organization_analytics = voter_has_authority(request, authority_required)
+
+    google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
+    state_code = request.GET.get('state_code', '')
+    organization_we_vote_id = request.GET.get('organization_we_vote_id', '')
+
+    organization_election_metrics_list = []
+    try:
+        organization_election_metrics_query = OrganizationElectionMetrics.objects.using('analytics').\
+            order_by('-election_day_text')
+        organization_election_metrics_query = \
+            organization_election_metrics_query.filter(organization_we_vote_id__iexact=organization_we_vote_id)
+        organization_election_metrics_query = organization_election_metrics_query[:3]
+        organization_election_metrics_list = list(organization_election_metrics_query)
+    except OrganizationElectionMetrics.DoesNotExist:
+        # This is fine
+        pass
+
+    organization_daily_metrics_list = []
+    try:
+        organization_daily_metrics_query = \
+            OrganizationDailyMetrics.objects.using('analytics').order_by('-date_as_integer')
+        organization_daily_metrics_query = \
+            organization_daily_metrics_query.filter(organization_we_vote_id__iexact=organization_we_vote_id)
+        organization_daily_metrics_query = organization_daily_metrics_query[:3]
+        organization_daily_metrics_list = list(organization_daily_metrics_query)
+    except OrganizationDailyMetrics.DoesNotExist:
+        # This is fine
+        pass
+
+    messages_on_stage = get_messages(request)
+
+    template_values = {
+        'messages_on_stage':                            messages_on_stage,
+        'organization_election_metrics_list':           organization_election_metrics_list,
+        'organization_daily_metrics_list':              organization_daily_metrics_list,
+        'voter_allowed_to_see_organization_analytics':  voter_allowed_to_see_organization_analytics,
+        'state_code':                                   state_code,
+        'google_civic_election_id':                     google_civic_election_id,
+        'organization_we_vote_id':                      organization_we_vote_id,
+    }
+    return render(request, 'analytics/organization_analytics_index.html', template_values)
+
+
+@login_required
 def organization_daily_metrics_process_view(request):
     """
     :param request:
@@ -103,18 +154,17 @@ def organization_daily_metrics_process_view(request):
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
-    google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
-    state_code = request.GET.get('state_code', '')
+    organization_we_vote_id = request.GET.get('organization_we_vote_id', '')
+    changes_since_this_date_as_integer = convert_to_int(request.GET.get('date_as_integer', 0))
+    changes_through_this_date_as_integer = convert_to_int(request.GET.get('date_as_integer_end', 0))
 
-    date_as_integer = 20170904
-
-    if not positive_value_exists(date_as_integer):
+    if not positive_value_exists(changes_since_this_date_as_integer):
         messages.add_message(request, messages.ERROR, 'date_as_integer required.')
         return HttpResponseRedirect(reverse('analytics:organization_daily_metrics', args=()) +
                                     "?google_civic_election_id=" + str(google_civic_election_id) +
                                     "&state_code=" + str(state_code))
 
-    results = save_organization_daily_metrics(date_as_integer)
+    results = save_organization_daily_metrics(organization_we_vote_id, changes_since_this_date_as_integer)
 
     return HttpResponseRedirect(reverse('analytics:organization_daily_metrics', args=()) +
                                 "?google_civic_election_id=" + str(google_civic_election_id) +
@@ -235,6 +285,7 @@ def organization_daily_metrics_view(request):
 
     google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
     state_code = request.GET.get('state_code', '')
+    organization_we_vote_id = request.GET.get('organization_we_vote_id', '')
 
     organization_daily_metrics_list = []
 
@@ -242,6 +293,8 @@ def organization_daily_metrics_view(request):
     try:
         organization_daily_metrics_query = OrganizationDailyMetrics.objects.using('analytics').\
             order_by('-date_as_integer')
+        organization_daily_metrics_query = organization_daily_metrics_query.filter(
+            organization_we_vote_id__iexact=organization_we_vote_id)
         organization_daily_metrics_list = list(organization_daily_metrics_query)
     except OrganizationDailyMetrics.DoesNotExist:
         # This is fine
@@ -306,14 +359,18 @@ def organization_election_metrics_view(request):
 
     google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
     state_code = request.GET.get('state_code', '')
+    organization_we_vote_id = request.GET.get('organization_we_vote_id', '')
 
     organization_election_metrics_list = []
     try:
         organization_election_metrics_query = OrganizationElectionMetrics.objects.using('analytics').\
-            order_by('-election_day_text')
+            order_by('-followers_visited_ballot')
         if positive_value_exists(google_civic_election_id):
             organization_election_metrics_query = \
                 organization_election_metrics_query.filter(google_civic_election_id=google_civic_election_id)
+        if positive_value_exists(organization_we_vote_id):
+            organization_election_metrics_query = \
+                organization_election_metrics_query.filter(organization_we_vote_id__iexact=organization_we_vote_id)
         organization_election_metrics_list = list(organization_election_metrics_query)
     except OrganizationElectionMetrics.DoesNotExist:
         # This is fine
@@ -325,8 +382,10 @@ def organization_election_metrics_view(request):
 
     template_values = {
         'messages_on_stage':                    messages_on_stage,
+        'WEB_APP_ROOT_URL':                     WEB_APP_ROOT_URL,
         'organization_election_metrics_list':   organization_election_metrics_list,
         'google_civic_election_id':             google_civic_election_id,
+        'organization_we_vote_id':              organization_we_vote_id,
         'election_list':                        election_list,
         'state_code':                           state_code,
     }

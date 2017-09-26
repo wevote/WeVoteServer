@@ -1,7 +1,10 @@
 {# templates/analytics/sitewide_election_metrics_table.html #}
 
 <table border="1" cellpadding="5" cellspacing="5" class="table">
+{% for one_row in sitewide_election_metrics_list %}
+{% if forloop.counter == 1 or forloop.counter|divisibleby:20 %}
     <tr>
+        <th>#</th>
         <th>Election Name (ID)</th>
         <th>visitors</th>
         <th>voter guides</th>
@@ -13,8 +16,9 @@
 {#        <th>organization public positions</th>#}
 {#        <th>individuals with positions</th>#}
     </tr>
-{% for one_row in sitewide_election_metrics_list %}
+{% endif %}
     <tr>
+        <td>{{ forloop.counter }}</td>
         <td>{{ one_row.election.election_name|default_if_none:"n/a" }} ({{ one_row.google_civic_election_id }})</td>
         <td>
             all: {{ one_row.visitors_total }}
@@ -32,7 +36,7 @@
         <td>followed: {{ one_row.unique_voters_that_followed_organizations|default_if_none:"n/a" }}<br />
             auto-followed: {{ one_row.unique_voters_that_auto_followed_organizations|default_if_none:"n/a" }}</td>
 {#        <td>followed: {{ one_row.organizations_followed|default_if_none:"n/a" }}<br />#}
-{#            auto-followed: {{ one_row.organizations_autofollowed|default_if_none:"n/a" }}</td>#}
+{#            auto-followed: {{ one_row.organizations_auto_followed|default_if_none:"n/a" }}</td>#}
 {#        <td>{{ one_row.organizations_with_positions }}</td>#}
 {#        <td>{{ one_row.organization_public_positions }}</td>#}
 {#        <td>total: {{ one_row.individuals_with_positions }}<br />#}
