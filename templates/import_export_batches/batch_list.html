@@ -126,10 +126,27 @@
 
         {% if kind_of_batch == "IMPORT_BALLOT_ITEM" %}
         <div class="form-group">
-            <label for="polling_location_we_vote_id_id" class="col-sm-3 control-label">polling_location_we_vote_id</label>
+            <label for="polling_location_we_vote_id_id" class="col-sm-3 control-label">Polling Location</label>
             <div class="col-sm-8">
-                <input type="text" name="polling_location_we_vote_id" id="polling_location_we_vote_id_id" class="form-control"
-                       value="{{ polling_location_we_vote_id }}" />
+            {# Choose polling location for this ballot_returned #}
+            Search for City: <input type="text" name="polling_location_city" value="{{ polling_location_city }}" />
+            or ZIP: <input type="text" name="polling_location_zip" value="{{ polling_location_zip }}" />
+            <input type="submit" value="Search" />
+            <br />
+            {% if polling_location_list %}
+                <select id="polling_location_we_vote_id_id" name="polling_location_we_vote_id" class="form-control">
+                    <option value="0" {% if 0 == polling_location_we_vote_id %} selected="selected"{% endif %}>
+                        -- Polling Locations --</option>
+                {% for polling_location in polling_location_list %}
+                    <option value="{{ polling_location.we_vote_id }}"
+                            {% if polling_location.we_vote_id|slugify == polling_location_we_vote_id|slugify %} selected="selected"{% endif %}>
+                        {{ polling_location.get_text_for_map_search|title }} - {{ polling_location.we_vote_id }}</option>
+                {% endfor %}
+                </select>
+                <br />
+            {% else %}
+                (There are no polling locations to choose from)<br />
+            {% endif %}
             </div>
         </div>
         {% endif %}
@@ -209,6 +226,11 @@
 
 
     <script>
+        $(function() {
+            $('#polling_location_we_vote_id_id').change(function() {
+                this.form.submit();
+            });
+        });
         $(function() {
             $('#google_civic_election_id').change(function() {
                 this.form.submit();

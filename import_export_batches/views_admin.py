@@ -22,6 +22,7 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.utils.http import urlquote
 from election.models import Election, ElectionManager
+from polling_location.models import PollingLocation, PollingLocationManager
 from position.models import POSITION
 from voter.models import voter_has_authority
 from voter_guide.models import ORGANIZATION_WORD
@@ -64,6 +65,8 @@ def batch_list_view(request):
     batch_uri = request.GET.get('batch_uri', '')
     google_civic_election_id = request.GET.get('google_civic_election_id', 0)
     polling_location_we_vote_id = request.GET.get('polling_location_we_vote_id', '')
+    polling_location_city = request.GET.get('polling_location_city', '')
+    polling_location_zip = request.GET.get('polling_location_zip', '')
 
     messages_on_stage = get_messages(request)
     batch_list_found = False
@@ -80,6 +83,30 @@ def batch_list_view(request):
         batch_list = []
         batch_list_found = False
         pass
+
+    polling_location_found = False
+    polling_location = PollingLocation()
+    polling_location_manager = PollingLocationManager()
+    if not polling_location_found and positive_value_exists(polling_location_we_vote_id):
+        results = polling_location_manager.retrieve_polling_location_by_id(0, polling_location_we_vote_id)
+        if results['polling_location_found']:
+            polling_location = results['polling_location']
+            polling_location_we_vote_id = polling_location.we_vote_id
+            polling_location_id = polling_location.id
+            polling_location_found = True
+
+    election_state = ''
+    if google_civic_election_id:
+        election_manager = ElectionManager()
+        results = election_manager.retrieve_election(google_civic_election_id)
+        if results['election_found']:
+            election = results['election']
+            election_state = election.get_election_state()
+    polling_location_list = []
+    results = polling_location_manager.retrieve_polling_locations_in_city_or_state(
+        election_state, polling_location_city, polling_location_zip)
+    if results['polling_location_list_found']:
+        polling_location_list = results['polling_location_list']
 
     if kind_of_batch == ORGANIZATION_WORD or kind_of_batch == ELECTED_OFFICE or kind_of_batch == POLITICIAN:
         # We do not want to ask the person importing the file for an election, because it isn't used
@@ -99,6 +126,10 @@ def batch_list_view(request):
         'batch_uri':                batch_uri,
         'google_civic_election_id': convert_to_int(google_civic_election_id),
         'polling_location_we_vote_id': polling_location_we_vote_id,
+        'polling_location':    polling_location,
+        'polling_location_list':    polling_location_list,
+        'polling_location_city': polling_location_city,
+        'polling_location_zip': polling_location_zip,
     }
     return render(request, 'import_export_batches/batch_list.html', template_values)
 
@@ -119,11 +150,17 @@ def batch_list_process_view(request):
     batch_uri_encoded = urlquote(batch_uri) if positive_value_exists(batch_uri) else ""
     google_civic_election_id = request.POST.get('google_civic_election_id', 0)
     polling_location_we_vote_id = request.POST.get('polling_location_we_vote_id', "")
+    polling_location_city = request.POST.get('polling_location_city', '')
+    polling_location_zip = request.POST.get('polling_location_zip', '')
     if kind_of_batch not in (MEASURE, ELECTED_OFFICE, CONTEST_OFFICE, CANDIDATE, ORGANIZATION_WORD, POSITION,
                              POLITICIAN, IMPORT_BALLOT_ITEM):
         messages.add_message(request, messages.ERROR, 'The kind_of_batch is required for a batch import.')
         return HttpResponseRedirect(reverse('import_export_batches:batch_list', args=()) +
-                                    "?google_civic_election_id=" + str(google_civic_election_id) +
+                                    "?kind_of_batch=" + str(kind_of_batch) +
+                                    "&google_civic_election_id=" + str(google_civic_election_id) +
+                                    "&polling_location_we_vote_id=" + str(polling_location_we_vote_id) +
+                                    "&polling_location_city=" + str(polling_location_city) +
+                                    "&polling_location_zip=" + str(polling_location_zip) +
                                     "&batch_uri=" + batch_uri_encoded)
 
     # If here we know we have the required variables
@@ -146,6 +183,8 @@ def batch_list_process_view(request):
                                     "?kind_of_batch=" + str(kind_of_batch) +
                                     "&polling_location_we_vote_id=" + str(polling_location_we_vote_id) +
                                     "&google_civic_election_id=" + str(google_civic_election_id) +
+                                    "&polling_location_city=" + str(polling_location_city) +
+                                    "&polling_location_zip=" + str(polling_location_zip) +
                                     "&batch_uri=" + batch_uri_encoded)
 
     # Make sure we have a Google Civic Election ID *unless* we are uploading an organization
@@ -156,6 +195,8 @@ def batch_list_process_view(request):
                                     "?kind_of_batch=" + str(kind_of_batch) +
                                     "&polling_location_we_vote_id=" + str(polling_location_we_vote_id) +
                                     "&google_civic_election_id=" + str(google_civic_election_id) +
+                                    "&polling_location_city=" + str(polling_location_city) +
+                                    "&polling_location_zip=" + str(polling_location_zip) +
                                     "&batch_uri=" + batch_uri_encoded)
 
     # Make sure we have a polling_location_we_vote_id
@@ -167,6 +208,8 @@ def batch_list_process_view(request):
                                     "?kind_of_batch=" + str(kind_of_batch) +
                                     "&polling_location_we_vote_id=" + str(polling_location_we_vote_id) +
                                     "&google_civic_election_id=" + str(google_civic_election_id) +
+                                    "&polling_location_city=" + str(polling_location_city) +
+                                    "&polling_location_zip=" + str(polling_location_zip) +
                                     "&batch_uri=" + batch_uri_encoded)
 
     election_name = ""  # For printing status
@@ -222,6 +265,8 @@ def batch_list_process_view(request):
                                     "?kind_of_batch=" + str(kind_of_batch) +
                                     "&polling_location_we_vote_id=" + str(polling_location_we_vote_id) +
                                     "&google_civic_election_id=" + str(google_civic_election_id) +
+                                    "&polling_location_city=" + str(polling_location_city) +
+                                    "&polling_location_zip=" + str(polling_location_zip) +
                                     "&batch_uri=" + batch_uri_encoded)
 
 
