@@ -1,7 +1,10 @@
 {# templates/analytics/sitewide_monthly_metrics_table.html #}
 
 <table border="1" cellpadding="5" cellspacing="5" class="table">
+{% for one_row in sitewide_monthly_metrics_list %}
+{% if forloop.counter == 1 or forloop.counter|divisibleby:20 %}
     <tr>
+        <th>#</th>
         <th>Month</th>
         <th>visitors</th>
         <th>authenticated visitors</th>
@@ -10,7 +13,7 @@
         <th>issues followed</th>
         <th>issue follows</th>
         <th>organizations followed</th>
-        <th>organizations autofollowed</th>
+        <th>organizations auto_followed</th>
         <th>organizations with issues</th>
         <th>issues linked</th>
         <th>organizations with positions</th>
@@ -18,8 +21,9 @@
         <th>individuals with positions</th>
         <th>friends-only positions</th>
     </tr>
-{% for one_row in sitewide_monthly_metrics_list %}
+{% endif %}
     <tr>
+        <td>{{ forloop.counter }}</td>
         <td>{{ one_row.month_display }}</td>
         <td>total, all time: {{ one_row.visitors_total }}<br />
             this month: {{ one_row.visitors_this_month }}<br />
@@ -36,8 +40,8 @@
             this month: {{ one_row.issue_follows_this_month }}</td>
         <td>total, all time: {{ one_row.organizations_followed_total }}<br />
             this month: {{ one_row.organizations_followed_this_month }}</td>
-        <td>total, all time: {{ one_row.organizations_autofollowed_total }}<br />
-            this month: {{ one_row.organizations_autofollowed_this_month }}</td>
+        <td>total, all time: {{ one_row.organizations_auto_followed_total }}<br />
+            this month: {{ one_row.organizations_auto_followed_this_month }}</td>
         <td>{{ one_row.organizations_with_linked_issues }}</td>
         <td>total, all time: {{ one_row.issues_linked_total }}<br />
             this month: {{ one_row.issues_linked_this_month }}</td>

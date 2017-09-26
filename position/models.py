@@ -5817,18 +5817,21 @@ class PositionMetricsManager(models.Model):
     def __unicode__(self):
         return "PositionMetricsManager"
 
-    def fetch_positions_public(self, google_civic_election_id=0):
+    def fetch_positions_public(self, google_civic_election_id=0, positions_taken_by_these_voter_we_vote_ids=False):
         count_result = None
         try:
             count_query = PositionEntered.objects.using('readonly').all()
             if positive_value_exists(google_civic_election_id):
                 count_query = count_query.filter(google_civic_election_id=google_civic_election_id)
+            if positions_taken_by_these_voter_we_vote_ids is not False:
+                count_query = count_query.filter(voter_we_vote_id__in=positions_taken_by_these_voter_we_vote_ids)
             count_result = count_query.count()
         except Exception as e:
             pass
         return count_result
 
-    def fetch_positions_public_with_comments(self, google_civic_election_id=0):
+    def fetch_positions_public_with_comments(self, google_civic_election_id=0,
+                                             positions_taken_by_these_voter_we_vote_ids=False):
         count_result = None
         try:
             count_query = PositionEntered.objects.using('readonly').all()
@@ -5838,23 +5841,29 @@ class PositionMetricsManager(models.Model):
                 (Q(statement_text__isnull=True) | Q(statement_text__exact='')) &
                 (Q(statement_html__isnull=True) | Q(statement_html__exact=''))
             )
+            if positions_taken_by_these_voter_we_vote_ids is not False:
+                count_query = count_query.filter(voter_we_vote_id__in=positions_taken_by_these_voter_we_vote_ids)
             count_result = count_query.count()
         except Exception as e:
             pass
         return count_result
 
-    def fetch_positions_friends_only(self, google_civic_election_id=0):
+    def fetch_positions_friends_only(self, google_civic_election_id=0,
+                                     positions_taken_by_these_voter_we_vote_ids=False):
         count_result = None
         try:
             count_query = PositionForFriends.objects.using('readonly').all()
             if positive_value_exists(google_civic_election_id):
                 count_query = count_query.filter(google_civic_election_id=google_civic_election_id)
+            if positions_taken_by_these_voter_we_vote_ids is not False:
+                count_query = count_query.filter(voter_we_vote_id__in=positions_taken_by_these_voter_we_vote_ids)
             count_result = count_query.count()
         except Exception as e:
             pass
         return count_result
 
-    def fetch_positions_friends_only_with_comments(self, google_civic_election_id=0):
+    def fetch_positions_friends_only_with_comments(self, google_civic_election_id=0,
+                                                   positions_taken_by_these_voter_we_vote_ids=False):
         count_result = None
         try:
             count_query = PositionForFriends.objects.using('readonly').all()
@@ -5864,6 +5873,8 @@ class PositionMetricsManager(models.Model):
                 (Q(statement_text__isnull=True) | Q(statement_text__exact='')) &
                 (Q(statement_html__isnull=True) | Q(statement_html__exact=''))
             )
+            if positions_taken_by_these_voter_we_vote_ids is not False:
+                count_query = count_query.filter(voter_we_vote_id__in=positions_taken_by_these_voter_we_vote_ids)
             count_result = count_query.count()
         except Exception as e:
             pass

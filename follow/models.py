@@ -346,21 +346,6 @@ class FollowMetricsManager(models.Model):
     def __unicode__(self):
         return "FollowMetricsManager"
 
-    def fetch_number_of_issues_followed(self, voter_we_vote_id):
-        number_of_issues_followed = 0
-
-        try:
-            if positive_value_exists(voter_we_vote_id):
-                follow_issue_query = FollowIssue.objects.using('readonly').filter(
-                    voter_we_vote_id__iexact=voter_we_vote_id,
-                    following_status=FOLLOWING
-                )
-                number_of_issues_followed = follow_issue_query.count()
-        except Exception as e:
-            pass
-
-        return number_of_issues_followed
-
     def fetch_organization_followers(self, organization_we_vote_id, google_civic_election_id=0):
         count_result = None
         try:
@@ -386,12 +371,26 @@ class FollowMetricsManager(models.Model):
             pass
         return count_result
 
-    def fetch_voter_issues_followed(self, voter_we_vote_id):
+    def fetch_issues_followed(self, voter_we_vote_id='',
+                              limit_to_one_date_as_integer=0, count_through_this_date_as_integer=0):
+        timezone = pytz.timezone("America/Los_Angeles")
+        if positive_value_exists(limit_to_one_date_as_integer):
+            one_date_string = str(limit_to_one_date_as_integer)
+            limit_to_one_date = timezone.localize(datetime.strptime(one_date_string, "%Y%m%d"))
+        if positive_value_exists(count_through_this_date_as_integer):
+            count_through_date_string = str(count_through_this_date_as_integer)
+            count_through_this_date = timezone.localize(datetime.strptime(count_through_date_string, "%Y%m%d"))
         count_result = None
         try:
             count_query = FollowIssue.objects.using('readonly').all()
-            count_query = count_query.filter(voter_we_vote_id__iexact=voter_we_vote_id)
+            if positive_value_exists(voter_we_vote_id):
+                count_query = count_query.filter(voter_we_vote_id__iexact=voter_we_vote_id)
             count_query = count_query.filter(following_status=FOLLOWING)
+            if positive_value_exists(limit_to_one_date_as_integer):
+                # TODO DALE THIS NEEDS WORK TO FIND ALL ENTRIES ON ONE DAY
+                count_query = count_query.filter(date_last_changed=limit_to_one_date)
+            elif positive_value_exists(count_through_this_date_as_integer):
+                count_query = count_query.filter(date_last_changed__lte=count_through_this_date)
             count_result = count_query.count()
         except Exception as e:
             pass

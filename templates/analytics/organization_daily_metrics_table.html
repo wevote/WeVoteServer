@@ -1,7 +1,10 @@
 {# templates/analytics/organization_daily_metrics_table.html #}
 
 <table border="1" cellpadding="5" cellspacing="5" class="table">
+{% for one_row in sitewide_daily_metrics_list %}
+{% if forloop.counter == 1 or forloop.counter|divisibleby:20 %}
     <tr>
+        <th>#</th>
         <th>Day</th>
         <th>visitors</th>
         <th>authenticated visitors</th>
@@ -9,7 +12,7 @@
         <th>voter guides</th>
         <th>issue follows</th>
         <th>organizations followed</th>
-        <th>organizations autofollowed</th>
+        <th>organizations auto_followed</th>
         <th>organizations with issues</th>
         <th>issues linked</th>
         <th>organizations with positions</th>
@@ -17,8 +20,9 @@
         <th>individuals with positions</th>
         <th>friends-only positions</th>
     </tr>
-{% for one_row in sitewide_daily_metrics_list %}
+{% endif %}
     <tr>
+        <td>{{ forloop.counter }}</td>
         <td>{{ one_row.date_as_integer }}</td>
         <td><span class="u-no-break">total, all time: {{ one_row.visitors_total|default_if_none:"n/a" }}</span><br />
             <span class="u-no-break">today: {{ one_row.visitors_today|default_if_none:"n/a" }}</span><br />
@@ -33,8 +37,8 @@
             <span class="u-no-break">today: {{ one_row.issues_followed_today|default_if_none:"n/a" }}</span></td>
         <td><span class="u-no-break">total, all time: {{ one_row.organizations_followed_total|default_if_none:"n/a" }}</span><br />
             <span class="u-no-break">today: {{ one_row.organizations_followed_today|default_if_none:"n/a" }}</span></td>
-        <td><span class="u-no-break">total, all time: {{ one_row.organizations_autofollowed_total|default_if_none:"n/a" }}</span><br />
-            <span class="u-no-break">today: {{ one_row.organizations_autofollowed_today|default_if_none:"n/a" }}</span></td>
+        <td><span class="u-no-break">total, all time: {{ one_row.organizations_auto_followed_total|default_if_none:"n/a" }}</span><br />
+            <span class="u-no-break">today: {{ one_row.organizations_auto_followed_today|default_if_none:"n/a" }}</span></td>
         <td>{{ one_row.organizations_with_linked_issues|default_if_none:"n/a" }}</td>
         <td><span class="u-no-break">total, all time: {{ one_row.issues_linked_total|default_if_none:"n/a" }}</span><br />
             <span class="u-no-break">today: {{ one_row.issues_linked_today|default_if_none:"n/a" }}</span></td>

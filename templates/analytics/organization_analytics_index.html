@@ -1,0 +1,36 @@
+{# templates/analytics/organization_analytics_index.html #}
+{% extends "template_base.html" %}
+
+{% block title %}
+    Org Analytics
+{% endblock %}
+
+{%  block content %}
+{% load template_filters %}
+<p><a href="{% url 'admin_tools:admin_home' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
+    < Back to Admin Home</a></p>
+
+<h1>Analytics for Org</h1>
+<p>
+    <a href="{% url 'analytics:analytics_action_list' organization_we_vote_id %}" target="_blank">
+    View Raw Log</a>
+</p>
+
+<h2>Organization Election Metrics</h2>
+    <p>
+        Show activity related to how voters are viewing one organization, for one election.
+        <a href="{% url 'analytics:organization_election_metrics' %}?organization_we_vote_id={{ organization_we_vote_id }}">see all</a>
+    </p>
+
+    {% include "analytics/organization_election_metrics_table.html" %}
+
+
+<h2>Organization Daily Metrics</h2>
+    <p>
+        Show activity day-to-day related to this organization.
+        <a href="{% url 'analytics:organization_daily_metrics' %}?organization_we_vote_id={{ organization_we_vote_id }}">see all</a>
+    </p>
+
+    {% include "analytics/organization_daily_metrics_table.html" with organization_daily_metrics_list=organization_daily_metrics_list %}
+
+{% endblock %}

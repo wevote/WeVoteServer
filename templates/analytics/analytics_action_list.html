@@ -64,6 +64,8 @@
     </form>
 {% endif %}
 <table border="1" cellpadding="5" cellspacing="5" class="table">
+{% for one_row in analytics_action_list %}
+{% if forloop.counter == 1 or forloop.counter|divisibleby:20 %}
     <tr>
         <th>#</th>
         <th>id</th>
@@ -78,7 +80,7 @@
         <th>google civic election id</th>
         <th>first visit today</th>
     </tr>
-{% for one_row in analytics_action_list %}
+{% endif %}
     <tr>
         <td>{{ forloop.counter }}</td>
         <td>{{ one_row.id }}</td>
