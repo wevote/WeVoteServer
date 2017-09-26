@@ -114,6 +114,7 @@ urlpatterns = [
     url(r'^saveAnalyticsAction/', views_analytics.save_analytics_action_view, name='saveAnalyticsActionView'),
     url(r'^searchAll/', views_misc.search_all_view, name='searchAllView'),
     url(r'^twitterIdentityRetrieve/', views_twitter.twitter_identity_retrieve_view, name='twitterIdentityRetrieveView'),
+    url(r'^twitterNativeSignInSave/', views_twitter.twitter_native_sign_in_save_view, name='twitterNativeSignInSave'),
     url(r'^twitterSignInRequestAccessToken/',
         views_twitter.twitter_sign_in_request_access_token_view, name='twitterSignInRequestAccessTokenView'),
     url(r'^twitterSignInRequestVoterInfo/',
