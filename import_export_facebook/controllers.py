@@ -795,10 +795,10 @@ def voter_facebook_sign_in_save_for_api(voter_device_id,  # voterFacebookSignInS
     status += auth_data_results['status']
 
     # Is this the last save for this Facebook user?
-    # facebook_profile_image_url_https could have some error that's why marking minimum_data_saved as
-    # per auth_data_results success
+    # facebook_profile_image_url_https could have some error that's why marking minimum_data_saved
+    # if facebook_user_id value is positive
     minimum_data_saved = positive_value_exists(facebook_profile_image_url_https)
-    minimum_data_saved = success
+    minimum_data_saved = positive_value_exists(facebook_user_id)
     # positive_value_exists(facebook_email)
 
     json_data = {
