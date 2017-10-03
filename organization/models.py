@@ -205,6 +205,48 @@ class OrganizationManager(models.Manager):
     def retrieve_organization_from_vote_smart_id(self, vote_smart_id):
         return self.retrieve_organization(0, '', vote_smart_id)
 
+    def retrieve_organization_from_twitter_handle(self, twitter_handle):
+        error_result = False
+        exception_does_not_exist = False
+        exception_multiple_object_returned = False
+        organization_on_stage = Organization()
+        organization_on_stage_id = 0
+        status = "ERROR_ENTERING_RETRIEVE_ORGANIZATION"
+        try:
+            if positive_value_exists(twitter_handle):
+                status = "ERROR_RETRIEVING_ORGANIZATION_WITH_ID"
+                organization_on_stage = Organization.objects.get(organization_twitter_handle=twitter_handle)
+                organization_on_stage_id = organization_on_stage.id
+                status = "ORGANIZATION_FOUND_WITH_TWITTER_HANDLE"
+        except Organization.MultipleObjectsReturned as e:
+            handle_record_found_more_than_one_exception(e, logger)
+            error_result = True
+            exception_multiple_object_returned = True
+            status = "ERROR_MORE_THAN_ONE_ORGANIZATION_FOUND"
+            # logger.warning("Organization.MultipleObjectsReturned")
+        except Organization.DoesNotExist as e:
+            status += ", ORGANIZATION_NOT_FOUND"
+            handle_exception(e, logger=logger, exception_message=status)
+            error_result = True
+            exception_does_not_exist = True
+            # logger.warning("Organization.DoesNotExist")
+
+        organization_on_stage_found = True if organization_on_stage_id > 0 else False
+        results = {
+            'success':                      True if organization_on_stage_found else False,
+            'status':                       status,
+            'organization_found':           organization_on_stage_found,
+            'organization_id':
+                organization_on_stage.id if organization_on_stage.id else organization_on_stage_id,
+            'we_vote_id':
+                organization_on_stage.we_vote_id if organization_on_stage.we_vote_id else "",
+            'organization':                 organization_on_stage,
+            'error_result':                 error_result,
+            'DoesNotExist':                 exception_does_not_exist,
+            'MultipleObjectsReturned':      exception_multiple_object_returned,
+        }
+        return results
+
     def retrieve_organization_from_twitter_user_id(self, twitter_user_id):
         organization_we_vote_id = ''
 

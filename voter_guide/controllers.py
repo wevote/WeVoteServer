@@ -12,7 +12,7 @@ from itertools import chain
 from issue.models import OrganizationLinkToIssueList
 import json
 
-from organization.controllers import organization_follow_all
+from organization.controllers import organization_follow_or_unfollow_or_ignore
 from organization.models import OrganizationManager, OrganizationListManager
 from position.controllers import retrieve_ballot_item_we_vote_ids_for_organizations_to_follow
 from position.models import ANY_STANCE, PositionEntered, PositionManager, PositionListManager, SUPPORT
@@ -1149,7 +1149,7 @@ def voter_follow_all_organizations_followed_by_organization_for_api(voter_device
     if len(organization_we_vote_ids_list_need_to_be_followed):
         number_added_to_list = 0
         for organization_we_vote_id_followed in organization_we_vote_ids_list_need_to_be_followed:
-            organization_follow_result = organization_follow_all(
+            organization_follow_result = organization_follow_or_unfollow_or_ignore(
                 voter_device_id, organization_id=0, organization_we_vote_id=organization_we_vote_id_followed,
                 follow_kind=FOLLOWING)
             if not organization_follow_result['success']:

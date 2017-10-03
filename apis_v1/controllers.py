@@ -6,11 +6,11 @@ from django.http import HttpResponse
 from exception.models import handle_exception
 from follow.models import FOLLOW_IGNORE, FOLLOWING, STOP_FOLLOWING
 import json
-from organization.models import Organization
-from organization.controllers import organization_follow_all
+from organization.models import Organization, OrganizationManager
+from organization.controllers import organization_follow_or_unfollow_or_ignore
 from voter.models import fetch_voter_id_from_voter_device_link, Voter, VoterManager, VoterMetricsManager
 import wevote_functions.admin
-from wevote_functions.functions import is_voter_device_id_valid
+from wevote_functions.functions import is_voter_device_id_valid, positive_value_exists
 
 logger = wevote_functions.admin.get_logger(__name__)
 
@@ -37,18 +37,26 @@ def organization_count():
 
 
 def organization_follow(voter_device_id, organization_id=0, organization_we_vote_id='',  # organizationFollow
-                        organization_follow_based_on_issue=None):
+                        organization_twitter_handle='', organization_follow_based_on_issue=None):
     """
     Save that the voter wants to follow this org
     :param voter_device_id: 
     :param organization_id: 
-    :param organization_we_vote_id: 
+    :param organization_we_vote_id:
+    :param organization_twitter_handle;
     :param organization_follow_based_on_issue: 
     :return: 
     """
-    json_data = organization_follow_all(voter_device_id, organization_id, organization_we_vote_id,
-                                        follow_kind=FOLLOWING,
-                                        organization_follow_based_on_issue=organization_follow_based_on_issue)
+    if positive_value_exists(organization_twitter_handle):
+        organization_manager = OrganizationManager()
+        organization_results = organization_manager.retrieve_organization_from_twitter_handle(
+            organization_twitter_handle)
+        if organization_results['organization_found']:
+            organization_we_vote_id = organization_results['organization'].we_vote_id
+
+    json_data = organization_follow_or_unfollow_or_ignore(
+        voter_device_id, organization_id, organization_we_vote_id, follow_kind=FOLLOWING,
+        organization_follow_based_on_issue=organization_follow_based_on_issue)
 
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 
@@ -61,8 +69,8 @@ def organization_stop_following(voter_device_id, organization_id=0, organization
     :param organization_we_vote_id
     :return:
     """
-    json_data = organization_follow_all(voter_device_id, organization_id, organization_we_vote_id,
-                                        follow_kind=STOP_FOLLOWING)
+    json_data = organization_follow_or_unfollow_or_ignore(voter_device_id, organization_id, organization_we_vote_id,
+                                                          follow_kind=STOP_FOLLOWING)
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 
 
@@ -74,8 +82,8 @@ def organization_follow_ignore(voter_device_id, organization_id=0, organization_
     :param organization_we_vote_id
     :return:
     """
-    json_data = organization_follow_all(voter_device_id, organization_id, organization_we_vote_id,
-                                        follow_kind=FOLLOW_IGNORE)
+    json_data = organization_follow_or_unfollow_or_ignore(voter_device_id, organization_id, organization_we_vote_id,
+                                                          follow_kind=FOLLOW_IGNORE)
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 
 
