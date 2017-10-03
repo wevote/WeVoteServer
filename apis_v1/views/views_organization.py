@@ -33,9 +33,11 @@ def organization_follow_api_view(request):  # organizationFollow
     voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
     organization_id = request.GET.get('organization_id', 0)
     organization_we_vote_id = request.GET.get('organization_we_vote_id', '')
+    organization_twitter_handle = request.GET.get('organization_twitter_handle', '')
     organization_follow_based_on_issue = request.GET.get('organization_follow_based_on_issue', False)
     return organization_follow(voter_device_id=voter_device_id, organization_id=organization_id,
                                organization_we_vote_id=organization_we_vote_id,
+                               organization_twitter_handle=organization_twitter_handle,
                                organization_follow_based_on_issue=organization_follow_based_on_issue)
 
 
