@@ -105,6 +105,12 @@ class AnalyticsAction(models.Model):
     #  this, if a voter_device_id is not found the first time, we want to try again minutes later. BUT if that
     #  fails we want to invalidate the analytics.
     authentication_failed_twice = models.BooleanField(verbose_name='', default=False)
+    user_agent = models.CharField(verbose_name="https request user agent", max_length=255, null=True, blank=True,
+                                  unique=False)
+    is_bot = models.BooleanField(verbose_name="request came from web-bots or spider", default=False)
+    is_mobile = models.BooleanField(verbose_name="request came from mobile device", default=False)
+    is_desktop = models.BooleanField(verbose_name="request came from desktop device", default=False)
+    is_tablet = models.BooleanField(verbose_name="request came from tablet device", default=False)
 
     # We override the save function to auto-generate date_as_integer
     def save(self, *args, **kwargs):
@@ -474,8 +480,8 @@ class AnalyticsManager(models.Model):
 
     def create_action_type1(
             self, action_constant, voter_we_vote_id, voter_id, is_signed_in, state_code,
-            organization_we_vote_id, organization_id, google_civic_election_id,
-            ballot_item_we_vote_id="", voter_device_id=None):
+            organization_we_vote_id, organization_id, google_civic_election_id, user_agent_string, is_bot,
+            is_mobile, is_desktop, is_tablet, ballot_item_we_vote_id="", voter_device_id=None):
         """
         Create AnalyticsAction data
         """
@@ -515,6 +521,11 @@ class AnalyticsManager(models.Model):
                 organization_id=organization_id,
                 google_civic_election_id=google_civic_election_id,
                 ballot_item_we_vote_id=ballot_item_we_vote_id,
+                user_agent=user_agent_string,
+                is_bot=is_bot,
+                is_mobile=is_mobile,
+                is_desktop=is_desktop,
+                is_tablet=is_tablet
             )
             success = True
             action_saved = True
@@ -533,7 +544,8 @@ class AnalyticsManager(models.Model):
 
     def create_action_type2(
             self, action_constant, voter_we_vote_id, voter_id, is_signed_in, state_code,
-            google_civic_election_id, ballot_item_we_vote_id, voter_device_id=None):
+            google_civic_election_id, user_agent_string, is_bot, is_mobile, is_desktop, is_tablet,
+            ballot_item_we_vote_id, voter_device_id=None):
         """
         Create AnalyticsAction data
         """
@@ -568,6 +580,11 @@ class AnalyticsManager(models.Model):
                 state_code=state_code,
                 google_civic_election_id=google_civic_election_id,
                 ballot_item_we_vote_id=ballot_item_we_vote_id,
+                user_agent=user_agent_string,
+                is_bot=is_bot,
+                is_mobile=is_mobile,
+                is_desktop=is_desktop,
+                is_tablet=is_tablet
             )
             success = True
             action_saved = True
@@ -694,8 +711,8 @@ class AnalyticsManager(models.Model):
 
     def save_action(self, action_constant, voter_we_vote_id, voter_id, is_signed_in=False, state_code="",
                     organization_we_vote_id="", organization_id=0,
-                    google_civic_election_id=0, ballot_item_we_vote_id="",
-                    voter_device_id=None):
+                    google_civic_election_id=0, user_agent_string="", is_bot=False, is_mobile=False, is_desktop=False,
+                    is_tablet=False, ballot_item_we_vote_id="", voter_device_id=None):
         # If a voter_device_id is passed in, it is because this action may be coming from
         #  https://analytics.wevoteusa.org and hasn't been authenticated yet
         # Confirm that we have a valid voter_device_id. If not, store the action with the voter_device_id so we can
@@ -709,11 +726,12 @@ class AnalyticsManager(models.Model):
             # In the future we could reduce clutter in the AnalyticsAction table by only storing one entry per day
             return self.create_action_type1(action_constant, voter_we_vote_id, voter_id, is_signed_in, state_code,
                                             organization_we_vote_id, organization_id, google_civic_election_id,
+                                            user_agent_string, is_bot, is_mobile, is_desktop, is_tablet,
                                             ballot_item_we_vote_id, voter_device_id)
         else:
             return self.create_action_type2(action_constant, voter_we_vote_id, voter_id, is_signed_in, state_code,
-                                            google_civic_election_id,
-                                            ballot_item_we_vote_id, voter_device_id)
+                                            google_civic_election_id, user_agent_string, is_bot, is_mobile, is_desktop,
+                                            is_tablet, ballot_item_we_vote_id, voter_device_id)
 
     def save_organization_daily_metrics_values(self, organization_daily_metrics_values):
         success = False
