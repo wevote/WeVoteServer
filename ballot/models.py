@@ -16,6 +16,7 @@ from office.models import ContestOfficeManager
 from polling_location.models import PollingLocationManager
 import wevote_functions.admin
 from wevote_functions.functions import convert_date_to_date_as_integer, convert_to_int, positive_value_exists
+from wevote_settings.models import fetch_next_we_vote_id_ballot_returned_integer, fetch_site_unique_id_prefix
 
 OFFICE = 'OFFICE'
 CANDIDATE = 'CANDIDATE'
@@ -693,6 +694,10 @@ class BallotReturned(models.Model):
     """
     This is a generated table with a summary of address + election combinations returned ballot data
     """
+    we_vote_id = models.CharField(
+        verbose_name="we vote permanent id", max_length=255, default=None, null=True,
+        blank=True, unique=True)
+
     # The unique id of the voter for which this ballot was retrieved
     voter_id = models.IntegerField(verbose_name="the voter unique id", null=True, blank=True)
     # The polling location for which this ballot was retrieved
@@ -709,6 +714,15 @@ class BallotReturned(models.Model):
                                                  verbose_name='text label for this election')
     election_date = models.DateField(verbose_name='election start date', null=True, auto_now=False)
 
+    # Should we show this ballot as an option for this election?
+    ballot_location_display_option_on = models.BooleanField(default=False)
+    ballot_location_display_name = models.CharField(verbose_name='name that shows in button',
+                                                    max_length=255, blank=True, null=True)
+    ballot_location_shortcut = models.CharField(verbose_name='the url string to find this location',
+                                                max_length=255, blank=True, null=True)
+    ballot_location_order = models.PositiveIntegerField(
+        verbose_name="order of these ballot locations in display", default=0, null=False)
+
     text_for_map_search = models.CharField(max_length=255, blank=False, null=False, verbose_name='address as entered')
 
     latitude = models.FloatField(null=True, verbose_name='latitude returned from Google')
@@ -723,6 +737,30 @@ class BallotReturned(models.Model):
                                         verbose_name='normalized state returned from Google')
     normalized_zip = models.CharField(max_length=255, blank=True, null=True,
                                       verbose_name='normalized zip returned from Google')
+
+    # We override the save function so we can auto-generate we_vote_id
+    def save(self, *args, **kwargs):
+        # Even if this voter_guide came from another source we still need a unique we_vote_id
+        if self.we_vote_id:
+            self.we_vote_id = self.we_vote_id.strip().lower()
+        if self.we_vote_id == "" or self.we_vote_id is None:  # If there isn't a value...
+            self.generate_new_we_vote_id()
+        super(BallotReturned, self).save(*args, **kwargs)
+
+    def generate_new_we_vote_id(self):
+        # ...generate a new id
+        site_unique_id_prefix = fetch_site_unique_id_prefix()
+        next_local_integer = fetch_next_we_vote_id_ballot_returned_integer()
+        # "wv" = We Vote
+        # site_unique_id_prefix = a generated (or assigned) unique id for one server running We Vote
+        # "ballot" = tells us this is a unique id for a ballot_returned entry
+        # next_integer = a unique, sequential integer for this server - not necessarily tied to database id
+        self.we_vote_id = "wv{site_unique_id_prefix}ballot{next_integer}".format(
+            site_unique_id_prefix=site_unique_id_prefix,
+            next_integer=next_local_integer,
+        )
+        # TODO we need to deal with the situation where we_vote_id is NOT unique on save
+        return
 
     def election_date_text(self):
         return self.election_date.strftime('%Y-%m-%d')
@@ -766,14 +804,38 @@ class BallotReturnedManager(models.Model):
                                                                                        voter_id,
                                                                                        polling_location_we_vote_id)
 
-    def retrieve_existing_ballot_returned_by_identifier(self, ballot_returned_id, google_civic_election_id=0,
-                                                        voter_id=0, polling_location_we_vote_id=''):
+    def retrieve_ballot_returned_from_ballot_returned_we_vote_id(self, ballot_returned_we_vote_id):
+        ballot_returned_id = 0
+        google_civic_election_id = 0
+        voter_id = 0
+        polling_location_we_vote_id = ''
+        ballot_returned_manager = BallotReturnedManager()
+        return ballot_returned_manager.retrieve_existing_ballot_returned_by_identifier(
+            ballot_returned_id, google_civic_election_id, voter_id, polling_location_we_vote_id,
+            ballot_returned_we_vote_id)
+
+    def retrieve_ballot_returned_from_ballot_location_shortcut(self, ballot_location_shortcut):
+        ballot_returned_id = 0
+        google_civic_election_id = 0
+        voter_id = 0
+        polling_location_we_vote_id = ''
+        ballot_returned_we_vote_id = ''
+        ballot_returned_manager = BallotReturnedManager()
+        return ballot_returned_manager.retrieve_existing_ballot_returned_by_identifier(
+            ballot_returned_id, google_civic_election_id, voter_id, polling_location_we_vote_id,
+            ballot_returned_we_vote_id, ballot_location_shortcut)
+
+    def retrieve_existing_ballot_returned_by_identifier(
+            self, ballot_returned_id, google_civic_election_id=0, voter_id=0, polling_location_we_vote_id='',
+            ballot_returned_we_vote_id='', ballot_location_shortcut=''):
         """
         Search by voter_id (or polling_location_we_vote_id) + google_civic_election_id to see if have an entry
         :param ballot_returned_id:
         :param google_civic_election_id:
         :param voter_id:
         :param polling_location_we_vote_id:
+        :param ballot_returned_we_vote_id:
+        :param ballot_location_shortcut:
         :return:
         """
         exception_does_not_exist = False
@@ -789,6 +851,13 @@ class BallotReturnedManager(models.Model):
                 ballot_returned_found = True if positive_value_exists(ballot_returned_id) else False
                 success = True
                 status = "BALLOT_RETURNED_FOUND_FROM_VOTER_ID "
+            elif positive_value_exists(ballot_returned_we_vote_id):
+                ballot_returned = BallotReturned.objects.get(we_vote_id=ballot_returned_we_vote_id)
+                # If still here, we found an existing ballot_returned
+                ballot_returned_id = ballot_returned.id
+                ballot_returned_found = True if positive_value_exists(ballot_returned_id) else False
+                success = True
+                status = "BALLOT_RETURNED_FOUND_FROM_BALLOT_RETURNED_WE_VOTE_ID "
             elif positive_value_exists(voter_id) and positive_value_exists(google_civic_election_id):
                 ballot_returned = BallotReturned.objects.get(voter_id=voter_id,
                                                              google_civic_election_id=google_civic_election_id)
@@ -805,6 +874,13 @@ class BallotReturnedManager(models.Model):
                 ballot_returned_found = True if positive_value_exists(ballot_returned_id) else False
                 success = True
                 status = "BALLOT_RETURNED_FOUND_FROM_POLLING_LOCATION_WE_VOTE_ID "
+            elif positive_value_exists(ballot_location_shortcut):
+                ballot_returned = BallotReturned.objects.get(ballot_location_shortcut=ballot_location_shortcut)
+                # If still here, we found an existing ballot_returned
+                ballot_returned_id = ballot_returned.id
+                ballot_returned_found = True if positive_value_exists(ballot_returned_id) else False
+                success = True
+                status = "BALLOT_RETURNED_FOUND_FROM_BALLOT_RETURNED_LOCATION_SHORTCUT "
             else:
                 ballot_returned_found = False
                 success = False
@@ -1480,6 +1556,14 @@ class VoterBallotSaved(models.Model):
         verbose_name="we vote permanent id of the polling location this was copied from",
         max_length=255, default=None, null=True, blank=True, unique=False)
 
+    # When we copy a ballot from a master ballot_returned entry, we want to store a link back to that source
+    ballot_returned_we_vote_id = models.CharField(
+        verbose_name="ballot_returned we_vote_id this was copied from",
+        max_length=255, default=None, null=True, blank=True, unique=False)
+    ballot_location_shortcut = models.CharField(
+        verbose_name="the url string used to find specific ballot",
+        max_length=255, default=None, null=True, blank=True, unique=False)
+
     def election_date_text(self):
         if isinstance(self.election_date, date):
             return self.election_date.strftime('%Y-%m-%d')
@@ -1600,6 +1684,22 @@ class VoterBallotSavedManager(models.Model):
         voter_ballot_saved_id = 0
         return self.retrieve_voter_ballot_saved(voter_ballot_saved_id, voter_id, google_civic_election_id)
 
+    def retrieve_voter_ballot_saved_by_ballot_returned_we_vote_id(self, voter_id, ballot_returned_we_vote_id):
+        voter_ballot_saved_id = 0
+        google_civic_election_id = 0
+        text_for_map_search = ''
+        return self.retrieve_voter_ballot_saved(
+            voter_ballot_saved_id, voter_id, google_civic_election_id, text_for_map_search, ballot_returned_we_vote_id)
+
+    def retrieve_voter_ballot_saved_by_ballot_location_shortcut(self, voter_id, ballot_location_shortcut):
+        voter_ballot_saved_id = 0
+        google_civic_election_id = 0
+        text_for_map_search = ''
+        ballot_returned_we_vote_id = ''
+        return self.retrieve_voter_ballot_saved(
+            voter_ballot_saved_id, voter_id, google_civic_election_id, text_for_map_search,
+            ballot_returned_we_vote_id, ballot_location_shortcut)
+
     def retrieve_voter_ballot_saved_by_address_text(self, voter_id, text_for_map_search):
         voter_ballot_saved_id = 0
         google_civic_election_id = 0
@@ -1607,13 +1707,15 @@ class VoterBallotSavedManager(models.Model):
                                                 text_for_map_search)
 
     def retrieve_voter_ballot_saved(self, voter_ballot_saved_id, voter_id=0, google_civic_election_id=0,
-                                    text_for_map_search=''):
+                                    text_for_map_search='', ballot_returned_we_vote_id='', ballot_location_shortcut=''):
         """
 
         :param voter_ballot_saved_id:
         :param voter_id:
         :param google_civic_election_id:
         :param text_for_map_search:
+        :param ballot_returned_we_vote_id:
+        :param ballot_location_shortcut:
         :return:
         """
         exception_does_not_exist = False
@@ -1621,6 +1723,9 @@ class VoterBallotSavedManager(models.Model):
         voter_ballot_saved_found = False
         voter_ballot_saved = None
         status = ""
+        # Are we looking for a specific ballot?
+        specific_ballot_requested = positive_value_exists(ballot_returned_we_vote_id) or \
+            positive_value_exists(ballot_location_shortcut)
 
         try:
             if positive_value_exists(voter_ballot_saved_id):
@@ -1638,6 +1743,22 @@ class VoterBallotSavedManager(models.Model):
                 voter_ballot_saved_found = True if positive_value_exists(voter_ballot_saved_id) else False
                 success = True
                 status += "VOTER_BALLOT_SAVED_FOUND_FROM_VOTER_ID_AND_GOOGLE_CIVIC "
+            elif positive_value_exists(voter_id) and positive_value_exists(ballot_returned_we_vote_id):
+                voter_ballot_saved = VoterBallotSaved.objects.get(
+                    voter_id=voter_id, ballot_returned_we_vote_id__iexact=ballot_returned_we_vote_id)
+                # If still here, we found an existing voter_ballot_saved
+                voter_ballot_saved_id = voter_ballot_saved.id
+                voter_ballot_saved_found = True if positive_value_exists(voter_ballot_saved_id) else False
+                success = True
+                status += "VOTER_BALLOT_SAVED_FOUND_FROM_VOTER_ID_AND_BALLOT_RETURNED_ID "
+            elif positive_value_exists(voter_id) and positive_value_exists(ballot_location_shortcut):
+                voter_ballot_saved = VoterBallotSaved.objects.get(
+                    voter_id=voter_id, ballot_location_shortcut__iexact=ballot_location_shortcut)
+                # If still here, we found an existing voter_ballot_saved
+                voter_ballot_saved_id = voter_ballot_saved.id
+                voter_ballot_saved_found = True if positive_value_exists(voter_ballot_saved_id) else False
+                success = True
+                status += "VOTER_BALLOT_SAVED_FOUND_FROM_VOTER_ID_AND_BALLOT_LOCATION_SHORTCUT "
             else:
                 voter_ballot_saved_found = False
                 success = False
@@ -1654,7 +1775,7 @@ class VoterBallotSavedManager(models.Model):
 
         # If here and a voter_ballot_saved not found yet, then try to find list of entries saved under this address
         # and return the most recent
-        if not voter_ballot_saved_found:
+        if not voter_ballot_saved_found and not specific_ballot_requested:
             try:
                 if positive_value_exists(text_for_map_search) and positive_value_exists(voter_id):
                     # Start with narrowest search
@@ -1662,14 +1783,12 @@ class VoterBallotSavedManager(models.Model):
                     voter_ballot_saved_queryset = voter_ballot_saved_queryset.filter(
                         voter_id=voter_id, original_text_for_map_search__iexact=text_for_map_search)
                     # Return the latest google_civic_election_id first
-                    voter_ballot_saved_list = voter_ballot_saved_queryset.order_by('-google_civic_election_id')
+                    voter_ballot_saved_queryset = voter_ballot_saved_queryset.order_by('-google_civic_election_id')
+                    voter_ballot_saved = voter_ballot_saved_queryset.first()
 
-                    if len(voter_ballot_saved_list):
-                        status += "VOTER_BALLOT_SAVED_LIST_FOUND2 "
-                        for voter_ballot_saved in voter_ballot_saved_list:
-                            voter_ballot_saved_found = True
-                            success = True
-                            break
+                    status += "VOTER_BALLOT_SAVED_LIST_FOUND2 "
+                    voter_ballot_saved_found = True
+                    success = True
                 else:
                     voter_ballot_saved_found = False
                     success = False
@@ -1690,7 +1809,7 @@ class VoterBallotSavedManager(models.Model):
         }
         return results
 
-    def create_voter_ballot_saved(
+    def update_or_create_voter_ballot_saved(
             self, voter_id,
             google_civic_election_id,
             state_code,
@@ -1700,26 +1819,53 @@ class VoterBallotSavedManager(models.Model):
             substituted_address_nearby='',
             is_from_substituted_address=False,
             is_from_test_ballot=False,
-            polling_location_we_vote_id_source=''):
+            polling_location_we_vote_id_source='',
+            ballot_returned_we_vote_id=None,
+            ballot_location_shortcut=''):
         # We assume that we tried to find an entry for this voter
         voter_ballot_saved_found = False
+
+        ballot_location_shortcut = str(ballot_location_shortcut)
+        ballot_location_shortcut = ballot_location_shortcut.strip().lower()
         try:
-            if positive_value_exists(voter_id) and positive_value_exists(google_civic_election_id):
+            defaults = {
+                'voter_id': voter_id,
+                'google_civic_election_id': google_civic_election_id,
+                'state_code': state_code,
+                'election_date': election_date_text,
+                'election_description_text': election_description_text,
+                'original_text_for_map_search': original_text_for_map_search,
+                'substituted_address_nearby': substituted_address_nearby,
+                'is_from_substituted_address': is_from_substituted_address,
+                'is_from_test_ballot': is_from_test_ballot,
+                'ballot_returned_we_vote_id': ballot_returned_we_vote_id,
+                'ballot_location_shortcut': ballot_location_shortcut,
+                'polling_location_we_vote_id_source': polling_location_we_vote_id_source,
+            }
+
+            if positive_value_exists(voter_id) and positive_value_exists(ballot_returned_we_vote_id):
+                voter_ballot_saved, created = VoterBallotSaved.objects.update_or_create(
+                    voter_id=voter_id,
+                    ballot_returned_we_vote_id=ballot_returned_we_vote_id,
+                    defaults=defaults,
+                )
+                voter_ballot_saved_found = voter_ballot_saved.id
+                status = "BALLOT_SAVED "
+                success = True
+            elif positive_value_exists(voter_id) and positive_value_exists(ballot_location_shortcut):
+                voter_ballot_saved, created = VoterBallotSaved.objects.update_or_create(
+                    voter_id=voter_id,
+                    ballot_location_shortcut=ballot_location_shortcut,
+                    defaults=defaults,
+                )
+                voter_ballot_saved_found = voter_ballot_saved.id
+                status = "BALLOT_SAVED"
+                success = True
+            elif positive_value_exists(voter_id) and positive_value_exists(google_civic_election_id):
                 voter_ballot_saved, created = VoterBallotSaved.objects.update_or_create(
                     voter_id=voter_id,
                     google_civic_election_id=google_civic_election_id,
-                    defaults={
-                        'voter_id':                             voter_id,
-                        'google_civic_election_id':             google_civic_election_id,
-                        'state_code':                           state_code,
-                        'election_date':                        election_date_text,
-                        'election_description_text':            election_description_text,
-                        'original_text_for_map_search':         original_text_for_map_search,
-                        'substituted_address_nearby':           substituted_address_nearby,
-                        'is_from_substituted_address':          is_from_substituted_address,
-                        'is_from_test_ballot':                  is_from_test_ballot,
-                        'polling_location_we_vote_id_source':   polling_location_we_vote_id_source,
-                    }
+                    defaults=defaults,
                 )
                 voter_ballot_saved_found = voter_ballot_saved.id
                 status = "BALLOT_SAVED"
@@ -1746,79 +1892,144 @@ class VoterBallotSavedManager(models.Model):
         return results
 
 
-def copy_existing_ballot_items_from_stored_ballot(voter_id, text_for_map_search, google_civic_election_id=0):
+def copy_existing_ballot_items_from_stored_ballot(voter_id, text_for_map_search, google_civic_election_id=0,
+                                                  ballot_returned_we_vote_id='', ballot_location_shortcut=''):
     """
     We are looking for the most recent ballot near this voter. We may or may not have a google_civic_election_id
     :param voter_id:
     :param text_for_map_search:
     :param google_civic_election_id:
-    :param state_code:
+    :param ballot_returned_we_vote_id:
+    :param ballot_location_shortcut:
     :return:
     """
-    #
+    status = ""
+
     ballot_returned_manager = BallotReturnedManager()
-    find_results = ballot_returned_manager.find_closest_ballot_returned(text_for_map_search, google_civic_election_id)
-    status = find_results['status']
-
-    if not find_results['ballot_returned_found']:
-        error_results = {
-            'voter_id':                             voter_id,
-            'google_civic_election_id':             0,
-            'state_code':                           '',
-            'election_date_text':                   '',
-            'election_description_text':            '',
-            'text_for_map_search':                  text_for_map_search,
-            'substituted_address_nearby':           '',
-            'ballot_returned_copied':               False,
-            'polling_location_we_vote_id_source':   '',
-            'status':                               status,
-        }
-        return error_results
-
-    # A ballot at a nearby address was found.
-    ballot_returned = find_results['ballot_returned']
-
-    # Remove all prior ballot items, so we make room for copy_ballot_items to save ballot items
     voter_ballot_saved_manager = VoterBallotSavedManager()
     ballot_item_list_manager = BallotItemListManager()
+
+    # specific_ballot_requested = positive_value_exists(ballot_returned_we_vote_id) or \
+    #     positive_value_exists(ballot_location_shortcut)
+
+    if positive_value_exists(ballot_returned_we_vote_id):
+        find_results = ballot_returned_manager.retrieve_ballot_returned_from_ballot_returned_we_vote_id(
+            ballot_returned_we_vote_id)
+        status += find_results['status']
+
+        if not find_results['ballot_returned_found']:
+            error_results = {
+                'voter_id':                             voter_id,
+                'google_civic_election_id':             0,
+                'state_code':                           '',
+                'election_date_text':                   '',
+                'election_description_text':            '',
+                'text_for_map_search':                  text_for_map_search,
+                'substituted_address_nearby':           '',
+                'ballot_returned_copied':               False,
+                'ballot_returned_we_vote_id':           ballot_returned_we_vote_id,
+                'ballot_location_shortcut':             ballot_location_shortcut,
+                'polling_location_we_vote_id_source':   '',
+                'status':                               status,
+            }
+            return error_results
+
+        # A specific ballot was found.
+        ballot_returned = find_results['ballot_returned']
+    elif positive_value_exists(ballot_location_shortcut):
+        find_results = ballot_returned_manager.retrieve_ballot_returned_from_ballot_location_shortcut(
+            ballot_location_shortcut)
+        status += find_results['status']
+
+        if not find_results['ballot_returned_found']:
+            error_results = {
+                'voter_id':                             voter_id,
+                'google_civic_election_id':             0,
+                'state_code':                           '',
+                'election_date_text':                   '',
+                'election_description_text':            '',
+                'text_for_map_search':                  text_for_map_search,
+                'substituted_address_nearby':           '',
+                'ballot_returned_copied':               False,
+                'ballot_returned_we_vote_id':           ballot_returned_we_vote_id,
+                'ballot_location_shortcut':             ballot_location_shortcut,
+                'polling_location_we_vote_id_source':   '',
+                'status':                               status,
+            }
+            return error_results
+
+        # A specific ballot was found.
+        ballot_returned = find_results['ballot_returned']
+    else:
+        find_results = ballot_returned_manager.find_closest_ballot_returned(
+            text_for_map_search, google_civic_election_id)
+        status += find_results['status']
+
+        if not find_results['ballot_returned_found']:
+            error_results = {
+                'voter_id':                             voter_id,
+                'google_civic_election_id':             0,
+                'state_code':                           '',
+                'election_date_text':                   '',
+                'election_description_text':            '',
+                'text_for_map_search':                  text_for_map_search,
+                'substituted_address_nearby':           '',
+                'ballot_returned_copied':               False,
+                'ballot_returned_we_vote_id':           ballot_returned_we_vote_id,
+                'ballot_location_shortcut':             ballot_location_shortcut,
+                'polling_location_we_vote_id_source':   '',
+                'status':                               status,
+            }
+            return error_results
+
+        # A ballot at a nearby address was found.
+        ballot_returned = find_results['ballot_returned']
+
+    # Remove all prior ballot items, so we make room for copy_ballot_items to save ballot items
     if positive_value_exists(ballot_returned.google_civic_election_id):
         voter_ballot_saved_id = 0
         voter_ballot_saved_results = voter_ballot_saved_manager.delete_voter_ballot_saved(
             voter_ballot_saved_id, voter_id, ballot_returned.google_civic_election_id)
 
         # We include a google_civic_election_id, so only the ballot info for this election is removed
-        ballot_item_list_manager.delete_all_ballot_items_for_voter(voter_id, google_civic_election_id)
+        ballot_item_list_manager.delete_all_ballot_items_for_voter(voter_id, ballot_returned.google_civic_election_id)
 
-    # ...and then copy it for the voter.
-    copy_item_results = ballot_item_list_manager.copy_ballot_items(ballot_returned, voter_id)
-    status += copy_item_results['status']
+    # ...and then copy it for the voter as long as it doesn't already belong to the voter
+    if ballot_returned.voter_id != voter_id:
+        copy_item_results = ballot_item_list_manager.copy_ballot_items(ballot_returned, voter_id)
+        status += copy_item_results['status']
 
-    if not copy_item_results['ballot_returned_copied']:
-        error_results = {
-            'voter_id':                             voter_id,
-            'google_civic_election_id':             0,
-            'state_code':                           '',
-            'election_date_text':                   '',
-            'election_description_text':            '',
-            'text_for_map_search':                  text_for_map_search,
-            'substituted_address_nearby':           '',
-            'ballot_returned_copied':               False,
-            'polling_location_we_vote_id_source':   '',
-            'status':                               status,
-        }
-        return error_results
+        if not copy_item_results['ballot_returned_copied']:
+            error_results = {
+                'voter_id':                             voter_id,
+                'google_civic_election_id':             0,
+                'state_code':                           '',
+                'election_date_text':                   '',
+                'election_description_text':            '',
+                'text_for_map_search':                  text_for_map_search,
+                'substituted_address_nearby':           '',
+                'ballot_returned_copied':               False,
+                'ballot_returned_we_vote_id':           ballot_returned_we_vote_id,
+                'ballot_location_shortcut':             ballot_location_shortcut,
+                'polling_location_we_vote_id_source':   '',
+                'status':                               status,
+            }
+            return error_results
 
     # VoterBallotSaved is updated outside of this function
 
     results = {
-        'voter_id':                             voter_id,
+        'voter_id':                             ballot_returned.voter_id,
         'google_civic_election_id':             ballot_returned.google_civic_election_id,
         'state_code':                           ballot_returned.normalized_state,
         'election_date_text':                   ballot_returned.election_date_text(),
         'election_description_text':            ballot_returned.election_description_text,
-        'text_for_map_search':                  text_for_map_search,
+        'text_for_map_search':                  ballot_returned.text_for_map_search,
         'substituted_address_nearby':           ballot_returned.text_for_map_search,
         'ballot_returned_copied':               True,
+        'ballot_returned_we_vote_id':           ballot_returned.we_vote_id,
+        'ballot_location_shortcut':             ballot_returned.ballot_location_shortcut if
+        ballot_returned.ballot_location_shortcut else '',
         'polling_location_we_vote_id_source':   ballot_returned.polling_location_we_vote_id,
         'status':                               status,
     }

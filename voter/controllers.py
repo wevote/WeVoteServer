@@ -343,6 +343,8 @@ def voter_address_retrieve_for_api(voter_device_id):  # voterAddressRetrieve
             'text_for_map_search': voter_address.text_for_map_search if voter_address.text_for_map_search else '',
             'google_civic_election_id': voter_address.google_civic_election_id if voter_address.google_civic_election_id
             else 0,
+            'ballot_returned_we_vote_id': voter_address.ballot_returned_we_vote_id if
+            voter_address.ballot_returned_we_vote_id else '',
             'latitude': voter_address.latitude if voter_address.latitude else '',
             'longitude': voter_address.longitude if voter_address.longitude else '',
             'normalized_line1': voter_address.normalized_line1 if voter_address.normalized_line1 else '',
@@ -364,6 +366,7 @@ def voter_address_retrieve_for_api(voter_device_id):  # voterAddressRetrieve
             'address_type': '',
             'text_for_map_search': '',
             'google_civic_election_id': 0,
+            'ballot_returned_we_vote_id': '',
             'latitude': '',
             'longitude': '',
             'normalized_line1': '',
@@ -373,40 +376,6 @@ def voter_address_retrieve_for_api(voter_device_id):  # voterAddressRetrieve
             'normalized_zip': '',
         }
         return voter_address_retrieve_results
-
-
-# No longer in use
-# def voter_address_save_for_api(voter_device_id, voter_id, address_raw_text):
-#     # At this point, we have a valid voter
-#
-#     voter_address_manager = VoterAddressManager()
-#     address_type = BALLOT_ADDRESS
-#
-#     # We wrap get_or_create because we want to centralize error handling
-#     results = voter_address_manager.update_or_create_voter_address(voter_id, address_type, address_raw_text.strip())
-#
-#     if results['success']:
-#         if positive_value_exists(address_raw_text):
-#             status = "VOTER_ADDRESS_SAVED"
-#         else:
-#             status = "VOTER_ADDRESS_EMPTY_SAVED"
-#
-#         results = {
-#                 'status': status,
-#                 'success': True,
-#                 'voter_device_id': voter_device_id,
-#                 'text_for_map_search': address_raw_text,
-#             }
-#     # elif results['status'] == 'MULTIPLE_MATCHING_ADDRESSES_FOUND':
-#         # delete all currently matching addresses and save again
-#     else:
-#         results = {
-#                 'status': results['status'],
-#                 'success': False,
-#                 'voter_device_id': voter_device_id,
-#                 'text_for_map_search': address_raw_text,
-#             }
-#     return results
 
 
 def voter_create_for_api(voter_device_id):  # voterCreate

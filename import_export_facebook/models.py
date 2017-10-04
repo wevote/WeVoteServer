@@ -749,10 +749,9 @@ class FacebookManager(models.Model):
             facebook_friends_list_found = True
         except Exception as e:
             success = False
-            status += " " + "FACEBOOK_FRIENDS_LIST_NOT_FOUND"
+            status += " " + "FACEBOOK_FRIENDS_LIST_FAILED_WITH_EXCEPTION"
             facebook_friends_list_found = False
             handle_exception(e, logger=logger, exception_message=status)
-            logger.error("retrieve_facebook_friends_from_facebook caught: " + e)
 
         results = {
             'success':                          success,

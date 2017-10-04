@@ -5,8 +5,8 @@
 from django.db import models
 from django.db.models import Q
 from exception.models import handle_exception, handle_record_found_more_than_one_exception
-from wevote_settings.models import fetch_next_we_vote_id_last_contest_measure_integer, \
-    fetch_next_we_vote_id_last_measure_campaign_integer, fetch_site_unique_id_prefix
+from wevote_settings.models import fetch_next_we_vote_id_contest_measure_integer, \
+    fetch_next_we_vote_id_measure_campaign_integer, fetch_site_unique_id_prefix
 import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, extract_state_from_ocd_division_id, positive_value_exists
 
@@ -86,7 +86,7 @@ class ContestMeasure(models.Model):
         if self.we_vote_id == "" or self.we_vote_id is None:  # If there isn't a value...
             # ...generate a new id
             site_unique_id_prefix = fetch_site_unique_id_prefix()
-            next_local_integer = fetch_next_we_vote_id_last_contest_measure_integer()
+            next_local_integer = fetch_next_we_vote_id_contest_measure_integer()
             # "wv" = We Vote
             # site_unique_id_prefix = a generated (or assigned) unique id for one server running We Vote
             # "meas" = tells us this is a unique id for a ContestMeasure
@@ -152,7 +152,7 @@ class MeasureCampaign(models.Model):
         if self.we_vote_id == "" or self.we_vote_id is None:  # If there isn't a value...
             # ...generate a new id
             site_unique_id_prefix = fetch_site_unique_id_prefix()
-            next_local_integer = fetch_next_we_vote_id_last_measure_campaign_integer()
+            next_local_integer = fetch_next_we_vote_id_measure_campaign_integer()
             # "wv" = We Vote
             # site_unique_id_prefix = a generated (or assigned) unique id for one server running We Vote
             # "meascam" = tells us this is a unique id for a MeasureCampaign

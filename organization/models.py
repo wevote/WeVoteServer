@@ -13,7 +13,7 @@ from twitter.models import TwitterLinkToOrganization, TwitterLinkToVoter, Twitte
 from voter.models import VoterManager
 import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, extract_twitter_handle_from_text_string, positive_value_exists
-from wevote_settings.models import fetch_next_we_vote_id_last_org_integer, fetch_site_unique_id_prefix
+from wevote_settings.models import fetch_next_we_vote_id_org_integer, fetch_site_unique_id_prefix
 
 CORPORATION = 'C'
 GROUP = 'G'  # Group of people (not an individual), but org status unknown
@@ -2056,7 +2056,7 @@ class Organization(models.Model):
     def generate_new_we_vote_id(self):
         # ...generate a new id
         site_unique_id_prefix = fetch_site_unique_id_prefix()
-        next_local_integer = fetch_next_we_vote_id_last_org_integer()
+        next_local_integer = fetch_next_we_vote_id_org_integer()
         # "wv" = We Vote
         # site_unique_id_prefix = a generated (or assigned) unique id for one server running We Vote
         # "org" = tells us this is a unique id for an org

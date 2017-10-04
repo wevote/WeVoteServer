@@ -164,7 +164,17 @@ def fetch_site_unique_id_prefix():
     return site_unique_id_prefix
 
 
-def fetch_next_we_vote_id_last_org_integer():
+def fetch_next_we_vote_id_ballot_returned_integer():
+    we_vote_settings_manager = WeVoteSettingsManager()
+    we_vote_id_last_integer = we_vote_settings_manager.fetch_setting('we_vote_id_last_ballot_returned_integer')
+    we_vote_id_last_integer = convert_to_int(we_vote_id_last_integer)
+    we_vote_id_last_integer += 1
+    we_vote_settings_manager.save_setting('we_vote_id_last_ballot_returned_integer',
+                                          we_vote_id_last_integer)
+    return we_vote_id_last_integer
+
+
+def fetch_next_we_vote_id_org_integer():
     we_vote_settings_manager = WeVoteSettingsManager()
     we_vote_id_last_org_integer = we_vote_settings_manager.fetch_setting('we_vote_id_last_org_integer')
     we_vote_id_last_org_integer = convert_to_int(we_vote_id_last_org_integer)
@@ -173,7 +183,7 @@ def fetch_next_we_vote_id_last_org_integer():
     return we_vote_id_last_org_integer
 
 
-def fetch_next_we_vote_id_last_position_integer():
+def fetch_next_we_vote_id_position_integer():
     we_vote_settings_manager = WeVoteSettingsManager()
     we_vote_id_last_position_integer = we_vote_settings_manager.fetch_setting('we_vote_id_last_position_integer')
     we_vote_id_last_position_integer = convert_to_int(we_vote_id_last_position_integer)
@@ -182,7 +192,7 @@ def fetch_next_we_vote_id_last_position_integer():
     return we_vote_id_last_position_integer
 
 
-def fetch_next_we_vote_id_last_candidate_campaign_integer():
+def fetch_next_we_vote_id_candidate_campaign_integer():
     we_vote_settings_manager = WeVoteSettingsManager()
     we_vote_id_last_candidate_campaign_integer = \
         we_vote_settings_manager.fetch_setting('we_vote_id_last_candidate_campaign_integer')
@@ -193,7 +203,7 @@ def fetch_next_we_vote_id_last_candidate_campaign_integer():
     return we_vote_id_last_candidate_campaign_integer
 
 
-def fetch_next_we_vote_id_last_contest_office_integer():
+def fetch_next_we_vote_id_contest_office_integer():
     we_vote_settings_manager = WeVoteSettingsManager()
     we_vote_id_last_contest_office_integer = \
         we_vote_settings_manager.fetch_setting('we_vote_id_last_contest_office_integer')
@@ -204,7 +214,7 @@ def fetch_next_we_vote_id_last_contest_office_integer():
     return we_vote_id_last_contest_office_integer
 
 
-def fetch_next_we_vote_id_last_elected_office_integer():
+def fetch_next_we_vote_id_elected_office_integer():
     we_vote_settings_manager = WeVoteSettingsManager()
     we_vote_id_last_elected_office_integer = \
         we_vote_settings_manager.fetch_setting('we_vote_id_last_elected_office_integer')
@@ -215,7 +225,7 @@ def fetch_next_we_vote_id_last_elected_office_integer():
     return we_vote_id_last_elected_office_integer
 
 
-def fetch_next_we_vote_id_last_contest_measure_integer():
+def fetch_next_we_vote_id_contest_measure_integer():
     we_vote_settings_manager = WeVoteSettingsManager()
     we_vote_id_last_contest_measure_integer = \
         we_vote_settings_manager.fetch_setting('we_vote_id_last_contest_measure_integer')
@@ -226,7 +236,7 @@ def fetch_next_we_vote_id_last_contest_measure_integer():
     return we_vote_id_last_contest_measure_integer
 
 
-def fetch_next_we_vote_id_last_email_integer():
+def fetch_next_we_vote_id_email_integer():
     we_vote_settings_manager = WeVoteSettingsManager()
     we_vote_id_last_email_integer = we_vote_settings_manager.fetch_setting('we_vote_id_last_email_integer')
     we_vote_id_last_email_integer = convert_to_int(we_vote_id_last_email_integer)
@@ -236,7 +246,7 @@ def fetch_next_we_vote_id_last_email_integer():
     return we_vote_id_last_email_integer
 
 
-def fetch_next_we_vote_id_last_issue_integer():
+def fetch_next_we_vote_id_issue_integer():
     we_vote_settings_manager = WeVoteSettingsManager()
     we_vote_id_last_issue_integer = we_vote_settings_manager.fetch_setting('we_vote_id_last_issue_integer')
     we_vote_id_last_issue_integer = convert_to_int(we_vote_id_last_issue_integer)
@@ -246,7 +256,7 @@ def fetch_next_we_vote_id_last_issue_integer():
     return we_vote_id_last_issue_integer
 
 
-def fetch_next_we_vote_id_last_measure_campaign_integer():
+def fetch_next_we_vote_id_measure_campaign_integer():
     we_vote_settings_manager = WeVoteSettingsManager()
     we_vote_id_last_measure_campaign_integer = \
         we_vote_settings_manager.fetch_setting('we_vote_id_last_measure_campaign_integer')
@@ -257,7 +267,7 @@ def fetch_next_we_vote_id_last_measure_campaign_integer():
     return we_vote_id_last_measure_campaign_integer
 
 
-def fetch_next_we_vote_id_last_politician_integer():
+def fetch_next_we_vote_id_politician_integer():
     we_vote_settings_manager = WeVoteSettingsManager()
     we_vote_id_last_politician_integer = \
         we_vote_settings_manager.fetch_setting('we_vote_id_last_politician_integer')
@@ -268,7 +278,7 @@ def fetch_next_we_vote_id_last_politician_integer():
     return we_vote_id_last_politician_integer
 
 
-def fetch_next_we_vote_id_last_polling_location_integer():
+def fetch_next_we_vote_id_polling_location_integer():
     we_vote_settings_manager = WeVoteSettingsManager()
     we_vote_id_last_polling_location_integer = \
         we_vote_settings_manager.fetch_setting('we_vote_id_last_polling_location_integer')
@@ -279,7 +289,7 @@ def fetch_next_we_vote_id_last_polling_location_integer():
     return we_vote_id_last_polling_location_integer
 
 
-def fetch_next_we_vote_id_last_quick_info_integer():
+def fetch_next_we_vote_id_quick_info_integer():
     we_vote_settings_manager = WeVoteSettingsManager()
     we_vote_id_last_quick_info_integer = we_vote_settings_manager.fetch_setting('we_vote_id_last_quick_info_integer')
     we_vote_id_last_quick_info_integer = convert_to_int(we_vote_id_last_quick_info_integer)
@@ -288,7 +298,7 @@ def fetch_next_we_vote_id_last_quick_info_integer():
     return we_vote_id_last_quick_info_integer
 
 
-def fetch_next_we_vote_id_last_quick_info_master_integer():
+def fetch_next_we_vote_id_quick_info_master_integer():
     we_vote_settings_manager = WeVoteSettingsManager()
     we_vote_id_last_quick_info_master_integer = \
         we_vote_settings_manager.fetch_setting('we_vote_id_last_quick_info_master_integer')
@@ -299,7 +309,7 @@ def fetch_next_we_vote_id_last_quick_info_master_integer():
     return we_vote_id_last_quick_info_master_integer
 
 
-def fetch_next_we_vote_id_last_voter_integer():
+def fetch_next_we_vote_id_voter_integer():
     we_vote_settings_manager = WeVoteSettingsManager()
     we_vote_id_last_voter_integer = we_vote_settings_manager.fetch_setting('we_vote_id_last_voter_integer')
     we_vote_id_last_voter_integer = convert_to_int(we_vote_id_last_voter_integer)
@@ -309,7 +319,7 @@ def fetch_next_we_vote_id_last_voter_integer():
 
 
 # Related to voter guide
-def fetch_next_we_vote_id_last_voter_guide_integer():
+def fetch_next_we_vote_id_voter_guide_integer():
     we_vote_settings_manager = WeVoteSettingsManager()
     we_vote_id_last_voter_guide_integer = we_vote_settings_manager.fetch_setting('we_vote_id_last_voter_guide_integer')
     we_vote_id_last_voter_guide_integer = convert_to_int(we_vote_id_last_voter_guide_integer)
@@ -318,7 +328,7 @@ def fetch_next_we_vote_id_last_voter_guide_integer():
     return we_vote_id_last_voter_guide_integer
 
 
-def fetch_next_we_vote_election_id_integer():
+def fetch_next_we_vote_id_election_integer():
     we_vote_settings_manager = WeVoteSettingsManager()
     last_integer = we_vote_settings_manager.fetch_setting('we_vote_last_election_id_integer')
     last_integer = convert_to_int(last_integer)
@@ -329,6 +339,7 @@ def fetch_next_we_vote_election_id_integer():
     we_vote_settings_manager.save_setting('we_vote_last_election_id_integer', last_integer)
     return last_integer
 
+
 def fetch_next_we_vote_id_electoral_district_integer():
     we_vote_settings_manager = WeVoteSettingsManager()
     we_vote_id_electoral_district_integer = \
@@ -338,6 +349,7 @@ def fetch_next_we_vote_id_electoral_district_integer():
     we_vote_settings_manager.save_setting('we_vote_id_electoral_district_integer',
                                           we_vote_id_electoral_district_integer)
     return we_vote_id_electoral_district_integer
+
 
 def fetch_next_we_vote_id_party_integer():
     we_vote_settings_manager = WeVoteSettingsManager()

@@ -282,6 +282,12 @@
         <td>Retrieve a list of users ballots from different elections from the We Vote database.</td>
     </tr>
     <tr>
+        <td><a href="{% url 'apis_v1:electionsRetrieveDocs' %}">electionsRetrieve</a></td>
+        <td>static c3</td>
+        <td>Return a list of all elections, and include ballot location options so a voter can jump to
+            sample ballots.</td>
+    </tr>
+    <tr>
         <td><a href="{% url 'apis_v1:electionsSyncOutDocs' %}">electionsSyncOut</a></td>
         <td>static c3</td>
         <td>Provide another We Vote Server a complete listing of all public elections information.</td>

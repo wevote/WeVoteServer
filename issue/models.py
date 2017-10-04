@@ -5,7 +5,7 @@
 from django.db import models
 from exception.models import handle_exception, handle_record_found_more_than_one_exception, \
     handle_record_not_found_exception, handle_record_not_saved_exception
-from wevote_settings.models import fetch_next_we_vote_id_last_issue_integer, fetch_site_unique_id_prefix
+from wevote_settings.models import fetch_next_we_vote_id_issue_integer, fetch_site_unique_id_prefix
 import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, positive_value_exists
 
@@ -179,7 +179,7 @@ class Issue(models.Model):
         if self.we_vote_id == "" or self.we_vote_id is None:  # If there isn't a value...
             # ...generate a new id
             site_unique_id_prefix = fetch_site_unique_id_prefix()
-            next_local_integer = fetch_next_we_vote_id_last_issue_integer()
+            next_local_integer = fetch_next_we_vote_id_issue_integer()
             # "wv" = We Vote
             # site_unique_id_prefix = a generated (or assigned) unique id for one server running We Vote
             # "issue" = tells us this is a unique id for a Issue

@@ -5,8 +5,8 @@
 from django.db import models
 from django.db.models import Q
 from exception.models import handle_exception, handle_record_found_more_than_one_exception
-from wevote_settings.models import fetch_next_we_vote_id_last_contest_office_integer, fetch_site_unique_id_prefix, \
-    fetch_next_we_vote_id_last_elected_office_integer
+from wevote_settings.models import fetch_next_we_vote_id_contest_office_integer, fetch_site_unique_id_prefix, \
+    fetch_next_we_vote_id_elected_office_integer
 import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, extract_state_from_ocd_division_id, positive_value_exists
 
@@ -103,7 +103,7 @@ class ContestOffice(models.Model):
         if self.we_vote_id == "" or self.we_vote_id is None:  # If there isn't a value...
             # ...generate a new id
             site_unique_id_prefix = fetch_site_unique_id_prefix()
-            next_local_integer = fetch_next_we_vote_id_last_contest_office_integer()
+            next_local_integer = fetch_next_we_vote_id_contest_office_integer()
             # "wv" = We Vote
             # site_unique_id_prefix = a generated (or assigned) unique id for one server running We Vote
             # "off" = tells us this is a unique id for a ContestOffice
@@ -831,7 +831,7 @@ class ElectedOffice(models.Model):
         if self.we_vote_id == "" or self.we_vote_id is None:  # If there isn't a value...
             # ...generate a new id
             site_unique_id_prefix = fetch_site_unique_id_prefix()
-            next_local_integer = fetch_next_we_vote_id_last_elected_office_integer()
+            next_local_integer = fetch_next_we_vote_id_elected_office_integer()
             # "wv" = We Vote
             # site_unique_id_prefix = a generated (or assigned) unique id for one server running We Vote
             # "off" = tells us this is a unique id for a ContestOffice

@@ -22,7 +22,7 @@ from voter.models import fetch_voter_id_from_voter_we_vote_id, fetch_voter_we_vo
 from voter_guide.models import VoterGuideManager
 import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, positive_value_exists
-from wevote_settings.models import fetch_next_we_vote_id_last_position_integer, fetch_site_unique_id_prefix
+from wevote_settings.models import fetch_next_we_vote_id_position_integer, fetch_site_unique_id_prefix
 
 
 ANY_STANCE = 'ANY_STANCE'  # This is a way to indicate when we want to return any stance (support, oppose, no_stance)
@@ -244,7 +244,7 @@ class PositionEntered(models.Model):
     def generate_new_we_vote_id(self):
         # ...generate a new id
         site_unique_id_prefix = fetch_site_unique_id_prefix()
-        next_local_integer = fetch_next_we_vote_id_last_position_integer()
+        next_local_integer = fetch_next_we_vote_id_position_integer()
         # "wv" = We Vote
         # site_unique_id_prefix = a generated (or assigned) unique id for one server running We Vote
         # "pos" = tells us this is a unique id for an pos
@@ -583,7 +583,7 @@ class PositionForFriends(models.Model):
         if self.we_vote_id == "" or self.we_vote_id is None:  # If there isn't a value...
             # ...generate a new id
             site_unique_id_prefix = fetch_site_unique_id_prefix()
-            next_local_integer = fetch_next_we_vote_id_last_position_integer()
+            next_local_integer = fetch_next_we_vote_id_position_integer()
             # "wv" = We Vote
             # site_unique_id_prefix = a generated (or assigned) unique id for one server running We Vote
             # "pos" = tells us this is a unique id for an pos

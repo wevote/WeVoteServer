@@ -16,7 +16,7 @@ from wevote_functions.functions import convert_to_int, convert_to_political_part
     NO_PARTY_PREFERENCE, NON_PARTISAN, PEACE_AND_FREEDOM, REFORM, REPUBLICAN
 
 
-from wevote_settings.models import fetch_next_we_vote_id_last_politician_integer, fetch_site_unique_id_prefix
+from wevote_settings.models import fetch_next_we_vote_id_politician_integer, fetch_site_unique_id_prefix
 
 
 FEMALE = 'F'
@@ -127,7 +127,7 @@ class Politician(models.Model):
         if self.we_vote_id == "" or self.we_vote_id is None:  # If there isn't a value...
             # ...generate a new id
             site_unique_id_prefix = fetch_site_unique_id_prefix()
-            next_local_integer = fetch_next_we_vote_id_last_politician_integer()
+            next_local_integer = fetch_next_we_vote_id_politician_integer()
             # "wv" = We Vote
             # site_unique_id_prefix = a generated (or assigned) unique id for one server running We Vote
             # "pol" = tells us this is a unique id for a Politician

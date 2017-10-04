@@ -3,6 +3,7 @@
 # -*- coding: UTF-8 -*-
 
 from .models import Election, ElectionManager
+from ballot.models import BallotReturned, BallotReturnedManager
 from config.base import get_environment_variable
 from import_export_google_civic.controllers import retrieve_from_google_civic_api_election_query, \
     store_results_from_google_civic_api_election_query
@@ -84,6 +85,8 @@ def elections_import_from_structured_json(structured_json):
         election_day_text = one_election["election_day_text"] if "election_day_text" in one_election else ''
         ocd_division_id = one_election["ocd_division_id"] if "ocd_division_id" in one_election else ''
         state_code = one_election["state_code"] if "state_code" in one_election else ''
+        include_in_list_for_voters = one_election["include_in_list_for_voters"] \
+            if "include_in_list_for_voters" in one_election else ''
 
         # Make sure we have the minimum required variables
         if not positive_value_exists(google_civic_election_id) or not positive_value_exists(election_name):
@@ -95,7 +98,8 @@ def elections_import_from_structured_json(structured_json):
                 election_name,
                 election_day_text,
                 ocd_division_id,
-                state_code)
+                state_code,
+                include_in_list_for_voters)
         if results['success']:
             if results['new_election_created']:
                 elections_saved += 1
@@ -112,6 +116,69 @@ def elections_import_from_structured_json(structured_json):
         'not_processed':    elections_not_processed,
     }
     return elections_results
+
+
+def elections_retrieve_for_api():
+    status = ""
+    election_list = []
+
+    try:
+        # Get the election list using the readonly DB server
+        election_list_query = Election.objects.using('readonly').all()
+        election_list_query = election_list_query.order_by('-election_day_text')
+        election_list_query = election_list_query.filter(include_in_list_for_voters=True)
+        success = True
+    except Exception as e:
+        success = False
+        results = {
+            'success': success,
+            'status': status,
+            'election_list': election_list,
+        }
+        return results
+
+    election_list_raw = list(election_list_query)
+    for election in election_list_raw:
+        try:
+            ballot_location_list = []
+            ballot_returned_query = BallotReturned.objects.using('readonly')
+            ballot_returned_query = ballot_returned_query.filter(
+                google_civic_election_id=election.google_civic_election_id)
+            ballot_returned_query = ballot_returned_query.filter(ballot_location_display_option_on=True)
+            ballot_returned_query = ballot_returned_query.order_by('ballot_location_display_name')
+            ballot_returned_list = list(ballot_returned_query)
+            for ballot_returned in ballot_returned_list:
+                ballot_location_display_option = {
+                    'ballot_location_display_name': ballot_returned.ballot_location_display_name,
+                    'ballot_location_shortcut':     ballot_returned.ballot_location_shortcut if
+                    ballot_returned.ballot_location_shortcut else '',
+                    'text_for_map_search':          ballot_returned.text_for_map_search,
+                    'ballot_returned_we_vote_id':   ballot_returned.we_vote_id,
+                    'polling_location_we_vote_id':  ballot_returned.polling_location_we_vote_id,
+                    'ballot_location_order':        ballot_returned.ballot_location_order,
+                    'google_civic_election_id':     ballot_returned.google_civic_election_id,
+                }
+                ballot_location_list.append(ballot_location_display_option)
+            election_json = {
+                'google_civic_election_id':     election.google_civic_election_id,
+                'election_name':                election.election_name,
+                'election_day_text':            election.election_day_text,
+                'get_election_state':           election.get_election_state(),
+                'state_code':                   election.state_code,
+                'ocd_division_id':              election.ocd_division_id,
+                'ballot_location_list':         ballot_location_list,
+            }
+            election_list.append(election_json)
+
+        except Exception as e:
+            pass
+
+    results = {
+        'success':          success,
+        'status':           status,
+        'election_list':    election_list,
+    }
+    return results
 
 
 def elections_sync_out_list_for_api(voter_device_id):

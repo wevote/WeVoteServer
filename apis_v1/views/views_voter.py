@@ -23,8 +23,6 @@ from position_like.controllers import voter_position_like_off_save_for_api, \
     voter_position_like_on_save_for_api, voter_position_like_status_retrieve_for_api
 from ballot.controllers import choose_election_and_prepare_ballot_data, voter_ballot_list_retrieve_for_api
 from ballot.models import OFFICE, CANDIDATE, MEASURE, VoterBallotSavedManager
-from rest_framework.response import Response
-from rest_framework.views import APIView
 from bookmark.controllers import voter_all_bookmarks_status_retrieve_for_api, voter_bookmark_off_save_for_api, \
     voter_bookmark_on_save_for_api, voter_bookmark_status_retrieve_for_api
 from support_oppose_deciding.controllers import voter_opposing_save, voter_stop_opposing_save, \
@@ -105,6 +103,7 @@ def voter_address_retrieve_view(request):  # voterAddressRetrieve
             'address_type': voter_address_retrieve_results['address_type'],
             'text_for_map_search': voter_address_retrieve_results['text_for_map_search'],
             'google_civic_election_id': google_civic_election_id,
+            'ballot_returned_we_vote_id': voter_address_retrieve_results['ballot_returned_we_vote_id'],
             'latitude': voter_address_retrieve_results['latitude'],
             'longitude': voter_address_retrieve_results['longitude'],
             'normalized_line1': voter_address_retrieve_results['normalized_line1'],
@@ -131,6 +130,7 @@ def voter_address_retrieve_view(request):  # voterAddressRetrieve
             'address_type': '',
             'text_for_map_search': '',
             'google_civic_election_id': 0,
+            'ballot_returned_we_vote_id': '',
             'latitude': '',
             'longitude': '',
             'normalized_line1': '',
@@ -228,6 +228,7 @@ def voter_address_retrieve_view(request):  # voterAddressRetrieve
                     'address_type': voter_address_retrieve_results['address_type'],
                     'text_for_map_search': voter_address_retrieve_results['text_for_map_search'],
                     'google_civic_election_id': google_civic_election_id,
+                    'ballot_returned_we_vote_id': voter_address_retrieve_results['ballot_returned_we_vote_id'],
                     'latitude': voter_address_retrieve_results['latitude'],
                     'longitude': voter_address_retrieve_results['longitude'],
                     'normalized_line1': voter_address_retrieve_results['normalized_line1'],
@@ -248,6 +249,7 @@ def voter_address_retrieve_view(request):  # voterAddressRetrieve
                     'address_type': '',
                     'text_for_map_search': '',
                     'google_civic_election_id': google_civic_election_id,
+                    'ballot_returned_we_vote_id': '',
                     'latitude': '',
                     'longitude': '',
                     'normalized_line1': '',
@@ -271,6 +273,7 @@ def voter_address_retrieve_view(request):  # voterAddressRetrieve
                 'address_type': '',
                 'text_for_map_search': '',
                 'google_civic_election_id': 0,
+                'ballot_returned_we_vote_id': '',
                 'latitude': '',
                 'longitude': '',
                 'normalized_line1': '',
@@ -294,6 +297,7 @@ def voter_address_save_view(request):  # voterAddressSave
     """
     google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
     simple_save = request.GET.get('simple_save', False)
+    ballot_returned_we_vote_id = ''
 
     voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
     try:
@@ -390,8 +394,12 @@ def voter_address_save_view(request):  # voterAddressSave
             # Leave google_civic_election_id as it was at the top of this function
             pass
 
+        if google_retrieve_results['ballot_returned_we_vote_id']:
+            ballot_returned_we_vote_id = google_retrieve_results['ballot_returned_we_vote_id']
+
         # At this point proceed to update google_civic_election_id whether it is a positive integer or zero
         voter_address.google_civic_election_id = google_civic_election_id
+        voter_address.ballot_returned_we_vote_id = ballot_returned_we_vote_id
         voter_address_update_results = voter_address_manager.update_existing_voter_address_object(voter_address)
 
         if voter_address_update_results['success']:
@@ -403,7 +411,8 @@ def voter_address_save_view(request):  # voterAddressSave
                 voter_device_link_manager.update_voter_device_link_with_election_id(
                     voter_device_link, google_civic_election_id)
 
-    json_data = voter_ballot_items_retrieve_for_api(voter_device_id, google_civic_election_id)
+    json_data = voter_ballot_items_retrieve_for_api(voter_device_id, google_civic_election_id,
+                                                    ballot_returned_we_vote_id)
     json_data['simple_save'] = simple_save
 
     return HttpResponse(json.dumps(json_data), content_type='application/json')
@@ -419,6 +428,8 @@ def voter_ballot_items_retrieve_view(request):  # voterBallotItemsRetrieve
     voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
     # If passed in, we want to look at
     google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
+    ballot_returned_we_vote_id = request.GET.get('ballot_returned_we_vote_id', '')
+    ballot_location_shortcut = request.GET.get('ballot_location_shortcut', '')
 
     use_test_election = request.GET.get('use_test_election', False)
     use_test_election = False if use_test_election == 'false' else use_test_election
@@ -427,7 +438,8 @@ def voter_ballot_items_retrieve_view(request):  # voterBallotItemsRetrieve
     if use_test_election:
         google_civic_election_id = 2000  # The Google Civic test election
 
-    json_data = voter_ballot_items_retrieve_for_api(voter_device_id, google_civic_election_id)
+    json_data = voter_ballot_items_retrieve_for_api(voter_device_id, google_civic_election_id,
+                                                    ballot_returned_we_vote_id, ballot_location_shortcut)
 
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 
@@ -463,7 +475,7 @@ def voter_ballot_items_retrieve_from_google_civic_view(request):  # voterBallotI
             # We don't update the voter_address because this view might be used independent of the voter_address
 
             # Save the meta information for this ballot data. If it fails, ignore the failure
-            voter_ballot_saved_manager.create_voter_ballot_saved(
+            voter_ballot_saved_manager.update_or_create_voter_ballot_saved(
                 voter_id,
                 results['google_civic_election_id'],
                 results['election_date_text'],
@@ -472,7 +484,8 @@ def voter_ballot_items_retrieve_from_google_civic_view(request):  # voterBallotI
                 substituted_address_nearby,
                 is_from_substituted_address,
                 is_from_test_address,
-                polling_location_we_vote_id_source
+                polling_location_we_vote_id_source,
+                results['ballot_returned_we_vote_id'],
             )
 
     return HttpResponse(json.dumps(results), content_type='application/json')
