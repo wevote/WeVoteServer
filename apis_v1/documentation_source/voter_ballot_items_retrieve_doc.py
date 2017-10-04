@@ -27,6 +27,16 @@ def voter_ballot_items_retrieve_doc_template_values(url_root):
                             'ballot for the voter\'s address.',
         },
         {
+            'name':         'ballot_returned_we_vote_id',
+            'value':        'string',  # boolean, integer, long, string
+            'description':  'The unique identifier for the ballot at one address.',
+        },
+        {
+            'name':         'ballot_location_shortcut',
+            'value':        'string',  # boolean, integer, long, string
+            'description':  'The unique identifier for one ballot, identified by a string url.',
+        },
+        {
             'name':         'use_test_election',
             'value':        'boolean',  # boolean, integer, long, string
             'description':  'If you need to request a test election, pass this with the value \'True\'. Note that '

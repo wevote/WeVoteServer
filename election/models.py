@@ -51,6 +51,7 @@ class Election(models.Model):
     # The state code for the election. This is not directly provided from Google Civic, but useful when we are
     # entering elections manually.
     state_code = models.CharField(verbose_name="state code for the election", max_length=2, null=True, blank=True)
+    include_in_list_for_voters = models.BooleanField(default=False)
 
     def get_election_state(self):
         if positive_value_exists(self.state_code):
@@ -67,7 +68,7 @@ class Election(models.Model):
 class ElectionManager(models.Model):
 
     def update_or_create_election(self, google_civic_election_id, election_name, election_day_text,
-                                  ocd_division_id, state_code=''):
+                                  ocd_division_id, state_code='', include_in_list_for_voters=False):
         """
         Either update or create an election entry.
         """
@@ -93,6 +94,7 @@ class ElectionManager(models.Model):
                     'election_day_text':        election_day_text,
                     'ocd_division_id':          ocd_division_id,
                     'state_code':               state_code,
+                    'include_in_list_for_voters': include_in_list_for_voters,
                 }
                 election_on_stage, new_election_created = Election.objects.update_or_create(
                     google_civic_election_id=google_civic_election_id, defaults=updated_values)
@@ -194,6 +196,10 @@ class ElectionManager(models.Model):
         return results
 
     def retrieve_we_vote_elections(self):
+        """
+        Only retrieve the elections we have entered without a Google Civic Election Id
+        :return:
+        """
         try:
             election_list_query = Election.objects.all()
             # We can't do this as long as google_civic_election_id is stored as a char

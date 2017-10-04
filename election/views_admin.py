@@ -2,7 +2,7 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
-from .controllers import election_remote_retrieve, elections_import_from_master_server, elections_sync_out_list_for_api
+from .controllers import election_remote_retrieve, elections_import_from_master_server
 from .models import Election
 from admin_tools.views import redirect_to_sign_in_page
 from ballot.models import BallotItemListManager, BallotReturnedListManager, BallotReturnedManager
@@ -19,17 +19,13 @@ from exception.models import handle_record_found_more_than_one_exception, handle
     handle_record_not_saved_exception
 from import_export_google_civic.controllers import retrieve_one_ballot_from_google_civic_api, \
     store_one_ballot_from_google_civic_api
-import json
 from office.models import ContestOfficeListManager
 from polling_location.models import PollingLocation
 from position.models import PositionListManager
-from rest_framework.views import APIView
-from rest_framework.response import Response
-import time
 from voter.models import voter_has_authority
 import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, get_voter_device_id, positive_value_exists, STATE_CODE_MAP
-from wevote_settings.models import fetch_next_we_vote_election_id_integer
+from wevote_settings.models import fetch_next_we_vote_id_election_integer
 
 logger = wevote_functions.admin.get_logger(__name__)
 
@@ -364,6 +360,7 @@ def election_edit_process_view(request):
     election_name = request.POST.get('election_name', False)
     election_day_text = request.POST.get('election_day_text', False)
     state_code = request.POST.get('state_code', False)
+    include_in_list_for_voters = request.POST.get('include_in_list_for_voters', False)
 
     election_on_stage = Election()
     election_changed = False
@@ -380,54 +377,43 @@ def election_edit_process_view(request):
 
     try:
         if election_on_stage_found:
-            if convert_to_int(election_on_stage.google_civic_election_id) < 1000000:
+            # if convert_to_int(election_on_stage.google_civic_election_id) < 1000000:  # Not supported currently
                 # If here, this is an election created by Google Civic and we limit what fields to update
-                # Update
-                if election_name is not False:
-                    election_on_stage.election_name = election_name
-                    election_changed = True
-
-                if election_day_text is not False:
-                    election_on_stage.election_day_text = election_day_text
-                    election_changed = True
-
-                if state_code is not False:
-                    election_on_stage.state_code = state_code
-                    election_changed = True
-
-                if election_changed:
-                    election_on_stage.save()
-                    messages.add_message(request, messages.INFO, 'Google Civic-created election updated.')
-            else:
                 # If here, this is a We Vote created election
-                # Update
-                if election_name is not False:
-                    election_on_stage.election_name = election_name
-                    election_changed = True
 
-                if election_day_text is not False:
-                    election_on_stage.election_day_text = election_day_text
-                    election_changed = True
+            # Update
+            if election_name is not False:
+                election_on_stage.election_name = election_name
+                election_changed = True
 
-                if state_code is not False:
-                    election_on_stage.state_code = state_code
-                    election_changed = True
+            if election_day_text is not False:
+                election_on_stage.election_day_text = election_day_text
+                election_changed = True
 
-                if election_changed:
-                    election_on_stage.save()
-                    messages.add_message(request, messages.INFO, 'We Vote-created election updated.')
+            if state_code is not False:
+                election_on_stage.state_code = state_code
+                election_changed = True
+
+            election_on_stage.include_in_list_for_voters = include_in_list_for_voters
+            election_changed = True
+
+            if election_changed:
+                election_on_stage.save()
+                messages.add_message(request, messages.INFO, str(election_name) +
+                                     ' (' + str(election_on_stage.google_civic_election_id) + ') updated.')
         else:
             # Create new
-            next_local_election_id_integer = fetch_next_we_vote_election_id_integer()
+            next_local_election_id_integer = fetch_next_we_vote_id_election_integer()
 
             election_on_stage = Election(
                 google_civic_election_id=next_local_election_id_integer,
                 election_name=election_name,
                 election_day_text=election_day_text,
                 state_code=state_code,
+                include_in_list_for_voters=include_in_list_for_voters,
             )
             election_on_stage.save()
-            messages.add_message(request, messages.INFO, 'New election saved.')
+            messages.add_message(request, messages.INFO, 'New election ' + str(election_name) + ' saved.')
     except Exception as e:
         handle_record_not_saved_exception(e, logger=logger)
         messages.add_message(request, messages.ERROR, 'Could not save election.')
@@ -640,32 +626,6 @@ def election_summary_view(request, election_local_id):
             'state_list':           sorted_state_list,
         }
     return render(request, 'election/election_summary.html', template_values)
-
-
-def elections_sync_out_view(request):  # electionsSyncOut
-    voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
-    results = elections_sync_out_list_for_api(voter_device_id)
-
-    if 'success' not in results:
-        json_data = results['json_data']
-        return HttpResponse(json.dumps(json_data), content_type='application/json')
-    elif not results['success']:
-        json_data = results['json_data']
-        return HttpResponse(json.dumps(json_data), content_type='application/json')
-    else:
-        election_list = results['election_list']
-        election_list_dict = election_list.values('google_civic_election_id', 'election_name', 'election_day_text',
-                                                  'ocd_division_id', 'state_code')
-        if election_list_dict:
-            election_list_json = list(election_list_dict)
-            return HttpResponse(json.dumps(election_list_json), content_type='application/json')
-        else:
-            json_data = {
-                'success': False,
-                'status': 'ELECTION_LIST_MISSING',
-                'voter_device_id': voter_device_id
-            }
-            return HttpResponse(json.dumps(json_data), content_type='application/json')
 
 
 @login_required

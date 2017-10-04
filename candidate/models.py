@@ -8,7 +8,7 @@ from election.models import Election
 from exception.models import handle_exception, handle_record_found_more_than_one_exception
 from office.models import ContestOffice, ContestOfficeManager
 import re
-from wevote_settings.models import fetch_next_we_vote_id_last_candidate_campaign_integer, fetch_site_unique_id_prefix
+from wevote_settings.models import fetch_next_we_vote_id_candidate_campaign_integer, fetch_site_unique_id_prefix
 import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, display_full_name_with_correct_capitalization, \
     extract_first_name_from_full_name, \
@@ -657,7 +657,7 @@ class CandidateCampaign(models.Model):
         if self.we_vote_id == "" or self.we_vote_id is None:  # If there isn't a value...
             # ...generate a new id
             site_unique_id_prefix = fetch_site_unique_id_prefix()
-            next_local_integer = fetch_next_we_vote_id_last_candidate_campaign_integer()
+            next_local_integer = fetch_next_we_vote_id_candidate_campaign_integer()
             # "wv" = We Vote
             # site_unique_id_prefix = a generated (or assigned) unique id for one server running We Vote
             # "cand" = tells us this is a unique id for a CandidateCampaign

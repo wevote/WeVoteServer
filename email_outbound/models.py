@@ -6,7 +6,7 @@ from django.core.mail import EmailMultiAlternatives
 from django.db import models
 from wevote_functions.functions import extract_email_addresses_from_string, generate_random_string, \
     positive_value_exists
-from wevote_settings.models import fetch_next_we_vote_id_last_email_integer, fetch_site_unique_id_prefix
+from wevote_settings.models import fetch_next_we_vote_id_email_integer, fetch_site_unique_id_prefix
 
 FRIEND_ACCEPTED_INVITATION_TEMPLATE = 'FRIEND_ACCEPTED_INVITATION_TEMPLATE'
 FRIEND_INVITATION_TEMPLATE = 'FRIEND_INVITATION_TEMPLATE'
@@ -72,7 +72,7 @@ class EmailAddress(models.Model):
         if self.we_vote_id == "" or self.we_vote_id is None:  # If there isn't a value...
             # ...generate a new id
             site_unique_id_prefix = fetch_site_unique_id_prefix()
-            next_local_integer = fetch_next_we_vote_id_last_email_integer()
+            next_local_integer = fetch_next_we_vote_id_email_integer()
             # "wv" = We Vote
             # site_unique_id_prefix = a generated (or assigned) unique id for one server running We Vote
             # "email" = tells us this is a unique id for a EmailAddress

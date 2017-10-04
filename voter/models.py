@@ -14,7 +14,7 @@ from validate_email import validate_email
 import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, generate_voter_device_id, \
     get_voter_api_device_id, positive_value_exists
-from wevote_settings.models import fetch_next_we_vote_id_last_voter_integer, fetch_site_unique_id_prefix
+from wevote_settings.models import fetch_next_we_vote_id_voter_integer, fetch_site_unique_id_prefix
 
 
 logger = wevote_functions.admin.get_logger(__name__)
@@ -117,7 +117,7 @@ class VoterManager(BaseUserManager):
             logger.debug("create_voter IntegrityError exception (#1) " + str(e))
             try:
                 # Trying to save again will increment the 'we_vote_id_last_voter_integer'
-                # by calling 'fetch_next_we_vote_id_last_voter_integer'
+                # by calling 'fetch_next_we_vote_id_voter_integer'
                 # TODO We could get into a race condition where multiple creates could be failing at once, so we
                 #  should look more closely at this
                 voter.save()
@@ -1632,7 +1632,7 @@ class Voter(AbstractBaseUser):
     def generate_new_we_vote_id(self):
         # ...generate a new id
         site_unique_id_prefix = fetch_site_unique_id_prefix()
-        next_local_integer = fetch_next_we_vote_id_last_voter_integer()
+        next_local_integer = fetch_next_we_vote_id_voter_integer()
         # "wv" = We Vote
         # site_unique_id_prefix = a generated (or assigned) unique id for one server running We Vote
         # "voter" = tells us this is a unique id for an org
@@ -2160,6 +2160,10 @@ class VoterAddress(models.Model):
         verbose_name="google civic election id for this address", null=True, unique=False)
     # The last election day this address was used to retrieve a ballot
     election_day_text = models.CharField(verbose_name="election day", max_length=255, null=True, blank=True)
+
+    ballot_returned_we_vote_id = models.CharField(
+        verbose_name="we vote id of the ballot", max_length=255, default=None, null=True,
+        blank=True, unique=False)
 
     refreshed_from_google = models.BooleanField(
         verbose_name="have normalized fields been updated from Google since address change?", default=False)
