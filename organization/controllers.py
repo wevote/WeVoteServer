@@ -322,7 +322,7 @@ def organization_follow_or_unfollow_or_ignore(voter_device_id, organization_id, 
             analytics_results = analytics_manager.save_action(
                 ACTION_ORGANIZATION_FOLLOW, voter_we_vote_id, voter_id, is_signed_in, state_code,
                 organization_we_vote_id, organization_id, user_agent_string=user_agent_string, is_bot=is_bot,
-                is_mobile=user_agent_object.is_mobile, is_desktop=user_agent_object.is_desktop,
+                is_mobile=user_agent_object.is_mobile, is_desktop=user_agent_object.is_pc,
                 is_tablet=user_agent_object.is_tablet)
         else:
             status = results['status']
@@ -341,7 +341,7 @@ def organization_follow_or_unfollow_or_ignore(voter_device_id, organization_id, 
             analytics_results = analytics_manager.save_action(
                 ACTION_ORGANIZATION_FOLLOW_IGNORE, voter_we_vote_id, voter_id, is_signed_in, state_code,
                 organization_we_vote_id, organization_id, user_agent_string=user_agent_string, is_bot=is_bot,
-                is_mobile=user_agent_object.is_mobile, is_desktop=user_agent_object.is_desktop,
+                is_mobile=user_agent_object.is_mobile, is_desktop=user_agent_object.is_pc,
                 is_tablet=user_agent_object.is_tablet)
         else:
             status = results['status']
@@ -359,7 +359,7 @@ def organization_follow_or_unfollow_or_ignore(voter_device_id, organization_id, 
             analytics_results = analytics_manager.save_action(
                 ACTION_ORGANIZATION_STOP_FOLLOWING, voter_we_vote_id, voter_id, is_signed_in, state_code,
                 organization_we_vote_id, organization_id, user_agent_string=user_agent_string, is_bot=is_bot,
-                is_mobile=user_agent_object.is_mobile, is_desktop=user_agent_object.is_desktop,
+                is_mobile=user_agent_object.is_mobile, is_desktop=user_agent_object.is_pc,
                 is_tablet=user_agent_object.is_tablet)
         else:
             status = results['status']

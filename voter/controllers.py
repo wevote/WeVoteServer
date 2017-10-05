@@ -1504,28 +1504,28 @@ def voter_retrieve_for_api(voter_device_id, state_code_from_ip_address='',
             analytics_manager.save_action(ACTION_FACEBOOK_AUTHENTICATION_EXISTS, voter.we_vote_id, voter_id,
                                           is_signed_in, user_agent_string=user_agent_string, is_bot=is_bot,
                                           is_mobile=user_agent_object.is_mobile,
-                                          is_desktop=user_agent_object.is_desktop,
+                                          is_desktop=user_agent_object.is_pc,
                                           is_tablet=user_agent_object.is_tablet)
         if voter.signed_in_google():
             is_signed_in = True
             analytics_manager.save_action(ACTION_GOOGLE_AUTHENTICATION_EXISTS, voter.we_vote_id, voter_id,
                                           is_signed_in, user_agent_string=user_agent_string, is_bot=is_bot,
                                           is_mobile=user_agent_object.is_mobile,
-                                          is_desktop=user_agent_object.is_desktop,
+                                          is_desktop=user_agent_object.is_pc,
                                           is_tablet=user_agent_object.is_tablet)
         if voter.signed_in_twitter():
             is_signed_in = True
             analytics_manager.save_action(ACTION_TWITTER_AUTHENTICATION_EXISTS, voter.we_vote_id, voter_id,
                                           is_signed_in, user_agent_string=user_agent_string, is_bot=is_bot,
                                           is_mobile=user_agent_object.is_mobile,
-                                          is_desktop=user_agent_object.is_desktop,
+                                          is_desktop=user_agent_object.is_pc,
                                           is_tablet=user_agent_object.is_tablet)
         if voter.signed_in_with_email():
             is_signed_in = True
             analytics_manager.save_action(ACTION_EMAIL_AUTHENTICATION_EXISTS, voter.we_vote_id, voter_id,
                                           is_signed_in, user_agent_string=user_agent_string, is_bot=is_bot,
                                           is_mobile=user_agent_object.is_mobile,
-                                          is_desktop=user_agent_object.is_desktop,
+                                          is_desktop=user_agent_object.is_pc,
                                           is_tablet=user_agent_object.is_tablet)
 
         donation_list = donation_history_for_a_voter(voter.we_vote_id)

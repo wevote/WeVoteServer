@@ -316,7 +316,7 @@ def voter_issue_follow_for_api(voter_device_id, issue_we_vote_id, follow_value, 
                                                               voter_we_vote_id, voter_id, is_signed_in,
                                                               user_agent_string=user_agent_string, is_bot=is_bot,
                                                               is_mobile=user_agent_object.is_mobile,
-                                                              is_desktop=user_agent_object.is_desktop,
+                                                              is_desktop=user_agent_object.is_pc,
                                                               is_tablet=user_agent_object.is_tablet)
         elif not follow_value:
             result = follow_issue_manager.toggle_off_voter_following_issue(voter_we_vote_id, issue_id,
@@ -325,7 +325,7 @@ def voter_issue_follow_for_api(voter_device_id, issue_we_vote_id, follow_value, 
                                                               voter_we_vote_id, voter_id, is_signed_in,
                                                               user_agent_string=user_agent_string, is_bot=is_bot,
                                                               is_mobile=user_agent_object.is_mobile,
-                                                              is_desktop=user_agent_object.is_desktop,
+                                                              is_desktop=user_agent_object.is_pc,
                                                               is_tablet=user_agent_object.is_tablet)
         elif ignore_value:
             result = follow_issue_manager.toggle_ignore_voter_following_issue(voter_we_vote_id, issue_id,
@@ -334,7 +334,7 @@ def voter_issue_follow_for_api(voter_device_id, issue_we_vote_id, follow_value, 
                                                               voter_we_vote_id, voter_id, is_signed_in,
                                                               user_agent_string=user_agent_string, is_bot=is_bot,
                                                               is_mobile=user_agent_object.is_mobile,
-                                                              is_desktop=user_agent_object.is_desktop,
+                                                              is_desktop=user_agent_object.is_pc,
                                                               is_tablet=user_agent_object.is_tablet)
 
     if not result:

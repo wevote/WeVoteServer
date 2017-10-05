@@ -4149,8 +4149,8 @@ class PositionManager(models.Model):
                 ACTION_POSITION_TAKEN, voter_we_vote_id, voter_id, is_signed_in, state_code,
                 organization_we_vote_id_temp, organization_id_temp,
                 google_civic_election_id, user_agent_string=user_agent_string, is_bot=is_bot,
-                is_mobile=user_agent_object.is_mobile, is_desktop=user_agent_object.is_desktop,
-                is_tablet=user_agent_object.istablet, ballot_item_we_vote_id=ballot_item_we_vote_id)
+                is_mobile=user_agent_object.is_mobile, is_desktop=user_agent_object.is_pc,
+                is_tablet=user_agent_object.is_tablet, ballot_item_we_vote_id=ballot_item_we_vote_id)
 
         results = {
             'status':               status,
