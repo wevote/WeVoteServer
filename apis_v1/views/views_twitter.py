@@ -5,7 +5,7 @@ from config.base import get_environment_variable
 from django.http import HttpResponse, HttpResponseRedirect
 from import_export_twitter.controllers import twitter_sign_in_start_for_api, \
     twitter_sign_in_request_access_token_for_api, twitter_sign_in_request_voter_info_for_api, \
-    twitter_sign_in_retrieve_for_api, twitter_retrieve_ids_i_follow_for_api
+    twitter_sign_in_retrieve_for_api, twitter_retrieve_ids_i_follow_for_api, twitter_native_sign_in_save_for_api
 import json
 from twitter.controllers import twitter_identity_retrieve_for_api
 from urllib.parse import quote
@@ -67,6 +67,7 @@ def twitter_identity_retrieve_view(request):  # twitterIdentityRetrieve
 
 def twitter_sign_in_start_view(request):  # twitterSignInStart
     """
+    Step 1 of the Twitter Sign In Process for the WebApp
     Start off the process of signing in with Twitter (twitterSignInStart)
     :param request:
     :return:
@@ -96,7 +97,7 @@ def twitter_sign_in_start_view(request):  # twitterSignInStart
 
 def twitter_sign_in_request_access_token_view(request):  # twitterSignInRequestAccessToken
     """
-    Step 2 of the Twitter Sign In Process (twitterSignInRequestAccessToken)
+    Step 2 of the Twitter Sign In Process (twitterSignInRequestAccessToken) for the WebApp
     :param request:
     :return:
     """
@@ -121,6 +122,27 @@ def twitter_sign_in_request_access_token_view(request):  # twitterSignInRequestA
         'success': results['success'],
         'voter_device_id': voter_device_id,
         'access_token_and_secret_returned': results['access_token_and_secret_returned'],
+    }
+    return HttpResponse(json.dumps(json_data), content_type='application/json')
+
+
+def twitter_native_sign_in_save_view(request):  # twitterNativeSignInSave
+    """
+    For the native "app" react-native-oauth, replaces Steps 1 & 2 of the WebApp Twitter Sign In Process.
+    Receives twitter_access_token and twitter_access_token_secret from the native app's authenticate() call
+    :param request:
+    :return:
+    """
+
+    voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
+    twitter_access_token = request.GET.get('twitter_access_token', '')
+    twitter_access_token_secret = request.GET.get('twitter_access_token_secret', '')
+    results = twitter_native_sign_in_save_for_api(voter_device_id, twitter_access_token, twitter_access_token_secret)
+
+    json_data = {
+        'status': results['status'],
+        'success': results['success'],
+        'voter_device_id': voter_device_id,
     }
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 

@@ -27,6 +27,15 @@ def organization_follow_doc_template_values(url_root):
                             'might support other identifiers used in the industry.',
         },
         {
+            'name':         'organization_twitter_handle',
+            'value':        'string',  # boolean, integer, long, string
+            'description':  'The unique identifier for this organization across all networks '
+                            '(either organization_we_vote_id OR organization_twitter_handle required -- not all.) '
+                            'NOTE: In the future we '
+                            'might support other identifiers used in the industry.',
+        },
+
+        {
             'name':         'api_key',
             'value':        'string (from post, cookie, or get (in that order))',  # boolean, integer, long, string
             'description':  'The unique key provided to any organization using the WeVoteServer APIs',

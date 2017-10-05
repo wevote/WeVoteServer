@@ -8,6 +8,8 @@ from config.base import get_environment_variable
 from django.http import HttpResponse
 import json
 from organization.models import OrganizationManager
+import robot_detection
+from django_user_agents.utils import get_user_agent
 from voter.models import VoterDeviceLinkManager, VoterManager
 import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, get_voter_device_id, is_voter_device_id_valid, \
@@ -36,6 +38,14 @@ def save_analytics_action_view(request):  # saveAnalyticsAction
     organization_we_vote_id = request.GET.get('organization_we_vote_id', '')
     organization_id = convert_to_int(request.GET.get('organization_id', 0))
     ballot_item_we_vote_id = request.GET.get('ballot_item_we_vote_id', '')
+    user_agent_string = request.META['HTTP_USER_AGENT']
+
+    # robot-detection is used for detecting web bots only and django-user-agents is used for device detection
+    user_agent = get_user_agent(request)
+    is_bot = user_agent.is_bot or robot_detection.is_robot(user_agent_string)
+    is_mobile = user_agent.is_mobile
+    is_desktop = user_agent.is_pc
+    is_tablet = user_agent.is_tablet
 
     # We use the lighter call to VoterDeviceLinkManager instead of VoterManager until we know there is an entry
     voter_device_link_manager = VoterDeviceLinkManager()
@@ -86,14 +96,19 @@ def save_analytics_action_view(request):  # saveAnalyticsAction
             'organization_we_vote_id':  organization_we_vote_id,
             'organization_id':          organization_id,
             'ballot_item_we_vote_id':   ballot_item_we_vote_id,
-            'date_as_integer':          date_as_integer
+            'date_as_integer':          date_as_integer,
+            'user_agent':               user_agent_string,
+            'is_bot':                   is_bot,
+            'is_mobile':                is_mobile,
+            'is_desktop':               is_desktop,
+            'is_tablet':                is_tablet,
         }
         return HttpResponse(json.dumps(json_data), content_type='application/json')
 
     results = save_analytics_action_for_api(action_constant, voter_we_vote_id, voter_id, is_signed_in, state_code,
                                             organization_we_vote_id, organization_id,
-                                            google_civic_election_id, ballot_item_we_vote_id,
-                                            voter_device_id_for_storage)
+                                            google_civic_election_id, user_agent_string, is_bot, is_mobile,
+                                            is_desktop, is_tablet, ballot_item_we_vote_id, voter_device_id_for_storage)
 
     status += results['status']
     json_data = {
@@ -107,6 +122,11 @@ def save_analytics_action_view(request):  # saveAnalyticsAction
         'organization_we_vote_id':  organization_we_vote_id,
         'organization_id':          organization_id,
         'ballot_item_we_vote_id':   ballot_item_we_vote_id,
-        'date_as_integer':          results['date_as_integer']
+        'date_as_integer':          results['date_as_integer'],
+        'user_agent':               user_agent_string,
+        'is_bot':                   is_bot,
+        'is_mobile':                is_mobile,
+        'is_desktop':               is_desktop,
+        'is_tablet':                is_tablet,
     }
     return HttpResponse(json.dumps(json_data), content_type='application/json')

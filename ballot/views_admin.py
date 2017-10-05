@@ -399,6 +399,10 @@ def ballot_item_list_edit_process_view(request):
     contest_office1_order = request.POST.get('contest_office1_order', 0)
     contest_measure1_id = request.POST.get('contest_measure1_id', 0)
 
+    ballot_location_display_option_on = request.POST.get('ballot_location_display_option_on', False)
+    ballot_location_display_name = request.POST.get('ballot_location_display_name', '')
+    ballot_location_shortcut = request.POST.get('ballot_location_shortcut', '')
+
     # Find existing ballot_returned
     ballot_returned_found = False
     ballot_returned = BallotReturned()
@@ -497,6 +501,9 @@ def ballot_item_list_edit_process_view(request):
                 normalized_line2=polling_location.line2,
                 normalized_state=polling_location.state,
                 normalized_zip=polling_location.get_formatted_zip(),
+                ballot_location_display_name=ballot_location_display_name,
+                ballot_location_display_option_on=ballot_location_display_option_on,
+                ballot_location_shortcut=ballot_location_shortcut,
                 text_for_map_search=polling_location.get_text_for_map_search(),
             )
             ballot_returned.save()
@@ -505,18 +512,25 @@ def ballot_item_list_edit_process_view(request):
             messages.add_message(request, messages.INFO, 'New ballot_returned saved.')
 
         # #######################################
-        # Make sure we have saved a latitude and longitude for the ballot_returned entry
-        if ballot_returned_found and positive_value_exists(ballot_returned.text_for_map_search):
-            if not ballot_returned.latitude or not ballot_returned.longitude:
-                google_client = get_geocoder_for_service('google')(GOOGLE_MAPS_API_KEY)
-                location = google_client.geocode(ballot_returned.text_for_map_search)
-                if location is None:
-                    status = 'Could not find location matching "{}"'.format(ballot_returned.text_for_map_search)
-                    logger.debug(status)
-                else:
-                    ballot_returned.latitude = location.latitude
-                    ballot_returned.longitude = location.longitude
-                    ballot_returned.save()
+        # Update the ballot_returned entry
+        if ballot_returned_found:
+            if positive_value_exists(ballot_returned.text_for_map_search):
+                if not ballot_returned.latitude or not ballot_returned.longitude:
+                    # Make sure we have saved a latitude and longitude for the ballot_returned entry
+                    google_client = get_geocoder_for_service('google')(GOOGLE_MAPS_API_KEY)
+                    location = google_client.geocode(ballot_returned.text_for_map_search)
+                    if location is None:
+                        status = 'Could not find location matching "{}"'.format(ballot_returned.text_for_map_search)
+                        logger.debug(status)
+                    else:
+                        ballot_returned.latitude = location.latitude
+                        ballot_returned.longitude = location.longitude
+            ballot_returned.ballot_location_display_option_on = ballot_location_display_option_on
+            ballot_returned.ballot_location_display_name = ballot_location_display_name
+            ballot_returned.ballot_location_shortcut = ballot_location_shortcut
+
+            ballot_returned.save()
+            messages.add_message(request, messages.INFO, 'Ballot_returned updated.')
 
         # #######################################
         # Now create new ballot_item entries

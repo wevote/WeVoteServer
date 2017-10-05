@@ -34,6 +34,7 @@ def elections_sync_out_doc_template_values(url_root):
                    '  "election_day_text": string,\n' \
                    '  "get_election_state": string,\n' \
                    '  "ocd_division_id": string,\n' \
+                   '  "include_in_list_for_voters": boolean,\n' \
                    '}]\n'\
                    'FAILURE:\n'\
                    '{\n' \

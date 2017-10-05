@@ -11,7 +11,7 @@ import operator
 from organization.models import Organization, OrganizationManager
 import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, convert_to_str, positive_value_exists
-from wevote_settings.models import fetch_site_unique_id_prefix, fetch_next_we_vote_id_last_voter_guide_integer
+from wevote_settings.models import fetch_site_unique_id_prefix, fetch_next_we_vote_id_voter_guide_integer
 
 logger = wevote_functions.admin.get_logger(__name__)
 
@@ -758,7 +758,7 @@ class VoterGuide(models.Model):
     def generate_new_we_vote_id(self):
         # ...generate a new id
         site_unique_id_prefix = fetch_site_unique_id_prefix()
-        next_local_integer = fetch_next_we_vote_id_last_voter_guide_integer()
+        next_local_integer = fetch_next_we_vote_id_voter_guide_integer()
         # "wv" = We Vote
         # site_unique_id_prefix = a generated (or assigned) unique id for one server running We Vote
         # "vg" = tells us this is a unique id for a voter guide

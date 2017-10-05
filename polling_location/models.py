@@ -7,7 +7,7 @@ from django.db.models import Q
 from exception.models import handle_record_found_more_than_one_exception
 import wevote_functions.admin
 from wevote_functions.functions import extract_zip_formatted_from_zip9, positive_value_exists
-from wevote_settings.models import fetch_next_we_vote_id_last_polling_location_integer, fetch_site_unique_id_prefix
+from wevote_settings.models import fetch_next_we_vote_id_polling_location_integer, fetch_site_unique_id_prefix
 
 
 logger = wevote_functions.admin.get_logger(__name__)
@@ -66,7 +66,7 @@ class PollingLocation(models.Model):
         if self.we_vote_id == "" or self.we_vote_id is None:  # If there isn't a value...
             # ...generate a new id
             site_unique_id_prefix = fetch_site_unique_id_prefix()
-            next_local_integer = fetch_next_we_vote_id_last_polling_location_integer()
+            next_local_integer = fetch_next_we_vote_id_polling_location_integer()
             # "wv" = We Vote
             # site_unique_id_prefix = a generated (or assigned) unique id for one server running We Vote
             # "ploc" = tells us this is a unique id for a PollingLocation

@@ -22,7 +22,7 @@ from voter.models import fetch_voter_id_from_voter_we_vote_id, fetch_voter_we_vo
 from voter_guide.models import VoterGuideManager
 import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, positive_value_exists
-from wevote_settings.models import fetch_next_we_vote_id_last_position_integer, fetch_site_unique_id_prefix
+from wevote_settings.models import fetch_next_we_vote_id_position_integer, fetch_site_unique_id_prefix
 
 
 ANY_STANCE = 'ANY_STANCE'  # This is a way to indicate when we want to return any stance (support, oppose, no_stance)
@@ -244,7 +244,7 @@ class PositionEntered(models.Model):
     def generate_new_we_vote_id(self):
         # ...generate a new id
         site_unique_id_prefix = fetch_site_unique_id_prefix()
-        next_local_integer = fetch_next_we_vote_id_last_position_integer()
+        next_local_integer = fetch_next_we_vote_id_position_integer()
         # "wv" = We Vote
         # site_unique_id_prefix = a generated (or assigned) unique id for one server running We Vote
         # "pos" = tells us this is a unique id for an pos
@@ -583,7 +583,7 @@ class PositionForFriends(models.Model):
         if self.we_vote_id == "" or self.we_vote_id is None:  # If there isn't a value...
             # ...generate a new id
             site_unique_id_prefix = fetch_site_unique_id_prefix()
-            next_local_integer = fetch_next_we_vote_id_last_position_integer()
+            next_local_integer = fetch_next_we_vote_id_position_integer()
             # "wv" = We Vote
             # site_unique_id_prefix = a generated (or assigned) unique id for one server running We Vote
             # "pos" = tells us this is a unique id for an pos
@@ -5817,18 +5817,21 @@ class PositionMetricsManager(models.Model):
     def __unicode__(self):
         return "PositionMetricsManager"
 
-    def fetch_positions_public(self, google_civic_election_id=0):
+    def fetch_positions_public(self, google_civic_election_id=0, positions_taken_by_these_voter_we_vote_ids=False):
         count_result = None
         try:
             count_query = PositionEntered.objects.using('readonly').all()
             if positive_value_exists(google_civic_election_id):
                 count_query = count_query.filter(google_civic_election_id=google_civic_election_id)
+            if positions_taken_by_these_voter_we_vote_ids is not False:
+                count_query = count_query.filter(voter_we_vote_id__in=positions_taken_by_these_voter_we_vote_ids)
             count_result = count_query.count()
         except Exception as e:
             pass
         return count_result
 
-    def fetch_positions_public_with_comments(self, google_civic_election_id=0):
+    def fetch_positions_public_with_comments(self, google_civic_election_id=0,
+                                             positions_taken_by_these_voter_we_vote_ids=False):
         count_result = None
         try:
             count_query = PositionEntered.objects.using('readonly').all()
@@ -5838,23 +5841,29 @@ class PositionMetricsManager(models.Model):
                 (Q(statement_text__isnull=True) | Q(statement_text__exact='')) &
                 (Q(statement_html__isnull=True) | Q(statement_html__exact=''))
             )
+            if positions_taken_by_these_voter_we_vote_ids is not False:
+                count_query = count_query.filter(voter_we_vote_id__in=positions_taken_by_these_voter_we_vote_ids)
             count_result = count_query.count()
         except Exception as e:
             pass
         return count_result
 
-    def fetch_positions_friends_only(self, google_civic_election_id=0):
+    def fetch_positions_friends_only(self, google_civic_election_id=0,
+                                     positions_taken_by_these_voter_we_vote_ids=False):
         count_result = None
         try:
             count_query = PositionForFriends.objects.using('readonly').all()
             if positive_value_exists(google_civic_election_id):
                 count_query = count_query.filter(google_civic_election_id=google_civic_election_id)
+            if positions_taken_by_these_voter_we_vote_ids is not False:
+                count_query = count_query.filter(voter_we_vote_id__in=positions_taken_by_these_voter_we_vote_ids)
             count_result = count_query.count()
         except Exception as e:
             pass
         return count_result
 
-    def fetch_positions_friends_only_with_comments(self, google_civic_election_id=0):
+    def fetch_positions_friends_only_with_comments(self, google_civic_election_id=0,
+                                                   positions_taken_by_these_voter_we_vote_ids=False):
         count_result = None
         try:
             count_query = PositionForFriends.objects.using('readonly').all()
@@ -5864,6 +5873,8 @@ class PositionMetricsManager(models.Model):
                 (Q(statement_text__isnull=True) | Q(statement_text__exact='')) &
                 (Q(statement_html__isnull=True) | Q(statement_html__exact=''))
             )
+            if positions_taken_by_these_voter_we_vote_ids is not False:
+                count_query = count_query.filter(voter_we_vote_id__in=positions_taken_by_these_voter_we_vote_ids)
             count_result = count_query.count()
         except Exception as e:
             pass

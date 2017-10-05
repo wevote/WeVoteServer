@@ -3,20 +3,14 @@
 # -*- coding: UTF-8 -*-
 
 from .models import AnalyticsAction, AnalyticsCountManager, AnalyticsManager, \
-    ACTION_VOTER_GUIDE_VISIT, ACTION_VOTER_GUIDE_ENTRY, \
-    ACTION_ORGANIZATION_FOLLOW, ACTION_ORGANIZATION_AUTO_FOLLOW, \
-    ACTION_ISSUE_FOLLOW, ACTION_BALLOT_VISIT, \
-    ACTION_POSITION_TAKEN, ACTION_VOTER_TWITTER_AUTH, ACTION_VOTER_FACEBOOK_AUTH, \
-    ACTION_WELCOME_ENTRY, ACTION_FRIEND_ENTRY, ACTIONS_THAT_REQUIRE_ORGANIZATION_IDS
+    ACTIONS_THAT_REQUIRE_ORGANIZATION_IDS
 from candidate.models import CandidateCampaignManager
 from config.base import get_environment_variable
-from datetime import datetime, timedelta
+from datetime import timedelta
 from django.db.models import Q
-from django.utils.timezone import localtime, now
-from follow.models import FollowMetricsManager
+from follow.models import FollowMetricsManager, FollowOrganizationList
 from measure.models import ContestMeasureManager
 from position.models import PositionMetricsManager
-import pytz
 from voter.models import VoterManager, VoterMetricsManager
 import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, positive_value_exists
@@ -190,8 +184,8 @@ def augment_one_voter_analytics_action_entries_without_election_id(voter_we_vote
 
 def save_analytics_action_for_api(action_constant, voter_we_vote_id, voter_id, is_signed_in, state_code,
                                   organization_we_vote_id, organization_id,
-                                  google_civic_election_id, ballot_item_we_vote_id=None,
-                                  voter_device_id=None):  # saveAnalyticsAction
+                                  google_civic_election_id, user_agent_string, is_bot, is_mobile, is_desktop, is_tablet,
+                                  ballot_item_we_vote_id=None, voter_device_id=None):  # saveAnalyticsAction
     analytics_manager = AnalyticsManager()
     success = True
     status = "SAVE_ANALYTICS_ACTION "
@@ -235,7 +229,12 @@ def save_analytics_action_for_api(action_constant, voter_we_vote_id, voter_id, i
             'organization_we_vote_id':  organization_we_vote_id,
             'organization_id':          organization_id,
             'ballot_item_we_vote_id':   ballot_item_we_vote_id,
-            'date_as_integer':          date_as_integer
+            'date_as_integer':          date_as_integer,
+            'user_agent':               user_agent_string,
+            'is_bot':                   is_bot,
+            'is_mobile':                is_mobile,
+            'is_desktop':               is_desktop,
+            'is_tablet':                is_tablet,
         }
         return results
 
@@ -243,6 +242,7 @@ def save_analytics_action_for_api(action_constant, voter_we_vote_id, voter_id, i
             action_constant,
             voter_we_vote_id, voter_id, is_signed_in, state_code,
             organization_we_vote_id, organization_id, google_civic_election_id,
+            user_agent_string, is_bot, is_mobile, is_desktop, is_tablet,
             ballot_item_we_vote_id, voter_device_id)
     if save_results['action_saved']:
         action = save_results['action']
@@ -264,7 +264,12 @@ def save_analytics_action_for_api(action_constant, voter_we_vote_id, voter_id, i
         'organization_we_vote_id':  organization_we_vote_id,
         'organization_id':          organization_id,
         'ballot_item_we_vote_id':   ballot_item_we_vote_id,
-        'date_as_integer':          date_as_integer
+        'date_as_integer':          date_as_integer,
+        'user_agent':               user_agent_string,
+        'is_bot':                   is_bot,
+        'is_mobile':                is_mobile,
+        'is_desktop':               is_desktop,
+        'is_tablet':                is_tablet,
     }
     return results
 
@@ -275,29 +280,56 @@ def calculate_organization_election_metrics(google_civic_election_id, organizati
 
     analytics_count_manager = AnalyticsCountManager()
     follow_count_manager = FollowMetricsManager()
+    position_metrics_manager = PositionMetricsManager()
+    follow_organization_list = FollowOrganizationList()
+
     limit_to_authenticated = True
+    return_voter_we_vote_id = True
 
     google_civic_election_id = convert_to_int(google_civic_election_id)
-    visitors_total = analytics_count_manager.fetch_visitors_to_organization_in_election(
-        organization_we_vote_id, google_civic_election_id)
-    authenticated_visitors_total = analytics_count_manager.fetch_visitors_to_organization_in_election(
-        organization_we_vote_id, google_civic_election_id, limit_to_authenticated)
+    visitors_total = analytics_count_manager.fetch_visitors(google_civic_election_id, organization_we_vote_id)
+    authenticated_visitors_total = analytics_count_manager.fetch_visitors(
+        google_civic_election_id, organization_we_vote_id, 0, 0, limit_to_authenticated)
     voter_guide_entrants = analytics_count_manager.fetch_visitors_first_visit_to_organization_in_election(
         organization_we_vote_id, google_civic_election_id)
     followers_at_time_of_election = follow_count_manager.fetch_organization_followers(
         organization_we_vote_id, google_civic_election_id)
     new_followers = analytics_count_manager.fetch_new_followers_in_election(
         google_civic_election_id, organization_we_vote_id)
-    new_autofollowers = analytics_count_manager.fetch_new_auto_followers_in_election(
+    new_auto_followers = analytics_count_manager.fetch_new_auto_followers_in_election(
         google_civic_election_id, organization_we_vote_id)
     entrants_visited_ballot = analytics_count_manager.fetch_organization_entrants_visited_ballot(
         organization_we_vote_id, google_civic_election_id)
     followers_visited_ballot = analytics_count_manager.fetch_organization_followers_visited_ballot(
         organization_we_vote_id, google_civic_election_id)
+
     entrants_took_position = analytics_count_manager.fetch_organization_entrants_took_position(
         organization_we_vote_id, google_civic_election_id)
+    entrants_voter_we_vote_ids = analytics_count_manager.fetch_organization_entrants_list(
+        organization_we_vote_id, google_civic_election_id)
+    entrants_public_positions = position_metrics_manager.fetch_positions_public(
+        google_civic_election_id, entrants_voter_we_vote_ids)
+    entrants_public_positions_with_comments = position_metrics_manager.fetch_positions_public_with_comments(
+        google_civic_election_id, entrants_voter_we_vote_ids)
+    entrants_friends_only_positions = position_metrics_manager.fetch_positions_friends_only(
+        google_civic_election_id, entrants_voter_we_vote_ids)
+    entrants_friends_only_positions_with_comments = position_metrics_manager.fetch_positions_friends_only_with_comments(
+        google_civic_election_id, entrants_voter_we_vote_ids)
+
     followers_took_position = analytics_count_manager.fetch_organization_followers_took_position(
         organization_we_vote_id, google_civic_election_id)
+    followers_voter_we_vote_ids = follow_organization_list.fetch_followers_list_by_organization_we_vote_id(
+        organization_we_vote_id, return_voter_we_vote_id)
+    followers_public_positions = position_metrics_manager.fetch_positions_public(
+        google_civic_election_id, followers_voter_we_vote_ids)
+    followers_public_positions_with_comments = position_metrics_manager.fetch_positions_public_with_comments(
+        google_civic_election_id, followers_voter_we_vote_ids)
+    followers_friends_only_positions = position_metrics_manager.fetch_positions_friends_only(
+        google_civic_election_id, followers_voter_we_vote_ids)
+    followers_friends_only_positions_with_comments = \
+        position_metrics_manager.fetch_positions_friends_only_with_comments(
+            google_civic_election_id, followers_voter_we_vote_ids)
+
 
     success = True
     status += "CALCULATED_ORGANIZATION_ELECTION_METRICS "
@@ -310,11 +342,19 @@ def calculate_organization_election_metrics(google_civic_election_id, organizati
         'voter_guide_entrants':     voter_guide_entrants,
         'followers_at_time_of_election':    followers_at_time_of_election,
         'new_followers':            new_followers,
-        'new_autofollowers':        new_autofollowers,
+        'new_auto_followers':        new_auto_followers,
         'entrants_visited_ballot':  entrants_visited_ballot,
         'followers_visited_ballot': followers_visited_ballot,
-        'entrants_took_position':   entrants_took_position,
-        'followers_took_position':  followers_took_position,
+        'entrants_took_position':                           entrants_took_position,
+        'entrants_public_positions':                        entrants_public_positions,
+        'entrants_public_positions_with_comments':          entrants_public_positions_with_comments,
+        'entrants_friends_only_positions':                  entrants_friends_only_positions,
+        'entrants_friends_only_positions_with_comments':    entrants_friends_only_positions_with_comments,
+        'followers_took_position':                          followers_took_position,
+        'followers_public_positions':                       followers_public_positions,
+        'followers_public_positions_with_comments':         followers_public_positions_with_comments,
+        'followers_friends_only_positions':                 followers_friends_only_positions,
+        'followers_friends_only_positions_with_comments':   followers_friends_only_positions_with_comments,
     }
     results = {
         'status':                               status,
@@ -324,21 +364,35 @@ def calculate_organization_election_metrics(google_civic_election_id, organizati
     return results
 
 
-def calculate_organization_daily_metrics(organization_we_vote_id, date):
+def calculate_organization_daily_metrics(organization_we_vote_id, limit_to_one_date_as_integer):
     status = ""
     success = False
+    google_civic_election_id_zero = 0
+    limit_to_authenticated = True
+
+    analytics_count_manager = AnalyticsCountManager()
+    follow_count_manager = FollowMetricsManager()
+    position_metrics_manager = PositionMetricsManager()
+    follow_organization_list = FollowOrganizationList()
 
     date_as_integer = convert_to_int(date)
-    visitors_total = None
-    visitors_today = None
+    visitors_total = analytics_count_manager.fetch_visitors(google_civic_election_id_zero, organization_we_vote_id)
+    authenticated_visitors_total = analytics_count_manager.fetch_visitors(
+        google_civic_election_id_zero, organization_we_vote_id, 0, 0, limit_to_authenticated)
+
+    visitors_today = analytics_count_manager.fetch_visitors(
+        google_civic_election_id_zero, organization_we_vote_id, limit_to_one_date_as_integer)
+    authenticated_visitors_today = analytics_count_manager.fetch_visitors(
+        google_civic_election_id_zero, organization_we_vote_id, limit_to_one_date_as_integer, 0, limit_to_authenticated)
+
     new_visitors_today = None
     voter_guide_entrants_today = None
     entrants_visiting_ballot = None
     followers_visiting_ballot = None
     followers_total = None
     new_followers_today = None
-    autofollowers_total = None
-    new_autofollowers_today = None
+    auto_followers_total = None
+    new_auto_followers_today = None
     issues_linked_total = None
     organization_public_positions = None
 
@@ -350,13 +404,15 @@ def calculate_organization_daily_metrics(organization_we_vote_id, date):
         'visitors_total':                           visitors_total,
         'visitors_today':                           visitors_today,
         'new_visitors_today':                       new_visitors_today,
+        'authenticated_visitors_total':             authenticated_visitors_total,
+        'authenticated_visitors_today':             authenticated_visitors_today,
         'voter_guide_entrants_today':               voter_guide_entrants_today,
         'entrants_visiting_ballot':                 entrants_visiting_ballot,
         'followers_visiting_ballot':                followers_visiting_ballot,
         'followers_total':                          followers_total,
         'new_followers_today':                      new_followers_today,
-        'autofollowers_total':                      autofollowers_total,
-        'new_autofollowers_today':                  new_autofollowers_today,
+        'auto_followers_total':                     auto_followers_total,
+        'new_auto_followers_today':                 new_auto_followers_today,
         'issues_linked_total':                      issues_linked_total,
         'organization_public_positions':            organization_public_positions,
     }
@@ -373,36 +429,47 @@ def calculate_sitewide_daily_metrics(limit_to_one_date_as_integer):
     success = False
 
     analytics_count_manager = AnalyticsCountManager()
-    follow_count_manager = FollowMetricsManager()
+    follow_metrics_manager = FollowMetricsManager()
+
     google_civic_election_id_zero = 0
+    organization_we_vote_id_empty = ""
+    voter_we_vote_id_empty = ""
     limit_to_authenticated = True
     date_as_integer_zero = 0
     limit_to_one_date_as_integer = convert_to_int(limit_to_one_date_as_integer)
     count_through_this_date_as_integer = limit_to_one_date_as_integer
 
     visitors_total = analytics_count_manager.fetch_visitors(
-        google_civic_election_id_zero, date_as_integer_zero, count_through_this_date_as_integer)
-    visitors_today = analytics_count_manager.fetch_visitors(google_civic_election_id_zero, limit_to_one_date_as_integer)
+        google_civic_election_id_zero, organization_we_vote_id_empty, date_as_integer_zero,
+        count_through_this_date_as_integer)
+    visitors_today = analytics_count_manager.fetch_visitors(
+        google_civic_election_id_zero, organization_we_vote_id_empty, limit_to_one_date_as_integer)
     new_visitors_today = None
     voter_guide_entrants_today = None
     welcome_page_entrants_today = None
     friend_entrants_today = None
     authenticated_visitors_total = analytics_count_manager.fetch_visitors(
-        google_civic_election_id_zero, date_as_integer_zero, count_through_this_date_as_integer, limit_to_authenticated)
+        google_civic_election_id_zero, organization_we_vote_id_empty,
+        date_as_integer_zero, count_through_this_date_as_integer, limit_to_authenticated)
     authenticated_visitors_today = analytics_count_manager.fetch_visitors(
-        google_civic_election_id_zero, limit_to_one_date_as_integer, date_as_integer_zero, limit_to_authenticated)
+        google_civic_election_id_zero, organization_we_vote_id_empty,
+        limit_to_one_date_as_integer, date_as_integer_zero, limit_to_authenticated)
     ballot_views_today = analytics_count_manager.fetch_ballot_views(
         google_civic_election_id_zero, limit_to_one_date_as_integer)
     voter_guides_viewed_total = analytics_count_manager.fetch_voter_guides_viewed(
         google_civic_election_id_zero, date_as_integer_zero, count_through_this_date_as_integer)
     voter_guides_viewed_today = analytics_count_manager.fetch_voter_guides_viewed(
         google_civic_election_id_zero, limit_to_one_date_as_integer)
-    issues_followed_total = None
-    issues_followed_today = None
+
+    issues_followed_total = follow_metrics_manager.fetch_issues_followed(
+        voter_we_vote_id_empty, date_as_integer_zero, count_through_this_date_as_integer)
+    issues_followed_today = follow_metrics_manager.fetch_issues_followed(
+        voter_we_vote_id_empty, limit_to_one_date_as_integer)
+
     organizations_followed_total = None
     organizations_followed_today = None
-    organizations_autofollowed_total = None
-    organizations_autofollowed_today = None
+    organizations_auto_followed_total = None
+    organizations_auto_followed_today = None
     organizations_with_linked_issues = None
     issues_linked_total = None
     issues_linked_today = None
@@ -435,8 +502,8 @@ def calculate_sitewide_daily_metrics(limit_to_one_date_as_integer):
         'issues_followed_today':                    issues_followed_today,
         'organizations_followed_total':             organizations_followed_total,
         'organizations_followed_today':             organizations_followed_today,
-        'organizations_autofollowed_total':         organizations_autofollowed_total,
-        'organizations_autofollowed_today':         organizations_autofollowed_today,
+        'organizations_auto_followed_total':         organizations_auto_followed_total,
+        'organizations_auto_followed_today':         organizations_auto_followed_today,
         'organizations_with_linked_issues':         organizations_with_linked_issues,
         'issues_linked_total':                      issues_linked_total,
         'issues_linked_today':                      issues_linked_today,
@@ -478,7 +545,7 @@ def calculate_sitewide_election_metrics(google_civic_election_id):
     unique_voters_that_auto_followed_organizations = analytics_count_manager.fetch_new_auto_followers_in_election(
         google_civic_election_id)
     organizations_followed = None
-    organizations_autofollowed = None
+    organizations_auto_followed = None
     organizations_signed_in = None
     organizations_with_positions = None
     organization_public_positions = None
@@ -505,7 +572,7 @@ def calculate_sitewide_election_metrics(google_civic_election_id):
         'unique_voters_that_followed_organizations':        unique_voters_that_followed_organizations,
         'unique_voters_that_auto_followed_organizations':   unique_voters_that_auto_followed_organizations,
         'organizations_followed':                   organizations_followed,
-        'organizations_autofollowed':               organizations_autofollowed,
+        'organizations_auto_followed':              organizations_auto_followed,
         'organizations_signed_in':                  organizations_signed_in,
         'organizations_with_positions':             organizations_with_positions,
         'organization_public_positions':            organization_public_positions,
@@ -554,7 +621,7 @@ def calculate_sitewide_voter_metrics_for_one_voter(voter_we_vote_id):
     ballot_visited = analytics_count_manager.fetch_voter_ballot_visited(voter_we_vote_id)
     welcome_visited = analytics_count_manager.fetch_voter_welcome_visited(voter_we_vote_id)
     entered_full_address = voter_metrics_manager.fetch_voter_entered_full_address(voter_id)
-    issues_followed = follow_metrics_manager.fetch_voter_issues_followed(voter_we_vote_id)
+    issues_followed = follow_metrics_manager.fetch_issues_followed(voter_we_vote_id)
     organizations_followed = follow_metrics_manager.fetch_voter_organizations_followed(voter_id)
     time_until_sign_in = None
     positions_entered_friends_only = position_metrics_manager.fetch_voter_positions_entered_friends_only(

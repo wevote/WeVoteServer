@@ -246,8 +246,9 @@ def transfer_to_organization_if_missing(from_organization, to_organization, fiel
     return save_to_organization
 
 
-def organization_follow_all(voter_device_id, organization_id, organization_we_vote_id, follow_kind=FOLLOWING,
-                            organization_follow_based_on_issue=None):
+def organization_follow_or_unfollow_or_ignore(voter_device_id, organization_id, organization_we_vote_id,
+                                              follow_kind=FOLLOWING,
+                                              organization_follow_based_on_issue=None):
     if organization_follow_based_on_issue is None:
         organization_follow_based_on_issue = False
 

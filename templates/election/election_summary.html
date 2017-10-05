@@ -10,25 +10,64 @@
 
 {% if election %}
 
-    <h1>{{ election.election_name }}</h1>
-    <table>
-        <tr>
-            <td>Day of Election:</td>
-            <td>{{ election.election_day_text }}</td>
-        </tr>
-        <tr>
-            <td>Google Civic Election ID:</td>
-            <td>{{ election.google_civic_election_id }}</td>
-        </tr>
-        <tr>
-            <td>OCD Division ID:</td>
-            <td>{{ election.raw_ocd_division_id }}</td>
-        </tr>
-        <tr>
-            <td>State Code:</td>
-            <td>{{ election.state_code }}</td>
-        </tr>
-    </table>
+<h1>{{ election.election_name }}</h1>
+
+<form action="{% url "election:election_edit_process" %}" method="post" class="form-horizontal">
+
+    <div class="form-group">
+        <label for="election_id" class="col-sm-3 control-label">Election Name{% if election %} (ID: {{ election.id }}){% endif %}</label>
+        <div class="col-sm-8">
+            <input type="text" name="election" id="election_id" class="form-control" disabled
+                   value="{% if election %}{{ election.election_name }}{% endif %}" />
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label for="include_in_list_for_voters_id" class="col-sm-3 control-label">Show:&nbsp;
+            <input type="checkbox" name="include_in_list_for_voters" id="include_in_list_for_voters_id" disabled
+               value={% if election %}{% if election.include_in_list_for_voters %}True{% else %}False{% endif %}{% else %}False{% endif %}
+               {% if election.include_in_list_for_voters %}checked{% endif %} />
+        </label>
+        <div class="col-sm-8">
+            Show in lists of elections for voters
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label for="google_civic_election_id_id" class="col-sm-3 control-label">Google Civic ID</label>
+        <div class="col-sm-8">
+            <input type="text" name="google_civic_election_id" id="google_civic_election_id_id" class="form-control" disabled
+                   value="{% if election %}{{ election.google_civic_election_id|default_if_none:"" }}{% endif %}" />
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label for="election_day_text_id" class="col-sm-3 control-label">Election Day
+            <span class="no_break">(Format: "YYYY-MM-DD")</span></label>
+        <div class="col-sm-8">
+            <input type="text" name="election_day_text" id="election_day_text_id" class="form-control" disabled
+                   value="{% if election %}{{ election.election_day_text|default_if_none:"" }}{% endif %}" />
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label for="state_id" class="col-sm-3 control-label">State Code</label>
+        <div class="col-sm-8">
+            <input type="text" name="state" id="state_id" class="form-control" disabled
+                   value="{% if election %}{{ election.state_code|default_if_none:"" }}{% endif %}" />
+        </div>
+    </div>
+
+{#    <div class="form-group">#}
+{#        <label for="raw_ocd_division_id_id" class="col-sm-3 control-label">OCD Division ID</label>#}
+{#        <div class="col-sm-8">#}
+{#            <input type="text" name="raw_ocd_division_id" id="raw_ocd_division_id_id" class="form-control" disabled#}
+{#                   value="{% if election %}{{ election.raw_ocd_division_id|default_if_none:"" }}{% endif %}" />#}
+{#        </div>#}
+{#    </div>#}
+</form>
+
+<div class="col-sm-12">
 
     <p><a href="{% url 'election:election_edit' election.id %}">edit</a></p>
 
@@ -94,6 +133,7 @@
             <td><a href="{% url 'election:election_summary' election.id %}?google_civic_election_id={{ election.google_civic_election_id }}&state_code={{ state_code }}&show_offices_and_candidates=1">
                 Offices & Candidates</a></td>
             <td>Ballot Items</td>
+            <td>Shortcut?</td>
             <td>&nbsp;</td>
         </tr>
     {% for ballot_returned in ballot_returned_list %}
@@ -107,14 +147,20 @@
             <td align="middle">{{ ballot_returned.normalized_state|default_if_none:"" }}</td>
             <td align="middle">{% if ballot_returned.office_and_candidate_text %}{{ ballot_returned.office_and_candidate_text }}{% endif %}</td>
             <td align="middle">{% if ballot_returned.ballot_items_count %}{{ ballot_returned.ballot_items_count }}{% endif %}</td>
+            <td align="middle">{% if ballot_returned.ballot_location_shortcut %}{{ ballot_returned.ballot_location_shortcut }}{% endif %}{% if ballot_returned.ballot_location_display_option_on %} ON{% endif %}</td>
             <td><a href="{% url 'ballot:ballot_item_list_edit' ballot_returned.id %}">(edit)</a></td>
         </tr>
     {% endfor %}
     </table>
+    <br />
+    <br />
+    <br />
+    <br />
 {% else %}
     <p>(no ballot_returned data found)</p>
 {% endif %}
 
+    </div>
 {% else %}
 
     <h1>No Election Found</h1>

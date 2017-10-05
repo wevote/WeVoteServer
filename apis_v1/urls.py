@@ -10,11 +10,11 @@ from django.conf import settings
 from django.conf.urls import url
 from django.conf.urls.static import static
 
-from apis_v1.views import views_docs, views_analytics, views_ballot, views_candidate, views_donation, views_facebook, \
-    views_friend, views_issues, views_misc, views_organization, views_position, views_twitter, views_voter
+from apis_v1.views import views_docs, views_analytics, views_ballot, views_candidate, views_donation, \
+    views_election, views_facebook, views_friend, views_issues, views_misc, views_organization, \
+    views_position, views_twitter, views_voter
 from ballot.views_admin import ballot_items_sync_out_view, ballot_returned_sync_out_view
 from candidate.views_admin import candidates_sync_out_view
-from election.views_admin import elections_sync_out_view
 from issue.views_admin import issues_sync_out_view, issues_retrieve_view, retrieve_issues_to_follow_view, \
     organization_link_to_issue_sync_out_view
 from measure.views_admin import measures_sync_out_view
@@ -41,7 +41,8 @@ urlpatterns = [
     url(r'^donationRefund', views_donation.donation_refund_view, name='donationRefund'),
     url(r'^donationStripeWebhook/', views_donation.donation_stripe_webhook_view, name='donationStripeWebhookView'),
     url(r'^donationWithStripe', views_donation.donation_with_stripe_view, name='donationWithStripeView'),
-    url(r'^electionsSyncOut/', elections_sync_out_view, name='electionsSyncOutView'),
+    url(r'^electionsRetrieve/', views_election.elections_retrieve_view, name='electionsRetrieveView'),
+    url(r'^electionsSyncOut/', views_election.elections_sync_out_view, name='electionsSyncOutView'),
     url(r'^facebookDisconnect/', views_facebook.facebook_disconnect_view, name='facebookDisconnectView'),
     url(r'^facebookFriendsAction/', views_facebook.facebook_friends_action_view, name='facebookFriendsActionView'),
     url(r'^friendInvitationByEmailSend/',
@@ -114,6 +115,7 @@ urlpatterns = [
     url(r'^saveAnalyticsAction/', views_analytics.save_analytics_action_view, name='saveAnalyticsActionView'),
     url(r'^searchAll/', views_misc.search_all_view, name='searchAllView'),
     url(r'^twitterIdentityRetrieve/', views_twitter.twitter_identity_retrieve_view, name='twitterIdentityRetrieveView'),
+    url(r'^twitterNativeSignInSave/', views_twitter.twitter_native_sign_in_save_view, name='twitterNativeSignInSave'),
     url(r'^twitterSignInRequestAccessToken/',
         views_twitter.twitter_sign_in_request_access_token_view, name='twitterSignInRequestAccessTokenView'),
     url(r'^twitterSignInRequestVoterInfo/',
@@ -211,6 +213,7 @@ urlpatterns = [
     url(r'^docs/candidatesSyncOut/$', views_docs.candidates_sync_out_doc_view, name='candidatesSyncOutDocs'),
     url(r'^docs/deviceIdGenerate/$', views_docs.device_id_generate_doc_view, name='deviceIdGenerateDocs'),
     url(r'^docs/donationWithStripe/$', views_docs.donation_with_stripe_doc_view, name='donationWithStripeDocs'),
+    url(r'^docs/electionsRetrieve/$', views_docs.elections_retrieve_doc_view, name='electionsRetrieveDocs'),
     url(r'^docs/electionsSyncOut/$', views_docs.elections_sync_out_doc_view, name='electionsSyncOutDocs'),
     url(r'^docs/facebookDisconnect/$', views_docs.facebook_disconnect_doc_view, name='facebookDisconnectDocs'),
     url(r'^docs/facebookFriendsAction/$',

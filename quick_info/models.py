@@ -9,8 +9,8 @@ from exception.models import handle_exception, handle_record_found_more_than_one
     handle_record_not_saved_exception
 import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, positive_value_exists
-from wevote_settings.models import fetch_next_we_vote_id_last_quick_info_integer, \
-    fetch_next_we_vote_id_last_quick_info_master_integer, fetch_site_unique_id_prefix
+from wevote_settings.models import fetch_next_we_vote_id_quick_info_integer, \
+    fetch_next_we_vote_id_quick_info_master_integer, fetch_site_unique_id_prefix
 
 # Language Codes: http://www.mcanerin.com/en/articles/meta-language.asp
 # Country Codes: http://www.mcanerin.com/en/articles/ccTLD.asp
@@ -123,7 +123,7 @@ class QuickInfo(models.Model):
         if self.we_vote_id == "" or self.we_vote_id is None:  # If there isn't a value...
             # ...generate a new id
             site_unique_id_prefix = fetch_site_unique_id_prefix()
-            next_local_integer = fetch_next_we_vote_id_last_quick_info_integer()
+            next_local_integer = fetch_next_we_vote_id_quick_info_integer()
             # "wv" = We Vote
             # site_unique_id_prefix = a generated (or assigned) unique id for one server running We Vote
             # "info" = tells us this is a unique id for a quick_info entry
@@ -592,7 +592,7 @@ class QuickInfoMaster(models.Model):
         if self.we_vote_id == "" or self.we_vote_id is None:  # If there isn't a value...
             # ...generate a new id
             site_unique_id_prefix = fetch_site_unique_id_prefix()
-            next_local_integer = fetch_next_we_vote_id_last_quick_info_master_integer()
+            next_local_integer = fetch_next_we_vote_id_quick_info_master_integer()
             # "wv" = We Vote
             # site_unique_id_prefix = a generated (or assigned) unique id for one server running We Vote
             # "infom" = tells us this is a unique id for a quick_info_master entry
