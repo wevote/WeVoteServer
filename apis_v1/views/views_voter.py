@@ -6,6 +6,7 @@ from apis_v1.controllers import voter_count
 from ballot.controllers import choose_election_from_existing_data, voter_ballot_items_retrieve_for_api
 from config.base import get_environment_variable
 from django.http import HttpResponse
+from django_user_agents.utils import get_user_agent
 from email_outbound.controllers import voter_email_address_save_for_api, voter_email_address_retrieve_for_api, \
     voter_email_address_sign_in_for_api, voter_email_address_verify_for_api
 from wevote_functions.functions import extract_first_name_from_full_name, extract_last_name_from_full_name
@@ -778,10 +779,13 @@ def voter_follow_all_organizations_followed_by_organization_view(request):
     organization_we_vote_id = request.GET.get('organization_we_vote_id', '')
     voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
     maximum_number_to_follow = get_maximum_number_to_retrieve_from_request(request)
+    user_agent_string = request.META['HTTP_USER_AGENT']
+    user_agent_object = get_user_agent(request)
     return voter_follow_all_organizations_followed_by_organization_for_api(
         voter_device_id,
         organization_we_vote_id=organization_we_vote_id,
-        maximum_number_to_follow=maximum_number_to_follow)
+        maximum_number_to_follow=maximum_number_to_follow, user_agent_string=user_agent_string,
+        user_agent_object=user_agent_object)
 
 
 def voter_guides_followed_by_organization_retrieve_view(request):  # voterGuidesFollowedByOrganizationRetrieve
@@ -878,6 +882,8 @@ def voter_issue_follow_view(request):  # issueFollow
     voter_device_id = request.GET.get('voter_device_id', False)
     issue_we_vote_id = request.GET.get('issue_we_vote_id', False)
     follow_value = request.GET.get('follow', False)
+    user_agent_string = request.META['HTTP_USER_AGENT']
+    user_agent_object = get_user_agent(request)
     if follow_value == 'true':
         follow_value = True
     elif follow_value == 'false':
@@ -891,7 +897,8 @@ def voter_issue_follow_view(request):  # issueFollow
     return voter_issue_follow_for_api(voter_device_id=voter_device_id,
                                       issue_we_vote_id=issue_we_vote_id,
                                       follow_value=follow_value,
-                                      ignore_value=ignore_value)
+                                      ignore_value=ignore_value, user_agent_string=user_agent_string,
+                                      user_agent_object=user_agent_object)
 
 
 def voter_location_retrieve_from_ip_view(request):  # voterLocationRetrieveFromIP - GeoIP geo location
@@ -1174,6 +1181,8 @@ def voter_opposing_save_view(request):
     kind_of_ballot_item = request.GET.get('kind_of_ballot_item', "")
     ballot_item_id = request.GET.get('ballot_item_id', 0)
     ballot_item_we_vote_id = request.GET.get('ballot_item_we_vote_id', None)
+    user_agent_string = request.META['HTTP_USER_AGENT']
+    user_agent_object = get_user_agent(request)
     if kind_of_ballot_item == CANDIDATE:
         candidate_id = ballot_item_id
         candidate_we_vote_id = ballot_item_we_vote_id
@@ -1191,7 +1200,8 @@ def voter_opposing_save_view(request):
         measure_we_vote_id = None
     return voter_opposing_save(voter_device_id=voter_device_id,
                                candidate_id=candidate_id, candidate_we_vote_id=candidate_we_vote_id,
-                               measure_id=measure_id, measure_we_vote_id=measure_we_vote_id)
+                               measure_id=measure_id, measure_we_vote_id=measure_we_vote_id,
+                               user_agent_string=user_agent_string, user_agent_object=user_agent_object)
 
 
 def voter_split_into_two_accounts_view(request):  # voterSplitIntoTwoAccounts
@@ -1220,13 +1230,16 @@ def voter_retrieve_view(request):  # voterRetrieve
     :return:
     """
     voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
+    user_agent_string = request.META['HTTP_USER_AGENT']
+    user_agent_object = get_user_agent(request)
 
     # Figure out the city & state from IP address
     voter_location_results = voter_location_retrieve_from_ip_for_api(request)
     state_code_from_ip_address = voter_location_results['region']
 
     results = voter_retrieve_for_api(voter_device_id=voter_device_id,
-                                     state_code_from_ip_address=state_code_from_ip_address)
+                                     state_code_from_ip_address=state_code_from_ip_address,
+                                     user_agent_string=user_agent_string, user_agent_object=user_agent_object)
     return HttpResponse(json.dumps(results), content_type='application/json')
 
 
@@ -1270,6 +1283,8 @@ def voter_stop_opposing_save_view(request):
     kind_of_ballot_item = request.GET.get('kind_of_ballot_item', "")
     ballot_item_id = request.GET.get('ballot_item_id', 0)
     ballot_item_we_vote_id = request.GET.get('ballot_item_we_vote_id', None)
+    user_agent_string = request.META['HTTP_USER_AGENT']
+    user_agent_object = get_user_agent(request)
     if kind_of_ballot_item == CANDIDATE:
         candidate_id = ballot_item_id
         candidate_we_vote_id = ballot_item_we_vote_id
@@ -1287,7 +1302,8 @@ def voter_stop_opposing_save_view(request):
         measure_we_vote_id = None
     return voter_stop_opposing_save(voter_device_id=voter_device_id,
                                     candidate_id=candidate_id, candidate_we_vote_id=candidate_we_vote_id,
-                                    measure_id=measure_id, measure_we_vote_id=measure_we_vote_id)
+                                    measure_id=measure_id, measure_we_vote_id=measure_we_vote_id,
+                                    user_agent_string=user_agent_string, user_agent_object=user_agent_object)
 
 
 def voter_stop_supporting_save_view(request):
@@ -1301,6 +1317,8 @@ def voter_stop_supporting_save_view(request):
     kind_of_ballot_item = request.GET.get('kind_of_ballot_item', "")
     ballot_item_id = request.GET.get('ballot_item_id', 0)
     ballot_item_we_vote_id = request.GET.get('ballot_item_we_vote_id', None)
+    user_agent_string = request.META['HTTP_USER_AGENT']
+    user_agent_object = get_user_agent(request)
     if kind_of_ballot_item == CANDIDATE:
         candidate_id = ballot_item_id
         candidate_we_vote_id = ballot_item_we_vote_id
@@ -1318,7 +1336,8 @@ def voter_stop_supporting_save_view(request):
         measure_we_vote_id = None
     return voter_stop_supporting_save(voter_device_id=voter_device_id,
                                       candidate_id=candidate_id, candidate_we_vote_id=candidate_we_vote_id,
-                                      measure_id=measure_id, measure_we_vote_id=measure_we_vote_id)
+                                      measure_id=measure_id, measure_we_vote_id=measure_we_vote_id,
+                                      user_agent_string=user_agent_string, user_agent_object=user_agent_object)
 
 
 def voter_supporting_save_view(request):
@@ -1332,6 +1351,8 @@ def voter_supporting_save_view(request):
     kind_of_ballot_item = request.GET.get('kind_of_ballot_item', "")
     ballot_item_id = request.GET.get('ballot_item_id', 0)
     ballot_item_we_vote_id = request.GET.get('ballot_item_we_vote_id', None)
+    user_agent_string = request.META['HTTP_USER_AGENT']
+    user_agent_object = get_user_agent(request)
     if kind_of_ballot_item == CANDIDATE:
         candidate_id = ballot_item_id
         candidate_we_vote_id = ballot_item_we_vote_id
@@ -1349,7 +1370,8 @@ def voter_supporting_save_view(request):
         measure_we_vote_id = None
     return voter_supporting_save_for_api(voter_device_id=voter_device_id,
                                          candidate_id=candidate_id, candidate_we_vote_id=candidate_we_vote_id,
-                                         measure_id=measure_id, measure_we_vote_id=measure_we_vote_id)
+                                         measure_id=measure_id, measure_we_vote_id=measure_we_vote_id,
+                                         user_agent_string=user_agent_string, user_agent_object=user_agent_object)
 
 
 def voter_bookmark_off_save_view(request):

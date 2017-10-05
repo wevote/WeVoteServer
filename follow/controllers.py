@@ -10,6 +10,7 @@ from django.http import HttpResponse
 from friend.models import FriendManager
 import json
 from organization.models import OrganizationManager
+import robot_detection
 from twitter.models import TwitterUserManager
 from voter.models import VoterManager, fetch_voter_we_vote_id_from_voter_device_link
 import wevote_functions.admin
@@ -287,7 +288,8 @@ def duplicate_organization_followers_to_another_organization(from_organization_i
     return results
 
 
-def voter_issue_follow_for_api(voter_device_id, issue_we_vote_id, follow_value, ignore_value):  # issueFollow
+def voter_issue_follow_for_api(voter_device_id, issue_we_vote_id, follow_value, ignore_value,
+                               user_agent_string, user_agent_object):  # issueFollow
     voter_we_vote_id = False
     voter_id = 0
     is_signed_in = False
@@ -304,23 +306,36 @@ def voter_issue_follow_for_api(voter_device_id, issue_we_vote_id, follow_value, 
     follow_issue_manager = FollowIssueManager()
     follow_metrics_manager = FollowMetricsManager()
     result = False
+    is_bot = user_agent_object.is_bot or robot_detection.is_robot(user_agent_string)
     analytics_manager = AnalyticsManager()
     if positive_value_exists(voter_we_vote_id) and positive_value_exists(issue_we_vote_id):
         if follow_value:
             result = follow_issue_manager.toggle_on_voter_following_issue(voter_we_vote_id, issue_id,
                                                                           issue_we_vote_id)
             analytics_results = analytics_manager.save_action(ACTION_ISSUE_FOLLOW,
-                                                              voter_we_vote_id, voter_id, is_signed_in)
+                                                              voter_we_vote_id, voter_id, is_signed_in,
+                                                              user_agent_string=user_agent_string, is_bot=is_bot,
+                                                              is_mobile=user_agent_object.is_mobile,
+                                                              is_desktop=user_agent_object.is_desktop,
+                                                              is_tablet=user_agent_object.is_tablet)
         elif not follow_value:
             result = follow_issue_manager.toggle_off_voter_following_issue(voter_we_vote_id, issue_id,
                                                                            issue_we_vote_id)
             analytics_results = analytics_manager.save_action(ACTION_ISSUE_STOP_FOLLOWING,
-                                                              voter_we_vote_id, voter_id, is_signed_in)
+                                                              voter_we_vote_id, voter_id, is_signed_in,
+                                                              user_agent_string=user_agent_string, is_bot=is_bot,
+                                                              is_mobile=user_agent_object.is_mobile,
+                                                              is_desktop=user_agent_object.is_desktop,
+                                                              is_tablet=user_agent_object.is_tablet)
         elif ignore_value:
             result = follow_issue_manager.toggle_ignore_voter_following_issue(voter_we_vote_id, issue_id,
                                                                               issue_we_vote_id)
             analytics_results = analytics_manager.save_action(ACTION_ISSUE_FOLLOW_IGNORE,
-                                                              voter_we_vote_id, voter_id, is_signed_in)
+                                                              voter_we_vote_id, voter_id, is_signed_in,
+                                                              user_agent_string=user_agent_string, is_bot=is_bot,
+                                                              is_mobile=user_agent_object.is_mobile,
+                                                              is_desktop=user_agent_object.is_desktop,
+                                                              is_tablet=user_agent_object.is_tablet)
 
     if not result:
         new_result = {

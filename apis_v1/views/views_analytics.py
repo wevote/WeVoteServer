@@ -41,11 +41,11 @@ def save_analytics_action_view(request):  # saveAnalyticsAction
     user_agent_string = request.META['HTTP_USER_AGENT']
 
     # robot-detection is used for detecting web bots only and django-user-agents is used for device detection
-    user_agent = get_user_agent(request)
-    is_bot = user_agent.is_bot or robot_detection.is_robot(user_agent_string)
-    is_mobile = user_agent.is_mobile
-    is_desktop = user_agent.is_pc
-    is_tablet = user_agent.is_tablet
+    user_agent_object = get_user_agent(request)
+    is_bot = user_agent_object.is_bot or robot_detection.is_robot(user_agent_string)
+    is_mobile = user_agent_object.is_mobile
+    is_desktop = user_agent_object.is_pc
+    is_tablet = user_agent_object.is_tablet
 
     # We use the lighter call to VoterDeviceLinkManager instead of VoterManager until we know there is an entry
     voter_device_link_manager = VoterDeviceLinkManager()

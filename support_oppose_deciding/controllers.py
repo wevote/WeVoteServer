@@ -776,7 +776,7 @@ def positions_public_count_for_contest_measure(measure_id, measure_we_vote_id, s
 
 
 def voter_opposing_save(voter_device_id, candidate_id, candidate_we_vote_id,  # voterOpposingSave
-                        measure_id, measure_we_vote_id):
+                        measure_id, measure_we_vote_id, user_agent_string, user_agent_object):
     # Get voter_id from the voter_device_id so we can know who is supporting/opposing
     results = is_voter_device_id_valid(voter_device_id)
     if not results['success']:
@@ -809,7 +809,8 @@ def voter_opposing_save(voter_device_id, candidate_id, candidate_we_vote_id,  # 
         elif positive_value_exists(candidate_we_vote_id):
             candidate_id = candidate_campaign_manager.fetch_candidate_campaign_id_from_we_vote_id(candidate_we_vote_id)
 
-        results = position_manager.toggle_on_voter_oppose_for_candidate_campaign(voter_id, candidate_id)
+        results = position_manager.toggle_on_voter_oppose_for_candidate_campaign(voter_id, candidate_id,
+                                                                                 user_agent_string, user_agent_object)
         # toggle_off_voter_support_for_candidate_campaign
         status = "OPPOSING_CANDIDATE " + results['status']
         success = results['success']
@@ -830,7 +831,8 @@ def voter_opposing_save(voter_device_id, candidate_id, candidate_we_vote_id,  # 
         elif positive_value_exists(measure_we_vote_id):
             measure_id = contest_measure_manager.fetch_contest_measure_id_from_we_vote_id(measure_we_vote_id)
 
-        results = position_manager.toggle_on_voter_oppose_for_contest_measure(voter_id, measure_id)
+        results = position_manager.toggle_on_voter_oppose_for_contest_measure(voter_id, measure_id,
+                                                                              user_agent_string, user_agent_object)
         status = "OPPOSING_MEASURE " + results['status']
         success = results['success']
 
@@ -857,7 +859,7 @@ def voter_opposing_save(voter_device_id, candidate_id, candidate_we_vote_id,  # 
 
 
 def voter_stop_opposing_save(voter_device_id, candidate_id, candidate_we_vote_id,  # voterStopOpposingSave
-                             measure_id, measure_we_vote_id):
+                             measure_id, measure_we_vote_id, user_agent_string, user_agent_object):
     # Get voter_id from the voter_device_id so we can know who is supporting/opposing
     results = is_voter_device_id_valid(voter_device_id)
     if not results['success']:
@@ -890,7 +892,8 @@ def voter_stop_opposing_save(voter_device_id, candidate_id, candidate_we_vote_id
         elif positive_value_exists(candidate_we_vote_id):
             candidate_id = candidate_campaign_manager.fetch_candidate_campaign_id_from_we_vote_id(candidate_we_vote_id)
 
-        results = position_manager.toggle_off_voter_oppose_for_candidate_campaign(voter_id, candidate_id)
+        results = position_manager.toggle_off_voter_oppose_for_candidate_campaign(voter_id, candidate_id,
+                                                                                  user_agent_string, user_agent_object)
         status = "STOP_OPPOSING_CANDIDATE " + results['status']
         success = results['success']
 
@@ -910,7 +913,8 @@ def voter_stop_opposing_save(voter_device_id, candidate_id, candidate_we_vote_id
         elif positive_value_exists(measure_we_vote_id):
             measure_id = contest_measure_manager.fetch_contest_measure_id_from_we_vote_id(measure_we_vote_id)
 
-        results = position_manager.toggle_off_voter_oppose_for_contest_measure(voter_id, measure_id)
+        results = position_manager.toggle_off_voter_oppose_for_contest_measure(voter_id, measure_id,
+                                                                               user_agent_string, user_agent_object)
         status = "STOP_OPPOSING_MEASURE" + results['status']
         success = results['success']
 
@@ -937,7 +941,7 @@ def voter_stop_opposing_save(voter_device_id, candidate_id, candidate_we_vote_id
 
 
 def voter_stop_supporting_save(voter_device_id, candidate_id, candidate_we_vote_id,  # voterStopSupportingSave
-                               measure_id, measure_we_vote_id):
+                               measure_id, measure_we_vote_id, user_agent_string, user_agent_object):
     # Get voter_id from the voter_device_id so we can know who is supporting/opposing
     results = is_voter_device_id_valid(voter_device_id)
     if not results['success']:
@@ -970,7 +974,8 @@ def voter_stop_supporting_save(voter_device_id, candidate_id, candidate_we_vote_
         elif positive_value_exists(candidate_we_vote_id):
             candidate_id = candidate_campaign_manager.fetch_candidate_campaign_id_from_we_vote_id(candidate_we_vote_id)
 
-        results = position_manager.toggle_off_voter_support_for_candidate_campaign(voter_id, candidate_id)
+        results = position_manager.toggle_off_voter_support_for_candidate_campaign(voter_id, candidate_id,
+                                                                                   user_agent_string, user_agent_object)
         status = "STOP_SUPPORTING_CANDIDATE " + results['status']
         success = results['success']
 
@@ -990,7 +995,8 @@ def voter_stop_supporting_save(voter_device_id, candidate_id, candidate_we_vote_
         elif positive_value_exists(measure_we_vote_id):
             measure_id = contest_measure_manager.fetch_contest_measure_id_from_we_vote_id(measure_we_vote_id)
 
-        results = position_manager.toggle_off_voter_support_for_contest_measure(voter_id, measure_id)
+        results = position_manager.toggle_off_voter_support_for_contest_measure(voter_id, measure_id,
+                                                                                user_agent_string, user_agent_object)
         status = "STOP_SUPPORTING_MEASURE " + results['status']
         success = results['success']
 
@@ -1018,7 +1024,7 @@ def voter_stop_supporting_save(voter_device_id, candidate_id, candidate_we_vote_
 
 def voter_supporting_save_for_api(voter_device_id,  # voterSupportingSave
                                   candidate_id, candidate_we_vote_id,
-                                  measure_id, measure_we_vote_id):
+                                  measure_id, measure_we_vote_id, user_agent_string, user_agent_object):
     """
     Default to this being a private position
     :param voter_device_id:
@@ -1026,6 +1032,8 @@ def voter_supporting_save_for_api(voter_device_id,  # voterSupportingSave
     :param candidate_we_vote_id:
     :param measure_id:
     :param measure_we_vote_id:
+    :param user_agent_string:
+    :param user_agent_object:
     :return:
     """
     # Get voter_id from the voter_device_id so we can know who is supporting/opposing
@@ -1060,7 +1068,8 @@ def voter_supporting_save_for_api(voter_device_id,  # voterSupportingSave
         elif positive_value_exists(candidate_we_vote_id):
             candidate_id = candidate_campaign_manager.fetch_candidate_campaign_id_from_we_vote_id(candidate_we_vote_id)
 
-        results = position_manager.toggle_on_voter_support_for_candidate_campaign(voter_id, candidate_id)
+        results = position_manager.toggle_on_voter_support_for_candidate_campaign(voter_id, candidate_id,
+                                                                                  user_agent_string, user_agent_object)
         status = "SUPPORTING_CANDIDATE " + results['status']
         success = results['success']
 
@@ -1080,7 +1089,8 @@ def voter_supporting_save_for_api(voter_device_id,  # voterSupportingSave
         elif positive_value_exists(measure_we_vote_id):
             measure_id = contest_measure_manager.fetch_contest_measure_id_from_we_vote_id(measure_we_vote_id)
 
-        results = position_manager.toggle_on_voter_support_for_contest_measure(voter_id, measure_id)
+        results = position_manager.toggle_on_voter_support_for_contest_measure(voter_id, measure_id,
+                                                                               user_agent_string, user_agent_object)
         status = "SUPPORTING_MEASURE " + results['status']
         success = results['success']
 

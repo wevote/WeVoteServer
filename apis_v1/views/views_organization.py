@@ -10,6 +10,7 @@ from apis_v1.controllers import organization_count, organization_follow, organiz
     organization_stop_following
 from config.base import get_environment_variable
 from django.http import HttpResponse
+from django_user_agents.utils import get_user_agent
 from follow.controllers import organization_suggestion_tasks_for_api
 import json
 from organization.controllers import organization_retrieve_for_api, organization_save_for_api, \
@@ -35,26 +36,35 @@ def organization_follow_api_view(request):  # organizationFollow
     organization_we_vote_id = request.GET.get('organization_we_vote_id', '')
     organization_twitter_handle = request.GET.get('organization_twitter_handle', '')
     organization_follow_based_on_issue = request.GET.get('organization_follow_based_on_issue', False)
+    user_agent_string = request.META['HTTP_USER_AGENT']
+    user_agent_object = get_user_agent(request)
     return organization_follow(voter_device_id=voter_device_id, organization_id=organization_id,
                                organization_we_vote_id=organization_we_vote_id,
                                organization_twitter_handle=organization_twitter_handle,
-                               organization_follow_based_on_issue=organization_follow_based_on_issue)
+                               organization_follow_based_on_issue=organization_follow_based_on_issue,
+                               user_agent_string=user_agent_string, user_agent_object=user_agent_object)
 
 
 def organization_stop_following_api_view(request):  # organizationStopFollowing
     voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
     organization_id = request.GET.get('organization_id', 0)
     organization_we_vote_id = request.GET.get('organization_we_vote_id', '')
+    user_agent_string = request.META['HTTP_USER_AGENT']
+    user_agent_object = get_user_agent(request)
     return organization_stop_following(voter_device_id=voter_device_id, organization_id=organization_id,
-                                       organization_we_vote_id=organization_we_vote_id)
+                                       organization_we_vote_id=organization_we_vote_id,
+                                       user_agent_string=user_agent_string, user_agent_object=user_agent_object)
 
 
 def organization_follow_ignore_api_view(request):  # organizationFollowIgnore
     voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
     organization_id = request.GET.get('organization_id', 0)
     organization_we_vote_id = request.GET.get('organization_we_vote_id', '')
+    user_agent_string = request.META['HTTP_USER_AGENT']
+    user_agent_object = get_user_agent(request)
     return organization_follow_ignore(voter_device_id=voter_device_id, organization_id=organization_id,
-                                      organization_we_vote_id=organization_we_vote_id)
+                                      organization_we_vote_id=organization_we_vote_id,
+                                      user_agent_string=user_agent_string, user_agent_object=user_agent_object)
 
 
 def organization_retrieve_view(request):

@@ -1068,7 +1068,8 @@ def voter_guides_followed_retrieve_for_api(voter_device_id, maximum_number_to_re
 
 def voter_follow_all_organizations_followed_by_organization_for_api(voter_device_id,
                                                                     organization_we_vote_id,
-                                                                    maximum_number_to_follow=0):
+                                                                    maximum_number_to_follow=0,
+                                                                    user_agent_string='', user_agent_object=None):
     # voterGuidesFollowedByOrganizationRetrieve
     """
     Retrieve organizations followed by organization_we_vote_id and follow all.
@@ -1076,6 +1077,8 @@ def voter_follow_all_organizations_followed_by_organization_for_api(voter_device
     :param voter_device_id:
     :param organization_we_vote_id:
     :param maximum_number_to_follow:
+    :param user_agent_string:
+    :param user_agent_object:
     :return:
     """
     if not positive_value_exists(voter_device_id):
@@ -1151,7 +1154,7 @@ def voter_follow_all_organizations_followed_by_organization_for_api(voter_device
         for organization_we_vote_id_followed in organization_we_vote_ids_list_need_to_be_followed:
             organization_follow_result = organization_follow_or_unfollow_or_ignore(
                 voter_device_id, organization_id=0, organization_we_vote_id=organization_we_vote_id_followed,
-                follow_kind=FOLLOWING)
+                follow_kind=FOLLOWING, user_agent_string=user_agent_string, user_agent_object=user_agent_object)
             if not organization_follow_result['success']:
                 success = False
 
