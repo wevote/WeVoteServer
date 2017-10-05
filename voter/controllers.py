@@ -25,6 +25,7 @@ from organization.controllers import move_organization_to_another_complete
 from organization.models import OrganizationListManager, OrganizationManager, INDIVIDUAL
 from position.controllers import duplicate_positions_to_another_voter, move_positions_to_another_voter
 from position.models import PositionListManager
+import robot_detection
 from twitter.models import TwitterLinkToOrganization, TwitterLinkToVoter, TwitterUserManager
 from voter_guide.controllers import duplicate_voter_guides
 import wevote_functions.admin
@@ -1176,11 +1177,14 @@ def voter_photo_save_for_api(voter_device_id, facebook_profile_image_url_https, 
     return results
 
 
-def voter_retrieve_for_api(voter_device_id, state_code_from_ip_address=''):  # voterRetrieve
+def voter_retrieve_for_api(voter_device_id, state_code_from_ip_address='',
+                           user_agent_string='', user_agent_object=None):  # voterRetrieve
     """
     Used by the api
     :param voter_device_id:
     :param state_code_from_ip_address:
+    :param user_object_string:
+    :param user_agent_object:
     :return:
     """
     voter_manager = VoterManager()
@@ -1493,22 +1497,36 @@ def voter_retrieve_for_api(voter_device_id, state_code_from_ip_address=''):  # v
             status += repair_results['status']
 
         # TODO DALE: Add if repair_facebook_link_to_voter_caching_now
-
+        is_bot = user_agent_object.is_bot or robot_detection.is_robot(user_agent_string)
         analytics_manager = AnalyticsManager()
         if voter.signed_in_facebook():
             is_signed_in = True
-            analytics_manager.save_action(ACTION_FACEBOOK_AUTHENTICATION_EXISTS,
-                                          voter.we_vote_id, voter_id, is_signed_in)
+            analytics_manager.save_action(ACTION_FACEBOOK_AUTHENTICATION_EXISTS, voter.we_vote_id, voter_id,
+                                          is_signed_in, user_agent_string=user_agent_string, is_bot=is_bot,
+                                          is_mobile=user_agent_object.is_mobile,
+                                          is_desktop=user_agent_object.is_pc,
+                                          is_tablet=user_agent_object.is_tablet)
         if voter.signed_in_google():
             is_signed_in = True
-            analytics_manager.save_action(ACTION_GOOGLE_AUTHENTICATION_EXISTS, voter.we_vote_id, voter_id, is_signed_in)
+            analytics_manager.save_action(ACTION_GOOGLE_AUTHENTICATION_EXISTS, voter.we_vote_id, voter_id,
+                                          is_signed_in, user_agent_string=user_agent_string, is_bot=is_bot,
+                                          is_mobile=user_agent_object.is_mobile,
+                                          is_desktop=user_agent_object.is_pc,
+                                          is_tablet=user_agent_object.is_tablet)
         if voter.signed_in_twitter():
             is_signed_in = True
-            analytics_manager.save_action(ACTION_TWITTER_AUTHENTICATION_EXISTS,
-                                          voter.we_vote_id, voter_id, is_signed_in)
+            analytics_manager.save_action(ACTION_TWITTER_AUTHENTICATION_EXISTS, voter.we_vote_id, voter_id,
+                                          is_signed_in, user_agent_string=user_agent_string, is_bot=is_bot,
+                                          is_mobile=user_agent_object.is_mobile,
+                                          is_desktop=user_agent_object.is_pc,
+                                          is_tablet=user_agent_object.is_tablet)
         if voter.signed_in_with_email():
             is_signed_in = True
-            analytics_manager.save_action(ACTION_EMAIL_AUTHENTICATION_EXISTS, voter.we_vote_id, voter_id, is_signed_in)
+            analytics_manager.save_action(ACTION_EMAIL_AUTHENTICATION_EXISTS, voter.we_vote_id, voter_id,
+                                          is_signed_in, user_agent_string=user_agent_string, is_bot=is_bot,
+                                          is_mobile=user_agent_object.is_mobile,
+                                          is_desktop=user_agent_object.is_pc,
+                                          is_tablet=user_agent_object.is_tablet)
 
         donation_list = donation_history_for_a_voter(voter.we_vote_id)
         json_data = {

@@ -17,6 +17,7 @@ from organization.models import Organization
 from position.controllers import move_positions_to_another_organization, update_position_for_friends_details_from_voter, \
     update_position_entered_details_from_organization
 from position.models import PositionListManager
+import robot_detection
 from twitter.models import TwitterUserManager
 from voter.models import fetch_voter_id_from_voter_device_link, VoterManager, Voter
 from voter_guide.models import VoterGuide, VoterGuideManager
@@ -248,7 +249,8 @@ def transfer_to_organization_if_missing(from_organization, to_organization, fiel
 
 def organization_follow_or_unfollow_or_ignore(voter_device_id, organization_id, organization_we_vote_id,
                                               follow_kind=FOLLOWING,
-                                              organization_follow_based_on_issue=None):
+                                              organization_follow_based_on_issue=None,
+                                              user_agent_string='', user_agent_object=None):
     if organization_follow_based_on_issue is None:
         organization_follow_based_on_issue = False
 
@@ -304,7 +306,7 @@ def organization_follow_or_unfollow_or_ignore(voter_device_id, organization_id, 
             'voter_linked_organization_we_vote_id': voter_linked_organization_we_vote_id,
         }
         return json_data
-
+    is_bot = user_agent_object.is_bot or robot_detection.is_robot(user_agent_string)
     analytics_manager = AnalyticsManager()
     follow_organization_manager = FollowOrganizationManager()
     if follow_kind == FOLLOWING:
@@ -319,7 +321,9 @@ def organization_follow_or_unfollow_or_ignore(voter_device_id, organization_id, 
             organization_we_vote_id = follow_organization.organization_we_vote_id
             analytics_results = analytics_manager.save_action(
                 ACTION_ORGANIZATION_FOLLOW, voter_we_vote_id, voter_id, is_signed_in, state_code,
-                organization_we_vote_id, organization_id)
+                organization_we_vote_id, organization_id, user_agent_string=user_agent_string, is_bot=is_bot,
+                is_mobile=user_agent_object.is_mobile, is_desktop=user_agent_object.is_pc,
+                is_tablet=user_agent_object.is_tablet)
         else:
             status = results['status']
             success = False
@@ -336,7 +340,9 @@ def organization_follow_or_unfollow_or_ignore(voter_device_id, organization_id, 
             organization_we_vote_id = follow_organization.organization_we_vote_id
             analytics_results = analytics_manager.save_action(
                 ACTION_ORGANIZATION_FOLLOW_IGNORE, voter_we_vote_id, voter_id, is_signed_in, state_code,
-                organization_we_vote_id, organization_id)
+                organization_we_vote_id, organization_id, user_agent_string=user_agent_string, is_bot=is_bot,
+                is_mobile=user_agent_object.is_mobile, is_desktop=user_agent_object.is_pc,
+                is_tablet=user_agent_object.is_tablet)
         else:
             status = results['status']
             success = False
@@ -352,7 +358,9 @@ def organization_follow_or_unfollow_or_ignore(voter_device_id, organization_id, 
             organization_we_vote_id = follow_organization.organization_we_vote_id
             analytics_results = analytics_manager.save_action(
                 ACTION_ORGANIZATION_STOP_FOLLOWING, voter_we_vote_id, voter_id, is_signed_in, state_code,
-                organization_we_vote_id, organization_id)
+                organization_we_vote_id, organization_id, user_agent_string=user_agent_string, is_bot=is_bot,
+                is_mobile=user_agent_object.is_mobile, is_desktop=user_agent_object.is_pc,
+                is_tablet=user_agent_object.is_tablet)
         else:
             status = results['status']
             success = False

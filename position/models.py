@@ -17,6 +17,7 @@ from friend.models import FriendManager
 from measure.models import ContestMeasure, ContestMeasureList, ContestMeasureManager
 from office.models import ContestOfficeManager
 from organization.models import Organization, OrganizationManager
+import robot_detection
 from twitter.models import TwitterUser
 from voter.models import fetch_voter_id_from_voter_we_vote_id, fetch_voter_we_vote_id_from_voter_id, Voter, VoterManager
 from voter_guide.models import VoterGuideManager
@@ -3879,31 +3880,36 @@ class PositionManager(models.Model):
             return True
         return False
 
-    def toggle_on_voter_support_for_candidate_campaign(self, voter_id, candidate_campaign_id):
+    def toggle_on_voter_support_for_candidate_campaign(self, voter_id, candidate_campaign_id, user_agent_string,
+                                                       user_agent_object):
         stance = SUPPORT
         position_manager = PositionManager()
         return position_manager.toggle_on_voter_position_for_candidate_campaign(
-            voter_id, candidate_campaign_id, stance)
+            voter_id, candidate_campaign_id, stance, user_agent_string, user_agent_object)
 
-    def toggle_off_voter_support_for_candidate_campaign(self, voter_id, candidate_campaign_id):
+    def toggle_off_voter_support_for_candidate_campaign(self, voter_id, candidate_campaign_id, user_agent_string,
+                                                        user_agent_object):
         stance = NO_STANCE
         position_manager = PositionManager()
         return position_manager.toggle_on_voter_position_for_candidate_campaign(
-            voter_id, candidate_campaign_id, stance)
+            voter_id, candidate_campaign_id, stance, user_agent_string, user_agent_object)
 
-    def toggle_on_voter_oppose_for_candidate_campaign(self, voter_id, candidate_campaign_id):
+    def toggle_on_voter_oppose_for_candidate_campaign(self, voter_id, candidate_campaign_id, user_agent_string,
+                                                      user_agent_object):
         stance = OPPOSE
         position_manager = PositionManager()
         return position_manager.toggle_on_voter_position_for_candidate_campaign(
-            voter_id, candidate_campaign_id, stance)
+            voter_id, candidate_campaign_id, stance, user_agent_string, user_agent_object)
 
-    def toggle_off_voter_oppose_for_candidate_campaign(self, voter_id, candidate_campaign_id):
+    def toggle_off_voter_oppose_for_candidate_campaign(self, voter_id, candidate_campaign_id, user_agent_string,
+                                                       user_agent_object):
         stance = NO_STANCE
         position_manager = PositionManager()
         return position_manager.toggle_on_voter_position_for_candidate_campaign(
-            voter_id, candidate_campaign_id, stance)
+            voter_id, candidate_campaign_id, stance, user_agent_string, user_agent_object)
 
-    def toggle_on_voter_position_for_candidate_campaign(self, voter_id, candidate_campaign_id, stance):
+    def toggle_on_voter_position_for_candidate_campaign(self, voter_id, candidate_campaign_id, stance,
+                                                        user_agent_string, user_agent_object):
         # Does a position from this voter already exist?
         position_manager = PositionManager()
         duplicates_found = False
@@ -3950,10 +3956,11 @@ class PositionManager(models.Model):
 
         return position_manager.toggle_voter_position(voter_id, voter_position_found, voter_position_on_stage,
                                                       stance, candidate_campaign_id, contest_measure_id,
-                                                      is_public_position)
+                                                      is_public_position, user_agent_string, user_agent_object)
 
     def toggle_voter_position(self, voter_id, voter_position_found, voter_position_on_stage, stance,
-                              candidate_campaign_id, contest_measure_id, is_public_position):
+                              candidate_campaign_id, contest_measure_id, is_public_position, user_agent_string,
+                              user_agent_object):
         voter_position_on_stage_found = False
         position_we_vote_id = ''
         voter_we_vote_id = ''
@@ -4136,11 +4143,14 @@ class PositionManager(models.Model):
                 ballot_item_we_vote_id = contest_measure_we_vote_id
             else:
                 ballot_item_we_vote_id = ""
+            is_bot = user_agent_object.is_bot or robot_detection.is_robot (user_agent_string)
             analytics_manager = AnalyticsManager()
             analytics_results = analytics_manager.save_action(
                 ACTION_POSITION_TAKEN, voter_we_vote_id, voter_id, is_signed_in, state_code,
                 organization_we_vote_id_temp, organization_id_temp,
-                google_civic_election_id, ballot_item_we_vote_id)
+                google_civic_election_id, user_agent_string=user_agent_string, is_bot=is_bot,
+                is_mobile=user_agent_object.is_mobile, is_desktop=user_agent_object.is_pc,
+                is_tablet=user_agent_object.is_tablet, ballot_item_we_vote_id=ballot_item_we_vote_id)
 
         results = {
             'status':               status,
@@ -4150,31 +4160,36 @@ class PositionManager(models.Model):
         }
         return results
 
-    def toggle_on_voter_support_for_contest_measure(self, voter_id, contest_measure_id):
+    def toggle_on_voter_support_for_contest_measure(self, voter_id, contest_measure_id,
+                                                    user_agent_string, user_agent_object):
         stance = SUPPORT
         position_manager = PositionManager()
         return position_manager.toggle_on_voter_position_for_contest_measure(
-            voter_id, contest_measure_id, stance)
+            voter_id, contest_measure_id, stance, user_agent_string, user_agent_object)
 
-    def toggle_off_voter_support_for_contest_measure(self, voter_id, contest_measure_id):
+    def toggle_off_voter_support_for_contest_measure(self, voter_id, contest_measure_id,
+                                                     user_agent_string, user_agent_object):
         stance = NO_STANCE
         position_manager = PositionManager()
         return position_manager.toggle_on_voter_position_for_contest_measure(
-            voter_id, contest_measure_id, stance)
+            voter_id, contest_measure_id, stance, user_agent_string, user_agent_object)
 
-    def toggle_on_voter_oppose_for_contest_measure(self, voter_id, contest_measure_id):
+    def toggle_on_voter_oppose_for_contest_measure(self, voter_id, contest_measure_id,
+                                                   user_agent_string, user_agent_object):
         stance = OPPOSE
         position_manager = PositionManager()
         return position_manager.toggle_on_voter_position_for_contest_measure(
-            voter_id, contest_measure_id, stance)
+            voter_id, contest_measure_id, stance, user_agent_string, user_agent_object)
 
-    def toggle_off_voter_oppose_for_contest_measure(self, voter_id, contest_measure_id):
+    def toggle_off_voter_oppose_for_contest_measure(self, voter_id, contest_measure_id,
+                                                    user_agent_string, user_agent_object):
         stance = NO_STANCE
         position_manager = PositionManager()
         return position_manager.toggle_on_voter_position_for_contest_measure(
-            voter_id, contest_measure_id, stance)
+            voter_id, contest_measure_id, stance, user_agent_string, user_agent_object)
 
-    def toggle_on_voter_position_for_contest_measure(self, voter_id, contest_measure_id, stance):
+    def toggle_on_voter_position_for_contest_measure(self, voter_id, contest_measure_id, stance,
+                                                     user_agent_string, user_agent_object):
         # Does a position from this voter already exist?
         position_manager = PositionManager()
         duplicates_found = False
@@ -4221,7 +4236,7 @@ class PositionManager(models.Model):
 
         return position_manager.toggle_voter_position(voter_id, voter_position_found, voter_position_on_stage,
                                                       stance, candidate_campaign_id, contest_measure_id,
-                                                      is_public_position)
+                                                      is_public_position, user_agent_string, user_agent_object)
 
     def update_or_create_position_comment(self, position_we_vote_id, voter_id, voter_we_vote_id,
                                           office_we_vote_id, candidate_we_vote_id, measure_we_vote_id,

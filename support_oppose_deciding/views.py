@@ -3,6 +3,7 @@
 # -*- coding: UTF-8 -*-
 
 from django.http import JsonResponse
+from django_user_agents.utils import get_user_agent
 from position.models import PositionManager
 from voter.models import fetch_voter_id_from_voter_device_link
 import wevote_functions.admin
@@ -16,11 +17,14 @@ def voter_supporting_candidate_campaign_view(request, candidate_campaign_id):
     logger.debug("voter_supporting_candidate_campaign_view {candidate_campaign_id}".format(
         candidate_campaign_id=candidate_campaign_id
     ))
+    user_agent_string = request.META['HTTP_USER_AGENT']
+    user_agent_object = get_user_agent(request)
     voter_api_device_id = get_voter_api_device_id(request)
     voter_id = fetch_voter_id_from_voter_device_link(voter_api_device_id)
 
     position_manager = PositionManager()
-    results = position_manager.toggle_on_voter_support_for_candidate_campaign(voter_id, candidate_campaign_id)
+    results = position_manager.toggle_on_voter_support_for_candidate_campaign(voter_id, candidate_campaign_id,
+                                                                              user_agent_string, user_agent_object)
     if results['success']:
         return JsonResponse({0: "success"})
     else:
@@ -31,11 +35,14 @@ def voter_stop_supporting_candidate_campaign_view(request, candidate_campaign_id
     logger.debug("voter_stop_supporting_candidate_campaign_view {candidate_campaign_id}".format(
         candidate_campaign_id=candidate_campaign_id
     ))
+    user_agent_string = request.META['HTTP_USER_AGENT']
+    user_agent_object = get_user_agent(request)
     voter_api_device_id = get_voter_api_device_id(request)
     voter_id = fetch_voter_id_from_voter_device_link(voter_api_device_id)
 
     position_manager = PositionManager()
-    results = position_manager.toggle_off_voter_support_for_candidate_campaign(voter_id, candidate_campaign_id)
+    results = position_manager.toggle_off_voter_support_for_candidate_campaign(voter_id, candidate_campaign_id,
+                                                                               user_agent_string, user_agent_object)
     if results['success']:
         return JsonResponse({0: "success"})
     else:
@@ -46,11 +53,14 @@ def voter_opposing_candidate_campaign_view(request, candidate_campaign_id):
     logger.debug("voter_opposing_candidate_campaign_view {candidate_campaign_id}".format(
         candidate_campaign_id=candidate_campaign_id
     ))
+    user_agent_string = request.META['HTTP_USER_AGENT']
+    user_agent_object = get_user_agent(request)
     voter_api_device_id = get_voter_api_device_id(request)
     voter_id = fetch_voter_id_from_voter_device_link(voter_api_device_id)
 
     position_manager = PositionManager()
-    results = position_manager.toggle_on_voter_oppose_for_candidate_campaign(voter_id, candidate_campaign_id)
+    results = position_manager.toggle_on_voter_oppose_for_candidate_campaign(voter_id, candidate_campaign_id,
+                                                                             user_agent_string, user_agent_object)
     if results['success']:
         return JsonResponse({0: "success"})
     else:
@@ -61,11 +71,14 @@ def voter_stop_opposing_candidate_campaign_view(request, candidate_campaign_id):
     logger.debug("voter_stop_opposing_candidate_campaign_view {candidate_campaign_id}".format(
         candidate_campaign_id=candidate_campaign_id
     ))
+    user_agent_string = request.META['HTTP_USER_AGENT']
+    user_agent_object = get_user_agent(request)
     voter_api_device_id = get_voter_api_device_id(request)
     voter_id = fetch_voter_id_from_voter_device_link(voter_api_device_id)
 
     position_manager = PositionManager()
-    results = position_manager.toggle_off_voter_oppose_for_candidate_campaign(voter_id, candidate_campaign_id)
+    results = position_manager.toggle_off_voter_oppose_for_candidate_campaign(voter_id, candidate_campaign_id,
+                                                                              user_agent_string, user_agent_object)
     if results['success']:
         return JsonResponse({0: "success"})
     else:
