@@ -183,8 +183,8 @@ def augment_one_voter_analytics_action_entries_without_election_id(voter_we_vote
 
 
 def save_analytics_action_for_api(action_constant, voter_we_vote_id, voter_id, is_signed_in, state_code,
-                                  organization_we_vote_id, organization_id,
-                                  google_civic_election_id, user_agent_string, is_bot, is_mobile, is_desktop, is_tablet,
+                                  organization_we_vote_id, organization_id, google_civic_election_id,
+                                  user_agent_string, is_bot, is_mobile, is_desktop, is_tablet,
                                   ballot_item_we_vote_id=None, voter_device_id=None):  # saveAnalyticsAction
     analytics_manager = AnalyticsManager()
     success = True

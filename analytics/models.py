@@ -480,8 +480,9 @@ class AnalyticsManager(models.Model):
 
     def create_action_type1(
             self, action_constant, voter_we_vote_id, voter_id, is_signed_in, state_code,
-            organization_we_vote_id, organization_id, google_civic_election_id, user_agent_string, is_bot,
-            is_mobile, is_desktop, is_tablet, ballot_item_we_vote_id="", voter_device_id=None):
+            organization_we_vote_id, organization_id, google_civic_election_id,
+            user_agent_string, is_bot, is_mobile, is_desktop, is_tablet,
+            ballot_item_we_vote_id="", voter_device_id=None):
         """
         Create AnalyticsAction data
         """
@@ -532,7 +533,7 @@ class AnalyticsManager(models.Model):
             status += 'ACTION_TYPE1_SAVED '
         except Exception as e:
             success = False
-            status += 'COULD_NOT_SAVE_ACTION_TYPE1'
+            status += 'COULD_NOT_SAVE_ACTION_TYPE1 '
 
         results = {
             'success':      success,
@@ -543,8 +544,8 @@ class AnalyticsManager(models.Model):
         return results
 
     def create_action_type2(
-            self, action_constant, voter_we_vote_id, voter_id, is_signed_in, state_code,
-            google_civic_election_id, user_agent_string, is_bot, is_mobile, is_desktop, is_tablet,
+            self, action_constant, voter_we_vote_id, voter_id, is_signed_in, state_code, google_civic_election_id,
+            user_agent_string, is_bot, is_mobile, is_desktop, is_tablet,
             ballot_item_we_vote_id, voter_device_id=None):
         """
         Create AnalyticsAction data
@@ -591,7 +592,7 @@ class AnalyticsManager(models.Model):
             status += 'ACTION_TYPE2_SAVED '
         except Exception as e:
             success = False
-            status += 'COULD_NOT_SAVE_ACTION_TYPE2'
+            status += 'COULD_NOT_SAVE_ACTION_TYPE2 '
 
         results = {
             'success':      success,
@@ -710,9 +711,9 @@ class AnalyticsManager(models.Model):
         return results
 
     def save_action(self, action_constant, voter_we_vote_id, voter_id, is_signed_in=False, state_code="",
-                    organization_we_vote_id="", organization_id=0,
-                    google_civic_election_id=0, user_agent_string="", is_bot=False, is_mobile=False, is_desktop=False,
-                    is_tablet=False, ballot_item_we_vote_id="", voter_device_id=None):
+                    organization_we_vote_id="", organization_id=0, google_civic_election_id=0,
+                    user_agent_string="", is_bot=False, is_mobile=False, is_desktop=False, is_tablet=False,
+                    ballot_item_we_vote_id="", voter_device_id=None):
         # If a voter_device_id is passed in, it is because this action may be coming from
         #  https://analytics.wevoteusa.org and hasn't been authenticated yet
         # Confirm that we have a valid voter_device_id. If not, store the action with the voter_device_id so we can
@@ -730,8 +731,9 @@ class AnalyticsManager(models.Model):
                                             ballot_item_we_vote_id, voter_device_id)
         else:
             return self.create_action_type2(action_constant, voter_we_vote_id, voter_id, is_signed_in, state_code,
-                                            google_civic_election_id, user_agent_string, is_bot, is_mobile, is_desktop,
-                                            is_tablet, ballot_item_we_vote_id, voter_device_id)
+                                            google_civic_election_id,
+                                            user_agent_string, is_bot, is_mobile, is_desktop, is_tablet,
+                                            ballot_item_we_vote_id, voter_device_id)
 
     def save_organization_daily_metrics_values(self, organization_daily_metrics_values):
         success = False
