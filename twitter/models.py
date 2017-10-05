@@ -100,16 +100,18 @@ class TwitterLinkPossibility(models.Model):
     These are Twitter Accounts that might match a candidate or organization
     """
     candidate_campaign_we_vote_id = models.CharField(verbose_name="candidate we vote id", max_length=255, unique=False)
-    twitter_id = models.BigIntegerField(verbose_name="twitter big integer id", null=False, unique=False)
+
     search_term_used = models.CharField(verbose_name="", max_length=255, unique=False)
     not_a_match = models.BooleanField(default=False, verbose_name="")
     likelihood_percentage = models.IntegerField(verbose_name="", null=True, unique=False)
+
+    twitter_id = models.BigIntegerField(verbose_name="twitter big integer id", null=True, unique=False)
     twitter_handle = models.CharField(verbose_name='twitter screen name / handle',
-                                      max_length=255, null=False, unique=True)
+                                      max_length=255, null=True, unique=False)
     twitter_profile_image_url_https = models.URLField(verbose_name='url of logo from twitter', blank=True, null=True)
     twitter_description = models.CharField(verbose_name="Text description of this organization from twitter.",
                                            max_length=255, null=True, blank=True)
-    twitter_url = models.URLField(blank=True, null=True, verbose_name='url of user\'s website')
+    twitter_url = models.URLField(blank=True, null=True, verbose_name='url of website from twitter account')
     twitter_location = models.CharField(verbose_name="location from twitter", max_length=255, null=True, blank=True)
     twitter_followers_count = models.IntegerField(verbose_name="number of twitter followers",
                                                   null=False, blank=True, default=0)

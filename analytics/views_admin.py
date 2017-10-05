@@ -187,6 +187,7 @@ def analytics_action_list_view(request, voter_we_vote_id=False, organization_we_
     google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
     state_code = request.GET.get('state_code', '')
     analytics_action_search = request.GET.get('analytics_action_search', '')
+    show_user_agent = request.GET.get('show_user_agent', '')
 
     analytics_action_list = []
 
@@ -244,6 +245,7 @@ def analytics_action_list_view(request, voter_we_vote_id=False, organization_we_
         'state_code':               state_code,
         'organization_we_vote_id':  organization_we_vote_id,
         'voter_we_vote_id':         voter_we_vote_id,
+        'show_user_agent':          show_user_agent,
     }
     return render(request, 'analytics/analytics_action_list.html', template_values)
 

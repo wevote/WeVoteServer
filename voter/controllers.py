@@ -1183,7 +1183,7 @@ def voter_retrieve_for_api(voter_device_id, state_code_from_ip_address='',
     Used by the api
     :param voter_device_id:
     :param state_code_from_ip_address:
-    :param user_object_string:
+    :param user_agent_string:
     :param user_agent_object:
     :return:
     """

@@ -29,6 +29,10 @@
     {% else %}
         Show raw AnalyticsAction entries.
     {% endif %}
+    {% if show_user_agent != '1' %}
+        <a href="{% url 'analytics:analytics_action_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}&show_user_agent=1">Show user agent data</a>.
+    {% endif %}
+
     </p>
 
 {% if analytics_action_search %}
@@ -48,18 +52,21 @@
     <form name="analytics_form" method="get" action="{% url 'analytics:analytics_action_list' voter_we_vote_id %}">
         {% csrf_token %}
         <input type="text" name="analytics_action_search" id="analytics_action_search_id" value="{{ analytics_action_search }}" />
+        <input type="text" name="show_user_agent" value="{{ show_user_agent }}" />
         <input type="submit" value="Search" />
     </form>
 {% elif organization_we_vote_id %}
     <form name="analytics_form" method="get" action="{% url 'analytics:analytics_action_list' organization_we_vote_id %}">
         {% csrf_token %}
         <input type="text" name="analytics_action_search" id="analytics_action_search_id" value="{{ analytics_action_search }}" />
+        <input type="text" name="show_user_agent" value="{{ show_user_agent }}" />
         <input type="submit" value="Search" />
     </form>
 {% else %}
     <form name="analytics_form" method="get" action="{% url 'analytics:analytics_action_list' %}">
         {% csrf_token %}
         <input type="text" name="analytics_action_search" id="analytics_action_search_id" value="{{ analytics_action_search }}" />
+        <input type="text" name="show_user_agent" value="{{ show_user_agent }}" />
         <input type="submit" value="Search" />
     </form>
 {% endif %}
@@ -79,11 +86,13 @@
         <th>state code</th>
         <th>google civic election id</th>
         <th>first visit today</th>
-        <th>User Agent</th>
         <th>Is Bot?</th>
-        <th>Is Mobile?</th>
-        <th>Is Desktop?</th>
-        <th>Is Tablet?</th>
+        <th>Device</th>
+        {% if show_user_agent %}
+        <th>User Agent
+            (<a href="{% url 'analytics:analytics_action_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">hide</a>)
+        </th>
+        {% endif %}
     </tr>
 {% endif %}
     <tr>
@@ -117,11 +126,13 @@
         <td>{{ one_row.state_code|default_if_none:"" }}</td>
         <td>{{ one_row.google_civic_election_id|default_if_none:"n/a" }}</td>
         <td>{% if one_row.first_visit_today %}first{% endif %}</td>
+        <td>{% if one_row.is_bot %}Y{% endif %}</td>
+        <td>{% if one_row.is_mobile %}Mobile {% endif %}
+            {% if one_row.is_desktop %}Desktop {% endif %}
+            {% if one_row.is_tablet %}Tablet {% endif %}</td>
+        {% if show_user_agent %}
         <td>{{ one_row.user_agent|default_if_none:"" }}</td>
-        <td>{{ one_row.is_bot }}</td>
-        <td>{{ one_row.is_mobile }}</td>
-        <td>{{ one_row.is_desktop }}</td>
-        <td>{{ one_row.is_tablet }}</td>
+        {% endif %}
     </tr>
 {% endfor %}
 {% if not analytics_action_list %}
