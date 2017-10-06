@@ -4,7 +4,7 @@
 
 from candidate.models import CandidateCampaign
 from config.base import get_environment_variable
-from datetime import date, datetime, time
+from datetime import date, datetime
 from django.db import models
 from django.db.models import F, Q, Count
 from election.models import ElectionManager
@@ -1560,6 +1560,9 @@ class VoterBallotSaved(models.Model):
     ballot_returned_we_vote_id = models.CharField(
         verbose_name="ballot_returned we_vote_id this was copied from",
         max_length=255, default=None, null=True, blank=True, unique=False)
+    ballot_location_display_name = models.CharField(
+        verbose_name="the name of the ballot the voter is looking at",
+        max_length=255, default=None, null=True, blank=True, unique=False)
     ballot_location_shortcut = models.CharField(
         verbose_name="the url string used to find specific ballot",
         max_length=255, default=None, null=True, blank=True, unique=False)
@@ -1820,6 +1823,7 @@ class VoterBallotSavedManager(models.Model):
             is_from_substituted_address=False,
             is_from_test_ballot=False,
             polling_location_we_vote_id_source='',
+            ballot_location_display_name=None,
             ballot_returned_we_vote_id=None,
             ballot_location_shortcut=''):
         # We assume that we tried to find an entry for this voter
@@ -1838,6 +1842,7 @@ class VoterBallotSavedManager(models.Model):
                 'substituted_address_nearby': substituted_address_nearby,
                 'is_from_substituted_address': is_from_substituted_address,
                 'is_from_test_ballot': is_from_test_ballot,
+                'ballot_location_display_name': ballot_location_display_name,
                 'ballot_returned_we_vote_id': ballot_returned_we_vote_id,
                 'ballot_location_shortcut': ballot_location_shortcut,
                 'polling_location_we_vote_id_source': polling_location_we_vote_id_source,
@@ -1927,9 +1932,10 @@ def copy_existing_ballot_items_from_stored_ballot(voter_id, text_for_map_search,
                 'text_for_map_search':                  text_for_map_search,
                 'substituted_address_nearby':           '',
                 'ballot_returned_copied':               False,
+                'polling_location_we_vote_id_source':   '',
+                'ballot_location_display_name':        '',
                 'ballot_returned_we_vote_id':           ballot_returned_we_vote_id,
                 'ballot_location_shortcut':             ballot_location_shortcut,
-                'polling_location_we_vote_id_source':   '',
                 'status':                               status,
             }
             return error_results
@@ -1951,6 +1957,7 @@ def copy_existing_ballot_items_from_stored_ballot(voter_id, text_for_map_search,
                 'text_for_map_search':                  text_for_map_search,
                 'substituted_address_nearby':           '',
                 'ballot_returned_copied':               False,
+                'ballot_location_display_name':        '',
                 'ballot_returned_we_vote_id':           ballot_returned_we_vote_id,
                 'ballot_location_shortcut':             ballot_location_shortcut,
                 'polling_location_we_vote_id_source':   '',
@@ -1975,6 +1982,7 @@ def copy_existing_ballot_items_from_stored_ballot(voter_id, text_for_map_search,
                 'text_for_map_search':                  text_for_map_search,
                 'substituted_address_nearby':           '',
                 'ballot_returned_copied':               False,
+                'ballot_location_display_name':        '',
                 'ballot_returned_we_vote_id':           ballot_returned_we_vote_id,
                 'ballot_location_shortcut':             ballot_location_shortcut,
                 'polling_location_we_vote_id_source':   '',
@@ -2009,6 +2017,7 @@ def copy_existing_ballot_items_from_stored_ballot(voter_id, text_for_map_search,
                 'text_for_map_search':                  text_for_map_search,
                 'substituted_address_nearby':           '',
                 'ballot_returned_copied':               False,
+                'ballot_location_display_name':         '',
                 'ballot_returned_we_vote_id':           ballot_returned_we_vote_id,
                 'ballot_location_shortcut':             ballot_location_shortcut,
                 'polling_location_we_vote_id_source':   '',
@@ -2027,6 +2036,7 @@ def copy_existing_ballot_items_from_stored_ballot(voter_id, text_for_map_search,
         'text_for_map_search':                  ballot_returned.text_for_map_search,
         'substituted_address_nearby':           ballot_returned.text_for_map_search,
         'ballot_returned_copied':               True,
+        'ballot_location_display_name':         ballot_returned.ballot_location_display_name,
         'ballot_returned_we_vote_id':           ballot_returned.we_vote_id,
         'ballot_location_shortcut':             ballot_returned.ballot_location_shortcut if
         ballot_returned.ballot_location_shortcut else '',

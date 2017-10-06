@@ -2161,6 +2161,9 @@ class VoterAddress(models.Model):
     # The last election day this address was used to retrieve a ballot
     election_day_text = models.CharField(verbose_name="election day", max_length=255, null=True, blank=True)
 
+    ballot_location_display_name = models.CharField(
+        verbose_name="display name of ballot voter is viewing", max_length=255, default=None, null=True,
+        blank=True, unique=False)
     ballot_returned_we_vote_id = models.CharField(
         verbose_name="we vote id of the ballot", max_length=255, default=None, null=True,
         blank=True, unique=False)

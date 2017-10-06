@@ -34,9 +34,11 @@ def elections_retrieve_doc_template_values(url_root):
                    '    "google_civic_election_id": integer,\n' \
                    '    "election_name": string,\n' \
                    '    "election_day_text": string,\n' \
+                   '    "election_is_upcoming": boolean,\n' \
                    '    "get_election_state": string,\n' \
                    '    "state_code": string,\n' \
                    '    "ocd_division_id": string,\n' \
+                   '    "ballot_returned_count": integer,\n' \
                    '    "ballot_location_list": list\n' \
                    '    [\n' \
                    '      "ballot_location_display_name": string,\n' \

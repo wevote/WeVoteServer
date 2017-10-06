@@ -104,6 +104,7 @@ def voter_address_retrieve_view(request):  # voterAddressRetrieve
             'address_type': voter_address_retrieve_results['address_type'],
             'text_for_map_search': voter_address_retrieve_results['text_for_map_search'],
             'google_civic_election_id': google_civic_election_id,
+            'ballot_location_display_name': voter_address_retrieve_results['ballot_location_display_name'],
             'ballot_returned_we_vote_id': voter_address_retrieve_results['ballot_returned_we_vote_id'],
             'latitude': voter_address_retrieve_results['latitude'],
             'longitude': voter_address_retrieve_results['longitude'],
@@ -131,6 +132,7 @@ def voter_address_retrieve_view(request):  # voterAddressRetrieve
             'address_type': '',
             'text_for_map_search': '',
             'google_civic_election_id': 0,
+            'ballot_location_display_name': '',
             'ballot_returned_we_vote_id': '',
             'latitude': '',
             'longitude': '',
@@ -229,6 +231,7 @@ def voter_address_retrieve_view(request):  # voterAddressRetrieve
                     'address_type': voter_address_retrieve_results['address_type'],
                     'text_for_map_search': voter_address_retrieve_results['text_for_map_search'],
                     'google_civic_election_id': google_civic_election_id,
+                    'ballot_location_display_name': voter_address_retrieve_results['ballot_location_display_name'],
                     'ballot_returned_we_vote_id': voter_address_retrieve_results['ballot_returned_we_vote_id'],
                     'latitude': voter_address_retrieve_results['latitude'],
                     'longitude': voter_address_retrieve_results['longitude'],
@@ -250,6 +253,7 @@ def voter_address_retrieve_view(request):  # voterAddressRetrieve
                     'address_type': '',
                     'text_for_map_search': '',
                     'google_civic_election_id': google_civic_election_id,
+                    'ballot_location_display_name': '',
                     'ballot_returned_we_vote_id': '',
                     'latitude': '',
                     'longitude': '',
@@ -274,6 +278,7 @@ def voter_address_retrieve_view(request):  # voterAddressRetrieve
                 'address_type': '',
                 'text_for_map_search': '',
                 'google_civic_election_id': 0,
+                'ballot_location_display_name': '',
                 'ballot_returned_we_vote_id': '',
                 'latitude': '',
                 'longitude': '',
@@ -298,6 +303,7 @@ def voter_address_save_view(request):  # voterAddressSave
     """
     google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
     simple_save = request.GET.get('simple_save', False)
+    ballot_location_display_name = ''
     ballot_returned_we_vote_id = ''
 
     voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
@@ -395,11 +401,15 @@ def voter_address_save_view(request):  # voterAddressSave
             # Leave google_civic_election_id as it was at the top of this function
             pass
 
+        if google_retrieve_results['ballot_location_display_name']:
+            ballot_location_display_name = google_retrieve_results['ballot_location_display_name']
+
         if google_retrieve_results['ballot_returned_we_vote_id']:
             ballot_returned_we_vote_id = google_retrieve_results['ballot_returned_we_vote_id']
 
         # At this point proceed to update google_civic_election_id whether it is a positive integer or zero
         voter_address.google_civic_election_id = google_civic_election_id
+        voter_address.ballot_location_display_name = ballot_location_display_name
         voter_address.ballot_returned_we_vote_id = ballot_returned_we_vote_id
         voter_address_update_results = voter_address_manager.update_existing_voter_address_object(voter_address)
 
@@ -486,6 +496,7 @@ def voter_ballot_items_retrieve_from_google_civic_view(request):  # voterBallotI
                 is_from_substituted_address,
                 is_from_test_address,
                 polling_location_we_vote_id_source,
+                results['ballot_location_display_name'],
                 results['ballot_returned_we_vote_id'],
             )
 

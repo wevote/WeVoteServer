@@ -382,7 +382,9 @@ def election_edit_process_view(request):
                 # If here, this is a We Vote created election
 
             # Update
-            if election_name is not False:
+            if election_name is False:
+                election_name = election_on_stage.election_name  # Update election_name for the message below
+            else:
                 election_on_stage.election_name = election_name
                 election_changed = True
 

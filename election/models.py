@@ -2,11 +2,13 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
+from datetime import date, datetime, time
 from django.db import models
 from django.db.models import Q
 from exception.models import handle_record_found_more_than_one_exception
 import wevote_functions.admin
-from wevote_functions.functions import convert_to_int, extract_state_from_ocd_division_id, positive_value_exists
+from wevote_functions.functions import convert_date_to_date_as_integer, convert_to_int, \
+    extract_state_from_ocd_division_id, positive_value_exists
 
 
 TIME_SPAN_LIST = [
@@ -52,6 +54,17 @@ class Election(models.Model):
     # entering elections manually.
     state_code = models.CharField(verbose_name="state code for the election", max_length=2, null=True, blank=True)
     include_in_list_for_voters = models.BooleanField(default=False)
+
+    def election_is_upcoming(self):
+        if not positive_value_exists(self.election_day_text):
+            return False
+        today = datetime.now().date()
+        today_date_as_integer = convert_date_to_date_as_integer(today)
+        election_date_as_simple_string = self.election_day_text.replace("-", "")
+        this_election_date_as_integer = convert_to_int(election_date_as_simple_string)
+        if this_election_date_as_integer > today_date_as_integer:
+            return True
+        return False
 
     def get_election_state(self):
         if positive_value_exists(self.state_code):

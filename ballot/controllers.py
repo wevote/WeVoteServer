@@ -578,8 +578,9 @@ def voter_ballot_items_retrieve_for_api(
             'ballot_caveat':                        '',
             'is_from_substituted_address':          False,
             'is_from_test_ballot':                  False,
-            'ballot_returned_we_vote_id':           ballot_returned_we_vote_id,
+            'ballot_location_display_name':         '',
             'ballot_location_shortcut':             ballot_location_shortcut,
+            'ballot_returned_we_vote_id':           ballot_returned_we_vote_id,
             'polling_location_we_vote_id_source':   '',
         }
         return error_json_data
@@ -601,8 +602,9 @@ def voter_ballot_items_retrieve_for_api(
             'ballot_caveat':                '',
             'is_from_substituted_address':  False,
             'is_from_test_ballot':          False,
-            'ballot_returned_we_vote_id':           ballot_returned_we_vote_id,
+            'ballot_location_display_name':         '',
             'ballot_location_shortcut':             ballot_location_shortcut,
+            'ballot_returned_we_vote_id':           ballot_returned_we_vote_id,
             'polling_location_we_vote_id_source':   '',
         }
         return error_json_data
@@ -625,6 +627,7 @@ def voter_ballot_items_retrieve_for_api(
             'ballot_caveat':                '',
             'is_from_substituted_address':  False,
             'is_from_test_ballot':          False,
+            'ballot_location_display_name':         '',
             'ballot_returned_we_vote_id':           ballot_returned_we_vote_id,
             'ballot_location_shortcut':             ballot_location_shortcut,
             'polling_location_we_vote_id_source': '',
@@ -661,8 +664,9 @@ def voter_ballot_items_retrieve_for_api(
             'ballot_caveat':                ballot_caveat,
             'is_from_substituted_address':  False,
             'is_from_test_ballot':          False,
-            'ballot_returned_we_vote_id':           ballot_returned_we_vote_id,
+            'ballot_location_display_name':         '',
             'ballot_location_shortcut':             ballot_location_shortcut,
+            'ballot_returned_we_vote_id':           ballot_returned_we_vote_id,
             'polling_location_we_vote_id_source': '',
         }
         return error_json_data
@@ -737,8 +741,9 @@ def voter_ballot_items_retrieve_for_api(
             'ballot_caveat':                voter_ballot_saved.ballot_caveat(),
             'is_from_substituted_address':  voter_ballot_saved.is_from_substituted_address,
             'is_from_test_ballot':          voter_ballot_saved.is_from_test_ballot,
-            'ballot_returned_we_vote_id':   voter_ballot_saved.ballot_returned_we_vote_id,
+            'ballot_location_display_name': voter_ballot_saved.ballot_location_display_name,
             'ballot_location_shortcut':     voter_ballot_saved.ballot_location_shortcut,
+            'ballot_returned_we_vote_id':   voter_ballot_saved.ballot_returned_we_vote_id,
             'polling_location_we_vote_id_source': voter_ballot_saved.polling_location_we_vote_id_source,
         }
         return json_data
@@ -756,8 +761,9 @@ def voter_ballot_items_retrieve_for_api(
         'ballot_caveat':                '',
         'is_from_substituted_address':  False,
         'is_from_test_ballot':          False,
-        'ballot_returned_we_vote_id':           ballot_returned_we_vote_id,
+        'ballot_location_display_name':         '',
         'ballot_location_shortcut':             ballot_location_shortcut,
+        'ballot_returned_we_vote_id':           ballot_returned_we_vote_id,
         'polling_location_we_vote_id_source':   '',
     }
     return error_json_data
@@ -866,6 +872,7 @@ def generate_ballot_data(voter_device_link, voter_address, ballot_returned_we_vo
                 is_from_substituted_address,
                 is_from_test_address,
                 copy_results['polling_location_we_vote_id_source'],
+                copy_results['ballot_location_display_name'],
                 copy_results['ballot_returned_we_vote_id'],
                 copy_results['ballot_location_shortcut']
             )
@@ -918,6 +925,7 @@ def generate_ballot_data(voter_device_link, voter_address, ballot_returned_we_vo
                 is_from_substituted_address,
                 is_from_test_address,
                 polling_location_we_vote_id_source,
+                results['ballot_location_display_name'],
                 results['ballot_returned_we_vote_id'],
                 results['ballot_location_shortcut']
             )
@@ -939,6 +947,7 @@ def generate_ballot_data(voter_device_link, voter_address, ballot_returned_we_vo
             # a specific_ballot_requested, we want to update the VoterAddress
             if not specific_ballot_requested and positive_value_exists(voter_address.text_for_map_search):
                 try:
+                    voter_address.ballot_location_display_name = copy_results['ballot_location_display_name']
                     voter_address.ballot_returned_we_vote_id = copy_results['ballot_returned_we_vote_id']
                     voter_address.save()
                 except Exception as e:
@@ -958,6 +967,7 @@ def generate_ballot_data(voter_device_link, voter_address, ballot_returned_we_vo
                 is_from_substituted_address,
                 is_from_test_address,
                 copy_results['polling_location_we_vote_id_source'],
+                copy_results['ballot_location_display_name'],
                 copy_results['ballot_returned_we_vote_id'],
                 copy_results['ballot_location_shortcut']
             )

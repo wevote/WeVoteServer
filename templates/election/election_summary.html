@@ -125,7 +125,8 @@
         <tr>
             <td></td>
             <td>Ballot Returned ID</td>
-            <td>Polling Location</td>
+            <td>Display Name</td>
+            <td>Shortcut?</td>
             <td>Text for Map Search</td>
             <td>Voter Id</td>
             <td>Lat/Long?</td>
@@ -133,21 +134,22 @@
             <td><a href="{% url 'election:election_summary' election.id %}?google_civic_election_id={{ election.google_civic_election_id }}&state_code={{ state_code }}&show_offices_and_candidates=1">
                 Offices & Candidates</a></td>
             <td>Ballot Items</td>
-            <td>Shortcut?</td>
+            <td>Polling Location</td>
             <td>&nbsp;</td>
         </tr>
     {% for ballot_returned in ballot_returned_list %}
         <tr>
             <td>{{ forloop.counter }}</td>
             <td><a href="{% url 'ballot:ballot_item_list_edit' ballot_returned.id %}">{{ ballot_returned.id }}</a></td>
-            <td>{{ ballot_returned.polling_location_we_vote_id|default_if_none:"" }}</td>
+            <td align="middle">{% if ballot_returned.ballot_location_display_name %}{{ ballot_returned.ballot_location_display_name }}{% endif %}</td>
+            <td align="middle">{% if ballot_returned.ballot_location_shortcut %}{{ ballot_returned.ballot_location_shortcut }}{% endif %}{% if ballot_returned.ballot_location_display_option_on %} ON{% endif %}</td>
             <td>{{ ballot_returned.text_for_map_search }}</td>
             <td>{% if ballot_returned.voter_id != 0 %}{{ ballot_returned.voter_id|default_if_none:"" }}{% endif %}</td>
             <td align="middle">{% if ballot_returned.latitude %}yes{% endif %}</td>
             <td align="middle">{{ ballot_returned.normalized_state|default_if_none:"" }}</td>
             <td align="middle">{% if ballot_returned.office_and_candidate_text %}{{ ballot_returned.office_and_candidate_text }}{% endif %}</td>
             <td align="middle">{% if ballot_returned.ballot_items_count %}{{ ballot_returned.ballot_items_count }}{% endif %}</td>
-            <td align="middle">{% if ballot_returned.ballot_location_shortcut %}{{ ballot_returned.ballot_location_shortcut }}{% endif %}{% if ballot_returned.ballot_location_display_option_on %} ON{% endif %}</td>
+            <td>{{ ballot_returned.polling_location_we_vote_id|default_if_none:"" }}</td>
             <td><a href="{% url 'ballot:ballot_item_list_edit' ballot_returned.id %}">(edit)</a></td>
         </tr>
     {% endfor %}

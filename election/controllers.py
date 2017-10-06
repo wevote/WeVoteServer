@@ -118,7 +118,7 @@ def elections_import_from_structured_json(structured_json):
     return elections_results
 
 
-def elections_retrieve_for_api():
+def elections_retrieve_for_api():  # electionsRetrieve
     status = ""
     election_list = []
 
@@ -147,6 +147,12 @@ def elections_retrieve_for_api():
             ballot_returned_query = ballot_returned_query.filter(ballot_location_display_option_on=True)
             ballot_returned_query = ballot_returned_query.order_by('ballot_location_display_name')
             ballot_returned_list = list(ballot_returned_query)
+
+            ballot_returned_count_query = BallotReturned.objects.using('readonly')
+            ballot_returned_count_query = ballot_returned_count_query.filter(
+                google_civic_election_id=election.google_civic_election_id)
+            ballot_returned_count = ballot_returned_count_query.count()
+
             for ballot_returned in ballot_returned_list:
                 ballot_location_display_option = {
                     'ballot_location_display_name': ballot_returned.ballot_location_display_name,
@@ -163,10 +169,12 @@ def elections_retrieve_for_api():
                 'google_civic_election_id':     election.google_civic_election_id,
                 'election_name':                election.election_name,
                 'election_day_text':            election.election_day_text,
+                'election_is_upcoming':         election.election_is_upcoming(),
                 'get_election_state':           election.get_election_state(),
                 'state_code':                   election.state_code,
                 'ocd_division_id':              election.ocd_division_id,
                 'ballot_location_list':         ballot_location_list,
+                'ballot_returned_count':        ballot_returned_count,
             }
             election_list.append(election_json)
 
