@@ -70,12 +70,18 @@ def voter_ballot_items_retrieve_from_google_civic_doc_template_values(url_root):
     api_response = '{\n' \
                    '  "status": string,\n' \
                    '  "success": boolean,\n' \
-                   '  "election_data_retrieved": boolean,\n' \
-                   '  "polling_location_retrieved": boolean,\n' \
-                   '  "contests_retrieved": boolean,\n' \
                    '  "voter_device_id": string (88 characters long),\n' \
                    '  "google_civic_election_id": integer,\n' \
+                   '  "state_code": string,\n' \
+                   '  "election_date_text": string,\n' \
+                   '  "election_description_text": string,\n' \
+                   '  "election_data_retrieved": boolean,\n' \
                    '  "text_for_map_search": string,\n' \
+                   '  "polling_location_retrieved": boolean,\n' \
+                   '  "contests_retrieved": boolean,\n' \
+                   '  "ballot_location_display_name": string,\n' \
+                   '  "ballot_location_shortcut": string,\n' \
+                   '  "ballot_returned_we_vote_id": string,\n' \
                    '}'
 
     template_values = {

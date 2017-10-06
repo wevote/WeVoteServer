@@ -902,10 +902,10 @@ def generate_ballot_data(voter_device_link, voter_address, ballot_returned_we_vo
         # 1) Get ballot data from Google Civic for the actual VoterAddress
         text_for_map_search = voter_address.text_for_map_search
         use_test_election = False
-        results = voter_ballot_items_retrieve_from_google_civic_for_api(voter_device_id, text_for_map_search,
-                                                                        use_test_election)
-        status += results['status']
-        if results['google_civic_election_id'] and results['contests_retrieved']:
+        google_retrieve_results = voter_ballot_items_retrieve_from_google_civic_for_api(
+            voter_device_id, text_for_map_search, use_test_election)
+        status += google_retrieve_results['status']
+        if google_retrieve_results['google_civic_election_id'] and google_retrieve_results['contests_retrieved']:
             is_from_substituted_address = False
             substituted_address_nearby = ''
             is_from_test_address = False
@@ -916,18 +916,18 @@ def generate_ballot_data(voter_device_link, voter_address, ballot_returned_we_vo
             # Save the meta information for this ballot data
             save_results = voter_ballot_saved_manager.update_or_create_voter_ballot_saved(
                 voter_id,
-                results['google_civic_election_id'],
-                results['state_code'],
-                results['election_date_text'],
-                results['election_description_text'],
-                results['text_for_map_search'],
+                google_retrieve_results['google_civic_election_id'],
+                google_retrieve_results['state_code'],
+                google_retrieve_results['election_date_text'],
+                google_retrieve_results['election_description_text'],
+                google_retrieve_results['text_for_map_search'],
                 substituted_address_nearby,
                 is_from_substituted_address,
                 is_from_test_address,
                 polling_location_we_vote_id_source,
-                results['ballot_location_display_name'],
-                results['ballot_returned_we_vote_id'],
-                results['ballot_location_shortcut']
+                google_retrieve_results['ballot_location_display_name'],
+                google_retrieve_results['ballot_returned_we_vote_id'],
+                google_retrieve_results['ballot_location_shortcut']
             )
             status += save_results['status']
             results = {
@@ -983,9 +983,9 @@ def generate_ballot_data(voter_device_link, voter_address, ballot_returned_we_vo
 
         # 3) Get test ballot data from Google Civic
         # use_test_election = True
-        # results = voter_ballot_items_retrieve_from_google_civic_for_api(voter_device_id, text_for_map_search,
-        #                                                                 use_test_election)
-        # if results['google_civic_election_id']:
+        # google_retrieve_results = voter_ballot_items_retrieve_from_google_civic_for_api(
+        #          voter_device_id, text_for_map_search, use_test_election)
+        # if google_retrieve_results['google_civic_election_id']:
         #     is_from_substituted_address = False
         #     substituted_address_nearby = ''
         #     is_from_test_address = True
@@ -994,15 +994,18 @@ def generate_ballot_data(voter_device_link, voter_address, ballot_returned_we_vo
             # with the voter_address
         #     save_results = voter_ballot_saved_manager.update_or_create_voter_ballot_saved(
         #         voter_id,
-        #         results['google_civic_election_id'],
-        #         results['state_code'],
-        #         results['election_date_text'],
-        #         results['election_description_text'],
-        #         results['text_for_map_search'],
+        #         google_retrieve_results['google_civic_election_id'],
+        #         google_retrieve_results['state_code'],
+        #         google_retrieve_results['election_date_text'],
+        #         google_retrieve_results['election_description_text'],
+        #         google_retrieve_results['text_for_map_search'],
         #         substituted_address_nearby,
         #         is_from_substituted_address,
         #         is_from_test_address,
-        #         polling_location_we_vote_id_source
+        #         polling_location_we_vote_id_source,
+        #         google_retrieve_results['ballot_location_display_name'],
+        #         google_retrieve_results['ballot_returned_we_vote_id'],
+        #         google_retrieve_results['ballot_location_shortcut'],
         #     )
         #     results = {
         #         'status':                   save_results['status'],

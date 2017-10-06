@@ -464,10 +464,10 @@ def voter_ballot_items_retrieve_from_google_civic_view(request):  # voterBallotI
 
     voter_id = 0
 
-    results = voter_ballot_items_retrieve_from_google_civic_for_api(
+    google_retrieve_results = voter_ballot_items_retrieve_from_google_civic_for_api(
         voter_device_id, text_for_map_search, use_test_election)
 
-    if results['google_civic_election_id'] and not use_test_election:
+    if google_retrieve_results['google_civic_election_id'] and not use_test_election:
         # After the ballot is retrieved from google we want to save some info about it for the voter
         if positive_value_exists(voter_device_id):
             voter_device_link_manager = VoterDeviceLinkManager()
@@ -488,19 +488,21 @@ def voter_ballot_items_retrieve_from_google_civic_view(request):  # voterBallotI
             # Save the meta information for this ballot data. If it fails, ignore the failure
             voter_ballot_saved_manager.update_or_create_voter_ballot_saved(
                 voter_id,
-                results['google_civic_election_id'],
-                results['election_date_text'],
-                results['election_description_text'],
-                results['text_for_map_search'],
+                google_retrieve_results['google_civic_election_id'],
+                google_retrieve_results['state_code'],
+                google_retrieve_results['election_date_text'],
+                google_retrieve_results['election_description_text'],
+                google_retrieve_results['text_for_map_search'],
                 substituted_address_nearby,
                 is_from_substituted_address,
                 is_from_test_address,
                 polling_location_we_vote_id_source,
-                results['ballot_location_display_name'],
-                results['ballot_returned_we_vote_id'],
+                google_retrieve_results['ballot_location_display_name'],
+                google_retrieve_results['ballot_returned_we_vote_id'],
+                google_retrieve_results['ballot_location_shortcut'],
             )
 
-    return HttpResponse(json.dumps(results), content_type='application/json')
+    return HttpResponse(json.dumps(google_retrieve_results), content_type='application/json')
 
 
 def voter_ballot_list_retrieve_view(request):  # voterBallotListRetrieve
