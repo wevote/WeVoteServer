@@ -789,6 +789,7 @@ def voter_ballot_items_retrieve_from_google_civic_for_api(
             'voter_device_id':              voter_device_id,
             'google_civic_election_id':     0,
             'text_for_map_search':          text_for_map_search,
+            'ballot_location_display_name': "",
             'ballot_returned_we_vote_id':   "",
             'election_date_text':           "",
             'election_description_text':    "",
@@ -806,6 +807,7 @@ def voter_ballot_items_retrieve_from_google_civic_for_api(
             'voter_device_id':              voter_device_id,
             'google_civic_election_id':     0,
             'text_for_map_search':          text_for_map_search,
+            'ballot_location_display_name': "",
             'ballot_returned_we_vote_id':   "",
             'election_date_text':           "",
             'election_description_text':    "",
@@ -824,6 +826,7 @@ def voter_ballot_items_retrieve_from_google_civic_for_api(
             'voter_device_id':              voter_device_id,
             'google_civic_election_id':     0,
             'text_for_map_search':          text_for_map_search,
+            'ballot_location_display_name': "",
             'ballot_returned_we_vote_id':   "",
             'election_date_text':           "",
             'election_description_text':    "",
@@ -841,6 +844,7 @@ def voter_ballot_items_retrieve_from_google_civic_for_api(
             'voter_device_id':              voter_device_id,
             'google_civic_election_id':     0,
             'text_for_map_search':          text_for_map_search,
+            'ballot_location_display_name': "",
             'ballot_returned_we_vote_id':   "",
             'election_date_text':           "",
             'election_description_text':    "",
@@ -856,6 +860,7 @@ def voter_ballot_items_retrieve_from_google_civic_for_api(
     election_description_text = ''
     election_data_retrieved = False
     polling_location_retrieved = False
+    ballot_location_display_name = ''
     ballot_returned_we_vote_id = ''
     contests_retrieved = False
     if not positive_value_exists(text_for_map_search):
@@ -912,6 +917,7 @@ def voter_ballot_items_retrieve_from_google_civic_for_api(
                     google_civic_election_id = store_one_ballot_results['google_civic_election_id']
                     if store_one_ballot_results['ballot_returned_found']:
                         ballot_returned = store_one_ballot_results['ballot_returned']
+                        ballot_location_display_name = ballot_returned.ballot_location_display_name
                         ballot_returned_we_vote_id = ballot_returned.we_vote_id
                 else:
                     status += 'UNABLE_TO-store_one_ballot_from_google_civic_api '
@@ -938,6 +944,7 @@ def voter_ballot_items_retrieve_from_google_civic_for_api(
         'voter_device_id':              voter_device_id,
         'google_civic_election_id':     google_civic_election_id,
         'text_for_map_search':          text_for_map_search,
+        'ballot_location_display_name': ballot_location_display_name,
         'ballot_returned_we_vote_id':   ballot_returned_we_vote_id,
         'election_date_text':           election_date_text,
         'election_description_text':    election_description_text,
