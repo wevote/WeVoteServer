@@ -11,9 +11,31 @@ from organization.models import OrganizationListManager
 from wevote_functions.functions import convert_to_int, positive_value_exists
 
 
+def delete_possible_twitter_handles(candidate_campaign):
+    status = ""
+    twitter_user_manager = TwitterUserManager()
+
+    if not candidate_campaign:
+        status += "DELETE_POSSIBLE_TWITTER_HANDLES-CANDIDATE_MISSING "
+        results = {
+            'success':                  False,
+            'status':                   status,
+        }
+        return results
+
+    results = twitter_user_manager.delete_twitter_link_possibilities(candidate_campaign.we_vote_id)
+    status += results['status']
+
+    results = {
+        'success':                  True,
+        'status':                   status,
+    }
+
+    return results
+
+
 def retrieve_possible_twitter_handles(candidate_campaign):
     status = ""
-    candidate_campaign_manager = CandidateCampaignManager()
     twitter_user_manager = TwitterUserManager()
 
     if not candidate_campaign:

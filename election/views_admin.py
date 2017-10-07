@@ -469,6 +469,10 @@ def election_list_view(request):
         election.ballot_returned_count = \
             ballot_returned_list_manager.fetch_ballot_returned_list_count_for_election(
                 election.google_civic_election_id, election.state_code)
+        election.ballot_location_display_option_on_count = \
+            ballot_returned_list_manager.fetch_ballot_location_display_option_on_count_for_election(
+                election.google_civic_election_id, election.state_code)
+
         election_list_modified.append(election)
 
     template_values = {

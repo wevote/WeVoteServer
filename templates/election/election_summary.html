@@ -5,8 +5,9 @@
 
 {%  block content %}
 {% load template_filters %}
+<p><a href="{% url 'admin_tools:admin_home' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">< Back to Admin Home</a></p>
 
-<a href="{% url 'election:election_list' %}">< Back to Elections</a>
+<p><a href="{% url 'election:election_list' %}">< Back to Elections</a></p>
 
 {% if election %}
 
@@ -130,7 +131,7 @@
             <td>Text for Map Search</td>
             <td>Voter Id</td>
             <td>Lat/Long?</td>
-            <td>normalized_state</td>
+            <td>normalized state</td>
             <td><a href="{% url 'election:election_summary' election.id %}?google_civic_election_id={{ election.google_civic_election_id }}&state_code={{ state_code }}&show_offices_and_candidates=1">
                 Offices & Candidates</a></td>
             <td>Ballot Items</td>

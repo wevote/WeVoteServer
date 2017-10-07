@@ -128,6 +128,7 @@
     {% if candidate.twitter_url %}Twitter URL (from Google Civic): {{ candidate.twitter_url }}{% endif %}
 
     (<a href="{% url 'twitter2:retrieve_possible_twitter_handles' candidate.we_vote_id %}">retrieve possible Twitter handles</a>)
+    (<a href="{% url 'twitter2:delete_possible_twitter_handles' candidate.we_vote_id %}">delete possible Twitter handles</a>)
 
     <table border="1" cellpadding="5" cellspacing="5" class="table">
         <tr>
@@ -137,6 +138,7 @@
             <th>twitter_handle</th>
             <th>twitter_url</th>
             <th>twitter_location</th>
+            <th>utc_offset</th>
             <th>twitter_followers_count</th>
             <th>twitter_profile_image_url_https</th>
             <th>likelihood_percentage</th>
@@ -147,9 +149,10 @@
             <td>{{ forloop.counter }}</td>
             <td>{{ one_row.id }}</td>
             <td>{{ one_row.twitter_id }}</td>
-            <td>{{ one_row.twitter_handle|default_if_none:"n/a" }}</td>
+            <td><a href="https://twitter.com/{{ one_row.twitter_handle }}" target="_blank">{{ one_row.twitter_handle|default_if_none:"n/a" }}</a></td>
             <td>{{ one_row.twitter_url|default_if_none:"n/a" }}</td>
             <td>{{ one_row.twitter_location|default_if_none:"n/a" }}</td>
+            <td>{% if one_row.twitter_utc_offset %}{{ one_row.twitter_utc_offset|default_if_none:"n/a" }}{% endif %}</td>
             <td>{{ one_row.twitter_followers_count|default_if_none:"" }}</td>
             <td><img src='{{ one_row.twitter_profile_image_url_https }}' /></td>
             <td>{{ one_row.likelihood_percentage|default_if_none:"n/a" }}</td>
