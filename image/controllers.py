@@ -2,6 +2,8 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
+import requests
+import wevote_functions.admin
 from .functions import analyze_remote_url, analyze_image_file
 from .models import WeVoteImageManager, WeVoteImage, FACEBOOK_PROFILE_IMAGE_NAME, FACEBOOK_BACKGROUND_IMAGE_NAME, \
     TWITTER_PROFILE_IMAGE_NAME, TWITTER_BACKGROUND_IMAGE_NAME, TWITTER_BANNER_IMAGE_NAME, MAPLIGHT_IMAGE_NAME, \
@@ -11,18 +13,16 @@ from candidate.models import CandidateCampaignManager
 from config.base import get_environment_variable
 from django.db.models import Q
 from import_export_facebook.models import FacebookManager
-from import_export_twitter.functions import retrieve_twitter_user_info
 from issue.models import IssueManager
 from organization.models import OrganizationManager
 from politician.models import PoliticianManager
 from position.controllers import reset_all_position_image_details_from_candidate, \
     reset_position_for_friends_image_details_from_voter, reset_position_entered_image_details_from_organization
+from twitter.functions import retrieve_twitter_user_info
 from twitter.models import TwitterUserManager
-from voter_guide.models import VoterGuideManager
 from voter.models import VoterManager, VoterDeviceLinkManager, VoterAddressManager, VoterAddress, Voter
+from voter_guide.models import VoterGuideManager
 from wevote_functions.functions import positive_value_exists, convert_to_int
-import requests
-import wevote_functions.admin
 
 logger = wevote_functions.admin.get_logger(__name__)
 HTTP_OK = 200

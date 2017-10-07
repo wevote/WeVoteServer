@@ -643,7 +643,7 @@ class CandidateCampaign(models.Model):
         return extract_first_name_from_full_name(full_name)
 
     def extract_last_name(self):
-        full_name = self.display_candidate_name
+        full_name = self.display_candidate_name()
         return extract_last_name_from_full_name(full_name)
 
     def political_party_display(self):
