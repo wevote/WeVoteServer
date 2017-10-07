@@ -1,4 +1,4 @@
-# import_export_twitter/functions.py
+# twitter/functions.py
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
@@ -76,31 +76,4 @@ def retrieve_twitter_user_info(twitter_user_id, twitter_handle):
         'twitter_handle_found': twitter_handle_found,
         'twitter_json':         twitter_json,
     }
-    return results
-
-
-def retrieve_twitter_user_possibilities(full_name='', state_code=''):
-    search_term = full_name
-
-    auth = tweepy.OAuthHandler(TWITTER_CONSUMER_KEY, TWITTER_CONSUMER_SECRET)
-    auth.set_access_token(TWITTER_ACCESS_TOKEN, TWITTER_ACCESS_TOKEN_SECRET)
-    api = tweepy.API(auth)
-    results = {'possible_twitter_handles_list': []}
-    search_results = api.search_users(q=search_term, page=1)
-    search_results.sort(key=lambda possible_candidate: possible_candidate.followers_count, reverse=True)
-    denom = sum(candidate.followers_count for candidate in search_results)
-    possibility_percentages = [candidate.followers_count / denom for candidate in search_results]
-
-    for possible_candidate_index in range(len(search_results)):
-        one_result = search_results[possible_candidate_index]
-
-        current_candidate_twitter_info = {}
-        current_candidate_twitter_info['search_term'] = search_term
-        current_candidate_twitter_info['likelihood_percentage'] = int(possibility_percentages[possible_candidate_index] * 100)
-        current_candidate_twitter_info['twitter_json'] = one_result._json
-
-        results['possible_twitter_handles_list'].append(current_candidate_twitter_info)
-
-    results['success'] = bool(results['possible_twitter_handles_list'])
-
     return results

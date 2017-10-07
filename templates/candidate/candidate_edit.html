@@ -12,7 +12,7 @@
 {% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
 
 
-<form action="{% url "candidate:candidate_edit_process" %}" method="post" class="form-horizontal">
+<form action="{% url "candidate:candidate_edit_process" %}" id="candidate_edit" method="post" class="form-horizontal">
 {% csrf_token %}
 
 <input type="hidden" name="candidate_id" value="{% if candidate %}{{ candidate.id }}{% else %}0{% endif %}">
@@ -133,30 +133,30 @@
     <table border="1" cellpadding="5" cellspacing="5" class="table">
         <tr>
             <th>#</th>
-            <th>id</th>
-            <th>twitter_id</th>
-            <th>twitter_handle</th>
-            <th>twitter_url</th>
+            <th>%</th>
+            <th></th>
+            <th>twitter name</th>
+            <th>twitter handle</th>
+            <th>twitter url</th>
             <th>twitter_location</th>
             <th>utc_offset</th>
-            <th>twitter_followers_count</th>
-            <th>twitter_profile_image_url_https</th>
-            <th>likelihood_percentage</th>
-            <th>search_term_used</th>
+            <th>twitter followers</th>
+            <th>description</th>
         </tr>
     {% for one_row in twitter_link_possibility_list %}
         <tr>
             <td>{{ forloop.counter }}</td>
-            <td>{{ one_row.id }}</td>
-            <td>{{ one_row.twitter_id }}</td>
-            <td><a href="https://twitter.com/{{ one_row.twitter_handle }}" target="_blank">{{ one_row.twitter_handle|default_if_none:"n/a" }}</a></td>
-            <td>{{ one_row.twitter_url|default_if_none:"n/a" }}</td>
+            <td>{{ one_row.likelihood_percentage|default_if_none:"n/a" }}</td>
+            <td><img src='{{ one_row.twitter_profile_image_url_https }}' /></td>
+            <td>{{ one_row.twitter_name }}</td>
+            <td><a href="https://twitter.com/{{ one_row.twitter_handle }}" target="_blank">{{ one_row.twitter_handle|default_if_none:"n/a" }}</a><br />
+                <input id="choose_{{ forloop.counter }}" type="button" value="Choose and Update" onclick="document.getElementById('candidate_twitter_handle_id').value = '{{ one_row.twitter_handle }}';document.getElementById('candidate_edit').submit();" />
+            </td>
+            <td><a href="{{ one_row.twitter_url }}" target="_blank">{{ one_row.twitter_url|default_if_none:"" }}</a></td>
             <td>{{ one_row.twitter_location|default_if_none:"n/a" }}</td>
             <td>{% if one_row.twitter_utc_offset %}{{ one_row.twitter_utc_offset|default_if_none:"n/a" }}{% endif %}</td>
             <td>{{ one_row.twitter_followers_count|default_if_none:"" }}</td>
-            <td><img src='{{ one_row.twitter_profile_image_url_https }}' /></td>
-            <td>{{ one_row.likelihood_percentage|default_if_none:"n/a" }}</td>
-            <td>{{ one_row.search_term_used|default_if_none:"n/a" }}</td>
+            <td>{{ one_row.twitter_description|default_if_none:"n/a" }}</td>
         </tr>
     {% endfor %}
     </table>

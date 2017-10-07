@@ -3,27 +3,26 @@
 # -*- coding: UTF-8 -*-
 
 # See also WeVoteServer/twitter/controllers.py for routines that manage internal twitter data
-from image.models import WeVoteImageManager
-from politician.models import PoliticianManager
-from position.controllers import update_all_position_details_from_candidate, \
-    update_position_entered_details_from_organization, update_position_for_friends_details_from_voter
-from voter_guide.models import VoterGuideManager
-from .functions import retrieve_twitter_user_info
+import re
+import tweepy
+import urllib.request
+import wevote_functions.admin
 from candidate.controllers import refresh_candidate_data_from_master_tables
 from candidate.models import CandidateCampaignManager, CandidateCampaignListManager
 from config.base import get_environment_variable
 from image.controllers import TWITTER, cache_master_and_resized_image
+from image.models import WeVoteImageManager
 from import_export_twitter.models import TwitterAuthManager
 from organization.controllers import move_organization_to_another_complete, \
     update_social_media_statistics_in_other_tables
 from organization.models import Organization, OrganizationListManager, OrganizationManager, INDIVIDUAL
-import re
+from politician.models import PoliticianManager
+from position.controllers import update_all_position_details_from_candidate, \
+    update_position_entered_details_from_organization, update_position_for_friends_details_from_voter
 from socket import timeout
-import tweepy
+from twitter.functions import retrieve_twitter_user_info
 from twitter.models import TwitterUserManager
-import urllib.request
-from voter.models import VoterDeviceLinkManager, VoterManager
-import wevote_functions.admin
+from voter.models import VoterManager
 from wevote_functions.functions import convert_to_int, extract_twitter_handle_from_text_string, \
     is_voter_device_id_valid, positive_value_exists
 

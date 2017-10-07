@@ -5,13 +5,14 @@
 from django.core.validators import RegexValidator
 from django.db import models
 from django.db.models import Q
+
+import wevote_functions.admin
 from exception.models import handle_exception, \
     handle_record_found_more_than_one_exception, handle_record_not_saved_exception, handle_record_not_found_exception
 from import_export_facebook.models import FacebookManager
-from import_export_twitter.functions import retrieve_twitter_user_info
+from twitter.functions import retrieve_twitter_user_info
 from twitter.models import TwitterLinkToOrganization, TwitterLinkToVoter, TwitterUserManager
 from voter.models import VoterManager
-import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, extract_twitter_handle_from_text_string, positive_value_exists
 from wevote_settings.models import fetch_next_we_vote_id_org_integer, fetch_site_unique_id_prefix
 

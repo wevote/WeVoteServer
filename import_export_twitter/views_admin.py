@@ -2,25 +2,26 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
+from django.contrib import messages
+from django.contrib.auth.decorators import login_required
+from django.core.urlresolvers import reverse
+from django.http import HttpResponseRedirect
+
+import wevote_functions.admin
+from admin_tools.views import redirect_to_sign_in_page
+from candidate.models import CandidateCampaignManager
+from image.controllers import delete_cached_images_for_voter, delete_cached_images_for_candidate, \
+    delete_cached_images_for_organization
+from organization.controllers import update_social_media_statistics_in_other_tables
+from organization.models import OrganizationManager
+from twitter.functions import retrieve_twitter_user_info
+from voter.models import voter_has_authority, VoterManager
+from wevote_functions.functions import convert_to_int, positive_value_exists
 from .controllers import refresh_twitter_candidate_details, retrieve_twitter_data_for_all_organizations, \
     refresh_twitter_organization_details, \
     scrape_social_media_from_one_site, refresh_twitter_candidate_details_for_election, \
     scrape_and_save_social_media_for_candidates_in_one_election, scrape_and_save_social_media_from_all_organizations, \
     transfer_candidate_twitter_handles_from_google_civic
-from .functions import retrieve_twitter_user_info
-from admin_tools.views import redirect_to_sign_in_page
-from candidate.models import CandidateCampaignManager
-from django.contrib.auth.decorators import login_required
-from django.contrib import messages
-from django.core.urlresolvers import reverse
-from django.http import HttpResponseRedirect
-from image.controllers import delete_cached_images_for_voter, delete_cached_images_for_candidate, \
-    delete_cached_images_for_organization
-from organization.controllers import update_social_media_statistics_in_other_tables
-from organization.models import OrganizationManager
-from voter.models import voter_has_authority, VoterManager
-import wevote_functions.admin
-from wevote_functions.functions import convert_to_int, positive_value_exists
 
 logger = wevote_functions.admin.get_logger(__name__)
 
