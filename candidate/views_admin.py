@@ -726,7 +726,7 @@ def candidate_politician_match_view(request):
 
 @login_required
 def candidate_politician_match_for_this_election_view(request):
-    authority_required = {'admin'}  # admin, verified_volunteer
+    authority_required = {'verified_volunteer'}  # admin, verified_volunteer
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 

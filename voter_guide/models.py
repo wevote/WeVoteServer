@@ -1141,7 +1141,7 @@ class VoterGuideListManager(models.Model):
 
         return voter_guide_list_filtered
 
-    def retrieve_all_voter_guides_order_by(self, order_by=''):
+    def retrieve_all_voter_guides_order_by(self, order_by='', limit_number=0):
         voter_guide_list = []
         voter_guide_list_found = False
         try:
@@ -1151,7 +1151,11 @@ class VoterGuideListManager(models.Model):
                     '-vote_smart_time_span', '-google_civic_election_id')
             else:
                 voter_guide_queryset = voter_guide_queryset.order_by('-twitter_followers_count')
-            voter_guide_list = voter_guide_queryset
+
+            if positive_value_exists(limit_number):
+                voter_guide_list = voter_guide_queryset[:limit_number]
+            else:
+                voter_guide_list = voter_guide_queryset
 
             if len(voter_guide_list):
                 voter_guide_list_found = True

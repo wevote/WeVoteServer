@@ -115,6 +115,8 @@ class TwitterLinkPossibility(models.Model):
     twitter_location = models.CharField(verbose_name="location from twitter", max_length=255, null=True, blank=True)
     twitter_followers_count = models.IntegerField(verbose_name="number of twitter followers",
                                                   null=False, blank=True, default=0)
+    twitter_utc_offset = models.IntegerField(verbose_name="utc_offset from twitter",
+                                             null=True, blank=True, default=0)
 
 
 class TwitterUser(models.Model):
@@ -149,25 +151,36 @@ class TwitterUserManager(models.Model):
     def __unicode__(self):
         return "TwitterUserManager"
 
-    def update_or_create_twitter_link_possibility(self, voter_we_vote_id, twitter_json, search_term, likelihood_percentage):
+    def update_or_create_twitter_link_possibility(self, candidate_campaign_we_vote_id, twitter_json, search_term,
+                                                  likelihood_percentage):
         try:
-            TwitterLinkPossibility.objects.update_or_create(candidate_campaign_we_vote_id=voter_we_vote_id,
-                    twitter_id=twitter_json['id'],
-                    twitter_handle=twitter_json['screen_name'],
-                    defaults={
-                        'likelihood_percentage': likelihood_percentage,
-                        'search_term_used': search_term,
-                        'twitter_description': twitter_json['description'],
-                        'twitter_profile_image_url_https': twitter_json['profile_image_url_https'],
-                        'twitter_url': twitter_json['url'],
-                        'twitter_location': twitter_json['location'],
-                        'twitter_followers_count': twitter_json['followers_count'],
-                        }
-                    )
+            TwitterLinkPossibility.objects.update_or_create(
+                candidate_campaign_we_vote_id=candidate_campaign_we_vote_id,
+                twitter_id=twitter_json['id'],
+                twitter_handle=twitter_json['screen_name'],
+                defaults={
+                    'likelihood_percentage': likelihood_percentage,
+                    'search_term_used': search_term,
+                    'twitter_description': twitter_json['description'],
+                    'twitter_profile_image_url_https': twitter_json['profile_image_url_https'],
+                    'twitter_url': twitter_json['url'],
+                    'twitter_location': twitter_json['location'],
+                    'twitter_followers_count': twitter_json['followers_count'],
+                    'twitter_utc_offset': twitter_json['utc_offset'],
+                    }
+                )
             status = "TWITTER_LINK_TO_POSSIBILITY_CREATED"
+            success = True
+
         except Exception as e:
-            import pdb; pdb.set_trace()
             status = "TWITTER_LINK_TO_POSSIBILITY_NOT_CREATED"
+            success = False
+
+        results = {
+            'success': success,
+            'status': status,
+        }
+        return results
 
     def create_twitter_link_to_organization(self, twitter_id, organization_we_vote_id):
         if not positive_value_exists(twitter_id) or not \
@@ -231,6 +244,21 @@ class TwitterUserManager(models.Model):
             'status':                       status,
             'twitter_link_to_voter_saved':  twitter_link_to_voter_saved,
             'twitter_link_to_voter':        twitter_link_to_voter,
+        }
+        return results
+
+    def delete_twitter_link_possibilities(self, candidate_campaign_we_vote_id):
+        try:
+            TwitterLinkPossibility.objects.filter(candidate_campaign_we_vote_id=candidate_campaign_we_vote_id).delete()
+            status = "TWITTER_LINK_TO_POSSIBILITY_DELETED"
+            success = True
+        except Exception as e:
+            status = "TWITTER_LINK_TO_POSSIBILITY_NOT_DELETED"
+            success = False
+
+        results = {
+            'success': success,
+            'status': status,
         }
         return results
 

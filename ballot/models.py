@@ -1414,7 +1414,26 @@ class BallotReturnedListManager(models.Model):
     A way to work with a list of ballot_returned entries
     """
 
-    def retrieve_ballot_returned_list_for_election(self, google_civic_election_id, state_code=''):
+    def fetch_ballot_location_display_option_on_count_for_election(self, google_civic_election_id, state_code=''):
+        google_civic_election_id = convert_to_int(google_civic_election_id)
+        try:
+            ballot_returned_queryset = BallotReturned.objects.all()
+            ballot_returned_queryset = ballot_returned_queryset.filter(
+                google_civic_election_id=google_civic_election_id)
+            ballot_returned_queryset = ballot_returned_queryset.filter(ballot_location_display_option_on=True)
+            if positive_value_exists(state_code):
+                ballot_returned_queryset = ballot_returned_queryset.filter(normalized_state__iexact=state_code)
+
+            return ballot_returned_queryset.count()
+        except BallotReturned.DoesNotExist:
+            # No ballot items found. Not a problem.
+            pass
+        except Exception as e:
+            pass
+
+        return 0
+
+    def retrieve_ballot_returned_list_for_election(self, google_civic_election_id, state_code='', limit=0):
         google_civic_election_id = convert_to_int(google_civic_election_id)
         ballot_returned_list = []
         ballot_returned_list_found = False
@@ -1424,6 +1443,9 @@ class BallotReturnedListManager(models.Model):
                 google_civic_election_id=google_civic_election_id)
             if positive_value_exists(state_code):
                 ballot_returned_queryset = ballot_returned_queryset.filter(normalized_state__iexact=state_code)
+            if positive_value_exists(limit):
+                ballot_returned_queryset = ballot_returned_queryset[:limit]
+            ballot_returned_queryset = ballot_returned_queryset.order_by("-ballot_location_display_name")
 
             ballot_returned_list = ballot_returned_queryset
 
@@ -1432,7 +1454,7 @@ class BallotReturnedListManager(models.Model):
                 status = 'BALLOT_RETURNED_LIST_FOUND'
             else:
                 status = 'NO_BALLOT_RETURNED_LIST_FOUND'
-        except BallotItem.DoesNotExist:
+        except BallotReturned.DoesNotExist:
             # No ballot items found. Not a problem.
             status = 'NO_BALLOT_RETURNED_LIST_FOUND_DOES_NOT_EXIST'
             ballot_returned_list = []
@@ -1459,7 +1481,7 @@ class BallotReturnedListManager(models.Model):
                 ballot_returned_queryset = ballot_returned_queryset.filter(normalized_state__iexact=state_code)
 
             return ballot_returned_queryset.count()
-        except BallotItem.DoesNotExist:
+        except BallotReturned.DoesNotExist:
             # No ballot items found. Not a problem.
             status = 'NO_BALLOT_RETURNED_LIST_FOUND_DOES_NOT_EXIST'
             ballot_returned_list = []

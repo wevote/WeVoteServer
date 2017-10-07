@@ -316,7 +316,8 @@ def voter_guide_list_view(request):
 
     else:
         order_by = "google_civic_election_id"
-        results = voter_guide_list_object.retrieve_all_voter_guides_order_by(order_by)
+        limit_number = 75
+        results = voter_guide_list_object.retrieve_all_voter_guides_order_by(order_by, limit_number)
 
         if results['success']:
             voter_guide_list = results['voter_guide_list']

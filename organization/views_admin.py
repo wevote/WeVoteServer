@@ -552,13 +552,13 @@ def organization_position_list_view(request, organization_id=0, organization_we_
     else:
         organization_position_list_found = False
         try:
-            organization_position_list = PositionEntered.objects.order_by('stance')
+            organization_position_list = PositionEntered.objects.all()
             organization_position_list = organization_position_list.filter(organization_id=organization_id)
             if positive_value_exists(google_civic_election_id):
                 organization_position_list = organization_position_list.filter(
                     google_civic_election_id=google_civic_election_id)
             organization_position_list = organization_position_list.order_by(
-                'google_civic_election_id', '-vote_smart_time_span')
+                '-google_civic_election_id', '-vote_smart_time_span')
             if len(organization_position_list):
                 organization_position_list_found = True
 
