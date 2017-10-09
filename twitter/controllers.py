@@ -77,6 +77,8 @@ def retrieve_possible_twitter_handles(candidate_campaign):
         one_result = search_results[possible_candidate_index]
         likelihood_percentage = 0
         if one_result.followers_count > 1000:
+            likelihood_percentage += 30
+        elif one_result.followers_count > 500:
             likelihood_percentage += 20
         elif one_result.followers_count > 100:
             likelihood_percentage += 10
@@ -88,16 +90,29 @@ def retrieve_possible_twitter_handles(candidate_campaign):
         if one_result.location and positive_value_exists(state_full_name) and state_full_name in one_result.location:
             likelihood_percentage += 30
         elif one_result.location and positive_value_exists(state_code) and state_code in one_result.location:
+            likelihood_percentage += 20
+
+        if one_result.description and positive_value_exists(state_full_name) and \
+                state_full_name in one_result.description:
+            likelihood_percentage += 20
+        elif one_result.description and positive_value_exists(state_code) and state_code in one_result.description:
             likelihood_percentage += 10
 
         political_party = candidate_campaign.political_party_display()
         if one_result.description and positive_value_exists(political_party) and \
-                        political_party in one_result.description:
+                political_party in one_result.description:
             likelihood_percentage += 20
 
         office_name = candidate_campaign.contest_office_name
         if one_result.description and positive_value_exists(office_name) and office_name in one_result.description:
             likelihood_percentage += 20
+
+        # Increase the percentage for every keyword we find
+        if one_result.description and "candidate" in one_result.description.lower():
+            likelihood_percentage += 10
+
+        if one_result.description and "district" in one_result.description.lower():
+            likelihood_percentage += 10
 
         current_candidate_twitter_info = {}
         current_candidate_twitter_info['search_term'] = search_term

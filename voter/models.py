@@ -12,7 +12,7 @@ from import_export_facebook.models import FacebookManager
 from twitter.models import TwitterUserManager
 from validate_email import validate_email
 import wevote_functions.admin
-from wevote_functions.functions import convert_to_int, generate_voter_device_id, \
+from wevote_functions.functions import extract_state_code_from_address_string, convert_to_int, generate_voter_device_id, \
     get_voter_api_device_id, positive_value_exists
 from wevote_settings.models import fetch_next_we_vote_id_voter_integer, fetch_site_unique_id_prefix
 
@@ -2170,6 +2170,12 @@ class VoterAddress(models.Model):
 
     refreshed_from_google = models.BooleanField(
         verbose_name="have normalized fields been updated from Google since address change?", default=False)
+
+    def get_state_code_from_text_for_map_search(self):
+        if positive_value_exists(self.text_for_map_search):
+            return extract_state_code_from_address_string(self.text_for_map_search)
+        else:
+            return ""
 
 
 class VoterAddressManager(models.Model):

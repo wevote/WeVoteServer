@@ -6,8 +6,11 @@
 
 {% block content %}
 {% load template_filters %}
-<a href="{% url 'election:election_summary' election.id %}?google_civic_election_id={{ google_civic_election_id }}">
+<p>
+    <a href="{% url 'admin_tools:admin_home' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">< Back to Admin Home</a><br />
+    <a href="{% url 'election:election_summary' election.id %}?google_civic_election_id={{ google_civic_election_id }}">
     < Back to Election</a>
+</p>
 
 <h1>{% if ballot_returned.id %}Ballot for '{{ ballot_returned.text_for_map_search|title }}'{% else %}New Ballot{% endif %}</h1>
 {% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}

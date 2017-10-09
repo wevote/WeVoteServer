@@ -581,10 +581,10 @@ def store_one_ballot_from_google_civic_api(one_ballot_json, voter_id=0, polling_
         }
         return results
 
-    election_date_text = ''
+    election_day_text = ''
     election_description_text = ''
     if 'electionDay' in one_ballot_json['election']:
-        election_date_text = one_ballot_json['election']['electionDay']
+        election_day_text = one_ballot_json['election']['electionDay']
     if 'name' in one_ballot_json['election']:
         election_description_text = one_ballot_json['election']['name']
 
@@ -680,7 +680,7 @@ def store_one_ballot_from_google_civic_api(one_ballot_json, voter_id=0, polling_
             else:
                 create_results = ballot_returned_manager.create_ballot_returned_with_normalized_values(
                     voter_address_dict,
-                    election_date_text, election_description_text,
+                    election_day_text, election_description_text,
                     google_civic_election_id, voter_id, '')
                 # We store ballot_returned entries without latitude and longitude here.
                 # These entries will not be found by a geo search until we augment them with latitude and longitude
@@ -702,7 +702,7 @@ def store_one_ballot_from_google_civic_api(one_ballot_json, voter_id=0, polling_
                 voter_id = 0
                 create_results = ballot_returned_manager.create_ballot_returned_with_normalized_values(
                     voter_address_dict,
-                    election_date_text, election_description_text,
+                    election_day_text, election_description_text,
                     google_civic_election_id, voter_id, polling_location_we_vote_id,
                     polling_location_latitude, polling_location_longitude)
                 ballot_returned_found = create_results['ballot_returned_found']
@@ -764,13 +764,13 @@ def store_results_from_google_civic_api_election_query(structured_json):
     results = {}
     for one_election in elections_list_json:
         raw_ocd_division_id = one_election['ocdDivisionId']
-        election_date_text = one_election['electionDay']
+        election_day_text = one_election['electionDay']
         google_civic_election_id = one_election['id']
         election_name = one_election['name']
 
         election_manager = ElectionManager()
         results = election_manager.update_or_create_election(
-            google_civic_election_id, election_name, election_date_text, raw_ocd_division_id)
+            google_civic_election_id, election_name, election_day_text, raw_ocd_division_id)
 
     return results
 
@@ -789,7 +789,7 @@ def voter_ballot_items_retrieve_from_google_civic_for_api(
             'voter_device_id':              voter_device_id,
             'google_civic_election_id':     0,
             'state_code':                   "",
-            'election_date_text':           "",
+            'election_day_text':           "",
             'election_description_text':    "",
             'election_data_retrieved':      False,
             'text_for_map_search':          text_for_map_search,
@@ -809,7 +809,7 @@ def voter_ballot_items_retrieve_from_google_civic_for_api(
             'voter_device_id':              voter_device_id,
             'google_civic_election_id':     0,
             'state_code':                   "",
-            'election_date_text':           "",
+            'election_day_text':           "",
             'election_description_text':    "",
             'election_data_retrieved':      False,
             'text_for_map_search':          text_for_map_search,
@@ -830,7 +830,7 @@ def voter_ballot_items_retrieve_from_google_civic_for_api(
             'voter_device_id':              voter_device_id,
             'google_civic_election_id':     0,
             'state_code':                   "",
-            'election_date_text':           "",
+            'election_day_text':           "",
             'election_description_text':    "",
             'election_data_retrieved':      False,
             'text_for_map_search':          text_for_map_search,
@@ -850,7 +850,7 @@ def voter_ballot_items_retrieve_from_google_civic_for_api(
             'voter_device_id':              voter_device_id,
             'google_civic_election_id':     0,
             'state_code':                   "",
-            'election_date_text':           "",
+            'election_day_text':           "",
             'election_description_text':    "",
             'election_data_retrieved':      False,
             'text_for_map_search':          text_for_map_search,
@@ -864,7 +864,7 @@ def voter_ballot_items_retrieve_from_google_civic_for_api(
 
     status = ''
     success = False
-    election_date_text = ''
+    election_day_text = ''
     election_description_text = ''
     election_data_retrieved = False
     polling_location_retrieved = False
@@ -885,7 +885,7 @@ def voter_ballot_items_retrieve_from_google_civic_for_api(
 
         if one_ballot_results['success']:
             one_ballot_json = one_ballot_results['structured_json']
-            election_date_text = one_ballot_json['election']['electionDay']
+            election_day_text = one_ballot_json['election']['electionDay']
             election_description_text = one_ballot_json['election']['name']
 
             # We may receive some election data, but not all of the data we need
@@ -955,7 +955,7 @@ def voter_ballot_items_retrieve_from_google_civic_for_api(
         'voter_device_id':              voter_device_id,
         'google_civic_election_id':     google_civic_election_id,
         'state_code':                   state_code,  # Note, this isn't an actual state_code yet - TODO: populate
-        'election_date_text':           election_date_text,
+        'election_day_text':           election_day_text,
         'election_description_text':    election_description_text,
         'election_data_retrieved':      election_data_retrieved,
         'text_for_map_search':          text_for_map_search,

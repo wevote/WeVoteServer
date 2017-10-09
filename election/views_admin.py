@@ -40,7 +40,7 @@ def election_all_ballots_retrieve_view(request, election_local_id=0):
     :param election_local_id:
     :return:
     """
-    authority_required = {'admin'}  # admin, verified_volunteer
+    authority_required = {'verified_volunteer'}  # admin, verified_volunteer
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
@@ -197,7 +197,7 @@ def election_one_ballot_retrieve_view(request, election_local_id=0):
     :param election_local_id:
     :return:
     """
-    authority_required = {'admin'}  # admin, verified_volunteer
+    authority_required = {'verified_volunteer'}  # admin, verified_volunteer
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
@@ -492,7 +492,7 @@ def election_remote_retrieve_view(request):
     :param request:
     :return:
     """
-    authority_required = {'admin'}  # admin, verified_volunteer
+    authority_required = {'verified_volunteer'}  # admin, verified_volunteer
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 

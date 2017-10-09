@@ -165,8 +165,8 @@ def ballot_returned_sync_out_view(request):  # ballotReturnedSyncOut
         # return Response(serializer.data)
         if ballot_returned_list:
             ballot_returned_list = ballot_returned_list.extra(
-                select={'election_date': "to_char(election_date, 'YYYY-MM-DD')"})
-            ballot_returned_list_dict = ballot_returned_list.values('election_date', 'election_description_text',
+                select={'election_day_text': "to_char(election_date, 'YYYY-MM-DD')"})
+            ballot_returned_list_dict = ballot_returned_list.values('election_day_text', 'election_description_text',
                                                                     'google_civic_election_id', 'latitude', 'longitude',
                                                                     'normalized_line1', 'normalized_line2',
                                                                     'normalized_city', 'normalized_state',
@@ -388,6 +388,8 @@ def ballot_item_list_edit_process_view(request):
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
+    status = ""
+
     ballot_returned_id = convert_to_int(request.POST.get('ballot_returned_id', 0))
     google_civic_election_id = request.POST.get('google_civic_election_id', 0)
     state_code = request.POST.get('state_code', '')
@@ -515,16 +517,19 @@ def ballot_item_list_edit_process_view(request):
         # Update the ballot_returned entry
         if ballot_returned_found:
             if positive_value_exists(ballot_returned.text_for_map_search):
-                if not ballot_returned.latitude or not ballot_returned.longitude:
-                    # Make sure we have saved a latitude and longitude for the ballot_returned entry
-                    google_client = get_geocoder_for_service('google')(GOOGLE_MAPS_API_KEY)
-                    location = google_client.geocode(ballot_returned.text_for_map_search)
-                    if location is None:
-                        status = 'Could not find location matching "{}"'.format(ballot_returned.text_for_map_search)
-                        logger.debug(status)
-                    else:
-                        ballot_returned.latitude = location.latitude
-                        ballot_returned.longitude = location.longitude
+                try:
+                    if not ballot_returned.latitude or not ballot_returned.longitude:
+                        # Make sure we have saved a latitude and longitude for the ballot_returned entry
+                        google_client = get_geocoder_for_service('google')(GOOGLE_MAPS_API_KEY)
+                        location = google_client.geocode(ballot_returned.text_for_map_search)
+                        if location is None:
+                            status += 'Could not find location matching "{}"'.format(ballot_returned.text_for_map_search)
+                            logger.debug(status)
+                        else:
+                            ballot_returned.latitude = location.latitude
+                            ballot_returned.longitude = location.longitude
+                except Exception as e:
+                    status += "EXCEPTION with get_geocoder_for_service "
             ballot_returned.ballot_location_display_option_on = ballot_location_display_option_on
             ballot_returned.ballot_location_display_name = ballot_location_display_name
             ballot_returned.ballot_location_shortcut = ballot_location_shortcut
@@ -588,10 +593,12 @@ def ballot_item_list_edit_process_view(request):
                 polling_location_we_vote_id, google_civic_election_id)
             if ballot_item_list_results['ballot_item_list_found']:
                 ballot_item_list = ballot_item_list_results['ballot_item_list']
+                local_ballot_order_count = 0
                 for one_ballot_item in ballot_item_list:
                     try:
-                        # local_ballot_order_ + one_ballot_item.id
-                        local_ballot_order = request.POST['local_ballot_order_' + str(one_ballot_item.id)]
+                        local_ballot_order_count += 1
+                        local_ballot_order_key = 'local_ballot_order_' + str(one_ballot_item.id)
+                        local_ballot_order = request.POST.get(local_ballot_order_key, local_ballot_order_count)
                         if local_ballot_order:
                             one_ballot_item.local_ballot_order = local_ballot_order
                             one_ballot_item.save()
