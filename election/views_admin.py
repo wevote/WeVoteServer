@@ -46,6 +46,7 @@ def election_all_ballots_retrieve_view(request, election_local_id=0):
 
     google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
     state_code = request.GET.get('state_code', '')
+    import_limit = convert_to_int(request.GET.get('import_limit', 500))
 
     try:
         if positive_value_exists(election_local_id):
@@ -77,7 +78,7 @@ def election_all_ballots_retrieve_view(request, election_local_id=0):
         polling_location_list = polling_location_list.filter(state__iexact=state_code)
         # We used to have a limit of 500 ballots to pull per election, but now retrieve all
         # Ordering by "location_name" creates a bit of (locational) random order
-        polling_location_list = polling_location_list.order_by('location_name')[:200]  # Limiting for full country pull
+        polling_location_list = polling_location_list.order_by('location_name')[:import_limit]
     except PollingLocation.DoesNotExist:
         messages.add_message(request, messages.INFO,
                              'Could not retrieve ballot data for the {election_name}. '
