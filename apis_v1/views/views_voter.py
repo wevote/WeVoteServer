@@ -431,8 +431,7 @@ def voter_address_save_view(request):  # voterAddressSave
 
 def voter_ballot_items_retrieve_view(request):  # voterBallotItemsRetrieve
     """
-    Request a skeleton of ballot data for this voter location,
-    so that the web_app has all of the ids it needs to make more requests for data about each ballot item.
+    Request the ballot data requested by the voter
     :param request:
     :return:
     """
@@ -490,7 +489,7 @@ def voter_ballot_items_retrieve_from_google_civic_view(request):  # voterBallotI
                 voter_id,
                 google_retrieve_results['google_civic_election_id'],
                 google_retrieve_results['state_code'],
-                google_retrieve_results['election_date_text'],
+                google_retrieve_results['election_day_text'],
                 google_retrieve_results['election_description_text'],
                 google_retrieve_results['text_for_map_search'],
                 substituted_address_nearby,

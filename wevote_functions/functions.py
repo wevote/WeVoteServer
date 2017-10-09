@@ -251,6 +251,18 @@ def extract_state_from_ocd_division_id(ocd_division_id):
     return fields['state']
 
 
+def extract_state_code_from_address_string(text_for_map_search):
+    text_for_map_search_lower = text_for_map_search.lower()
+    text_for_map_search_substring_list = re.split(r'[;,\s]\s*', text_for_map_search_lower)
+    for state_code, state_name in STATE_CODE_MAP.items():
+        if state_code.lower() in text_for_map_search_substring_list:
+            return state_code.lower()
+        elif state_name.lower() in text_for_map_search_substring_list:
+            return state_code.lower()
+
+    return ""
+
+
 def extract_district_from_ocd_division_id(ocd_division_id):
     # Pull this from ocdDivisionId
     pieces = [piece.split(':', 1) for piece in ocd_division_id.split('/')]

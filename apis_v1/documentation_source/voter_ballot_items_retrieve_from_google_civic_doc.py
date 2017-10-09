@@ -73,7 +73,7 @@ def voter_ballot_items_retrieve_from_google_civic_doc_template_values(url_root):
                    '  "voter_device_id": string (88 characters long),\n' \
                    '  "google_civic_election_id": integer,\n' \
                    '  "state_code": string,\n' \
-                   '  "election_date_text": string,\n' \
+                   '  "election_day_text": string,\n' \
                    '  "election_description_text": string,\n' \
                    '  "election_data_retrieved": boolean,\n' \
                    '  "text_for_map_search": string,\n' \

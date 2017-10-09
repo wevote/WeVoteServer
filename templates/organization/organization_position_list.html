@@ -5,10 +5,10 @@
 
 {%  block content %}
 {% load template_filters %}
-
-<p><a href="{% url 'organization:organization_list' %}?google_civic_election_id={{ google_civic_election_id }}">< Back to Organizations</a></p>
-<p><a href="{% url 'voter_guide:voter_guide_list' %}?google_civic_election_id={{ google_civic_election_id }}">< Back to Voter Guides</a></p>
-<p><a href="{% url 'admin_tools:data_cleanup_organization_analysis' %}?organization_we_vote_id={{ organization.we_vote_id }}&google_civic_election_id={{ google_civic_election_id }}">
+<p><a href="{% url 'admin_tools:admin_home' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">< Back to Admin Home</a>&nbsp;&nbsp;&nbsp;
+<a href="{% url 'organization:organization_list' %}?google_civic_election_id={{ google_civic_election_id }}">< Back to Organizations</a>&nbsp;&nbsp;&nbsp;
+<a href="{% url 'voter_guide:voter_guide_list' %}?google_civic_election_id={{ google_civic_election_id }}">< Back to Voter Guides</a>&nbsp;&nbsp;&nbsp;
+<a href="{% url 'admin_tools:data_cleanup_organization_analysis' %}?organization_we_vote_id={{ organization.we_vote_id }}&google_civic_election_id={{ google_civic_election_id }}">
     Analyze Organization Data ></a></p>
 
 {% if organization %}
@@ -22,7 +22,7 @@
     </tr>
     <tr>
         <th>Vote Smart ID:</th>
-        <td>{{ organization.vote_smart_id }}</td>
+        <td>{{ organization.vote_smart_id|default_if_none:"" }}</td>
     </tr>
     <tr>
         <th>Website:</th>
@@ -41,25 +41,25 @@
             <a href="{{ organization.generate_twitter_link }}" target="_blank">{{ organization.organization_twitter_handle }}</a>
             ({{ organization.twitter_followers_count }} Followers)
         {% else %}
-            {{ organization.organization_twitter_handle }}
+            {{ organization.organization_twitter_handle|default_if_none:"" }}
         {% endif %} (<a href="{% url 'import_export_twitter:refresh_twitter_organization_details' organization.id %}?google_civic_election_id={{ google_civic_election_id }}">refresh Twitter details</a>)
         (<a href="{% url 'import_export_twitter:delete_images_view'%}?organization_id={{ organization.id }}&google_civic_election_id={{ google_civic_election_id }}">Delete Cached Images</a>)</td>
     </tr>
     <tr>
         <th>Twitter Descriptive Name:</th>
-        <td>{{ organization.twitter_name }}</td>
+        <td>{{ organization.twitter_name|default_if_none:"" }}</td>
     </tr>
     <tr>
         <th>Twitter Description:</th>
-        <td>{{ organization.twitter_description }}</td>
+        <td>{{ organization.twitter_description|default_if_none:"" }}</td>
     </tr>
     <tr>
         <th>Twitter Location:</th>
-        <td>{{ organization.twitter_location }}</td>
+        <td>{{ organization.twitter_location|default_if_none:"" }}</td>
     </tr>
     <tr>
         <th>Profile Banner:</th>
-        <td>{{ organization.twitter_profile_banner_url_https }}</td>
+        <td>{{ organization.twitter_profile_banner_url_https|default_if_none:"" }}</td>
     </tr>
     <tr>
         <th>Facebook: </th>
