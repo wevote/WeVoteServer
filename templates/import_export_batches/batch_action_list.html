@@ -680,6 +680,32 @@
                     </tr>
                     {% endif %}
                 </tbody>
+            {% elif one_batch_row.kind_of_batch == "IMPORT_BALLOT_ITEM" %}
+            {# ####################################### #}
+            {# ### IMPORT_BALLOT_ITEM ### #}
+            {# ####################################### #}
+                <tr>
+                    <th></th>
+                    <th>polling_location_we_vote_id</th>
+                    <th>candidate_name</th>
+                    <th>candidate_twitter_handle</th>
+                    <th>contest_office_name</th>
+                    <th>contest_measure_name</th>
+                    <th>local_ballot_order</th>
+                    <th>ALERTS</th>
+                    <th>ACTIONS</th>
+                </tr>
+                <tr>
+                    <td>analysis:</td>
+                    <td>{{ one_batch_row.batch_row_action.polling_location_we_vote_id}}</td>
+                    <td>{{ one_batch_row.batch_row_action.candidate_name}}</td>
+                    <td>{{ one_batch_row.batch_row_action.candidate_twitter_handle }}</td>
+                    <td>{{ one_batch_row.batch_row_action.contest_office_name}}</td>
+                    <td>{{ one_batch_row.batch_row_action.contest_measure_name}}</td>
+                    <td>{{ one_batch_row.batch_row_action.local_ballot_order }}</td>
+                    <td></td>
+                    <td>{{ one_batch_row.batch_row_action.kind_of_action }}</td>
+                </tr>
             {% endif %}
             </table></td>
         </tr>
