@@ -1287,6 +1287,7 @@ def create_batch_row_action_candidate(batch_description, batch_header_map, one_b
         else:
             if kind_of_action == IMPORT_CREATE:
                 # We should not create without a valid office entry
+                status += "MISSING_VALID_OFFICE_ENTRY "
                 kind_of_action = IMPORT_TO_BE_DETERMINED
 
     # TODO Other checks:

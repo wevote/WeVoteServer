@@ -46,6 +46,7 @@ def election_all_ballots_retrieve_view(request, election_local_id=0):
 
     google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
     state_code = request.GET.get('state_code', '')
+    import_limit = convert_to_int(request.GET.get('import_limit', 500))
 
     try:
         if positive_value_exists(election_local_id):
@@ -77,7 +78,7 @@ def election_all_ballots_retrieve_view(request, election_local_id=0):
         polling_location_list = polling_location_list.filter(state__iexact=state_code)
         # We used to have a limit of 500 ballots to pull per election, but now retrieve all
         # Ordering by "location_name" creates a bit of (locational) random order
-        polling_location_list = polling_location_list.order_by('location_name')[:200]  # Limiting for full country pull
+        polling_location_list = polling_location_list.order_by('location_name')[:import_limit]
     except PollingLocation.DoesNotExist:
         messages.add_message(request, messages.INFO,
                              'Could not retrieve ballot data for the {election_name}. '
@@ -552,14 +553,15 @@ def election_summary_view(request, election_local_id):
 
         sorted_state_list = sorted(state_list_modified.items())
 
+        limit = 200  # Since this is a summary page, we don't need to show very many ballot_returned entries
         ballot_returned_list_results = ballot_returned_list_manager.retrieve_ballot_returned_list_for_election(
-            election_on_stage.google_civic_election_id, state_code)
+            election_on_stage.google_civic_election_id, state_code, limit)
 
         if ballot_returned_list_results['success']:
             ballot_returned_list = ballot_returned_list_results['ballot_returned_list']
             ballot_returned_count = len(ballot_returned_list)
             if not positive_value_exists(state_code):
-                ballot_returned_list = ballot_returned_list[:1000]
+                ballot_returned_list = ballot_returned_list[:200]
         else:
             ballot_returned_list = []
 
@@ -572,7 +574,7 @@ def election_summary_view(request, election_local_id):
         if show_offices_and_candidates:
             ballot_returned_list_modified = []
             # office_list_manager = ContestOfficeListManager()
-            ballot_returned_list_shorter = ballot_returned_list[:200]
+            ballot_returned_list_shorter = ballot_returned_list[:50]
             for one_ballot_returned in ballot_returned_list_shorter:
                 candidates_count = 0
                 offices_count = 0

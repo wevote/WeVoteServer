@@ -264,12 +264,13 @@ def ballot_item_list_edit_view(request, ballot_returned_id, polling_location_we_
 
     ballot_returned_manager = BallotReturnedManager()
     voter_id = 0
-    results = ballot_returned_manager.retrieve_existing_ballot_returned_by_identifier(
-        ballot_returned_id, google_civic_election_id, voter_id, polling_location_we_vote_id_from_path)
-    if results['ballot_returned_found']:
-        ballot_returned = results['ballot_returned']
-        ballot_returned_found = True
-        google_civic_election_id = ballot_returned.google_civic_election_id
+    if positive_value_exists(ballot_returned_id) or positive_value_exists(polling_location_we_vote_id_from_path):
+        results = ballot_returned_manager.retrieve_existing_ballot_returned_by_identifier(
+            ballot_returned_id, google_civic_election_id, voter_id, polling_location_we_vote_id_from_path)
+        if results['ballot_returned_found']:
+            ballot_returned = results['ballot_returned']
+            ballot_returned_found = True
+            google_civic_election_id = ballot_returned.google_civic_election_id
 
     election = Election()
     election_state = ''
