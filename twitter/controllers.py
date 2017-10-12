@@ -30,7 +30,10 @@ def analyze_twitter_search_results(search_results, search_results_length, candid
         if positive_value_exists(one_result.followers_count):
             followers_likelihood = floor(10.0 * log2(one_result.followers_count / 125.0))
             if positive_value_exists(followers_likelihood):
-                likelihood_score += followers_likelihood
+                if followers_likelihood > 30:
+                    likelihood_score += 30
+                else:
+                    likelihood_score += followers_likelihood
 
         if one_result.name == candidate_campaign.candidate_name:
             # If exact name match
