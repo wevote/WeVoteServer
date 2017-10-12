@@ -11,7 +11,7 @@ import re
 from wevote_settings.models import fetch_next_we_vote_id_candidate_campaign_integer, fetch_site_unique_id_prefix
 import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, display_full_name_with_correct_capitalization, \
-    extract_first_name_from_full_name, \
+    extract_first_name_from_full_name, extract_middle_name_from_full_name, \
     extract_last_name_from_full_name, extract_state_from_ocd_division_id, extract_twitter_handle_from_text_string, \
     positive_value_exists
 
@@ -641,6 +641,10 @@ class CandidateCampaign(models.Model):
     def extract_first_name(self):
         full_name = self.display_candidate_name()
         return extract_first_name_from_full_name(full_name)
+
+    def extract_middle_name(self):
+        full_name = self.display_candidate_name()
+        return extract_middle_name_from_full_name(full_name)
 
     def extract_last_name(self):
         full_name = self.display_candidate_name()
