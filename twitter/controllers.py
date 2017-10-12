@@ -10,6 +10,7 @@ from candidate.models import CandidateCampaignListManager
 from config.base import get_environment_variable
 from organization.models import OrganizationListManager
 from wevote_functions.functions import convert_state_code_to_state_text, convert_to_int, positive_value_exists
+from math import floor, log2
 
 TWITTER_CONSUMER_KEY = get_environment_variable("TWITTER_CONSUMER_KEY")
 TWITTER_CONSUMER_SECRET = get_environment_variable("TWITTER_CONSUMER_SECRET")
@@ -25,12 +26,11 @@ def analyze_twitter_search_results(search_results, search_results_length, candid
     for possible_candidate_index in range(search_results_length):
         one_result = search_results[possible_candidate_index]
         likelihood_percentage = 0
-        if one_result.followers_count > 1000:
-            likelihood_percentage += 30
-        elif one_result.followers_count > 500:
-            likelihood_percentage += 20
-        elif one_result.followers_count > 100:
-            likelihood_percentage += 10
+
+        if positive_value_exists(one_result.followers_count):
+            followers_likelihood = floor(10.0 * log2(one_result.followers_count / 125.0))
+            if positive_value_exists(followers_likelihood):
+                likelihood_percentage += followers_likelihood
 
         if one_result.name == candidate_campaign.candidate_name:
             # If exact name match
@@ -60,7 +60,16 @@ def analyze_twitter_search_results(search_results, search_results_length, candid
         if one_result.description and "candidate" in one_result.description.lower():
             likelihood_percentage += 10
 
+        if one_result.description and "chair" in one_result.description.lower():
+            likelihood_percentage += 10
+
         if one_result.description and "district" in one_result.description.lower():
+            likelihood_percentage += 10
+
+        if one_result.description and "endorsed" in one_result.description.lower():
+            likelihood_percentage += 10
+
+        if one_result.description and "running" in one_result.description.lower():
             likelihood_percentage += 10
 
         current_candidate_twitter_info = {}
