@@ -17,63 +17,12 @@ TWITTER_ACCESS_TOKEN = get_environment_variable("TWITTER_ACCESS_TOKEN")
 TWITTER_ACCESS_TOKEN_SECRET = get_environment_variable("TWITTER_ACCESS_TOKEN_SECRET")
 
 
-def delete_possible_twitter_handles(candidate_campaign):
-    status = ""
-    twitter_user_manager = TwitterUserManager()
-
-    if not candidate_campaign:
-        status += "DELETE_POSSIBLE_TWITTER_HANDLES-CANDIDATE_MISSING "
-        results = {
-            'success':                  False,
-            'status':                   status,
-        }
-        return results
-
-    results = twitter_user_manager.delete_twitter_link_possibilities(candidate_campaign.we_vote_id)
-    status += results['status']
-
-    results = {
-        'success':                  True,
-        'status':                   status,
-    }
-
-    return results
-
-
-def retrieve_possible_twitter_handles(candidate_campaign):
-    status = ""
-    twitter_user_manager = TwitterUserManager()
-
-    if not candidate_campaign:
-        status = "RETRIEVE_POSSIBLE_TWITTER_HANDLES-CANDIDATE_MISSING "
-        results = {
-            'success':                  False,
-            'status':                   status,
-        }
-        return results
-
-    status += "RETRIEVE_POSSIBLE_TWITTER_HANDLES-REACHING_OUT_TO_TWITTER "
-
+def analyze_twitter_search_results(search_results, search_results_length, candidate_campaign, possible_twitter_handles_list):
     search_term = candidate_campaign.candidate_name
     state_code = candidate_campaign.state_code
     state_full_name = convert_state_code_to_state_text(state_code)
 
-    auth = tweepy.OAuthHandler(TWITTER_CONSUMER_KEY, TWITTER_CONSUMER_SECRET)
-    auth.set_access_token(TWITTER_ACCESS_TOKEN, TWITTER_ACCESS_TOKEN_SECRET)
-    api = tweepy.API(auth)
-    results = {'possible_twitter_handles_list': []}
-    possible_twitter_handles_list = []
-    search_results = api.search_users(q=search_term, page=1)
-    search_results.sort(key=lambda possible_candidate: possible_candidate.followers_count, reverse=True)
-    search_results_found = len(search_results)
-
-    if not positive_value_exists(search_results_found):
-        # No results found with name "as-is". Try searching for only first and last name (without middle names)
-        modified_search_term = candidate_campaign.extract_first_name() + " " + candidate_campaign.extract_last_name()
-        search_results = api.search_users(q=modified_search_term, page=1)
-        search_results.sort(key=lambda possible_candidate: possible_candidate.followers_count, reverse=True)
-
-    for possible_candidate_index in range(len(search_results)):
+    for possible_candidate_index in range(search_results_length):
         one_result = search_results[possible_candidate_index]
         likelihood_percentage = 0
         if one_result.followers_count > 1000:
@@ -120,6 +69,78 @@ def retrieve_possible_twitter_handles(candidate_campaign):
         current_candidate_twitter_info['twitter_json'] = one_result._json
 
         possible_twitter_handles_list.append(current_candidate_twitter_info)
+
+
+def delete_possible_twitter_handles(candidate_campaign):
+    status = ""
+    twitter_user_manager = TwitterUserManager()
+
+    if not candidate_campaign:
+        status += "DELETE_POSSIBLE_TWITTER_HANDLES-CANDIDATE_MISSING "
+        results = {
+            'success':                  False,
+            'status':                   status,
+        }
+        return results
+
+    results = twitter_user_manager.delete_twitter_link_possibilities(candidate_campaign.we_vote_id)
+    status += results['status']
+
+    results = {
+        'success':                  True,
+        'status':                   status,
+    }
+
+    return results
+
+
+def retrieve_possible_twitter_handles(candidate_campaign):
+    status = ""
+    twitter_user_manager = TwitterUserManager()
+
+    if not candidate_campaign:
+        status = "RETRIEVE_POSSIBLE_TWITTER_HANDLES-CANDIDATE_MISSING "
+        results = {
+            'success':                  False,
+            'status':                   status,
+        }
+        return results
+
+    status += "RETRIEVE_POSSIBLE_TWITTER_HANDLES-REACHING_OUT_TO_TWITTER "
+
+    search_term = candidate_campaign.candidate_name
+
+    auth = tweepy.OAuthHandler(TWITTER_CONSUMER_KEY, TWITTER_CONSUMER_SECRET)
+    auth.set_access_token(TWITTER_ACCESS_TOKEN, TWITTER_ACCESS_TOKEN_SECRET)
+    api = tweepy.API(auth)
+    # results = {'possible_twitter_handles_list': []}
+    possible_twitter_handles_list = []
+    search_results = api.search_users(q=search_term, page=1)
+
+    search_results.sort(key=lambda possible_candidate: possible_candidate.followers_count, reverse=True)
+    search_results_found = len(search_results)
+
+    analyze_twitter_search_results(search_results, search_results_found, candidate_campaign,
+                                   possible_twitter_handles_list)
+
+    # Also include search results omitting any initials in name.
+    first_name = candidate_campaign.extract_first_name()
+    middle_name = candidate_campaign.extract_middle_name()
+    last_name = candidate_campaign.extract_last_name()
+    modified_search_term = ""
+    if len(first_name) and "." not in first_name:
+        modified_search_term += first_name + " "
+    if len(middle_name) and "." not in middle_name:
+        modified_search_term += middle_name + " "
+    if len(last_name) and "." not in last_name:
+        modified_search_term += last_name
+
+    if search_term != modified_search_term:
+        modified_search_results = api.search_users(q=modified_search_term, page=1)
+        modified_search_results.sort(key=lambda possible_candidate: possible_candidate.followers_count, reverse=True)
+        modified_search_results_found = len(modified_search_results)
+        analyze_twitter_search_results(modified_search_results, modified_search_results_found, candidate_campaign,
+                                       possible_twitter_handles_list)
 
     success = bool(possible_twitter_handles_list)
 
