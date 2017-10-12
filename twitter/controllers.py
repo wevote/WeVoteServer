@@ -25,56 +25,56 @@ def analyze_twitter_search_results(search_results, search_results_length, candid
 
     for possible_candidate_index in range(search_results_length):
         one_result = search_results[possible_candidate_index]
-        likelihood_percentage = 0
+        likelihood_score = 0
 
         if positive_value_exists(one_result.followers_count):
             followers_likelihood = floor(10.0 * log2(one_result.followers_count / 125.0))
             if positive_value_exists(followers_likelihood):
-                likelihood_percentage += followers_likelihood
+                likelihood_score += followers_likelihood
 
         if one_result.name == candidate_campaign.candidate_name:
             # If exact name match
-            likelihood_percentage += 20
+            likelihood_score += 20
 
         if one_result.location and positive_value_exists(state_full_name) and state_full_name in one_result.location:
-            likelihood_percentage += 30
+            likelihood_score += 30
         elif one_result.location and positive_value_exists(state_code) and state_code in one_result.location:
-            likelihood_percentage += 20
+            likelihood_score += 20
 
         if one_result.description and positive_value_exists(state_full_name) and \
                 state_full_name in one_result.description:
-            likelihood_percentage += 20
+            likelihood_score += 20
         elif one_result.description and positive_value_exists(state_code) and state_code in one_result.description:
-            likelihood_percentage += 10
+            likelihood_score += 10
 
         political_party = candidate_campaign.political_party_display()
         if one_result.description and positive_value_exists(political_party) and \
                 political_party in one_result.description:
-            likelihood_percentage += 20
+            likelihood_score += 20
 
         office_name = candidate_campaign.contest_office_name
         if one_result.description and positive_value_exists(office_name) and office_name in one_result.description:
-            likelihood_percentage += 20
+            likelihood_score += 20
 
         # Increase the percentage for every keyword we find
         if one_result.description and "candidate" in one_result.description.lower():
-            likelihood_percentage += 10
+            likelihood_score += 10
 
         if one_result.description and "chair" in one_result.description.lower():
-            likelihood_percentage += 10
+            likelihood_score += 10
 
         if one_result.description and "district" in one_result.description.lower():
-            likelihood_percentage += 10
+            likelihood_score += 10
 
         if one_result.description and "endorsed" in one_result.description.lower():
-            likelihood_percentage += 10
+            likelihood_score += 10
 
         if one_result.description and "running" in one_result.description.lower():
-            likelihood_percentage += 10
+            likelihood_score += 10
 
         current_candidate_twitter_info = {}
         current_candidate_twitter_info['search_term'] = search_term
-        current_candidate_twitter_info['likelihood_percentage'] = likelihood_percentage
+        current_candidate_twitter_info['likelihood_score'] = likelihood_score
         current_candidate_twitter_info['twitter_json'] = one_result._json
 
         possible_twitter_handles_list.append(current_candidate_twitter_info)
@@ -159,7 +159,7 @@ def retrieve_possible_twitter_handles(candidate_campaign):
         for possibility_result in possible_twitter_handles_list:
             save_twitter_user_results = twitter_user_manager.update_or_create_twitter_link_possibility(
                 candidate_campaign.we_vote_id, possibility_result['twitter_json'],
-                possibility_result['search_term'], possibility_result['likelihood_percentage'])
+                possibility_result['search_term'], possibility_result['likelihood_score'])
 
     results = {
         'success':                  True,
