@@ -176,20 +176,30 @@ def retrieve_possible_twitter_handles(candidate_campaign):
     nickname = sub(r"[^A-Za-z']", "", candidate_campaign.extract_nickname())
 
     modified_search_term = ""
+    modified_search_term_base = ""
     if len(first_name) > 1:
         modified_search_term += first_name + " "
     if len(middle_name) > 1:
-        modified_search_term += middle_name + " "
+        modified_search_term_base += middle_name + " "
     if len(last_name) > 1:
-        modified_search_term += last_name
+        modified_search_term_base += last_name
     if len(suffix):
-        modified_search_term += " " + suffix
-
+        modified_search_term_base += " " + suffix
+    modified_search_term += modified_search_term_base
     if search_term != modified_search_term:
         modified_search_results = api.search_users(q=modified_search_term, page=1)
         modified_search_results.sort(key=lambda possible_candidate: possible_candidate.followers_count, reverse=True)
         modified_search_results_found = len(modified_search_results)
         analyze_twitter_search_results(modified_search_results, modified_search_results_found, candidate_campaign,
+                                       possible_twitter_handles_list)
+
+    # If nickname exists, try searching with nickname instead of first name
+    if len(nickname):
+        modified_search_term_2 = nickname + " " + modified_search_term_base
+        modified_search_results_2 = api.search_users(q=modified_search_term_2, page=1)
+        modified_search_results_2.sort(key=lambda possible_candidate: possible_candidate.followers_count, reverse=True)
+        modified_search_results_2_found = len(modified_search_results_2)
+        analyze_twitter_search_results(modified_search_results_2, modified_search_results_2_found, candidate_campaign,
                                        possible_twitter_handles_list)
 
     success = bool(possible_twitter_handles_list)
