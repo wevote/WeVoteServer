@@ -11,6 +11,7 @@ from config.base import get_environment_variable
 from organization.models import OrganizationListManager
 from wevote_functions.functions import convert_state_code_to_state_text, convert_to_int, positive_value_exists
 from math import floor, log2
+from time import time
 
 TWITTER_CONSUMER_KEY = get_environment_variable("TWITTER_CONSUMER_KEY")
 TWITTER_CONSUMER_SECRET = get_environment_variable("TWITTER_CONSUMER_SECRET")
@@ -28,6 +29,10 @@ def analyze_twitter_search_results(search_results, search_results_length, candid
         likelihood_score = 0
 
         if positive_value_exists(one_result.followers_count):
+            #  125 followers =  0 points
+            #  250 followers = 10 points
+            #  500 followers = 20 points
+            # 1000 followers = 30 points
             followers_likelihood = floor(10.0 * log2(one_result.followers_count / 125.0))
             if positive_value_exists(followers_likelihood):
                 if followers_likelihood > 30:
@@ -59,7 +64,7 @@ def analyze_twitter_search_results(search_results, search_results_length, candid
         if one_result.description and positive_value_exists(office_name) and office_name in one_result.description:
             likelihood_score += 20
 
-        # Increase the percentage for every keyword we find
+        # Increase the score for every keyword we find
         if one_result.description and "candidate" in one_result.description.lower():
             likelihood_score += 10
 
@@ -74,6 +79,30 @@ def analyze_twitter_search_results(search_results, search_results_length, candid
 
         if one_result.description and "running" in one_result.description.lower():
             likelihood_score += 10
+
+        # Decrease the score for inactive accounts
+        try:
+            time_last_active = one_result.status.created_at.timestamp()
+            time_difference = time() - time_last_active
+            if positive_value_exists(time_difference):
+                #  30 days = 2,592,000 seconds
+                #  30 days inactive =   0 points
+                #  60 days inactive = -10 points
+                # 120 days inactive = -20 points
+                # 240 days inactive = -30 points
+                inactivity_likelihood = floor(10.0 * log2(time_difference / 2.592e6))
+                if positive_value_exists(inactivity_likelihood):
+                    if inactivity_likelihood > 30:
+                        likelihood_score -= 30
+                    else:
+                        likelihood_score -= inactivity_likelihood
+        except AttributeError:
+            # 'User' object (one_result) has no attribute 'status'
+            # So the account likely has no tweets
+            likelihood_score -= 30
+
+        if not positive_value_exists(likelihood_score):
+            likelihood_score = 0
 
         current_candidate_twitter_info = {}
         current_candidate_twitter_info['search_term'] = search_term
