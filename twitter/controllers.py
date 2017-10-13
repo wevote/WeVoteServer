@@ -11,6 +11,7 @@ from config.base import get_environment_variable
 from organization.models import OrganizationListManager
 from wevote_functions.functions import convert_state_code_to_state_text, convert_to_int, positive_value_exists
 from math import floor, log2
+from re import sub
 from time import time
 
 TWITTER_CONSUMER_KEY = get_environment_variable("TWITTER_CONSUMER_KEY")
@@ -165,16 +166,17 @@ def retrieve_possible_twitter_handles(candidate_campaign):
     analyze_twitter_search_results(search_results, search_results_found, candidate_campaign,
                                    possible_twitter_handles_list)
 
-    # Also include search results omitting any initials in name.
-    first_name = candidate_campaign.extract_first_name()
-    middle_name = candidate_campaign.extract_middle_name()
-    last_name = candidate_campaign.extract_last_name()
+    # Also include search results omitting any single-letter initials in name.
+    # Example: "A." is ignored while "A.J." becomes "AJ"
+    first_name = sub(r"[^A-Za-z']", "", candidate_campaign.extract_first_name())
+    middle_name = sub(r"[^A-Za-z']", "", candidate_campaign.extract_middle_name())
+    last_name = sub(r"[^A-Za-z']", "", candidate_campaign.extract_last_name())
     modified_search_term = ""
-    if len(first_name) and "." not in first_name:
+    if len(first_name) > 1:
         modified_search_term += first_name + " "
-    if len(middle_name) and "." not in middle_name:
+    if len(middle_name) > 1:
         modified_search_term += middle_name + " "
-    if len(last_name) and "." not in last_name:
+    if len(last_name) > 1:
         modified_search_term += last_name
 
     if search_term != modified_search_term:
