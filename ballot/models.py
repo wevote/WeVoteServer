@@ -1545,9 +1545,9 @@ class BallotReturnedListManager(models.Model):
         google_civic_election_id = convert_to_int(google_civic_election_id)
         try:
             ballot_returned_queryset = BallotReturned.objects.all()
-            # ballot_returned_queryset = ballot_returned_queryset.exclude(
-            #     Q(polling_location_we_vote_id=None) |
-            #     Q(polling_location_we_vote_id=""))
+            ballot_returned_queryset = ballot_returned_queryset.exclude(
+                Q(polling_location_we_vote_id=None) |
+                Q(polling_location_we_vote_id=""))
             ballot_returned_queryset = ballot_returned_queryset.filter(latitude=None)
             ballot_returned_queryset = ballot_returned_queryset.filter(
                 google_civic_election_id=google_civic_election_id)
