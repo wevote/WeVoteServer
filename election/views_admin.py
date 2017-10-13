@@ -534,8 +534,11 @@ def election_summary_view(request, election_local_id):
         pass
 
     state_code = request.GET.get('state_code', '')
+    sorted_state_list = []
     status_print_list = ""
     ballot_returned_count = 0
+    ballot_returned_count_entire_election = 0
+    entries_missing_latitude_longitude = 0
     ballot_returned_list_manager = BallotReturnedListManager()
     candidate_campaign_list_manager = CandidateCampaignListManager()
 
@@ -556,16 +559,21 @@ def election_summary_view(request, election_local_id):
         limit = 200  # Since this is a summary page, we don't need to show very many ballot_returned entries
         ballot_returned_list_results = ballot_returned_list_manager.retrieve_ballot_returned_list_for_election(
             election_on_stage.google_civic_election_id, state_code, limit)
+        ballot_returned_count_entire_election = \
+            ballot_returned_list_manager.fetch_ballot_returned_list_count_for_election(
+                election_on_stage.google_civic_election_id)
+        entries_missing_latitude_longitude = \
+            ballot_returned_list_manager.fetch_ballot_returned_entries_needed_lat_long_for_election(
+                election_on_stage.google_civic_election_id, state_code)
 
         if ballot_returned_list_results['success']:
             ballot_returned_list = ballot_returned_list_results['ballot_returned_list']
-            ballot_returned_count = len(ballot_returned_list)
             if not positive_value_exists(state_code):
                 ballot_returned_list = ballot_returned_list[:200]
         else:
             ballot_returned_list = []
 
-        status_print_list += "ballot_returned_count: " + str(ballot_returned_count) + "<br />"
+        status_print_list += "ballot_returned_count: " + str(ballot_returned_count_entire_election) + "<br />"
         messages.add_message(request, messages.INFO, status_print_list)
         messages_on_stage = get_messages(request)
 
@@ -620,6 +628,8 @@ def election_summary_view(request, election_local_id):
 
         template_values = {
             'ballot_returned_list': ballot_returned_list_modified,
+            'ballot_returned_count_entire_election':    ballot_returned_count_entire_election,
+            'entries_missing_latitude_longitude':   entries_missing_latitude_longitude,
             'election':             election_on_stage,
             'messages_on_stage':    messages_on_stage,
             'state_code':           state_code,
@@ -629,6 +639,8 @@ def election_summary_view(request, election_local_id):
         messages_on_stage = get_messages(request)
 
         template_values = {
+            'ballot_returned_count_entire_election':    ballot_returned_count_entire_election,
+            'entries_missing_latitude_longitude':   entries_missing_latitude_longitude,
             'messages_on_stage':    messages_on_stage,
             'state_code':           state_code,
             'state_list':           sorted_state_list,
