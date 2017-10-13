@@ -166,11 +166,15 @@ def retrieve_possible_twitter_handles(candidate_campaign):
     analyze_twitter_search_results(search_results, search_results_found, candidate_campaign,
                                    possible_twitter_handles_list)
 
-    # Also include search results omitting any single-letter initials in name.
+    # Also include search results omitting any single-letter initials and periods in name.
     # Example: "A." is ignored while "A.J." becomes "AJ"
+    title = sub(r"[^A-Za-z']", "", candidate_campaign.extract_title())
     first_name = sub(r"[^A-Za-z']", "", candidate_campaign.extract_first_name())
     middle_name = sub(r"[^A-Za-z']", "", candidate_campaign.extract_middle_name())
     last_name = sub(r"[^A-Za-z']", "", candidate_campaign.extract_last_name())
+    suffix = sub(r"[^A-Za-z']", "", candidate_campaign.extract_suffix())
+    nickname = sub(r"[^A-Za-z']", "", candidate_campaign.extract_nickname())
+
     modified_search_term = ""
     if len(first_name) > 1:
         modified_search_term += first_name + " "
@@ -178,6 +182,8 @@ def retrieve_possible_twitter_handles(candidate_campaign):
         modified_search_term += middle_name + " "
     if len(last_name) > 1:
         modified_search_term += last_name
+    if len(suffix):
+        modified_search_term += " " + suffix
 
     if search_term != modified_search_term:
         modified_search_results = api.search_users(q=modified_search_term, page=1)
