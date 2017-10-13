@@ -20,7 +20,7 @@ gunicorn==19.3.0
 httplib2==0.9.1
 oauth2client==1.4.7
 oauthlib==0.7.2
-nameparser==0.3.11
+nameparser==0.5.3
 Pillow==4.0.0
 psycopg2==2.6
 pyasn1==0.1.7
