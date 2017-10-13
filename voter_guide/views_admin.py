@@ -317,40 +317,10 @@ def voter_guide_list_view(request):
     else:
         order_by = "google_civic_election_id"
         limit_number = 75
-        results = voter_guide_list_object.retrieve_all_voter_guides_order_by(order_by, limit_number)
+        results = voter_guide_list_object.retrieve_all_voter_guides_order_by(order_by, limit_number, voter_guide_search)
 
         if results['success']:
             voter_guide_list = results['voter_guide_list']
-
-    if positive_value_exists(voter_guide_search):
-        search_words = voter_guide_search.split()
-        for one_word in search_words:
-            filters = []
-
-            new_filter = Q(twitter_handle__icontains=one_word)
-            filters.append(new_filter)
-
-            new_filter = Q(owner_we_vote_id__icontains=one_word)
-            filters.append(new_filter)
-
-            new_filter = Q(state_code__icontains=one_word)
-            filters.append(new_filter)
-
-            new_filter = Q(public_figure_we_vote_id__icontains=one_word)
-            filters.append(new_filter)
-
-            new_filter = Q(display_name__icontains=one_word)
-            filters.append(new_filter)
-
-            # Add the first query
-            if len(filters):
-                final_filters = filters.pop()
-
-                # ...and "OR" the remaining items in the list
-                for item in filters:
-                    final_filters |= item
-
-                voter_guide_list = voter_guide_list.filter(final_filters)
 
     modified_voter_guide_list = []
     position_list_manager = PositionListManager()
