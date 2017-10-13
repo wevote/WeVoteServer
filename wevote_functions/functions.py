@@ -353,6 +353,21 @@ def extract_email_addresses_from_string(incoming_string):
     return list_of_emails
 
 
+def extract_title_from_full_name(full_name):
+    """
+    See documentation here: https://github.com/derek73/python-nameparser
+    :param full_name:
+    :return:
+    """
+    if full_name is not None and not callable(full_name):
+        full_name = str(full_name)
+        full_name.strip()
+        full_name_parsed = HumanName(full_name)
+        title = full_name_parsed.title
+        return title
+    return ""
+
+
 def extract_first_name_from_full_name(full_name):
     """
     See documentation here: https://github.com/derek73/python-nameparser
@@ -395,6 +410,36 @@ def extract_last_name_from_full_name(full_name):
         full_name_parsed = HumanName(full_name)
         last_name = full_name_parsed.last
         return last_name
+    return ""
+
+
+def extract_suffix_from_full_name(full_name):
+    """
+    See documentation here: https://github.com/derek73/python-nameparser
+    :param full_name:
+    :return:
+    """
+    if full_name is not None and not callable(full_name):
+        full_name = str(full_name)
+        full_name.strip()
+        full_name_parsed = HumanName(full_name)
+        suffix = full_name_parsed.suffix
+        return suffix
+    return ""
+
+
+def extract_nickname_from_full_name(full_name):
+    """
+    See documentation here: https://github.com/derek73/python-nameparser
+    :param full_name:
+    :return:
+    """
+    if full_name is not None and not callable(full_name):
+        full_name = str(full_name)
+        full_name.strip()
+        full_name_parsed = HumanName(full_name)
+        nickname = full_name_parsed.nickname
+        return nickname
     return ""
 
 

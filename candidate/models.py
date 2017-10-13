@@ -11,8 +11,9 @@ import re
 from wevote_settings.models import fetch_next_we_vote_id_candidate_campaign_integer, fetch_site_unique_id_prefix
 import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, display_full_name_with_correct_capitalization, \
-    extract_first_name_from_full_name, extract_middle_name_from_full_name, \
-    extract_last_name_from_full_name, extract_state_from_ocd_division_id, extract_twitter_handle_from_text_string, \
+    extract_title_from_full_name, extract_first_name_from_full_name, extract_middle_name_from_full_name, \
+    extract_last_name_from_full_name, extract_suffix_from_full_name, extract_nickname_from_full_name, \
+    extract_state_from_ocd_division_id, extract_twitter_handle_from_text_string, \
     positive_value_exists
 
 logger = wevote_functions.admin.get_logger(__name__)
@@ -638,6 +639,10 @@ class CandidateCampaign(models.Model):
             return full_name_corrected_capitalization
         return full_name
 
+    def extract_title(self):
+        full_name = self.display_candidate_name()
+        return extract_title_from_full_name(full_name)
+
     def extract_first_name(self):
         full_name = self.display_candidate_name()
         return extract_first_name_from_full_name(full_name)
@@ -649,6 +654,14 @@ class CandidateCampaign(models.Model):
     def extract_last_name(self):
         full_name = self.display_candidate_name()
         return extract_last_name_from_full_name(full_name)
+
+    def extract_suffix(self):
+        full_name = self.display_candidate_name()
+        return extract_suffix_from_full_name(full_name)
+
+    def extract_nickname(self):
+        full_name = self.display_candidate_name()
+        return extract_nickname_from_full_name(full_name)
 
     def political_party_display(self):
         return candidate_party_display(self.party)
