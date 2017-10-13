@@ -19,7 +19,8 @@ TWITTER_ACCESS_TOKEN = get_environment_variable("TWITTER_ACCESS_TOKEN")
 TWITTER_ACCESS_TOKEN_SECRET = get_environment_variable("TWITTER_ACCESS_TOKEN_SECRET")
 
 
-def analyze_twitter_search_results(search_results, search_results_length, candidate_campaign, possible_twitter_handles_list):
+def analyze_twitter_search_results(search_results, search_results_length, candidate_campaign,
+                                   possible_twitter_handles_list):
     search_term = candidate_campaign.candidate_name
     state_code = candidate_campaign.state_code
     state_full_name = convert_state_code_to_state_text(state_code)
