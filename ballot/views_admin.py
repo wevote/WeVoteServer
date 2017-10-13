@@ -661,6 +661,8 @@ def update_ballot_returned_with_latitude_and_longitude_view(request):
     state_code = request.GET.get('state_code', "")
 
     latitude_and_longitude_updated_count = 0
+    latitude_and_longitude_not_updated_count = 0
+    errors_status = ""
     polling_location_updated_count = 0
     polling_location_not_updated_count = 0
 
@@ -677,6 +679,10 @@ def update_ballot_returned_with_latitude_and_longitude_view(request):
                         ballot_returned_manager.populate_latitude_and_longitude_for_ballot_returned(ballot_returned)
                     if ballot_returned_results['success']:
                         latitude_and_longitude_updated_count += 1
+                    else:
+                        latitude_and_longitude_not_updated_count += 1
+                        errors_status += ballot_returned_results['status']
+
             except Exception as e:
                 pass
     else:
@@ -723,19 +729,27 @@ def update_ballot_returned_with_latitude_and_longitude_view(request):
             ballot_returned_results = ballot_returned_manager.populate_latitude_and_longitude_for_ballot_returned(
                  ballot_returned)
             if ballot_returned_results['success']:
-                # Keep track of the limit to how many we can request per second
+                # Keep track of the number we have processed since last break, since we can only request 10 per second
                 latitude_and_longitude_updated_count += 1
-                if rate_limit_count >= 10:
-                    time.sleep(1)
-                    # After pause, reset the limit count
-                    rate_limit_count = 0
+            else:
+                latitude_and_longitude_not_updated_count += 1
+                errors_status += ballot_returned_results['status']
+
+            if rate_limit_count >= 10:
+                time.sleep(1)
+                # After pause, reset the limit count
+                rate_limit_count = 0
+
             if ballot_returned_results['geocoder_quota_exceeded']:
                 break
 
     status_print_list = ""
+    errors_status = errors_status[:155]  # We cut off the string so we don't overwhelm the message system
 
     status_print_list += "BallotReturned entries updated with lat/long info: " + \
-                         str(latitude_and_longitude_updated_count) + "<br />"
+                         str(latitude_and_longitude_updated_count) + "<br />" + \
+                         "not updated: " + str(latitude_and_longitude_not_updated_count) + \
+                         ", errors: " + errors_status + "<br />"
     if positive_value_exists(polling_location_updated_count) \
             or positive_value_exists(polling_location_not_updated_count):
         status_print_list += "polling_location_updated_count: " + str(polling_location_updated_count) + ", "
