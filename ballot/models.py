@@ -1417,9 +1417,18 @@ class BallotReturnedManager(models.Model):
         try:
             location = self.google_client.geocode(full_ballot_address)
         except GeocoderQuotaExceeded:
+            status += "GeocoderQuotaExceeded "
             results = {
-                'status':                  "GeocoderQuotaExceeded ",
+                'status':                   status,
                 'geocoder_quota_exceeded':  True,
+                'success':                  False,
+            }
+            return results
+        except Exception as e:
+            status += "Geocoder-Exception: " + str(e) + " "
+            results = {
+                'status':                   status,
+                'geocoder_quota_exceeded':  False,
                 'success':                  False,
             }
             return results
