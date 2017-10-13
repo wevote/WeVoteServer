@@ -114,12 +114,12 @@
         Reach out to Google Civic API and ask for ballots from many polling locations so we can stitch
         together the measures, races and candidates. Add "import_limit" as a URL variable to increase the number of
         polling locations to retrieve ballots from.
-        (<a href="{% url 'ballot:update_ballot_returned_latitude_and_longitude' %}?google_civic_election_id={{ election.google_civic_election_id }}&state_code={{ state_code }}">Update Lat/Long{% if state_code %} for {{ state_code }}{% endif %}</a>)
+        (<a href="{% url 'ballot:update_ballot_returned_latitude_and_longitude' %}?google_civic_election_id={{ election.google_civic_election_id }}&state_code={{ state_code }}">Update Lat/Long{% if state_code %} for {{ state_code }}{% endif %}: {{ entries_missing_latitude_longitude }} missing</a>)
     </p>
 {% endif %}
 
 {% if ballot_returned_list %}
-    <h5>Ballot Returned Entries</h5>
+    <h5>{{ ballot_returned_count_entire_election }} Ballot Returned Entries</h5>
 
     These are ballots that voters can find from WebApp.<br />
 

@@ -1541,6 +1541,31 @@ class BallotReturnedListManager(models.Model):
 
         return 0
 
+    def fetch_ballot_returned_entries_needed_lat_long_for_election(self, google_civic_election_id, state_code=''):
+        google_civic_election_id = convert_to_int(google_civic_election_id)
+        try:
+            ballot_returned_queryset = BallotReturned.objects.all()
+            # ballot_returned_queryset = ballot_returned_queryset.exclude(
+            #     Q(polling_location_we_vote_id=None) |
+            #     Q(polling_location_we_vote_id=""))
+            ballot_returned_queryset = ballot_returned_queryset.filter(latitude=None)
+            ballot_returned_queryset = ballot_returned_queryset.filter(
+                google_civic_election_id=google_civic_election_id)
+            if positive_value_exists(state_code):
+                ballot_returned_queryset = ballot_returned_queryset.filter(normalized_state__iexact=state_code)
+
+            return ballot_returned_queryset.count()
+        except BallotReturned.DoesNotExist:
+            # No ballot items found. Not a problem.
+            status = 'NO_BALLOT_RETURNED_LIST_FOUND_DOES_NOT_EXIST'
+            ballot_returned_list = []
+        except Exception as e:
+            handle_exception(e, logger=logger)
+            status = 'FAILED retrieve_ballot_returned_list_for_election ' \
+                     '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
+
+        return 0
+
     def retrieve_possible_duplicate_ballot_returned(self, google_civic_election_id, normalized_line1, normalized_zip,
                                                     polling_location_we_vote_id):
         ballot_returned_list_objects = []
