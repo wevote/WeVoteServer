@@ -168,12 +168,12 @@ def retrieve_possible_twitter_handles(candidate_campaign):
 
     # Also include search results omitting any single-letter initials and periods in name.
     # Example: "A." is ignored while "A.J." becomes "AJ"
-    title = sub(r"[^A-Za-z']", "", candidate_campaign.extract_title())
-    first_name = sub(r"[^A-Za-z']", "", candidate_campaign.extract_first_name())
-    middle_name = sub(r"[^A-Za-z']", "", candidate_campaign.extract_middle_name())
-    last_name = sub(r"[^A-Za-z']", "", candidate_campaign.extract_last_name())
-    suffix = sub(r"[^A-Za-z']", "", candidate_campaign.extract_suffix())
-    nickname = sub(r"[^A-Za-z']", "", candidate_campaign.extract_nickname())
+    title = sub(r"[^\w'-]", "", candidate_campaign.extract_title())
+    first_name = sub(r"[^\w'-]", "", candidate_campaign.extract_first_name())
+    middle_name = sub(r"[^\w'-]", "", candidate_campaign.extract_middle_name())
+    last_name = sub(r"[^\w'-]", "", candidate_campaign.extract_last_name())
+    suffix = sub(r"[^\w'-]", "", candidate_campaign.extract_suffix())
+    nickname = sub(r"[^\w'-]", "", candidate_campaign.extract_nickname())
 
     modified_search_term = ""
     modified_search_term_base = ""
