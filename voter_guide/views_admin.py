@@ -381,7 +381,7 @@ def voter_guide_list_view(request):
 
 
 @login_required
-def voter_guide_search_view(request):
+def voter_guide_search_view(request):  # Is this an active view?
     """
     Before creating a voter guide, search for an existing organization
     :param request:

@@ -1483,9 +1483,9 @@ class BallotReturnedListManager(models.Model):
                 google_civic_election_id=google_civic_election_id)
             if positive_value_exists(state_code):
                 ballot_returned_queryset = ballot_returned_queryset.filter(normalized_state__iexact=state_code)
+            ballot_returned_queryset = ballot_returned_queryset.order_by("-ballot_location_display_name")
             if positive_value_exists(limit):
                 ballot_returned_queryset = ballot_returned_queryset[:limit]
-            ballot_returned_queryset = ballot_returned_queryset.order_by("-ballot_location_display_name")
 
             ballot_returned_list = ballot_returned_queryset
 
@@ -1840,9 +1840,11 @@ class VoterBallotSavedManager(models.Model):
             success = True
             status += "VOTER_BALLOT_SAVED_NOT_FOUND1 "
 
-        # If here and a voter_ballot_saved not found yet, then try to find list of entries saved under this address
+        # If here, a voter_ballot_saved not found yet, and not looking for specific ballot or
+        # a ballot by google_civic_election_id, then try to find list of entries saved under this address
         # and return the most recent
-        if not voter_ballot_saved_found and not specific_ballot_requested:
+        if not voter_ballot_saved_found and not specific_ballot_requested and not \
+                positive_value_exists(google_civic_election_id):
             try:
                 if positive_value_exists(text_for_map_search) and positive_value_exists(voter_id):
                     # Start with narrowest search

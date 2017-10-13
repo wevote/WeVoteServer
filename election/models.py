@@ -189,12 +189,24 @@ class ElectionManager(models.Model):
         return results
 
     def retrieve_upcoming_elections(self, include_test_election=False):
+        upcoming_election_list = []
         try:
             election_list_query = Election.objects.all()
             if not positive_value_exists(include_test_election):
                 election_list_query = election_list_query.exclude(google_civic_election_id=2000)
             election_list_query = election_list_query.order_by('election_day_text').reverse()
-            election_list = election_list_query
+
+            raw_election_list = list(election_list_query)
+
+            today = datetime.now().date()
+            today_date_as_integer = convert_date_to_date_as_integer(today)
+
+            for one_election in raw_election_list:
+                election_date_as_simple_string = one_election.election_day_text.replace("-", "")
+                this_election_date_as_integer = convert_to_int(election_date_as_simple_string)
+                if this_election_date_as_integer >= today_date_as_integer:
+                    upcoming_election_list.append(one_election)
+
             status = 'ELECTIONS_FOUND'
             success = True
         except Election.DoesNotExist as e:
@@ -204,7 +216,7 @@ class ElectionManager(models.Model):
         results = {
             'success':          success,
             'status':           status,
-            'election_list':    election_list,
+            'election_list':    upcoming_election_list,
         }
         return results
 

@@ -25,6 +25,7 @@
 
 {%  block content %}
 {% load template_filters %}
+<p><a href="{% url 'admin_tools:admin_home' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">< Back to Admin Home</a></p>
 <p><a href="{% url 'import_export_batches:batches_home' %}?google_civic_election_id={{ google_civic_election_id }}">< Back to Import Batches Index</a></p>
 
 {% if kind_of_batch == "CANDIDATE" %}
