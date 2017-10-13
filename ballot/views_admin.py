@@ -14,6 +14,8 @@ from django.core.urlresolvers import reverse
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.messages import get_messages
+from django.db.models import Q
+from django.http import HttpResponse
 from django.shortcuts import render
 from election.models import Election, ElectionManager
 from geopy.geocoders import get_geocoder_for_service
@@ -23,7 +25,6 @@ import time
 from voter.models import voter_has_authority
 import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, positive_value_exists
-from django.http import HttpResponse
 import json
 
 GOOGLE_MAPS_API_KEY = get_environment_variable("GOOGLE_MAPS_API_KEY")
@@ -686,10 +687,44 @@ def update_ballot_returned_with_latitude_and_longitude_view(request):
             except Exception as e:
                 pass
     else:
+        # Gather the list of ballot_returned entries that need to be updated
+        ballot_returned_query = BallotReturned.objects.order_by('id')
+        ballot_returned_query = ballot_returned_query.filter(Q(latitude=None) | Q(latitude=0))
+        # Don't retrieve entries for voters
+        ballot_returned_query = ballot_returned_query.exclude(Q(polling_location_we_vote_id=None) |
+                                                              Q(polling_location_we_vote_id=""))
+        if positive_value_exists(google_civic_election_id):
+            ballot_returned_query = ballot_returned_query.filter(google_civic_election_id=google_civic_election_id)
+        if positive_value_exists(state_code):
+            ballot_returned_query = ballot_returned_query.filter(normalized_state__iexact=state_code)
+        # Limit to 200 because that is all that seems to store anyways with each call
+        ballot_returned_query = ballot_returned_query[:100]
+
+        rate_limit_count = 0
+        for ballot_returned in ballot_returned_query:
+            rate_limit_count += 1
+            ballot_returned_results = ballot_returned_manager.populate_latitude_and_longitude_for_ballot_returned(
+                 ballot_returned)
+            if ballot_returned_results['success']:
+                # Keep track of the number we have processed since last break, since we can only request 10 per second
+                latitude_and_longitude_updated_count += 1
+            else:
+                latitude_and_longitude_not_updated_count += 1
+                errors_status += ballot_returned_results['status']
+
+            if rate_limit_count >= 10:
+                time.sleep(1)
+                # After pause, reset the limit count
+                rate_limit_count = 0
+
+            if ballot_returned_results['geocoder_quota_exceeded']:
+                break
+
         # Write the lat/long data that we have back to the polling location table
         ballot_returned_query = BallotReturned.objects.order_by('id')
-        ballot_returned_query = ballot_returned_query.exclude(latitude=None)  # Exclude empty entries
-        ballot_returned_query = ballot_returned_query.exclude(polling_location_we_vote_id=None)
+        ballot_returned_query = ballot_returned_query.exclude(Q(latitude=None) | Q(latitude=0))  # Exclude empty entries
+        ballot_returned_query = ballot_returned_query.exclude(Q(polling_location_we_vote_id=None) |
+                                                              Q(polling_location_we_vote_id=""))
         if positive_value_exists(google_civic_election_id):
             ballot_returned_query = ballot_returned_query.filter(google_civic_election_id=google_civic_election_id)
         if positive_value_exists(state_code):
@@ -711,37 +746,6 @@ def update_ballot_returned_with_latitude_and_longitude_view(request):
                             polling_location_updated_count += 1
                         except Exception as e:
                             polling_location_not_updated_count += 1
-
-        # Now gather the list of ballot_returned entries that need to be updated
-        ballot_returned_query = BallotReturned.objects.order_by('id')
-        ballot_returned_query = ballot_returned_query.filter(latitude=None)
-        ballot_returned_query = ballot_returned_query.exclude(polling_location_we_vote_id=None)
-        if positive_value_exists(google_civic_election_id):
-            ballot_returned_query = ballot_returned_query.filter(google_civic_election_id=google_civic_election_id)
-        if positive_value_exists(state_code):
-            ballot_returned_query = ballot_returned_query.filter(normalized_state__iexact=state_code)
-        # Limit to 200 because that is all that seems to store anyways with each call
-        ballot_returned_query = ballot_returned_query[:200]
-
-        rate_limit_count = 0
-        for ballot_returned in ballot_returned_query:
-            rate_limit_count += 1
-            ballot_returned_results = ballot_returned_manager.populate_latitude_and_longitude_for_ballot_returned(
-                 ballot_returned)
-            if ballot_returned_results['success']:
-                # Keep track of the number we have processed since last break, since we can only request 10 per second
-                latitude_and_longitude_updated_count += 1
-            else:
-                latitude_and_longitude_not_updated_count += 1
-                errors_status += ballot_returned_results['status']
-
-            if rate_limit_count >= 10:
-                time.sleep(1)
-                # After pause, reset the limit count
-                rate_limit_count = 0
-
-            if ballot_returned_results['geocoder_quota_exceeded']:
-                break
 
     status_print_list = ""
     errors_status = errors_status[:155]  # We cut off the string so we don't overwhelm the message system
