@@ -146,8 +146,7 @@ class ElectoralDistrict(models.Model):
 class ElectoralDistrictManager(models.Model):
 
     def update_or_create_electoral_district(self, ctcl_id_temp, electoral_district_name,
-                                            electoral_district_type, electoral_district_number=0,
-                                            electoral_district_other_type='', ocd_id_external_id=0, state_code=''):
+                                            updated_values):
         """
         Either update or create an electoral district entry.
         """
@@ -165,15 +164,6 @@ class ElectoralDistrictManager(models.Model):
             success = False
             status = 'MISSING_ELECTORAL_DISTRICT_NAME'
         else:
-            # TODO Bulk update_or_create. check if bulk_create handles update as well
-            updated_values = {
-                # The rest of the values
-                'electoral_district_type': electoral_district_type,
-                'electoral_district_number': electoral_district_number,
-                'electoral_district_other_type': electoral_district_other_type,
-                'ocd_id_external_id': ocd_id_external_id,
-                'state_code': state_code
-            }
             new_electoral_district, created = ElectoralDistrict.objects.update_or_create(
                 ctcl_id_temp=ctcl_id_temp, electoral_district_name=electoral_district_name, defaults=updated_values)
             if new_electoral_district or len(new_electoral_district):

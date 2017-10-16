@@ -49,16 +49,15 @@ def party_import_from_xml_data(party_xml_data):
     party_manager = PartyManager()
     for one_party in party_xml_data:
         # party_id_temp = ''
-        party_name = None
+        party_name_english = None
         party_abbreviation = ''
         ctcl_uuid = ''
         duplicate_entry = 0
 
         party_id_temp = one_party.attrib['id']
-        # party_name = one_party.find('Name').text
-        party_name_node = one_party.find("./Name/Text/[@language='" + LANGUAGE_CODE_ENGLISH + "']")
-        if party_name_node is not None:
-            party_name = party_name_node.text
+        party_name_node_english = one_party.find("./Name/Text/[@language='" + LANGUAGE_CODE_ENGLISH + "']")
+        if party_name_node_english is not None:
+            party_name_english = party_name_node_english.text
 
         party_abbreviation_node = one_party.find('Abbreviation')
         if party_abbreviation_node is not None:
@@ -75,7 +74,7 @@ def party_import_from_xml_data(party_xml_data):
             #     'ctcl_uuid': ctcl_uuid,
             # }
         # Make sure we have the minimum required variables
-        if not positive_value_exists(party_id_temp) or not positive_value_exists(party_name):
+        if not positive_value_exists(party_id_temp) or not positive_value_exists(party_name_english):
             party_not_processed += 1
             continue
 
@@ -94,8 +93,15 @@ def party_import_from_xml_data(party_xml_data):
                 status = "PARTY_ENTRY_EXISTS"
             else:
                 try:
-                    results = party_manager.update_or_create_party(party_id_temp, party_name, party_abbreviation,
-                                                                   ctcl_uuid)
+                    updated_values = {
+                        'party_abbreviation': party_abbreviation,
+                        'ctcl_uuid': ctcl_uuid,
+                        'party_id_temp': party_id_temp,
+                        'party_name': party_name_english
+                    }
+
+                    results = party_manager.update_or_create_party(
+                        party_id_temp, ctcl_uuid, party_name_english, updated_values)
                     if not results:
                         party_not_processed += 1
                         success = False
