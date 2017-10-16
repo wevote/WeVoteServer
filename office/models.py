@@ -129,6 +129,14 @@ class ContestOfficeManager(models.Model):
         contest_office_manager = ContestOfficeManager()
         return contest_office_manager.retrieve_contest_office(contest_office_id, contest_office_we_vote_id)
 
+    def retrieve_contest_office_from_ctcl_uuid(self, ctcl_uuid):
+        contest_office_id = 0
+        contest_office_we_vote_id = ''
+        maplight_id = ''
+        contest_office_manager = ContestOfficeManager()
+        return contest_office_manager.retrieve_contest_office(contest_office_id, contest_office_we_vote_id,
+                                                              maplight_id, ctcl_uuid)
+
     def retrieve_contest_office_from_maplight_id(self, maplight_id):
         contest_office_id = 0
         contest_office_we_vote_id = ''
@@ -333,7 +341,8 @@ class ContestOfficeManager(models.Model):
         return results
 
     # NOTE: searching by all other variables seems to return a list of objects
-    def retrieve_contest_office(self, contest_office_id, contest_office_we_vote_id='', maplight_id=None):
+    def retrieve_contest_office(self, contest_office_id, contest_office_we_vote_id='',
+                                maplight_id=None, ctcl_uuid=None):
         error_result = False
         exception_does_not_exist = False
         exception_multiple_object_returned = False
@@ -346,10 +355,15 @@ class ContestOfficeManager(models.Model):
                 contest_office_we_vote_id = contest_office_on_stage.we_vote_id
                 status = "RETRIEVE_OFFICE_FOUND_BY_ID"
             elif positive_value_exists(contest_office_we_vote_id):
-                contest_office_on_stage = ContestOffice.objects.get(we_vote_id=contest_office_we_vote_id)
+                contest_office_on_stage = ContestOffice.objects.get(we_vote_id__iexact=contest_office_we_vote_id)
                 contest_office_id = contest_office_on_stage.id
                 contest_office_we_vote_id = contest_office_on_stage.we_vote_id
                 status = "RETRIEVE_OFFICE_FOUND_BY_WE_VOTE_ID"
+            elif positive_value_exists(ctcl_uuid):
+                contest_office_on_stage = ContestOffice.objects.get(ctcl_uuid=ctcl_uuid)
+                contest_office_id = contest_office_on_stage.id
+                contest_office_we_vote_id = contest_office_on_stage.we_vote_id
+                status = "RETRIEVE_OFFICE_FOUND_BY_CTCL_UUID"
             elif positive_value_exists(maplight_id):
                 contest_office_on_stage = ContestOffice.objects.get(maplight_id=maplight_id)
                 contest_office_id = contest_office_on_stage.id
@@ -419,7 +433,8 @@ class ContestOfficeManager(models.Model):
         return state_code
 
     def create_contest_office_row_entry(self, contest_office_name, contest_office_votes_allowed, ctcl_uuid,
-                                        contest_office_number_elected, google_civic_election_id, state_code):
+                                        contest_office_number_elected, google_civic_election_id, state_code,
+                                        defaults):
         """
         Create ContestOffice table entry with ContestOffice details 
         :param contest_office_name: 
@@ -428,6 +443,7 @@ class ContestOfficeManager(models.Model):
         :param contest_office_number_elected: 
         :param google_civic_election_id: 
         :param state_code:
+        :param defaults:
         :return:
         """
 
@@ -446,7 +462,12 @@ class ContestOfficeManager(models.Model):
             if new_contest_office:
                 success = True
                 status = "CONTEST_OFFICE_CREATED"
+                contest_office_updated = True
                 new_contest_office_created = True
+                new_contest_office.district_id = defaults['district_id']
+                new_contest_office.district_name = defaults['district_name']
+                new_contest_office.district_scope = defaults['district_scope']
+                new_contest_office.save()
             else:
                 success = False
                 status = "CONTEST_OFFICE_CREATE_FAILED"
@@ -461,13 +482,14 @@ class ContestOfficeManager(models.Model):
                 'status':                       status,
                 'new_contest_office_created':   new_contest_office_created,
                 'contest_office_updated':       contest_office_updated,
-                'new_contest_office':           new_contest_office,
+                'contest_office':               new_contest_office,
             }
         return results
 
     def update_contest_office_row_entry(self, contest_office_name, contest_office_votes_allowed, ctcl_uuid,
                                         contest_office_number_elected, contest_office_we_vote_id,
-                                        google_civic_election_id, state_code):
+                                        google_civic_election_id, state_code,
+                                        defaults):
         """
         Update ContestOffice table entry with matching we_vote_id 
         :param contest_office_name: 
@@ -477,7 +499,8 @@ class ContestOfficeManager(models.Model):
         :param contest_office_we_vote_id:
         :param google_civic_election_id:
         :param state_code:
-        :return: 
+        :param defaults:
+        :return:
         """
 
         success = False
@@ -486,10 +509,17 @@ class ContestOfficeManager(models.Model):
         # new_contest_office_created = False
         # new_contest_office = ''
         existing_contest_office_entry = ''
+        contest_office_found = False
 
         try:
-            existing_contest_office_entry = ContestOffice.objects.get(we_vote_id__iexact=contest_office_we_vote_id)
-            if existing_contest_office_entry:
+            if positive_value_exists(contest_office_we_vote_id):
+                existing_contest_office_entry = ContestOffice.objects.get(we_vote_id__iexact=contest_office_we_vote_id)
+                contest_office_found = True
+            elif positive_value_exists(ctcl_uuid):
+                existing_contest_office_entry = ContestOffice.objects.get(ctcl_uuid=ctcl_uuid)
+                contest_office_found = True
+
+            if contest_office_found:
                 # found the existing entry, update the values
                 existing_contest_office_entry.office_name = contest_office_name
                 existing_contest_office_entry.number_voted_for = contest_office_votes_allowed
@@ -497,6 +527,12 @@ class ContestOfficeManager(models.Model):
                 existing_contest_office_entry.number_elected = contest_office_number_elected
                 existing_contest_office_entry.google_civic_election_id = google_civic_election_id
                 existing_contest_office_entry.state_code = state_code
+                if 'district_id' in defaults:
+                    existing_contest_office_entry.district_id = defaults['district_id']
+                if 'district_name' in defaults:
+                    existing_contest_office_entry.district_name = defaults['district_name']
+                if 'district_scope' in defaults:
+                    existing_contest_office_entry.district_scope = defaults['district_scope']
                 # now go ahead and save this entry (update)
                 existing_contest_office_entry.save()
                 contest_office_updated = True
@@ -512,7 +548,7 @@ class ContestOfficeManager(models.Model):
                 'success':                      success,
                 'status':                       status,
                 'contest_office_updated':       contest_office_updated,
-                'updated_contest_office':       existing_contest_office_entry,
+                'contest_office':       existing_contest_office_entry,
             }
         return results
 
@@ -651,7 +687,7 @@ class ContestOfficeListManager(models.Model):
         return results
 
     def retrieve_contest_offices_from_non_unique_identifiers(
-            self, contest_office_name, google_civic_election_id, state_code):
+            self, contest_office_name, google_civic_election_id, state_code, district_id='', district_name=''):
         keep_looking_for_duplicates = True
         success = False
         contest_office = ContestOffice()
@@ -667,6 +703,10 @@ class ContestOfficeListManager(models.Model):
             contest_office_query = contest_office_query.filter(office_name__iexact=contest_office_name,
                                                                state_code__iexact=state_code,
                                                                google_civic_election_id=google_civic_election_id)
+            if positive_value_exists(district_id):
+                contest_office_query = contest_office_query.filter(district_id=district_id)
+            elif positive_value_exists(district_name):
+                contest_office_query = contest_office_query.filter(district_name__iexact=district_name)
 
             contest_office_list = list(contest_office_query)
             if len(contest_office_list):

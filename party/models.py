@@ -55,7 +55,7 @@ class Party(models.Model):
 
 class PartyManager(models.Model):
 
-    def update_or_create_party(self, party_id_temp='', party_name='', party_abbreviation='', ctcl_uuid=''):
+    def update_or_create_party(self, party_id_temp='', ctcl_uuid='', party_name='', updated_values={}):
         """
         Either update or create a party entry.
         """
@@ -69,15 +69,10 @@ class PartyManager(models.Model):
             success = False
             status = 'MISSING_PARTY_NAME'
         else:
-            updated_values = {
-                'party_abbreviation': party_abbreviation,
-                'ctcl_uuid': ctcl_uuid,
-                'party_id_temp': party_id_temp,
-                'party_name': party_name
-            }
             new_party, created = Party.objects.update_or_create(
                 party_id_temp=party_id_temp,
-                ctcl_uuid=ctcl_uuid, defaults=updated_values)
+                ctcl_uuid=ctcl_uuid,
+                defaults=updated_values)
             if new_party or len(new_party):
                 success = True
                 status = 'PARTY_SAVED'
@@ -90,7 +85,7 @@ class PartyManager(models.Model):
             'success':                  success,
             'status':                   status,
             'MultipleObjectsReturned':  exception_multiple_object_returned,
-            'new_party_created':     created,
+            'new_party_created':        created,
         }
         return results
 
