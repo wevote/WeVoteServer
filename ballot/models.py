@@ -1927,6 +1927,7 @@ class VoterBallotSavedManager(models.Model):
             ballot_returned_we_vote_id=None,
             ballot_location_shortcut=''):
         # We assume that we tried to find an entry for this voter
+        status = ""
         voter_ballot_saved_found = False
 
         ballot_location_shortcut = str(ballot_location_shortcut)
@@ -1955,7 +1956,7 @@ class VoterBallotSavedManager(models.Model):
                     defaults=defaults,
                 )
                 voter_ballot_saved_found = voter_ballot_saved.id
-                status = "BALLOT_SAVED "
+                status += "BALLOT_SAVED-ballot_returned_we_vote_id "
                 success = True
             elif positive_value_exists(voter_id) and positive_value_exists(ballot_location_shortcut):
                 voter_ballot_saved, created = VoterBallotSaved.objects.update_or_create(
@@ -1964,7 +1965,7 @@ class VoterBallotSavedManager(models.Model):
                     defaults=defaults,
                 )
                 voter_ballot_saved_found = voter_ballot_saved.id
-                status = "BALLOT_SAVED"
+                status += "BALLOT_SAVED-BALLOT_LOCATION_SHORTCUT "
                 success = True
             elif positive_value_exists(voter_id) and positive_value_exists(google_civic_election_id):
                 voter_ballot_saved, created = VoterBallotSaved.objects.update_or_create(
@@ -1973,15 +1974,15 @@ class VoterBallotSavedManager(models.Model):
                     defaults=defaults,
                 )
                 voter_ballot_saved_found = voter_ballot_saved.id
-                status = "BALLOT_SAVED"
+                status = "BALLOT_SAVED-VOTER_ID_AND_ELECTION_ID "
                 success = True
             else:
                 voter_ballot_saved = None
-                status = "UNABLE_TO_CREATE_BALLOT_SAVED"
+                status += "UNABLE_TO_CREATE_BALLOT_SAVED "
                 success = False
                 google_civic_election_id = 0
         except Exception as e:
-            status = "UNABLE_TO_CREATE_BALLOT_SAVED_EXCEPTION"
+            status = "UNABLE_TO_CREATE_BALLOT_SAVED_EXCEPTION "
             success = False
             voter_ballot_saved = None
             google_civic_election_id = 0
