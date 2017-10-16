@@ -1974,7 +1974,7 @@ class VoterBallotSavedManager(models.Model):
                     defaults=defaults,
                 )
                 voter_ballot_saved_found = voter_ballot_saved.id
-                status = "BALLOT_SAVED-VOTER_ID_AND_ELECTION_ID "
+                status += "BALLOT_SAVED-VOTER_ID_AND_ELECTION_ID "
                 success = True
             else:
                 voter_ballot_saved = None
@@ -1982,7 +1982,8 @@ class VoterBallotSavedManager(models.Model):
                 success = False
                 google_civic_election_id = 0
         except Exception as e:
-            status = "UNABLE_TO_CREATE_BALLOT_SAVED_EXCEPTION "
+            status += 'UNABLE_TO_CREATE_BALLOT_SAVED_EXCEPTION: ' \
+                      '{error} [type: {error_type}] '.format(error=e, error_type=type(e))
             success = False
             voter_ballot_saved = None
             google_civic_election_id = 0
