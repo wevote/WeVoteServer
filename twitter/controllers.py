@@ -44,6 +44,7 @@ def analyze_twitter_search_results(search_results, search_results_length, candid
         one_result = search_results[possible_candidate_index]
         likelihood_score = 0
 
+        # Increase the score with increased followers count
         if positive_value_exists(one_result.followers_count):
             #  125 followers =  0 points
             #  250 followers = 10 points
@@ -57,12 +58,22 @@ def analyze_twitter_search_results(search_results, search_results_length, candid
                     likelihood_score += followers_likelihood
 
         # Check if name (or parts of name) are in Twitter name and handle
+        name_found_in_name = False
+        name_found_in_screen_name = False
         for name in candidate_name.values():
             if len(name) and name in one_result.name:
                 likelihood_score += 10
+                name_found_in_name = True
             if len(name) and name.lower().replace(" ", "") in one_result.screen_name.lower():
                 likelihood_score += 10
+                name_found_in_screen_name = True
 
+        if not name_found_in_name:
+            likelihood_score -= 40
+        if not name_found_in_screen_name:
+            likelihood_score -= 30
+
+        # Check if state or state code is in location or description
         if one_result.location and positive_value_exists(state_full_name) and state_full_name in one_result.location:
             likelihood_score += 30
         elif one_result.location and positive_value_exists(state_code) and state_code in one_result.location:
@@ -74,6 +85,7 @@ def analyze_twitter_search_results(search_results, search_results_length, candid
         elif one_result.description and positive_value_exists(state_code) and state_code in one_result.description:
             likelihood_score += 10
 
+        # Check if party or office name are in description
         political_party = candidate_campaign.political_party_display()
         if one_result.description and positive_value_exists(political_party) and \
                 political_party in one_result.description:
