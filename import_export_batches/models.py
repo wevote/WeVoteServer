@@ -1671,9 +1671,13 @@ class BatchManager(models.Model):
                     # party_details_dict =  [entry for entry in party_details_list]
                     for one_party in party_details_list:
                         # get the party name matching person_party_id
-                        if person_party_id == one_party.get('party_id_temp'):
-                            person_party_name = one_party.get('party_name')
-                            break
+                        try:
+                            party_id_temp = one_party.get('party_id_temp')
+                            if person_party_id == party_id_temp:
+                                person_party_name = one_party.get('party_name')
+                                break
+                        except Exception as e:
+                            pass
 
             person_email_id_node = one_person.find('./ContactInformation/Email')
             if person_email_id_node is not None:
@@ -2396,7 +2400,7 @@ class BatchManager(models.Model):
                 handle_exception(e, logger=logger, exception_message=status)
 
             # import Electoral District
-            skip_electoral_district = True  # We can turn this off during development to save time
+            skip_electoral_district = False  # We can set this to True during development to save time
             if continue_batch_set_processing and not skip_electoral_district:
                 electoral_district_list_found = False
                 electoral_district_item_list = xml_root.findall('ElectoralDistrict')
@@ -2416,7 +2420,7 @@ class BatchManager(models.Model):
                         status += " CREATE_BATCH_SET_ELECTORAL_DISTRICT_ERRORS "
 
             # import Party
-            skip_party = True  # We can turn this off during development to save time
+            skip_party = False  # We can set this to True during development to save time
             if continue_batch_set_processing and not skip_party:
                 party_list_found = False
                 party_item_list = xml_root.findall('Party')
@@ -2451,7 +2455,8 @@ class BatchManager(models.Model):
             # look for different data sets in the XML - ElectedOffice, ContestOffice, Candidate, Politician, Measure
 
             # Elected Office
-            if continue_batch_set_processing:
+            skip_elected_office = False  # We can set this to True during development to save time
+            if continue_batch_set_processing and not skip_elected_office:
                 results = self.store_elected_office_xml(batch_uri, google_civic_election_id, organization_we_vote_id,
                                                         xml_root, batch_set_id)
                 if results['success']:
@@ -2464,7 +2469,7 @@ class BatchManager(models.Model):
                     status += " CREATE_BATCH_SET-PARTY_IMPORT_ERRORS "
 
             # Candidate-to-office-mappings
-            skip_candidate_mapping = False  # We can turn this off during development to save time
+            skip_candidate_mapping = False  # We can set this to True during development to save time
             if continue_batch_set_processing and not skip_candidate_mapping:
                 results = create_candidate_selection_rows(xml_root, batch_set_id)
                 if results['success']:
@@ -2477,8 +2482,8 @@ class BatchManager(models.Model):
                     status += " CREATE_BATCH_SET-CANDIDATE_SELECTION_ERRORS "
 
             # ContestOffice entries
-            skip_office = False  # We can turn this off during development to save time
-            if continue_batch_set_processing and not skip_office:
+            skip_contest_office = False  # We can set this to True during development to save time
+            if continue_batch_set_processing and not skip_contest_office:
                 results = self.store_contest_office_xml(
                     batch_uri, google_civic_election_id, organization_we_vote_id, xml_root, batch_set_id)
                 if results['success']:
@@ -2491,7 +2496,8 @@ class BatchManager(models.Model):
                     status += " CREATE_BATCH_SET-CONTEST_OFFICE_ERRORS "
 
             # Politician entries
-            if continue_batch_set_processing:
+            skip_politician = False  # We can set this to True during development to save time
+            if continue_batch_set_processing and not skip_politician:
                 results = self.store_politician_xml(
                     batch_uri, google_civic_election_id, organization_we_vote_id, xml_root, batch_set_id)
                 if results['success']:
@@ -2503,7 +2509,8 @@ class BatchManager(models.Model):
                     status += " CREATE_BATCH_SET-POLITICIAN_ERRORS "
 
             # Candidate entries
-            if continue_batch_set_processing:
+            skip_candidate = False  # We can set this to True during development to save time
+            if continue_batch_set_processing and not skip_candidate:
                 results = self.store_candidate_xml(
                     batch_uri, google_civic_election_id, organization_we_vote_id, xml_root, batch_set_id)
                 if results['success']:
@@ -2515,7 +2522,8 @@ class BatchManager(models.Model):
                     status += " CREATE_BATCH_SET-CANDIDATE_ERRORS "
 
             # Measure entries
-            if continue_batch_set_processing:
+            skip_measure = False  # We can set this to True during development to save time
+            if continue_batch_set_processing and not skip_measure:
                 results = self.store_measure_xml(
                     batch_uri, google_civic_election_id, organization_we_vote_id, xml_root, batch_set_id)
                 if results['success']:

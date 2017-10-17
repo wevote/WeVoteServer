@@ -408,6 +408,8 @@ def election_edit_process_view(request):
             # Create new
             next_local_election_id_integer = fetch_next_we_vote_id_election_integer()
 
+            if not state_code:
+                state_code = ""
             election_on_stage = Election(
                 google_civic_election_id=next_local_election_id_integer,
                 election_name=election_name,
