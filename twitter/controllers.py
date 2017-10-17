@@ -112,10 +112,11 @@ def analyze_twitter_search_results(search_results, search_results_length, candid
         if not positive_value_exists(likelihood_score):
             likelihood_score = 0
 
-        current_candidate_twitter_info = {}
-        current_candidate_twitter_info['search_term'] = search_term
-        current_candidate_twitter_info['likelihood_score'] = likelihood_score
-        current_candidate_twitter_info['twitter_json'] = one_result._json
+        current_candidate_twitter_info = {
+            'search_term': search_term,
+            'likelihood_score': likelihood_score,
+            'twitter_json': one_result._json,
+        }
 
         possible_twitter_handles_list.append(current_candidate_twitter_info)
 
