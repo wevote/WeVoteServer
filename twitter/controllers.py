@@ -19,6 +19,20 @@ TWITTER_CONSUMER_SECRET = get_environment_variable("TWITTER_CONSUMER_SECRET")
 TWITTER_ACCESS_TOKEN = get_environment_variable("TWITTER_ACCESS_TOKEN")
 TWITTER_ACCESS_TOKEN_SECRET = get_environment_variable("TWITTER_ACCESS_TOKEN_SECRET")
 
+KEYWORDS = [
+    "candidate",
+    "chair",
+    "city",
+    "civic",
+    "district",
+    "endorse",
+    "local",
+    "office",
+    "public",
+    "running",
+    "state",
+]
+
 
 def analyze_twitter_search_results(search_results, search_results_length, candidate_campaign,
                                    possible_twitter_handles_list):
@@ -67,20 +81,9 @@ def analyze_twitter_search_results(search_results, search_results_length, candid
             likelihood_score += 20
 
         # Increase the score for every keyword we find
-        if one_result.description and "candidate" in one_result.description.lower():
-            likelihood_score += 10
-
-        if one_result.description and "chair" in one_result.description.lower():
-            likelihood_score += 10
-
-        if one_result.description and "district" in one_result.description.lower():
-            likelihood_score += 10
-
-        if one_result.description and "endorsed" in one_result.description.lower():
-            likelihood_score += 10
-
-        if one_result.description and "running" in one_result.description.lower():
-            likelihood_score += 10
+        for keyword in KEYWORDS:
+            if one_result.description and keyword in one_result.description.lower():
+                likelihood_score += 10
 
         # Decrease the score for inactive accounts
         try:
