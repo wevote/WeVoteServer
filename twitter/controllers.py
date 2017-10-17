@@ -60,11 +60,13 @@ def analyze_twitter_search_results(search_results, search_results_length, candid
         # Check if name (or parts of name) are in Twitter name and handle
         name_found_in_name = False
         name_found_in_screen_name = False
+        screen_name_handling_regex = r"[^a-zA-Z]"
         for name in candidate_name.values():
             if len(name) and name in one_result.name:
                 likelihood_score += 10
                 name_found_in_name = True
-            if len(name) and name.lower().replace(" ", "") in one_result.screen_name.lower():
+            if len(name) and sub(screen_name_handling_regex, "", name).lower() in \
+                             sub(screen_name_handling_regex, "", one_result.screen_name).lower():
                 likelihood_score += 10
                 name_found_in_screen_name = True
 
