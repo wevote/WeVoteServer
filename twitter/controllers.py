@@ -19,7 +19,8 @@ TWITTER_CONSUMER_SECRET = get_environment_variable("TWITTER_CONSUMER_SECRET")
 TWITTER_ACCESS_TOKEN = get_environment_variable("TWITTER_ACCESS_TOKEN")
 TWITTER_ACCESS_TOKEN_SECRET = get_environment_variable("TWITTER_ACCESS_TOKEN_SECRET")
 
-KEYWORDS = [
+POSITIVE_KEYWORDS = [
+    "affiliate",
     "candidate",
     "chair",
     "city",
@@ -31,9 +32,16 @@ KEYWORDS = [
     "endorse",
     "local",
     "office",
+    "official",
     "public",
     "running",
     "state",
+]
+
+NEGATIVE_KEYWORDS = [
+    "fake",
+    "parody",
+    "unofficial",
 ]
 
 
@@ -105,10 +113,15 @@ def analyze_twitter_search_results(search_results, search_results_length, candid
             if one_result.description and len(word) > 1 and word in one_result.description:
                 likelihood_score += 10
 
-        # Increase the score for every keyword we find
-        for keyword in KEYWORDS:
+        # Increase the score for every positive keyword we find
+        for keyword in POSITIVE_KEYWORDS:
             if one_result.description and keyword in one_result.description.lower():
-                likelihood_score += 10
+                likelihood_score += 5
+
+        # Decrease the score for every negative keyword we find
+        for keyword in NEGATIVE_KEYWORDS:
+            if one_result.description and keyword in one_result.description.lower():
+                likelihood_score -= 20
 
         # Decrease the score for inactive accounts
         try:
