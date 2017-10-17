@@ -34,8 +34,8 @@ KEYWORDS = [
 ]
 
 
-def analyze_twitter_search_results(search_results, search_results_length, candidate_campaign,
-                                   possible_twitter_handles_list):
+def analyze_twitter_search_results(search_results, search_results_length, candidate_name,
+                                   candidate_campaign, possible_twitter_handles_list):
     search_term = candidate_campaign.candidate_name
     state_code = candidate_campaign.state_code
     state_full_name = convert_state_code_to_state_text(state_code)
@@ -56,9 +56,12 @@ def analyze_twitter_search_results(search_results, search_results_length, candid
                 else:
                     likelihood_score += followers_likelihood
 
-        if one_result.name == candidate_campaign.candidate_name:
-            # If exact name match
-            likelihood_score += 20
+        # Check if name (or parts of name) are in Twitter name and handle
+        for name in candidate_name.values():
+            if len(name) and name in one_result.name:
+                likelihood_score += 10
+            if len(name) and name.lower().replace(" ", "") in one_result.screen_name.lower():
+                likelihood_score += 10
 
         if one_result.location and positive_value_exists(state_full_name) and state_full_name in one_result.location:
             likelihood_score += 30
@@ -104,7 +107,7 @@ def analyze_twitter_search_results(search_results, search_results_length, candid
         except AttributeError:
             # 'User' object (one_result) has no attribute 'status'
             # So the account likely has no tweets
-            likelihood_score = 0
+            likelihood_score -= 50
 
         if not positive_value_exists(likelihood_score):
             likelihood_score = 0
@@ -166,20 +169,21 @@ def retrieve_possible_twitter_handles(candidate_campaign):
     search_results.sort(key=lambda possible_candidate: possible_candidate.followers_count, reverse=True)
     search_results_found = len(search_results)
 
-    analyze_twitter_search_results(search_results, search_results_found, candidate_campaign,
+    name_handling_regex = r"[^ \w'-]"
+    candidate_name = {
+        'title':       sub(name_handling_regex, "", candidate_campaign.extract_title()),
+        'first_name':  sub(name_handling_regex, "", candidate_campaign.extract_first_name()),
+        'middle_name': sub(name_handling_regex, "", candidate_campaign.extract_middle_name()),
+        'last_name':   sub(name_handling_regex, "", candidate_campaign.extract_last_name()),
+        'suffix':      sub(name_handling_regex, "", candidate_campaign.extract_suffix()),
+        'nickname':    sub(name_handling_regex, "", candidate_campaign.extract_nickname()),
+    }
+
+    analyze_twitter_search_results(search_results, search_results_found, candidate_name, candidate_campaign,
                                    possible_twitter_handles_list)
 
     # Also include search results omitting any single-letter initials and periods in name.
     # Example: "A." is ignored while "A.J." becomes "AJ"
-    candidate_name = {
-        'title':       sub(r"[^\w'-]", "", candidate_campaign.extract_title()),
-        'first_name':  sub(r"[^\w'-]", "", candidate_campaign.extract_first_name()),
-        'middle_name': sub(r"[^\w'-]", "", candidate_campaign.extract_middle_name()),
-        'last_name':   sub(r"[^\w'-]", "", candidate_campaign.extract_last_name()),
-        'suffix':      sub(r"[^\w'-]", "", candidate_campaign.extract_suffix()),
-        'nickname':    sub(r"[^\w'-]", "", candidate_campaign.extract_nickname()),
-    }
-
     modified_search_term = ""
     modified_search_term_base = ""
     if len(candidate_name['first_name']) > 1:
@@ -195,8 +199,8 @@ def retrieve_possible_twitter_handles(candidate_campaign):
         modified_search_results = api.search_users(q=modified_search_term, page=1)
         modified_search_results.sort(key=lambda possible_candidate: possible_candidate.followers_count, reverse=True)
         modified_search_results_found = len(modified_search_results)
-        analyze_twitter_search_results(modified_search_results, modified_search_results_found, candidate_campaign,
-                                       possible_twitter_handles_list)
+        analyze_twitter_search_results(modified_search_results, modified_search_results_found,
+                                       candidate_name, candidate_campaign, possible_twitter_handles_list)
 
     # If nickname exists, try searching with nickname instead of first name
     if len(candidate_name['nickname']):
@@ -204,8 +208,8 @@ def retrieve_possible_twitter_handles(candidate_campaign):
         modified_search_results_2 = api.search_users(q=modified_search_term_2, page=1)
         modified_search_results_2.sort(key=lambda possible_candidate: possible_candidate.followers_count, reverse=True)
         modified_search_results_2_found = len(modified_search_results_2)
-        analyze_twitter_search_results(modified_search_results_2, modified_search_results_2_found, candidate_campaign,
-                                       possible_twitter_handles_list)
+        analyze_twitter_search_results(modified_search_results_2, modified_search_results_2_found,
+                                       candidate_name, candidate_campaign, possible_twitter_handles_list)
 
     success = bool(possible_twitter_handles_list)
 
