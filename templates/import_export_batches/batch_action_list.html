@@ -25,6 +25,7 @@
 
 {%  block content %}
 {% load template_filters %}
+<p><a href="{% url 'admin_tools:admin_home' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">< Back to Admin Home</a></p>
 {% if batch_set_id %}
     <p><a href="{% url 'import_export_batches:batch_set_batch_list' %}?batch_set_id={{ batch_set_id }}&google_civic_election_id={{ google_civic_election_id }}">
             Back to Batch Set</a></p>
@@ -100,34 +101,83 @@
     {% endif %}
     : {{ batch_description.batch_name }}
     </h1>
-    <form action="{% url 'import_export_batches:batch_action_list_analyze_process' %}" method="get" class="form-horizontal">
+    <form action="{% url 'import_export_batches:batch_action_list' %}" method="get" class="form-horizontal">
         {% csrf_token %}
         <input type="hidden" name="kind_of_batch" value="{{ kind_of_batch }}">
         <input type="hidden" name="batch_header_id" value="{{ batch_header_id }}">
         <input type="hidden" name="polling_location_we_vote_id" value="{{ polling_location_we_vote_id }}">
 
+        {% if state_list %}
         <div class="form-group">
-        {% if election_list and election_list|length %}
-            <label for="google_civic_election_id" class="col-sm-3 control-label">Election</label>
+            <label for="state_code_id" class="col-sm-3 control-label">Limit to Processing Only One State</label>
             <div class="col-sm-8">
-                {% for election in election_list %}
-                    {% if election.google_civic_election_id|slugify == batch_description.google_civic_election_id|slugify %}
-                        {{ election.election_name }} - {{ election.google_civic_election_id }} - {{ election.election_day_text }}
-                    {% endif %}
+                <select id="state_code_id" name="state_code" class="form-control">
+                    <option value="" {% if '' == state_code %} selected="selected"{% endif %}>
+                        -- Choose State --</option>
+                {% for key, state in state_list %}
+                    <option value="{{ key }}"
+                            {% if key|lower == state_code|lower %} selected="selected"{% endif %}>
+                        {{ state }}</option>
                 {% endfor %}
+                </select>
             </div>
-        {% endif %}{# End of if election_list #}
+        </div>
+        {% endif %}{# End of if state_list #}
+    </form>
+    {% if election_list and election_list|length %}
+    <div class="form-horizontal">
+        <div class="form-group">
+                <label for="google_civic_election_id" class="col-sm-3 control-label">Election</label>
+                <div class="col-sm-8">
+                    {% for election in election_list %}
+                        {% if election.google_civic_election_id|slugify == batch_description.google_civic_election_id|slugify %}
+                            {{ election.election_name }} - {{ election.google_civic_election_id }} - {{ election.election_day_text }}
+                        {% endif %}
+                    {% endfor %}
+                </div>
+        </div>
+    </div>
+    {% endif %}{# End of if election_list #}
+    {% if batch_description.batch_set_id %}
+    <form action="{% url 'import_export_batches:batch_action_list_assign_election_to_rows_process' %}" method="get" class="form-horizontal">
+        {% csrf_token %}
+        <input type="hidden" name="kind_of_batch" value="{{ kind_of_batch }}">
+        <input type="hidden" name="batch_header_id" value="{{ batch_header_id }}">
+        <input type="hidden" name="state_code" value="{{ state_code }}">
+
+        <div class="form-group">
+            <label for="google_civic_election_id" class="col-sm-3 control-label">Assign Election</label>
+            <div class="col-sm-8">
+                <input type="text" name="google_civic_election_id" id="google_civic_election_id_id"
+                       value="{{ google_civic_election_id }}" />
+                <button type="submit" id="assign_election_button_id" name="assign_election_button" class="btn btn-default"
+                        value="1">Assign this election to filtered Batch Rows</button>
+            </div>
+        </div>
+    </div>
+            </form>
+    {% endif %}{# End of if assign election #}
+
         {% if polling_location_we_vote_id %}
             <label for="polling_location_we_vote_id" class="col-sm-3 control-label">Polling Location</label>
             <div class="col-sm-8">
                 {{ polling_location_we_vote_id }}
             </div>
-        {% endif %}{# End of if election_list #}
-        </div>
+        {% endif %}{# End of if polling_location_we_vote_id #}
+    </div>
+
+    <form action="{% url 'import_export_batches:batch_action_list_analyze_process' %}" method="get" class="form-horizontal">
+        {% csrf_token %}
+        <input type="hidden" name="kind_of_batch" value="{{ kind_of_batch }}">
+        <input type="hidden" name="batch_header_id" value="{{ batch_header_id }}">
+        <input type="hidden" name="polling_location_we_vote_id" value="{{ polling_location_we_vote_id }}">
+        <input type="hidden" name="state_code" value="{{ state_code }}">
+
         <div class="form-group">
             <label for="create_actions_button_id" class="col-sm-3 control-label"></label>
             <div class="col-sm-8">
-                <button type="submit" id="create_actions_button_id" name="create_actions_button" class="btn btn-default" value={{ kind_of_batch }}>Analyze Data</button>
+                <button type="submit" id="create_actions_button_id" name="create_actions_button" class="btn btn-default"
+                        value={{ kind_of_batch }}>Analyze Data</button>
             </div>
         </div>
     </form>
@@ -136,16 +186,20 @@
         <input type="hidden" name="kind_of_batch" value="{{ kind_of_batch }}">
         <input type="hidden" name="batch_header_id" value="{{ batch_header_id }}">
         <input type="hidden" name="kind_of_action" value="IMPORT_CREATE">
+        <input type="hidden" name="state_code" value="{{ state_code }}">
         <label for="create_actions_button_id" class="col-sm-3 control-label"></label>
-        <button type="submit" id="create_import_create_actions_button_id" name="create_actions_button" class="btn btn-default" value={{ kind_of_batch }}>Create Live Data</button>
+        <button type="submit" id="create_import_create_actions_button_id" name="create_actions_button" class="btn btn-default"
+                value={{ kind_of_batch }}>Create Live Data</button>
     </form>
     <form action="{% url 'import_export_batches:batch_action_list_create_or_update_process' %}" method="get" class="form-horizontal">
         {% csrf_token %}
         <input type="hidden" name="kind_of_batch" value="{{ kind_of_batch }}">
         <input type="hidden" name="batch_header_id" value="{{ batch_header_id }}">
         <input type="hidden" name="kind_of_action" value="IMPORT_ADD_TO_EXISTING">
+        <input type="hidden" name="state_code" value="{{ state_code }}">
         <label for="create_actions_button_id" class="col-sm-3 control-label"></label>
-        <button type="submit" id="create_import_update_actions_button_id" name="create_actions_button" class="btn btn-default" value={{ kind_of_batch }}>Update Live Data</button>
+        <button type="submit" id="create_import_update_actions_button_id" name="create_actions_button" class="btn btn-default"
+                value={{ kind_of_batch }}>Update Live Data</button>
     </form>
 
 {% endif %}
@@ -180,8 +234,14 @@
         </tr>
     {% for one_batch_row in batch_row_list %}
         <tr>
-            <td><a href="{% url 'import_export_batches:batch_action_list_analyze_process' %}?batch_header_id={{ batch_header_id }}&batch_row_id={{ one_batch_row.id }}">
+            <td><a href="{% url 'import_export_batches:batch_action_list_analyze_process' %}?batch_header_id={{ batch_header_id }}&batch_row_id={{ one_batch_row.id }}&state_code={{ one_batch_row.state_code }}">
                 Analyze</a>
+                {% if one_batch_row.state_code %}<br />
+                    state: {{ one_batch_row.state_code }}
+                {% endif %}
+                {% if one_batch_row.google_civic_election_id %}<br />
+                    eid: {{ one_batch_row.google_civic_election_id }}
+                {% endif %}
             </td>
             <td>{{ one_batch_row.batch_row_000|truncatechars:255 }}</td>
             <td>{{ one_batch_row.batch_row_001|truncatechars:255 }}</td>
@@ -253,8 +313,10 @@
                                 <input type="hidden" name="batch_header_id" value="{{ one_batch_row.batch_header_id }}">
                                 <input type="hidden" name="batch_row_id" value="{{ one_batch_row.id }}">
                                 <input type="hidden" name="kind_of_action" value="{{ one_batch_row.batch_row_action.kind_of_action }}">
+                                <input type="hidden" name="state_code" value="{{ state_code }}">
                                 <label for="create_actions_button_id" class="col-sm-3 control-label"></label>
-                                <button type="submit" id="create_batch_row_action_id_id" name="create_batch_row_action_id" class="btn btn-default" value={{ one_batch_row.batch_row_action.id }}>Create</button>
+                                <button type="submit" id="create_batch_row_action_id_id" name="create_batch_row_action_id" class="btn btn-default"
+                                        value={{ one_batch_row.batch_row_action.id }}>Create</button>
                             </form>
                             {% elif one_batch_row.batch_row_action.kind_of_action == "IMPORT_ADD_TO_EXISTING" %}
                             <form action="{% url 'import_export_batches:batch_action_list_create_or_update_process' %}" method="get" class="form-horizontal">
@@ -263,8 +325,10 @@
                                 <input type="hidden" name="batch_header_id" value="{{ one_batch_row.batch_header_id }}">
                                 <input type="hidden" name="batch_row_id" value="{{ one_batch_row.id }}">
                                 <input type="hidden" name="kind_of_action" value="{{ one_batch_row.batch_row_action.kind_of_action }}">
+                                <input type="hidden" name="state_code" value="{{ state_code }}">
                                 <label for="create_actions_button_id" class="col-sm-3 control-label"></label>
-                                <button type="submit" id="create_batch_row_action_id_id" name="create_batch_row_action_id" class="btn btn-default" value={{ one_batch_row.batch_row_action.id }}>UPDATE</button>
+                                <button type="submit" id="create_batch_row_action_id_id" name="create_batch_row_action_id" class="btn btn-default"
+                                        value={{ one_batch_row.batch_row_action.id }}>UPDATE</button>
                                 {{ one_batch_row.batch_row_action.candidate_we_vote_id }}
                             </form>
                             {% else %}
@@ -281,6 +345,9 @@
                                 <br />
                                 <a href="{% url 'office:office_list' %}?kind_of_batch={{ kind_of_batch }}&google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}&office_search={{ one_batch_row.batch_row_action.contest_office_name|default_if_none:"" }}"
                                    target="_blank">Search for Office</a>
+                            {% endif %}
+                            {% if one_batch_row.batch_row_action.batch_row_action_office_ctcl_uuid %}
+                            <br /><span>office: {{ one_batch_row.batch_row_action.batch_row_action_office_ctcl_uuid|default_if_none:"" }}</span>
                             {% endif %}
                         </td>
                         <td>{{ one_batch_row.batch_row_action.state_code|default_if_none:"" }}</td>
@@ -322,6 +389,9 @@
                         <th>office name</th>
                         <th>election</th>
                         <th>state_code</th>
+                        <th>district id</th>
+                        <th>district name</th>
+                        <th>ocd id</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -344,7 +414,8 @@
                                 <input type="hidden" name="batch_row_id" value="{{ one_batch_row.id }}">
                                 <input type="hidden" name="kind_of_action" value="{{ one_batch_row.batch_row_action.kind_of_action }}">
                                 <label for="create_actions_button_id" class="col-sm-3 control-label"></label>
-                                <button type="submit" id="create_batch_row_action_id_id" name="create_batch_row_action_id" class="btn btn-default" value={{ one_batch_row.batch_row_action.id }}>Create</button>
+                                <button type="submit" id="create_batch_row_action_id_id" name="create_batch_row_action_id" class="btn btn-default"
+                                        value={{ one_batch_row.batch_row_action.id }}>Create</button>
                             </form>
                             {% elif one_batch_row.batch_row_action.kind_of_action == "IMPORT_ADD_TO_EXISTING" %}
                             <form action="{% url 'import_export_batches:batch_action_list_create_or_update_process' %}" method="get" class="form-horizontal">
@@ -354,7 +425,8 @@
                                 <input type="hidden" name="batch_row_id" value="{{ one_batch_row.id }}">
                                 <input type="hidden" name="kind_of_action" value="{{ one_batch_row.batch_row_action.kind_of_action }}">
                                 <label for="create_actions_button_id" class="col-sm-3 control-label"></label>
-                                <button type="submit" id="create_batch_row_action_id_id" name="create_batch_row_action_id" class="btn btn-default" value={{ one_batch_row.batch_row_action.id }}>UPDATE</button>
+                                <button type="submit" id="create_batch_row_action_id_id" name="create_batch_row_action_id" class="btn btn-default"
+                                        value={{ one_batch_row.batch_row_action.id }}>UPDATE</button>
                                 {{ one_batch_row.batch_row_action.contest_office_we_vote_id }}
                             </form>
                             {% else %}
@@ -368,6 +440,9 @@
                         </td>
                         <td>{{ one_batch_row.batch_row_action.google_civic_election_id|default_if_none:"" }}</td>
                         <td>{{ one_batch_row.batch_row_action.state_code|default_if_none:"" }}</td>
+                        <td>{{ one_batch_row.batch_row_action.district_id|default_if_none:"" }}</td>
+                        <td>{{ one_batch_row.batch_row_action.district_name|default_if_none:"" }}</td>
+                        <td>{{ one_batch_row.batch_row_action.ocd_division_id|default_if_none:"" }}</td>
                     </tr>
                     {% if one_batch_row.batch_row_action.status %}
                     <tr class="{% if one_batch_row.batch_row_action.kind_of_action == "IMPORT_CREATE" %}
@@ -574,23 +649,89 @@
             {# ####################################### #}
             {# ### POLITICIAN ### #}
             {# ####################################### #}
-                <tr>
-                    <th></th>
-                    <th>politician_name</th>
-                    <th>politician_twitter_handle</th>
-                    <th>state_code</th>
-                    <th>ALERTS</th>
-                    <th>ACTIONS</th>
-                </tr>
-                <tr>
-                    <td>analysis:</td>
-                    <td>{{ one_batch_row.batch_row_action.politician_name}}</td>
-                    <td>{{ one_batch_row.batch_row_action.politician_twitter_handle}}</td>
-                    <td>{{ one_batch_row.batch_row_action.state_code}}</td>
-                    <td></td>
-                    <td>{{ one_batch_row.batch_row_action.kind_of_action }}</td>
-                </tr>
-
+                <thead>
+                    <tr class="{% if one_batch_row.batch_row_action.kind_of_action == "IMPORT_CREATE" %}
+                        table-success
+                        {% elif one_batch_row.batch_row_action.kind_of_action == "IMPORT_ADD_TO_EXISTING" %}
+                        table-warning
+                        {% elif one_batch_row.batch_row_action.kind_of_action == "IMPORT_TO_BE_DETERMINED" %}
+                        table-danger
+                        {% elif one_batch_row.batch_row_action.kind_of_action == "IMPORT_QUERY_ERROR" %}
+                        table-danger
+                        {% endif %}">
+                        <th></th>
+                        <th>politician name</th>
+                        <th>state_code</th>
+                        <th>party</th>
+                        <th>twitter</th>
+                        <th>email</th>
+                        <th>url</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="{% if one_batch_row.batch_row_action.kind_of_action == "IMPORT_CREATE" %}
+                        table-success
+                        {% elif one_batch_row.batch_row_action.kind_of_action == "IMPORT_ADD_TO_EXISTING" %}
+                        table-warning
+                        {% elif one_batch_row.batch_row_action.kind_of_action == "IMPORT_TO_BE_DETERMINED" %}
+                        table-danger
+                        {% elif one_batch_row.batch_row_action.kind_of_action == "IMPORT_QUERY_ERROR" %}
+                        table-danger
+                        {% endif %}">
+                        <td>
+                            {# Based on the results of analysis, show button to do the action #}
+                            {% if one_batch_row.batch_row_action.kind_of_action == "IMPORT_CREATE" %}
+                            <form action="{% url 'import_export_batches:batch_action_list_create_or_update_process' %}" method="get" class="form-horizontal">
+                                {% csrf_token %}
+                                <input type="hidden" name="kind_of_batch" value="POLITICIAN">
+                                <input type="hidden" name="batch_header_id" value="{{ one_batch_row.batch_header_id }}">
+                                <input type="hidden" name="batch_row_id" value="{{ one_batch_row.id }}">
+                                <input type="hidden" name="kind_of_action" value="{{ one_batch_row.batch_row_action.kind_of_action }}">
+                                <label for="create_actions_button_id" class="col-sm-3 control-label"></label>
+                                <button type="submit" id="create_batch_row_action_id_id" name="create_batch_row_action_id" class="btn btn-default"
+                                        value={{ one_batch_row.batch_row_action.id }}>Create</button>
+                            </form>
+                            {% elif one_batch_row.batch_row_action.kind_of_action == "IMPORT_ADD_TO_EXISTING" %}
+                            <form action="{% url 'import_export_batches:batch_action_list_create_or_update_process' %}" method="get" class="form-horizontal">
+                                {% csrf_token %}
+                                <input type="hidden" name="kind_of_batch" value="POLITICIAN">
+                                <input type="hidden" name="batch_header_id" value="{{ one_batch_row.batch_header_id }}">
+                                <input type="hidden" name="batch_row_id" value="{{ one_batch_row.id }}">
+                                <input type="hidden" name="kind_of_action" value="{{ one_batch_row.batch_row_action.kind_of_action }}">
+                                <label for="create_actions_button_id" class="col-sm-3 control-label"></label>
+                                <button type="submit" id="create_batch_row_action_id_id" name="create_batch_row_action_id" class="btn btn-default"
+                                        value={{ one_batch_row.batch_row_action.id }}>UPDATE</button>
+                                {{ one_batch_row.batch_row_action.contest_office_we_vote_id }}
+                            </form>
+                            {% else %}
+                                {{ one_batch_row.batch_row_action.kind_of_action }}
+                            {% endif %}
+                        </td>
+                        <td>{{ one_batch_row.batch_row_action.politician_name|default_if_none:"" }}
+                            {% if one_batch_row.batch_row_action.contest_office_we_vote_id %}
+                            <span> ({{ one_batch_row.batch_row_action.politician_we_vote_id|default_if_none:"" }})</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ one_batch_row.batch_row_action.state_code|default_if_none:"" }}</td>
+                        <td>{{ one_batch_row.batch_row_action.political_party|default_if_none:"" }}</td>
+                        <td>{{ one_batch_row.batch_row_action.politician_twitter_handle|default_if_none:"" }}</td>
+                        <td>{{ one_batch_row.batch_row_action.politician_email_address|default_if_none:"" }}</td>
+                        <td>{{ one_batch_row.batch_row_action.politician_url|default_if_none:"" }}</td>
+                    </tr>
+                    {% if one_batch_row.batch_row_action.status %}
+                    <tr class="{% if one_batch_row.batch_row_action.kind_of_action == "IMPORT_CREATE" %}
+                        table-success
+                        {% elif one_batch_row.batch_row_action.kind_of_action == "IMPORT_ADD_TO_EXISTING" %}
+                        table-warning
+                        {% elif one_batch_row.batch_row_action.kind_of_action == "IMPORT_TO_BE_DETERMINED" %}
+                        table-danger
+                        {% elif one_batch_row.batch_row_action.kind_of_action == "IMPORT_QUERY_ERROR" %}
+                        table-danger
+                        {% endif %}">
+                        <td colspan="20">STATUS: {{ one_batch_row.batch_row_action.status }}</td>
+                    </tr>
+                    {% endif %}
+                </tbody>
             {% elif one_batch_row.kind_of_batch == "POSITION" %}
             {# ####################################### #}
             {# ### POSITION ### #}
@@ -732,6 +873,14 @@
     <script>
         $(function() {
             $('#google_civic_election_id').change(function() {
+                this.form.submit();
+            });
+        });
+    </script>
+
+    <script>
+        $(function() {
+            $('#state_code_id').change(function() {
                 this.form.submit();
             });
         });

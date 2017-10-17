@@ -49,10 +49,12 @@ def electoral_district_import_from_xml_data(electoral_district_xml_data):
 
     electoral_district_manager = ElectoralDistrictManager()
 
-    limit_for_testing = 5
+    limit_for_testing = 0
 
     for one_electoral_district in electoral_district_xml_data:
-        if (electoral_district_saved+electoral_district_not_processed+electoral_district_updated) >= limit_for_testing:
+        total_count = electoral_district_saved + electoral_district_not_processed + electoral_district_updated
+        if positive_value_exists(limit_for_testing) and total_count >= limit_for_testing:
+            # This limitation is used when we are doing development and testing
             break
 
         electoral_district_number = None
@@ -74,21 +76,11 @@ def electoral_district_import_from_xml_data(electoral_district_xml_data):
         electoral_district_number_found = one_electoral_district.find('Number')
         if electoral_district_number_found is not None:
             electoral_district_number = convert_to_int(electoral_district_number_found.text)
-            # defaults = {
-            #     'electoral_district_number': electoral_district_number,
-            #     'electoral_district_other_type': electoral_district_other_type,
-            #     'ocd_id_external_id': ocd_id_external_id
-            # }
 
         electoral_district_other_type_found = one_electoral_district.find('OtherType')
 
         if electoral_district_other_type_found is not None:
             electoral_district_other_type = electoral_district_other_type_found.text
-            # defaults = {
-            #     'electoral_district_number': electoral_district_number,
-            #     'electoral_district_other_type': electoral_district_other_type,
-            #     'ocd_id_external_id': ocd_id_external_id
-            # }
 
         external_identifiers_list = one_electoral_district.findall(
             "./ExternalIdentifiers/ExternalIdentifier/[Type='ocd-id']/Value")
@@ -109,11 +101,6 @@ def electoral_district_import_from_xml_data(electoral_district_xml_data):
                     state_code = 'dc'
         else:
             state_code = ''
-            # defaults = {
-            #     'electoral_district_number': electoral_district_number,
-            #     'electoral_district_other_type': electoral_district_other_type,
-            #     'ocd_id_external_id': ocd_id_external_id
-            # }
 
         # Always store state_code in lower case
         if state_code:
@@ -133,8 +120,7 @@ def electoral_district_import_from_xml_data(electoral_district_xml_data):
                     ctcl_id_temp=ctcl_id_temp, electoral_district_name=electoral_district_name)
                 # electoral_district_query = electoral_district_query.filter(
                 #     electoral_district_name=electoral_district_name)
-                # TODO currently update is not handled. Based on what constitues a unique row,
-                # update needs to be handled
+                # TODO currently update is not handled. Based on what constitutes a unique row, handle update
                 if electoral_district_query.count() > 0:
                     duplicate_entry = 1
                     electoral_district_not_processed += 1
@@ -142,28 +128,33 @@ def electoral_district_import_from_xml_data(electoral_district_xml_data):
             if duplicate_entry > 0:
                 # This entry already exists, skip update_or_create. set success to True
                 success = True
-                status = "ELECTORAL_DISTRICT_ENTRY_EXISTS"
+                status += "ELECTORAL_DISTRICT_ENTRY_EXISTS "
             else:
                 try:
+                    updated_values = {
+                        'electoral_district_type':          electoral_district_type,
+                        'electoral_district_number':        electoral_district_number,
+                        'electoral_district_other_type':    electoral_district_other_type,
+                        'ocd_id_external_id':               ocd_id_external_id,
+                        'state_code':                       state_code
+                    }
                     results = electoral_district_manager.update_or_create_electoral_district(
                         ctcl_id_temp,
                         electoral_district_name,
-                        electoral_district_type,
-                        electoral_district_number,
-                        electoral_district_other_type, ocd_id_external_id, state_code)
+                        updated_values)
                     if not results:
                         electoral_district_not_processed += 1
                         success = False
                     elif results['new_electoral_district_created']:
                         electoral_district_saved += 1
                         success = True
-                        status = "ELECTORAL_DISTRICT_IMPORT_PROCESS_CREATED"
+                        status += "ELECTORAL_DISTRICT_IMPORT_PROCESS_CREATED "
                     else:
                         electoral_district_updated += 1
                         success = True
-                        status = "ELECTORAL_DISTRICT_IMPORT_PROCESS_UPDATED"
+                        status += "ELECTORAL_DISTRICT_IMPORT_PROCESS_UPDATED "
                 except Exception as e:
-                    status = 'FAILED update_or_create_electoral_district. ' \
+                    status += 'FAILED update_or_create_electoral_district. ' \
                              '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
                     handle_exception(e, logger=logger, exception_message=status)
                     success = False

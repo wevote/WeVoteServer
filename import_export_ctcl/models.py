@@ -8,6 +8,7 @@ import wevote_functions.admin
 
 logger = wevote_functions.admin.get_logger(__name__)
 
+
 class CandidateSelection(models.Model):
     """
     Contest Office to Candidate mapping is stored in this table.

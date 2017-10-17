@@ -1141,7 +1141,7 @@ class VoterGuideListManager(models.Model):
 
         return voter_guide_list_filtered
 
-    def retrieve_all_voter_guides_order_by(self, order_by='', limit_number=0):
+    def retrieve_all_voter_guides_order_by(self, order_by='', limit_number=0, search_string=''):
         voter_guide_list = []
         voter_guide_list_found = False
         try:
@@ -1152,10 +1152,40 @@ class VoterGuideListManager(models.Model):
             else:
                 voter_guide_queryset = voter_guide_queryset.order_by('-twitter_followers_count')
 
+            if positive_value_exists(search_string):
+                search_words = search_string.split()
+                for one_word in search_words:
+                    filters = []
+
+                    new_filter = Q(twitter_handle__icontains=one_word)
+                    filters.append(new_filter)
+
+                    new_filter = Q(owner_we_vote_id__icontains=one_word)
+                    filters.append(new_filter)
+
+                    new_filter = Q(state_code__icontains=one_word)
+                    filters.append(new_filter)
+
+                    new_filter = Q(public_figure_we_vote_id__icontains=one_word)
+                    filters.append(new_filter)
+
+                    new_filter = Q(display_name__icontains=one_word)
+                    filters.append(new_filter)
+
+                    # Add the first query
+                    if len(filters):
+                        final_filters = filters.pop()
+
+                        # ...and "OR" the remaining items in the list
+                        for item in filters:
+                            final_filters |= item
+
+                        voter_guide_queryset = voter_guide_queryset.filter(final_filters)
+
             if positive_value_exists(limit_number):
                 voter_guide_list = voter_guide_queryset[:limit_number]
             else:
-                voter_guide_list = voter_guide_queryset
+                voter_guide_list = list(voter_guide_queryset)
 
             if len(voter_guide_list):
                 voter_guide_list_found = True
@@ -1165,7 +1195,7 @@ class VoterGuideListManager(models.Model):
             success = True
         except Exception as e:
             handle_record_not_found_exception(e, logger=logger)
-            status = 'voterGuidesToFollowRetrieve: Unable to retrieve voter guides from db. ' \
+            status = 'retrieve_all_voter_guides_order_by: Unable to retrieve voter guides from db. ' \
                      '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
             success = False
 

@@ -27,7 +27,8 @@ from position.models import POSITION
 from voter.models import voter_has_authority
 from voter_guide.models import ORGANIZATION_WORD
 import wevote_functions.admin
-from wevote_functions.functions import convert_to_int, positive_value_exists
+from wevote_functions.functions import convert_to_int, positive_value_exists, STATE_CODE_MAP
+
 
 logger = wevote_functions.admin.get_logger(__name__)
 
@@ -285,6 +286,7 @@ def batch_action_list_view(request):
 
     batch_header_id = convert_to_int(request.GET.get('batch_header_id', 0))
     kind_of_batch = request.GET.get('kind_of_batch', '')
+    state_code = request.GET.get('state_code', '')
     position_owner_organization_we_vote_id = request.GET.get('position_owner_organization_we_vote_id', '')
 
     if not positive_value_exists(batch_header_id):
@@ -325,8 +327,20 @@ def batch_action_list_view(request):
 
     batch_list_found = False
     try:
-        batch_row_list = BatchRow.objects.order_by('id')
-        batch_row_list = batch_row_list.filter(batch_header_id=batch_header_id)
+        batch_row_count_query = BatchRow.objects.order_by('id')
+        batch_row_count_query = batch_row_count_query.filter(batch_header_id=batch_header_id)
+        if positive_value_exists(state_code):
+            batch_row_count_query = batch_row_count_query.filter(state_code__iexact=state_code)
+
+        batch_row_count = batch_row_count_query.count()
+
+        batch_row_query = BatchRow.objects.order_by('id')
+        batch_row_query = batch_row_query.filter(batch_header_id=batch_header_id)
+        if positive_value_exists(state_code):
+            batch_row_query = batch_row_query.filter(state_code__iexact=state_code)
+            batch_row_list = list(batch_row_query)
+        else:
+            batch_row_list = batch_row_query[:200]
         if len(batch_row_list):
             batch_list_found = True
     except BatchDescription.DoesNotExist:
@@ -335,9 +349,14 @@ def batch_action_list_view(request):
         batch_list_found = False
 
     modified_batch_row_list = []
+    active_state_codes = []
     batch_manager = BatchManager()
     if batch_list_found:
         for one_batch_row in batch_row_list:
+            if positive_value_exists(one_batch_row.state_code):
+                if one_batch_row.state_code not in active_state_codes:
+                    active_state_codes.append(one_batch_row.state_code)
+
             if kind_of_batch == CANDIDATE:
                 existing_results = batch_manager.retrieve_batch_row_action_candidate(batch_header_id, one_batch_row.id)
                 if existing_results['batch_row_action_found']:
@@ -417,6 +436,17 @@ def batch_action_list_view(request):
 
     election_query = Election.objects.order_by('-election_day_text')
     election_list = list(election_query)
+
+    filtered_state_list = []
+    state_list = STATE_CODE_MAP
+    sorted_state_list = sorted(state_list.items())
+    for one_state in sorted_state_list:
+        if one_state[0].lower() in active_state_codes:
+            filtered_state_list.append(one_state)
+
+    messages.add_message(request, messages.INFO, 'Batch Row Count: {batch_row_count}'
+                                                 ''.format(batch_row_count=batch_row_count))
+
     messages_on_stage = get_messages(request)
 
     template_values = {
@@ -430,6 +460,8 @@ def batch_action_list_view(request):
         'election_list':            election_list,
         'kind_of_batch':            kind_of_batch,
         'google_civic_election_id': google_civic_election_id,
+        'state_code':               state_code,
+        'state_list':               filtered_state_list,
         'position_owner_organization_we_vote_id': position_owner_organization_we_vote_id,
     }
     return render(request, 'import_export_batches/batch_action_list.html', template_values)
@@ -438,7 +470,7 @@ def batch_action_list_view(request):
 @login_required
 def batch_action_list_analyze_process_view(request):
     """
-    Work with the BatchRows and BatchActionXXXs of an existing batch
+    Create BatchRowActions for either all of the BatchRows for batch_header_id, or only one with batch_row_id
     :param request:
     :return:
     """
@@ -449,15 +481,17 @@ def batch_action_list_analyze_process_view(request):
     batch_header_id = convert_to_int(request.GET.get('batch_header_id', 0))
     batch_row_id = convert_to_int(request.GET.get('batch_row_id', 0))
     kind_of_batch = request.GET.get('kind_of_batch', '')
+    state_code = request.GET.get('state_code', '')
 
     if not positive_value_exists(batch_header_id):
         messages.add_message(request, messages.ERROR, 'Batch_header_id required.')
         return HttpResponseRedirect(reverse('import_export_batches:batch_list', args=()) +
                                     "?kind_of_batch=" + str(kind_of_batch))
 
-    # if create_actions_button in (MEASURE, ELECTED_OFFICE, CANDIDATE, ORGANIZATION_WORD, POSITION, POLITICIAN, IMPORT_BALLOT_ITEM)
+    # if create_actions_button in (MEASURE, ELECTED_OFFICE, CANDIDATE, ORGANIZATION_WORD,
+    # POSITION, POLITICIAN, IMPORT_BALLOT_ITEM)
     # Run the analysis of either A) every row in this batch, or B) Just the batch_row_id specified within this batch
-    results = create_batch_row_actions(batch_header_id, batch_row_id)
+    results = create_batch_row_actions(batch_header_id, batch_row_id, state_code)
     kind_of_batch = results['kind_of_batch']
 
     messages.add_message(request, messages.INFO, 'Batch Actions:'
@@ -468,7 +502,9 @@ def batch_action_list_analyze_process_view(request):
 
     return HttpResponseRedirect(reverse('import_export_batches:batch_action_list', args=()) +
                                 "?kind_of_batch=" + str(kind_of_batch) +
-                                "&batch_header_id=" + str(batch_header_id))
+                                "&batch_header_id=" + str(batch_header_id) +
+                                "&state_code=" + str(state_code)
+                                )
 
 
 @login_required
@@ -667,9 +703,8 @@ def batch_header_mapping_process_view(request):
 
 
 @login_required
-def batch_action_list_create_or_update_process_view(request):
+def batch_action_list_assign_election_to_rows_process_view(request):
     """
-    Use batch_row_action entries and create live data
     :param request:
     :return: 
     """
@@ -684,6 +719,9 @@ def batch_action_list_create_or_update_process_view(request):
     batch_row_id = convert_to_int(request.GET.get('batch_row_id', 0))
     kind_of_batch = request.GET.get('kind_of_batch', '')
     kind_of_action = request.GET.get('kind_of_action')
+    state_code = request.GET.get('state_code', '')
+    google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
+
     # do for entire batch_rows
     try:
         batch_header_map = BatchHeaderMap.objects.get(batch_header_id=batch_header_id)
@@ -695,11 +733,14 @@ def batch_action_list_create_or_update_process_view(request):
 
     if batch_header_map_found:
         try:
-            batch_row_list = BatchRow.objects.all()
-            batch_row_list = batch_row_list.filter(batch_header_id=batch_header_id)
+            batch_row_query = BatchRow.objects.all()
+            batch_row_query = batch_row_query.filter(batch_header_id=batch_header_id)
             if positive_value_exists(batch_row_id):
-                batch_row_list = batch_row_list.filter(id=batch_row_id)
+                batch_row_query = batch_row_query.filter(id=batch_row_id)
+            if positive_value_exists(state_code):
+                batch_row_query = batch_row_query.filter(state_code__iexact=state_code)
 
+            batch_row_list = list(batch_row_query)
             if len(batch_row_list):
                 batch_row_list_found = True
         except BatchDescription.DoesNotExist:
@@ -708,7 +749,73 @@ def batch_action_list_create_or_update_process_view(request):
             pass
 
     if batch_header_map_found and batch_row_list_found:
-        results = import_data_from_batch_row_actions(kind_of_batch, kind_of_action, batch_header_id, batch_row_id)
+        for one_batch_row in batch_row_list:
+            try:
+                one_batch_row.google_civic_election_id = google_civic_election_id
+                one_batch_row.save()
+            except Exception as e:
+                pass
+        # messages.add_message(request, messages.INFO,
+        #                      'Kind of Batch: {kind_of_batch}, ' 'Number Created: {created} '
+        #                      ''.format(kind_of_batch=kind_of_batch,
+        #                                created=results['number_of_table_rows_created']))
+
+    return HttpResponseRedirect(reverse('import_export_batches:batch_action_list', args=()) +
+                                "?kind_of_batch=" + str(kind_of_batch) +
+                                "&batch_header_id=" + str(batch_header_id) +
+                                "&state_code=" + str(state_code) +
+                                "&google_civic_election_id=" + str(google_civic_election_id)
+                                )
+
+
+@login_required
+def batch_action_list_create_or_update_process_view(request):
+    """
+    Use batch_row_action entries and create live data
+    :param request:
+    :return:
+    """
+    authority_required = {'verified_volunteer'}  # admin, verified_volunteer
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
+    batch_row_list_found = False
+    batch_row_list = []
+
+    batch_header_id = convert_to_int(request.GET.get('batch_header_id', 0))
+    batch_row_id = convert_to_int(request.GET.get('batch_row_id', 0))
+    kind_of_batch = request.GET.get('kind_of_batch', '')
+    kind_of_action = request.GET.get('kind_of_action')
+    state_code = request.GET.get('state_code', '')
+    # do for entire batch_rows
+    try:
+        batch_header_map = BatchHeaderMap.objects.get(batch_header_id=batch_header_id)
+        batch_header_map_found = True
+    except BatchHeaderMap.DoesNotExist:
+        # This is fine
+        batch_header_map = BatchHeaderMap()
+        batch_header_map_found = False
+
+    if batch_header_map_found:
+        try:
+            batch_row_query = BatchRow.objects.all()
+            batch_row_query = batch_row_query.filter(batch_header_id=batch_header_id)
+            if positive_value_exists(batch_row_id):
+                batch_row_query = batch_row_query.filter(id=batch_row_id)
+            if positive_value_exists(state_code):
+                batch_row_query = batch_row_query.filter(state_code__iexact=state_code)
+
+            batch_row_list = list(batch_row_query)
+            if len(batch_row_list):
+                batch_row_list_found = True
+        except BatchDescription.DoesNotExist:
+            # This is fine
+            batch_row_list_found = False
+            pass
+
+    if batch_header_map_found and batch_row_list_found:
+        results = import_data_from_batch_row_actions(
+            kind_of_batch, kind_of_action, batch_header_id, batch_row_id, state_code)
 
         if kind_of_action == IMPORT_CREATE:
             if results['success']:
@@ -738,7 +845,9 @@ def batch_action_list_create_or_update_process_view(request):
 
     return HttpResponseRedirect(reverse('import_export_batches:batch_action_list', args=()) +
                                 "?kind_of_batch=" + str(kind_of_batch) +
-                                "&batch_header_id=" + str(batch_header_id))
+                                "&batch_header_id=" + str(batch_header_id) +
+                                "&state_code=" + str(state_code)
+                                )
 
 
 @login_required
@@ -753,6 +862,7 @@ def batch_set_list_view(request):
         return redirect_to_sign_in_page(request, authority_required)
 
     # kind_of_batch = request.GET.get('kind_of_batch', '')
+    batch_file = request.GET.get('batch_file', '')
     batch_uri = request.GET.get('batch_uri', '')
     google_civic_election_id = request.GET.get('google_civic_election_id', 0)
 
@@ -778,6 +888,7 @@ def batch_set_list_view(request):
             'messages_on_stage':        messages_on_stage,
             'batch_set_list':           batch_set_list,
             'election_list':            election_list,
+            'batch_file':               batch_file,
             'batch_uri':                batch_uri,
             'google_civic_election_id': google_civic_election_id,
         }
@@ -785,6 +896,7 @@ def batch_set_list_view(request):
         template_values = {
             'messages_on_stage':        messages_on_stage,
             'election_list':            election_list,
+            'batch_file':               batch_file,
             'batch_uri':                batch_uri,
             'google_civic_election_id': google_civic_election_id,
         }
@@ -809,37 +921,54 @@ def batch_set_list_process_view(request):
     import_batch_button = request.POST.get('import_batch_button', '')
 
     batch_uri_encoded = urlquote(batch_uri) if positive_value_exists(batch_uri) else ""
+    batch_file = None
 
     # Store contents of spreadsheet?
-    if not positive_value_exists(google_civic_election_id):
-        messages.add_message(request, messages.ERROR, 'This batch set requires you '
-                                                      'to choose an election.')
-        return HttpResponseRedirect(reverse('import_export_batches:batch_set_list', args=()) +
-                                    "?batch_uri=" + batch_uri_encoded)
+    # if not positive_value_exists(google_civic_election_id):
+    #     messages.add_message(request, messages.ERROR, 'This batch set requires you to choose an election.')
+    #     return HttpResponseRedirect(reverse('import_export_batches:batch_set_list', args=()) +
+    #                                 "?batch_uri=" + batch_uri_encoded)
 
     election_manager = ElectionManager()
+    election_name = ""
     results = election_manager.retrieve_election(google_civic_election_id)
     if results['election_found']:
         election = results['election']
+        election_name = election.election_name
 
-        if positive_value_exists(import_batch_button):  # If the button was pressed...
-            batch_manager = BatchManager()
+    if positive_value_exists(import_batch_button):  # If the button was pressed...
+        batch_manager = BatchManager()
+        try:
+            if request.method == 'POST' and request.FILES['batch_file']:
+                batch_file = request.FILES['batch_file']
+        except KeyError:
+            pass
 
+        if batch_file is not None:
+            results = batch_manager.create_batch_set_vip_xml(
+                batch_file, batch_uri, google_civic_election_id, organization_we_vote_id)
+            if results['batch_saved']:
+                messages.add_message(request, messages.INFO, 'Import batch for {election_name} election saved.'
+                                                             ''.format(election_name=election_name))
+            else:
+                messages.add_message(request, messages.ERROR, results['status'])
+        elif positive_value_exists(batch_uri):
             # check file type
             filetype = batch_manager.find_file_type(batch_uri)
             if "xml" in filetype:
                 # file is XML
                 # Retrieve the VIP data from XML
-                results = batch_manager.create_batch_set_vip_xml(batch_uri, google_civic_election_id,
-                                                             organization_we_vote_id)
+                results = batch_manager.create_batch_set_vip_xml(
+                    batch_file, batch_uri, google_civic_election_id, organization_we_vote_id)
             else:
                 pass
                 # results = batch_manager.create_batch(batch_uri, google_civic_election_id, organization_we_vote_id)
-            if results['batch_saved']:
-                messages.add_message(request, messages.INFO, 'Import batch for {election_name} election saved.'
-                                                             ''.format(election_name=election.election_name))
-            else:
-                messages.add_message(request, messages.ERROR, results['status'])
+
+        if results['batch_saved']:
+            messages.add_message(request, messages.INFO, 'Import batch for {election_name} election saved.'
+                                                         ''.format(election_name=election_name))
+        else:
+            messages.add_message(request, messages.ERROR, results['status'])
 
     return HttpResponseRedirect(reverse('import_export_batches:batch_set_list', args=()) +
                                 "?google_civic_election_id=" + str(google_civic_election_id) +
@@ -864,32 +993,41 @@ def batch_set_batch_list_view(request):
         return HttpResponseRedirect(reverse('import_export_batches:batch_set_list', args=()))
 
     google_civic_election_id = request.GET.get('google_civic_election_id', 0)
-    number_of_batch_actions_created = 0
+    batch_list_modified = []
 
     try:
+        batch_manager = BatchManager()
         batch_description = BatchDescription.objects.filter(batch_set_id=batch_set_id)
-        batch_description_found = True
 
         batch_list = list(batch_description)
-        # loop through all data sets in this batch
-        for one_batch_set_row in batch_list:
-            batch_header_id = one_batch_set_row.batch_header_id
-            results = create_batch_row_actions(batch_header_id, 0)
-            if results['success']:
-                # number_of_batch_actions_created += results['number_of_batch_actions_created']
-                # status += results['status']
-                one_batch_set_row.number_of_batch_actions_created = results['number_of_batch_actions_created']
-                pass
-            else:
-                # rows must be existing in the action table, get the count
-                batch_manager = BatchManager()
-                kind_of_batch = one_batch_set_row.kind_of_batch
-                one_batch_set_row.number_of_batch_actions_created = batch_manager.count_number_of_batch_action_rows(
-                    batch_header_id, kind_of_batch)
+
+        # Loop through all batches and add count data
+        for one_batch_description in batch_list:
+            batch_header_id = one_batch_description.batch_header_id
+            one_batch_description.number_of_batch_rows_imported = batch_manager.fetch_batch_row_count(batch_header_id)
+            one_batch_description.number_of_batch_rows_analyzed = \
+                batch_manager.fetch_batch_row_action_count(batch_header_id, one_batch_description.kind_of_batch)
+
+            batch_list_modified.append(one_batch_description)
+
+        # loop through all data sets in this batch and create batch_action entries
+        # for one_batch_set_row in batch_list:
+        #     batch_header_id = one_batch_set_row.batch_header_id
+        #     results = create_batch_row_actions(batch_header_id, 0)
+        #     if results['success']:
+        #         # number_of_batch_actions_created += results['number_of_batch_actions_created']
+        #         # status += results['status']
+        #         one_batch_set_row.number_of_batch_actions_created = results['number_of_batch_actions_created']
+        #         pass
+        #     else:
+        #         # rows must be existing in the action table, get the count
+        #         batch_manager = BatchManager()
+        #         kind_of_batch = one_batch_set_row.kind_of_batch
+        #         one_batch_set_row.number_of_batch_actions_created = batch_manager.count_number_of_batch_action_rows(
+        #             batch_header_id, kind_of_batch)
     except BatchDescription.DoesNotExist:
         # This is fine
         batch_description = BatchDescription()
-        batch_description_found = False
 
     election_list = Election.objects.order_by('-election_day_text')
     messages_on_stage = get_messages(request)
@@ -898,7 +1036,7 @@ def batch_set_batch_list_view(request):
         'messages_on_stage':                messages_on_stage,
         'batch_set_id':                     batch_set_id,
         'batch_description':                batch_description,
-        'batch_list':                       batch_list,
+        'batch_list':                       batch_list_modified,
         'election_list':                    election_list,
         'google_civic_election_id':         google_civic_election_id,
     }

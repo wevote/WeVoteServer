@@ -18,7 +18,7 @@
 <div class="form-group">
     <label for="election_id" class="col-sm-3 control-label">Election Name{% if election %} (ID: {{ election.id }}){% endif %}</label>
     <div class="col-sm-8">
-        <input type="text" name="election" id="election_id" class="form-control"
+        <input type="text" name="election_name" id="election_id" class="form-control"
                value="{% if election %}{{ election.election_name }}{% endif %}" />
     </div>
 </div>
@@ -54,7 +54,7 @@
 <div class="form-group">
     <label for="state_id" class="col-sm-3 control-label">State Code</label>
     <div class="col-sm-8">
-        <input type="text" name="state" id="state_id" class="form-control"
+        <input type="text" name="state_code" id="state_id" class="form-control"
                value="{% if election %}{{ election.state_code|default_if_none:"" }}{% endif %}" />
     </div>
 </div>
