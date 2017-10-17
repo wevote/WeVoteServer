@@ -82,9 +82,9 @@ def analyze_twitter_search_results(search_results, search_results_length, candid
                 name_found_in_screen_name = True
 
         if not name_found_in_name:
-            likelihood_score -= 40
-        if not name_found_in_screen_name:
             likelihood_score -= 30
+        if not name_found_in_screen_name:
+            likelihood_score -= 20
 
         # Check if state or state code is in location or description
         if one_result.location and positive_value_exists(state_full_name) and state_full_name in one_result.location:
@@ -105,13 +105,15 @@ def analyze_twitter_search_results(search_results, search_results_length, candid
         # Check (each word individually) if office name is in description
         # This also checks if state code is in description
         office_name = candidate_campaign.contest_office_name
-        if positive_value_exists(office_name):
+        if positive_value_exists(office_name) and one_result.description:
             office_name = office_name.split()
-        else:
-            office_name = []
-        for word in office_name:
-            if one_result.description and len(word) > 1 and word in one_result.description:
-                likelihood_score += 10
+            office_found_in_description = False
+            for word in office_name:
+                if len(word) > 1 and word in one_result.description:
+                    likelihood_score += 10
+                    office_found_in_description = True
+            if not office_found_in_description:
+                likelihood_score -= 10
 
         # Increase the score for every positive keyword we find
         for keyword in POSITIVE_KEYWORDS:
@@ -132,17 +134,17 @@ def analyze_twitter_search_results(search_results, search_results_length, candid
                 #  30 days inactive =   0 points
                 #  60 days inactive = -10 points
                 # 120 days inactive = -20 points
-                # 240 days inactive = -30 points
+                # 240 days inactive = -30 points (etc.)
                 inactivity_likelihood = floor(10.0 * log2(time_difference / 2.592e6))
                 if positive_value_exists(inactivity_likelihood):
-                    if inactivity_likelihood > 30:
-                        likelihood_score -= 30
+                    if inactivity_likelihood > 60:
+                        likelihood_score -= 60
                     else:
                         likelihood_score -= inactivity_likelihood
         except AttributeError:
             # 'User' object (one_result) has no attribute 'status'
             # So the account likely has no tweets
-            likelihood_score -= 50
+            likelihood_score -= 60
 
         if not positive_value_exists(likelihood_score):
             likelihood_score = 0
