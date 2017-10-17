@@ -1203,6 +1203,7 @@ class BallotReturnedManager(models.Model):
         location = None
         try_without_maps_key = False
         status = ""
+        state_code = ""
 
         if not positive_value_exists(text_for_map_search):
             status += "FIND_CLOSEST_BALLOT_RETURNED-NO_TEXT_FOR_MAP_SEARCH "
@@ -1249,19 +1250,23 @@ class BallotReturnedManager(models.Model):
             # If Geocoder is not able to give us a location, look to see if their voter entered their address as
             # "city_name, state_code" eg: "Sunnyvale, CA". If so, try to parse the entry and get ballot data
             # for that location
-            address = text_for_map_search
-            state_code = address.split(', ')[-1]
-            state_code = state_code.upper()
-            city = address.split(', ')[-2]
-            city = city.lower()
-
             ballot_returned_query = BallotReturned.objects.all()
-            if positive_value_exists(state_code):
-                ballot_returned_query = ballot_returned_query.filter(normalized_state__iexact=state_code)
-            if positive_value_exists(city):
-                ballot_returned_query = ballot_returned_query.filter(normalized_city__iexact=city)
             if positive_value_exists(google_civic_election_id):
                 ballot_returned_query = ballot_returned_query.filter(google_civic_election_id=google_civic_election_id)
+
+            if "," in text_for_map_search:
+                address = text_for_map_search
+                state_code = address.split(', ')[-1]
+                state_code = state_code.upper()
+                city = address.split(', ')[-2]
+                city = city.lower()
+                if positive_value_exists(state_code):
+                    ballot_returned_query = ballot_returned_query.filter(normalized_state__iexact=state_code)
+                if positive_value_exists(city):
+                    ballot_returned_query = ballot_returned_query.filter(normalized_city__iexact=city)
+            else:
+                ballot_returned_query = ballot_returned_query.filter(text_for_map_search__icontains=text_for_map_search)
+
             ballot = ballot_returned_query.first()
         else:
             # If here, then the geocoder successfully found the address
