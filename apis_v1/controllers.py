@@ -57,14 +57,26 @@ def organization_follow(voter_device_id, organization_id=0, organization_we_vote
         if organization_results['organization_found']:
             organization_we_vote_id = organization_results['organization'].we_vote_id
 
-    json_data = organization_follow_or_unfollow_or_ignore(
+    results = organization_follow_or_unfollow_or_ignore(
         voter_device_id, organization_id, organization_we_vote_id, follow_kind=FOLLOWING,
         organization_follow_based_on_issue=organization_follow_based_on_issue, user_agent_string=user_agent_string,
         user_agent_object=user_agent_object)
 
+    json_data = {
+        'status': results['status'],
+        'success': results['success'],
+        'voter_device_id': results['voter_device_id'],
+        'organization_id': results['organization_id'],
+        'organization_we_vote_id': results['organization_we_vote_id'],
+        'organization_twitter_handle': organization_twitter_handle,
+        'organization_follow_based_on_issue': results['organization_follow_based_on_issue'],
+        'voter_linked_organization_we_vote_id': results['voter_linked_organization_we_vote_id'],
+    }
+
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 
 
+# TODO Update organization_stop_following to match organization_follow (and include "organization_twitter_handle")
 def organization_stop_following(voter_device_id, organization_id=0, organization_we_vote_id='',
                                 user_agent_string='', user_agent_object=None):
     """

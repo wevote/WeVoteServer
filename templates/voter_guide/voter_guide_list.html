@@ -54,7 +54,8 @@
         <tr>
             <td></td>
             <td>&nbsp;</td>
-            <td>&nbsp;</td>
+            <td>Organization</td>
+            <td>Twitter</td>
             <td>Election</td>
             <td>Time Span</td>
             <td>Public<br />
@@ -90,6 +91,7 @@
             <td></td>
             <td><a href="#">?Owner Type?</a></td>
         {% endif %}
+            <td>{{ voter_guide.twitter_handle|default_if_none:"" }}</td>
             <td>{{ voter_guide.google_civic_election_id|default_if_none:"" }}</td>
             <td>{{ voter_guide.vote_smart_time_span|default_if_none:"" }}</td>
             <td>{{ voter_guide.number_of_public_positions|default_if_none:"" }}</td>
