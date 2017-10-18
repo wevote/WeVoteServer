@@ -10,11 +10,152 @@ from candidate.models import CandidateCampaignListManager
 from config.base import get_environment_variable
 from organization.models import OrganizationListManager
 from wevote_functions.functions import convert_state_code_to_state_text, convert_to_int, positive_value_exists
+from math import floor, log2
+from re import sub
+from time import time
 
 TWITTER_CONSUMER_KEY = get_environment_variable("TWITTER_CONSUMER_KEY")
 TWITTER_CONSUMER_SECRET = get_environment_variable("TWITTER_CONSUMER_SECRET")
 TWITTER_ACCESS_TOKEN = get_environment_variable("TWITTER_ACCESS_TOKEN")
 TWITTER_ACCESS_TOKEN_SECRET = get_environment_variable("TWITTER_ACCESS_TOKEN_SECRET")
+
+POSITIVE_KEYWORDS = [
+    "affiliate",
+    "candidate",
+    "chair",
+    "city",
+    "civic",
+    "country",
+    "county",
+    "district",
+    "elect",
+    "endorse",
+    "local",
+    "office",
+    "official",
+    "public",
+    "running",
+    "state",
+]
+
+NEGATIVE_KEYWORDS = [
+    "fake",
+    "parody",
+    "unofficial",
+]
+
+
+def analyze_twitter_search_results(search_results, search_results_length, candidate_name,
+                                   candidate_campaign, possible_twitter_handles_list):
+    search_term = candidate_campaign.candidate_name
+    state_code = candidate_campaign.state_code
+    state_full_name = convert_state_code_to_state_text(state_code)
+
+    for possible_candidate_index in range(search_results_length):
+        one_result = search_results[possible_candidate_index]
+        likelihood_score = 0
+
+        # Increase the score with increased followers count
+        if positive_value_exists(one_result.followers_count):
+            #  125 followers =  0 points
+            #  250 followers = 10 points
+            #  500 followers = 20 points
+            # 1000 followers = 30 points
+            followers_likelihood = floor(10.0 * log2(one_result.followers_count / 125.0))
+            if positive_value_exists(followers_likelihood):
+                if followers_likelihood > 30:
+                    likelihood_score += 30
+                else:
+                    likelihood_score += followers_likelihood
+
+        # Check if name (or parts of name) are in Twitter name and handle
+        name_found_in_name = False
+        name_found_in_screen_name = False
+        screen_name_handling_regex = r"[^a-zA-Z]"
+        for name in candidate_name.values():
+            if len(name) and name in one_result.name:
+                likelihood_score += 10
+                name_found_in_name = True
+            if len(name) and sub(screen_name_handling_regex, "", name).lower() in \
+                             sub(screen_name_handling_regex, "", one_result.screen_name).lower():
+                likelihood_score += 10
+                name_found_in_screen_name = True
+
+        if not name_found_in_name:
+            likelihood_score -= 30
+        if not name_found_in_screen_name:
+            likelihood_score -= 20
+
+        # Check if state or state code is in location or description
+        if one_result.location and positive_value_exists(state_full_name) and state_full_name in one_result.location:
+            likelihood_score += 30
+        elif one_result.location and positive_value_exists(state_code) and state_code in one_result.location:
+            likelihood_score += 20
+
+        if one_result.description and positive_value_exists(state_full_name) and \
+                state_full_name in one_result.description:
+            likelihood_score += 20
+
+        # Check if candidate's party is in description
+        political_party = candidate_campaign.political_party_display()
+        if one_result.description and positive_value_exists(political_party) and \
+                political_party in one_result.description:
+            likelihood_score += 20
+
+        # Check (each word individually) if office name is in description
+        # This also checks if state code is in description
+        office_name = candidate_campaign.contest_office_name
+        if positive_value_exists(office_name) and one_result.description:
+            office_name = office_name.split()
+            office_found_in_description = False
+            for word in office_name:
+                if len(word) > 1 and word in one_result.description:
+                    likelihood_score += 10
+                    office_found_in_description = True
+            if not office_found_in_description:
+                likelihood_score -= 10
+
+        # Increase the score for every positive keyword we find
+        for keyword in POSITIVE_KEYWORDS:
+            if one_result.description and keyword in one_result.description.lower():
+                likelihood_score += 5
+
+        # Decrease the score for every negative keyword we find
+        for keyword in NEGATIVE_KEYWORDS:
+            if one_result.description and keyword in one_result.description.lower():
+                likelihood_score -= 20
+
+        # Decrease the score for inactive accounts
+        try:
+            time_last_active = one_result.status.created_at.timestamp()
+            time_difference = time() - time_last_active
+            if positive_value_exists(time_difference):
+                #  30 days = 2,592,000 seconds
+                #  30 days inactive =   0 points
+                #  60 days inactive = -10 points
+                # 120 days inactive = -20 points
+                # 240 days inactive = -30 points (etc.)
+                inactivity_likelihood = floor(10.0 * log2(time_difference / 2.592e6))
+                if positive_value_exists(inactivity_likelihood):
+                    if inactivity_likelihood > 60:
+                        likelihood_score -= 60
+                    else:
+                        likelihood_score -= inactivity_likelihood
+        except AttributeError:
+            # 'User' object (one_result) has no attribute 'status'
+            # So the account likely has no tweets
+            likelihood_score -= 60
+
+        if not positive_value_exists(likelihood_score):
+            likelihood_score = 0
+
+        current_candidate_twitter_info = {
+            'search_term': search_term,
+            'likelihood_score': likelihood_score,
+            'twitter_json': one_result._json,
+        }
+
+        possible_twitter_handles_list.append(current_candidate_twitter_info)
 
 
 def delete_possible_twitter_handles(candidate_campaign):
@@ -55,71 +196,58 @@ def retrieve_possible_twitter_handles(candidate_campaign):
     status += "RETRIEVE_POSSIBLE_TWITTER_HANDLES-REACHING_OUT_TO_TWITTER "
 
     search_term = candidate_campaign.candidate_name
-    state_code = candidate_campaign.state_code
-    state_full_name = convert_state_code_to_state_text(state_code)
 
     auth = tweepy.OAuthHandler(TWITTER_CONSUMER_KEY, TWITTER_CONSUMER_SECRET)
     auth.set_access_token(TWITTER_ACCESS_TOKEN, TWITTER_ACCESS_TOKEN_SECRET)
     api = tweepy.API(auth)
-    results = {'possible_twitter_handles_list': []}
+    # results = {'possible_twitter_handles_list': []}
     possible_twitter_handles_list = []
     search_results = api.search_users(q=search_term, page=1)
+
     search_results.sort(key=lambda possible_candidate: possible_candidate.followers_count, reverse=True)
     search_results_found = len(search_results)
 
-    if not positive_value_exists(search_results_found):
-        # No results found with name "as-is". Try searching for only first and last name (without middle names)
-        modified_search_term = candidate_campaign.extract_first_name() + " " + candidate_campaign.extract_last_name()
-        search_results = api.search_users(q=modified_search_term, page=1)
-        search_results.sort(key=lambda possible_candidate: possible_candidate.followers_count, reverse=True)
+    name_handling_regex = r"[^ \w'-]"
+    candidate_name = {
+        'title':       sub(name_handling_regex, "", candidate_campaign.extract_title()),
+        'first_name':  sub(name_handling_regex, "", candidate_campaign.extract_first_name()),
+        'middle_name': sub(name_handling_regex, "", candidate_campaign.extract_middle_name()),
+        'last_name':   sub(name_handling_regex, "", candidate_campaign.extract_last_name()),
+        'suffix':      sub(name_handling_regex, "", candidate_campaign.extract_suffix()),
+        'nickname':    sub(name_handling_regex, "", candidate_campaign.extract_nickname()),
+    }
 
-    for possible_candidate_index in range(len(search_results)):
-        one_result = search_results[possible_candidate_index]
-        likelihood_percentage = 0
-        if one_result.followers_count > 1000:
-            likelihood_percentage += 30
-        elif one_result.followers_count > 500:
-            likelihood_percentage += 20
-        elif one_result.followers_count > 100:
-            likelihood_percentage += 10
+    analyze_twitter_search_results(search_results, search_results_found, candidate_name, candidate_campaign,
+                                   possible_twitter_handles_list)
 
-        if one_result.name == candidate_campaign.candidate_name:
-            # If exact name match
-            likelihood_percentage += 20
+    # Also include search results omitting any single-letter initials and periods in name.
+    # Example: "A." is ignored while "A.J." becomes "AJ"
+    modified_search_term = ""
+    modified_search_term_base = ""
+    if len(candidate_name['first_name']) > 1:
+        modified_search_term += candidate_name['first_name'] + " "
+    if len(candidate_name['middle_name']) > 1:
+        modified_search_term_base += candidate_name['middle_name'] + " "
+    if len(candidate_name['last_name']) > 1:
+        modified_search_term_base += candidate_name['last_name']
+    if len(candidate_name['suffix']):
+        modified_search_term_base += " " + candidate_name['suffix']
+    modified_search_term += modified_search_term_base
+    if search_term != modified_search_term:
+        modified_search_results = api.search_users(q=modified_search_term, page=1)
+        modified_search_results.sort(key=lambda possible_candidate: possible_candidate.followers_count, reverse=True)
+        modified_search_results_found = len(modified_search_results)
+        analyze_twitter_search_results(modified_search_results, modified_search_results_found,
+                                       candidate_name, candidate_campaign, possible_twitter_handles_list)
 
-        if one_result.location and positive_value_exists(state_full_name) and state_full_name in one_result.location:
-            likelihood_percentage += 30
-        elif one_result.location and positive_value_exists(state_code) and state_code in one_result.location:
-            likelihood_percentage += 20
-
-        if one_result.description and positive_value_exists(state_full_name) and \
-                state_full_name in one_result.description:
-            likelihood_percentage += 20
-        elif one_result.description and positive_value_exists(state_code) and state_code in one_result.description:
-            likelihood_percentage += 10
-
-        political_party = candidate_campaign.political_party_display()
-        if one_result.description and positive_value_exists(political_party) and \
-                political_party in one_result.description:
-            likelihood_percentage += 20
-
-        office_name = candidate_campaign.contest_office_name
-        if one_result.description and positive_value_exists(office_name) and office_name in one_result.description:
-            likelihood_percentage += 20
-
-        # Increase the percentage for every keyword we find
-        if one_result.description and "candidate" in one_result.description.lower():
-            likelihood_percentage += 10
-
-        if one_result.description and "district" in one_result.description.lower():
-            likelihood_percentage += 10
-
-        current_candidate_twitter_info = {}
-        current_candidate_twitter_info['search_term'] = search_term
-        current_candidate_twitter_info['likelihood_percentage'] = likelihood_percentage
-        current_candidate_twitter_info['twitter_json'] = one_result._json
-
-        possible_twitter_handles_list.append(current_candidate_twitter_info)
+    # If nickname exists, try searching with nickname instead of first name
+    if len(candidate_name['nickname']):
+        modified_search_term_2 = candidate_name['nickname'] + " " + modified_search_term_base
+        modified_search_results_2 = api.search_users(q=modified_search_term_2, page=1)
+        modified_search_results_2.sort(key=lambda possible_candidate: possible_candidate.followers_count, reverse=True)
+        modified_search_results_2_found = len(modified_search_results_2)
+        analyze_twitter_search_results(modified_search_results_2, modified_search_results_2_found,
+                                       candidate_name, candidate_campaign, possible_twitter_handles_list)
 
     success = bool(possible_twitter_handles_list)
 
@@ -129,7 +257,7 @@ def retrieve_possible_twitter_handles(candidate_campaign):
         for possibility_result in possible_twitter_handles_list:
             save_twitter_user_results = twitter_user_manager.update_or_create_twitter_link_possibility(
                 candidate_campaign.we_vote_id, possibility_result['twitter_json'],
-                possibility_result['search_term'], possibility_result['likelihood_percentage'])
+                possibility_result['search_term'], possibility_result['likelihood_score'])
 
     results = {
         'success':                  True,
