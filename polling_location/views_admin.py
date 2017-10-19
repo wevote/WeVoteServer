@@ -116,7 +116,7 @@ def polling_locations_import_from_master_server_view(request):
     :param request:
     :return:
     """
-    google_civic_election_id = request.GET.get('google_civic_election_id', 0)
+    google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
     state_code = request.GET.get('state_code', '')
 
     results = polling_locations_import_from_master_server(request, state_code)
@@ -324,6 +324,8 @@ def polling_location_summary_view(request, polling_location_local_id):
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
+    google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
+
     messages_on_stage = get_messages(request)
     polling_location_local_id = convert_to_int(polling_location_local_id)
     polling_location_on_stage_found = False
@@ -337,15 +339,11 @@ def polling_location_summary_view(request, polling_location_local_id):
         # This is fine, create new
         pass
 
-    if polling_location_on_stage_found:
-        template_values = {
-            'messages_on_stage': messages_on_stage,
-            'polling_location': polling_location_on_stage,
-        }
-    else:
-        template_values = {
-            'messages_on_stage': messages_on_stage,
-        }
+    template_values = {
+        'google_civic_election_id': google_civic_election_id,
+        'messages_on_stage':        messages_on_stage,
+        'polling_location':         polling_location_on_stage,
+    }
     return render(request, 'polling_location/polling_location_summary.html', template_values)
 
 
@@ -354,6 +352,8 @@ def polling_location_summary_by_we_vote_id_view(request, polling_location_we_vot
     authority_required = {'verified_volunteer'}  # admin, verified_volunteer
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
+
+    google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
 
     messages_on_stage = get_messages(request)
     polling_location_on_stage_found = False
@@ -367,13 +367,9 @@ def polling_location_summary_by_we_vote_id_view(request, polling_location_we_vot
         # This is fine, create new
         pass
 
-    if polling_location_on_stage_found:
-        template_values = {
-            'messages_on_stage': messages_on_stage,
-            'polling_location': polling_location_on_stage,
-        }
-    else:
-        template_values = {
-            'messages_on_stage': messages_on_stage,
-        }
+    template_values = {
+        'google_civic_election_id': google_civic_election_id,
+        'messages_on_stage':        messages_on_stage,
+        'polling_location':         polling_location_on_stage,
+    }
     return render(request, 'polling_location/polling_location_summary.html', template_values)
