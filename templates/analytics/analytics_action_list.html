@@ -30,7 +30,8 @@
         Show raw AnalyticsAction entries.
     {% endif %}
     {% if show_user_agent != '1' %}
-        <a href="{% url 'analytics:analytics_action_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}&show_user_agent=1">Show user agent data</a>.
+        <a href="{% if voter_we_vote_id %}{% url 'analytics:analytics_action_list' voter_we_vote_id %}{% elif organization_we_vote_id %}{% url 'analytics:analytics_action_list' organization_we_vote_id %}{% else %}{% url 'analytics:analytics_action_list' %}{% endif %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}&show_user_agent=1">
+            Show user agent data</a>.
     {% endif %}
 
     </p>
@@ -90,7 +91,7 @@
         <th>Device</th>
         {% if show_user_agent %}
         <th>User Agent
-            (<a href="{% url 'analytics:analytics_action_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">hide</a>)
+            (<a href="{% if voter_we_vote_id %}{% url 'analytics:analytics_action_list' voter_we_vote_id %}{% elif organization_we_vote_id %}{% url 'analytics:analytics_action_list' organization_we_vote_id %}{% else %}{% url 'analytics:analytics_action_list' %}{% endif %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">hide</a>)
         </th>
         {% endif %}
     </tr>

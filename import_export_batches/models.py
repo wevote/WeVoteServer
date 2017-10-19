@@ -168,9 +168,11 @@ BATCH_IMPORT_KEYS_ACCEPTED_FOR_POSITIONS = {
 
 BATCH_IMPORT_KEYS_ACCEPTED_FOR_BALLOT_ITEMS = {
     'polling_location_we_vote_id': 'polling_location_we_vote_id',
+    'contest_office_we_vote_id': 'contest_office_we_vote_id',
+    'contest_office_name': 'contest_office_name',
     'candidate_name': 'candidate_name',
     'candidate_twitter_handle': 'candidate_twitter_handle',
-    'contest_office_name': 'contest_office_name',
+    'contest_measure_we_vote_id': 'contest_measure_we_vote_id',
     'contest_measure_name': 'contest_measure_name',
     'local_ballot_order': 'local_ballot_order',
 }
@@ -222,12 +224,14 @@ class BatchManager(models.Model):
             batch_file_name, csv_data, kind_of_batch, google_civic_election_id, organization_we_vote_id)
 
     def create_batch_from_local_file_upload(
-            self, batch_file, kind_of_batch, google_civic_election_id, organization_we_vote_id):
+            self, batch_file, kind_of_batch, google_civic_election_id, organization_we_vote_id,
+            polling_location_we_vote_id=""):
         if (batch_file.content_type == 'text/csv') or (batch_file.content_type == 'application/vnd.ms-excel'):
             csv_data = csv.reader(codecs.iterdecode(batch_file, 'utf-8'), delimiter=',')
             batch_file_name = batch_file.name
             return self.create_batch_from_csv_data(
-                batch_file_name, csv_data, kind_of_batch, google_civic_election_id, organization_we_vote_id)
+                batch_file_name, csv_data, kind_of_batch, google_civic_election_id, organization_we_vote_id,
+                polling_location_we_vote_id)
 
         status = "CREATE_BATCH_FILETYPE_NOT_RECOGNIZED"
         results = {
@@ -239,7 +243,8 @@ class BatchManager(models.Model):
         }
         return results
 
-    def create_batch_from_csv_data(self, file_name, csv_data, kind_of_batch, google_civic_election_id, organization_we_vote_id):
+    def create_batch_from_csv_data(self, file_name, csv_data, kind_of_batch, google_civic_election_id,
+                                   organization_we_vote_id, polling_location_we_vote_id=""):
         first_line = True
         success = False
         status = ""
@@ -391,6 +396,7 @@ class BatchManager(models.Model):
                             google_civic_election_id=google_civic_election_id,
                             kind_of_batch=kind_of_batch,
                             organization_we_vote_id=organization_we_vote_id,
+                            polling_location_we_vote_id=polling_location_we_vote_id,
                             # source_uri=batch_uri,
                             )
                         status += "BATCH_DESCRIPTION_SAVED "
@@ -2740,6 +2746,8 @@ class BatchDescription(models.Model):
     kind_of_batch = models.CharField(max_length=32, choices=KIND_OF_BATCH_CHOICES, default=MEASURE)
     organization_we_vote_id = models.CharField(
         verbose_name="if for positions, the organization's we vote id", max_length=255, null=True, blank=True)
+    polling_location_we_vote_id = models.CharField(
+        verbose_name="if for ballot items, the polling location we vote id", max_length=255, null=True, blank=True)
     batch_description_text = models.CharField(max_length=255)
     source_uri = models.URLField(blank=True, null=True, verbose_name='uri where data is coming from')
     date_created = models.DateTimeField(verbose_name='date first saved', null=True, auto_now=True)
@@ -3603,6 +3611,7 @@ class BatchRowActionBallotItem(models.Model):
     batch_row_id = models.PositiveIntegerField(verbose_name="unique id of batch row", unique=True, null=False)
     kind_of_action = models.CharField(max_length=40, choices=KIND_OF_ACTION_CHOICES, default=IMPORT_TO_BE_DETERMINED)
 
+    ballot_item_id = models.IntegerField(verbose_name="ballot item unique id", default=0, null=True, blank=True)
     # Fields from BallotItem
     # The unique id of the voter for which this ballot was retrieved
     voter_id = models.IntegerField(verbose_name="the voter unique id", default=0, null=False, blank=False)

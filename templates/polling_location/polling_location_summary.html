@@ -1,7 +1,7 @@
 {# templates/polling_location/polling_location_summary.html #}
 {% extends "template_base.html" %}
 
-{% block title %}{% if polling_location %}{{ polling_location.polling_location_name }} Summary{% else %}No Polling Location Found{% endif %}{% endblock %}
+{% block title %}Polling Location{% if polling_location %}: {{ polling_location.location_name }}{% else %} Not Found{% endif %}{% endblock %}
 
 {%  block content %}
 
@@ -20,10 +20,19 @@
         <br />
     {% endif %}
     Hours: {{ polling_location.polling_hours_text }}<br />
-    VIP ID: {{ polling_location.polling_location_id }}
+    VIP ID: {{ polling_location.polling_location_id }}<br />
+    we_vote_id: {{ polling_location.we_vote_id }}
     </p>
 
-{#    <p><a href="{% url 'polling_location:polling_location_edit' polling_location.id %}">edit</a></p>#}
+<p><a href="{% url 'polling_location:polling_location_edit' polling_location.id %}">edit</a></p>
+
+<p><a href="{% url 'ballot:ballot_item_list_edit' 0 %}?google_civic_election_id={{ election.google_civic_election_id }}&state_code={{ state_code }}&polling_location_we_vote_id={{ polling_location.we_vote_id }}">
+   Create Ballot for this Election for one Location</a>
+    (so voters can find a ballot before Google Civic data is live)</p>
+
+<p><a href="{% url 'import_export_batches:batch_list' %}?kind_of_batch=IMPORT_BALLOT_ITEM&google_civic_election_id={{ google_civic_election_id }}&polling_location_we_vote_id={{ polling_location.we_vote_id }}">
+   Import/Export Ballot Items at One Polling Location</a></p>
+
 
 
 {% else %}

@@ -202,7 +202,7 @@ def election_one_ballot_retrieve_view(request, election_local_id=0):
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
-    polling_location_we_vote_id = ""
+    polling_location_we_vote_id = request.GET.get('polling_location_we_vote_id', '')
 
     google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
     ballot_returned_id = convert_to_int(request.GET.get('ballot_returned_id', 0))
@@ -217,6 +217,7 @@ def election_one_ballot_retrieve_view(request, election_local_id=0):
     try:
         if positive_value_exists(election_local_id):
             election_on_stage = Election.objects.get(id=election_local_id)
+            google_civic_election_id = election_on_stage.google_civic_election_id
         else:
             election_on_stage = Election.objects.get(google_civic_election_id=google_civic_election_id)
             election_local_id = election_on_stage.id
@@ -227,6 +228,8 @@ def election_one_ballot_retrieve_view(request, election_local_id=0):
     except Election.DoesNotExist:
         messages.add_message(request, messages.ERROR, 'Could not retrieve ballot data. Election could not be found.')
         return HttpResponseRedirect(reverse('election:election_list', args=()))
+    except Exception as e:
+        pass
 
     # Check to see if we have polling location data related to the region(s) covered by this election
     # We request the ballot data for each polling location as a way to build up our local data
@@ -244,7 +247,10 @@ def election_one_ballot_retrieve_view(request, election_local_id=0):
                              'state: {state}. '.format(
                                  election_name=election_on_stage.election_name,
                                  state=state_code))
-        return HttpResponseRedirect(reverse('ballot:ballot_item_list_edit', args=(ballot_returned_id,)))
+        return HttpResponseRedirect(reverse('ballot:ballot_item_list_edit', args=(ballot_returned_id,)) +
+                                    "?polling_location_we_vote_id=" + str(polling_location_we_vote_id) +
+                                    "&google_civic_election_id=" + str(google_civic_election_id)
+                                    )
     except Exception as e:
         messages.add_message(request, messages.ERROR,
                              'Problem retrieving polling location "{polling_location_we_vote_id}" for {election_name}. '
@@ -252,7 +258,10 @@ def election_one_ballot_retrieve_view(request, election_local_id=0):
                                  election_name=election_on_stage.election_name,
                                  polling_location_we_vote_id=polling_location_we_vote_id,
                                  state=state_code))
-        return HttpResponseRedirect(reverse('ballot:ballot_item_list_edit', args=(ballot_returned_id,)))
+        return HttpResponseRedirect(reverse('ballot:ballot_item_list_edit', args=(ballot_returned_id,)) +
+                                    "?polling_location_we_vote_id=" + str(polling_location_we_vote_id) +
+                                    "&google_civic_election_id=" + str(google_civic_election_id)
+                                    )
 
     ballots_retrieved = 0
     ballots_not_retrieved = 0
@@ -268,6 +277,9 @@ def election_one_ballot_retrieve_view(request, election_local_id=0):
                                                                           polling_location.we_vote_id)
         if store_one_ballot_results['success']:
             success = True
+            if store_one_ballot_results['ballot_returned_found']:
+                ballot_returned = store_one_ballot_results['ballot_returned']
+                ballot_returned_id = ballot_returned.id
             # NOTE: We don't support retrieving ballots for polling locations AND geocoding simultaneously
             # if store_one_ballot_results['ballot_returned_found']:
             #     ballot_returned = store_one_ballot_results['ballot_returned']
@@ -307,7 +319,10 @@ def election_one_ballot_retrieve_view(request, election_local_id=0):
                              ' (not retrieved: {ballots_not_retrieved})'.format(
                                  ballots_not_retrieved=ballots_not_retrieved,
                                  election_name=election_on_stage.election_name))
-    return HttpResponseRedirect(reverse('ballot:ballot_item_list_edit', args=(ballot_returned_id,)))
+    return HttpResponseRedirect(reverse('ballot:ballot_item_list_edit', args=(ballot_returned_id,)) +
+                                "?polling_location_we_vote_id=" + str(polling_location_we_vote_id) +
+                                "&google_civic_election_id=" + str(google_civic_election_id)
+                                )
 
 
 @login_required

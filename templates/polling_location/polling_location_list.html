@@ -61,7 +61,7 @@
     {% for polling_location in polling_location_list %}
         <tr>
             <td>{{ forloop.counter }}</td>
-            <td><a href="{% url 'polling_location:polling_location_edit' polling_location.id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
+            <td><a href="{% url 'polling_location:polling_location_summary' polling_location.id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
             {% if polling_location.location_name %}{{ polling_location.location_name }}{% else %}(missing location name)&nbsp;&nbsp;{% endif %}</a>
             </td>
             <td>

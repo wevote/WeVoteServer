@@ -259,6 +259,7 @@ def ballot_item_list_edit_view(request, ballot_returned_id, polling_location_we_
     polling_location_zip = request.GET.get('polling_location_zip', '')
     google_civic_election_id = request.GET.get('google_civic_election_id', 0)
     google_civic_election_id = convert_to_int(google_civic_election_id)
+    state_code = request.GET.get('state_code', '')
 
     ballot_returned_found = False
     ballot_returned = BallotReturned()
@@ -304,12 +305,14 @@ def ballot_item_list_edit_view(request, ballot_returned_id, polling_location_we_
     polling_location_found = False
     polling_location = PollingLocation()
     polling_location_manager = PollingLocationManager()
+    polling_location_state_code = ""
     if positive_value_exists(polling_location_id):
         results = polling_location_manager.retrieve_polling_location_by_id(polling_location_id)
         if results['polling_location_found']:
             polling_location = results['polling_location']
             polling_location_we_vote_id = polling_location.we_vote_id
             polling_location_id = polling_location.id
+            polling_location_state_code = polling_location.state
             polling_location_found = True
     if not polling_location_found and positive_value_exists(polling_location_we_vote_id):
         results = polling_location_manager.retrieve_polling_location_by_id(0, polling_location_we_vote_id)
@@ -317,6 +320,7 @@ def ballot_item_list_edit_view(request, ballot_returned_id, polling_location_we_
             polling_location = results['polling_location']
             polling_location_we_vote_id = polling_location.we_vote_id
             polling_location_id = polling_location.id
+            polling_location_state_code = polling_location.state
             polling_location_found = True
 
     polling_location_list = []
@@ -358,11 +362,23 @@ def ballot_item_list_edit_view(request, ballot_returned_id, polling_location_we_
         if one_contest_office.we_vote_id not in contest_office_we_vote_ids_already_on_ballot:
             contest_offices_to_choose_list.append(one_contest_office)
 
+    if positive_value_exists(google_civic_election_id):
+        election_list = []
+    else:
+        # Only offer an election list if a google_civic_election_id was not passed in
+        election_query = Election.objects.filter(Q(state_code=None) | Q(state_code="") |
+                                                 Q(state_code__iexact="na") |
+                                                 Q(state_code__iexact=polling_location_state_code) |
+                                                 Q(state_code__iexact=state_code))
+        election_query = election_query.order_by('-election_day_text')
+        election_list = list(election_query)
+
     template_values = {
         'messages_on_stage':            messages_on_stage,
         'ballot_returned':              ballot_returned,
         'ballot_returned_id':           ballot_returned_id,
         'election':                     election,
+        'election_list':                election_list,
         'measure_list':                 contest_measure_list,
         'office_list':                  contest_office_list,
         'contest_offices_to_choose_list':   contest_offices_to_choose_list,

@@ -88,6 +88,7 @@ def batch_list_view(request):
     polling_location_found = False
     polling_location = PollingLocation()
     polling_location_manager = PollingLocationManager()
+    election_state = ''
     if not polling_location_found and positive_value_exists(polling_location_we_vote_id):
         results = polling_location_manager.retrieve_polling_location_by_id(0, polling_location_we_vote_id)
         if results['polling_location_found']:
@@ -95,8 +96,8 @@ def batch_list_view(request):
             polling_location_we_vote_id = polling_location.we_vote_id
             polling_location_id = polling_location.id
             polling_location_found = True
+            election_state = polling_location.state
 
-    election_state = ''
     if google_civic_election_id:
         election_manager = ElectionManager()
         results = election_manager.retrieve_election(google_civic_election_id)
@@ -227,7 +228,8 @@ def batch_list_process_view(request):
 
         if batch_file is not None:
             results = batch_manager.create_batch_from_local_file_upload(
-                batch_file, kind_of_batch, google_civic_election_id, organization_we_vote_id)
+                batch_file, kind_of_batch, google_civic_election_id, organization_we_vote_id,
+                polling_location_we_vote_id)
             if results['batch_saved']:
                 messages.add_message(request, messages.INFO, 'Import batch for {election_name} election saved.'
                                                              ''.format(election_name=election_name))
@@ -283,6 +285,7 @@ def batch_action_list_view(request):
         return redirect_to_sign_in_page(request, authority_required)
 
     batch_set_list = []
+    polling_location_we_vote_id = ""
 
     batch_header_id = convert_to_int(request.GET.get('batch_header_id', 0))
     kind_of_batch = request.GET.get('kind_of_batch', '')
@@ -302,6 +305,7 @@ def batch_action_list_view(request):
         batch_description_found = True
         batch_set_id = batch_description.batch_set_id
         google_civic_election_id = batch_description.google_civic_election_id
+        polling_location_we_vote_id = batch_description.polling_location_we_vote_id
     except BatchDescription.DoesNotExist:
         # This is fine
         batch_description = BatchDescription()
@@ -437,6 +441,11 @@ def batch_action_list_view(request):
     election_query = Election.objects.order_by('-election_day_text')
     election_list = list(election_query)
 
+    # TODO Retrieve and send a list of polling_locations to choose from into the template
+    polling_location_list = []
+    if kind_of_batch == IMPORT_BALLOT_ITEM:
+        polling_location_list = []
+
     filtered_state_list = []
     state_list = STATE_CODE_MAP
     sorted_state_list = sorted(state_list.items())
@@ -460,6 +469,7 @@ def batch_action_list_view(request):
         'election_list':            election_list,
         'kind_of_batch':            kind_of_batch,
         'google_civic_election_id': google_civic_election_id,
+        'polling_location_we_vote_id':  polling_location_we_vote_id,
         'state_code':               state_code,
         'state_list':               filtered_state_list,
         'position_owner_organization_we_vote_id': position_owner_organization_we_vote_id,
