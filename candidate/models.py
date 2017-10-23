@@ -333,7 +333,7 @@ class CandidateCampaignListManager(models.Model):
         keep_looking_for_duplicates = True
         candidate = CandidateCampaign()
         candidate_found = False
-        candidate_list_objects = []
+        candidate_list = []
         candidate_list_found = False
         multiple_entries_found = False
         candidate_twitter_handle = extract_twitter_handle_from_text_string(candidate_twitter_handle)
@@ -360,6 +360,7 @@ class CandidateCampaignListManager(models.Model):
                         keep_looking_for_duplicates = False
                     else:
                         # more than one entry found
+                        candidate_list_found = True
                         multiple_entries_found = True
                         keep_looking_for_duplicates = False  # Deal with multiple Twitter duplicates manually
             except CandidateCampaign.DoesNotExist:
@@ -391,6 +392,7 @@ class CandidateCampaignListManager(models.Model):
                         keep_looking_for_duplicates = False
                     else:
                         # more than one entry found with a match in CandidateCampaign
+                        candidate_list_found = True
                         keep_looking_for_duplicates = False
                         multiple_entries_found = True
             except CandidateCampaign.DoesNotExist:
@@ -420,6 +422,7 @@ class CandidateCampaignListManager(models.Model):
                         keep_looking_for_duplicates = False
                     else:
                         # more than one entry found with a match in CandidateCampaign
+                        candidate_list_found = True
                         keep_looking_for_duplicates = False
                         multiple_entries_found = True
                 else:
@@ -435,7 +438,7 @@ class CandidateCampaignListManager(models.Model):
             'candidate_found':          candidate_found,
             'candidate':                candidate,
             'candidate_list_found':     candidate_list_found,
-            'candidate_list':           candidate_list_objects,
+            'candidate_list':           candidate_list,
             'multiple_entries_found':   multiple_entries_found,
         }
         return results
