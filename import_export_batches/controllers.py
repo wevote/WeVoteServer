@@ -1630,6 +1630,7 @@ def create_batch_row_action_position(batch_description, batch_header_map, one_ba
             if matching_results['candidate_list_found']:
                 candidate_list = matching_results['candidate_list']
                 candidate = candidate_list[0]
+                candidate_found = True
                 candidate_we_vote_id = candidate.we_vote_id
                 candidate_id = candidate.id
                 contest_office_we_vote_id = candidate.contest_office_we_vote_id
