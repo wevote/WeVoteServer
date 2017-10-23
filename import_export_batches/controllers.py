@@ -1624,7 +1624,15 @@ def create_batch_row_action_position(batch_description, batch_header_map, one_ba
             contest_office_we_vote_id = candidate.contest_office_we_vote_id
             contest_office_id = candidate.contest_office_id
         elif matching_results['multiple_entries_found']:
-            status += "MULTIPLE_CANDIDATES_FOUND "
+            # Note: In some jurisdictions like NY, they list one candidate with multiple parties.
+            #  We therefore have to store multiple candidates with the same name in these cases.
+            status += "MULTIPLE_CANDIDATES_FOUND-STORING_FIRST "
+            candidate_list = matching_results['candidate_list']
+            candidate = candidate_list.popleft()
+            candidate_we_vote_id = candidate.we_vote_id
+            candidate_id = candidate.id
+            contest_office_we_vote_id = candidate.contest_office_we_vote_id
+            contest_office_id = candidate.contest_office_id
         elif not matching_results['success']:
             status += matching_results['status']
         else:
@@ -1706,6 +1714,7 @@ def create_batch_row_action_position(batch_description, batch_header_map, one_ba
         if not variables_found_to_create_position:
             status += "MEASURE-MISSING_VARIABLES_REQUIRED_TO_CREATE "
     else:
+        ballot_item_display_name = ""
         variables_found_to_create_position = False
         status += "MISSING_CANDIDATE_OR_MEASURE_REQUIRED_TO_CREATE "
 
