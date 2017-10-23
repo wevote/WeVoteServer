@@ -1628,7 +1628,7 @@ def create_batch_row_action_position(batch_description, batch_header_map, one_ba
             #  We therefore have to store multiple candidates with the same name in these cases.
             status += "MULTIPLE_CANDIDATES_FOUND-STORING_FIRST "
             candidate_list = matching_results['candidate_list']
-            candidate = candidate_list.popleft()
+            candidate = candidate_list[0]
             candidate_we_vote_id = candidate.we_vote_id
             candidate_id = candidate.id
             contest_office_we_vote_id = candidate.contest_office_we_vote_id
