@@ -92,6 +92,7 @@ INSTALLED_APPS = (
     'follow',
     'friend',
     'geoip',
+    'google_custom_search',
     'image',
     'import_export_batches',
     'import_export_ctcl',

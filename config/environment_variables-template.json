@@ -109,6 +109,12 @@
   "SOCIAL_AUTH_LOGIN_ERROR_URL":    "https://localhost:8889/login/",
   "SOCIAL_AUTH_LOGIN_REDIRECT_URL": "https://localhost:8889/voter/login_complete/",
 
+  "_comment":                       "google_custom_search",
+  "GOOGLE_SEARCH_API_KEY":          "",
+  "GOOGLE_SEARCH_ENGINE_ID":        "",
+  "GOOGLE_SEARCH_API_NAME":         "customsearch",
+  "GOOGLE_SEARCH_API_VERSION":      "v1",
+
   "_comment":                       "django secret key",
   "SECRET_KEY":                     "REALLYANYTHINGYOUWANT",
 
