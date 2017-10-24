@@ -144,9 +144,23 @@
             (office missing)
         {% endif %}
             </td>
-            <td>{% if candidate.candidate_twitter_handle %}<a href="https://twitter.com/{{ candidate.candidate_twitter_handle }}"
-                    target="_blank">{{ candidate.candidate_twitter_handle }}</a><br />
-                ({{ candidate.twitter_followers_count }} followers){% endif %}</td>
+            <td>{% if candidate.candidate_twitter_handle %}
+                    <a href="https://twitter.com/{{ candidate.candidate_twitter_handle }}"
+                        target="_blank">{{ candidate.candidate_twitter_handle }}</a><br />
+                    ({{ candidate.twitter_followers_count }} followers)
+                {% else %}
+                    {% if candidate.candidate_merge_possibility %}
+                        <a href="{% url 'candidate:candidate_edit' candidate.id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
+                            <img src='{{ candidate.candidate_merge_possibility.twitter_profile_image_url_https }}' height="25px" /></a>&nbsp;
+                        <a href="{% url 'candidate:candidate_edit' candidate.id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
+                            {{ candidate.candidate_merge_possibility.twitter_handle }}</a>
+                        (Best Guess:
+                        <a href="{% url 'candidate:candidate_edit' candidate.id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
+                            {{ candidate.candidate_merge_possibility.likelihood_percentage }}</a>)<br />
+                        {{ candidate.candidate_merge_possibility.twitter_description }}
+                    {% endif %}
+                {% endif %}
+            </td>
             <td>{% if candidate.candidate_url %}<a href="{{ candidate.candidate_url }}" target="_blank">{{ candidate.candidate_url }}</a>{% endif %}</td>
             <td>{{ candidate.id }}</td>
             <td>{{ candidate.we_vote_id }}
