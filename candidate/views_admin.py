@@ -219,6 +219,16 @@ def candidate_list_view(request):
 
     election_list = Election.objects.order_by('-election_day_text')
 
+    # Attach the best guess Twitter account, if any, to each candidate in list
+    for candidate in candidate_list:
+        try:
+            twitter_possibility_query = TwitterLinkPossibility.objects.order_by('-likelihood_percentage')
+            twitter_possibility_query = twitter_possibility_query.filter(
+                candidate_campaign_we_vote_id=candidate.we_vote_id)
+            candidate.candidate_merge_possibility = twitter_possibility_query[0]
+        except Exception as e:
+            candidate.candidate_merge_possibility = None
+
     template_values = {
         'messages_on_stage':        messages_on_stage,
         'candidate_list':           candidate_list,
