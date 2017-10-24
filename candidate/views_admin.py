@@ -18,6 +18,7 @@ from django.shortcuts import render
 from election.models import Election, ElectionManager
 from exception.models import handle_record_found_more_than_one_exception,\
     handle_record_not_found_exception, handle_record_not_saved_exception, print_to_log
+from google_custom_search.models import GoogleSearchUser
 from import_export_vote_smart.models import VoteSmartRatingOneCandidate
 from import_export_vote_smart.votesmart_local import VotesmartApiError
 from politician.models import PoliticianManager
@@ -387,16 +388,27 @@ def candidate_edit_view(request, candidate_id=0, candidate_campaign_we_vote_id="
         except Exception as e:
             pass
 
+        google_search_possibility_list = []
+        try:
+            google_search_possibility_query = GoogleSearchUser.objects.order_by('-likelihood_percentage')
+            google_search_possibility_query = google_search_possibility_query.filter(
+                candidate_campaign_we_vote_id=candidate_on_stage.we_vote_id)
+            google_search_possibility_list = list(google_search_possibility_query)
+
+        except Exception as e:
+            pass
+
         template_values = {
-            'messages_on_stage':        messages_on_stage,
-            'candidate':                candidate_on_stage,
-            'rating_list':              rating_list,
-            'candidate_position_list':  candidate_position_list,
-            'office_list':              contest_office_list,
-            'contest_office_id':        contest_office_id,
-            'google_civic_election_id': google_civic_election_id,
-            'state_code':               state_code,
+            'messages_on_stage':                messages_on_stage,
+            'candidate':                        candidate_on_stage,
+            'rating_list':                      rating_list,
+            'candidate_position_list':          candidate_position_list,
+            'office_list':                      contest_office_list,
+            'contest_office_id':                contest_office_id,
+            'google_civic_election_id':         google_civic_election_id,
+            'state_code':                       state_code,
             'twitter_link_possibility_list':    twitter_link_possibility_list,
+            'google_search_possibility_list':   google_search_possibility_list,
             # Incoming variables, not saved yet
             'candidate_name':                   candidate_name,
             'google_civic_candidate_name':      google_civic_candidate_name,
