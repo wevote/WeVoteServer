@@ -1178,8 +1178,9 @@ def refresh_organization_data_from_master_tables(organization_we_vote_id):
     voter_manager = VoterManager()
 
     results = organization_manager.retrieve_organization(0, organization_we_vote_id)
+    status += results['status']
     if not results['organization_found']:
-        status = "REFRESH_ORGANIZATION_FROM_MASTER_TABLES-ORGANIZATION_NOT_FOUND "
+        status += "REFRESH_ORGANIZATION_FROM_MASTER_TABLES-ORGANIZATION_NOT_FOUND "
         results = {
             'success':                  False,
             'status':                   status,
@@ -1212,7 +1213,7 @@ def refresh_organization_data_from_master_tables(organization_we_vote_id):
                 organization.twitter_followers_count = 0
                 organization.save()
             except Exception as e:
-                pass
+                status += "COULD_NOT_SAVE_ORGANIZATION "
         else:
             twitter_user_manager.create_twitter_link_to_organization(twitter_user_id, organization_we_vote_id)
 
