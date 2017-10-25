@@ -3,14 +3,14 @@
 # -*- coding: UTF-8 -*-
 
 from .controllers import delete_possible_twitter_handles, retrieve_possible_twitter_handles
+from .models import TwitterLinkPossibility
 from admin_tools.views import redirect_to_sign_in_page
 from candidate.models import CandidateCampaign, CandidateCampaignManager
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
-from twitter.models import TwitterLinkPossibility
-from voter.models import voter_has_authority, VoterManager
+from voter.models import voter_has_authority
 from wevote_functions.functions import convert_to_int, positive_value_exists
 import wevote_functions.admin
 
