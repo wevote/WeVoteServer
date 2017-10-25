@@ -8,6 +8,7 @@ from .models import TwitterUserManager
 from ballot.controllers import figure_out_google_civic_election_id_voter_is_watching
 from candidate.models import CandidateCampaignListManager
 from config.base import get_environment_variable
+from office.models import ContestOfficeManager
 from organization.models import OrganizationListManager
 from wevote_functions.functions import convert_state_code_to_state_text, convert_to_int, positive_value_exists
 from math import floor, log2
@@ -192,6 +193,19 @@ def retrieve_possible_twitter_handles(candidate_campaign):
             'status':                   status,
         }
         return results
+
+    if positive_value_exists(candidate_campaign.contest_office_we_vote_id) and not \
+            positive_value_exists(candidate_campaign.contest_office_name):
+        contest_office_manager = ContestOfficeManager()
+        results = contest_office_manager.retrieve_contest_office_from_we_vote_id(
+            candidate_campaign.contest_office_we_vote_id)
+        if results['contest_office_found']:
+            contest_office = results['contest_office']
+            try:
+                candidate_campaign.contest_office_name = contest_office.office_name
+                candidate_campaign.save()
+            except Exception as e:
+                pass
 
     status += "RETRIEVE_POSSIBLE_TWITTER_HANDLES-REACHING_OUT_TO_TWITTER "
 

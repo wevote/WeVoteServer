@@ -40,6 +40,7 @@ def candidates_sync_out_doc_template_values(url_root):
                    '  "candidate_twitter_handle": string,\n' \
                    '  "candidate_url": string,\n' \
                    '  "contest_office_we_vote_id": string,\n' \
+                   '  "contest_office_name": string,\n' \
                    '  "facebook_url": string,\n' \
                    '  "google_civic_candidate_name": string,\n' \
                    '  "google_civic_election_id": integer,\n' \
