@@ -76,7 +76,7 @@ def candidates_sync_out_view(request):  # candidatesSyncOut
 
                 candidate_list = candidate_list.filter(final_filters)
 
-        candidate_list_dict = candidate_list.values('we_vote_id', 'maplight_id', 'vote_smart_id',
+        candidate_list_dict = candidate_list.values('we_vote_id', 'maplight_id', 'vote_smart_id', 'contest_office_name',
                                                     'contest_office_we_vote_id', 'politician_we_vote_id',
                                                     'candidate_name', 'google_civic_candidate_name', 'party',
                                                     'photo_url', 'photo_url_from_maplight',

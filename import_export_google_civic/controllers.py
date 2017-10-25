@@ -53,6 +53,14 @@ def process_candidates_from_structured_json(
            "type": "Twitter",
            "id": "https://twitter.com/johndennis2012"
     """
+    contest_office_name = ""
+    if positive_value_exists(contest_office_we_vote_id):
+        contest_office_manager = ContestOfficeManager()
+        results = contest_office_manager.retrieve_contest_office_from_we_vote_id(contest_office_we_vote_id)
+        if results['contest_office_found']:
+            contest_office = results['contest_office']
+            contest_office_name = contest_office.office_name
+
     results = {}
     for one_candidate in candidates_structured_json:
         candidate_name = one_candidate['name'] if 'name' in one_candidate else ''
@@ -141,6 +149,8 @@ def process_candidates_from_structured_json(
                 updated_candidate_campaign_values["contest_office_id"] = contest_office_id
             if positive_value_exists(contest_office_we_vote_id):
                 updated_candidate_campaign_values["contest_office_we_vote_id"] = contest_office_we_vote_id
+            if positive_value_exists(contest_office_name):
+                updated_candidate_campaign_values["contest_office_name"] = contest_office_name
 
             candidate_campaign_manager = CandidateCampaignManager()
             results = candidate_campaign_manager.update_or_create_candidate_campaign(

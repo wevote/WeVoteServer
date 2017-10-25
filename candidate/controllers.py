@@ -278,6 +278,8 @@ def candidates_import_from_structured_json(structured_json):
                 'maplight_id': one_candidate['maplight_id'] if 'maplight_id' in one_candidate else None,
                 'vote_smart_id': one_candidate['vote_smart_id'] if 'vote_smart_id' in one_candidate else None,
                 'contest_office_id': contest_office_id,  # Retrieved from above
+                'contest_office_name':
+                    one_candidate['contest_office_name'] if 'contest_office_name' in one_candidate else '',
                 'politician_we_vote_id':
                     one_candidate['politician_we_vote_id'] if 'politician_we_vote_id' in one_candidate else '',
                 'state_code': one_candidate['state_code'] if 'state_code' in one_candidate else '',
