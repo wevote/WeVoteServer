@@ -18,7 +18,6 @@ from django.db.models import Q
 from electoral_district.controllers import retrieve_electoral_district
 from election.models import ElectionManager
 from exception.models import handle_exception
-from wevote_functions.functions import extract_first_name_from_full_name, extract_last_name_from_full_name
 from measure.models import ContestMeasure, ContestMeasureManager, ContestMeasureList
 from office.models import ContestOffice, ContestOfficeListManager, ContestOfficeManager, \
     ElectedOffice, ElectedOfficeManager
@@ -28,6 +27,7 @@ from organization.models import Organization, OrganizationListManager, Organizat
 from politician.models import Politician, PoliticianManager
 from position.models import PositionManager, INFORMATION_ONLY, OPPOSE, SUPPORT
 from twitter.models import TwitterUserManager
+from voter_guide.controllers import refresh_existing_voter_guides
 from voter_guide.models import ORGANIZATION_WORD
 import wevote_functions.admin
 from wevote_functions.functions import positive_value_exists, extract_twitter_handle_from_text_string
@@ -1628,6 +1628,7 @@ def create_batch_row_action_position(batch_description, batch_header_map, one_ba
             #  We therefore have to store multiple candidates with the same name in these cases.
             status += "MULTIPLE_CANDIDATES_FOUND "
             if matching_results['candidate_list_found']:
+                # NOTE: It would be better if we matched to multiple candidates, instead of just the first one
                 candidate_list = matching_results['candidate_list']
                 candidate = candidate_list[0]
                 candidate_found = True
@@ -3355,6 +3356,8 @@ def import_position_data_from_batch_row_actions(
         status += "POSITION_UPDATE_NOT_WORKING YET "
 
     position_manager = PositionManager()
+    google_civic_election_id = 0
+    unique_organization_we_vote_id_list = []
     for one_batch_row_action in batch_row_action_list:
         if create_entry_flag:
             position_we_vote_id = ""
@@ -3375,6 +3378,14 @@ def import_position_data_from_batch_row_actions(
 
             if not results['new_position_created']:
                 continue
+
+            # Store a list of organization voter guides we should refresh
+            if positive_value_exists(one_batch_row_action.google_civic_election_id):
+                # The election id should all be the same, so we just use the last one
+                google_civic_election_id = one_batch_row_action.google_civic_election_id
+            if positive_value_exists(one_batch_row_action.organization_we_vote_id) and \
+                    one_batch_row_action.organization_we_vote_id not in unique_organization_we_vote_id_list:
+                unique_organization_we_vote_id_list.append(one_batch_row_action.organization_we_vote_id)
 
             number_of_positions_created += 1
             position = results['position']
@@ -3422,11 +3433,17 @@ def import_position_data_from_batch_row_actions(
     elif number_of_positions_updated:
         status += "IMPORT_POSITION_ENTRY: POSITIONS_UPDATED "
 
+    if positive_value_exists(number_of_positions_created) or positive_value_exists(number_of_positions_updated):
+        # Refresh all voter guides that were touched by new positions
+        for organization_we_vote_id in unique_organization_we_vote_id_list:
+            results = refresh_existing_voter_guides(google_civic_election_id, organization_we_vote_id)
+            # voter_guide_updated_count = results['voter_guide_updated_count']
+
     results = {
-        'success':                       success,
-        'status':                        status,
-        'number_of_positions_created':    number_of_positions_created,
-        'number_of_positions_updated':    number_of_positions_updated,
+        'success':                      success,
+        'status':                       status,
+        'number_of_positions_created':  number_of_positions_created,
+        'number_of_positions_updated':  number_of_positions_updated,
     }
     return results
 

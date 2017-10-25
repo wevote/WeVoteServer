@@ -2,7 +2,7 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
-from .controllers import voter_guides_import_from_master_server
+from .controllers import refresh_existing_voter_guides, voter_guides_import_from_master_server
 from .models import VoterGuide, VoterGuideListManager, VoterGuideManager
 from admin_tools.views import redirect_to_sign_in_page
 from django.contrib.auth.decorators import login_required
@@ -11,10 +11,7 @@ from django.core.urlresolvers import reverse
 from django.contrib.messages import get_messages
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
-from django.db.models import Q
 from election.models import Election, ElectionManager, TIME_SPAN_LIST
-from organization.controllers import push_organization_data_to_other_table_caches, \
-    refresh_organization_data_from_master_tables
 from organization.models import Organization, OrganizationListManager
 from organization.views_admin import organization_edit_process_view
 from position.models import PositionEntered, PositionForFriends, PositionListManager
@@ -241,58 +238,23 @@ def refresh_existing_voter_guides_view(request):
     google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
     organization_we_vote_id = request.GET.get('organization_we_vote_id', False)
 
-    voter_guide_updated_count = 0
-    voter_guide_list_found = False
-    voter_guide_list = []
-    # Cycle through existing voter_guides
-    voter_guide_list_manager = VoterGuideListManager()
-    voter_guide_manager = VoterGuideManager()
-
-    if positive_value_exists(organization_we_vote_id) and positive_value_exists(google_civic_election_id):
-        results = voter_guide_manager.update_or_create_organization_voter_guide_by_election_id(
-            organization_we_vote_id, google_civic_election_id)
-        if results['voter_guide_saved']:
-            voter_guide_list_found = True
-            voter_guide_list.append(results['voter_guide'])
-    elif positive_value_exists(organization_we_vote_id):
-        results = voter_guide_list_manager.retrieve_all_voter_guides_by_organization_we_vote_id(organization_we_vote_id)
-        if results['voter_guide_list_found']:
-            voter_guide_list_found = True
-            voter_guide_list = results['voter_guide_list']
-    elif positive_value_exists(google_civic_election_id):
-        results = voter_guide_list_manager.retrieve_voter_guides_for_election(google_civic_election_id)
-        if results['voter_guide_list_found']:
-            voter_guide_list_found = True
-            voter_guide_list = results['voter_guide_list']
-    else:
-        results = voter_guide_list_manager.retrieve_all_voter_guides_order_by()
-        if results['voter_guide_list_found']:
-            voter_guide_list_found = True
-            voter_guide_list = results['voter_guide_list']
-
-    if voter_guide_list_found:
-        for voter_guide in voter_guide_list:
-            if positive_value_exists(voter_guide.organization_we_vote_id):
-                results = refresh_organization_data_from_master_tables(voter_guide.organization_we_vote_id)
-                if results['success']:
-                    push_organization_data_to_other_table_caches(voter_guide.organization_we_vote_id)
-                if positive_value_exists(voter_guide.google_civic_election_id):
-                    results = voter_guide_manager.update_or_create_organization_voter_guide_by_election_id(
-                        voter_guide.organization_we_vote_id, voter_guide.google_civic_election_id)
-                    if results['success']:
-                        voter_guide_updated_count += 1
-                elif positive_value_exists(voter_guide.vote_smart_time_span):
-                    results = voter_guide_manager.update_or_create_organization_voter_guide_by_time_span(
-                        voter_guide.organization_we_vote_id, voter_guide.vote_smart_time_span)
-                    if results['success']:
-                        voter_guide_updated_count += 1
+    results = refresh_existing_voter_guides(google_civic_election_id, organization_we_vote_id)
+    voter_guide_updated_count = results['voter_guide_updated_count']
 
     messages.add_message(request, messages.INFO,
-                         '{voter_guide_updated_count} updated.'.format(
+                         '{voter_guide_updated_count} voter guide(s) updated.'.format(
                              voter_guide_updated_count=voter_guide_updated_count,
                          ))
-    return HttpResponseRedirect(reverse('voter_guide:voter_guide_list', args=()) + "?google_civic_election_id=" +
-                                str(google_civic_election_id))
+    if positive_value_exists(organization_we_vote_id):
+        return HttpResponseRedirect(reverse('organization:organization_we_vote_id_position_list',
+                                            args=(organization_we_vote_id,)) +
+                                    "?google_civic_election_id=" + str(google_civic_election_id)
+                                    )
+    else:
+        return HttpResponseRedirect(reverse('voter_guide:voter_guide_list', args=()) +
+                                    "?google_civic_election_id=" + str(google_civic_election_id) +
+                                    "&organization_we_vote_id=" + str(organization_we_vote_id)
+                                    )
 
 
 @login_required
