@@ -1251,8 +1251,6 @@ class BallotReturnedManager(models.Model):
             # "city_name, state_code" eg: "Sunnyvale, CA". If so, try to parse the entry and get ballot data
             # for that location
             ballot_returned_query = BallotReturned.objects.all()
-            if positive_value_exists(google_civic_election_id):
-                ballot_returned_query = ballot_returned_query.filter(google_civic_election_id=google_civic_election_id)
 
             if "," in text_for_map_search:
                 address = text_for_map_search
@@ -1262,10 +1260,27 @@ class BallotReturnedManager(models.Model):
                 city = city.lower()
                 if positive_value_exists(state_code):
                     ballot_returned_query = ballot_returned_query.filter(normalized_state__iexact=state_code)
-                if positive_value_exists(city):
-                    ballot_returned_query = ballot_returned_query.filter(normalized_city__iexact=city)
+                # Searching by city is not critical for internal testing, and can cause problems
+                # if positive_value_exists(city):
+                #     ballot_returned_query = ballot_returned_query.filter(normalized_city__iexact=city)
             else:
                 ballot_returned_query = ballot_returned_query.filter(text_for_map_search__icontains=text_for_map_search)
+
+            if positive_value_exists(google_civic_election_id):
+                ballot_returned_query = ballot_returned_query.filter(google_civic_election_id=google_civic_election_id)
+            else:
+                # If we have an active election coming up, including today
+                # fetch_next_upcoming_election_in_this_state returns next election with ballot items
+                upcoming_google_civic_election_id = self.fetch_next_upcoming_election_in_this_state(state_code)
+                if positive_value_exists(upcoming_google_civic_election_id):
+                    ballot_returned_query = ballot_returned_query.filter(
+                        google_civic_election_id=upcoming_google_civic_election_id)
+                else:
+                    past_google_civic_election_id = self.fetch_last_election_in_this_state(state_code)
+                    if positive_value_exists(past_google_civic_election_id):
+                        # Limit the search to the most recent election with ballot items
+                        ballot_returned_query = ballot_returned_query.filter(
+                            google_civic_election_id=past_google_civic_election_id)
 
             ballot = ballot_returned_query.first()
         else:

@@ -616,8 +616,10 @@ def voter_ballot_items_retrieve_for_api(
     status += " " + voter_address_results['status']
     if positive_value_exists(voter_address_results['voter_address_has_value']):
         voter_address = voter_address_results['voter_address']
+        ballot_retrieval_based_on_voter_address = True
     elif positive_value_exists(google_civic_election_id) or specific_ballot_requested:
         voter_address = VoterAddress()
+        ballot_retrieval_based_on_voter_address = False
     else:
         error_json_data = {
             'status':                       status,
@@ -682,8 +684,12 @@ def voter_ballot_items_retrieve_for_api(
 
     # Update voter_address to include matching google_civic_election_id and voter_ballot_saved entry
     if positive_value_exists(google_civic_election_id):
-        voter_address.google_civic_election_id = google_civic_election_id
-        voter_address_manager.update_existing_voter_address_object(voter_address)
+        # 2017-10-25 DALE It turns out we don't want to update the address with just the election_id unless
+        #  the election was calculated from an address. We want to keep google_civic_election_id tied
+        #  to the voter's address
+        if ballot_retrieval_based_on_voter_address:
+            voter_address.google_civic_election_id = google_civic_election_id
+            voter_address_manager.update_existing_voter_address_object(voter_address)
 
         # Get and return the ballot_item_list
         results = voter_ballot_items_retrieve_for_one_election_for_api(voter_device_id, voter_id,

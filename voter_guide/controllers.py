@@ -4,19 +4,17 @@
 
 from ballot.models import OFFICE, CANDIDATE, MEASURE
 from config.base import get_environment_variable
-from django.contrib import messages
 from django.http import HttpResponse
 from follow.models import FollowOrganizationList, FollowIssueList, FOLLOWING
-from friend.models import FriendManager
 from itertools import chain
 from issue.models import OrganizationLinkToIssueList
 import json
-
-from organization.controllers import organization_follow_or_unfollow_or_ignore
+from organization.controllers import organization_follow_or_unfollow_or_ignore, \
+    push_organization_data_to_other_table_caches, \
+    refresh_organization_data_from_master_tables
 from organization.models import OrganizationManager, OrganizationListManager
 from position.controllers import retrieve_ballot_item_we_vote_ids_for_organizations_to_follow
 from position.models import ANY_STANCE, PositionEntered, PositionManager, PositionListManager, SUPPORT
-import requests
 from voter.models import fetch_voter_id_from_voter_device_link, fetch_voter_we_vote_id_from_voter_device_link, \
     VoterManager
 from voter_guide.models import VoterGuideListManager, VoterGuideManager, VoterGuidePossibilityManager
@@ -1416,6 +1414,66 @@ def voter_guide_followers_retrieve_for_api(voter_device_id, organization_we_vote
         'voter_guides':                 voter_guides,
     }
     return HttpResponse(json.dumps(json_data), content_type='application/json')
+
+
+def refresh_existing_voter_guides(google_civic_election_id, organization_we_vote_id=""):
+    voter_guide_updated_count = 0
+    voter_guide_list_found = False
+    voter_guide_list = []
+    status = ""
+    success = True
+
+    # Cycle through existing voter_guides
+    voter_guide_list_manager = VoterGuideListManager()
+    voter_guide_manager = VoterGuideManager()
+
+    if positive_value_exists(organization_we_vote_id) and positive_value_exists(google_civic_election_id):
+        results = voter_guide_manager.update_or_create_organization_voter_guide_by_election_id(
+            organization_we_vote_id, google_civic_election_id)
+        if results['voter_guide_saved']:
+            voter_guide_list_found = True
+            voter_guide_list.append(results['voter_guide'])
+    elif positive_value_exists(organization_we_vote_id):
+        results = voter_guide_list_manager.retrieve_all_voter_guides_by_organization_we_vote_id(organization_we_vote_id)
+        if results['voter_guide_list_found']:
+            voter_guide_list_found = True
+            voter_guide_list = results['voter_guide_list']
+    elif positive_value_exists(google_civic_election_id):
+        results = voter_guide_list_manager.retrieve_voter_guides_for_election(google_civic_election_id)
+        if results['voter_guide_list_found']:
+            voter_guide_list_found = True
+            voter_guide_list = results['voter_guide_list']
+    else:
+        results = voter_guide_list_manager.retrieve_all_voter_guides_order_by()
+        if results['voter_guide_list_found']:
+            voter_guide_list_found = True
+            voter_guide_list = results['voter_guide_list']
+
+    if voter_guide_list_found:
+        for voter_guide in voter_guide_list:
+            if positive_value_exists(voter_guide.organization_we_vote_id):
+                results = refresh_organization_data_from_master_tables(voter_guide.organization_we_vote_id)
+                status += results['status']
+                if results['success']:
+                    push_organization_data_to_other_table_caches(voter_guide.organization_we_vote_id)
+                if positive_value_exists(voter_guide.google_civic_election_id):
+                    results = voter_guide_manager.update_or_create_organization_voter_guide_by_election_id(
+                        voter_guide.organization_we_vote_id, voter_guide.google_civic_election_id)
+                    if results['success']:
+                        voter_guide_updated_count += 1
+                elif positive_value_exists(voter_guide.vote_smart_time_span):
+                    results = voter_guide_manager.update_or_create_organization_voter_guide_by_time_span(
+                        voter_guide.organization_we_vote_id, voter_guide.vote_smart_time_span)
+                    if results['success']:
+                        voter_guide_updated_count += 1
+    results = {
+        'status':                       status,
+        'success':                      success,
+        'voter_guide_updated_count':    voter_guide_updated_count,
+        'voter_guide_list_found':       voter_guide_list_found,
+        'voter_guide_list':             voter_guide_list,
+    }
+    return results
 
 
 def retrieve_organizations_followed_by_organization_we_vote_id(organization_we_vote_id):
