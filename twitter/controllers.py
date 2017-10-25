@@ -96,6 +96,9 @@ def analyze_twitter_search_results(search_results, search_results_length, candid
         if one_result.description and positive_value_exists(state_full_name) and \
                 state_full_name in one_result.description:
             likelihood_score += 20
+        if one_result.description and positive_value_exists(state_code) and \
+                state_code in one_result.description:
+            likelihood_score += 10
 
         # Check if candidate's party is in description
         political_party = candidate_campaign.political_party_display()
@@ -104,7 +107,6 @@ def analyze_twitter_search_results(search_results, search_results_length, candid
             likelihood_score += 20
 
         # Check (each word individually) if office name is in description
-        # This also checks if state code is in description
         office_name = candidate_campaign.contest_office_name
         if positive_value_exists(office_name) and one_result.description:
             office_name = office_name.split()
