@@ -76,16 +76,19 @@
         3. <a href="{% url 'import_export_twitter:scrape_social_media_for_candidates_in_one_election' %}?google_civic_election_id={{ google_civic_election_id }}" >
             Go to Candidate Sites and get Twitter Handles for this Election</a> (1-2 minutes)<br />
 
-        4. <a href="{% url 'import_export_twitter:refresh_twitter_candidate_details_for_election' google_civic_election_id %}?state_code={{ state_code }}" >
+        4. <a href="{% url 'twitter2:bulk_retrieve_possible_twitter_handles' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}" >
+            Retrieve Possible Twitter Handles</a> (10 at a time - about 30 seconds)<br />
+
+        5. <a href="{% url 'import_export_twitter:refresh_twitter_candidate_details_for_election' google_civic_election_id %}?state_code={{ state_code }}" >
             Retrieve/Refresh Candidate Twitter Info for this Election</a> (1-2 minutes)<br />
 
-        5. <a href="{% url 'import_export_vote_smart:retrieve_positions_from_vote_smart_for_election' %}?google_civic_election_id={{ google_civic_election_id }}" target="_blank" >
+        6. <a href="{% url 'import_export_vote_smart:retrieve_positions_from_vote_smart_for_election' %}?google_civic_election_id={{ google_civic_election_id }}" target="_blank" >
             Retrieve Positions from Vote Smart for this Election</a> (5-15 minutes - Open in New Window)<br />
 
-        6. <a href="{% url 'voter_guide:generate_voter_guides_one_election' %}?google_civic_election_id={{ google_civic_election_id }}" >
+        7. <a href="{% url 'voter_guide:generate_voter_guides_one_election' %}?google_civic_election_id={{ google_civic_election_id }}" >
             Generate Voter Guides for this Election</a> (about 1 minute)<br />
 
-        7. <a href="{% url 'position:refresh_positions_with_candidate_details_for_election' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}" >
+        8. <a href="{% url 'position:refresh_positions_with_candidate_details_for_election' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}" >
             Refresh Positions from Candidate Info for this Election</a> (1-2 minutes)<br />
 
     </p>
