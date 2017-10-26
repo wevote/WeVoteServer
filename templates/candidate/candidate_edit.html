@@ -167,33 +167,35 @@
 <div>
     <label for="candidate_twitter_handle_id" class="col-sm-3 control-label">Google Search</label>
     <div class="col-sm-8">
-    (<a href="{% url 'google_custom_search:retrieve_possible_google_search_users' candidate.we_vote_id %}">retrieve possible goggle search users</a>)
+    (<a href="{% url 'google_custom_search:retrieve_possible_google_search_users' candidate.we_vote_id %}">retrieve possible google search users</a>)
     (<a href="{% url 'google_custom_search:delete_possible_google_search_users' candidate.we_vote_id %}">delete possible google search users</a>)
 
     <table border="1" cellpadding="5" cellspacing="5" class="table">
         <tr>
             <th>#</th>
-            <th>%</th>
+            <th>Score</th>
             <th>Image</th>
             <th>Google search title</th>
             <th>Google search link</th>
-            <th>Google search snippet</th>
             <th>Google search description</th>
-            <th>Google search request url</th>
         </tr>
     {% for one_row in google_search_possibility_list %}
         <tr>
             <td>{{ forloop.counter }}</td>
-            <td>{{ one_row.likelihood_percentage|default_if_none:"n/a" }}</td>
+            <td>{{ one_row.likelihood_score|default_if_none:"n/a" }}</td>
             <td><img src='{{ one_row.item_image }}' height="96px" /></td>
             <td>{{ one_row.item_title }}</td>
-            <td><a href="{{ one_row.item_link }}" target="_blank">{{ one_row.item_link|default_if_none:"" }}</a>
+            <td>
+                {{ one_row.item_snippet|default_if_none:"n/a" }}
                 <br />
-                <a href="{{ one_row.item_formatted_link }}" target="_blank">{{ one_row.item_formatted_url|default_if_none:"" }}</a>
+                {{ one_row.item_meta_tags_description|default_if_none:"n/a" }}
             </td>
-            <td>{{ one_row.item_snippet|default_if_none:"n/a" }}</td>
-            <td>{{ one_row.item_meta_tags_description|default_if_none:"n/a" }}</td>
-            <td><a href="{{ one_row.search_request_url }}" target="_blank">{{ one_row.search_request_url|default_if_none:"" }}</a></td>
+            <td>
+                <a href="{{ one_row.item_link }}" target="_blank">{{ one_row.item_link|default_if_none:"" }}</a>
+                <a href="{{ one_row.item_formatted_link }}" target="_blank">{{ one_row.item_formatted_url|default_if_none:"" }}</a>
+                <br />
+                <a href="{{ one_row.search_request_url }}" target="_blank">{{ one_row.search_request_url|default_if_none:"" }}</a>
+            </td>
         </tr>
     {% endfor %}
     </table>

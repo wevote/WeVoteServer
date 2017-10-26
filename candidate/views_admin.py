@@ -400,7 +400,7 @@ def candidate_edit_view(request, candidate_id=0, candidate_campaign_we_vote_id="
 
         google_search_possibility_list = []
         try:
-            google_search_possibility_query = GoogleSearchUser.objects.order_by('-likelihood_percentage')
+            google_search_possibility_query = GoogleSearchUser.objects.order_by('-likelihood_score')
             google_search_possibility_query = google_search_possibility_query.filter(
                 candidate_campaign_we_vote_id=candidate_on_stage.we_vote_id)
             google_search_possibility_list = list(google_search_possibility_query)
