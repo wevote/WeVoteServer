@@ -20,6 +20,7 @@ GOOGLE_SEARCH_API_VERSION = get_environment_variable("GOOGLE_SEARCH_API_VERSION"
 MAXIMUM_GOOGLE_SEARCH_USERS = 10
 MAXIMUM_CHARACTERS_LENGTH = 1000
 
+
 def delete_possible_google_search_users(candidate_campaign):
     status = ""
     google_search_user_manager = GoogleSearchUserManager()
@@ -45,6 +46,7 @@ def delete_possible_google_search_users(candidate_campaign):
 
 def retrieve_possible_google_search_users(candidate_campaign):
     status = ""
+    google_search_users_list = []
     possible_google_search_users_list = []
     google_search_user_manager = GoogleSearchUserManager()
 
@@ -74,8 +76,8 @@ def retrieve_possible_google_search_users(candidate_campaign):
         'nickname':    sub(name_handling_regex, "", candidate_campaign.extract_nickname()),
     }
 
-    possible_google_search_users_list.extend(analyze_google_search_results(search_results, search_term, candidate_name,
-                                                                           candidate_campaign))
+    google_search_users_list.extend(analyze_google_search_results(search_results, search_term, candidate_name,
+                                                                  candidate_campaign))
 
     # Also include search results omitting any single-letter initials and periods in name.
     # Example: "A." is ignored while "A.J." becomes "AJ"
@@ -93,18 +95,25 @@ def retrieve_possible_google_search_users(candidate_campaign):
     if search_term != modified_search_term:
         modified_search_results = google_api.cse().list(q=modified_search_term, cx=GOOGLE_SEARCH_ENGINE_ID,
                                                         gl="countryUS", filter='1').execute()
-        possible_google_search_users_list.extend(analyze_google_search_results(modified_search_results,
-                                                                               modified_search_term, candidate_name,
-                                                                               candidate_campaign))
+        google_search_users_list.extend(analyze_google_search_results(modified_search_results,
+                                                                      modified_search_term, candidate_name,
+                                                                      candidate_campaign))
 
     # If nickname exists, try searching with nickname instead of first name
     if len(candidate_name['nickname']):
         modified_search_term_2 = candidate_name['nickname'] + " " + modified_search_term_base
         modified_search_results_2 = google_api.cse().list(q=modified_search_term_2, cx=GOOGLE_SEARCH_ENGINE_ID,
                                                           gl="countryUS", filter='1').execute()
-        possible_google_search_users_list.extend(analyze_google_search_results(modified_search_results_2,
-                                                                               modified_search_term_2, candidate_name,
-                                                                               candidate_campaign))
+        google_search_users_list.extend(analyze_google_search_results(modified_search_results_2,
+                                                                      modified_search_term_2, candidate_name,
+                                                                      candidate_campaign))
+    # remove duplicates
+    for possible_user in google_search_users_list:
+        for existing_user in possible_google_search_users_list:
+            if possible_user['google_json']['item_link'] == existing_user['google_json']['item_link']:
+                break
+        else:
+            possible_google_search_users_list.append(possible_user)
 
     wikipedia_page_results = retrieve_possible_wikipedia_page(search_term)
     if wikipedia_page_results['wikipedia_page_found']:
@@ -130,7 +139,7 @@ def retrieve_possible_google_search_users(candidate_campaign):
             if save_google_search_user_results['success'] and \
                     save_google_search_user_results['google_search_user_created']:
                 google_search_user_count += 1
-                if google_search_user_count > MAXIMUM_GOOGLE_SEARCH_USERS:
+                if google_search_user_count == MAXIMUM_GOOGLE_SEARCH_USERS:
                     break
 
     results = {
@@ -148,7 +157,7 @@ def analyze_google_search_results(search_results, search_term, candidate_name,
     state_code = candidate_campaign.state_code
     state_full_name = convert_state_code_to_state_text(state_code)
     possible_google_search_users_list = []
-    election_name = candidate_campaign.election().election_name
+
     if positive_value_exists(search_results):
         total_search_results = (search_results.get('searchInformation').get('totalResults')
                                 if 'searchInformation' in search_results.keys() and
@@ -205,8 +214,12 @@ def analyze_google_search_results(search_results, search_term, candidate_name,
             if "ballotpedia" in google_json['item_link']:
                 likelihood_score += 80
             if "linkedin" in google_json['item_link']:
-                likelihood_score += 50
+                likelihood_score += 60
             if "facebook" in google_json['item_link']:
+                likelihood_score += 55
+            if "Twitter" in google_json['item_link']:
+                likelihood_score += 55
+            if "wikipedia" in google_json['item_link']:
                 likelihood_score += 50
 
             # Check (each word individually) if office name is in description
@@ -318,6 +331,7 @@ def update_google_search_with_wikipedia_results(wikipedia_page, search_term, can
             wikipedia_user_exist_in_google_search = True
             possible_wikipedia_search_user = possible_wikipedia_search_user[0]
             google_search_user['likelihood_score'] = possible_wikipedia_search_user['likelihood_score']
+            break
 
     results = {
         'wikipedia_user_exist_in_google_search':    wikipedia_user_exist_in_google_search,
@@ -328,8 +342,10 @@ def update_google_search_with_wikipedia_results(wikipedia_page, search_term, can
 
 def analyze_wikipedia_search_results(wikipedia_page, search_term, candidate_name,
                                      candidate_campaign):
-    likelihood_score = 10
+    likelihood_score = 50
     possible_google_search_users_list = []
+    state_code = candidate_campaign.state_code
+    state_full_name = convert_state_code_to_state_text(state_code)
     wikipedia_images_result = retrieve_candidate_images_from_wikipedia_page(candidate_campaign, wikipedia_page,
                                                                             force_retrieve=True)
 
@@ -349,7 +365,7 @@ def analyze_wikipedia_search_results(wikipedia_page, search_term, candidate_name
     name_found_in_description = False
     for name in candidate_name.values():
         if len(name) and name in google_json['item_title']:
-            likelihood_score += 5
+            likelihood_score += 10
             name_found_in_title = True
         if len(name) and name in google_json['item_snippet'].lower():
             likelihood_score += 5
@@ -358,9 +374,19 @@ def analyze_wikipedia_search_results(wikipedia_page, search_term, candidate_name
     if not name_found_in_title and not name_found_in_description:
         return possible_google_search_users_list
     if not name_found_in_title:
-        likelihood_score -= 20
-    if not name_found_in_description:
         likelihood_score -= 10
+    if not name_found_in_description:
+        likelihood_score -= 5
+
+    if google_json['item_snippet'] and positive_value_exists(state_full_name) and \
+            state_full_name in google_json['item_snippet']:
+        likelihood_score += 20
+
+    # Check if candidate's party is in description
+    political_party = candidate_campaign.political_party_display()
+    if google_json['item_snippet'] and positive_value_exists(political_party) and \
+            political_party in google_json['item_snippet']:
+        likelihood_score += 20
 
     # Check (each word individually) if office name is in description
     # This also checks if state code is in description
@@ -374,7 +400,7 @@ def analyze_wikipedia_search_results(wikipedia_page, search_term, candidate_name
                 likelihood_score += 10
                 office_found_in_description = True
         if not office_found_in_description:
-            likelihood_score -= 10
+            likelihood_score -= 5
 
     # Increase the score for every positive keyword we find
     for keyword in POSITIVE_KEYWORDS:
