@@ -10,7 +10,8 @@ from candidate.models import CandidateCampaignListManager
 from config.base import get_environment_variable
 from office.models import ContestOfficeManager
 from organization.models import OrganizationListManager
-from wevote_functions.functions import convert_state_code_to_state_text, convert_to_int, positive_value_exists
+from wevote_functions.functions import convert_state_code_to_state_text, convert_state_code_to_utc_offset, \
+    convert_to_int, positive_value_exists
 from math import floor, log2
 from re import sub
 from time import time
@@ -96,6 +97,14 @@ def analyze_twitter_search_results(search_results, search_results_length, candid
         if one_result.description and positive_value_exists(state_full_name) and \
                 state_full_name in one_result.description:
             likelihood_score += 20
+        if one_result.description and positive_value_exists(state_code) and \
+                state_code in one_result.description:
+            likelihood_score += 10
+
+        # Check if user time zone is close to election/state time zone
+        state_utc_offset = convert_state_code_to_utc_offset(state_code)
+        if one_result.utc_offset and state_utc_offset and abs(state_utc_offset - one_result.utc_offset) > 7200:
+            likelihood_score -= 30
 
         # Check if candidate's party is in description
         political_party = candidate_campaign.political_party_display()
@@ -104,7 +113,6 @@ def analyze_twitter_search_results(search_results, search_results_length, candid
             likelihood_score += 20
 
         # Check (each word individually) if office name is in description
-        # This also checks if state code is in description
         office_name = candidate_campaign.contest_office_name
         if positive_value_exists(office_name) and one_result.description:
             office_name = office_name.split()
