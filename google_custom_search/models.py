@@ -25,7 +25,7 @@ class GoogleSearchUser(models.Model):
                                                   null=True, blank=True)
     search_request_url = models.URLField(verbose_name="search request url", null=True, blank=True)
     not_a_match = models.BooleanField(default=False, verbose_name="")
-    likelihood_percentage = models.IntegerField(verbose_name="", null=True, unique=False)
+    likelihood_score = models.IntegerField(verbose_name="score for a match", null=True, unique=False)
 
 
 class GoogleSearchUserManager(models.Model):
@@ -34,15 +34,15 @@ class GoogleSearchUserManager(models.Model):
         return "TwitterUserManager"
 
     def update_or_create_google_search_user_possibility(self, candidate_campaign_we_vote_id, google_json, search_term,
-                                                        likelihood_percentage):
+                                                        likelihood_score):
         try:
             GoogleSearchUser.objects.update_or_create(
                 candidate_campaign_we_vote_id=candidate_campaign_we_vote_id,
-                item_title=google_json['item_title'],
+                item_link=google_json['item_link'],
                 defaults={
-                    'likelihood_percentage':        likelihood_percentage,
+                    'likelihood_score':             likelihood_score,
                     'search_term_used':             search_term,
-                    'item_link':                    google_json['item_link'],
+                    'item_title':                   google_json['item_title'],
                     'item_snippet':                 google_json['item_snippet'],
                     'item_image':                   google_json['item_image'],
                     'item_formatted_url':           google_json['item_formatted_url'],
