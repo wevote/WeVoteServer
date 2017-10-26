@@ -35,8 +35,10 @@ class GoogleSearchUserManager(models.Model):
 
     def update_or_create_google_search_user_possibility(self, candidate_campaign_we_vote_id, google_json, search_term,
                                                         likelihood_score):
+        google_search_user_on_stage = None
+        google_search_user_created = False
         try:
-            GoogleSearchUser.objects.update_or_create(
+            google_search_user_on_stage, google_search_user_created = GoogleSearchUser.objects.update_or_create(
                 candidate_campaign_we_vote_id=candidate_campaign_we_vote_id,
                 item_link=google_json['item_link'],
                 defaults={
@@ -50,7 +52,10 @@ class GoogleSearchUserManager(models.Model):
                     'search_request_url':           google_json['search_request_url']
                     }
                 )
-            status = "GOOGLE_SEARCH_USER_POSSIBILITY_CREATED"
+            if google_search_user_created:
+                status = "GOOGLE_SEARCH_USER_POSSIBILITY_CREATED"
+            else:
+                status = "GOOGLE_SEARCH_USER_POSSIBILITY_UPDATED"
             success = True
 
         except Exception as e:
@@ -58,8 +63,10 @@ class GoogleSearchUserManager(models.Model):
             success = False
 
         results = {
-            'success': success,
-            'status': status,
+            'success':                      success,
+            'status':                       status,
+            'google_serach_user':           google_search_user_on_stage,
+            'google_search_user_created':   google_search_user_created
         }
         return results
 

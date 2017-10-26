@@ -11,14 +11,14 @@ from import_export_wikipedia.controllers import reach_out_to_wikipedia_with_gues
     retrieve_candidate_images_from_wikipedia_page
 from re import sub
 from twitter.controllers import POSITIVE_KEYWORDS, NEGATIVE_KEYWORDS
-from wevote_functions.functions import positive_value_exists
+from wevote_functions.functions import positive_value_exists, convert_state_code_to_state_text
 
 GOOGLE_SEARCH_ENGINE_ID = get_environment_variable("GOOGLE_SEARCH_ENGINE_ID")
 GOOGLE_SEARCH_API_KEY = get_environment_variable("GOOGLE_SEARCH_API_KEY")
 GOOGLE_SEARCH_API_NAME = get_environment_variable("GOOGLE_SEARCH_API_NAME")
 GOOGLE_SEARCH_API_VERSION = get_environment_variable("GOOGLE_SEARCH_API_VERSION")
 MAXIMUM_GOOGLE_SEARCH_USERS = 10
-
+MAXIMUM_CHARACTERS_LENGTH = 1000
 
 def delete_possible_google_search_users(candidate_campaign):
     status = ""
@@ -127,7 +127,8 @@ def retrieve_possible_google_search_users(candidate_campaign):
                                                                 possibility_result['google_json'],
                                                                 possibility_result['search_term'],
                                                                 possibility_result['likelihood_score'])
-            if save_google_search_user_results['success']:
+            if save_google_search_user_results['success'] and \
+                    save_google_search_user_results['google_search_user_created']:
                 google_search_user_count += 1
                 if google_search_user_count > MAXIMUM_GOOGLE_SEARCH_USERS:
                     break
@@ -144,6 +145,8 @@ def retrieve_possible_google_search_users(candidate_campaign):
 def analyze_google_search_results(search_results, search_term, candidate_name,
                                   candidate_campaign):
     total_search_results = 0
+    state_code = candidate_campaign.state_code
+    state_full_name = convert_state_code_to_state_text(state_code)
     possible_google_search_users_list = []
     election_name = candidate_campaign.election().election_name
     if positive_value_exists(search_results):
@@ -157,17 +160,12 @@ def analyze_google_search_results(search_results, search_term, candidate_name,
             likelihood_score = 0
             google_json = parse_google_search_results(search_term, one_result)
 
-            # If candidate_location is not same as election location then skip this search entry
-            if google_json['item_person_location'] and \
-                    google_json['item_person_location'].lower() not in election_name.lower():
-                continue
-
             # Check if name (or parts of name) are in title, snippet and description
             name_found_in_title = False
             name_found_in_description = False
             for name in candidate_name.values():
                 if len(name) and name in google_json['item_title']:
-                    likelihood_score += 5
+                    likelihood_score += 10
                     name_found_in_title = True
                 if len(name) and (name in google_json['item_snippet'].lower() or
                                   name in google_json['item_meta_tags_description'].lower()):
@@ -177,23 +175,45 @@ def analyze_google_search_results(search_results, search_term, candidate_name,
             if not name_found_in_title and not name_found_in_description:
                 continue
             if not name_found_in_title:
-                likelihood_score -= 20
-            if not name_found_in_description:
                 likelihood_score -= 10
+            if not name_found_in_description:
+                likelihood_score -= 5
+
+            # Check if state or state code is in location or description
+            if google_json['item_person_location'] and positive_value_exists(state_full_name) and \
+                    state_full_name in google_json['item_person_location']:
+                likelihood_score += 30
+            elif google_json['item_person_location'] and positive_value_exists(state_code) and \
+                    state_code in google_json['item_person_location']:
+                likelihood_score += 20
+            if google_json['item_snippet'] and positive_value_exists(state_full_name) and \
+                    state_full_name in google_json['item_snippet']:
+                likelihood_score += 20
+            elif google_json['item_meta_tags_description'] and positive_value_exists(state_full_name) and \
+                    state_full_name in google_json['item_meta_tags_description']:
+                likelihood_score += 20
+
+            # Check if candidate's party is in description
+            political_party = candidate_campaign.political_party_display()
+            if google_json['item_snippet'] and positive_value_exists(political_party) and \
+                    political_party in google_json['item_snippet']:
+                likelihood_score += 20
+            elif google_json['item_meta_tags_description'] and positive_value_exists(political_party) and \
+                    political_party in google_json['item_meta_tags_description']:
+                likelihood_score += 20
 
             if "ballotpedia" in google_json['item_link']:
-                likelihood_score += 70
+                likelihood_score += 80
             if "linkedin" in google_json['item_link']:
                 likelihood_score += 50
             if "facebook" in google_json['item_link']:
-                likelihood_score += 40
+                likelihood_score += 50
 
             # Check (each word individually) if office name is in description
             # This also checks if state code is in description
             office_name = candidate_campaign.contest_office_name
             if positive_value_exists(office_name) and (google_json['item_snippet'] or
                                                        google_json['item_meta_tags_description']):
-                office_name = office_name.lower()
                 office_name = office_name.split()
                 office_found_in_description = False
                 for word in office_name:
@@ -202,7 +222,7 @@ def analyze_google_search_results(search_results, search_term, candidate_name,
                         likelihood_score += 10
                         office_found_in_description = True
                 if not office_found_in_description:
-                    likelihood_score -= 10
+                    likelihood_score -= 5
 
             # Increase the score for every positive keyword we find
             for keyword in POSITIVE_KEYWORDS:
@@ -254,10 +274,10 @@ def parse_google_search_results(search_term, result):
     google_json = {
         'item_title':                   item_title,
         'item_link':                    item_link,
-        'item_snippet':                 item_snippet,
+        'item_snippet':                 item_snippet[:MAXIMUM_CHARACTERS_LENGTH],
         'item_image':                   item_image,
         'item_formatted_url':           item_formatted_url,
-        'item_meta_tags_description':   item_meta_tags_description,
+        'item_meta_tags_description':   item_meta_tags_description[:MAXIMUM_CHARACTERS_LENGTH],
         'item_person_location':         item_person_location,
         'search_request_url':           search_request_url,
     }
@@ -316,7 +336,7 @@ def analyze_wikipedia_search_results(wikipedia_page, search_term, candidate_name
     google_json = {
         'item_title':                   wikipedia_page.original_title,
         'item_link':                    wikipedia_page.url,
-        'item_snippet':                 wikipedia_page.summary,
+        'item_snippet':                 wikipedia_page.summary[:MAXIMUM_CHARACTERS_LENGTH],
         'item_image':                   wikipedia_images_result['image'] if wikipedia_images_result['success'] else '',
         'item_formatted_url':           '',
         'item_meta_tags_description':   '',
