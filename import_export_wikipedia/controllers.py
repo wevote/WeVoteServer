@@ -274,13 +274,13 @@ def retrieve_wikipedia_page_from_wikipedia(organization, force_retrieve=False):
     return results
 
 
-def reach_out_to_wikipedia_with_guess(wikipedia_page_title_guess):
+def reach_out_to_wikipedia_with_guess(wikipedia_page_title_guess, auto_suggest=False, redirect=False, preload=False):
+    # auto_suggest = False  # If the literal string isn't found, don't try another page
+    # redirect = False  # I changed this from the default (True), but redirect might be ok
+    # preload = False
     status = ''
     wikipedia_page = False
     try:
-        auto_suggest = False  # If the literal string isn't found, don't try another page
-        redirect = False  # I changed this from the default (True), but redirect might be ok
-        preload = False
         wikipedia_page_id = 0
         wikipedia_page = wikipedia.page(wikipedia_page_title_guess,
                                         wikipedia_page_id, auto_suggest, redirect, preload)
@@ -484,6 +484,156 @@ def retrieve_all_organizations_logos_from_wikipedia(state_code=''):
         'success':      True,
         'status':       status,
         'logos_found':  logos_found,
+    }
+    return results
+
+
+def retrieve_candidate_images_from_wikipedia_page(candidate_campaign, wikipedia_page, force_retrieve=False):
+    status = ''
+    wikipedia_photo_url = ''
+    image_options = []
+    image_found = False
+    values_changed = False
+
+    if not candidate_campaign:
+        status += 'WIKIPEDIA_CANDIDATE_REQUIRED_FOR_IMAGE '
+        results = {
+            'success':                  False,
+            'status':                   status,
+        }
+        return results
+
+    if not positive_value_exists(candidate_campaign.id):
+        status += 'WIKIPEDIA_CANDIDATE_ID_REQUIRED_FOR_IMAGE '
+        results = {
+            'success':                  False,
+            'status':                   status,
+        }
+        return results
+
+    # Have we already retrieved a Wikipedia photo?
+    if positive_value_exists(candidate_campaign.wikipedia_photo_url) and not force_retrieve:
+        status += 'WIKIPEDIA_CANDIDATE_IMAGE_ALREADY_RETRIEVED-NO_FORCE '
+        results = {
+            'success':                      True,
+            'status':                       status,
+        }
+        return results
+
+    if not wikipedia_page:
+        status += 'WIKIPEDIA_OBJECT_REQUIRED_FOR_IMAGE '
+        results = {
+            'success':                  False,
+            'status':                   status,
+        }
+        return results
+
+    if not positive_value_exists(wikipedia_page.pageid):
+        status += 'WIKIPEDIA_PAGE_ID_REQUIRED_FOR_IMAGE '
+        results = {
+            'success':                  False,
+            'status':                   status,
+        }
+        return results
+
+    if force_retrieve and wikipedia_page.images and len(wikipedia_page.images):
+        # Capture the possible image URLS to display on the admin page
+        for one_image in wikipedia_page.images:
+            image_options.append(one_image)
+
+    if wikipedia_page.images and len(wikipedia_page.images):
+        image_found = False
+        # Pass one
+        for one_image in wikipedia_page.images:
+            if re.search('commons-logo', one_image, re.IGNORECASE) or \
+                    re.search('wikidata-logo', one_image, re.IGNORECASE) or \
+                    re.search('wikinews-logo', one_image, re.IGNORECASE) or \
+                    re.search('wikisource-logo', one_image, re.IGNORECASE) or \
+                    re.search('wikiquote-logo', one_image, re.IGNORECASE):
+                # We don't want to pay attention to the Creative Commons logo or other Wikipedia logos
+                pass
+            elif re.search('logo', one_image, re.IGNORECASE):
+                status += 'WIKIPEDIA_IMAGE_FOUND_WITH_IMAGE_IN_URL '
+                wikipedia_photo_url = one_image
+                image_found = True
+                break
+        # Pass two - Once we have checked all URLs for "logo", now look for org name in the image title
+        if not image_found:
+            # Find any images that have the organization's name in the image url
+            name_with_underscores = wikipedia_page.title.replace(" ", "_")
+            name_without_spaces = wikipedia_page.title.replace(" ", "")
+            # Try it without the leading "The "
+            if candidate_campaign.candidate_name.find("The ", 0, 4) == 0:
+                name_without_the = candidate_campaign.candidate_name[4:]
+            else:
+                name_without_the = ''
+            for one_image in wikipedia_page.images:
+                if re.search('commons-logo', one_image, re.IGNORECASE) or \
+                        re.search('wikidata-logo', one_image, re.IGNORECASE) or \
+                        re.search('wikinews-logo', one_image, re.IGNORECASE) or \
+                        re.search('wikisource-logo', one_image, re.IGNORECASE) or \
+                        re.search('wikiquote-logo', one_image, re.IGNORECASE):
+                    # We don't want to pay attention to the Creative Commons logo or other Wikipedia logos
+                    pass
+                elif re.search(name_with_underscores, one_image, re.IGNORECASE):
+                    status += 'WIKIPEDIA_IMAGE_FOUND_WITH_CANDIDATE_NAME_UNDERLINES_IN_URL '
+                    wikipedia_photo_url = one_image
+                    image_found = True
+                    break
+                elif re.search(name_without_spaces, one_image, re.IGNORECASE):
+                    status += 'WIKIPEDIA_IMAGE_FOUND_WITH_CANDIDATE_NAME_NO_SPACES_URL '
+                    wikipedia_photo_url = one_image
+                    image_found = True
+                    break
+                elif positive_value_exists(name_without_the) and \
+                        re.search(name_without_the, one_image, re.IGNORECASE):
+                    status += 'WIKIPEDIA_IMAGE_FOUND_WITH_CANDIDATE_NAME_MINUS_THE_IN_URL '
+                    wikipedia_photo_url = one_image
+                    image_found = True
+                    break
+        # Pass three - Remove images we know are not the logo, and if one remains, use that as the logo
+        if not image_found:
+            filtered_image_list = []
+            for one_image in wikipedia_page.images:
+                if re.search('commons-logo', one_image, re.IGNORECASE) or \
+                        re.search('wikidata-logo', one_image, re.IGNORECASE) or \
+                        re.search('wikinews-logo', one_image, re.IGNORECASE) or \
+                        re.search('wikisource-logo', one_image, re.IGNORECASE) or \
+                        re.search('wikiquote-logo', one_image, re.IGNORECASE):
+                    # We don't want to pay attention to the Creative Commons logo or other Wikipedia logos
+                    pass
+                else:
+                    filtered_image_list.append(one_image)
+            if len(filtered_image_list) == 1:
+                wikipedia_photo_url = filtered_image_list[0]
+                image_found = True
+        # Pass four - Remove images we know are not the logo, and look for any that have the word "banner"
+        if not image_found:
+            for one_image in wikipedia_page.images:
+                if re.search('commons-logo', one_image, re.IGNORECASE) or \
+                        re.search('wikidata-logo', one_image, re.IGNORECASE) or \
+                        re.search('wikinews-logo', one_image, re.IGNORECASE) or \
+                        re.search('wikisource-logo', one_image, re.IGNORECASE) or \
+                        re.search('wikiquote-logo', one_image, re.IGNORECASE):
+                    # We don't want to pay attention to the Creative Commons logo or other Wikipedia logos
+                    pass
+                elif re.search('banner', one_image, re.IGNORECASE):
+                    status += 'WIKIPEDIA_IMAGE_FOUND_WITH_BANNER_IN_URL '
+                    wikipedia_photo_url = one_image
+                    image_found = True
+                    break
+
+    if image_found:
+        success = True
+    else:
+        success = False
+
+    results = {
+        'success':          success,
+        'status':           status,
+        'image_found':      image_found,
+        'image_options':    image_options,
+        'image':            wikipedia_photo_url,
     }
     return results
 
