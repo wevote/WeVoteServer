@@ -75,7 +75,66 @@ STATE_CODE_MAP = {
     'WA': 'Washington',
     'WI': 'Wisconsin',
     'WV': 'West Virginia',
-    'WY': 'Wyoming'
+    'WY': 'Wyoming',
+}
+
+UTC_OFFSET_MAP = {
+    'AK': -32400,
+    'AL': -18000,
+    'AR': -21600,
+    'AS': -39600,
+    'AZ': -25200,
+    'CA': -28800,
+    'CO': -25200,
+    'CT': -18000,
+    'DC': -18000,
+    'DE': -18000,
+    'FL': -18000,
+    'GA': -18000,
+    'GU':  36000,
+    'HI': -36000,
+    'IA': -21600,
+    'ID': -25200,
+    'IL': -21600,
+    'IN': -18000,
+    'KS': -21600,
+    'KY': -18000,
+    'LA': -21600,
+    'MA': -18000,
+    'MD': -18000,
+    'ME': -18000,
+    'MI': -18000,
+    'MN': -21600,
+    'MO': -21600,
+    'MP':  36000,
+    'MS': -21600,
+    'MT': -25200,
+    'NC': -18000,
+    'ND': -21600,
+    'NE': -21600,
+    'NH': -18000,
+    'NJ': -18000,
+    'NM': -25200,
+    'NV': -25200,
+    'NY': -18000,
+    'OH': -18000,
+    'OK': -21600,
+    'OR': -25200,
+    'PA': -18000,
+    'PR': -14400,
+    'RI': -18000,
+    'SC': -18000,
+    'SD': -21600,
+    'TN': -18000,
+    'TX': -21600,
+    'UT': -25200,
+    'VA': -18000,
+    'VI': -14400,
+    'VT': -18000,
+    'WA': -28800,
+    'WI': -21600,
+    'WV': -18000,
+    'WY': -25200,
 }
 
 AMERICAN_INDEPENDENT = 'AMERICAN_INDEPENDENT'
@@ -690,6 +749,10 @@ def convert_state_code_to_state_text(incoming_state_code):
             return state_name
     else:
         return ""
+
+
+def convert_state_code_to_utc_offset(state_code):
+    return UTC_OFFSET_MAP.get(state_code, None)
 
 
 def process_request_from_master(request, message_text, get_url, get_params):
