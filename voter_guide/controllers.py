@@ -360,6 +360,8 @@ def voter_guides_to_follow_retrieve_for_api(voter_device_id,  # voterGuidesToFol
                                             google_civic_election_id=0, search_string='',
                                             maximum_number_to_retrieve=0, filter_voter_guides_by_issue=False,
                                             add_voter_guides_not_from_election=False):
+    filter_voter_guides_by_issue = positive_value_exists(filter_voter_guides_by_issue)
+    add_voter_guides_not_from_election = positive_value_exists(add_voter_guides_not_from_election)
     status = ""
     # Get voter_id from the voter_device_id so we can figure out which voter_guides to offer
     results = is_voter_device_id_valid(voter_device_id)
@@ -738,6 +740,8 @@ def retrieve_voter_guides_to_follow_by_election_for_api(voter_id, google_civic_e
                                                         filter_voter_guides_by_issue=False,
                                                         organization_we_vote_id_list_for_voter_issues=None,
                                                         maximum_number_to_retrieve=0, sort_by='', sort_order=''):
+    filter_voter_guides_by_issue = positive_value_exists(filter_voter_guides_by_issue)
+
     voter_guide_list_found = False
     status = ""
     status += "voter_id: " + str(voter_id) + " "
@@ -928,6 +932,7 @@ def retrieve_voter_guides_to_follow_generic_for_api(voter_id, search_string, fil
     :param sort_order:
     :return:
     """
+    filter_voter_guides_by_issue = positive_value_exists(filter_voter_guides_by_issue)
     voter_guide_list_found = False
 
     # Start with orgs followed and ignored by this voter

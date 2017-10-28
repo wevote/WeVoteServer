@@ -182,6 +182,8 @@ def convert_to_bool(value):
         return True
     elif value is 1:
         return True
+    elif value > 0:
+        return True
     elif value is False:
         return False
     elif value is 0:
@@ -705,8 +707,10 @@ def positive_value_exists(value):
     :return: bool
     """
     try:
-        if value in [None, '', 'None', False, 'False', 'false', '0']:
+        if value in [None, '', 'None', False, 'FALSE', 'False', 'false', '0']:
             return False
+        if value in ['TRUE', 'True', 'true', '1']:
+            return True
         if sys.version_info > (3, 0):
             # Python 3 code in this block
             if isinstance(value, list):

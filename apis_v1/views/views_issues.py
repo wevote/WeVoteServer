@@ -57,7 +57,7 @@ def issues_to_link_to_for_organization_view(request):  # issuesToLinkToForOrgani
 def organization_link_to_issue_view(request):
     organization_we_vote_id = request.GET.get('organization_we_vote_id', False)
     issue_we_vote_id = request.GET.get('issue_we_vote_id', False)
-    organization_linked_to_issue = request.GET.get('organization_linked_to_issue', True)
+    organization_linked_to_issue = positive_value_exists(request.GET.get('organization_linked_to_issue', True))
     reason_for_link = request.GET.get('reason_for_link', LINKED_BY_ORGANIZATION)
     reason_for_unlink = request.GET.get('reason_for_unlink', BLOCKED_BY_ORGANIZATION)
 
@@ -79,10 +79,6 @@ def organization_link_to_issue_view(request):
         }
         return HttpResponse(json.dumps(json_data), content_type='application/json')
 
-    if organization_linked_to_issue == 'true':
-        organization_linked_to_issue = True
-    elif organization_linked_to_issue == 'false':
-        organization_linked_to_issue = False
     issue_id = False
 
     link_manager = OrganizationLinkToIssueManager()

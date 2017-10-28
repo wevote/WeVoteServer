@@ -109,10 +109,8 @@ def position_list_for_opinion_maker_view(request):  # positionListForOpinionMake
     opinion_maker_we_vote_id = request.GET.get('opinion_maker_we_vote_id', "")
     google_civic_election_id = request.GET.get('google_civic_election_id', 0)
     state_code = request.GET.get('state_code', "")
-    filter_for_voter = request.GET.get('filter_for_voter', True)
-    filter_for_voter = convert_to_bool(filter_for_voter)
-    filter_out_voter = request.GET.get('filter_out_voter', False)
-    filter_out_voter = convert_to_bool(filter_out_voter)
+    filter_for_voter = positive_value_exists(request.GET.get('filter_for_voter', True))
+    filter_out_voter = positive_value_exists(request.GET.get('filter_out_voter', False))
     # Make sure filter_for_voter is reset to False if filter_out_voter is true
     filter_for_voter = False if filter_out_voter else filter_for_voter
     if (kind_of_opinion_maker == ORGANIZATION) or (kind_of_opinion_maker == "ORGANIZATION"):
@@ -162,9 +160,9 @@ def position_list_for_voter_view(request):  # positionListForVoter
     google_civic_election_id = request.GET.get('google_civic_election_id', 0)
     state_code = request.GET.get('state_code', "")
     show_only_this_election = request.GET.get('show_only_this_election', True)
-    show_only_this_election = convert_to_bool(show_only_this_election)
+    show_only_this_election = positive_value_exists(show_only_this_election)
     show_all_other_elections = request.GET.get('show_all_other_elections', False)
-    show_all_other_elections = convert_to_bool(show_all_other_elections)
+    show_all_other_elections = positive_value_exists(show_all_other_elections)
     # Make sure show_only_this_election is reset to False if filter_out_voter is true
     show_only_this_election = False if show_all_other_elections else show_only_this_election
     if show_only_this_election or show_all_other_elections and not positive_value_exists(google_civic_election_id):
@@ -409,5 +407,6 @@ def position_like_count_view(request):
     voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
     position_entered_id = request.GET.get('position_entered_id', 0)
     limit_to_voters_network = request.GET.get('limit_to_voters_network', False)
+    limit_to_voters_network = positive_value_exists(limit_to_voters_network)
     return position_like_count_for_api(voter_device_id=voter_device_id, position_entered_id=position_entered_id,
                                        limit_to_voters_network=limit_to_voters_network)
