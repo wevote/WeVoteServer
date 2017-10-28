@@ -302,7 +302,7 @@ def voter_address_save_view(request):  # voterAddressSave
     :return:
     """
     google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
-    simple_save = request.GET.get('simple_save', False)
+    simple_save = positive_value_exists(request.GET.get('simple_save', False))
     ballot_location_display_name = ''
     ballot_returned_we_vote_id = ''
 
@@ -441,9 +441,7 @@ def voter_ballot_items_retrieve_view(request):  # voterBallotItemsRetrieve
     ballot_returned_we_vote_id = request.GET.get('ballot_returned_we_vote_id', '')
     ballot_location_shortcut = request.GET.get('ballot_location_shortcut', '')
 
-    use_test_election = request.GET.get('use_test_election', False)
-    use_test_election = False if use_test_election == 'false' else use_test_election
-    use_test_election = False if use_test_election == 'False' else use_test_election
+    use_test_election = positive_value_exists(request.GET.get('use_test_election', False))
 
     if use_test_election:
         google_civic_election_id = 2000  # The Google Civic test election
@@ -457,9 +455,7 @@ def voter_ballot_items_retrieve_view(request):  # voterBallotItemsRetrieve
 def voter_ballot_items_retrieve_from_google_civic_view(request):  # voterBallotItemsRetrieveFromGoogleCivic
     voter_device_id = get_voter_device_id(request)
     text_for_map_search = request.GET.get('text_for_map_search', '')
-    use_test_election = request.GET.get('use_test_election', False)
-    use_test_election = False if use_test_election == 'false' else use_test_election
-    use_test_election = False if use_test_election == 'False' else use_test_election
+    use_test_election = positive_value_exists(request.GET.get('use_test_election', False))
 
     voter_id = 0
 
@@ -577,14 +573,10 @@ def voter_email_address_save_view(request):  # voterEmailAddressSave
     voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
     text_for_email_address = request.GET.get('text_for_email_address', '')
     incoming_email_we_vote_id = request.GET.get('email_we_vote_id', '')
-    resend_verification_email = request.GET.get('resend_verification_email', False)
-    resend_verification_email = True if positive_value_exists(resend_verification_email) else False
-    send_link_to_sign_in = request.GET.get('send_link_to_sign_in', False)
-    send_link_to_sign_in = True if positive_value_exists(send_link_to_sign_in) else False
-    make_primary_email = request.GET.get('make_primary_email', False)
-    make_primary_email = True if positive_value_exists(make_primary_email) else False
-    delete_email = request.GET.get('delete_email', "")
-    delete_email = True if positive_value_exists(delete_email) else False
+    resend_verification_email = positive_value_exists(request.GET.get('resend_verification_email', False))
+    send_link_to_sign_in = positive_value_exists(request.GET.get('send_link_to_sign_in', False))
+    make_primary_email = positive_value_exists(request.GET.get('make_primary_email', False))
+    delete_email = positive_value_exists(request.GET.get('delete_email', ""))
 
     results = voter_email_address_save_for_api(voter_device_id=voter_device_id,
                                                text_for_email_address=text_for_email_address,
@@ -839,17 +831,13 @@ def voter_guides_to_follow_retrieve_view(request):  # voterGuidesToFollowRetriev
     ballot_item_we_vote_id = request.GET.get('ballot_item_we_vote_id', '')
     google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
     search_string = request.GET.get('search_string', '')
-    use_test_election = request.GET.get('use_test_election', False)
-    use_test_election = False if use_test_election == 'false' else use_test_election
-    use_test_election = False if use_test_election == 'False' else use_test_election
+    use_test_election = positive_value_exists(request.GET.get('use_test_election', False))
     maximum_number_to_retrieve = get_maximum_number_to_retrieve_from_request(request)
-    filter_voter_guides_by_issue = request.GET.get('filter_voter_guides_by_issue', False)
+    filter_voter_guides_by_issue = positive_value_exists(request.GET.get('filter_voter_guides_by_issue', False))
     # If we want to show voter guides associated with election first, but then show more after those are exhausted,
     #  set add_voter_guides_not_from_election to True
     add_voter_guides_not_from_election = request.GET.get('add_voter_guides_not_from_election', False)
-
-    if filter_voter_guides_by_issue == 'true':
-        filter_voter_guides_by_issue = True
+    add_voter_guides_not_from_election = positive_value_exists(add_voter_guides_not_from_election)
 
     if positive_value_exists(ballot_item_we_vote_id):
         # We don't need both ballot_item and google_civic_election_id
@@ -893,18 +881,10 @@ def voter_guides_to_follow_retrieve_view(request):  # voterGuidesToFollowRetriev
 def voter_issue_follow_view(request):  # issueFollow
     voter_device_id = request.GET.get('voter_device_id', False)
     issue_we_vote_id = request.GET.get('issue_we_vote_id', False)
-    follow_value = request.GET.get('follow', False)
+    follow_value = positive_value_exists(request.GET.get('follow', False))
     user_agent_string = request.META['HTTP_USER_AGENT']
     user_agent_object = get_user_agent(request)
-    if follow_value == 'true':
-        follow_value = True
-    elif follow_value == 'false':
-        follow_value = False
-    ignore_value = request.GET.get('ignore', False)
-    if ignore_value == 'true':
-        ignore_value = True
-    elif ignore_value == 'false':
-        ignore_value = False
+    ignore_value = positive_value_exists(request.GET.get('ignore', False))
 
     return voter_issue_follow_for_api(voter_device_id=voter_device_id,
                                       issue_we_vote_id=issue_we_vote_id,

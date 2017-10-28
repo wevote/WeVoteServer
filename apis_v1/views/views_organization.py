@@ -36,6 +36,7 @@ def organization_follow_api_view(request):  # organizationFollow
     organization_we_vote_id = request.GET.get('organization_we_vote_id', '')
     organization_twitter_handle = request.GET.get('organization_twitter_handle', '')
     organization_follow_based_on_issue = request.GET.get('organization_follow_based_on_issue', False)
+    organization_follow_based_on_issue = positive_value_exists(organization_follow_based_on_issue)
     user_agent_string = request.META['HTTP_USER_AGENT']
     user_agent_object = get_user_agent(request)
     return organization_follow(voter_device_id=voter_device_id, organization_id=organization_id,
