@@ -8,7 +8,6 @@ from .models import PositionEntered, PositionForFriends, PositionManager, Positi
 from ballot.models import OFFICE, CANDIDATE, MEASURE
 from candidate.models import CandidateCampaignManager, CandidateCampaignListManager
 from config.base import get_environment_variable
-from django.contrib import messages
 from django.db.models import Q
 from django.http import HttpResponse
 from election.models import fetch_election_state
@@ -20,12 +19,11 @@ from office.models import ContestOfficeManager, ContestOfficeListManager
 from operator import itemgetter
 from organization.models import Organization, OrganizationManager
 import json
-import requests
 from voter.models import fetch_voter_id_from_voter_device_link, VoterManager
 from voter_guide.models import ORGANIZATION, PUBLIC_FIGURE, VOTER, UNKNOWN_VOTER_GUIDE, VoterGuideManager
 import wevote_functions.admin
 from wevote_functions.functions import is_voter_device_id_valid, positive_value_exists, process_request_from_master, \
-    convert_to_int
+    convert_to_int, is_link_to_video
 
 logger = wevote_functions.admin.get_logger(__name__)
 
@@ -1308,8 +1306,8 @@ def position_list_for_ballot_item_for_api(voter_device_id, friends_vs_public,  #
                 'ballot_item_display_name':         one_position.ballot_item_display_name,
                 'speaker_display_name':             speaker_display_name,
                 'speaker_image_url_https_large':    one_position.speaker_image_url_https_large
-                    if positive_value_exists(one_position.speaker_image_url_https_large)
-                    else one_position.speaker_image_url_https,
+                if positive_value_exists(one_position.speaker_image_url_https_large)
+                else one_position.speaker_image_url_https,
                 'speaker_image_url_https_medium':   one_position.speaker_image_url_https_medium,
                 'speaker_image_url_https_tiny':     one_position.speaker_image_url_https_tiny,
                 'speaker_twitter_handle':           one_position.speaker_twitter_handle,
@@ -1324,6 +1322,7 @@ def position_list_for_ballot_item_for_api(voter_device_id, friends_vs_public,  #
                 'is_oppose_or_negative_rating':     one_position.is_oppose_or_negative_rating(),
                 'is_information_only':              one_position.is_information_only(),
                 'is_public_position':               one_position.is_public_position,
+                'has_video':                        is_link_to_video(one_position.more_info_url),
                 'vote_smart_rating':                one_position.vote_smart_rating,
                 'vote_smart_time_span':             one_position.vote_smart_time_span,
                 'statement_text':                   one_position.statement_text,

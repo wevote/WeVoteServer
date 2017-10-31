@@ -971,7 +971,7 @@ class FollowOrganizationList(models.Model):
                 # Heal the data by making sure the voter's linked_organization_we_vote_id exists and is accurate
                 if positive_value_exists(voter_linked_organization_we_vote_id) \
                     and voter_linked_organization_we_vote_id != \
-                                follow_organization.voter_linked_organization_we_vote_id:
+                        follow_organization.voter_linked_organization_we_vote_id:
                     try:
                         follow_organization.voter_linked_organization_we_vote_id = voter_linked_organization_we_vote_id
                         follow_organization.save()
