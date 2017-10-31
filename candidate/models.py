@@ -498,6 +498,8 @@ class CandidateCampaign(models.Model):
     # The URL for the candidate's campaign web site.
     candidate_url = models.URLField(verbose_name='website url of candidate campaign', blank=True, null=True)
     facebook_url = models.URLField(verbose_name='facebook url of candidate campaign', blank=True, null=True)
+    facebook_profile_image_url_https = models.URLField(verbose_name='url of profile image from facebook',
+                                                       blank=True, null=True)
 
     twitter_url = models.URLField(verbose_name='twitter url of candidate campaign', blank=True, null=True)
     twitter_user_id = models.BigIntegerField(verbose_name="twitter id", null=True, blank=True)
@@ -534,6 +536,13 @@ class CandidateCampaign(models.Model):
     wikipedia_page_title = models.CharField(
         verbose_name="Page title on Wikipedia", max_length=255, null=True, blank=True)
     wikipedia_photo_url = models.URLField(verbose_name='url of wikipedia logo', blank=True, null=True)
+    linkedin_url = models.CharField(
+        verbose_name="linkedin url of candidate", max_length=255, null=True, blank=True)
+    linkedin_photo_url = models.URLField(verbose_name='url of linkedin logo', blank=True, null=True)
+
+    other_source_url = models.CharField(
+        verbose_name="other source url of candidate", max_length=255, null=True, blank=True)
+    other_source_photo_url = models.URLField(verbose_name='url of other source image', blank=True, null=True)
 
     ballotpedia_page_title = models.CharField(
         verbose_name="Page title on Ballotpedia", max_length=255, null=True, blank=True)

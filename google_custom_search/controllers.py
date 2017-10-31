@@ -17,6 +17,7 @@ GOOGLE_SEARCH_ENGINE_ID = get_environment_variable("GOOGLE_SEARCH_ENGINE_ID")
 GOOGLE_SEARCH_API_KEY = get_environment_variable("GOOGLE_SEARCH_API_KEY")
 GOOGLE_SEARCH_API_NAME = get_environment_variable("GOOGLE_SEARCH_API_NAME")
 GOOGLE_SEARCH_API_VERSION = get_environment_variable("GOOGLE_SEARCH_API_VERSION")
+BALLOTPEDIA_LOGO_URL = "ballotpedia-logo-square"
 MAXIMUM_GOOGLE_SEARCH_USERS = 10
 MAXIMUM_CHARACTERS_LENGTH = 1000
 
@@ -51,14 +52,14 @@ def retrieve_possible_google_search_users(candidate_campaign):
     google_search_user_manager = GoogleSearchUserManager()
 
     if not candidate_campaign:
-        status = "RETRIEVE_POSSIBLE_TWITTER_HANDLES-CANDIDATE_MISSING "
+        status = "RETRIEVE_POSSIBLE_GOOGLE_SEARCH_USERS-CANDIDATE_MISSING "
         results = {
             'success':                  False,
             'status':                   status,
         }
         return results
 
-    status += "RETRIEVE_POSSIBLE_TWITTER_HANDLES-REACHING_OUT_TO_TWITTER "
+    status += "RETRIEVE_POSSIBLE_GOOGLE_SEARCH_USERS-REACHING_OUT_TO_GOOGLE "
 
     search_term = candidate_campaign.candidate_name
     google_api = build(GOOGLE_SEARCH_API_NAME, GOOGLE_SEARCH_API_VERSION,
@@ -169,6 +170,11 @@ def analyze_google_search_results(search_results, search_term, candidate_name,
             likelihood_score = 0
             google_json = parse_google_search_results(search_term, one_result)
 
+            if not positive_value_exists(google_json['item_image']):
+                continue
+            elif BALLOTPEDIA_LOGO_URL in google_json['item_image']:
+                google_json['item_image'] = ""
+
             # Check if name (or parts of name) are in title, snippet and description
             name_found_in_title = False
             name_found_in_description = False
@@ -191,7 +197,7 @@ def analyze_google_search_results(search_results, search_term, candidate_name,
             # Check if state or state code is in location or description
             if google_json['item_person_location'] and positive_value_exists(state_full_name) and \
                     state_full_name in google_json['item_person_location']:
-                likelihood_score += 30
+                likelihood_score += 20
             elif google_json['item_person_location'] and positive_value_exists(state_code) and \
                     state_code in google_json['item_person_location']:
                 likelihood_score += 20
@@ -214,10 +220,10 @@ def analyze_google_search_results(search_results, search_term, candidate_name,
             if "ballotpedia" in google_json['item_link']:
                 likelihood_score += 80
             if "linkedin" in google_json['item_link']:
-                likelihood_score += 60
+                likelihood_score += 55
             if "facebook" in google_json['item_link']:
                 likelihood_score += 55
-            if "Twitter" in google_json['item_link']:
+            if "twitter" in google_json['item_link']:
                 likelihood_score += 55
             if "wikipedia" in google_json['item_link']:
                 likelihood_score += 50
@@ -230,8 +236,8 @@ def analyze_google_search_results(search_results, search_term, candidate_name,
                 office_name = office_name.split()
                 office_found_in_description = False
                 for word in office_name:
-                    if len(word) > 1 and (word in google_json['item_snippet'].lower() or
-                                          word in google_json['item_meta_tags_description'].lower()):
+                    if len(word) > 1 and (word in google_json['item_snippet'] or
+                                          word in google_json['item_meta_tags_description']):
                         likelihood_score += 10
                         office_found_in_description = True
                 if not office_found_in_description:
@@ -276,6 +282,14 @@ def parse_google_search_results(search_term, result):
     item_image = (result.get('pagemap').get('metatags')[0].get('og:image')
                   if 'pagemap' in result and result.get('pagemap', {}).get('metatags', []) and
                   result.get('pagemap', {}).get('metatags', [])[0].get('og:image') else '')
+    if not item_image:
+        item_image = (result.get('pagemap').get('cse_image')[0].get('src')
+                      if 'pagemap' in result and result.get('pagemap', {}).get('cse_image', []) and
+                         result.get('pagemap', {}).get('cse_image', [])[0].get('src') else '')
+        if not item_image:
+            item_image = (result.get('pagemap').get('cse_thumbnail')[0].get('src')
+                          if 'pagemap' in result and result.get('pagemap', {}).get('cse_thumbnail', []) and
+                             result.get('pagemap', {}).get('cse_thumbnail', [])[0].get('src') else '')
     item_meta_tags_description = (result.get('pagemap').get('metatags')[0].get('og:description')
                                   if 'pagemap' in result and result.get('pagemap', {}).get('metatags', []) and
                                   result.get('pagemap', {}).get('metatags', [])[0].get('og:description') else '')

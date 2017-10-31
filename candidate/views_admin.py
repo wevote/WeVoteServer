@@ -4,7 +4,8 @@
 
 from .controllers import candidates_import_from_master_server, candidates_import_from_sample_file, \
     candidate_politician_match, find_duplicate_candidate, \
-    retrieve_candidate_photos, retrieve_candidate_politician_match_options
+    retrieve_candidate_photos, retrieve_candidate_politician_match_options, save_google_search_image_to_candidate_table, \
+    save_google_search_link_to_candidate_table
 from .models import CandidateCampaign, CandidateCampaignListManager, CandidateCampaignManager
 from admin_tools.views import redirect_to_sign_in_page
 from office.models import ContestOffice, ContestOfficeManager
@@ -18,7 +19,7 @@ from django.shortcuts import render
 from election.models import Election, ElectionManager
 from exception.models import handle_record_found_more_than_one_exception,\
     handle_record_not_found_exception, handle_record_not_saved_exception, print_to_log
-from google_custom_search.models import GoogleSearchUser
+from google_custom_search.models import GoogleSearchUser, GoogleSearchUserManager
 from import_export_vote_smart.models import VoteSmartRatingOneCandidate
 from import_export_vote_smart.votesmart_local import VotesmartApiError
 from politician.models import PoliticianManager
@@ -467,6 +468,8 @@ def candidate_edit_process_view(request):
     maplight_id = request.POST.get('maplight_id', False)
     state_code = request.POST.get('state_code', False)
     politician_we_vote_id = request.POST.get('politician_we_vote_id', False)
+    google_search_image_file = request.POST.get('google_search_image_file', False)
+    google_search_link = request.POST.get('google_search_link', False)
 
     # Check to see if this candidate is already being used anywhere
     candidate_on_stage_found = False
@@ -616,6 +619,23 @@ def candidate_edit_process_view(request):
                 candidate_on_stage.party = party
             if google_civic_candidate_name is not False:
                 candidate_on_stage.google_civic_candidate_name = google_civic_candidate_name
+
+            if google_search_link:
+                if google_search_image_file:
+                    # If google search image exist then cache master and resized images and save them to candidate table
+                    save_google_search_image_to_candidate_table(candidate_on_stage, google_search_image_file,
+                                                                google_search_link)
+                else:
+                    # save google search link
+                    save_google_search_link_to_candidate_table(candidate_on_stage, google_search_link)
+
+            google_search_user_manager = GoogleSearchUserManager()
+            google_search_user_results = google_search_user_manager.retrieve_google_search_user(
+                candidate_on_stage.we_vote_id, google_search_link)
+            if google_search_user_results['google_search_user_found']:
+                google_search_user = google_search_user_results['google_search_user']
+                google_search_user.chosen_and_updated = True
+                google_search_user.save()
 
             # Check to see if this is a We Vote-created election
             # is_we_vote_google_civic_election_id = True \
