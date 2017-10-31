@@ -360,3 +360,82 @@ def fetch_next_we_vote_id_party_integer():
     we_vote_settings_manager.save_setting('we_vote_id_party_integer',
                                           we_vote_id_party_integer)
     return we_vote_id_party_integer
+
+SEARCH_TWITTER_LINK_POSSIBILITY = 'SEARCH_TWITTER_LINK_POSSIBILITY'
+SEARCH_GOOGLE_LINK_POSSIBILITY = 'SEARCH_GOOGLE_LINK_POSSIBILITY'
+STOP_BULK_SEARCH_TWITTER_LINK_POSSIBILITY = 'STOP_BULK_SEARCH_TWITTER_LINK_POSSIBILITY'
+
+KIND_OF_ACTION_CHOICES = (
+    (SEARCH_TWITTER_LINK_POSSIBILITY, 'Retrieve possible twitter handles'),
+    (SEARCH_GOOGLE_LINK_POSSIBILITY, 'Retrieve possible google links'),
+    (STOP_BULK_SEARCH_TWITTER_LINK_POSSIBILITY, 'Stop search for Bulk twitter links'),
+)
+
+
+class RemoteRequestHistory(models.Model):
+    """
+    Keep a log of events when reaching out to Remote servers with requests
+    """
+    # The data and time we reached out to the Remote server
+    datetime_of_action = models.DateTimeField(verbose_name='date and time of action', auto_now=True)
+    # If a 'ballot' entry, store the election this is for
+    google_civic_election_id = models.PositiveIntegerField(verbose_name="google civic election id", null=True)
+
+    kind_of_action = models.CharField(verbose_name="kind of action to take", max_length=50,
+                                      choices=KIND_OF_ACTION_CHOICES, default=SEARCH_TWITTER_LINK_POSSIBILITY)
+    candidate_campaign_we_vote_id = models.CharField(verbose_name="candidate we vote id", max_length=255, unique=False, null=True)
+
+    organization_we_vote_id = models.CharField(verbose_name="we vote id for the org owner", max_length=255, unique=False, null=True)
+    number_of_results = models.PositiveIntegerField(verbose_name="number of results", null=True, default=0)
+    status = models.CharField(verbose_name="Request status message", max_length=255, default="", null=True, blank=True)
+
+
+class RemoteRequestHistoryManager(models.Model):
+
+    def __unicode__(self):
+        return "RemoteRequestHistoryManager"
+
+    def create_remote_request_history_entry(self, kind_of_action, google_civic_election_id,
+                                            candidate_campaign_we_vote_id='', organization_we_vote_id='',
+                                            number_of_results=0, status=''):
+        """
+        Create a new entry for twitter link search request in the RemoteRequestHistory
+        :param kind_of_action: 
+        :param google_civic_election_id: 
+        :param candidate_campaign_we_vote_id: 
+        :param organization_we_vote_id: 
+        :param number_of_results: 
+        :param status: 
+        :return: 
+        """
+
+        success = False
+        status = ""
+        remote_request_history_entry_created = False
+        remote_request_history_entry = ''
+
+        # save this entry
+        try:
+            remote_request_history_entry = RemoteRequestHistory.objects.create(
+                kind_of_action=kind_of_action, google_civic_election_id=google_civic_election_id,
+                candidate_campaign_we_vote_id=candidate_campaign_we_vote_id,
+                organization_we_vote_id=organization_we_vote_id, number_of_results=number_of_results,
+                status=status)
+            if remote_request_history_entry:
+                success = True
+                status += "REMOTE_REQUEST_HISTORY_ENTRY_CREATED"
+                remote_request_history_entry_created = True
+            else:
+                success = False
+                status += "CREATE_REMOTE_REQUEST_HISTORY_ENTRY_FAILED"
+        except Exception as e:
+            status += "REMOTE_REQUEST_HISTORY_ENTRY_ERROR"
+            handle_record_not_saved_exception(e, logger=logger)
+
+        results = {
+            'success': success,
+            'status': status,
+            'remote_request_history_entry_created': remote_request_history_entry_created,
+            'remote_request_history_entry': remote_request_history_entry,
+        }
+        return results
