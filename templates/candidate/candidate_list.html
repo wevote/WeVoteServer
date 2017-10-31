@@ -159,9 +159,9 @@
                             {{ candidate.candidate_merge_possibility.twitter_handle }}</a>
                         (Best Guess:
                         <a href="{% url 'candidate:candidate_edit' candidate.id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
-                            {{ candidate.candidate_merge_possibility.likelihood_percentage }}</a>)<br />
+                            {{ candidate.candidate_merge_possibility.likelihood_score }}</a>)<br />
                         {{ candidate.candidate_merge_possibility.twitter_description }}<br />
-                        {% if candidate.candidate_merge_possibility.likelihood_percentage >= 60 %}
+                        {% if candidate.candidate_merge_possibility.likelihood_score >= 60 %}
                             <form action="{% url 'candidate:candidate_edit_process' %}" id="candidate_edit" method="post" class="form-horizontal">
                                 {% csrf_token %}
                                 <input type="hidden" name="candidate_twitter_handle" value="{{ candidate.candidate_merge_possibility.twitter_handle }}" />
