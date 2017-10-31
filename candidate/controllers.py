@@ -8,7 +8,8 @@ from config.base import get_environment_variable
 from django.contrib import messages
 from django.http import HttpResponse
 from exception.models import handle_exception
-from image.controllers import retrieve_all_images_for_one_candidate
+from image.controllers import retrieve_all_images_for_one_candidate, cache_master_and_resized_image, BALLOTPEDIA, \
+    LINKEDIN, TWITTER, WIKIPEDIA, FACEBOOK
 from import_export_vote_smart.controllers import retrieve_and_match_candidate_from_vote_smart, \
     retrieve_candidate_photo_from_vote_smart
 import json
@@ -829,3 +830,92 @@ def retrieve_candidate_politician_match_options(vote_smart_id, maplight_id, cand
     }
 
     return results
+
+
+def save_google_search_image_to_candidate_table(candidate, google_search_image_file, google_search_link):
+    google_search_website_name = google_search_link.split("//")[1].split("/")[0]
+    if BALLOTPEDIA in google_search_website_name:
+        cache_results = cache_master_and_resized_image(
+            candidate_id=candidate.id, candidate_we_vote_id=candidate.we_vote_id,
+            ballotpedia_profile_image_url=google_search_image_file,
+            image_source=BALLOTPEDIA)
+        cached_ballotpedia_profile_image_url_https = cache_results['cached_ballotpedia_image_url_https']
+        candidate.ballotpedia_photo_url = cached_ballotpedia_profile_image_url_https
+        candidate.ballotpedia_page_title = google_search_link
+
+    elif LINKEDIN in google_search_website_name:
+        cache_results = cache_master_and_resized_image(
+            candidate_id=candidate.id, candidate_we_vote_id=candidate.we_vote_id,
+            linkedin_profile_image_url=google_search_image_file,
+            image_source=LINKEDIN)
+        cached_linkedin_profile_image_url_https = cache_results['cached_linkedin_image_url_https']
+        candidate.linkedin_url = google_search_link
+        candidate.linkedin_photo_url = cached_linkedin_profile_image_url_https
+
+    elif WIKIPEDIA in google_search_website_name:
+        cache_results = cache_master_and_resized_image(
+            candidate_id=candidate.id, candidate_we_vote_id=candidate.we_vote_id,
+            wikipedia_profile_image_url=google_search_image_file,
+            image_source=WIKIPEDIA)
+        cached_wikipedia_profile_image_url_https = cache_results['cached_wikipedia_image_url_https']
+        candidate.wikipedia_photo_url = cached_wikipedia_profile_image_url_https
+        candidate.wikipedia_page_title = google_search_link
+
+    elif TWITTER in google_search_website_name:
+        cache_results = cache_master_and_resized_image(
+            candidate_id=candidate.id, candidate_we_vote_id=candidate.we_vote_id,
+            twitter_profile_image_url_https=google_search_image_file,
+            image_source=TWITTER)
+        cached_twitter_profile_image_url_https = cache_results['cached_twitter_profile_image_url_https']
+        candidate.twitter_profile_image_url_https = cached_twitter_profile_image_url_https
+        candidate.twitter_url = google_search_link
+
+    elif FACEBOOK in google_search_website_name:
+        cache_results = cache_master_and_resized_image(
+            candidate_id=candidate.id, candidate_we_vote_id=candidate.we_vote_id,
+            facebook_profile_image_url_https=google_search_image_file,
+            image_source=FACEBOOK)
+        cached_facebook_profile_image_url_https = cache_results['cached_facebook_profile_image_url_https']
+        candidate.facebook_url = google_search_link
+        candidate.facebook_profile_image_url_https = cached_facebook_profile_image_url_https
+
+    else:
+        cache_results = cache_master_and_resized_image(
+            candidate_id=candidate.id, candidate_we_vote_id=candidate.we_vote_id,
+            other_source_image_url=google_search_image_file,
+            other_source=google_search_website_name)
+        cached_other_source_image_url_https = cache_results['cached_other_source_image_url_https']
+        candidate.other_source_url = google_search_link
+        candidate.other_source_photo_url = cached_other_source_image_url_https
+
+    we_vote_hosted_profile_image_url_large = cache_results['we_vote_hosted_profile_image_url_large']
+    we_vote_hosted_profile_image_url_medium = cache_results['we_vote_hosted_profile_image_url_medium']
+    we_vote_hosted_profile_image_url_tiny = cache_results['we_vote_hosted_profile_image_url_tiny']
+
+    try:
+        candidate.we_vote_hosted_profile_image_url_large = we_vote_hosted_profile_image_url_large
+        candidate.we_vote_hosted_profile_image_url_medium = we_vote_hosted_profile_image_url_medium
+        candidate.we_vote_hosted_profile_image_url_tiny = we_vote_hosted_profile_image_url_tiny
+        candidate.save()
+    except Exception as e:
+        pass
+
+
+def save_google_search_link_to_candidate_table(candidate, google_search_link):
+    google_search_website_name = google_search_link.split("//")[1].split("/")[0]
+    if "ballotpedia" in google_search_website_name:
+        candidate.ballotpedia_page_title = google_search_link
+    elif "linkedin" in google_search_website_name:
+        candidate.linkedin_url = google_search_link
+    elif "wikipedia" in google_search_website_name:
+        candidate.wikipedia_page_title = google_search_link
+    elif "twitter" in google_search_website_name:
+        candidate.twitter_url = google_search_link
+    elif "facebook" in google_search_website_name:
+        candidate.facebook_url = google_search_link
+    else:
+        candidate.other_source_url = google_search_link
+    try:
+        candidate.save()
+    except Exception as e:
+        pass

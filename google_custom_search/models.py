@@ -6,6 +6,8 @@
 import wevote_functions.admin
 from django.db import models
 
+from wevote_functions.functions import positive_value_exists
+
 logger = wevote_functions.admin.get_logger(__name__)
 
 
@@ -26,7 +28,8 @@ class GoogleSearchUser(models.Model):
     search_request_url = models.URLField(verbose_name="search request url", null=True, blank=True)
     not_a_match = models.BooleanField(default=False, verbose_name="")
     likelihood_score = models.IntegerField(verbose_name="score for a match", null=True, unique=False)
-
+    chosen_and_updated = models.BooleanField(default=False,
+                                             verbose_name="when search detail updated in candidate table")
 
 class GoogleSearchUserManager(models.Model):
 
@@ -65,8 +68,35 @@ class GoogleSearchUserManager(models.Model):
         results = {
             'success':                      success,
             'status':                       status,
-            'google_serach_user':           google_search_user_on_stage,
+            'google_search_user':           google_search_user_on_stage,
             'google_search_user_created':   google_search_user_created
+        }
+        return results
+
+    def retrieve_google_search_user(self, candidate_campaign_we_vote_id, item_link):
+        google_search_user = GoogleSearchUser()
+        try:
+            if positive_value_exists(candidate_campaign_we_vote_id):
+                google_search_user = GoogleSearchUser.objects.get(
+                    candidate_campaign_we_vote_id=candidate_campaign_we_vote_id,
+                    item_link=item_link)
+            success = True
+            google_search_user_found = True
+            status = "RETRIEVE_GOOGLE_SEARCH_USER_BY_WE_VOTE_ID"
+        except GoogleSearchUser.DoesNotExist:
+            google_search_user_found = False
+            success = True
+            status = "RETRIEVE_GOOGLE_SEARCH_USER_NOT_FOUND"
+        except Exception as e:
+            google_search_user_found = False
+            success = False
+            status = 'FAILED retrieve_googgle_search_user'
+
+        results = {
+            'success':                      success,
+            'status':                       status,
+            'google_search_user_found':     google_search_user_found,
+            'google_search_user':           google_search_user,
         }
         return results
 
