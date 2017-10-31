@@ -377,16 +377,16 @@ class RemoteRequestHistory(models.Model):
     Keep a log of events when reaching out to Remote servers with requests
     """
     # The data and time we reached out to the Remote server
-    datetime_of_action = models.DateTimeField(verbose_name='date and time of action', null=False, auto_now=True)
+    datetime_of_action = models.DateTimeField(verbose_name='date and time of action', auto_now=True)
     # If a 'ballot' entry, store the election this is for
     google_civic_election_id = models.PositiveIntegerField(verbose_name="google civic election id", null=True)
 
-    kind_of_action = models.CharField(verbose_name="kind of action to take", max_length=40,
+    kind_of_action = models.CharField(verbose_name="kind of action to take", max_length=50,
                                       choices=KIND_OF_ACTION_CHOICES, default=SEARCH_TWITTER_LINK_POSSIBILITY)
-    candidate_campaign_we_vote_id = models.CharField(verbose_name="candidate we vote id", max_length=255, unique=False)
+    candidate_campaign_we_vote_id = models.CharField(verbose_name="candidate we vote id", max_length=255, unique=False, null=True)
 
-    organization_we_vote_id = models.CharField(verbose_name="we vote id for the org owner", max_length=255, unique=True)
-    number_of_results = models.PositiveIntegerField(verbose_name="number of results", max_length=255, null=True)
+    organization_we_vote_id = models.CharField(verbose_name="we vote id for the org owner", max_length=255, unique=False, null=True)
+    number_of_results = models.PositiveIntegerField(verbose_name="number of results", null=True, default=0)
     status = models.CharField(verbose_name="Request status message", max_length=255, default="", null=True, blank=True)
 
 
@@ -411,32 +411,31 @@ class RemoteRequestHistoryManager(models.Model):
 
         success = False
         status = ""
-        new_remote_request_history_entry_created = False
-        new_remote_request_history_entry = ''
+        remote_request_history_entry_created = False
+        remote_request_history_entry = ''
 
-        if kind_of_action == SEARCH_TWITTER_LINK_POSSIBILITY:
-            # save this entry
-            try:
-                new_remote_request_history_entry = RemoteRequestHistory.objects.create(
-                    kind_of_action=kind_of_action, google_civic_election_id=google_civic_election_id,
-                    candidate_campaign_we_vote_id=candidate_campaign_we_vote_id,
-                    organization_we_vote_id=organization_we_vote_id, number_of_results=number_of_results,
-                    status=status)
-                if new_remote_request_history_entry:
-                    success = True
-                    status = "REMOTE_REQUEST_HISTORY_ENTRY_CREATED"
-                    new_remote_request_history_entry_created = True
-                else:
-                    success = False
-                    status = "CREATE_REMOTE_REQUEST_HISTORY_ENTRY_FAILED"
-            except Exception as e:
-                status = "REMOTE_REQUEST_HISTORY_ENTRY_ERROR"
-                handle_record_not_saved_exception(e, logger=logger)
+        # save this entry
+        try:
+            remote_request_history_entry = RemoteRequestHistory.objects.create(
+                kind_of_action=kind_of_action, google_civic_election_id=google_civic_election_id,
+                candidate_campaign_we_vote_id=candidate_campaign_we_vote_id,
+                organization_we_vote_id=organization_we_vote_id, number_of_results=number_of_results,
+                status=status)
+            if remote_request_history_entry:
+                success = True
+                status += "REMOTE_REQUEST_HISTORY_ENTRY_CREATED"
+                remote_request_history_entry_created = True
+            else:
+                success = False
+                status += "CREATE_REMOTE_REQUEST_HISTORY_ENTRY_FAILED"
+        except Exception as e:
+            status += "REMOTE_REQUEST_HISTORY_ENTRY_ERROR"
+            handle_record_not_saved_exception(e, logger=logger)
 
         results = {
             'success': success,
             'status': status,
-            'new_remote_request_history_entry_created': new_remote_request_history_entry_created,
-            'new_remote_request_history_entry': new_remote_request_history_entry,
+            'remote_request_history_entry_created': remote_request_history_entry_created,
+            'remote_request_history_entry': remote_request_history_entry,
         }
         return results
