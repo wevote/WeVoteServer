@@ -15,10 +15,11 @@ span.wrap_word { word-break: break-word; }
 {% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
 
 
-<form action="{% url "candidate:candidate_edit_process" %}" id="candidate_edit" method="post" class="form-horizontal">
+<form action="{% url 'candidate:candidate_edit_process' %}" id="candidate_edit" method="post" class="form-horizontal">
 {% csrf_token %}
 
 <input type="hidden" name="candidate_id" value="{% if candidate %}{{ candidate.id }}{% else %}0{% endif %}">
+<input type="hidden" name="redirect_to_candidate_list" value="0">
 
 <div class="form-group">
     <label for="candidate_name_id" class="col-sm-3 control-label">Candidate Name</label>

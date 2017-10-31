@@ -36,6 +36,7 @@ POSITIVE_KEYWORDS = [
     "office",
     "official",
     "public",
+    "represent",
     "running",
     "state",
 ]
@@ -43,7 +44,6 @@ POSITIVE_KEYWORDS = [
 NEGATIVE_KEYWORDS = [
     "fake",
     "parody",
-    "unofficial",
 ]
 
 
