@@ -284,6 +284,23 @@ span.wrap_word { word-break: break-word; }
     <img src='{{ candidate.candidate_photo_url }}' />
     {% endif %}
 
+    {% if candidate.we_vote_hosted_profile_image_url_tiny %}
+        we_vote_hosted_profile_image_url_tiny: {{ candidate.we_vote_hosted_profile_image_url_tiny }}<br />
+        <img src="{{ candidate.we_vote_hosted_profile_image_url_tiny }}"><br />
+        <br />
+    {% endif %}
+
+    {% if candidate.we_vote_hosted_profile_image_url_medium %}
+        we_vote_hosted_profile_image_url_medium: {{ candidate.we_vote_hosted_profile_image_url_medium }}<br />
+        <img src="{{ candidate.we_vote_hosted_profile_image_url_medium }}"><br />
+        <br />
+    {% endif %}
+
+    {% if candidate.we_vote_hosted_profile_image_url_large %}
+        we_vote_hosted_profile_image_url_large: {{ candidate.we_vote_hosted_profile_image_url_large }}<br />
+        <br />
+    {% endif %}
+
     <h4>We Vote Positions Related to {{ candidate.candidate_name  }}</h4>
     {% if candidate.vote_smart_id %}
         <p><a href="{% url 'import_export_vote_smart:transfer_vote_smart_ratings_to_positions_for_candidate' candidate.id %}">Transfer Vote Smart Ratings to We Vote Positions</a></p>
