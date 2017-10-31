@@ -224,10 +224,11 @@ def candidate_list_view(request):
     # Attach the best guess Twitter account, if any, to each candidate in list
     for candidate in candidate_list:
         try:
-            twitter_possibility_query = TwitterLinkPossibility.objects.order_by('-likelihood_percentage')
+            twitter_possibility_query = TwitterLinkPossibility.objects.order_by('-likelihood_score')
             twitter_possibility_query = twitter_possibility_query.filter(
                 candidate_campaign_we_vote_id=candidate.we_vote_id)
-            candidate.candidate_merge_possibility = twitter_possibility_query[0]
+            twitter_possibility_list = list(twitter_possibility_query)
+            candidate.candidate_merge_possibility = twitter_possibility_list[0]
         except Exception as e:
             candidate.candidate_merge_possibility = None
 
@@ -393,7 +394,7 @@ def candidate_edit_view(request, candidate_id=0, candidate_campaign_we_vote_id="
 
         twitter_link_possibility_list = []
         try:
-            twitter_possibility_query = TwitterLinkPossibility.objects.order_by('-likelihood_percentage')
+            twitter_possibility_query = TwitterLinkPossibility.objects.order_by('-likelihood_score')
             twitter_possibility_query = twitter_possibility_query.filter(
                 candidate_campaign_we_vote_id=candidate_on_stage.we_vote_id)
             twitter_link_possibility_list = list(twitter_possibility_query)
