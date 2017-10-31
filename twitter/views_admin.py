@@ -92,7 +92,7 @@ def bulk_retrieve_possible_twitter_handles_view(request):
                 # Candidate does not have a Twitter account linked
                 twitter_link_possibility_list = []
                 try:
-                    twitter_possibility_query = TwitterLinkPossibility.objects.order_by('-likelihood_percentage')
+                    twitter_possibility_query = TwitterLinkPossibility.objects.order_by('-likelihood_score')
                     twitter_possibility_query = twitter_possibility_query.filter(
                         candidate_campaign_we_vote_id=one_candidate.we_vote_id)
                     twitter_link_possibility_list = list(twitter_possibility_query)

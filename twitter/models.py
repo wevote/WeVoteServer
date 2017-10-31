@@ -104,7 +104,7 @@ class TwitterLinkPossibility(models.Model):
     search_term_used = models.CharField(verbose_name="", max_length=255, unique=False)
     twitter_name = models.CharField(verbose_name="display name from twitter", max_length=255, null=True, blank=True)
     not_a_match = models.BooleanField(default=False, verbose_name="")
-    likelihood_percentage = models.IntegerField(verbose_name="", null=True, unique=False)
+    likelihood_score = models.IntegerField(verbose_name="", null=True, unique=False)
 
     twitter_id = models.BigIntegerField(verbose_name="twitter big integer id", null=True, unique=False)
     twitter_handle = models.CharField(verbose_name='twitter screen name / handle',
@@ -153,14 +153,14 @@ class TwitterUserManager(models.Model):
         return "TwitterUserManager"
 
     def update_or_create_twitter_link_possibility(self, candidate_campaign_we_vote_id, twitter_json, search_term,
-                                                  likelihood_percentage):
+                                                  likelihood_score):
         try:
             TwitterLinkPossibility.objects.update_or_create(
                 candidate_campaign_we_vote_id=candidate_campaign_we_vote_id,
                 twitter_id=twitter_json['id'],
                 twitter_handle=twitter_json['screen_name'],
                 defaults={
-                    'likelihood_percentage': likelihood_percentage,
+                    'likelihood_score': likelihood_score,
                     'search_term_used': search_term,
                     'twitter_name': twitter_json['name'],
                     'twitter_description': twitter_json['description'],

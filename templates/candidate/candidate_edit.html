@@ -150,7 +150,7 @@ span.wrap_word { word-break: break-word; }
     {% for one_row in twitter_link_possibility_list %}
         <tr>
             <td>{{ forloop.counter }}</td>
-            <td>{{ one_row.likelihood_percentage|default_if_none:"n/a" }}</td>
+            <td>{{ one_row.likelihood_score|default_if_none:"n/a" }}</td>
             <td><img src='{{ one_row.twitter_profile_image_url_https }}' /></td>
             <td>{{ one_row.twitter_name }}</td>
             <td><a href="https://twitter.com/{{ one_row.twitter_handle }}" target="_blank">{{ one_row.twitter_handle|default_if_none:"n/a" }}</a><br />
