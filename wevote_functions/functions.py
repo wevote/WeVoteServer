@@ -616,6 +616,12 @@ def get_voter_device_id(request, generate_if_no_value=False):
         return ''
 
 
+def is_link_to_video(link_url):
+    if "youtube.com" in link_url:
+        return True
+    return False
+
+
 def is_voter_device_id_valid(voter_device_id):
     if not voter_device_id \
             or len(voter_device_id) <= 70 \

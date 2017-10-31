@@ -1375,7 +1375,10 @@ class PositionListManager(models.Model):
         # If we have multiple positions for one org, we only want to show the most recent.
         if most_recent_only:
             if position_list_found:
-                position_list_filtered = self.remove_older_positions_for_each_org(position_list)
+                if len(position_list) > 1:
+                    position_list_filtered = self.remove_older_positions_for_each_org(position_list)
+                else:
+                    position_list_filtered = position_list
             else:
                 position_list_filtered = []
         else:
@@ -1456,7 +1459,10 @@ class PositionListManager(models.Model):
         # If we have multiple positions for one org, we only want to show the most recent.
         if most_recent_only:
             if position_list_found:
-                position_list_filtered = self.remove_older_positions_for_each_org(position_list)
+                if len(position_list) > 1:
+                    position_list_filtered = self.remove_older_positions_for_each_org(position_list)
+                else:
+                    position_list_filtered = position_list
             else:
                 position_list_filtered = []
         else:

@@ -19,7 +19,8 @@ from voter.models import fetch_voter_id_from_voter_device_link, fetch_voter_we_v
     VoterManager
 from voter_guide.models import VoterGuideListManager, VoterGuideManager, VoterGuidePossibilityManager
 import wevote_functions.admin
-from wevote_functions.functions import is_voter_device_id_valid, positive_value_exists, process_request_from_master
+from wevote_functions.functions import is_voter_device_id_valid, positive_value_exists, process_request_from_master, \
+    is_link_to_video
 
 logger = wevote_functions.admin.get_logger(__name__)
 
@@ -555,7 +556,7 @@ def voter_guides_to_follow_retrieve_for_api(voter_device_id,  # voterGuidesToFol
                 #  support, oppose, or a comment
                 if position_found:
                     if position.is_support_or_positive_rating() or position.is_oppose_or_negative_rating() or \
-                            position.statement_text:
+                            position.statement_text or is_link_to_video(position.more_info_url):
                         # We can proceed
                         pass
                     else:
@@ -574,6 +575,7 @@ def voter_guides_to_follow_retrieve_for_api(voter_device_id,  # voterGuidesToFol
                     one_voter_guide['speaker_display_name'] = position.speaker_display_name
                     one_voter_guide['statement_text'] = position.statement_text
                     one_voter_guide['more_info_url'] = position.more_info_url
+                    one_voter_guide['has_video'] = is_link_to_video(position.more_info_url)
                     one_voter_guide['vote_smart_rating'] = position.vote_smart_rating
                     one_voter_guide['vote_smart_time_span'] = position.vote_smart_time_span
 
