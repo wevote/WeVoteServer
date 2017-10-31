@@ -20,6 +20,7 @@ from election.models import Election, ElectionManager
 from exception.models import handle_record_found_more_than_one_exception,\
     handle_record_not_found_exception, handle_record_not_saved_exception, print_to_log
 from google_custom_search.models import GoogleSearchUser, GoogleSearchUserManager
+from import_export_twitter.controllers import refresh_twitter_candidate_details
 from import_export_vote_smart.models import VoteSmartRatingOneCandidate
 from import_export_vote_smart.votesmart_local import VotesmartApiError
 from politician.models import PoliticianManager
@@ -454,6 +455,7 @@ def candidate_edit_process_view(request):
     remove_duplicate_process = request.POST.get('remove_duplicate_process', False)
 
     candidate_id = convert_to_int(request.POST['candidate_id'])
+    redirect_to_candidate_list = convert_to_int(request.POST['redirect_to_candidate_list'])
     candidate_name = request.POST.get('candidate_name', False)
     google_civic_candidate_name = request.POST.get('google_civic_candidate_name', False)
     google_civic_election_id = request.POST.get('google_civic_election_id', 0)
@@ -714,6 +716,13 @@ def candidate_edit_process_view(request):
     except Exception as e:
         messages.add_message(request, messages.ERROR, 'Could not save candidate.')
         return HttpResponseRedirect(reverse('candidate:candidate_edit', args=(candidate_id,)))
+
+    results = refresh_twitter_candidate_details(candidate_on_stage)
+
+    if redirect_to_candidate_list:
+        return HttpResponseRedirect(reverse('candidate:candidate_list', args=()) +
+                                    '?google_civic_election_id=' + str(google_civic_election_id) +
+                                    '&state_code=' + str(state_code))
 
     if remove_duplicate_process:
         return HttpResponseRedirect(reverse('candidate:find_and_remove_duplicate_candidates', args=()) +
