@@ -251,11 +251,18 @@ class ContestMeasureManager(models.Model):
                         google_civic_election_id__exact=google_civic_election_id,
                         we_vote_id__iexact=we_vote_id,
                         defaults=updated_contest_measure_values)
+                    success = True
+                    status += 'CONTEST_UPDATE_OR_CREATE_SUCCEEDED '
+                    measure_updated = not new_measure_created
                 except ContestMeasure.MultipleObjectsReturned as e:
                     handle_record_found_more_than_one_exception(e, logger=logger)
                     success = False
                     status = 'MULTIPLE_MATCHING_CONTEST_MEASURES_FOUND'
                     exception_multiple_object_returned = True
+                except Exception as e:
+                    status += 'FAILED_TO_UPDATE_OR_CREATE ' \
+                              '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
+                    success = False
             else:
                 # Given we might have the measure listed by google_civic_measure_title
                 # OR measure_title, we need to check both before we try to create a new entry

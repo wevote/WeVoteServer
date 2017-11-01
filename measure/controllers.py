@@ -5,14 +5,12 @@
 from .models import ContestMeasureList, ContestMeasureManager
 from ballot.models import MEASURE
 from config.base import get_environment_variable
-from django.contrib import messages
 from django.http import HttpResponse
 from election.models import ElectionManager
 import json
 from position.controllers import update_all_position_details_from_contest_measure
-import requests
 import wevote_functions.admin
-from wevote_functions.functions import convert_state_code_to_state_text, positive_value_exists, \
+from wevote_functions.functions import convert_state_code_to_state_text, convert_to_int, positive_value_exists, \
     process_request_from_master
 
 logger = wevote_functions.admin.get_logger(__name__)
@@ -137,8 +135,7 @@ def measures_import_from_master_server(request, google_civic_election_id, state_
 
 def filter_measures_structured_json_for_local_duplicates(structured_json):
     """
-    With this function, we remove candidates that seem to be duplicates, but have different we_vote_id's.
-    We do not check to see if we have a matching office this routine -- that is done elsewhere.
+    With this function, we remove measures that seem to be duplicates, but have different we_vote_id's.
     :param structured_json:
     :return:
     """
@@ -189,7 +186,8 @@ def measures_import_from_structured_json(structured_json):
     for one_measure in structured_json:
         we_vote_id = one_measure['we_vote_id'] if 'we_vote_id' in one_measure else ''
         google_civic_election_id = \
-            one_measure['google_civic_election_id'] if 'google_civic_election_id' in one_measure else ''
+            one_measure['google_civic_election_id'] if 'google_civic_election_id' in one_measure else 0
+        google_civic_election_id = convert_to_int(google_civic_election_id)
 
         if positive_value_exists(we_vote_id) and positive_value_exists(google_civic_election_id):
             proceed_to_update_or_create = True
