@@ -80,6 +80,9 @@
         <li><a href="{% url 'twitter2:bulk_retrieve_possible_twitter_handles' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}" >
         Retrieve Possible Twitter Handles</a> (10 at a time - about 30 seconds)</li>
 
+        <li><a href="{% url 'google_custom_search:bulk_retrieve_possible_google_search_users' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}" >
+        Retrieve Possible Candidates from Google</a> (10 at a time - 1-2 minutes)</li>
+
         <li><a href="{% url 'import_export_twitter:refresh_twitter_candidate_details_for_election' google_civic_election_id %}?state_code={{ state_code }}" >
         Retrieve/Refresh Candidate Twitter Info for this Election</a> (1-2 minutes)</li>
 
@@ -115,6 +118,7 @@
             <td>Election</td>
             <td>Office</td>
             <td>Twitter Handle</td>
+            <td>Google Search Results</td>
             <td>Website</td>
             <td>Id</td>
             <td>We Vote Id</td>
@@ -174,6 +178,23 @@
                             </form>
                         {% endif %}
                     {% endif %}
+                {% endif %}
+            </td>
+            <td>{% if candidate.google_search_merge_possibility %}
+                    {% if not candidate.google_search_merge_possibility.chosen_and_updated %}
+                        <a href="{% url 'candidate:candidate_edit' candidate.id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
+                            <img src='{{ candidate.google_search_merge_possibility.item_image }}' height="25px" /></a>&nbsp;
+                        (Best Guess:
+                        <a href="{% url 'candidate:candidate_edit' candidate.id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
+                            {{ candidate.google_search_merge_possibility.likelihood_score }}</a>)<br />
+                        <a href="{{ candidate.google_search_merge_possibility.item_link }}" target="_blank">{{ candidate.google_search_merge_possibility.item_link|default_if_none:"" }}</a><br />
+                        {{ candidate.google_search_merge_possibility.item_snippet }}
+                    {% else %}
+                        <a href="{% url 'candidate:candidate_edit' candidate.id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
+                            <img src='{{ candidate.google_search_merge_possibility.item_image }}' height="25px" /></a>&nbsp;
+                        <a href="{{ candidate.google_search_merge_possibility.item_link }}" target="_blank">{{ candidate.google_search_merge_possibility.item_link|default_if_none:"" }}</a><br />
+                    {% endif %}
+
                 {% endif %}
             </td>
             <td>{% if candidate.candidate_url %}<a href="{{ candidate.candidate_url }}" target="_blank">{{ candidate.candidate_url }}</a>{% endif %}</td>

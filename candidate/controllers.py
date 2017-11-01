@@ -914,7 +914,7 @@ def save_google_search_link_to_candidate_table(candidate, google_search_link):
     elif "facebook" in google_search_website_name:
         candidate.facebook_url = google_search_link
     else:
-        candidate.other_source_url = google_search_link
+        candidate.candidate_url = google_search_link
     try:
         candidate.save()
     except Exception as e:
