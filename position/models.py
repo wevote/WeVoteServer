@@ -1421,36 +1421,38 @@ class PositionListManager(models.Model):
         position_list_found = False
         try:
             if retrieve_public_positions:
-                position_list = PositionEntered.objects.order_by('date_entered')
+                position_list_query = PositionEntered.objects.order_by('date_entered')
                 retrieve_friends_positions = False
             else:
-                position_list = PositionForFriends.objects.order_by('date_entered')
+                position_list_query = PositionForFriends.objects.order_by('date_entered')
                 retrieve_friends_positions = True
 
             if positive_value_exists(contest_measure_id):
-                position_list = position_list.filter(contest_measure_id=contest_measure_id)
+                position_list_query = position_list_query.filter(contest_measure_id=contest_measure_id)
             else:
-                position_list = position_list.filter(contest_measure_we_vote_id__iexact=contest_measure_we_vote_id)
+                position_list_query = position_list_query.filter(
+                    contest_measure_we_vote_id__iexact=contest_measure_we_vote_id)
             # SUPPORT, STILL_DECIDING, INFORMATION_ONLY, NO_STANCE, OPPOSE, PERCENT_RATING
             if stance_we_are_looking_for != ANY_STANCE:
                 # If we passed in the stance "ANY" it means we want to not filter down the list
-                position_list = position_list.filter(stance=stance_we_are_looking_for)
+                position_list_query = position_list_query.filter(stance=stance_we_are_looking_for)
                 # NOTE: We don't have a special case for
                 # "if stance_we_are_looking_for == SUPPORT or stance_we_are_looking_for == OPPOSE"
                 # for contest_measure (like we do for candidate_campaign) because we don't have to deal with
                 # PERCENT_RATING data with measures
+
             if retrieve_friends_positions and friends_we_vote_id_list is not False:
                 # Find positions from friends. Look for we_vote_id case insensitive.
                 we_vote_id_filter = Q()
                 for we_vote_id in friends_we_vote_id_list:
                     we_vote_id_filter |= Q(voter_we_vote_id__iexact=we_vote_id)
-                position_list = position_list.filter(we_vote_id_filter)
+                    position_list_query = position_list_query.filter(we_vote_id_filter)
             # Limit to positions in the last x years - currently we are not limiting
             # position_list = position_list.filter(election_id=election_id)
 
             # We don't need to filter out the positions that have a percent rating that doesn't match
             # the stance_we_are_looking_for (like we do for candidates)
-
+            position_list = list(position_list_query)
             if len(position_list):
                 position_list_found = True
         except Exception as e:
@@ -1501,24 +1503,24 @@ class PositionListManager(models.Model):
                 return position_list
 
         # Retrieve the support positions for this contest_office_id
-        position_list = []
+        #position_list = []
         position_list_found = False
         try:
             if retrieve_public_positions:
-                position_list = PositionEntered.objects.order_by('date_entered')
+                position_list_query = PositionEntered.objects.order_by('date_entered')
                 retrieve_friends_positions = False
             else:
-                position_list = PositionForFriends.objects.order_by('date_entered')
+                position_list_query = PositionForFriends.objects.order_by('date_entered')
                 retrieve_friends_positions = True
 
             if positive_value_exists(contest_office_we_vote_id):
-                position_list = position_list.filter(contest_office_we_vote_id__iexact=contest_office_we_vote_id)
+                position_list_query = position_list_query.filter(contest_office_we_vote_id__iexact=contest_office_we_vote_id)
             else:
-                position_list = position_list.filter(contest_office_id=contest_office_id)
+                position_list_query = position_list_query.filter(contest_office_id=contest_office_id)
             # SUPPORT, STILL_DECIDING, INFORMATION_ONLY, NO_STANCE, OPPOSE, PERCENT_RATING
             if stance_we_are_looking_for != ANY_STANCE:
                 # If we passed in the stance "ANY" it means we want to not filter down the list
-                position_list = position_list.filter(stance=stance_we_are_looking_for)
+                position_list_query = position_list_query.filter(stance=stance_we_are_looking_for)
                 # NOTE: We don't have a special case for
                 # "if stance_we_are_looking_for == SUPPORT or stance_we_are_looking_for == OPPOSE"
                 # for contest_office (like we do for candidate_campaign) because we don't have to deal with
@@ -1528,13 +1530,13 @@ class PositionListManager(models.Model):
                 we_vote_id_filter = Q()
                 for we_vote_id in friends_we_vote_id_list:
                     we_vote_id_filter |= Q(voter_we_vote_id__iexact=we_vote_id)
-                position_list = position_list.filter(we_vote_id_filter)
+                    position_list_query = position_list_query.filter(we_vote_id_filter)
             # Limit to positions in the last x years - currently we are not limiting
             # position_list = position_list.filter(election_id=election_id)
 
             # We don't need to filter out the positions that have a percent rating that doesn't match
             # the stance_we_are_looking_for (like we do for candidates)
-
+            position_list = list(position_list_query)
             if len(position_list):
                 position_list_found = True
         except Exception as e:
