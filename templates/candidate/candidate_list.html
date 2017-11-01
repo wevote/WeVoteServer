@@ -189,6 +189,18 @@
                             {{ candidate.google_search_merge_possibility.likelihood_score }}</a>)<br />
                         <a href="{{ candidate.google_search_merge_possibility.item_link }}" target="_blank">{{ candidate.google_search_merge_possibility.item_link|default_if_none:"" }}</a><br />
                         {{ candidate.google_search_merge_possibility.item_snippet }}
+                        {% if candidate.google_search_merge_possibility.likelihood_score >= 50 %}
+                            <form action="{% url 'candidate:candidate_edit_process' %}" id="candidate_edit_process" method="post" class="form-horizontal">
+                                {% csrf_token %}
+                                <input type="hidden" name="google_search_link" value="{{ candidate.google_search_merge_possibility.item_link }}" />
+                                <input type="hidden" name="google_search_image_file" value="{{ candidate.google_search_merge_possibility.item_image }}" />
+                                <input type="hidden" name="candidate_id" value="{{ candidate.id }}" />
+                                <input type="hidden" name="google_civic_election_id" value="{{ google_civic_election_id }}" />
+                                <input type="hidden" name="state_code" value="{{ state_code }}" />
+                                <input type="hidden" name="redirect_to_candidate_list" value="1" />
+                                <input id="choose_and_update_{{ forloop.counter }}" type="submit" value="Choose and Update" />
+                            </form>
+                        {% endif %}
                     {% else %}
                         <a href="{% url 'candidate:candidate_edit' candidate.id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
                             <img src='{{ candidate.google_search_merge_possibility.item_image }}' height="25px" /></a>&nbsp;

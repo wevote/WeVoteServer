@@ -236,7 +236,8 @@ def candidate_list_view(request):
     for candidate in candidate_list:
         try:
             google_search_possibility_query = GoogleSearchUser.objects.filter(
-                candidate_campaign_we_vote_id=candidate.we_vote_id)
+                candidate_campaign_we_vote_id=candidate.we_vote_id).\
+                exclude(item_image__isnull=True).exclude(item_image__exact='')
             google_search_possibility_query = google_search_possibility_query.order_by(
                 '-chosen_and_updated', 'not_a_match', '-likelihood_score')
             candidate.google_search_merge_possibility = google_search_possibility_query[0]

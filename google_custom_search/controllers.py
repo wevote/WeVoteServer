@@ -7,6 +7,7 @@
 from .models import GoogleSearchUserManager
 from config.base import get_environment_variable
 from googleapiclient.discovery import build
+from image.controllers import BALLOTPEDIA, LINKEDIN, FACEBOOK, TWITTER, WIKIPEDIA
 from import_export_wikipedia.controllers import reach_out_to_wikipedia_with_guess, \
     retrieve_candidate_images_from_wikipedia_page
 from re import sub
@@ -291,21 +292,21 @@ def analyze_google_search_results(search_results, search_term, candidate_name,
                     political_party in google_json['item_meta_tags_description']:
                 likelihood_score += 20
 
-            if "ballotpedia" in google_json['item_link']:
+            if BALLOTPEDIA in google_json['item_link']:
                 from_ballotpedia = True
-                likelihood_score += 80
-            if "linkedin" in google_json['item_link']:
+                likelihood_score += 20
+            if LINKEDIN in google_json['item_link']:
                 from_linkedin = True
-                likelihood_score += 55
-            if "facebook" in google_json['item_link']:
+                likelihood_score += 20
+            if FACEBOOK in google_json['item_link']:
                 from_facebook = True
-                likelihood_score += 55
-            if "twitter" in google_json['item_link']:
+                likelihood_score += 20
+            if TWITTER in google_json['item_link']:
                 from_twitter = True
-                likelihood_score += 55
-            if "wikipedia" in google_json['item_link']:
+                likelihood_score += 20
+            if WIKIPEDIA in google_json['item_link']:
                 from_wikipedia = True
-                likelihood_score += 50
+                likelihood_score += 20
 
             # Check (each word individually) if office name is in description
             # This also checks if state code is in description
@@ -440,7 +441,7 @@ def update_google_search_with_wikipedia_results(wikipedia_page, search_term, can
 
 def analyze_wikipedia_search_results(wikipedia_page, search_term, candidate_name,
                                      candidate_campaign):
-    likelihood_score = 50
+    likelihood_score = 20
     possible_google_search_users_list = []
     state_code = candidate_campaign.state_code
     state_full_name = convert_state_code_to_state_text(state_code)

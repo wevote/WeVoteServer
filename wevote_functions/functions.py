@@ -504,6 +504,54 @@ def extract_nickname_from_full_name(full_name):
     return ""
 
 
+def extract_website_from_url(url_string):
+    """
+
+    :param url_string:
+    :return:
+    """
+    if not url_string:
+        return ""
+    if not positive_value_exists(url_string):
+        return ""
+    url_string = str(url_string)
+    url_string.strip()
+    url_string = url_string.replace("https://www.", "")
+    url_string = url_string.replace("http://www.", "")
+    url_string = url_string.replace("https://", "")
+    url_string = url_string.replace("http://", "")
+    url_string = url_string.replace("www://", "")
+    url_string = url_string.split("/")[0]
+    return url_string
+
+
+def extract_facebook_username_from_text_string(facebook_text_string):
+    """
+
+    :param facebook_text_string:
+    :return:
+    """
+    if not facebook_text_string:
+        return ""
+    if not positive_value_exists(facebook_text_string):
+        return ""
+    facebook_text_string = str(facebook_text_string)
+    facebook_text_string.strip()
+    facebook_text_string = facebook_text_string.lower()
+    facebook_text_string = facebook_text_string.replace("http://facebook.com", "")
+    facebook_text_string = facebook_text_string.replace("http://www.facebook.com", "")
+    facebook_text_string = facebook_text_string.replace("http://m.facebook.com", "")
+    facebook_text_string = facebook_text_string.replace("https://facebook.com", "")
+    facebook_text_string = facebook_text_string.replace("https://www.facebook.com", "")
+    facebook_text_string = facebook_text_string.replace("https://m.facebook.com", "")
+    facebook_text_string = facebook_text_string.replace("www.facebook.com", "")
+    facebook_text_string = facebook_text_string.replace("facebook.com", "")
+    facebook_text_string = facebook_text_string.replace("@", "")
+    facebook_text_string = facebook_text_string.replace("/", "")
+    facebook_text_string = facebook_text_string.split("?", 1)[0]  # Remove everything after first "?" (including "?")
+    return facebook_text_string
+
+
 def extract_twitter_handle_from_text_string(twitter_text_string):
     """
 
@@ -519,7 +567,9 @@ def extract_twitter_handle_from_text_string(twitter_text_string):
     twitter_text_string = twitter_text_string.lower()
     twitter_text_string = twitter_text_string.replace("http://twitter.com", "")
     twitter_text_string = twitter_text_string.replace("http://www.twitter.com", "")
+    twitter_text_string = twitter_text_string.replace("http://m.twitter.com", "")
     twitter_text_string = twitter_text_string.replace("https://twitter.com", "")
+    twitter_text_string = twitter_text_string.replace("https://m.twitter.com", "")
     twitter_text_string = twitter_text_string.replace("https://www.twitter.com", "")
     twitter_text_string = twitter_text_string.replace("www.twitter.com", "")
     twitter_text_string = twitter_text_string.replace("twitter.com", "")
