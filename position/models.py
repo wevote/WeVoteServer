@@ -5094,14 +5094,8 @@ class PositionManager(models.Model):
                         )
                         if results['position_found']:
                             position_on_stage = results['position']
-
-                        # position_on_stage = position_on_stage_starter.objects.get(
-                        #     candidate_campaign_we_vote_id=candidate_we_vote_id,
-                        #     organization_we_vote_id=organization_we_vote_id,
-                        #     vote_smart_time_span=vote_smart_time_span
-                        # )
-                        position_on_stage_found = True
-                        found_with_status = "FOUND_WITH_CANDIDATE_AND_ORGANIZATION_WE_VOTE_ID_WITH_TIME_SPAN"
+                            position_on_stage_found = True
+                            found_with_status = "FOUND_WITH_CANDIDATE_AND_ORGANIZATION_WE_VOTE_ID_WITH_TIME_SPAN"
                     except MultipleObjectsReturned as e:
                         handle_record_found_more_than_one_exception(e, logger)
                         exception_multiple_object_returned = True
@@ -5138,17 +5132,12 @@ class PositionManager(models.Model):
                             candidate_we_vote_id,
                             measure_we_vote_id,
                             google_civic_election_id,
-                            vote_smart_time_span,
+                            vote_smart_time_span
                         )
                         if results['position_found']:
                             position_on_stage = results['position']
-                        # position_on_stage = position_on_stage_starter.objects.get(
-                        #     contest_measure_we_vote_id=measure_we_vote_id,
-                        #     organization_we_vote_id=organization_we_vote_id,
-                        #     google_civic_election_id=google_civic_election_id
-                        # )
-                        position_on_stage_found = True
-                        found_with_status = "FOUND_WITH_MEASURE_AND_ORGANIZATION_WE_VOTE_ID"
+                            position_on_stage_found = True
+                            found_with_status = "FOUND_WITH_MEASURE_AND_ORGANIZATION_WE_VOTE_ID"
                     except MultipleObjectsReturned as e:
                         handle_record_found_more_than_one_exception(e, logger)
                         exception_multiple_object_returned = True

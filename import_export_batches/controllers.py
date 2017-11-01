@@ -1730,6 +1730,16 @@ def create_batch_row_action_position(batch_description, batch_header_map, one_ba
             and positive_value_exists(stance)
         if not variables_found_to_create_position:
             status += "MEASURE-MISSING_VARIABLES_REQUIRED_TO_CREATE "
+            if not positive_value_exists(ballot_item_display_name):
+                status += " ballot_item_display_name "
+            if not positive_value_exists(contest_measure_we_vote_id):
+                status += " contest_measure_we_vote_id "
+            if not positive_value_exists(organization_name):
+                status += " organization_name "
+            if not positive_value_exists(organization_we_vote_id):
+                status += " organization_we_vote_id "
+            if not positive_value_exists(stance):
+                status += " stance "
     else:
         ballot_item_display_name = ""
         variables_found_to_create_position = False
