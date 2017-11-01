@@ -230,6 +230,17 @@ def candidate_list_view(request):
         except Exception as e:
             candidate.candidate_merge_possibility = None
 
+    # Attach the best guess google search, if any, to each candidate in list
+    for candidate in candidate_list:
+        try:
+            google_search_possibility_query = GoogleSearchUser.objects.filter(
+                candidate_campaign_we_vote_id=candidate.we_vote_id)
+            google_search_possibility_query = google_search_possibility_query.order_by(
+                '-chosen_and_updated', 'not_a_match', '-likelihood_score')
+            candidate.google_search_merge_possibility = google_search_possibility_query[0]
+        except Exception as e:
+            candidate.google_search_merge_possibility = None
+
     template_values = {
         'messages_on_stage':        messages_on_stage,
         'candidate_list':           candidate_list,
@@ -401,9 +412,10 @@ def candidate_edit_view(request, candidate_id=0, candidate_campaign_we_vote_id="
 
         google_search_possibility_list = []
         try:
-            google_search_possibility_query = GoogleSearchUser.objects.order_by('-likelihood_score')
-            google_search_possibility_query = google_search_possibility_query.filter(
+            google_search_possibility_query = GoogleSearchUser.objects.filter(
                 candidate_campaign_we_vote_id=candidate_on_stage.we_vote_id)
+            google_search_possibility_query = google_search_possibility_query.order_by(
+                '-chosen_and_updated', 'not_a_match', '-likelihood_score')
             google_search_possibility_list = list(google_search_possibility_query)
 
         except Exception as e:
@@ -620,22 +632,20 @@ def candidate_edit_process_view(request):
             if google_civic_candidate_name is not False:
                 candidate_on_stage.google_civic_candidate_name = google_civic_candidate_name
 
-            if google_search_link:
-                if google_search_image_file:
-                    # If google search image exist then cache master and resized images and save them to candidate table
-                    save_google_search_image_to_candidate_table(candidate_on_stage, google_search_image_file,
-                                                                google_search_link)
-                else:
-                    # save google search link
-                    save_google_search_link_to_candidate_table(candidate_on_stage, google_search_link)
-
-            google_search_user_manager = GoogleSearchUserManager()
-            google_search_user_results = google_search_user_manager.retrieve_google_search_user(
-                candidate_on_stage.we_vote_id, google_search_link)
-            if google_search_user_results['google_search_user_found']:
-                google_search_user = google_search_user_results['google_search_user']
-                google_search_user.chosen_and_updated = True
-                google_search_user.save()
+            if google_search_image_file:
+                # If google search image exist then cache master and resized images and save them to candidate table
+                save_google_search_image_to_candidate_table(candidate_on_stage, google_search_image_file,
+                                                            google_search_link)
+                google_search_user_manager = GoogleSearchUserManager()
+                google_search_user_results = google_search_user_manager.retrieve_google_search_user_from_item_link(
+                    candidate_on_stage.we_vote_id, google_search_link)
+                if google_search_user_results['google_search_user_found']:
+                    google_search_user = google_search_user_results['google_search_user']
+                    google_search_user.chosen_and_updated = True
+                    google_search_user.save()
+            elif google_search_link:
+                # save google search link
+                save_google_search_link_to_candidate_table(candidate_on_stage, google_search_link)
 
             # Check to see if this is a We Vote-created election
             # is_we_vote_google_civic_election_id = True \

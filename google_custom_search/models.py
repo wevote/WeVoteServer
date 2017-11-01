@@ -26,7 +26,12 @@ class GoogleSearchUser(models.Model):
     item_meta_tags_description = models.CharField(verbose_name="searched item meta tags description", max_length=1000,
                                                   null=True, blank=True)
     search_request_url = models.URLField(verbose_name="search request url", null=True, blank=True)
-    not_a_match = models.BooleanField(default=False, verbose_name="")
+    from_ballotpedia = models.BooleanField(default=False, verbose_name="searched link from ballotpedia")
+    from_facebook = models.BooleanField(default=False, verbose_name="searched link from facebook")
+    from_linkedin = models.BooleanField(default=False, verbose_name="searched link from linkedin")
+    from_twitter = models.BooleanField(default=False, verbose_name="searched link from twitter")
+    from_wikipedia = models.BooleanField (default=False, verbose_name="searched link from wikipedia")
+    not_a_match = models.BooleanField(default=False, verbose_name="this candidate does not match")
     likelihood_score = models.IntegerField(verbose_name="score for a match", null=True, unique=False)
     chosen_and_updated = models.BooleanField(default=False,
                                              verbose_name="when search detail updated in candidate table")
@@ -37,7 +42,8 @@ class GoogleSearchUserManager(models.Model):
         return "TwitterUserManager"
 
     def update_or_create_google_search_user_possibility(self, candidate_campaign_we_vote_id, google_json, search_term,
-                                                        likelihood_score):
+                                                        likelihood_score, from_ballotpedia=False, from_facebook=False,
+                                                        from_linkedin=False, from_twitter=False, from_wikipedia=False):
         google_search_user_on_stage = None
         google_search_user_created = False
         try:
@@ -47,6 +53,11 @@ class GoogleSearchUserManager(models.Model):
                 defaults={
                     'likelihood_score':             likelihood_score,
                     'search_term_used':             search_term,
+                    'from_ballotpedia':             from_ballotpedia,
+                    'from_facebook':                from_facebook,
+                    'from_linkedin':                from_linkedin,
+                    'from_twitter':                 from_twitter,
+                    'from_wikipedia':               from_wikipedia,
                     'item_title':                   google_json['item_title'],
                     'item_snippet':                 google_json['item_snippet'],
                     'item_image':                   google_json['item_image'],
@@ -73,7 +84,7 @@ class GoogleSearchUserManager(models.Model):
         }
         return results
 
-    def retrieve_google_search_user(self, candidate_campaign_we_vote_id, item_link):
+    def retrieve_google_search_user_from_item_link(self, candidate_campaign_we_vote_id, item_link):
         google_search_user = GoogleSearchUser()
         try:
             if positive_value_exists(candidate_campaign_we_vote_id):
@@ -100,6 +111,34 @@ class GoogleSearchUserManager(models.Model):
         }
         return results
 
+    def retrieve_google_search_users_list(self, candidate_campaign_we_vote_id):
+        google_search_users_list = []
+        try:
+            google_search_users_queryset = GoogleSearchUser.objects.all()
+            google_search_users_queryset = google_search_users_queryset.filter(
+                candidate_campaign_we_vote_id=candidate_campaign_we_vote_id)
+            google_search_users_list = google_search_users_queryset
+
+            if len(google_search_users_list):
+                status = "GOOGLE_SEARCH_USERS_LIST_FOUND"
+                success = True
+                google_search_users_found = True
+            else:
+                status = "GOOGLE_SEARCH_USERS_LIST_NOT_FOUND"
+                success = True
+                google_search_users_found = False
+        except Exception as e:
+            status = "FAILED_RETRIEVE_GOOGLE_SEARCH_USERS_LIST"
+            success = False
+            google_search_users_found = False
+        results = {
+            'success':                      success,
+            'status':                       status,
+            'google_search_users_found':    google_search_users_found,
+            'google_search_users_list':     google_search_users_list,
+        }
+        return results
+
     def delete_google_search_users_possibilities(self, candidate_campaign_we_vote_id):
         try:
             GoogleSearchUser.objects.filter(candidate_campaign_we_vote_id=candidate_campaign_we_vote_id).delete()
@@ -114,3 +153,4 @@ class GoogleSearchUserManager(models.Model):
             'status': status,
         }
         return results
+

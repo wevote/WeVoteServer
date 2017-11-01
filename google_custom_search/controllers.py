@@ -45,6 +45,74 @@ def delete_possible_google_search_users(candidate_campaign):
     return results
 
 
+def bulk_possible_google_search_users_do_not_match(candidate_campaign):
+    status = ""
+    google_search_user_manager = GoogleSearchUserManager()
+
+    if not candidate_campaign:
+        status += "BULK_POSSIBLE_GOOGLE_SEARCH_USERS_DO_NOT_MATCH-CANDIDATE_MISSING "
+        results = {
+            'success':                  False,
+            'status':                   status,
+        }
+        return results
+
+    results = google_search_user_manager.retrieve_google_search_users_list(candidate_campaign.we_vote_id)
+    status += results['status']
+    google_search_users_list = results['google_search_users_list']
+    try:
+        for google_search_user in google_search_users_list:
+            if not google_search_user.chosen_and_updated:
+                google_search_user.not_a_match = True
+                google_search_user.save()
+    except Exception as e:
+        pass
+
+    results = {
+        'success':                  True,
+        'status':                   status,
+    }
+
+    return results
+
+
+def possible_google_search_user_do_not_match(candidate_we_vote_id, item_link):
+    status = ""
+    google_search_user_manager = GoogleSearchUserManager()
+
+    if not positive_value_exists(candidate_we_vote_id):
+        status += "DELETE_POSSIBLE_GOOGLE_SEARCH_USER-CANDIDATE_WE_VOTE_ID_MISSING "
+        results = {
+            'success':                  False,
+            'status':                   status,
+        }
+        return results
+
+    if not positive_value_exists(item_link):
+        status += "DELETE_POSSIBLE_GOOGLE_SEARCH_USER-ITEM_LINK_MISSING "
+        results = {
+            'success':                  False,
+            'status':                   status,
+        }
+        return results
+
+    results = google_search_user_manager.retrieve_google_search_user_from_item_link(candidate_we_vote_id, item_link)
+    status += results['status']
+    if results['google_search_user_found']:
+        google_search_user = results['google_search_user']
+        try:
+            if not google_search_user.chosen_and_updated:
+                google_search_user.not_a_match = True
+                google_search_user.save()
+        except Exception as e:
+            pass
+    results = {
+        'success':                  True,
+        'status':                   status,
+    }
+    return results
+
+
 def retrieve_possible_google_search_users(candidate_campaign):
     status = ""
     google_search_users_list = []
@@ -133,10 +201,11 @@ def retrieve_possible_google_search_users(candidate_campaign):
         status += "RETRIEVE_POSSIBLE_GOOGLE_SEARCH_USERS-RETRIEVED_FROM_GOOGLE"
         for possibility_result in possible_google_search_users_list:
             save_google_search_user_results = google_search_user_manager.\
-                update_or_create_google_search_user_possibility(candidate_campaign.we_vote_id,
-                                                                possibility_result['google_json'],
-                                                                possibility_result['search_term'],
-                                                                possibility_result['likelihood_score'])
+                update_or_create_google_search_user_possibility(
+                    candidate_campaign.we_vote_id, possibility_result['google_json'], possibility_result['search_term'],
+                    possibility_result['likelihood_score'], possibility_result['from_ballotpedia'],
+                    possibility_result['from_facebook'], possibility_result['from_linkedin'],
+                    possibility_result['from_twitter'], possibility_result['from_wikipedia'])
             if save_google_search_user_results['success'] and \
                     save_google_search_user_results['google_search_user_created']:
                 google_search_user_count += 1
@@ -168,6 +237,11 @@ def analyze_google_search_results(search_results, search_term, candidate_name,
         all_search_items = search_results.get('items', [])
         for one_result in all_search_items:
             likelihood_score = 0
+            from_ballotpedia = False
+            from_facebook = False
+            from_linkedin = False
+            from_twitter = False
+            from_wikipedia = False
             google_json = parse_google_search_results(search_term, one_result)
 
             if not positive_value_exists(google_json['item_image']):
@@ -218,14 +292,19 @@ def analyze_google_search_results(search_results, search_term, candidate_name,
                 likelihood_score += 20
 
             if "ballotpedia" in google_json['item_link']:
+                from_ballotpedia = True
                 likelihood_score += 80
             if "linkedin" in google_json['item_link']:
+                from_linkedin = True
                 likelihood_score += 55
             if "facebook" in google_json['item_link']:
+                from_facebook = True
                 likelihood_score += 55
             if "twitter" in google_json['item_link']:
+                from_twitter = True
                 likelihood_score += 55
             if "wikipedia" in google_json['item_link']:
+                from_wikipedia = True
                 likelihood_score += 50
 
             # Check (each word individually) if office name is in description
@@ -263,6 +342,11 @@ def analyze_google_search_results(search_results, search_term, candidate_name,
             current_candidate_google_search_info = {
                 'search_term':              search_term,
                 'likelihood_score':         likelihood_score,
+                'from_ballotpedia':         from_ballotpedia,
+                'from_facebook':            from_facebook,
+                'from_linkedin':            from_linkedin,
+                'from_twitter':             from_twitter,
+                'from_wikipedia':           from_wikipedia,
                 'google_json':              google_json
             }
             possible_google_search_users_list.append(current_candidate_google_search_info)
@@ -432,6 +516,11 @@ def analyze_wikipedia_search_results(wikipedia_page, search_term, candidate_name
     current_candidate_wikipedia_search_info = {
         'search_term':              search_term,
         'likelihood_score':         likelihood_score,
+        'from_ballotpedia':         False,
+        'from_facebook':            False,
+        'from_linkedin':            False,
+        'from_twitter':             False,
+        'from_wikipedia':           True,
         'google_json':              google_json
     }
     possible_google_search_users_list.append(current_candidate_wikipedia_search_info)
