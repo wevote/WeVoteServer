@@ -137,6 +137,39 @@ UTC_OFFSET_MAP = {
     'WY': -25200,
 }
 
+POSITIVE_SEARCH_KEYWORDS = [
+    "affiliate",
+    "candidate",
+    "chair",
+    "city",
+    "civic",
+    'council',
+    "country",
+    "county",
+    'democratic',
+    "district",
+    "elect",
+    "endorse",
+    'leader',
+    "local",
+    'municipal',
+    "office",
+    "official",
+    'party',
+    'politic',
+    "public",
+    "represent",
+    "running",
+    "state",
+]
+
+NEGATIVE_SEARCH_KEYWORDS = [
+    "fake",
+    'musician',
+    "parody",
+    'singer',
+]
+
 AMERICAN_INDEPENDENT = 'AMERICAN_INDEPENDENT'
 DEMOCRAT = 'DEMOCRAT'
 D_R = 'D_R'
