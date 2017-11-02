@@ -470,6 +470,7 @@ def candidate_edit_process_view(request):
 
     look_for_politician = request.POST.get('look_for_politician', False)  # If this comes in with value, don't save
     remove_duplicate_process = request.POST.get('remove_duplicate_process', False)
+    refresh_from_twitter = request.POST.get('refresh_from_twitter', False)
 
     candidate_id = convert_to_int(request.POST['candidate_id'])
     redirect_to_candidate_list = convert_to_int(request.POST['redirect_to_candidate_list'])
@@ -732,7 +733,8 @@ def candidate_edit_process_view(request):
         messages.add_message(request, messages.ERROR, 'Could not save candidate.')
         return HttpResponseRedirect(reverse('candidate:candidate_edit', args=(candidate_id,)))
 
-    results = refresh_twitter_candidate_details(candidate_on_stage)
+    if positive_value_exists(refresh_from_twitter) or positive_value_exists(candidate_twitter_handle):
+        results = refresh_twitter_candidate_details(candidate_on_stage)
 
     if redirect_to_candidate_list:
         return HttpResponseRedirect(reverse('candidate:candidate_list', args=()) +

@@ -236,7 +236,7 @@ span.wrap_word { word-break: break-word; }
     <a href="{% url 'import_export_twitter:delete_images_view'%}?candidate_id={{ candidate.id }}">Delete Cached Images</a><br />
     {% if candidate.candidate_photo_url %}
         <img src='{{ candidate.candidate_photo_url }}' />
-        x<br />
+        <br />
     {% endif %}
 
     {% if candidate.we_vote_hosted_profile_image_url_tiny %}
