@@ -12,6 +12,7 @@ from office.models import ContestOfficeManager
 from organization.models import OrganizationListManager
 from wevote_functions.functions import convert_state_code_to_state_text, convert_state_code_to_utc_offset, \
     convert_to_int, positive_value_exists
+from wevote_settings.models import RemoteRequestHistoryManager, RETRIEVE_POSSIBLE_TWITTER_HANDLES
 from math import floor, log2
 from re import sub
 from time import time
@@ -193,6 +194,7 @@ def delete_possible_twitter_handles(candidate_campaign):
 def retrieve_possible_twitter_handles(candidate_campaign):
     status = ""
     twitter_user_manager = TwitterUserManager()
+    remote_request_history_manager = RemoteRequestHistoryManager()
 
     if not candidate_campaign:
         status = "RETRIEVE_POSSIBLE_TWITTER_HANDLES-CANDIDATE_MISSING "
@@ -280,6 +282,11 @@ def retrieve_possible_twitter_handles(candidate_campaign):
             save_twitter_user_results = twitter_user_manager.update_or_create_twitter_link_possibility(
                 candidate_campaign.we_vote_id, possibility_result['twitter_json'],
                 possibility_result['search_term'], possibility_result['likelihood_score'])
+
+    # Create a record denoting that we have retrieved from Twitter for this candidate
+    save_results_history = remote_request_history_manager.create_remote_request_history_entry(
+        RETRIEVE_POSSIBLE_TWITTER_HANDLES, candidate_campaign.google_civic_election_id,
+        candidate_campaign.we_vote_id, None, len(possible_twitter_handles_list), status)
 
     results = {
         'success':                  True,
