@@ -92,7 +92,7 @@ def bulk_retrieve_possible_twitter_handles_view(request):
             if not positive_value_exists(one_candidate.candidate_twitter_handle):
                 # Candidate does not have a Twitter account linked
                 request_history = RemoteRequestHistory.objects.filter(
-                    candidate_campaign_we_vote_id=one_candidate.we_vote_id)
+                    candidate_campaign_we_vote_id__iexact=one_candidate.we_vote_id)
                 request_history_list = list(request_history)
 
                 if not positive_value_exists(request_history_list):
