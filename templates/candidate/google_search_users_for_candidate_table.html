@@ -1,0 +1,75 @@
+{# templates/analytics/google_search_users_for_candidate_table.html #}
+
+<input type="hidden" name="google_search_image_file" id="google_search_image_file_id" class="form-control"
+       value="{{ google_search_image_file }}" />
+<input type="hidden" name="google_search_link" id="google_search_link_id" class="form-control"
+       value="{{ google_search_link }}" />
+
+<table border="1" cellpadding="5" cellspacing="5" class="table">
+    <tr>
+        <th>#</th>
+        <th>Score</th>
+        <th>Image</th>
+        <th>Google search description</th>
+        <th>Google search link</th>
+    </tr>
+{% for one_row in google_search_possibility_list %}
+    <tr>
+        <td style="width:5%;">{{ forloop.counter }}</td>
+        <td style="text-align:center;width:5%;">
+            {% if one_row.chosen_and_updated %}
+                <img src="/static/green_ok.png" height="16px"/><br />
+            {% endif %}
+            {% if one_row.not_a_match %}
+                <img src="/static/red_cross.png" height="16px"/><br />
+            {% endif %}
+            {{ one_row.likelihood_score|default_if_none:"n/a" }}
+            <br />
+            {% if not one_row.chosen_and_updated and not one_row.not_a_match %}
+                <a href="{% url 'google_custom_search:possible_google_search_user_do_not_match' %}?candidate_we_vote_id={{ candidate.we_vote_id }}&item_link={{ one_row.item_link }}">Not a match</a>
+            {% endif %}
+        </td>
+        <td style="text-align:center;width:10%">
+            {% if one_row.item_image %}
+                <img src='{{ one_row.item_image }}' height="48px"/><br />
+            {% endif %}
+            {{ one_row.item_title }}
+            <br />
+            {% if not one_row.not_a_match %}
+                {% if one_row.item_image %}
+                    <input id="choose_and_update_{{ forloop.counter }}" type="button" value="Choose and Update" onclick="document.getElementById('google_search_image_file_id').value = '{{ one_row.item_image }}'
+                        document.getElementById('google_search_link_id').value = '{{ one_row.item_link }}';document.getElementById('candidate_edit').submit();" />
+                {% endif %}
+                <br />
+                {% if one_row.from_ballotpedia %}
+                    <input id="save_ballotpedia_{{ forloop.counter }}" type="button" value="Save Ballotpedia Link" onclick="document.getElementById('google_search_link_id').value = '{{ one_row.item_link }}';document.getElementById('candidate_edit').submit();" />
+                {% elif one_row.from_facebook %}
+                    <input id="save_facebook_{{ forloop.counter }}" type="button" value="Save Facebook Link" onclick="document.getElementById('google_search_link_id').value = '{{ one_row.item_link }}';document.getElementById('candidate_edit').submit();" />
+                {% elif one_row.from_linkedin %}
+                    <input id="save_linkedin_{{ forloop.counter }}" type="button" value="Save Linkedin Link" onclick="document.getElementById('google_search_link_id').value = '{{ one_row.item_link }}';document.getElementById('candidate_edit').submit();" />
+                {% elif one_row.from_twitter %}
+                    <input id="save_twitter_{{ forloop.counter }}" type="button" value="Save Twitter Link" onclick="document.getElementById('google_search_link_id').value = '{{ one_row.item_link }}';document.getElementById('candidate_edit').submit();" />
+                {% elif one_row.from_wikipedia %}
+                    <input id="save_wikipedia_{{ forloop.counter }}" type="button" value="Save Wikipedia Link" onclick="document.getElementById('google_search_link_id').value = '{{ one_row.item_link }}';document.getElementById('candidate_edit').submit();" />
+                {% else %}
+                    <input id="save_link_{{ forloop.counter }}" type="button" value="Save Candidate Link" onclick="document.getElementById('google_search_link_id').value = '{{ one_row.item_link }}';document.getElementById('candidate_edit').submit();" />
+                {% endif %}
+            {% endif %}
+        </td>
+
+        <td style="width:40%;word-break:break-word;">
+            {{ one_row.item_snippet|default_if_none:"n/a" }}
+            <br />
+            {{ one_row.item_meta_tags_description|default_if_none:"n/a" }}
+        </td>
+        <td style="width:50%;">
+            <span class="wrap_word">
+                <a href="{{ one_row.item_link }}" target="_blank">{{ one_row.item_link|default_if_none:"" }}</a>
+                <a href="{{ one_row.item_formatted_link }}" target="_blank">{{ one_row.item_formatted_url|default_if_none:"" }}</a>
+                <br />
+                <a href="{{ one_row.search_request_url }}" target="_blank">{{ one_row.search_request_url|default_if_none:"" }}</a>
+            </span>
+        </td>
+    </tr>
+{% endfor %}
+</table>
