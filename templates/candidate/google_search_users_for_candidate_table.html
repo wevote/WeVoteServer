@@ -4,7 +4,8 @@
        value="{{ google_search_image_file }}" />
 <input type="hidden" name="google_search_link" id="google_search_link_id" class="form-control"
        value="{{ google_search_link }}" />
-
+<input type="hidden" name="refresh_from_twitter" id="refresh_from_twitter_id" class="form-control"
+       value="{{ refresh_from_twitter }}" />
 <table border="1" cellpadding="5" cellspacing="5" class="table">
     <tr>
         <th>#</th>
@@ -37,8 +38,14 @@
             <br />
             {% if not one_row.not_a_match %}
                 {% if one_row.item_image %}
-                    <input id="choose_and_update_{{ forloop.counter }}" type="button" value="Choose and Update" onclick="document.getElementById('google_search_image_file_id').value = '{{ one_row.item_image }}'
-                        document.getElementById('google_search_link_id').value = '{{ one_row.item_link }}';document.getElementById('candidate_edit').submit();" />
+                    {% if not one_row.from_twitter %}
+                        <input id="choose_and_update_{{ forloop.counter }}" type="button" value="Choose and Update" onclick="document.getElementById('google_search_image_file_id').value = '{{ one_row.item_image }}'
+                            document.getElementById('google_search_link_id').value = '{{ one_row.item_link }}';document.getElementById('candidate_edit').submit();" />
+                    {% else %}
+                        <input id="choose_and_update_from_twitter{{ forloop.counter }}" type="button" value="Choose and Update" onclick="document.getElementById('google_search_image_file_id').value = '{{ one_row.item_image }}'
+                            document.getElementById('google_search_link_id').value = '{{ one_row.item_link }}';
+                            document.getElementById('refresh_from_twitter_id').value = '{{ one_row.from_twitter }}';document.getElementById('candidate_edit').submit();" />
+                    {% endif %}
                 {% endif %}
                 <br />
                 {% if one_row.from_ballotpedia %}
