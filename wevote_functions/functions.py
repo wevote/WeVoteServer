@@ -667,6 +667,8 @@ def get_voter_device_id(request, generate_if_no_value=False):
 
 
 def is_link_to_video(link_url):
+    if link_url is None:
+        return False
     if "youtube.com" in link_url:
         return True
     return False

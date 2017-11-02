@@ -14,7 +14,8 @@ from organization.controllers import organization_follow_or_unfollow_or_ignore, 
     refresh_organization_data_from_master_tables
 from organization.models import OrganizationManager, OrganizationListManager
 from position.controllers import retrieve_ballot_item_we_vote_ids_for_organizations_to_follow
-from position.models import ANY_STANCE, PositionEntered, PositionManager, PositionListManager, SUPPORT
+from position.models import ANY_STANCE, INFORMATION_ONLY, OPPOSE, \
+    PositionEntered, PositionManager, PositionListManager, SUPPORT
 from voter.models import fetch_voter_id_from_voter_device_link, fetch_voter_we_vote_id_from_voter_device_link, \
     VoterManager
 from voter_guide.models import VoterGuideListManager, VoterGuideManager, VoterGuidePossibilityManager
@@ -446,7 +447,7 @@ def voter_guides_to_follow_retrieve_for_api(voter_device_id,  # voterGuidesToFol
             results = retrieve_voter_guides_to_follow_by_ballot_item(voter_id,
                                                                      kind_of_ballot_item, ballot_item_we_vote_id,
                                                                      search_string, filter_voter_guides_by_issue,
-                                                                     organization_we_vote_id_list_for_voter_issues, )
+                                                                     organization_we_vote_id_list_for_voter_issues)
             success = results['success']
             status += results['status']
             voter_guide_list = results['voter_guide_list']
@@ -511,6 +512,16 @@ def voter_guides_to_follow_retrieve_for_api(voter_device_id,  # voterGuidesToFol
             else:
                 ballot_item_we_vote_ids_this_org_supports = []
 
+            if hasattr(voter_guide, 'ballot_item_we_vote_ids_this_org_info_only'):
+                ballot_item_we_vote_ids_this_org_info_only = voter_guide.ballot_item_we_vote_ids_this_org_info_only
+            else:
+                ballot_item_we_vote_ids_this_org_info_only = []
+
+            if hasattr(voter_guide, 'ballot_item_we_vote_ids_this_org_opposes'):
+                ballot_item_we_vote_ids_this_org_opposes = voter_guide.ballot_item_we_vote_ids_this_org_opposes
+            else:
+                ballot_item_we_vote_ids_this_org_opposes = []
+
             position_found = False
             one_voter_guide = {
                 'we_vote_id':                   voter_guide.we_vote_id,
@@ -529,7 +540,9 @@ def voter_guides_to_follow_retrieve_for_api(voter_device_id,  # voterGuidesToFol
                 'twitter_followers_count':      voter_guide.twitter_followers_count,
                 'twitter_handle':               voter_guide.twitter_handle,
                 'owner_voter_id':               voter_guide.owner_voter_id,
-                'ballot_item_we_vote_ids_this_org_supports': ballot_item_we_vote_ids_this_org_supports,
+                'ballot_item_we_vote_ids_this_org_supports':    ballot_item_we_vote_ids_this_org_supports,
+                'ballot_item_we_vote_ids_this_org_info_only':   ballot_item_we_vote_ids_this_org_info_only,
+                'ballot_item_we_vote_ids_this_org_opposes':     ballot_item_we_vote_ids_this_org_opposes,
                 'last_updated':                 voter_guide.last_updated.strftime('%Y-%m-%d %H:%M'),
             }
             if positive_value_exists(ballot_item_we_vote_id):
@@ -709,18 +722,65 @@ def retrieve_voter_guides_to_follow_by_ballot_item(voter_id, kind_of_ballot_item
             results['voter_guide_found'] = False
 
         if results['voter_guide_found']:
-            voter_guide = results['voter_guide']
+            one_voter_guide = results['voter_guide']
+
+            # Augment the voter guide with a list of ballot_item we_vote_id's that this org supports
+            stance_we_are_looking_for = SUPPORT
+            organization_id = 0
+            ballot_item_support_results = retrieve_ballot_item_we_vote_ids_for_organizations_to_follow(
+                voter_id, organization_id, one_voter_guide.organization_we_vote_id, stance_we_are_looking_for,
+                one_position.google_civic_election_id)
+
+            if ballot_item_support_results['count']:
+                ballot_item_we_vote_ids_this_org_supports = ballot_item_support_results['ballot_item_we_vote_ids_list']
+            else:
+                ballot_item_we_vote_ids_this_org_supports = []
+
+            one_voter_guide.ballot_item_we_vote_ids_this_org_supports = \
+                ballot_item_we_vote_ids_this_org_supports
+
+            # Augment the voter guide with a list of ballot_item we_vote_id's that this org has info about
+            stance_we_are_looking_for = INFORMATION_ONLY
+            organization_id = 0
+            ballot_item_info_only_results = retrieve_ballot_item_we_vote_ids_for_organizations_to_follow(
+                voter_id, organization_id, one_voter_guide.organization_we_vote_id, stance_we_are_looking_for,
+                one_position.google_civic_election_id)
+
+            if ballot_item_info_only_results['count']:
+                ballot_item_we_vote_ids_this_org_info_only = \
+                    ballot_item_info_only_results['ballot_item_we_vote_ids_list']
+            else:
+                ballot_item_we_vote_ids_this_org_info_only = []
+
+            one_voter_guide.ballot_item_we_vote_ids_this_org_info_only = \
+                ballot_item_we_vote_ids_this_org_info_only
+
+            # Augment the voter guide with a list of ballot_item we_vote_id's that this org opposes
+            stance_we_are_looking_for = OPPOSE
+            organization_id = 0
+            ballot_item_oppose_results = retrieve_ballot_item_we_vote_ids_for_organizations_to_follow(
+                voter_id, organization_id, one_voter_guide.organization_we_vote_id, stance_we_are_looking_for,
+                one_position.google_civic_election_id)
+
+            if ballot_item_oppose_results['count']:
+                ballot_item_we_vote_ids_this_org_opposes = ballot_item_oppose_results['ballot_item_we_vote_ids_list']
+            else:
+                ballot_item_we_vote_ids_this_org_opposes = []
+
+            one_voter_guide.ballot_item_we_vote_ids_this_org_opposes = \
+                ballot_item_we_vote_ids_this_org_opposes
+
             # If we passed in search_string, make sure they are in this entry.
             # If they aren't, don't return voter guide
             if positive_value_exists(search_string):
                 search_string = str(search_string)  # Make sure search_string is a string
-                twitter_handle = str(voter_guide.twitter_handle)
-                display_name = str(voter_guide.display_name)
+                twitter_handle = str(one_voter_guide.twitter_handle)
+                display_name = str(one_voter_guide.display_name)
 
                 if search_string.lower() in twitter_handle.lower() or search_string.lower() in display_name.lower():
-                    voter_guide_list.append(voter_guide)
+                    voter_guide_list.append(one_voter_guide)
             else:
-                voter_guide_list.append(voter_guide)
+                voter_guide_list.append(one_voter_guide)
 
     status = 'SUCCESSFUL_RETRIEVE_OF_VOTER_GUIDES_BY_BALLOT_ITEM'
     success = True
@@ -897,17 +957,49 @@ def retrieve_voter_guides_to_follow_by_election_for_api(voter_id, google_civic_e
             # Augment the voter guide with a list of ballot_item we_vote_id's that this org supports
             stance_we_are_looking_for = SUPPORT
             organization_id = 0
-            ballot_item_results = retrieve_ballot_item_we_vote_ids_for_organizations_to_follow(
+            ballot_item_support_results = retrieve_ballot_item_we_vote_ids_for_organizations_to_follow(
                 voter_id, organization_id, one_voter_guide.organization_we_vote_id, stance_we_are_looking_for,
                 google_civic_election_id)
 
-            if ballot_item_results['count']:
-                ballot_item_we_vote_ids_this_org_supports = ballot_item_results['ballot_item_we_vote_ids_list']
+            if ballot_item_support_results['count']:
+                ballot_item_we_vote_ids_this_org_supports = ballot_item_support_results['ballot_item_we_vote_ids_list']
             else:
                 ballot_item_we_vote_ids_this_org_supports = []
 
             one_voter_guide.ballot_item_we_vote_ids_this_org_supports = \
                 ballot_item_we_vote_ids_this_org_supports
+
+            # Augment the voter guide with a list of ballot_item we_vote_id's that this org has info about
+            stance_we_are_looking_for = INFORMATION_ONLY
+            organization_id = 0
+            ballot_item_info_only_results = retrieve_ballot_item_we_vote_ids_for_organizations_to_follow(
+                voter_id, organization_id, one_voter_guide.organization_we_vote_id, stance_we_are_looking_for,
+                google_civic_election_id)
+
+            if ballot_item_info_only_results['count']:
+                ballot_item_we_vote_ids_this_org_info_only = \
+                    ballot_item_info_only_results['ballot_item_we_vote_ids_list']
+            else:
+                ballot_item_we_vote_ids_this_org_info_only = []
+
+            one_voter_guide.ballot_item_we_vote_ids_this_org_info_only = \
+                ballot_item_we_vote_ids_this_org_info_only
+
+            # Augment the voter guide with a list of ballot_item we_vote_id's that this org opposes
+            stance_we_are_looking_for = OPPOSE
+            organization_id = 0
+            ballot_item_oppose_results = retrieve_ballot_item_we_vote_ids_for_organizations_to_follow(
+                voter_id, organization_id, one_voter_guide.organization_we_vote_id, stance_we_are_looking_for,
+                google_civic_election_id)
+
+            if ballot_item_oppose_results['count']:
+                ballot_item_we_vote_ids_this_org_opposes = ballot_item_oppose_results['ballot_item_we_vote_ids_list']
+            else:
+                ballot_item_we_vote_ids_this_org_opposes = []
+
+            one_voter_guide.ballot_item_we_vote_ids_this_org_opposes = \
+                ballot_item_we_vote_ids_this_org_opposes
+
             updated_voter_guide_list.append(one_voter_guide)
         voter_guide_list = updated_voter_guide_list
 

@@ -117,6 +117,10 @@ def voter_guides_to_follow_retrieve_doc_template_values(url_root):
                    '     "owner_voter_id": integer TO BE DEPRECATED,\n' \
                    '     "ballot_item_we_vote_ids_this_org_supports": ' \
                    'The list of ballot_item_we_vote_ids supported by this organization,\n' \
+                   '     "ballot_item_we_vote_ids_this_org_info_only": ' \
+                   'The list of ballot_item_we_vote_ids this organization has information about,\n' \
+                   '     "ballot_item_we_vote_ids_this_org_opposes": ' \
+                   'The list of ballot_item_we_vote_ids opposed by this organization,\n' \
                    '     "is_support": boolean (Exists if looking at voter guides for one ballot_item),\n' \
                    '     "is_positive_rating": boolean (Exists if looking at voter guides for one ballot_item),\n' \
                    '     "is_support_or_positive_rating": boolean (Exists if looking at one ballot_item),\n' \
