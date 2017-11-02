@@ -11,7 +11,8 @@ from config.base import get_environment_variable
 from office.models import ContestOfficeManager
 from organization.models import OrganizationListManager
 from wevote_functions.functions import convert_state_code_to_state_text, convert_state_code_to_utc_offset, \
-    convert_to_int, positive_value_exists
+    convert_to_int, positive_value_exists, POSITIVE_SEARCH_KEYWORDS, NEGATIVE_SEARCH_KEYWORDS
+from wevote_settings.models import RemoteRequestHistoryManager, RETRIEVE_POSSIBLE_TWITTER_HANDLES
 from math import floor, log2
 from re import sub
 from time import time
@@ -20,31 +21,6 @@ TWITTER_CONSUMER_KEY = get_environment_variable("TWITTER_CONSUMER_KEY")
 TWITTER_CONSUMER_SECRET = get_environment_variable("TWITTER_CONSUMER_SECRET")
 TWITTER_ACCESS_TOKEN = get_environment_variable("TWITTER_ACCESS_TOKEN")
 TWITTER_ACCESS_TOKEN_SECRET = get_environment_variable("TWITTER_ACCESS_TOKEN_SECRET")
-
-POSITIVE_KEYWORDS = [
-    "affiliate",
-    "candidate",
-    "chair",
-    "city",
-    "civic",
-    "country",
-    "county",
-    "district",
-    "elect",
-    "endorse",
-    "local",
-    "office",
-    "official",
-    "public",
-    "represent",
-    "running",
-    "state",
-]
-
-NEGATIVE_KEYWORDS = [
-    "fake",
-    "parody",
-]
 
 
 def analyze_twitter_search_results(search_results, search_results_length, candidate_name,
@@ -125,12 +101,12 @@ def analyze_twitter_search_results(search_results, search_results_length, candid
                 likelihood_score -= 10
 
         # Increase the score for every positive keyword we find
-        for keyword in POSITIVE_KEYWORDS:
+        for keyword in POSITIVE_SEARCH_KEYWORDS:
             if one_result.description and keyword in one_result.description.lower():
                 likelihood_score += 5
 
         # Decrease the score for every negative keyword we find
-        for keyword in NEGATIVE_KEYWORDS:
+        for keyword in NEGATIVE_SEARCH_KEYWORDS:
             if one_result.description and keyword in one_result.description.lower():
                 likelihood_score -= 20
 
@@ -193,6 +169,7 @@ def delete_possible_twitter_handles(candidate_campaign):
 def retrieve_possible_twitter_handles(candidate_campaign):
     status = ""
     twitter_user_manager = TwitterUserManager()
+    remote_request_history_manager = RemoteRequestHistoryManager()
 
     if not candidate_campaign:
         status = "RETRIEVE_POSSIBLE_TWITTER_HANDLES-CANDIDATE_MISSING "
@@ -280,6 +257,11 @@ def retrieve_possible_twitter_handles(candidate_campaign):
             save_twitter_user_results = twitter_user_manager.update_or_create_twitter_link_possibility(
                 candidate_campaign.we_vote_id, possibility_result['twitter_json'],
                 possibility_result['search_term'], possibility_result['likelihood_score'])
+
+    # Create a record denoting that we have retrieved from Twitter for this candidate
+    save_results_history = remote_request_history_manager.create_remote_request_history_entry(
+        RETRIEVE_POSSIBLE_TWITTER_HANDLES, candidate_campaign.google_civic_election_id,
+        candidate_campaign.we_vote_id, None, len(possible_twitter_handles_list), status)
 
     results = {
         'success':                  True,

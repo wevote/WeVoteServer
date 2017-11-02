@@ -10,6 +10,8 @@ import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, generate_random_string
 
 
+RETRIEVE_POSSIBLE_TWITTER_HANDLES = 'RETRIEVE_POSSIBLE_TWITTER_HANDLES'
+
 logger = wevote_functions.admin.get_logger(__name__)
 
 
@@ -410,7 +412,7 @@ class RemoteRequestHistoryManager(models.Model):
         """
 
         success = False
-        status = ""
+        create_status = ""
         remote_request_history_entry_created = False
         remote_request_history_entry = ''
 
@@ -423,18 +425,18 @@ class RemoteRequestHistoryManager(models.Model):
                 status=status)
             if remote_request_history_entry:
                 success = True
-                status += "REMOTE_REQUEST_HISTORY_ENTRY_CREATED"
+                create_status += "REMOTE_REQUEST_HISTORY_ENTRY_CREATED"
                 remote_request_history_entry_created = True
             else:
                 success = False
-                status += "CREATE_REMOTE_REQUEST_HISTORY_ENTRY_FAILED"
+                create_status += "CREATE_REMOTE_REQUEST_HISTORY_ENTRY_FAILED"
         except Exception as e:
             status += "REMOTE_REQUEST_HISTORY_ENTRY_ERROR"
             handle_record_not_saved_exception(e, logger=logger)
 
         results = {
             'success': success,
-            'status': status,
+            'status': create_status,
             'remote_request_history_entry_created': remote_request_history_entry_created,
             'remote_request_history_entry': remote_request_history_entry,
         }
