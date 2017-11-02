@@ -177,9 +177,9 @@ span.wrap_word { word-break: break-word; }
 
         {% include "candidate/google_search_users_for_candidate_table.html" with candidate=candidate google_search_possibility_list=google_search_possibility_list %}
         {% if google_search_possibility_list|length == 1 %}
-            <a href="{% url 'candidate:candidate_edit' candidate.id %}?show_all_google_search_users=1">Show more google search users</a>
+            <a href="{% url 'candidate:candidate_edit' candidate.id %}?show_all_google_search_users=1">Show more Google search users</a>
         {% elif google_search_possibility_list|length > 1 %}
-            <a href="{% url 'candidate:candidate_edit' candidate.id %}?show_all_google_search_users=0">Show less google search user</a>
+            <a href="{% url 'candidate:candidate_edit' candidate.id %}?show_all_google_search_users=0">Show fewer Google search users</a>
         {% endif %}
     </div>
 </div>
