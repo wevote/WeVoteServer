@@ -143,20 +143,20 @@ POSITIVE_SEARCH_KEYWORDS = [
     "chair",
     "city",
     "civic",
-    'council',
+    "council",
     "country",
     "county",
-    'democratic',
+    "democratic",
     "district",
     "elect",
     "endorse",
-    'leader',
+    "leader",
     "local",
-    'municipal',
+    "municipal",
     "office",
     "official",
-    'party',
-    'politic',
+    "party",
+    "politic",
     "public",
     "represent",
     "running",
@@ -165,9 +165,9 @@ POSITIVE_SEARCH_KEYWORDS = [
 
 NEGATIVE_SEARCH_KEYWORDS = [
     "fake",
-    'musician',
+    "musician",
     "parody",
-    'singer',
+    "singer",
 ]
 
 AMERICAN_INDEPENDENT = 'AMERICAN_INDEPENDENT'
