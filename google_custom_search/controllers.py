@@ -7,10 +7,10 @@
 from .models import GoogleSearchUserManager
 from config.base import get_environment_variable
 from googleapiclient.discovery import build
+from image.controllers import BALLOTPEDIA, LINKEDIN, FACEBOOK, TWITTER, WIKIPEDIA
 from import_export_wikipedia.controllers import reach_out_to_wikipedia_with_guess, \
     retrieve_candidate_images_from_wikipedia_page
 from re import sub
-from twitter.controllers import POSITIVE_KEYWORDS, NEGATIVE_KEYWORDS
 from wevote_functions.functions import positive_value_exists, convert_state_code_to_state_text
 
 GOOGLE_SEARCH_ENGINE_ID = get_environment_variable("GOOGLE_SEARCH_ENGINE_ID")
@@ -20,6 +20,39 @@ GOOGLE_SEARCH_API_VERSION = get_environment_variable("GOOGLE_SEARCH_API_VERSION"
 BALLOTPEDIA_LOGO_URL = "ballotpedia-logo-square"
 MAXIMUM_GOOGLE_SEARCH_USERS = 10
 MAXIMUM_CHARACTERS_LENGTH = 1000
+
+GOOGLE_SEARCH_POSITIVE_KEYWORDS = [
+    "affiliate",
+    "candidate",
+    "chair",
+    "city",
+    "civic",
+    "country",
+    "county",
+    "district",
+    "elect",
+    "endorse",
+    "local",
+    "office",
+    "official",
+    "public",
+    "represent",
+    "running",
+    "state",
+    'leader',
+    'democratic',
+    'council',
+    'municipal',
+    'party',
+    'politic',
+]
+
+GOOGLE_SEARCH_NEGATIVE_KEYWORDS = [
+    "fake",
+    "parody",
+    'musician',
+    'singer',
+]
 
 
 def delete_possible_google_search_users(candidate_campaign):
@@ -137,12 +170,12 @@ def retrieve_possible_google_search_users(candidate_campaign):
 
     name_handling_regex = r"[^ \w'-]"
     candidate_name = {
-        'title':       sub(name_handling_regex, "", candidate_campaign.extract_title()),
-        'first_name':  sub(name_handling_regex, "", candidate_campaign.extract_first_name()),
-        'middle_name': sub(name_handling_regex, "", candidate_campaign.extract_middle_name()),
-        'last_name':   sub(name_handling_regex, "", candidate_campaign.extract_last_name()),
-        'suffix':      sub(name_handling_regex, "", candidate_campaign.extract_suffix()),
-        'nickname':    sub(name_handling_regex, "", candidate_campaign.extract_nickname()),
+        'title':       sub(name_handling_regex, "", candidate_campaign.extract_title().lower()),
+        'first_name':  sub(name_handling_regex, "", candidate_campaign.extract_first_name().lower()),
+        'middle_name': sub(name_handling_regex, "", candidate_campaign.extract_middle_name().lower()),
+        'last_name':   sub(name_handling_regex, "", candidate_campaign.extract_last_name().lower()),
+        'suffix':      sub(name_handling_regex, "", candidate_campaign.extract_suffix().lower()),
+        'nickname':    sub(name_handling_regex, "", candidate_campaign.extract_nickname().lower()),
     }
 
     google_search_users_list.extend(analyze_google_search_results(search_results, search_term, candidate_name,
@@ -244,7 +277,8 @@ def analyze_google_search_results(search_results, search_term, candidate_name,
             from_wikipedia = False
             google_json = parse_google_search_results(search_term, one_result)
 
-            if not positive_value_exists(google_json['item_image']):
+            # if item_image does not exist and this link is not from ballotpedia then skip this
+            if not positive_value_exists(google_json['item_image']) and BALLOTPEDIA not in google_json['item_link']:
                 continue
             elif BALLOTPEDIA_LOGO_URL in google_json['item_image']:
                 google_json['item_image'] = ""
@@ -253,7 +287,7 @@ def analyze_google_search_results(search_results, search_term, candidate_name,
             name_found_in_title = False
             name_found_in_description = False
             for name in candidate_name.values():
-                if len(name) and name in google_json['item_title']:
+                if len(name) and name in google_json['item_title'].lower():
                     likelihood_score += 10
                     name_found_in_title = True
                 if len(name) and (name in google_json['item_snippet'].lower() or
@@ -291,21 +325,21 @@ def analyze_google_search_results(search_results, search_term, candidate_name,
                     political_party in google_json['item_meta_tags_description']:
                 likelihood_score += 20
 
-            if "ballotpedia" in google_json['item_link']:
+            if BALLOTPEDIA in google_json['item_link']:
                 from_ballotpedia = True
-                likelihood_score += 80
-            if "linkedin" in google_json['item_link']:
+                likelihood_score += 20
+            if LINKEDIN in google_json['item_link']:
                 from_linkedin = True
-                likelihood_score += 55
-            if "facebook" in google_json['item_link']:
+                likelihood_score += 20
+            if FACEBOOK in google_json['item_link']:
                 from_facebook = True
-                likelihood_score += 55
-            if "twitter" in google_json['item_link']:
+                likelihood_score += 20
+            if TWITTER in google_json['item_link']:
                 from_twitter = True
-                likelihood_score += 55
-            if "wikipedia" in google_json['item_link']:
+                likelihood_score += 20
+            if WIKIPEDIA in google_json['item_link']:
                 from_wikipedia = True
-                likelihood_score += 50
+                likelihood_score += 20
 
             # Check (each word individually) if office name is in description
             # This also checks if state code is in description
@@ -323,14 +357,14 @@ def analyze_google_search_results(search_results, search_term, candidate_name,
                     likelihood_score -= 5
 
             # Increase the score for every positive keyword we find
-            for keyword in POSITIVE_KEYWORDS:
+            for keyword in GOOGLE_SEARCH_POSITIVE_KEYWORDS:
                 if google_json['item_snippet'] and keyword in google_json['item_snippet'].lower() or \
                         google_json['item_meta_tags_description'] and \
                         keyword in google_json['item_meta_tags_description'].lower():
                     likelihood_score += 5
 
             # Decrease the score for every negative keyword we find
-            for keyword in NEGATIVE_KEYWORDS:
+            for keyword in GOOGLE_SEARCH_NEGATIVE_KEYWORDS:
                 if (google_json['item_snippet'] and keyword in google_json['item_snippet'].lower()) or \
                     (google_json['item_meta_tags_description'] and
                      keyword in google_json['item_meta_tags_description'].lower()):
@@ -440,7 +474,7 @@ def update_google_search_with_wikipedia_results(wikipedia_page, search_term, can
 
 def analyze_wikipedia_search_results(wikipedia_page, search_term, candidate_name,
                                      candidate_campaign):
-    likelihood_score = 50
+    likelihood_score = 20
     possible_google_search_users_list = []
     state_code = candidate_campaign.state_code
     state_full_name = convert_state_code_to_state_text(state_code)
@@ -462,7 +496,7 @@ def analyze_wikipedia_search_results(wikipedia_page, search_term, candidate_name
     name_found_in_title = False
     name_found_in_description = False
     for name in candidate_name.values():
-        if len(name) and name in google_json['item_title']:
+        if len(name) and name in google_json['item_title'].lower():
             likelihood_score += 10
             name_found_in_title = True
         if len(name) and name in google_json['item_snippet'].lower():
@@ -501,12 +535,12 @@ def analyze_wikipedia_search_results(wikipedia_page, search_term, candidate_name
             likelihood_score -= 5
 
     # Increase the score for every positive keyword we find
-    for keyword in POSITIVE_KEYWORDS:
+    for keyword in GOOGLE_SEARCH_POSITIVE_KEYWORDS:
         if google_json['item_snippet'] and keyword in google_json['item_snippet'].lower():
             likelihood_score += 5
 
     # Decrease the score for every negative keyword we find
-    for keyword in NEGATIVE_KEYWORDS:
+    for keyword in GOOGLE_SEARCH_NEGATIVE_KEYWORDS:
         if google_json['item_snippet'] and keyword in google_json['item_snippet'].lower():
             likelihood_score -= 20
 

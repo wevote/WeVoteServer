@@ -19,7 +19,8 @@ from position.controllers import update_all_position_details_from_candidate
 from twitter.models import TwitterUserManager
 import requests
 import wevote_functions.admin
-from wevote_functions.functions import positive_value_exists, process_request_from_master, convert_to_int
+from wevote_functions.functions import positive_value_exists, process_request_from_master, convert_to_int, \
+    extract_twitter_handle_from_text_string, extract_website_from_url
 
 logger = wevote_functions.admin.get_logger(__name__)
 
@@ -833,7 +834,13 @@ def retrieve_candidate_politician_match_options(vote_smart_id, maplight_id, cand
 
 
 def save_google_search_image_to_candidate_table(candidate, google_search_image_file, google_search_link):
-    google_search_website_name = google_search_link.split("//")[1].split("/")[0]
+    cache_results = {
+        'we_vote_hosted_profile_image_url_large':   None,
+        'we_vote_hosted_profile_image_url_medium':  None,
+        'we_vote_hosted_profile_image_url_tiny':    None
+    }
+
+    google_search_website_name = extract_website_from_url(google_search_link)
     if BALLOTPEDIA in google_search_website_name:
         cache_results = cache_master_and_resized_image(
             candidate_id=candidate.id, candidate_we_vote_id=candidate.we_vote_id,
@@ -862,12 +869,8 @@ def save_google_search_image_to_candidate_table(candidate, google_search_image_f
         candidate.wikipedia_page_title = google_search_link
 
     elif TWITTER in google_search_website_name:
-        cache_results = cache_master_and_resized_image(
-            candidate_id=candidate.id, candidate_we_vote_id=candidate.we_vote_id,
-            twitter_profile_image_url_https=google_search_image_file,
-            image_source=TWITTER)
-        cached_twitter_profile_image_url_https = cache_results['cached_twitter_profile_image_url_https']
-        candidate.twitter_profile_image_url_https = cached_twitter_profile_image_url_https
+        twitter_screen_name = extract_twitter_handle_from_text_string(google_search_link)
+        candidate.candidate_twitter_handle = twitter_screen_name
         candidate.twitter_url = google_search_link
 
     elif FACEBOOK in google_search_website_name:
@@ -903,15 +906,15 @@ def save_google_search_image_to_candidate_table(candidate, google_search_image_f
 
 def save_google_search_link_to_candidate_table(candidate, google_search_link):
     google_search_website_name = google_search_link.split("//")[1].split("/")[0]
-    if "ballotpedia" in google_search_website_name:
+    if BALLOTPEDIA in google_search_website_name:
         candidate.ballotpedia_page_title = google_search_link
-    elif "linkedin" in google_search_website_name:
+    elif LINKEDIN in google_search_website_name:
         candidate.linkedin_url = google_search_link
-    elif "wikipedia" in google_search_website_name:
+    elif WIKIPEDIA in google_search_website_name:
         candidate.wikipedia_page_title = google_search_link
-    elif "twitter" in google_search_website_name:
+    elif TWITTER in google_search_website_name:
         candidate.twitter_url = google_search_link
-    elif "facebook" in google_search_website_name:
+    elif FACEBOOK in google_search_website_name:
         candidate.facebook_url = google_search_link
     else:
         candidate.candidate_url = google_search_link

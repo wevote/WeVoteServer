@@ -236,7 +236,8 @@ def candidate_list_view(request):
     for candidate in candidate_list:
         try:
             google_search_possibility_query = GoogleSearchUser.objects.filter(
-                candidate_campaign_we_vote_id=candidate.we_vote_id)
+                candidate_campaign_we_vote_id=candidate.we_vote_id).\
+                exclude(item_image__isnull=True).exclude(item_image__exact='')
             google_search_possibility_query = google_search_possibility_query.order_by(
                 '-chosen_and_updated', 'not_a_match', '-likelihood_score')
             candidate.google_search_merge_possibility = google_search_possibility_query[0]
@@ -344,6 +345,7 @@ def candidate_edit_view(request, candidate_id=0, candidate_campaign_we_vote_id="
     vote_smart_id = request.GET.get('vote_smart_id', False)
     maplight_id = request.GET.get('maplight_id', False)
     state_code = request.GET.get('state_code', "")
+    show_all_google_search_users = request.GET.get('show_all_google_search_users', False)
 
     messages_on_stage = get_messages(request)
     candidate_id = convert_to_int(candidate_id)
@@ -418,8 +420,10 @@ def candidate_edit_view(request, candidate_id=0, candidate_campaign_we_vote_id="
                 candidate_campaign_we_vote_id=candidate_on_stage.we_vote_id)
             google_search_possibility_query = google_search_possibility_query.order_by(
                 '-chosen_and_updated', 'not_a_match', '-likelihood_score')
-            google_search_possibility_list = list(google_search_possibility_query)
-
+            if positive_value_exists(show_all_google_search_users):
+                google_search_possibility_list = list(google_search_possibility_query)
+            else:
+                google_search_possibility_list.append(google_search_possibility_query[0])
         except Exception as e:
             pass
 
