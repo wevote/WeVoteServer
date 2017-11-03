@@ -255,8 +255,8 @@ def ballot_items_import_from_structured_json(structured_json):
         if proceed_to_update_or_create:
             ballot_item_display_name = one_ballot_item['ballot_item_display_name'] \
                 if 'ballot_item_display_name' in one_ballot_item else ''
-            measure_subtitle = one_ballot_item['measure_subtitle'] if 'measure_subtitle' in one_ballot_item else 0
-            measure_text = one_ballot_item['measure_text'] if 'measure_text' in one_ballot_item else 0
+            measure_subtitle = one_ballot_item['measure_subtitle'] if 'measure_subtitle' in one_ballot_item else ''
+            measure_text = one_ballot_item['measure_text'] if 'measure_text' in one_ballot_item else ''
             google_ballot_placement = one_ballot_item['google_ballot_placement'] \
                 if 'google_ballot_placement' in one_ballot_item else 0
             local_ballot_order = one_ballot_item['local_ballot_order'] \
