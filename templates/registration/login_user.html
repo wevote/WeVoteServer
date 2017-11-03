@@ -52,7 +52,7 @@
 <br />
 <br />
 
-{# <p><a href="{% url 'social:begin' 'facebook' %}?next={{ next }}">Sign in with Facebook</a></p> #}
+<p><a href="{% url 'social:begin' 'facebook' %}?next={{ next }}">Sign in with Facebook</a></p>
 <p><a href="{% url 'social:begin' 'twitter' %}?next={{ next }}">Sign in with Twitter</a></p>
 
 
@@ -68,6 +68,7 @@ we_vote_id: {{ request.user.we_vote_id }}<br />
 id: {{ request.user.id }}<br />
 email: {{ request.user.email }}<br />
 twitter: {{ request.user.twitter_screen_name }}<br />
+facebook: {{ request.user.fb_username }} <br />
 admin: {{ request.user.is_admin }}<br />
 verified_volunteer: {{ request.user.is_verified_volunteer }}<br />
 

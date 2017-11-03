@@ -877,6 +877,42 @@ class VoterManager(BaseUserManager):
         }
         return results
 
+    def save_facebook_user_values_from_dict(self, voter, facebook_user_dict,
+                                            cached_facebook_profile_image_url_https=None,
+                                            we_vote_hosted_profile_image_url_large=None,
+                                            we_vote_hosted_profile_image_url_medium=None,
+                                            we_vote_hosted_profile_image_url_tiny=None):
+        try:
+            if 'id' in facebook_user_dict:
+                voter.facebook_id = facebook_user_dict['id']
+            if cached_facebook_profile_image_url_https:
+                voter.facebook_profile_image_url_https = cached_facebook_profile_image_url_https
+            elif 'profile_image_url_https' in facebook_user_dict:
+                voter.facebook_profile_image_url_https = facebook_user_dict['profile_image_url_https']
+            if 'fb_username' in facebook_user_dict:
+                voter.fb_username = facebook_user_dict['fb_username']
+            if we_vote_hosted_profile_image_url_large:
+                voter.we_vote_hosted_profile_image_url_large = we_vote_hosted_profile_image_url_large
+            if we_vote_hosted_profile_image_url_medium:
+                voter.we_vote_hosted_profile_image_url_medium = we_vote_hosted_profile_image_url_medium
+            if we_vote_hosted_profile_image_url_tiny:
+                voter.we_vote_hosted_profile_image_url_tiny = we_vote_hosted_profile_image_url_tiny
+
+            voter.save()
+            success = True
+            status = "SAVED_VOTER_FACEBOOK_VALUES"
+        except Exception as e:
+            status = "UNABLE_TO_SAVE_VOTER_FACEBOOK_VALUES"
+            success = False
+            handle_record_not_saved_exception(e, logger=logger, exception_message_optional=status)
+
+        results = {
+            'status':   status,
+            'success':  success,
+            'voter':    voter,
+        }
+        return results
+
     def save_twitter_user_values(self, voter, twitter_user_object,
                                  cached_twitter_profile_image_url_https=None,
                                  we_vote_hosted_profile_image_url_large=None,
@@ -1558,7 +1594,7 @@ class Voter(AbstractBaseUser):
     facebook_id = models.BigIntegerField(verbose_name="facebook big integer id", null=True, blank=True)
     facebook_email = models.EmailField(verbose_name='facebook email address', max_length=255, unique=False,
                                        null=True, blank=True)
-    fb_username = models.CharField(unique=True, max_length=20, validators=[alphanumeric], null=True)
+    fb_username = models.CharField(max_length=20, validators=[alphanumeric], null=True)
     facebook_profile_image_url_https = models.URLField(verbose_name='url of image from facebook', blank=True, null=True)
 
     # Twitter session information
