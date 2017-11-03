@@ -3,13 +3,13 @@
 # -*- coding: UTF-8 -*-
 
 from .models import Election, ElectionManager
-from ballot.models import BallotReturned, BallotReturnedManager
+from ballot.models import BallotReturned
 from config.base import get_environment_variable
 from import_export_google_civic.controllers import retrieve_from_google_civic_api_election_query, \
     store_results_from_google_civic_api_election_query
 import json
 import wevote_functions.admin
-from wevote_functions.functions import positive_value_exists, process_request_from_master
+from wevote_functions.functions import convert_to_int, positive_value_exists, process_request_from_master
 
 logger = wevote_functions.admin.get_logger(__name__)
 
@@ -166,7 +166,7 @@ def elections_retrieve_for_api():  # electionsRetrieve
                 }
                 ballot_location_list.append(ballot_location_display_option)
             election_json = {
-                'google_civic_election_id':     election.google_civic_election_id,
+                'google_civic_election_id':     convert_to_int(election.google_civic_election_id),
                 'election_name':                election.election_name,
                 'election_day_text':            election.election_day_text,
                 'election_is_upcoming':         election.election_is_upcoming(),

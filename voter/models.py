@@ -2171,6 +2171,8 @@ class VoterAddress(models.Model):
     refreshed_from_google = models.BooleanField(
         verbose_name="have normalized fields been updated from Google since address change?", default=False)
 
+    voter_entered_address = models.BooleanField(verbose_name="Did the voter manually enter an address?", default=False)
+
     def get_state_code_from_text_for_map_search(self):
         if positive_value_exists(self.text_for_map_search):
             return extract_state_code_from_address_string(self.text_for_map_search)
@@ -2313,13 +2315,15 @@ class VoterAddressManager(models.Model):
             text_for_map_search = voter_address.text_for_map_search
         return text_for_map_search
 
-    def update_or_create_voter_address(self, voter_id, address_type, raw_address_text, google_civic_election_id=False):
+    def update_or_create_voter_address(self, voter_id, address_type, raw_address_text, google_civic_election_id=False,
+                                       voter_entered_address=True):
         """
         NOTE: This approach won't support multiple FORMER_BALLOT_ADDRESS
         :param voter_id:
         :param address_type:
         :param raw_address_text:
         :param google_civic_election_id:
+        :param voter_entered_address:
         :return:
         """
         status = ''
@@ -2346,6 +2350,7 @@ class VoterAddressManager(models.Model):
                     'normalized_zip':           None,
                     # We clear out former values for these so voter_ballot_items_retrieve_for_api resets them
                     'refreshed_from_google':    False,
+                    'voter_entered_address':    voter_entered_address,
                     'google_civic_election_id': google_civic_election_id,
                     'election_day_text':        '',
                 }

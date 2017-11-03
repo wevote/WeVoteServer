@@ -106,6 +106,9 @@ def voter_address_retrieve_view(request):  # voterAddressRetrieve
             'google_civic_election_id': google_civic_election_id,
             'ballot_location_display_name': voter_address_retrieve_results['ballot_location_display_name'],
             'ballot_returned_we_vote_id': voter_address_retrieve_results['ballot_returned_we_vote_id'],
+            'voter_entered_address': voter_address_retrieve_results['voter_entered_address'],
+            'voter_specific_ballot_from_google_civic':
+                voter_address_retrieve_results['voter_specific_ballot_from_google_civic'],
             'latitude': voter_address_retrieve_results['latitude'],
             'longitude': voter_address_retrieve_results['longitude'],
             'normalized_line1': voter_address_retrieve_results['normalized_line1'],
@@ -133,6 +136,8 @@ def voter_address_retrieve_view(request):  # voterAddressRetrieve
             'text_for_map_search': '',
             'google_civic_election_id': 0,
             'ballot_location_display_name': '',
+            'voter_entered_address': False,
+            'voter_specific_ballot_from_google_civic': False,
             'ballot_returned_we_vote_id': '',
             'latitude': '',
             'longitude': '',
@@ -233,6 +238,9 @@ def voter_address_retrieve_view(request):  # voterAddressRetrieve
                     'google_civic_election_id': google_civic_election_id,
                     'ballot_location_display_name': voter_address_retrieve_results['ballot_location_display_name'],
                     'ballot_returned_we_vote_id': voter_address_retrieve_results['ballot_returned_we_vote_id'],
+                    'voter_entered_address': voter_address_retrieve_results['voter_entered_address'],
+                    'voter_specific_ballot_from_google_civic':
+                        voter_address_retrieve_results['voter_specific_ballot_from_google_civic'],
                     'latitude': voter_address_retrieve_results['latitude'],
                     'longitude': voter_address_retrieve_results['longitude'],
                     'normalized_line1': voter_address_retrieve_results['normalized_line1'],
@@ -255,6 +263,8 @@ def voter_address_retrieve_view(request):  # voterAddressRetrieve
                     'google_civic_election_id': google_civic_election_id,
                     'ballot_location_display_name': '',
                     'ballot_returned_we_vote_id': '',
+                    'voter_entered_address': False,
+                    'voter_specific_ballot_from_google_civic': False,
                     'latitude': '',
                     'longitude': '',
                     'normalized_line1': '',
@@ -280,6 +290,8 @@ def voter_address_retrieve_view(request):  # voterAddressRetrieve
                 'google_civic_election_id': 0,
                 'ballot_location_display_name': '',
                 'ballot_returned_we_vote_id': '',
+                'voter_entered_address': False,
+                'voter_specific_ballot_from_google_civic': False,
                 'latitude': '',
                 'longitude': '',
                 'normalized_line1': '',
@@ -305,6 +317,9 @@ def voter_address_save_view(request):  # voterAddressSave
     simple_save = positive_value_exists(request.GET.get('simple_save', False))
     ballot_location_display_name = ''
     ballot_returned_we_vote_id = ''
+    text_for_map_search_saved = ''
+    voter_entered_address = True
+    voter_specific_ballot_from_google_civic = False
 
     voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
     try:
@@ -365,7 +380,7 @@ def voter_address_save_view(request):  # voterAddressSave
     # Save the address value, and clear out ballot_saved information
     voter_address_manager = VoterAddressManager()
     voter_address_save_results = voter_address_manager.update_or_create_voter_address(
-        voter_id, BALLOT_ADDRESS, text_for_map_search, google_civic_election_id)
+        voter_id, BALLOT_ADDRESS, text_for_map_search, google_civic_election_id, voter_entered_address)
     # TODO DALE 2017-07-17 This needs a fresh look:
     # , google_civic_election_id
 
@@ -408,23 +423,40 @@ def voter_address_save_view(request):  # voterAddressSave
             ballot_returned_we_vote_id = google_retrieve_results['ballot_returned_we_vote_id']
 
         # At this point proceed to update google_civic_election_id whether it is a positive integer or zero
-        voter_address.google_civic_election_id = google_civic_election_id
-        voter_address.ballot_location_display_name = ballot_location_display_name
-        voter_address.ballot_returned_we_vote_id = ballot_returned_we_vote_id
-        voter_address_update_results = voter_address_manager.update_existing_voter_address_object(voter_address)
+        # First retrieve the latest address, since it gets saved when we retrieve from google civic
+        updated_address_results = voter_address_manager.retrieve_address(voter_address.id)
+        if updated_address_results['voter_address_found']:
+            voter_address = updated_address_results['voter_address']
+            voter_address.google_civic_election_id = google_civic_election_id
+            voter_address.ballot_location_display_name = ballot_location_display_name
+            voter_address.ballot_returned_we_vote_id = ballot_returned_we_vote_id
+            voter_entered_address = voter_address.voter_entered_address
+            voter_specific_ballot_from_google_civic = voter_address.refreshed_from_google
+            voter_address_update_results = voter_address_manager.update_existing_voter_address_object(voter_address)
 
-        if voter_address_update_results['success']:
-            # Replace the former google_civic_election_id from this voter_device_link
-            voter_device_link_manager = VoterDeviceLinkManager()
-            voter_device_link_results = voter_device_link_manager.retrieve_voter_device_link(voter_device_id)
-            if voter_device_link_results['voter_device_link_found']:
-                voter_device_link = voter_device_link_results['voter_device_link']
-                voter_device_link_manager.update_voter_device_link_with_election_id(
-                    voter_device_link, google_civic_election_id)
+            if voter_address_update_results['success']:
+                # Replace the former google_civic_election_id from this voter_device_link
+                voter_device_link_manager = VoterDeviceLinkManager()
+                voter_device_link_results = voter_device_link_manager.retrieve_voter_device_link(voter_device_id)
+                if voter_device_link_results['voter_device_link_found']:
+                    voter_device_link = voter_device_link_results['voter_device_link']
+                    voter_device_link_manager.update_voter_device_link_with_election_id(
+                        voter_device_link, google_civic_election_id)
+                if voter_address_update_results['voter_address_found']:
+                    voter_address = voter_address_update_results['voter_address']
+                    text_for_map_search_saved = voter_address.text_for_map_search
 
     json_data = voter_ballot_items_retrieve_for_api(voter_device_id, google_civic_election_id,
                                                     ballot_returned_we_vote_id)
     json_data['simple_save'] = simple_save
+    json_data['address'] = {
+        'text_for_map_search':          text_for_map_search_saved,
+        'google_civic_election_id':     google_civic_election_id,
+        'ballot_returned_we_vote_id':   ballot_returned_we_vote_id,
+        'ballot_location_display_name': ballot_location_display_name,
+        'voter_entered_address':        voter_entered_address,
+        'voter_specific_ballot_from_google_civic':    voter_specific_ballot_from_google_civic,
+    }
 
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 
