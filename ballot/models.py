@@ -1508,20 +1508,54 @@ class BallotReturnedListManager(models.Model):
 
         return 0
 
-    def retrieve_ballot_returned_list_for_election(self, google_civic_election_id, state_code='', limit=0):
+    def retrieve_ballot_returned_list_for_election(self, google_civic_election_id, state_code='', limit=0,
+                                                   ballot_returned_search_str=''):
         google_civic_election_id = convert_to_int(google_civic_election_id)
         ballot_returned_list = []
         ballot_returned_list_found = False
+
         try:
             ballot_returned_queryset = BallotReturned.objects.all()
+            if positive_value_exists(ballot_returned_search_str):
+                filters = []
+                new_filter = Q(id__icontains=ballot_returned_search_str)
+                filters.append(new_filter)
+
+                new_filter = Q(ballot_location_display_name__icontains=ballot_returned_search_str)
+                filters.append(new_filter)
+
+                new_filter = Q(ballot_location_shortcut__icontains=ballot_returned_search_str)
+                filters.append(new_filter)
+
+                new_filter = Q(text_for_map_search__icontains=ballot_returned_search_str)
+                filters.append(new_filter)
+
+                new_filter = Q(normalized_state__icontains=ballot_returned_search_str)
+                filters.append(new_filter)
+
+                new_filter = Q(we_vote_id__icontains=ballot_returned_search_str)
+                filters.append(new_filter)
+
+                new_filter = Q(polling_location_we_vote_id__icontains=ballot_returned_search_str)
+                filters.append(new_filter)
+
+                # Add the first query
+                if len(filters):
+                    final_filters = filters.pop()
+
+                    # ...and "OR" the remaining items in the list
+                    for item in filters:
+                        final_filters |= item
+
+                    ballot_returned_queryset = ballot_returned_queryset.filter(final_filters)
+
             ballot_returned_queryset = ballot_returned_queryset.filter(
                 google_civic_election_id=google_civic_election_id)
             if positive_value_exists(state_code):
                 ballot_returned_queryset = ballot_returned_queryset.filter(normalized_state__iexact=state_code)
-            ballot_returned_queryset = ballot_returned_queryset.order_by("-ballot_location_display_name")
+            ballot_returned_queryset = ballot_returned_queryset.order_by("ballot_location_display_name")
             if positive_value_exists(limit):
                 ballot_returned_queryset = ballot_returned_queryset[:limit]
-
             ballot_returned_list = ballot_returned_queryset
 
             if len(ballot_returned_list):

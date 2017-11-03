@@ -532,6 +532,7 @@ def election_summary_view(request, election_local_id):
     show_offices_and_candidates = request.GET.get('show_offices_and_candidates', False)
     google_civic_election_id = request.GET.get('google_civic_election_id', 0)
     election_local_id = convert_to_int(election_local_id)
+    ballot_returned_search = request.GET.get('ballot_returned_search', '')
 
     election_on_stage_found = False
     election_on_stage = Election()
@@ -575,7 +576,7 @@ def election_summary_view(request, election_local_id):
 
         limit = 200  # Since this is a summary page, we don't need to show very many ballot_returned entries
         ballot_returned_list_results = ballot_returned_list_manager.retrieve_ballot_returned_list_for_election(
-            election_on_stage.google_civic_election_id, state_code, limit)
+            election_on_stage.google_civic_election_id, state_code, limit, ballot_returned_search)
         ballot_returned_count_entire_election = \
             ballot_returned_list_manager.fetch_ballot_returned_list_count_for_election(
                 election_on_stage.google_civic_election_id)
@@ -651,6 +652,7 @@ def election_summary_view(request, election_local_id):
             'messages_on_stage':    messages_on_stage,
             'state_code':           state_code,
             'state_list':           sorted_state_list,
+            'ballot_returned_search':   ballot_returned_search,
         }
     else:
         messages_on_stage = get_messages(request)
@@ -661,6 +663,7 @@ def election_summary_view(request, election_local_id):
             'messages_on_stage':    messages_on_stage,
             'state_code':           state_code,
             'state_list':           sorted_state_list,
+            'ballot_returned_search':   ballot_returned_search,
         }
     return render(request, 'election/election_summary.html', template_values)
 
