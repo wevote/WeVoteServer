@@ -864,7 +864,7 @@ class BallotReturnedManager(models.Model):
                 success = True
                 status = "BALLOT_RETURNED_FOUND_FROM_VOTER_ID "
             elif positive_value_exists(ballot_returned_we_vote_id):
-                ballot_returned = BallotReturned.objects.get(we_vote_id=ballot_returned_we_vote_id)
+                ballot_returned = BallotReturned.objects.get(we_vote_id__iexact=ballot_returned_we_vote_id)
                 # If still here, we found an existing ballot_returned
                 ballot_returned_id = ballot_returned.id
                 ballot_returned_found = True if positive_value_exists(ballot_returned_id) else False
@@ -1518,7 +1518,7 @@ class BallotReturnedListManager(models.Model):
             ballot_returned_queryset = BallotReturned.objects.all()
             if positive_value_exists(ballot_returned_search_str):
                 filters = []
-                new_filter = Q(id__icontains=ballot_returned_search_str)
+                new_filter = Q(id__iexact=ballot_returned_search_str)
                 filters.append(new_filter)
 
                 new_filter = Q(ballot_location_display_name__icontains=ballot_returned_search_str)
@@ -1533,13 +1533,13 @@ class BallotReturnedListManager(models.Model):
                 new_filter = Q(normalized_state__icontains=ballot_returned_search_str)
                 filters.append(new_filter)
 
-                new_filter = Q(we_vote_id__icontains=ballot_returned_search_str)
+                new_filter = Q(we_vote_id__iexact=ballot_returned_search_str)
                 filters.append(new_filter)
 
                 new_filter = Q(voter_id__iexact=ballot_returned_search_str)
                 filters.append(new_filter)
 
-                new_filter = Q(polling_location_we_vote_id__icontains=ballot_returned_search_str)
+                new_filter = Q(polling_location_we_vote_id__iexact=ballot_returned_search_str)
                 filters.append(new_filter)
 
                 # Add the first query
@@ -2241,13 +2241,17 @@ def copy_existing_ballot_items_from_stored_ballot(voter_id, text_for_map_search,
         ballot_returned = find_results['ballot_returned']
 
     # Remove all prior ballot items, so we make room for copy_ballot_items to save ballot items
-    if positive_value_exists(ballot_returned.google_civic_election_id):
+    # 2017-11-03 We only want to delete if the ballot_returned in question has a polling_location_we_vote_id
+    if positive_value_exists(ballot_returned.google_civic_election_id) and \
+            positive_value_exists(ballot_returned.polling_location_we_vote_id):
         voter_ballot_saved_id = 0
         voter_ballot_saved_results = voter_ballot_saved_manager.delete_voter_ballot_saved(
             voter_ballot_saved_id, voter_id, ballot_returned.google_civic_election_id)
 
         # We include a google_civic_election_id, so only the ballot info for this election is removed
         ballot_item_list_manager.delete_all_ballot_items_for_voter(voter_id, ballot_returned.google_civic_election_id)
+    else:
+        status += "NOT_DELETED-voter_ballot_saved-AND-VOTER_BALLOT_ITEMS "
 
     # ...and then copy it for the voter as long as it doesn't already belong to the voter
     if ballot_returned.voter_id != voter_id:
