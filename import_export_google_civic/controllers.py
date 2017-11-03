@@ -348,11 +348,12 @@ def process_contest_office_from_structured_json(
             and positive_value_exists(contest_office_id):
         ballot_item_manager = BallotItemManager()
         measure_subtitle = ""
+        measure_text = ""
         contest_measure_id = 0
         contest_measure_we_vote_id = ""
         ballot_item_manager.update_or_create_ballot_item_for_voter(
             voter_id, google_civic_election_id, google_ballot_placement,
-            ballot_item_display_name, measure_subtitle, local_ballot_order,
+            ballot_item_display_name, measure_subtitle, measure_text, local_ballot_order,
             contest_office_id, contest_office_we_vote_id,
             contest_measure_id, contest_measure_we_vote_id, state_code)
 
@@ -362,11 +363,12 @@ def process_contest_office_from_structured_json(
             and positive_value_exists(contest_office_id):
         ballot_item_manager = BallotItemManager()
         measure_subtitle = ""
+        measure_text = ""
         contest_measure_id = 0
         contest_measure_we_vote_id = ""
         ballot_item_manager.update_or_create_ballot_item_for_polling_location(
             polling_location_we_vote_id, google_civic_election_id, google_ballot_placement,
-            ballot_item_display_name, measure_subtitle, local_ballot_order,
+            ballot_item_display_name, measure_subtitle, measure_text, local_ballot_order,
             contest_office_id, contest_office_we_vote_id,
             contest_measure_id, contest_measure_we_vote_id, state_code)
 
@@ -965,7 +967,7 @@ def voter_ballot_items_retrieve_from_google_civic_for_api(
         'voter_device_id':              voter_device_id,
         'google_civic_election_id':     google_civic_election_id,
         'state_code':                   state_code,  # Note, this isn't an actual state_code yet - TODO: populate
-        'election_day_text':           election_day_text,
+        'election_day_text':            election_day_text,
         'election_description_text':    election_description_text,
         'election_data_retrieved':      election_data_retrieved,
         'text_for_map_search':          text_for_map_search,
@@ -1084,6 +1086,7 @@ def process_contest_referendum_from_structured_json(
         contest_measure_we_vote_id = contest_measure.we_vote_id
         ballot_item_display_name = contest_measure.measure_title
         measure_subtitle = contest_measure.measure_subtitle
+        measure_text = contest_measure.measure_text
         ballot_item_manager = BallotItemManager()
 
         # If a voter_id was passed in, save an entry for this office for the voter's ballot
@@ -1093,7 +1096,7 @@ def process_contest_referendum_from_structured_json(
             contest_office_we_vote_id = ''
             ballot_item_manager.update_or_create_ballot_item_for_voter(
                 voter_id, google_civic_election_id, google_ballot_placement, ballot_item_display_name,
-                measure_subtitle, local_ballot_order,
+                measure_subtitle, measure_text, local_ballot_order,
                 contest_office_id, contest_office_we_vote_id,
                 contest_measure_id, contest_measure_we_vote_id, state_code)
 
@@ -1103,7 +1106,7 @@ def process_contest_referendum_from_structured_json(
             contest_office_we_vote_id = ''
             ballot_item_manager.update_or_create_ballot_item_for_polling_location(
                 polling_location_we_vote_id, google_civic_election_id, google_ballot_placement,
-                ballot_item_display_name, measure_subtitle, local_ballot_order,
+                ballot_item_display_name, measure_subtitle, measure_text, local_ballot_order,
                 contest_office_id, contest_office_we_vote_id,
                 contest_measure_id, contest_measure_we_vote_id, state_code)
 

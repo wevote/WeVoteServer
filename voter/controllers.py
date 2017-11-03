@@ -355,6 +355,8 @@ def voter_address_retrieve_for_api(voter_device_id):  # voterAddressRetrieve
             'normalized_city': voter_address.normalized_city if voter_address.normalized_city else '',
             'normalized_state': voter_address.normalized_state if voter_address.normalized_state else '',
             'normalized_zip': voter_address.normalized_zip if voter_address.normalized_zip else '',
+            'voter_entered_address': voter_address.voter_entered_address,
+            'voter_specific_ballot_from_google_civic': voter_address.refreshed_from_google,
             'address_found': True,
             'success': True,
             'status': status,
@@ -377,6 +379,8 @@ def voter_address_retrieve_for_api(voter_device_id):  # voterAddressRetrieve
             'normalized_city': '',
             'normalized_state': '',
             'normalized_zip': '',
+            'voter_entered_address': False,
+            'voter_specific_ballot_from_google_civic': False,
         }
         return voter_address_retrieve_results
 
