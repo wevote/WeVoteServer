@@ -1671,7 +1671,7 @@ def create_batch_row_action_position(batch_description, batch_header_map, one_ba
                     organization_id, contest_measure_we_vote_id, google_civic_election_id)
             if position_results['position_found']:
                 position = position_results['position']
-                position_we_vote_id = position.position_we_vote_id
+                position_we_vote_id = position.we_vote_id
 
     if positive_value_exists(contest_office_we_vote_id):
         contest_office_manager = ContestOfficeManager()
