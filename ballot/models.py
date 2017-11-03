@@ -1536,6 +1536,9 @@ class BallotReturnedListManager(models.Model):
                 new_filter = Q(we_vote_id__icontains=ballot_returned_search_str)
                 filters.append(new_filter)
 
+                new_filter = Q(voter_id__iexact=ballot_returned_search_str)
+                filters.append(new_filter)
+
                 new_filter = Q(polling_location_we_vote_id__icontains=ballot_returned_search_str)
                 filters.append(new_filter)
 
