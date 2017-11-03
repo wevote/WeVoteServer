@@ -80,15 +80,16 @@ def voter_ballot_items_retrieve_doc_template_values(url_root):
                    '  "is_from_test_ballot": boolean,\n' \
                    '  "ballot_item_list": list\n' \
                    '   [\n' \
+                   '     "id": integer,\n' \
+                   '     "we_vote_id": string,\n' \
                    '     "ballot_item_display_name": string,\n' \
-                   '     "voter_id": integer,\n' \
                    '     "google_civic_election_id": integer,\n' \
                    '     "google_ballot_placement": integer,\n' \
                    '     "local_ballot_order": integer,\n' \
                    '     "kind_of_ballot_item": string (CANDIDATE, MEASURE),\n' \
-                   '     "id": integer,\n' \
-                   '     "we_vote_id": string,\n' \
-                   '     "candidate_list": list\n' \
+                   '     "measure_subtitle": string (if kind_of_ballot_item is MEASURE)\n' \
+                   '     "measure_text": string (if kind_of_ballot_item is MEASURE)\n' \
+                   '     "candidate_list": list (if kind_of_ballot_item is CANDIDATE)\n' \
                    '      [\n' \
                    '        "id": integer,\n' \
                    '        "we_vote_id": string,\n' \
@@ -98,6 +99,10 @@ def voter_ballot_items_retrieve_doc_template_values(url_root):
                    '        "candidate_photo_url_tiny": string,\n' \
                    '        "party": string,\n' \
                    '        "order_on_ballot": integer,\n' \
+                   '        "kind_of_ballot_item": string,\n' \
+                   '        "twitter_handle": string,\n' \
+                   '        "twitter_description": string,\n' \
+                   '        "twitter_followers_count": integer,\n' \
                    '      ],\n' \
                    '   ],\n' \
                    '}'

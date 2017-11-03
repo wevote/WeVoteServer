@@ -255,7 +255,8 @@ def ballot_items_import_from_structured_json(structured_json):
         if proceed_to_update_or_create:
             ballot_item_display_name = one_ballot_item['ballot_item_display_name'] \
                 if 'ballot_item_display_name' in one_ballot_item else ''
-            measure_subtitle = one_ballot_item['measure_subtitle'] if 'measure_subtitle' in one_ballot_item else 0
+            measure_subtitle = one_ballot_item['measure_subtitle'] if 'measure_subtitle' in one_ballot_item else ''
+            measure_text = one_ballot_item['measure_text'] if 'measure_text' in one_ballot_item else ''
             google_ballot_placement = one_ballot_item['google_ballot_placement'] \
                 if 'google_ballot_placement' in one_ballot_item else 0
             local_ballot_order = one_ballot_item['local_ballot_order'] \
@@ -266,7 +267,7 @@ def ballot_items_import_from_structured_json(structured_json):
 
             results = ballot_item_manager.update_or_create_ballot_item_for_polling_location(
                 polling_location_we_vote_id, google_civic_election_id, google_ballot_placement,
-                ballot_item_display_name, measure_subtitle, local_ballot_order,
+                ballot_item_display_name, measure_subtitle, measure_text, local_ballot_order,
                 contest_office_id, contest_office_we_vote_id,
                 contest_measure_id, contest_measure_we_vote_id, state_code)
 
@@ -1419,6 +1420,7 @@ def voter_ballot_items_retrieve_for_one_election_for_api(voter_device_id, voter_
                     'google_ballot_placement':      ballot_item.google_ballot_placement,
                     'local_ballot_order':           ballot_item.local_ballot_order,
                     'measure_subtitle':             ballot_item.measure_subtitle,
+                    'measure_text':                 ballot_item.measure_text,
                     'kind_of_ballot_item':          kind_of_ballot_item,
                     'id':                           ballot_item_id,
                     'we_vote_id':                   we_vote_id,

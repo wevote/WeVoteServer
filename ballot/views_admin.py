@@ -568,6 +568,7 @@ def ballot_item_list_edit_process_view(request):
             ballot_item_display_name = contest_office.office_name
             google_ballot_placement = 0
             measure_subtitle = ''
+            measure_text = ''
             local_ballot_order = contest_office1_order if positive_value_exists(contest_office1_order) else 0
             contest_measure_id = 0
             contest_measure_we_vote_id = ""
@@ -576,7 +577,7 @@ def ballot_item_list_edit_process_view(request):
 
             results = ballot_item_manager.update_or_create_ballot_item_for_polling_location(
                 polling_location.we_vote_id, google_civic_election_id, google_ballot_placement,
-                ballot_item_display_name, measure_subtitle, local_ballot_order,
+                ballot_item_display_name, measure_subtitle, measure_text, local_ballot_order,
                 contest_office.id, contest_office.we_vote_id,
                 contest_measure_id, contest_measure_we_vote_id, state_code)
 
@@ -601,7 +602,8 @@ def ballot_item_list_edit_process_view(request):
 
             ballot_item_manager.update_or_create_ballot_item_for_polling_location(
                 polling_location.we_vote_id, google_civic_election_id, google_ballot_placement,
-                ballot_item_display_name, contest_measure.measure_subtitle, local_ballot_order,
+                ballot_item_display_name, contest_measure.measure_subtitle, contest_measure.measure_text,
+                local_ballot_order,
                 contest_office_id, contest_office_we_vote_id,
                 contest_measure.id, contest_measure.we_vote_id, state_code)
 
