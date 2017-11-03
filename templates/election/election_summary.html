@@ -117,6 +117,16 @@
         (<a href="{% url 'ballot:update_ballot_returned_latitude_and_longitude' %}?google_civic_election_id={{ election.google_civic_election_id }}&state_code={{ state_code }}">Update Lat/Long{% if state_code %} for {{ state_code }}{% endif %}: {{ entries_missing_latitude_longitude }} missing</a>)
     </p>
 {% endif %}
+<form name="ballot_returned_search_form" method="get" action="{% url 'election:election_summary' election.id %}">
+    {% csrf_token %}
+
+{% if ballot_returned_search %}
+    <a href="{% url 'election:election_summary' election.id %}">
+        clear search</a>
+{% endif %}
+    <input type="text" name="ballot_returned_search" id="ballot_returned_id" value="{{ ballot_returned_search|default_if_none:"" }}" />
+    <input type="submit" value="Search for ballot returned" />
+</form>
 
 {% if ballot_returned_list %}
     <h5>{{ ballot_returned_count_entire_election }} Ballot Returned Entries</h5>
