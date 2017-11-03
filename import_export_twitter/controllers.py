@@ -828,11 +828,12 @@ def twitter_native_sign_in_save_for_api(voter_device_id, twitter_access_token, t
 
         twitter_auth_response = auth_create_results['twitter_auth_response']
 
-
     try:
         if positive_value_exists(twitter_access_token) and positive_value_exists(twitter_access_secret):
             twitter_auth_response.twitter_access_token = twitter_access_token
             twitter_auth_response.twitter_access_secret = twitter_access_secret
+            twitter_auth_response.twitter_request_token = 'native'
+            twitter_auth_response.twitter_request_secret = 'native'
             twitter_auth_response.save()
 
             success = True
