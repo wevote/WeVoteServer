@@ -346,6 +346,7 @@ def candidate_edit_view(request, candidate_id=0, candidate_campaign_we_vote_id="
     maplight_id = request.GET.get('maplight_id', False)
     state_code = request.GET.get('state_code', "")
     show_all_google_search_users = request.GET.get('show_all_google_search_users', False)
+    show_all_twitter_search_results = request.GET.get('show_all_twitter_search_results', False)
 
     messages_on_stage = get_messages(request)
     candidate_id = convert_to_int(candidate_id)
@@ -410,7 +411,10 @@ def candidate_edit_view(request, candidate_id=0, candidate_campaign_we_vote_id="
             twitter_possibility_query = TwitterLinkPossibility.objects.order_by('-likelihood_score')
             twitter_possibility_query = twitter_possibility_query.filter(
                 candidate_campaign_we_vote_id=candidate_on_stage.we_vote_id)
-            twitter_link_possibility_list = list(twitter_possibility_query)
+            if positive_value_exists(show_all_twitter_search_results):
+                twitter_link_possibility_list = list(twitter_possibility_query)
+            else:
+                twitter_link_possibility_list.append(twitter_possibility_query[0])
         except Exception as e:
             pass
 
