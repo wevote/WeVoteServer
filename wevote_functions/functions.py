@@ -689,6 +689,10 @@ def get_voter_device_id(request, generate_if_no_value=False):
     if positive_value_exists(voter_device_id):
         return voter_device_id
 
+    # Then check for a cookie (in Native)
+    if 'voter_device_id' in request.COOKIES:
+        return request.COOKIES['voter_device_id']
+
     if generate_if_no_value:
         voter_device_id = generate_voter_device_id()
         logger.debug("generate_voter_device_id, voter_device_id: {voter_device_id}".format(

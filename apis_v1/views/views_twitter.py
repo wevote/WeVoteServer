@@ -137,12 +137,23 @@ def twitter_native_sign_in_save_view(request):  # twitterNativeSignInSave
     voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
     twitter_access_token = request.GET.get('twitter_access_token', '')
     twitter_access_token_secret = request.GET.get('twitter_access_token_secret', '')
-    results = twitter_native_sign_in_save_for_api(voter_device_id, twitter_access_token, twitter_access_token_secret)
+    resultsNative = twitter_native_sign_in_save_for_api(voter_device_id, twitter_access_token, twitter_access_token_secret)
+
+    if resultsNative['success'] != True:
+        logger.error("Bad save in twitter_native_sign_in_save_view: " + resultsNative['status'])
+
+    # Call equivalent of oAuth for WebApp Step 3
+    resultsVoterInfo = twitter_sign_in_request_voter_info_for_api(voter_device_id, "Native API Call, No Return URL")
 
     json_data = {
-        'status': results['status'],
-        'success': results['success'],
-        'voter_device_id': voter_device_id,
+        'status':               resultsVoterInfo['status'] + ' '  + resultsNative['status'],
+        'success':              resultsVoterInfo['success'],
+        'twitter_handle':       resultsVoterInfo['twitter_handle'],
+        'twitter_handle_found': resultsVoterInfo['twitter_handle_found'],
+        'twitter_secret_key':   resultsVoterInfo['twitter_secret_key'],
+        'voter_device_id':      resultsVoterInfo['voter_device_id'],
+        'voter_info_retrieved': resultsVoterInfo['voter_info_retrieved'],
+        'switch_accounts':      resultsVoterInfo['switch_accounts'],
     }
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 
@@ -187,17 +198,17 @@ def twitter_sign_in_retrieve_view(request):  # twitterSignInRetrieve
     json_data = {
         'status':                                   results['status'],
         'success':                                  results['success'],
-        'voter_device_id':                          voter_device_id,
-        'voter_we_vote_id':                         results['voter_we_vote_id'],
-        'voter_has_data_to_preserve':               results['voter_has_data_to_preserve'],
         'existing_twitter_account_found':           results['existing_twitter_account_found'],
-        'voter_we_vote_id_attached_to_twitter':     results['voter_we_vote_id_attached_to_twitter'],
+        'twitter_profile_image_url_https':          results['twitter_profile_image_url_https'],
         'twitter_retrieve_attempted':               True,
+        'twitter_secret_key':                       results['twitter_secret_key'],
+        'twitter_sign_in_failed':                   results['twitter_sign_in_failed'],
         'twitter_sign_in_found':                    results['twitter_sign_in_found'],
         'twitter_sign_in_verified':                 results['twitter_sign_in_verified'],
-        'twitter_sign_in_failed':                   results['twitter_sign_in_failed'],
-        'twitter_secret_key':                       results['twitter_secret_key'],
-        'twitter_profile_image_url_https':          results['twitter_profile_image_url_https'],
+        'voter_device_id':                          voter_device_id,
+        'voter_has_data_to_preserve':               results['voter_has_data_to_preserve'],
+        'voter_we_vote_id':                         results['voter_we_vote_id'],
+        'voter_we_vote_id_attached_to_twitter':     results['voter_we_vote_id_attached_to_twitter'],
         'we_vote_hosted_profile_image_url_large':   results['we_vote_hosted_profile_image_url_large'],
         'we_vote_hosted_profile_image_url_medium':  results['we_vote_hosted_profile_image_url_medium'],
         'we_vote_hosted_profile_image_url_tiny':    results['we_vote_hosted_profile_image_url_tiny'],
