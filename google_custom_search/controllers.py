@@ -129,13 +129,6 @@ def retrieve_possible_google_search_users(candidate_campaign):
         return results
 
     status += "RETRIEVE_POSSIBLE_GOOGLE_SEARCH_USERS-REACHING_OUT_TO_GOOGLE "
-
-    search_term = candidate_campaign.candidate_name
-    google_api = build(GOOGLE_SEARCH_API_NAME, GOOGLE_SEARCH_API_VERSION,
-                       developerKey=GOOGLE_SEARCH_API_KEY)
-    search_results = google_api.cse().list(q=search_term, cx=GOOGLE_SEARCH_ENGINE_ID, gl="countryUS",
-                                           filter='1').execute()
-
     name_handling_regex = r"[^ \w'-]"
     candidate_name = {
         'title':       sub(name_handling_regex, "", candidate_campaign.extract_title().lower()),
@@ -146,8 +139,16 @@ def retrieve_possible_google_search_users(candidate_campaign):
         'nickname':    sub(name_handling_regex, "", candidate_campaign.extract_nickname().lower()),
     }
 
-    google_search_users_list.extend(analyze_google_search_results(search_results, search_term, candidate_name,
-                                                                  candidate_campaign))
+    search_term = candidate_campaign.candidate_name
+    google_api = build(GOOGLE_SEARCH_API_NAME, GOOGLE_SEARCH_API_VERSION,
+                       developerKey=GOOGLE_SEARCH_API_KEY)
+    try:
+        search_results = google_api.cse().list(q=search_term, cx=GOOGLE_SEARCH_ENGINE_ID, gl="countryUS",
+                                               filter='1').execute()
+        google_search_users_list.extend(analyze_google_search_results(search_results, search_term, candidate_name,
+                                                                      candidate_campaign))
+    except Exception as e:
+        pass
 
     # Also include search results omitting any single-letter initials and periods in name.
     # Example: "A." is ignored while "A.J." becomes "AJ"
@@ -163,20 +164,27 @@ def retrieve_possible_google_search_users(candidate_campaign):
         modified_search_term_base += " " + candidate_name['suffix']
     modified_search_term += modified_search_term_base
     if search_term != modified_search_term:
-        modified_search_results = google_api.cse().list(q=modified_search_term, cx=GOOGLE_SEARCH_ENGINE_ID,
-                                                        gl="countryUS", filter='1').execute()
-        google_search_users_list.extend(analyze_google_search_results(modified_search_results,
-                                                                      modified_search_term, candidate_name,
-                                                                      candidate_campaign))
+        try:
+            modified_search_results = google_api.cse().list(q=modified_search_term, cx=GOOGLE_SEARCH_ENGINE_ID,
+                                                            gl="countryUS", filter='1').execute()
+            google_search_users_list.extend(analyze_google_search_results(modified_search_results,
+                                                                          modified_search_term, candidate_name,
+                                                                          candidate_campaign))
+        except Exception as e:
+            pass
 
     # If nickname exists, try searching with nickname instead of first name
     if len(candidate_name['nickname']):
         modified_search_term_2 = candidate_name['nickname'] + " " + modified_search_term_base
-        modified_search_results_2 = google_api.cse().list(q=modified_search_term_2, cx=GOOGLE_SEARCH_ENGINE_ID,
-                                                          gl="countryUS", filter='1').execute()
-        google_search_users_list.extend(analyze_google_search_results(modified_search_results_2,
-                                                                      modified_search_term_2, candidate_name,
-                                                                      candidate_campaign))
+        try:
+            modified_search_results_2 = google_api.cse().list(q=modified_search_term_2, cx=GOOGLE_SEARCH_ENGINE_ID,
+                                                              gl="countryUS", filter='1').execute()
+            google_search_users_list.extend(analyze_google_search_results(modified_search_results_2,
+                                                                          modified_search_term_2, candidate_name,
+                                                                          candidate_campaign))
+        except Exception as e:
+            pass
+
     # remove duplicates
     for possible_user in google_search_users_list:
         for existing_user in possible_google_search_users_list:
