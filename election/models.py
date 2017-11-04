@@ -81,7 +81,7 @@ class Election(models.Model):
 class ElectionManager(models.Model):
 
     def update_or_create_election(self, google_civic_election_id, election_name, election_day_text,
-                                  ocd_division_id, state_code='', include_in_list_for_voters=False):
+                                  ocd_division_id, state_code='', include_in_list_for_voters=None):
         """
         Either update or create an election entry.
         """
@@ -107,12 +107,16 @@ class ElectionManager(models.Model):
                     'election_day_text':        election_day_text,
                     'ocd_division_id':          ocd_division_id,
                     'state_code':               state_code,
-                    'include_in_list_for_voters': include_in_list_for_voters,
                 }
                 election_on_stage, new_election_created = Election.objects.update_or_create(
                     google_civic_election_id=google_civic_election_id, defaults=updated_values)
                 success = True
                 status = 'ELECTION_SAVED'
+
+                if include_in_list_for_voters is not None:
+                    election_on_stage.include_in_list_for_voters = include_in_list_for_voters
+                    election_on_stage.save()
+
             except Election.MultipleObjectsReturned as e:
                 handle_record_found_more_than_one_exception(e, logger=logger)
                 success = False
