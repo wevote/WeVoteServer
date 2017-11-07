@@ -1553,8 +1553,11 @@ def refresh_existing_voter_guides(google_civic_election_id, organization_we_vote
             if positive_value_exists(voter_guide.organization_we_vote_id):
                 results = refresh_organization_data_from_master_tables(voter_guide.organization_we_vote_id)
                 status += results['status']
+                # DALE 2017-11-06 This seems to be wasteful, doing the same data pushing multiple times. Refactor.
                 if results['success']:
                     push_organization_data_to_other_table_caches(voter_guide.organization_we_vote_id)
+                # DALE 2017-11-06 The update voter guides functions below I think are also done
+                #  in "push_organization_data_to_other_table_caches". Refactor.
                 if positive_value_exists(voter_guide.google_civic_election_id):
                     results = voter_guide_manager.update_or_create_organization_voter_guide_by_election_id(
                         voter_guide.organization_we_vote_id, voter_guide.google_civic_election_id)

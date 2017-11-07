@@ -17,13 +17,13 @@ from friend.models import FriendManager
 from measure.models import ContestMeasureManager, ContestMeasureList
 from office.models import ContestOfficeManager, ContestOfficeListManager
 from operator import itemgetter
-from organization.models import Organization, OrganizationManager
+from organization.models import Organization, OrganizationManager, PUBLIC_FIGURE, UNKNOWN
 import json
 from voter.models import fetch_voter_id_from_voter_device_link, VoterManager
-from voter_guide.models import ORGANIZATION, PUBLIC_FIGURE, VOTER, UNKNOWN_VOTER_GUIDE, VoterGuideManager
+from voter_guide.models import ORGANIZATION, VOTER, VoterGuideManager
 import wevote_functions.admin
 from wevote_functions.functions import is_voter_device_id_valid, positive_value_exists, process_request_from_master, \
-    convert_to_int, is_link_to_video
+    convert_to_int, is_link_to_video, is_speaker_type_organization, is_speaker_type_public_figure
 
 logger = wevote_functions.admin.get_logger(__name__)
 
@@ -1294,7 +1294,7 @@ def position_list_for_ballot_item_for_api(voter_device_id, friends_vs_public,  #
                 one_position = position_manager.refresh_cached_position_info(one_position)
             speaker_display_name = one_position.speaker_display_name
         else:
-            speaker_type = UNKNOWN_VOTER_GUIDE
+            speaker_type = UNKNOWN
             speaker_display_name = "Unknown"
             speaker_id = None
             speaker_we_vote_id = None
@@ -1377,7 +1377,7 @@ def position_list_for_opinion_maker_for_api(voter_device_id,  # positionListForO
         opinion_maker_id = public_figure_id
         opinion_maker_we_vote_id = public_figure_we_vote_id
     else:
-        kind_of_opinion_maker = UNKNOWN_VOTER_GUIDE
+        kind_of_opinion_maker = UNKNOWN
         kind_of_opinion_maker_text = "UNKNOWN_VOTER_GUIDE"
         opinion_maker_id = 0
         opinion_maker_we_vote_id = ''
@@ -1436,7 +1436,7 @@ def position_list_for_opinion_maker_for_api(voter_device_id,  # positionListForO
 
     position_list_manager = PositionListManager()
     opinion_maker_found = False
-    if kind_of_opinion_maker == ORGANIZATION:
+    if is_speaker_type_organization(kind_of_opinion_maker):
         # Since we want to return the id and we_vote_id, and we don't know for sure that there are any positions
         # for this opinion_maker, we retrieve the following so we can get the id and we_vote_id (per the request of
         # the WebApp team)
@@ -1473,7 +1473,7 @@ def position_list_for_opinion_maker_for_api(voter_device_id,  # positionListForO
         else:
             opinion_maker_id = organization_id
             opinion_maker_we_vote_id = organization_we_vote_id
-    elif kind_of_opinion_maker == PUBLIC_FIGURE:
+    elif is_speaker_type_public_figure(kind_of_opinion_maker):
         # TODO retrieve_all_positions_for_public_figure is just a stub, and doesn't do anything.  The list is empty.
         position_list_raw = position_list_manager.retrieve_all_positions_for_public_figure(
                 public_figure_id, public_figure_we_vote_id, stance_we_are_looking_for,

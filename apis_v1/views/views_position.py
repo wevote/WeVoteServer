@@ -1,25 +1,25 @@
 # apis_v1/views/views_position.py
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
-from ballot.controllers import figure_out_google_civic_election_id_voter_is_watching
 from config.base import get_environment_variable
 from django.http import HttpResponse
 import json
+from ballot.controllers import figure_out_google_civic_election_id_voter_is_watching
+from ballot.models import OFFICE, CANDIDATE, MEASURE
 from position.controllers import position_list_for_ballot_item_for_api, position_list_for_opinion_maker_for_api, \
     position_list_for_voter_for_api, \
     position_retrieve_for_api, position_save_for_api
 from position.models import ANY_STANCE, SUPPORT, STILL_DECIDING, INFORMATION_ONLY, NO_STANCE, OPPOSE, PERCENT_RATING, \
     FRIENDS_ONLY, PUBLIC_ONLY, FRIENDS_AND_PUBLIC
 from position_like.controllers import position_like_count_for_api
-from ballot.models import OFFICE, CANDIDATE, MEASURE
 from support_oppose_deciding.controllers import position_oppose_count_for_ballot_item_for_api, \
     position_support_count_for_ballot_item_for_api, \
     position_public_oppose_count_for_ballot_item_for_api, \
     position_public_support_count_for_ballot_item_for_api, positions_count_for_all_ballot_items_for_api, \
     positions_count_for_one_ballot_item_for_api
-from voter_guide.models import ORGANIZATION, PUBLIC_FIGURE
 import wevote_functions.admin
-from wevote_functions.functions import convert_to_bool, get_voter_device_id, positive_value_exists
+from wevote_functions.functions import convert_to_bool, get_voter_device_id,  \
+    is_speaker_type_organization, is_speaker_type_public_figure, positive_value_exists
 
 logger = wevote_functions.admin.get_logger(__name__)
 
@@ -113,12 +113,12 @@ def position_list_for_opinion_maker_view(request):  # positionListForOpinionMake
     filter_out_voter = positive_value_exists(request.GET.get('filter_out_voter', False))
     # Make sure filter_for_voter is reset to False if filter_out_voter is true
     filter_for_voter = False if filter_out_voter else filter_for_voter
-    if (kind_of_opinion_maker == ORGANIZATION) or (kind_of_opinion_maker == "ORGANIZATION"):
+    if is_speaker_type_organization(kind_of_opinion_maker):
         organization_id = opinion_maker_id
         organization_we_vote_id = opinion_maker_we_vote_id
         public_figure_id = 0
         public_figure_we_vote_id = ''
-    elif (kind_of_opinion_maker == PUBLIC_FIGURE) or (kind_of_opinion_maker == "PUBLIC_FIGURE"):
+    elif is_speaker_type_public_figure(kind_of_opinion_maker):
         organization_id = 0
         organization_we_vote_id = ''
         public_figure_id = opinion_maker_id

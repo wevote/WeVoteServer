@@ -58,6 +58,7 @@
             <td>Twitter</td>
             <td>Election</td>
             <td>Time Span</td>
+            <td>Type</td>
             <td>Public<br />
                 Positions</td>
             <td>Friends-only<br />
@@ -67,7 +68,6 @@
     {% for voter_guide in voter_guide_list %}
         <tr>
             <td>{{ forloop.counter }}</td>
-        {% if voter_guide.voter_guide_owner_type == voter_guide.ORGANIZATION %}
             {% if voter_guide.organization %}
                 <td>{% if voter_guide.we_vote_hosted_profile_image_url_tiny %}
                     <a href="{% url 'organization:organization_position_list' voter_guide.organization.id %}?google_civic_election_id={{ google_civic_election_id }}">
@@ -81,19 +81,10 @@
             {% else %}
                 <td colspan="2">(no org found)</td>
             {% endif %}
-        {% elif voter_guide.voter_guide_owner_type == voter_guide.PUBLIC_FIGURE %}
-            <td></td>
-            <td><a href="#">Public Figure</a></td>
-        {% elif voter_guide.voter_guide_owner_type == voter_guide.VOTER %}
-            <td></td>
-            <td><a href="#">Voter</a></td>
-        {% else %}
-            <td></td>
-            <td><a href="#">?Owner Type?</a></td>
-        {% endif %}
             <td>{{ voter_guide.twitter_handle|default_if_none:"" }}</td>
             <td>{{ voter_guide.google_civic_election_id|default_if_none:"" }}</td>
             <td>{{ voter_guide.vote_smart_time_span|default_if_none:"" }}</td>
+            <td>{{ voter_guide.voter_guide_owner_type|default_if_none:"" }}</td>
             <td>{{ voter_guide.number_of_public_positions|default_if_none:"" }}</td>
             <td>{{ voter_guide.number_of_friends_only_positions|default_if_none:"" }}</td>
             <td>{{ voter_guide.last_updated }}</td>
