@@ -2,7 +2,9 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
-from .models import OrganizationListManager, OrganizationManager
+from .models import Organization, OrganizationListManager, OrganizationManager, \
+    CORPORATION, GROUP, INDIVIDUAL, NEWS_ORGANIZATION, NONPROFIT, NONPROFIT_501C3, NONPROFIT_501C4, \
+    POLITICAL_ACTION_COMMITTEE, ORGANIZATION, PUBLIC_FIGURE, UNKNOWN, VOTER, ORGANIZATION_TYPE_CHOICES
 from analytics.models import ACTION_ORGANIZATION_FOLLOW, ACTION_ORGANIZATION_FOLLOW_IGNORE, \
     ACTION_ORGANIZATION_STOP_FOLLOWING, AnalyticsManager
 from config.base import get_environment_variable
@@ -13,8 +15,8 @@ from follow.models import FollowOrganizationManager, FollowOrganizationList, FOL
 from image.controllers import retrieve_all_images_for_one_organization
 from import_export_facebook.models import FacebookManager
 import json
-from organization.models import Organization
-from position.controllers import move_positions_to_another_organization, update_position_for_friends_details_from_voter, \
+from position.controllers import move_positions_to_another_organization, \
+    update_position_for_friends_details_from_voter, \
     update_position_entered_details_from_organization
 from position.models import PositionListManager
 import robot_detection
@@ -1272,11 +1274,12 @@ def refresh_organization_data_from_master_tables(organization_we_vote_id):
 
 def push_organization_data_to_other_table_caches(organization_we_vote_id):
     organization_manager = OrganizationManager()
+    voter_guide_manager = VoterGuideManager()
     results = organization_manager.retrieve_organization(0, organization_we_vote_id)
     organization = results['organization']
 
-    save_voter_guide_from_organization_results = update_social_media_statistics_in_other_tables(
-        organization)
+    save_voter_guide_from_organization_results = \
+        voter_guide_manager.update_organization_voter_guides_with_organization_data(organization)
 
     save_position_from_organization_results = update_position_entered_details_from_organization(organization)
 
@@ -1316,6 +1319,7 @@ def retrieve_organizations_followed(voter_id, auto_followed_from_twitter_suggest
 def update_social_media_statistics_in_other_tables(organization):
     """
     Update other tables that use any of these social media statistics
+    DALE 2017-11-06 This function is used several places, but I don't think it is doing what is implied by its name
     :param organization:
     :return:
     """

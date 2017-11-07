@@ -2,7 +2,7 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
-from .controllers import organizations_import_from_master_server
+from .controllers import organizations_import_from_master_server, push_organization_data_to_other_table_caches
 from .models import Organization
 from admin_tools.views import redirect_to_sign_in_page
 from candidate.models import CandidateCampaign, CandidateCampaignListManager, CandidateCampaignManager
@@ -399,6 +399,9 @@ def organization_edit_process_view(request):
             organization_on_stage.save()
             organization_id = organization_on_stage.id
             organization_we_vote_id = organization_on_stage.we_vote_id
+
+            push_organization_data_to_other_table_caches(organization_we_vote_id)
+
             messages.add_message(request, messages.INFO, 'Organization updated.')
         else:
             # Create new

@@ -8,23 +8,19 @@ from election.models import ElectionManager, TIME_SPAN_LIST
 from exception.models import handle_exception, handle_record_not_found_exception, \
     handle_record_found_more_than_one_exception
 import operator
-from organization.models import Organization, OrganizationManager
+from organization.models import Organization, OrganizationManager, \
+    CORPORATION, GROUP, INDIVIDUAL, NEWS_ORGANIZATION, NONPROFIT, NONPROFIT_501C3, NONPROFIT_501C4, \
+    POLITICAL_ACTION_COMMITTEE, PUBLIC_FIGURE, UNKNOWN, ORGANIZATION_TYPE_CHOICES
+
 import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, convert_to_str, positive_value_exists
 from wevote_settings.models import fetch_site_unique_id_prefix, fetch_next_we_vote_id_voter_guide_integer
 
 logger = wevote_functions.admin.get_logger(__name__)
 
-ORGANIZATION = 'O'
+ORGANIZATION = 'O'  # Deprecated
 ORGANIZATION_WORD = 'ORGANIZATION'
-PUBLIC_FIGURE = 'P'
-VOTER = 'V'
-UNKNOWN_VOTER_GUIDE = 'U'
-VOTER_GUIDE_TYPE_CHOICES = (
-    (ORGANIZATION, 'Organization'),
-    (PUBLIC_FIGURE, 'Public Figure or Politician'),
-    (VOTER, 'Voter'),
-)
+VOTER = 'V'  # Deprecated
 
 
 class VoterGuideManager(models.Manager):
@@ -37,7 +33,6 @@ class VoterGuideManager(models.Manager):
         This creates voter_guides, and also refreshes voter guides with updated organization data
         """
         google_civic_election_id = convert_to_int(google_civic_election_id)
-        voter_guide_owner_type = ORGANIZATION
         exception_multiple_object_returned = False
         voter_guide_on_stage = None
         organization = Organization()
@@ -64,12 +59,12 @@ class VoterGuideManager(models.Manager):
                         'google_civic_election_id': google_civic_election_id,
                         'organization_we_vote_id':  organization_we_vote_id,
                         # The rest of the values
-                        'voter_guide_owner_type':   voter_guide_owner_type,
                         'image_url':                organization.organization_photo_url(),
                         'twitter_handle':           organization.organization_twitter_handle,
                         'twitter_description':      organization.twitter_description,
                         'twitter_followers_count':  organization.twitter_followers_count,
                         'display_name':             organization.organization_name,
+                        'voter_guide_owner_type':   organization.organization_type,
                         'state_code':               state_code,
                         'we_vote_hosted_profile_image_url_large':  organization.we_vote_hosted_profile_image_url_large,
                         'we_vote_hosted_profile_image_url_medium': organization.we_vote_hosted_profile_image_url_medium,
@@ -439,9 +434,41 @@ class VoterGuideManager(models.Manager):
         }
         return results
 
+    def update_organization_voter_guides_with_organization_data(self, organization):
+        """
+        Update voter_guide entry with the latest information from an organization
+        """
+        success = False
+        status = ""
+        voter_guides_updated = 0
+
+        if organization:
+            voter_guide_list_manager = VoterGuideListManager()
+            results = voter_guide_list_manager.retrieve_all_voter_guides_by_organization_we_vote_id(
+                organization.we_vote_id)
+            if positive_value_exists(results['voter_guide_list_found']):
+                voter_guide_list = results['voter_guide_list']
+                for voter_guide in voter_guide_list:
+                    # Note that "refresh_one_voter_guide_from_organization" doesn't save changes
+                    refresh_results = self.refresh_one_voter_guide_from_organization(voter_guide, organization)
+                    if positive_value_exists(refresh_results['values_changed']):
+                        voter_guide = refresh_results['voter_guide']
+                        voter_guide.save()
+                        success = True
+                        voter_guides_updated += 1
+        status += "UPDATED_VOTER_GUIDES_WITH_ORG_DATA: " + str(voter_guides_updated) + " "
+
+        results = {
+            'success':                  success,
+            'status':                   status,
+            'organization':             organization,
+        }
+        return results
+
     def update_voter_guide_social_media_statistics(self, organization):
         """
         Update voter_guide entry with details retrieved from Twitter, Facebook, or ???
+        DALE 2017-11-06 This function needs to be refactored
         """
         success = False
         status = ""
@@ -490,6 +517,9 @@ class VoterGuideManager(models.Manager):
 
     def refresh_one_voter_guide_from_organization(self, voter_guide, organization):
         values_changed = False
+        if voter_guide.voter_guide_owner_type != organization.organization_type:
+            voter_guide.voter_guide_owner_type = organization.organization_type
+            values_changed = True
         if voter_guide.twitter_followers_count != organization.twitter_followers_count:
             voter_guide.twitter_followers_count = organization.twitter_followers_count
             values_changed = True
@@ -674,9 +704,10 @@ class VoterGuide(models.Model):
     we_vote_hosted_profile_image_url_tiny = models.URLField(
         verbose_name='tiny version image url of logo/photo associated with voter guide', blank=True, null=True)
 
+    # Mapped directly from organization.organization_type
     voter_guide_owner_type = models.CharField(
-        verbose_name="is owner org, public figure, or voter?", max_length=1, choices=VOTER_GUIDE_TYPE_CHOICES,
-        default=ORGANIZATION)
+        verbose_name="is owner org, public figure, or voter?", max_length=2, choices=ORGANIZATION_TYPE_CHOICES,
+        default=UNKNOWN)
 
     twitter_handle = models.CharField(verbose_name='twitter screen_name', max_length=255, null=True, unique=False)
     twitter_description = models.CharField(verbose_name="Text description of this organization from twitter.",
@@ -718,13 +749,22 @@ class VoterGuide(models.Model):
         return ''
 
     # The date of the last change to this voter_guide
-    last_updated = models.DateTimeField(verbose_name='date last changed', null=True, auto_now=True)  # TODO convert to date_last_changed
+    # TODO convert to date_last_changed
+    last_updated = models.DateTimeField(verbose_name='date last changed', null=True, auto_now=True)
 
     # We want to map these here so they are available in the templates
-    ORGANIZATION = ORGANIZATION
+    CORPORATION = CORPORATION
+    GROUP = GROUP  # Group of people (not an individual), but org status unknown
+    INDIVIDUAL = INDIVIDUAL
+    NEWS_ORGANIZATION = NEWS_ORGANIZATION
+    NONPROFIT = NONPROFIT
+    NONPROFIT_501C3 = NONPROFIT_501C3
+    NONPROFIT_501C4 = NONPROFIT_501C4
+    POLITICAL_ACTION_COMMITTEE = POLITICAL_ACTION_COMMITTEE
+    ORGANIZATION = ORGANIZATION  # Deprecate in favor of GROUP
     PUBLIC_FIGURE = PUBLIC_FIGURE
-    VOTER = VOTER
-    UNKNOWN_VOTER_GUIDE = UNKNOWN_VOTER_GUIDE
+    VOTER = VOTER  # Deprecate in favor of Individual
+    UNKNOWN = UNKNOWN
 
     def __unicode__(self):
         return self.last_updated
@@ -1510,12 +1550,14 @@ class VoterGuidePossibility(models.Model):
     # The unique ID of this election. (Provided by Google Civic)
     google_civic_election_id = models.PositiveIntegerField(verbose_name="google civic election id", null=True)
 
+    # Mapped directly from organization.organization_type
     voter_guide_owner_type = models.CharField(
-        verbose_name="is owner org, public figure, or voter?", max_length=1, choices=VOTER_GUIDE_TYPE_CHOICES,
-        default=ORGANIZATION)
+        verbose_name="is owner org, public figure, or voter?", max_length=2, choices=ORGANIZATION_TYPE_CHOICES,
+        default=UNKNOWN)
 
     # The date of the last change to this voter_guide_possibility
-    last_updated = models.DateTimeField(verbose_name='date last changed', null=True, auto_now=True)  # TODO Convert to date_last_changed
+    # TODO Convert to date_last_changed
+    last_updated = models.DateTimeField(verbose_name='date last changed', null=True, auto_now=True)
 
     def __unicode__(self):
         return self.last_updated

@@ -53,21 +53,21 @@
     <form name="analytics_form" method="get" action="{% url 'analytics:analytics_action_list' voter_we_vote_id %}">
         {% csrf_token %}
         <input type="text" name="analytics_action_search" id="analytics_action_search_id" value="{{ analytics_action_search }}" />
-        <input type="text" name="show_user_agent" value="{{ show_user_agent }}" />
+        <input type="hidden" name="show_user_agent" value="{{ show_user_agent }}" />
         <input type="submit" value="Search" />
     </form>
 {% elif organization_we_vote_id %}
     <form name="analytics_form" method="get" action="{% url 'analytics:analytics_action_list' organization_we_vote_id %}">
         {% csrf_token %}
         <input type="text" name="analytics_action_search" id="analytics_action_search_id" value="{{ analytics_action_search }}" />
-        <input type="text" name="show_user_agent" value="{{ show_user_agent }}" />
+        <input type="hidden" name="show_user_agent" value="{{ show_user_agent }}" />
         <input type="submit" value="Search" />
     </form>
 {% else %}
     <form name="analytics_form" method="get" action="{% url 'analytics:analytics_action_list' %}">
         {% csrf_token %}
         <input type="text" name="analytics_action_search" id="analytics_action_search_id" value="{{ analytics_action_search }}" />
-        <input type="text" name="show_user_agent" value="{{ show_user_agent }}" />
+        <input type="hidden" name="show_user_agent" value="{{ show_user_agent }}" />
         <input type="submit" value="Search" />
     </form>
 {% endif %}

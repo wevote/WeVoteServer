@@ -16,16 +16,19 @@ from voter.models import VoterManager
 from wevote_functions.functions import convert_to_int, extract_twitter_handle_from_text_string, positive_value_exists
 from wevote_settings.models import fetch_next_we_vote_id_org_integer, fetch_site_unique_id_prefix
 
+# Also see a copy of these in wevote_function/functions.py
 CORPORATION = 'C'
 GROUP = 'G'  # Group of people (not an individual), but org status unknown
 INDIVIDUAL = 'I'  # One person
-NEWS_ORGANIZATION = 'NW'
 NONPROFIT = 'NP'
 NONPROFIT_501C3 = 'C3'
 NONPROFIT_501C4 = 'C4'
+NEWS_ORGANIZATION = 'NW'
+ORGANIZATION = 'O'  # Deprecated
 POLITICAL_ACTION_COMMITTEE = 'P'
 PUBLIC_FIGURE = 'PF'
 UNKNOWN = 'U'
+VOTER = 'V'
 ORGANIZATION_TYPE_CHOICES = (
     (CORPORATION, 'Corporation'),
     (GROUP, 'Group'),
@@ -37,6 +40,7 @@ ORGANIZATION_TYPE_CHOICES = (
     (POLITICAL_ACTION_COMMITTEE, 'Political Action Committee'),
     (PUBLIC_FIGURE, 'Public Figure'),
     (UNKNOWN, 'Unknown Type'),
+    (ORGANIZATION, 'Group - Organization'),  # Deprecated
 )
 
 ORGANIZATION_TYPE_MAP = {

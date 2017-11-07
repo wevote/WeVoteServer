@@ -14,6 +14,20 @@ import json
 import requests
 from django.contrib import messages
 
+# We don't want to include the actual constants from organization/models.py, since that can cause include conflicts
+CORPORATION = 'C'
+GROUP = 'G'  # Group of people (not an individual), but org status unknown
+INDIVIDUAL = 'I'  # One person
+NONPROFIT = 'NP'
+NONPROFIT_501C3 = 'C3'
+NONPROFIT_501C4 = 'C4'
+NEWS_ORGANIZATION = 'NW'
+ORGANIZATION = 'O'  # Deprecated
+POLITICAL_ACTION_COMMITTEE = 'P'
+PUBLIC_FIGURE = 'PF'
+UNKNOWN = 'U'
+VOTER = 'V'
+
 
 logger = wevote_functions.admin.get_logger(__name__)
 
@@ -707,6 +721,25 @@ def is_link_to_video(link_url):
     if link_url is None:
         return False
     if "youtube.com" in link_url:
+        return True
+    return False
+
+
+def is_speaker_type_individual(speaker_type):
+    if speaker_type in (INDIVIDUAL, VOTER):
+        return True
+    return False
+
+
+def is_speaker_type_organization(speaker_type):
+    if speaker_type in (CORPORATION, GROUP, NEWS_ORGANIZATION, NONPROFIT, NONPROFIT_501C3,
+                        NONPROFIT_501C4, ORGANIZATION, POLITICAL_ACTION_COMMITTEE, "ORGANIZATION"):
+        return True
+    return False
+
+
+def is_speaker_type_public_figure(speaker_type):
+    if speaker_type in (PUBLIC_FIGURE, "PUBLIC_FIGURE"):
         return True
     return False
 
