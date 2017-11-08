@@ -12,7 +12,7 @@ from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
 from google_custom_search.models import GoogleSearchUser
 from voter.models import voter_has_authority
-from wevote_functions.functions import convert_to_int, positive_value_exists
+from wevote_functions.functions import convert_to_int, positive_value_exists, get_voter_api_device_id
 import wevote_functions.admin
 
 logger = wevote_functions.admin.get_logger(__name__)
@@ -83,6 +83,7 @@ def retrieve_possible_google_search_users_view(request, candidate_campaign_we_vo
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
+    voter_device_id = get_voter_api_device_id(request)
     candidate_manager = CandidateCampaignManager()
     results = candidate_manager.retrieve_candidate_campaign_from_we_vote_id(candidate_campaign_we_vote_id)
 
@@ -93,7 +94,7 @@ def retrieve_possible_google_search_users_view(request, candidate_campaign_we_vo
 
     candidate_campaign = results['candidate_campaign']
 
-    results = retrieve_possible_google_search_users(candidate_campaign)
+    results = retrieve_possible_google_search_users(candidate_campaign, voter_device_id)
     messages.add_message(request, messages.INFO, 'Number of possibilities found: ' + results['num_of_possibilities'])
 
     return HttpResponseRedirect(reverse('candidate:candidate_edit_we_vote_id', args=(candidate_campaign_we_vote_id,)))
@@ -105,6 +106,7 @@ def bulk_retrieve_possible_google_search_users_view(request):
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
+    voter_device_id = get_voter_api_device_id(request)
     google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
     state_code = request.GET.get('state_code', '')
     show_all = request.GET.get('show_all', False)
@@ -139,7 +141,7 @@ def bulk_retrieve_possible_google_search_users_view(request):
             if not positive_value_exists(google_search_possibility_list):
                 # Google search and analysis has not been run on this candidate yet
                 # (or no results have been found for this candidate, at least)
-                results = retrieve_possible_google_search_users(one_candidate)
+                results = retrieve_possible_google_search_users(one_candidate, voter_device_id)
                 number_of_candidates_to_search -= 1
             current_candidate_index += 1
     except CandidateCampaign.DoesNotExist:

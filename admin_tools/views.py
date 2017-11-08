@@ -1628,6 +1628,11 @@ def login_user(request):
     :return:
     """
     voter_api_device_id = get_voter_api_device_id(request)  # We look in the cookies for voter_api_device_id
+    if hasattr(request, 'facebook'):
+        facebook_object = request.facebook
+        facebook_data = getattr(facebook_object, 'social_user', None)
+    else:
+        facebook_data = None
     store_new_voter_api_device_id_in_cookie = False
     voter_signed_in = False
 
@@ -1712,6 +1717,26 @@ def login_user(request):
         'messages_on_stage':    messages_on_stage,
     }
     response = render(request, 'registration/login_user.html', template_values)
+
+    # If login with facebook then save facebook details in facebookAuthResponse and facebookLinkToVoter
+    if facebook_data:
+        facebook_user_data = getattr(facebook_data, 'user', None)
+        facebook_user_first_name = getattr(facebook_user_data, 'first_name', '')
+        facebook_user_middle_name = getattr(facebook_user_data, 'middle_name', '')
+        facebook_user_last_name = getattr(facebook_user_data, 'last_name', '')
+        facebook_user_email = getattr(facebook_user_data, 'email', '')
+        facebook_user_we_vote_id = getattr(facebook_user_data, 'we_vote_id', '')
+        facebook_access_token = getattr(facebook_data, 'access_token', '')
+        facebook_user_id = getattr(facebook_data, 'uid', 0)
+        facebook_user_manager = FacebookManager()
+        if positive_value_exists(facebook_access_token) and positive_value_exists(facebook_user_id):
+            facebook_auth_response_results = facebook_user_manager.update_or_create_facebook_auth_response(
+                voter_api_device_id, facebook_access_token, facebook_user_id, 0, '', facebook_user_email,
+                facebook_user_first_name, facebook_user_middle_name, facebook_user_last_name, '', '', '', '')
+
+        if positive_value_exists(facebook_user_id) and positive_value_exists(facebook_user_we_vote_id):
+            facebook_link_results = facebook_user_manager.create_facebook_link_to_voter(facebook_user_id,
+                                                                                        facebook_user_we_vote_id)
 
     # We want to store the voter_api_device_id cookie if it is new
     if positive_value_exists(voter_api_device_id) and positive_value_exists(store_new_voter_api_device_id_in_cookie):
