@@ -24,7 +24,7 @@ def authenticate_associate_by_email(**kwargs):
             results = voter_manager.retrieve_voter_by_twitter_id(twitter_id)
         elif kwargs['backend'].name == 'facebook':
             facebook_id = kwargs['uid']
-            results = voter_manager.retrieve_voter_by_facebook_id(facebook_id)
+            results = voter_manager.retrieve_voter_by_facebook_id_old(facebook_id)
         if results['voter_found']:
             kwargs['user'] = results['voter']
         else:
@@ -55,7 +55,7 @@ def social_user(backend, uid, details, user=None, *args, **kwargs):
         # local_user_matches = user and user.twitter_id == uid
     elif backend.name == 'facebook':
         # Facebook: Check to see if we have a voter with a matching facebook_id
-        results = voter_manager.retrieve_voter_by_facebook_id(uid)
+        results = voter_manager.retrieve_voter_by_facebook_id_old(uid)
         if results['voter_found']:
             user = results['voter']
             local_user_matches = True
@@ -101,7 +101,7 @@ def social_user(backend, uid, details, user=None, *args, **kwargs):
                     voter_found_that_matches_auth = True
             elif backend.name == 'facebook':
                 # Find the voter account that actually matches this facebook_id
-                results = voter_manager.retrieve_voter_by_facebook_id(uid)
+                results = voter_manager.retrieve_voter_by_facebook_id_old(uid)
                 if results['voter_found']:
                     voter_that_matches_auth = results['voter']
                     voter_found_that_matches_auth = True

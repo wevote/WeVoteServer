@@ -815,6 +815,115 @@ class FacebookManager(models.Model):
         }
         return results
 
+    def extract_facebook_user_details(self, facebook_user_api_details):
+        """
+        Extracting facebook user details with required fields
+        :param facebook_user_api_details:
+        :return:
+        """
+        facebook_user_details_dict = {}
+        facebook_user_details_dict['about'] = (facebook_user_api_details.get('about')
+                                               if 'about' in facebook_user_api_details.keys() else None)
+
+        facebook_user_details_dict['location'] = ""
+        if 'location' in facebook_user_api_details.keys():
+            if 'city' in facebook_user_api_details.get('location'):
+                facebook_user_details_dict['location'] += facebook_user_api_details.get('location').get('city')
+            if 'street' in facebook_user_api_details.get('location'):
+                facebook_user_details_dict['location'] += ", " + facebook_user_api_details.get('location').get('street')
+            if 'zip' in facebook_user_api_details.get('location'):
+                facebook_user_details_dict['location'] += ", " + facebook_user_api_details.get('location').get('zip')
+
+        photos = (facebook_user_api_details.get('photos').get(
+            'data') if 'photos' in facebook_user_api_details.keys() and facebook_user_api_details.get(
+            'photos', {}).get('data', []) else "")
+        facebook_user_details_dict['photos'] = [photo.get('picture') for photo in photos if 'picture' in photo.keys()]
+
+        facebook_user_details_dict['bio'] = (facebook_user_api_details.get('bio')
+                                             if 'bio' in facebook_user_api_details.keys() else "")
+
+        facebook_user_details_dict['general_info'] = (facebook_user_api_details.get('general_info')
+                                                      if 'general_info' in facebook_user_api_details.
+                                                      keys() else "")
+        facebook_user_details_dict['description'] = (facebook_user_api_details.get('description')
+                                                     if 'description' in facebook_user_api_details.keys()
+                                                     else "")
+        facebook_user_details_dict['features'] = (facebook_user_api_details.get('features')
+                                                  if 'features' in facebook_user_api_details.keys() else "")
+        facebook_user_details_dict['contact_address'] = (facebook_user_api_details.get('contact_address')
+                                                         if 'contact_address' in
+                                                            facebook_user_api_details.keys() else "")
+        facebook_user_details_dict['emails'] = " ".join(facebook_user_api_details.get('emails')
+                                                        if 'emails' in facebook_user_api_details.keys() else [])
+        facebook_user_details_dict['name'] = (facebook_user_api_details.get('name')
+                                              if 'name' in facebook_user_api_details.keys() else "")
+        facebook_user_details_dict['mission'] = (facebook_user_api_details.get('mission')
+                                                 if 'mission' in facebook_user_api_details.keys() else "")
+        facebook_user_details_dict['category'] = (facebook_user_api_details.get('category')
+                                                  if 'category' in facebook_user_api_details.keys() else "")
+        facebook_user_details_dict['website'] = (facebook_user_api_details.get('website')
+                                                 if 'website' in facebook_user_api_details.keys() else "")
+        facebook_user_details_dict['personal_interests'] = (facebook_user_api_details.get('personal_interests')
+                                                            if 'personal_interests' in
+                                                               facebook_user_api_details.keys() else "")
+        facebook_user_details_dict['personal_info'] = (facebook_user_api_details.get('personal_info')
+                                                       if 'personal_info' in facebook_user_api_details.keys()
+                                                       else "")
+        posts = (facebook_user_api_details.get('posts').get(
+            'data') if 'posts' in facebook_user_api_details.keys() and facebook_user_api_details.get(
+            'posts', {}).get('data', []) else "")
+        facebook_user_details_dict['posts'] = " ".join([str(post.get('message'))
+                                                        for post in posts if 'message' in post.keys()])
+
+        return facebook_user_details_dict
+
+    def retrieve_facebook_user_details_from_facebook(self, voter_device_id, facebook_user_name):
+        """
+        :param voter_device_id:
+        :param facebook_user_name:
+        :return:
+        """
+
+        success = False
+        status = ''
+        facebook_user_details_found = False
+        facebook_user_details_dict = {}
+        facebook_api_fields = "about, location, photos{picture}, bio, general_info, description, features, " \
+                              "contact_address, emails, posts{message}, name, hometown, mission, category," \
+                              "website, personal_interests, personal_info"
+        auth_response_results = self.retrieve_facebook_auth_response(voter_device_id)
+        if not auth_response_results['facebook_auth_response_found']:
+            error_results = {
+                'status':                           "FACEBOOK_AUTH_RESPONSE_NOT_FOUND",
+                'success':                          success,
+                'facebook_user_details_found':      facebook_user_details_found,
+                'facebook_user_details':            facebook_user_details_dict,
+            }
+            return error_results
+
+        facebook_auth_response = auth_response_results['facebook_auth_response']
+        try:
+            facebook_graph = facebook.GraphAPI(facebook_auth_response.facebook_access_token, version='2.7')
+            facebook_user_api_details = facebook_graph.get_object(id=facebook_user_name,
+                                                                  fields=facebook_api_fields)
+            facebook_user_details_dict = self.extract_facebook_user_details(facebook_user_api_details)
+            success = True
+            status += " " + "FACEBOOK_USER_DETAILS_FOUND"
+            facebook_user_details_found = True
+        except Exception as e:
+            success = False
+            status += " " + "FACEBOOK_USER_DETAILS_FAILED_WITH_EXCEPTION"
+            facebook_user_details_found = False
+            handle_exception(e, logger=logger, exception_message=status)
+
+        results = {
+            'success':                          success,
+            'status':                           status,
+            'facebook_user_details_found':      facebook_user_details_found,
+            'facebook_user_details':            facebook_user_details_dict,
+        }
+        return results
+
     def retrieve_facebook_user_by_facebook_user_id(self, facebook_user_id):
         """
         Retrieve facebook user from FacebookUser table.
