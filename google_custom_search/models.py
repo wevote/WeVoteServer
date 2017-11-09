@@ -6,9 +6,17 @@
 import wevote_functions.admin
 from django.db import models
 
+from config.base import get_environment_variable
 from wevote_functions.functions import positive_value_exists
 
 logger = wevote_functions.admin.get_logger(__name__)
+GOOGLE_SEARCH_ENGINE_ID = get_environment_variable("GOOGLE_SEARCH_ENGINE_ID")
+GOOGLE_SEARCH_API_KEY = get_environment_variable("GOOGLE_SEARCH_API_KEY")
+GOOGLE_SEARCH_API_NAME = get_environment_variable("GOOGLE_SEARCH_API_NAME")
+GOOGLE_SEARCH_API_VERSION = get_environment_variable("GOOGLE_SEARCH_API_VERSION")
+BALLOTPEDIA_LOGO_URL = "ballotpedia-logo-square"
+MAXIMUM_GOOGLE_SEARCH_USERS = 10
+MAXIMUM_CHARACTERS_LENGTH = 1024
 
 
 class GoogleSearchUser(models.Model):
@@ -20,7 +28,7 @@ class GoogleSearchUser(models.Model):
     search_term_used = models.CharField(verbose_name="", max_length=255, unique=False)
     item_title = models.CharField(verbose_name="searched item title", max_length=255, null=True, blank=True)
     item_link = models.URLField(verbose_name="url where searched item pointing", null=True, blank=True)
-    item_snippet = models.CharField(verbose_name="searched item snippet", max_length=1000, null=True, blank=True)
+    item_snippet = models.CharField(verbose_name="searched item snippet", max_length=1024, null=True, blank=True)
     item_image = models.URLField(verbose_name='image url for searched item', blank=True, null=True)
     item_formatted_url = models.URLField(verbose_name="item formatted url", null=True, blank=True)
     item_meta_tags_description = models.CharField(verbose_name="searched item meta tags description", max_length=1000,
@@ -35,6 +43,28 @@ class GoogleSearchUser(models.Model):
     likelihood_score = models.IntegerField(verbose_name="score for a match", null=True, unique=False)
     chosen_and_updated = models.BooleanField(default=False,
                                              verbose_name="when search detail updated in candidate table")
+    facebook_search_found = models.BooleanField(default=False, verbose_name="user found from facebook search")
+    facebook_name = models.CharField(verbose_name="name from facebook search", max_length=255, null=True, blank=True)
+    facebook_emails = models.CharField(verbose_name="emails from facebook", max_length=255, null=True, blank=True)
+    facebook_about = models.CharField(verbose_name="about from facebook", max_length=255, null=True, blank=True)
+    facebook_location = models.CharField(verbose_name="location from facebook", max_length=255, null=True, blank=True)
+    facebook_photos = models.CharField(verbose_name="photos from facebook", max_length=1024, null=True, blank=True)
+    facebook_bio = models.CharField(verbose_name="bio from facebook", max_length=1024, null=True, blank=True)
+    facebook_general_info = models.CharField(verbose_name="general information from facebook", max_length=1024,
+                                             null=True, blank=True)
+    facebook_description = models.CharField(verbose_name="description from facebook", max_length=1024,
+                                            null=True, blank=True)
+    facebook_features = models.CharField(verbose_name="features from facebook", max_length=255, null=True, blank=True)
+    facebook_contact_address = models.CharField(verbose_name="contact address from facebook", max_length=255,
+                                                null=True, blank=True)
+    facebook_mission = models.CharField(verbose_name="mission from facebook", max_length=1024, null=True, blank=True)
+    facebook_category = models.CharField(verbose_name="category from facebook", max_length=255, null=True, blank=True)
+    facebook_website = models.URLField(verbose_name="website from facebook", null=True, blank=True)
+    facebook_personal_info = models.CharField(verbose_name="personal information from facebook", max_length=1024,
+                                              null=True, blank=True)
+    facebook_personal_interests = models.CharField(verbose_name="personal interests from facebook", max_length=255,
+                                                   null=True, blank=True)
+    facebook_posts = models.CharField(verbose_name="posts from facebook", max_length=1024, null=True, blank=True)
 
 class GoogleSearchUserManager(models.Model):
 
@@ -42,8 +72,9 @@ class GoogleSearchUserManager(models.Model):
         return "TwitterUserManager"
 
     def update_or_create_google_search_user_possibility(self, candidate_campaign_we_vote_id, google_json, search_term,
-                                                        likelihood_score, from_ballotpedia=False, from_facebook=False,
-                                                        from_linkedin=False, from_twitter=False, from_wikipedia=False):
+                                                        likelihood_score, facebook_json=None, from_ballotpedia=False,
+                                                        from_facebook=False, from_linkedin=False, from_twitter=False,
+                                                        from_wikipedia=False):
         google_search_user_on_stage = None
         google_search_user_created = False
         try:
@@ -66,6 +97,32 @@ class GoogleSearchUserManager(models.Model):
                     'search_request_url':           google_json['search_request_url']
                     }
                 )
+            if positive_value_exists(facebook_json):
+                if facebook_json['facebook_search_found']:
+                    google_search_user_on_stage, google_search_user_updated = GoogleSearchUser.objects.update_or_create(
+                        candidate_campaign_we_vote_id=candidate_campaign_we_vote_id,
+                        item_link=google_json['item_link'],
+                        defaults={
+                            'facebook_search_found':        facebook_json['facebook_search_found'],
+                            'facebook_name':                facebook_json['name'],
+                            'facebook_emails':              facebook_json['emails'],
+                            'facebook_about':               facebook_json['about'],
+                            'facebook_location':            facebook_json['location'],
+                            'facebook_photos':              facebook_json['photos'][:MAXIMUM_CHARACTERS_LENGTH],
+                            'facebook_bio':                 facebook_json['bio'][:MAXIMUM_CHARACTERS_LENGTH],
+                            'facebook_general_info':        facebook_json['general_info'][:MAXIMUM_CHARACTERS_LENGTH],
+                            'facebook_description':         facebook_json['description'][:MAXIMUM_CHARACTERS_LENGTH],
+                            'facebook_features':            facebook_json['features'],
+                            'facebook_contact_address':     facebook_json['contact_address'],
+                            'facebook_mission':             facebook_json['mission'][:MAXIMUM_CHARACTERS_LENGTH],
+                            'facebook_category':            facebook_json['category'],
+                            'facebook_website':             facebook_json['website'],
+                            'facebook_personal_info':       facebook_json['personal_info'][:MAXIMUM_CHARACTERS_LENGTH],
+                            'facebook_personal_interests':  facebook_json['personal_interests'],
+                            'facebook_posts':               facebook_json['posts'][:MAXIMUM_CHARACTERS_LENGTH]
+                        }
+                    )
+
             if google_search_user_created:
                 status = "GOOGLE_SEARCH_USER_POSSIBILITY_CREATED"
             else:

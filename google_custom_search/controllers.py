@@ -3,9 +3,9 @@
 # -*- coding: UTF-8 -*-
 
 # See also WeVoteServer/import_export_twitter/controllers.py for routines that manage incoming twitter data
-
-from .models import GoogleSearchUserManager
-from config.base import get_environment_variable
+from image.functions import analyze_remote_url
+from .models import GoogleSearchUserManager, GOOGLE_SEARCH_API_NAME, GOOGLE_SEARCH_API_VERSION, GOOGLE_SEARCH_API_KEY, \
+    GOOGLE_SEARCH_ENGINE_ID, BALLOTPEDIA_LOGO_URL, MAXIMUM_CHARACTERS_LENGTH, MAXIMUM_GOOGLE_SEARCH_USERS
 from googleapiclient.discovery import build
 from image.controllers import BALLOTPEDIA, LINKEDIN, FACEBOOK, TWITTER, WIKIPEDIA
 from import_export_facebook.models import FacebookManager
@@ -15,13 +15,6 @@ from re import sub
 from wevote_functions.functions import positive_value_exists, convert_state_code_to_state_text, \
     POSITIVE_SEARCH_KEYWORDS, NEGATIVE_SEARCH_KEYWORDS, extract_facebook_username_from_text_string
 
-GOOGLE_SEARCH_ENGINE_ID = get_environment_variable("GOOGLE_SEARCH_ENGINE_ID")
-GOOGLE_SEARCH_API_KEY = get_environment_variable("GOOGLE_SEARCH_API_KEY")
-GOOGLE_SEARCH_API_NAME = get_environment_variable("GOOGLE_SEARCH_API_NAME")
-GOOGLE_SEARCH_API_VERSION = get_environment_variable("GOOGLE_SEARCH_API_VERSION")
-BALLOTPEDIA_LOGO_URL = "ballotpedia-logo-square"
-MAXIMUM_GOOGLE_SEARCH_USERS = 10
-MAXIMUM_CHARACTERS_LENGTH = 1000
 
 
 def delete_possible_google_search_users(candidate_campaign):
@@ -213,9 +206,10 @@ def retrieve_possible_google_search_users(candidate_campaign, voter_device_id):
             save_google_search_user_results = google_search_user_manager.\
                 update_or_create_google_search_user_possibility(
                     candidate_campaign.we_vote_id, possibility_result['google_json'], possibility_result['search_term'],
-                    possibility_result['likelihood_score'], possibility_result['from_ballotpedia'],
-                    possibility_result['from_facebook'], possibility_result['from_linkedin'],
-                    possibility_result['from_twitter'], possibility_result['from_wikipedia'])
+                    possibility_result['likelihood_score'], possibility_result['facebook_json'],
+                    possibility_result['from_ballotpedia'], possibility_result['from_facebook'],
+                    possibility_result['from_linkedin'], possibility_result['from_twitter'],
+                    possibility_result['from_wikipedia'])
             if save_google_search_user_results['success'] and \
                     save_google_search_user_results['google_search_user_created']:
                 google_search_user_count += 1
@@ -365,7 +359,8 @@ def analyze_google_search_results(search_results, search_term, candidate_name,
                 'from_linkedin':            from_linkedin,
                 'from_twitter':             from_twitter,
                 'from_wikipedia':           from_wikipedia,
-                'google_json':              google_json
+                'google_json':              google_json,
+                'facebook_json':            None
             }
             possible_google_search_users_list.append(current_candidate_google_search_info)
     return possible_google_search_users_list
@@ -384,14 +379,24 @@ def parse_google_search_results(search_term, result):
     item_image = (result.get('pagemap').get('metatags')[0].get('og:image')
                   if 'pagemap' in result and result.get('pagemap', {}).get('metatags', []) and
                   result.get('pagemap', {}).get('metatags', [])[0].get('og:image') else '')
+    if item_image:
+        image_results = analyze_remote_url(item_image)
+        item_image = None if not image_results['image_url_valid'] else item_image
     if not item_image:
         item_image = (result.get('pagemap').get('cse_image')[0].get('src')
                       if 'pagemap' in result and result.get('pagemap', {}).get('cse_image', []) and
                          result.get('pagemap', {}).get('cse_image', [])[0].get('src') else '')
+        if item_image:
+            image_results = analyze_remote_url(item_image)
+            item_image = None if not image_results['image_url_valid'] else item_image
         if not item_image:
             item_image = (result.get('pagemap').get('cse_thumbnail')[0].get('src')
                           if 'pagemap' in result and result.get('pagemap', {}).get('cse_thumbnail', []) and
                              result.get('pagemap', {}).get('cse_thumbnail', [])[0].get('src') else '')
+            if item_image:
+                image_results = analyze_remote_url(item_image)
+                item_image = None if not image_results['image_url_valid'] else item_image
+
     item_meta_tags_description = (result.get('pagemap').get('metatags')[0].get('og:description')
                                   if 'pagemap' in result and result.get('pagemap', {}).get('metatags', []) and
                                   result.get('pagemap', {}).get('metatags', [])[0].get('og:description') else '')
@@ -539,7 +544,8 @@ def analyze_wikipedia_search_results(wikipedia_page, search_term, candidate_name
         'from_linkedin':            False,
         'from_twitter':             False,
         'from_wikipedia':           True,
-        'google_json':              google_json
+        'google_json':              google_json,
+        'facebook_json':            None
     }
     possible_google_search_users_list.append(current_candidate_wikipedia_search_info)
     return possible_google_search_users_list
@@ -557,79 +563,69 @@ def analyze_facebook_search_results(google_json, search_term, candidate_name,
         voter_device_id, facebook_user_name)
     facebook_user_details = facebook_user_details_results['facebook_user_details']
     if facebook_user_details_results['success']:
-        facebook_user_posts = facebook_user_details['posts']
-        google_json['item_snippet'] = "{about} {emails} {general_info} {description}"\
-            .format(about=facebook_user_details['about'], emails=facebook_user_details['emails'],
-                    general_info=facebook_user_details['general_info'],
-                    description=facebook_user_details['description'])
-
-        google_json['item_meta_tags_description'] = "{website} {category} {contact_address} {bio} {mission} " \
-                                                    "{features} {personal_info}"\
-            .format(website=facebook_user_details['website'], category=facebook_user_details['category'],
-                    contact_address=facebook_user_details['contact_address'], bio=facebook_user_details['bio'],
-                    mission=facebook_user_details['mission'], features=facebook_user_details['features'],
-                    personal_info=facebook_user_details['personal_info'])
-
-        google_json['item_person_location'] = google_json['item_person_location'] \
-            if positive_value_exists(google_json['item_person_location']) else facebook_user_details['location']
-
-        google_json['item_formatted_url'] = google_json['item_formatted_url'] \
-            if positive_value_exists(google_json['item_formatted_url']) else facebook_user_details['website']
-
         # Check if name (or parts of name) are in title, snippet and description
         name_found_in_title = False
         name_found_in_description = False
         for name in candidate_name.values():
-            if len(name) and (name in google_json['item_title'].lower() or
-                              name in facebook_user_details['name'].lower()):
+            if len(name) and (name in facebook_user_details['name'].lower()):
                 likelihood_score += 10
                 name_found_in_title = True
-            if len(name) and (name in google_json['item_snippet'].lower() or
-                              name in google_json['item_meta_tags_description'].lower()):
+            if len(name) and (name in facebook_user_details['description'].lower() or
+                              name in facebook_user_details['about'].lower() or
+                              name in facebook_user_details['mission'].lower() or
+                              name in facebook_user_details['bio'].lower()):
                 likelihood_score += 5
                 name_found_in_description = True
-
         if not name_found_in_title:
             likelihood_score -= 10
         if not name_found_in_description:
             likelihood_score -= 5
 
         # Check if state or state code is in location or description
-        if google_json['item_person_location'] and positive_value_exists(state_full_name) and \
-                state_full_name in google_json['item_person_location']:
-            likelihood_score += 20
-        elif google_json['item_person_location'] and positive_value_exists(state_code) and \
-                state_code in google_json['item_person_location']:
-            likelihood_score += 20
-        if google_json['item_snippet'] and positive_value_exists(state_full_name) and \
-                state_full_name in google_json['item_snippet']:
-            likelihood_score += 20
-        elif google_json['item_meta_tags_description'] and positive_value_exists(state_full_name) and \
-                state_full_name in google_json['item_meta_tags_description']:
-            likelihood_score += 20
+        if positive_value_exists(state_full_name):
+            if state_full_name in facebook_user_details['location']:
+                likelihood_score += 20
+            if state_full_name in facebook_user_details['description'] or \
+                    state_full_name in facebook_user_details['bio'] or \
+                    state_full_name in facebook_user_details['about'] or \
+                    state_full_name in facebook_user_details['general_info'] or \
+                    state_full_name in facebook_user_details['personal_info']:
+                likelihood_score += 20
+        elif positive_value_exists(state_code):
+            if state_code in facebook_user_details['location']:
+                likelihood_score += 20
+            if state_code in facebook_user_details['description'] or \
+                    state_code in facebook_user_details['bio'] or \
+                    state_code in facebook_user_details['about'] or \
+                    state_full_name in facebook_user_details['general_info'] or \
+                    state_full_name in facebook_user_details['personal_info']:
+                likelihood_score += 20
 
         # Check if candidate's party is in description
         political_party = candidate_campaign.political_party_display()
         if positive_value_exists(political_party):
-            if google_json['item_snippet'] and political_party in google_json['item_snippet']:
-                likelihood_score += 20
-            elif google_json['item_meta_tags_description'] and \
-                    political_party in google_json['item_meta_tags_description']:
-                likelihood_score += 20
-            elif facebook_user_posts and political_party in facebook_user_posts:
+            if political_party in facebook_user_details['description'] or \
+                    political_party in facebook_user_details['bio'] or \
+                    political_party in facebook_user_details['about'] or \
+                    political_party in facebook_user_details['mission'] or \
+                    political_party in facebook_user_details['general_info'] or \
+                    political_party in facebook_user_details['personal_info'] or \
+                    political_party in facebook_user_details['posts']:
                 likelihood_score += 20
 
         # Check (each word individually) if office name is in description
         # This also checks if state code is in description
         office_name = candidate_campaign.contest_office_name
-        if positive_value_exists(office_name) and (google_json['item_snippet'] or
-                                                   google_json['item_meta_tags_description'] or facebook_user_posts):
+        if positive_value_exists(office_name):
             office_name = office_name.split()
             office_found_in_description = False
             for word in office_name:
-                if len(word) > 1 and (word in google_json['item_snippet'] or
-                                      word in google_json['item_meta_tags_description'] or
-                                      word in facebook_user_posts):
+                if len(word) > 1 and (word in facebook_user_details['description'] or
+                                      word in facebook_user_details['bio'] or
+                                      word in facebook_user_details['about'] or
+                                      word in facebook_user_details['mission'] or
+                                      word in facebook_user_details['general_info'] or
+                                      word in facebook_user_details['personal_info']):
                     likelihood_score += 10
                     office_found_in_description = True
             if not office_found_in_description:
@@ -637,28 +633,28 @@ def analyze_facebook_search_results(google_json, search_term, candidate_name,
 
         # Increase the score for every positive keyword we find
         for keyword in POSITIVE_SEARCH_KEYWORDS:
-            if google_json['item_snippet'] and keyword in google_json['item_snippet'].lower():
-                likelihood_score += 5
-            elif google_json['item_meta_tags_description'] and \
-                    keyword in google_json['item_meta_tags_description'].lower():
-                likelihood_score += 5
-            elif facebook_user_posts and keyword in facebook_user_posts.lower():
+            if keyword in facebook_user_details['description'] or \
+                    keyword in facebook_user_details['bio'] or \
+                    keyword in facebook_user_details['about'] or \
+                    keyword in facebook_user_details['mission'] or \
+                    keyword in facebook_user_details['general_info'] or \
+                    keyword in facebook_user_details['personal_info'] or \
+                    keyword in facebook_user_details['posts']:
                 likelihood_score += 5
 
         # Decrease the score for every negative keyword we find
         for keyword in NEGATIVE_SEARCH_KEYWORDS:
-            if (google_json['item_snippet'] and keyword in google_json['item_snippet'].lower()) or \
-                (google_json['item_meta_tags_description'] and
-                 keyword in google_json['item_meta_tags_description'].lower()) or \
-                 (facebook_user_posts and keyword in facebook_user_posts):
+            if keyword in facebook_user_details['description'] or \
+                    keyword in facebook_user_details['bio'] or \
+                    keyword in facebook_user_details['about'] or \
+                    keyword in facebook_user_details['mission'] or \
+                    keyword in facebook_user_details['general_info'] or \
+                    keyword in facebook_user_details['personal_info'] or \
+                    keyword in facebook_user_details['posts']:
                 likelihood_score -= 20
 
         if likelihood_score < 0:
             return dict
-
-        google_json['item_snippet'] = google_json['item_snippet'][:MAXIMUM_CHARACTERS_LENGTH]
-        google_json['item_meta_tags_description'] = \
-            google_json['item_meta_tags_description'][:MAXIMUM_CHARACTERS_LENGTH]
 
     current_candidate_facebook_search_info = {
         'search_term':              search_term,
@@ -668,6 +664,7 @@ def analyze_facebook_search_results(google_json, search_term, candidate_name,
         'from_linkedin':            False,
         'from_twitter':             False,
         'from_wikipedia':           False,
-        'google_json':              google_json
+        'google_json':              google_json,
+        'facebook_json':            facebook_user_details
     }
     return current_candidate_facebook_search_info

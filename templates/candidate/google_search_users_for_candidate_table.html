@@ -65,14 +65,31 @@
         </td>
 
         <td style="width:40%;word-break:break-word;">
-            {{ one_row.item_snippet|default_if_none:"n/a" }}
-            <br />
-            {{ one_row.item_meta_tags_description|default_if_none:"n/a" }}
+            {% if not one_row.facebook_search_found %}
+                {{ one_row.item_snippet|default_if_none:"n/a" }}
+                <br />
+                {{ one_row.item_meta_tags_description|default_if_none:"n/a" }}
+            {% else %}
+                {{ one_row.facebook_about|default_if_none:"n/a"}}
+                {{ one_row.facebook_category|default_if_none:"n/a"}}
+                {{ one_row.facebook_emails|default_if_none:"n/a"}}
+                {{ one_row.facebook_location|default_if_none:"n/a"}}
+                <br />
+                {{ one_row.facebook_mission|default_if_none:"n/a"}}
+                {{ one_row.facebook_description|default_if_none:"n/a"}}
+                {{ one_row.facebook_general_info|default_if_none:"n/a"}}
+                {{ one_row.facebook_bio|default_if_none:"n/a"}}
+                {{ one_row.facebook_personal_info|default_if_none:"n/a"}}
+            {% endif %}
         </td>
         <td style="width:50%;">
             <span class="wrap_word">
                 <a href="{{ one_row.item_link }}" target="_blank">{{ one_row.item_link|default_if_none:"" }}</a>
                 <a href="{{ one_row.item_formatted_link }}" target="_blank">{{ one_row.item_formatted_url|default_if_none:"" }}</a>
+                {% if one_row.facebook_search_found %}
+                    <br />
+                    <a href="{{ one_row.item_formatted_link }}" target="_blank">{{ one_row.facebook_website|default_if_none:"" }}</a>
+                {% endif %}
                 <br />
                 <a href="{{ one_row.search_request_url }}" target="_blank">{{ one_row.search_request_url|default_if_none:"" }}</a>
             </span>
