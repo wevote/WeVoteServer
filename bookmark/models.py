@@ -289,7 +289,7 @@ class BookmarkItemList(models.Model):
         bookmark_item_list_found = False
         bookmark_item_list = []
         try:
-            bookmark_item_list = BookmarkItem.objects.all()
+            bookmark_item_list = BookmarkItem.objects.using('readonly').all()
             bookmark_item_list = bookmark_item_list.filter(voter_id=voter_id)
             if len(bookmark_item_list):
                 bookmark_item_list_found = True

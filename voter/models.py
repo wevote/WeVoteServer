@@ -2501,7 +2501,7 @@ class VoterAddressManager(models.Model):
     def fetch_address_count(self, or_filter=True,
                             refreshed_from_google=False, has_election=False, google_civic_election_id=False,
                             has_latitude_longitude=False):
-        voter_address_queryset = VoterAddress.objects.all()
+        voter_address_queryset = VoterAddress.objects.using('readonly').all()
 
         voter_raw_filters = []
         if positive_value_exists(or_filter):
@@ -2675,7 +2675,7 @@ class VoterMetricsManager(models.Model):
     def fetch_voter_count(self, or_filter=True,
                           has_twitter=False, has_facebook=False, has_email=False, has_verified_email=False,
                           by_notification_settings=0, by_interface_status_flags=0):
-        voter_queryset = Voter.objects.all()
+        voter_queryset = Voter.objects.using('readonly').all()
 
         voter_raw_filters = []
         if positive_value_exists(or_filter):

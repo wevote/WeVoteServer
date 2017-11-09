@@ -353,7 +353,9 @@ class BallotItemListManager(models.Model):
         ballot_item_list = []
         ballot_item_list_found = False
         try:
-            ballot_item_queryset = BallotItem.objects.order_by('local_ballot_order', 'google_ballot_placement')
+            # We cannot use 'readonly' because the result set sometimes gets modified with .save()
+            ballot_item_queryset = BallotItem.objects.all()
+            ballot_item_queryset = ballot_item_queryset.order_by('local_ballot_order', 'google_ballot_placement')
             ballot_item_list = ballot_item_queryset.filter(
                 google_civic_election_id=google_civic_election_id)
 
@@ -448,7 +450,9 @@ class BallotItemListManager(models.Model):
         ballot_item_list = []
         ballot_item_list_found = False
         try:
-            ballot_item_queryset = BallotItem.objects.order_by('local_ballot_order', 'google_ballot_placement')
+            # Intentionally not using 'readonly' here
+            ballot_item_queryset = BallotItem.objects.all()
+            ballot_item_queryset = ballot_item_queryset.order_by('local_ballot_order', 'google_ballot_placement')
             ballot_item_queryset = ballot_item_queryset.filter(voter_id=voter_id)
             if positive_value_exists(google_civic_election_id):
                 ballot_item_queryset = ballot_item_queryset.filter(google_civic_election_id=google_civic_election_id)
@@ -484,7 +488,8 @@ class BallotItemListManager(models.Model):
         ballot_item_list = []
         ballot_item_list_found = False
         try:
-            ballot_item_queryset = BallotItem.objects.order_by('local_ballot_order', 'google_ballot_placement')
+            ballot_item_queryset = BallotItem.objects.using('readonly').all()
+            ballot_item_queryset = ballot_item_queryset.order_by('local_ballot_order', 'google_ballot_placement')
             ballot_item_queryset = ballot_item_queryset.filter(polling_location_we_vote_id=polling_location_we_vote_id)
             if positive_value_exists(google_civic_election_id):
                 ballot_item_queryset = ballot_item_queryset.filter(google_civic_election_id=google_civic_election_id)
@@ -1515,7 +1520,7 @@ class BallotReturnedListManager(models.Model):
         ballot_returned_list_found = False
 
         try:
-            ballot_returned_queryset = BallotReturned.objects.all()
+            ballot_returned_queryset = BallotReturned.objects.using('readonly').all()
             if positive_value_exists(ballot_returned_search_str):
                 filters = []
                 new_filter = Q(id__iexact=ballot_returned_search_str)
@@ -1586,7 +1591,7 @@ class BallotReturnedListManager(models.Model):
     def fetch_ballot_returned_list_count_for_election(self, google_civic_election_id, state_code=''):
         google_civic_election_id = convert_to_int(google_civic_election_id)
         try:
-            ballot_returned_queryset = BallotReturned.objects.all()
+            ballot_returned_queryset = BallotReturned.objects.using('readonly').all()
             ballot_returned_queryset = ballot_returned_queryset.filter(
                 google_civic_election_id=google_civic_election_id)
             if positive_value_exists(state_code):
@@ -1607,7 +1612,7 @@ class BallotReturnedListManager(models.Model):
     def fetch_ballot_returned_entries_needed_lat_long_for_election(self, google_civic_election_id, state_code=''):
         google_civic_election_id = convert_to_int(google_civic_election_id)
         try:
-            ballot_returned_queryset = BallotReturned.objects.all()
+            ballot_returned_queryset = BallotReturned.objects.using('readonly').all()
             ballot_returned_queryset = ballot_returned_queryset.exclude(
                 Q(polling_location_we_vote_id=None) |
                 Q(polling_location_we_vote_id=""))
@@ -1757,7 +1762,7 @@ class VoterBallotSavedManager(models.Model):
 
         if positive_value_exists(voter_id):
             try:
-                voter_ballot_list_queryset = VoterBallotSaved.objects.filter(voter_id=voter_id)
+                voter_ballot_list_queryset = VoterBallotSaved.objects.using('readonly').filter(voter_id=voter_id)
                 voter_ballot_list_queryset = voter_ballot_list_queryset.order_by("-election_date")  # Newest first
                 voter_ballot_list = list(voter_ballot_list_queryset)
                 success = True
@@ -1920,6 +1925,7 @@ class VoterBallotSavedManager(models.Model):
         specific_ballot_requested = positive_value_exists(ballot_returned_we_vote_id) or \
             positive_value_exists(ballot_location_shortcut)
 
+        # Note: We are not using the 'readonly' here intentionally
         try:
             if positive_value_exists(voter_ballot_saved_id):
                 voter_ballot_saved = VoterBallotSaved.objects.get(id=voter_ballot_saved_id)

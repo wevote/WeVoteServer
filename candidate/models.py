@@ -145,7 +145,7 @@ class CandidateCampaignListManager(models.Model):
             return results
 
         try:
-            candidate_queryset = CandidateCampaign.objects.all()
+            candidate_queryset = CandidateCampaign.objects.using('readonly').all()
             if positive_value_exists(office_id):
                 candidate_queryset = candidate_queryset.filter(contest_office_id=office_id)
             elif positive_value_exists(office_we_vote_id):

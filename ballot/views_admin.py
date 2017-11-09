@@ -153,7 +153,7 @@ def ballot_returned_sync_out_view(request):  # ballotReturnedSyncOut
         return HttpResponse(json.dumps(json_data), content_type='application/json')
 
     try:
-        ballot_returned_list = BallotReturned.objects.all()
+        ballot_returned_list = BallotReturned.objects.using('readonly').all()
         # We only want BallotReturned values associated with polling locations
         ballot_returned_list = ballot_returned_list.exclude(polling_location_we_vote_id__isnull=True)
         ballot_returned_list = ballot_returned_list.exclude(polling_location_we_vote_id__iexact='')

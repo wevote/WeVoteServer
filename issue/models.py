@@ -76,7 +76,7 @@ class IssueListManager(models.Model):
             return results
 
         try:
-            issue_queryset = Issue.objects.all()
+            issue_queryset = Issue.objects.using('readonly').all()
             if issue_we_vote_id_list_to_filter is not None:
                 issue_queryset = issue_queryset.filter(we_vote_id__in=issue_we_vote_id_list_to_filter)
             if issue_we_vote_id_list_to_exclude is not None:
@@ -117,7 +117,7 @@ class IssueListManager(models.Model):
 
     def retrieve_issue_count(self):
         try:
-            issue_queryset = Issue.objects.all()
+            issue_queryset = Issue.objects.using('readonly').all()
             issue_list = issue_queryset
 
             issue_count = issue_list.count()
@@ -425,7 +425,7 @@ class IssueManager(models.Model):
 
 
 class OrganizationLinkToIssue(models.Model):
-    # This class represent the link between an oraganization and an issue
+    # This class represent the link between an organization and an issue
     # We are relying on built-in Python id field
 
     # The organization's we_vote_id linked to the issue
@@ -439,7 +439,7 @@ class OrganizationLinkToIssue(models.Model):
     issue_we_vote_id = models.CharField(
         verbose_name="we vote permanent id", max_length=255, null=True, blank=True, unique=False)
 
-    # Are the oraganization and the issue linked?
+    # Are the organization and the issue linked?
     link_active = models.BooleanField(verbose_name='', default=True)
 
     # AUTO_TAGGED_BY_TEXT, AUTO_TAGGED_BY_HASHTAG, TAGGED_BY_ORGANIZATION, TAGGED_BY_WE_VOTE, NO_REASON

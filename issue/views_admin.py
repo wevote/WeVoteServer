@@ -591,7 +591,7 @@ def organization_link_to_issue_sync_out_view(request):  # organizationLinkToIssu
     issue_search = request.GET.get('issue_search', '')
 
     try:
-        issue_list = OrganizationLinkToIssue.objects.all()
+        issue_list = OrganizationLinkToIssue.objects.using('readonly').all()
         # filters = []
         # if positive_value_exists(issue_search):
         #     new_filter = Q(issue_name__icontains=issue_search)

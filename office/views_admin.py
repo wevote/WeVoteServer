@@ -36,7 +36,7 @@ def offices_sync_out_view(request):  # officesSyncOut
     state_code = request.GET.get('state_code', '')
 
     try:
-        contest_office_list = ContestOffice.objects.all()
+        contest_office_list = ContestOffice.objects.using('readonly').all()
         if positive_value_exists(google_civic_election_id):
             contest_office_list = contest_office_list.filter(google_civic_election_id=google_civic_election_id)
         if positive_value_exists(state_code):
