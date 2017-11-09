@@ -97,7 +97,7 @@ class PartyManager(models.Model):
         party_items_list = []
         try:
             # retrieve party_id and the corresponding party_name from the table
-            party_items_list = Party.objects.values('party_id_temp', 'party_name')
+            party_items_list = Party.objects.using('readonly').values('party_id_temp', 'party_name')
         except Exception as e:
             handle_record_not_found_exception(e, logger=logger)
 

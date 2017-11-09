@@ -265,7 +265,7 @@ class FriendManager(models.Model):
         current_friend = CurrentFriend()
         # Note that the direction of the friendship does not matter
         try:
-            current_friend = CurrentFriend.objects.get(
+            current_friend = CurrentFriend.objects.using('readonly').get(
                 viewer_voter_we_vote_id__iexact=sender_voter_we_vote_id,
                 viewee_voter_we_vote_id__iexact=recipient_voter_we_vote_id,
             )
@@ -285,7 +285,7 @@ class FriendManager(models.Model):
 
         if not current_friend_found and success:
             try:
-                current_friend = CurrentFriend.objects.get(
+                current_friend = CurrentFriend.objects.using('readonly').get(
                     viewer_voter_we_vote_id__iexact=recipient_voter_we_vote_id,
                     viewee_voter_we_vote_id__iexact=sender_voter_we_vote_id,
                 )
@@ -315,7 +315,7 @@ class FriendManager(models.Model):
         suggested_friend = CurrentFriend()
         # Note that the direction of the friendship does not matter
         try:
-            suggested_friend = SuggestedFriend.objects.get(
+            suggested_friend = SuggestedFriend.objects.using('readonly').get(
                 viewer_voter_we_vote_id__iexact=sender_voter_we_vote_id,
                 viewee_voter_we_vote_id__iexact=recipient_voter_we_vote_id,
             )
@@ -335,7 +335,7 @@ class FriendManager(models.Model):
 
         if not suggested_friend_found and success:
             try:
-                suggested_friend = SuggestedFriend.objects.get(
+                suggested_friend = SuggestedFriend.objects.using('readonly').get(
                     viewer_voter_we_vote_id__iexact=recipient_voter_we_vote_id,
                     viewee_voter_we_vote_id__iexact=sender_voter_we_vote_id,
                 )
@@ -625,18 +625,36 @@ class FriendManager(models.Model):
         return results
 
     def fetch_current_friends_count(self, voter_we_vote_id):
-        results = self.retrieve_current_friends(voter_we_vote_id)
-        if results['current_friend_list_found']:
-            current_friend_list = results['current_friend_list']
-            return len(current_friend_list)
-        return 0
+        current_friends_count = 0
+
+        if not positive_value_exists(voter_we_vote_id):
+            return current_friends_count
+
+        try:
+            current_friend_queryset = CurrentFriend.objects.using('readonly').all()
+            current_friend_queryset = current_friend_queryset.filter(
+                Q(viewer_voter_we_vote_id__iexact=voter_we_vote_id) |
+                Q(viewee_voter_we_vote_id__iexact=voter_we_vote_id))
+            current_friends_count = current_friend_queryset.count()
+        except Exception as e:
+            current_friends_count = 0
+        return current_friends_count
 
     def fetch_suggested_friends_count(self, voter_we_vote_id):
-        results = self.retrieve_suggested_friend_list(voter_we_vote_id)
-        if results['suggested_friend_list_found']:
-            suggested_friend_list = results['suggested_friend_list']
-            return len(suggested_friend_list)
-        return 0
+        suggested_friends_count = 0
+
+        if not positive_value_exists(voter_we_vote_id):
+            return suggested_friends_count
+
+        try:
+            suggested_friend_queryset = SuggestedFriend.objects.using('readonly').all()
+            suggested_friend_queryset = suggested_friend_queryset.filter(
+                Q(viewer_voter_we_vote_id__iexact=voter_we_vote_id) |
+                Q(viewee_voter_we_vote_id__iexact=voter_we_vote_id))
+            suggested_friends_count = suggested_friend_queryset.count()
+        except Exception as e:
+            suggested_friends_count = 0
+        return suggested_friends_count
 
     def retrieve_current_friends(self, voter_we_vote_id):
         current_friend_list = []  # The entries from CurrentFriend table
@@ -655,7 +673,7 @@ class FriendManager(models.Model):
             return results
 
         try:
-            current_friend_queryset = CurrentFriend.objects.all()
+            current_friend_queryset = CurrentFriend.objects.using('readonly').all()
             current_friend_queryset = current_friend_queryset.filter(
                 Q(viewer_voter_we_vote_id__iexact=voter_we_vote_id) |
                 Q(viewee_voter_we_vote_id__iexact=voter_we_vote_id))
@@ -714,7 +732,7 @@ class FriendManager(models.Model):
             return results
 
         try:
-            current_friend_queryset = CurrentFriend.objects.all()
+            current_friend_queryset = CurrentFriend.objects.using('readonly').all()
             current_friend_queryset = current_friend_queryset.filter(
                 Q(viewer_voter_we_vote_id__iexact=voter_we_vote_id) |
                 Q(viewee_voter_we_vote_id__iexact=voter_we_vote_id))
@@ -1559,7 +1577,7 @@ class FriendManager(models.Model):
             return results
 
         try:
-            suggested_friend_queryset = SuggestedFriend.objects.all()
+            suggested_friend_queryset = SuggestedFriend.objects.using('readonly').all()
             suggested_friend_queryset = suggested_friend_queryset.filter(
                 Q(viewer_voter_we_vote_id__iexact=voter_we_vote_id) |
                 Q(viewee_voter_we_vote_id__iexact=voter_we_vote_id))
@@ -1618,7 +1636,7 @@ class FriendManager(models.Model):
             return results
 
         try:
-            suggested_friend_queryset = SuggestedFriend.objects.all()
+            suggested_friend_queryset = SuggestedFriend.objects.using('readonly').all()
             suggested_friend_queryset = suggested_friend_queryset.filter(
                 Q(viewer_voter_we_vote_id__iexact=voter_we_vote_id) |
                 Q(viewee_voter_we_vote_id__iexact=voter_we_vote_id))

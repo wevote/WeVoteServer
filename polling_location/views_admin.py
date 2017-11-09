@@ -89,7 +89,7 @@ def polling_locations_sync_out_view(request):  # pollingLocationsSyncOut
     state = request.GET.get('state', '')
 
     try:
-        polling_location_list = PollingLocation.objects.all()
+        polling_location_list = PollingLocation.objects.using('readonly').all()
         if positive_value_exists(state):
             polling_location_list = polling_location_list.filter(state__iexact=state)
 

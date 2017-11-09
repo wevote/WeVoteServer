@@ -34,7 +34,7 @@ def measures_sync_out_view(request):  # measuresSyncOut
     state_code = request.GET.get('state_code', '')
 
     try:
-        contest_measure_list = ContestMeasure.objects.all()
+        contest_measure_list = ContestMeasure.objects.using('readonly').all()
         if positive_value_exists(google_civic_election_id):
             contest_measure_list = contest_measure_list.filter(google_civic_election_id=google_civic_election_id)
         if positive_value_exists(state_code):

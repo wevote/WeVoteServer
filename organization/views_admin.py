@@ -3,7 +3,7 @@
 # -*- coding: UTF-8 -*-
 
 from .controllers import organizations_import_from_master_server, push_organization_data_to_other_table_caches
-from .models import Organization
+from .models import Organization, GROUP
 from admin_tools.views import redirect_to_sign_in_page
 from candidate.models import CandidateCampaign, CandidateCampaignListManager, CandidateCampaignManager
 from django.db.models import Q
@@ -47,7 +47,7 @@ def organizations_sync_out_view(request):  # organizationsSyncOut
     state_served_code = request.GET.get('state_served_code', '')
 
     try:
-        organization_list = Organization.objects.all()
+        organization_list = Organization.objects.using('readonly').all()
         if positive_value_exists(state_served_code):
             organization_list = organization_list.filter(state_served_code__iexact=state_served_code)
         organization_list_dict = organization_list.values(
@@ -354,7 +354,7 @@ def organization_edit_process_view(request):
     organization_endorsements_api_url = request.POST.get('organization_endorsements_api_url', False)
     state_served_code = request.POST.get('state_served_code', False)
     organization_link_issue_we_vote_ids = request.POST.getlist('selected_issues', False)
-    organization_type = request.POST.get('organization_type', False)
+    organization_type = request.POST.get('organization_type', GROUP)
 
     # A positive value in google_civic_election_id or add_organization_button means we want to create a voter guide
     # for this org for this election
@@ -463,6 +463,8 @@ def organization_edit_process_view(request):
                 organization_on_stage.organization_endorsements_api_url = organization_endorsements_api_url
             if state_served_code is not False:
                 organization_on_stage.state_served_code = state_served_code
+            if organization_type is not False:
+                organization_on_stage.organization_type = organization_type
             organization_on_stage.save()
             organization_id = organization_on_stage.id
             organization_we_vote_id = organization_on_stage.we_vote_id

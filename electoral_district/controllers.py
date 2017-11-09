@@ -181,7 +181,7 @@ def retrieve_electoral_district(ctcl_id_temp):
     electoral_district_found = False
 
     try:
-        electoral_district_query = ElectoralDistrict.objects.all()
+        electoral_district_query = ElectoralDistrict.objects.using('readonly').all()
         electoral_district_item = electoral_district_query.get(ctcl_id_temp=ctcl_id_temp)
         electoral_district_found = True
         state_code = electoral_district_item.state_code

@@ -26,6 +26,7 @@ def import_export_ctcl_index_view(request):
     }
     return render(request, 'import_export_ctcl/index.html', template_values)
 
+
 @login_required
 def import_ctcl_from_xml_view(request):
     """

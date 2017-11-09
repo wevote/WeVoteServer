@@ -306,8 +306,9 @@ def position_public_support_count_for_ballot_item_for_api(candidate_id, candidat
                                           measure_id, measure_we_vote_id, stance_we_are_looking_for)
 
 
-def positions_count_for_all_ballot_items_for_api(voter_device_id, google_civic_election_id=0,
-                                                 show_positions_this_voter_follows=True):
+def positions_count_for_all_ballot_items_for_api(  # positionsCountForAllBallotItems
+        voter_device_id, google_civic_election_id=0,
+        show_positions_this_voter_follows=True):
     """
     We want to return a JSON file with the a list of the support and oppose counts from the orgs, friends and
     public figures the voter follows

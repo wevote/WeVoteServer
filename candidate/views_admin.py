@@ -46,7 +46,7 @@ def candidates_sync_out_view(request):  # candidatesSyncOut
     candidate_search = request.GET.get('candidate_search', '')
 
     try:
-        candidate_list = CandidateCampaign.objects.all()
+        candidate_list = CandidateCampaign.objects.using('readonly').all()
         if positive_value_exists(google_civic_election_id):
             candidate_list = candidate_list.filter(google_civic_election_id=google_civic_election_id)
         if positive_value_exists(state_code):

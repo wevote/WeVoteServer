@@ -27,7 +27,7 @@ def voter_guides_sync_out_view(request):  # voterGuidesSyncOut
     google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
 
     try:
-        voter_guide_list = VoterGuide.objects.all()
+        voter_guide_list = VoterGuide.objects.using('readonly').all()
         if positive_value_exists(google_civic_election_id):
             voter_guide_list = voter_guide_list.filter(google_civic_election_id=google_civic_election_id)
 

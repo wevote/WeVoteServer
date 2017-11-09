@@ -1045,7 +1045,8 @@ class Tweet(models.Model):
     A tweet referenced somewhere by a We Vote tag. We store it (once - not every time it is referenced by a tag)
     locally so we can publish JSON from for consumption on the We Vote newsfeed.
     """
-    # twitter_tweet_id # (unique id from twitter for tweet?)
+    # twitter_tweet_id # (unique id from twitter for tweet?) - TODO ADD This
+    # author_twitter_id - TODO ADD This
     author_handle = models.CharField(max_length=15, verbose_name='twitter handle of this tweet\'s author')
     # (stored quickly before we look up voter_id)
     # author_voter_id = models.ForeignKey(Voter, null=True, blank=True, related_name='we vote id of tweet author')

@@ -418,7 +418,7 @@ class FollowIssueList(models.Model):
             following_status = FOLLOWING
         follow_issue_list_length = 0
         try:
-            follow_issue_list_query = FollowIssue.objects.all()
+            follow_issue_list_query = FollowIssue.objects.using('readonly').all()
             follow_issue_list_query = follow_issue_list_query.filter(voter_we_vote_id__iexact=voter_we_vote_id)
             follow_issue_list_query = follow_issue_list_query.filter(following_status=following_status)
             follow_issue_list_length = follow_issue_list_query.count()
@@ -440,7 +440,7 @@ class FollowIssueList(models.Model):
             following_status = FOLLOWING
         follow_issue_list = {}
         try:
-            follow_issue_list_query = FollowIssue.objects.all()
+            follow_issue_list_query = FollowIssue.objects.using('readonly').all()
             follow_issue_list_query = follow_issue_list_query.filter(voter_we_vote_id__iexact=voter_we_vote_id)
             if positive_value_exists(following_status):
                 follow_issue_list = follow_issue_list_query.filter(following_status=following_status)
@@ -462,7 +462,7 @@ class FollowIssueList(models.Model):
             following_status = FOLLOWING
 
         try:
-            follow_issue_list_query = FollowIssue.objects.all()
+            follow_issue_list_query = FollowIssue.objects.using('readonly').all()
             follow_issue_list_query = follow_issue_list_query.filter(voter_we_vote_id__iexact=voter_we_vote_id)
             if positive_value_exists(following_status):
                 follow_issue_list_query = follow_issue_list_query.filter(following_status=following_status)
@@ -511,7 +511,7 @@ class FollowIssueList(models.Model):
         follow_issue_list_found = False
         follow_issue_list = {}
         try:
-            follow_issue_list = FollowIssue.objects.all()
+            follow_issue_list = FollowIssue.objects.using('readonly').all()
             if positive_value_exists(issue_id):
                 follow_issue_list = follow_issue_list.filter(issue_id=issue_id)
             else:
@@ -894,6 +894,7 @@ class FollowOrganizationList(models.Model):
         following_status = FOLLOWING
         follow_organization_list = {}
         try:
+            # Should not be 'readonly' since we sometimes save the results of this call
             follow_organization_list = FollowOrganization.objects.all()
             follow_organization_list = follow_organization_list.filter(voter_id=voter_id)
             follow_organization_list = follow_organization_list.filter(following_status=following_status)

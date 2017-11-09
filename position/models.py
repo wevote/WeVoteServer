@@ -826,7 +826,7 @@ class PositionListManager(models.Model):
         total_count = 0
         # Public Positions
         try:
-            public_position_list = PositionEntered.objects.all()
+            public_position_list = PositionEntered.objects.using('readonly').all()
             public_position_list = public_position_list.exclude(voter_we_vote_id=None)  # Don't include if no we_vote_id
 
             if positive_value_exists(candidate_campaign_id):
@@ -867,7 +867,7 @@ class PositionListManager(models.Model):
 
         # Friends-only Positions
         try:
-            friends_only_position_list = PositionForFriends.objects.all()
+            friends_only_position_list = PositionForFriends.objects.using('readonly').all()
             friends_only_position_list = friends_only_position_list.exclude(voter_we_vote_id=None)  # No we_vote_id
 
             if positive_value_exists(candidate_campaign_id):
@@ -933,7 +933,7 @@ class PositionListManager(models.Model):
         total_count = 0
         # Public Positions
         try:
-            public_position_list = PositionEntered.objects.all()
+            public_position_list = PositionEntered.objects.using('readonly').all()
             public_position_list = public_position_list.exclude(voter_we_vote_id=None)  # Don't include if no we_vote_id
 
             if positive_value_exists(contest_measure_id):
@@ -974,7 +974,7 @@ class PositionListManager(models.Model):
 
         # Friends-only Positions
         try:
-            friends_only_position_list = PositionForFriends.objects.all()
+            friends_only_position_list = PositionForFriends.objects.using('readonly').all()
             friends_only_position_list = friends_only_position_list.exclude(voter_we_vote_id=None)  # No we_vote_id
 
             if positive_value_exists(contest_measure_id):
@@ -1039,7 +1039,7 @@ class PositionListManager(models.Model):
                 position_on_stage_starter = PositionForFriends
                 position_on_stage = PositionForFriends()
 
-            position_list = position_on_stage_starter.objects.order_by('date_entered')
+            position_list = position_on_stage_starter.objects.using('readonly').order_by('date_entered')
             position_list = position_list.filter(organization_we_vote_id__iexact=organization_we_vote_id)
             position_list = position_list.filter(google_civic_election_id=google_civic_election_id)
             # SUPPORT, STILL_DECIDING, INFORMATION_ONLY, NO_STANCE, OPPOSE, PERCENT_RATING
@@ -1075,7 +1075,7 @@ class PositionListManager(models.Model):
         try:
             position_on_stage_starter = PositionForFriends
 
-            position_list = position_on_stage_starter.objects.all()
+            position_list = position_on_stage_starter.objects.using('readonly').all()
             position_list = position_list.filter(voter_we_vote_id__iexact=voter_we_vote_id)
             position_count = position_list.count()
         except Exception as e:
@@ -1087,7 +1087,7 @@ class PositionListManager(models.Model):
         try:
             position_on_stage_starter = PositionEntered
 
-            position_list = position_on_stage_starter.objects.all()
+            position_list = position_on_stage_starter.objects.using('readonly').all()
             position_list = position_list.filter(voter_we_vote_id__iexact=voter_we_vote_id)
             position_count = position_list.count()
         except Exception as e:
@@ -1321,10 +1321,10 @@ class PositionListManager(models.Model):
         position_list_found = False
         try:
             if retrieve_public_positions:
-                position_list = PositionEntered.objects.order_by('date_entered')
+                position_list = PositionEntered.objects.using('readonly').order_by('date_entered')
                 retrieve_friends_positions = False
             else:
-                position_list = PositionForFriends.objects.order_by('date_entered')
+                position_list = PositionForFriends.objects.using('readonly').order_by('date_entered')
                 retrieve_friends_positions = True
 
             if positive_value_exists(candidate_campaign_id):
@@ -1421,10 +1421,10 @@ class PositionListManager(models.Model):
         position_list_found = False
         try:
             if retrieve_public_positions:
-                position_list_query = PositionEntered.objects.order_by('date_entered')
+                position_list_query = PositionEntered.objects.using('readonly').order_by('date_entered')
                 retrieve_friends_positions = False
             else:
-                position_list_query = PositionForFriends.objects.order_by('date_entered')
+                position_list_query = PositionForFriends.objects.using('readonly').order_by('date_entered')
                 retrieve_friends_positions = True
 
             if positive_value_exists(contest_measure_id):
@@ -1507,14 +1507,15 @@ class PositionListManager(models.Model):
         position_list_found = False
         try:
             if retrieve_public_positions:
-                position_list_query = PositionEntered.objects.order_by('date_entered')
+                position_list_query = PositionEntered.objects.using('readonly').order_by('date_entered')
                 retrieve_friends_positions = False
             else:
-                position_list_query = PositionForFriends.objects.order_by('date_entered')
+                position_list_query = PositionForFriends.objects.using('readonly').order_by('date_entered')
                 retrieve_friends_positions = True
 
             if positive_value_exists(contest_office_we_vote_id):
-                position_list_query = position_list_query.filter(contest_office_we_vote_id__iexact=contest_office_we_vote_id)
+                position_list_query = position_list_query.filter(
+                    contest_office_we_vote_id__iexact=contest_office_we_vote_id)
             else:
                 position_list_query = position_list_query.filter(contest_office_id=contest_office_id)
             # SUPPORT, STILL_DECIDING, INFORMATION_ONLY, NO_STANCE, OPPOSE, PERCENT_RATING
@@ -1610,9 +1611,9 @@ class PositionListManager(models.Model):
         public_query_exists = True
         if retrieve_public_positions:
             try:
-                public_positions_list = PositionEntered.objects.order_by('ballot_item_display_name',
-                                                                         '-vote_smart_time_span',
-                                                                         '-google_civic_election_id')
+                public_positions_list = PositionEntered.objects.using('readonly').order_by('ballot_item_display_name',
+                                                                      '-vote_smart_time_span',
+                                                                      '-google_civic_election_id')
                 if positive_value_exists(organization_id):
                     public_positions_list = public_positions_list.filter(organization_id=organization_id)
                 else:
@@ -2310,7 +2311,7 @@ class PositionListManager(models.Model):
         # Retrieve the support positions for this candidate_campaign_id
         position_count = 0
         try:
-            position_list = PositionEntered.objects.order_by('date_entered')
+            position_list = PositionEntered.objects.using('readonly').order_by('date_entered')
             if positive_value_exists(candidate_campaign_id):
                 position_list = position_list.filter(candidate_campaign_id=candidate_campaign_id)
             else:
@@ -2357,7 +2358,7 @@ class PositionListManager(models.Model):
         # Retrieve the support positions for this contest_measure_id
         position_count = 0
         try:
-            position_list = PositionEntered.objects.order_by('date_entered')
+            position_list = PositionEntered.objects.using('readonly').order_by('date_entered')
             if positive_value_exists(contest_measure_id):
                 position_list = position_list.filter(contest_measure_id=contest_measure_id)
             else:
