@@ -1321,10 +1321,12 @@ class PositionListManager(models.Model):
         position_list_found = False
         try:
             if retrieve_public_positions:
-                position_list = PositionEntered.objects.using('readonly').order_by('date_entered')
+                # We intentionally do not use 'readonly' here since we need to save based on the results of this query
+                position_list = PositionEntered.objects.order_by('date_entered')
                 retrieve_friends_positions = False
             else:
-                position_list = PositionForFriends.objects.using('readonly').order_by('date_entered')
+                # We intentionally do not use 'readonly' here since we need to save based on the results of this query
+                position_list = PositionForFriends.objects.order_by('date_entered')
                 retrieve_friends_positions = True
 
             if positive_value_exists(candidate_campaign_id):
@@ -1421,10 +1423,12 @@ class PositionListManager(models.Model):
         position_list_found = False
         try:
             if retrieve_public_positions:
-                position_list_query = PositionEntered.objects.using('readonly').order_by('date_entered')
+                # We intentionally do not use 'readonly' here since we need to save based on the results of this query
+                position_list_query = PositionEntered.objects.order_by('date_entered')
                 retrieve_friends_positions = False
             else:
-                position_list_query = PositionForFriends.objects.using('readonly').order_by('date_entered')
+                # We intentionally do not use 'readonly' here since we need to save based on the results of this query
+                position_list_query = PositionForFriends.objects.order_by('date_entered')
                 retrieve_friends_positions = True
 
             if positive_value_exists(contest_measure_id):
@@ -1503,14 +1507,15 @@ class PositionListManager(models.Model):
                 return position_list
 
         # Retrieve the support positions for this contest_office_id
-        #position_list = []
         position_list_found = False
         try:
             if retrieve_public_positions:
-                position_list_query = PositionEntered.objects.using('readonly').order_by('date_entered')
+                # We intentionally do not use 'readonly' here since we need to save based on the results of this query
+                position_list_query = PositionEntered.objects.order_by('date_entered')
                 retrieve_friends_positions = False
             else:
-                position_list_query = PositionForFriends.objects.using('readonly').order_by('date_entered')
+                # We intentionally do not use 'readonly' here since we need to save based on the results of this query
+                position_list_query = PositionForFriends.objects.order_by('date_entered')
                 retrieve_friends_positions = True
 
             if positive_value_exists(contest_office_we_vote_id):
