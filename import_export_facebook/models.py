@@ -821,9 +821,11 @@ class FacebookManager(models.Model):
         :param facebook_user_api_details:
         :return:
         """
-        facebook_user_details_dict = {}
+        facebook_user_details_dict = {
+            'facebook_search_found':    True
+        }
         facebook_user_details_dict['about'] = (facebook_user_api_details.get('about')
-                                               if 'about' in facebook_user_api_details.keys() else None)
+                                               if 'about' in facebook_user_api_details.keys() else "")
 
         facebook_user_details_dict['location'] = ""
         if 'location' in facebook_user_api_details.keys():
@@ -837,7 +839,8 @@ class FacebookManager(models.Model):
         photos = (facebook_user_api_details.get('photos').get(
             'data') if 'photos' in facebook_user_api_details.keys() and facebook_user_api_details.get(
             'photos', {}).get('data', []) else "")
-        facebook_user_details_dict['photos'] = [photo.get('picture') for photo in photos if 'picture' in photo.keys()]
+        facebook_user_details_dict['photos'] = " ".join([str(photo.get('picture'))
+                                                         for photo in photos if 'picture' in photo.keys()])
 
         facebook_user_details_dict['bio'] = (facebook_user_api_details.get('bio')
                                              if 'bio' in facebook_user_api_details.keys() else "")
@@ -887,9 +890,11 @@ class FacebookManager(models.Model):
         success = False
         status = ''
         facebook_user_details_found = False
-        facebook_user_details_dict = {}
+        facebook_user_details_dict = {
+            'facebook_search_found':    facebook_user_details_found
+        }
         facebook_api_fields = "about, location, photos{picture}, bio, general_info, description, features, " \
-                              "contact_address, emails, posts{message}, name, hometown, mission, category," \
+                              "contact_address, emails, posts.limit(10){message}, name, mission, category," \
                               "website, personal_interests, personal_info"
         auth_response_results = self.retrieve_facebook_auth_response(voter_device_id)
         if not auth_response_results['facebook_auth_response_found']:
