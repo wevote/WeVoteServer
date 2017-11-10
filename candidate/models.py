@@ -581,10 +581,14 @@ class CandidateCampaign(models.Model):
         return office
 
     def candidate_photo_url(self):
+        if self.we_vote_hosted_profile_image_url_tiny:
+            return self.we_vote_hosted_profile_image_url_tiny
         if self.photo_url_from_vote_smart:
             return self.photo_url_from_vote_smart_large()
         if self.twitter_profile_image_url_https:
             return self.twitter_profile_image_url_https_original()
+        if self.facebook_profile_image_url_https:
+            return self.facebook_profile_image_url_https
         if self.photo_url_from_maplight:
             return self.photo_url_from_maplight
         if self.photo_url:
