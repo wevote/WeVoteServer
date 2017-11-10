@@ -56,12 +56,31 @@ Start up the WeVoteServer on Linux:
 Find admin tools here:
 
     http://localhost:8000/admin
-    
-Now you will need to authenticate as an admin. For now, this will require that you log in with your Twitter account. 
-Please contact Dale.McGrew@WeVoteUSA.org for configuration settings you can add to your local 
+
+Now you will need to authenticate as an admin. You can log in with Email or Twitter account or Facebook account.
+
+Login with Email:
+If you created superuser with this command "python manage.py createsuperuser" during Setup - Database Creation step,
+login with same email id and password, otherwise create superuser with the following command and use that email to
+login:
+
+    python manage.py createsuperuser
+
+or
+
+Login with Twitter:
+Please contact Dale.McGrew@WeVoteUSA.org for configuration settings you can add to your local
 WeVoteServer/config/environment_variables.json file.
 
-    Click "Sign in with Twitter" and use your Twitter credentials to Sign-In. 
+    Click "Sign in with Twitter" and use your Twitter credentials to Sign-In.
+
+or
+
+Login with Facebook:
+Please contact Dale.McGrew@WeVoteUSA.org for configuration settings you can add to your local
+WeVoteServer/config/environment_variables.json file.
+
+    Click "Sign in with Facebook" and use your Facebook credentials to Sign-In.
     
 After you have signed in, you will see an error message in red that states "You must sign in with account that has
 Verified Volunteer rights to see that page." Just below the error message, there will be a field "we_vote_id" with a 
