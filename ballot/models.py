@@ -1766,13 +1766,13 @@ class VoterBallotSavedManager(models.Model):
                 voter_ballot_list_queryset = voter_ballot_list_queryset.order_by("-election_date")  # Newest first
                 voter_ballot_list = list(voter_ballot_list_queryset)
                 success = True
-                status += "VOTER_BALLOT_LIST_RETRIEVED"
+                status += "VOTER_BALLOT_LIST_RETRIEVED_PER_VOTER_ID"
                 voter_ballot_list_found = len(voter_ballot_list)
             except Exception as e:
                 success = False
-                status += "VOTER_BALLOT_LIST_FAILED_TO_RETRIEVE"
+                status += "VOTER_BALLOT_LIST_FAILED_TO_RETRIEVE_PER_VOTER_ID"
         else:
-            status += "VOTER_BALLOT_LIST_NOT_RETRIEVED"
+            status += "VOTER_BALLOT_LIST_NOT_RETRIEVED-MISSING_VOTER_ID"
 
         results = {
             'success':                  success,

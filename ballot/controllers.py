@@ -1123,8 +1123,10 @@ def voter_ballot_list_retrieve_for_api(voter_id):  # voterBallotListRetrieve
     # Retrieve all of the upcoming elections
     ballot_returned_list_manager = BallotReturnedListManager()
     election_manager = ElectionManager()
-    results = election_manager.retrieve_upcoming_elections()
-    upcoming_election_list = results['election_list']
+    # results = election_manager.retrieve_upcoming_elections()
+    # upcoming_election_list = results['election_list']
+    results = election_manager.retrieve_listed_elections()
+    election_list = results['election_list']
 
     # If a voter_id was passed in, return a list of elections the voter has looked at
     if positive_value_exists(voter_id):
@@ -1146,23 +1148,23 @@ def voter_ballot_list_retrieve_for_api(voter_id):  # voterBallotListRetrieve
                 }
                 voter_ballot_list_for_json.append(one_voter_ballot_list)
 
-    # Now see if there are any upcoming elections that the voter has not looked at that we can add at the top
-    for upcoming_election in upcoming_election_list:
-        if convert_to_int(upcoming_election.google_civic_election_id) not in election_ids_in_voter_ballot_saved_list:
+    # Now see if there are any elections that the voter has not looked at that we can add at the top
+    for election in election_list:
+        if convert_to_int(election.google_civic_election_id) not in election_ids_in_voter_ballot_saved_list:
             ballot_returned_count = ballot_returned_list_manager.fetch_ballot_returned_list_count_for_election(
-                upcoming_election.google_civic_election_id)
+                election.google_civic_election_id)
             if positive_value_exists(ballot_returned_count):
                 one_election = {
-                    "google_civic_election_id":         upcoming_election.google_civic_election_id,
-                    "election_description_text":        upcoming_election.election_name,
-                    "election_day_text":                upcoming_election.election_day_text,
+                    "google_civic_election_id":         convert_to_int(election.google_civic_election_id),
+                    "election_description_text":        election.election_name,
+                    "election_day_text":                election.election_day_text,
                     "original_text_for_map_search":     "",
                     "ballot_returned_we_vote_id":       "",
                     "ballot_location_shortcut":         "",
                 }
                 final_ballot_list.append(one_election)
 
-    final_ballot_list = final_ballot_list + voter_ballot_list_for_json
+    final_ballot_list = voter_ballot_list_for_json + final_ballot_list
 
     results = {
         'status': "VOTER_BALLOT_LIST_RETRIEVED",
