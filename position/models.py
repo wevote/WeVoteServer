@@ -1616,9 +1616,10 @@ class PositionListManager(models.Model):
         public_query_exists = True
         if retrieve_public_positions:
             try:
-                public_positions_list = PositionEntered.objects.using('readonly').order_by('ballot_item_display_name',
-                                                                      '-vote_smart_time_span',
-                                                                      '-google_civic_election_id')
+                # We intentionally do not use 'readonly' here since we need to save based on the results of this query
+                public_positions_list = PositionEntered.objects.order_by('ballot_item_display_name',
+                                                                         '-vote_smart_time_span',
+                                                                         '-google_civic_election_id')
                 if positive_value_exists(organization_id):
                     public_positions_list = public_positions_list.filter(organization_id=organization_id)
                 else:

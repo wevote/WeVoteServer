@@ -178,10 +178,19 @@ POSITIVE_SEARCH_KEYWORDS = [
 ]
 
 NEGATIVE_SEARCH_KEYWORDS = [
+    "available to serve your needs",
+    "call us today",
+    "complete satisfaction",
     "fake",
+    "for our customers",
+    "inc.",
+    "is a city",
     "musician",
+    "our quality work",
     "parody",
     "singer",
+    "view the profiles of people named",
+    "we guarantee",
 ]
 
 AMERICAN_INDEPENDENT = 'AMERICAN_INDEPENDENT'

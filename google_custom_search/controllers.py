@@ -16,7 +16,6 @@ from wevote_functions.functions import positive_value_exists, convert_state_code
     POSITIVE_SEARCH_KEYWORDS, NEGATIVE_SEARCH_KEYWORDS, extract_facebook_username_from_text_string
 
 
-
 def delete_possible_google_search_users(candidate_campaign):
     status = ""
     google_search_user_manager = GoogleSearchUserManager()
