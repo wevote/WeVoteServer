@@ -133,7 +133,7 @@ class ElectionManager(models.Model):
 
     def retrieve_elections_by_date(self, newest_to_oldest=True, include_test_election=False):
         try:
-            election_list_query = Election.objects.all()
+            election_list_query = Election.objects.using('readonly').all()
             if not positive_value_exists(include_test_election):
                 election_list_query = election_list_query.exclude(google_civic_election_id=2000)
             election_list_query = election_list_query.order_by('election_day_text')
@@ -192,10 +192,36 @@ class ElectionManager(models.Model):
         }
         return results
 
+    def retrieve_listed_elections(self):
+        """
+        These are all of the elections marked as "listed" with "include_in_list_for_voters"
+        :return:
+        """
+        election_list = []
+        try:
+            election_list_query = Election.objects.using('readonly').all()
+            election_list_query = election_list_query.filter(include_in_list_for_voters=True)
+            election_list_query = election_list_query.order_by('election_day_text').reverse()
+
+            election_list = list(election_list_query)
+
+            status = 'ELECTIONS_FOUND'
+            success = True
+        except Election.DoesNotExist as e:
+            status = 'NO_ELECTIONS_FOUND'
+            success = True
+
+        results = {
+            'success':          success,
+            'status':           status,
+            'election_list':    election_list,
+        }
+        return results
+
     def retrieve_upcoming_elections(self, include_test_election=False):
         upcoming_election_list = []
         try:
-            election_list_query = Election.objects.all()
+            election_list_query = Election.objects.using('readonly').all()
             if not positive_value_exists(include_test_election):
                 election_list_query = election_list_query.exclude(google_civic_election_id=2000)
             election_list_query = election_list_query.order_by('election_day_text').reverse()
@@ -254,7 +280,7 @@ class ElectionManager(models.Model):
 
     def retrieve_google_civic_elections_in_state_list(self, state_code_list):
         try:
-            election_list_query = Election.objects.all()
+            election_list_query = Election.objects.using('readonly').all()
             election_list_query = election_list_query.extra(where=["CHAR_LENGTH(google_civic_election_id) < 7"])
             election_list_query = election_list_query.exclude(google_civic_election_id=2000)
 
