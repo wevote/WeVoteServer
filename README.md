@@ -10,6 +10,8 @@ and share voter guide data.
 You can see our current alpha version for a San Francisco ballot here:
 https://WeVote.US/
 
+To get started, <a href="https://www.clahub.com/agreements/wevote/WeVoteServer">sign the Contributor License Agreement</a>.
+
 ## Installing Python/Django API Server
 
 [Installation instructions](docs/README_API_INSTALL.md).
