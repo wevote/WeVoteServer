@@ -44,6 +44,7 @@ TWITTER_CONSUMER_KEY = get_environment_variable("TWITTER_CONSUMER_KEY")
 TWITTER_CONSUMER_SECRET = get_environment_variable("TWITTER_CONSUMER_SECRET")
 TWITTER_ACCESS_TOKEN = get_environment_variable("TWITTER_ACCESS_TOKEN")
 TWITTER_ACCESS_TOKEN_SECRET = get_environment_variable("TWITTER_ACCESS_TOKEN_SECRET")
+TWITTER_NATIVE_INDICATOR = 'native'
 
 
 class FakeFirefoxURLopener(urllib.request.FancyURLopener):
@@ -832,8 +833,8 @@ def twitter_native_sign_in_save_for_api(voter_device_id, twitter_access_token, t
         if positive_value_exists(twitter_access_token) and positive_value_exists(twitter_access_secret):
             twitter_auth_response.twitter_access_token = twitter_access_token
             twitter_auth_response.twitter_access_secret = twitter_access_secret
-            twitter_auth_response.twitter_request_token = 'native'
-            twitter_auth_response.twitter_request_secret = 'native'
+            twitter_auth_response.twitter_request_token = TWITTER_NATIVE_INDICATOR
+            twitter_auth_response.twitter_request_secret = TWITTER_NATIVE_INDICATOR
             twitter_auth_response.save()
 
             success = True

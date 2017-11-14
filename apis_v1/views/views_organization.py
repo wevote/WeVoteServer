@@ -76,7 +76,7 @@ def organization_retrieve_view(request):
     """
     organization_id = request.GET.get('organization_id', 0)
     organization_we_vote_id = request.GET.get('organization_we_vote_id', '')
-    voter_device_id = request.GET.get('voter_device_id', "")
+    voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
     return organization_retrieve_for_api(
         organization_id=organization_id,
         organization_we_vote_id=organization_we_vote_id,
