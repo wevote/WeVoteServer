@@ -2,7 +2,7 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
-from .controllers import retrieve_endorsments, import_candidate_position, import_measure_position
+from .controllers import retrieve_endorsements, import_candidate_position, import_measure_position
 from admin_tools.views import redirect_to_sign_in_page
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
@@ -34,21 +34,18 @@ def import_organization_endorsements(request, organization_id):
     organization = results['organization']
 
     # When looking up logos one at a time, we want to force a retrieve
-    organization_results = retrieve_endorsments(organization)
+    results = retrieve_endorsements(organization)
+    batch_set_id = 0
+    google_civic_election_id=0
+    election_name=''
 
-    if organization_results['success']:
-        endorsments_json = organization_results['endorsments']
-
-        if 'candidate_positions' in endorsments_json:
-            for position in endorsments_json['candidate_positions']:
-                import_candidate_position(position)
-
-        if 'measure_positions' in endorsments_json:
-            for position in endorsments_json['measure_positions']:
-                import_measure_position(position)
-
-        messages.add_message(request, messages.SUCCESS, "Endorsments imported")
+    if results['success']:
+        messages.add_message(request, messages.INFO, 'Import batch for {election_name} election saved.'
+                                                     ''.format(election_name=results['election_name']))
     else:
-        messages.add_message(request, messages.ERROR, "Endorsments import failed: "+organization_results['status'])
+        messages.add_message(request, messages.ERROR, 'Import batch for organization endorsements failed: {status}.'
+                                                      ''.format(status=results['status']))
 
-    return HttpResponseRedirect(reverse('organization:organization_position_list', args=(organization_id,)))
+    return HttpResponseRedirect(reverse('import_export_batches:batch_set_list', args=()) +
+                                "?google_civic_election_id=" + str(results['google_civic_election_id']) +
+                                "&batch_set_id=" + str(results['batch_set_id']))

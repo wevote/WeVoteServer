@@ -80,6 +80,8 @@
         <th>Endorsements Importer URL:</th>
         <td><a href="{{ organization.organization_endorsements_api_url }}" target="_blank">{{ organization.organization_endorsements_api_url }}</a></td>
     </tr>
+    <th><a href="{% url 'import_export_endorsements:import_organization_endorsements' organization.id %}">Import endorsements</a>
+</th>
     {% endif %}
     {% if issue_names_list %}
     <tr>
@@ -109,7 +111,6 @@
 <p>
     <a href="{% url 'import_export_wikipedia:import_organization_logo' organization.id %}">Retrieve photos from Wikipedia</a>,
     <a href="{% url 'import_export_twitter:scrape_website_for_social_media' organization.id %}">Scrape org website for Twitter Acounts</a>,
-    <a href="{% url 'import_export_endorsements:import_organization_endorsements' organization.id %}">Import endorsements</a>
 </p>
 
 <p>
