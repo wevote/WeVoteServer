@@ -911,7 +911,7 @@ def voter_guides_to_follow_retrieve_view(request):  # voterGuidesToFollowRetriev
 
 
 def voter_issue_follow_view(request):  # issueFollow
-    voter_device_id = request.GET.get('voter_device_id', False)
+    voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
     issue_we_vote_id = request.GET.get('issue_we_vote_id', False)
     follow_value = positive_value_exists(request.GET.get('follow', False))
     user_agent_string = request.META['HTTP_USER_AGENT']
