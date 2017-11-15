@@ -12,14 +12,17 @@ from django.db import models
 from organization.models import ORGANIZATION_TYPE_CHOICES, UNKNOWN, alphanumeric
 from position.models import POSITION, POSITION_CHOICES, NO_STANCE
 from politician.models import GENDER_CHOICES, UNKNOWN
-import urllib.request
+from urllib.request import Request, urlopen
+from django.utils.http import urlquote
 from voter_guide.models import ORGANIZATION_WORD
+from election.models import ElectionManager
 import wevote_functions.admin
 from wevote_functions.functions import positive_value_exists, LANGUAGE_CODE_ENGLISH, LANGUAGE_CODE_SPANISH
 import urllib
 from exception.models import handle_exception
 import magic
 from datetime import date
+import json
 
 import xml.etree.ElementTree as ElementTree
 
@@ -54,7 +57,7 @@ KIND_OF_ACTION_CHOICES = (
 )
 
 BATCH_SET_SOURCE_CTCL = 'CTCL'
-
+BATCH_SET_SOURCE_IMPORT_EXPORT_ENDORSEMENTS = 'IMPORT_EXPORT_ENDORSEMENTS'
 
 BATCH_IMPORT_KEYS_ACCEPTED_FOR_CANDIDATES = {
     'candidate_name': 'candidate_name',
@@ -2716,6 +2719,460 @@ class BatchManager(models.Model):
 
         return state_code
 
+    def create_batch_set_organization_endorsements(self, organization):
+        """
+        Create batch set for organization endorsements
+        :param organization: 
+        :return: 
+        """
+        batch_set_id = 0
+        batch_saved = False
+        status = ''
+        success = False
+        number_of_batch_rows = 0
+        batch_set_id = 0
+        election_name = ''
+        structured_organization_endorsement_json = ''
+        google_civic_election_id = 0
+
+        organization_endorsements_api_url = organization.organization_endorsements_api_url
+        if not organization_endorsements_api_url:
+            results = {
+                'success': False,
+                'status':       "CREATE_BATCH_SET_ORGANIZATION_ENDORSEMENTS-INVALID_URL",
+                'batch_saved': batch_saved,
+                'number_of_batch_rows': 0,
+                'election_name': election_name,
+                'batch_set_id': batch_set_id,
+                'google_civic_election_id': google_civic_election_id,
+            }
+
+        import_date = date.today()
+        try:
+            endorsement_req = urllib.request.Request(organization_endorsements_api_url,
+                                                     headers={'User-Agent': 'Mozilla/5.0'})
+            endorsement_url = urlopen(endorsement_req)
+            # endorsement_url.close()
+            # structured_organization_endorsement_json = json.loads(endorsement_url)
+            organization_endorsement_url = endorsement_url.read()
+            organization_endorsement_json = organization_endorsement_url.decode('utf-8')
+            structured_organization_endorsement_json = json.loads(organization_endorsement_json)
+            batch_set_name_url = urlquote(organization_endorsements_api_url) + " - " + str(import_date)
+        except Exception as e:
+            batch_set_id = 0
+            status += " EXCEPTION_BATCH_SET "
+            handle_exception(e, logger=logger, exception_message=status)
+
+        if not structured_organization_endorsement_json:
+            results = {
+                'success': False,
+                'status': "CREATE_BATCH_SET_ORGANIZATION_ENDORSEMENT_FAILED",
+                'batch_saved': batch_saved,
+                'number_of_batch_rows': 0,
+                'election_name': election_name,
+                'batch_set_id': batch_set_id,
+                'google_civic_election_id': google_civic_election_id,
+            }
+            return results
+
+        # set batch_set_name as file_name
+        batch_set_name_list = batch_set_name_url.split('/')
+        batch_set_name = batch_set_name_list[len(batch_set_name_list) - 1] + " - " + str(import_date)
+
+        # create batch_set object
+        try:
+            batch_set = BatchSet.objects.create(batch_set_description_text="", batch_set_name=batch_set_name,
+                                                batch_set_source=BATCH_SET_SOURCE_IMPORT_EXPORT_ENDORSEMENTS,
+                                                source_uri=batch_set_name_url, import_date=import_date)
+            batch_set_id = batch_set.id
+            if positive_value_exists(batch_set_id):
+                status += " BATCH_SET_SAVED"
+                success = True
+        except Exception as e:
+            # Stop trying to save rows -- break out of the for loop
+            batch_set_id = 0
+            status += " EXCEPTION_BATCH_SET "
+            handle_exception(e, logger=logger, exception_message=status)
+
+        # import metadata like organization name, url, endorsement url, twitter url, org image url, email
+        # organization_name = structured_organization_endorsement_json['organization_name']
+        # organization_url = structured_organization_endorsement_json['organization_url']
+        # organization_endorsements_url = structured_organization_endorsement_json['organization_endorsements_url']
+        # organization_twitter_url = structured_organization_endorsement_json['organization_twitter_url']
+        # organization_image_url = structured_organization_endorsement_json['organization_image_url']
+        # organization_image_url_https = structured_organization_endorsement_json['organization_image_url_https']
+        # organization_email = structured_organization_endorsement_json['organization_email']
+        candidate_positions_list = structured_organization_endorsement_json['candidate_positions']
+        # measure_positions_list = structured_organization_endorsement_json['measure_positions']
+
+        results = self.import_candidate_positions_from_endorsement_json(batch_set_name_url, batch_set_id,
+                                                                        candidate_positions_list)
+        if results['success']:
+            success = True
+            status += "CREATE_BATCH_SET_CANDIDATE_POSITIONS_IMPORTED "
+            number_of_batch_rows += results['number_of_candidate_positions']
+            # TODO check this whether it should be only saved or updated Candidate positionss
+            # number_of_batch_rows += results['updated']
+            batch_saved = True
+            election_name = results['election_name']
+            google_civic_election_id = results['google_civic_election_id']
+        else:
+            # continue_batch_set_processing = False
+            status += results['status']
+            status += " CREATE_BATCH_SET_CANDIDATE_POSITIONS_ERRORS "
+
+        results = {
+            'success': success,
+            'status': status,
+            'number_of_batch_rows': number_of_batch_rows,
+            'batch_saved': batch_saved,
+            'election_name': election_name,
+            'batch_set_id': batch_set_id,
+            'google_civic_election_id': google_civic_election_id,
+        }
+        return results
+
+    def import_candidate_positions_from_endorsement_json(self, batch_uri, batch_set_id, candidate_positions_list):
+        """
+        Import candidate positions from organization endorsements json file        
+        :param batch_uri: 
+        :param batch_set_id: 
+        :param candidate_positions_list: 
+        :return: 
+        """
+
+        status = ''
+        success = False
+        number_of_candidate_positions = 0
+        first_line = True
+        election_name = ''
+        google_civic_election_id = 0
+
+        if not candidate_positions_list:
+            results = {
+                'success': False,
+                'status': "IMPORT_CANDIDATE_POSITIONS_FROM_ENDORSEMENT_JSON-INVALID_DATA",
+                'candidate_positions_saved': False,
+                'number_of_candidate_positions': 0,
+                'election_name': election_name,
+                'google_civic_election_id': google_civic_election_id,
+            }
+            return results
+
+        # else:
+        for one_entry in candidate_positions_list:
+            # read position details for each candidate
+            candidate_name = one_entry['name']
+            stance = one_entry['stance']
+            percent_rating = one_entry['percent_rating']
+            grade_rating = one_entry['grade_rating']
+            candidate_id = one_entry['id']
+            candidate_ocd_division_id = one_entry['candidate_ocd_division_id']
+            organization_position_url = one_entry['organization_position_url']
+            party = one_entry['party']
+            candidate_twitter_url = one_entry['twitter_url']
+            candidate_facebook_url = one_entry['facebook_url']
+            candidate_website_url = one_entry['website_url']
+            candidate_profile_image_url = one_entry['profile_image_url']
+            candidate_profile_image_url_https = one_entry['profile_image_url_https']
+            candidate_position_description = one_entry['position_description']
+            office_name = one_entry['office_name']
+            state_code = one_entry['state_code']
+            office_ocd_division_id = one_entry['office_ocd_division_id']
+            election_day = one_entry['election_day']
+            google_civic_election_id = one_entry['google_civic_election_id']
+
+            # election lookup using state & election day, and fetch google_civic_election_id
+            election_manager = ElectionManager()
+            election_results = election_manager.retrieve_elections_by_state_and_election_date(state_code, election_day)
+            if election_results['success']:
+                election_list = election_results['election_list']
+                for election in election_list:
+                    election_name = election.election_name
+                    google_civic_election_id = election.google_civic_election_id
+
+            if first_line:
+                # create batch_header and batch_header_map for candidate_positions
+                first_line = False
+                try:
+                    batch_header = BatchHeader.objects.create(
+                        batch_header_column_000='id',
+                        batch_header_column_001='name',
+                        batch_header_column_002='stance',
+                        batch_header_column_003='percent_rating',
+                        batch_header_column_004='grade_rating',
+                        batch_header_column_005='candidate_ocd_division_id',
+                        batch_header_column_006='organization_position_url',
+                        batch_header_column_007='party',
+                        batch_header_column_008='twitter_url',
+                        batch_header_column_009='facebook_url',
+                        batch_header_column_010='website_url',
+                        batch_header_column_011='profile_image_url',
+                        batch_header_column_012='profile_image_url_https',
+                        batch_header_column_013='position_description',
+                        batch_header_column_014='office_name',
+                        batch_header_column_015='state_code',
+                        batch_header_column_016='office_ocd_division_id',
+                        batch_header_column_017='election_day',
+                        batch_header_column_018='google_civic_election_id',
+                    )
+                    batch_header_id = batch_header.id
+
+                    if positive_value_exists(batch_header_id):
+                        # Save an initial BatchHeaderMap
+                        batch_header_map = BatchHeaderMap.objects.create(
+                            batch_header_id=batch_header_id,
+                            batch_header_map_000='candidate_id',
+                            batch_header_map_001='candidate_name',
+                            batch_header_map_002='stance',
+                            batch_header_map_003='percent_rating',
+                            batch_header_map_004='grade_rating',
+                            batch_header_map_005='candidate_ocd_division_id',
+                            batch_header_map_006='organization_position_url',
+                            batch_header_map_007='candidate_party_name',
+                            batch_header_map_008='candidate_twitter_handle',
+                            batch_header_map_009='facebook_url',
+                            batch_header_map_010='candidate_url',
+                            batch_header_map_011='profile_image_url',
+                            batch_header_map_012='profile_image_url_https',
+                            batch_header_map_013='position_description',
+                            batch_header_map_014='candidate_office_name',
+                            batch_header_map_015='state_code',
+                            batch_header_map_016='office_ocd_division_id',
+                            batch_header_map_017='election_day',
+                            batch_header_map_018='google_civic_election_id',
+                        )
+                        batch_header_map_id = batch_header_map.id
+                        status += " BATCH_HEADER_MAP_SAVED"
+
+                    if positive_value_exists(batch_header_id) and positive_value_exists(batch_header_map_id):
+                        # Now save the BatchDescription
+                        batch_name = "ENDORSEMENTS_JSON_CANDIDATES " + " batch_header_id: " + str(batch_header_id)
+                        batch_description_text = ""
+                        batch_description = BatchDescription.objects.create(
+                            batch_header_id=batch_header_id,
+                            batch_header_map_id=batch_header_map_id,
+                            batch_name=batch_name,
+                            batch_description_text=batch_description_text,
+                            # google_civic_election_id=google_civic_election_id,
+                            kind_of_batch='ENDORSEMENTS_JSON_CANDIDATES',
+                            # organization_we_vote_id=organization_we_vote_id,
+                            source_uri=batch_uri,
+                            batch_set_id=batch_set_id,
+                        )
+                        status += " BATCH_DESCRIPTION_SAVED"
+                        success = True
+                except Exception as e:
+                    batch_header_id = 0
+                    status += " EXCEPTION_BATCH_HEADER"
+                    handle_exception(e, logger=logger, exception_message=status)
+                    break
+            if not positive_value_exists(batch_header_id):
+                break
+
+            try:
+                batch_row = BatchRow.objects.create(
+                    batch_header_id=batch_header_id,
+                    batch_row_000=candidate_id,
+                    batch_row_001=candidate_name,
+                    batch_row_002=stance,
+                    batch_row_003=percent_rating,
+                    batch_row_004=grade_rating,
+                    batch_row_005=candidate_ocd_division_id,
+                    batch_row_006=organization_position_url,
+                    batch_row_007=party,
+                    batch_row_008=candidate_twitter_url,
+                    batch_row_009=candidate_facebook_url,
+                    batch_row_010=candidate_website_url,
+                    batch_row_011=candidate_profile_image_url,
+                    batch_row_012=candidate_profile_image_url_https,
+                    batch_row_013=candidate_position_description,
+                    batch_row_014=office_name,
+                    batch_row_015=state_code,
+                    batch_row_016=office_ocd_division_id,
+                    batch_row_017=election_day,
+                    batch_row_018=google_civic_election_id,
+                )
+                number_of_candidate_positions += 1
+            except Exception as e:
+                # Stop trying to save rows -- break out of the for loop
+                status += " EXCEPTION_BATCH_ROW"
+                handle_exception(e, logger=logger, exception_message=status)
+                break
+        results = {
+            'success': success,
+            'status': status,
+            'batch_header_id': batch_header_id,
+            'batch_saved': success,
+            'number_of_candidate_positions': number_of_candidate_positions,
+            'election_name': election_name,
+            'google_civic_election_id': google_civic_election_id,
+        }
+
+        return results
+
+    def import_measure_positions_from_endorsement_json(self, batch_uri, batch_set_id, measure_positions_list):
+        """
+        Import measure positions from organization endorsements json file        
+        :param batch_uri: 
+        :param batch_set_id: 
+        :param measure_positions_list: 
+        :return: 
+        """
+
+        status = ''
+        success = False
+        number_of_measure_positions = 0
+        first_line = True
+        election_name = ''
+        google_civic_election_id = 0
+
+        if not measure_positions_list:
+            results = {
+                'success': False,
+                'status': "IMPORT_MEASURE_POSITIONS_FROM_ENDORSEMENT_JSON-INVALID_DATA",
+                'measure_positions_saved': False,
+                'number_of_measure_positions': 0,
+                'election_name': election_name,
+                'google_civic_election_id': google_civic_election_id,
+            }
+            return results
+
+        # else:
+        for one_entry in measure_positions_list:
+            # read position details for each candidate
+            measure_name = one_entry['name']
+            stance = one_entry['stance']
+            measure_ocd_division_id = one_entry['measure_ocd_division_id']
+            organization_position_url = one_entry['organization_position_url']
+            measure_id = one_entry['id']
+            twitter_url = one_entry['twitter_url']
+            facebook_url = one_entry['facebook_url']
+            website_url = one_entry['website_url']
+            image_url = one_entry['image_url']
+            image_url_https = one_entry['image_url_https']
+            measure_position_description = one_entry['position_description']
+            state_code = one_entry['state_code']
+            election_day = one_entry['election_day']
+            google_civic_election_id = one_entry['google_civic_election_id']
+
+            # election models or manager retrieve_elections_by_date
+            election_manager = ElectionManager()
+            election_results = election_manager.retrieve_elections_by_state_and_election_date(state_code, election_day)
+            if election_results['success']:
+                # These elections are sorted by most recent to least recent
+                election_list = election_results['election_list']
+                for election in election_list:
+                    election_name = election.election_name
+                    google_civic_election_id = election.google_civic_election_id
+                    # # Filter out elections later than today
+                    # if not positive_value_exists(election.election_day_text):
+                    #     continue
+
+            if first_line:
+                # create batch_header and batch_header_map for candidate_positions
+                first_line = False
+                try:
+                    batch_header = BatchHeader.objects.create(
+                        batch_header_column_000='id',
+                        batch_header_column_001='name',
+                        batch_header_column_002='stance',
+                        batch_header_column_003='measure_ocd_division_id',
+                        batch_header_column_004='organization_position_url',
+                        batch_header_column_005='twitter_url',
+                        batch_header_column_006='facebook_url',
+                        batch_header_column_007='website_url',
+                        batch_header_column_008='image_url',
+                        batch_header_column_009='image_url_https',
+                        batch_header_column_010='position_description',
+                        batch_header_column_011='state_code',
+                        batch_header_column_012='election_day',
+                        batch_header_column_013='google_civic_election_id',
+                    )
+                    batch_header_id = batch_header.id
+
+                    if positive_value_exists(batch_header_id):
+                        # Save an initial BatchHeaderMap
+                        batch_header_map = BatchHeaderMap.objects.create(
+                            batch_header_id=batch_header_id,
+                            batch_header_map_000='measure_id',
+                            batch_header_map_001='measure_title',
+                            batch_header_map_002='stance',
+                            batch_header_map_003='measure_ocd_division_id',
+                            batch_header_map_004='organization_position_url',
+                            batch_header_map_005='measure_twitter_handle',
+                            batch_header_map_006='facebook_url',
+                            batch_header_map_007='more_info_url',
+                            batch_header_map_008='image_url',
+                            batch_header_map_009='image_url_https',
+                            batch_header_map_010='position_description',
+                            batch_header_map_011='state_code',
+                            batch_header_map_012='election_day',
+                            batch_header_map_013='google_civic_election_id',
+                        )
+                        batch_header_map_id = batch_header_map.id
+                        status += " BATCH_HEADER_MAP_SAVED"
+
+                    if positive_value_exists(batch_header_id) and positive_value_exists(batch_header_map_id):
+                        # Now save the BatchDescription
+                        batch_name = "ENDORSEMENTS_JSON_MEASURES " + " batch_header_id: " + str(batch_header_id)
+                        batch_description_text = ""
+                        batch_description = BatchDescription.objects.create(
+                            batch_header_id=batch_header_id,
+                            batch_header_map_id=batch_header_map_id,
+                            batch_name=batch_name,
+                            batch_description_text=batch_description_text,
+                            # google_civic_election_id=google_civic_election_id,
+                            kind_of_batch='ENDORSEMENTS_JSON_MEASURES',
+                            # organization_we_vote_id=organization_we_vote_id,
+                            source_uri=batch_uri,
+                            batch_set_id=batch_set_id,
+                        )
+                        status += " BATCH_DESCRIPTION_SAVED"
+                        success = True
+                except Exception as e:
+                    batch_header_id = 0
+                    status += " EXCEPTION_BATCH_HEADER"
+                    handle_exception(e, logger=logger, exception_message=status)
+                    break
+            if not positive_value_exists(batch_header_id):
+                break
+
+            try:
+                batch_row = BatchRow.objects.create(
+                    batch_header_id=batch_header_id,
+                    batch_row_000=measure_id,
+                    batch_row_001=measure_name,
+                    batch_row_002=stance,
+                    batch_row_003=measure_ocd_division_id,
+                    batch_row_004=organization_position_url,
+                    batch_row_005=twitter_url,
+                    batch_row_006=facebook_url,
+                    batch_row_007=website_url,
+                    batch_row_008=image_url,
+                    batch_row_009=image_url_https,
+                    batch_row_010=measure_position_description,
+                    batch_row_011=state_code,
+                    batch_row_012=election_day,
+                    batch_row_013=google_civic_election_id,
+                )
+                number_of_measure_positions += 1
+            except Exception as e:
+                # Stop trying to save rows -- break out of the for loop
+                status += " EXCEPTION_BATCH_ROW"
+                handle_exception(e, logger=logger, exception_message=status)
+                break
+        results = {
+            'success': success,
+            'status': status,
+            'batch_header_id': batch_header_id,
+            'batch_saved': success,
+            'number_of_measure_positions': number_of_measure_positions,
+            'election_name': election_name,
+            'google_civic_election_id': google_civic_election_id,
+        }
+
+        return results
 
 class BatchSet(models.Model):
     """
