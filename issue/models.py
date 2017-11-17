@@ -52,6 +52,20 @@ LINKING_BLOCKED_REASON_CHOICES = (
 logger = wevote_functions.admin.get_logger(__name__)
 
 
+class TrackedWordOrPhrase():
+    # word_or_phrase
+    # ignored
+    pass
+
+
+class HashtagLinkedToIssue():
+    """ If this hashtag is found in an organization’s Twitter Feed a certain number of times, link an organization to
+    this issue automatically """
+    # hashtag_text
+    # issue_we_vote_id
+    pass
+
+
 class IssueListManager(models.Model):
     """
     This is a class to make it easy to retrieve lists of Issues
