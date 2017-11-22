@@ -33,6 +33,18 @@ WE_VOTE_API_KEY = get_environment_variable("WE_VOTE_API_KEY")
 ORGANIZATIONS_SYNC_URL = get_environment_variable("ORGANIZATIONS_SYNC_URL")
 
 
+def organization_retrieve_tweets(organization_we_vote_id, number_to_retrieve):
+    # For one organization, retrieve X Tweets, and capture all #Hashtags used.
+    # Sample code: Search for tweepy http://tweepy.readthedocs.io/en/v3.5.0/
+    pass
+
+
+def organization_analyze_tweets(organization_we_vote_id):
+    # For one organization, retrieve X Tweets, and capture all #Hashtags used.
+    # Loop through Tweets and create OrganizationLinkToHashtag and OrganizationLinkToWordOrPhrase
+    pass
+
+
 def move_organization_data_to_another_organization(from_organization_we_vote_id, to_organization_we_vote_id):
     status = ""
     success = False

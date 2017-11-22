@@ -22,7 +22,7 @@ oauth2client==1.4.7
 oauthlib==0.7.2
 nameparser==0.5.3
 Pillow==4.0.0
-psycopg2==2.6
+psycopg2==2.7
 pyasn1==0.1.7
 pyasn1-modules==0.0.5
 py3dns==3.1.0
