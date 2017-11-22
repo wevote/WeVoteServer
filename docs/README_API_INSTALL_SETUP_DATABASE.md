@@ -130,10 +130,14 @@ and click on:
 Run this command from your Postgres command line. Replace WE_VOTE_ID_HERE with the actual we_vote_id found above:
 
     UPDATE voter_voter SET is_admin=true WHERE we_vote_id='WE_VOTE_ID_HERE';
+    
+Once you see "admin: True" on your account page, sign out, and sign in again. This will lock in place your admin rights.
 
 ## Test your access
 
-Now, you should be able to access the admin tools. 
+Now, you should be able to access the admin tools here:
+
+    http://localhost:8000/admin
 
 Find documentation for all of the APIs here:
 
