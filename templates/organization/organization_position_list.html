@@ -111,6 +111,7 @@
 <p>
     <a href="{% url 'import_export_wikipedia:import_organization_logo' organization.id %}">Retrieve photos from Wikipedia</a>,
     <a href="{% url 'import_export_twitter:scrape_website_for_social_media' organization.id %}">Scrape org website for Twitter Acounts</a>,
+    <a href="{% url 'organization:organization_retrieve_tweets' organization.we_vote_id %}">Linked issues in bulk</a>,
 </p>
 
 <p>

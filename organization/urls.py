@@ -18,6 +18,8 @@ urlpatterns = [
     url(r'^new/$', views_admin.organization_new_view, name='organization_new'),
     url(r'^(?P<organization_id>[0-9]+)/pos/$',
         views_admin.organization_position_list_view, name='organization_position_list',),
+    url(r'^(?P<organization_we_vote_id>wv[\w]{2}org[\w]+)/retrieve_tweets/$',
+        views_admin.organization_retrieve_tweets_view, name='organization_retrieve_tweets',),
     url(r'^(?P<organization_we_vote_id>wv[\w]{2}org[\w]+)/pos/$',
         views_admin.organization_position_list_view, name='organization_we_vote_id_position_list',),
     url(r'^(?P<incorrect_integer>[0-9]+)/pos/$',
