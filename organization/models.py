@@ -61,6 +61,22 @@ alphanumeric = RegexValidator(r'^[0-9a-zA-Z]*$', message='Only alphanumeric char
 logger = wevote_functions.admin.get_logger(__name__)
 
 
+class OrganizationLinkToHashtag():
+    # organization_we_vote_id
+    # hashtag_text
+    # tweet_id
+    # published_datetime
+    pass
+
+
+class OrganizationLinkToWordOrPhrase():
+    # organization_we_vote_id
+    # word_or_phrase
+    # tweet_id
+    # published_datetime
+    pass
+
+
 class OrganizationManager(models.Manager):
     """
     A class for working with the Organization model

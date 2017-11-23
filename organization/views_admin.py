@@ -42,6 +42,11 @@ ORGANIZATION_STANCE_CHOICES = (
 logger = wevote_functions.admin.get_logger(__name__)
 
 
+def organization_retrieve_tweets_view(request, organization_we_vote_id):
+    #For one organization, retrieve X Tweets, and capture all #Hashtags used.
+    return HttpResponse("Hello, world. You're at the organization_retrieve_tweets_view page.")
+
+
 # This page does not need to be protected.
 def organizations_sync_out_view(request):  # organizationsSyncOut
     state_served_code = request.GET.get('state_served_code', '')
