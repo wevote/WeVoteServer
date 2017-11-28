@@ -33,8 +33,11 @@ logger = wevote_functions.admin.get_logger(__name__)
 
 WE_VOTE_API_KEY = get_environment_variable("WE_VOTE_API_KEY")
 ORGANIZATIONS_SYNC_URL = get_environment_variable("ORGANIZATIONS_SYNC_URL")
+# Seems like the following lines are repeated from import_export_twitter/controllers.py
 TWITTER_CONSUMER_KEY = get_environment_variable("TWITTER_CONSUMER_KEY")
 TWITTER_CONSUMER_SECRET = get_environment_variable("TWITTER_CONSUMER_SECRET")
+# As far as I can tell this following env vars specify the wevote org; this is over-ridden
+# by specifying the twitter_id in line 53
 TWITTER_ACCESS_TOKEN = get_environment_variable("TWITTER_ACCESS_TOKEN")
 TWITTER_ACCESS_TOKEN_SECRET = get_environment_variable("TWITTER_ACCESS_TOKEN_SECRET")
 
@@ -47,10 +50,12 @@ def organization_retrieve_tweets(organization_we_vote_id, number_to_retrieve):
 
     api = tweepy.API(auth)
 
-    return api.user_timeline()
+    # TODO(eayoungs@gmail.com): Lookup twitter credential by we_vote_id
+    # This is a temporary test; hard coding the twitter id is not recommmended practice
+    return api.user_timeline('106502456') # The number of tweets DESPERATELY needs to be limited!
+    
 
-
-def organization_analyze_tweets(organization_we_vote_id):
+def organization_analyze_tweets():
     # For one organization, retrieve X Tweets, and capture all #Hashtags used.
     # Loop through Tweets and create OrganizationLinkToHashtag and OrganizationLinkToWordOrPhrase
     pass
