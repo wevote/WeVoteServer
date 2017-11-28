@@ -83,10 +83,10 @@
   "LEGISLATORS_CURRENT_CSV_FILE":   "import_export_theunitedstatesio/import_data/legislators-current.csv",
 
   "_comment":                       "import_export_twitter",
-  "TWITTER_CONSUMER_KEY":           "",
-  "TWITTER_CONSUMER_SECRET":        "",
-  "TWITTER_ACCESS_TOKEN":           "",
-  "TWITTER_ACCESS_TOKEN_SECRET":    "",
+  "TWITTER_CONSUMER_KEY":           "AT1kSVKGXBEkvBZy1CkVqBYfO",
+  "TWITTER_CONSUMER_SECRET":        "xoJZrkRHJxC1C85gfgn07b65Hh52NwZq95OuhLKYSg81cqJLYo",
+  "TWITTER_ACCESS_TOKEN":           "2860808066-OYDIwFb8YTDg3tHcdWw8tkJc6ZnzZu5pzZ7zClt",
+  "TWITTER_ACCESS_TOKEN_SECRET":    "mOzin2QWoVk886JZdaWUxteMvTjpNo6L0qE489R5xQJcu",
 
   "_comment":                       "import_export_vote_smart",
   "VOTE_SMART_API_KEY":             "",

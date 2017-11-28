@@ -47,12 +47,15 @@ def organization_retrieve_tweets(organization_we_vote_id, number_to_retrieve):
     # Sample code: Search for tweepy http://tweepy.readthedocs.io/en/v3.5.0/
     auth = tweepy.OAuthHandler(TWITTER_CONSUMER_KEY, TWITTER_CONSUMER_SECRET)
     auth.set_access_token(TWITTER_ACCESS_TOKEN, TWITTER_ACCESS_TOKEN_SECRET)
-
     api = tweepy.API(auth)
 
+    organization_manager = OrganizationManager()
+    organization_twitter_handle = organization_manager.fetch_twitter_handle_from_organization_we_vote_id(organization_we_vote_id)
+    new_tweets = api.user_timeline(organization_twitter_handle, count=number_to_retrieve)
     # TODO(eayoungs@gmail.com): Lookup twitter credential by we_vote_id
     # This is a temporary test; hard coding the twitter id is not recommmended practice
-    return api.user_timeline('106502456') # The number of tweets DESPERATELY needs to be limited!
+    out_tweets = [[tweet.id_str, tweet.created_at, tweet.text] for tweet in new_tweets]
+    return out_tweets # The number of tweets DESPERATELY needs to be limited!
     
 
 def organization_analyze_tweets():

@@ -70,6 +70,13 @@ class OrganizationLinkToHashtag():
 
 
 class OrganizationLinkToWordOrPhrase():
+    def __unicode__(self):
+        return "OrganizationLinkToWordOrPhrase"
+
+    organization_we_vote_id = models.CharField(verbose_name="we vote permanent id", max_length=255, unique=True)
+    word_or_phrase_text = models.CharField(verbose_name="word or phrase text", max_length=255, unique=False)
+    tweet_id = models.BigIntegerField(verbose_name="tweet id",unique=True)
+    published_datetime = models.DateTimeField(verbose_name="published datetime")
     # organization_we_vote_id
     # word_or_phrase
     # tweet_id
