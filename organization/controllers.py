@@ -26,17 +26,28 @@ from voter_guide.models import VoterGuide, VoterGuideManager
 import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, extract_twitter_handle_from_text_string, positive_value_exists, \
     process_request_from_master
+import tweepy
+
 
 logger = wevote_functions.admin.get_logger(__name__)
 
 WE_VOTE_API_KEY = get_environment_variable("WE_VOTE_API_KEY")
 ORGANIZATIONS_SYNC_URL = get_environment_variable("ORGANIZATIONS_SYNC_URL")
+TWITTER_CONSUMER_KEY = get_environment_variable("TWITTER_CONSUMER_KEY")
+TWITTER_CONSUMER_SECRET = get_environment_variable("TWITTER_CONSUMER_SECRET")
+TWITTER_ACCESS_TOKEN = get_environment_variable("TWITTER_ACCESS_TOKEN")
+TWITTER_ACCESS_TOKEN_SECRET = get_environment_variable("TWITTER_ACCESS_TOKEN_SECRET")
 
 
 def organization_retrieve_tweets(organization_we_vote_id, number_to_retrieve):
     # For one organization, retrieve X Tweets, and capture all #Hashtags used.
     # Sample code: Search for tweepy http://tweepy.readthedocs.io/en/v3.5.0/
-    pass
+    auth = tweepy.OAuthHandler(TWITTER_CONSUMER_KEY, TWITTER_CONSUMER_SECRET)
+    auth.set_access_token(TWITTER_ACCESS_TOKEN, TWITTER_ACCESS_TOKEN_SECRET)
+
+    api = tweepy.API(auth)
+
+    return api.user_timeline()
 
 
 def organization_analyze_tweets(organization_we_vote_id):
