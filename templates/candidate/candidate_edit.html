@@ -130,10 +130,10 @@ span.wrap_word { word-break: break-word; }
         Twitter Followers: {{ candidate.twitter_followers_count }}<br />
     {% endif %}
     {% if candidate.twitter_url %}Twitter URL (from Google Civic): {{ candidate.twitter_url }}{% endif %}
-
+    {% if candidate %}
     (<a href="{% url 'twitter2:retrieve_possible_twitter_handles' candidate.we_vote_id %}">retrieve possible Twitter handles</a>)
     (<a href="{% url 'twitter2:delete_possible_twitter_handles' candidate.we_vote_id %}">delete possible Twitter handles</a>)
-
+    {% endif %}
     <table border="1" cellpadding="5" cellspacing="5" class="table">
         <tr>
             <th>#</th>
@@ -173,6 +173,7 @@ span.wrap_word { word-break: break-word; }
     </div>
 </div>
 
+    {% if candidate %}
 <div class="form-group">
     <label for="google_search_image_file_id" class="col-sm-3 control-label">Google Search</label>
     <div class="col-sm-8">
@@ -188,6 +189,7 @@ span.wrap_word { word-break: break-word; }
         {% endif %}
     </div>
 </div>
+    {% endif %}
 
 <div class="form-group">
     <label for="candidate_url_id" class="col-sm-3 control-label">Candidate Website</label>

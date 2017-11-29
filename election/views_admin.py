@@ -376,6 +376,7 @@ def election_edit_process_view(request):
     election_name = request.POST.get('election_name', False)
     election_day_text = request.POST.get('election_day_text', False)
     state_code = request.POST.get('state_code', False)
+    google_civic_election_id = request.POST.get('google_civic_election_id', '0')
     include_in_list_for_voters = request.POST.get('include_in_list_for_voters', False)
 
     election_on_stage = Election()
@@ -421,12 +422,12 @@ def election_edit_process_view(request):
                                      ' (' + str(election_on_stage.google_civic_election_id) + ') updated.')
         else:
             # Create new
-            next_local_election_id_integer = fetch_next_we_vote_id_election_integer()
+            # next_local_election_id_integer = fetch_next_we_vote_id_election_integer()
 
             if not state_code:
                 state_code = ""
             election_on_stage = Election(
-                google_civic_election_id=next_local_election_id_integer,
+                google_civic_election_id=google_civic_election_id,
                 election_name=election_name,
                 election_day_text=election_day_text,
                 state_code=state_code,

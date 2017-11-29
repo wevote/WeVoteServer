@@ -158,6 +158,8 @@ BATCH_IMPORT_KEYS_ACCEPTED_FOR_POSITIONS = {
     'candidate_twitter_handle': 'candidate_twitter_handle',
     'contest_office_name': 'contest_office_name',
     'contest_measure_title': 'contest_measure_title',
+    'election_day': 'election_day',
+    'google_civic_election_id': 'google_civic_election_id',
     'more_info_url': 'more_info_url',
     'stance': 'stance (SUPPORT or OPPOSE)',
     'support': 'support (TRUE or FALSE)',
@@ -2804,8 +2806,9 @@ class BatchManager(models.Model):
         # organization_email = structured_organization_endorsement_json['organization_email']
         candidate_positions_list = structured_organization_endorsement_json['candidate_positions']
         # measure_positions_list = structured_organization_endorsement_json['measure_positions']
-
+        organization_we_vote_id = organization.we_vote_id
         results = self.import_candidate_positions_from_endorsement_json(batch_set_name_url, batch_set_id,
+                                                                        organization_we_vote_id,
                                                                         candidate_positions_list)
         if results['success']:
             success = True
@@ -2832,11 +2835,13 @@ class BatchManager(models.Model):
         }
         return results
 
-    def import_candidate_positions_from_endorsement_json(self, batch_uri, batch_set_id, candidate_positions_list):
+    def import_candidate_positions_from_endorsement_json(self, batch_uri, batch_set_id, organization_we_vote_id,
+                                                         candidate_positions_list):
         """
         Import candidate positions from organization endorsements json file        
         :param batch_uri: 
         :param batch_set_id: 
+        :param organization_we_vote_id:
         :param candidate_positions_list: 
         :return: 
         """
@@ -2884,7 +2889,7 @@ class BatchManager(models.Model):
 
             # election lookup using state & election day, and fetch google_civic_election_id
             election_manager = ElectionManager()
-            election_results = election_manager.retrieve_elections_by_state_and_election_date(state_code, election_day)
+            election_results = election_manager.retrieve_elections_by_election_date(election_day)
             if election_results['success']:
                 election_list = election_results['election_list']
                 for election in election_list:
@@ -2954,9 +2959,9 @@ class BatchManager(models.Model):
                             batch_header_map_id=batch_header_map_id,
                             batch_name=batch_name,
                             batch_description_text=batch_description_text,
-                            # google_civic_election_id=google_civic_election_id,
-                            kind_of_batch='ENDORSEMENTS_JSON_CANDIDATES',
-                            # organization_we_vote_id=organization_we_vote_id,
+                            google_civic_election_id=google_civic_election_id,
+                            kind_of_batch='POSITION',
+                            organization_we_vote_id=organization_we_vote_id,
                             source_uri=batch_uri,
                             batch_set_id=batch_set_id,
                         )
@@ -3058,7 +3063,7 @@ class BatchManager(models.Model):
 
             # election models or manager retrieve_elections_by_date
             election_manager = ElectionManager()
-            election_results = election_manager.retrieve_elections_by_state_and_election_date(state_code, election_day)
+            election_results = election_manager.retrieve_elections_by_election_date(election_day)
             if election_results['success']:
                 # These elections are sorted by most recent to least recent
                 election_list = election_results['election_list']
@@ -3123,7 +3128,7 @@ class BatchManager(models.Model):
                             batch_name=batch_name,
                             batch_description_text=batch_description_text,
                             # google_civic_election_id=google_civic_election_id,
-                            kind_of_batch='ENDORSEMENTS_JSON_MEASURES',
+                            kind_of_batch='POSITION',
                             # organization_we_vote_id=organization_we_vote_id,
                             source_uri=batch_uri,
                             batch_set_id=batch_set_id,
