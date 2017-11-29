@@ -21,7 +21,7 @@ from issue.models import ALPHABETICAL_ASCENDING, IssueListManager, IssueManager,
 from measure.models import ContestMeasure, ContestMeasureList, ContestMeasureManager
 import operator
 from organization.models import OrganizationListManager, OrganizationManager, ORGANIZATION_TYPE_MAP, UNKNOWN
-from organization.controllers import organization_retrieve_tweets
+from organization.controllers import organization_retrieve_tweets, organization_analyze_tweets
 from position.models import PositionEntered, PositionManager, INFORMATION_ONLY, OPPOSE, \
     STILL_DECIDING, SUPPORT
 from voter.models import retrieve_voter_authority, voter_has_authority, VoterManager
@@ -42,13 +42,17 @@ ORGANIZATION_STANCE_CHOICES = (
 
 logger = wevote_functions.admin.get_logger(__name__)
 
+def organization_analyze_tweets_view(request, organization_we_vote_id):
+
+    org_hashtags = organization_analyze_tweets(organization_we_vote_id)
+    return HttpResponse(org_tweets)
 
 def organization_retrieve_tweets_view(request, organization_we_vote_id):
     # For one organization, retrieve X Tweets, and capture all #Hashtags used.
     number_to_retrieve = 5
     org_tweets = organization_retrieve_tweets(organization_we_vote_id, number_to_retrieve)
-
-    return HttpResponse(org_tweets)
+    org_hashtags = organization_analyze_tweets(organization_we_vote_id)
+    return HttpResponse(org_hashtags)
 
 
 # This page does not need to be protected.

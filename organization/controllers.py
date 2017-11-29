@@ -27,7 +27,8 @@ import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, extract_twitter_handle_from_text_string, positive_value_exists, \
     process_request_from_master
 import tweepy
-
+import re
+from organization.models import OrganizationLinkToHashtag
 
 logger = wevote_functions.admin.get_logger(__name__)
 
@@ -42,23 +43,55 @@ TWITTER_ACCESS_TOKEN = get_environment_variable("TWITTER_ACCESS_TOKEN")
 TWITTER_ACCESS_TOKEN_SECRET = get_environment_variable("TWITTER_ACCESS_TOKEN_SECRET")
 
 
-def organization_retrieve_tweets(organization_we_vote_id, number_to_retrieve):
+def organization_retrieve_tweets(organization_we_vote_id, number_to_retrieve=5):
     # For one organization, retrieve X Tweets, and capture all #Hashtags used.
     # Sample code: Search for tweepy http://tweepy.readthedocs.io/en/v3.5.0/
     auth = tweepy.OAuthHandler(TWITTER_CONSUMER_KEY, TWITTER_CONSUMER_SECRET)
     auth.set_access_token(TWITTER_ACCESS_TOKEN, TWITTER_ACCESS_TOKEN_SECRET)
-
     api = tweepy.API(auth)
 
+    organization_manager = OrganizationManager()
+    organization_twitter_handle = organization_manager.fetch_twitter_handle_from_organization_we_vote_id(organization_we_vote_id)
+    new_tweets = api.user_timeline(organization_twitter_handle, count=number_to_retrieve)
     # TODO(eayoungs@gmail.com): Lookup twitter credential by we_vote_id
-    # This is a temporary test; hard coding the twitter id is not recommmended practice
-    return api.user_timeline('106502456') # The number of tweets DESPERATELY needs to be limited!
-    
 
-def organization_analyze_tweets():
+    # Gets ID, date and tweet text
+    out_tweets = [[tweet.id_str, tweet.created_at, tweet.text] for tweet in new_tweets]
+    return out_tweets # The number of tweets DESPERATELY needs to be limited!
+
+def organization_analyze_tweets(organization_we_vote_id):
     # For one organization, retrieve X Tweets, and capture all #Hashtags used.
     # Loop through Tweets and create OrganizationLinkToHashtag and OrganizationLinkToWordOrPhrase
-    pass
+    auth = tweepy.OAuthHandler(TWITTER_CONSUMER_KEY, TWITTER_CONSUMER_SECRET)
+    auth.set_access_token(TWITTER_ACCESS_TOKEN, TWITTER_ACCESS_TOKEN_SECRET)
+    api = tweepy.API(auth)
+
+    organization_manager = OrganizationManager()
+    organization_twitter_handle = organization_manager.fetch_twitter_handle_from_organization_we_vote_id(organization_we_vote_id)
+
+    #
+    all_tweets = api.user_timeline(organization_twitter_handle, count=5)
+    all_hashtags = []
+
+    #We need a count here instead of hard limit 5
+    for i in range(0, 5):
+        if re.findall(r"#(\w+)", all_tweets[i].text):
+            all_hashtags.append(re.findall(r"#(\w+)", all_tweets[i].text))
+
+    # Populate a dictionary with the frequency of words in all tweets 
+    counts = dict()
+    for tweet in all_tweets:
+        words = tweet.text.split()
+        for word in words:
+            if word in counts:
+                counts[word] += 1
+            else:
+                counts[word] = 1
+
+    organization_link_to_hashtag = OrganizationLinkToHashtag()
+
+    # For now it returns a list of hashtags and frequency dictionary of all words.
+    return all_hashtags, counts
 
 
 def move_organization_data_to_another_organization(from_organization_we_vote_id, to_organization_we_vote_id):
