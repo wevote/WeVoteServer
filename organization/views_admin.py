@@ -48,7 +48,7 @@ def organization_analyze_tweets_view(request, organization_we_vote_id):
     return HttpResponse(org_tweets)
 
 def organization_retrieve_tweets_view(request, organization_we_vote_id):
-    # For one organization, retrieve X Tweets, and capture all #Hashtags used.
+    """ For one organization, retrieve X Tweets, and capture all #Hashtags used. """
     number_to_retrieve = 5
     org_tweets = organization_retrieve_tweets(organization_we_vote_id, number_to_retrieve)
     org_hashtags = organization_analyze_tweets(organization_we_vote_id)
