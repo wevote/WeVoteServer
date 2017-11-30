@@ -31,6 +31,7 @@ import re
 from organization.models import OrganizationLinkToHashtag
 from import_export_twitter.models import TwitterAuthManager
 
+
 logger = wevote_functions.admin.get_logger(__name__)
 
 WE_VOTE_API_KEY = get_environment_variable("WE_VOTE_API_KEY")
@@ -40,7 +41,7 @@ TWITTER_ACCESS_TOKEN = get_environment_variable("TWITTER_ACCESS_TOKEN")
 TWITTER_ACCESS_TOKEN_SECRET = get_environment_variable("TWITTER_ACCESS_TOKEN_SECRET")
 
 
-def organization_retrieve_tweets(organization_we_vote_id, number_to_retrieve=5):
+def organization_retrieve_tweets_from_twitter(organization_we_vote_id, number_to_retrieve=200):
     """For one organization, retrieve X Tweets, and capture all #Hashtags used.
         Sample code: Search for tweepy http://tweepy.readthedocs.io/en/v3.5.0/ """
     auth = tweepy.OAuthHandler(TWITTER_CONSUMER_KEY, TWITTER_CONSUMER_SECRET)
@@ -48,12 +49,30 @@ def organization_retrieve_tweets(organization_we_vote_id, number_to_retrieve=5):
     api = tweepy.API(auth)
 
     organization_manager = OrganizationManager()
-    organization_twitter_handle = organization_manager.fetch_twitter_handle_from_organization_we_vote_id(organization_we_vote_id)
-    new_tweets = api.user_timeline(organization_twitter_handle, count=number_to_retrieve)
+    organization_twitter_id = organization_manager.fetch_twitter_handle_from_organization_we_vote_id(organization_we_vote_id)
+    new_tweets = api.user_timeline(organization_twitter_id, count=number_to_retrieve)
+
+    twitter_user_manager = TwitterUserManager()
+    tweets_saved = 0
+    tweets_not_saved = 0
+    for tweet_json in new_tweets:
+        results = twitter_user_manager.update_or_create_tweet(tweet_json)
+        if results['success']:
+            tweets_saved += 1
+        else:
+            tweets_not_saved += 1
+
+    #results = {
+    #        'status': 'MOVE_ORGANIZATION_DATA_INCOMING_VARIABLES_MISSING ',
+    #        'success': False,
+    #        'from_organization': from_organization,
+    #        'to_organization': to_organization,
+    #        'data_transfer_complete': False,
+    #    }
 
     # Gets ID, date and tweet text
-    out_tweets = [[tweet.id_str, tweet.created_at, tweet.text] for tweet in new_tweets]
-    return out_tweets # The number of tweets DESPERATELY needs to be limited!
+    # out_tweets = [[tweet.id_str, tweet.created_at, tweet.text] for tweet in new_tweets]
+    return tweets_saved, tweets_not_saved
 
 
 def organization_analyze_tweets(organization_we_vote_id):

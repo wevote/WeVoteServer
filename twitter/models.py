@@ -10,6 +10,7 @@ from django.db import models
 from exception.models import handle_record_found_more_than_one_exception
 from twitter.functions import retrieve_twitter_user_info
 from wevote_functions.functions import convert_to_int, generate_random_string, positive_value_exists
+import json
 
 TWITTER_CONSUMER_KEY = get_environment_variable("TWITTER_CONSUMER_KEY")
 TWITTER_CONSUMER_SECRET = get_environment_variable("TWITTER_CONSUMER_SECRET")
@@ -151,6 +152,39 @@ class TwitterUserManager(models.Model):
 
     def __unicode__(self):
         return "TwitterUserManager"
+
+    def update_or_create_tweet(self, tweet_json):
+        """
+        Either update or create a tweet entry.
+        """
+
+        created = False
+
+        if not tweet_json: 
+            success = False
+            status = 'MISSING_TWEET_JSON '
+        else:
+            new_tweet, created = Tweet.objects.update_or_create(
+                author_handle = tweet_json.user._json['name'],
+                twitter_id = tweet_json.user._json['id'],
+                tweet_id = tweet_json.id,
+                #is_retweet = tweet_json['retweeted_status'],
+                tweet_text = tweet_json.text,
+                date_published = tweet_json.created_at)
+            if new_tweet or len(new_tweet):
+                success = True
+                status = 'TWEET_SAVED'
+            else:
+                success = False
+                created = False
+                status = 'TWEET_NOT_UPDATED_OR_CREATED'
+
+        results = {
+            'success':                  success,
+            'status':                   status,
+            'new_tweet_created':        created,
+        }
+        return results
 
     def update_or_create_twitter_link_possibility(self, candidate_campaign_we_vote_id, twitter_json, search_term,
                                                   likelihood_score):
@@ -1047,12 +1081,14 @@ class Tweet(models.Model):
     """
     # twitter_tweet_id # (unique id from twitter for tweet?) - TODO ADD This
     # author_twitter_id - TODO ADD This
-    author_handle = models.CharField(max_length=15, verbose_name='twitter handle of this tweet\'s author')
+    author_handle = models.CharField(default='', max_length=15, verbose_name='twitter handle of this tweet\'s author')
+    twitter_id = models.BigIntegerField(default=0, verbose_name='twitter user\'s id of this tweet\'s author')
+    tweet_id = models.BigIntegerField(default=0, verbose_name='id of this tweet\'s author')
     # (stored quickly before we look up voter_id)
     # author_voter_id = models.ForeignKey(Voter, null=True, blank=True, related_name='we vote id of tweet author')
     is_retweet = models.BooleanField(default=False, verbose_name='is this a retweet?')
     # parent_tweet_id # If this is a retweet, what is the id of the originating tweet?
-    body = models.CharField(blank=True, null=True, max_length=255, verbose_name='')
+    tweet_text = models.CharField(default='', blank=False, null=False, max_length=280, verbose_name='text field from twitter tweet api')
     date_published = models.DateTimeField(null=True, verbose_name='date published')
 
 
