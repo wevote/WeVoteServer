@@ -29,39 +29,47 @@ from wevote_functions.functions import convert_to_int, extract_twitter_handle_fr
 import tweepy
 import re
 from organization.models import OrganizationLinkToHashtag
+from import_export_twitter.models import TwitterAuthManager
+
 
 logger = wevote_functions.admin.get_logger(__name__)
 
 WE_VOTE_API_KEY = get_environment_variable("WE_VOTE_API_KEY")
-ORGANIZATIONS_SYNC_URL = get_environment_variable("ORGANIZATIONS_SYNC_URL")
-# Seems like the following lines are repeated from import_export_twitter/controllers.py
 TWITTER_CONSUMER_KEY = get_environment_variable("TWITTER_CONSUMER_KEY")
 TWITTER_CONSUMER_SECRET = get_environment_variable("TWITTER_CONSUMER_SECRET")
-# As far as I can tell this following env vars specify the wevote org; this is over-ridden
-# by specifying the twitter_id in line 53
 TWITTER_ACCESS_TOKEN = get_environment_variable("TWITTER_ACCESS_TOKEN")
 TWITTER_ACCESS_TOKEN_SECRET = get_environment_variable("TWITTER_ACCESS_TOKEN_SECRET")
 
 
-def organization_retrieve_tweets(organization_we_vote_id, number_to_retrieve=5):
-    # For one organization, retrieve X Tweets, and capture all #Hashtags used.
-    # Sample code: Search for tweepy http://tweepy.readthedocs.io/en/v3.5.0/
+def organization_retrieve_tweets_from_twitter(organization_we_vote_id, number_to_retrieve=200):
+    """For one organization, retrieve X Tweets, and capture all #Hashtags used.
+        Sample code: Search for tweepy http://tweepy.readthedocs.io/en/v3.5.0/ """
     auth = tweepy.OAuthHandler(TWITTER_CONSUMER_KEY, TWITTER_CONSUMER_SECRET)
     auth.set_access_token(TWITTER_ACCESS_TOKEN, TWITTER_ACCESS_TOKEN_SECRET)
     api = tweepy.API(auth)
 
     organization_manager = OrganizationManager()
-    organization_twitter_handle = organization_manager.fetch_twitter_handle_from_organization_we_vote_id(organization_we_vote_id)
-    new_tweets = api.user_timeline(organization_twitter_handle, count=number_to_retrieve)
-    # TODO(eayoungs@gmail.com): Lookup twitter credential by we_vote_id
+    organization_twitter_id = organization_manager.fetch_twitter_handle_from_organization_we_vote_id(organization_we_vote_id)
+    new_tweets = api.user_timeline(organization_twitter_id, count=number_to_retrieve)
+
+    twitter_user_manager = TwitterUserManager()
+    tweets_saved = 0
+    tweets_not_saved = 0
+    for tweet_json in new_tweets:
+        results = twitter_user_manager.update_or_create_tweet(tweet_json)
+        if results['success']:
+            tweets_saved += 1
+        else:
+            tweets_not_saved += 1
 
     # Gets ID, date and tweet text
-    out_tweets = [[tweet.id_str, tweet.created_at, tweet.text] for tweet in new_tweets]
-    return out_tweets # The number of tweets DESPERATELY needs to be limited!
+    # out_tweets = [[tweet.id_str, tweet.created_at, tweet.text] for tweet in new_tweets]
+    return results
+
 
 def organization_analyze_tweets(organization_we_vote_id):
-    # For one organization, retrieve X Tweets, and capture all #Hashtags used.
-    # Loop through Tweets and create OrganizationLinkToHashtag and OrganizationLinkToWordOrPhrase
+    """ For one organization, retrieve X Tweets, and capture all #Hashtags used.
+        Loop through Tweets and create OrganizationLinkToHashtag and OrganizationLinkToWordOrPhrase """
     auth = tweepy.OAuthHandler(TWITTER_CONSUMER_KEY, TWITTER_CONSUMER_SECRET)
     auth.set_access_token(TWITTER_ACCESS_TOKEN, TWITTER_ACCESS_TOKEN_SECRET)
     api = tweepy.API(auth)
