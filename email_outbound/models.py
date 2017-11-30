@@ -13,12 +13,16 @@ FRIEND_INVITATION_TEMPLATE = 'FRIEND_INVITATION_TEMPLATE'
 GENERIC_EMAIL_TEMPLATE = 'GENERIC_EMAIL_TEMPLATE'
 LINK_TO_SIGN_IN_TEMPLATE = 'LINK_TO_SIGN_IN_TEMPLATE'
 VERIFY_EMAIL_ADDRESS_TEMPLATE = 'VERIFY_EMAIL_ADDRESS_TEMPLATE'
+SEND_BALLOT_TO_SELF = 'SEND_BALLOT_TO_SELF'
+SEND_BALLOT_TO_FRIENDS = 'SEND_BALLOT_TO_FRIENDS'
 KIND_OF_EMAIL_TEMPLATE_CHOICES = (
     (GENERIC_EMAIL_TEMPLATE,  'Generic Email'),
     (FRIEND_ACCEPTED_INVITATION_TEMPLATE, 'Accept an invitation to be a Friend'),
     (FRIEND_INVITATION_TEMPLATE, 'Invite Friend'),
     (LINK_TO_SIGN_IN_TEMPLATE, 'Link to sign in.'),
     (VERIFY_EMAIL_ADDRESS_TEMPLATE, 'Verify Senders Email Address'),
+    (SEND_BALLOT_TO_SELF, 'Send ballot to self'),
+    (SEND_BALLOT_TO_FRIENDS, 'Send ballot to friends'),
 )
 
 TO_BE_PROCESSED = 'TO_BE_PROCESSED'
@@ -29,6 +33,7 @@ ASSEMBLY_STATUS_CHOICES = (
     (BEING_ASSEMBLED, 'Email being assembled with template'),
     (SCHEDULED, 'Sent to the scheduler'),
 )
+WAITING_FOR_VERIFICATION = 'WAITING_FOR_VERIFICATION'
 
 BEING_SENT = 'BEING_SENT'
 SENT = 'SENT'
@@ -581,9 +586,53 @@ class EmailManager(models.Model):
 
         return ""
 
-    def schedule_email(self, email_outbound_description, subject, message_text, message_html):
-        send_status = TO_BE_PROCESSED
+    def retrieve_scheduled_email_list_from_send_status(self, sender_voter_we_vote_id, send_status):
+        scheduled_email_list = []
+        try:
+            email_scheduled_queryset = EmailScheduled.objects.all()
+            email_scheduled_queryset = email_scheduled_queryset.filter(
+                sender_voter_we_vote_id=sender_voter_we_vote_id,
+                send_status=send_status,
+            )
+            scheduled_email_list = email_scheduled_queryset
 
+            if len(scheduled_email_list):
+                success = True
+                scheduled_email_list_found = True
+                status = 'SCHEDULED_EMAIL_LIST_RETRIEVED'
+            else:
+                success = True
+                scheduled_email_list_found = False
+                status = 'NO_SCHEDULED_EMAIL_LIST_RETRIEVED'
+        except EmailScheduled.DoesNotExist:
+            # No data found. Not a problem.
+            success = True
+            scheduled_email_list_found = False
+            status = 'NO_SCHEDULED_EMAIL_LIST_RETRIEVED_DoesNotExist'
+            scheduled_email_list = []
+        except Exception as e:
+            success = False
+            scheduled_email_list_found = False
+            status = 'FAILED retrieve_scheduled_email_list_from_send_status EmailAddress'
+
+        results = {
+            'success':                      success,
+            'status':                       status,
+            'scheduled_email_list_found':   scheduled_email_list_found,
+            'scheduled_email_list':         scheduled_email_list,
+        }
+        return results
+
+    def update_scheduled_email_with_new_send_status(self, email_scheduled_object, send_status):
+        try:
+            email_scheduled_object.send_status = send_status
+            email_scheduled_object.save()
+            return email_scheduled_object
+        except Exception as e:
+            return email_scheduled_object
+
+    def schedule_email(self, email_outbound_description, subject, message_text, message_html,
+                       send_status=TO_BE_PROCESSED):
         try:
             email_scheduled = EmailScheduled.objects.create(
                 sender_voter_we_vote_id=email_outbound_description.sender_voter_we_vote_id,
