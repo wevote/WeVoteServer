@@ -62,17 +62,9 @@ def organization_retrieve_tweets_from_twitter(organization_we_vote_id, number_to
         else:
             tweets_not_saved += 1
 
-    #results = {
-    #        'status': 'MOVE_ORGANIZATION_DATA_INCOMING_VARIABLES_MISSING ',
-    #        'success': False,
-    #        'from_organization': from_organization,
-    #        'to_organization': to_organization,
-    #        'data_transfer_complete': False,
-    #    }
-
     # Gets ID, date and tweet text
     # out_tweets = [[tweet.id_str, tweet.created_at, tweet.text] for tweet in new_tweets]
-    return tweets_saved, tweets_not_saved
+    return results
 
 
 def organization_analyze_tweets(organization_we_vote_id):
