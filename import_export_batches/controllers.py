@@ -1557,6 +1557,18 @@ def create_batch_row_action_position(batch_description, batch_header_map, one_ba
         google_civic_election_id = str(one_batch_row.google_civic_election_id)
     else:
         google_civic_election_id = str(batch_description.google_civic_election_id)
+
+    if not positive_value_exists(google_civic_election_id):
+        # look up google_civic_election_id using state and election_day
+        election_day = batch_manager.retrieve_value_from_batch_row("election_day", batch_header_map, one_batch_row)
+        election_manager = ElectionManager()
+        election_results = election_manager.retrieve_elections_by_election_date(election_day)
+        if election_results['success']:
+            election_list = election_results['election_list']
+            for election in election_list:
+                # election_name = election.election_name
+                google_civic_election_id = election.google_civic_election_id
+
     state_code = batch_manager.retrieve_value_from_batch_row("state_code", batch_header_map, one_batch_row)
     if positive_value_exists(google_civic_election_id) and not positive_value_exists(state_code):
         # Check to see if there is a state served for the election
@@ -1566,6 +1578,10 @@ def create_batch_row_action_position(batch_description, batch_header_map, one_ba
             election = results['election']
             state_code = election.state_code
 
+    # TODO verify the correct location for this code
+    # get org we_vote_id from batch_description for org endorsement import
+    if not positive_value_exists(organization_we_vote_id):
+        organization_we_vote_id = batch_description.organization_we_vote_id
     # Find the organization
     if positive_value_exists(organization_we_vote_id):
         # If here, then we are updating an existing known record
