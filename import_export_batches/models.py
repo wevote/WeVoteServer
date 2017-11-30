@@ -2807,8 +2807,10 @@ class BatchManager(models.Model):
         candidate_positions_list = structured_organization_endorsement_json['candidate_positions']
         # measure_positions_list = structured_organization_endorsement_json['measure_positions']
         organization_we_vote_id = organization.we_vote_id
+        organization_twitter_handle = organization.organization_twitter_handle
         results = self.import_candidate_positions_from_endorsement_json(batch_set_name_url, batch_set_id,
                                                                         organization_we_vote_id,
+                                                                        organization_twitter_handle,
                                                                         candidate_positions_list)
         if results['success']:
             success = True
@@ -2836,12 +2838,13 @@ class BatchManager(models.Model):
         return results
 
     def import_candidate_positions_from_endorsement_json(self, batch_uri, batch_set_id, organization_we_vote_id,
-                                                         candidate_positions_list):
+                                                         organization_twitter_handle, candidate_positions_list):
         """
-        Import candidate positions from organization endorsements json file        
+        Import candidate positions from organization endorsements json file
         :param batch_uri: 
         :param batch_set_id: 
-        :param organization_we_vote_id:
+        :param organization_we_vote_id: 
+        :param organization_twitter_handle: 
         :param candidate_positions_list: 
         :return: 
         """
@@ -2908,18 +2911,19 @@ class BatchManager(models.Model):
                         batch_header_column_004='grade_rating',
                         batch_header_column_005='candidate_ocd_division_id',
                         batch_header_column_006='organization_position_url',
-                        batch_header_column_007='party',
-                        batch_header_column_008='twitter_url',
-                        batch_header_column_009='facebook_url',
-                        batch_header_column_010='website_url',
-                        batch_header_column_011='profile_image_url',
-                        batch_header_column_012='profile_image_url_https',
-                        batch_header_column_013='position_description',
-                        batch_header_column_014='office_name',
-                        batch_header_column_015='state_code',
-                        batch_header_column_016='office_ocd_division_id',
-                        batch_header_column_017='election_day',
-                        batch_header_column_018='google_civic_election_id',
+                        batch_header_column_007='organization_twitter_handle',
+                        batch_header_column_008='party',
+                        batch_header_column_009='twitter_url',
+                        batch_header_column_010='facebook_url',
+                        batch_header_column_011='more_info_url',
+                        batch_header_column_012='profile_image_url',
+                        batch_header_column_013='profile_image_url_https',
+                        batch_header_column_014='position_description',
+                        batch_header_column_015='office_name',
+                        batch_header_column_016='state_code',
+                        batch_header_column_017='office_ocd_division_id',
+                        batch_header_column_018='election_day',
+                        batch_header_column_019='google_civic_election_id',
                     )
                     batch_header_id = batch_header.id
 
@@ -2934,18 +2938,19 @@ class BatchManager(models.Model):
                             batch_header_map_004='grade_rating',
                             batch_header_map_005='candidate_ocd_division_id',
                             batch_header_map_006='organization_position_url',
-                            batch_header_map_007='candidate_party_name',
-                            batch_header_map_008='candidate_twitter_handle',
-                            batch_header_map_009='facebook_url',
-                            batch_header_map_010='candidate_url',
-                            batch_header_map_011='profile_image_url',
-                            batch_header_map_012='profile_image_url_https',
-                            batch_header_map_013='position_description',
-                            batch_header_map_014='candidate_office_name',
-                            batch_header_map_015='state_code',
-                            batch_header_map_016='office_ocd_division_id',
-                            batch_header_map_017='election_day',
-                            batch_header_map_018='google_civic_election_id',
+                            batch_header_map_007='organization_twitter_handle',
+                            batch_header_map_008='candidate_party_name',
+                            batch_header_map_009='candidate_twitter_handle',
+                            batch_header_map_010='facebook_url',
+                            batch_header_map_011='more_info_url',
+                            batch_header_map_012='profile_image_url',
+                            batch_header_map_013='profile_image_url_https',
+                            batch_header_map_014='statement_text',
+                            batch_header_map_015='candidate_office_name',
+                            batch_header_map_016='state_code',
+                            batch_header_map_017='office_ocd_division_id',
+                            batch_header_map_018='election_day',
+                            batch_header_map_019='google_civic_election_id',
                         )
                         batch_header_map_id = batch_header_map.id
                         status += " BATCH_HEADER_MAP_SAVED"
@@ -2985,18 +2990,19 @@ class BatchManager(models.Model):
                     batch_row_004=grade_rating,
                     batch_row_005=candidate_ocd_division_id,
                     batch_row_006=organization_position_url,
-                    batch_row_007=party,
-                    batch_row_008=candidate_twitter_url,
-                    batch_row_009=candidate_facebook_url,
-                    batch_row_010=candidate_website_url,
-                    batch_row_011=candidate_profile_image_url,
-                    batch_row_012=candidate_profile_image_url_https,
-                    batch_row_013=candidate_position_description,
-                    batch_row_014=office_name,
-                    batch_row_015=state_code,
-                    batch_row_016=office_ocd_division_id,
-                    batch_row_017=election_day,
-                    batch_row_018=google_civic_election_id,
+                    batch_row_007=organization_twitter_handle,
+                    batch_row_008=party,
+                    batch_row_009=candidate_twitter_url,
+                    batch_row_010=candidate_facebook_url,
+                    batch_row_011=candidate_website_url,
+                    batch_row_012=candidate_profile_image_url,
+                    batch_row_013=candidate_profile_image_url_https,
+                    batch_row_014=candidate_position_description,
+                    batch_row_015=office_name,
+                    batch_row_016=state_code,
+                    batch_row_017=office_ocd_division_id,
+                    batch_row_018=election_day,
+                    batch_row_019=google_civic_election_id,
                 )
                 number_of_candidate_positions += 1
             except Exception as e:
@@ -3110,7 +3116,7 @@ class BatchManager(models.Model):
                             batch_header_map_007='more_info_url',
                             batch_header_map_008='image_url',
                             batch_header_map_009='image_url_https',
-                            batch_header_map_010='position_description',
+                            batch_header_map_010='statement_text',
                             batch_header_map_011='state_code',
                             batch_header_map_012='election_day',
                             batch_header_map_013='google_civic_election_id',
