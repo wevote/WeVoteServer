@@ -4,7 +4,7 @@
 
 from .functions import merge_message_content_with_template
 from .models import EmailAddress, EmailManager, EmailScheduled, GENERIC_EMAIL_TEMPLATE, LINK_TO_SIGN_IN_TEMPLATE, \
-    VERIFY_EMAIL_ADDRESS_TEMPLATE
+    VERIFY_EMAIL_ADDRESS_TEMPLATE, WAITING_FOR_VERIFICATION, SENT, TO_BE_PROCESSED
 from config.base import get_environment_variable
 import json
 from organization.models import OrganizationManager, INDIVIDUAL
@@ -163,7 +163,7 @@ def move_email_address_entries_to_another_voter(from_voter_we_vote_id, to_voter_
     return results
 
 
-def schedule_email_with_email_outbound_description(email_outbound_description):
+def schedule_email_with_email_outbound_description(email_outbound_description, send_status=TO_BE_PROCESSED):
     email_manager = EmailManager()
 
     template_variables_in_json = email_outbound_description.template_variables_in_json
@@ -178,7 +178,7 @@ def schedule_email_with_email_outbound_description(email_outbound_description):
         message_text = email_template_results['message_text']
         message_html = email_template_results['message_html']
         schedule_email_results = email_manager.schedule_email(email_outbound_description, subject,
-                                                              message_text, message_html)
+                                                              message_text, message_html, send_status)
         success = schedule_email_results['success']
         status = schedule_email_results['status']
         email_scheduled_saved = schedule_email_results['email_scheduled_saved']
@@ -608,6 +608,23 @@ def voter_email_address_verify_for_api(voter_device_id, email_secret_key):  # vo
                 'email_address_found':                      False,
             }
             return error_results
+
+    # send previous scheduled emails
+    email_manager = EmailManager()
+    send_status = WAITING_FOR_VERIFICATION
+    scheduled_email_results = email_manager.retrieve_scheduled_email_list_from_send_status(voter_we_vote_id,
+                                                                                           send_status)
+    if scheduled_email_results['scheduled_email_list_found']:
+        scheduled_email_list = scheduled_email_results['scheduled_email_list']
+        for scheduled_email in scheduled_email_list:
+            send_results = email_manager.send_scheduled_email(scheduled_email)
+            email_scheduled_sent = send_results['email_scheduled_sent']
+            status += send_results['status']
+            if email_scheduled_sent:
+                # If scheduled email sent successfully then change their status from WAITING_FOR_VERIFICATION to SENT
+                send_status = SENT
+                update_scheduled_email_results = email_manager.update_scheduled_email_with_new_send_status(
+                    scheduled_email, send_status)
 
     if voter_ownership_saved:
         if not positive_value_exists(voter.linked_organization_we_vote_id):

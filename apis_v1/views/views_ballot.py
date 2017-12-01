@@ -10,7 +10,8 @@ from measure.controllers import measure_retrieve_for_api
 from office.controllers import office_retrieve_for_api
 from ballot.models import OFFICE, CANDIDATE, MEASURE
 import wevote_functions.admin
-from wevote_functions.functions import convert_to_int, positive_value_exists
+from wevote_functions.functions import convert_to_int, positive_value_exists, get_voter_device_id
+from voter.controllers import email_ballot_data_for_api
 
 logger = wevote_functions.admin.get_logger(__name__)
 
@@ -57,3 +58,29 @@ def ballot_item_retrieve_view(request):  # ballotItemRetrieve
             'ballot_item_we_vote_id':   ballot_item_we_vote_id,
         }
         return HttpResponse(json.dumps(json_data), content_type='application/json')
+
+
+def email_ballot_data_view(request):  # emailBallotData
+    """
+
+    :param request:
+    :return:
+    """
+    voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
+    email_address_array = request.GET.getlist('email_address_array[]', "")
+    first_name_array = request.GET.getlist('first_name_array[]', "")
+    last_name_array = request.GET.getlist('last_name_array[]', "")
+    email_addresses_raw = request.GET.get('email_addresses_raw', "")
+    invitation_message = request.GET.get('invitation_message', "")
+    ballot_link = request.GET.get('ballot_link', "")
+    sender_email_address = request.GET.get('sender_email_address', "")
+    results = email_ballot_data_for_api(voter_device_id, email_address_array, first_name_array,
+                                        last_name_array, email_addresses_raw,
+                                        invitation_message, ballot_link, sender_email_address)
+    json_data = {
+        'status':                               results['status'],
+        'success':                              results['success'],
+        'voter_device_id':                      voter_device_id,
+        'sender_voter_email_address_missing':   results['sender_voter_email_address_missing'],
+    }
+    return HttpResponse(json.dumps(json_data), content_type='application/json')

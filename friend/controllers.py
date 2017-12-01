@@ -8,7 +8,7 @@ from .models import ACCEPTED, FriendInvitationVoterLink, FriendManager, CURRENT_
 from config.base import get_environment_variable
 from email_outbound.controllers import schedule_email_with_email_outbound_description, schedule_verification_email
 from email_outbound.models import EmailAddress, EmailManager, FRIEND_ACCEPTED_INVITATION_TEMPLATE, \
-    FRIEND_INVITATION_TEMPLATE, VERIFY_EMAIL_ADDRESS_TEMPLATE
+    FRIEND_INVITATION_TEMPLATE
 from import_export_facebook.models import FacebookManager
 import json
 from organization.models import OrganizationManager, INDIVIDUAL
