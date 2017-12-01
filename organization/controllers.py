@@ -55,6 +55,7 @@ def organization_retrieve_tweets_from_twitter(organization_we_vote_id, number_to
     twitter_user_manager = TwitterUserManager()
     tweets_saved = 0
     tweets_not_saved = 0
+
     for tweet_json in new_tweets:
         results = twitter_user_manager.update_or_create_tweet(tweet_json)
         if results['success']:
@@ -62,33 +63,28 @@ def organization_retrieve_tweets_from_twitter(organization_we_vote_id, number_to
         else:
             tweets_not_saved += 1
 
-    # Gets ID, date and tweet text
-    # out_tweets = [[tweet.id_str, tweet.created_at, tweet.text] for tweet in new_tweets]
     return results
 
 
 def organization_analyze_tweets(organization_we_vote_id):
     """ For one organization, retrieve X Tweets, and capture all #Hashtags used.
         Loop through Tweets and create OrganizationLinkToHashtag and OrganizationLinkToWordOrPhrase """
-    auth = tweepy.OAuthHandler(TWITTER_CONSUMER_KEY, TWITTER_CONSUMER_SECRET)
-    auth.set_access_token(TWITTER_ACCESS_TOKEN, TWITTER_ACCESS_TOKEN_SECRET)
-    api = tweepy.API(auth)
-
-    organization_manager = OrganizationManager()
     organization_twitter_handle = organization_manager.fetch_twitter_handle_from_organization_we_vote_id(organization_we_vote_id)
-
+    twitter_user_manager = TwitterUserManager()
+    # Change in doc
+    results = twitter_user_manager.retrieve_tweets(organization_twitter_handle)
     #
-    all_tweets = api.user_timeline(organization_twitter_handle, count=5)
+    new_tweets = api.user_timeline(organization_twitter_handle)
     all_hashtags = []
 
     #We need a count here instead of hard limit 5
-    for i in range(0, 5):
-        if re.findall(r"#(\w+)", all_tweets[i].text):
-            all_hashtags.append(re.findall(r"#(\w+)", all_tweets[i].text))
+    for i in range(0, len(new_tweets)):
+        if re.findall(r"#(\w+)", new_tweets[i].text):
+            all_hashtags.append(re.findall(r"#(\w+)", new_tweets[i].text))
 
     # Populate a dictionary with the frequency of words in all tweets 
     counts = dict()
-    for tweet in all_tweets:
+    for tweet in new_tweets:
         words = tweet.text.split()
         for word in words:
             if word in counts:
@@ -96,7 +92,17 @@ def organization_analyze_tweets(organization_we_vote_id):
             else:
                 counts[word] = 1
 
+    tweet_list = twitter_user_manager.retrieve_tweets_cached_locally()
+
+    # THIS PART IS STILL UNDERDEV
     organization_link_to_hashtag = OrganizationLinkToHashtag()
+    organization_link_to_hashtag.organization_we_vote_id = organization_we_vote_id
+    all_hashtags = []
+    for i in range(0, len(tweet_list)):
+        if re.findall(r"#(\w+)", tweet_list[i].tweet_text):
+            organization_link_to_hashtag.hashtag_text = re.findall(r"#(\w+)", tweet_list[i].tweet_text)
+            organization_link_to_hashtag.tweet_id = tweet_list[i].tweet_id
+            organization_link_to_hashtag.published_datetime = tweet_list[i].date_published
 
     # For now it returns a list of hashtags and frequency dictionary of all words.
     return all_hashtags, counts
