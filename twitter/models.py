@@ -159,6 +159,10 @@ class TwitterUserManager(models.Model):
         """
 
         created = False
+        
+        is_retweet_boolen = False
+        if "retweeted_status" in tweet_json._json:
+            is_retweet_boolen = True
 
         if not tweet_json: 
             success = False
@@ -168,8 +172,10 @@ class TwitterUserManager(models.Model):
                 author_handle = tweet_json.user._json['name'],
                 twitter_id = tweet_json.user._json['id'],
                 tweet_id = tweet_json.id,
-                #is_retweet = tweet_json['retweeted_status'],
+                # is_retweet = tweet_json['retweeted_status'],
+                is_retweet = is_retweet_boolen,
                 tweet_text = tweet_json.text,
+                # RuntimeWarning: DateTimeField Tweet.date_published received a naive datetime (2017-11-30 21:32:35) while time zone support is active.
                 date_published = tweet_json.created_at)
             if new_tweet or len(new_tweet):
                 success = True
@@ -185,6 +191,33 @@ class TwitterUserManager(models.Model):
             'new_tweet_created':        created,
         }
         return results
+
+
+    def retrieve_tweets_cached_locally(self):
+        tweet_on_stage = Tweet()
+        tweet_found = False
+        success = False
+        status = "TWEET_NOT_FOUND"
+
+        tweet_list = []
+
+        try:
+            tweet_list_query = Tweet.objects.all()
+            tweet_list = list(tweet_list_query)
+            status = "TWEET_FOUND"
+            success = True
+        except Tweet.DoesNotExist as e:
+            status = 'NO_TWEET_FOUND'
+            success = True
+
+        results = {
+            'success':                  success,
+            'status':                   status,
+            'tweet_list':               tweet_list,
+            'tweet_on_stage':           tweet_on_stage,
+        }
+        return results
+
 
     def update_or_create_twitter_link_possibility(self, candidate_campaign_we_vote_id, twitter_json, search_term,
                                                   likelihood_score):
