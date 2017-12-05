@@ -153,16 +153,16 @@ class TwitterUserManager(models.Model):
     def __unicode__(self):
         return "TwitterUserManager"
 
-    def update_or_create_tweet(self, tweet_json):
+    def update_or_create_tweet(self, tweet_json, organization_we_vote_id):
         """
         Either update or create a tweet entry.
         """
 
         created = False
         
-        is_retweet_boolen = False
+        is_retweet_boolean = False
         if "retweeted_status" in tweet_json._json:
-            is_retweet_boolen = True
+            is_retweet_boolean = True
 
         if not tweet_json: 
             success = False
@@ -173,10 +173,11 @@ class TwitterUserManager(models.Model):
                 twitter_id = tweet_json.user._json['id'],
                 tweet_id = tweet_json.id,
                 # is_retweet = tweet_json['retweeted_status'],
-                is_retweet = is_retweet_boolen,
+                is_retweet = is_retweet_boolean,
                 tweet_text = tweet_json.text,
                 # RuntimeWarning: DateTimeField Tweet.date_published received a naive datetime (2017-11-30 21:32:35) while time zone support is active.
-                date_published = tweet_json.created_at)
+                date_published = tweet_json.created_at,
+                organization_we_vote_id= organization_we_vote_id)
             if new_tweet or len(new_tweet):
                 success = True
                 status = 'TWEET_SAVED'
@@ -193,7 +194,7 @@ class TwitterUserManager(models.Model):
         return results
 
 
-    def retrieve_tweets_cached_locally(self):
+    def retrieve_tweets_cached_locally(self, organization_we_vote_id):
         tweet_on_stage = Tweet()
         tweet_found = False
         success = False
@@ -202,14 +203,15 @@ class TwitterUserManager(models.Model):
         tweet_list = []
 
         try:
-            tweet_list_query = Tweet.objects.all()
+            tweet_list_query = Tweet.objects.filter(organization_we_vote_id__iexact=organization_we_vote_id)
+            tweet_list_query = tweet_list_query.order_by('date_published').reverse()
             tweet_list = list(tweet_list_query)
             status = "TWEET_FOUND"
             success = True
         except Tweet.DoesNotExist as e:
             status = 'NO_TWEET_FOUND'
             success = True
-
+        # ADD GENERAL EXCEPTION
         results = {
             'success':                  success,
             'status':                   status,
@@ -1123,6 +1125,7 @@ class Tweet(models.Model):
     # parent_tweet_id # If this is a retweet, what is the id of the originating tweet?
     tweet_text = models.CharField(default='', blank=False, null=False, max_length=280, verbose_name='text field from twitter tweet api')
     date_published = models.DateTimeField(null=True, verbose_name='date published')
+    organization_we_vote_id = models.CharField(verbose_name="we vote permanent id", max_length=255, null=True, blank=True, unique=False)
 
 
 class TweetFavorite(models.Model):
