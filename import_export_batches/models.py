@@ -62,14 +62,17 @@ BATCH_SET_SOURCE_IMPORT_EXPORT_ENDORSEMENTS = 'IMPORT_EXPORT_ENDORSEMENTS'
 BATCH_IMPORT_KEYS_ACCEPTED_FOR_CANDIDATES = {
     'candidate_name': 'candidate_name',
     'candidate_ctcl_uuid': 'candidate_ctcl_uuid',
-    'candidate_person_id': 'candidate_person_id',
+    'candidate_ctcl_person_id': 'candidate_ctcl_person_id',
     'candidate_is_top_ticket': 'candidate_is_top_ticket',
     'candidate_is_incumbent': 'candidate_is_incumbent',
     'candidate_party_name': 'candidate_party_name',
+    'candidate_profile_image_url': 'candidate_profile_image_url',
     'candidate_batch_id': 'candidate_batch_id',
     'candidate_twitter_handle': 'candidate_twitter_handle',
     'candidate_url': 'candidate_url (website)',
+    'election_day': 'election_day',
     'facebook_url': 'facebook_url',
+    'google_civic_election_id': 'google_civic_election_id',
     'state_code': 'state_code',
     'contest_office_we_vote_id': 'contest_office_we_vote_id',
     'contest_office_name': 'contest_office_name',
@@ -82,6 +85,7 @@ BATCH_IMPORT_KEYS_ACCEPTED_FOR_CONTEST_OFFICES = {
     'contest_office_ctcl_uuid': 'contest_office_ctcl_uuid',
     'contest_office_votes_allowed': 'contest_office_votes_allowed',
     'contest_office_number_elected': 'contest_office_number_elected',
+    'candidate_name': 'candidate_name',
     'elected_office_id': 'elected_office_id',
     'candidate_selection_id1': 'candidate_selection_id1',
     'candidate_selection_id2': 'candidate_selection_id2',
@@ -93,6 +97,8 @@ BATCH_IMPORT_KEYS_ACCEPTED_FOR_CONTEST_OFFICES = {
     'candidate_selection_id8': 'candidate_selection_id8',
     'candidate_selection_id9': 'candidate_selection_id9',
     'candidate_selection_id10': 'candidate_selection_id10',
+    'election_day': 'election_day',
+    'google_civic_election_id': 'google_civic_election_id',
     'state_code': 'state_code',
 }
 
@@ -1878,7 +1884,7 @@ class BatchManager(models.Model):
                 break
 
             candidate_name_english = None
-            candidate_person_id = ""
+            candidate_ctcl_person_id = ""
             candidate_party_name = ""
             ctcl_uuid = ""
 
@@ -1892,9 +1898,9 @@ class BatchManager(models.Model):
             if candidate_name_node_english is not None:
                 candidate_name_english = candidate_name_node_english.text
 
-            candidate_person_id_node = one_candidate.find('./PersonId')
-            if candidate_person_id_node is not None:
-                candidate_person_id = candidate_person_id_node.text
+            candidate_ctcl_person_id_node = one_candidate.find('./PersonId')
+            if candidate_ctcl_person_id_node is not None:
+                candidate_ctcl_person_id = candidate_ctcl_person_id_node.text
 
             candidate_party_id_node = one_candidate.find('./PartyId')
             if candidate_party_id_node is not None:
@@ -1941,7 +1947,7 @@ class BatchManager(models.Model):
                         batch_header_map = BatchHeaderMap.objects.create(
                             batch_header_id=batch_header_id,
                             batch_header_map_000='candidate_batch_id',
-                            batch_header_map_001='candidate_person_id',
+                            batch_header_map_001='candidate_ctcl_person_id',
                             batch_header_map_002='candidate_name',
                             batch_header_map_003='candidate_party_name',
                             batch_header_map_004='candidate_is_top_ticket',
@@ -1977,14 +1983,14 @@ class BatchManager(models.Model):
             if not positive_value_exists(batch_header_id):
                 break
 
-            # check for candidate_id or candidate_person_id or name AND ctcl_uuid
+            # check for candidate_id or candidate_ctcl_person_id or name AND ctcl_uuid
             if positive_value_exists(candidate_id) and positive_value_exists(ctcl_uuid) and \
-                    (positive_value_exists(candidate_person_id) or positive_value_exists(candidate_name_english)):
+                    (positive_value_exists(candidate_ctcl_person_id) or positive_value_exists(candidate_name_english)):
                 try:
                     batch_row = BatchRow.objects.create(
                         batch_header_id=batch_header_id,
                         batch_row_000=candidate_id,
-                        batch_row_001=candidate_person_id,
+                        batch_row_001=candidate_ctcl_person_id,
                         batch_row_002=candidate_name_english,
                         batch_row_003=candidate_party_name,
                         batch_row_004=candidate_is_top_ticket,
@@ -2711,7 +2717,7 @@ class BatchManager(models.Model):
         try:
             if positive_value_exists(batch_header_id) and person_id is not None:
                 batchrowaction_candidate = BatchRowActionCandidate.objects.get(batch_header_id=batch_header_id,
-                                                                               candidate_person_id=person_id)
+                                                                               candidate_ctcl_person_id=person_id)
 
                 if batchrowaction_candidate is not None:
                     state_code = batchrowaction_candidate.state_code
@@ -2722,6 +2728,49 @@ class BatchManager(models.Model):
             state_code = ''
 
         return state_code
+
+    def retrieve_election_details_from_election_day_or_state_code(self, election_day='', state_code=''):
+        """
+        Retrieve election_name and google_civic_election_id from election_day and/or state_code
+        :param election_day: 
+        :param state_code: 
+        :return: 
+        """
+
+        success = False
+        election_name = ''
+        google_civic_election_id = ''
+
+        # election lookup using state & election day, and fetch google_civic_election_id
+        election_manager = ElectionManager()
+        election_results = election_manager.retrieve_elections_by_election_date(election_day)
+        if election_results['success']:
+            election_list = election_results['election_list']
+            if len(election_list) == 1:
+                [election] = election_list
+                election_name = election.election_name
+                google_civic_election_id = election.google_civic_election_id
+                success = True
+            else:
+                # use state_code & election_date for lookup. If multiple entries found, do not set
+                # google_civic_election_id
+                election_results = election_manager.retrieve_elections_by_state_and_election_date(state_code,
+                                                                                                  election_day)
+                if election_results['success']:
+                    election_list = election_results['election_list']
+                    if len(election_list) == 1:
+                        [election] = election_list
+                        election_name = election.election_name
+                        google_civic_election_id = election.google_civic_election_id
+                        success = True
+
+        results = {
+            'success': success,
+            'election_name': election_name,
+            'google_civic_election_id': google_civic_election_id,
+        }
+
+        return results
 
     def create_batch_set_organization_endorsements(self, organization):
         """
@@ -2845,7 +2894,7 @@ class BatchManager(models.Model):
             # number_of_batch_rows += results['updated']
             batch_saved = True
             election_name = results['election_name']
-            # google_civic_election_id = results['google_civic_election_id']
+            google_civic_election_id = results['google_civic_election_id']
         else:
             # continue_batch_set_processing = False
             status += results['status']
@@ -2877,7 +2926,7 @@ class BatchManager(models.Model):
         success = False
         number_of_offices = 0
         first_line = True
-        election_name = ''
+        # election_day = ''
         google_civic_election_id = 0
 
         if not candidate_positions_list:
@@ -2885,7 +2934,7 @@ class BatchManager(models.Model):
                 'success': False,
                 'status': "IMPORT_OFFICES_FROM_ENDORSEMENT_JSON-INVALID_DATA",
                 'number_of_offices': 0,
-                'election_name': election_name,
+                'election_day': '',
                 'google_civic_election_id': google_civic_election_id,
             }
             return results
@@ -2895,46 +2944,20 @@ class BatchManager(models.Model):
             # read office details for each candidate position
             office_name = one_entry['office_name']
             state_code = one_entry['state_code']
-            office_ocd_division_id = one_entry['office_ocd_division_id']
-            party = one_entry['party']
+            candidate_name = one_entry['name']
             election_day = one_entry['election_day']
             google_civic_election_id = one_entry['google_civic_election_id']
-            candidate_id = one_entry['id']
-
-            # election lookup using state & election day, and fetch google_civic_election_id
-            if not positive_value_exists(google_civic_election_id):
-                election_manager = ElectionManager()
-                election_results = election_manager.retrieve_elections_by_election_date(election_day)
-                if election_results['success']:
-                    election_list = election_results['election_list']
-                    if len(election_list) == 1:
-                        [election] = election_list
-                        election_name = election.election_name
-                        google_civic_election_id = election.google_civic_election_id
-                    else:
-                        # If multiple entries found for a given election, look up using state code and election day
-                        # if this returns multiple election entries, do not set google_civic_election_id
-                        election_results = election_manager.retrieve_elections_by_state_and_election_date(state_code,
-                                                                                                          election_day)
-                        if election_results['success']:
-                            election_list = election_results['election_list']
-                            if len(election_list) == 1:
-                                [election] = election_list
-                                election_name = election.election_name
-                                google_civic_election_id = election.google_civic_election_id
 
             if first_line:
                 # create batch_header and batch_header_map for candidate_positions
                 first_line = False
                 try:
                     batch_header = BatchHeader.objects.create(
-                        batch_header_column_000='id',
-                        batch_header_column_001='office_name',
-                        batch_header_column_002='state_code',
-                        batch_header_column_003='party',
-                        batch_header_column_004='office_ocd_division_id',
-                        batch_header_column_005='election_day',
-                        batch_header_column_006='google_civic_election_id',
+                        batch_header_column_000='office_name',
+                        batch_header_column_001='state_code',
+                        batch_header_column_002='candidate_name',
+                        batch_header_column_003='election_day',
+                        batch_header_column_004='google_civic_election_id',
                     )
                     batch_header_id = batch_header.id
 
@@ -2942,13 +2965,11 @@ class BatchManager(models.Model):
                         # Save an initial BatchHeaderMap
                         batch_header_map = BatchHeaderMap.objects.create(
                             batch_header_id=batch_header_id,
-                            batch_header_map_000='candidate_id',
-                            batch_header_map_001='contest_office_name',
-                            batch_header_map_002='state_code',
-                            batch_header_map_003='party',
-                            batch_header_map_004='office_ocd_division_id',
-                            batch_header_map_005='election_day',
-                            batch_header_map_006='google_civic_election_id',
+                            batch_header_map_000='contest_office_name',
+                            batch_header_map_001='state_code',
+                            batch_header_map_002='candidate_name',
+                            batch_header_map_003='election_day',
+                            batch_header_map_004='google_civic_election_id',
                         )
                         batch_header_map_id = batch_header_map.id
                         status += " BATCH_HEADER_MAP_SAVED"
@@ -2981,13 +3002,11 @@ class BatchManager(models.Model):
             try:
                 batch_row = BatchRow.objects.create(
                     batch_header_id=batch_header_id,
-                    batch_row_000=candidate_id,
-                    batch_row_001=office_name,
-                    batch_row_002=state_code,
-                    batch_row_003=party,
-                    batch_row_004=office_ocd_division_id,
-                    batch_row_005=election_day,
-                    batch_row_006=google_civic_election_id,
+                    batch_row_000=office_name,
+                    batch_row_001=state_code,
+                    batch_row_002=candidate_name,
+                    batch_row_003=election_day,
+                    batch_row_004=google_civic_election_id,
                 )
                 number_of_offices += 1
             except Exception as e:
@@ -3001,7 +3020,7 @@ class BatchManager(models.Model):
             'batch_header_id': batch_header_id,
             'batch_saved': success,
             'number_of_offices': number_of_offices,
-            'election_name': election_name,
+            'election_day': election_day,
             'google_civic_election_id': google_civic_election_id,
         }
 
@@ -3022,7 +3041,7 @@ class BatchManager(models.Model):
         success = False
         number_of_candidates = 0
         first_line = True
-        election_name = ''
+        election_day = ''
         google_civic_election_id = 0
 
         if not candidate_positions_list:
@@ -3030,7 +3049,7 @@ class BatchManager(models.Model):
                 'success': False,
                 'status': "IMPORT_CANDIDATES_FROM_ENDORSEMENT_JSON-INVALID_DATA",
                 'number_of_candidates': 0,
-                'election_name': election_name,
+                'election_day': election_day,
                 'google_civic_election_id': google_civic_election_id,
             }
             return results
@@ -3042,54 +3061,28 @@ class BatchManager(models.Model):
             candidate_facebook_url = one_entry['facebook_url']
             candidate_twitter_url = one_entry['twitter_url']
             candidate_website_url = one_entry['website_url']
-            candidate_id = one_entry['id']
-            candidate_ocd_division_id = one_entry['candidate_ocd_division_id']
             party = one_entry['party']
-            candidate_profile_image_url = one_entry['profile_image_url']
+            contest_office_name = one_entry['office_name']
             candidate_profile_image_url_https = one_entry['profile_image_url_https']
             state_code = one_entry['state_code']
             election_day = one_entry['election_day']
             google_civic_election_id = one_entry['google_civic_election_id']
-
-            # election lookup using state & election day, and fetch google_civic_election_id
-            if not positive_value_exists(google_civic_election_id):
-                election_manager = ElectionManager()
-                election_results = election_manager.retrieve_elections_by_election_date(election_day)
-                if election_results['success']:
-                    election_list = election_results['election_list']
-                    if len(election_list) == 1:
-                        [election] = election_list
-                        election_name = election.election_name
-                        google_civic_election_id = election.google_civic_election_id
-                    else:
-                        # use state_code & election_date for lookup. If multiple entries found, do not set
-                        # google_civic_election_id
-                        election_results = election_manager.retrieve_elections_by_state_and_election_date(state_code,
-                                                                                                          election_day)
-                        if election_results['success']:
-                            election_list = election_results['election_list']
-                            if len(election_list) == 1:
-                                [election] = election_list
-                                election_name = election.election_name
-                                google_civic_election_id = election.google_civic_election_id
 
             if first_line:
                 # create batch_header and batch_header_map for candidate_positions
                 first_line = False
                 try:
                     batch_header = BatchHeader.objects.create(
-                        batch_header_column_000='id',
-                        batch_header_column_001='name',
-                        batch_header_column_002='twitter_url',
-                        batch_header_column_003='facebook_url',
-                        batch_header_column_004='more_info_url',
-                        batch_header_column_005='state_code',
-                        batch_header_column_006='profile_image_url',
-                        batch_header_column_007='profile_image_url_https',
-                        batch_header_column_008='candidate_ocd_division_id',
-                        batch_header_column_009='party',
-                        batch_header_column_010='election_day',
-                        batch_header_column_011='google_civic_election_id',
+                        batch_header_column_000='name',
+                        batch_header_column_001='twitter_url',
+                        batch_header_column_002='facebook_url',
+                        batch_header_column_003='more_info_url',
+                        batch_header_column_004='state_code',
+                        batch_header_column_005='office_name',
+                        batch_header_column_006='profile_image_url_https',
+                        batch_header_column_007='party',
+                        batch_header_column_008='election_day',
+                        batch_header_column_009='google_civic_election_id',
                     )
                     batch_header_id = batch_header.id
 
@@ -3097,18 +3090,16 @@ class BatchManager(models.Model):
                         # Save an initial BatchHeaderMap
                         batch_header_map = BatchHeaderMap.objects.create(
                             batch_header_id=batch_header_id,
-                            batch_header_map_000='candidate_id',
-                            batch_header_map_001='candidate_name',
-                            batch_header_map_002='candidate_twitter_handle',
-                            batch_header_map_003='facebook_url',
-                            batch_header_map_004='candidate_url',
-                            batch_header_map_005='state_code',
-                            batch_header_map_006='profile_image_url',
-                            batch_header_map_007='profile_image_url_https',
-                            batch_header_map_008='candidate_ocd_division_id',
-                            batch_header_map_009='candidate_party_name',
-                            batch_header_map_010='election_day',
-                            batch_header_map_011='google_civic_election_id',
+                            batch_header_map_000='candidate_name',
+                            batch_header_map_001='candidate_twitter_handle',
+                            batch_header_map_002='facebook_url',
+                            batch_header_map_003='candidate_url',
+                            batch_header_map_004='state_code',
+                            batch_header_map_005='contest_office_name',
+                            batch_header_map_006='candidate_profile_image_url',
+                            batch_header_map_007='candidate_party_name',
+                            batch_header_map_008='election_day',
+                            batch_header_map_009='google_civic_election_id',
                         )
                         batch_header_map_id = batch_header_map.id
                         status += " BATCH_HEADER_MAP_SAVED"
@@ -3141,18 +3132,16 @@ class BatchManager(models.Model):
             try:
                 batch_row = BatchRow.objects.create(
                     batch_header_id=batch_header_id,
-                    batch_row_000=candidate_id,
-                    batch_row_001=candidate_name,
-                    batch_row_002=candidate_twitter_url,
-                    batch_row_003=candidate_facebook_url,
-                    batch_row_004=candidate_website_url,
-                    batch_row_005=state_code,
-                    batch_row_006=candidate_profile_image_url,
-                    batch_row_007=candidate_profile_image_url_https,
-                    batch_row_008=candidate_ocd_division_id,
-                    batch_row_009=party,
-                    batch_row_010=election_day,
-                    batch_row_011=google_civic_election_id,
+                    batch_row_000=candidate_name,
+                    batch_row_001=candidate_twitter_url,
+                    batch_row_002=candidate_facebook_url,
+                    batch_row_003=candidate_website_url,
+                    batch_row_004=state_code,
+                    batch_row_005=contest_office_name,
+                    batch_row_006=candidate_profile_image_url_https,
+                    batch_row_007=party,
+                    batch_row_008=election_day,
+                    batch_row_009=google_civic_election_id,
                 )
                 number_of_candidates += 1
             except Exception as e:
@@ -3166,7 +3155,7 @@ class BatchManager(models.Model):
             'batch_header_id': batch_header_id,
             'batch_saved': success,
             'number_of_candidates': number_of_candidates,
-            'election_name': election_name,
+            'election_day': election_day,
             'google_civic_election_id': google_civic_election_id,
         }
 
@@ -3209,56 +3198,31 @@ class BatchManager(models.Model):
             stance = one_entry['stance']
             percent_rating = one_entry['percent_rating']
             grade_rating = one_entry['grade_rating']
-            candidate_id = one_entry['id']
-            candidate_ocd_division_id = one_entry['candidate_ocd_division_id']
-            organization_position_url = one_entry['organization_position_url']
-            party = one_entry['party']
             candidate_twitter_url = one_entry['twitter_url']
-            candidate_facebook_url = one_entry['facebook_url']
             candidate_website_url = one_entry['website_url']
-            candidate_profile_image_url = one_entry['profile_image_url']
-            candidate_profile_image_url_https = one_entry['profile_image_url_https']
             candidate_position_description = one_entry['position_description']
             office_name = one_entry['office_name']
             state_code = one_entry['state_code']
-            office_ocd_division_id = one_entry['office_ocd_division_id']
             election_day = one_entry['election_day']
             google_civic_election_id = one_entry['google_civic_election_id']
-
-            # election lookup using state & election day, and fetch google_civic_election_id
-            election_manager = ElectionManager()
-            election_results = election_manager.retrieve_elections_by_election_date(election_day)
-            if election_results['success']:
-                election_list = election_results['election_list']
-                for election in election_list:
-                    election_name = election.election_name
-                    google_civic_election_id = election.google_civic_election_id
 
             if first_line:
                 # create batch_header and batch_header_map for candidate_positions
                 first_line = False
                 try:
                     batch_header = BatchHeader.objects.create(
-                        batch_header_column_000='id',
-                        batch_header_column_001='name',
-                        batch_header_column_002='stance',
-                        batch_header_column_003='percent_rating',
-                        batch_header_column_004='grade_rating',
-                        batch_header_column_005='candidate_ocd_division_id',
-                        batch_header_column_006='organization_position_url',
-                        batch_header_column_007='organization_twitter_handle',
-                        batch_header_column_008='party',
-                        batch_header_column_009='twitter_url',
-                        batch_header_column_010='facebook_url',
-                        batch_header_column_011='more_info_url',
-                        batch_header_column_012='profile_image_url',
-                        batch_header_column_013='profile_image_url_https',
-                        batch_header_column_014='position_description',
-                        batch_header_column_015='office_name',
-                        batch_header_column_016='state_code',
-                        batch_header_column_017='office_ocd_division_id',
-                        batch_header_column_018='election_day',
-                        batch_header_column_019='google_civic_election_id',
+                        batch_header_column_000='name',
+                        batch_header_column_001='stance',
+                        batch_header_column_002='percent_rating',
+                        batch_header_column_003='grade_rating',
+                        batch_header_column_004='organization_twitter_handle',
+                        batch_header_column_005='twitter_url',
+                        batch_header_column_006='more_info_url',
+                        batch_header_column_007='position_description',
+                        batch_header_column_008='office_name',
+                        batch_header_column_009='state_code',
+                        batch_header_column_010='election_day',
+                        batch_header_column_011='google_civic_election_id',
                     )
                     batch_header_id = batch_header.id
 
@@ -3266,26 +3230,18 @@ class BatchManager(models.Model):
                         # Save an initial BatchHeaderMap
                         batch_header_map = BatchHeaderMap.objects.create(
                             batch_header_id=batch_header_id,
-                            batch_header_map_000='candidate_id',
-                            batch_header_map_001='candidate_name',
-                            batch_header_map_002='stance',
-                            batch_header_map_003='percent_rating',
-                            batch_header_map_004='grade_rating',
-                            batch_header_map_005='candidate_ocd_division_id',
-                            batch_header_map_006='organization_position_url',
-                            batch_header_map_007='organization_twitter_handle',
-                            batch_header_map_008='candidate_party_name',
-                            batch_header_map_009='candidate_twitter_handle',
-                            batch_header_map_010='facebook_url',
-                            batch_header_map_011='more_info_url',
-                            batch_header_map_012='profile_image_url',
-                            batch_header_map_013='profile_image_url_https',
-                            batch_header_map_014='statement_text',
-                            batch_header_map_015='candidate_office_name',
-                            batch_header_map_016='state_code',
-                            batch_header_map_017='office_ocd_division_id',
-                            batch_header_map_018='election_day',
-                            batch_header_map_019='google_civic_election_id',
+                            batch_header_map_000='candidate_name',
+                            batch_header_map_001='stance',
+                            batch_header_map_002='percent_rating',
+                            batch_header_map_003='grade_rating',
+                            batch_header_map_004='organization_twitter_handle',
+                            batch_header_map_005='candidate_twitter_handle',
+                            batch_header_map_006='more_info_url',
+                            batch_header_map_007='statement_text',
+                            batch_header_map_008='contest_office_name',
+                            batch_header_map_009='state_code',
+                            batch_header_map_010='election_day',
+                            batch_header_map_011='google_civic_election_id',
                         )
                         batch_header_map_id = batch_header_map.id
                         status += " BATCH_HEADER_MAP_SAVED"
@@ -3318,26 +3274,18 @@ class BatchManager(models.Model):
             try:
                 batch_row = BatchRow.objects.create(
                     batch_header_id=batch_header_id,
-                    batch_row_000=candidate_id,
-                    batch_row_001=candidate_name,
-                    batch_row_002=stance,
-                    batch_row_003=percent_rating,
-                    batch_row_004=grade_rating,
-                    batch_row_005=candidate_ocd_division_id,
-                    batch_row_006=organization_position_url,
-                    batch_row_007=organization_twitter_handle,
-                    batch_row_008=party,
-                    batch_row_009=candidate_twitter_url,
-                    batch_row_010=candidate_facebook_url,
-                    batch_row_011=candidate_website_url,
-                    batch_row_012=candidate_profile_image_url,
-                    batch_row_013=candidate_profile_image_url_https,
-                    batch_row_014=candidate_position_description,
-                    batch_row_015=office_name,
-                    batch_row_016=state_code,
-                    batch_row_017=office_ocd_division_id,
-                    batch_row_018=election_day,
-                    batch_row_019=google_civic_election_id,
+                    batch_row_000=candidate_name,
+                    batch_row_001=stance,
+                    batch_row_002=percent_rating,
+                    batch_row_003=grade_rating,
+                    batch_row_004=organization_twitter_handle,
+                    batch_row_005=candidate_twitter_url,
+                    batch_row_006=candidate_website_url,
+                    batch_row_007=candidate_position_description,
+                    batch_row_008=office_name,
+                    batch_row_009=state_code,
+                    batch_row_010=election_day,
+                    batch_row_011=google_civic_election_id,
                 )
                 number_of_candidate_positions += 1
             except Exception as e:
@@ -3401,19 +3349,6 @@ class BatchManager(models.Model):
             state_code = one_entry['state_code']
             election_day = one_entry['election_day']
             google_civic_election_id = one_entry['google_civic_election_id']
-
-            # election models or manager retrieve_elections_by_date
-            election_manager = ElectionManager()
-            election_results = election_manager.retrieve_elections_by_election_date(election_day)
-            if election_results['success']:
-                # These elections are sorted by most recent to least recent
-                election_list = election_results['election_list']
-                for election in election_list:
-                    election_name = election.election_name
-                    google_civic_election_id = election.google_civic_election_id
-                    # # Filter out elections later than today
-                    # if not positive_value_exists(election.election_day_text):
-                    #     continue
 
             if first_line:
                 # create batch_header and batch_header_map for candidate_positions
@@ -4185,7 +4120,7 @@ class BatchRowActionCandidate(models.Model):
     candidate_is_incumbent = models.BooleanField(verbose_name="candidate is currently in the office", default=False)
 
     # From VIP standard format
-    candidate_person_id = models.CharField(verbose_name="candidate person id", max_length=255, null=True, blank=True)
+    candidate_ctcl_person_id = models.CharField(verbose_name="candidate person id", max_length=255, null=True, blank=True)
 
     status = models.TextField(verbose_name="batch row action candidate status", null=True, blank=True, default="")
 
