@@ -73,7 +73,6 @@ class OrganizationLinkToHashtag():
     # hashtag_text
     # tweet_id
     # published_datetime
-    pass
 
 
 class OrganizationLinkToWordOrPhrase():
@@ -88,13 +87,13 @@ class OrganizationLinkToWordOrPhrase():
     # word_or_phrase
     # tweet_id
     # published_datetime
-    pass
 
 
 class OrganizationManager(models.Manager):
     """
     A class for working with the Organization model
     """
+    # Create organizationLinkToHashtag
     def create_organization_simple(self, organization_name, organization_website, organization_twitter_handle,
                                    organization_email='', organization_facebook='', organization_image='',
                                    organization_type=''):
