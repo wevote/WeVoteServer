@@ -774,6 +774,14 @@ def create_batch_row_action_contest_office(batch_description, batch_header_map, 
     # check if state_code is given in batch_header_map
     state_code = batch_manager.retrieve_value_from_batch_row("state_code", batch_header_map, one_batch_row)
 
+    # if google_civic_election_id is null, get it from election_day and/or state_code
+    if not positive_value_exists(google_civic_election_id):
+        election_day = batch_manager.retrieve_value_from_batch_row("election_day", batch_header_map, one_batch_row)
+        election_results = batch_manager.retrieve_election_details_from_election_day_or_state_code(election_day,
+                                                                                                   state_code)
+        if election_results['success']:
+            google_civic_election_id = election_results['google_civic_election_id']
+
     district_id = ""
     district_name = ""
     district_scope = ""
@@ -836,6 +844,7 @@ def create_batch_row_action_contest_office(batch_description, batch_header_map, 
                                                                           one_batch_row)
     candidate_selection_id10 = batch_manager.retrieve_value_from_batch_row("candidate_selection_id10", batch_header_map,
                                                                            one_batch_row)
+    candidate_name = batch_manager.retrieve_value_from_batch_row("candidate_name", batch_header_map, one_batch_row)
 
     batch_set_id = batch_description.batch_set_id
 
@@ -890,6 +899,29 @@ def create_batch_row_action_contest_office(batch_description, batch_header_map, 
                 keep_looking_for_duplicates = False
             elif matching_results['contest_office_list_found']:
                 kind_of_action = IMPORT_TO_BE_DETERMINED
+                keep_looking_for_duplicates = False
+            elif not matching_results['success']:
+                kind_of_action = IMPORT_TO_BE_DETERMINED
+                status += matching_results['status']
+                keep_looking_for_duplicates = False
+            else:
+                kind_of_action = IMPORT_CREATE
+
+        # we haven't found contest_office yet. Look up for existing contest_office using candidate_name & state_code
+        if keep_looking_for_duplicates:
+            candidate_campaign_list_manager = CandidateCampaignListManager()
+            matching_results = candidate_campaign_list_manager.retrieve_candidates_from_non_unique_identifiers(
+                google_civic_election_id, state_code, '', candidate_name)
+
+            if matching_results['candidate_found']:
+                candidate = matching_results['candidate']
+                contest_office_we_vote_id = candidate.contest_office_we_vote_id
+                contest_office_name = candidate.contest_office_name
+                kind_of_action = IMPORT_ADD_TO_EXISTING
+                keep_looking_for_duplicates = False
+            elif matching_results['multiple_entries_found']:
+                kind_of_action = IMPORT_TO_BE_DETERMINED
+                status += "MULTIPLE_ORGANIZATIONS_FOUND "
                 keep_looking_for_duplicates = False
             elif not matching_results['success']:
                 kind_of_action = IMPORT_TO_BE_DETERMINED
@@ -1233,7 +1265,6 @@ def create_batch_row_action_candidate(batch_description, batch_header_map, one_b
     contest_office_we_vote_id = ""
     office_ctcl_uuid = None
     office_district_id = None
-    contest_office_batch_row_action_lookup_done = False
 
     # Does a BatchRowActionCandidate entry already exist?
     # We want to start with the BatchRowAction... entry first so we can record our findings line by line while
@@ -1278,8 +1309,8 @@ def create_batch_row_action_candidate(batch_description, batch_header_map, one_b
     else:
         google_civic_election_id = str(batch_description.google_civic_election_id)
     ctcl_uuid = batch_manager.retrieve_value_from_batch_row("candidate_ctcl_uuid", batch_header_map, one_batch_row)
-    candidate_person_id = batch_manager.retrieve_value_from_batch_row(
-        "candidate_person_id", batch_header_map, one_batch_row)
+    candidate_ctcl_person_id = batch_manager.retrieve_value_from_batch_row(
+        "candidate_ctcl_person_id", batch_header_map, one_batch_row)
     contest_office_name = batch_manager.retrieve_value_from_batch_row(
         "contest_office_name", batch_header_map, one_batch_row)
     candidate_is_top_ticket = batch_manager.retrieve_value_from_batch_row(
@@ -1293,6 +1324,8 @@ def create_batch_row_action_candidate(batch_description, batch_header_map, one_b
     candidate_twitter_handle = extract_twitter_handle_from_text_string(candidate_twitter_handle_raw)
     candidate_url = batch_manager.retrieve_value_from_batch_row("candidate_url", batch_header_map, one_batch_row)
     facebook_url = batch_manager.retrieve_value_from_batch_row("facebook_url", batch_header_map, one_batch_row)
+    candidate_profile_image_url = batch_manager.retrieve_value_from_batch_row("candidate_profile_image_url",
+                                                                              batch_header_map, one_batch_row)
     state_code = batch_manager.retrieve_value_from_batch_row("state_code", batch_header_map, one_batch_row)
     candidate_temp_id = batch_manager.retrieve_value_from_batch_row(
         "candidate_batch_id", batch_header_map, one_batch_row)  # TODO Is the name transformation correct?
@@ -1340,28 +1373,13 @@ def create_batch_row_action_candidate(batch_description, batch_header_map, one_b
             status = "BATCH_ROW_ACTION_CANDIDATE-CONTEST_OFFICE_NOT_FOUND"
             pass
 
-    if not contest_office_batch_row_action_lookup_done and \
-            positive_value_exists(contest_office_batch_header_id):
-        # we haven't yet looked up BatchRowActionContestOffice for a match. Get contest_office_name from
-        # there with matching contest_office_batch_header_id
-        try:
-            batch_row_action_contest_office_query = BatchRowActionContestOffice.objects.all()
-            batch_row_action_contest_office_query = batch_row_action_contest_office_query.filter(
-                batch_header_id=contest_office_batch_header_id, state_code=state_code)
-            # batch_row_action_contest_office_query = batch_row_action_contest_office_query.filter()
-            batch_row_action_contest_office_list = list(batch_row_action_contest_office_query)
-            if len(batch_row_action_contest_office_list):
-                # state_code = batch_row_action_contest_office_list[0].state_code
-                # office_ctcl_uuid = batch_row_action_contest_office_list[0].ctcl_uuid
-                # office_district_id = batch_row_action_contest_office_list[0].district_id
-                contest_office = batch_row_action_contest_office_list[0].contest_office_name
-                contest_office_we_vote_id = batch_row_action_contest_office_list[0]. \
-                    contest_office_we_vote_id
-                # contest_office_id = batch_row_action_contest_office_list[0].id
-                contest_office_batch_row_action_lookup_done = True
-        except BatchRowActionContestOffice.DoesNotExist:
-            status = "BATCH_ROW_ACTION_CANDIDATE-CONTEST_OFFICE_NOT_FOUND"
-            pass
+    # if google_civic_election_id is null, look up using state_code and/or election_day
+    if not positive_value_exists(google_civic_election_id):
+        election_day = batch_manager.retrieve_value_from_batch_row("election_day", batch_header_map, one_batch_row)
+        election_results = batch_manager.retrieve_election_details_from_election_day_or_state_code(election_day,
+                                                                                                   state_code)
+        if election_results['success']:
+            google_civic_election_id = election_results['google_civic_election_id']
 
     # Look up CandidateCampaign to see if an entry exists
     # These three parameters are needed to look up in ElectedOffice table for a match
@@ -1446,7 +1464,7 @@ def create_batch_row_action_candidate(batch_description, batch_header_map, one_b
     try:
         batch_row_action_candidate.candidate_we_vote_id = candidate_we_vote_id
         batch_row_action_candidate.candidate_name = candidate_name
-        batch_row_action_candidate.candidate_person_id = candidate_person_id
+        batch_row_action_candidate.candidate_ctcl_person_id = candidate_ctcl_person_id
         batch_row_action_candidate.batch_row_action_office_ctcl_uuid = office_ctcl_uuid
         batch_row_action_candidate.ctcl_uuid = ctcl_uuid
         batch_row_action_candidate.state_code = state_code
@@ -1462,6 +1480,7 @@ def create_batch_row_action_candidate(batch_description, batch_header_map, one_b
         batch_row_action_candidate.candidate_twitter_handle = candidate_twitter_handle
         batch_row_action_candidate.candidate_url = candidate_url
         batch_row_action_candidate.facebook_url = facebook_url
+        batch_row_action_candidate.photo_url = candidate_profile_image_url
         batch_row_action_candidate.save()
     except Exception as e:
         success = False
@@ -1591,25 +1610,11 @@ def create_batch_row_action_position(batch_description, batch_header_map, one_ba
     if not positive_value_exists(google_civic_election_id):
         # look up google_civic_election_id using state and election_day
         election_day = batch_manager.retrieve_value_from_batch_row("election_day", batch_header_map, one_batch_row)
-        election_manager = ElectionManager()
-        election_results = election_manager.retrieve_elections_by_election_date(election_day)
+        election_results = batch_manager.retrieve_election_details_from_election_day_or_state_code(election_day,
+                                                                                                   state_code)
         if election_results['success']:
-            election_list = election_results['election_list']
-            if len(election_list) == 1:
-                [election] = election_list
-                election_name = election.election_name
-                google_civic_election_id = election.google_civic_election_id
-            else:
-                # If multiple entries found for a given election, look up using state code and election day
-                # if this returns multiple election entries, do not set google_civic_election_id
-                election_results = election_manager.retrieve_elections_by_state_and_election_date(state_code,
-                                                                                                  election_day)
-                if election_results['success']:
-                    election_list = election_results['election_list']
-                    if len(election_list) == 1:
-                        [election] = election_list
-                        election_name = election.election_name
-                        google_civic_election_id = election.google_civic_election_id
+            google_civic_election_id = election_results['google_civic_election_id']
+            # election_name = election_results['election_name']
 
     if positive_value_exists(google_civic_election_id) and not positive_value_exists(state_code):
         # Check to see if there is a state served for the election
@@ -2911,7 +2916,7 @@ def import_candidate_data_from_batch_row_actions(batch_header_id, batch_row_id, 
         return results
 
     for one_batch_row_action in batch_row_action_list:
-        candidate_person_id = one_batch_row_action.candidate_person_id
+        candidate_ctcl_person_id = one_batch_row_action.candidate_ctcl_person_id
         if positive_value_exists(one_batch_row_action.google_civic_election_id):
             google_civic_election_id = str(one_batch_row_action.google_civic_election_id)
         else:
@@ -2954,7 +2959,6 @@ def import_candidate_data_from_batch_row_actions(batch_header_id, batch_row_id, 
                     and positive_value_exists(google_civic_election_id) and \
                     positive_value_exists(one_batch_row_action.state_code):
                 # Check to see if anyone else is using the Twitter handle
-
 
                 results = candidate_manager.create_candidate_row_entry(update_values)
                 if results['new_candidate_created']:
