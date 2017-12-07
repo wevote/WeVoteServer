@@ -144,14 +144,14 @@ class DonationInvoice(models.Model):
     that is necessary to associate the charge succeeded stripe event with a subscription
     """
     subscription_id = models.CharField(verbose_name="unique stripe subscription id",
-                                  max_length=64, default="", null=True, blank=True)
-    donation_plan_id = models.CharField(verbose_name=
-        "plan id for one voter and an amount, can have duplicates if voter has multiple subscriptions for the same amount",
-                                        default="", max_length=255, null=False, blank=False)
+                                       max_length=64, default="", null=True, blank=True)
+    donation_plan_id = models.CharField(
+        verbose_name="plan id for one voter and an amount, can have duplicates "
+        "if voter has multiple subscriptions for the same amount", default="", max_length=255, null=False, blank=False)
     invoice_id = models.CharField(verbose_name="unique stripe invoice id for one payment",
                                   max_length=64, default="", null=True, blank=True)
     invoice_date = models.DateTimeField(verbose_name="creation date for this stripe invoice", auto_now=False,
-                              auto_now_add=False, null=True)
+                                        auto_now_add=False, null=True)
     stripe_customer_id = models.CharField(verbose_name="stripe unique customer id", max_length=32,
                                           unique=False, null=False, blank=False)
 

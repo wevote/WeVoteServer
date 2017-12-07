@@ -199,6 +199,19 @@ span.nobr { white-space: nowrap; }
 
 
 {% if organization %}
+  <br />
+  <br />
+<form action="{% url "organization:organization_delete_process" %}" method="post" class="form-horizontal">
+{% csrf_token %}
+  <input type="hidden" name="organization_id" value="{% if organization %}{{ organization.id }}{% else %}0{% endif %}">
+  <button type="submit" class="btn btn-danger">Delete Organization</button>
+</form>
+{% endif %}
+  <br />
+  <br />
+
+
+{% if organization %}
     {% if organization.wikipedia_thumbnail_url %}
         <img src="{{ organization.wikipedia_thumbnail_url }}"><br />
         Thumbnail<br />
