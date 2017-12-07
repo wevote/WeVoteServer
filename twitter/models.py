@@ -210,8 +210,11 @@ class TwitterUserManager(models.Model):
             success = True
         except Tweet.DoesNotExist as e:
             status = 'NO_TWEET_FOUND'
-            success = True
-        # ADD GENERAL EXCEPTION
+            success = False
+        except Exception as e:
+            status = "RETRIEVE_TWEETS_CACHED_LOCALLY_FAILED"
+            success = False
+
         results = {
             'success':                  success,
             'status':                   status,

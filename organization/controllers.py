@@ -45,13 +45,17 @@ TWITTER_ACCESS_TOKEN_SECRET = get_environment_variable("TWITTER_ACCESS_TOKEN_SEC
 def organization_retrieve_tweets_from_twitter(organization_we_vote_id, number_to_retrieve=200):
     """For one organization, retrieve X Tweets, and capture all #Hashtags used.
         Sample code: Search for tweepy http://tweepy.readthedocs.io/en/v3.5.0/ """
-    auth = tweepy.OAuthHandler(TWITTER_CONSUMER_KEY, TWITTER_CONSUMER_SECRET)
-    auth.set_access_token(TWITTER_ACCESS_TOKEN, TWITTER_ACCESS_TOKEN_SECRET)
-    api = tweepy.API(auth)
+    try:
+        auth = tweepy.OAuthHandler(TWITTER_CONSUMER_KEY, TWITTER_CONSUMER_SECRET)
+        auth.set_access_token(TWITTER_ACCESS_TOKEN, TWITTER_ACCESS_TOKEN_SECRET)
+        api = tweepy.API(auth)
 
-    organization_manager = OrganizationManager()
-    organization_twitter_id = organization_manager.fetch_twitter_handle_from_organization_we_vote_id(organization_we_vote_id)
-    new_tweets = api.user_timeline(organization_twitter_id, count=number_to_retrieve)
+        organization_manager = OrganizationManager()
+        organization_twitter_id = organization_manager.fetch_twitter_handle_from_organization_we_vote_id(organization_we_vote_id)
+        new_tweets = api.user_timeline(organization_twitter_id, count=number_to_retrieve)
+    except tweepy.error.TweepError as e:
+        success = False
+        status = "ORGANIZATION_RETRIEVE_TWEETS_FROM_TWITTER_AUTH_FAIL "
     # Exceptions
     twitter_user_manager = TwitterUserManager()
     tweets_saved = 0
@@ -67,7 +71,7 @@ def organization_retrieve_tweets_from_twitter(organization_we_vote_id, number_to
 
     # unclear on the status 
     results = {
-        'success' : True,
+        'success': True,
         'status': status,
         'tweets_saved': tweets_saved,
         'tweets_not_saved': tweets_not_saved,
@@ -84,17 +88,17 @@ def organization_analyze_tweets(organization_we_vote_id):
     tweet_list = results["tweet_list"]
     all_hashtags = []
 
-    #We need a count here instead of hard limit 5
+    # We need a count here instead of hard limit 5
     for i in range(0, len(tweet_list)):
         if re.findall(r"#(\w+)", tweet_list[i].tweet_text):
             all_hashtags.append(re.findall(r"#(\w+)", tweet_list[i].tweet_text))
 
-    #This is giving a weird output!
+    # This is giving a weird output!
     # Populate a dictionary with the frequency of words in all tweets 
     counts = dict()
     for tweet in tweet_list:
         words = str(tweet.tweet_text).split()
-        return tweet.tweet_text, str(tweet.tweet_text).split(), tweet.tweet_text.split(), words
+        # return tweet.tweet_text, str(tweet.tweet_text).split(), tweet.tweet_text.split(), words
         for word in words:
             if word in counts:
                 counts[word] += 1
@@ -103,8 +107,12 @@ def organization_analyze_tweets(organization_we_vote_id):
 
     # THIS PART IS STILL UNDERDEV
     organization_link_to_hashtag = OrganizationLinkToHashtag()
-    resutls = organization_manager.create_or_update_organization_link_to_hashtag(tweet_id, published_datetime, organization_we_vote_id, hashtag_text)
     organization_link_to_hashtag.organization_we_vote_id = organization_we_vote_id
+    
+    organization_manager = OrganizationManager()
+    # resutls = organization_manager.create_or_update_organization_link_to_hashtag(
+    # tweet_id, published_datetime, organization_we_vote_id, hashtag_text)
+    
     all_hashtags = []
     for i in range(0, len(tweet_list)):
         if re.findall(r"#(\w+)", tweet_list[i].tweet_text):
@@ -113,8 +121,12 @@ def organization_analyze_tweets(organization_we_vote_id):
             organization_link_to_hashtag.published_datetime = tweet_list[i].date_published
 
     # For now it returns a list of hashtags and frequency dictionary of all words.
-    # Results
-    return all_hashtags, counts
+    # results = {
+      #  "success": success,
+       # "status": status,
+    # }
+    # return all_hashtags, counts
+    return results
 
 
 def move_organization_data_to_another_organization(from_organization_we_vote_id, to_organization_we_vote_id):
