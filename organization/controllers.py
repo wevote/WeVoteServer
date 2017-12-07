@@ -34,6 +34,7 @@ from import_export_twitter.models import TwitterAuthManager
 
 logger = wevote_functions.admin.get_logger(__name__)
 
+ORGANIZATIONS_SYNC_URL = get_environment_variable("ORGANIZATIONS_SYNC_URL")
 WE_VOTE_API_KEY = get_environment_variable("WE_VOTE_API_KEY")
 TWITTER_CONSUMER_KEY = get_environment_variable("TWITTER_CONSUMER_KEY")
 TWITTER_CONSUMER_SECRET = get_environment_variable("TWITTER_CONSUMER_SECRET")
@@ -596,6 +597,9 @@ def organizations_import_from_master_server(request, state_code=''):
         filtered_structured_json = results['structured_json']
         duplicates_removed = results['duplicates_removed']
 
+        # filtered_structured_json = structured_json
+        # duplicates_removed = 0
+
         import_results = organizations_import_from_structured_json(filtered_structured_json)
         import_results['duplicates_removed'] = duplicates_removed
 
@@ -646,6 +650,8 @@ def organizations_import_from_structured_json(structured_json):
     organizations_not_processed = 0
     for one_organization in structured_json:
         # We have already removed duplicate organizations
+        twitter_user_id = 0
+        we_vote_id = ""
 
         # Make sure we have the minimum required variables
         if not positive_value_exists(one_organization["we_vote_id"]) or \
@@ -830,6 +836,14 @@ def organizations_import_from_structured_json(structured_json):
                 organizations_saved += 1
         except Exception as e:
             organizations_not_processed += 1
+
+        # Now create a TwitterLinkToOrganization entry if one doesn't exist
+        twitter_user_manager = TwitterUserManager()
+        try:
+            if positive_value_exists(twitter_user_id) and positive_value_exists(we_vote_id):
+                results = twitter_user_manager.create_twitter_link_to_organization(twitter_user_id, we_vote_id)
+        except Exception as e:
+            pass
 
     organizations_results = {
         'success': True,

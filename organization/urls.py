@@ -11,6 +11,7 @@ urlpatterns = [
     url(r'^(?P<organization_id>[0-9]+)/edit/$', views_admin.organization_edit_view, name='organization_edit'),
     url(r'^edit/(?P<organization_we_vote_id>wv[\w]{2}org[\w]+)$',
         views_admin.organization_edit_view, name='organization_edit_we_vote_id'),
+    url(r'^delete_process/$', views_admin.organization_delete_process_view, name='organization_delete_process'),
     url(r'^edit_process/$', views_admin.organization_edit_process_view, name='organization_edit_process'),
     url(r'^$', views_admin.organization_list_view, name='organization_list',),
     url(r'^import/$',

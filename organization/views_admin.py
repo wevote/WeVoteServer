@@ -348,6 +348,27 @@ def organization_edit_view(request, organization_id=0, organization_we_vote_id="
 
 
 @login_required
+def organization_delete_process_view(request):
+    """
+    Delete an organization
+    :param request:
+    :return:
+    """
+    organization_id = convert_to_int(request.POST.get('organization_id', 0))
+
+    organization_manager = OrganizationManager()
+    results = organization_manager.retrieve_organization(organization_id)
+    if results['organization_found']:
+        organization = results['organization']
+        organization.delete()
+        messages.add_message(request, messages.INFO, 'Organization deleted.')
+    else:
+        messages.add_message(request, messages.ERROR, 'Organization not found.')
+
+    return HttpResponseRedirect(reverse('organization:organization_list', args=()))
+
+
+@login_required
 def organization_edit_process_view(request):
     """
     Process the new or edit organization forms
