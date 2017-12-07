@@ -50,7 +50,8 @@ def organization_retrieve_tweets_from_twitter(organization_we_vote_id, number_to
     api = tweepy.API(auth)
 
     organization_manager = OrganizationManager()
-    organization_twitter_id = organization_manager.fetch_twitter_handle_from_organization_we_vote_id(organization_we_vote_id)
+    organization_twitter_id = organization_manager.fetch_twitter_handle_from_organization_we_vote_id(
+        organization_we_vote_id)
     new_tweets = api.user_timeline(organization_twitter_id, count=number_to_retrieve)
     # Exceptions
     twitter_user_manager = TwitterUserManager()

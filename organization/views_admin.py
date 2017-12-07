@@ -42,10 +42,12 @@ ORGANIZATION_STANCE_CHOICES = (
 
 logger = wevote_functions.admin.get_logger(__name__)
 
+
 def organization_analyze_tweets_view(request, organization_we_vote_id):
 
     org_hashtags = organization_analyze_tweets(organization_we_vote_id)
     return HttpResponse(org_tweets)
+
 
 def organization_retrieve_tweets_view(request, organization_we_vote_id):
     """ For one organization, retrieve X Tweets, and capture all #Hashtags used. """
