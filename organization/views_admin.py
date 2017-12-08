@@ -55,7 +55,7 @@ def organization_retrieve_tweets_view(request, organization_we_vote_id):
     org_tweets = organization_retrieve_tweets_from_twitter(organization_we_vote_id, number_to_retrieve)
     org_hashtags = organization_analyze_tweets(organization_we_vote_id)
 
-    return HttpResponse(org_tweets)
+    return HttpResponse(org_hashtags)
 
 
 # This page does not need to be protected.
