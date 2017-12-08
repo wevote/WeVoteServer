@@ -523,7 +523,7 @@ def send_ballot_email(voter_device_id, sender_voter, send_now, sender_email_addr
     email_manager = EmailManager()
     error_message_to_show_voter = ''
     # Variables used by templates/email_outbound/email_templates/friend_invitation.txt and .html
-    subject = "Ballot Data from We Vote"
+    subject = "Ballot from We Vote"
     system_sender_email_address = "We Vote <info@WeVote.US>"  # TODO DALE Make system variable
     if positive_value_exists(sender_email_with_ownership_verified):
         sender_email_address = sender_email_with_ownership_verified
