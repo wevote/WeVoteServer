@@ -169,10 +169,9 @@ class TwitterUserManager(models.Model):
             status = 'MISSING_TWEET_JSON '
         else:
             new_tweet, created = Tweet.objects.update_or_create(
-                author_handle = tweet_json.user._json['name'],
+                author_handle = tweet_json.user._json['screen_name'],
                 twitter_id = tweet_json.user._json['id'],
                 tweet_id = tweet_json.id,
-                # is_retweet = tweet_json['retweeted_status'],
                 is_retweet = is_retweet_boolean,
                 tweet_text = tweet_json.text,
                 # RuntimeWarning: DateTimeField Tweet.date_published received a naive datetime (2017-11-30 21:32:35) while time zone support is active.
