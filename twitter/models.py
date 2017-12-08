@@ -169,13 +169,13 @@ class TwitterUserManager(models.Model):
             status = 'MISSING_TWEET_JSON '
         else:
             new_tweet, created = Tweet.objects.update_or_create(
-                author_handle = tweet_json.user._json['name'],
+                author_handle = tweet_json.user._json['screen_name'],
                 twitter_id = tweet_json.user._json['id'],
                 tweet_id = tweet_json.id,
-                # is_retweet = tweet_json['retweeted_status'],
                 is_retweet = is_retweet_boolean,
                 tweet_text = tweet_json.text,
-                # RuntimeWarning: DateTimeField Tweet.date_published received a naive datetime (2017-11-30 21:32:35) while time zone support is active.
+                # RuntimeWarning: DateTimeField Tweet.date_published received a naive datetime (2017-11-30 21:32:35)
+                # while time zone support is active.
                 date_published = tweet_json.created_at,
                 organization_we_vote_id= organization_we_vote_id)
             if new_tweet or len(new_tweet):
@@ -1126,9 +1126,11 @@ class Tweet(models.Model):
     # author_voter_id = models.ForeignKey(Voter, null=True, blank=True, related_name='we vote id of tweet author')
     is_retweet = models.BooleanField(default=False, verbose_name='is this a retweet?')
     # parent_tweet_id # If this is a retweet, what is the id of the originating tweet?
-    tweet_text = models.CharField(default='', blank=False, null=False, max_length=280, verbose_name='text field from twitter tweet api')
+    tweet_text = models.CharField(default='', blank=False, null=False, max_length=280,
+                                  verbose_name='text field from twitter tweet api')
     date_published = models.DateTimeField(null=True, verbose_name='date published')
-    organization_we_vote_id = models.CharField(verbose_name="we vote permanent id", max_length=255, null=True, blank=True, unique=False)
+    organization_we_vote_id = models.CharField(verbose_name="we vote permanent id", max_length=255, null=True,
+                                               blank=True, unique=False)
 
 
 class TweetFavorite(models.Model):
