@@ -51,7 +51,8 @@ def organization_retrieve_tweets_from_twitter(organization_we_vote_id, number_to
         api = tweepy.API(auth)
 
         organization_manager = OrganizationManager()
-        organization_twitter_id = organization_manager.fetch_twitter_handle_from_organization_we_vote_id(organization_we_vote_id)
+        organization_twitter_id = organization_manager.fetch_twitter_handle_from_organization_we_vote_id(
+            organization_we_vote_id)
         new_tweets = api.user_timeline(organization_twitter_id, count=number_to_retrieve)
     except tweepy.error.TweepError as e:
         success = False
@@ -492,8 +493,9 @@ def organization_follow_or_unfollow_or_ignore(voter_device_id, organization_id, 
 def organizations_followed_retrieve_for_api(voter_device_id, maximum_number_to_retrieve=0,
                                             auto_followed_from_twitter_suggestion=False):
     """
-    organizationsFollowedRetrieve Return a list of the organizations followed. See also voter_guides_followed_retrieve_for_api,
-    which starts with organizations followed, but returns data as a list of voter guides.
+    organizationsFollowedRetrieve Return a list of the organizations followed. See also
+    voter_guides_followed_retrieve_for_api, which starts with organizations followed, but returns data as a list of
+    voter guides.
     :param voter_device_id:
     :param maximum_number_to_retrieve:
     :param auto_followed_from_twitter_suggestion:
