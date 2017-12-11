@@ -21,22 +21,22 @@ def email_ballot_data_doc_template_values(url_root):
         {
             'name':         'email_address_array',
             'value':        'string',  # boolean, integer, long, string
-            'description':  'Array of Email address for self or friends to send the ballot data to.',
+            'description':  'Array of Email address for self or friends to send the ballot link to.',
         },
         {
             'name':         'first_name_array',
             'value':        'string',  # boolean, integer, long, string
-            'description':  'Array of First Name for self or friends to send the ballot data to.',
+            'description':  'Array of First Name for self or friends to send the ballot link to.',
         },
         {
             'name':         'last_name_array',
             'value':        'string',  # boolean, integer, long, string
-            'description':  'Array of Last Name for self or friends to send the ballot data to.',
+            'description':  'Array of Last Name for self or friends to send the ballot link to.',
         },
         {
             'name':         'email_addresses_raw',
             'value':        'string',  # boolean, integer, long, string
-            'description':  'Email addresses to send the ballot data to.',
+            'description':  'Email addresses to send the ballot link to.',
         },
         {
             'name':         'ballot_link',
@@ -83,7 +83,7 @@ def email_ballot_data_doc_template_values(url_root):
         'api_name': 'emailBallotData',
         'api_slug': 'emailBallotData',
         'api_introduction':
-            "Send your ballot data via email to self or friends.",
+            "Send current ballot link via email to self or friends.",
         'try_now_link': 'apis_v1:emailBallotDataView',
         'try_now_link_variables_dict': try_now_link_variables_dict,
         'url_root': url_root,

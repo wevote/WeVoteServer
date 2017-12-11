@@ -668,7 +668,7 @@ def send_ballot_email(voter_device_id, sender_voter, send_now, sender_email_addr
         # After sending friend invitation, send email about ballot data
         kind_of_email_template = SEND_BALLOT_TO_FRIENDS
         if positive_value_exists(sender_name):
-            subject = sender_name + " sent Ballot Data from We Vote"
+            subject = sender_name + " sent Ballot from We Vote"
     else:
         # sending ballot email to herself/himself
         kind_of_email_template = SEND_BALLOT_TO_SELF
