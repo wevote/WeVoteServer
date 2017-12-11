@@ -902,6 +902,7 @@ def find_and_remove_duplicate_candidates_view(request):
         return redirect_to_sign_in_page(request, authority_required)
 
     candidate_list = []
+    ignore_candidate_id_list = []
     google_civic_election_id = request.GET.get('google_civic_election_id', 0)
     google_civic_election_id = convert_to_int(google_civic_election_id)
 
@@ -923,7 +924,9 @@ def find_and_remove_duplicate_candidates_view(request):
 
     # Loop through all of the candidates in this election
     for we_vote_candidate in candidate_list:
-        results = find_duplicate_candidate(we_vote_candidate)
+        ignore_candidate_id_list.append(we_vote_candidate.we_vote_id)
+        results = find_duplicate_candidate(we_vote_candidate, ignore_candidate_id_list)
+        ignore_candidate_id_list = []
 
         # If we find candidates to merge, stop and ask for confirmation
         if results['candidate_merge_possibility_found']:
