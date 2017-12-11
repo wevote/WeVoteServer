@@ -329,7 +329,8 @@ class CandidateCampaignListManager(models.Model):
         return results
 
     def retrieve_candidates_from_non_unique_identifiers(self, google_civic_election_id, state_code,
-                                                        candidate_twitter_handle, candidate_name):
+                                                        candidate_twitter_handle, candidate_name,
+                                                        ignore_candidate_id_list=[]):
         keep_looking_for_duplicates = True
         candidate = CandidateCampaign()
         candidate_found = False
@@ -347,6 +348,9 @@ class CandidateCampaignListManager(models.Model):
                                                          google_civic_election_id=google_civic_election_id)
                 if positive_value_exists(state_code):
                     candidate_query = candidate_query.filter(state_code__iexact=state_code)
+
+                if positive_value_exists(ignore_candidate_id_list):
+                    candidate_query = candidate_query.exclude(we_vote_id__in=ignore_candidate_id_list)
 
                 candidate_list = list(candidate_query)
                 if len(candidate_list):
@@ -380,6 +384,9 @@ class CandidateCampaignListManager(models.Model):
                 if positive_value_exists(state_code):
                     candidate_query = candidate_query.filter(state_code__iexact=state_code)
 
+                if positive_value_exists(ignore_candidate_id_list):
+                    candidate_query = candidate_query.exclude(we_vote_id__in=ignore_candidate_id_list)
+
                 candidate_list = list(candidate_query)
                 if len(candidate_list):
                     # entry exists
@@ -409,6 +416,9 @@ class CandidateCampaignListManager(models.Model):
                 candidate_query = candidate_query.filter(candidate_name__icontains=first_name)
                 last_name = extract_last_name_from_full_name(candidate_name)
                 candidate_query = candidate_query.filter(candidate_name__icontains=last_name)
+
+                if positive_value_exists(ignore_candidate_id_list):
+                    candidate_query = candidate_query.exclude(we_vote_id__in=ignore_candidate_id_list)
 
                 candidate_list = list(candidate_query)
                 if len(candidate_list):
