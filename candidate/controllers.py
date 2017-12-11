@@ -73,7 +73,7 @@ def candidates_import_from_master_server(request, google_civic_election_id='', s
     return import_results
 
 
-def find_duplicate_candidate(we_vote_candidate, ignore_candidate_id_list=[]):
+def find_duplicate_candidate(we_vote_candidate, ignore_candidate_id_list):
     if not hasattr(we_vote_candidate, 'google_civic_election_id'):
         error_results = {
             'success':                              False,
@@ -93,36 +93,50 @@ def find_duplicate_candidate(we_vote_candidate, ignore_candidate_id_list=[]):
     # Search for other candidates within this election that match name and election
     candidate_campaign_list_manager = CandidateCampaignListManager()
     try:
-        candidate_duplicates_query = CandidateCampaign.objects.order_by('candidate_name')
-        candidate_duplicates_query = candidate_duplicates_query.filter(
-            google_civic_election_id=we_vote_candidate.google_civic_election_id)
-        candidate_duplicates_query = candidate_duplicates_query.filter(
-            candidate_name=we_vote_candidate.candidate_name)
-        candidate_duplicates_query = candidate_duplicates_query.exclude(id=we_vote_candidate.id)
-        number_of_duplicates = candidate_duplicates_query.count()
-        if number_of_duplicates >= 1:
+        results = candidate_campaign_list_manager.retrieve_candidates_from_non_unique_identifiers(
+            we_vote_candidate.google_civic_election_id, we_vote_candidate.state_code,
+            we_vote_candidate.candidate_twitter_handle, we_vote_candidate.candidate_name, ignore_candidate_id_list)
+
+        # candidate_duplicates_query = CandidateCampaign.objects.order_by('candidate_name')
+        # candidate_duplicates_query = candidate_duplicates_query.filter(
+        #     google_civic_election_id=we_vote_candidate.google_civic_election_id)
+        # candidate_duplicates_query = candidate_duplicates_query.filter(
+        #     candidate_name=we_vote_candidate.candidate_name)
+        # candidate_duplicates_query = candidate_duplicates_query.exclude(id=we_vote_candidate.id)
+        # number_of_duplicates = candidate_duplicates_query.count()
+        if results['candidate_found']:
             # Only deal with merging the incoming candidate and the first on found
-            candidate_duplicate_list = candidate_duplicates_query
+            # candidate_duplicate_list = candidate_duplicates_query
 
             # What are the conflicts we will encounter when trying to merge these candidates?
             # ASK_VOTER = Ask voter which one to use
             # MATCHING = Values already match. Nothing to do
             # CANDIDATE1 = Use the value from Candidate 1
             # CANDIDATE2 = Use the value from Candidate 2
-            candidate_merge_conflict_values = figure_out_conflict_values(we_vote_candidate, candidate_duplicate_list[0])
+            # candidate_merge_conflict_values = figure_out_conflict_values(we_vote_candidate,
+            #   candidate_duplicate_list[0])
 
             results = {
                 'success':                              True,
                 'status':                               "FIND_DUPLICATE_CANDIDATE_DUPLICATES_FOUND",
                 'candidate_merge_possibility_found':    True,
-                'candidate_merge_possibility':          candidate_duplicate_list[0],
-                'candidate_merge_conflict_values':      candidate_merge_conflict_values,
+                'candidate_merge_possibility':          results['candidate'],
+                'candidate_merge_conflict_values':      {},
+            }
+            return results
+        elif results['candidate_list_found']:
+            results = {
+                'success':                              True,
+                'status':                               "FIND_DUPLICATE_CANDIDATE_DUPLICATES_FOUND",
+                'candidate_merge_possibility_found':    True,
+                'candidate_merge_possibility':          results['candidate_list'][0],
+                'candidate_merge_conflict_values':      {},
             }
             return results
         else:
             results = {
-                'success': True,
-                'status': "FIND_DUPLICATE_CANDIDATE_NO_DUPLICATES_FOUND",
+                'success':                              True,
+                'status':                               "FIND_DUPLICATE_CANDIDATE_NO_DUPLICATES_FOUND",
                 'candidate_merge_possibility_found':    False,
             }
             return results
