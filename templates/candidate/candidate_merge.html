@@ -17,14 +17,24 @@
 {% if candidate_option1 and candidate_option2 %}
 <table>
 <tr>
-    <td>&nbsp;</td>
-    <td>Candidate Option 1</td>
-    <td>Candidate Option 2</td>
+    <th>&nbsp;</th>
+    <th>Candidate Option 1</th>
+    <th>Candidate Option 2</th>
 </tr>
 <tr>
     <td>Candidate Name</td>
     <td>{{ candidate_option1.candidate_name }}</td>
     <td>{{ candidate_option2.candidate_name }}</td>
+</tr>
+<tr>
+    <td>Candidate Name (from Google Civic)</td>
+    <td>{{ candidate_option1.google_civic_candidate_name }}</td>
+    <td>{{ candidate_option2.google_civic_candidate_name }}</td>
+</tr>
+<tr>
+    <td>Party</td>
+    <td>{{ candidate_option1.party }}</td>
+    <td>{{ candidate_option2.party }}</td>
 </tr>
 <tr>
     <td>ID</td>
@@ -37,12 +47,47 @@
     <td>{{ candidate_option2.we_vote_id }}</td>
 </tr>
 <tr>
-    <td>Election</td>
+    <td>Politician ID</td>
+    <td>{{ candidate_option1.politician_id }}</td>
+    <td>{{ candidate_option2.politician_id }}</td>
+</tr>
+<tr>
+    <td>Politician We Vote ID</td>
+    <td>{{ candidate_option1.politician_we_vote_id }}</td>
+    <td>{{ candidate_option2.politician_we_vote_id }}</td>
+</tr>
+<tr>
+    <td>Election ID</td>
     <td>{{ candidate_option1.google_civic_election_id }}</td>
     <td>{{ candidate_option2.google_civic_election_id }}</td>
 </tr>
 <tr>
-    <td>Website</td>
+    <td>Vote Smart ID</td>
+    <td>{{ candidate_option1.vote_smart_id }}</td>
+    <td>{{ candidate_option2.vote_smart_id }}</td>
+</tr>
+<tr>
+    <td>CTCL UUID</td>
+    <td>{{ candidate_option1.ctcl_uuid }}</td>
+    <td>{{ candidate_option2.ctcl_uuid }}</td>
+</tr>
+<tr>
+    <td>MapLight ID</td>
+    <td>{{ candidate_option1.maplight_id }}</td>
+    <td>{{ candidate_option2.maplight_id }}</td>
+</tr>
+<tr>
+    <td>OCD Division ID</td>
+    <td>{{ candidate_option1.ocd_division_id }}</td>
+    <td>{{ candidate_option2.ocd_division_id }}</td>
+</tr>
+<tr>
+    <td>State Code</td>
+    <td>{{ candidate_option1.state_code }}</td>
+    <td>{{ candidate_option2.state_code }}</td>
+</tr>
+<tr>
+    <td>Candidate URL</td>
     <td>{{ candidate_option1.candidate_url }}</td>
     <td>{{ candidate_option2.candidate_url }}</td>
 </tr>
@@ -70,6 +115,116 @@
     <td>Twitter Location</td>
     <td>{{ candidate_option1.twitter_location }}</td>
     <td>{{ candidate_option2.twitter_location }}</td>
+</tr>
+<tr>
+    <td>Candidate Email</td>
+    <td>{{ candidate_option1.candidate_email }}</td>
+    <td>{{ candidate_option2.candidate_email }}</td>
+</tr>
+<tr>
+    <td>Phone Number</td>
+    <td>{{ candidate_option1.candidate_phone }}</td>
+    <td>{{ candidate_option2.candidate_phone }}</td>
+</tr>
+<tr>
+    <td>Candidate Is Incumbent</td>
+    <td>{{ candidate_option1.candidate_is_incumbent }}</td>
+    <td>{{ candidate_option2.candidate_is_incumbent }}</td>
+</tr>
+<tr>
+    <td>Candidate Is Top Ticket</td>
+    <td>{{ candidate_option1.candidate_is_top_ticket }}</td>
+    <td>{{ candidate_option2.candidate_is_top_ticket }}</td>
+</tr>
+<tr>
+    <td>Order on Ballot</td>
+    <td>{{ candidate_option1.order_on_ballot }}</td>
+    <td>{{ candidate_option2.order_on_ballot }}</td>
+</tr>
+<tr>
+    <td>Ballotpedia Page Title</td>
+    <td>{{ candidate_option1.ballotpedia_page_title }}</td>
+    <td>{{ candidate_option2.ballotpedia_page_title }}</td>
+</tr>
+<tr>
+    <td>Ballotpedia Photo URL</td>
+    <td>{{ candidate_option1.ballotpedia_photo_url }}</td>
+    <td>{{ candidate_option2.ballotpedia_photo_url }}</td>
+</tr>
+<tr>
+    <td>Wikipedia Page Title</td>
+    <td>{{ candidate_option1.wikipedia_page_title }}</td>
+    <td>{{ candidate_option2.wikipedia_page_title }}</td>
+</tr>
+<tr>
+    <td>Wikipedia Photo URL</td>
+    <td>{{ candidate_option1.wikipedia_photo_url }}</td>
+    <td>{{ candidate_option2.wikipedia_photo_url }}</td>
+</tr>
+<tr>
+    <td>Facebook URL</td>
+    <td>{{ candidate_option1.facebook_url }}</td>
+    <td>{{ candidate_option2.facebook_url }}</td>
+</tr>
+<tr>
+    <td>YouTube URL</td>
+    <td>{{ candidate_option1.youtube_url }}</td>
+    <td>{{ candidate_option2.youtube_url }}</td>
+</tr>
+<tr>
+    <td>Google+ URL</td>
+    <td>{{ candidate_option1.google_plus_url }}</td>
+    <td>{{ candidate_option2.google_plus_url }}</td>
+</tr>
+<tr>
+    <td>LinkedIn URL</td>
+    <td>{{ candidate_option1.linkedin_url }}</td>
+    <td>{{ candidate_option2.linkedin_url }}</td>
+</tr>
+<tr>
+    <td>LinkedIn Photo URL</td>
+    <td>{{ candidate_option1.linkedin_photo_url }}</td>
+    <td>{{ candidate_option2.linkedin_photo_url }}</td>
+</tr>
+<tr>
+    <td>Other Source URL</td>
+    <td>{{ candidate_option1.other_source_url }}</td>
+    <td>{{ candidate_option2.other_source_url }}</td>
+</tr>
+<tr>
+    <td>Other Source Photo URL</td>
+    <td>{{ candidate_option1.other_source_photo_url }}</td>
+    <td>{{ candidate_option2.other_source_photo_url }}</td>
+</tr>
+<tr>
+    <td>Photo URL</td>
+    <td>{{ candidate_option1.photo_url }}</td>
+    <td>{{ candidate_option2.photo_url }}</td>
+</tr>
+<tr>
+    <td>Photo URL (from MapLight)</td>
+    <td>{{ candidate_option1.photo_url_from_maplight }}</td>
+    <td>{{ candidate_option2.photo_url_from_maplight }}</td>
+</tr>
+<tr>
+    <td>Photo URL (from Vote Smart)</td>
+    <td>{{ candidate_option1.photo_url_from_vote_smart }}</td>
+    <td>{{ candidate_option2.photo_url_from_vote_smart }}</td>
+</tr>
+<tr>
+    <td>We Vote Image URL (Tiny)</td>
+    <td>{{ candidate_option1.we_vote_hosted_profile_image_url_tiny }}</td>
+    <td>{{ candidate_option2.we_vote_hosted_profile_image_url_tiny }}</td>
+</tr>
+<tr>
+    <td>We Vote Image URL (Medium)</td>
+    <td>{{ candidate_option1.we_vote_hosted_profile_image_url_medium }}</td>
+    <td>{{ candidate_option2.we_vote_hosted_profile_image_url_medium }}</td>
+</tr>
+<tr>
+    <td>We Vote Image URL (Large)</td>
+    <td>{{ candidate_option1.we_vote_hosted_profile_image_url_large }}</td>
+    <td>{{ candidate_option2.we_vote_hosted_profile_image_url_large }}</td>
 </tr>
 <tr>
     <td>&nbsp;</td>
