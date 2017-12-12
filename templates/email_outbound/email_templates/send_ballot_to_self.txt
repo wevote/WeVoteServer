@@ -4,8 +4,7 @@ Hello {{ recipient_name }},
 Hello,
 {% endif %}
 
-This is a link to the
-ballot you were viewing on We Vote. Please feel free to forward to friends!
+This is a link to the ballot you were viewing on We Vote. Please feel free to forward to friends!
 "{{ ballot_link }}"
 
 {% if invitation_message %}
