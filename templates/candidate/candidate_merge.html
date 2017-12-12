@@ -111,8 +111,8 @@
     {% if candidate_option1.candidate_url != None or candidate_option2.candidate_url != None %}
     <tr>
         <td>Candidate URL</td>
-        <td>{{ candidate_option1.candidate_url|default_if_none:"" }}</td>
-        <td>{{ candidate_option2.candidate_url|default_if_none:"" }}</td>
+        <td>{% if candidate_option1.candidate_url != None %}<a href="{{ candidate_option1.candidate_url }}">{{ candidate_option1.candidate_url }}</a>{% endif %}</td>
+        <td>{% if candidate_option2.candidate_url != None %}<a href="{{ candidate_option2.candidate_url }}">{{ candidate_option2.candidate_url }}</a>{% endif %}</td>
     </tr>
     {% endif %}
     {% if candidate_option1.candidate_twitter_handle != None or candidate_option2.candidate_twitter_handle != None %}
@@ -125,8 +125,8 @@
     {% if candidate_option1.twitter_url != None or candidate_option2.twitter_url != None %}
     <tr>
         <td>Twitter URL (from Google)</td>
-        <td>{{ candidate_option1.twitter_url|default_if_none:"" }}</td>
-        <td>{{ candidate_option2.twitter_url|default_if_none:"" }}</td>
+        <td>{% if candidate_option1.twitter_url != None %}<a href="{{ candidate_option1.twitter_url }}">{{ candidate_option1.twitter_url }}</a>{% endif %}</td>
+        <td>{% if candidate_option2.twitter_url != None %}<a href="{{ candidate_option2.twitter_url }}">{{ candidate_option2.twitter_url }}</a>{% endif %}</td>
     </tr>
     {% endif %}
     {% if candidate_option1.twitter_name != None or candidate_option2.twitter_name != None %}
@@ -153,8 +153,8 @@
     {% if candidate_option1.candidate_email != None or candidate_option2.candidate_email != None %}
     <tr>
         <td>Candidate Email</td>
-        <td>{{ candidate_option1.candidate_email|default_if_none:"" }}</td>
-        <td>{{ candidate_option2.candidate_email|default_if_none:"" }}</td>
+        <td>{% if candidate_option1.candidate_email != None %}<a href="mailto:{{ candidate_option1.candidate_email }}">{{ candidate_option1.candidate_email }}</a>{% endif %}</td>
+        <td>{% if candidate_option2.candidate_email != None %}<a href="mailto:{{ candidate_option2.candidate_email }}">{{ candidate_option2.candidate_email }}</a>{% endif %}</td>
     </tr>
     {% endif %}
     {% if candidate_option1.candidate_phone != None or candidate_option2.candidate_phone != None %}
@@ -194,9 +194,9 @@
     {% endif %}
     {% if candidate_option1.ballotpedia_photo_url != None or candidate_option2.ballotpedia_photo_url != None %}
     <tr>
-        <td>Ballotpedia Photo URL</td>
-        <td>{{ candidate_option1.ballotpedia_photo_url|default_if_none:"" }}</td>
-        <td>{{ candidate_option2.ballotpedia_photo_url|default_if_none:"" }}</td>
+        <td>Ballotpedia Photo</td>
+        <td>{% if candidate_option1.ballotpedia_photo_url != None %}<img src="{{ candidate_option1.ballotpedia_photo_url }}" />{% endif %}</td>
+        <td>{% if candidate_option2.ballotpedia_photo_url != None %}<img src="{{ candidate_option2.ballotpedia_photo_url }}" />{% endif %}</td>
     </tr>
     {% endif %}
     {% if candidate_option1.wikipedia_page_title != None or candidate_option2.wikipedia_page_title != None %}
@@ -208,100 +208,100 @@
     {% endif %}
     {% if candidate_option1.wikipedia_photo_url != None or candidate_option2.wikipedia_photo_url != None %}
     <tr>
-        <td>Wikipedia Photo URL</td>
-        <td>{{ candidate_option1.wikipedia_photo_url|default_if_none:"" }}</td>
-        <td>{{ candidate_option2.wikipedia_photo_url|default_if_none:"" }}</td>
+        <td>Wikipedia Photo</td>
+        <td>{% if candidate_option1.wikipedia_photo_url != None %}<img src="{{ candidate_option1.wikipedia_photo_url }}" />{% endif %}</td>
+        <td>{% if candidate_option2.wikipedia_photo_url != None %}<img src="{{ candidate_option2.wikipedia_photo_url }}" />{% endif %}</td>
     </tr>
     {% endif %}
     {% if candidate_option1.facebook_url != None or candidate_option2.facebook_url != None %}
     <tr>
         <td>Facebook URL</td>
-        <td>{{ candidate_option1.facebook_url|default_if_none:"" }}</td>
-        <td>{{ candidate_option2.facebook_url|default_if_none:"" }}</td>
+        <td>{% if candidate_option1.facebook_url != None %}<a href="{{ candidate_option1.facebook_url }}">{{ candidate_option1.facebook_url }}</a>{% endif %}</td>
+        <td>{% if candidate_option2.facebook_url != None %}<a href="{{ candidate_option2.facebook_url }}">{{ candidate_option2.facebook_url }}</a>{% endif %}</td>
     </tr>
     {% endif %}
     {% if candidate_option1.youtube_url != None or candidate_option2.youtube_url != None %}
     <tr>
         <td>YouTube URL</td>
-        <td>{{ candidate_option1.youtube_url|default_if_none:"" }}</td>
-        <td>{{ candidate_option2.youtube_url|default_if_none:"" }}</td>
+        <td>{% if candidate_option1.youtube_url != None %}<a href="{{ candidate_option1.youtube_url }}">{{ candidate_option1.youtube_url }}</a>{% endif %}</td>
+        <td>{% if candidate_option2.youtube_url != None %}<a href="{{ candidate_option2.youtube_url }}">{{ candidate_option2.youtube_url }}</a>{% endif %}</td>
     </tr>
     {% endif %}
     {% if candidate_option1.google_plus_url != None or candidate_option2.google_plus_url != None %}
     <tr>
         <td>Google+ URL</td>
-        <td>{{ candidate_option1.google_plus_url|default_if_none:"" }}</td>
-        <td>{{ candidate_option2.google_plus_url|default_if_none:"" }}</td>
+        <td>{% if candidate_option1.google_plus_url != None %}<a href="{{ candidate_option1.google_plus_url }}">{{ candidate_option1.google_plus_url }}</a>{% endif %}</td>
+        <td>{% if candidate_option2.google_plus_url != None %}<a href="{{ candidate_option2.google_plus_url }}">{{ candidate_option2.google_plus_url }}</a>{% endif %}</td>
     </tr>
     {% endif %}
     {% if candidate_option1.linkedin_url != None or candidate_option2.linkedin_url != None %}
     <tr>
         <td>LinkedIn URL</td>
-        <td>{{ candidate_option1.linkedin_url|default_if_none:"" }}</td>
-        <td>{{ candidate_option2.linkedin_url|default_if_none:"" }}</td>
+        <td>{% if candidate_option1.linkedin_url != None %}<a href="{{ candidate_option1.linkedin_url }}">{{ candidate_option1.linkedin_url }}</a>{% endif %}</td>
+        <td>{% if candidate_option2.linkedin_url != None %}<a href="{{ candidate_option2.linkedin_url }}">{{ candidate_option2.linkedin_url }}</a>{% endif %}</td>
     </tr>
     {% endif %}
     {% if candidate_option1.linkedin_photo_url != None or candidate_option2.linkedin_photo_url != None %}
     <tr>
-        <td>LinkedIn Photo URL</td>
-        <td>{{ candidate_option1.linkedin_photo_url|default_if_none:"" }}</td>
-        <td>{{ candidate_option2.linkedin_photo_url|default_if_none:"" }}</td>
+        <td>LinkedIn Photo</td>
+        <td>{% if candidate_option1.linkedin_photo_url != None %}<img src="{{ candidate_option1.linkedin_photo_url }}" />{% endif %}</td>
+        <td>{% if candidate_option2.linkedin_photo_url != None %}<img src="{{ candidate_option2.linkedin_photo_url }}" />{% endif %}</td>
     </tr>
     {% endif %}
     {% if candidate_option1.other_source_url != None or candidate_option2.other_source_url != None %}
     <tr>
         <td>Other Source URL</td>
-        <td>{{ candidate_option1.other_source_url|default_if_none:"" }}</td>
-        <td>{{ candidate_option2.other_source_url|default_if_none:"" }}</td>
+        <td>{% if candidate_option1.other_source_url != None %}<a href="{{ candidate_option1.other_source_url }}">{{ candidate_option1.other_source_url }}</a>{% endif %}</td>
+        <td>{% if candidate_option2.other_source_url != None %}<a href="{{ candidate_option2.other_source_url }}">{{ candidate_option2.other_source_url }}</a>{% endif %}</td>
     </tr>
     {% endif %}
     {% if candidate_option1.other_source_photo_url != None or candidate_option2.other_source_photo_url != None %}
     <tr>
-        <td>Other Source Photo URL</td>
-        <td>{{ candidate_option1.other_source_photo_url|default_if_none:"" }}</td>
-        <td>{{ candidate_option2.other_source_photo_url|default_if_none:"" }}</td>
+        <td>Other Source Photo</td>
+        <td>{% if candidate_option1.other_source_photo_url != None %}<img src="{{ candidate_option1.other_source_photo_url }}" />{% endif %}</td>
+        <td>{% if candidate_option2.other_source_photo_url != None %}<img src="{{ candidate_option2.other_source_photo_url }}" />{% endif %}</td>
     </tr>
     {% endif %}
     {% if candidate_option1.photo_url != None or candidate_option2.photo_url != None %}
     <tr>
-        <td>Photo URL</td>
-        <td>{{ candidate_option1.photo_url|default_if_none:"" }}</td>
-        <td>{{ candidate_option2.photo_url|default_if_none:"" }}</td>
+        <td>Other Photo</td>
+        <td>{% if candidate_option1.photo_url != None %}<img src="{{ candidate_option1.photo_url }}" />{% endif %}</td>
+        <td>{% if candidate_option2.photo_url != None %}<img src="{{ candidate_option2.photo_url }}" />{% endif %}</td>
     </tr>
     {% endif %}
     {% if candidate_option1.photo_url_from_maplight != None or candidate_option2.photo_url_from_maplight != None %}
     <tr>
-        <td>Photo URL (from MapLight)</td>
-        <td>{{ candidate_option1.photo_url_from_maplight|default_if_none:"" }}</td>
-        <td>{{ candidate_option2.photo_url_from_maplight|default_if_none:"" }}</td>
+        <td>Photo (from MapLight)</td>
+        <td>{% if candidate_option1.photo_url_from_maplight != None %}<img src="{{ candidate_option1.photo_url_from_maplight }}" />{% endif %}</td>
+        <td>{% if candidate_option2.photo_url_from_maplight != None %}<img src="{{ candidate_option2.photo_url_from_maplight }}" />{% endif %}</td>
     </tr>
     {% endif %}
     {% if candidate_option1.photo_url_from_vote_smart != None or candidate_option2.photo_url_from_vote_smart != None %}
     <tr>
-        <td>Photo URL (from Vote Smart)</td>
-        <td>{{ candidate_option1.photo_url_from_vote_smart|default_if_none:"" }}</td>
-        <td>{{ candidate_option2.photo_url_from_vote_smart|default_if_none:"" }}</td>
+        <td>Photo (from Vote Smart)</td>
+        <td>{% if candidate_option1.photo_url_from_vote_smart != None %}<img src="{{ candidate_option1.photo_url_from_vote_smart }}" />{% endif %}</td>
+        <td>{% if candidate_option2.photo_url_from_vote_smart != None %}<img src="{{ candidate_option2.photo_url_from_vote_smart }}" />{% endif %}</td>
     </tr>
     {% endif %}
     {% if candidate_option1.we_vote_hosted_profile_image_url_tiny != None or candidate_option2.we_vote_hosted_profile_image_url_tiny != None %}
     <tr>
-        <td>We Vote Image URL (Tiny)</td>
-        <td>{{ candidate_option1.we_vote_hosted_profile_image_url_tiny|default_if_none:"" }}</td>
-        <td>{{ candidate_option2.we_vote_hosted_profile_image_url_tiny|default_if_none:"" }}</td>
+        <td>We Vote Image (Tiny)</td>
+        <td>{% if candidate_option1.we_vote_hosted_profile_image_url_tiny != None %}<img src="{{ candidate_option1.we_vote_hosted_profile_image_url_tiny }}" />{% endif %}</td>
+        <td>{% if candidate_option2.we_vote_hosted_profile_image_url_tiny != None %}<img src="{{ candidate_option2.we_vote_hosted_profile_image_url_tiny }}" />{% endif %}</td>
     </tr>
     {% endif %}
     {% if candidate_option1.we_vote_hosted_profile_image_url_medium != None or candidate_option2.we_vote_hosted_profile_image_url_medium != None %}
     <tr>
-        <td>We Vote Image URL (Medium)</td>
-        <td>{{ candidate_option1.we_vote_hosted_profile_image_url_medium|default_if_none:"" }}</td>
-        <td>{{ candidate_option2.we_vote_hosted_profile_image_url_medium|default_if_none:"" }}</td>
+        <td>We Vote Image (Medium)</td>
+        <td>{% if candidate_option1.we_vote_hosted_profile_image_url_medium != None %}<img src="{{ candidate_option1.we_vote_hosted_profile_image_url_medium }}" />{% endif %}</td>
+        <td>{% if candidate_option2.we_vote_hosted_profile_image_url_medium != None %}<img src="{{ candidate_option2.we_vote_hosted_profile_image_url_medium }}" />{% endif %}</td>
     </tr>
     {% endif %}
     {% if candidate_option1.we_vote_hosted_profile_image_url_large != None or candidate_option2.we_vote_hosted_profile_image_url_large != None %}
     <tr>
-        <td>We Vote Image URL (Large)</td>
-        <td>{{ candidate_option1.we_vote_hosted_profile_image_url_large|default_if_none:"" }}</td>
-        <td>{{ candidate_option2.we_vote_hosted_profile_image_url_large|default_if_none:"" }}</td>
+        <td>We Vote Image (Large)</td>
+        <td>{% if candidate_option1.we_vote_hosted_profile_image_url_large != None %}<img src="{{ candidate_option1.we_vote_hosted_profile_image_url_large }}" />{% endif %}</td>
+        <td>{% if candidate_option2.we_vote_hosted_profile_image_url_large != None %}<img src="{{ candidate_option2.we_vote_hosted_profile_image_url_large }}" />{% endif %}</td>
     </tr>
     {% endif %}
     <tr>
