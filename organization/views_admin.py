@@ -127,23 +127,34 @@ def organization_list_view(request):
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
-    state_code = request.GET.get('state_code', '')
-    google_civic_election_id = request.GET.get('google_civic_election_id', '')
     candidate_we_vote_id = request.GET.get('candidate_we_vote_id', '')
+    google_civic_election_id = request.GET.get('google_civic_election_id', '')
     organization_search = request.GET.get('organization_search', '')
     organization_type_filter = request.GET.get('organization_type_filter', '')
     selected_issue_vote_id_list = request.GET.getlist('selected_issues', '')
+    sort_by = request.GET.get('sort_by', '')
+    state_code = request.GET.get('state_code', '')
 
     messages_on_stage = get_messages(request)
     organization_list_query = Organization.objects.all()
-    organization_list_query = organization_list_query.order_by('organization_name')
+    if positive_value_exists(sort_by):
+        if sort_by == "twitter":
+            organization_list_query = \
+                organization_list_query.order_by('organization_name').order_by('-twitter_followers_count')
+        else:
+            organization_list_query = organization_list_query.order_by('organization_name')
+    else:
+        organization_list_query = organization_list_query.order_by('organization_name')
 
     if positive_value_exists(state_code):
         organization_list_query = organization_list_query.filter(state_served_code__iexact=state_code)
     if positive_value_exists(organization_type_filter):
         organization_list_query = organization_list_query.filter(organization_type__iexact=organization_type_filter)
 
-    # Retrieve all issues
+    link_issue_list_manager = OrganizationLinkToIssueList()
+
+    # Only show organizations linked to specific issues
+    # 2017-12-12 DALE I'm not sure this is being used yet...
     issues_selected = False
     issue_list = []
     if positive_value_exists(selected_issue_vote_id_list):
@@ -159,8 +170,7 @@ def organization_list_view(request):
                 new_issue_list.append(issue)
             issue_list = new_issue_list
 
-            link_issue_list = OrganizationLinkToIssueList()
-            organization_we_vote_id_list_result = link_issue_list.\
+            organization_we_vote_id_list_result = link_issue_list_manager.\
                 retrieve_organization_we_vote_id_list_from_issue_we_vote_id_list(selected_issue_vote_id_list)
             organization_we_vote_id_list = organization_we_vote_id_list_result['organization_we_vote_id_list']
             # we decided to not deal with case-insensitivity, in favor of using '__in'
@@ -222,8 +232,14 @@ def organization_list_view(request):
             organization_list_query = organization_list_query.exclude(final_filters)
 
     # Limit to only showing 1000 on screen
-    organization_list_query = organization_list_query[:1000]
-    organization_list = organization_list_query
+    organization_list = organization_list_query[:1000]
+
+    # Now loop through these organizations and add on the linked_issues_count
+    modified_organization_list = []
+    for one_organization in organization_list:
+        one_organization.linked_issues_count = link_issue_list_manager. \
+            fetch_issue_count_for_organization(0, one_organization.we_vote_id)
+        modified_organization_list.append(one_organization)
 
     state_list = STATE_CODE_MAP
     sorted_state_list = sorted(state_list.items())
@@ -240,8 +256,9 @@ def organization_list_view(request):
         'issues_selected':          issues_selected,
         'organization_type_filter': organization_type_filter,
         'organization_types':       organization_types_list,
-        'organization_list':        organization_list,
+        'organization_list':        modified_organization_list,
         'organization_search':      organization_search,
+        'sort_by':                  sort_by,
         'state_code':               state_code,
         'state_list':               sorted_state_list,
     }

@@ -49,6 +49,7 @@
 
 <form name="state_code_form" method="get" action="{% url 'organization:organization_list' %}">
     {% csrf_token %}
+    <input type="hidden" name="sort_by" value="{{ sort_by }}">
 
 {% if state_list %}
     <select id="state_code_id" name="state_code">
@@ -111,8 +112,16 @@
         <tr>
             <td></td>
             <td></td>
-            <td>Organization</td>
-            <td>Twitter</td>
+            <td>
+              <a href="{% url 'organization:organization_list' %}?sort_by=organization&state_code={{ state_code }}&organization_type_filter={{ organization_type_filter }}&organization_search={{ organization_search }}">
+              {% if sort_by == "organization" %}<strong>Organization</strong>{% else %}Organization{% endif %}
+              </a>
+            </td>
+            <td>
+              <a href="{% url 'organization:organization_list' %}?sort_by=twitter&state_code={{ state_code }}&organization_type_filter={{ organization_type_filter }}&organization_search={{ organization_search }}">
+              {% if sort_by == "twitter" %}<strong>Twitter</strong>{% else %}Twitter{% endif %}
+              </a>
+            </td>
             <td>Type</td>
             <td>Vote Smart ID</td>
             <td>State</td>
@@ -127,7 +136,11 @@
                     <img src="{{ organization.we_vote_hosted_profile_image_url_medium }}" width="48px" /></a>{% endif %}</td>
             <td><a href="{% url 'organization:organization_position_list' organization.id %}?google_civic_election_id={{ google_civic_election_id }}&candidate_we_vote_id={{ candidate_we_vote_id }}">
                 {{ organization.organization_name }}</a><br />
-                &nbsp;&nbsp;&nbsp;(<a href="{% url 'image:images_for_one_organization' organization.we_vote_id %}" target="_blank">See images</a> in new window)
+                &nbsp;&nbsp;&nbsp;(<a href="{% url 'image:images_for_one_organization' organization.we_vote_id %}"
+                                      target="_blank">See images</a> in new window)
+              {% if organization.linked_issues_count %}
+                {{ organization.linked_issues_count }} Issues Linked
+              {% endif %}
             </td>
             <td>{% if organization.organization_twitter_handle %}{{ organization.organization_twitter_handle }} <br />
                 ({{ organization.twitter_followers_count }} followers){% endif %}</td>

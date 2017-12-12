@@ -540,6 +540,8 @@ class CandidateCampaign(models.Model):
         verbose_name="linkedin url of candidate", max_length=255, null=True, blank=True)
     linkedin_photo_url = models.URLField(verbose_name='url of linkedin logo', blank=True, null=True)
 
+    # other_source_url is the location (ex/ http://mywebsite.com/candidate1.html) where we find
+    # the other_source_photo_url OR the original url of the photo before we store it locally
     other_source_url = models.CharField(
         verbose_name="other source url of candidate", max_length=255, null=True, blank=True)
     other_source_photo_url = models.URLField(verbose_name='url of other source image', blank=True, null=True)
