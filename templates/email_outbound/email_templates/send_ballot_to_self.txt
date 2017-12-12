@@ -1,5 +1,5 @@
-{% if recipient_name %}
-Hello {{ recipient_name }},
+{% if sender_name %}
+Hello {{ sender_name }},
 {% else %}
 Hello,
 {% endif %}
