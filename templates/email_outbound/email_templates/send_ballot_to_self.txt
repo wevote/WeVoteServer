@@ -1,7 +1,7 @@
 {% if recipient_name %}
 Hello {{ recipient_name }},
 {% else %}
-Hello {% if sender_name %}{{ sender_name }}{% else %}{{ sender_email_address }}{% endif %},
+Hello,
 {% endif %}
 
 This is a link to the
