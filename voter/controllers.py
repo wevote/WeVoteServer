@@ -516,7 +516,8 @@ def send_ballot_email(voter_device_id, sender_voter, send_now, sender_email_addr
     # Starting with a raw email address, find (or create) the EmailAddress entry
     # and the owner (Voter) if exists
     status = ""
-    sender_name = sender_voter.get_full_name()
+    real_name_only = True
+    sender_name = sender_voter.get_full_name(real_name_only)
     sender_photo = sender_voter.voter_photo_url()
     sender_description = ""
     sender_network_details = ""
@@ -588,7 +589,8 @@ def send_ballot_email(voter_device_id, sender_voter, send_now, sender_email_addr
             recipient_voter_email = recipient_email_address_object.normalized_email_address
 
             # Template variables
-            recipient_name = voter_friend.get_full_name()
+            real_name_only = True
+            recipient_name = voter_friend.get_full_name(real_name_only)
         else:
             # Store the friend invitation in FriendInvitationEmailLink table
             friend_invitation_results = store_internal_friend_invitation_with_unknown_email(
