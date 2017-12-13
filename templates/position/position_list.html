@@ -36,8 +36,8 @@
 </p>
 
 {% if election_list %}
-    <form name="organization_position_choose_election" method="get" action="{% url 'position:position_list' %}">
-        {% csrf_token %}
+<form name="organization_position_choose_election" method="get" action="{% url 'position:position_list' %}">
+    {% csrf_token %}
 
     <select id="google_civic_election_id" name="google_civic_election_id">
         <option value="0" {% if 0 == google_civic_election_id %} selected="selected"{% endif %}>
@@ -48,15 +48,22 @@
             {{ election.election_name }} - {{ election.google_civic_election_id }} - {{ election.election_day_text }}</option>
     {% endfor %}
     </select>
-    <br />
+
+    {# Default to showing only upcoming elections #}
+    <label for="show_all_elections_id">
+      <input type="checkbox" name="show_all_elections" id="show_all_elections_id" value="1"
+             {% if show_all_elections %}checked{% endif %} /> All Elections
+    </label>
+    &nbsp;&nbsp;&nbsp;&nbsp;
+{% endif %}{# End of if election_list #}
+
     {% if position_search %}
-            <a href="{% url 'position:position_list' %}?google_civic_election_id={{ google_civic_election_id }}">
-                 clear search</a>&nbsp;
-        {% endif %}
+        <a href="{% url 'position:position_list' %}?google_civic_election_id={{ google_civic_election_id }}">
+             clear search</a>&nbsp;
+    {% endif %}
     <input type="text" name="position_search" id="position_search_id" value="{{ position_search }}" />
     <input type="submit" value="Search for positions" />
-    </form>
-{% endif %}{# End of if election_list #}
+</form>
 
 {% if position_list %}
     <table border="1" cellpadding="5" cellspacing="5">
@@ -118,11 +125,16 @@
 {#    <p><a href="{% url 'position:position_new' %}">Add New Position</a></p>#}
 
     <script>
-        $(function() {
-            $('#google_civic_election_id').change(function() {
-                this.form.submit();
-            });
+    $(function() {
+        $('#google_civic_election_id').change(function() {
+            this.form.submit();
         });
+    });
+    $(function() {
+        $('#show_all_elections_id').change(function() {
+            this.form.submit();
+        });
+    });
     </script>
 
 {% endblock %}

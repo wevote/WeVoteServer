@@ -159,6 +159,7 @@ def candidate_list_view(request):
     candidate_search = request.GET.get('candidate_search', '')
     state_code = request.GET.get('state_code', '')
     show_all = request.GET.get('show_all', False)
+    show_all_elections = request.GET.get('show_all_elections', False)
 
     state_list = STATE_CODE_MAP
     sorted_state_list = sorted(state_list.items())
@@ -206,7 +207,7 @@ def candidate_list_view(request):
         candidate_list_count = candidate_list.count()
 
         if not positive_value_exists(show_all):
-            candidate_list = candidate_list[:200]
+            candidate_list = candidate_list[:25]
     except CandidateCampaign.DoesNotExist:
         # This is fine, create new
         pass
@@ -219,7 +220,13 @@ def candidate_list_view(request):
 
     messages_on_stage = get_messages(request)
 
-    election_list = Election.objects.order_by('-election_day_text')
+    election_manager = ElectionManager()
+    if positive_value_exists(show_all_elections):
+        results = election_manager.retrieve_elections()
+        election_list = results['election_list']
+    else:
+        results = election_manager.retrieve_upcoming_elections()
+        election_list = results['election_list']
 
     # Attach the best guess Twitter account, if any, to each candidate in list
     for candidate in candidate_list:
@@ -249,6 +256,7 @@ def candidate_list_view(request):
         'candidate_list':           candidate_list,
         'candidate_search':         candidate_search,
         'election_list':            election_list,
+        'show_all_elections':       show_all_elections,
         'state_code':               state_code,
         'state_list':               sorted_state_list,
         'google_civic_election_id': google_civic_election_id,
