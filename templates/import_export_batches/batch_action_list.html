@@ -290,6 +290,7 @@
                         <th></th>
                         <th>candidate name</th>
                         <th>office name</th>
+                        <th>google civic election id</th>
                         <th>state_code</th>
                         <th>party name</th>
                         <th>twitter_handle</th>
@@ -339,7 +340,12 @@
                                 {{ one_batch_row.batch_row_action.kind_of_action }}
                             {% endif %}
                         </td>
-                        <td>{{ one_batch_row.batch_row_action.candidate_name|default_if_none:"" }}</td>
+                        <td>
+                            {% if one_batch_row.batch_row_action.photo_url %}
+                            <img src="{{ one_batch_row.batch_row_action.photo_url }}" height="50"><br />
+                            <br />
+                            {% endif %}
+                        {{ one_batch_row.batch_row_action.candidate_name|default_if_none:"" }}</td>
                         <td>
                             {{ one_batch_row.batch_row_action.contest_office_name|default_if_none:"" }}
                             {% if one_batch_row.batch_row_action.contest_office_we_vote_id %}
@@ -354,6 +360,7 @@
                             <br /><span>office: {{ one_batch_row.batch_row_action.batch_row_action_office_ctcl_uuid|default_if_none:"" }}</span>
                             {% endif %}
                         </td>
+                        <td>{{ one_batch_row.batch_row_action.google_civic_election_id|default_if_none:"" }}</td>
                         <td>{{ one_batch_row.batch_row_action.state_code|default_if_none:"" }}</td>
                         <td>{{ one_batch_row.batch_row_action.party|default_if_none:"" }}</td>
                         <td>{{ one_batch_row.batch_row_action.candidate_twitter_handle|default_if_none:"" }}</td>

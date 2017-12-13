@@ -2926,7 +2926,7 @@ class BatchManager(models.Model):
         success = False
         number_of_offices = 0
         first_line = True
-        # election_day = ''
+        election_day = ''
         google_civic_election_id = 0
 
         if not candidate_positions_list:
@@ -2947,6 +2947,8 @@ class BatchManager(models.Model):
             candidate_name = one_entry['name']
             election_day = one_entry['election_day']
             google_civic_election_id = one_entry['google_civic_election_id']
+            party = one_entry['party']
+            office_ocd_division_id = one_entry['office_ocd_division_id']
 
             if first_line:
                 # create batch_header and batch_header_map for candidate_positions
@@ -2958,6 +2960,8 @@ class BatchManager(models.Model):
                         batch_header_column_002='candidate_name',
                         batch_header_column_003='election_day',
                         batch_header_column_004='google_civic_election_id',
+                        batch_header_column_005='party',
+                        batch_header_column_006='office_ocd_division_id',
                     )
                     batch_header_id = batch_header.id
 
@@ -2970,6 +2974,8 @@ class BatchManager(models.Model):
                             batch_header_map_002='candidate_name',
                             batch_header_map_003='election_day',
                             batch_header_map_004='google_civic_election_id',
+                            batch_header_map_005='party',
+                            batch_header_map_006='office_ocd_division_id',
                         )
                         batch_header_map_id = batch_header_map.id
                         status += " BATCH_HEADER_MAP_SAVED"
@@ -3007,6 +3013,8 @@ class BatchManager(models.Model):
                     batch_row_002=candidate_name,
                     batch_row_003=election_day,
                     batch_row_004=google_civic_election_id,
+                    batch_row_005=party,
+                    batch_row_006=office_ocd_division_id,
                 )
                 number_of_offices += 1
             except Exception as e:
@@ -3067,6 +3075,7 @@ class BatchManager(models.Model):
             state_code = one_entry['state_code']
             election_day = one_entry['election_day']
             google_civic_election_id = one_entry['google_civic_election_id']
+            candidate_ocd_division_id = one_entry['candidate_ocd_division_id']
 
             if first_line:
                 # create batch_header and batch_header_map for candidate_positions
@@ -3083,6 +3092,7 @@ class BatchManager(models.Model):
                         batch_header_column_007='party',
                         batch_header_column_008='election_day',
                         batch_header_column_009='google_civic_election_id',
+                        batch_header_column_010='candidate_ocd_division_id',
                     )
                     batch_header_id = batch_header.id
 
@@ -3100,6 +3110,7 @@ class BatchManager(models.Model):
                             batch_header_map_007='candidate_party_name',
                             batch_header_map_008='election_day',
                             batch_header_map_009='google_civic_election_id',
+                            batch_header_map_010='candidate_ocd_division_id',
                         )
                         batch_header_map_id = batch_header_map.id
                         status += " BATCH_HEADER_MAP_SAVED"
@@ -3142,6 +3153,7 @@ class BatchManager(models.Model):
                     batch_row_007=party,
                     batch_row_008=election_day,
                     batch_row_009=google_civic_election_id,
+                    batch_row_010=candidate_ocd_division_id,
                 )
                 number_of_candidates += 1
             except Exception as e:
@@ -3205,6 +3217,7 @@ class BatchManager(models.Model):
             state_code = one_entry['state_code']
             election_day = one_entry['election_day']
             google_civic_election_id = one_entry['google_civic_election_id']
+            organization_position_url = one_entry['organization_position_url']
 
             if first_line:
                 # create batch_header and batch_header_map for candidate_positions
@@ -3223,6 +3236,7 @@ class BatchManager(models.Model):
                         batch_header_column_009='state_code',
                         batch_header_column_010='election_day',
                         batch_header_column_011='google_civic_election_id',
+                        batch_header_column_012='organization_position_url',
                     )
                     batch_header_id = batch_header.id
 
@@ -3242,6 +3256,7 @@ class BatchManager(models.Model):
                             batch_header_map_009='state_code',
                             batch_header_map_010='election_day',
                             batch_header_map_011='google_civic_election_id',
+                            batch_header_map_012='organization_position_url',
                         )
                         batch_header_map_id = batch_header_map.id
                         status += " BATCH_HEADER_MAP_SAVED"
@@ -3286,6 +3301,7 @@ class BatchManager(models.Model):
                     batch_row_009=state_code,
                     batch_row_010=election_day,
                     batch_row_011=google_civic_election_id,
+                    batch_row_012=organization_position_url,
                 )
                 number_of_candidate_positions += 1
             except Exception as e:
