@@ -585,6 +585,7 @@ def organization_position_list_view(request, organization_id=0, organization_we_
     organization_id = convert_to_int(organization_id)
     google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
     candidate_we_vote_id = request.GET.get('candidate_we_vote_id', '')
+    show_all_elections = request.GET.get('show_all_elections', False)
 
     organization_on_stage = Organization()
     organization_on_stage_found = False
@@ -649,7 +650,14 @@ def organization_position_list_view(request, organization_id=0, organization_we_
             position_manager = PositionManager()
             one_position = position_manager.refresh_cached_position_info(one_position)
 
-        election_list = Election.objects.order_by('-election_day_text')
+        election_manager = ElectionManager()
+        if positive_value_exists(show_all_elections):
+            results = election_manager.retrieve_elections()
+            election_list = results['election_list']
+        else:
+            results = election_manager.retrieve_upcoming_elections()
+            election_list = results['election_list']
+
         organization_type_display_text = ORGANIZATION_TYPE_MAP.get(organization_on_stage.organization_type,
                                                                    ORGANIZATION_TYPE_MAP[UNKNOWN])
         template_values = {
@@ -661,6 +669,7 @@ def organization_position_list_view(request, organization_id=0, organization_we_
             'election_list':                    election_list,
             'google_civic_election_id':         google_civic_election_id,
             'candidate_we_vote_id':             candidate_we_vote_id,
+            'show_all_elections':               show_all_elections,
             'voter':                            voter,
             'issue_names_list':                 issue_names_list,
             'issue_blocked_names_list':         issue_blocked_names_list,

@@ -28,6 +28,7 @@
 
 <form name="candidate_choose_election" method="get" action="{% url 'candidate:candidate_list' %}">
     {% csrf_token %}
+
     {% if election_list %}
     <select id="google_civic_election_id" name="google_civic_election_id">
         <option value="0" {% if 0 == google_civic_election_id|convert_to_int %} selected="selected"{% endif %}>
@@ -39,6 +40,13 @@
         {% endfor %}
     </select>
     {% endif %}{# End of if election_list #}
+
+    {# Default to showing only upcoming elections #}
+    <label for="show_all_elections_id">
+      <input type="checkbox" name="show_all_elections" id="show_all_elections_id" value="1"
+             {% if show_all_elections %}checked{% endif %} /> All Elections
+    </label>
+    &nbsp;&nbsp;&nbsp;&nbsp;
 
     {% if state_list %}
         <select id="state_code_id" name="state_code">
@@ -236,6 +244,11 @@
     <script>
     $(function() {
         $('#google_civic_election_id').change(function() {
+            this.form.submit();
+        });
+    });
+    $(function() {
+        $('#show_all_elections_id').change(function() {
             this.form.submit();
         });
     });

@@ -27,6 +27,9 @@ from wevote_functions.functions import positive_value_exists, convert_to_int
 
 logger = wevote_functions.admin.get_logger(__name__)
 HTTP_OK = 200
+# These constants are used for "image_source" which is not a WeVoteImage table value, but gets used in the controller
+# to set the table values like: kind_of_image_twitter_profile and kind_of_image_facebook_profile
+# code. "other_source" is a database table value that is not given its own "kind_of_image..." table boolean
 TWITTER = "twitter"
 FACEBOOK = "facebook"
 MAPLIGHT = "maplight"
@@ -34,7 +37,8 @@ VOTE_SMART = "vote_smart"
 BALLOTPEDIA = "ballotpedia"
 LINKEDIN = "linkedin"
 WIKIPEDIA = "wikipedia"
-OTHER_SOURCE = "other_source"
+OTHER_SOURCE = "other_source"  # Set "kind_of_image_other_source" to true
+
 MAPLIGHT_URL_NOT_FOUND = "maplight url not found"
 VOTE_SMART_URL_NOT_FOUND = "votesmart url not found"
 BALLOTPEDIA_URL_NOT_FOUND = "ballotpedia url not found"
@@ -2146,7 +2150,7 @@ def cache_master_and_resized_image(twitter_id=None, twitter_screen_name=None,
     :param candidate_we_vote_id:
     :param organization_id:
     :param organization_we_vote_id:
-    :param image_source:
+    :param image_source: 2017-12-12 Currently not used within WeVoteServer
     :param facebook_user_id:
     :param facebook_profile_image_url_https:
     :param facebook_background_image_url_https:
@@ -2365,7 +2369,7 @@ def cache_master_images(twitter_id=None, twitter_screen_name=None,
     :param candidate_we_vote_id:
     :param organization_id:
     :param organization_we_vote_id:
-    :param image_source:
+    :param image_source: 2017-12-12 Currently not used within WeVoteServer
     :param facebook_user_id:
     :param facebook_profile_image_url_https:
     :param facebook_background_image_url_https:
