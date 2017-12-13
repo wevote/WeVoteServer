@@ -905,6 +905,7 @@ def find_and_remove_duplicate_candidates_view(request):
     ignore_candidate_id_list = []
     google_civic_election_id = request.GET.get('google_civic_election_id', 0)
     google_civic_election_id = convert_to_int(google_civic_election_id)
+    position_list_manager = PositionListManager()
 
     number_of_duplicate_candidates_processed = 0
     number_of_duplicate_candidates_failed = 0
@@ -930,11 +931,27 @@ def find_and_remove_duplicate_candidates_view(request):
 
         # If we find candidates to merge, stop and ask for confirmation
         if results['candidate_merge_possibility_found']:
+            candidate_option1_for_template = we_vote_candidate
+            candidate_option1_for_template.public_positions_count = \
+                position_list_manager.fetch_public_positions_count_for_candidate_campaign(
+                    candidate_option1_for_template.id, candidate_option1_for_template.we_vote_id)
+            candidate_option1_for_template.friends_positions_count = \
+                position_list_manager.fetch_friends_only_positions_count_for_candidate_campaign(
+                    candidate_option1_for_template.id, candidate_option1_for_template.we_vote_id)
+
+            candidate_option2_for_template = results['candidate_merge_possibility']
+            candidate_option2_for_template.public_positions_count = \
+                position_list_manager.fetch_public_positions_count_for_candidate_campaign(
+                    candidate_option2_for_template.id, candidate_option2_for_template.we_vote_id)
+            candidate_option2_for_template.friends_positions_count = \
+                position_list_manager.fetch_friends_only_positions_count_for_candidate_campaign(
+                    candidate_option2_for_template.id, candidate_option2_for_template.we_vote_id)
+
             messages_on_stage = get_messages(request)
             template_values = {
                 'messages_on_stage': messages_on_stage,
-                'candidate_option1': we_vote_candidate,
-                'candidate_option2': results['candidate_merge_possibility'],
+                'candidate_option1': candidate_option1_for_template,
+                'candidate_option2': candidate_option2_for_template,
             }
             return render(request, 'candidate/candidate_merge.html', template_values)
 
