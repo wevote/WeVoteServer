@@ -67,8 +67,12 @@ def organization_retrieve_tweets_view(request, organization_we_vote_id):
     messages.add_message(request, messages.INFO, 'Organization retrieve tweets executed, '
                                                  'Tweets retrieved: {tweets_saved},'
                                                  'Tweets not retrieved: {tweets_not_saved},'
+                                                 'Hash tags retrieved: {hash_tags_retrieved},'
+                                                 'Words or phrases retrieved: {words_or_phrases_retrieved}'
                                                  ''.format(tweets_saved=org_tweets_results['tweets_saved'],
-                                                           tweets_not_saved=org_tweets_results['tweets_not_saved']))
+                                                           tweets_not_saved=org_tweets_results['tweets_not_saved'],
+                                                           hash_tags_retrieved=org_hashtags['hash_tags_retrieved'],
+                                                           words_or_phrases_retrieved=org_hashtags['words_or_phrases_retrieved']))
     return HttpResponseRedirect(reverse('organization:organization_we_vote_id_position_list',
                                         args=(organization_we_vote_id,)) +
                                 "?google_civic_election_id=" + str(google_civic_election_id) + "&state_code=" +
