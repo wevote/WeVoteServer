@@ -1381,9 +1381,16 @@ class CandidateCampaignManager(models.Model):
                 new_candidate.facebook_url = facebook_url
                 new_candidate.photo_url = photo_url
                 if new_candidate.photo_url:
-                    # save_to_candidate_object = False
-                    candidate_results = self.modify_candidate_with_organization_endorsements_image(new_candidate, photo_url,
-                                                                                             False)
+                    candidate_results = self.modify_candidate_with_organization_endorsements_image(new_candidate,
+                                                                                                   photo_url, True)
+                    if candidate_results['success']:
+                        candidate = candidate_results['candidate']
+                        new_candidate.we_vote_hosted_profile_image_url_large = \
+                            candidate.we_vote_hosted_profile_image_url_large
+                        new_candidate.we_vote_hosted_profile_image_url_medium = \
+                            candidate.we_vote_hosted_profile_image_url_medium
+                        new_candidate.we_vote_hosted_profile_image_url_tiny = \
+                            candidate.we_vote_hosted_profile_image_url_tiny
                 new_candidate.save()
 
                 status += "CANDIDATE_CREATE_THEN_UPDATE_SUCCESS "
@@ -1473,6 +1480,13 @@ class CandidateCampaignManager(models.Model):
                         existing_candidate_entry, update_values['photo_url'], save_to_candidate_object)
                     if candidate_results['success']:
                         values_changed = True
+                        candidate = candidate_results['candidate']
+                        existing_candidate_entry.we_vote_hosted_profile_image_url_large = \
+                            candidate.we_vote_hosted_profile_image_url_large
+                        existing_candidate_entry.we_vote_hosted_profile_image_url_medium = \
+                            candidate.we_vote_hosted_profile_image_url_medium
+                        existing_candidate_entry.we_vote_hosted_profile_image_url_tiny = \
+                            candidate.we_vote_hosted_profile_image_url_tiny
 
                 # now go ahead and save this entry (update)
                 if values_changed:
@@ -1520,7 +1534,7 @@ class CandidateCampaignManager(models.Model):
         from image.controllers import OTHER_SOURCE, cache_master_and_resized_image
 
         # add https to the url and replace “\/” with “/”
-        modified_url_string = ''
+        modified_url_string = candidate_photo_url
         temp_url_string = candidate_photo_url.lower()
         temp_url_string = temp_url_string.replace("\\", "")
         if "http" not in temp_url_string:
@@ -1546,6 +1560,7 @@ class CandidateCampaignManager(models.Model):
                 candidate.we_vote_hosted_profile_image_url_large = we_vote_hosted_profile_image_url_large
                 candidate.we_vote_hosted_profile_image_url_medium = we_vote_hosted_profile_image_url_medium
                 candidate.we_vote_hosted_profile_image_url_tiny = we_vote_hosted_profile_image_url_tiny
+                success = True
                 status += "MODIFY_CANDIDATE_WITH_ORGANIZATION_ENDORSEMENTS_IMAGE-IMAGE_SAVED"
             except Exception as e:
                 status += "MODIFY_CANDIDATE_WITH_ORGANIZATION_ENDORSEMENTS_IMAGE-IMAGE_SAVE_FAILED"
