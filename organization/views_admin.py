@@ -43,19 +43,36 @@ ORGANIZATION_STANCE_CHOICES = (
 logger = wevote_functions.admin.get_logger(__name__)
 
 
+@login_required
 def organization_analyze_tweets_view(request, organization_we_vote_id):
 
     org_hashtags = organization_analyze_tweets(organization_we_vote_id)
     return HttpResponse(org_tweets)
 
 
+@login_required
 def organization_retrieve_tweets_view(request, organization_we_vote_id):
-    """ For one organization, retrieve X Tweets, and capture all #Hashtags used. """
-    number_to_retrieve = 5
-    org_tweets = organization_retrieve_tweets_from_twitter(organization_we_vote_id, number_to_retrieve)
-    org_hashtags = organization_analyze_tweets(organization_we_vote_id)
+    """
+    For one organization, retrieve X Tweets, and capture all #Hashtags used.
 
-    return HttpResponse(org_hashtags)
+    :param request:
+    :param organization_we_vote_id:
+    :return:
+    """
+    google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
+    state_code = request.GET.get('state_code', False)
+
+    org_tweets_results = organization_retrieve_tweets_from_twitter(organization_we_vote_id)
+    org_hashtags = organization_analyze_tweets(organization_we_vote_id)
+    messages.add_message(request, messages.INFO, 'Organization retrieve tweets executed, '
+                                                 'Tweets retrieved: {tweets_saved},'
+                                                 'Tweets not retrieved: {tweets_not_saved},'
+                                                 ''.format(tweets_saved=org_tweets_results['tweets_saved'],
+                                                           tweets_not_saved=org_tweets_results['tweets_not_saved']))
+    return HttpResponseRedirect(reverse('organization:organization_we_vote_id_position_list',
+                                        args=(organization_we_vote_id,)) +
+                                "?google_civic_election_id=" + str(google_civic_election_id) + "&state_code=" +
+                                str(state_code))
 
 
 # This page does not need to be protected.

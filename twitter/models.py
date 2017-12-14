@@ -1137,7 +1137,7 @@ class TweetFavorite(models.Model):
     """
     This table tells us who favorited a tweet
     """
-    tweet_id = models.ForeignKey(Tweet, null=True, blank=True, verbose_name='we vote tweet id')
+    tweet_id = models.BigIntegerField(default=0, verbose_name='id of this tweet\'s author')
     # twitter_tweet_id # (unique id from twitter for tweet?)
     # TODO Should favorited_by_handle be a ForeignKey link to the Twitter User? I'm concerned this will slow saving,
     #  and it might be better to ForeignKey against voter_id

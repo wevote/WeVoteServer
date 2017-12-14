@@ -42,14 +42,20 @@ TWITTER_ACCESS_TOKEN = get_environment_variable("TWITTER_ACCESS_TOKEN")
 TWITTER_ACCESS_TOKEN_SECRET = get_environment_variable("TWITTER_ACCESS_TOKEN_SECRET")
 
 
-def organization_retrieve_tweets_from_twitter(organization_we_vote_id, number_to_retrieve=200):
-    """For one organization, retrieve X Tweets, and capture all #Hashtags used.
-        Sample code: Search for tweepy http://tweepy.readthedocs.io/en/v3.5.0/ """
+def organization_retrieve_tweets_from_twitter(organization_we_vote_id):
+    """
+    For one organization, retrieve X Tweets, and capture all #Hashtags used.
+    Sample code: Search for tweepy http://tweepy.readthedocs.io/en/v3.5.0/
+
+    :param organization_we_vote_id:
+    :return:
+    """
     try:
         auth = tweepy.OAuthHandler(TWITTER_CONSUMER_KEY, TWITTER_CONSUMER_SECRET)
         auth.set_access_token(TWITTER_ACCESS_TOKEN, TWITTER_ACCESS_TOKEN_SECRET)
         api = tweepy.API(auth)
 
+        number_to_retrieve = 200  # TODO Remove this
         organization_manager = OrganizationManager()
         organization_twitter_id = organization_manager.fetch_twitter_handle_from_organization_we_vote_id(
             organization_we_vote_id)
