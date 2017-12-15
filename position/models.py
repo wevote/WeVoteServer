@@ -2301,22 +2301,23 @@ class PositionListManager(models.Model):
         return position_list_filtered
 
     def fetch_public_positions_count_for_candidate_campaign(self, candidate_campaign_id,
-                                                               candidate_campaign_we_vote_id,
-                                                               stance_we_are_looking_for=ANY_STANCE):
+                                                            candidate_campaign_we_vote_id,
+                                                            stance_we_are_looking_for=ANY_STANCE):
         return self.fetch_positions_count_for_candidate_campaign(candidate_campaign_id,
-                                                                    candidate_campaign_we_vote_id,
-                                                                    stance_we_are_looking_for,
-                                                                    PUBLIC_ONLY)
+                                                                 candidate_campaign_we_vote_id,
+                                                                 stance_we_are_looking_for,
+                                                                 PUBLIC_ONLY)
 
     def fetch_friends_only_positions_count_for_candidate_campaign(self, candidate_campaign_id,
-                                                               candidate_campaign_we_vote_id,
-                                                               stance_we_are_looking_for=ANY_STANCE):
+                                                                  candidate_campaign_we_vote_id,
+                                                                  stance_we_are_looking_for=ANY_STANCE):
         return self.fetch_positions_count_for_candidate_campaign(candidate_campaign_id,
-                                                                    candidate_campaign_we_vote_id,
-                                                                    stance_we_are_looking_for,
-                                                                    FRIENDS_ONLY)
+                                                                 candidate_campaign_we_vote_id,
+                                                                 stance_we_are_looking_for,
+                                                                 FRIENDS_ONLY)
 
-    def fetch_positions_count_for_candidate_campaign(self, candidate_campaign_id,
+    @staticmethod
+    def fetch_positions_count_for_candidate_campaign(candidate_campaign_id,
                                                      candidate_campaign_we_vote_id,
                                                      stance_we_are_looking_for,
                                                      public_or_private=PUBLIC_ONLY):
