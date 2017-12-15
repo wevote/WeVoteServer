@@ -113,12 +113,13 @@ def organization_analyze_tweets(organization_we_vote_id):
         if re.findall(r"#(\w+)", cached_tweets[i].tweet_text):
             all_hashtags.append(re.findall(r"#(\w+)", cached_tweets[i].tweet_text))
 
-    all_hastags_list = []
+    all_hastags_list = [] # all_hashtags is a nested list, flattened here prior to building frequency distribution
     [[all_hastags_list.append(hashtag) for hashtag in hashtag_list]for hashtag_list in all_hashtags]
     unique_hashtags_count_dict = dict(zip(all_hastags_list, [0] * len(all_hastags_list)))
     for hashtag in all_hastags_list:
         unique_hashtags_count_dict[hashtag] += 1
 
+    # TODO (eayoungs@gmail.com) This is Abed's code; left to be considered for future work
     # This is giving a weird output!
     # Populate a dictionary with the frequency of words in all tweets 
     #counts = dict()
