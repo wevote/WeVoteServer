@@ -907,10 +907,6 @@ def find_and_remove_duplicate_candidates_view(request):
     google_civic_election_id = convert_to_int(google_civic_election_id)
     position_list_manager = PositionListManager()
 
-    number_of_duplicate_candidates_processed = 0
-    number_of_duplicate_candidates_failed = 0
-    number_of_duplicates_could_not_process = 0
-
     # We only want to process if a google_civic_election_id comes in
     if not positive_value_exists(google_civic_election_id):
         messages.add_message(request, messages.ERROR, "Google Civic Election ID required.")
@@ -954,6 +950,7 @@ def find_and_remove_duplicate_candidates_view(request):
                 'messages_on_stage': messages_on_stage,
                 'candidate_option1': candidate_option1_for_template,
                 'candidate_option2': candidate_option2_for_template,
+                'conflict_values':   results['candidate_merge_conflict_values'],
             }
             return render(request, 'candidate/candidate_merge.html', template_values)
 
