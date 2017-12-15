@@ -932,6 +932,9 @@ def find_and_remove_duplicate_candidates_view(request):
         # If we find candidates to merge, stop and ask for confirmation
         if results['candidate_merge_possibility_found']:
             candidate_option1_for_template = we_vote_candidate
+            candidate_option2_for_template = results['candidate_merge_possibility']
+
+            # Get positions counts for both candidates
             candidate_option1_for_template.public_positions_count = \
                 position_list_manager.fetch_public_positions_count_for_candidate_campaign(
                     candidate_option1_for_template.id, candidate_option1_for_template.we_vote_id)
@@ -939,7 +942,6 @@ def find_and_remove_duplicate_candidates_view(request):
                 position_list_manager.fetch_friends_only_positions_count_for_candidate_campaign(
                     candidate_option1_for_template.id, candidate_option1_for_template.we_vote_id)
 
-            candidate_option2_for_template = results['candidate_merge_possibility']
             candidate_option2_for_template.public_positions_count = \
                 position_list_manager.fetch_public_positions_count_for_candidate_campaign(
                     candidate_option2_for_template.id, candidate_option2_for_template.we_vote_id)
