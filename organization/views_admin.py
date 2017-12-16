@@ -374,11 +374,34 @@ def organization_delete_process_view(request):
     :return:
     """
     organization_id = convert_to_int(request.POST.get('organization_id', 0))
+    confirm_delete = convert_to_int(request.POST.get('confirm_delete', 0))
+
+    google_civic_election_id = request.POST.get('google_civic_election_id', 0)
+    state_code = request.POST.get('state_code', '')
+
+    if not positive_value_exists(confirm_delete):
+        messages.add_message(request, messages.ERROR,
+                             'Unable to delete this organization. '
+                             'Please check the checkbox to confirm you want to delete this organization.')
+        return HttpResponseRedirect(reverse('organization:organization_edit', args=(organization_id,)) +
+                                    "?google_civic_election_id=" + str(google_civic_election_id) +
+                                    "&state_code=" + str(state_code))
 
     organization_manager = OrganizationManager()
     results = organization_manager.retrieve_organization(organization_id)
     if results['organization_found']:
         organization = results['organization']
+
+        organization_link_to_issue_list = OrganizationLinkToIssueList()
+        issue_count = organization_link_to_issue_list.fetch_issue_count_for_organization(0, organization.we_vote_id)
+
+        if positive_value_exists(issue_count):
+            messages.add_message(request, messages.ERROR, 'Could not delete -- '
+                                                          'issues still attached to this organization.')
+            return HttpResponseRedirect(reverse('organization:organization_edit', args=(organization_id,)) +
+                                        "?google_civic_election_id=" + str(google_civic_election_id) +
+                                        "&state_code=" + str(state_code))
+
         organization.delete()
         messages.add_message(request, messages.INFO, 'Organization deleted.')
     else:
