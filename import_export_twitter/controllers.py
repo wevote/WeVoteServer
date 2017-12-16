@@ -247,8 +247,6 @@ def refresh_twitter_organization_details(organization):
     else:
         status = "ORGANIZATION_TWITTER_DETAILS-CLEARING_DETAILS"
         save_organization_results = organization_manager.clear_organization_twitter_details(organization)
-        twitter_user_manager_results = twitter_user_manager.create_twitter_link_to_organization(
-            organization.we_vote_id, organization.twitter_user_id)
 
         if save_organization_results['success']:
             results = update_social_media_statistics_in_other_tables(organization)
@@ -258,7 +256,6 @@ def refresh_twitter_organization_details(organization):
         'success':      True,
         'status':       status,
         'organization': organization,
-        'twitter_id':   twitter_user_manager_results['twitter_link_to_organization']
     }
     return results
 
