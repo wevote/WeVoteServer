@@ -116,6 +116,23 @@
 {% endif %}
 
 
+
+{% if issue %}
+  <br />
+  <br />
+<form action="{% url "issue:issue_delete_process" %}" method="post" class="form-horizontal">
+{% csrf_token %}
+  <input type="hidden" name="issue_we_vote_id" value="{{ issue.we_vote_id }}">
+  <button type="submit" class="btn btn-danger">Delete Issue</button>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  <label for="confirm_delete_id">
+    <input type="checkbox" name="confirm_delete" id="confirm_delete_id" value="1" /> Check to confirm that you want to permanently delete this issue
+  </label>
+</form>
+{% endif %}
+  <br />
+  <br />
+
+
 <script>
     $(function() {
         $('#contest_office_id').change(function() {

@@ -514,19 +514,29 @@ def issue_delete_process_view(request):
     :param request:
     :return:
     """
-    authority_required = {'verified_volunteer'}  # admin, verified_volunteer
+    authority_required = {'admin'}  # admin, verified_volunteer
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
-    issue_id = convert_to_int(request.GET.get('issue_id', 0))
-    google_civic_election_id = request.GET.get('google_civic_election_id', 0)
+    issue_we_vote_id = request.POST.get('issue_we_vote_id', False)
+    google_civic_election_id = request.POST.get('google_civic_election_id', 0)
+    confirm_delete = convert_to_int(request.POST.get('confirm_delete', 0))
+    state_code = request.POST.get('state_code', '')
+
+    if not positive_value_exists(confirm_delete):
+        messages.add_message(request, messages.ERROR,
+                             'Unable to delete this issue. '
+                             'Please check the checkbox to confirm you want to delete this issue.')
+        return HttpResponseRedirect(reverse('issue:issue_edit', args=(issue_we_vote_id,)) +
+                                    "?google_civic_election_id=" + str(google_civic_election_id) + "&state_code=" +
+                                    str(state_code))
 
     # Retrieve this issue
     issue_on_stage_found = False
     issue_on_stage = Issue()
-    if positive_value_exists(issue_id):
+    if positive_value_exists(issue_we_vote_id):
         try:
-            issue_query = Issue.objects.filter(id=issue_id)
+            issue_query = Issue.objects.filter(we_vote_id__iexact=issue_we_vote_id)
             if len(issue_query):
                 issue_on_stage = issue_query[0]
                 issue_on_stage_found = True
@@ -540,26 +550,21 @@ def issue_delete_process_view(request):
 
     # Are there any positions attached to this issue that should be moved to another
     # instance of this issue?
-    position_list_manager = PositionListManager()
-    retrieve_public_positions = True  # The alternate is positions for friends-only
-    position_list = position_list_manager.retrieve_all_positions_for_issue_campaign(retrieve_public_positions, issue_id)
-    if positive_value_exists(len(position_list)):
-        positions_found_for_this_issue = True
+    organization_link_to_issue_list = OrganizationLinkToIssueList()
+    link_count = organization_link_to_issue_list.fetch_organization_count_for_issue(issue_we_vote_id)
+    if positive_value_exists(link_count):
+        organizations_found_for_this_issue = True
     else:
-        positions_found_for_this_issue = False
+        organizations_found_for_this_issue = False
 
-    try:
-        if not positions_found_for_this_issue:
-            # Delete the issue
-            issue_on_stage.delete()
-            messages.add_message(request, messages.INFO, 'Candidate Campaign deleted.')
-        else:
-            messages.add_message(request, messages.ERROR, 'Could not delete -- '
-                                                          'positions still attached to this issue.')
-            return HttpResponseRedirect(reverse('issue:issue_edit', args=(issue_id,)))
-    except Exception as e:
-        messages.add_message(request, messages.ERROR, 'Could not delete issue -- exception.')
-        return HttpResponseRedirect(reverse('issue:issue_edit', args=(issue_id,)))
+    if not organizations_found_for_this_issue:
+        # Delete the issue
+        issue_on_stage.delete()
+        messages.add_message(request, messages.INFO, 'Issue deleted.')
+    else:
+        messages.add_message(request, messages.ERROR, 'Could not delete -- '
+                                                      'organizations still attached to this issue.')
+        return HttpResponseRedirect(reverse('issue:issue_edit', args=(issue_we_vote_id,)))
 
     return HttpResponseRedirect(reverse('issue:issue_list', args=()) +
                                 "?google_civic_election_id=" + str(google_civic_election_id))
