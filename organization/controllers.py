@@ -30,6 +30,7 @@ import tweepy
 import re
 from organization.models import OrganizationLinkToHashtag
 from import_export_twitter.models import TwitterAuthManager
+# import pandas  # I would use the full name as opposed to shortening it with something like "as pd"
 
 
 logger = wevote_functions.admin.get_logger(__name__)
@@ -42,14 +43,20 @@ TWITTER_ACCESS_TOKEN = get_environment_variable("TWITTER_ACCESS_TOKEN")
 TWITTER_ACCESS_TOKEN_SECRET = get_environment_variable("TWITTER_ACCESS_TOKEN_SECRET")
 
 
-def organization_retrieve_tweets_from_twitter(organization_we_vote_id, number_to_retrieve=200):
-    """For one organization, retrieve X Tweets, and capture all #Hashtags used.
-        Sample code: Search for tweepy http://tweepy.readthedocs.io/en/v3.5.0/ """
+def organization_retrieve_tweets_from_twitter(organization_we_vote_id):
+    """
+    For one organization, retrieve X Tweets, and capture all #Hashtags used.
+    Sample code: Search for tweepy http://tweepy.readthedocs.io/en/v3.5.0/
+
+    :param organization_we_vote_id:
+    :return:
+    """
     try:
         auth = tweepy.OAuthHandler(TWITTER_CONSUMER_KEY, TWITTER_CONSUMER_SECRET)
         auth.set_access_token(TWITTER_ACCESS_TOKEN, TWITTER_ACCESS_TOKEN_SECRET)
         api = tweepy.API(auth)
 
+        number_to_retrieve = 200  # TODO Remove this
         organization_manager = OrganizationManager()
         organization_twitter_id = organization_manager.fetch_twitter_handle_from_organization_we_vote_id(
             organization_we_vote_id)
@@ -82,51 +89,75 @@ def organization_retrieve_tweets_from_twitter(organization_we_vote_id, number_to
 
 
 def organization_analyze_tweets(organization_we_vote_id):
-    """ For one organization, retrieve X Tweets, and capture all #Hashtags used.
-        Loop through Tweets and create OrganizationLinkToHashtag and OrganizationLinkToWordOrPhrase """
-    twitter_user_manager = TwitterUserManager()    
-    results = twitter_user_manager.retrieve_tweets_cached_locally(organization_we_vote_id)
-    tweet_list = results["tweet_list"]
+    """
+    For one organization, retrieve X Tweets, and capture all #Hashtags used.
+    Loop through Tweets and create OrganizationLinkToHashtag and OrganizationLinkToWordOrPhrase
+
+    :param organization_we_vote_id:
+    :return:
+    """
+    twitter_user_manager = TwitterUserManager()
+    retrieve_tweets_cached_locally_results = twitter_user_manager.retrieve_tweets_cached_locally(
+        organization_we_vote_id)
+    if retrieve_tweets_cached_locally_results['status'] == 'NO_TWEETS_FOUND':
+        results = {
+            'status':  'NO_TWEETS_CACHED_LOCALLY',
+            'success': False,
+        }
+        return results
+    cached_tweets = retrieve_tweets_cached_locally_results["tweet_list"]
     all_hashtags = []
 
-    # We need a count here instead of hard limit 5
-    for i in range(0, len(tweet_list)):
-        if re.findall(r"#(\w+)", tweet_list[i].tweet_text):
-            all_hashtags.append(re.findall(r"#(\w+)", tweet_list[i].tweet_text))
+    for i in range(0, len(cached_tweets)):
+        if re.findall(r"#(\w+)", cached_tweets[i].tweet_text):
+            all_hashtags.append(re.findall(r"#(\w+)", cached_tweets[i].tweet_text))
 
+    all_hastags_list = [] # all_hashtags is a nested list, flattened here prior to building frequency distribution
+    [[all_hastags_list.append(hashtag) for hashtag in hashtag_list]for hashtag_list in all_hashtags]
+    unique_hashtags_count_dict = dict(zip(all_hastags_list, [0] * len(all_hastags_list)))
+    for hashtag in all_hastags_list:
+        unique_hashtags_count_dict[hashtag] += 1
+
+    # TODO (eayoungs@gmail.com) This is Abed's code; left to be considered for future work
     # This is giving a weird output!
     # Populate a dictionary with the frequency of words in all tweets 
-    counts = dict()
-    for tweet in tweet_list:
-        words = str(tweet.tweet_text).split()
-        # return tweet.tweet_text, str(tweet.tweet_text).split(), tweet.tweet_text.split(), words
-        for word in words:
-            if word in counts:
-                counts[word] += 1
-            else:
-                counts[word] = 1
+    #counts = dict()
+    #for tweet in tweet_list:
+    #    words = str(tweet.tweet_text).split()
+    #    # return tweet.tweet_text, str(tweet.tweet_text).split(), tweet.tweet_text.split(), words
+    #    for word in words:
+    #        if word in counts:
+    #            counts[word] += 1
+    #        else:
+    #            counts[word] = 1
 
     # THIS PART IS STILL UNDERDEV
-    organization_link_to_hashtag = OrganizationLinkToHashtag()
-    organization_link_to_hashtag.organization_we_vote_id = organization_we_vote_id
-    
+    #organization_link_to_hashtag = OrganizationLinkToHashtag()
+    #organization_link_to_hashtag.organization_we_vote_id = organization_we_vote_id
+
+    unique_hashtags_list = list(unique_hashtags_count_dict.keys())
     organization_manager = OrganizationManager()
-    # resutls = organization_manager.create_or_update_organization_link_to_hashtag(
-    # tweet_id, published_datetime, organization_we_vote_id, hashtag_text)
-    
-    all_hashtags = []
-    for i in range(0, len(tweet_list)):
-        if re.findall(r"#(\w+)", tweet_list[i].tweet_text):
-            organization_link_to_hashtag.hashtag_text = re.findall(r"#(\w+)", tweet_list[i].tweet_text)
-            organization_link_to_hashtag.tweet_id = tweet_list[i].tweet_id
-            organization_link_to_hashtag.published_datetime = tweet_list[i].date_published
+    organization_link_to_hashtag_results = organization_manager.create_or_update_organization_link_to_hashtag(
+        organization_we_vote_id, unique_hashtags_list[0])
+
+    #all_hashtags = []
+    #for i in range(0, len(tweet_list)):
+    #    if re.findall(r"#(\w+)", tweet_list[i].tweet_text):
+    #        organization_link_to_hashtag.hashtag_text = re.findall(r"#(\w+)", tweet_list[i].tweet_text)
+    #        organization_link_to_hashtag.tweet_id = tweet_list[i].tweet_id
+    #        organization_link_to_hashtag.published_datetime = tweet_list[i].date_published
 
     # For now it returns a list of hashtags and frequency dictionary of all words.
-    # results = {
-      #  "success": success,
-       # "status": status,
-    # }
+
     # return all_hashtags, counts
+    results = {
+        'status':                               'HASHTAGS_FOUND_IN_TWEETS_CACHED_LOCALLY',
+        'success':                              True,
+        'hash_tags_retrieved':                  len(all_hashtags),
+        'cached_tweets':                        len(cached_tweets),
+        'unique_hashtags_count_dict':           len(unique_hashtags_count_dict),
+        'organization_link_to_hashtag_results': organization_link_to_hashtag_results,
+    }
     return results
 
 
