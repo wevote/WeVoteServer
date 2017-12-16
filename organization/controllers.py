@@ -30,8 +30,7 @@ import tweepy
 import re
 from organization.models import OrganizationLinkToHashtag
 from import_export_twitter.models import TwitterAuthManager
-
-import pandas as pd
+# import pandas  # I would use the full name as opposed to shortening it with something like "as pd"
 
 
 logger = wevote_functions.admin.get_logger(__name__)
