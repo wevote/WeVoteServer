@@ -101,7 +101,7 @@ def organization_analyze_tweets(organization_we_vote_id):
     retrieve_tweets_cached_locally_results = twitter_user_manager.retrieve_tweets_cached_locally(
         organization_we_vote_id)
     if retrieve_tweets_cached_locally_results['status'] == 'NO_TWEETS_FOUND':
-        result = {
+        results = {
             'status':  'NO_TWEETS_CACHED_LOCALLY',
             'success': False,
         }
@@ -133,12 +133,13 @@ def organization_analyze_tweets(organization_we_vote_id):
     #            counts[word] = 1
 
     # THIS PART IS STILL UNDERDEV
-    organization_link_to_hashtag = OrganizationLinkToHashtag()
-    organization_link_to_hashtag.organization_we_vote_id = organization_we_vote_id
+    #organization_link_to_hashtag = OrganizationLinkToHashtag()
+    #organization_link_to_hashtag.organization_we_vote_id = organization_we_vote_id
 
+    unique_hashtags_list = list(unique_hashtags_count_dict.keys())
     organization_manager = OrganizationManager()
-    # resutls = organization_manager.create_or_update_organization_link_to_hashtag(
-    # tweet_id, published_datetime, organization_we_vote_id, hashtag_text)
+    organization_link_to_hashtag_results = organization_manager.create_or_update_organization_link_to_hashtag(
+        organization_we_vote_id, unique_hashtags_list[0])
 
     #all_hashtags = []
     #for i in range(0, len(tweet_list)):
@@ -151,11 +152,12 @@ def organization_analyze_tweets(organization_we_vote_id):
 
     # return all_hashtags, counts
     results = {
-        'status':                       'HASHTAGS_FOUND_IN_TWEETS_CACHED_LOCALLY',
-        'success':                      True,
-        'hash_tags_retrieved':          len(all_hashtags),
-        'cached_tweets':                len(cached_tweets),
-        'unique_hashtags_count_dict':   unique_hashtags_count_dict,
+        'status':                               'HASHTAGS_FOUND_IN_TWEETS_CACHED_LOCALLY',
+        'success':                              True,
+        'hash_tags_retrieved':                  len(all_hashtags),
+        'cached_tweets':                        len(cached_tweets),
+        'unique_hashtags_count_dict':           len(unique_hashtags_count_dict),
+        'organization_link_to_hashtag_results': organization_link_to_hashtag_results,
     }
     return results
 
