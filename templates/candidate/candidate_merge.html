@@ -9,7 +9,8 @@
 <h1>{% if candidate_option1 %}Merge {{ candidate_option1.candidate_name }}{% else %}CANNOT MERGE{% endif %}</h1>
 {% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
 
-
+<form action="{% url 'candidate:candidate_merge_process' %}" method="post">
+{% csrf_token %}
 {% if candidate_option1 and candidate_option2 %}
 <table>
     <tr>
@@ -320,14 +321,18 @@
         <td>&nbsp;</td>
     </tr>
     <tr>
-        <td><a href="{% url 'candidate:candidate_list' %}">cancel</a></td>
+        <td><input type="submit" value="Merge Candidates" /></p></td>
         <td><a href="{% url 'candidate:remove_duplicate_candidate' %}?google_civic_election_id={{ candidate_option1.google_civic_election_id }}&candidate_id={{ candidate_option1.id }}">
             Delete Candidate Option 1</a></td>
         <td><a href="{% url 'candidate:remove_duplicate_candidate' %}?google_civic_election_id={{ candidate_option2.google_civic_election_id }}&candidate_id={{ candidate_option2.id }}">
             Delete Candidate Option 2</a></td>
     </tr>
 </table>
+<input type="hidden" name="remove_duplicate_process" value="1" />
 {% endif %}
+{% if candidate_option1 and candidate_option2 %}{% else %}<input type="submit" value="CANNOT MERGE" /></p>{% endif %}
+<a href="{% url 'candidate:candidate_list' %}">cancel</a>
+</form>
 
 <br />
 
