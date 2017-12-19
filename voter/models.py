@@ -1680,7 +1680,15 @@ class Voter(AbstractBaseUser):
         # TODO we need to deal with the situation where we_vote_id is NOT unique on save
         return
 
-    def get_full_name(self):
+    def get_full_name(self, real_name_only=False):
+        """
+
+        :param real_name_only: Only return a real name if we have it. Otherwise return blank. If false, make up a
+        placeholder name.
+        :return:
+        """
+        allow_placeholder_name = not real_name_only
+
         full_name = self.first_name if positive_value_exists(self.first_name) else ''
         full_name += " " if positive_value_exists(self.first_name) and positive_value_exists(self.last_name) else ''
         full_name += self.last_name if positive_value_exists(self.last_name) else ''
@@ -1688,14 +1696,16 @@ class Voter(AbstractBaseUser):
         if not positive_value_exists(full_name):
             if positive_value_exists(self.twitter_name):
                 full_name = self.twitter_name
-            else:
+            elif allow_placeholder_name:
                 full_name = self.twitter_screen_name
 
-        if not positive_value_exists(full_name) and positive_value_exists(self.email):
-            full_name = self.email.split("@", 1)[0]
+        if not positive_value_exists(full_name):
+            if positive_value_exists(self.email) and allow_placeholder_name:
+                full_name = self.email.split("@", 1)[0]
 
         if not positive_value_exists(full_name):
-            full_name = "Voter-" + self.we_vote_id
+            if allow_placeholder_name:
+                full_name = "Voter-" + self.we_vote_id
 
         return full_name
 

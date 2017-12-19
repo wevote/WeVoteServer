@@ -42,6 +42,13 @@
     </select>
 {% endif %}{# End of if election_list #}
 
+    {# Default to showing only upcoming elections #}
+    <label for="show_all_elections_id">
+      <input type="checkbox" name="show_all_elections" id="show_all_elections_id" value="1"
+             {% if show_all_elections %}checked{% endif %} /> All Elections
+    </label>
+    &nbsp;&nbsp;&nbsp;&nbsp;
+
 {% if state_list %}
     <select id="state_code_id" name="state_code">
         <option value="">
@@ -112,6 +119,11 @@
     <script>
     $(function() {
         $('#google_civic_election_id').change(function() {
+            this.form.submit();
+        });
+    });
+    $(function() {
+        $('#show_all_elections_id').change(function() {
             this.form.submit();
         });
     });

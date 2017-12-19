@@ -535,13 +535,25 @@ class OrganizationLinkToIssueList(models.Model):
         return link_issue_we_vote_id_list
 
     def fetch_issue_count_for_organization(self, organization_id=0, organization_we_vote_id=''):
-        link_issue_list_found = False
         link_active = True
-        link_issue_list = {}
         link_issue_list_count = 0
         try:
             link_issue_list = OrganizationLinkToIssue.objects.all()
             link_issue_list = link_issue_list.filter(organization_we_vote_id__iexact=organization_we_vote_id)
+            link_issue_list = link_issue_list.filter(link_active=link_active)
+            link_issue_list_count = link_issue_list.count()
+
+        except Exception as e:
+            pass
+
+        return link_issue_list_count
+
+    def fetch_organization_count_for_issue(self, issue_we_vote_id=''):
+        link_active = True
+        link_issue_list_count = 0
+        try:
+            link_issue_list = OrganizationLinkToIssue.objects.all()
+            link_issue_list = link_issue_list.filter(issue_we_vote_id__iexact=issue_we_vote_id)
             link_issue_list = link_issue_list.filter(link_active=link_active)
             link_issue_list_count = link_issue_list.count()
 

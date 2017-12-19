@@ -516,14 +516,15 @@ def send_ballot_email(voter_device_id, sender_voter, send_now, sender_email_addr
     # Starting with a raw email address, find (or create) the EmailAddress entry
     # and the owner (Voter) if exists
     status = ""
-    sender_name = sender_voter.get_full_name()
+    real_name_only = True
+    sender_name = sender_voter.get_full_name(real_name_only)
     sender_photo = sender_voter.voter_photo_url()
     sender_description = ""
     sender_network_details = ""
     email_manager = EmailManager()
     error_message_to_show_voter = ''
     # Variables used by templates/email_outbound/email_templates/friend_invitation.txt and .html
-    subject = "Ballot Data from We Vote"
+    subject = "Ballot from We Vote"
     system_sender_email_address = "We Vote <info@WeVote.US>"  # TODO DALE Make system variable
     if positive_value_exists(sender_email_with_ownership_verified):
         sender_email_address = sender_email_with_ownership_verified
@@ -588,7 +589,8 @@ def send_ballot_email(voter_device_id, sender_voter, send_now, sender_email_addr
             recipient_voter_email = recipient_email_address_object.normalized_email_address
 
             # Template variables
-            recipient_name = voter_friend.get_full_name()
+            real_name_only = True
+            recipient_name = voter_friend.get_full_name(real_name_only)
         else:
             # Store the friend invitation in FriendInvitationEmailLink table
             friend_invitation_results = store_internal_friend_invitation_with_unknown_email(
@@ -625,7 +627,7 @@ def send_ballot_email(voter_device_id, sender_voter, send_now, sender_email_addr
                     "invitation_message":           friend_invitation_message,
                     "sender_name":                  sender_name,
                     "sender_photo":                 sender_photo,
-                    "sender_email_address":         system_sender_email_address,  # TODO DALE WAS sender_email_address,
+                    "sender_email_address":         sender_email_address,  # TODO DALE WAS sender_email_address,
                     "sender_description":           sender_description,
                     "sender_network_details":       sender_network_details,
                     "recipient_name":               recipient_name,
@@ -641,7 +643,7 @@ def send_ballot_email(voter_device_id, sender_voter, send_now, sender_email_addr
                 # Create the outbound email description, then schedule it
                 kind_of_email_template = FRIEND_INVITATION_TEMPLATE
                 outbound_results = email_manager.create_email_outbound_description(
-                    sender_voter_we_vote_id, sender_email_with_ownership_verified, recipient_voter_we_vote_id,
+                    sender_voter_we_vote_id, sender_email_address, recipient_voter_we_vote_id,
                     recipient_email_we_vote_id, recipient_voter_email,
                     template_variables_in_json, kind_of_email_template)
                 status += outbound_results['status'] + " "
@@ -668,7 +670,9 @@ def send_ballot_email(voter_device_id, sender_voter, send_now, sender_email_addr
         # After sending friend invitation, send email about ballot data
         kind_of_email_template = SEND_BALLOT_TO_FRIENDS
         if positive_value_exists(sender_name):
-            subject = sender_name + " sent Ballot Data from We Vote"
+            subject = sender_name + " sent Ballot from We Vote"
+        else:
+            subject = "Ballot from We Vote"
     else:
         # sending ballot email to herself/himself
         kind_of_email_template = SEND_BALLOT_TO_SELF
@@ -688,7 +692,7 @@ def send_ballot_email(voter_device_id, sender_voter, send_now, sender_email_addr
         "ballot_link":                  ballot_link,
         "sender_name":                  sender_name,
         "sender_photo":                 sender_photo,
-        "sender_email_address":         system_sender_email_address,  # TODO DALE WAS sender_email_address,
+        "sender_email_address":         sender_email_address,  # TODO DALE WAS sender_email_address,
         "sender_description":           sender_description,
         "sender_network_details":       sender_network_details,
         "recipient_name":               recipient_name,
@@ -703,7 +707,7 @@ def send_ballot_email(voter_device_id, sender_voter, send_now, sender_email_addr
     # TODO DALE - What kind of policy do we want re: sending a second email to a person?
     # Create the outbound email description, then schedule it
     outbound_results = email_manager.create_email_outbound_description(
-        sender_voter_we_vote_id, sender_email_with_ownership_verified, recipient_voter_we_vote_id,
+        sender_voter_we_vote_id, sender_email_address, recipient_voter_we_vote_id,
         recipient_email_we_vote_id, recipient_voter_email,
         template_variables_in_json, kind_of_email_template)
     status += outbound_results['status'] + " "

@@ -308,21 +308,18 @@ class ElectionManager(models.Model):
         }
         return results
 
-    def retrieve_elections_by_election_date(self, election_day_text='', include_test_election=False):
+    def retrieve_elections(self, include_test_election=False):
         """
-        Retrieve elections using election_day_text
-        :param election_day_text: 
-        :param include_test_election: 
-        :return: 
+        Retrieve all elections
+        :param include_test_election:
+        :return:
         """
 
         try:
             election_list_query = Election.objects.all()
             if not positive_value_exists(include_test_election):
                 election_list_query = election_list_query.exclude(google_civic_election_id=2000)
-            if election_day_text:
-                election_list_query = election_list_query.filter(election_day_text=election_day_text )
-            election_list_query = election_list_query.order_by('election_day_text')
+            election_list_query = election_list_query.order_by('-election_day_text')
             election_list = election_list_query
             status = 'ELECTIONS_FOUND'
             success = True
@@ -338,6 +335,35 @@ class ElectionManager(models.Model):
         }
         return results
 
+    def retrieve_elections_by_election_date(self, election_day_text='', include_test_election=False):
+        """
+        Retrieve elections using election_day_text
+        :param election_day_text: 
+        :param include_test_election: 
+        :return: 
+        """
+
+        try:
+            election_list_query = Election.objects.all()
+            if not positive_value_exists(include_test_election):
+                election_list_query = election_list_query.exclude(google_civic_election_id=2000)
+            if election_day_text:
+                election_list_query = election_list_query.filter(election_day_text=election_day_text)
+            election_list_query = election_list_query.order_by('election_day_text')
+            election_list = election_list_query
+            status = 'ELECTIONS_FOUND'
+            success = True
+        except Election.DoesNotExist as e:
+            status = 'NO_ELECTIONS_FOUND'
+            success = True
+            election_list = []
+
+        results = {
+            'success':          success,
+            'status':           status,
+            'election_list':    election_list,
+        }
+        return results
 
     def retrieve_elections_by_state_and_election_date(self, state_code='', election_day_text='',
                                                       include_test_election=False):

@@ -165,23 +165,34 @@ def organization_list_view(request):
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
-    state_code = request.GET.get('state_code', '')
-    google_civic_election_id = request.GET.get('google_civic_election_id', '')
     candidate_we_vote_id = request.GET.get('candidate_we_vote_id', '')
+    google_civic_election_id = request.GET.get('google_civic_election_id', '')
     organization_search = request.GET.get('organization_search', '')
     organization_type_filter = request.GET.get('organization_type_filter', '')
     selected_issue_vote_id_list = request.GET.getlist('selected_issues', '')
+    sort_by = request.GET.get('sort_by', '')
+    state_code = request.GET.get('state_code', '')
 
     messages_on_stage = get_messages(request)
     organization_list_query = Organization.objects.all()
-    organization_list_query = organization_list_query.order_by('organization_name')
+    if positive_value_exists(sort_by):
+        if sort_by == "twitter":
+            organization_list_query = \
+                organization_list_query.order_by('organization_name').order_by('-twitter_followers_count')
+        else:
+            organization_list_query = organization_list_query.order_by('organization_name')
+    else:
+        organization_list_query = organization_list_query.order_by('organization_name')
 
     if positive_value_exists(state_code):
         organization_list_query = organization_list_query.filter(state_served_code__iexact=state_code)
     if positive_value_exists(organization_type_filter):
         organization_list_query = organization_list_query.filter(organization_type__iexact=organization_type_filter)
 
-    # Retrieve all issues
+    link_issue_list_manager = OrganizationLinkToIssueList()
+
+    # Only show organizations linked to specific issues
+    # 2017-12-12 DALE I'm not sure this is being used yet...
     issues_selected = False
     issue_list = []
     if positive_value_exists(selected_issue_vote_id_list):
@@ -197,8 +208,7 @@ def organization_list_view(request):
                 new_issue_list.append(issue)
             issue_list = new_issue_list
 
-            link_issue_list = OrganizationLinkToIssueList()
-            organization_we_vote_id_list_result = link_issue_list.\
+            organization_we_vote_id_list_result = link_issue_list_manager.\
                 retrieve_organization_we_vote_id_list_from_issue_we_vote_id_list(selected_issue_vote_id_list)
             organization_we_vote_id_list = organization_we_vote_id_list_result['organization_we_vote_id_list']
             # we decided to not deal with case-insensitivity, in favor of using '__in'
@@ -260,8 +270,14 @@ def organization_list_view(request):
             organization_list_query = organization_list_query.exclude(final_filters)
 
     # Limit to only showing 1000 on screen
-    organization_list_query = organization_list_query[:1000]
-    organization_list = organization_list_query
+    organization_list = organization_list_query[:1000]
+
+    # Now loop through these organizations and add on the linked_issues_count
+    modified_organization_list = []
+    for one_organization in organization_list:
+        one_organization.linked_issues_count = link_issue_list_manager. \
+            fetch_issue_count_for_organization(0, one_organization.we_vote_id)
+        modified_organization_list.append(one_organization)
 
     state_list = STATE_CODE_MAP
     sorted_state_list = sorted(state_list.items())
@@ -278,8 +294,9 @@ def organization_list_view(request):
         'issues_selected':          issues_selected,
         'organization_type_filter': organization_type_filter,
         'organization_types':       organization_types_list,
-        'organization_list':        organization_list,
+        'organization_list':        modified_organization_list,
         'organization_search':      organization_search,
+        'sort_by':                  sort_by,
         'state_code':               state_code,
         'state_list':               sorted_state_list,
     }
@@ -395,11 +412,34 @@ def organization_delete_process_view(request):
     :return:
     """
     organization_id = convert_to_int(request.POST.get('organization_id', 0))
+    confirm_delete = convert_to_int(request.POST.get('confirm_delete', 0))
+
+    google_civic_election_id = request.POST.get('google_civic_election_id', 0)
+    state_code = request.POST.get('state_code', '')
+
+    if not positive_value_exists(confirm_delete):
+        messages.add_message(request, messages.ERROR,
+                             'Unable to delete this organization. '
+                             'Please check the checkbox to confirm you want to delete this organization.')
+        return HttpResponseRedirect(reverse('organization:organization_edit', args=(organization_id,)) +
+                                    "?google_civic_election_id=" + str(google_civic_election_id) +
+                                    "&state_code=" + str(state_code))
 
     organization_manager = OrganizationManager()
     results = organization_manager.retrieve_organization(organization_id)
     if results['organization_found']:
         organization = results['organization']
+
+        organization_link_to_issue_list = OrganizationLinkToIssueList()
+        issue_count = organization_link_to_issue_list.fetch_issue_count_for_organization(0, organization.we_vote_id)
+
+        if positive_value_exists(issue_count):
+            messages.add_message(request, messages.ERROR, 'Could not delete -- '
+                                                          'issues still attached to this organization.')
+            return HttpResponseRedirect(reverse('organization:organization_edit', args=(organization_id,)) +
+                                        "?google_civic_election_id=" + str(google_civic_election_id) +
+                                        "&state_code=" + str(state_code))
+
         organization.delete()
         messages.add_message(request, messages.INFO, 'Organization deleted.')
     else:
@@ -606,6 +646,7 @@ def organization_position_list_view(request, organization_id=0, organization_we_
     organization_id = convert_to_int(organization_id)
     google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
     candidate_we_vote_id = request.GET.get('candidate_we_vote_id', '')
+    show_all_elections = request.GET.get('show_all_elections', False)
 
     organization_on_stage = Organization()
     organization_on_stage_found = False
@@ -670,7 +711,14 @@ def organization_position_list_view(request, organization_id=0, organization_we_
             position_manager = PositionManager()
             one_position = position_manager.refresh_cached_position_info(one_position)
 
-        election_list = Election.objects.order_by('-election_day_text')
+        election_manager = ElectionManager()
+        if positive_value_exists(show_all_elections):
+            results = election_manager.retrieve_elections()
+            election_list = results['election_list']
+        else:
+            results = election_manager.retrieve_upcoming_elections()
+            election_list = results['election_list']
+
         organization_type_display_text = ORGANIZATION_TYPE_MAP.get(organization_on_stage.organization_type,
                                                                    ORGANIZATION_TYPE_MAP[UNKNOWN])
         template_values = {
@@ -682,6 +730,7 @@ def organization_position_list_view(request, organization_id=0, organization_we_
             'election_list':                    election_list,
             'google_civic_election_id':         google_civic_election_id,
             'candidate_we_vote_id':             candidate_we_vote_id,
+            'show_all_elections':               show_all_elections,
             'voter':                            voter,
             'issue_names_list':                 issue_names_list,
             'issue_blocked_names_list':         issue_blocked_names_list,

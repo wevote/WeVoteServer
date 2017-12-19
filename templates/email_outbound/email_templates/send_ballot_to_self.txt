@@ -1,11 +1,10 @@
-{% if recipient_name %}
-Hello {{ recipient_name }},
+{% if sender_name %}
+Hello {{ sender_name }},
 {% else %}
 Hello,
 {% endif %}
 
-{% if sender_name %}{{ sender_name }}{% else %}{{ sender_email_address }}{% endif %}This is a link to the
-ballot you were viewing on We Vote. Please feel free to forward to friends!
+This is a link to the ballot you were viewing on We Vote. Please feel free to forward to friends!
 "{{ ballot_link }}"
 
 {% if invitation_message %}

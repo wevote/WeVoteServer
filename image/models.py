@@ -27,6 +27,8 @@ BALLOTPEDIA_IMAGE_NAME = "ballotpedia_image"
 LINKEDIN_IMAGE_NAME = "linkedin_image"
 WIKIPEDIA_IMAGE_NAME = "wikipedia_image"
 MASTER_IMAGE = "master"
+# This constant is stored in WeVoteImage, field is other_source
+ORGANIZATION_ENDORSEMENTS_IMAGE_NAME = "organization_endorsements_image"
 
 AWS_ACCESS_KEY_ID = get_environment_variable("AWS_ACCESS_KEY_ID")
 AWS_SECRET_ACCESS_KEY = get_environment_variable("AWS_SECRET_ACCESS_KEY")
