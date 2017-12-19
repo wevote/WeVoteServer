@@ -15,7 +15,6 @@ from twitter.models import TwitterLinkToOrganization, TwitterLinkToVoter, Twitte
 from voter.models import VoterManager
 from wevote_functions.functions import convert_to_int, extract_twitter_handle_from_text_string, positive_value_exists
 from wevote_settings.models import fetch_next_we_vote_id_org_integer, fetch_site_unique_id_prefix
-from twitter.models import Tweet
 
 
 # Also see a copy of these in wevote_function/functions.py
@@ -63,16 +62,17 @@ alphanumeric = RegexValidator(r'^[0-9a-zA-Z]*$', message='Only alphanumeric char
 logger = wevote_functions.admin.get_logger(__name__)
 
 
-class OrganizationLinkToHashtag():
-    def __unicode__(self):
-        return "OrganizationLinkToHashtag"
-    
-    organization_we_vote_id = models.CharField(verbose_name="we vote permanent id", max_length=255, unique=True)
+class OrganizationLinkToHashtag(models.Model):
+    #def __unicode__(self):
+    #    return "OrganizationLinkToHashtag"
+
+    id = models.AutoField(primary_key=True) # Throwing an exception for non unique key values on iteration
+    organization_we_vote_id = models.CharField(verbose_name="we vote permanent id", max_length=255, unique=False)
     hashtag_text = models.CharField(verbose_name="hashtag text", max_length=255, unique=False)
-    tweet_id = models.BigIntegerField(verbose_name="tweet id", unique=True)
-    published_datetime = models.DateTimeField(verbose_name="published datetime")
-    organization_twitter_handle = models.CharField(verbose_name="organization twitter handle", max_length=15,
-                                                   unique=False)
+    #tweet_id = models.BigIntegerField(verbose_name="tweet id", unique=True)
+    #published_datetime = models.DateTimeField(verbose_name="published datetime")
+    #organization_twitter_handle = models.CharField(verbose_name="organization twitter handle", max_length=15,
+    #                                               unique=False)
 
 
 class OrganizationLinkToWordOrPhrase():
@@ -97,37 +97,44 @@ class OrganizationManager(models.Manager):
     """
     # DO WE WANT CREATE OR UPDATE AND CREATE # Do we want the organization twitter handle
     def create_or_update_organization_link_to_hashtag(self, organization_we_vote_id, hashtag):
+        success = False
+        status = ""
+        organization_link_to_hashtag_created = False
+
         if not positive_value_exists(organization_we_vote_id):
-            organization_link_to_hashtag = OrganizationLinkToHashtag()
+            status = 'CREATE_ORGANIZATION_LINK_TO_HASHTAG_MISSING_WE_VOTE_ID '
             results = {
-                'success': False,
-                'status': 'CREATE_ORGANIZATION_LINK_TO_HASHTAG_MISSING_WE_VOTE_ID ',
-                'organization_link_to_hashtag': organization_link_to_hashtag,
-                'organization_link_to_hashtag_created': False
+                'success':                              success,
+                'status':                               status,
+                'organization_link_to_hashtag_created': organization_link_to_hashtag_created,
             }
             return results
         # add required for hashtag_text similar to organization_we_vote_id
         try:    
-            organization_link_to_hashtag = OrganizationLinkToHashtag.objects.create(
-                                                        organization_we_vote_id=organization_we_vote_id,
-                                                        hashtag_text=hashtag)
+
+            new_organization_link_to_hastag, created = OrganizationLinkToHashtag.objects.update_or_create(
+                organization_we_vote_id=organization_we_vote_id,
+                hashtag_text=hashtag)
+            # NOTE: Hashtags are only significant if there are more than one for a particular issue so I'm not sure
+            #   if it makes sense to have indivitual tweet's id or date.
+            #tweet_id=hashtag['tweet_id'],
+            #published_datetime=tweet_list['date_published'],
+            #organization_twitter_handle=tweet_list['author_handle'])
             status = "CREATE_ORGANIZATION_LINK_TO_HASHTAG_SUCCESSFUL"
             success = True
-            organization_link_to_hashtag = organization_link_to_hashtag
             organization_link_to_hashtag_created = True
         except Exception as e:
             handle_record_not_saved_exception(e, logger=logger)
-            status = "CREATE_ORGANIZATION_LINK_TO_HASHTAG_FAILED"
             success = False
+            status = "CREATE_ORGANIZATION_LINK_TO_HASHTAG_FAILED"
             organization_link_to_hashtag_created = False
-            organization_link_to_hashtag = None
         results = {
             'success':                              success,
             'status':                               status,
-            'organization_link_to_hashtag':         organization_link_to_hashtag,
             'organization_link_to_hashtag_created': organization_link_to_hashtag_created,
         }
         return results
+
 
     def create_organization_simple(self, organization_name, organization_website, organization_twitter_handle,
                                    organization_email='', organization_facebook='', organization_image='',

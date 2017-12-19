@@ -30,7 +30,6 @@ import tweepy
 import re
 from organization.models import OrganizationLinkToHashtag
 from import_export_twitter.models import TwitterAuthManager
-# import pandas  # I would use the full name as opposed to shortening it with something like "as pd"
 
 
 logger = wevote_functions.admin.get_logger(__name__)
@@ -51,25 +50,43 @@ def organization_retrieve_tweets_from_twitter(organization_we_vote_id):
     :param organization_we_vote_id:
     :return:
     """
-    try:
-        auth = tweepy.OAuthHandler(TWITTER_CONSUMER_KEY, TWITTER_CONSUMER_SECRET)
-        auth.set_access_token(TWITTER_ACCESS_TOKEN, TWITTER_ACCESS_TOKEN_SECRET)
-        api = tweepy.API(auth)
+    status = ""
+    success = False
+    tweets_saved = None
+    tweets_not_saved = None
 
-        number_to_retrieve = 200  # TODO Remove this
-        organization_manager = OrganizationManager()
+    if not positive_value_exists(organization_we_vote_id):
+        status = "ORGANIZATION_WE_VOTE_ID_MISSING"
+        results = {
+        'success':          success,
+        'status':           status,
+        'tweets_saved':     tweets_saved,
+        'tweets_not_saved': tweets_not_saved
+        }
+        return results
+    auth = tweepy.OAuthHandler(TWITTER_CONSUMER_KEY, TWITTER_CONSUMER_SECRET)
+    auth.set_access_token(TWITTER_ACCESS_TOKEN, TWITTER_ACCESS_TOKEN_SECRET)
+    api = tweepy.API(auth)
+
+    number_to_retrieve = 200  # TODO Remove this
+    organization_manager = OrganizationManager()
+    try:
         organization_twitter_id = organization_manager.fetch_twitter_handle_from_organization_we_vote_id(
             organization_we_vote_id)
         new_tweets = api.user_timeline(organization_twitter_id, count=number_to_retrieve)
     except tweepy.error.TweepError as e:
-        success = False
         status = "ORGANIZATION_RETRIEVE_TWEETS_FROM_TWITTER_AUTH_FAIL "
-    # Exceptions
+        results = {
+            'success': success,
+            'status': status,
+            'tweets_saved': tweets_saved,
+            'tweets_not_saved': tweets_not_saved
+        }
+        return results
+
     twitter_user_manager = TwitterUserManager()
     tweets_saved = 0
     tweets_not_saved = 0
-    status = ""
-
     for tweet_json in new_tweets:
         results = twitter_user_manager.update_or_create_tweet(tweet_json, organization_we_vote_id)
         if results['success']:
@@ -77,14 +94,12 @@ def organization_retrieve_tweets_from_twitter(organization_we_vote_id):
         else:
             tweets_not_saved += 1
 
-    # unclear on the status 
     results = {
-        'success': True,
-        'status': status,
-        'tweets_saved': tweets_saved,
+        'success':          success,
+        'status':           status,
+        'tweets_saved':     tweets_saved,
         'tweets_not_saved': tweets_not_saved,
     }
-
     return results
 
 
@@ -96,13 +111,36 @@ def organization_analyze_tweets(organization_we_vote_id):
     :param organization_we_vote_id:
     :return:
     """
+    status = ""
+    success = False
+    hastags_retrieved = None
+    cached_tweets = None
+    unique_hashtags = None
+    organization_link_to_hashtag_results = None
+
+    if not positive_value_exists(organization_we_vote_id):
+        results = {
+            'status': status,
+            'success': success,
+            'hash_tags_retrieved': hastags_retrieved,
+            'cached_tweets': cached_tweets,
+            'unique_hashtags': unique_hashtags,
+            'organization_link_to_hashtag_results': organization_link_to_hashtag_results,
+        }
+        return results
+
     twitter_user_manager = TwitterUserManager()
     retrieve_tweets_cached_locally_results = twitter_user_manager.retrieve_tweets_cached_locally(
         organization_we_vote_id)
     if retrieve_tweets_cached_locally_results['status'] == 'NO_TWEETS_FOUND':
+        status = "NO_TWEETS_CACHED_LOCALLY",
         results = {
-            'status':  'NO_TWEETS_CACHED_LOCALLY',
-            'success': False,
+            'status':                               status,
+            'success':                              success,
+            'hash_tags_retrieved':                  hastags_retrieved,
+            'cached_tweets':                        cached_tweets,
+            'unique_hashtags':                      unique_hashtags,
+            'organization_link_to_hashtag_results': organization_link_to_hashtag_results,
         }
         return results
     cached_tweets = retrieve_tweets_cached_locally_results["tweet_list"]
@@ -117,6 +155,10 @@ def organization_analyze_tweets(organization_we_vote_id):
     unique_hashtags_count_dict = dict(zip(all_hastags_list, [0] * len(all_hastags_list)))
     for hashtag in all_hastags_list:
         unique_hashtags_count_dict[hashtag] += 1
+
+    hashtags_retrieved = len(all_hashtags)
+    cached_tweets = len(cached_tweets)
+    unique_hashtags = len(unique_hashtags_count_dict)
 
     # TODO (eayoungs@gmail.com) This is Abed's code; left to be considered for future work
     # This is giving a weird output!
@@ -135,27 +177,18 @@ def organization_analyze_tweets(organization_we_vote_id):
     #organization_link_to_hashtag = OrganizationLinkToHashtag()
     #organization_link_to_hashtag.organization_we_vote_id = organization_we_vote_id
 
-    unique_hashtags_list = list(unique_hashtags_count_dict.keys())
     organization_manager = OrganizationManager()
-    organization_link_to_hashtag_results = organization_manager.create_or_update_organization_link_to_hashtag(
-        organization_we_vote_id, unique_hashtags_list[0])
+    for key, value in unique_hashtags_count_dict.items():
+        if value > 2: # TODO (eayoungs@gmail.com): First pass at testing for relevance; requires further discussion
+            organization_link_to_hashtag_results = organization_manager.create_or_update_organization_link_to_hashtag(
+                organization_we_vote_id, key)
 
-    #all_hashtags = []
-    #for i in range(0, len(tweet_list)):
-    #    if re.findall(r"#(\w+)", tweet_list[i].tweet_text):
-    #        organization_link_to_hashtag.hashtag_text = re.findall(r"#(\w+)", tweet_list[i].tweet_text)
-    #        organization_link_to_hashtag.tweet_id = tweet_list[i].tweet_id
-    #        organization_link_to_hashtag.published_datetime = tweet_list[i].date_published
-
-    # For now it returns a list of hashtags and frequency dictionary of all words.
-
-    # return all_hashtags, counts
     results = {
-        'status':                               'HASHTAGS_FOUND_IN_TWEETS_CACHED_LOCALLY',
-        'success':                              True,
-        'hash_tags_retrieved':                  len(all_hashtags),
-        'cached_tweets':                        len(cached_tweets),
-        'unique_hashtags_count_dict':           len(unique_hashtags_count_dict),
+        'status':                               status,
+        'success':                              success,
+        'hash_tags_retrieved':                  hashtags_retrieved,
+        'cached_tweets':                        cached_tweets,
+        'unique_hashtags':                      unique_hashtags,
         'organization_link_to_hashtag_results': organization_link_to_hashtag_results,
     }
     return results
