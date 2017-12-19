@@ -524,8 +524,9 @@
     </tr>
 </table>
 <input type="hidden" name="remove_duplicate_process" value="1" />
+{% else %}
+<input type="submit" value="CANNOT MERGE" />
 {% endif %}
-{% if candidate_option1 and candidate_option2 %}{% else %}<input type="submit" value="CANNOT MERGE" /></p>{% endif %}
 <a href="{% url 'candidate:candidate_list' %}">cancel</a>
 </form>
 
