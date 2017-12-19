@@ -45,9 +45,31 @@ logger = wevote_functions.admin.get_logger(__name__)
 
 @login_required
 def organization_analyze_tweets_view(request, organization_we_vote_id):
+    """
+
+    :param request:
+    :param organization_we_vote_id:
+    :return:
+    """
+    google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
+    state_code = request.GET.get('state_code', False)
 
     org_hashtags = organization_analyze_tweets(organization_we_vote_id)
-    return HttpResponse(org_tweets)
+    messages.add_message(request, messages.INFO, 'Tweets stored locally: {cached_tweets}, '
+                                                 'Hash tags retrieved: {hash_tags_retrieved}, '
+                                                 'Number of unique hashtags found in cached tweets: '
+                                                 '{unique_hashtags}, '
+                                                 'Organization links to hashtags: '
+                                                 '{organization_link_to_hashtag_results}'
+                                                 ''.format(cached_tweets=org_hashtags['cached_tweets'],
+                                                           hash_tags_retrieved=org_hashtags['hash_tags_retrieved'],
+                                                           unique_hashtags=org_hashtags['unique_hashtags'],
+                                                           organization_link_to_hashtag_results=
+                                                           org_hashtags['organization_link_to_hashtag_results']))
+    return HttpResponseRedirect(reverse('organization:organization_we_vote_id_position_list',
+                                        args=(organization_we_vote_id,)) +
+                                "?google_civic_election_id=" + str(google_civic_election_id) + "&state_code=" +
+                                str(state_code))
 
 
 @login_required
@@ -63,24 +85,11 @@ def organization_retrieve_tweets_view(request, organization_we_vote_id):
     state_code = request.GET.get('state_code', False)
 
     org_tweets_results = organization_retrieve_tweets_from_twitter(organization_we_vote_id)
-    org_hashtags = organization_analyze_tweets(organization_we_vote_id)
     messages.add_message(request, messages.INFO, 'Organization retrieve tweets executed, '
-                                                 'Tweets retrieved: {tweets_saved},'
-                                                 'Tweets not retrieved: {tweets_not_saved},'
-                                                 'Hash tags retrieved: {hash_tags_retrieved},'
-                                                 'Tweets stored locally: {cached_tweets},'
-                                                 'Number of unique hashtags found in cached tweets: '
-                                                 '{unique_hashtags_count_dict},'
-                                                 'Organization links to hashtags: '
-                                                 '{organization_link_to_hashtag_results}'
+                                                 'Tweets retrieved: {tweets_saved}, '
+                                                 'Tweets not retrieved: {tweets_not_saved}, '
                                                  ''.format(tweets_saved=org_tweets_results['tweets_saved'],
-                                                           tweets_not_saved=org_tweets_results['tweets_not_saved'],
-                                                           hash_tags_retrieved=org_hashtags['hash_tags_retrieved'],
-                                                           cached_tweets=org_hashtags['cached_tweets'],
-                                                           unique_hashtags_count_dict=org_hashtags[
-                                                               'unique_hashtags_count_dict'],
-                                                           organization_link_to_hashtag_results=
-                                                                org_hashtags['organization_link_to_hashtag_results']))
+                                                           tweets_not_saved=org_tweets_results['tweets_not_saved'],))
     return HttpResponseRedirect(reverse('organization:organization_we_vote_id_position_list',
                                         args=(organization_we_vote_id,)) +
                                 "?google_civic_election_id=" + str(google_civic_election_id) + "&state_code=" +
