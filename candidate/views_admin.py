@@ -3,10 +3,11 @@
 # -*- coding: UTF-8 -*-
 
 from .controllers import candidates_import_from_master_server, candidates_import_from_sample_file, \
-    candidate_politician_match, find_duplicate_candidate, \
-    retrieve_candidate_photos, retrieve_candidate_politician_match_options, save_google_search_image_to_candidate_table, \
+    candidate_politician_match, figure_out_conflict_values, find_duplicate_candidate, retrieve_candidate_photos, \
+    retrieve_candidate_politician_match_options, save_google_search_image_to_candidate_table, \
     save_google_search_link_to_candidate_table
-from .models import CandidateCampaign, CandidateCampaignListManager, CandidateCampaignManager
+from .models import CandidateCampaign, CandidateCampaignListManager, CandidateCampaignManager, \
+    CANDIDATE_UNIQUE_IDENTIFIERS
 from admin_tools.views import redirect_to_sign_in_page
 from office.models import ContestOffice, ContestOfficeManager
 from django.db.models import Q
@@ -906,273 +907,289 @@ def candidate_merge_process_view(request):
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
-    look_for_politician = request.POST.get('look_for_politician', False)  # If this comes in with value, don't save
-    remove_duplicate_process = request.POST.get('remove_duplicate_process', False)
-    refresh_from_twitter = request.POST.get('refresh_from_twitter', False)
+    candidate_campaign_manager = CandidateCampaignManager()
 
-    candidate_id = convert_to_int(request.POST['candidate_id'])
-    redirect_to_candidate_list = convert_to_int(request.POST['redirect_to_candidate_list'])
-    candidate_name = request.POST.get('candidate_name', False)
-    google_civic_candidate_name = request.POST.get('google_civic_candidate_name', False)
+    candidate1_we_vote_id = request.POST.get('candidate1_we_vote_id', 0)
+    candidate2_we_vote_id = request.POST.get('candidate2_we_vote_id', 0)
     google_civic_election_id = request.POST.get('google_civic_election_id', 0)
-    candidate_twitter_handle = request.POST.get('candidate_twitter_handle', False)
-    if positive_value_exists(candidate_twitter_handle):
-        candidate_twitter_handle = extract_twitter_handle_from_text_string(candidate_twitter_handle)
-    candidate_url = request.POST.get('candidate_url', False)
-    contest_office_id = request.POST.get('contest_office_id', False)
-    ballot_guide_official_statement = request.POST.get('ballot_guide_official_statement', False)
-    party = request.POST.get('party', False)
-    vote_smart_id = request.POST.get('vote_smart_id', False)
-    maplight_id = request.POST.get('maplight_id', False)
-    state_code = request.POST.get('state_code', False)
-    politician_we_vote_id = request.POST.get('politician_we_vote_id', False)
-    google_search_image_file = request.POST.get('google_search_image_file', False)
-    google_search_link = request.POST.get('google_search_link', False)
+    redirect_to_candidate_list = request.POST.get('redirect_to_candidate_list', False)
+    remove_duplicate_process = request.POST.get('remove_duplicate_process', False)
+    state_code = request.POST.get('state_code', '')
 
-    # Check to see if this candidate is already being used anywhere
-    candidate_on_stage_found = False
-    candidate_on_stage = CandidateCampaign()
-    if positive_value_exists(candidate_id):
-        try:
-            candidate_query = CandidateCampaign.objects.filter(id=candidate_id)
-            if len(candidate_query):
-                candidate_on_stage = candidate_query[0]
-                candidate_on_stage_found = True
-        except Exception as e:
-            pass
+    candidate1_on_stage = {}
+    candidate2_on_stage = {}
+
+    candidate1_results = candidate_campaign_manager.retrieve_candidate_campaign_from_we_vote_id(candidate1_we_vote_id)
+    if candidate1_results['success']:
+        candidate1_on_stage = candidate1_results['candidate_campaign']
+    else:
+        messages.add_message(request, messages.ERROR, 'Could not retrieve candidate 1.')
+        return HttpResponseRedirect(reverse('candidate:candidate_list', args=()) +
+                                    '?google_civic_election_id=' + str(google_civic_election_id) +
+                                    '&state_code=' + str(state_code))
+
+    candidate2_results = candidate_campaign_manager.retrieve_candidate_campaign_from_we_vote_id(candidate2_we_vote_id)
+    if candidate2_results['success']:
+        candidate2_on_stage = candidate2_results['candidate_campaign']
+    else:
+        messages.add_message(request, messages.ERROR, 'Could not retrieve candidate 2.')
+        return HttpResponseRedirect(reverse('candidate:candidate_list', args=()) +
+                                    '?google_civic_election_id=' + str(google_civic_election_id) +
+                                    '&state_code=' + str(state_code))
+
+    # TODO: Check politician data
+    # look_for_politician = request.POST.get('look_for_politician', False)  # If this comes in with value, don't save
+    # TODO: Merge politician data
+
+    conflict_values = figure_out_conflict_values(candidate1_on_stage, candidate2_on_stage)
+
+    for attribute in CANDIDATE_UNIQUE_IDENTIFIERS:
+        conflict_value = conflict_values.get(attribute, None)
+        if conflict_value == "CONFLICT":
+            choice = request.POST.get(attribute + '_choice', '')
+            if candidate2_we_vote_id == choice:
+                setattr(candidate1_on_stage, attribute, getattr(candidate2_on_stage, attribute))
+        elif conflict_value == "CANDIDATE2":
+            setattr(candidate1_on_stage, attribute, getattr(candidate2_on_stage, attribute))
+
+    # TODO: Merge positions counts
+
+    candidate1_on_stage.save()
+
+    # TODO: Remove candidate 2
 
     # If linked to a Politician, make sure that both politician_id and politician_we_vote_id exist
-    if candidate_on_stage_found:
-        if positive_value_exists(candidate_on_stage.politician_we_vote_id) \
-                and not positive_value_exists(candidate_on_stage.politician_id):
-            try:
-                politician_manager = PoliticianManager()
-                results = politician_manager.retrieve_politician(0, candidate_on_stage.politician_we_vote_id)
-                if results['politician_found']:
-                    politician = results['politician']
-                    candidate_on_stage.politician_id = politician.id
-                    candidate_on_stage.save()
-                pass
-            except Exception as e:
-                messages.add_message(request, messages.ERROR, 'Could not save candidate.')
+    # if candidate_on_stage_found:
+    #     if positive_value_exists(candidate_on_stage.politician_we_vote_id) \
+    #             and not positive_value_exists(candidate_on_stage.politician_id):
+    #         try:
+    #             politician_manager = PoliticianManager()
+    #             results = politician_manager.retrieve_politician(0, candidate_on_stage.politician_we_vote_id)
+    #             if results['politician_found']:
+    #                 politician = results['politician']
+    #                 candidate_on_stage.politician_id = politician.id
+    #                 candidate_on_stage.save()
+    #             pass
+    #         except Exception as e:
+    #             messages.add_message(request, messages.ERROR, 'Could not save candidate.')
 
-    contest_office_we_vote_id = ''
-    contest_office_name = ''
-    if positive_value_exists(contest_office_id):
-        contest_office_manager = ContestOfficeManager()
-        results = contest_office_manager.retrieve_contest_office_from_id(contest_office_id)
-        if results['contest_office_found']:
-            contest_office = results['contest_office']
-            contest_office_we_vote_id = contest_office.we_vote_id
-            contest_office_name = contest_office.office_name
+    # contest_office_we_vote_id = ''
+    # contest_office_name = ''
+    # if positive_value_exists(contest_office_id):
+    #     contest_office_manager = ContestOfficeManager()
+    #     results = contest_office_manager.retrieve_contest_office_from_id(contest_office_id)
+    #     if results['contest_office_found']:
+    #         contest_office = results['contest_office']
+    #         contest_office_we_vote_id = contest_office.we_vote_id
+    #         contest_office_name = contest_office.office_name
 
-    election_manager = ElectionManager()
-    election_results = election_manager.retrieve_election(google_civic_election_id)
-    state_code_from_election = ""
-    if election_results['election_found']:
-        election = election_results['election']
-        election_found = election_results['election_found']
-        state_code_from_election = election.get_election_state()
+    # election_manager = ElectionManager()
+    # election_results = election_manager.retrieve_election(google_civic_election_id)
+    # state_code_from_election = ""
+    # if election_results['election_found']:
+    #     election = election_results['election']
+    #     election_found = election_results['election_found']
+    #     state_code_from_election = election.get_election_state()
 
-    best_state_code = state_code_from_election if positive_value_exists(state_code_from_election) \
-        else state_code
+    # best_state_code = state_code_from_election if positive_value_exists(state_code_from_election) \
+    #     else state_code
 
-    if positive_value_exists(look_for_politician):
-        # If here, we specifically want to see if a politician exists, given the information submitted
-        match_results = retrieve_candidate_politician_match_options(vote_smart_id, maplight_id,
-                                                                    candidate_twitter_handle,
-                                                                    candidate_name, best_state_code)
-        if match_results['politician_found']:
-            messages.add_message(request, messages.INFO, 'Politician found! Information filled into this form.')
-            matching_politician = match_results['politician']
-            politician_we_vote_id = matching_politician.we_vote_id
-            politician_twitter_handle = matching_politician.politician_twitter_handle \
-                if positive_value_exists(matching_politician.politician_twitter_handle) else ""
-            # If Twitter handle was entered in the Add new form, leave in place. Otherwise, pull from Politician entry.
-            candidate_twitter_handle = candidate_twitter_handle if candidate_twitter_handle \
-                else politician_twitter_handle
-            vote_smart_id = matching_politician.vote_smart_id
-            maplight_id = matching_politician.maplight_id if positive_value_exists(matching_politician.maplight_id) \
-                else ""
-            party = matching_politician.political_party
-            google_civic_candidate_name = matching_politician.google_civic_candidate_name
-            candidate_name = candidate_name if positive_value_exists(candidate_name) \
-                else matching_politician.politician_name
-        else:
-            messages.add_message(request, messages.INFO, 'No politician found. Please make sure you have entered '
-                                                         '1) Candidate Name & State Code, '
-                                                         '2) Twitter Handle, or '
-                                                         '3) Vote Smart Id')
-
-        url_variables = "?google_civic_election_id=" + str(google_civic_election_id) + \
-                        "&candidate_name=" + str(candidate_name) + \
-                        "&state_code=" + str(state_code) + \
-                        "&google_civic_candidate_name=" + str(google_civic_candidate_name) + \
-                        "&contest_office_id=" + str(contest_office_id) + \
-                        "&candidate_twitter_handle=" + str(candidate_twitter_handle) + \
-                        "&candidate_url=" + str(candidate_url) + \
-                        "&party=" + str(party) + \
-                        "&ballot_guide_official_statement=" + str(ballot_guide_official_statement) + \
-                        "&vote_smart_id=" + str(vote_smart_id) + \
-                        "&politician_we_vote_id=" + str(politician_we_vote_id) + \
-                        "&maplight_id=" + str(maplight_id)
-
-        if positive_value_exists(candidate_id):
-            return HttpResponseRedirect(reverse('candidate:candidate_edit', args=(candidate_id,)) + url_variables)
-        else:
-            return HttpResponseRedirect(reverse('candidate:candidate_new', args=()) + url_variables)
+    # if positive_value_exists(look_for_politician):
+    #     # If here, we specifically want to see if a politician exists, given the information submitted
+    #     match_results = retrieve_candidate_politician_match_options(vote_smart_id, maplight_id,
+    #                                                                 candidate_twitter_handle,
+    #                                                                 candidate_name, best_state_code)
+    #     if match_results['politician_found']:
+    #         messages.add_message(request, messages.INFO, 'Politician found! Information filled into this form.')
+    #         matching_politician = match_results['politician']
+    #         politician_we_vote_id = matching_politician.we_vote_id
+    #         politician_twitter_handle = matching_politician.politician_twitter_handle \
+    #             if positive_value_exists(matching_politician.politician_twitter_handle) else ""
+    #         # If Twitter handle was entered in the Add new form, leave in place. Otherwise, pull from Politician entry.
+    #         candidate_twitter_handle = candidate_twitter_handle if candidate_twitter_handle \
+    #             else politician_twitter_handle
+    #         vote_smart_id = matching_politician.vote_smart_id
+    #         maplight_id = matching_politician.maplight_id if positive_value_exists(matching_politician.maplight_id) \
+    #             else ""
+    #         party = matching_politician.political_party
+    #         google_civic_candidate_name = matching_politician.google_civic_candidate_name
+    #         candidate_name = candidate_name if positive_value_exists(candidate_name) \
+    #             else matching_politician.politician_name
+    #     else:
+    #         messages.add_message(request, messages.INFO, 'No politician found. Please make sure you have entered '
+    #                                                      '1) Candidate Name & State Code, '
+    #                                                      '2) Twitter Handle, or '
+    #                                                      '3) Vote Smart Id')
+    #
+    #     url_variables = "?google_civic_election_id=" + str(google_civic_election_id) + \
+    #                     "&candidate_name=" + str(candidate_name) + \
+    #                     "&state_code=" + str(state_code) + \
+    #                     "&google_civic_candidate_name=" + str(google_civic_candidate_name) + \
+    #                     "&contest_office_id=" + str(contest_office_id) + \
+    #                     "&candidate_twitter_handle=" + str(candidate_twitter_handle) + \
+    #                     "&candidate_url=" + str(candidate_url) + \
+    #                     "&party=" + str(party) + \
+    #                     "&ballot_guide_official_statement=" + str(ballot_guide_official_statement) + \
+    #                     "&vote_smart_id=" + str(vote_smart_id) + \
+    #                     "&politician_we_vote_id=" + str(politician_we_vote_id) + \
+    #                     "&maplight_id=" + str(maplight_id)
+    #
+    #     if positive_value_exists(candidate_id):
+    #         return HttpResponseRedirect(reverse('candidate:candidate_edit', args=(candidate_id,)) + url_variables)
+    #     else:
+    #         return HttpResponseRedirect(reverse('candidate:candidate_new', args=()) + url_variables)
 
     # Check to see if there is a duplicate candidate already saved for this election
-    existing_candidate_found = False
-    if not positive_value_exists(candidate_id):
-        try:
-            filter_list = Q()
+    # existing_candidate_found = False
+    # if not positive_value_exists(candidate_id):
+    #     try:
+    #         filter_list = Q()
+    #
+    #         at_least_one_filter = False
+    #         if positive_value_exists(vote_smart_id):
+    #             at_least_one_filter = True
+    #             filter_list |= Q(vote_smart_id=vote_smart_id)
+    #         if positive_value_exists(maplight_id):
+    #             at_least_one_filter = True
+    #             filter_list |= Q(maplight_id=maplight_id)
+    #
+    #         if at_least_one_filter:
+    #             candidate_duplicates_query = CandidateCampaign.objects.filter(filter_list)
+    #             candidate_duplicates_query = candidate_duplicates_query.filter(
+    #                 google_civic_election_id=google_civic_election_id)
+    #
+    #             if len(candidate_duplicates_query):
+    #                 existing_candidate_found = True
+    #     except Exception as e:
+    #         pass
 
-            at_least_one_filter = False
-            if positive_value_exists(vote_smart_id):
-                at_least_one_filter = True
-                filter_list |= Q(vote_smart_id=vote_smart_id)
-            if positive_value_exists(maplight_id):
-                at_least_one_filter = True
-                filter_list |= Q(maplight_id=maplight_id)
+    # try:
+    #     if existing_candidate_found:
+    #         # We have found a duplicate for this election
+    #         messages.add_message(request, messages.ERROR, 'This candidate is already saved for this election.')
+    #         url_variables = "?google_civic_election_id=" + str(google_civic_election_id) + \
+    #                         "&candidate_name=" + str(candidate_name) + \
+    #                         "&state_code=" + str(state_code) + \
+    #                         "&google_civic_candidate_name=" + str(google_civic_candidate_name) + \
+    #                         "&contest_office_id=" + str(contest_office_id) + \
+    #                         "&candidate_twitter_handle=" + str(candidate_twitter_handle) + \
+    #                         "&candidate_url=" + str(candidate_url) + \
+    #                         "&party=" + str(party) + \
+    #                         "&ballot_guide_official_statement=" + str(ballot_guide_official_statement) + \
+    #                         "&vote_smart_id=" + str(vote_smart_id) + \
+    #                         "&politician_we_vote_id=" + str(politician_we_vote_id) + \
+    #                         "&maplight_id=" + str(maplight_id)
+    #         return HttpResponseRedirect(reverse('candidate:candidate_new', args=()) + url_variables)
+    #     elif candidate_on_stage_found:
+    #         # Update
+    #         if candidate_name is not False:
+    #             candidate_on_stage.candidate_name = candidate_name
+    #         if candidate_twitter_handle is not False:
+    #             candidate_on_stage.candidate_twitter_handle = candidate_twitter_handle
+    #         if candidate_url is not False:
+    #             candidate_on_stage.candidate_url = candidate_url
+    #         if ballot_guide_official_statement is not False:
+    #             candidate_on_stage.ballot_guide_official_statement = ballot_guide_official_statement
+    #         if party is not False:
+    #             candidate_on_stage.party = party
+    #         if google_civic_candidate_name is not False:
+    #             candidate_on_stage.google_civic_candidate_name = google_civic_candidate_name
+    #
+    #         if google_search_image_file:
+    #             # If google search image exist then cache master and resized images and save them to candidate table
+    #             save_google_search_image_to_candidate_table(candidate_on_stage, google_search_image_file,
+    #                                                         google_search_link)
+    #             google_search_user_manager = GoogleSearchUserManager()
+    #             google_search_user_results = google_search_user_manager.retrieve_google_search_user_from_item_link(
+    #                 candidate_on_stage.we_vote_id, google_search_link)
+    #             if google_search_user_results['google_search_user_found']:
+    #                 google_search_user = google_search_user_results['google_search_user']
+    #                 google_search_user.chosen_and_updated = True
+    #                 google_search_user.save()
+    #         elif google_search_link:
+    #             # save google search link
+    #             save_google_search_link_to_candidate_table(candidate_on_stage, google_search_link)
+    #
+    #         # Check to see if this is a We Vote-created election
+    #         # is_we_vote_google_civic_election_id = True \
+    #         #     if convert_to_int(candidate_on_stage.google_civic_election_id) >= 1000000 \
+    #         #     else False
+    #
+    #         if contest_office_id is not False:
+    #             # We only allow updating of candidates within the We Vote Admin in
+    #             candidate_on_stage.contest_office_id = contest_office_id
+    #             candidate_on_stage.contest_office_we_vote_id = contest_office_we_vote_id
+    #             candidate_on_stage.contest_office_name = contest_office_name
+    #         candidate_on_stage.save()
+    #
+    #         # Now refresh the cache entries for this candidate
+    #
+    #         messages.add_message(request, messages.INFO, 'Candidate Campaign updated.')
+    #     else:
+    #         # Create new
+    #         # election must be found
+    #         if not election_found:
+    #             messages.add_message(request, messages.ERROR, 'Could not find election -- required to save candidate.')
+    #             return HttpResponseRedirect(reverse('candidate:candidate_edit', args=(candidate_id,)))
+    #
+    #         required_candidate_variables = True \
+    #             if positive_value_exists(candidate_name) and positive_value_exists(contest_office_id) \
+    #             else False
+    #         if required_candidate_variables:
+    #             candidate_on_stage = CandidateCampaign(
+    #                 candidate_name=candidate_name,
+    #                 google_civic_election_id=google_civic_election_id,
+    #                 contest_office_id=contest_office_id,
+    #                 contest_office_we_vote_id=contest_office_we_vote_id,
+    #                 state_code=best_state_code,
+    #             )
+    #             if google_civic_candidate_name is not False:
+    #                 candidate_on_stage.google_civic_candidate_name = google_civic_candidate_name
+    #             if candidate_twitter_handle is not False:
+    #                 candidate_on_stage.candidate_twitter_handle = candidate_twitter_handle
+    #             if candidate_url is not False:
+    #                 candidate_on_stage.candidate_url = candidate_url
+    #             if party is not False:
+    #                 candidate_on_stage.party = party
+    #             if ballot_guide_official_statement is not False:
+    #                 candidate_on_stage.ballot_guide_official_statement = ballot_guide_official_statement
+    #             if vote_smart_id is not False:
+    #                 candidate_on_stage.vote_smart_id = vote_smart_id
+    #             if maplight_id is not False:
+    #                 candidate_on_stage.maplight_id = maplight_id
+    #             if politician_we_vote_id is not False:
+    #                 candidate_on_stage.politician_we_vote_id = politician_we_vote_id
+    #
+    #             candidate_on_stage.save()
+    #             candidate_id = candidate_on_stage.id
+    #             messages.add_message(request, messages.INFO, 'New candidate saved.')
+    #         else:
+    #             # messages.add_message(request, messages.INFO, 'Could not save -- missing required variables.')
+    #             url_variables = "?google_civic_election_id=" + str(google_civic_election_id) + \
+    #                             "&candidate_name=" + str(candidate_name) + \
+    #                             "&state_code=" + str(state_code) + \
+    #                             "&google_civic_candidate_name=" + str(google_civic_candidate_name) + \
+    #                             "&contest_office_id=" + str(contest_office_id) + \
+    #                             "&candidate_twitter_handle=" + str(candidate_twitter_handle) + \
+    #                             "&candidate_url=" + str(candidate_url) + \
+    #                             "&party=" + str(party) + \
+    #                             "&ballot_guide_official_statement=" + str(ballot_guide_official_statement) + \
+    #                             "&vote_smart_id=" + str(vote_smart_id) + \
+    #                             "&politician_we_vote_id=" + str(politician_we_vote_id) + \
+    #                             "&maplight_id=" + str(maplight_id)
+    #             if positive_value_exists(candidate_id):
+    #                 return HttpResponseRedirect(reverse('candidate:candidate_edit', args=(candidate_id,)) +
+    #                                             url_variables)
+    #             else:
+    #                 return HttpResponseRedirect(reverse('candidate:candidate_new', args=()) +
+    #                                             url_variables)
+    #
+    # except Exception as e:
+    #     messages.add_message(request, messages.ERROR, 'Could not save candidate.')
+    #     return HttpResponseRedirect(reverse('candidate:candidate_edit', args=(candidate_id,)))
 
-            if at_least_one_filter:
-                candidate_duplicates_query = CandidateCampaign.objects.filter(filter_list)
-                candidate_duplicates_query = candidate_duplicates_query.filter(
-                    google_civic_election_id=google_civic_election_id)
-
-                if len(candidate_duplicates_query):
-                    existing_candidate_found = True
-        except Exception as e:
-            pass
-
-    try:
-        if existing_candidate_found:
-            # We have found a duplicate for this election
-            messages.add_message(request, messages.ERROR, 'This candidate is already saved for this election.')
-            url_variables = "?google_civic_election_id=" + str(google_civic_election_id) + \
-                            "&candidate_name=" + str(candidate_name) + \
-                            "&state_code=" + str(state_code) + \
-                            "&google_civic_candidate_name=" + str(google_civic_candidate_name) + \
-                            "&contest_office_id=" + str(contest_office_id) + \
-                            "&candidate_twitter_handle=" + str(candidate_twitter_handle) + \
-                            "&candidate_url=" + str(candidate_url) + \
-                            "&party=" + str(party) + \
-                            "&ballot_guide_official_statement=" + str(ballot_guide_official_statement) + \
-                            "&vote_smart_id=" + str(vote_smart_id) + \
-                            "&politician_we_vote_id=" + str(politician_we_vote_id) + \
-                            "&maplight_id=" + str(maplight_id)
-            return HttpResponseRedirect(reverse('candidate:candidate_new', args=()) + url_variables)
-        elif candidate_on_stage_found:
-            # Update
-            if candidate_name is not False:
-                candidate_on_stage.candidate_name = candidate_name
-            if candidate_twitter_handle is not False:
-                candidate_on_stage.candidate_twitter_handle = candidate_twitter_handle
-            if candidate_url is not False:
-                candidate_on_stage.candidate_url = candidate_url
-            if ballot_guide_official_statement is not False:
-                candidate_on_stage.ballot_guide_official_statement = ballot_guide_official_statement
-            if party is not False:
-                candidate_on_stage.party = party
-            if google_civic_candidate_name is not False:
-                candidate_on_stage.google_civic_candidate_name = google_civic_candidate_name
-
-            if google_search_image_file:
-                # If google search image exist then cache master and resized images and save them to candidate table
-                save_google_search_image_to_candidate_table(candidate_on_stage, google_search_image_file,
-                                                            google_search_link)
-                google_search_user_manager = GoogleSearchUserManager()
-                google_search_user_results = google_search_user_manager.retrieve_google_search_user_from_item_link(
-                    candidate_on_stage.we_vote_id, google_search_link)
-                if google_search_user_results['google_search_user_found']:
-                    google_search_user = google_search_user_results['google_search_user']
-                    google_search_user.chosen_and_updated = True
-                    google_search_user.save()
-            elif google_search_link:
-                # save google search link
-                save_google_search_link_to_candidate_table(candidate_on_stage, google_search_link)
-
-            # Check to see if this is a We Vote-created election
-            # is_we_vote_google_civic_election_id = True \
-            #     if convert_to_int(candidate_on_stage.google_civic_election_id) >= 1000000 \
-            #     else False
-
-            if contest_office_id is not False:
-                # We only allow updating of candidates within the We Vote Admin in
-                candidate_on_stage.contest_office_id = contest_office_id
-                candidate_on_stage.contest_office_we_vote_id = contest_office_we_vote_id
-                candidate_on_stage.contest_office_name = contest_office_name
-            candidate_on_stage.save()
-
-            # Now refresh the cache entries for this candidate
-
-            messages.add_message(request, messages.INFO, 'Candidate Campaign updated.')
-        else:
-            # Create new
-            # election must be found
-            if not election_found:
-                messages.add_message(request, messages.ERROR, 'Could not find election -- required to save candidate.')
-                return HttpResponseRedirect(reverse('candidate:candidate_edit', args=(candidate_id,)))
-
-            required_candidate_variables = True \
-                if positive_value_exists(candidate_name) and positive_value_exists(contest_office_id) \
-                else False
-            if required_candidate_variables:
-                candidate_on_stage = CandidateCampaign(
-                    candidate_name=candidate_name,
-                    google_civic_election_id=google_civic_election_id,
-                    contest_office_id=contest_office_id,
-                    contest_office_we_vote_id=contest_office_we_vote_id,
-                    state_code=best_state_code,
-                )
-                if google_civic_candidate_name is not False:
-                    candidate_on_stage.google_civic_candidate_name = google_civic_candidate_name
-                if candidate_twitter_handle is not False:
-                    candidate_on_stage.candidate_twitter_handle = candidate_twitter_handle
-                if candidate_url is not False:
-                    candidate_on_stage.candidate_url = candidate_url
-                if party is not False:
-                    candidate_on_stage.party = party
-                if ballot_guide_official_statement is not False:
-                    candidate_on_stage.ballot_guide_official_statement = ballot_guide_official_statement
-                if vote_smart_id is not False:
-                    candidate_on_stage.vote_smart_id = vote_smart_id
-                if maplight_id is not False:
-                    candidate_on_stage.maplight_id = maplight_id
-                if politician_we_vote_id is not False:
-                    candidate_on_stage.politician_we_vote_id = politician_we_vote_id
-
-                candidate_on_stage.save()
-                candidate_id = candidate_on_stage.id
-                messages.add_message(request, messages.INFO, 'New candidate saved.')
-            else:
-                # messages.add_message(request, messages.INFO, 'Could not save -- missing required variables.')
-                url_variables = "?google_civic_election_id=" + str(google_civic_election_id) + \
-                                "&candidate_name=" + str(candidate_name) + \
-                                "&state_code=" + str(state_code) + \
-                                "&google_civic_candidate_name=" + str(google_civic_candidate_name) + \
-                                "&contest_office_id=" + str(contest_office_id) + \
-                                "&candidate_twitter_handle=" + str(candidate_twitter_handle) + \
-                                "&candidate_url=" + str(candidate_url) + \
-                                "&party=" + str(party) + \
-                                "&ballot_guide_official_statement=" + str(ballot_guide_official_statement) + \
-                                "&vote_smart_id=" + str(vote_smart_id) + \
-                                "&politician_we_vote_id=" + str(politician_we_vote_id) + \
-                                "&maplight_id=" + str(maplight_id)
-                if positive_value_exists(candidate_id):
-                    return HttpResponseRedirect(reverse('candidate:candidate_edit', args=(candidate_id,)) +
-                                                url_variables)
-                else:
-                    return HttpResponseRedirect(reverse('candidate:candidate_new', args=()) +
-                                                url_variables)
-
-    except Exception as e:
-        messages.add_message(request, messages.ERROR, 'Could not save candidate.')
-        return HttpResponseRedirect(reverse('candidate:candidate_edit', args=(candidate_id,)))
-
-    if positive_value_exists(refresh_from_twitter) or positive_value_exists(candidate_twitter_handle):
-        results = refresh_twitter_candidate_details(candidate_on_stage)
+    # if positive_value_exists(refresh_from_twitter) or positive_value_exists(candidate_twitter_handle):
+    #     results = refresh_twitter_candidate_details(candidate_on_stage)
 
     if redirect_to_candidate_list:
         return HttpResponseRedirect(reverse('candidate:candidate_list', args=()) +
@@ -1184,7 +1201,7 @@ def candidate_merge_process_view(request):
                                     "?google_civic_election_id=" + str(google_civic_election_id) +
                                     "&state_code=" + str(state_code))
     else:
-        return HttpResponseRedirect(reverse('candidate:candidate_edit', args=(candidate_id,)))
+        return HttpResponseRedirect(reverse('candidate:candidate_edit', args=(candidate1_on_stage.id,)))
 
 
 @login_required
