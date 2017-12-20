@@ -65,8 +65,6 @@ logger = wevote_functions.admin.get_logger(__name__)
 class OrganizationLinkToHashtag(models.Model):
 
     organization_we_vote_id = models.CharField(verbose_name="we vote permanent id", max_length=255, unique=False)
-    # CICharField requires 'hstore' extension enabled in database
-    # https://docs.djangoproject.com/en/2.0/ref/contrib/postgres/operations/#create-postgresql-extensions
     hashtag_text = models.CharField(verbose_name="hashtag text", max_length=255, unique=False)
     # tweet_id = models.BigIntegerField(verbose_name="tweet id", unique=True)
     # published_datetime = models.DateTimeField(verbose_name="published datetime")
