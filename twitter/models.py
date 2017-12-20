@@ -193,7 +193,6 @@ class TwitterUserManager(models.Model):
         }
         return results
 
-
     def retrieve_tweets_cached_locally(self, organization_we_vote_id):
         """
 
@@ -202,12 +201,6 @@ class TwitterUserManager(models.Model):
         """
 
         tweet_list = []
-        if not Tweet:
-            results = {
-                'success': False,
-                'status': 'NO_TWEETS_FOUND',
-            }
-            return results
         try:
             tweet_list_query = Tweet.objects.filter(organization_we_vote_id__iexact=organization_we_vote_id)
             tweet_list_query = tweet_list_query.order_by('date_published').reverse()

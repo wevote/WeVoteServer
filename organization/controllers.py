@@ -150,10 +150,10 @@ def organization_analyze_tweets(organization_we_vote_id):
         if re.findall(r"#(\w+)", cached_tweets[i].tweet_text):
             all_hashtags.append(re.findall(r"#(\w+)", cached_tweets[i].tweet_text))
 
-    all_hastags_list = [] # all_hashtags is a nested list, flattened here prior to building frequency distribution
-    [[all_hastags_list.append(hashtag) for hashtag in hashtag_list]for hashtag_list in all_hashtags]
-    unique_hashtags_count_dict = dict(zip(all_hastags_list, [0] * len(all_hastags_list)))
-    for hashtag in all_hastags_list:
+    all_hashtags_list = [] # all_hashtags is a nested list, flattened here prior to building frequency distribution
+    [[all_hashtags_list.append(hashtag) for hashtag in hashtag_list]for hashtag_list in all_hashtags]
+    unique_hashtags_count_dict = dict(zip(all_hashtags_list, [0] * len(all_hashtags_list)))
+    for hashtag in all_hashtags_list:
         unique_hashtags_count_dict[hashtag] += 1
 
     hashtags_retrieved = len(all_hashtags)
@@ -179,9 +179,8 @@ def organization_analyze_tweets(organization_we_vote_id):
 
     organization_manager = OrganizationManager()
     for key, value in unique_hashtags_count_dict.items():
-        if value > 2: # TODO (eayoungs@gmail.com): First pass at testing for relevance; requires further discussion
-            organization_link_to_hashtag_results = organization_manager.create_or_update_organization_link_to_hashtag(
-                organization_we_vote_id, key)
+        organization_link_to_hashtag_results = organization_manager.create_or_update_organization_link_to_hashtag(
+            organization_we_vote_id, key)
 
     results = {
         'status':                               status,
