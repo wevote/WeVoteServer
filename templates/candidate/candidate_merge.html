@@ -516,7 +516,7 @@
         <td>&nbsp;</td>
     </tr>
     <tr>
-        <td><input type="submit" value="Merge Candidates" /></p></td>
+        <td><input type="submit" value="Merge Candidates" /></td>
         <!--<td><a href="{% url 'candidate:remove_duplicate_candidate' %}?google_civic_election_id={{ candidate_option1.google_civic_election_id }}&candidate_id={{ candidate_option1.id }}">-->
             <!--Delete Candidate Option 1</a></td>-->
         <!--<td><a href="{% url 'candidate:remove_duplicate_candidate' %}?google_civic_election_id={{ candidate_option2.google_civic_election_id }}&candidate_id={{ candidate_option2.id }}">-->
@@ -524,6 +524,8 @@
     </tr>
 </table>
 <input type="hidden" name="remove_duplicate_process" value="1" />
+<input type="hidden" name="candidate1_we_vote_id" value="{{ candidate_option1.we_vote_id }}" />
+<input type="hidden" name="candidate2_we_vote_id" value="{{ candidate_option2.we_vote_id }}" />
 {% else %}
 <input type="submit" value="CANNOT MERGE" />
 {% endif %}
