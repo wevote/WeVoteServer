@@ -920,7 +920,7 @@ def candidate_merge_process_view(request):
     candidate2_on_stage = {}
 
     candidate1_results = candidate_campaign_manager.retrieve_candidate_campaign_from_we_vote_id(candidate1_we_vote_id)
-    if candidate1_results['success']:
+    if candidate1_results['candidate_campaign_found']:
         candidate1_on_stage = candidate1_results['candidate_campaign']
     else:
         messages.add_message(request, messages.ERROR, 'Could not retrieve candidate 1.')
@@ -929,7 +929,7 @@ def candidate_merge_process_view(request):
                                     '&state_code=' + str(state_code))
 
     candidate2_results = candidate_campaign_manager.retrieve_candidate_campaign_from_we_vote_id(candidate2_we_vote_id)
-    if candidate2_results['success']:
+    if candidate2_results['candidate_campaign_found']:
         candidate2_on_stage = candidate2_results['candidate_campaign']
     else:
         messages.add_message(request, messages.ERROR, 'Could not retrieve candidate 2.')
