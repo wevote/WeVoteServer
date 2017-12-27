@@ -42,7 +42,7 @@ logger = wevote_functions.admin.get_logger(__name__)
 
 def email_ballot_data_for_api(voter_device_id, email_address_array, first_name_array, last_name_array,
                               email_addresses_raw, invitation_message, ballot_link,
-                              sender_email_address):  # emailBallotData
+                              sender_email_address, verification_email_sent):  # emailBallotData
     """
 
     :param voter_device_id:
@@ -53,6 +53,7 @@ def email_ballot_data_for_api(voter_device_id, email_address_array, first_name_a
     :param invitation_message:
     :param ballot_link:
     :param sender_email_address:
+    :param verification_email_sent
     :return:
     """
     success = False
@@ -150,7 +151,7 @@ def email_ballot_data_for_api(voter_device_id, email_address_array, first_name_a
             }
             return error_results
 
-    if valid_new_sender_email_address:
+    if not verification_email_sent and valid_new_sender_email_address:
         # Send verification email, and store the rest of the data without processing until sender_email is verified
         recipient_voter_we_vote_id = sender_voter.we_vote_id
         recipient_email_we_vote_id = sender_email_address_object.we_vote_id
