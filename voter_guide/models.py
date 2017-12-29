@@ -11,7 +11,7 @@ import operator
 from organization.models import Organization, OrganizationManager, \
     CORPORATION, GROUP, INDIVIDUAL, NEWS_ORGANIZATION, NONPROFIT, NONPROFIT_501C3, NONPROFIT_501C4, \
     POLITICAL_ACTION_COMMITTEE, PUBLIC_FIGURE, UNKNOWN, ORGANIZATION_TYPE_CHOICES
-
+from pledge_to_vote.models import PledgeToVoteManager
 import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, convert_to_str, positive_value_exists
 from wevote_settings.models import fetch_site_unique_id_prefix, fetch_next_we_vote_id_voter_guide_integer
@@ -28,7 +28,8 @@ class VoterGuideManager(models.Manager):
     A class for working with the VoterGuide model
     """
     def update_or_create_organization_voter_guide_by_election_id(self, organization_we_vote_id,
-                                                                 google_civic_election_id, state_code=''):
+                                                                 google_civic_election_id, state_code='',
+                                                                 pledge_goal=0):
         """
         This creates voter_guides, and also refreshes voter guides with updated organization data
         """
@@ -54,6 +55,13 @@ class VoterGuideManager(models.Manager):
             # Now update voter_guide  # TODO DALE Get from TwitterLinkToOrganization, not organization_twitter_handle
             try:
                 if organization_found:
+                    pledge_to_vote_manager = PledgeToVoteManager()
+                    pledge_results = pledge_to_vote_manager.retrieve_pledge_count_from_organization_we_vote_id(
+                            organization_we_vote_id)
+                    if pledge_results['pledge_count_found']:
+                        pledge_count = pledge_results['pledge_count']
+                    else:
+                        pledge_count = 0
                     updated_values = {
                         # Values we search against below
                         'google_civic_election_id': google_civic_election_id,
@@ -69,7 +77,10 @@ class VoterGuideManager(models.Manager):
                         'we_vote_hosted_profile_image_url_large':  organization.we_vote_hosted_profile_image_url_large,
                         'we_vote_hosted_profile_image_url_medium': organization.we_vote_hosted_profile_image_url_medium,
                         'we_vote_hosted_profile_image_url_tiny':   organization.we_vote_hosted_profile_image_url_tiny,
+                        'pledge_count':             pledge_count,
                     }
+                    if positive_value_exists(pledge_goal):
+                        updated_values['pledge_goal'] = pledge_goal
                     voter_guide_on_stage, new_voter_guide_created = VoterGuide.objects.update_or_create(
                         google_civic_election_id__exact=google_civic_election_id,
                         organization_we_vote_id__iexact=organization_we_vote_id,
@@ -99,7 +110,8 @@ class VoterGuideManager(models.Manager):
         }
         return results
 
-    def update_or_create_organization_voter_guide_by_time_span(self, organization_we_vote_id, vote_smart_time_span):
+    def update_or_create_organization_voter_guide_by_time_span(self, organization_we_vote_id, vote_smart_time_span,
+                                                               pledge_goal=''):
         organization_found = False
         voter_guide_owner_type = ORGANIZATION
         exception_multiple_object_returned = False
@@ -123,6 +135,13 @@ class VoterGuideManager(models.Manager):
                         twitter_followers_count = 0
                     else:
                         twitter_followers_count = convert_to_int(organization.twitter_followers_count)
+                    pledge_to_vote_manager = PledgeToVoteManager()
+                    pledge_results = pledge_to_vote_manager.retrieve_pledge_count_from_organization_we_vote_id(
+                            organization_we_vote_id)
+                    if pledge_results['pledge_count_found']:
+                        pledge_count = pledge_results['pledge_count']
+                    else:
+                        pledge_count = 0
                     updated_values = {
                         # Values we search against below
                         'vote_smart_time_span':     vote_smart_time_span,
@@ -134,7 +153,10 @@ class VoterGuideManager(models.Manager):
                         'image_url':                organization.organization_photo_url(),
                         'twitter_description':      organization.twitter_description,
                         'twitter_followers_count':  twitter_followers_count,
+                        'pledge_count':             pledge_count,
                     }
+                    if positive_value_exists(pledge_goal):
+                        updated_values['pledge_goal'] = pledge_goal
                     voter_guide_on_stage, new_voter_guide_created = VoterGuide.objects.update_or_create(
                         vote_smart_time_span__exact=vote_smart_time_span,
                         organization_we_vote_id__iexact=organization_we_vote_id,
@@ -163,7 +185,8 @@ class VoterGuideManager(models.Manager):
         }
         return results
 
-    def update_or_create_public_figure_voter_guide(self, google_civic_election_id, public_figure_we_vote_id):
+    def update_or_create_public_figure_voter_guide(self, google_civic_election_id, public_figure_we_vote_id,
+                                                   pledge_goal):
         new_voter_guide = VoterGuide()
         voter_guide_owner_type = new_voter_guide.PUBLIC_FIGURE
         exception_multiple_object_returned = False
@@ -180,6 +203,8 @@ class VoterGuideManager(models.Manager):
                     'public_figure_we_vote_id': public_figure_we_vote_id,
                     # The rest of the values
                 }
+                if positive_value_exists(pledge_goal):
+                    updated_values['pledge_goal'] = pledge_goal
                 voter_guide_on_stage, new_voter_guide_created = VoterGuide.objects.update_or_create(
                     google_civic_election_id__exact=google_civic_election_id,
                     voter_guide_owner_type__iexact=voter_guide_owner_type,
@@ -268,7 +293,8 @@ class VoterGuideManager(models.Manager):
             voter_guide_found = False
         return voter_guide_found
 
-    def retrieve_voter_guide(self, voter_guide_id=0, google_civic_election_id=0, vote_smart_time_span=None,
+    def retrieve_voter_guide(self, voter_guide_id=0, voter_guide_we_vote_id="", google_civic_election_id=0,
+                             vote_smart_time_span=None,
                              organization_we_vote_id=None, public_figure_we_vote_id=None, owner_we_vote_id=None):
         voter_guide_id = convert_to_int(voter_guide_id)
         google_civic_election_id = convert_to_int(google_civic_election_id)
@@ -288,6 +314,11 @@ class VoterGuideManager(models.Manager):
                 voter_guide_on_stage = VoterGuide.objects.get(id=voter_guide_id)
                 voter_guide_on_stage_id = voter_guide_on_stage.id
                 status = "VOTER_GUIDE_FOUND_WITH_ID"
+            elif positive_value_exists(voter_guide_we_vote_id):
+                status = "ERROR_RETRIEVING_VOTER_GUIDE_WITH_WE_VOTE_ID"  # Set this in case the get fails
+                voter_guide_on_stage = VoterGuide.objects.get(we_vote_id=voter_guide_we_vote_id)
+                voter_guide_on_stage_id = voter_guide_on_stage.id
+                status = "VOTER_GUIDE_FOUND_WITH_WE_VOTE_ID"
             elif positive_value_exists(organization_we_vote_id) and positive_value_exists(google_civic_election_id):
                 status = "ERROR_RETRIEVING_VOTER_GUIDE_WITH_ORGANIZATION_WE_VOTE_ID"  # Set this in case the get fails
                 voter_guide_on_stage = VoterGuide.objects.get(google_civic_election_id=google_civic_election_id,
@@ -645,8 +676,20 @@ class VoterGuideManager(models.Manager):
         elif positive_value_exists(voter_guide.public_figure_we_vote_id):
             pass
 
+        # TODO Add code to refresh pledge_goal and pledge_count from PledgeToVote
+
         if voter_guide_change:
             voter_guide.save()
+
+        return voter_guide
+
+    def save_voter_guide_object(self, voter_guide):
+        """
+        """
+        try:
+            voter_guide.save()
+        except Exception as e:
+            handle_exception(e, logger=logger)
 
         return voter_guide
 
@@ -712,8 +755,13 @@ class VoterGuide(models.Model):
     twitter_handle = models.CharField(verbose_name='twitter screen_name', max_length=255, null=True, unique=False)
     twitter_description = models.CharField(verbose_name="Text description of this organization from twitter.",
                                            max_length=255, null=True, blank=True)
-    twitter_followers_count = models.IntegerField(verbose_name="number of twitter followers",
-                                                  null=True, blank=True, default=0)
+    twitter_followers_count = models.PositiveIntegerField(
+        verbose_name="number of twitter followers", null=True, blank=True, default=0)
+
+    pledge_goal = models.PositiveIntegerField(
+        verbose_name="target number of voters for pledge drive", null=True, blank=True, default=0)
+    pledge_count = models.PositiveIntegerField(
+        verbose_name="number of voters who have pledged", null=True, blank=True, default=0)
 
     # We usually cache the voter guide name, but in case we haven't, we force the lookup
     def voter_guide_display_name(self):

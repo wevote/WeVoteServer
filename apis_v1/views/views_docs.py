@@ -19,7 +19,7 @@ from apis_v1.documentation_source import ballot_item_options_retrieve_doc, ballo
     organization_link_to_issue_sync_out_doc, organization_link_to_issue_doc, organization_stop_following_doc, \
     organization_retrieve_doc, organization_save_doc, organization_search_doc, organizations_sync_out_doc, \
     organization_suggestion_tasks_doc, \
-    polling_locations_sync_out_doc, \
+    pledge_to_vote_with_voter_guide_doc, polling_locations_sync_out_doc, \
     position_like_count_doc, position_list_for_ballot_item_doc, position_list_for_opinion_maker_doc, \
     position_list_for_voter_doc, position_oppose_count_for_ballot_item_doc, \
     position_public_oppose_count_for_ballot_item_doc, position_retrieve_doc, position_save_doc, \
@@ -1028,6 +1028,16 @@ def voter_split_into_two_accounts_doc_view(request):
     """
     url_root = WE_VOTE_SERVER_ROOT_URL
     template_values = voter_split_into_two_accounts_doc.voter_split_into_two_accounts_doc_template_values(url_root)
+    template_values['voter_api_device_id'] = get_voter_api_device_id(request)
+    return render(request, 'apis_v1/api_doc_page.html', template_values)
+
+
+def pledge_to_vote_with_voter_guide_doc_view(request):
+    """
+    Show documentation about pledgeToVoteWithVoterGuide
+    """
+    url_root = WE_VOTE_SERVER_ROOT_URL
+    template_values = pledge_to_vote_with_voter_guide_doc.pledge_to_vote_with_voter_guide_doc_template_values(url_root)
     template_values['voter_api_device_id'] = get_voter_api_device_id(request)
     return render(request, 'apis_v1/api_doc_page.html', template_values)
 

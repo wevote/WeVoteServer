@@ -170,6 +170,7 @@ def position_list_view(request):
         'position_search':          position_search,
         'election_list':            election_list,
         'google_civic_election_id': google_civic_election_id,
+        'show_all_elections':       show_all_elections,
         'state_code':               state_code,
     }
     return render(request, 'position/position_list.html', template_values)
