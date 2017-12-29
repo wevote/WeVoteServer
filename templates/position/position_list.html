@@ -35,10 +35,9 @@
 
 </p>
 
-{% if election_list %}
 <form name="organization_position_choose_election" method="get" action="{% url 'position:position_list' %}">
     {% csrf_token %}
-
+{% if election_list %}
     <select id="google_civic_election_id" name="google_civic_election_id">
         <option value="0" {% if 0 == google_civic_election_id %} selected="selected"{% endif %}>
             -- Filter by Election --</option>
@@ -48,6 +47,7 @@
             {{ election.election_name }} - {{ election.google_civic_election_id }} - {{ election.election_day_text }}</option>
     {% endfor %}
     </select>
+{% endif %}{# End of if election_list #}
 
     {# Default to showing only upcoming elections #}
     <label for="show_all_elections_id">
@@ -55,7 +55,6 @@
              {% if show_all_elections %}checked{% endif %} /> All Elections
     </label>
     &nbsp;&nbsp;&nbsp;&nbsp;
-{% endif %}{# End of if election_list #}
 
     {% if position_search %}
         <a href="{% url 'position:position_list' %}?google_civic_election_id={{ google_civic_election_id }}">

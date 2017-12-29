@@ -110,7 +110,7 @@ class PositionEntered(models.Model):
     speaker_twitter_handle = models.CharField(verbose_name='twitter screen_name for org or person with position',
                                               max_length=255, null=True, unique=False)
 
-    date_entered = models.DateTimeField(verbose_name='date entered', null=True, auto_now=True)
+    date_entered = models.DateTimeField(verbose_name='date entered', null=True, auto_now_add=True)
     # The date the this position last changed
     date_last_changed = models.DateTimeField(verbose_name='date last changed', null=True, auto_now=True)
 
