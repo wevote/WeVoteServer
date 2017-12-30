@@ -930,6 +930,8 @@ class VoterGuideListManager(models.Model):
             voter_guide_queryset = VoterGuide.objects.all()
             voter_guide_queryset = voter_guide_queryset.filter(
                 organization_we_vote_id__in=organization_we_vote_ids_followed_by_voter)
+            test_election = 2000
+            voter_guide_queryset = voter_guide_queryset.exclude(google_civic_election_id=test_election)
             if filter_by_this_google_civic_election_id:
                 voter_guide_queryset = voter_guide_queryset.filter(
                     google_civic_election_id=filter_by_this_google_civic_election_id)

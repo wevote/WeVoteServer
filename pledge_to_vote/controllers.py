@@ -3,6 +3,11 @@
 # -*- coding: UTF-8 -*-
 
 from .models import PledgeToVoteManager
+from follow.models import FollowOrganizationManager
+from friend.models import FriendManager
+from organization.models import OrganizationManager
+from position.models import ANY_STANCE, SUPPORT, STILL_DECIDING, INFORMATION_ONLY, NO_STANCE, OPPOSE, PERCENT_RATING, \
+    FRIENDS_ONLY, PUBLIC_ONLY, FRIENDS_AND_PUBLIC, PositionListManager, PositionManager
 from voter.models import VoterManager
 from voter_guide.models import VoterGuideManager
 import wevote_functions.admin
@@ -89,6 +94,99 @@ def pledge_to_vote_with_voter_guide_for_api(voter_device_id, voter_guide_we_vote
     # And save the the updated pledge_count in the VoterGuide
     voter_guide.pledge_count = pledge_count
     voter_guide_manager.save_voter_guide_object(voter_guide)
+
+    # Make sure we are following this organization
+    organization_manager = OrganizationManager()
+    # Retrieve the organization the voter_guide is for, so we have the organization_id
+    organization_results = organization_manager.retrieve_organization_from_we_vote_id(
+        voter_guide.organization_we_vote_id)
+    if organization_results['organization_found']:
+        organization = organization_results['organization']
+        voter_guide_organization_id = organization.id
+    else:
+        voter_guide_organization_id = 0
+
+    follow_manager = FollowOrganizationManager()
+    results = follow_manager.toggle_on_voter_following_organization(
+        voter_id, voter_guide_organization_id, voter_guide.organization_we_vote_id, voter.linked_organization_we_vote_id)
+    status += results['status']
+
+    # Now support or oppose everything this org does for this election
+
+    # Default to copying the public position
+    friends_vs_public = PUBLIC_ONLY
+
+    # ...but check to see if the voter is friends with this organization
+    friend_manager = FriendManager()
+    voter_for_organization_results = voter_manager.retrieve_voter_by_organization_we_vote_id(
+        voter_guide.organization_we_vote_id)
+    if voter_for_organization_results['voter_found']:
+        voter_for_organization = voter_for_organization_results['voter']
+        results = friend_manager.retrieve_current_friend(voter.we_vote_id, voter_for_organization.we_vote_id)
+        # Is a friend? If so, copy all positions
+        if results['current_friend_found']:
+            friends_vs_public = FRIENDS_AND_PUBLIC
+
+    position_manager = PositionManager()
+    position_list_manager = PositionListManager()
+    # Retrieve all of the positions for current election
+    show_positions_current_voter_election = True
+    exclude_positions_current_voter_election = False
+    position_list = position_list_manager.retrieve_all_positions_for_organization(
+        organization_id=voter_guide_organization_id,
+        organization_we_vote_id=voter_guide.organization_we_vote_id,
+        stance_we_are_looking_for=ANY_STANCE,
+        friends_vs_public=friends_vs_public,
+        show_positions_current_voter_election=show_positions_current_voter_election,
+        exclude_positions_current_voter_election=exclude_positions_current_voter_election,
+        voter_device_id=voter_device_id,
+        google_civic_election_id=voter_guide.google_civic_election_id)
+
+    for organization_position in position_list:
+        # Check to see if voter already has a position on this candidate or measure
+        results = position_manager.retrieve_position_table_unknown(
+            position_we_vote_id="",
+            organization_id=0,
+            organization_we_vote_id=voter.linked_organization_we_vote_id,
+            voter_id=voter.id,
+            contest_office_id=organization_position.contest_office_id,
+            candidate_campaign_id=organization_position.candidate_campaign_id,
+            contest_measure_id=organization_position.contest_measure_id,
+            google_civic_election_id=voter_guide.google_civic_election_id)
+        if results['position_found']:
+            if results['is_support_or_positive_rating'] or \
+                    results['is_oppose_or_negative_rating']:
+                # If here there has been a conflict with this position, and we can't update automatically
+                # If information only, we do update
+                pass
+            else:
+                voter_position = results['position']
+                try:
+                    voter_position.stance = organization_position.stance
+                    voter_position.save()
+                except Exception as e:
+                    # handle_record_not_saved_exception(e, logger=logger)
+                    status += 'NEW_STANCE_COULD_NOT_BE_SAVED '
+        else:
+            # Create a new position
+            results = position_manager.update_or_create_position(
+                position_we_vote_id=False,
+                organization_we_vote_id=voter.linked_organization_we_vote_id,
+                public_figure_we_vote_id=False,
+                voter_we_vote_id=voter.we_vote_id,
+                google_civic_election_id=voter_guide.google_civic_election_id,
+                state_code=voter_guide.state_code,
+                ballot_item_display_name=organization_position.ballot_item_display_name,
+                office_we_vote_id=organization_position.contest_office_we_vote_id,
+                candidate_we_vote_id=organization_position.candidate_campaign_we_vote_id,
+                measure_we_vote_id=organization_position.contest_measure_we_vote_id,
+                stance=organization_position.stance,
+                set_as_public_position=False,
+                vote_smart_time_span=organization_position.vote_smart_time_span,
+                vote_smart_rating_id=organization_position.vote_smart_rating_id,
+                vote_smart_rating=organization_position.vote_smart_rating,
+                vote_smart_rating_name=organization_position.vote_smart_rating_name)
+            status += results['status']
 
     results = {
         'status':                   status,
