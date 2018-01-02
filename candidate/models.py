@@ -15,6 +15,7 @@ from wevote_functions.functions import convert_to_int, display_full_name_with_co
     extract_last_name_from_full_name, extract_suffix_from_full_name, extract_nickname_from_full_name, \
     extract_state_from_ocd_division_id, extract_twitter_handle_from_text_string, \
     positive_value_exists
+from image.models import ORGANIZATION_ENDORSEMENTS_IMAGE_NAME
 
 logger = wevote_functions.admin.get_logger(__name__)
 
@@ -592,6 +593,8 @@ class CandidateCampaign(models.Model):
         verbose_name="linkedin url of candidate", max_length=255, null=True, blank=True)
     linkedin_photo_url = models.URLField(verbose_name='url of linkedin logo', blank=True, null=True)
 
+    # other_source_url is the location (ex/ http://mywebsite.com/candidate1.html) where we find
+    # the other_source_photo_url OR the original url of the photo before we store it locally
     other_source_url = models.CharField(
         verbose_name="other source url of candidate", max_length=255, null=True, blank=True)
     other_source_photo_url = models.URLField(verbose_name='url of other source image', blank=True, null=True)
@@ -1382,6 +1385,8 @@ class CandidateCampaignManager(models.Model):
             if 'candidate_url' in update_values else ''
         facebook_url = update_values['facebook_url'] \
             if 'facebook_url' in update_values else ''
+        photo_url = update_values['photo_url'] \
+            if 'photo_url' in update_values else ''
 
         if not positive_value_exists(candidate_name) or not positive_value_exists(contest_office_we_vote_id) \
                 or not positive_value_exists(contest_office_id) \
@@ -1426,6 +1431,18 @@ class CandidateCampaignManager(models.Model):
                 new_candidate.candidate_twitter_handle = candidate_twitter_handle
                 new_candidate.candidate_url = candidate_url
                 new_candidate.facebook_url = facebook_url
+                new_candidate.photo_url = photo_url
+                if new_candidate.photo_url:
+                    candidate_results = self.modify_candidate_with_organization_endorsements_image(new_candidate,
+                                                                                                   photo_url, True)
+                    if candidate_results['success']:
+                        candidate = candidate_results['candidate']
+                        new_candidate.we_vote_hosted_profile_image_url_large = \
+                            candidate.we_vote_hosted_profile_image_url_large
+                        new_candidate.we_vote_hosted_profile_image_url_medium = \
+                            candidate.we_vote_hosted_profile_image_url_medium
+                        new_candidate.we_vote_hosted_profile_image_url_tiny = \
+                            candidate.we_vote_hosted_profile_image_url_tiny
                 new_candidate.save()
 
                 status += "CANDIDATE_CREATE_THEN_UPDATE_SUCCESS "
@@ -1502,6 +1519,27 @@ class CandidateCampaignManager(models.Model):
                 if 'facebook_url' in update_values:
                     existing_candidate_entry.facebook_url = update_values['facebook_url']
                     values_changed = True
+                if 'photo_url' in update_values:
+                    # check if candidate has an existing photo in the CandidateCampaign table
+                    if positive_value_exists(existing_candidate_entry.we_vote_hosted_profile_image_url_large) and \
+                            positive_value_exists(existing_candidate_entry.we_vote_hosted_profile_image_url_medium) \
+                            and positive_value_exists(existing_candidate_entry.we_vote_hosted_profile_image_url_tiny):
+                        save_to_candidate_object = False
+                    else:
+                        save_to_candidate_object = True
+
+                    candidate_results = self.modify_candidate_with_organization_endorsements_image(
+                        existing_candidate_entry, update_values['photo_url'], save_to_candidate_object)
+                    if candidate_results['success']:
+                        values_changed = True
+                        candidate = candidate_results['candidate']
+                        existing_candidate_entry.we_vote_hosted_profile_image_url_large = \
+                            candidate.we_vote_hosted_profile_image_url_large
+                        existing_candidate_entry.we_vote_hosted_profile_image_url_medium = \
+                            candidate.we_vote_hosted_profile_image_url_medium
+                        existing_candidate_entry.we_vote_hosted_profile_image_url_tiny = \
+                            candidate.we_vote_hosted_profile_image_url_tiny
+
                 # now go ahead and save this entry (update)
                 if values_changed:
                     existing_candidate_entry.save()
@@ -1524,4 +1562,65 @@ class CandidateCampaignManager(models.Model):
                 'candidate_updated':    candidate_updated,
                 'updated_candidate':    existing_candidate_entry,
             }
+        return results
+
+
+    def modify_candidate_with_organization_endorsements_image(self, candidate, candidate_photo_url,
+                                                              save_to_candidate_object):
+        """
+        Save profile image url for candidate in image table
+        This function could be updated to save images from other sources beyond ORGANIZATION_ENDORSEMENTS_IMAGE_NAME
+        :param candidate: 
+        :param candidate_photo_url: 
+        :param save_to_candidate_object: 
+        :return: 
+        """
+        status = ''
+        success = False
+        cache_results = {
+            'we_vote_hosted_profile_image_url_large':   None,
+            'we_vote_hosted_profile_image_url_medium':  None,
+            'we_vote_hosted_profile_image_url_tiny':    None
+        }
+
+        from image.controllers import OTHER_SOURCE, cache_master_and_resized_image
+
+        # add https to the url and replace “\/” with “/”
+        modified_url_string = candidate_photo_url
+        temp_url_string = candidate_photo_url.lower()
+        temp_url_string = temp_url_string.replace("\\", "")
+        if "http" not in temp_url_string:
+            modified_url_string = "https:{0}".format(temp_url_string)
+        # image_source=OTHER_SOURCE is not currently used
+        cache_results = cache_master_and_resized_image(candidate_id=candidate.id, candidate_we_vote_id=candidate.we_vote_id,
+                                                       other_source_image_url=modified_url_string,
+                                                       other_source=ORGANIZATION_ENDORSEMENTS_IMAGE_NAME,
+                                                       image_source=OTHER_SOURCE)
+        cached_other_source_image_url_https = cache_results['cached_other_source_image_url_https']
+        # We store the original source of the candidate photo, even though we don't use this url to display the image
+        candidate.other_source_url = candidate_photo_url
+        # Store locally cached link to this image
+        candidate.other_source_photo_url = cached_other_source_image_url_https
+
+        # save this in candidate table only if no image exists for the candidate. Do not overwrite existing image
+        if positive_value_exists(save_to_candidate_object):
+            we_vote_hosted_profile_image_url_large = cache_results['we_vote_hosted_profile_image_url_large']
+            we_vote_hosted_profile_image_url_medium = cache_results['we_vote_hosted_profile_image_url_medium']
+            we_vote_hosted_profile_image_url_tiny = cache_results['we_vote_hosted_profile_image_url_tiny']
+
+            try:
+                candidate.we_vote_hosted_profile_image_url_large = we_vote_hosted_profile_image_url_large
+                candidate.we_vote_hosted_profile_image_url_medium = we_vote_hosted_profile_image_url_medium
+                candidate.we_vote_hosted_profile_image_url_tiny = we_vote_hosted_profile_image_url_tiny
+                success = True
+                status += "MODIFY_CANDIDATE_WITH_ORGANIZATION_ENDORSEMENTS_IMAGE-IMAGE_SAVED"
+            except Exception as e:
+                status += "MODIFY_CANDIDATE_WITH_ORGANIZATION_ENDORSEMENTS_IMAGE-IMAGE_SAVE_FAILED"
+                pass
+        results = {
+            'success': success,
+            'status': status,
+            'candidate': candidate,
+        }
+
         return results

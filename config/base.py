@@ -108,6 +108,7 @@ INSTALLED_APPS = (
     'office',
     'organization',
     'party',
+    'pledge_to_vote',
     'politician',
     'polling_location',
     'position',

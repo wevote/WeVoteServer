@@ -1407,7 +1407,7 @@ def position_list_for_opinion_maker_for_api(voter_device_id,  # positionListForO
             'filter_out_voter':                     filter_out_voter,
             'friends_vs_public':                    friends_vs_public,
         }
-        return HttpResponse(json.dumps(json_data), content_type='application/json')
+        return json_data
 
     voter_id = fetch_voter_id_from_voter_device_link(voter_device_id)
     if not positive_value_exists(voter_id):
@@ -1432,7 +1432,7 @@ def position_list_for_opinion_maker_for_api(voter_device_id,  # positionListForO
             'filter_out_voter':                     filter_out_voter,
             'friends_vs_public':                    friends_vs_public,
         }
-        return HttpResponse(json.dumps(json_data), content_type='application/json')
+        return json_data
 
     position_list_manager = PositionListManager()
     opinion_maker_found = False
@@ -1519,7 +1519,7 @@ def position_list_for_opinion_maker_for_api(voter_device_id,  # positionListForO
             'filter_out_voter':                     filter_out_voter,
             'friends_vs_public':                    friends_vs_public,
         }
-        return HttpResponse(json.dumps(json_data), content_type='application/json')
+        return json_data
 
     if not opinion_maker_found:
         position_list = []
@@ -1543,7 +1543,7 @@ def position_list_for_opinion_maker_for_api(voter_device_id,  # positionListForO
             'filter_out_voter':                     filter_out_voter,
             'friends_vs_public':                    friends_vs_public,
         }
-        return HttpResponse(json.dumps(json_data), content_type='application/json')
+        return json_data
 
     position_list = []
     all_elections_that_have_positions = []
@@ -1668,7 +1668,7 @@ def position_list_for_opinion_maker_for_api(voter_device_id,  # positionListForO
         'filter_out_voter':                     filter_out_voter,
         'friends_vs_public':                    friends_vs_public,
     }
-    return HttpResponse(json.dumps(json_data), content_type='application/json')
+    return json_data
 
 
 def position_list_for_voter_for_api(voter_device_id,

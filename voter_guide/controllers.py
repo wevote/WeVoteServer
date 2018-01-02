@@ -13,11 +13,12 @@ from organization.controllers import organization_follow_or_unfollow_or_ignore, 
     push_organization_data_to_other_table_caches, \
     refresh_organization_data_from_master_tables
 from organization.models import OrganizationManager, OrganizationListManager
+from pledge_to_vote.models import PledgeToVoteManager
 from position.controllers import retrieve_ballot_item_we_vote_ids_for_organizations_to_follow
 from position.models import ANY_STANCE, INFORMATION_ONLY, OPPOSE, \
     PositionEntered, PositionManager, PositionListManager, SUPPORT
 from voter.models import fetch_voter_id_from_voter_device_link, fetch_voter_we_vote_id_from_voter_device_link, \
-    VoterManager
+    fetch_voter_we_vote_id_from_voter_id, VoterManager
 from voter_guide.models import VoterGuideListManager, VoterGuideManager, VoterGuidePossibilityManager
 import wevote_functions.admin
 from wevote_functions.functions import is_voter_device_id_valid, positive_value_exists, process_request_from_master, \
@@ -49,11 +50,12 @@ def duplicate_voter_guides(from_voter_id, from_voter_we_vote_id, from_organizati
 
         # See if the "to_voter_organization" already has an entry for this organization
         voter_guide_id = 0
+        voter_guide_we_vote_id = ""
         google_civic_election_id = 0
         vote_smart_time_span = None
         public_figure_we_vote_id = None
         existing_entry_results = voter_guide_manager.retrieve_voter_guide(
-            voter_guide_id, google_civic_election_id, vote_smart_time_span,
+            voter_guide_id, voter_guide_we_vote_id, google_civic_election_id, vote_smart_time_span,
             to_organization_we_vote_id, public_figure_we_vote_id, to_voter_we_vote_id)
         if not existing_entry_results['voter_guide_found']:
             try:
@@ -83,11 +85,12 @@ def duplicate_voter_guides(from_voter_id, from_voter_we_vote_id, from_organizati
 
         # See if the "to_voter_organization" already has an entry for this organization
         voter_guide_id = 0
+        voter_guide_we_vote_id = ""
         google_civic_election_id = 0
         vote_smart_time_span = None
         public_figure_we_vote_id = None
         existing_entry_results = voter_guide_manager.retrieve_voter_guide(
-            voter_guide_id, google_civic_election_id, vote_smart_time_span,
+            voter_guide_id, voter_guide_we_vote_id, google_civic_election_id, vote_smart_time_span,
             to_organization_we_vote_id, public_figure_we_vote_id, to_voter_we_vote_id)
         if not existing_entry_results['voter_guide_found']:
             try:
@@ -210,6 +213,8 @@ def voter_guides_import_from_structured_json(structured_json):
         public_figure_we_vote_id = one_voter_guide['public_figure_we_vote_id'] \
             if 'public_figure_we_vote_id' in one_voter_guide else ''
         state_code = one_voter_guide['state_code'] if 'state_code' in one_voter_guide else ''
+        pledge_count = one_voter_guide['pledge_count'] if 'pledge_count' in one_voter_guide else ''
+        pledge_goal = one_voter_guide['pledge_goal'] if 'pledge_goal' in one_voter_guide else ''
 
         if positive_value_exists(we_vote_id) and \
                 (positive_value_exists(organization_we_vote_id) or
@@ -240,13 +245,13 @@ def voter_guides_import_from_structured_json(structured_json):
         if proceed_to_update_or_create:
             if positive_value_exists(organization_we_vote_id) and positive_value_exists(google_civic_election_id):
                 results = voter_guide_manager.update_or_create_organization_voter_guide_by_election_id(
-                    organization_we_vote_id, google_civic_election_id, state_code)
+                    organization_we_vote_id, google_civic_election_id, state_code, pledge_goal)
             elif positive_value_exists(organization_we_vote_id) and positive_value_exists(vote_smart_time_span):
                 results = voter_guide_manager.update_or_create_organization_voter_guide_by_time_span(
-                    organization_we_vote_id, vote_smart_time_span)
+                    organization_we_vote_id, vote_smart_time_span, pledge_goal)
             elif positive_value_exists(public_figure_we_vote_id) and positive_value_exists(google_civic_election_id):
                 results = voter_guide_manager.update_or_create_public_figure_voter_guide(
-                    google_civic_election_id, public_figure_we_vote_id)
+                    google_civic_election_id, public_figure_we_vote_id, pledge_goal)
             else:
                 results = {
                     'success': False,
@@ -362,6 +367,7 @@ def voter_guides_to_follow_retrieve_for_api(voter_device_id,  # voterGuidesToFol
                                             google_civic_election_id=0, search_string='',
                                             maximum_number_to_retrieve=0, filter_voter_guides_by_issue=False,
                                             add_voter_guides_not_from_election=False):
+    voter_we_vote_id = ""
     filter_voter_guides_by_issue = positive_value_exists(filter_voter_guides_by_issue)
     add_voter_guides_not_from_election = positive_value_exists(add_voter_guides_not_from_election)
     status = ""
@@ -495,11 +501,13 @@ def voter_guides_to_follow_retrieve_for_api(voter_device_id,  # voterGuidesToFol
         linked_organization_we_vote_id = ""
         if results['voter_found']:
             voter = results['voter']
+            voter_we_vote_id = voter.we_vote_id
             linked_organization_we_vote_id = voter.linked_organization_we_vote_id
 
         number_added_to_list = 0
         position_manager = PositionManager()
         position = PositionEntered()
+        pledge_to_vote_manager = PledgeToVoteManager()
         for voter_guide in voter_guide_list:
             if positive_value_exists(voter_guide.organization_we_vote_id) \
                     and positive_value_exists(linked_organization_we_vote_id) \
@@ -522,6 +530,13 @@ def voter_guides_to_follow_retrieve_for_api(voter_device_id,  # voterGuidesToFol
             else:
                 ballot_item_we_vote_ids_this_org_opposes = []
 
+            pledge_to_vote_we_vote_id = ""
+            pledge_results = pledge_to_vote_manager.retrieve_pledge_to_vote(
+                pledge_to_vote_we_vote_id, voter_we_vote_id, voter_guide.we_vote_id)
+            if pledge_results['pledge_found']:
+                voter_has_pledged = pledge_results['voter_has_pledged']
+            else:
+                voter_has_pledged = False
             position_found = False
             one_voter_guide = {
                 'we_vote_id':                   voter_guide.we_vote_id,
@@ -543,6 +558,9 @@ def voter_guides_to_follow_retrieve_for_api(voter_device_id,  # voterGuidesToFol
                 'ballot_item_we_vote_ids_this_org_supports':    ballot_item_we_vote_ids_this_org_supports,
                 'ballot_item_we_vote_ids_this_org_info_only':   ballot_item_we_vote_ids_this_org_info_only,
                 'ballot_item_we_vote_ids_this_org_opposes':     ballot_item_we_vote_ids_this_org_opposes,
+                'pledge_goal':                  voter_guide.pledge_goal,
+                'pledge_count':                 voter_guide.pledge_count,
+                'voter_has_pledged':            voter_has_pledged,
                 'last_updated':                 voter_guide.last_updated.strftime('%Y-%m-%d %H:%M'),
             }
             if positive_value_exists(ballot_item_we_vote_id):
@@ -600,7 +618,7 @@ def voter_guides_to_follow_retrieve_for_api(voter_device_id,  # voterGuidesToFol
 
         if len(voter_guides):
             json_data = {
-                'status': status + ' VOTER_GUIDES_TO_FOLLOW_RETRIEVED',
+                'status': status + ' VOTER_GUIDES_TO_FOLLOW_FOR_API_RETRIEVED',
                 'success': True,
                 'voter_device_id': voter_device_id,
                 'voter_guides': voter_guides,
@@ -1116,8 +1134,17 @@ def voter_guides_followed_retrieve_for_api(voter_device_id, maximum_number_to_re
     voter_guide_list = results['voter_guide_list']
     voter_guides = []
     if results['voter_guide_list_found']:
+        pledge_to_vote_manager = PledgeToVoteManager()
+        voter_we_vote_id = fetch_voter_we_vote_id_from_voter_id(voter_id)
         number_added_to_list = 0
         for voter_guide in voter_guide_list:
+            pledge_to_vote_we_vote_id = ""
+            pledge_results = pledge_to_vote_manager.retrieve_pledge_to_vote(
+                pledge_to_vote_we_vote_id, voter_we_vote_id, voter_guide.we_vote_id)
+            if pledge_results['pledge_found']:
+                voter_has_pledged = pledge_results['voter_has_pledged']
+            else:
+                voter_has_pledged = False
             one_voter_guide = {
                 'we_vote_id':                   voter_guide.we_vote_id,
                 'google_civic_election_id':     voter_guide.google_civic_election_id,
@@ -1135,6 +1162,9 @@ def voter_guides_followed_retrieve_for_api(voter_device_id, maximum_number_to_re
                 'twitter_followers_count':      voter_guide.twitter_followers_count,
                 'twitter_handle':               voter_guide.twitter_handle,
                 'owner_voter_id':               voter_guide.owner_voter_id,
+                'pledge_goal':                  voter_guide.pledge_goal,
+                'pledge_count':                 voter_guide.pledge_count,
+                'voter_has_pledged':            voter_has_pledged,
                 'last_updated':                 voter_guide.last_updated.strftime('%Y-%m-%d %H:%M'),
             }
             voter_guides.append(one_voter_guide.copy())
@@ -1286,6 +1316,7 @@ def voter_guides_followed_by_organization_retrieve_for_api(voter_device_id,  # v
     :param maximum_number_to_retrieve:
     :return:
     """
+    status = ""
     if not positive_value_exists(voter_device_id):
         json_data = {
             'status':                       'VALID_VOTER_DEVICE_ID_MISSING',
@@ -1313,9 +1344,10 @@ def voter_guides_followed_by_organization_retrieve_for_api(voter_device_id,  # v
 
     voter_manager = VoterManager()
     results = voter_manager.retrieve_voter_by_id(voter_id)
+    status += results['status'] + 'VOTER_NOT_FOUND'
     if not results['voter_found']:
         json_data = {
-            'status':                       'VOTER_NOT_FOUND',
+            'status':                       status,
             'success':                      False,
             'voter_device_id':              voter_device_id,
             'maximum_number_to_retrieve':   maximum_number_to_retrieve,
@@ -1325,47 +1357,24 @@ def voter_guides_followed_by_organization_retrieve_for_api(voter_device_id,  # v
         }
         return HttpResponse(json.dumps(json_data), content_type='application/json')
 
-    """
-    organization_manager = OrganizationManager()
-    organization_results = organization_manager.retrieve_organization_from_we_vote_id(voter_organization_we_vote_id)
-    if not organization_results["organization_found"]:
-        json_data = {
-            'status': 'ORGANIZATION_NOT_FOUND',
-            'success': False,
-            'organization_we_vote_id': voter_linked_organization_we_vote_id,
-            'maximum_number_to_retrieve': maximum_number_to_retrieve,
-            'voter_guides': [],
-        }
-        return HttpResponse(json.dumps(json_data), content_type='application/json')
-    organization_id = organization_results["organization_id"]
-
     voter = results['voter']
-    if not positive_value_exists(voter_linked_organization_we_vote_id):
-        json_data = {
-            'status': 'VALID_WE_VOTE_ID_MISSING',
-            'success': False,
-            'organization_we_vote_id': voter_linked_organization_we_vote_id,
-            'maximum_number_to_retrieve': maximum_number_to_retrieve,
-            'voter_guides': [],
-        }
-        return HttpResponse(json.dumps(json_data), content_type='application/json')
-
-    # Retrieve voter's friend
-    friends_we_vote_id_list = []
-    friend_manager = FriendManager()
-    friend_results = friend_manager.retrieve_friends_we_vote_id_list(voter.we_vote_id)
-    if friend_results['friends_we_vote_id_list_found']:
-        friends_we_vote_id_list = friend_results['friends_we_vote_id_list']
-    """
-
+    voter_we_vote_id = voter.we_vote_id
     results = retrieve_voter_guides_followed_by_organization_we_vote_id(voter_linked_organization_we_vote_id,
                                                                         filter_by_this_google_civic_election_id)
-    status = results['status']
+    status += results['status']
     voter_guide_list = results['voter_guide_list']
     voter_guides = []
     if results['voter_guide_list_found']:
+        pledge_to_vote_manager = PledgeToVoteManager()
         number_added_to_list = 0
         for voter_guide in voter_guide_list:
+            pledge_to_vote_we_vote_id = ""
+            pledge_results = pledge_to_vote_manager.retrieve_pledge_to_vote(
+                pledge_to_vote_we_vote_id, voter_we_vote_id, voter_guide.we_vote_id)
+            if pledge_results['pledge_found']:
+                voter_has_pledged = pledge_results['voter_has_pledged']
+            else:
+                voter_has_pledged = False
             one_voter_guide = {
                 'we_vote_id':                   voter_guide.we_vote_id,
                 'google_civic_election_id':     voter_guide.google_civic_election_id,
@@ -1383,6 +1392,9 @@ def voter_guides_followed_by_organization_retrieve_for_api(voter_device_id,  # v
                 'twitter_followers_count':      voter_guide.twitter_followers_count,
                 'twitter_handle':               voter_guide.twitter_handle,
                 'owner_voter_id':               voter_guide.owner_voter_id,
+                'pledge_goal':                  voter_guide.pledge_goal,
+                'pledge_count':                 voter_guide.pledge_count,
+                'voter_has_pledged':            voter_has_pledged,
                 'last_updated':                 voter_guide.last_updated.strftime('%Y-%m-%d %H:%M'),
             }
             voter_guides.append(one_voter_guide.copy())
@@ -1461,32 +1473,37 @@ def voter_guide_followers_retrieve_for_api(voter_device_id, organization_we_vote
 
     results = retrieve_voter_guide_followers_by_organization_we_vote_id(organization_we_vote_id)
     status = results['status']
-    voter_guide_list = results['organization_list']
     voter_guides = []
     if results['organization_list_found']:
+        organization_list = results['organization_list']
         number_added_to_list = 0
-        for voter_guide in voter_guide_list:
-            if not positive_value_exists(voter_guide.organization_name):
+        for one_organization in organization_list:
+            if not positive_value_exists(one_organization.organization_name):
                 continue
-            elif voter_guide.organization_name.startswith("Voter-"):
+            elif one_organization.organization_name.startswith("Voter-"):
                 continue
 
-            date_last_changed = voter_guide.date_last_changed
+            date_last_changed = one_organization.date_last_changed
             if positive_value_exists(date_last_changed):
                 last_updated = date_last_changed.strftime('%Y-%m-%d %H:%M')
             else:
                 last_updated = ""
+            # pledge_to_vote_manager = PledgeToVoteManager()
+            # pledge_results = pledge_to_vote_manager.retrieve_pledge_statistics()
+            # TODO We don't have a voter_guide_we_vote_id here so it is hard to get the right pledge_statistics
             one_voter_guide = {
-                'voter_guide_display_name':     voter_guide.organization_name,
-                'voter_guide_image_url_large':  voter_guide.we_vote_hosted_profile_image_url_large
-                if positive_value_exists(voter_guide.we_vote_hosted_profile_image_url_large)
-                else voter_guide.organization_photo_url(),
-                'voter_guide_image_url_medium': voter_guide.we_vote_hosted_profile_image_url_medium,
-                'voter_guide_image_url_tiny':   voter_guide.we_vote_hosted_profile_image_url_tiny,
-                'organization_we_vote_id':      voter_guide.we_vote_id,
-                'twitter_description':          voter_guide.twitter_description,
-                'twitter_followers_count':      voter_guide.twitter_followers_count,
-                'twitter_handle':               voter_guide.organization_twitter_handle,
+                'voter_guide_display_name':     one_organization.organization_name,
+                'voter_guide_image_url_large':  one_organization.we_vote_hosted_profile_image_url_large
+                if positive_value_exists(one_organization.we_vote_hosted_profile_image_url_large)
+                else one_organization.organization_photo_url(),
+                'voter_guide_image_url_medium': one_organization.we_vote_hosted_profile_image_url_medium,
+                'voter_guide_image_url_tiny':   one_organization.we_vote_hosted_profile_image_url_tiny,
+                'organization_we_vote_id':      one_organization.we_vote_id,
+                'twitter_description':          one_organization.twitter_description,
+                'twitter_followers_count':      one_organization.twitter_followers_count,
+                'twitter_handle':               one_organization.organization_twitter_handle,
+                # 'pledge_goal':                  pledge_goal,
+                # 'pledge_count':                 pledge_count,
                 'last_updated':                 last_updated,
             }
             voter_guides.append(one_voter_guide.copy())
@@ -1743,6 +1760,13 @@ def voter_guides_ignored_retrieve_for_api(voter_device_id, maximum_number_to_ret
             'voter_guides': [],
         }
         return HttpResponse(json.dumps(json_data), content_type='application/json')
+    voter_manager = VoterManager()
+    results = voter_manager.retrieve_voter_by_id(voter_id)
+    if results['voter_found']:
+        voter = results['voter']
+        voter_we_vote_id = voter.we_vote_id
+    else:
+        voter_we_vote_id = ""
 
     results = retrieve_voter_guides_ignored(voter_id)
     status = results['status']
@@ -1750,7 +1774,15 @@ def voter_guides_ignored_retrieve_for_api(voter_device_id, maximum_number_to_ret
     voter_guides = []
     if results['voter_guide_list_found']:
         number_added_to_list = 0
+        pledge_to_vote_manager = PledgeToVoteManager()
         for voter_guide in voter_guide_list:
+            pledge_to_vote_we_vote_id = ""
+            pledge_results = pledge_to_vote_manager.retrieve_pledge_to_vote(
+                pledge_to_vote_we_vote_id, voter_we_vote_id, voter_guide.we_vote_id)
+            if pledge_results['pledge_found']:
+                voter_has_pledged = pledge_results['voter_has_pledged']
+            else:
+                voter_has_pledged = False
             one_voter_guide = {
                 'we_vote_id':                   voter_guide.we_vote_id,
                 'google_civic_election_id':     voter_guide.google_civic_election_id,
@@ -1768,6 +1800,9 @@ def voter_guides_ignored_retrieve_for_api(voter_device_id, maximum_number_to_ret
                 'twitter_followers_count':      voter_guide.twitter_followers_count,
                 'twitter_handle':               voter_guide.twitter_handle,
                 'owner_voter_id':               voter_guide.owner_voter_id,
+                'pledge_goal':                  voter_guide.pledge_goal,
+                'pledge_count':                 voter_guide.pledge_count,
+                'voter_has_pledged':            voter_has_pledged,
                 'last_updated':                 voter_guide.last_updated.strftime('%Y-%m-%d %H:%M'),
             }
             voter_guides.append(one_voter_guide.copy())

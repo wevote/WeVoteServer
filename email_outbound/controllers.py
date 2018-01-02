@@ -612,8 +612,8 @@ def voter_email_address_verify_for_api(voter_device_id, email_secret_key):  # vo
     # send previous scheduled emails
     email_manager = EmailManager()
     send_status = WAITING_FOR_VERIFICATION
-    scheduled_email_results = email_manager.retrieve_scheduled_email_list_from_send_status(voter_we_vote_id,
-                                                                                           send_status)
+    scheduled_email_results = email_manager.retrieve_scheduled_email_list_from_send_status(
+        email_address_object.voter_we_vote_id, send_status)
     if scheduled_email_results['scheduled_email_list_found']:
         scheduled_email_list = scheduled_email_results['scheduled_email_list']
         for scheduled_email in scheduled_email_list:

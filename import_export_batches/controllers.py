@@ -32,7 +32,6 @@ from voter_guide.models import ORGANIZATION_WORD
 import wevote_functions.admin
 from wevote_functions.functions import positive_value_exists, extract_twitter_handle_from_text_string
 
-
 logger = wevote_functions.admin.get_logger(__name__)
 
 # VOTE_SMART_API_KEY = get_environment_variable("VOTE_SMART_API_KEY")
@@ -2951,6 +2950,8 @@ def import_candidate_data_from_batch_row_actions(batch_header_id, batch_row_id, 
             update_values['candidate_url'] = one_batch_row_action.candidate_url
         if positive_value_exists(one_batch_row_action.facebook_url):
             update_values['facebook_url'] = one_batch_row_action.facebook_url
+        if positive_value_exists(one_batch_row_action.photo_url):
+            update_values['photo_url'] = one_batch_row_action.photo_url
 
         candidate_manager = CandidateCampaignManager()
         if create_entry_flag:

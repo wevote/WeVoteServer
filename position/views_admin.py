@@ -15,7 +15,7 @@ from django.contrib.messages import get_messages
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.db.models import Q
-from election.models import Election
+from election.models import ElectionManager
 from exception.models import handle_record_found_more_than_one_exception,\
     handle_record_not_found_exception, handle_record_not_saved_exception
 from measure.controllers import push_contest_measure_data_to_other_table_caches
@@ -111,6 +111,7 @@ def position_list_view(request):
 
     messages_on_stage = get_messages(request)
     google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
+    show_all_elections = request.GET.get('show_all_elections', False)
     state_code = request.GET.get('state_code', '')
 
     position_search = request.GET.get('position_search', '')
@@ -154,7 +155,14 @@ def position_list_view(request):
 
     if not positive_value_exists(google_civic_election_id):
         position_list = position_list[: 100]
-    election_list = Election.objects.order_by('-election_day_text')
+
+    election_manager = ElectionManager()
+    if positive_value_exists(show_all_elections):
+        results = election_manager.retrieve_elections()
+        election_list = results['election_list']
+    else:
+        results = election_manager.retrieve_upcoming_elections()
+        election_list = results['election_list']
 
     template_values = {
         'messages_on_stage':        messages_on_stage,
@@ -162,6 +170,7 @@ def position_list_view(request):
         'position_search':          position_search,
         'election_list':            election_list,
         'google_civic_election_id': google_civic_election_id,
+        'show_all_elections':       show_all_elections,
         'state_code':               state_code,
     }
     return render(request, 'position/position_list.html', template_values)

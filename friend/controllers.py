@@ -91,9 +91,11 @@ def friend_accepted_invitation_send(accepting_voter_we_vote_id, original_sender_
         recipient_voter_email = recipient_email_address_object.normalized_email_address
 
         # Template variables
-        recipient_name = original_sender_voter.get_full_name()
+        real_name_only = True
+        recipient_name = original_sender_voter.get_full_name(real_name_only)
 
-        sender_name = accepting_voter.get_full_name()
+        real_name_only = True
+        sender_name = accepting_voter.get_full_name(real_name_only)
         sender_photo = accepting_voter.voter_photo_url()
         sender_description = ""
         sender_network_details = ""
@@ -352,7 +354,8 @@ def send_to_one_friend(voter_device_id, sender_voter, send_now, sender_email_wit
     # Starting with a raw email address, find (or create) the EmailAddress entry
     # and the owner (Voter) if exists
     status = ""
-    sender_name = sender_voter.get_full_name()
+    real_name_only = True
+    sender_name = sender_voter.get_full_name(real_name_only)
     sender_photo = sender_voter.voter_photo_url()
     sender_description = ""
     sender_network_details = ""
@@ -416,7 +419,8 @@ def send_to_one_friend(voter_device_id, sender_voter, send_now, sender_email_wit
         recipient_voter_email = recipient_email_address_object.normalized_email_address
 
         # Template variables
-        recipient_name = voter_friend.get_full_name()
+        real_name_only = True
+        recipient_name = voter_friend.get_full_name(real_name_only)
     else:
         # Store the friend invitation in FriendInvitationEmailLink table
         friend_invitation_results = store_internal_friend_invitation_with_unknown_email(
@@ -1092,9 +1096,11 @@ def friend_invitation_by_we_vote_id_send_for_api(voter_device_id, other_voter_we
             recipient_voter_email = recipient_email_address_object.normalized_email_address
 
             # Template variables
-            recipient_name = recipient_voter.get_full_name()
+            real_name_only = True
+            recipient_name = recipient_voter.get_full_name(real_name_only)
 
-            sender_name = sender_voter.get_full_name()
+            real_name_only = True
+            sender_name = sender_voter.get_full_name(real_name_only)
             sender_photo = sender_voter.voter_photo_url()
             sender_description = ""
             sender_network_details = ""
@@ -1444,8 +1450,8 @@ def friend_list_for_api(voter_device_id,
                     "voter_we_vote_id":                 suggested_friend.we_vote_id,
                     "voter_display_name":               suggested_friend.get_full_name(),
                     "voter_photo_url_large":            suggested_friend.we_vote_hosted_profile_image_url_large
-                        if positive_value_exists(suggested_friend.we_vote_hosted_profile_image_url_large)
-                        else suggested_friend.voter_photo_url(),
+                    if positive_value_exists(suggested_friend.we_vote_hosted_profile_image_url_large)
+                    else suggested_friend.voter_photo_url(),
                     'voter_photo_url_medium':           suggested_friend.we_vote_hosted_profile_image_url_medium,
                     'voter_photo_url_tiny':             suggested_friend.we_vote_hosted_profile_image_url_tiny,
                     "voter_email_address":              suggested_friend.email,

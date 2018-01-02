@@ -12,7 +12,7 @@ from django.conf.urls.static import static
 
 from apis_v1.views import views_docs, views_analytics, views_ballot, views_candidate, views_donation, \
     views_election, views_facebook, views_friend, views_issues, views_misc, views_organization, \
-    views_position, views_twitter, views_voter
+    views_pledge_to_vote, views_position, views_twitter, views_voter
 from ballot.views_admin import ballot_items_sync_out_view, ballot_returned_sync_out_view
 from candidate.views_admin import candidates_sync_out_view
 from issue.views_admin import issues_sync_out_view, issues_retrieve_view, retrieve_issues_to_follow_view, \
@@ -86,6 +86,8 @@ urlpatterns = [
         views_organization.organizations_followed_retrieve_api_view, name='organizationsFollowedRetrieveView'),
     url(r'^organizationSuggestionTasks/',
         views_organization.organization_suggestion_tasks_view, name='organizationSuggestionTasksView'),
+    url(r'^pledgeToVoteWithVoterGuide/',
+        views_pledge_to_vote.pledge_to_vote_with_voter_guide_view, name='pledgeToVoteWithVoterGuideView'),
     url(r'^pollingLocationsSyncOut/', polling_locations_sync_out_view, name='pollingLocationsSyncOutView'),
     url(r'^positionsCountForAllBallotItems/',
         views_position.positions_count_for_all_ballot_items_view, name='positionsCountForAllBallotItemsView'),
@@ -261,6 +263,8 @@ urlpatterns = [
         views_docs.organizations_followed_retrieve_doc_view, name='organizationsFollowedRetrieveDocs'),
     url(r'^docs/organizationSuggestionTasks/',
         views_docs.organization_suggestion_tasks_doc_view, name='organizationSuggestionTasksDocs'),
+    url(r'^docs/pledgeToVoteWithVoterGuide/$',
+        views_docs.pledge_to_vote_with_voter_guide_doc_view, name='pledgeToVoteWithVoterGuideDocs'),
     url(r'^docs/pollingLocationsSyncOut/$',
         views_docs.polling_locations_sync_out_doc_view, name='pollingLocationsSyncOutDocs'),
     url(r'^docs/positionLikeCount/$', views_docs.position_like_count_doc_view, name='positionLikeCountDocs'),

@@ -193,24 +193,20 @@ class TwitterUserManager(models.Model):
         }
         return results
 
-
     def retrieve_tweets_cached_locally(self, organization_we_vote_id):
-        tweet_on_stage = Tweet()
-        tweet_found = False
-        success = False
-        status = "TWEET_NOT_FOUND"
+        """
+
+        :param organization_we_vote_id:
+        :return:
+        """
 
         tweet_list = []
-
         try:
             tweet_list_query = Tweet.objects.filter(organization_we_vote_id__iexact=organization_we_vote_id)
             tweet_list_query = tweet_list_query.order_by('date_published').reverse()
             tweet_list = list(tweet_list_query)
             status = "TWEET_FOUND"
             success = True
-        except Tweet.DoesNotExist as e:
-            status = 'NO_TWEET_FOUND'
-            success = False
         except Exception as e:
             status = "RETRIEVE_TWEETS_CACHED_LOCALLY_FAILED"
             success = False
@@ -219,7 +215,6 @@ class TwitterUserManager(models.Model):
             'success':                  success,
             'status':                   status,
             'tweet_list':               tweet_list,
-            'tweet_on_stage':           tweet_on_stage,
         }
         return results
 
@@ -1137,7 +1132,7 @@ class TweetFavorite(models.Model):
     """
     This table tells us who favorited a tweet
     """
-    tweet_id = models.ForeignKey(Tweet, null=True, blank=True, verbose_name='we vote tweet id')
+    tweet_id = models.BigIntegerField(default=0, verbose_name='id of this tweet\'s author')
     # twitter_tweet_id # (unique id from twitter for tweet?)
     # TODO Should favorited_by_handle be a ForeignKey link to the Twitter User? I'm concerned this will slow saving,
     #  and it might be better to ForeignKey against voter_id

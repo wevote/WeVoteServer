@@ -6,6 +6,7 @@ from exception.models import handle_exception
 from io import BytesIO
 from PIL import Image
 from urllib.request import Request, urlopen
+import urllib
 import requests
 import wevote_functions.admin
 
@@ -24,7 +25,14 @@ def analyze_remote_url(image_url_https):
     image_url_valid = False
     try:
         if image_url_https is not None:
-            urlopen(Request(image_url_https))
+            # urlopen(Request(image_url_https))
+            remote_url_req = urllib.request.Request(image_url_https,headers={'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/36.0.1941.0 Safari/537.36',
+                                                                             'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+                                                                             'Accept-Charset': 'ISO-8859-1,utf-8;q=0.7,*;q=0.3',
+                                                                             'Accept-Encoding': 'none',
+                                                                             'Accept-Language': 'en-US,en;q=0.8',
+                                                                             'Connection': 'keep-alive'})
+            remote_url = urlopen(remote_url_req)
             image_url_valid = True
     except Exception as e:
         image_url_valid = False
