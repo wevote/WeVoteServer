@@ -7,6 +7,7 @@ from candidate.models import CandidateCampaign
 from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
 from elasticsearch import Elasticsearch
+from election.models import Election
 from measure.models import ContestMeasure
 from office.models import ContestOffice
 from organization.models import Organization
@@ -118,6 +119,38 @@ def delete_contest_office_signal(sender, instance, **kwargs):
             res = elastic_search_object.delete(index="offices", doc_type='office', id=instance.id)
             if res["_shards"]["successful"] <= 1:
                 logger.error("failed to delete ContestMeasure " + instance.we_vote_id)
+        except Exception as err:
+            logger.error(err)
+
+
+# Election
+@receiver(post_save, sender=Election)
+def save_election_signal(sender, instance, **kwargs):
+    # logger.debug("search.save_Election_signal")
+    if 'elastic_search_object' in globals():
+        doc = {
+            "election_name": instance.election_name,
+            "election_day_text": instance.election_day_text,
+            "google_civic_election_id": instance.google_civic_election_id,
+            "state_code": instance.state_code,
+            "state_name": instance.state_name
+        }
+        try:
+            res = elastic_search_object.index(index="elections", doc_type='election', id=instance.id, body=doc)
+            if res["_shards"]["successful"] <= 1:
+                logger.error("failed to index Election " + instance.election_name)
+        except Exception as err:
+            logger.error(err)
+
+
+@receiver(post_delete, sender=Election)
+def delete_election_signal(sender, instance, **kwargs):
+    # logger.debug("search.delete_Election_signal")
+    if 'elastic_search_object' in globals():
+        try:
+            res = elastic_search_object.delete(index="elections", doc_type='election', id=instance.id)
+            if res["_shards"]["successful"] <= 1:
+                logger.error("failed to delete Election " + instance.election_name)
         except Exception as err:
             logger.error(err)
 
