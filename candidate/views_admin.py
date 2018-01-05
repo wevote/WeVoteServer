@@ -950,6 +950,12 @@ def candidate_merge_process_view(request):
     # look_for_politician = request.POST.get('look_for_politician', False)  # If this comes in with value, don't save
     # TODO: Merge politician data
 
+    # TODO: Migrate bookmarks
+
+    # TODO: Migrate images
+
+    # TODO: Migrate offices
+
     conflict_values = figure_out_conflict_values(candidate1_on_stage, candidate2_on_stage)
 
     # Merge attribute values
