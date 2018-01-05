@@ -454,7 +454,8 @@ def election_edit_process_view(request):
             messages.add_message(request, messages.INFO, 'New election ' + str(election_name) + ' saved.')
     except Exception as e:
         handle_record_not_saved_exception(e, logger=logger)
-        messages.add_message(request, messages.ERROR, 'Could not save election' + str(google_civic_election_id) + '.')
+        messages.add_message(request, messages.ERROR, 'Could not save election' + str(google_civic_election_id) +
+                             '. ' + status)
 
     return HttpResponseRedirect(reverse('election:election_list', args=()))
 
