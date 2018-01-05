@@ -25,6 +25,7 @@ from import_export_twitter.controllers import refresh_twitter_candidate_details
 from import_export_vote_smart.models import VoteSmartRatingOneCandidate
 from import_export_vote_smart.votesmart_local import VotesmartApiError
 from politician.models import PoliticianManager
+from position.controllers import move_positions_to_another_candidate
 from position.models import PositionEntered, PositionListManager
 from twitter.models import TwitterLinkPossibility
 from voter.models import voter_has_authority
@@ -951,6 +952,7 @@ def candidate_merge_process_view(request):
 
     conflict_values = figure_out_conflict_values(candidate1_on_stage, candidate2_on_stage)
 
+    # Merge attribute values
     for attribute in CANDIDATE_UNIQUE_IDENTIFIERS:
         conflict_value = conflict_values.get(attribute, None)
         if conflict_value == "CONFLICT":
@@ -960,7 +962,25 @@ def candidate_merge_process_view(request):
         elif conflict_value == "CANDIDATE2":
             setattr(candidate1_on_stage, attribute, getattr(candidate2_on_stage, attribute))
 
-    # TODO: Merge positions counts
+    # Merge public positions counts
+    public_positions_results = move_positions_to_another_candidate(candidate2_on_stage.id, candidate2_we_vote_id,
+                                                                   candidate1_on_stage.id, candidate1_we_vote_id,
+                                                                   True)
+    if not public_positions_results['success']:
+        messages.add_message(request, messages.ERROR, public_positions_results['status'])
+        return HttpResponseRedirect(reverse('candidate:find_and_remove_duplicate_candidates', args=()) +
+                                    "?google_civic_election_id=" + str(google_civic_election_id) +
+                                    "&state_code=" + str(state_code))
+
+    # Merge friends positions counts
+    friends_positions_results = move_positions_to_another_candidate(candidate2_on_stage.id, candidate2_we_vote_id,
+                                                                    candidate1_on_stage.id, candidate1_we_vote_id,
+                                                                    False)
+    if not friends_positions_results['success']:
+        messages.add_message(request, messages.ERROR, friends_positions_results['status'])
+        return HttpResponseRedirect(reverse('candidate:find_and_remove_duplicate_candidates', args=()) +
+                                    "?google_civic_election_id=" + str(google_civic_election_id) +
+                                    "&state_code=" + str(state_code))
 
     candidate1_on_stage.save()
 
