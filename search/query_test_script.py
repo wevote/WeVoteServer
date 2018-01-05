@@ -57,13 +57,13 @@ query_with_election_missing_date_value = { "query": { "multi_match": { "type": "
 # Example of querying ALL indexes
 res = es.search(body=query)
 res_with_missing_last_election_date = es.search(body=query_with_missing_last_election_date)
-res_with_missing_election_date_without_order = es.search(body=query_with_missing_election_date_without_order)
-res_with_election_missing_date_value = es.search(body=query_with_election_missing_date_value)
+# res_with_missing_election_date_without_order = es.search(body=query_with_missing_election_date_without_order)
+# res_with_election_missing_date_value = es.search(body=query_with_election_missing_date_value)
 
 print "Got %d hits from all index search: " % res['hits']['total']
 print "Got %d hits from all index search: " % res_with_missing_last_election_date['hits']['total']
-print "Got %d hits from all index search: " % res_with_missing_election_date_without_order['hits']['total']
-print "Got %d hits from all index search: " % res_with_election_missing_date_value['hits']['total']
+# print "Got %d hits from all index search: " % res_with_missing_election_date_without_order['hits']['total']
+# print "Got %d hits from all index search: " % res_with_election_missing_date_value['hits']['total']
 for hit in res['hits']['hits']:
         print "------------- RESULT --------------"
         for field in hit:
@@ -75,17 +75,17 @@ for hit in res_with_missing_last_election_date['hits']['hits']:
         for field in hit:
                 print "%s: %s" % (field, hit[field])
 print "============================================"
-print "============================================"
-for hit in res_with_missing_election_date_without_order['hits']['hits']:
-        print "------------- RESULT --------------"
-        for field in hit:
-                print "%s: %s" % (field, hit[field])
-print "============================================"
-print "============================================"
-for hit in res_with_election_missing_date_value['hits']['hits']:
-        print "------------- RESULT --------------"
-        for field in hit:
-                print "%s: %s" % (field, hit[field])
+# print "============================================"
+# for hit in res_with_missing_election_date_without_order['hits']['hits']:
+#         print "------------- RESULT --------------"
+#         for field in hit:
+#                 print "%s: %s" % (field, hit[field])
+# print "============================================"
+# print "============================================"
+# for hit in res_with_election_missing_date_value['hits']['hits']:
+#         print "------------- RESULT --------------"
+#         for field in hit:
+#                 print "%s: %s" % (field, hit[field])
 
 
 # example of querying single index
