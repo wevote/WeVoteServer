@@ -371,6 +371,8 @@ def election_edit_process_view(request):
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
+    status = ""
+
     election_local_id = convert_to_int(request.POST.get('election_id', 0))
     election_name = request.POST.get('election_name', False)
     election_day_text = request.POST.get('election_day_text', False)
@@ -383,19 +385,32 @@ def election_edit_process_view(request):
 
     # Check to see if this election is already being used anywhere
     election_on_stage_found = False
-    try:
-        election_query = Election.objects.filter(id=election_local_id)
-        if len(election_query):
-            election_on_stage = election_query[0]
-            election_on_stage_found = True
-    except Exception as e:
-        handle_record_not_found_exception(e, logger=logger)
+    if positive_value_exists(election_local_id):
+        status += "RETRIEVING_ELECTION_BY_ELECTION_LOCAL_ID "
+        try:
+            election_query = Election.objects.filter(id=election_local_id)
+            if len(election_query):
+                election_on_stage = election_query[0]
+                election_on_stage_found = True
+        except Exception as e:
+            handle_record_not_found_exception(e, logger=logger)
+
+    if not election_on_stage_found and positive_value_exists(google_civic_election_id):
+        status += "RETRIEVING_ELECTION_BY_GOOGLE_CIVIC_ELECTION_ID "
+        try:
+            election_query = Election.objects.filter(google_civic_election_id=google_civic_election_id)
+            if len(election_query):
+                election_on_stage = election_query[0]
+                election_on_stage_found = True
+        except Exception as e:
+            handle_record_not_found_exception(e, logger=logger)
 
     try:
         if election_on_stage_found:
+            status += "UPDATING_EXISTING_ELECTION "
             # if convert_to_int(election_on_stage.google_civic_election_id) < 1000000:  # Not supported currently
-                # If here, this is an election created by Google Civic and we limit what fields to update
-                # If here, this is a We Vote created election
+            # If here, this is an election created by Google Civic and we limit what fields to update
+            # If here, this is a We Vote created election
 
             # Update
             if election_name is False:
@@ -421,6 +436,7 @@ def election_edit_process_view(request):
                                      ' (' + str(election_on_stage.google_civic_election_id) + ') updated.')
         else:
             # Create new
+            status += "CREATING_NEW_ELECTION "
             if not positive_value_exists(google_civic_election_id):
                 election_manager = ElectionManager()
                 google_civic_election_id = election_manager.fetch_next_local_google_civic_election_id_integer()
@@ -438,7 +454,7 @@ def election_edit_process_view(request):
             messages.add_message(request, messages.INFO, 'New election ' + str(election_name) + ' saved.')
     except Exception as e:
         handle_record_not_saved_exception(e, logger=logger)
-        messages.add_message(request, messages.ERROR, 'Could not save election.')
+        messages.add_message(request, messages.ERROR, 'Could not save election' + str(google_civic_election_id) + '.')
 
     return HttpResponseRedirect(reverse('election:election_list', args=()))
 
