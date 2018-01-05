@@ -226,6 +226,87 @@ def return_most_likely_data(from_position, to_position, attribute):
     return getattr(to_position, attribute)
 
 
+def move_positions_to_another_candidate(from_candidate_id, from_candidate_we_vote_id,
+                                        to_candidate_id, to_candidate_we_vote_id,
+                                        public_or_private):
+    status = ''
+    success = True
+    position_entries_moved = 0
+    position_entries_not_moved = 0
+    position_list_manager = PositionListManager()
+
+    retrieve_public_positions = public_or_private
+    stance_we_are_looking_for = ANY_STANCE
+    most_recent_only = False
+    friends_we_vote_id_list = False
+    retrieve_all_admin_override = True
+
+    # Get all positions for the "from_candidate" that we are moving away from
+    from_position_list = position_list_manager.retrieve_all_positions_for_candidate_campaign(
+        retrieve_public_positions, from_candidate_id, from_candidate_we_vote_id, stance_we_are_looking_for,
+        most_recent_only, friends_we_vote_id_list, retrieve_all_admin_override)
+
+    # Get all positions for the "to_candidate" that we need to check
+    to_position_list = position_list_manager.retrieve_all_positions_for_candidate_campaign(
+        retrieve_public_positions, from_candidate_id, from_candidate_we_vote_id, stance_we_are_looking_for,
+        most_recent_only, friends_we_vote_id_list, retrieve_all_admin_override)
+
+    to_organization_we_vote_ids = []
+    for position_object in to_position_list:
+        if positive_value_exists(position_object.organization_we_vote_id):
+            to_organization_we_vote_ids.append(position_object.organization_we_vote_id)
+
+    for position_object in from_position_list:
+        # Check organization_we_vote_ids for duplicate positions
+        organization_we_vote_id = position_object.organization_we_vote_id
+        if positive_value_exists(organization_we_vote_id):
+            if organization_we_vote_id in to_organization_we_vote_ids:
+                # We have duplicate positions for the same organization, so just delete the one from "from" candidate
+                try:
+                    position_object.delete()
+                    position_entries_not_moved += 1
+                except Exception:
+                    if public_or_private:
+                        status += "MOVE_TO_ANOTHER_CANDIDATE-UNABLE_TO_DELETE_DUPLICATE_PUBLIC_POSITION "
+                    else:
+                        status += "MOVE_TO_ANOTHER_CANDIDATE-UNABLE_TO_DELETE_DUPLICATE_FRIENDS_POSITION "
+                    success = False
+                    break  # stop merge, exit for loop
+            else:
+                # Update candidate's ids for this position and save
+                position_object.candidate_campaign_id = to_candidate_id
+                position_object.candidate_campaign_we_vote_id = to_candidate_we_vote_id
+                try:
+                    position_object.save()
+                    position_entries_moved += 1
+                except Exception:
+                    if public_or_private:
+                        status += "MOVE_TO_ANOTHER_CANDIDATE-UNABLE_TO_SAVE_NEW_PUBLIC_POSITION "
+                    else:
+                        status += "MOVE_TO_ANOTHER_CANDIDATE-UNABLE_TO_SAVE_NEW_FRIENDS_POSITION "
+                    success = False
+                    break  # stop merge, exit for loop
+        else:
+            if public_or_private:
+                status += "MOVE_TO_ANOTHER_CANDIDATE-UNABLE_TO_FIND_ORGANIZATION_WE_VOTE_ID_FOR_PUBLIC_POSITION "
+            else:
+                status += "MOVE_TO_ANOTHER_CANDIDATE-UNABLE_TO_FIND_ORGANIZATION_WE_VOTE_ID_FOR_FRIENDS_POSITION "
+            success = False
+            break  # stop merge, exit for loop
+
+    results = {
+        'status':                       status,
+        'success':                      success,
+        'from_candidate_id':            from_candidate_id,
+        'from_candidate_we_vote_id':    from_candidate_we_vote_id,
+        'to_candidate_id':              to_candidate_id,
+        'to_candidate_we_vote_id':      to_candidate_we_vote_id,
+        'position_entries_moved':       position_entries_moved,
+        'position_entries_not_moved':   position_entries_not_moved,
+    }
+    return results
+
+
 def move_positions_to_another_organization(from_organization_id, from_organization_we_vote_id,
                                            to_organization_id, to_organization_we_vote_id,
                                            to_voter_id, to_voter_we_vote_id):
