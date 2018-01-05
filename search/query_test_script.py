@@ -26,7 +26,7 @@ query_with_missing_last_election_date = { "query": { "multi_match": { "type": "p
                                                                 "organization_name", "organization_twitter_handle",
                                                                 "twitter_description", "state_name"],
                                                     "slop": 5}},
-                                          "sort": [{"election_day_text": {"missing": "_last"}},
+                                          "sort": [{"election_day_text": {"missing": "1111-11-11"}},
                                                    {"_score": {"order": "desc"}}]}
 
 query_with_missing_election_date_without_order = { "query": { "multi_match": { "type": "phrase_prefix",
