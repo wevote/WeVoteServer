@@ -13,6 +13,7 @@ from urllib.error import HTTPError
 from wevote_functions.functions import convert_to_int, positive_value_exists
 import boto3
 import wevote_functions.admin
+from .functions import analyze_remote_url
 
 # naming convention stored at aws
 FACEBOOK_PROFILE_IMAGE_NAME = "facebook_profile_image"
@@ -825,7 +826,15 @@ class WeVoteImageManager(models.Model):
 
     def twitter_profile_image_url_https_original(self, twitter_profile_image_url_https):
         if twitter_profile_image_url_https:
-            return twitter_profile_image_url_https.replace("_normal", "")
+            # check if original url is valid after stripping _normal from the url
+            image_url_https_original = twitter_profile_image_url_https.replace("_normal", "")
+            image_results = analyze_remote_url(image_url_https_original)
+            valid_image_url_https_original = None if not image_results['image_url_valid'] else image_url_https_original
+            if valid_image_url_https_original is None:
+                # if stripping _normal from url doesn't work, replace _normal with _400x400
+                return twitter_profile_image_url_https.replace("_normal", "_400x400")
+            else:
+                return twitter_profile_image_url_https
         else:
             return None
 
