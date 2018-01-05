@@ -75,12 +75,15 @@ def search_all_for_api(text_from_search_field, voter_device_id):
     # 2016-08-27 No longer searching politician table -- candidate only
     query = {"query": {"multi_match": {"type": "phrase_prefix",
                                        "query": text_from_search_field,
-                                       "fields": ["election_name^3", "google_civic_election_id^3",
+                                       "fields": ["election_name^3", "google_civic_election_id",
                                                   "candidate_name", "candidate_twitter_handle", "twitter_name",
                                                   "measure_subtitle", "measure_text", "measure_title",
                                                   "office_name",
                                                   "party", "organization_name", "organization_twitter_handle",
-                                                  "twitter_description", "state_name"]}}}
+                                                  "twitter_description", "state_name"],
+                                       "slop": 5}},
+             "sort": [{"election_day_text": {"order": "desc"}},
+                      {"_score": {"order": "desc"}}]}
 
     # Example of querying ALL indexes
     search_results = []
