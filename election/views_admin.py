@@ -25,7 +25,6 @@ from position.models import PositionListManager
 from voter.models import voter_has_authority
 import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, get_voter_device_id, positive_value_exists, STATE_CODE_MAP
-from wevote_settings.models import fetch_next_we_vote_id_election_integer
 
 logger = wevote_functions.admin.get_logger(__name__)
 
@@ -327,7 +326,7 @@ def election_one_ballot_retrieve_view(request, election_local_id=0):
 
 @login_required
 def election_edit_view(request, election_local_id):
-    authority_required = {'admin'}  # admin, verified_volunteer
+    authority_required = {'verified_volunteer'}  # admin, verified_volunteer
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
@@ -368,7 +367,7 @@ def election_edit_process_view(request):
     :param request:
     :return:
     """
-    authority_required = {'admin'}  # admin, verified_volunteer
+    authority_required = {'verified_volunteer'}  # admin, verified_volunteer
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
@@ -422,7 +421,9 @@ def election_edit_process_view(request):
                                      ' (' + str(election_on_stage.google_civic_election_id) + ') updated.')
         else:
             # Create new
-            # next_local_election_id_integer = fetch_next_we_vote_id_election_integer()
+            if not positive_value_exists(google_civic_election_id):
+                election_manager = ElectionManager()
+                google_civic_election_id = election_manager.fetch_next_local_google_civic_election_id_integer()
 
             if not state_code:
                 state_code = ""

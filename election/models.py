@@ -4,7 +4,7 @@
 
 from datetime import date, datetime, time
 from django.db import models
-from django.db.models import Q
+from django.db.models import Max, Q
 from exception.models import handle_record_found_more_than_one_exception
 import wevote_functions.admin
 from wevote_functions.functions import convert_date_to_date_as_integer, convert_to_int, \
@@ -79,6 +79,26 @@ class Election(models.Model):
 
 
 class ElectionManager(models.Model):
+
+    def fetch_next_local_google_civic_election_id_integer(self):
+        highest_id = 0
+        election_query = Election.objects.all()
+        election_query = election_query.order_by('-google_civic_election_id')
+        election_list = list(election_query)
+        for one_election in election_list:
+            google_civic_election_id_integer = convert_to_int(one_election.google_civic_election_id)
+            if google_civic_election_id_integer > highest_id:
+                highest_id = google_civic_election_id_integer
+
+        # Did not work with string
+        # highest = Election.objects.all().aggregate(Max('google_civic_election_id'))['google_civic_election_id__max']
+
+        last_integer = highest_id
+        if last_integer >= 1000000:
+            last_integer += 1
+        else:
+            last_integer = 1000000
+        return last_integer
 
     def update_or_create_election(self, google_civic_election_id, election_name, election_day_text,
                                   ocd_division_id, state_code='', include_in_list_for_voters=None):
