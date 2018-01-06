@@ -243,18 +243,6 @@ def fetch_next_we_vote_id_voter_guide_integer():
     return fetch_next_we_vote_id_integer('we_vote_id_last_voter_guide_integer')
 
 
-def fetch_next_we_vote_id_election_integer():
-    we_vote_settings_manager = WeVoteSettingsManager()
-    last_integer = we_vote_settings_manager.fetch_setting('we_vote_last_election_id_integer')
-    last_integer = convert_to_int(last_integer)
-    if last_integer >= 1000000:
-        last_integer += 1
-    else:
-        last_integer = 1000000
-    we_vote_settings_manager.save_setting('we_vote_last_election_id_integer', last_integer)
-    return last_integer
-
-
 def fetch_next_we_vote_id_electoral_district_integer():
     return fetch_next_we_vote_id_integer('we_vote_id_electoral_district_integer')
 

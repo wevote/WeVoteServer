@@ -247,27 +247,27 @@
                     eid: {{ one_batch_row.google_civic_election_id }}
                 {% endif %}
             </td>
-            <td>{{ one_batch_row.batch_row_000|truncatechars:255 }}</td>
-            <td>{{ one_batch_row.batch_row_001|truncatechars:255 }}</td>
-            <td>{{ one_batch_row.batch_row_002|truncatechars:255 }}</td>
-            {% if batch_header_map.batch_header_map_003 %}<td>{{ one_batch_row.batch_row_003|truncatechars:255 }}</td>{% endif %}
-            {% if batch_header_map.batch_header_map_004 %}<td>{{ one_batch_row.batch_row_004|truncatechars:255 }}</td>{% endif %}
-            {% if batch_header_map.batch_header_map_005 %}<td>{{ one_batch_row.batch_row_005|truncatechars:255 }}</td>{% endif %}
-            {% if batch_header_map.batch_header_map_006 %}<td>{{ one_batch_row.batch_row_006|truncatechars:255 }}</td>{% endif %}
-            {% if batch_header_map.batch_header_map_007 %}<td>{{ one_batch_row.batch_row_007|truncatechars:255 }}</td>{% endif %}
-            {% if batch_header_map.batch_header_map_008 %}<td>{{ one_batch_row.batch_row_008|truncatechars:255 }}</td>{% endif %}
-            {% if batch_header_map.batch_header_map_009 %}<td>{{ one_batch_row.batch_row_009|truncatechars:255 }}</td>{% endif %}
-            {% if batch_header_map.batch_header_map_010 %}<td>{{ one_batch_row.batch_row_010|truncatechars:255 }}</td>{% endif %}
-            {% if batch_header_map.batch_header_map_011 %}<td>{{ one_batch_row.batch_row_011|truncatechars:255 }}</td>{% endif %}
-            {% if batch_header_map.batch_header_map_012 %}<td>{{ one_batch_row.batch_row_012|truncatechars:255 }}</td>{% endif %}
-            {% if batch_header_map.batch_header_map_013 %}<td>{{ one_batch_row.batch_row_013|truncatechars:255 }}</td>{% endif %}
-            {% if batch_header_map.batch_header_map_014 %}<td>{{ one_batch_row.batch_row_014|truncatechars:255 }}</td>{% endif %}
-            {% if batch_header_map.batch_header_map_015 %}<td>{{ one_batch_row.batch_row_015|truncatechars:255 }}</td>{% endif %}
-            {% if batch_header_map.batch_header_map_016 %}<td>{{ one_batch_row.batch_row_016|truncatechars:255 }}</td>{% endif %}
-            {% if batch_header_map.batch_header_map_017 %}<td>{{ one_batch_row.batch_row_017|truncatechars:255 }}</td>{% endif %}
-            {% if batch_header_map.batch_header_map_018 %}<td>{{ one_batch_row.batch_row_018|truncatechars:255 }}</td>{% endif %}
-            {% if batch_header_map.batch_header_map_019 %}<td>{{ one_batch_row.batch_row_019|truncatechars:255 }}</td>{% endif %}
-            {% if batch_header_map.batch_header_map_020 %}<td>{{ one_batch_row.batch_row_020|truncatechars:255 }}</td>{% endif %}
+            <td>{{ one_batch_row.batch_row_000|default_if_none:""|truncatechars:255 }}</td>
+            <td>{{ one_batch_row.batch_row_001|default_if_none:""|truncatechars:255 }}</td>
+            <td>{{ one_batch_row.batch_row_002|default_if_none:""|truncatechars:255 }}</td>
+            {% if batch_header_map.batch_header_map_003 %}<td>{{ one_batch_row.batch_row_003|default_if_none:""|truncatechars:255 }}</td>{% endif %}
+            {% if batch_header_map.batch_header_map_004 %}<td>{{ one_batch_row.batch_row_004|default_if_none:""|truncatechars:255 }}</td>{% endif %}
+            {% if batch_header_map.batch_header_map_005 %}<td>{{ one_batch_row.batch_row_005|default_if_none:""|truncatechars:255 }}</td>{% endif %}
+            {% if batch_header_map.batch_header_map_006 %}<td>{{ one_batch_row.batch_row_006|default_if_none:""|truncatechars:255 }}</td>{% endif %}
+            {% if batch_header_map.batch_header_map_007 %}<td>{{ one_batch_row.batch_row_007|default_if_none:""|truncatechars:255 }}</td>{% endif %}
+            {% if batch_header_map.batch_header_map_008 %}<td>{{ one_batch_row.batch_row_008|default_if_none:""|truncatechars:255 }}</td>{% endif %}
+            {% if batch_header_map.batch_header_map_009 %}<td>{{ one_batch_row.batch_row_009|default_if_none:""|truncatechars:255 }}</td>{% endif %}
+            {% if batch_header_map.batch_header_map_010 %}<td>{{ one_batch_row.batch_row_010|default_if_none:""|truncatechars:255 }}</td>{% endif %}
+            {% if batch_header_map.batch_header_map_011 %}<td>{{ one_batch_row.batch_row_011|default_if_none:""|truncatechars:255 }}</td>{% endif %}
+            {% if batch_header_map.batch_header_map_012 %}<td>{{ one_batch_row.batch_row_012|default_if_none:""|truncatechars:255 }}</td>{% endif %}
+            {% if batch_header_map.batch_header_map_013 %}<td>{{ one_batch_row.batch_row_013|default_if_none:""|truncatechars:255 }}</td>{% endif %}
+            {% if batch_header_map.batch_header_map_014 %}<td>{{ one_batch_row.batch_row_014|default_if_none:""|truncatechars:255 }}</td>{% endif %}
+            {% if batch_header_map.batch_header_map_015 %}<td>{{ one_batch_row.batch_row_015|default_if_none:""|truncatechars:255 }}</td>{% endif %}
+            {% if batch_header_map.batch_header_map_016 %}<td>{{ one_batch_row.batch_row_016|default_if_none:""|truncatechars:255 }}</td>{% endif %}
+            {% if batch_header_map.batch_header_map_017 %}<td>{{ one_batch_row.batch_row_017|default_if_none:""|truncatechars:255 }}</td>{% endif %}
+            {% if batch_header_map.batch_header_map_018 %}<td>{{ one_batch_row.batch_row_018|default_if_none:""|truncatechars:255 }}</td>{% endif %}
+            {% if batch_header_map.batch_header_map_019 %}<td>{{ one_batch_row.batch_row_019|default_if_none:""|truncatechars:255 }}</td>{% endif %}
+            {% if batch_header_map.batch_header_map_020 %}<td>{{ one_batch_row.batch_row_020|default_if_none:""|truncatechars:255 }}</td>{% endif %}
         </tr>
         {% if one_batch_row.batch_row_action_exists %}
         <tr>

@@ -7,6 +7,7 @@ from candidate.models import CandidateCampaign
 from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
 from elasticsearch import Elasticsearch
+from election.models import Election
 from measure.models import ContestMeasure
 from office.models import ContestOffice
 from organization.models import Organization
@@ -14,6 +15,73 @@ import wevote_functions.admin
 from wevote_functions.functions import positive_value_exists
 
 logger = wevote_functions.admin.get_logger(__name__)
+STATE_CODE_MAP = {
+    'AK': 'Alaska',
+    'AL': 'Alabama',
+    'AR': 'Arkansas',
+    'AS': 'American Samoa',
+    'AZ': 'Arizona',
+    'CA': 'California',
+    'CO': 'Colorado',
+    'CT': 'Connecticut',
+    'DC': 'District of Columbia',
+    'DE': 'Delaware',
+    'FL': 'Florida',
+    'GA': 'Georgia',
+    'GU': 'Guam',
+    'HI': 'Hawaii',
+    'IA': 'Iowa',
+    'ID': 'Idaho',
+    'IL': 'Illinois',
+    'IN': 'Indiana',
+    'KS': 'Kansas',
+    'KY': 'Kentucky',
+    'LA': 'Louisiana',
+    'MA': 'Massachusetts',
+    'MD': 'Maryland',
+    'ME': 'Maine',
+    'MI': 'Michigan',
+    'MN': 'Minnesota',
+    'MO': 'Missouri',
+    'MP': 'Northern Mariana Islands',
+    'MS': 'Mississippi',
+    'MT': 'Montana',
+    'NA': 'National',
+    'NC': 'North Carolina',
+    'ND': 'North Dakota',
+    'NE': 'Nebraska',
+    'NH': 'New Hampshire',
+    'NJ': 'New Jersey',
+    'NM': 'New Mexico',
+    'NV': 'Nevada',
+    'NY': 'New York',
+    'OH': 'Ohio',
+    'OK': 'Oklahoma',
+    'OR': 'Oregon',
+    'PA': 'Pennsylvania',
+    'PR': 'Puerto Rico',
+    'RI': 'Rhode Island',
+    'SC': 'South Carolina',
+    'SD': 'South Dakota',
+    'TN': 'Tennessee',
+    'TX': 'Texas',
+    'UT': 'Utah',
+    'VA': 'Virginia',
+    'VI': 'Virgin Islands',
+    'VT': 'Vermont',
+    'WA': 'Washington',
+    'WI': 'Wisconsin',
+    'WV': 'West Virginia',
+    'WY': 'Wyoming',
+}
+
+
+def convert_state_code_to_state_text(incoming_state_code):
+    for state_code, state_name in STATE_CODE_MAP.items():
+        if incoming_state_code.lower() == state_code.lower():
+            return state_name
+    else:
+        return ""
 
 ELASTIC_SEARCH_CONNECTION_STRING = get_environment_variable("ELASTIC_SEARCH_CONNECTION_STRING")
 if positive_value_exists(ELASTIC_SEARCH_CONNECTION_STRING):
@@ -118,6 +186,38 @@ def delete_contest_office_signal(sender, instance, **kwargs):
             res = elastic_search_object.delete(index="offices", doc_type='office', id=instance.id)
             if res["_shards"]["successful"] <= 1:
                 logger.error("failed to delete ContestMeasure " + instance.we_vote_id)
+        except Exception as err:
+            logger.error(err)
+
+
+# Election
+@receiver(post_save, sender=Election)
+def save_election_signal(sender, instance, **kwargs):
+    # logger.debug("search.save_Election_signal")
+    if 'elastic_search_object' in globals():
+        doc = {
+            "election_name": instance.election_name,
+            "election_day_text": instance.election_day_text,
+            "google_civic_election_id": instance.google_civic_election_id,
+            "state_code": instance.state_code,
+            "state_name": convert_state_code_to_state_text(instance.state_code)
+        }
+        try:
+            res = elastic_search_object.index(index="elections", doc_type='election', id=instance.id, body=doc)
+            if res["_shards"]["successful"] <= 1:
+                logger.error("failed to index Election " + instance.election_name)
+        except Exception as err:
+            logger.error(err)
+
+
+@receiver(post_delete, sender=Election)
+def delete_election_signal(sender, instance, **kwargs):
+    # logger.debug("search.delete_Election_signal")
+    if 'elastic_search_object' in globals():
+        try:
+            res = elastic_search_object.delete(index="elections", doc_type='election', id=instance.id)
+            if res["_shards"]["successful"] <= 1:
+                logger.error("failed to delete Election " + instance.election_name)
         except Exception as err:
             logger.error(err)
 

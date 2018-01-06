@@ -75,12 +75,13 @@ def search_all_for_api(text_from_search_field, voter_device_id):
     # 2016-08-27 No longer searching politician table -- candidate only
     query = {"query": {"multi_match": {"type": "phrase_prefix",
                                        "query": text_from_search_field,
-                                       "fields": ["candidate_name",
-                                                  "candidate_twitter_handle", "twitter_name",
+                                       "fields": ["election_name^3", "google_civic_election_id",
+                                                  "candidate_name", "candidate_twitter_handle", "twitter_name",
                                                   "measure_subtitle", "measure_text", "measure_title",
                                                   "office_name",
                                                   "party", "organization_name", "organization_twitter_handle",
-                                                  "twitter_description"]}}}
+                                                  "twitter_description", "state_name"],
+                                       "slop": 5}}}
 
     # Example of querying ALL indexes
     search_results = []
@@ -193,6 +194,26 @@ def search_all_for_api(text_from_search_field, voter_device_id):
                     'state_code':               one_search_result_dict['state_served_code'],
                     'twitter_handle':           one_search_result_dict['organization_twitter_handle'],
                     'we_vote_id':               one_search_result_dict['we_vote_id'],
+                    'local_id':                 one_search_result_id,
+                }
+                search_results.append(one_search_result)
+                search_count += 1
+            elif one_search_result_type == "election":
+                link_internal = "/ballot/election/" + one_search_result_dict['google_civic_election_id']
+                result_summary = one_search_result_dict['state_name'] + ' ' + \
+                                                                        one_search_result_dict['election_day_text']
+                one_search_result = {
+                    'result_title':             one_search_result_dict['election_name'],
+                    'result_image':             "",
+                    'result_subtitle':          "",
+                    'result_summary':           result_summary,
+                    'result_score':             one_search_result_score,
+                    'link_internal':            link_internal,
+                    'kind_of_owner':            "ELECTION",
+                    'google_civic_election_id': one_search_result_dict['google_civic_election_id'],
+                    'state_code':               one_search_result_dict['state_code'],
+                    'twitter_handle':           "",
+                    'we_vote_id':               "",
                     'local_id':                 one_search_result_id,
                 }
                 search_results.append(one_search_result)

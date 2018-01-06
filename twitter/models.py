@@ -558,8 +558,10 @@ class TwitterUserManager(models.Model):
         if twitter_results['twitter_handle_found']:
             twitter_save_results = self.update_or_create_twitter_user(twitter_results['twitter_json'])
             if twitter_save_results['twitter_user_found']:
+                twitter_user = twitter_save_results['twitter_user']
                 # If saved, pull the fresh results from the database and return
-                twitter_second_results = self.retrieve_twitter_user(twitter_user_id, twitter_handle)
+                twitter_second_results = self.retrieve_twitter_user(twitter_user.twitter_id,
+                                                                    twitter_user.twitter_handle)
                 if twitter_second_results['twitter_user_found']:
                     return twitter_second_results
 
@@ -922,7 +924,7 @@ class TwitterUserManager(models.Model):
         except Exception as e:
             success = False
             twitter_user_found = False
-            logger.error("save_new_twitter_user_from_twitter_json caught: ", e.message)
+            logger.error("save_new_twitter_user_from_twitter_json caught: ", str(e))
 
             status = 'FAILED_TO_CREATE_NEW_TWITTER_USER'
             twitter_user_on_stage = TwitterUser()
@@ -958,6 +960,14 @@ class TwitterUserManager(models.Model):
 
         twitter_results = self.retrieve_twitter_user(twitter_id)
         twitter_user_found = twitter_results['twitter_user_found']
+
+        if not twitter_user_found:
+            # Make sure the handle isn't in use, under a different twitter_id
+            if 'screen_name' in twitter_json and positive_value_exists(twitter_json['screen_name']):
+                twitter_handle = twitter_json['screen_name']
+                twitter_results = self.retrieve_twitter_user(0, twitter_handle)
+                twitter_user_found = twitter_results['twitter_user_found']
+
         if twitter_user_found:
             # Twitter user already exists so update twitter user details
             twitter_user = twitter_results['twitter_user']

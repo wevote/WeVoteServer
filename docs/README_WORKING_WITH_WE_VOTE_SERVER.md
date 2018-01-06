@@ -39,7 +39,7 @@ database with initial data that will help you do development. Visit the Admin Me
 
 
 ## Working with WebApp 
-See notes on working with the [Node/React/Flux WebApp mobile website](README_WORKING_WITH_WE_VOTE_SERVER.md) day-to-day
+See notes on working with the [Node/React/Flux WebApp mobile website](https://github.com/wevote/WebApp/blob/develop/docs/working/README_WORKING_WITH_WEB_APP.md) day-to-day
 
 ## Coding Standards
 

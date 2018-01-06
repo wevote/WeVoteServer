@@ -1306,7 +1306,6 @@ def twitter_sign_in_retrieve_for_api(voter_device_id):  # twitterSignInRetrieve
     else:
         twitter_profile_image_url_https = twitter_auth_response.twitter_profile_image_url_https
 
-
     if success:
         twitter_profile_banner_url_https = ""
         try:

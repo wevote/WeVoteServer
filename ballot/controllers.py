@@ -1127,6 +1127,8 @@ def voter_ballot_list_retrieve_for_api(voter_id):  # voterBallotListRetrieve
     # upcoming_election_list = results['election_list']
     results = election_manager.retrieve_listed_elections()
     election_list = results['election_list']
+    elections_retrieved_count = 0
+    maximum_number_of_elections_to_retrieve = 10
 
     # If a voter_id was passed in, return a list of elections the voter has looked at
     if positive_value_exists(voter_id):
@@ -1147,6 +1149,7 @@ def voter_ballot_list_retrieve_for_api(voter_id):  # voterBallotListRetrieve
                     "ballot_location_shortcut":     one_ballot_entry.ballot_location_shortcut,
                 }
                 voter_ballot_list_for_json.append(one_voter_ballot_list)
+                elections_retrieved_count += 1
 
     # Now see if there are any elections that the voter has not looked at that we can add at the top
     for election in election_list:
@@ -1163,6 +1166,7 @@ def voter_ballot_list_retrieve_for_api(voter_id):  # voterBallotListRetrieve
                     "ballot_location_shortcut":         "",
                 }
                 final_ballot_list.append(one_election)
+                elections_retrieved_count += 1
 
     final_ballot_list = voter_ballot_list_for_json + final_ballot_list
 
