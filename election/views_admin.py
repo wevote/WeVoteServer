@@ -414,34 +414,34 @@ def election_edit_process_view(request):
         # If here, this is a We Vote created election
 
         # Update
-        try:
-            if election_name is False:
-                election_name = election_on_stage.election_name  # Update election_name for the message below
-            else:
-                election_on_stage.election_name = election_name
-                election_changed = True
-
-            if election_day_text is not False:
-                election_on_stage.election_day_text = election_day_text
-                election_changed = True
-
-            if state_code is not False:
-                election_on_stage.state_code = state_code
-                election_changed = True
-
-            election_on_stage.include_in_list_for_voters = include_in_list_for_voters
+        # try:
+        if election_name is False:
+            election_name = election_on_stage.election_name  # Update election_name for the message below
+        else:
+            election_on_stage.election_name = election_name
             election_changed = True
 
-            if election_changed:
-                election_on_stage.save()
-                status += "UPDATED_EXISTING_ELECTION "
-                messages.add_message(request, messages.INFO, str(election_name) +
-                                     ' (' + str(election_on_stage.google_civic_election_id) + ') updated.')
-        except Exception as e:
-            handle_record_not_saved_exception(e, logger=logger)
-            messages.add_message(request, messages.ERROR, 'Could not save new election' +
-                                 str(google_civic_election_id) +
-                                 '. ' + status)
+        if election_day_text is not False:
+            election_on_stage.election_day_text = election_day_text
+            election_changed = True
+
+        if state_code is not False:
+            election_on_stage.state_code = state_code
+            election_changed = True
+
+        election_on_stage.include_in_list_for_voters = include_in_list_for_voters
+        election_changed = True
+
+        if election_changed:
+            election_on_stage.save()
+            status += "UPDATED_EXISTING_ELECTION "
+            messages.add_message(request, messages.INFO, str(election_name) +
+                                 ' (' + str(election_on_stage.google_civic_election_id) + ') updated.')
+        #except Exception as e:
+        #    handle_record_not_saved_exception(e, logger=logger)
+        #    messages.add_message(request, messages.ERROR, 'Could not save new election' +
+        #                         str(google_civic_election_id) +
+        #                         '. ' + status)
     else:
         # Create new
         status += "CREATING_NEW_ELECTION "
