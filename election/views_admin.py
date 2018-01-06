@@ -432,8 +432,9 @@ def election_edit_process_view(request):
 
             if election_changed:
                 election_on_stage.save()
-                messages.add_message(request, messages.INFO, str(election_name) +
-                                     ' (' + str(election_on_stage.google_civic_election_id) + ') updated.')
+                status += "ELECTION_SAVED "
+                # messages.add_message(request, messages.INFO, str(election_name) +
+                #                      ' (' + str(election_on_stage.google_civic_election_id) + ') updated.')
         else:
             # Create new
             status += "CREATING_NEW_ELECTION "
@@ -451,10 +452,11 @@ def election_edit_process_view(request):
                 include_in_list_for_voters=include_in_list_for_voters,
             )
             election_on_stage.save()
+            status += "ELECTION_SAVED "
             messages.add_message(request, messages.INFO, 'New election ' + str(election_name) + ' saved.')
     except Exception as e:
         handle_record_not_saved_exception(e, logger=logger)
-        messages.add_message(request, messages.ERROR, 'Could not save election' + str(google_civic_election_id) +
+        messages.add_message(request, messages.ERROR, 'Could not save election ' + str(google_civic_election_id) +
                              '. ' + status)
 
     return HttpResponseRedirect(reverse('election:election_list', args=()))
