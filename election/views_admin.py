@@ -428,6 +428,10 @@ def election_edit_process_view(request):
         if state_code is not False:
             election_on_stage.state_code = state_code
             election_changed = True
+            
+        if not positive_value_exists(election_on_stage.google_civic_election_id) and positive_value_exists(google_civic_election_id):
+            election_on_stage.google_civic_election_id = google_civic_election_id
+            election_changed = True
 
         election_on_stage.include_in_list_for_voters = include_in_list_for_voters
         election_changed = True
