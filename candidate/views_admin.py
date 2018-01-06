@@ -946,19 +946,29 @@ def candidate_merge_process_view(request):
                                     '?google_civic_election_id=' + str(google_civic_election_id) +
                                     '&state_code=' + str(state_code))
 
-    # TODO: Check politician data
-    # look_for_politician = request.POST.get('look_for_politician', False)  # If this comes in with value, don't save
-    # TODO: Merge politician data
+    # TODO: Migrate images
+
+    # Merge politician data
+    politician1_we_vote_id = candidate1_on_stage.politician_we_vote_id
+    politician2_we_vote_id = candidate2_on_stage.politician_we_vote_id
+    if positive_value_exists(politician1_we_vote_id) and positive_value_exists(politician2_we_vote_id):
+        if politician1_we_vote_id != politician2_we_vote_id:
+            # Conflicting parent politicians
+            # TODO: Call separate politician merge process
+            messages.add_message(request, messages.ERROR, 'Unable to merge politicians at this time.')
+            return HttpResponseRedirect(reverse('candidate:find_and_remove_duplicate_candidates', args=()) +
+                                        "?google_civic_election_id=" + str(google_civic_election_id) +
+                                        "&state_code=" + str(state_code))
+        # else do nothing (same parent politician)
+    elif positive_value_exists(politician2_we_vote_id):
+        # Migrate politician from candidate 2 to candidate 1
+        candidate1_on_stage.politician_we_vote_id = politician2_we_vote_id
+    # else do nothing (no parent politician for candidate 2)
 
     # TODO: Migrate bookmarks
 
-    # TODO: Migrate images
-
-    # TODO: Migrate offices
-
-    conflict_values = figure_out_conflict_values(candidate1_on_stage, candidate2_on_stage)
-
     # Merge attribute values
+    conflict_values = figure_out_conflict_values(candidate1_on_stage, candidate2_on_stage)
     for attribute in CANDIDATE_UNIQUE_IDENTIFIERS:
         conflict_value = conflict_values.get(attribute, None)
         if conflict_value == "CONFLICT":
@@ -988,6 +998,7 @@ def candidate_merge_process_view(request):
                                     "?google_civic_election_id=" + str(google_civic_election_id) +
                                     "&state_code=" + str(state_code))
 
+    # Note: wait to wrap in try/except block
     candidate1_on_stage.save()
 
     # TODO: Remove candidate 2
