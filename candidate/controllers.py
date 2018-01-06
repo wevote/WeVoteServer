@@ -2,7 +2,8 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
-from .models import CandidateCampaignListManager, CandidateCampaign, CandidateCampaignManager
+from .models import CandidateCampaignListManager, CandidateCampaign, CandidateCampaignManager, \
+    CANDIDATE_UNIQUE_IDENTIFIERS
 from ballot.models import CANDIDATE
 from config.base import get_environment_variable
 from django.contrib import messages
@@ -73,7 +74,7 @@ def candidates_import_from_master_server(request, google_civic_election_id='', s
     return import_results
 
 
-def find_duplicate_candidate(we_vote_candidate, ignore_candidate_id_list=[]):
+def find_duplicate_candidate(we_vote_candidate, ignore_candidate_id_list):
     if not hasattr(we_vote_candidate, 'google_civic_election_id'):
         error_results = {
             'success':                              False,
@@ -93,36 +94,38 @@ def find_duplicate_candidate(we_vote_candidate, ignore_candidate_id_list=[]):
     # Search for other candidates within this election that match name and election
     candidate_campaign_list_manager = CandidateCampaignListManager()
     try:
-        candidate_duplicates_query = CandidateCampaign.objects.order_by('candidate_name')
-        candidate_duplicates_query = candidate_duplicates_query.filter(
-            google_civic_election_id=we_vote_candidate.google_civic_election_id)
-        candidate_duplicates_query = candidate_duplicates_query.filter(
-            candidate_name=we_vote_candidate.candidate_name)
-        candidate_duplicates_query = candidate_duplicates_query.exclude(id=we_vote_candidate.id)
-        number_of_duplicates = candidate_duplicates_query.count()
-        if number_of_duplicates >= 1:
-            # Only deal with merging the incoming candidate and the first on found
-            candidate_duplicate_list = candidate_duplicates_query
+        results = candidate_campaign_list_manager.retrieve_candidates_from_non_unique_identifiers(
+            we_vote_candidate.google_civic_election_id, we_vote_candidate.state_code,
+            we_vote_candidate.candidate_twitter_handle, we_vote_candidate.candidate_name, ignore_candidate_id_list)
 
-            # What are the conflicts we will encounter when trying to merge these candidates?
-            # ASK_VOTER = Ask voter which one to use
-            # MATCHING = Values already match. Nothing to do
-            # CANDIDATE1 = Use the value from Candidate 1
-            # CANDIDATE2 = Use the value from Candidate 2
-            candidate_merge_conflict_values = figure_out_conflict_values(we_vote_candidate, candidate_duplicate_list[0])
+        if results['candidate_found']:
+            candidate_merge_conflict_values = figure_out_conflict_values(we_vote_candidate, results['candidate'])
 
             results = {
                 'success':                              True,
                 'status':                               "FIND_DUPLICATE_CANDIDATE_DUPLICATES_FOUND",
                 'candidate_merge_possibility_found':    True,
-                'candidate_merge_possibility':          candidate_duplicate_list[0],
+                'candidate_merge_possibility':          results['candidate'],
+                'candidate_merge_conflict_values':      candidate_merge_conflict_values,
+            }
+            return results
+        elif results['candidate_list_found']:
+            # Only deal with merging the incoming candidate and the first on found
+            candidate_merge_conflict_values = \
+                figure_out_conflict_values(we_vote_candidate, results['candidate_list'][0])
+
+            results = {
+                'success':                              True,
+                'status':                               "FIND_DUPLICATE_CANDIDATE_DUPLICATES_FOUND",
+                'candidate_merge_possibility_found':    True,
+                'candidate_merge_possibility':          results['candidate_list'][0],
                 'candidate_merge_conflict_values':      candidate_merge_conflict_values,
             }
             return results
         else:
             results = {
-                'success': True,
-                'status': "FIND_DUPLICATE_CANDIDATE_NO_DUPLICATES_FOUND",
+                'success':                              True,
+                'status':                               "FIND_DUPLICATE_CANDIDATE_NO_DUPLICATES_FOUND",
                 'candidate_merge_possibility_found':    False,
             }
             return results
@@ -141,10 +144,25 @@ def find_duplicate_candidate(we_vote_candidate, ignore_candidate_id_list=[]):
 
 
 def figure_out_conflict_values(candidate1, candidate2):
-    candidate_merge_conflict_values = {
-        'candidate_name': 'ASK_VOTER',
-        'maplight_id': 'MATCHING',
-    }
+    candidate_merge_conflict_values = {}
+
+    for attribute in CANDIDATE_UNIQUE_IDENTIFIERS:
+        try:
+            candidate1_attribute = getattr(candidate1, attribute)
+            candidate2_attribute = getattr(candidate2, attribute)
+            if candidate1_attribute is None and candidate2_attribute is None:
+                candidate_merge_conflict_values[attribute] = 'MATCHING'
+            elif candidate1_attribute is None:
+                candidate_merge_conflict_values[attribute] = 'CANDIDATE2'
+            elif candidate2_attribute is None:
+                candidate_merge_conflict_values[attribute] = 'CANDIDATE1'
+            elif candidate1_attribute == candidate2_attribute:
+                candidate_merge_conflict_values[attribute] = 'MATCHING'
+            else:
+                candidate_merge_conflict_values[attribute] = 'CONFLICT'
+        except AttributeError:
+            pass
+
     return candidate_merge_conflict_values
 
 

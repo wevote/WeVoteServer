@@ -713,7 +713,7 @@ def positions_public_count_for_candidate_campaign(candidate_id, candidate_we_vot
 
     position_list_manager = PositionListManager()
     all_positions_count_for_candidate_campaign = \
-        position_list_manager.retrieve_public_positions_count_for_candidate_campaign(
+        position_list_manager.fetch_public_positions_count_for_candidate_campaign(
             candidate_id,
             candidate_we_vote_id,
             stance_we_are_looking_for)

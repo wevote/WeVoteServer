@@ -19,6 +19,48 @@ from image.models import ORGANIZATION_ENDORSEMENTS_IMAGE_NAME
 
 logger = wevote_functions.admin.get_logger(__name__)
 
+CANDIDATE_UNIQUE_IDENTIFIERS = [
+    'ballotpedia_page_title',
+    'ballotpedia_photo_url',
+    'candidate_email',
+    'candidate_is_incumbent',
+    'candidate_is_top_ticket',
+    'candidate_name',
+    'candidate_phone',
+    'candidate_twitter_handle',
+    'candidate_url',
+    'ctcl_uuid',
+    'facebook_url',
+    'google_civic_candidate_name',
+    'google_civic_election_id',
+    'google_plus_url',
+    'linkedin_url',
+    'linkedin_photo_url',
+    'maplight_id',
+    'ocd_division_id',
+    'order_on_ballot',
+    'other_source_photo_url',
+    'other_source_url',
+    'party',
+    'photo_url',
+    'photo_url_from_maplight',
+    'photo_url_from_vote_smart',
+    'politician_id',
+    'politician_we_vote_id',
+    'state_code',
+    'twitter_description',
+    'twitter_location',
+    'twitter_name',
+    'twitter_url',
+    'vote_smart_id',
+    'we_vote_hosted_profile_image_url_large',
+    'we_vote_hosted_profile_image_url_medium',
+    'we_vote_hosted_profile_image_url_tiny',
+    'wikipedia_page_title',
+    'wikipedia_photo_url',
+    'youtube_url',
+]
+
 
 class CandidateCampaignListManager(models.Model):
     """
@@ -330,7 +372,8 @@ class CandidateCampaignListManager(models.Model):
         return results
 
     def retrieve_candidates_from_non_unique_identifiers(self, google_civic_election_id, state_code,
-                                                        candidate_twitter_handle, candidate_name):
+                                                        candidate_twitter_handle, candidate_name,
+                                                        ignore_candidate_id_list=[]):
         keep_looking_for_duplicates = True
         candidate = CandidateCampaign()
         candidate_found = False
@@ -348,6 +391,9 @@ class CandidateCampaignListManager(models.Model):
                                                          google_civic_election_id=google_civic_election_id)
                 if positive_value_exists(state_code):
                     candidate_query = candidate_query.filter(state_code__iexact=state_code)
+
+                if positive_value_exists(ignore_candidate_id_list):
+                    candidate_query = candidate_query.exclude(we_vote_id__in=ignore_candidate_id_list)
 
                 candidate_list = list(candidate_query)
                 if len(candidate_list):
@@ -381,6 +427,9 @@ class CandidateCampaignListManager(models.Model):
                 if positive_value_exists(state_code):
                     candidate_query = candidate_query.filter(state_code__iexact=state_code)
 
+                if positive_value_exists(ignore_candidate_id_list):
+                    candidate_query = candidate_query.exclude(we_vote_id__in=ignore_candidate_id_list)
+
                 candidate_list = list(candidate_query)
                 if len(candidate_list):
                     # entry exists
@@ -410,6 +459,9 @@ class CandidateCampaignListManager(models.Model):
                 candidate_query = candidate_query.filter(candidate_name__icontains=first_name)
                 last_name = extract_last_name_from_full_name(candidate_name)
                 candidate_query = candidate_query.filter(candidate_name__icontains=last_name)
+
+                if positive_value_exists(ignore_candidate_id_list):
+                    candidate_query = candidate_query.exclude(we_vote_id__in=ignore_candidate_id_list)
 
                 candidate_list = list(candidate_query)
                 if len(candidate_list):

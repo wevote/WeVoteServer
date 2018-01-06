@@ -38,6 +38,10 @@
         .u-no-break { // Replacement for nobr and &nbsp;
           white-space: nowrap;
         }
+
+        input[type="radio"]:checked + .bold-select {
+          font-weight: bold;
+        }
     </style>
 
     {% block js %}{% endblock %}

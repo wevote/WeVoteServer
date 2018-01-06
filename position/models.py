@@ -2300,12 +2300,30 @@ class PositionListManager(models.Model):
 
         return position_list_filtered
 
-    def retrieve_public_positions_count_for_candidate_campaign(self, candidate_campaign_id,
-                                                               candidate_campaign_we_vote_id,
-                                                               stance_we_are_looking_for):
+    def fetch_public_positions_count_for_candidate_campaign(self, candidate_campaign_id,
+                                                            candidate_campaign_we_vote_id,
+                                                            stance_we_are_looking_for=ANY_STANCE):
+        return self.fetch_positions_count_for_candidate_campaign(candidate_campaign_id,
+                                                                 candidate_campaign_we_vote_id,
+                                                                 stance_we_are_looking_for,
+                                                                 PUBLIC_ONLY)
+
+    def fetch_friends_only_positions_count_for_candidate_campaign(self, candidate_campaign_id,
+                                                                  candidate_campaign_we_vote_id,
+                                                                  stance_we_are_looking_for=ANY_STANCE):
+        return self.fetch_positions_count_for_candidate_campaign(candidate_campaign_id,
+                                                                 candidate_campaign_we_vote_id,
+                                                                 stance_we_are_looking_for,
+                                                                 FRIENDS_ONLY)
+
+    @staticmethod
+    def fetch_positions_count_for_candidate_campaign(candidate_campaign_id,
+                                                     candidate_campaign_we_vote_id,
+                                                     stance_we_are_looking_for,
+                                                     public_or_private=PUBLIC_ONLY):
         if stance_we_are_looking_for not \
                 in(ANY_STANCE, SUPPORT, STILL_DECIDING, INFORMATION_ONLY, NO_STANCE, OPPOSE, PERCENT_RATING):
-            return 0
+            stance_we_are_looking_for = ANY_STANCE
 
         # Note that one of the incoming options for stance_we_are_looking_for is 'ANY_STANCE'
         #  which means we want to return all stances
@@ -2314,34 +2332,41 @@ class PositionListManager(models.Model):
                 positive_value_exists(candidate_campaign_we_vote_id):
             return 0
 
+        if public_or_private not in(PUBLIC_ONLY, FRIENDS_ONLY):
+            public_or_private = PUBLIC_ONLY
+        if public_or_private == FRIENDS_ONLY:
+            position_list_query = PositionForFriends.objects.all()
+        else:
+            position_list_query = PositionEntered.objects.all()
+
         # Retrieve the support positions for this candidate_campaign_id
         position_count = 0
         try:
-            position_list = PositionEntered.objects.using('readonly').order_by('date_entered')
+            position_list_query = position_list_query.using('readonly').order_by('date_entered')
             if positive_value_exists(candidate_campaign_id):
-                position_list = position_list.filter(candidate_campaign_id=candidate_campaign_id)
+                position_list_query = position_list_query.filter(candidate_campaign_id=candidate_campaign_id)
             else:
-                position_list = position_list.filter(
+                position_list_query = position_list_query.filter(
                     candidate_campaign_we_vote_id__iexact=candidate_campaign_we_vote_id)
             # SUPPORT, STILL_DECIDING, INFORMATION_ONLY, NO_STANCE, OPPOSE, PERCENT_RATING
             if stance_we_are_looking_for != ANY_STANCE:
                 # If we passed in the stance "ANY_STANCE" it means we want to not filter down the list
                 if stance_we_are_looking_for == SUPPORT:
-                    position_list = position_list.filter(
+                    position_list_query = position_list_query.filter(
                         Q(stance=stance_we_are_looking_for) |  # Matches "is_support"
                         (Q(stance=PERCENT_RATING) & Q(vote_smart_rating__gte=66))  # Matches "is_positive_rating"
                     )  # | Q(stance=GRADE_RATING))
                 elif stance_we_are_looking_for == OPPOSE:
-                    position_list = position_list.filter(
+                    position_list_query = position_list_query.filter(
                         Q(stance=stance_we_are_looking_for) |  # Matches "is_oppose"
                         (Q(stance=PERCENT_RATING) & Q(vote_smart_rating__lte=33))  # Matches "is_negative_rating"
                     )  # | Q(stance=GRADE_RATING))
                 else:
-                    position_list = position_list.filter(stance=stance_we_are_looking_for)
+                    position_list_query = position_list_query.filter(stance=stance_we_are_looking_for)
             # Limit to positions in the last x years - currently we are not limiting
             # position_list = position_list.filter(election_id=election_id)
 
-            position_count = position_list.count()
+            position_count = position_list_query.count()
         except Exception as e:
             handle_record_not_found_exception(e, logger=logger)
 
