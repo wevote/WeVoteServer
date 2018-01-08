@@ -235,7 +235,6 @@ def move_positions_to_another_candidate(from_candidate_id, from_candidate_we_vot
     position_entries_not_moved = 0
     position_list_manager = PositionListManager()
 
-    retrieve_public_positions = public_or_private
     stance_we_are_looking_for = ANY_STANCE
     most_recent_only = False
     friends_we_vote_id_list = False
@@ -243,12 +242,12 @@ def move_positions_to_another_candidate(from_candidate_id, from_candidate_we_vot
 
     # Get all positions for the "from_candidate" that we are moving away from
     from_position_list = position_list_manager.retrieve_all_positions_for_candidate_campaign(
-        retrieve_public_positions, from_candidate_id, from_candidate_we_vote_id, stance_we_are_looking_for,
+        public_or_private, from_candidate_id, from_candidate_we_vote_id, stance_we_are_looking_for,
         most_recent_only, friends_we_vote_id_list, retrieve_all_admin_override)
 
     # Get all positions for the "to_candidate" that we need to check
     to_position_list = position_list_manager.retrieve_all_positions_for_candidate_campaign(
-        retrieve_public_positions, from_candidate_id, from_candidate_we_vote_id, stance_we_are_looking_for,
+        public_or_private, from_candidate_id, from_candidate_we_vote_id, stance_we_are_looking_for,
         most_recent_only, friends_we_vote_id_list, retrieve_all_admin_override)
 
     to_organization_we_vote_ids = []

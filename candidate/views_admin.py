@@ -927,10 +927,13 @@ def candidate_merge_process_view(request):
 
     candidate1_on_stage = {}
     candidate2_on_stage = {}
+    candidate1_id = ''
+    candidate2_id = ''
 
     candidate1_results = candidate_campaign_manager.retrieve_candidate_campaign_from_we_vote_id(candidate1_we_vote_id)
     if candidate1_results['candidate_campaign_found']:
         candidate1_on_stage = candidate1_results['candidate_campaign']
+        candidate1_id = candidate1_on_stage.id
     else:
         messages.add_message(request, messages.ERROR, 'Could not retrieve candidate 1.')
         return HttpResponseRedirect(reverse('candidate:candidate_list', args=()) +
@@ -940,6 +943,7 @@ def candidate_merge_process_view(request):
     candidate2_results = candidate_campaign_manager.retrieve_candidate_campaign_from_we_vote_id(candidate2_we_vote_id)
     if candidate2_results['candidate_campaign_found']:
         candidate2_on_stage = candidate2_results['candidate_campaign']
+        candidate2_id = candidate2_on_stage.id
     else:
         messages.add_message(request, messages.ERROR, 'Could not retrieve candidate 2.')
         return HttpResponseRedirect(reverse('candidate:candidate_list', args=()) +
@@ -979,8 +983,8 @@ def candidate_merge_process_view(request):
             setattr(candidate1_on_stage, attribute, getattr(candidate2_on_stage, attribute))
 
     # Merge public positions counts
-    public_positions_results = move_positions_to_another_candidate(candidate2_on_stage.id, candidate2_we_vote_id,
-                                                                   candidate1_on_stage.id, candidate1_we_vote_id,
+    public_positions_results = move_positions_to_another_candidate(candidate2_id, candidate2_we_vote_id,
+                                                                   candidate1_id, candidate1_we_vote_id,
                                                                    True)
     if not public_positions_results['success']:
         messages.add_message(request, messages.ERROR, public_positions_results['status'])
@@ -989,8 +993,8 @@ def candidate_merge_process_view(request):
                                     "&state_code=" + str(state_code))
 
     # Merge friends positions counts
-    friends_positions_results = move_positions_to_another_candidate(candidate2_on_stage.id, candidate2_we_vote_id,
-                                                                    candidate1_on_stage.id, candidate1_we_vote_id,
+    friends_positions_results = move_positions_to_another_candidate(candidate2_id, candidate2_we_vote_id,
+                                                                    candidate1_id, candidate1_we_vote_id,
                                                                     False)
     if not friends_positions_results['success']:
         messages.add_message(request, messages.ERROR, friends_positions_results['status'])
