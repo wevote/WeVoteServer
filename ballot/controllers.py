@@ -1151,22 +1151,24 @@ def voter_ballot_list_retrieve_for_api(voter_id):  # voterBallotListRetrieve
                 voter_ballot_list_for_json.append(one_voter_ballot_list)
                 elections_retrieved_count += 1
 
-    # Now see if there are any elections that the voter has not looked at that we can add at the top
+    # Now see if there are any elections that the voter has not looked at that we can add
     for election in election_list:
         if convert_to_int(election.google_civic_election_id) not in election_ids_in_voter_ballot_saved_list:
-            ballot_returned_count = ballot_returned_list_manager.fetch_ballot_returned_list_count_for_election(
-                election.google_civic_election_id)
-            if positive_value_exists(ballot_returned_count):
-                one_election = {
-                    "google_civic_election_id":         convert_to_int(election.google_civic_election_id),
-                    "election_description_text":        election.election_name,
-                    "election_day_text":                election.election_day_text,
-                    "original_text_for_map_search":     "",
-                    "ballot_returned_we_vote_id":       "",
-                    "ballot_location_shortcut":         "",
-                }
-                final_ballot_list.append(one_election)
-                elections_retrieved_count += 1
+            # We used to filter out elections without ballot items. Now we want to return all of them that are marked
+            #   as "listed"
+            # ballot_returned_count = ballot_returned_list_manager.fetch_ballot_returned_list_count_for_election(
+            #     election.google_civic_election_id)
+            # if positive_value_exists(ballot_returned_count):
+            one_election = {
+                "google_civic_election_id":         convert_to_int(election.google_civic_election_id),
+                "election_description_text":        election.election_name,
+                "election_day_text":                election.election_day_text,
+                "original_text_for_map_search":     "",
+                "ballot_returned_we_vote_id":       "",
+                "ballot_location_shortcut":         "",
+            }
+            final_ballot_list.append(one_election)
+            elections_retrieved_count += 1
 
     final_ballot_list = voter_ballot_list_for_json + final_ballot_list
 
