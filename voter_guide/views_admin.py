@@ -41,7 +41,10 @@ def voter_guides_sync_out_view(request):  # voterGuidesSyncOut
                                                         'public_figure_we_vote_id',
                                                         'twitter_description', 'twitter_followers_count',
                                                         'twitter_handle', 'vote_smart_time_span',
-                                                        'voter_guide_owner_type')
+                                                        'voter_guide_owner_type',
+                                                        'we_vote_hosted_profile_image_url_large',
+                                                        'we_vote_hosted_profile_image_url_medium',
+                                                        'we_vote_hosted_profile_image_url_tiny')
         if voter_guide_list_dict:
             voter_guide_list_list_json = list(voter_guide_list_dict)
             return HttpResponse(json.dumps(voter_guide_list_list_json), content_type='application/json')

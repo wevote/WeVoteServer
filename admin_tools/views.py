@@ -38,17 +38,19 @@ from voter.models import Voter, VoterAddress, VoterAddressManager, VoterDeviceLi
 from wevote_functions.functions import convert_to_int, delete_voter_api_device_id_cookie, generate_voter_device_id, \
     get_voter_api_device_id, positive_value_exists, set_voter_api_device_id, STATE_CODE_MAP
 
-BALLOT_ITEMS_SYNC_URL = get_environment_variable("BALLOT_ITEMS_SYNC_URL")
-BALLOT_RETURNED_SYNC_URL = get_environment_variable("BALLOT_RETURNED_SYNC_URL")
-ELECTIONS_SYNC_URL = get_environment_variable("ELECTIONS_SYNC_URL")
-ISSUES_SYNC_URL = get_environment_variable("ISSUES_SYNC_URL")
-ORGANIZATIONS_SYNC_URL = get_environment_variable("ORGANIZATIONS_SYNC_URL")
-OFFICES_SYNC_URL = get_environment_variable("OFFICES_SYNC_URL")
-CANDIDATES_SYNC_URL = get_environment_variable("CANDIDATES_SYNC_URL")
-MEASURES_SYNC_URL = get_environment_variable("MEASURES_SYNC_URL")
-POLLING_LOCATIONS_SYNC_URL = get_environment_variable("POLLING_LOCATIONS_SYNC_URL")
-POSITIONS_SYNC_URL = get_environment_variable("POSITIONS_SYNC_URL")
-VOTER_GUIDES_SYNC_URL = get_environment_variable("VOTER_GUIDES_SYNC_URL")
+BALLOT_ITEMS_SYNC_URL = get_environment_variable("BALLOT_ITEMS_SYNC_URL")  # ballotItemsSyncOut
+BALLOT_RETURNED_SYNC_URL = get_environment_variable("BALLOT_RETURNED_SYNC_URL")  # ballotReturnedSyncOut
+ELECTIONS_SYNC_URL = get_environment_variable("ELECTIONS_SYNC_URL")  # electionsSyncOut
+ISSUES_SYNC_URL = get_environment_variable("ISSUES_SYNC_URL")  # issuesSyncOut
+ORGANIZATIONS_SYNC_URL = get_environment_variable("ORGANIZATIONS_SYNC_URL")  # organizationsSyncOut
+ORGANIZATION_LINK_TO_ISSUE_SYNC_URL = \
+    get_environment_variable("ORGANIZATION_LINK_TO_ISSUE_SYNC_URL")  # organizationLinkToIssueSyncOut
+OFFICES_SYNC_URL = get_environment_variable("OFFICES_SYNC_URL")  # officesSyncOut
+CANDIDATES_SYNC_URL = get_environment_variable("CANDIDATES_SYNC_URL")  # candidatesSyncOut
+MEASURES_SYNC_URL = get_environment_variable("MEASURES_SYNC_URL")  # measuresSyncOut
+POLLING_LOCATIONS_SYNC_URL = get_environment_variable("POLLING_LOCATIONS_SYNC_URL")  # pollingLocationsSyncOut
+POSITIONS_SYNC_URL = get_environment_variable("POSITIONS_SYNC_URL")  # positionsSyncOut
+VOTER_GUIDES_SYNC_URL = get_environment_variable("VOTER_GUIDES_SYNC_URL")  # voterGuidesSyncOut
 
 
 @login_required
@@ -1839,6 +1841,7 @@ def sync_data_with_master_servers_view(request):
         'measures_sync_url':            MEASURES_SYNC_URL,
         'offices_sync_url':             OFFICES_SYNC_URL,
         'organizations_sync_url':       ORGANIZATIONS_SYNC_URL,
+        'organization_link_to_issue_sync_url':  ORGANIZATION_LINK_TO_ISSUE_SYNC_URL,
         'polling_locations_sync_url':   POLLING_LOCATIONS_SYNC_URL,
         'positions_sync_url':           POSITIONS_SYNC_URL,
         'voter_guides_sync_url':        VOTER_GUIDES_SYNC_URL,

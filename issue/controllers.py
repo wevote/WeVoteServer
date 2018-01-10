@@ -18,8 +18,9 @@ from wevote_functions.functions import positive_value_exists, process_request_fr
 logger = wevote_functions.admin.get_logger(__name__)
 
 WE_VOTE_API_KEY = get_environment_variable("WE_VOTE_API_KEY")
-ISSUES_SYNC_URL = get_environment_variable("ISSUES_SYNC_URL")
-ORGANIZATION_LINK_TO_ISSUE_SYNC_URL = get_environment_variable("ORGANIZATION_LINK_TO_ISSUE_SYNC_URL")
+ISSUES_SYNC_URL = get_environment_variable("ISSUES_SYNC_URL")  # issuesSyncOut
+ORGANIZATION_LINK_TO_ISSUE_SYNC_URL = \
+    get_environment_variable("ORGANIZATION_LINK_TO_ISSUE_SYNC_URL")  # organizationLinkToIssueSyncOut
 
 
 def issues_import_from_master_server(request):

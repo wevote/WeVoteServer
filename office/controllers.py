@@ -16,7 +16,7 @@ from wevote_functions.functions import positive_value_exists, process_request_fr
 logger = wevote_functions.admin.get_logger(__name__)
 
 WE_VOTE_API_KEY = get_environment_variable("WE_VOTE_API_KEY")
-OFFICES_SYNC_URL = get_environment_variable("OFFICES_SYNC_URL")
+OFFICES_SYNC_URL = get_environment_variable("OFFICES_SYNC_URL")  # officesSyncOut
 
 
 def offices_import_from_sample_file():

@@ -14,7 +14,7 @@ from wevote_functions.functions import convert_to_int, positive_value_exists, pr
 logger = wevote_functions.admin.get_logger(__name__)
 
 WE_VOTE_API_KEY = get_environment_variable("WE_VOTE_API_KEY")
-ELECTIONS_SYNC_URL = get_environment_variable("ELECTIONS_SYNC_URL")
+ELECTIONS_SYNC_URL = get_environment_variable("ELECTIONS_SYNC_URL")  # electionsSyncOut
 
 
 def election_remote_retrieve():

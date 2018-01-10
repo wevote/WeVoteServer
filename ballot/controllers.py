@@ -25,8 +25,8 @@ logger = wevote_functions.admin.get_logger(__name__)
 GOOGLE_CIVIC_API_KEY = get_environment_variable("GOOGLE_CIVIC_API_KEY")
 GOOGLE_MAPS_API_KEY = get_environment_variable("GOOGLE_MAPS_API_KEY")
 WE_VOTE_API_KEY = get_environment_variable("WE_VOTE_API_KEY")
-BALLOT_ITEMS_SYNC_URL = get_environment_variable("BALLOT_ITEMS_SYNC_URL")
-BALLOT_RETURNED_SYNC_URL = get_environment_variable("BALLOT_RETURNED_SYNC_URL")
+BALLOT_ITEMS_SYNC_URL = get_environment_variable("BALLOT_ITEMS_SYNC_URL")  # ballotItemsSyncOut
+BALLOT_RETURNED_SYNC_URL = get_environment_variable("BALLOT_RETURNED_SYNC_URL")  # ballotReturnedSyncOut
 
 
 def ballot_items_import_from_master_server(request, google_civic_election_id, state_code):
@@ -400,14 +400,17 @@ def ballot_returned_import_from_structured_json(structured_json):
 def heal_geo_coordinates(text_for_map_search):
     longitude = None
     latitude = None
-    google_client = get_geocoder_for_service('google')(GOOGLE_MAPS_API_KEY)
-    location = google_client.geocode(text_for_map_search)
-    if location is None:
-        status = 'Could not find location matching "{}"'.format(text_for_map_search)
-        logger.debug(status)
-    else:
-        latitude = location.latitude
-        longitude = location.longitude
+    try:
+        google_client = get_geocoder_for_service('google')(GOOGLE_MAPS_API_KEY)
+        location = google_client.geocode(text_for_map_search)
+        if location is None:
+            status = 'Could not find location matching "{}" '.format(text_for_map_search)
+            logger.debug(status)
+        else:
+            latitude = location.latitude
+            longitude = location.longitude
+    except Exception as e:
+        pass
     return latitude, longitude
 
 

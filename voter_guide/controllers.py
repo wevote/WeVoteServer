@@ -27,7 +27,7 @@ from wevote_functions.functions import is_voter_device_id_valid, positive_value_
 logger = wevote_functions.admin.get_logger(__name__)
 
 WE_VOTE_API_KEY = get_environment_variable("WE_VOTE_API_KEY")
-VOTER_GUIDES_SYNC_URL = get_environment_variable("VOTER_GUIDES_SYNC_URL")
+VOTER_GUIDES_SYNC_URL = get_environment_variable("VOTER_GUIDES_SYNC_URL")  # voterGuidesSyncOut
 
 
 def duplicate_voter_guides(from_voter_id, from_voter_we_vote_id, from_organization_we_vote_id,
@@ -215,6 +215,12 @@ def voter_guides_import_from_structured_json(structured_json):
         state_code = one_voter_guide['state_code'] if 'state_code' in one_voter_guide else ''
         pledge_count = one_voter_guide['pledge_count'] if 'pledge_count' in one_voter_guide else ''
         pledge_goal = one_voter_guide['pledge_goal'] if 'pledge_goal' in one_voter_guide else ''
+        we_vote_hosted_profile_image_url_large = one_voter_guide['we_vote_hosted_profile_image_url_large'] \
+            if 'we_vote_hosted_profile_image_url_large' in one_voter_guide else ''
+        we_vote_hosted_profile_image_url_medium = one_voter_guide['we_vote_hosted_profile_image_url_medium'] \
+            if 'we_vote_hosted_profile_image_url_medium' in one_voter_guide else ''
+        we_vote_hosted_profile_image_url_tiny = one_voter_guide['we_vote_hosted_profile_image_url_tiny'] \
+            if 'we_vote_hosted_profile_image_url_tiny' in one_voter_guide else ''
 
         if positive_value_exists(we_vote_id) and \
                 (positive_value_exists(organization_we_vote_id) or
@@ -245,13 +251,20 @@ def voter_guides_import_from_structured_json(structured_json):
         if proceed_to_update_or_create:
             if positive_value_exists(organization_we_vote_id) and positive_value_exists(google_civic_election_id):
                 results = voter_guide_manager.update_or_create_organization_voter_guide_by_election_id(
-                    organization_we_vote_id, google_civic_election_id, state_code, pledge_goal)
+                    organization_we_vote_id, google_civic_election_id, state_code, pledge_goal,
+                    we_vote_hosted_profile_image_url_large, we_vote_hosted_profile_image_url_medium,
+                    we_vote_hosted_profile_image_url_tiny
+                )
             elif positive_value_exists(organization_we_vote_id) and positive_value_exists(vote_smart_time_span):
                 results = voter_guide_manager.update_or_create_organization_voter_guide_by_time_span(
-                    organization_we_vote_id, vote_smart_time_span, pledge_goal)
+                    organization_we_vote_id, vote_smart_time_span, pledge_goal,
+                    we_vote_hosted_profile_image_url_large, we_vote_hosted_profile_image_url_medium,
+                    we_vote_hosted_profile_image_url_tiny)
             elif positive_value_exists(public_figure_we_vote_id) and positive_value_exists(google_civic_election_id):
                 results = voter_guide_manager.update_or_create_public_figure_voter_guide(
-                    google_civic_election_id, public_figure_we_vote_id, pledge_goal)
+                    google_civic_election_id, public_figure_we_vote_id, pledge_goal,
+                    we_vote_hosted_profile_image_url_large, we_vote_hosted_profile_image_url_medium,
+                    we_vote_hosted_profile_image_url_tiny)
             else:
                 results = {
                     'success': False,

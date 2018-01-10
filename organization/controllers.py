@@ -34,7 +34,7 @@ from import_export_twitter.models import TwitterAuthManager
 
 logger = wevote_functions.admin.get_logger(__name__)
 
-ORGANIZATIONS_SYNC_URL = get_environment_variable("ORGANIZATIONS_SYNC_URL")
+ORGANIZATIONS_SYNC_URL = get_environment_variable("ORGANIZATIONS_SYNC_URL")  # organizationsSyncOut
 WE_VOTE_API_KEY = get_environment_variable("WE_VOTE_API_KEY")
 TWITTER_CONSUMER_KEY = get_environment_variable("TWITTER_CONSUMER_KEY")
 TWITTER_CONSUMER_SECRET = get_environment_variable("TWITTER_CONSUMER_SECRET")
@@ -58,10 +58,10 @@ def organization_retrieve_tweets_from_twitter(organization_we_vote_id):
     if not positive_value_exists(organization_we_vote_id):
         status = "ORGANIZATION_WE_VOTE_ID_MISSING"
         results = {
-        'success':          success,
-        'status':           status,
-        'tweets_saved':     tweets_saved,
-        'tweets_not_saved': tweets_not_saved
+            'success':          success,
+            'status':           status,
+            'tweets_saved':     tweets_saved,
+            'tweets_not_saved': tweets_not_saved
         }
         return results
     auth = tweepy.OAuthHandler(TWITTER_CONSUMER_KEY, TWITTER_CONSUMER_SECRET)
@@ -823,6 +823,12 @@ def organizations_import_from_structured_json(structured_json):
                 if 'ballotpedia_photo_url' in one_organization else False
             organization_type = one_organization["organization_type"] \
                 if 'organization_type' in one_organization else False
+            we_vote_hosted_profile_image_url_large = one_organization['we_vote_hosted_profile_image_url_large'] \
+                if 'we_vote_hosted_profile_image_url_large' in one_organization else False
+            we_vote_hosted_profile_image_url_medium = one_organization['we_vote_hosted_profile_image_url_medium'] \
+                if 'we_vote_hosted_profile_image_url_medium' in one_organization else False
+            we_vote_hosted_profile_image_url_tiny = one_organization['we_vote_hosted_profile_image_url_tiny'] \
+                if 'we_vote_hosted_profile_image_url_tiny' in one_organization else False
 
             if organization_on_stage_found:
                 # Update existing organization in the database
@@ -905,6 +911,12 @@ def organizations_import_from_structured_json(structured_json):
                 organization_on_stage.ballotpedia_photo_url = ballotpedia_photo_url
             if organization_type is not False:
                 organization_on_stage.organization_type = organization_type
+            if we_vote_hosted_profile_image_url_large is not False:
+                organization_on_stage.we_vote_hosted_profile_image_url_large = we_vote_hosted_profile_image_url_large
+            if we_vote_hosted_profile_image_url_medium is not False:
+                organization_on_stage.we_vote_hosted_profile_image_url_medium = we_vote_hosted_profile_image_url_medium
+            if we_vote_hosted_profile_image_url_tiny is not False:
+                organization_on_stage.we_vote_hosted_profile_image_url_tiny = we_vote_hosted_profile_image_url_tiny
 
             organization_on_stage.save()
             if organization_on_stage_found:
