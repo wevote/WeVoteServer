@@ -66,6 +66,7 @@ STATE_CODE_MAP = {
     'WY': 'Wyoming',
 }
 
+
 def convert_state_code_to_state_text(incoming_state_code):
     for state_code, state_name in STATE_CODE_MAP.items():
         if incoming_state_code.lower() == state_code.lower():
