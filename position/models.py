@@ -4905,7 +4905,7 @@ class PositionManager(models.Model):
         else:
             position_on_stage_starter = PositionForFriends
             position_on_stage = PositionForFriends()
-        status = "ENTERING_UPDATE_OR_CREATE_POSITION"
+        status = "ENTERING_UPDATE_OR_CREATE_POSITION "
 
         position_manager = PositionManager()
 
@@ -5027,11 +5027,11 @@ class PositionManager(models.Model):
 
             if number_of_unique_ballot_item_identifiers > 1:
                 too_many_unique_ballot_item_variables_received = True
-                status = "FAILED-TOO_MANY_UNIQUE_BALLOT_ITEM_VARIABLES"
+                status = "FAILED-TOO_MANY_UNIQUE_BALLOT_ITEM_VARIABLES "
                 success = False
             elif number_of_unique_ballot_item_identifiers is 0:
                 no_unique_ballot_item_variables_received = True
-                status = "FAILED-NO_UNIQUE_BALLOT_ITEM_VARIABLES_RECEIVED"
+                status = "FAILED-NO_UNIQUE_BALLOT_ITEM_VARIABLES_RECEIVED "
                 success = False
 
             # Make sure that too many "actor" identifier variables weren't passed in
@@ -5045,11 +5045,11 @@ class PositionManager(models.Model):
 
             if number_of_unique_actor_identifiers > 1:
                 too_many_unique_actor_variables_received = True
-                status = "FAILED-TOO_MANY_UNIQUE_ACTOR_VARIABLES"
+                status = "FAILED-TOO_MANY_UNIQUE_ACTOR_VARIABLES "
                 success = False
             elif number_of_unique_actor_identifiers is 0:
                 no_unique_actor_variables_received = True
-                status = "FAILED-NO_UNIQUE_ACTOR_VARIABLES_RECEIVED"
+                status = "FAILED-NO_UNIQUE_ACTOR_VARIABLES_RECEIVED "
                 success = False
 
             # Only proceed if the correct number of unique identifiers was received
@@ -5088,11 +5088,11 @@ class PositionManager(models.Model):
                         if results['position_found']:
                             position_on_stage = results['position']
                             position_on_stage_found = True
-                            found_with_status = "FOUND_WITH_CANDIDATE_AND_ORGANIZATION_WE_VOTE_ID"
+                            found_with_status = "FOUND_WITH_CANDIDATE_AND_ORGANIZATION_WE_VOTE_ID "
                     except MultipleObjectsReturned as e:
                         handle_record_found_more_than_one_exception(e, logger)
                         exception_multiple_object_returned = True
-                        status = "FAILED-MULTIPLE_FOUND_WITH_CANDIDATE_AND_ORGANIZATION_WE_VOTE_ID"
+                        status = "FAILED-MULTIPLE_FOUND_WITH_CANDIDATE_AND_ORGANIZATION_WE_VOTE_ID "
                     except ObjectDoesNotExist as e:
                         # Not a problem -- a position matching this candidate_we_vote_id wasn't found
                         pass
@@ -5129,7 +5129,7 @@ class PositionManager(models.Model):
                         if results['position_found']:
                             position_on_stage = results['position']
                             position_on_stage_found = True
-                            found_with_status = "FOUND_WITH_CANDIDATE_AND_ORGANIZATION_WE_VOTE_ID_WITH_TIME_SPAN"
+                            found_with_status = "FOUND_WITH_CANDIDATE_AND_ORGANIZATION_WE_VOTE_ID_WITH_TIME_SPAN "
                     except MultipleObjectsReturned as e:
                         handle_record_found_more_than_one_exception(e, logger)
                         exception_multiple_object_returned = True

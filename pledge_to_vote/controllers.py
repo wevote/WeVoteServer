@@ -7,7 +7,7 @@ from follow.models import FollowOrganizationManager
 from friend.models import FriendManager
 from organization.models import OrganizationManager
 from position.models import ANY_STANCE, SUPPORT, STILL_DECIDING, INFORMATION_ONLY, NO_STANCE, OPPOSE, PERCENT_RATING, \
-    FRIENDS_ONLY, PUBLIC_ONLY, FRIENDS_AND_PUBLIC, PositionListManager, PositionManager
+    FRIENDS_ONLY, PUBLIC_ONLY, FRIENDS_AND_PUBLIC, PositionForFriends, PositionListManager, PositionManager
 from voter.models import VoterManager
 from voter_guide.models import VoterGuideManager
 import wevote_functions.admin
@@ -169,24 +169,39 @@ def pledge_to_vote_with_voter_guide_for_api(voter_device_id, voter_guide_we_vote
                     status += 'NEW_STANCE_COULD_NOT_BE_SAVED '
         else:
             # Create a new position
-            results = position_manager.update_or_create_position(
-                position_we_vote_id=False,
-                organization_we_vote_id=voter.linked_organization_we_vote_id,
-                public_figure_we_vote_id=False,
+            voter_organization_id = 0
+            if positive_value_exists(voter.linked_organization_we_vote_id):
+                organization_results = organization_manager.retrieve_organization_from_we_vote_id(
+                    voter.linked_organization_we_vote_id)
+                if organization_results['organization_found']:
+                    organization = organization_results['organization']
+                    voter_organization_id = organization.id
+
+            position_on_stage = PositionForFriends(
+                voter_id=voter.id,
                 voter_we_vote_id=voter.we_vote_id,
-                google_civic_election_id=voter_guide.google_civic_election_id,
-                state_code=voter_guide.state_code,
+                candidate_campaign_id=organization_position.candidate_campaign_id,
+                candidate_campaign_we_vote_id=organization_position.candidate_campaign_we_vote_id,
+                contest_measure_id=organization_position.contest_measure_id,
+                contest_measure_we_vote_id=organization_position.contest_measure_we_vote_id,
+                contest_office_id=organization_position.contest_office_id,
+                contest_office_we_vote_id=organization_position.contest_office_we_vote_id,
+                google_civic_election_id=organization_position.google_civic_election_id,
+                state_code=organization_position.state_code,
+                organization_id=voter_organization_id,
+                organization_we_vote_id=voter.linked_organization_we_vote_id,
                 ballot_item_display_name=organization_position.ballot_item_display_name,
-                office_we_vote_id=organization_position.contest_office_we_vote_id,
-                candidate_we_vote_id=organization_position.candidate_campaign_we_vote_id,
-                measure_we_vote_id=organization_position.contest_measure_we_vote_id,
+                speaker_display_name=voter.get_full_name(True),
                 stance=organization_position.stance,
-                set_as_public_position=False,
-                vote_smart_time_span=organization_position.vote_smart_time_span,
-                vote_smart_rating_id=organization_position.vote_smart_rating_id,
-                vote_smart_rating=organization_position.vote_smart_rating,
-                vote_smart_rating_name=organization_position.vote_smart_rating_name)
-            status += results['status']
+                # We are not currently supporting vote smart ratings
+                # vote_smart_time_span=organization_position.vote_smart_time_span,
+                # vote_smart_rating_id=organization_position.vote_smart_rating_id,
+                # vote_smart_rating=organization_position.vote_smart_rating,
+                # vote_smart_rating_name=organization_position.vote_smart_rating_name,
+            )
+            # Save again so the we_vote_id is created
+            position_on_stage.save()
+            status += "NEW_POSITION_SAVED "
 
     results = {
         'status':                   status,
