@@ -29,7 +29,11 @@ class VoterGuideManager(models.Manager):
     """
     def update_or_create_organization_voter_guide_by_election_id(self, organization_we_vote_id,
                                                                  google_civic_election_id, state_code='',
-                                                                 pledge_goal=0):
+                                                                 pledge_goal=0,
+                                                                 we_vote_hosted_profile_image_url_large='',
+                                                                 we_vote_hosted_profile_image_url_medium='',
+                                                                 we_vote_hosted_profile_image_url_tiny=''
+                                                                 ):
         """
         This creates voter_guides, and also refreshes voter guides with updated organization data
         """
@@ -81,6 +85,14 @@ class VoterGuideManager(models.Manager):
                     }
                     if positive_value_exists(pledge_goal):
                         updated_values['pledge_goal'] = pledge_goal
+                    if positive_value_exists(we_vote_hosted_profile_image_url_large):
+                        updated_values['we_vote_hosted_profile_image_url_large'] = \
+                            we_vote_hosted_profile_image_url_large
+                    if positive_value_exists(we_vote_hosted_profile_image_url_medium):
+                        updated_values['we_vote_hosted_profile_image_url_medium'] = \
+                            we_vote_hosted_profile_image_url_medium
+                    if positive_value_exists(we_vote_hosted_profile_image_url_tiny):
+                        updated_values['we_vote_hosted_profile_image_url_tiny'] = we_vote_hosted_profile_image_url_tiny
                     voter_guide_on_stage, new_voter_guide_created = VoterGuide.objects.update_or_create(
                         google_civic_election_id__exact=google_civic_election_id,
                         organization_we_vote_id__iexact=organization_we_vote_id,
@@ -111,7 +123,11 @@ class VoterGuideManager(models.Manager):
         return results
 
     def update_or_create_organization_voter_guide_by_time_span(self, organization_we_vote_id, vote_smart_time_span,
-                                                               pledge_goal=''):
+                                                               pledge_goal='',
+                                                               we_vote_hosted_profile_image_url_large='',
+                                                               we_vote_hosted_profile_image_url_medium='',
+                                                               we_vote_hosted_profile_image_url_tiny=''
+                                                               ):
         organization_found = False
         voter_guide_owner_type = ORGANIZATION
         exception_multiple_object_returned = False
@@ -157,6 +173,14 @@ class VoterGuideManager(models.Manager):
                     }
                     if positive_value_exists(pledge_goal):
                         updated_values['pledge_goal'] = pledge_goal
+                    if positive_value_exists(we_vote_hosted_profile_image_url_large):
+                        updated_values['we_vote_hosted_profile_image_url_large'] = \
+                            we_vote_hosted_profile_image_url_large
+                    if positive_value_exists(we_vote_hosted_profile_image_url_medium):
+                        updated_values['we_vote_hosted_profile_image_url_medium'] = \
+                            we_vote_hosted_profile_image_url_medium
+                    if positive_value_exists(we_vote_hosted_profile_image_url_tiny):
+                        updated_values['we_vote_hosted_profile_image_url_tiny'] = we_vote_hosted_profile_image_url_tiny
                     voter_guide_on_stage, new_voter_guide_created = VoterGuide.objects.update_or_create(
                         vote_smart_time_span__exact=vote_smart_time_span,
                         organization_we_vote_id__iexact=organization_we_vote_id,
@@ -186,7 +210,11 @@ class VoterGuideManager(models.Manager):
         return results
 
     def update_or_create_public_figure_voter_guide(self, google_civic_election_id, public_figure_we_vote_id,
-                                                   pledge_goal):
+                                                   pledge_goal,
+                                                   we_vote_hosted_profile_image_url_large='',
+                                                   we_vote_hosted_profile_image_url_medium='',
+                                                   we_vote_hosted_profile_image_url_tiny=''
+                                                   ):
         new_voter_guide = VoterGuide()
         voter_guide_owner_type = new_voter_guide.PUBLIC_FIGURE
         exception_multiple_object_returned = False
@@ -205,6 +233,14 @@ class VoterGuideManager(models.Manager):
                 }
                 if positive_value_exists(pledge_goal):
                     updated_values['pledge_goal'] = pledge_goal
+                if positive_value_exists(we_vote_hosted_profile_image_url_large):
+                    updated_values['we_vote_hosted_profile_image_url_large'] = \
+                        we_vote_hosted_profile_image_url_large
+                if positive_value_exists(we_vote_hosted_profile_image_url_medium):
+                    updated_values['we_vote_hosted_profile_image_url_medium'] = \
+                        we_vote_hosted_profile_image_url_medium
+                if positive_value_exists(we_vote_hosted_profile_image_url_tiny):
+                    updated_values['we_vote_hosted_profile_image_url_tiny'] = we_vote_hosted_profile_image_url_tiny
                 voter_guide_on_stage, new_voter_guide_created = VoterGuide.objects.update_or_create(
                     google_civic_election_id__exact=google_civic_election_id,
                     voter_guide_owner_type__iexact=voter_guide_owner_type,

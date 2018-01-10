@@ -72,6 +72,12 @@ If you do not see "WeVoteServerDB" in PGAdmin, try this command from your termin
 
     $ sudo -u postgres createdb WeVoteServerDB
 
+Or these commands:
+
+    $ psql postgres -U postgres
+    postgres=# CREATE DATABASE WeVoteServerDB;
+    postgres=# \list
+    postgres=# \q
 
 [NEXT: 2. Get WeVoteServer Code from Github](README_API_INSTALL_CODE_FROM_GITHUB.md)
 

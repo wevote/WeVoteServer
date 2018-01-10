@@ -28,7 +28,7 @@ from wevote_functions.functions import is_voter_device_id_valid, positive_value_
 logger = wevote_functions.admin.get_logger(__name__)
 
 WE_VOTE_API_KEY = get_environment_variable("WE_VOTE_API_KEY")
-POSITIONS_SYNC_URL = get_environment_variable("POSITIONS_SYNC_URL")
+POSITIONS_SYNC_URL = get_environment_variable("POSITIONS_SYNC_URL")  # positionsSyncOut
 
 
 def find_organizations_referenced_in_positions_for_this_voter(voter):

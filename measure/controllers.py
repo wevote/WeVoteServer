@@ -16,7 +16,7 @@ from wevote_functions.functions import convert_state_code_to_state_text, convert
 logger = wevote_functions.admin.get_logger(__name__)
 
 WE_VOTE_API_KEY = get_environment_variable("WE_VOTE_API_KEY")
-MEASURES_SYNC_URL = get_environment_variable("MEASURES_SYNC_URL")
+MEASURES_SYNC_URL = get_environment_variable("MEASURES_SYNC_URL")  # measuresSyncOut
 
 
 def measure_retrieve_for_api(measure_id, measure_we_vote_id):  # measureRetrieve

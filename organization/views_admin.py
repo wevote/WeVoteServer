@@ -122,7 +122,9 @@ def organizations_sync_out_view(request):  # organizationsSyncOut
             'wikipedia_page_id', 'wikipedia_photo_url',
             'wikipedia_thumbnail_url', 'wikipedia_thumbnail_width',
             'wikipedia_thumbnail_height', 'ballotpedia_page_title',
-            'ballotpedia_photo_url')
+            'ballotpedia_photo_url', 'we_vote_hosted_profile_image_url_large',
+            'we_vote_hosted_profile_image_url_medium', 'we_vote_hosted_profile_image_url_tiny'
+        )
         if organization_list_dict:
             organization_list_json = list(organization_list_dict)
             return HttpResponse(json.dumps(organization_list_json), content_type='application/json')
