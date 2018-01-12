@@ -14,6 +14,8 @@ from django.core.urlresolvers import reverse
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.messages import get_messages
+from django.http import HttpResponse
+import json
 from django.shortcuts import render
 from election.models import Election, ElectionManager
 from exception.models import handle_record_found_more_than_one_exception,\
@@ -21,8 +23,6 @@ from exception.models import handle_record_found_more_than_one_exception,\
 from import_export_vote_smart.models import VoteSmartRatingOneCandidate
 from import_export_vote_smart.votesmart_local import VotesmartApiError
 from position.models import PositionEntered, PositionListManager
-from rest_framework.views import APIView
-from rest_framework.response import Response
 from voter.models import voter_has_authority
 import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, convert_to_political_party_constant, \
@@ -30,11 +30,6 @@ from wevote_functions.functions import convert_to_int, convert_to_political_part
     extract_middle_name_from_full_name, \
     extract_last_name_from_full_name, extract_twitter_handle_from_text_string, \
     positive_value_exists
-# display_full_name_with_correct_capitalization, \
-# extract_state_from_ocd_division_id, extract_twitter_handle_from_text_string, \
-# positive_value_exists, \
-# AMERICAN_INDEPENDENT, DEMOCRAT, D_R, ECONOMIC_GROWTH, GREEN, INDEPENDENT,  INDEPENDENT_GREEN, LIBERTARIAN, \
-# NO_PARTY_PREFERENCE, NON_PARTISAN, PEACE_AND_FREEDOM, REFORM, REPUBLICAN
 
 
 logger = wevote_functions.admin.get_logger(__name__)
@@ -631,3 +626,64 @@ def politician_delete_process_view(request):  # TODO DALE Transition fully to po
         return HttpResponseRedirect(reverse('politician:politician_edit', args=(politician_id,)))
 
     return HttpResponseRedirect(reverse('politician:politician_list', args=()))
+
+
+# This page does not need to be protected.
+def politicians_sync_out_view(request):  # politiciansSyncOut
+    state_code = request.GET.get('state_code', '')
+    politician_search = request.GET.get('politician_search', '')
+
+    try:
+        politician_query = Politician.objects.using('readonly').all()
+        if positive_value_exists(state_code):
+            politician_query = politician_query.filter(state_code__iexact=state_code)
+        filters = []
+        if positive_value_exists(politician_search):
+            new_filter = Q(politician_name__icontains=politician_search)
+            filters.append(new_filter)
+
+            new_filter = Q(politician_twitter_handle__icontains=politician_search)
+            filters.append(new_filter)
+
+            new_filter = Q(politician_url__icontains=politician_search)
+            filters.append(new_filter)
+
+            new_filter = Q(party__icontains=politician_search)
+            filters.append(new_filter)
+
+            new_filter = Q(we_vote_id__icontains=politician_search)
+            filters.append(new_filter)
+
+            # Add the first query
+            if len(filters):
+                final_filters = filters.pop()
+
+                # ...and "OR" the remaining items in the list
+                for item in filters:
+                    final_filters |= item
+
+                politician_query = politician_query.filter(final_filters)
+
+        politician_query = politician_query.values(
+            'we_vote_id', 'first_name', 'middle_name', 'last_name',
+            'politician_name', 'google_civic_candidate_name', 'full_name_assembled', 'gender',
+            'birth_date', 'bioguide_id', 'thomas_id', 'lis_id', 'govtrack_id',
+            'opensecrets_id', 'vote_smart_id', 'fec_id', 'cspan_id',
+            'wikipedia_id', 'ballotpedia_id', 'house_history_id',
+            'maplight_id', 'washington_post_id', 'icpsr_id',
+            'political_party', 'state_code', 'politician_url',
+            'politician_twitter_handle',
+            'we_vote_hosted_profile_image_url_large', 'we_vote_hosted_profile_image_url_medium',
+            'we_vote_hosted_profile_image_url_tiny', 'ctcl_uuid', 'politician_facebook_id',
+            'politician_phone_number', 'politician_googleplus_id', 'politician_youtube_id', 'politician_email_address')
+        if politician_query:
+            politician_list_json = list(politician_query)
+            return HttpResponse(json.dumps(politician_list_json), content_type='application/json')
+    except Exception as e:
+        pass
+
+    json_data = {
+        'success': False,
+        'status': 'POLITICIAN_LIST_MISSING'
+    }
+    return HttpResponse(json.dumps(json_data), content_type='application/json')

@@ -1649,9 +1649,10 @@ def move_friends_to_another_voter(from_voter_we_vote_id, to_voter_we_vote_id):
         return results
 
     friend_manager = FriendManager()
-    from_friend_results = friend_manager.retrieve_current_friends(from_voter_we_vote_id)
+    for_editing = True
+    from_friend_results = friend_manager.retrieve_current_friends(from_voter_we_vote_id, for_editing)
     from_friend_list = from_friend_results['current_friend_list']
-    to_friend_results = friend_manager.retrieve_current_friends(to_voter_we_vote_id)
+    to_friend_results = friend_manager.retrieve_current_friends(to_voter_we_vote_id, for_editing)
     to_friend_list = to_friend_results['current_friend_list']
 
     for from_friend_entry in from_friend_list:
@@ -1675,7 +1676,7 @@ def move_friends_to_another_voter(from_voter_we_vote_id, to_voter_we_vote_id):
             except Exception as e:
                 friend_entries_not_moved += 1
 
-    from_friend_list_remaining_results = friend_manager.retrieve_current_friends(from_voter_we_vote_id)
+    from_friend_list_remaining_results = friend_manager.retrieve_current_friends(from_voter_we_vote_id, for_editing)
     from_friend_list_remaining = from_friend_list_remaining_results['current_friend_list']
     for from_friend_entry in from_friend_list_remaining:
         # Delete the remaining friendship values

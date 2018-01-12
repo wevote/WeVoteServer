@@ -3,12 +3,14 @@
 # -*- coding: UTF-8 -*-
 
 from .controllers import candidates_import_from_master_server, candidates_import_from_sample_file, \
-    candidate_politician_match, figure_out_conflict_values, find_duplicate_candidate, retrieve_candidate_photos, \
+    candidate_politician_match, fetch_duplicate_candidate_count, figure_out_conflict_values, find_duplicate_candidate, \
+    refresh_candidate_data_from_master_tables, retrieve_candidate_photos, \
     retrieve_candidate_politician_match_options, save_google_search_image_to_candidate_table, \
     save_google_search_link_to_candidate_table
 from .models import CandidateCampaign, CandidateCampaignListManager, CandidateCampaignManager, \
     CANDIDATE_UNIQUE_IDENTIFIERS
 from admin_tools.views import redirect_to_sign_in_page
+from bookmark.models import BookmarkItemList
 from office.models import ContestOffice, ContestOfficeManager
 from django.db.models import Q
 from django.http import HttpResponseRedirect
@@ -40,8 +42,6 @@ logger = wevote_functions.admin.get_logger(__name__)
 
 
 # This page does not need to be protected.
-# class CandidatesSyncOutView(APIView):
-#     def get(self, request, format=None):
 def candidates_sync_out_view(request):  # candidatesSyncOut
     google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
     state_code = request.GET.get('state_code', '')
@@ -918,6 +918,10 @@ def candidate_merge_process_view(request):
 
     candidate_campaign_manager = CandidateCampaignManager()
 
+    merge = request.POST.get('merge', False)
+    skip = request.POST.get('skip', False)
+
+    # Candidate 1 is the one we keep, and Candidate 2 is the one we will merge into Candidate 1
     candidate1_we_vote_id = request.POST.get('candidate1_we_vote_id', 0)
     candidate2_we_vote_id = request.POST.get('candidate2_we_vote_id', 0)
     google_civic_election_id = request.POST.get('google_civic_election_id', 0)
@@ -925,10 +929,16 @@ def candidate_merge_process_view(request):
     remove_duplicate_process = request.POST.get('remove_duplicate_process', False)
     state_code = request.POST.get('state_code', '')
 
-    candidate1_on_stage = {}
-    candidate2_on_stage = {}
-    candidate1_id = ''
-    candidate2_id = ''
+    if positive_value_exists(skip):
+        results = candidate_campaign_manager.update_or_create_candidates_are_not_duplicates(
+            candidate1_we_vote_id, candidate2_we_vote_id)
+        if not results['new_candidates_are_not_duplicates_created']:
+            messages.add_message(request, messages.ERROR, 'Could not save candidates_are_not_duplicates entry: ' +
+                                 results['status'])
+        messages.add_message(request, messages.INFO, 'Prior candidates skipped, and not merged.')
+        return HttpResponseRedirect(reverse('candidate:find_and_remove_duplicate_candidates', args=()) +
+                                    "?google_civic_election_id=" + str(google_civic_election_id) +
+                                    "&state_code=" + str(state_code))
 
     candidate1_results = candidate_campaign_manager.retrieve_candidate_campaign_from_we_vote_id(candidate1_we_vote_id)
     if candidate1_results['candidate_campaign_found']:
@@ -950,7 +960,7 @@ def candidate_merge_process_view(request):
                                     '?google_civic_election_id=' + str(google_civic_election_id) +
                                     '&state_code=' + str(state_code))
 
-    # TODO: Migrate images
+    # TODO: Migrate images?
 
     # Merge politician data
     politician1_we_vote_id = candidate1_on_stage.politician_we_vote_id
@@ -966,10 +976,30 @@ def candidate_merge_process_view(request):
         # else do nothing (same parent politician)
     elif positive_value_exists(politician2_we_vote_id):
         # Migrate politician from candidate 2 to candidate 1
+        politician2_id = 0
+        try:
+            # get the politician_id directly to avoid bad data
+            politician_manager = PoliticianManager()
+            results = politician_manager.retrieve_politician(0, politician2_we_vote_id)
+            if results['politician_found']:
+                politician = results['politician']
+                politician2_id = politician.id
+            pass
+        except Exception as e:
+            messages.add_message(request, messages.ERROR, 'Could not save politician.')
         candidate1_on_stage.politician_we_vote_id = politician2_we_vote_id
+        candidate1_on_stage.politician_id = politician2_id
     # else do nothing (no parent politician for candidate 2)
 
     # TODO: Migrate bookmarks
+    bookmark_item_list = BookmarkItemList()
+    bookmark_results = bookmark_item_list.retrieve_bookmark_item_list_for_candidate(candidate2_we_vote_id)
+    if bookmark_results['bookmark_item_list_found']:
+        messages.add_message(request, messages.ERROR, "Bookmarks found for Candidate 2 - "
+                                                      "automatic merge not working yet.")
+        return HttpResponseRedirect(reverse('candidate:find_and_remove_duplicate_candidates', args=()) +
+                                    "?google_civic_election_id=" + str(google_civic_election_id) +
+                                    "&state_code=" + str(state_code))
 
     # Merge attribute values
     conflict_values = figure_out_conflict_values(candidate1_on_stage, candidate2_on_stage)
@@ -982,7 +1012,7 @@ def candidate_merge_process_view(request):
         elif conflict_value == "CANDIDATE2":
             setattr(candidate1_on_stage, attribute, getattr(candidate2_on_stage, attribute))
 
-    # Merge public positions counts
+    # Merge public positions
     public_positions_results = move_positions_to_another_candidate(candidate2_id, candidate2_we_vote_id,
                                                                    candidate1_id, candidate1_we_vote_id,
                                                                    True)
@@ -992,7 +1022,7 @@ def candidate_merge_process_view(request):
                                     "?google_civic_election_id=" + str(google_civic_election_id) +
                                     "&state_code=" + str(state_code))
 
-    # Merge friends positions counts
+    # Merge friends-only positions
     friends_positions_results = move_positions_to_another_candidate(candidate2_id, candidate2_we_vote_id,
                                                                     candidate1_id, candidate1_we_vote_id,
                                                                     False)
@@ -1004,241 +1034,10 @@ def candidate_merge_process_view(request):
 
     # Note: wait to wrap in try/except block
     candidate1_on_stage.save()
+    refresh_candidate_data_from_master_tables(candidate1_on_stage.we_vote_id)
 
-    # TODO: Remove candidate 2
-
-    # If linked to a Politician, make sure that both politician_id and politician_we_vote_id exist
-    # if candidate_on_stage_found:
-    #     if positive_value_exists(candidate_on_stage.politician_we_vote_id) \
-    #             and not positive_value_exists(candidate_on_stage.politician_id):
-    #         try:
-    #             politician_manager = PoliticianManager()
-    #             results = politician_manager.retrieve_politician(0, candidate_on_stage.politician_we_vote_id)
-    #             if results['politician_found']:
-    #                 politician = results['politician']
-    #                 candidate_on_stage.politician_id = politician.id
-    #                 candidate_on_stage.save()
-    #             pass
-    #         except Exception as e:
-    #             messages.add_message(request, messages.ERROR, 'Could not save candidate.')
-
-    # contest_office_we_vote_id = ''
-    # contest_office_name = ''
-    # if positive_value_exists(contest_office_id):
-    #     contest_office_manager = ContestOfficeManager()
-    #     results = contest_office_manager.retrieve_contest_office_from_id(contest_office_id)
-    #     if results['contest_office_found']:
-    #         contest_office = results['contest_office']
-    #         contest_office_we_vote_id = contest_office.we_vote_id
-    #         contest_office_name = contest_office.office_name
-
-    # election_manager = ElectionManager()
-    # election_results = election_manager.retrieve_election(google_civic_election_id)
-    # state_code_from_election = ""
-    # if election_results['election_found']:
-    #     election = election_results['election']
-    #     election_found = election_results['election_found']
-    #     state_code_from_election = election.get_election_state()
-
-    # best_state_code = state_code_from_election if positive_value_exists(state_code_from_election) \
-    #     else state_code
-
-    # if positive_value_exists(look_for_politician):
-    #     # If here, we specifically want to see if a politician exists, given the information submitted
-    #     match_results = retrieve_candidate_politician_match_options(vote_smart_id, maplight_id,
-    #                                                                 candidate_twitter_handle,
-    #                                                                 candidate_name, best_state_code)
-    #     if match_results['politician_found']:
-    #         messages.add_message(request, messages.INFO, 'Politician found! Information filled into this form.')
-    #         matching_politician = match_results['politician']
-    #         politician_we_vote_id = matching_politician.we_vote_id
-    #         politician_twitter_handle = matching_politician.politician_twitter_handle \
-    #             if positive_value_exists(matching_politician.politician_twitter_handle) else ""
-    #         # If Twitter handle was entered in the Add new form, leave in place. Otherwise, pull from Politician entry.
-    #         candidate_twitter_handle = candidate_twitter_handle if candidate_twitter_handle \
-    #             else politician_twitter_handle
-    #         vote_smart_id = matching_politician.vote_smart_id
-    #         maplight_id = matching_politician.maplight_id if positive_value_exists(matching_politician.maplight_id) \
-    #             else ""
-    #         party = matching_politician.political_party
-    #         google_civic_candidate_name = matching_politician.google_civic_candidate_name
-    #         candidate_name = candidate_name if positive_value_exists(candidate_name) \
-    #             else matching_politician.politician_name
-    #     else:
-    #         messages.add_message(request, messages.INFO, 'No politician found. Please make sure you have entered '
-    #                                                      '1) Candidate Name & State Code, '
-    #                                                      '2) Twitter Handle, or '
-    #                                                      '3) Vote Smart Id')
-    #
-    #     url_variables = "?google_civic_election_id=" + str(google_civic_election_id) + \
-    #                     "&candidate_name=" + str(candidate_name) + \
-    #                     "&state_code=" + str(state_code) + \
-    #                     "&google_civic_candidate_name=" + str(google_civic_candidate_name) + \
-    #                     "&contest_office_id=" + str(contest_office_id) + \
-    #                     "&candidate_twitter_handle=" + str(candidate_twitter_handle) + \
-    #                     "&candidate_url=" + str(candidate_url) + \
-    #                     "&party=" + str(party) + \
-    #                     "&ballot_guide_official_statement=" + str(ballot_guide_official_statement) + \
-    #                     "&vote_smart_id=" + str(vote_smart_id) + \
-    #                     "&politician_we_vote_id=" + str(politician_we_vote_id) + \
-    #                     "&maplight_id=" + str(maplight_id)
-    #
-    #     if positive_value_exists(candidate_id):
-    #         return HttpResponseRedirect(reverse('candidate:candidate_edit', args=(candidate_id,)) + url_variables)
-    #     else:
-    #         return HttpResponseRedirect(reverse('candidate:candidate_new', args=()) + url_variables)
-
-    # Check to see if there is a duplicate candidate already saved for this election
-    # existing_candidate_found = False
-    # if not positive_value_exists(candidate_id):
-    #     try:
-    #         filter_list = Q()
-    #
-    #         at_least_one_filter = False
-    #         if positive_value_exists(vote_smart_id):
-    #             at_least_one_filter = True
-    #             filter_list |= Q(vote_smart_id=vote_smart_id)
-    #         if positive_value_exists(maplight_id):
-    #             at_least_one_filter = True
-    #             filter_list |= Q(maplight_id=maplight_id)
-    #
-    #         if at_least_one_filter:
-    #             candidate_duplicates_query = CandidateCampaign.objects.filter(filter_list)
-    #             candidate_duplicates_query = candidate_duplicates_query.filter(
-    #                 google_civic_election_id=google_civic_election_id)
-    #
-    #             if len(candidate_duplicates_query):
-    #                 existing_candidate_found = True
-    #     except Exception as e:
-    #         pass
-
-    # try:
-    #     if existing_candidate_found:
-    #         # We have found a duplicate for this election
-    #         messages.add_message(request, messages.ERROR, 'This candidate is already saved for this election.')
-    #         url_variables = "?google_civic_election_id=" + str(google_civic_election_id) + \
-    #                         "&candidate_name=" + str(candidate_name) + \
-    #                         "&state_code=" + str(state_code) + \
-    #                         "&google_civic_candidate_name=" + str(google_civic_candidate_name) + \
-    #                         "&contest_office_id=" + str(contest_office_id) + \
-    #                         "&candidate_twitter_handle=" + str(candidate_twitter_handle) + \
-    #                         "&candidate_url=" + str(candidate_url) + \
-    #                         "&party=" + str(party) + \
-    #                         "&ballot_guide_official_statement=" + str(ballot_guide_official_statement) + \
-    #                         "&vote_smart_id=" + str(vote_smart_id) + \
-    #                         "&politician_we_vote_id=" + str(politician_we_vote_id) + \
-    #                         "&maplight_id=" + str(maplight_id)
-    #         return HttpResponseRedirect(reverse('candidate:candidate_new', args=()) + url_variables)
-    #     elif candidate_on_stage_found:
-    #         # Update
-    #         if candidate_name is not False:
-    #             candidate_on_stage.candidate_name = candidate_name
-    #         if candidate_twitter_handle is not False:
-    #             candidate_on_stage.candidate_twitter_handle = candidate_twitter_handle
-    #         if candidate_url is not False:
-    #             candidate_on_stage.candidate_url = candidate_url
-    #         if ballot_guide_official_statement is not False:
-    #             candidate_on_stage.ballot_guide_official_statement = ballot_guide_official_statement
-    #         if party is not False:
-    #             candidate_on_stage.party = party
-    #         if google_civic_candidate_name is not False:
-    #             candidate_on_stage.google_civic_candidate_name = google_civic_candidate_name
-    #
-    #         if google_search_image_file:
-    #             # If google search image exist then cache master and resized images and save them to candidate table
-    #             save_google_search_image_to_candidate_table(candidate_on_stage, google_search_image_file,
-    #                                                         google_search_link)
-    #             google_search_user_manager = GoogleSearchUserManager()
-    #             google_search_user_results = google_search_user_manager.retrieve_google_search_user_from_item_link(
-    #                 candidate_on_stage.we_vote_id, google_search_link)
-    #             if google_search_user_results['google_search_user_found']:
-    #                 google_search_user = google_search_user_results['google_search_user']
-    #                 google_search_user.chosen_and_updated = True
-    #                 google_search_user.save()
-    #         elif google_search_link:
-    #             # save google search link
-    #             save_google_search_link_to_candidate_table(candidate_on_stage, google_search_link)
-    #
-    #         # Check to see if this is a We Vote-created election
-    #         # is_we_vote_google_civic_election_id = True \
-    #         #     if convert_to_int(candidate_on_stage.google_civic_election_id) >= 1000000 \
-    #         #     else False
-    #
-    #         if contest_office_id is not False:
-    #             # We only allow updating of candidates within the We Vote Admin in
-    #             candidate_on_stage.contest_office_id = contest_office_id
-    #             candidate_on_stage.contest_office_we_vote_id = contest_office_we_vote_id
-    #             candidate_on_stage.contest_office_name = contest_office_name
-    #         candidate_on_stage.save()
-    #
-    #         # Now refresh the cache entries for this candidate
-    #
-    #         messages.add_message(request, messages.INFO, 'Candidate Campaign updated.')
-    #     else:
-    #         # Create new
-    #         # election must be found
-    #         if not election_found:
-    #             messages.add_message(request, messages.ERROR, 'Could not find election -- required to save candidate.')
-    #             return HttpResponseRedirect(reverse('candidate:candidate_edit', args=(candidate_id,)))
-    #
-    #         required_candidate_variables = True \
-    #             if positive_value_exists(candidate_name) and positive_value_exists(contest_office_id) \
-    #             else False
-    #         if required_candidate_variables:
-    #             candidate_on_stage = CandidateCampaign(
-    #                 candidate_name=candidate_name,
-    #                 google_civic_election_id=google_civic_election_id,
-    #                 contest_office_id=contest_office_id,
-    #                 contest_office_we_vote_id=contest_office_we_vote_id,
-    #                 state_code=best_state_code,
-    #             )
-    #             if google_civic_candidate_name is not False:
-    #                 candidate_on_stage.google_civic_candidate_name = google_civic_candidate_name
-    #             if candidate_twitter_handle is not False:
-    #                 candidate_on_stage.candidate_twitter_handle = candidate_twitter_handle
-    #             if candidate_url is not False:
-    #                 candidate_on_stage.candidate_url = candidate_url
-    #             if party is not False:
-    #                 candidate_on_stage.party = party
-    #             if ballot_guide_official_statement is not False:
-    #                 candidate_on_stage.ballot_guide_official_statement = ballot_guide_official_statement
-    #             if vote_smart_id is not False:
-    #                 candidate_on_stage.vote_smart_id = vote_smart_id
-    #             if maplight_id is not False:
-    #                 candidate_on_stage.maplight_id = maplight_id
-    #             if politician_we_vote_id is not False:
-    #                 candidate_on_stage.politician_we_vote_id = politician_we_vote_id
-    #
-    #             candidate_on_stage.save()
-    #             candidate_id = candidate_on_stage.id
-    #             messages.add_message(request, messages.INFO, 'New candidate saved.')
-    #         else:
-    #             # messages.add_message(request, messages.INFO, 'Could not save -- missing required variables.')
-    #             url_variables = "?google_civic_election_id=" + str(google_civic_election_id) + \
-    #                             "&candidate_name=" + str(candidate_name) + \
-    #                             "&state_code=" + str(state_code) + \
-    #                             "&google_civic_candidate_name=" + str(google_civic_candidate_name) + \
-    #                             "&contest_office_id=" + str(contest_office_id) + \
-    #                             "&candidate_twitter_handle=" + str(candidate_twitter_handle) + \
-    #                             "&candidate_url=" + str(candidate_url) + \
-    #                             "&party=" + str(party) + \
-    #                             "&ballot_guide_official_statement=" + str(ballot_guide_official_statement) + \
-    #                             "&vote_smart_id=" + str(vote_smart_id) + \
-    #                             "&politician_we_vote_id=" + str(politician_we_vote_id) + \
-    #                             "&maplight_id=" + str(maplight_id)
-    #             if positive_value_exists(candidate_id):
-    #                 return HttpResponseRedirect(reverse('candidate:candidate_edit', args=(candidate_id,)) +
-    #                                             url_variables)
-    #             else:
-    #                 return HttpResponseRedirect(reverse('candidate:candidate_new', args=()) +
-    #                                             url_variables)
-    #
-    # except Exception as e:
-    #     messages.add_message(request, messages.ERROR, 'Could not save candidate.')
-    #     return HttpResponseRedirect(reverse('candidate:candidate_edit', args=(candidate_id,)))
-
-    # if positive_value_exists(refresh_from_twitter) or positive_value_exists(candidate_twitter_handle):
-    #     results = refresh_twitter_candidate_details(candidate_on_stage)
+    # Remove candidate 2
+    candidate2_on_stage.delete()
 
     if redirect_to_candidate_list:
         return HttpResponseRedirect(reverse('candidate:candidate_list', args=()) +
@@ -1249,8 +1048,8 @@ def candidate_merge_process_view(request):
         return HttpResponseRedirect(reverse('candidate:find_and_remove_duplicate_candidates', args=()) +
                                     "?google_civic_election_id=" + str(google_civic_election_id) +
                                     "&state_code=" + str(state_code))
-    else:
-        return HttpResponseRedirect(reverse('candidate:candidate_edit', args=(candidate1_on_stage.id,)))
+
+    return HttpResponseRedirect(reverse('candidate:candidate_edit', args=(candidate1_on_stage.id,)))
 
 
 @login_required
@@ -1261,8 +1060,10 @@ def find_and_remove_duplicate_candidates_view(request):
 
     candidate_list = []
     ignore_candidate_id_list = []
+    find_duplicates_count = request.GET.get('find_duplicates_count', 0)
     google_civic_election_id = request.GET.get('google_civic_election_id', 0)
     google_civic_election_id = convert_to_int(google_civic_election_id)
+    candidate_manager = CandidateCampaignManager()
     position_list_manager = PositionListManager()
 
     # We only want to process if a google_civic_election_id comes in
@@ -1272,14 +1073,38 @@ def find_and_remove_duplicate_candidates_view(request):
 
     try:
         # We sort by ID so that the entry which was saved first becomes the "master"
-        candidate_list = CandidateCampaign.objects.order_by('id')
-        candidate_list = candidate_list.filter(google_civic_election_id=google_civic_election_id)
+        candidate_query = CandidateCampaign.objects.order_by('id')
+        candidate_query = candidate_query.filter(google_civic_election_id=google_civic_election_id)
+        candidate_list = list(candidate_query)
     except CandidateCampaign.DoesNotExist:
         pass
 
+    # Loop through all of the candidates in this election to see how many have possible duplicates
+    if positive_value_exists(find_duplicates_count):
+        duplicate_candidate_count = 0
+        for we_vote_candidate in candidate_list:
+            # Note that we don't reset the ignore_candidate_list, so we don't search for a duplicate both directions
+            ignore_candidate_id_list.append(we_vote_candidate.we_vote_id)
+            duplicate_candidate_count_temp = fetch_duplicate_candidate_count(we_vote_candidate,
+                                                                             ignore_candidate_id_list)
+            duplicate_candidate_count += duplicate_candidate_count_temp
+
+        if positive_value_exists(duplicate_candidate_count):
+            messages.add_message(request, messages.INFO, "There are approximately {duplicate_candidate_count} "
+                                                         "possible duplicates."
+                                                         "".format(duplicate_candidate_count=duplicate_candidate_count))
+
     # Loop through all of the candidates in this election
+    ignore_candidate_id_list = []
     for we_vote_candidate in candidate_list:
+        # Add current candidate entry to the ignore list
         ignore_candidate_id_list.append(we_vote_candidate.we_vote_id)
+        # Now check to for other candidates we have labeled as "not a duplicate"
+        not_a_duplicate_list = candidate_manager.fetch_candidates_are_not_duplicates_list_we_vote_ids(
+            we_vote_candidate.we_vote_id)
+
+        ignore_candidate_id_list += not_a_duplicate_list
+
         results = find_duplicate_candidate(we_vote_candidate, ignore_candidate_id_list)
         ignore_candidate_id_list = []
 
@@ -1288,6 +1113,8 @@ def find_and_remove_duplicate_candidates_view(request):
             candidate_option1_for_template = we_vote_candidate
             candidate_option2_for_template = results['candidate_merge_possibility']
 
+            bookmark_item_list = BookmarkItemList()
+
             # Get positions counts for both candidates
             candidate_option1_for_template.public_positions_count = \
                 position_list_manager.fetch_public_positions_count_for_candidate_campaign(
@@ -1295,6 +1122,15 @@ def find_and_remove_duplicate_candidates_view(request):
             candidate_option1_for_template.friends_positions_count = \
                 position_list_manager.fetch_friends_only_positions_count_for_candidate_campaign(
                     candidate_option1_for_template.id, candidate_option1_for_template.we_vote_id)
+            # Bookmarks
+            bookmark_results = bookmark_item_list.retrieve_bookmark_item_list_for_candidate(
+                candidate_option1_for_template.we_vote_id)
+            if bookmark_results['bookmark_item_list_found']:
+                bookmark_item_list = bookmark_results['bookmark_item_list']
+                candidate_option1_bookmark_count = len(bookmark_item_list)
+            else:
+                candidate_option1_bookmark_count = 0
+            candidate_option1_for_template.bookmarks_count = candidate_option1_bookmark_count
 
             candidate_option2_for_template.public_positions_count = \
                 position_list_manager.fetch_public_positions_count_for_candidate_campaign(
@@ -1302,29 +1138,34 @@ def find_and_remove_duplicate_candidates_view(request):
             candidate_option2_for_template.friends_positions_count = \
                 position_list_manager.fetch_friends_only_positions_count_for_candidate_campaign(
                     candidate_option2_for_template.id, candidate_option2_for_template.we_vote_id)
+            # Bookmarks
+            bookmark_results = bookmark_item_list.retrieve_bookmark_item_list_for_candidate(
+                candidate_option2_for_template.we_vote_id)
+            if bookmark_results['bookmark_item_list_found']:
+                bookmark_item_list = bookmark_results['bookmark_item_list']
+                candidate_option2_bookmark_count = len(bookmark_item_list)
+            else:
+                candidate_option2_bookmark_count = 0
+            candidate_option2_for_template.bookmarks_count = candidate_option2_bookmark_count
 
             messages_on_stage = get_messages(request)
             template_values = {
-                'messages_on_stage': messages_on_stage,
-                'candidate_option1': candidate_option1_for_template,
-                'candidate_option2': candidate_option2_for_template,
-                'conflict_values':   results['candidate_merge_conflict_values'],
+                'messages_on_stage':        messages_on_stage,
+                'candidate_option1':        candidate_option1_for_template,
+                'candidate_option2':        candidate_option2_for_template,
+                'conflict_values':          results['candidate_merge_conflict_values'],
+                'google_civic_election_id': google_civic_election_id,
             }
             return render(request, 'candidate/candidate_merge.html', template_values)
 
-    # message = "Google Civic Election ID: {election_id}, " \
-    #           "{number_of_duplicate_candidates_processed} duplicates processed, " \
-    #           "{number_of_duplicate_candidates_failed} duplicate merges failed, " \
-    #           "{number_of_duplicates_could_not_process} could not be processed because 3 exist " \
-    #           "".format(election_id=google_civic_election_id,
-    #                     number_of_duplicate_candidates_processed=number_of_duplicate_candidates_processed,
-    #                     number_of_duplicate_candidates_failed=number_of_duplicate_candidates_failed,
-    #                     number_of_duplicates_could_not_process=number_of_duplicates_could_not_process)
+    message = "Google Civic Election ID: {election_id}, " \
+              "No duplicate candidates found for this election." \
+              "".format(election_id=google_civic_election_id)
 
-    # messages.add_message(request, messages.INFO, message)
+    messages.add_message(request, messages.INFO, message)
 
-    return HttpResponseRedirect(reverse('candidate:candidate_list', args=()) + "?google_civic_election_id={var}".format(
-        var=google_civic_election_id))
+    return HttpResponseRedirect(reverse('candidate:candidate_list', args=()) + "?google_civic_election_id={var}"
+                                                                               "".format(var=google_civic_election_id))
 
 
 @login_required

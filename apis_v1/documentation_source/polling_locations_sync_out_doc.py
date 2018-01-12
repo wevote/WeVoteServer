@@ -36,7 +36,7 @@ def polling_locations_sync_out_doc_template_values(url_root):
 
     template_values = {
         'api_name': 'pollingLocationsSyncOut',
-        'api_slug': 'pollingLocationsSyncOut/?format=json',
+        'api_slug': 'pollingLocationsSyncOut',
         'api_introduction':
             "",
         'try_now_link': 'apis_v1:pollingLocationsSyncOutView',

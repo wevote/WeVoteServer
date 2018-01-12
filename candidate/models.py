@@ -20,6 +20,7 @@ from image.models import ORGANIZATION_ENDORSEMENTS_IMAGE_NAME
 logger = wevote_functions.admin.get_logger(__name__)
 
 CANDIDATE_UNIQUE_IDENTIFIERS = [
+    'ballot_guide_official_statement',
     'ballotpedia_page_title',
     'ballotpedia_photo_url',
     'candidate_email',
@@ -29,7 +30,11 @@ CANDIDATE_UNIQUE_IDENTIFIERS = [
     'candidate_phone',
     'candidate_twitter_handle',
     'candidate_url',
+    'contest_office_id',
+    'contest_office_name',
+    'contest_office_we_vote_id',
     'ctcl_uuid',
+    'facebook_profile_image_url_https',
     'facebook_url',
     'google_civic_candidate_name',
     'google_civic_election_id',
@@ -51,7 +56,11 @@ CANDIDATE_UNIQUE_IDENTIFIERS = [
     'twitter_description',
     'twitter_location',
     'twitter_name',
+    'twitter_profile_background_image_url_https',
+    'twitter_profile_banner_url_https',
+    'twitter_profile_image_url_https',
     'twitter_url',
+    'twitter_user_id',
     'vote_smart_id',
     'we_vote_hosted_profile_image_url_large',
     'we_vote_hosted_profile_image_url_medium',
@@ -495,6 +504,76 @@ class CandidateCampaignListManager(models.Model):
             'multiple_entries_found':   multiple_entries_found,
         }
         return results
+
+    def fetch_candidates_from_non_unique_identifiers_count(
+            self, google_civic_election_id, state_code, candidate_twitter_handle, candidate_name,
+            ignore_candidate_id_list=[]):
+        keep_looking_for_duplicates = True
+        candidate_twitter_handle = extract_twitter_handle_from_text_string(candidate_twitter_handle)
+        status = ""
+
+        if keep_looking_for_duplicates and positive_value_exists(candidate_twitter_handle):
+            try:
+                candidate_query = CandidateCampaign.objects.all()
+                candidate_query = candidate_query.filter(candidate_twitter_handle__iexact=candidate_twitter_handle,
+                                                         google_civic_election_id=google_civic_election_id)
+                if positive_value_exists(state_code):
+                    candidate_query = candidate_query.filter(state_code__iexact=state_code)
+
+                if positive_value_exists(ignore_candidate_id_list):
+                    candidate_query = candidate_query.exclude(we_vote_id__in=ignore_candidate_id_list)
+
+                candidate_count = candidate_query.count()
+                if positive_value_exists(candidate_count):
+                    return candidate_count
+            except CandidateCampaign.DoesNotExist:
+                pass
+            except Exception as e:
+                keep_looking_for_duplicates = False
+                pass
+        # twitter handle does not exist, next look up against other data that might match
+
+        if keep_looking_for_duplicates and positive_value_exists(candidate_name):
+            # Search by Candidate name exact match
+            try:
+                candidate_query = CandidateCampaign.objects.all()
+                candidate_query = candidate_query.filter(candidate_name__iexact=candidate_name,
+                                                         google_civic_election_id=google_civic_election_id)
+                if positive_value_exists(state_code):
+                    candidate_query = candidate_query.filter(state_code__iexact=state_code)
+
+                if positive_value_exists(ignore_candidate_id_list):
+                    candidate_query = candidate_query.exclude(we_vote_id__in=ignore_candidate_id_list)
+
+                candidate_count = candidate_query.count()
+                if positive_value_exists(candidate_count):
+                    return candidate_count
+            except CandidateCampaign.DoesNotExist:
+                status += "BATCH_ROW_ACTION_CANDIDATE_NOT_FOUND "
+
+        if keep_looking_for_duplicates and positive_value_exists(candidate_name):
+            # Search for Candidate(s) that contains the same first and last names
+            try:
+                candidate_query = CandidateCampaign.objects.all()
+                candidate_query = candidate_query.filter(google_civic_election_id=google_civic_election_id)
+                if positive_value_exists(state_code):
+                    candidate_query = candidate_query.filter(state_code__iexact=state_code)
+                first_name = extract_first_name_from_full_name(candidate_name)
+                candidate_query = candidate_query.filter(candidate_name__icontains=first_name)
+                last_name = extract_last_name_from_full_name(candidate_name)
+                candidate_query = candidate_query.filter(candidate_name__icontains=last_name)
+
+                if positive_value_exists(ignore_candidate_id_list):
+                    candidate_query = candidate_query.exclude(we_vote_id__in=ignore_candidate_id_list)
+
+                candidate_count = candidate_query.count()
+                if positive_value_exists(candidate_count):
+                    return candidate_count
+            except CandidateCampaign.DoesNotExist:
+                status += "BATCH_ROW_ACTION_CANDIDATE_NOT_FOUND "
+                success = True
+
+        return 0
 
 
 class CandidateCampaign(models.Model):
@@ -983,6 +1062,140 @@ class CandidateCampaignManager(models.Model):
         }
         return results
 
+    def retrieve_candidates_are_not_duplicates(self, candidate1_we_vote_id, candidate2_we_vote_id, for_editing=False):
+        candidates_are_not_duplicates = CandidatesAreNotDuplicates()
+        # Note that the direction of the friendship does not matter
+        try:
+            if positive_value_exists(for_editing):
+                candidates_are_not_duplicates = CandidatesAreNotDuplicates.objects.get(
+                    candidate1_we_vote_id__iexact=candidate1_we_vote_id,
+                    candidate2_we_vote_id__iexact=candidate2_we_vote_id,
+                )
+            else:
+                candidates_are_not_duplicates = CandidatesAreNotDuplicates.objects.using('readonly').get(
+                    candidate1_we_vote_id__iexact=candidate1_we_vote_id,
+                    candidate2_we_vote_id__iexact=candidate2_we_vote_id,
+                )
+            candidates_are_not_duplicates_found = True
+            success = True
+            status = "CANDIDATES_NOT_DUPLICATES_UPDATED_OR_CREATED1 "
+        except CandidatesAreNotDuplicates.DoesNotExist:
+            # No data found. Try again below
+            success = True
+            candidates_are_not_duplicates_found = False
+            status = 'NO_CANDIDATES_NOT_DUPLICATES_RETRIEVED_DoesNotExist1 '
+        except Exception as e:
+            candidates_are_not_duplicates_found = False
+            candidates_are_not_duplicates = CandidatesAreNotDuplicates()
+            success = False
+            status = "CANDIDATES_NOT_DUPLICATES_NOT_UPDATED_OR_CREATED1 "
+
+        if not candidates_are_not_duplicates_found and success:
+            try:
+                if positive_value_exists(for_editing):
+                    candidates_are_not_duplicates = CandidatesAreNotDuplicates.objects.get(
+                        candidate1_we_vote_id__iexact=candidate2_we_vote_id,
+                        candidate2_we_vote_id__iexact=candidate1_we_vote_id,
+                    )
+                else:
+                    candidates_are_not_duplicates = CandidatesAreNotDuplicates.objects.using('readonly').get(
+                        candidate1_we_vote_id__iexact=candidate2_we_vote_id,
+                        candidate2_we_vote_id__iexact=candidate1_we_vote_id,
+                    )
+                candidates_are_not_duplicates_found = True
+                success = True
+                status = "CANDIDATES_NOT_DUPLICATES_UPDATED_OR_CREATED2 "
+            except CandidatesAreNotDuplicates.DoesNotExist:
+                # No data found. Try again below
+                success = True
+                candidates_are_not_duplicates_found = False
+                status = 'NO_CANDIDATES_NOT_DUPLICATES_RETRIEVED2_DoesNotExist2 '
+            except Exception as e:
+                candidates_are_not_duplicates_found = False
+                candidates_are_not_duplicates = CandidatesAreNotDuplicates()
+                success = False
+                status = "CANDIDATES_NOT_DUPLICATES_NOT_UPDATED_OR_CREATED2 "
+
+        results = {
+            'success':                              success,
+            'status':                               status,
+            'candidates_are_not_duplicates_found':  candidates_are_not_duplicates_found,
+            'candidates_are_not_duplicates':        candidates_are_not_duplicates,
+        }
+        return results
+
+    def retrieve_candidates_are_not_duplicates_list(self, candidate_we_vote_id, for_editing=False):
+        """
+        Get a list of other candidate_we_vote_id's that are not duplicates
+        :param candidate_we_vote_id:
+        :param for_editing:
+        :return:
+        """
+        # Note that the direction of the linkage does not matter
+        candidates_are_not_duplicates_list1 = []
+        candidates_are_not_duplicates_list2 = []
+        try:
+            if positive_value_exists(for_editing):
+                candidates_are_not_duplicates_list_query = CandidatesAreNotDuplicates.objects.filter(
+                    candidate1_we_vote_id__iexact=candidate_we_vote_id,
+                )
+            else:
+                candidates_are_not_duplicates_list_query = CandidatesAreNotDuplicates.objects.using('readonly').filter(
+                    candidate1_we_vote_id__iexact=candidate_we_vote_id,
+                )
+            candidates_are_not_duplicates_list1 = list(candidates_are_not_duplicates_list_query)
+            success = True
+            status = "CANDIDATES_NOT_DUPLICATES_LIST_UPDATED_OR_CREATED1 "
+        except CandidatesAreNotDuplicates.DoesNotExist:
+            # No data found. Try again below
+            success = True
+            status = 'NO_CANDIDATES_NOT_DUPLICATES_LIST_RETRIEVED_DoesNotExist1 '
+        except Exception as e:
+            success = False
+            status = "CANDIDATES_NOT_DUPLICATES_LIST_NOT_UPDATED_OR_CREATED1 "
+
+        if success:
+            try:
+                if positive_value_exists(for_editing):
+                    candidates_are_not_duplicates_list_query = CandidatesAreNotDuplicates.objects.filter(
+                        candidate2_we_vote_id__iexact=candidate_we_vote_id,
+                    )
+                else:
+                    candidates_are_not_duplicates_list_query = \
+                        CandidatesAreNotDuplicates.objects.using('readonly').filter(
+                            candidate2_we_vote_id__iexact=candidate_we_vote_id,
+                    )
+                candidates_are_not_duplicates_list2 = list(candidates_are_not_duplicates_list_query)
+                success = True
+                status = "CANDIDATES_NOT_DUPLICATES_LIST_UPDATED_OR_CREATED2 "
+            except CandidatesAreNotDuplicates.DoesNotExist:
+                success = True
+                status = 'NO_CANDIDATES_NOT_DUPLICATES_LIST_RETRIEVED2_DoesNotExist2 '
+            except Exception as e:
+                success = False
+                status = "CANDIDATES_NOT_DUPLICATES_LIST_NOT_UPDATED_OR_CREATED2 "
+
+        candidates_are_not_duplicates_list = candidates_are_not_duplicates_list1 + candidates_are_not_duplicates_list2
+        candidates_are_not_duplicates_list_found = positive_value_exists(len(candidates_are_not_duplicates_list))
+        candidates_are_not_duplicates_list_we_vote_ids = []
+        for one_entry in candidates_are_not_duplicates_list:
+            if one_entry.candidate1_we_vote_id != candidate_we_vote_id:
+                candidates_are_not_duplicates_list_we_vote_ids.append(one_entry.candidate1_we_vote_id)
+            elif one_entry.candidate2_we_vote_id != candidate_we_vote_id:
+                candidates_are_not_duplicates_list_we_vote_ids.append(one_entry.candidate2_we_vote_id)
+        results = {
+            'success':                                  success,
+            'status':                                   status,
+            'candidates_are_not_duplicates_list_found': candidates_are_not_duplicates_list_found,
+            'candidates_are_not_duplicates_list':       candidates_are_not_duplicates_list,
+            'candidates_are_not_duplicates_list_we_vote_ids': candidates_are_not_duplicates_list_we_vote_ids,
+        }
+        return results
+
+    def fetch_candidates_are_not_duplicates_list_we_vote_ids(self, candidate_we_vote_id):
+        results = self.retrieve_candidates_are_not_duplicates_list(candidate_we_vote_id)
+        return results['candidates_are_not_duplicates_list_we_vote_ids']
+
     def update_or_create_candidate_campaign(self, candidate_we_vote_id, google_civic_election_id, ocd_division_id,
                                             contest_office_id, contest_office_we_vote_id, google_civic_candidate_name,
                                             updated_candidate_campaign_values):
@@ -1114,6 +1327,47 @@ class CandidateCampaignManager(models.Model):
             'MultipleObjectsReturned':          exception_multiple_object_returned,
             'new_candidate_created':            new_candidate_created,
             'candidate_campaign':               candidate_campaign_on_stage,
+        }
+        return results
+
+    def update_or_create_candidates_are_not_duplicates(self, candidate1_we_vote_id, candidate2_we_vote_id):
+        """
+        Either update or create a candidate_campaign entry.
+        """
+        exception_multiple_object_returned = False
+        success = False
+        new_candidates_are_not_duplicates_created = False
+        candidates_are_not_duplicates = CandidatesAreNotDuplicates()
+        status = ""
+
+        if positive_value_exists(candidate1_we_vote_id) and positive_value_exists(candidate2_we_vote_id):
+            try:
+                updated_values = {
+                    'candidate1_we_vote_id':    candidate1_we_vote_id,
+                    'candidate2_we_vote_id':    candidate2_we_vote_id,
+                }
+                candidates_are_not_duplicates, new_candidates_are_not_duplicates_created = \
+                    CandidatesAreNotDuplicates.objects.update_or_create(
+                        candidate1_we_vote_id__exact=candidate1_we_vote_id,
+                        candidate2_we_vote_id__iexact=candidate2_we_vote_id,
+                        defaults=updated_values)
+                success = True
+                status += "CANDIDATES_ARE_NOT_DUPLICATES_UPDATED_OR_CREATED "
+            except CandidatesAreNotDuplicates.MultipleObjectsReturned as e:
+                success = False
+                status += 'MULTIPLE_MATCHING_CANDIDATES_ARE_NOT_DUPLICATES_FOUND_BY_CANDIDATE_WE_VOTE_ID '
+                exception_multiple_object_returned = True
+            except Exception as e:
+                status += 'EXCEPTION_UPDATE_OR_CREATE_CANDIDATES_ARE_NOT_DUPLICATES ' \
+                         '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
+                success = False
+
+        results = {
+            'success':                                      success,
+            'status':                                       status,
+            'MultipleObjectsReturned':                      exception_multiple_object_returned,
+            'new_candidates_are_not_duplicates_created':    new_candidates_are_not_duplicates_created,
+            'candidates_are_not_duplicates':                candidates_are_not_duplicates,
         }
         return results
 
@@ -1311,7 +1565,7 @@ class CandidateCampaignManager(models.Model):
         }
         return results
 
-    def refresh_cached_candidate_info(self, candidate_object):
+    def refresh_cached_candidate_office_info(self, candidate_object):
         """
         The candidate tables cache information from other tables. This function reaches out to the source tables
         and copies over the latest information to the candidate table.
@@ -1319,31 +1573,23 @@ class CandidateCampaignManager(models.Model):
         :return:
         """
         values_changed = False
+        office_found = False
+        contest_office_manager = ContestOfficeManager()
+        results = {}
+        if positive_value_exists(candidate_object.contest_office_id):
+            results = contest_office_manager.retrieve_contest_office_from_id(candidate_object.contest_office_id)
+            office_found = results['contest_office_found']
+        elif positive_value_exists(candidate_object.contest_office_we_vote_id):
+            results = contest_office_manager.retrieve_contest_office_from_we_vote_id(
+                candidate_object.contest_office_we_vote_id)
+            office_found = results['contest_office_found']
 
-        if not positive_value_exists(candidate_object.contest_office_id) \
-                or not positive_value_exists(candidate_object.contest_office_we_vote_id) \
-                or not positive_value_exists(candidate_object.contest_office_name):
-            office_found = False
-            contest_office_manager = ContestOfficeManager()
-            if positive_value_exists(candidate_object.contest_office_id):
-                results = contest_office_manager.retrieve_contest_office_from_id(candidate_object.contest_office_id)
-                office_found = results['contest_office_found']
-            elif positive_value_exists(candidate_object.contest_office_we_vote_id):
-                results = contest_office_manager.retrieve_contest_office_from_we_vote_id(
-                    candidate_object.contest_office_we_vote_id)
-                office_found = results['contest_office_found']
-
-            if office_found:
-                office_object = results['contest_office']
-                if not positive_value_exists(candidate_object.contest_office_id):
-                    candidate_object.contest_office_id = office_object.id
-                    values_changed = True
-                if not positive_value_exists(candidate_object.contest_office_we_vote_id):
-                    candidate_object.contest_office_we_vote_id = office_object.we_vote_id
-                    values_changed = True
-                if not positive_value_exists(candidate_object.contest_office_name):
-                    candidate_object.contest_office_name = office_object.office_name
-                    values_changed = True
+        if office_found:
+            office_object = results['contest_office']
+            candidate_object.contest_office_id = office_object.id
+            candidate_object.contest_office_we_vote_id = office_object.we_vote_id
+            candidate_object.contest_office_name = office_object.office_name
+            values_changed = True
 
         if values_changed:
             candidate_object.save()
@@ -1480,11 +1726,20 @@ class CandidateCampaignManager(models.Model):
 
             if existing_candidate_entry:
                 # found the existing entry, update the values
+                if 'candidate_is_incumbent' in update_values:
+                    existing_candidate_entry.candidate_is_incumbent = update_values['candidate_is_incumbent']
+                    values_changed = True
+                if 'candidate_is_top_ticket' in update_values:
+                    existing_candidate_entry.is_top_ticket = update_values['candidate_is_top_ticket']
+                    values_changed = True
                 if 'candidate_name' in update_values:
                     existing_candidate_entry.candidate_name = update_values['candidate_name']
                     values_changed = True
-                if 'party' in update_values:
-                    existing_candidate_entry.party = update_values['party']
+                if 'candidate_twitter_handle' in update_values:
+                    existing_candidate_entry.candidate_twitter_handle = update_values['candidate_twitter_handle']
+                    values_changed = True
+                if 'candidate_url' in update_values:
+                    existing_candidate_entry.candidate_url = update_values['candidate_url']
                     values_changed = True
                 if 'contest_office_we_vote_id' in update_values:
                     existing_candidate_entry.contest_office_we_vote_id = update_values['contest_office_we_vote_id']
@@ -1495,29 +1750,23 @@ class CandidateCampaignManager(models.Model):
                 if 'contest_office_name' in update_values:
                     existing_candidate_entry.contest_office_name = update_values['contest_office_name']
                     values_changed = True
-                if 'google_civic_election_id' in update_values:
-                    existing_candidate_entry.google_civic_election_id = update_values['google_civic_election_id']
-                    values_changed = True
-                if 'candidate_is_incumbent' in update_values:
-                    existing_candidate_entry.candidate_is_incumbent = update_values['candidate_is_incumbent']
-                    values_changed = True
-                if 'candidate_is_top_ticket' in update_values:
-                    existing_candidate_entry.is_top_ticket = update_values['candidate_is_top_ticket']
-                    values_changed = True
                 if 'ctcl_uuid' in update_values:
                     existing_candidate_entry.ctcl_uuid = update_values['ctcl_uuid']
                     values_changed = True
-                if 'state_code' in update_values:
-                    existing_candidate_entry.state_code = update_values['state_code']
-                    values_changed = True
-                if 'candidate_twitter_handle' in update_values:
-                    existing_candidate_entry.candidate_twitter_handle = update_values['candidate_twitter_handle']
-                    values_changed = True
-                if 'candidate_url' in update_values:
-                    existing_candidate_entry.candidate_url = update_values['candidate_url']
-                    values_changed = True
                 if 'facebook_url' in update_values:
                     existing_candidate_entry.facebook_url = update_values['facebook_url']
+                    values_changed = True
+                if 'google_civic_election_id' in update_values:
+                    existing_candidate_entry.google_civic_election_id = update_values['google_civic_election_id']
+                    values_changed = True
+                if 'party' in update_values:
+                    existing_candidate_entry.party = update_values['party']
+                    values_changed = True
+                if 'politician_id' in update_values:
+                    existing_candidate_entry.politician_id = update_values['politician_id']
+                    values_changed = True
+                if 'state_code' in update_values:
+                    existing_candidate_entry.state_code = update_values['state_code']
                     values_changed = True
                 if 'photo_url' in update_values:
                     # check if candidate has an existing photo in the CandidateCampaign table
@@ -1563,7 +1812,6 @@ class CandidateCampaignManager(models.Model):
                 'updated_candidate':    existing_candidate_entry,
             }
         return results
-
 
     def modify_candidate_with_organization_endorsements_image(self, candidate, candidate_photo_url,
                                                               save_to_candidate_object):
@@ -1624,3 +1872,23 @@ class CandidateCampaignManager(models.Model):
         }
 
         return results
+
+
+class CandidatesAreNotDuplicates(models.Model):
+    """
+    When checking for duplicates, there are times when we want to explicitly mark two candidates as NOT duplicates
+    """
+    candidate1_we_vote_id = models.CharField(
+        verbose_name="first candidate we are tracking", max_length=255, null=True, unique=False)
+    candidate2_we_vote_id = models.CharField(
+        verbose_name="second candidate we are tracking", max_length=255, null=True, unique=False)
+
+    def fetch_other_candidate_we_vote_id(self, one_we_vote_id):
+        if one_we_vote_id == self.candidate1_we_vote_id:
+            return self.candidate2_we_vote_id
+        elif one_we_vote_id == self.candidate2_we_vote_id:
+            return self.candidate1_we_vote_id
+        else:
+            # If the we_vote_id passed in wasn't found, don't return another we_vote_id
+            return ""
+

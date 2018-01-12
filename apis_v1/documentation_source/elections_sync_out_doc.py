@@ -44,7 +44,7 @@ def elections_sync_out_doc_template_values(url_root):
 
     template_values = {
         'api_name': 'electionsSyncOut',
-        'api_slug': 'electionsSyncOut/?format=json',
+        'api_slug': 'electionsSyncOut',
         'api_introduction':
             "Export the raw elections data stored in the database to JSON format. "
             "This API call does not reach out to the Google Civic API, but simply returns data that was retrieved "

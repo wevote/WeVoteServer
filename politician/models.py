@@ -202,12 +202,12 @@ class PoliticianManager(models.Model):
         politician_on_stage_id = 0
         politician_we_vote_id = ""
         try:
-            if politician_id > 0:
+            if positive_value_exists(politician_id):
                 politician_on_stage = Politician.objects.get(id=politician_id)
                 politician_on_stage_id = politician_on_stage.id
                 politician_we_vote_id = politician_on_stage.we_vote_id
             elif positive_value_exists(we_vote_id):
-                politician_on_stage = Politician.objects.get(we_vote_id=we_vote_id)
+                politician_on_stage = Politician.objects.get(we_vote_id__iexact=we_vote_id)
                 politician_on_stage_id = politician_on_stage.id
                 politician_we_vote_id = politician_on_stage.we_vote_id
         except Politician.MultipleObjectsReturned as e:

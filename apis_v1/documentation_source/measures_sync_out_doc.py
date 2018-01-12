@@ -51,7 +51,7 @@ def measures_sync_out_doc_template_values(url_root):
 
     template_values = {
         'api_name': 'measuresSyncOut',
-        'api_slug': 'measuresSyncOut/?format=json',
+        'api_slug': 'measuresSyncOut',
         'api_introduction':
             "",
         'try_now_link': 'apis_v1:measuresSyncOutView',

@@ -20,6 +20,7 @@ from issue.views_admin import issues_sync_out_view, issues_retrieve_view, retrie
 from measure.views_admin import measures_sync_out_view
 from office.views_admin import offices_sync_out_view
 from organization.views_admin import organizations_sync_out_view
+from politician.views_admin import politicians_sync_out_view
 from polling_location.views_admin import polling_locations_sync_out_view
 from position.views_admin import positions_sync_out_view
 from voter_guide.views_admin import voter_guides_sync_out_view
@@ -88,6 +89,7 @@ urlpatterns = [
         views_organization.organization_suggestion_tasks_view, name='organizationSuggestionTasksView'),
     url(r'^pledgeToVoteWithVoterGuide/',
         views_pledge_to_vote.pledge_to_vote_with_voter_guide_view, name='pledgeToVoteWithVoterGuideView'),
+    url(r'^politiciansSyncOut/', politicians_sync_out_view, name='politiciansSyncOutView'),
     url(r'^pollingLocationsSyncOut/', polling_locations_sync_out_view, name='pollingLocationsSyncOutView'),
     url(r'^positionsCountForAllBallotItems/',
         views_position.positions_count_for_all_ballot_items_view, name='positionsCountForAllBallotItemsView'),
@@ -265,6 +267,7 @@ urlpatterns = [
         views_docs.organization_suggestion_tasks_doc_view, name='organizationSuggestionTasksDocs'),
     url(r'^docs/pledgeToVoteWithVoterGuide/$',
         views_docs.pledge_to_vote_with_voter_guide_doc_view, name='pledgeToVoteWithVoterGuideDocs'),
+    url(r'^docs/politiciansSyncOut/$', views_docs.politicians_sync_out_doc_view, name='politiciansSyncOutDocs'),
     url(r'^docs/pollingLocationsSyncOut/$',
         views_docs.polling_locations_sync_out_doc_view, name='pollingLocationsSyncOutDocs'),
     url(r'^docs/positionLikeCount/$', views_docs.position_like_count_doc_view, name='positionLikeCountDocs'),

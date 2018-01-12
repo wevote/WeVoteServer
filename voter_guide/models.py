@@ -27,7 +27,7 @@ class VoterGuideManager(models.Manager):
     """
     A class for working with the VoterGuide model
     """
-    def update_or_create_organization_voter_guide_by_election_id(self, organization_we_vote_id,
+    def update_or_create_organization_voter_guide_by_election_id(self, voter_guide_we_vote_id, organization_we_vote_id,
                                                                  google_civic_election_id, state_code='',
                                                                  pledge_goal=0,
                                                                  we_vote_hosted_profile_image_url_large='',
@@ -83,6 +83,8 @@ class VoterGuideManager(models.Manager):
                         'we_vote_hosted_profile_image_url_tiny':   organization.we_vote_hosted_profile_image_url_tiny,
                         'pledge_count':             pledge_count,
                     }
+                    if positive_value_exists(voter_guide_we_vote_id):
+                        updated_values['we_vote_id'] = voter_guide_we_vote_id
                     if positive_value_exists(pledge_goal):
                         updated_values['pledge_goal'] = pledge_goal
                     if positive_value_exists(we_vote_hosted_profile_image_url_large):
@@ -122,7 +124,8 @@ class VoterGuideManager(models.Manager):
         }
         return results
 
-    def update_or_create_organization_voter_guide_by_time_span(self, organization_we_vote_id, vote_smart_time_span,
+    def update_or_create_organization_voter_guide_by_time_span(self, voter_guide_we_vote_id,
+                                                               organization_we_vote_id, vote_smart_time_span,
                                                                pledge_goal='',
                                                                we_vote_hosted_profile_image_url_large='',
                                                                we_vote_hosted_profile_image_url_medium='',
@@ -171,6 +174,8 @@ class VoterGuideManager(models.Manager):
                         'twitter_followers_count':  twitter_followers_count,
                         'pledge_count':             pledge_count,
                     }
+                    if positive_value_exists(voter_guide_we_vote_id):
+                        updated_values['we_vote_id'] = voter_guide_we_vote_id
                     if positive_value_exists(pledge_goal):
                         updated_values['pledge_goal'] = pledge_goal
                     if positive_value_exists(we_vote_hosted_profile_image_url_large):
@@ -209,7 +214,8 @@ class VoterGuideManager(models.Manager):
         }
         return results
 
-    def update_or_create_public_figure_voter_guide(self, google_civic_election_id, public_figure_we_vote_id,
+    def update_or_create_public_figure_voter_guide(self, voter_guide_we_vote_id,
+                                                   google_civic_election_id, public_figure_we_vote_id,
                                                    pledge_goal,
                                                    we_vote_hosted_profile_image_url_large='',
                                                    we_vote_hosted_profile_image_url_medium='',
@@ -231,6 +237,8 @@ class VoterGuideManager(models.Manager):
                     'public_figure_we_vote_id': public_figure_we_vote_id,
                     # The rest of the values
                 }
+                if positive_value_exists(voter_guide_we_vote_id):
+                    updated_values['we_vote_id'] = voter_guide_we_vote_id
                 if positive_value_exists(pledge_goal):
                     updated_values['pledge_goal'] = pledge_goal
                 if positive_value_exists(we_vote_hosted_profile_image_url_large):
@@ -1368,7 +1376,7 @@ class VoterGuideListManager(models.Model):
 
             # Ignore entries with we_vote_id coming in from master server
             if positive_value_exists(we_vote_id_from_master):
-                voter_guide_queryset = voter_guide_queryset.filter(~Q(we_vote_id__iexact=we_vote_id_from_master))
+                voter_guide_queryset = voter_guide_queryset.exclude(we_vote_id__iexact=we_vote_id_from_master)
 
             # We want to find candidates with *any* of these values
             if positive_value_exists(organization_we_vote_id):
@@ -1403,7 +1411,7 @@ class VoterGuideListManager(models.Model):
                 status = 'NO_DUPLICATE_VOTER_GUIDES_RETRIEVED'
                 success = True
         except VoterGuide.DoesNotExist:
-            # No candidates found. Not a problem.
+            # No voter guides found. Not a problem.
             status = 'NO_DUPLICATE_VOTER_GUIDES_FOUND_DoesNotExist'
             voter_guide_list_objects = []
             success = True

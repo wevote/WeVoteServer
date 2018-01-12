@@ -261,14 +261,20 @@ class FriendManager(models.Model):
         }
         return results
 
-    def retrieve_current_friend(self, sender_voter_we_vote_id, recipient_voter_we_vote_id):
+    def retrieve_current_friend(self, sender_voter_we_vote_id, recipient_voter_we_vote_id, for_editing=False):
         current_friend = CurrentFriend()
         # Note that the direction of the friendship does not matter
         try:
-            current_friend = CurrentFriend.objects.using('readonly').get(
-                viewer_voter_we_vote_id__iexact=sender_voter_we_vote_id,
-                viewee_voter_we_vote_id__iexact=recipient_voter_we_vote_id,
-            )
+            if positive_value_exists(for_editing):
+                current_friend = CurrentFriend.objects.get(
+                    viewer_voter_we_vote_id__iexact=sender_voter_we_vote_id,
+                    viewee_voter_we_vote_id__iexact=recipient_voter_we_vote_id,
+                )
+            else:
+                current_friend = CurrentFriend.objects.using('readonly').get(
+                    viewer_voter_we_vote_id__iexact=sender_voter_we_vote_id,
+                    viewee_voter_we_vote_id__iexact=recipient_voter_we_vote_id,
+                )
             current_friend_found = True
             success = True
             status = "CURRENT_FRIEND_UPDATED_OR_CREATED"
@@ -285,10 +291,16 @@ class FriendManager(models.Model):
 
         if not current_friend_found and success:
             try:
-                current_friend = CurrentFriend.objects.using('readonly').get(
-                    viewer_voter_we_vote_id__iexact=recipient_voter_we_vote_id,
-                    viewee_voter_we_vote_id__iexact=sender_voter_we_vote_id,
-                )
+                if positive_value_exists(for_editing):
+                    current_friend = CurrentFriend.objects.get(
+                        viewer_voter_we_vote_id__iexact=recipient_voter_we_vote_id,
+                        viewee_voter_we_vote_id__iexact=sender_voter_we_vote_id,
+                    )
+                else:
+                    current_friend = CurrentFriend.objects.using('readonly').get(
+                        viewer_voter_we_vote_id__iexact=recipient_voter_we_vote_id,
+                        viewee_voter_we_vote_id__iexact=sender_voter_we_vote_id,
+                    )
                 current_friend_found = True
                 success = True
                 status = "CURRENT_FRIEND_UPDATED_OR_CREATED"
@@ -311,14 +323,20 @@ class FriendManager(models.Model):
         }
         return results
 
-    def retrieve_suggested_friend(self, sender_voter_we_vote_id, recipient_voter_we_vote_id):
+    def retrieve_suggested_friend(self, sender_voter_we_vote_id, recipient_voter_we_vote_id, for_editing=False):
         suggested_friend = CurrentFriend()
         # Note that the direction of the friendship does not matter
         try:
-            suggested_friend = SuggestedFriend.objects.using('readonly').get(
-                viewer_voter_we_vote_id__iexact=sender_voter_we_vote_id,
-                viewee_voter_we_vote_id__iexact=recipient_voter_we_vote_id,
-            )
+            if positive_value_exists(for_editing):
+                suggested_friend = SuggestedFriend.objects.get(
+                    viewer_voter_we_vote_id__iexact=sender_voter_we_vote_id,
+                    viewee_voter_we_vote_id__iexact=recipient_voter_we_vote_id,
+                )
+            else:
+                suggested_friend = SuggestedFriend.objects.using('readonly').get(
+                    viewer_voter_we_vote_id__iexact=sender_voter_we_vote_id,
+                    viewee_voter_we_vote_id__iexact=recipient_voter_we_vote_id,
+                )
             suggested_friend_found = True
             success = True
             status = "SUGGESTED_FRIEND_UPDATED_OR_CREATED"
@@ -335,10 +353,16 @@ class FriendManager(models.Model):
 
         if not suggested_friend_found and success:
             try:
-                suggested_friend = SuggestedFriend.objects.using('readonly').get(
-                    viewer_voter_we_vote_id__iexact=recipient_voter_we_vote_id,
-                    viewee_voter_we_vote_id__iexact=sender_voter_we_vote_id,
-                )
+                if positive_value_exists(for_editing):
+                    suggested_friend = SuggestedFriend.objects.get(
+                        viewer_voter_we_vote_id__iexact=recipient_voter_we_vote_id,
+                        viewee_voter_we_vote_id__iexact=sender_voter_we_vote_id,
+                    )
+                else:
+                    suggested_friend = SuggestedFriend.objects.using('readonly').get(
+                        viewer_voter_we_vote_id__iexact=recipient_voter_we_vote_id,
+                        viewee_voter_we_vote_id__iexact=sender_voter_we_vote_id,
+                    )
                 suggested_friend_found = True
                 success = True
                 status = "SUGGESTED_FRIEND_UPDATED_OR_CREATED"
@@ -656,7 +680,7 @@ class FriendManager(models.Model):
             suggested_friends_count = 0
         return suggested_friends_count
 
-    def retrieve_current_friends(self, voter_we_vote_id):
+    def retrieve_current_friends(self, voter_we_vote_id, for_editing=False):
         current_friend_list = []  # The entries from CurrentFriend table
         current_friend_list_found = False
 
@@ -673,7 +697,10 @@ class FriendManager(models.Model):
             return results
 
         try:
-            current_friend_queryset = CurrentFriend.objects.using('readonly').all()
+            if positive_value_exists(for_editing):
+                current_friend_queryset = CurrentFriend.objects.all()
+            else:
+                current_friend_queryset = CurrentFriend.objects.using('readonly').all()
             current_friend_queryset = current_friend_queryset.filter(
                 Q(viewer_voter_we_vote_id__iexact=voter_we_vote_id) |
                 Q(viewee_voter_we_vote_id__iexact=voter_we_vote_id))
@@ -732,6 +759,9 @@ class FriendManager(models.Model):
             return results
 
         try:
+            # Note that since we are ultimately returning a list of voter objects (which are always retrieved from the
+            #  master database, as opposed to the readonly database), we don't need to call this function with a
+            #  "for_editing" specification.
             current_friend_queryset = CurrentFriend.objects.using('readonly').all()
             current_friend_queryset = current_friend_queryset.filter(
                 Q(viewer_voter_we_vote_id__iexact=voter_we_vote_id) |
@@ -1528,7 +1558,8 @@ class FriendManager(models.Model):
 
     def unfriend_current_friend(self, acting_voter_we_vote_id, other_voter_we_vote_id):
         # Retrieve the existing friendship
-        results = self.retrieve_current_friend(acting_voter_we_vote_id, other_voter_we_vote_id)
+        for_editing = True
+        results = self.retrieve_current_friend(acting_voter_we_vote_id, other_voter_we_vote_id, for_editing)
 
         success = False
         status = 'PREPARING_TO_DELETE_CURRENT_FRIEND'

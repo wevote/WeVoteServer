@@ -285,12 +285,22 @@ class BookmarkItemList(models.Model):
     A way to retrieve all of the bookmark_item information
     """
     def retrieve_bookmark_item_list_for_voter(self, voter_id):
-        # Retrieve a list of bookmark_item entries for this voter
+        return self.retrieve_bookmark_item_list(voter_id=voter_id)
+
+    def retrieve_bookmark_item_list_for_candidate(self, candidate_campaign_we_vote_id):
+        return self.retrieve_bookmark_item_list(candidate_campaign_we_vote_id=candidate_campaign_we_vote_id)
+
+    def retrieve_bookmark_item_list(self, voter_id=0, candidate_campaign_we_vote_id=""):
+        # Retrieve a list of bookmark_item entries
         bookmark_item_list_found = False
         bookmark_item_list = []
         try:
             bookmark_item_list = BookmarkItem.objects.using('readonly').all()
-            bookmark_item_list = bookmark_item_list.filter(voter_id=voter_id)
+            if positive_value_exists(voter_id):
+                bookmark_item_list = bookmark_item_list.filter(voter_id=voter_id)
+            if positive_value_exists(candidate_campaign_we_vote_id):
+                bookmark_item_list = bookmark_item_list.filter(
+                    candidate_campaign_we_vote_id=candidate_campaign_we_vote_id)
             if len(bookmark_item_list):
                 bookmark_item_list_found = True
         except Exception as e:
@@ -298,15 +308,17 @@ class BookmarkItemList(models.Model):
 
         if bookmark_item_list_found:
             results = {
-                'status':           "BOOKMARK_ITEMS_FOUND",
-                'success':          True,
-                'bookmark_item_list':   bookmark_item_list,
+                'status':                   "BOOKMARK_ITEMS_FOUND",
+                'success':                  True,
+                'bookmark_item_list':       bookmark_item_list,
+                'bookmark_item_list_found': bookmark_item_list_found,
             }
             return results
         else:
             results = {
-                'status':           "BOOKMARK_ITEMS_NOT_FOUND",
-                'success':          True,
-                'bookmark_item_list':   [],
+                'status':                   "BOOKMARK_ITEMS_NOT_FOUND",
+                'success':                  True,
+                'bookmark_item_list':       [],
+                'bookmark_item_list_found': bookmark_item_list_found,
             }
             return results

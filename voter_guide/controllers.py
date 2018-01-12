@@ -135,9 +135,11 @@ def voter_guides_import_from_master_server(request, google_civic_election_id):
     )
 
     if import_results['success']:
-        results = filter_voter_guides_structured_json_for_local_duplicates(structured_json)
-        filtered_structured_json = results['structured_json']
-        duplicates_removed = results['duplicates_removed']
+        # results = filter_voter_guides_structured_json_for_local_duplicates(structured_json)
+        # filtered_structured_json = results['structured_json']
+        # duplicates_removed = results['duplicates_removed']
+        filtered_structured_json = structured_json
+        duplicates_removed = 0
 
         import_results = voter_guides_import_from_structured_json(filtered_structured_json)
         import_results['duplicates_removed'] = duplicates_removed
@@ -192,7 +194,7 @@ def filter_voter_guides_structured_json_for_local_duplicates(structured_json):
 
 def voter_guides_import_from_structured_json(structured_json):
     """
-    This pathway in requires a we_vote_id, and is not used when we import from Google Civic
+    This pathway in requires a voter_guide_we_vote_id, and is not used when we import from Google Civic
     :param structured_json:
     :return:
     """
@@ -203,7 +205,7 @@ def voter_guides_import_from_structured_json(structured_json):
     voter_guides_updated = 0
     voter_guides_not_processed = 0
     for one_voter_guide in structured_json:
-        we_vote_id = one_voter_guide['we_vote_id'] if 'we_vote_id' in one_voter_guide else ''
+        voter_guide_we_vote_id = one_voter_guide['we_vote_id'] if 'we_vote_id' in one_voter_guide else ''
         google_civic_election_id = one_voter_guide['google_civic_election_id'] \
             if 'google_civic_election_id' in one_voter_guide else ''
         vote_smart_time_span = one_voter_guide['vote_smart_time_span'] \
@@ -222,7 +224,7 @@ def voter_guides_import_from_structured_json(structured_json):
         we_vote_hosted_profile_image_url_tiny = one_voter_guide['we_vote_hosted_profile_image_url_tiny'] \
             if 'we_vote_hosted_profile_image_url_tiny' in one_voter_guide else ''
 
-        if positive_value_exists(we_vote_id) and \
+        if positive_value_exists(voter_guide_we_vote_id) and \
                 (positive_value_exists(organization_we_vote_id) or
                  positive_value_exists(public_figure_we_vote_id)) and \
                 (positive_value_exists(google_civic_election_id) or
@@ -251,18 +253,18 @@ def voter_guides_import_from_structured_json(structured_json):
         if proceed_to_update_or_create:
             if positive_value_exists(organization_we_vote_id) and positive_value_exists(google_civic_election_id):
                 results = voter_guide_manager.update_or_create_organization_voter_guide_by_election_id(
-                    organization_we_vote_id, google_civic_election_id, state_code, pledge_goal,
+                    voter_guide_we_vote_id, organization_we_vote_id, google_civic_election_id, state_code, pledge_goal,
                     we_vote_hosted_profile_image_url_large, we_vote_hosted_profile_image_url_medium,
                     we_vote_hosted_profile_image_url_tiny
                 )
             elif positive_value_exists(organization_we_vote_id) and positive_value_exists(vote_smart_time_span):
                 results = voter_guide_manager.update_or_create_organization_voter_guide_by_time_span(
-                    organization_we_vote_id, vote_smart_time_span, pledge_goal,
+                    voter_guide_we_vote_id, organization_we_vote_id, vote_smart_time_span, pledge_goal,
                     we_vote_hosted_profile_image_url_large, we_vote_hosted_profile_image_url_medium,
                     we_vote_hosted_profile_image_url_tiny)
             elif positive_value_exists(public_figure_we_vote_id) and positive_value_exists(google_civic_election_id):
                 results = voter_guide_manager.update_or_create_public_figure_voter_guide(
-                    google_civic_election_id, public_figure_we_vote_id, pledge_goal,
+                    voter_guide_we_vote_id, google_civic_election_id, public_figure_we_vote_id, pledge_goal,
                     we_vote_hosted_profile_image_url_large, we_vote_hosted_profile_image_url_medium,
                     we_vote_hosted_profile_image_url_tiny)
             else:
@@ -1557,8 +1559,9 @@ def refresh_existing_voter_guides(google_civic_election_id, organization_we_vote
     voter_guide_manager = VoterGuideManager()
 
     if positive_value_exists(organization_we_vote_id) and positive_value_exists(google_civic_election_id):
+        voter_guide_we_vote_id = ''
         results = voter_guide_manager.update_or_create_organization_voter_guide_by_election_id(
-            organization_we_vote_id, google_civic_election_id)
+            voter_guide_we_vote_id, organization_we_vote_id, google_civic_election_id)
         if results['voter_guide_saved']:
             voter_guide_list_found = True
             voter_guide_list.append(results['voter_guide'])
@@ -1589,13 +1592,16 @@ def refresh_existing_voter_guides(google_civic_election_id, organization_we_vote
                 # DALE 2017-11-06 The update voter guides functions below I think are also done
                 #  in "push_organization_data_to_other_table_caches". Refactor.
                 if positive_value_exists(voter_guide.google_civic_election_id):
+                    voter_guide_we_vote_id = ''
                     results = voter_guide_manager.update_or_create_organization_voter_guide_by_election_id(
+                        voter_guide_we_vote_id,
                         voter_guide.organization_we_vote_id, voter_guide.google_civic_election_id)
                     if results['success']:
                         voter_guide_updated_count += 1
                 elif positive_value_exists(voter_guide.vote_smart_time_span):
+                    voter_guide_we_vote_id = ''
                     results = voter_guide_manager.update_or_create_organization_voter_guide_by_time_span(
-                        voter_guide.organization_we_vote_id, voter_guide.vote_smart_time_span)
+                        voter_guide_we_vote_id, voter_guide.organization_we_vote_id, voter_guide.vote_smart_time_span)
                     if results['success']:
                         voter_guide_updated_count += 1
     results = {
