@@ -5,6 +5,8 @@
 
 {%  block content %}
 <a href="{% url 'candidate:candidate_list' %}">< Back to Candidates</a>
+  <br /></r />
+<a href="{% url 'candidate:find_and_remove_duplicate_candidates' %}?google_civic_election_id={{ google_civic_election_id }}&find_duplicates_count=1" >Click to find out the number of possible duplicates</a> (takes 30-60 seconds)
 
 <h1>{% if candidate_option1 %}Merge {{ candidate_option1.candidate_name }}{% else %}CANNOT MERGE{% endif %}</h1>
 {% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
@@ -18,6 +20,11 @@
         <th>Candidate Option 1</th>
         <th>Candidate Option 2</th>
     </tr>
+    <tr>
+        <td>&nbsp;</td>
+        <td><a href="{% url 'candidate:candidate_edit_we_vote_id' candidate_campaign_we_vote_id=candidate_option1.we_vote_id %}" target="_blank">view (in new window)</a></td>
+        <td><a href="{% url 'candidate:candidate_edit_we_vote_id' candidate_campaign_we_vote_id=candidate_option2.we_vote_id %}" target="_blank">view (in new window)</a></td>
+    </tr>
     {% if candidate_option1.candidate_name != None or candidate_option2.candidate_name != None %}
     <tr>
         <td>Candidate Name</td>
@@ -30,6 +37,7 @@
         {% endif %}
     </tr>
     {% endif %}
+
     {% if candidate_option1.google_civic_candidate_name != None or candidate_option2.google_civic_candidate_name != None %}
     <tr>
         <td>Candidate Name (from Google Civic)</td>
@@ -42,6 +50,39 @@
         {% endif %}
     </tr>
     {% endif %}
+
+    <tr>
+        <td>{% if candidate_option1.contest_office_name == candidate_option2.contest_office_name %}Office Name{% else %}<strong><span style="color: red">Office Name (***mismatch***)</span></strong>{% endif %}</td>
+        <td>{{ candidate_option1.contest_office_name|default_if_none:"" }}</td>
+        <td>{{ candidate_option2.contest_office_name|default_if_none:"" }}</td>
+    </tr>
+
+    {% if candidate_option1.contest_office_we_vote_id != None or candidate_option2.contest_office_we_vote_id != None %}
+    <tr>
+        <td>Office We Vote Id</td>
+        {% if conflict_values.contest_office_we_vote_id == "CONFLICT" %}
+        <td><input type="radio" name="contest_office_we_vote_id_choice" value="{{ candidate_option1.contest_office_we_vote_id }}" checked /><span class="bold-select"> {{ candidate_option1.contest_office_we_vote_id }}</span></td>
+        <td><input type="radio" name="contest_office_we_vote_id_choice" value="{{ candidate_option2.contest_office_we_vote_id }}" /><span class="bold-select"> {{ candidate_option2.contest_office_we_vote_id }}</span></td>
+        {% else %}
+        <td>{% if conflict_values.contest_office_name == "CANDIDATE1" %}<strong>{{ candidate_option1.contest_office_we_vote_id }}</strong>{% else %}{{ candidate_option1.contest_office_we_vote_id|default_if_none:"" }}{% endif %}</td>
+        <td>{% if conflict_values.contest_office_name == "CANDIDATE2" %}<strong>{{ candidate_option2.contest_office_we_vote_id }}</strong>{% else %}{{ candidate_option2.contest_office_we_vote_id|default_if_none:"" }}{% endif %}</td>
+        {% endif %}
+    </tr>
+    {% endif %}
+
+    {% if candidate_option1.contest_office_name != None or candidate_option2.contest_office_name != None %}
+    <tr>
+        <td>Office Name</td>
+        {% if conflict_values.contest_office_name == "CONFLICT" %}
+        <td><input type="radio" name="contest_office_name_choice" value="{{ candidate_option1.contest_office_name }}" checked /><span class="bold-select"> {{ candidate_option1.contest_office_name }}</span></td>
+        <td><input type="radio" name="contest_office_name_choice" value="{{ candidate_option2.contest_office_name }}" /><span class="bold-select"> {{ candidate_option2.contest_office_name }}</span></td>
+        {% else %}
+        <td>{% if conflict_values.contest_office_name == "CANDIDATE1" %}<strong>{{ candidate_option1.contest_office_name }}</strong>{% else %}{{ candidate_option1.contest_office_name|default_if_none:"" }}{% endif %}</td>
+        <td>{% if conflict_values.contest_office_name == "CANDIDATE2" %}<strong>{{ candidate_option2.contest_office_name }}</strong>{% else %}{{ candidate_option2.contest_office_name|default_if_none:"" }}{% endif %}</td>
+        {% endif %}
+    </tr>
+    {% endif %}
+
     {% if candidate_option1.party != None or candidate_option2.party != None %}
     <tr>
         <td>Party</td>
@@ -54,6 +95,7 @@
         {% endif %}
     </tr>
     {% endif %}
+
     {% if candidate_option1.id != None or candidate_option2.id != None %}
     <tr>
         <td>ID</td>
@@ -511,12 +553,21 @@
         <td>{{ candidate_option2.friends_positions_count }}</td>
     </tr>
     <tr>
+        <td>Bookmarks Count</td>
+        <td>{{ candidate_option1.bookmarks_count }}</td>
+        <td>{{ candidate_option2.bookmarks_count }}</td>
+    </tr>
+    <tr>
         <td>&nbsp;</td>
         <td>&nbsp;</td>
         <td>&nbsp;</td>
     </tr>
     <tr>
-        <td><input type="submit" value="Merge Candidates" /></td>
+        <td>
+          <a href="{% url 'candidate:candidate_list' %}">cancel</a>&nbsp; <input type="submit" value="Skip - Not Duplicates" name="skip" />&nbsp;<input type="submit" value="Merge Candidates" name="merge" />
+        </td>
+        <td></td>
+        <td></td>
         <!--<td><a href="{% url 'candidate:remove_duplicate_candidate' %}?google_civic_election_id={{ candidate_option1.google_civic_election_id }}&candidate_id={{ candidate_option1.id }}">-->
             <!--Delete Candidate Option 1</a></td>-->
         <!--<td><a href="{% url 'candidate:remove_duplicate_candidate' %}?google_civic_election_id={{ candidate_option2.google_civic_election_id }}&candidate_id={{ candidate_option2.id }}">-->
@@ -531,7 +582,6 @@
 {% else %}
 <input type="submit" value="CANNOT MERGE" />
 {% endif %}
-<a href="{% url 'candidate:candidate_list' %}">cancel</a>
 </form>
 
 <br />

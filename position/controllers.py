@@ -229,10 +229,20 @@ def return_most_likely_data(from_position, to_position, attribute):
 def move_positions_to_another_candidate(from_candidate_id, from_candidate_we_vote_id,
                                         to_candidate_id, to_candidate_we_vote_id,
                                         public_or_private):
+    """
+
+    :param from_candidate_id:
+    :param from_candidate_we_vote_id:
+    :param to_candidate_id:
+    :param to_candidate_we_vote_id:
+    :param public_or_private: If true, move public positions. If false, move friends only positions.
+    :return:
+    """
     status = ''
     success = True
     position_entries_moved = 0
     position_entries_not_moved = 0
+    position_manager = PositionManager()
     position_list_manager = PositionListManager()
 
     stance_we_are_looking_for = ANY_STANCE
@@ -247,9 +257,11 @@ def move_positions_to_another_candidate(from_candidate_id, from_candidate_we_vot
 
     # Get all positions for the "to_candidate" that we need to check
     to_position_list = position_list_manager.retrieve_all_positions_for_candidate_campaign(
-        public_or_private, from_candidate_id, from_candidate_we_vote_id, stance_we_are_looking_for,
+        public_or_private, to_candidate_id, to_candidate_we_vote_id, stance_we_are_looking_for,
         most_recent_only, friends_we_vote_id_list, retrieve_all_admin_override)
 
+    # Put the organization_we_vote_id's of the orgs that have opinions about this candidate in a simple array
+    # These are existing positions attached to the candidate we are going to keep
     to_organization_we_vote_ids = []
     for position_object in to_position_list:
         if positive_value_exists(position_object.organization_we_vote_id):
@@ -257,10 +269,13 @@ def move_positions_to_another_candidate(from_candidate_id, from_candidate_we_vot
 
     for position_object in from_position_list:
         # Check organization_we_vote_ids for duplicate positions
+        # This is a list of positions that we want to migrate to the candidate we are planning to keep
         organization_we_vote_id = position_object.organization_we_vote_id
         if positive_value_exists(organization_we_vote_id):
             if organization_we_vote_id in to_organization_we_vote_ids:
-                # We have duplicate positions for the same organization, so just delete the one from "from" candidate
+                # We have an existing position for the same organization already attached to the "to" candidate,
+                # so just delete the one from "from" candidate
+                # In the future we could see if one has a comment that needs to be saved.
                 try:
                     position_object.delete()
                     position_entries_not_moved += 1
@@ -272,12 +287,15 @@ def move_positions_to_another_candidate(from_candidate_id, from_candidate_we_vot
                     success = False
                     break  # stop merge, exit for loop
             else:
-                # Update candidate's ids for this position and save
+                # Update candidate's ids for this position
                 position_object.candidate_campaign_id = to_candidate_id
                 position_object.candidate_campaign_we_vote_id = to_candidate_we_vote_id
                 try:
                     position_object.save()
                     position_entries_moved += 1
+                    # And finally, refresh the position to use the latest information
+                    force_update = True
+                    position_manager.refresh_cached_position_info(position_object, force_update)
                 except Exception:
                     if public_or_private:
                         status += "MOVE_TO_ANOTHER_CANDIDATE-UNABLE_TO_SAVE_NEW_PUBLIC_POSITION "
@@ -1723,8 +1741,9 @@ def position_list_for_opinion_maker_for_api(voter_device_id,  # positionListForO
     if positive_value_exists(opinion_maker_we_vote_id) and len(all_elections_that_have_positions):
         for one_google_civic_election_id in all_elections_that_have_positions:
             if not voter_guide_manager.voter_guide_exists(opinion_maker_we_vote_id, one_google_civic_election_id):
+                voter_guide_we_vote_id = ''
                 voter_guide_manager.update_or_create_organization_voter_guide_by_election_id(
-                    opinion_maker_we_vote_id, one_google_civic_election_id, state_code)
+                    voter_guide_we_vote_id, opinion_maker_we_vote_id, one_google_civic_election_id, state_code)
 
     status += ' POSITION_LIST_FOR_OPINION_MAKER_SUCCEEDED'
     success = True
@@ -3016,8 +3035,9 @@ def retrieve_ballot_item_we_vote_ids_for_organizations_to_follow(voter_id,
     # if positive_value_exists(opinion_maker_we_vote_id) and len(all_elections_that_have_positions):
     #     for one_google_civic_election_id in all_elections_that_have_positions:
     #         if not voter_guide_manager.voter_guide_exists(opinion_maker_we_vote_id, one_google_civic_election_id):
+    #             voter_guide_we_vote_id = ''
     #             voter_guide_manager.update_or_create_organization_voter_guide_by_election_id(
-    #                 opinion_maker_we_vote_id, one_google_civic_election_id)
+    #                 voter_guide_we_vote_id, opinion_maker_we_vote_id, one_google_civic_election_id)
 
     status += ' RETRIEVE_BALLOT_ITEM_WE_VOTE_IDS-SUCCESS'
     success = True

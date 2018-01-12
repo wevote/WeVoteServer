@@ -67,7 +67,7 @@ def positions_sync_out_doc_template_values(url_root):
 
     template_values = {
         'api_name': 'positionsSyncOut',
-        'api_slug': 'positionsSyncOut/?format=json',
+        'api_slug': 'positionsSyncOut',
         'api_introduction':
             "",
         'try_now_link': 'apis_v1:positionsSyncOutView',

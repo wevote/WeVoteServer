@@ -62,7 +62,7 @@ def organizations_sync_out_doc_template_values(url_root):
 
     template_values = {
         'api_name': 'organizationsSyncOut',
-        'api_slug': 'organizationsSyncOut/?format=json',
+        'api_slug': 'organizationsSyncOut',
         'api_introduction':
             "",
         'try_now_link': 'apis_v1:organizationsSyncOutView',

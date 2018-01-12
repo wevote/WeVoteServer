@@ -113,8 +113,9 @@ def generate_voter_guides_view(request):
                     google_civic_election_id=google_civic_election_id).count()
                 if positions_count > 0:
                     voter_guide_manager = VoterGuideManager()
+                    voter_guide_we_vote_id = ''
                     results = voter_guide_manager.update_or_create_organization_voter_guide_by_election_id(
-                        organization.we_vote_id, election.google_civic_election_id)
+                        voter_guide_we_vote_id, organization.we_vote_id, election.google_civic_election_id)
                     if results['success']:
                         if results['new_voter_guide_created']:
                             voter_guide_created_count += 1
@@ -129,8 +130,9 @@ def generate_voter_guides_view(request):
                     vote_smart_time_span=time_span).count()
                 if positions_count > 0:
                     voter_guide_manager = VoterGuideManager()
+                    voter_guide_we_vote_id = ''
                     results = voter_guide_manager.update_or_create_organization_voter_guide_by_time_span(
-                        organization.we_vote_id, time_span)
+                        voter_guide_we_vote_id, organization.we_vote_id, time_span)
                     if results['success']:
                         if results['new_voter_guide_created']:
                             voter_guide_created_count += 1
@@ -191,8 +193,9 @@ def generate_voter_guides_for_one_election_view(request):
                 google_civic_election_id=google_civic_election_id).count()
             if positions_count > 0:
                 voter_guide_manager = VoterGuideManager()
+                voter_guide_we_vote_id = ''
                 results = voter_guide_manager.update_or_create_organization_voter_guide_by_election_id(
-                    organization.we_vote_id, google_civic_election_id)
+                    voter_guide_we_vote_id, organization.we_vote_id, google_civic_election_id)
                 if results['success']:
                     if results['new_voter_guide_created']:
                         voter_guide_created_count += 1
@@ -207,8 +210,9 @@ def generate_voter_guides_for_one_election_view(request):
                     vote_smart_time_span=time_span).count()
                 if positions_count > 0:
                     voter_guide_manager = VoterGuideManager()
+                    voter_guide_we_vote_id = ''
                     results = voter_guide_manager.update_or_create_organization_voter_guide_by_time_span(
-                        organization.we_vote_id, time_span)
+                        voter_guide_we_vote_id, organization.we_vote_id, time_span)
                     if results['success']:
                         if results['new_voter_guide_created']:
                             voter_guide_created_count += 1

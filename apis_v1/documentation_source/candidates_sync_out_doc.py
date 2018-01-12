@@ -68,7 +68,7 @@ def candidates_sync_out_doc_template_values(url_root):
 
     template_values = {
         'api_name': 'candidatesSyncOut',
-        'api_slug': 'candidatesSyncOut/?format=json',
+        'api_slug': 'candidatesSyncOut',
         'api_introduction':
             "",
         'try_now_link': 'apis_v1:candidatesSyncOutView',

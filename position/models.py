@@ -2643,8 +2643,9 @@ class PositionManager(models.Model):
                 voter_guide_manager = VoterGuideManager()
                 # Make sure we have a voter guide so others can find
                 if not voter_guide_manager.voter_guide_exists(organization_we_vote_id, google_civic_election_id):
+                    voter_guide_we_vote_id = ''
                     voter_guide_manager.update_or_create_organization_voter_guide_by_election_id(
-                        organization_we_vote_id, google_civic_election_id, state_code)
+                        voter_guide_we_vote_id, organization_we_vote_id, google_civic_election_id, state_code)
 
         except Exception as e:
             success = False
@@ -3717,7 +3718,9 @@ class PositionManager(models.Model):
                     # Make sure we have a voter guide so others can find
                     if not voter_guide_manager.voter_guide_exists(existing_position.organization_we_vote_id,
                                                                   existing_position.google_civic_election_id):
+                        voter_guide_we_vote_id = ''
                         voter_guide_manager.update_or_create_organization_voter_guide_by_election_id(
+                            voter_guide_we_vote_id,
                             existing_position.organization_we_vote_id, existing_position.google_civic_election_id,
                             existing_position.state_code)
             else:

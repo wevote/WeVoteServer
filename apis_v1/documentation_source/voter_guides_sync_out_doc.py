@@ -40,7 +40,7 @@ def voter_guides_sync_out_doc_template_values(url_root):
 
     template_values = {
         'api_name': 'voterGuidesSyncOut',
-        'api_slug': 'voterGuidesSyncOut/?format=json',
+        'api_slug': 'voterGuidesSyncOut',
         'api_introduction':
             "",
         'try_now_link': 'apis_v1:voterGuidesSyncOutView',

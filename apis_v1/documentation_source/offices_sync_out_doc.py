@@ -55,7 +55,7 @@ def offices_sync_out_doc_template_values(url_root):
 
     template_values = {
         'api_name': 'officesSyncOut',
-        'api_slug': 'officesSyncOut/?format=json',
+        'api_slug': 'officesSyncOut',
         'api_introduction':
             "",
         'try_now_link': 'apis_v1:officesSyncOutView',

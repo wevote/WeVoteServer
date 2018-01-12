@@ -74,6 +74,20 @@ def candidates_import_from_master_server(request, google_civic_election_id='', s
     return import_results
 
 
+def fetch_duplicate_candidate_count(we_vote_candidate, ignore_candidate_id_list):
+    if not hasattr(we_vote_candidate, 'google_civic_election_id'):
+        return 0
+
+    if not positive_value_exists(we_vote_candidate.google_civic_election_id):
+        return 0
+
+    # Search for other candidates within this election that match name and election
+    candidate_campaign_list_manager = CandidateCampaignListManager()
+    return candidate_campaign_list_manager.fetch_candidates_from_non_unique_identifiers_count(
+        we_vote_candidate.google_civic_election_id, we_vote_candidate.state_code,
+        we_vote_candidate.candidate_twitter_handle, we_vote_candidate.candidate_name, ignore_candidate_id_list)
+
+
 def find_duplicate_candidate(we_vote_candidate, ignore_candidate_id_list):
     if not hasattr(we_vote_candidate, 'google_civic_election_id'):
         error_results = {
@@ -152,9 +166,9 @@ def figure_out_conflict_values(candidate1, candidate2):
             candidate2_attribute = getattr(candidate2, attribute)
             if candidate1_attribute is None and candidate2_attribute is None:
                 candidate_merge_conflict_values[attribute] = 'MATCHING'
-            elif candidate1_attribute is None:
+            elif candidate1_attribute is None or candidate1_attribute is "":
                 candidate_merge_conflict_values[attribute] = 'CANDIDATE2'
-            elif candidate2_attribute is None:
+            elif candidate2_attribute is None or candidate2_attribute is "":
                 candidate_merge_conflict_values[attribute] = 'CANDIDATE1'
             elif candidate1_attribute == candidate2_attribute:
                 candidate_merge_conflict_values[attribute] = 'MATCHING'
@@ -421,7 +435,7 @@ def candidate_retrieve_for_api(candidate_id, candidate_we_vote_id):  # candidate
     if success:
         candidate_campaign = results['candidate_campaign']
         if not positive_value_exists(candidate_campaign.contest_office_name):
-            candidate_campaign = candidate_manager.refresh_cached_candidate_info(candidate_campaign)
+            candidate_campaign = candidate_manager.refresh_cached_candidate_office_info(candidate_campaign)
         json_data = {
             'status':                       status,
             'success':                      True,
@@ -572,14 +586,16 @@ def refresh_candidate_data_from_master_tables(candidate_we_vote_id):
     status = ""
 
     candidate_campaign_manager = CandidateCampaignManager()
+    candidate_campaign = CandidateCampaign()
     twitter_user_manager = TwitterUserManager()
 
     results = candidate_campaign_manager.retrieve_candidate_campaign_from_we_vote_id(candidate_we_vote_id)
     if not results['candidate_campaign_found']:
         status = "REFRESH_CANDIDATE_FROM_MASTER_TABLES-CANDIDATE_NOT_FOUND "
         results = {
-            'success':                  False,
-            'status':                   status,
+            'success':              False,
+            'status':               status,
+            'candidate_campaign':   candidate_campaign,
         }
         return results
 
@@ -633,13 +649,23 @@ def refresh_candidate_data_from_master_tables(candidate_we_vote_id):
     success = update_candidate_results['success']
 
     # Refresh contest office details in candidate campaign
-    update_candidate_contest_office_results = candidate_campaign_manager.refresh_cached_candidate_info(
-        candidate_campaign)
+    candidate_campaign = candidate_campaign_manager.refresh_cached_candidate_office_info(candidate_campaign)
     status += "REFRESHED_CANDIDATE_CAMPAIGN_FROM_CONTEST_OFFICE"
 
+    if not positive_value_exists(candidate_campaign.politician_id) and \
+            positive_value_exists(candidate_campaign.politician_we_vote_id):
+        politician_manager = PoliticianManager()
+        politician_id = politician_manager.fetch_politician_id_from_we_vote_id(candidate_campaign.politician_we_vote_id)
+        update_values = {
+            'politician_id': politician_id,
+        }
+        results = candidate_campaign_manager.update_candidate_row_entry(candidate_campaign.we_vote_id, update_values)
+        candidate_campaign = results['updated_candidate']
+
     results = {
-        'success': success,
-        'status': status,
+        'success':              success,
+        'status':               status,
+        'candidate_campaign':   candidate_campaign,
     }
     return results
 

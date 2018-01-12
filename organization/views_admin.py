@@ -604,8 +604,9 @@ def organization_edit_process_view(request):
             else:
                 state_code = ""
 
+            voter_guide_we_vote_id = ''
             results = voter_guide_manager.update_or_create_organization_voter_guide_by_election_id(
-                organization_we_vote_id, google_civic_election_id, state_code)
+                voter_guide_we_vote_id, organization_we_vote_id, google_civic_election_id, state_code)
             if results['voter_guide_saved']:
                 messages.add_message(request, messages.INFO, 'Voter guide for {election_name} election saved.'
                                                              ''.format(election_name=election.election_name))
@@ -1222,8 +1223,9 @@ def organization_position_edit_process_view(request):
     # If the position was saved, then update the voter_guide entry
     if success:
         voter_guide_manager = VoterGuideManager()
+        voter_guide_we_vote_id = ''
         results = voter_guide_manager.update_or_create_organization_voter_guide_by_election_id(
-            organization_on_stage.we_vote_id, google_civic_election_id, state_code)
+            voter_guide_we_vote_id, organization_on_stage.we_vote_id, google_civic_election_id, state_code)
         # if results['success']:
 
     if go_back_to_add_new:
