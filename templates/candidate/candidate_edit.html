@@ -42,7 +42,7 @@ span.wrap_word { word-break: break-word; }
             {% if candidate.candidate_merge_possibility_found %}
                 <br />
                 (<a href="{% url 'candidate:find_duplicate_candidate' candidate.id %}?google_civic_election_id={{ google_civic_election_id }}"
-                    >check for duplicates of this candidate</a> - in new window)
+                    target="_blank">check for duplicates of this candidate</a> - in new window)
             {% endif %}
 
         {% else %}
