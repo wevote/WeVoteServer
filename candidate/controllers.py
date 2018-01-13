@@ -57,7 +57,6 @@ def candidates_import_from_master_server(request, google_civic_election_id='', s
         CANDIDATES_SYNC_URL,
         {
             "key": WE_VOTE_API_KEY,  # This comes from an environment variable
-            "format": 'json',
             "google_civic_election_id": str(google_civic_election_id),
             "state_code": state_code,
         }
@@ -302,62 +301,90 @@ def candidates_import_from_structured_json(structured_json):
             proceed_to_update_or_create = False
         if proceed_to_update_or_create:
             updated_candidate_campaign_values = {
-                # Values we search against
                 'google_civic_election_id': google_civic_election_id,
                 'ocd_division_id': ocd_division_id,
+                'contest_office_id': contest_office_id,
                 'contest_office_we_vote_id': contest_office_we_vote_id,
                 'candidate_name': candidate_name,
-                # The rest of the values
                 'we_vote_id': we_vote_id,
-                'maplight_id': one_candidate['maplight_id'] if 'maplight_id' in one_candidate else None,
-                'vote_smart_id': one_candidate['vote_smart_id'] if 'vote_smart_id' in one_candidate else None,
-                'contest_office_id': contest_office_id,  # Retrieved from above
-                'contest_office_name':
-                    one_candidate['contest_office_name'] if 'contest_office_name' in one_candidate else '',
-                'politician_we_vote_id':
-                    one_candidate['politician_we_vote_id'] if 'politician_we_vote_id' in one_candidate else '',
-                'state_code': one_candidate['state_code'] if 'state_code' in one_candidate else '',
-                'party': one_candidate['party'] if 'party' in one_candidate else '',
-                'order_on_ballot': one_candidate['order_on_ballot'] if 'order_on_ballot' in one_candidate else 0,
-                'candidate_url': one_candidate['candidate_url'] if 'candidate_url' in one_candidate else '',
-                'photo_url': one_candidate['photo_url'] if 'photo_url' in one_candidate else '',
-                'photo_url_from_maplight':
-                    one_candidate['photo_url_from_maplight'] if 'photo_url_from_maplight' in one_candidate else '',
-                'photo_url_from_vote_smart':
-                    one_candidate['photo_url_from_vote_smart'] if 'photo_url_from_vote_smart' in one_candidate else '',
-                'facebook_url': one_candidate['facebook_url'] if 'facebook_url' in one_candidate else '',
-                'twitter_url': one_candidate['twitter_url'] if 'twitter_url' in one_candidate else '',
-                'google_plus_url': one_candidate['google_plus_url'] if 'google_plus_url' in one_candidate else '',
-                'youtube_url': one_candidate['youtube_url'] if 'youtube_url' in one_candidate else '',
-                'google_civic_candidate_name':
-                    one_candidate['google_civic_candidate_name']
-                    if 'google_civic_candidate_name' in one_candidate else '',
-                'candidate_email': one_candidate['candidate_email'] if 'candidate_email' in one_candidate else '',
-                'candidate_phone': one_candidate['candidate_phone'] if 'candidate_phone' in one_candidate else '',
-                'twitter_user_id': one_candidate['twitter_user_id'] if 'twitter_user_id' in one_candidate else '',
-                'candidate_twitter_handle': one_candidate['candidate_twitter_handle']
-                    if 'candidate_twitter_handle' in one_candidate else '',
-                'twitter_name': one_candidate['twitter_name'] if 'twitter_name' in one_candidate else '',
-                'twitter_location': one_candidate['twitter_location'] if 'twitter_location' in one_candidate else '',
-                'twitter_followers_count': one_candidate['twitter_followers_count']
-                    if 'twitter_followers_count' in one_candidate else '',
-                'twitter_profile_image_url_https': one_candidate['twitter_profile_image_url_https']
-                    if 'twitter_profile_image_url_https' in one_candidate else '',
-                'twitter_description': one_candidate['twitter_description']
-                    if 'twitter_description' in one_candidate else '',
-                'wikipedia_page_id': one_candidate['wikipedia_page_id']
-                    if 'wikipedia_page_id' in one_candidate else '',
-                'wikipedia_page_title': one_candidate['wikipedia_page_title']
-                    if 'wikipedia_page_title' in one_candidate else '',
-                'wikipedia_photo_url': one_candidate['wikipedia_photo_url']
-                    if 'wikipedia_photo_url' in one_candidate else '',
-                'ballotpedia_page_title': one_candidate['ballotpedia_page_title']
-                    if 'ballotpedia_page_title' in one_candidate else '',
-                'ballotpedia_photo_url': one_candidate['ballotpedia_photo_url']
-                    if 'ballotpedia_photo_url' in one_candidate else '',
-                'ballot_guide_official_statement': one_candidate['ballot_guide_official_statement']
-                    if 'ballot_guide_official_statement' in one_candidate else '',
             }
+            if 'maplight_id' in one_candidate:
+                updated_candidate_campaign_values['maplight_id'] = one_candidate['maplight_id']
+            if 'vote_smart_id' in one_candidate:
+                updated_candidate_campaign_values['vote_smart_id'] = one_candidate['vote_smart_id']
+            if 'contest_office_name' in one_candidate:
+                updated_candidate_campaign_values['contest_office_name'] = one_candidate['contest_office_name']
+            if 'politician_we_vote_id' in one_candidate:
+                updated_candidate_campaign_values['politician_we_vote_id'] = one_candidate['politician_we_vote_id']
+            if 'state_code' in one_candidate:
+                updated_candidate_campaign_values['state_code'] = one_candidate['state_code']
+            if 'party' in one_candidate:
+                updated_candidate_campaign_values['party'] = one_candidate['party']
+            if 'order_on_ballot' in one_candidate:
+                updated_candidate_campaign_values['order_on_ballot'] = one_candidate['order_on_ballot']
+            if 'candidate_url' in one_candidate:
+                updated_candidate_campaign_values['candidate_url'] = one_candidate['candidate_url']
+            if 'photo_url' in one_candidate:
+                updated_candidate_campaign_values['photo_url'] = one_candidate['photo_url']
+            if 'photo_url_from_maplight' in one_candidate:
+                updated_candidate_campaign_values['photo_url_from_maplight'] = one_candidate['photo_url_from_maplight']
+            if 'photo_url_from_vote_smart' in one_candidate:
+                updated_candidate_campaign_values['photo_url_from_vote_smart'] = \
+                    one_candidate['photo_url_from_vote_smart']
+            if 'facebook_url' in one_candidate:
+                updated_candidate_campaign_values['facebook_url'] = one_candidate['facebook_url']
+            if 'twitter_url' in one_candidate:
+                updated_candidate_campaign_values['twitter_url'] = one_candidate['twitter_url']
+            if 'google_plus_url' in one_candidate:
+                updated_candidate_campaign_values['google_plus_url'] = one_candidate['google_plus_url']
+            if 'youtube_url' in one_candidate:
+                updated_candidate_campaign_values['youtube_url'] = one_candidate['youtube_url']
+            if 'google_civic_candidate_name' in one_candidate:
+                updated_candidate_campaign_values['google_civic_candidate_name'] = \
+                    one_candidate['google_civic_candidate_name']
+            if 'candidate_email' in one_candidate:
+                updated_candidate_campaign_values['candidate_email'] = one_candidate['candidate_email']
+            if 'candidate_phone' in one_candidate:
+                updated_candidate_campaign_values['candidate_phone'] = one_candidate['candidate_phone']
+            if 'twitter_user_id' in one_candidate:
+                updated_candidate_campaign_values['twitter_user_id'] = one_candidate['twitter_user_id']
+            if 'candidate_twitter_handle' in one_candidate:
+                updated_candidate_campaign_values['candidate_twitter_handle'] = \
+                    one_candidate['candidate_twitter_handle']
+            if 'twitter_name' in one_candidate:
+                updated_candidate_campaign_values['twitter_name'] = one_candidate['twitter_name']
+            if 'twitter_location' in one_candidate:
+                updated_candidate_campaign_values['twitter_location'] = one_candidate['twitter_location']
+            if 'twitter_followers_count' in one_candidate:
+                updated_candidate_campaign_values['twitter_followers_count'] = one_candidate['twitter_followers_count']
+            if 'twitter_profile_image_url_https' in one_candidate:
+                updated_candidate_campaign_values['twitter_profile_image_url_https'] = \
+                    one_candidate['twitter_profile_image_url_https']
+            if 'twitter_description' in one_candidate:
+                updated_candidate_campaign_values['twitter_description'] = one_candidate['twitter_description']
+            if 'wikipedia_page_id' in one_candidate:
+                updated_candidate_campaign_values['wikipedia_page_id'] = one_candidate['wikipedia_page_id']
+            if 'wikipedia_page_title' in one_candidate:
+                updated_candidate_campaign_values['wikipedia_page_title'] = one_candidate['wikipedia_page_title']
+            if 'wikipedia_photo_url' in one_candidate:
+                updated_candidate_campaign_values['wikipedia_photo_url'] = one_candidate['wikipedia_photo_url']
+            if 'ballotpedia_page_title' in one_candidate:
+                updated_candidate_campaign_values['ballotpedia_page_title'] = one_candidate['ballotpedia_page_title']
+            if 'ballotpedia_photo_url' in one_candidate:
+                updated_candidate_campaign_values['ballotpedia_photo_url'] = one_candidate['ballotpedia_photo_url']
+            if 'ballot_guide_official_statement' in one_candidate:
+                updated_candidate_campaign_values['ballot_guide_official_statement'] = \
+                    one_candidate['ballot_guide_official_statement']
+            if 'we_vote_hosted_profile_image_url_large' in one_candidate:
+                updated_candidate_campaign_values['we_vote_hosted_profile_image_url_large'] = \
+                    one_candidate['we_vote_hosted_profile_image_url_large']
+            if 'we_vote_hosted_profile_image_url_medium' in one_candidate:
+                updated_candidate_campaign_values['we_vote_hosted_profile_image_url_medium'] = \
+                    one_candidate['we_vote_hosted_profile_image_url_medium']
+            if 'we_vote_hosted_profile_image_url_tiny' in one_candidate:
+                updated_candidate_campaign_values['we_vote_hosted_profile_image_url_tiny'] = \
+                    one_candidate['we_vote_hosted_profile_image_url_tiny']
+
             results = candidate_campaign_manager.update_or_create_candidate_campaign(
                 we_vote_id, google_civic_election_id, ocd_division_id,
                 contest_office_id, contest_office_we_vote_id,

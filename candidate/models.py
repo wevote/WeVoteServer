@@ -53,7 +53,6 @@ CANDIDATE_UNIQUE_IDENTIFIERS = [
     'politician_id',
     'politician_we_vote_id',
     'state_code',
-    'twitter_description',
     'twitter_location',
     'twitter_name',
     'twitter_profile_background_image_url_https',

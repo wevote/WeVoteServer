@@ -27,7 +27,6 @@ def polling_locations_import_from_master_server(request, state_code):
         request, "Loading Polling Locations from We Vote Master servers",
         POLLING_LOCATIONS_SYNC_URL, {
             "key":    WE_VOTE_API_KEY,  # This comes from an environment variable
-            "format": 'json',
             "state":  state_code,
         }
     )

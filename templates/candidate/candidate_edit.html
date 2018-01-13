@@ -40,8 +40,9 @@ span.wrap_word { word-break: break-word; }
                     >match to politician</a>)
             {% endif %}
             {% if candidate.candidate_merge_possibility_found %}
+                <br />
                 (<a href="{% url 'candidate:find_duplicate_candidate' candidate.id %}?google_civic_election_id={{ google_civic_election_id }}"
-                    >merge with duplicate candidate</a>)
+                    >check for duplicates of this candidate</a> - in new window)
             {% endif %}
 
         {% else %}

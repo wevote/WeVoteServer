@@ -55,7 +55,7 @@
 {% endif %}{# End of if state_list #}
 
 <table>
-    <tr><td><h4>Offices</h4></h4></td></tr>
+    <tr><td><h4>Offices</h4></td></tr>
     <tr>
         <td>&nbsp;&nbsp;&nbsp;&nbsp;
             <a href="{% url 'office:offices_import_from_master_server' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
@@ -65,6 +65,17 @@
             &nbsp;&nbsp;
         </td>
         <td>The list of elected offices, like &#34;Governor State of Virginia&#34;, one entry for each polling location</td>
+    </tr>
+
+    <tr><td><h4>Politicians</h4></td></tr>
+    <tr>
+        <td>&nbsp;&nbsp;&nbsp;&nbsp;
+            <a href="{% url 'politician:politicians_import_from_master_server' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
+                Retrieve Politicians</a>
+            {% if state_code %} for the state {{ state_code }}{% else %} for ALL states{% endif %}
+            &nbsp;&nbsp;
+        </td>
+        <td>The list of politicians (current and former candidates)</td>
     </tr>
 
     <tr><td><h4>Candidates</h4></td></tr>
@@ -181,18 +192,19 @@
     <br />
     <br />
 <h4>Settings</h4>
-<p>ELECTIONS_SYNC_URL: {{ elections_sync_url }}</p>
-<p>OFFICES_SYNC_URL: {{ offices_sync_url }}</p>
-<p>CANDIDATES_SYNC_URL: {{ candidates_sync_url }}</p>
-<p>MEASURES_SYNC_URL: {{ measures_sync_url }}</p>
-<p>ORGANIZATIONS_SYNC_URL: {{ organizations_sync_url }}</p>
-<p>ORGANIZATION_LINK_TO_ISSUE_SYNC_URL: {{ organization_link_to_issue_sync_url }}</p>
-<p>POSITIONS_SYNC_URL: {{ positions_sync_url }}</p>
-<p>POLLING_LOCATIONS_SYNC_URL: {{ polling_locations_sync_url }}</p>
 <p>BALLOT_ITEMS_SYNC_URL: {{ ballot_items_sync_url }}</p>
 <p>BALLOT_RETURNED_SYNC_URL: {{ ballot_returned_sync_url }}</p>
-<p>VOTER_GUIDES_SYNC_URL: {{ voter_guides_sync_url }}</p>
+<p>CANDIDATES_SYNC_URL: {{ candidates_sync_url }}</p>
+<p>ELECTIONS_SYNC_URL: {{ elections_sync_url }}</p>
 <p>ISSUES_SYNC_URL: {{ issues_sync_url }}</p>
+<p>MEASURES_SYNC_URL: {{ measures_sync_url }}</p>
+<p>OFFICES_SYNC_URL: {{ offices_sync_url }}</p>
+<p>ORGANIZATIONS_SYNC_URL: {{ organizations_sync_url }}</p>
+<p>ORGANIZATION_LINK_TO_ISSUE_SYNC_URL: {{ organization_link_to_issue_sync_url }}</p>
+<p>POLITICIANS_SYNC_URL: {{ politicians_sync_url }}</p>
+<p>POLLING_LOCATIONS_SYNC_URL: {{ polling_locations_sync_url }}</p>
+<p>POSITIONS_SYNC_URL: {{ positions_sync_url }}</p>
+<p>VOTER_GUIDES_SYNC_URL: {{ voter_guides_sync_url }}</p>
 
 
 <script>

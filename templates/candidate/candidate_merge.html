@@ -162,8 +162,8 @@
     <tr>
         <td>CTCL UUID</td>
         {% if conflict_values.ctcl_uuid == "CONFLICT" %}
-        <td><input type="radio" name="ctcl_uuid_choice" value="{{ candidate_option1.we_vote_id }}" checked /><span class="bold-select"> {{ candidate_option1.ctcl_uuid }}</span></td>
-        <td><input type="radio" name="ctcl_uuid_choice" value="{{ candidate_option2.we_vote_id }}" /><span class="bold-select"> {{ candidate_option2.ctcl_uuid }}</span></td>
+        <td><input type="radio" name="ctcl_uuid_choice" value="{{ candidate_option1.we_vote_id }}" checked /><span class="bold-select"> {{ candidate_option1.ctcl_uuid|default_if_none:"" }}</span></td>
+        <td><input type="radio" name="ctcl_uuid_choice" value="{{ candidate_option2.we_vote_id }}" /><span class="bold-select"> {{ candidate_option2.ctcl_uuid|default_if_none:"" }}</span></td>
         {% else %}
         <td>{% if conflict_values.ctcl_uuid == "CANDIDATE1" %}<strong>{{ candidate_option1.ctcl_uuid }}</strong>{% else %}{{ candidate_option1.ctcl_uuid|default_if_none:"" }}{% endif %}</td>
         <td>{% if conflict_values.ctcl_uuid == "CANDIDATE2" %}<strong>{{ candidate_option2.ctcl_uuid }}</strong>{% else %}{{ candidate_option2.ctcl_uuid|default_if_none:"" }}{% endif %}</td>
@@ -254,18 +254,20 @@
         {% endif %}
     </tr>
     {% endif %}
-    {% if candidate_option1.twitter_description != None or candidate_option2.twitter_description != None %}
-    <tr>
-        <td>Twitter Description</td>
-        {% if conflict_values.twitter_description == "CONFLICT" %}
-        <td><input type="radio" name="twitter_description_choice" value="{{ candidate_option1.we_vote_id }}" checked /><span class="bold-select"> {{ candidate_option1.twitter_description }}</span></td>
-        <td><input type="radio" name="twitter_description_choice" value="{{ candidate_option2.we_vote_id }}" /><span class="bold-select"> {{ candidate_option2.twitter_description }}</span></td>
-        {% else %}
-        <td>{% if conflict_values.twitter_description == "CANDIDATE1" %}<strong>{{ candidate_option1.twitter_description }}</strong>{% else %}{{ candidate_option1.twitter_description|default_if_none:"" }}{% endif %}</td>
-        <td>{% if conflict_values.twitter_description == "CANDIDATE2" %}<strong>{{ candidate_option2.twitter_description }}</strong>{% else %}{{ candidate_option2.twitter_description|default_if_none:"" }}{% endif %}</td>
-        {% endif %}
-    </tr>
-    {% endif %}
+
+{#    {% if candidate_option1.twitter_description != None or candidate_option2.twitter_description != None %}#}
+{#    <tr>#}
+{#        <td>Twitter Description</td>#}
+{#        {% if conflict_values.twitter_description == "CONFLICT" %}#}
+{#        <td><input type="radio" name="twitter_description_choice" value="{{ candidate_option1.we_vote_id }}" checked /><span class="bold-select"> {{ candidate_option1.twitter_description }}</span></td>#}
+{#        <td><input type="radio" name="twitter_description_choice" value="{{ candidate_option2.we_vote_id }}" /><span class="bold-select"> {{ candidate_option2.twitter_description }}</span></td>#}
+{#        {% else %}#}
+{#        <td>{% if conflict_values.twitter_description == "CANDIDATE1" %}<strong>{{ candidate_option1.twitter_description }}</strong>{% else %}{{ candidate_option1.twitter_description|default_if_none:"" }}{% endif %}</td>#}
+{#        <td>{% if conflict_values.twitter_description == "CANDIDATE2" %}<strong>{{ candidate_option2.twitter_description }}</strong>{% else %}{{ candidate_option2.twitter_description|default_if_none:"" }}{% endif %}</td>#}
+{#        {% endif %}#}
+{#    </tr>#}
+{#    {% endif %}#}
+
     {% if candidate_option1.twitter_location != None or candidate_option2.twitter_location != None %}
     <tr>
         <td>Twitter Location</td>

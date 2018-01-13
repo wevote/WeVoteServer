@@ -57,7 +57,6 @@ def elections_import_from_master_server(request=None):
         request, "Loading Election from We Vote Master servers",
         ELECTIONS_SYNC_URL, {
             "key":    WE_VOTE_API_KEY,  # This comes from an environment variable
-            "format": 'json',
         }
     )
 
