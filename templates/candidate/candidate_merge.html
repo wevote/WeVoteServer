@@ -29,11 +29,11 @@
     <tr>
         <td>Candidate Name</td>
         {% if conflict_values.candidate_name == "CONFLICT" %}
-        <td><input type="radio" name="candidate_name_choice" value="{{ candidate_option1.we_vote_id }}" checked /><span class="bold-select"> {{ candidate_option1.candidate_name }}</span></td>
-        <td><input type="radio" name="candidate_name_choice" value="{{ candidate_option2.we_vote_id }}" /><span class="bold-select"> {{ candidate_option2.candidate_name }}</span></td>
+        <td><input type="radio" name="candidate_name_choice" value="{{ candidate_option1.we_vote_id }}" checked /><span class="bold-select"> {{ candidate_option1.candidate_name|default_if_none:"" }}</span></td>
+        <td><input type="radio" name="candidate_name_choice" value="{{ candidate_option2.we_vote_id }}" /><span class="bold-select"> {{ candidate_option2.candidate_name|default_if_none:"" }}</span></td>
         {% else %}
-        <td>{% if conflict_values.candidate_name == "CANDIDATE1" %}<strong>{{ candidate_option1.candidate_name }}</strong>{% else %}{{ candidate_option1.candidate_name|default_if_none:"" }}{% endif %}</td>
-        <td>{% if conflict_values.candidate_name == "CANDIDATE2" %}<strong>{{ candidate_option2.candidate_name }}</strong>{% else %}{{ candidate_option2.candidate_name|default_if_none:"" }}{% endif %}</td>
+        <td>{% if conflict_values.candidate_name == "CANDIDATE1" %}<strong>{{ candidate_option1.candidate_name|default_if_none:"" }}</strong>{% else %}{{ candidate_option1.candidate_name|default_if_none:"" }}{% endif %}</td>
+        <td>{% if conflict_values.candidate_name == "CANDIDATE2" %}<strong>{{ candidate_option2.candidate_name|default_if_none:"" }}</strong>{% else %}{{ candidate_option2.candidate_name|default_if_none:"" }}{% endif %}</td>
         {% endif %}
     </tr>
     {% endif %}
@@ -42,11 +42,11 @@
     <tr>
         <td>Candidate Name (from Google Civic)</td>
         {% if conflict_values.google_civic_candidate_name == "CONFLICT" %}
-        <td><input type="radio" name="google_civic_candidate_name_choice" value="{{ candidate_option1.we_vote_id }}" checked /><span class="bold-select"> {{ candidate_option1.google_civic_candidate_name }}</span></td>
-        <td><input type="radio" name="google_civic_candidate_name_choice" value="{{ candidate_option2.we_vote_id }}" /><span class="bold-select"> {{ candidate_option2.google_civic_candidate_name }}</span></td>
+        <td><input type="radio" name="google_civic_candidate_name_choice" value="{{ candidate_option1.we_vote_id }}" checked /><span class="bold-select"> {{ candidate_option1.google_civic_candidate_name|default_if_none:"" }}</span></td>
+        <td><input type="radio" name="google_civic_candidate_name_choice" value="{{ candidate_option2.we_vote_id }}" /><span class="bold-select"> {{ candidate_option2.google_civic_candidate_name|default_if_none:"" }}</span></td>
         {% else %}
-        <td>{% if conflict_values.google_civic_candidate_name == "CANDIDATE1" %}<strong>{{ candidate_option1.google_civic_candidate_name }}</strong>{% else %}{{ candidate_option1.google_civic_candidate_name|default_if_none:"" }}{% endif %}</td>
-        <td>{% if conflict_values.google_civic_candidate_name == "CANDIDATE2" %}<strong>{{ candidate_option2.google_civic_candidate_name }}</strong>{% else %}{{ candidate_option2.google_civic_candidate_name|default_if_none:"" }}{% endif %}</td>
+        <td>{% if conflict_values.google_civic_candidate_name == "CANDIDATE1" %}<strong>{{ candidate_option1.google_civic_candidate_name|default_if_none:"" }}</strong>{% else %}{{ candidate_option1.google_civic_candidate_name|default_if_none:"" }}{% endif %}</td>
+        <td>{% if conflict_values.google_civic_candidate_name == "CANDIDATE2" %}<strong>{{ candidate_option2.google_civic_candidate_name|default_if_none:"" }}</strong>{% else %}{{ candidate_option2.google_civic_candidate_name|default_if_none:"" }}{% endif %}</td>
         {% endif %}
     </tr>
     {% endif %}
@@ -61,11 +61,11 @@
     <tr>
         <td>Office We Vote Id</td>
         {% if conflict_values.contest_office_we_vote_id == "CONFLICT" %}
-        <td><input type="radio" name="contest_office_we_vote_id_choice" value="{{ candidate_option1.contest_office_we_vote_id }}" checked /><span class="bold-select"> {{ candidate_option1.contest_office_we_vote_id }}</span></td>
-        <td><input type="radio" name="contest_office_we_vote_id_choice" value="{{ candidate_option2.contest_office_we_vote_id }}" /><span class="bold-select"> {{ candidate_option2.contest_office_we_vote_id }}</span></td>
+        <td><input type="radio" name="contest_office_we_vote_id_choice" value="{{ candidate_option1.contest_office_we_vote_id }}" checked /><span class="bold-select"> {{ candidate_option1.contest_office_we_vote_id|default_if_none:"" }}</span></td>
+        <td><input type="radio" name="contest_office_we_vote_id_choice" value="{{ candidate_option2.contest_office_we_vote_id }}" /><span class="bold-select"> {{ candidate_option2.contest_office_we_vote_id|default_if_none:"" }}</span></td>
         {% else %}
-        <td>{% if conflict_values.contest_office_name == "CANDIDATE1" %}<strong>{{ candidate_option1.contest_office_we_vote_id }}</strong>{% else %}{{ candidate_option1.contest_office_we_vote_id|default_if_none:"" }}{% endif %}</td>
-        <td>{% if conflict_values.contest_office_name == "CANDIDATE2" %}<strong>{{ candidate_option2.contest_office_we_vote_id }}</strong>{% else %}{{ candidate_option2.contest_office_we_vote_id|default_if_none:"" }}{% endif %}</td>
+        <td>{% if conflict_values.contest_office_name == "CANDIDATE1" %}<strong>{{ candidate_option1.contest_office_we_vote_id|default_if_none:"" }}</strong>{% else %}{{ candidate_option1.contest_office_we_vote_id|default_if_none:"" }}{% endif %}</td>
+        <td>{% if conflict_values.contest_office_name == "CANDIDATE2" %}<strong>{{ candidate_option2.contest_office_we_vote_id|default_if_none:"" }}</strong>{% else %}{{ candidate_option2.contest_office_we_vote_id|default_if_none:"" }}{% endif %}</td>
         {% endif %}
     </tr>
     {% endif %}
@@ -165,8 +165,8 @@
         <td><input type="radio" name="ctcl_uuid_choice" value="{{ candidate_option1.we_vote_id }}" checked /><span class="bold-select"> {{ candidate_option1.ctcl_uuid|default_if_none:"" }}</span></td>
         <td><input type="radio" name="ctcl_uuid_choice" value="{{ candidate_option2.we_vote_id }}" /><span class="bold-select"> {{ candidate_option2.ctcl_uuid|default_if_none:"" }}</span></td>
         {% else %}
-        <td>{% if conflict_values.ctcl_uuid == "CANDIDATE1" %}<strong>{{ candidate_option1.ctcl_uuid }}</strong>{% else %}{{ candidate_option1.ctcl_uuid|default_if_none:"" }}{% endif %}</td>
-        <td>{% if conflict_values.ctcl_uuid == "CANDIDATE2" %}<strong>{{ candidate_option2.ctcl_uuid }}</strong>{% else %}{{ candidate_option2.ctcl_uuid|default_if_none:"" }}{% endif %}</td>
+        <td>{% if conflict_values.ctcl_uuid == "CANDIDATE1" %}<strong>{{ candidate_option1.ctcl_uuid|default_if_none:"" }}</strong>{% else %}{{ candidate_option1.ctcl_uuid|default_if_none:"" }}{% endif %}</td>
+        <td>{% if conflict_values.ctcl_uuid == "CANDIDATE2" %}<strong>{{ candidate_option2.ctcl_uuid|default_if_none:"" }}</strong>{% else %}{{ candidate_option2.ctcl_uuid|default_if_none:"" }}{% endif %}</td>
         {% endif %}
     </tr>
     {% endif %}
@@ -186,8 +186,8 @@
     <tr>
         <td>OCD Division ID</td>
         {% if conflict_values.ocd_division_id == "CONFLICT" %}
-        <td><input type="radio" name="ocd_division_id_choice" value="{{ candidate_option1.we_vote_id }}" checked /><span class="bold-select"> {{ candidate_option1.ocd_division_id }}</span></td>
-        <td><input type="radio" name="ocd_division_id_choice" value="{{ candidate_option2.we_vote_id }}" /><span class="bold-select"> {{ candidate_option2.ocd_division_id }}</span></td>
+        <td><input type="radio" name="ocd_division_id_choice" value="{{ candidate_option1.we_vote_id }}" checked /><span class="bold-select"> {{ candidate_option1.ocd_division_id|default_if_none:"" }}</span></td>
+        <td><input type="radio" name="ocd_division_id_choice" value="{{ candidate_option2.we_vote_id }}" /><span class="bold-select"> {{ candidate_option2.ocd_division_id|default_if_none:"" }}</span></td>
         {% else %}
         <td>{% if conflict_values.ocd_division_id == "CANDIDATE1" %}<strong>{{ candidate_option1.ocd_division_id }}</strong>{% else %}{{ candidate_option1.ocd_division_id|default_if_none:"" }}{% endif %}</td>
         <td>{% if conflict_values.ocd_division_id == "CANDIDATE2" %}<strong>{{ candidate_option2.ocd_division_id }}</strong>{% else %}{{ candidate_option2.ocd_division_id|default_if_none:"" }}{% endif %}</td>

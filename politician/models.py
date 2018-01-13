@@ -446,13 +446,12 @@ class PoliticianManager(models.Model):
             'political_party':                          political_party,
         }
 
-        return self.update_or_create_politician(
-            politician_we_vote_id=candidate.politician_we_vote_id, updated_politician_values=updated_politician_values)
+        return self.update_or_create_politician(updated_politician_values, candidate.politician_we_vote_id)
 
-    def update_or_create_politician(self, politician_we_vote_id, vote_smart_id=0, maplight_id="",
+    def update_or_create_politician(self, updated_politician_values, politician_we_vote_id,
+                                    vote_smart_id=0, maplight_id="",
                                     candidate_twitter_handle="", candidate_name="", state_code="",
-                                    first_name="", middle_name="", last_name="",
-                                    updated_politician_values=None):
+                                    first_name="", middle_name="", last_name=""):
         """
         Either update or create a politician entry. The individual variables passed in are for the purpose of finding
         a politician to update, and the updated_politician_values variable contains the values we want to update to.
