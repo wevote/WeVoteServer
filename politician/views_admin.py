@@ -2,9 +2,9 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
+from .controllers import politicians_import_from_master_server
 from .models import Politician, PoliticianManager
 from admin_tools.views import redirect_to_sign_in_page
-from candidate.controllers import candidates_import_from_master_server
 from candidate.models import CandidateCampaign
 from office.models import ContestOffice, ContestOfficeManager
 from django.db.models import Q
@@ -29,23 +29,23 @@ from wevote_functions.functions import convert_to_int, convert_to_political_part
     extract_first_name_from_full_name, \
     extract_middle_name_from_full_name, \
     extract_last_name_from_full_name, extract_twitter_handle_from_text_string, \
-    positive_value_exists
+    positive_value_exists, STATE_CODE_MAP
 
 
 logger = wevote_functions.admin.get_logger(__name__)
 
 
 @login_required
-def candidates_import_from_master_server_view(request):  # TODO DALE Transition fully to politician
+def politicians_import_from_master_server_view(request):
     google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
     state_code = request.GET.get('state_code', '')
 
-    results = candidates_import_from_master_server(request, google_civic_election_id)
+    results = politicians_import_from_master_server(request, state_code)
 
     if not results['success']:
         messages.add_message(request, messages.ERROR, results['status'])
     else:
-        messages.add_message(request, messages.INFO, 'Candidates import completed. '
+        messages.add_message(request, messages.INFO, 'Politician import completed. '
                                                      'Saved: {saved}, Updated: {updated}, '
                                                      'Duplicates skipped: '
                                                      '{duplicates_removed}, '
@@ -68,7 +68,11 @@ def politician_list_view(request):
     state_code = request.GET.get('state_code', '')
     politician_search = request.GET.get('politician_search', '')
     google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
+    show_all = request.GET.get('show_all', False)
     politician_list = []
+
+    state_list = STATE_CODE_MAP
+    sorted_state_list = sorted(state_list.items())
 
     try:
         politician_list = Politician.objects.all()
@@ -102,7 +106,8 @@ def politician_list_view(request):
 
                     politician_list = politician_list.filter(final_filters)
 
-        politician_list = politician_list.order_by('politician_name')[:200]
+        if not positive_value_exists(show_all):
+            politician_list = politician_list.order_by('politician_name')[:25]
     except ObjectDoesNotExist:
         # This is fine
         pass
@@ -111,8 +116,13 @@ def politician_list_view(request):
     temp_politician_list = []
     for one_politician in politician_list:
         try:
+            linked_candidate_query = CandidateCampaign.objects.all()
+            linked_candidate_query = linked_candidate_query.filter(politician_we_vote_id=one_politician.we_vote_id)
+            linked_candidate_list_count = linked_candidate_query.count()
+            one_politician.linked_candidate_list_count = linked_candidate_list_count
+
             related_candidate_list = CandidateCampaign.objects.all()
-            related_candidate_list = related_candidate_list.exclude(politician_id=one_politician.id)
+            related_candidate_list = related_candidate_list.exclude(politician_we_vote_id=one_politician.we_vote_id)
 
             filters = []
             new_filter = Q(candidate_name__icontains=one_politician.first_name) & \
@@ -149,12 +159,13 @@ def politician_list_view(request):
     election_list = Election.objects.order_by('-election_day_text')
 
     template_values = {
-        'messages_on_stage':    messages_on_stage,
-        'google_civic_election_id':    google_civic_election_id,
-        'politician_list':      politician_list,
-        'politician_search':    politician_search,
-        'election_list':        election_list,
-        'state_code':           state_code,
+        'messages_on_stage':        messages_on_stage,
+        'google_civic_election_id': google_civic_election_id,
+        'politician_list':          politician_list,
+        'politician_search':        politician_search,
+        'election_list':            election_list,
+        'state_code':               state_code,
+        'state_list':               sorted_state_list,
     }
     return render(request, 'politician/politician_list.html', template_values)
 
@@ -250,6 +261,7 @@ def politician_edit_view(request, politician_id):
     politician_id = convert_to_int(politician_id)
     politician_on_stage_found = False
     politician_on_stage = Politician()
+    duplicate_politician_list = []
 
     try:
         politician_on_stage = Politician.objects.get(id=politician_id)
@@ -276,21 +288,24 @@ def politician_edit_view(request, politician_id):
         # Working with We Vote Positions
         try:
             politician_position_list = PositionEntered.objects.order_by('stance')
-            politician_position_list = politician_position_list.filter(politician_id=politician_id)
+            politician_position_list = politician_position_list.filter(
+                politician_we_vote_id__iexact=politician_on_stage.we_vote_id)
         except Exception as e:
             politician_position_list = []
 
         # Working with Candidate "children" of this politician
         try:
             linked_candidate_list = CandidateCampaign.objects.all()
-            linked_candidate_list = linked_candidate_list.filter(politician_id=politician_on_stage.id)
+            linked_candidate_list = linked_candidate_list.filter(
+                politician_we_vote_id__iexact=politician_on_stage.we_vote_id)
         except Exception as e:
             linked_candidate_list = []
 
         # Finding Candidates that *might* be "children" of this politician
         try:
             related_candidate_list = CandidateCampaign.objects.all()
-            related_candidate_list = related_candidate_list.exclude(politician_id=politician_on_stage.id)
+            related_candidate_list = related_candidate_list.exclude(
+                politician_we_vote_id__iexact=politician_on_stage.we_vote_id)
 
             filters = []
             new_filter = Q(candidate_name__icontains=politician_on_stage.first_name) & \
@@ -322,7 +337,8 @@ def politician_edit_view(request, politician_id):
         # Find possible duplicate politicians
         try:
             duplicate_politician_list = Politician.objects.all()
-            duplicate_politician_list = duplicate_politician_list.exclude(id=politician_on_stage.id)
+            duplicate_politician_list = duplicate_politician_list.exclude(
+                we_vote_id__iexact=politician_on_stage.we_vote_id)
 
             filters = []
             new_filter = Q(politician_name__icontains=politician_on_stage.politician_name)

@@ -437,6 +437,7 @@ class PoliticianManager(models.Model):
             'google_civic_candidate_name':              candidate.google_civic_candidate_name,
             'state_code':                               candidate.state_code,
             'politician_twitter_handle':                candidate.candidate_twitter_handle,
+            'we_vote_hosted_profile_image_url_large':   candidate.we_vote_hosted_profile_image_url_large,
             'we_vote_hosted_profile_image_url_medium':  candidate.we_vote_hosted_profile_image_url_medium,
             'we_vote_hosted_profile_image_url_tiny':    candidate.we_vote_hosted_profile_image_url_tiny,
             'first_name':                               first_name,
@@ -446,15 +447,12 @@ class PoliticianManager(models.Model):
         }
 
         return self.update_or_create_politician(
-            candidate.politician_we_vote_id, candidate.vote_smart_id, candidate.maplight_id,
-            candidate.candidate_name, candidate.state_code, candidate.candidate_twitter_handle,
-            first_name, middle_name, last_name,
-            updated_politician_values)
+            politician_we_vote_id=candidate.politician_we_vote_id, updated_politician_values=updated_politician_values)
 
-    def update_or_create_politician(self, we_vote_id, vote_smart_id, maplight_id,
-                                    candidate_twitter_handle, candidate_name, state_code,
-                                    first_name, middle_name, last_name,
-                                    updated_politician_values):
+    def update_or_create_politician(self, politician_we_vote_id, vote_smart_id=0, maplight_id="",
+                                    candidate_twitter_handle="", candidate_name="", state_code="",
+                                    first_name="", middle_name="", last_name="",
+                                    updated_politician_values=None):
         """
         Either update or create a politician entry. The individual variables passed in are for the purpose of finding
         a politician to update, and the updated_politician_values variable contains the values we want to update to.
@@ -468,10 +466,10 @@ class PoliticianManager(models.Model):
             #  updating candidate_name via subsequent Google Civic imports
 
             # If coming from a record that has already been in We Vote
-            if positive_value_exists(we_vote_id):
+            if positive_value_exists(politician_we_vote_id):
                 politician, new_politician_created = \
                     Politician.objects.update_or_create(
-                        we_vote_id__iexact=we_vote_id,
+                        we_vote_id__iexact=politician_we_vote_id,
                         defaults=updated_politician_values)
                 politician_found = True
             elif positive_value_exists(vote_smart_id):

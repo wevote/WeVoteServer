@@ -93,7 +93,11 @@ def candidates_sync_out_view(request):  # candidatesSyncOut
                                                     'google_plus_url', 'youtube_url', 'candidate_email',
                                                     'candidate_phone', 'wikipedia_page_id', 'wikipedia_page_title',
                                                     'wikipedia_photo_url', 'ballotpedia_page_title',
-                                                    'ballotpedia_photo_url', 'ballot_guide_official_statement')
+                                                    'ballotpedia_photo_url', 'ballot_guide_official_statement',
+                                                    'we_vote_hosted_profile_image_url_large',
+                                                    'we_vote_hosted_profile_image_url_medium',
+                                                    'we_vote_hosted_profile_image_url_tiny',
+                                                    )
         if candidate_list_dict:
             candidate_list_json = list(candidate_list_dict)
             return HttpResponse(json.dumps(candidate_list_json), content_type='application/json')
@@ -1064,7 +1068,6 @@ def find_and_remove_duplicate_candidates_view(request):
     google_civic_election_id = request.GET.get('google_civic_election_id', 0)
     google_civic_election_id = convert_to_int(google_civic_election_id)
     candidate_manager = CandidateCampaignManager()
-    position_list_manager = PositionListManager()
 
     # We only want to process if a google_civic_election_id comes in
     if not positive_value_exists(google_civic_election_id):
@@ -1113,50 +1116,9 @@ def find_and_remove_duplicate_candidates_view(request):
             candidate_option1_for_template = we_vote_candidate
             candidate_option2_for_template = results['candidate_merge_possibility']
 
-            bookmark_item_list = BookmarkItemList()
-
-            # Get positions counts for both candidates
-            candidate_option1_for_template.public_positions_count = \
-                position_list_manager.fetch_public_positions_count_for_candidate_campaign(
-                    candidate_option1_for_template.id, candidate_option1_for_template.we_vote_id)
-            candidate_option1_for_template.friends_positions_count = \
-                position_list_manager.fetch_friends_only_positions_count_for_candidate_campaign(
-                    candidate_option1_for_template.id, candidate_option1_for_template.we_vote_id)
-            # Bookmarks
-            bookmark_results = bookmark_item_list.retrieve_bookmark_item_list_for_candidate(
-                candidate_option1_for_template.we_vote_id)
-            if bookmark_results['bookmark_item_list_found']:
-                bookmark_item_list = bookmark_results['bookmark_item_list']
-                candidate_option1_bookmark_count = len(bookmark_item_list)
-            else:
-                candidate_option1_bookmark_count = 0
-            candidate_option1_for_template.bookmarks_count = candidate_option1_bookmark_count
-
-            candidate_option2_for_template.public_positions_count = \
-                position_list_manager.fetch_public_positions_count_for_candidate_campaign(
-                    candidate_option2_for_template.id, candidate_option2_for_template.we_vote_id)
-            candidate_option2_for_template.friends_positions_count = \
-                position_list_manager.fetch_friends_only_positions_count_for_candidate_campaign(
-                    candidate_option2_for_template.id, candidate_option2_for_template.we_vote_id)
-            # Bookmarks
-            bookmark_results = bookmark_item_list.retrieve_bookmark_item_list_for_candidate(
-                candidate_option2_for_template.we_vote_id)
-            if bookmark_results['bookmark_item_list_found']:
-                bookmark_item_list = bookmark_results['bookmark_item_list']
-                candidate_option2_bookmark_count = len(bookmark_item_list)
-            else:
-                candidate_option2_bookmark_count = 0
-            candidate_option2_for_template.bookmarks_count = candidate_option2_bookmark_count
-
-            messages_on_stage = get_messages(request)
-            template_values = {
-                'messages_on_stage':        messages_on_stage,
-                'candidate_option1':        candidate_option1_for_template,
-                'candidate_option2':        candidate_option2_for_template,
-                'conflict_values':          results['candidate_merge_conflict_values'],
-                'google_civic_election_id': google_civic_election_id,
-            }
-            return render(request, 'candidate/candidate_merge.html', template_values)
+            # This view function takes us to displaying a template
+            return render_candidate_merge_form(request, candidate_option1_for_template, candidate_option2_for_template,
+                                               results['candidate_merge_conflict_values'])
 
     message = "Google Civic Election ID: {election_id}, " \
               "No duplicate candidates found for this election." \
@@ -1166,6 +1128,56 @@ def find_and_remove_duplicate_candidates_view(request):
 
     return HttpResponseRedirect(reverse('candidate:candidate_list', args=()) + "?google_civic_election_id={var}"
                                                                                "".format(var=google_civic_election_id))
+
+
+def render_candidate_merge_form(
+        request, candidate_option1_for_template, candidate_option2_for_template, candidate_merge_conflict_values):
+    position_list_manager = PositionListManager()
+
+    bookmark_item_list = BookmarkItemList()
+
+    # Get positions counts for both candidates
+    candidate_option1_for_template.public_positions_count = \
+        position_list_manager.fetch_public_positions_count_for_candidate_campaign(
+            candidate_option1_for_template.id, candidate_option1_for_template.we_vote_id)
+    candidate_option1_for_template.friends_positions_count = \
+        position_list_manager.fetch_friends_only_positions_count_for_candidate_campaign(
+            candidate_option1_for_template.id, candidate_option1_for_template.we_vote_id)
+    # Bookmarks
+    bookmark_results = bookmark_item_list.retrieve_bookmark_item_list_for_candidate(
+        candidate_option1_for_template.we_vote_id)
+    if bookmark_results['bookmark_item_list_found']:
+        bookmark_item_list = bookmark_results['bookmark_item_list']
+        candidate_option1_bookmark_count = len(bookmark_item_list)
+    else:
+        candidate_option1_bookmark_count = 0
+    candidate_option1_for_template.bookmarks_count = candidate_option1_bookmark_count
+
+    candidate_option2_for_template.public_positions_count = \
+        position_list_manager.fetch_public_positions_count_for_candidate_campaign(
+            candidate_option2_for_template.id, candidate_option2_for_template.we_vote_id)
+    candidate_option2_for_template.friends_positions_count = \
+        position_list_manager.fetch_friends_only_positions_count_for_candidate_campaign(
+            candidate_option2_for_template.id, candidate_option2_for_template.we_vote_id)
+    # Bookmarks
+    bookmark_results = bookmark_item_list.retrieve_bookmark_item_list_for_candidate(
+        candidate_option2_for_template.we_vote_id)
+    if bookmark_results['bookmark_item_list_found']:
+        bookmark_item_list = bookmark_results['bookmark_item_list']
+        candidate_option2_bookmark_count = len(bookmark_item_list)
+    else:
+        candidate_option2_bookmark_count = 0
+    candidate_option2_for_template.bookmarks_count = candidate_option2_bookmark_count
+
+    messages_on_stage = get_messages(request)
+    template_values = {
+        'messages_on_stage': messages_on_stage,
+        'candidate_option1': candidate_option1_for_template,
+        'candidate_option2': candidate_option2_for_template,
+        'conflict_values': candidate_merge_conflict_values,
+        'google_civic_election_id': candidate_option1_for_template.google_civic_election_id,
+    }
+    return render(request, 'candidate/candidate_merge.html', template_values)
 
 
 @login_required
@@ -1180,7 +1192,8 @@ def find_duplicate_candidate_view(request, candidate_id):
     number_of_duplicate_candidates_failed = 0
     number_of_duplicates_could_not_process = 0
 
-    google_civic_election_id = 0
+    google_civic_election_id = request.GET.get('google_civic_election_id', 0)
+    google_civic_election_id = convert_to_int(google_civic_election_id)
 
     candidate_manager = CandidateCampaignManager()
     candidate_results = candidate_manager.retrieve_candidate_campaign_from_id(candidate_id)
@@ -1192,55 +1205,23 @@ def find_duplicate_candidate_view(request, candidate_id):
     candidate = candidate_results['candidate_campaign']
 
     if not positive_value_exists(google_civic_election_id):
-        messages.add_message(request, messages.ERROR, "Candidate must have an election_id in order to merge.")
+        messages.add_message(request, messages.ERROR,
+                             "Candidate must have a google_civic_election_id in order to merge.")
         return HttpResponseRedirect(reverse('candidate:candidate_edit', args=(candidate_id,)))
 
-    results = find_duplicate_candidate(candidate)
+    ignore_candidate_id_list = []
+    ignore_candidate_id_list.append(candidate.we_vote_id)
 
+    results = find_duplicate_candidate(candidate, ignore_candidate_id_list)
+
+    # If we find candidates to merge, stop and ask for confirmation
     if results['candidate_merge_possibility_found']:
-        # If we find candidates to merge, ask for confirmation
-        messages_on_stage = get_messages(request)
-        template_values = {
-            'messages_on_stage': messages_on_stage,
-            'candidate_option1': candidate,
-            'candidate_option2': results['candidate_merge_possibility'],
-        }
-        return render(request, 'candidate/candidate_merge.html', template_values)
+        candidate_option1_for_template = candidate
+        candidate_option2_for_template = results['candidate_merge_possibility']
 
-    # # If we can automatically merge, we should do it
-    # is_automatic_merge_ok_results = candidate_campaign_list_manager.is_automatic_merge_ok(
-    #     we_vote_candidate, candidate_duplicate_list[0])
-    # if is_automatic_merge_ok_results['automatic_merge_ok']:
-    #     automatic_merge_results = candidate_campaign_list_manager.do_automatic_merge(
-    #         we_vote_candidate, candidate_duplicate_list[0])
-    #     if automatic_merge_results['success']:
-    #         number_of_duplicate_candidates_processed += 1
-    #     else:
-    #         number_of_duplicate_candidates_failed += 1
-    # else:
-    #     # If we cannot automatically merge, direct to a page where we can look at the two side-by-side
-    #     message = "Google Civic Election ID: {election_id}, " \
-    #               "{num_of_duplicate_candidates_processed} duplicates processed, " \
-    #               "{number_of_duplicate_candidates_failed} duplicate merges failed, " \
-    #               "{number_of_duplicates_could_not_process} could not be processed because 3 exist " \
-    #               "".format(election_id=google_civic_election_id,
-    #                         num_of_duplicate_candidates_processed=number_of_duplicate_candidates_processed,
-    #                         number_of_duplicate_candidates_failed=number_of_duplicate_candidates_failed,
-    #                         number_of_duplicates_could_not_process=number_of_duplicates_could_not_process)
-    #
-    #     messages.add_message(request, messages.INFO, message)
-    #
-    #     message = "{is_automatic_merge_ok_results_status} " \
-    #               "".format(is_automatic_merge_ok_results_status=is_automatic_merge_ok_results['status'])
-    #     messages.add_message(request, messages.ERROR, message)
-    #
-    #     messages_on_stage = get_messages(request)
-    #     template_values = {
-    #         'messages_on_stage': messages_on_stage,
-    #         'candidate_option1': we_vote_candidate,
-    #         'candidate_option2': candidate_duplicate_list[0],
-    #     }
-    #     return render(request, 'candidate/candidate_merge.html', template_values)
+        # This view function takes us to displaying a template
+        return render_candidate_merge_form(request, candidate_option1_for_template, candidate_option2_for_template,
+                                           results['candidate_merge_conflict_values'])
 
     message = "Google Civic Election ID: {election_id}, " \
               "{number_of_duplicate_candidates_processed} duplicates processed, " \

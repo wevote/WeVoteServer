@@ -21,23 +21,27 @@
 
 <h1>Politicians</h1>
 
+<a href="{% url 'politician:politician_new' %}?state_code={{ state_code }}">Add New Politician</a><br />
+
 <form name="state_code_form" method="get" action="{% url 'politician:politician_list' %}">
     {% csrf_token %}
-{% if state_list %}
-    <select id="state_code_id" name="state_code">
-        <option value="" {% if '' == state_code %} selected="selected"{% endif %}>
-            -- Filter by State Served --</option>
-    {% for key, state in state_list %}
-        <option value="{{ key }}"
-                {% if key|lower == state_code|lower %} selected="selected"{% endif %}>
-            {{ state }}</option>
-    {% endfor %}
-    </select>
-{% endif %}{# End of if state_list #}
 
-    <a href="{% url 'politician:politician_new' %}?state_code={{ state_code }}">Add New Politician</a><br />
+    {% if state_list %}
+        <select id="state_code_id" name="state_code">
+            <option value="">
+                -- Filter by State Served --</option>
+        {% for key, state in state_list %}
+            <option value="{{ key }}"
+                    {% if key|lower == state_code|lower %} selected="selected"{% endif %}>
+                {{ state }}</option>
+        {% endfor %}
+        </select>
+        {% if state_code != "" %}
+        <a href="{% url 'politician:politician_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}&candidate_search={{ candidate_search }}&show_all=1">
+            show all</a>
+        {% endif %}
+    {% endif %}{# End of if state_list #}
 
-    <br />
     {% if politician_search %}
     <a href="{% url 'politician:politician_list' %}?state_code={{ state_code }}">
          clear search</a>&nbsp;
@@ -58,7 +62,8 @@
             <td>Id</td>
             <td>We Vote Id</td>
             <td>Vote Smart Id</td>
-            <td>Unlinked Related Candidates?</td>
+            <td>Linked Candidates</td>
+            <td>Related Candidates?</td>
         </tr>
     {% for politician in politician_list %}
         <tr>
@@ -78,7 +83,8 @@
             <td>{% if politician.politician_url %}<a href="{{ politician.politician_url }}" target="_blank">{{ politician.politician_url }}</a>{% endif %}</td>
             <td>{{ politician.id }}</td>
             <td>{{ politician.we_vote_id }}</td>
-            <td>{{ politician.vote_smart_id }}</td>
+            <td>{{ politician.vote_smart_id|default_if_none:"" }}</td>
+            <td>{{ politician.linked_candidate_list_count }}</td>
             <td>{{ politician.related_candidate_list_count }}</td>
         </tr>
     {% endfor %}
@@ -94,7 +100,7 @@
 
     <script>
         $(function() {
-            $('#google_civic_election_id').change(function() {
+            $('#state_code_id').change(function() {
                 this.form.submit();
             });
         });

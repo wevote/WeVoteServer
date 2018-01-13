@@ -263,16 +263,23 @@ def move_positions_to_another_candidate(from_candidate_id, from_candidate_we_vot
     # Put the organization_we_vote_id's of the orgs that have opinions about this candidate in a simple array
     # These are existing positions attached to the candidate we are going to keep
     to_organization_we_vote_ids = []
+    to_voter_we_vote_ids = []
     for position_object in to_position_list:
         if positive_value_exists(position_object.organization_we_vote_id):
             to_organization_we_vote_ids.append(position_object.organization_we_vote_id)
+        if positive_value_exists(position_object.voter_we_vote_id):
+            to_voter_we_vote_ids.append(position_object.voter_we_vote_id)
 
     for position_object in from_position_list:
         # Check organization_we_vote_ids for duplicate positions
         # This is a list of positions that we want to migrate to the candidate we are planning to keep
-        organization_we_vote_id = position_object.organization_we_vote_id
-        if positive_value_exists(organization_we_vote_id):
-            if organization_we_vote_id in to_organization_we_vote_ids:
+
+        # If the position is friends only and doesn't have an organization_we_vote_id stored with it,
+        #  we want to check the voter record to see if there is a linked_organization_we_vote_id
+
+        if positive_value_exists(position_object.organization_we_vote_id) or \
+                positive_value_exists(position_object.voter_we_vote_id):
+            if position_object.organization_we_vote_id in to_organization_we_vote_ids:
                 # We have an existing position for the same organization already attached to the "to" candidate,
                 # so just delete the one from "from" candidate
                 # In the future we could see if one has a comment that needs to be saved.
@@ -281,9 +288,25 @@ def move_positions_to_another_candidate(from_candidate_id, from_candidate_we_vot
                     position_entries_not_moved += 1
                 except Exception:
                     if public_or_private:
-                        status += "MOVE_TO_ANOTHER_CANDIDATE-UNABLE_TO_DELETE_DUPLICATE_PUBLIC_POSITION "
+                        status += \
+                            "MOVE_TO_ANOTHER_CANDIDATE-UNABLE_TO_DELETE_DUPLICATE_PUBLIC_POSITION-BY_ORGANIZATION "
                     else:
-                        status += "MOVE_TO_ANOTHER_CANDIDATE-UNABLE_TO_DELETE_DUPLICATE_FRIENDS_POSITION "
+                        status += \
+                            "MOVE_TO_ANOTHER_CANDIDATE-UNABLE_TO_DELETE_DUPLICATE_FRIENDS_POSITION-BY_ORGANIZATION "
+                    success = False
+                    break  # stop merge, exit for loop
+            elif position_object.voter_we_vote_id in to_voter_we_vote_ids:
+                # We have an existing position for the same voter already attached to the "to" candidate,
+                # so just delete the one from "from" candidate
+                # In the future we could see if one has a comment that needs to be saved.
+                try:
+                    position_object.delete()
+                    position_entries_not_moved += 1
+                except Exception:
+                    if public_or_private:
+                        status += "MOVE_TO_ANOTHER_CANDIDATE-UNABLE_TO_DELETE_DUPLICATE_PUBLIC_POSITION-BY_VOTER "
+                    else:
+                        status += "MOVE_TO_ANOTHER_CANDIDATE-UNABLE_TO_DELETE_DUPLICATE_FRIENDS_POSITION-BY_VOTER "
                     success = False
                     break  # stop merge, exit for loop
             else:
@@ -305,9 +328,11 @@ def move_positions_to_another_candidate(from_candidate_id, from_candidate_we_vot
                     break  # stop merge, exit for loop
         else:
             if public_or_private:
-                status += "MOVE_TO_ANOTHER_CANDIDATE-UNABLE_TO_FIND_ORGANIZATION_WE_VOTE_ID_FOR_PUBLIC_POSITION "
+                status += \
+                    "MOVE_TO_ANOTHER_CANDIDATE-UNABLE_TO_FIND_ORGANIZATION_OR_VOTER_WE_VOTE_ID_FOR_PUBLIC_POSITION "
             else:
-                status += "MOVE_TO_ANOTHER_CANDIDATE-UNABLE_TO_FIND_ORGANIZATION_WE_VOTE_ID_FOR_FRIENDS_POSITION "
+                status += \
+                    "MOVE_TO_ANOTHER_CANDIDATE-UNABLE_TO_FIND_ORGANIZATION_OR_VOTER_WE_VOTE_ID_FOR_FRIENDS_POSITION "
             success = False
             break  # stop merge, exit for loop
 

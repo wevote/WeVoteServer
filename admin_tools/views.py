@@ -48,6 +48,7 @@ ORGANIZATION_LINK_TO_ISSUE_SYNC_URL = \
 OFFICES_SYNC_URL = get_environment_variable("OFFICES_SYNC_URL")  # officesSyncOut
 CANDIDATES_SYNC_URL = get_environment_variable("CANDIDATES_SYNC_URL")  # candidatesSyncOut
 MEASURES_SYNC_URL = get_environment_variable("MEASURES_SYNC_URL")  # measuresSyncOut
+POLITICIANS_SYNC_URL = get_environment_variable("POLITICIANS_SYNC_URL")  # politiciansSyncOut
 POLLING_LOCATIONS_SYNC_URL = get_environment_variable("POLLING_LOCATIONS_SYNC_URL")  # pollingLocationsSyncOut
 POSITIONS_SYNC_URL = get_environment_variable("POSITIONS_SYNC_URL")  # positionsSyncOut
 VOTER_GUIDES_SYNC_URL = get_environment_variable("VOTER_GUIDES_SYNC_URL")  # voterGuidesSyncOut
@@ -1842,6 +1843,7 @@ def sync_data_with_master_servers_view(request):
         'offices_sync_url':             OFFICES_SYNC_URL,
         'organizations_sync_url':       ORGANIZATIONS_SYNC_URL,
         'organization_link_to_issue_sync_url':  ORGANIZATION_LINK_TO_ISSUE_SYNC_URL,
+        'politicians_sync_url':         POLITICIANS_SYNC_URL,
         'polling_locations_sync_url':   POLLING_LOCATIONS_SYNC_URL,
         'positions_sync_url':           POSITIONS_SYNC_URL,
         'voter_guides_sync_url':        VOTER_GUIDES_SYNC_URL,
