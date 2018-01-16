@@ -2,7 +2,7 @@
 {% extends "template_base.html" %}
 
 {% block title %}{% if ballot_returned.id %}Ballot for '{{ ballot_returned.text_for_map_search|title }}'{% else %}
-    New Ballot{% endif %}{% endblock %}
+    New Ballot Location{% endif %}{% endblock %}
 
 {% block content %}
 {% load template_filters %}
@@ -15,7 +15,7 @@
     {% endif %}
 </p>
 
-<h1>{% if ballot_returned.id %}Ballot for '{{ ballot_returned.text_for_map_search|title }}'{% else %}New Ballot{% endif %}</h1>
+<h1>{% if ballot_returned.id %}Ballot for '{{ ballot_returned.text_for_map_search|title }}'{% else %}New Ballot Location{% endif %}</h1>
 {% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
 
 {% if election_list %}
@@ -179,10 +179,12 @@
     local voter guides to candidates and measures.<br />
     <br />
     {% if polling_location_found %}
-        <a href="{% url 'polling_location:polling_location_summary' polling_location.id %}" target="_blank">
+      <h3>Creating Ballot Location at this Polling Location</h3>
+        <a href="{% url 'polling_location:polling_location_summary' polling_location.id %}?google_civic_election_id={{ google_civic_election_id }}" target="_blank">
             {% if polling_location.location_name %}{{ polling_location.location_name }}{% else %}missing location name{% endif %}</a>
             - {{ polling_location.get_text_for_map_search|title }}
             {% if polling_location.we_vote_id %}({{ polling_location.we_vote_id }}){% endif %}
+        <br />
         <br />
         <input type="hidden" name="polling_location_id" value="{{ polling_location.id }}">
     {% else %}
@@ -214,18 +216,12 @@
 {# If here, we are looking at a We Vote election - 2016-08-10 This filter turned off for now #}
 {% endif %}
 
-<p>
-    <a href="{% url 'import_export_batches:batch_list' %}?kind_of_batch=IMPORT_BALLOT_ITEM&google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}&polling_location_we_vote_id={{ polling_location_we_vote_id }}">
-        Import Complete Ballot at One Location (Import/Export Batches)</a>
-</p>
-
 
 
    {# ################################### #}
     {% if contest_offices_to_choose_list %}
-        <h5>Add New Office</h5>
+        <h5>Add Office to This Ballot Location</h5>
         {# Office Option 1 #}
-        <label for="contest_office1_id_id">New Office</label>
         <select id="contest_office1_id_id" name="contest_office1_id">
             <option value="0" >-- Choose Office --</option>
         {% for office in contest_offices_to_choose_list %}
@@ -239,36 +235,54 @@
             </option>
         {% endfor %}
         </select>
-
+        <a href="{% url 'office:office_new' %}?google_civic_election_id={{ google_civic_election_id }}" target="_blank">
+            add office to the election</a> (in new window)
     {% else %}
         (no offices exist for this election yet -- you need to
         <a href="{% url 'office:office_new' %}?google_civic_election_id={{ google_civic_election_id }}" target="_blank">
             add offices to the election first</a> (in new window))
     {% endif %}
     <br />
+    <a href="{% url 'import_export_batches:batch_list' %}?kind_of_batch=CONTEST_OFFICE&google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}&polling_location_we_vote_id={{ polling_location_we_vote_id }}"
+       target="_blank">
+          Import Offices (Import/Export Batches) in new window</a>
+    <br />
+    <br />
 
     {# ################################### #}
     {% if measure_list %}
-        <h5>Add New Measure</h5>
+        <h5>Add Measure to This Ballot Location</h5>
         {# Measure Option 1 #}
-        <label for="contest_measure1_id_id">New Measure</label>
         <select id="contest_measure1_id_id" name="contest_measure1_id">
             <option value="0">-- Choose Measure --</option>
         {% for measure in measure_list %}
             <option value="{{ measure.id }}">{{ measure.measure_title }}</option>
         {% endfor %}
         </select>
-
+        <a href="{% url 'measure:measure_new' %}?google_civic_election_id={{ google_civic_election_id }}" target="_blank">
+            add measures to the election</a> (in new window)
     {% else %}
         (no measures exist for this election yet -- you need to
         <a href="{% url 'measure:measure_new' %}?google_civic_election_id={{ google_civic_election_id }}" target="_blank">
             add measures to the election first</a> (in new window))
     {% endif %}
     <br />
+    <a href="{% url 'import_export_batches:batch_list' %}?kind_of_batch=MEASURE&google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}&polling_location_we_vote_id={{ polling_location_we_vote_id }}"
+       target="_blank">
+          Import Measures (Import/Export Batches) in new window</a>
+    <br />
 
-{% if google_civic_election_id|convert_to_int >= 1000000 or google_civic_election_id|convert_to_int == 0 %}
+  {% if google_civic_election_id|convert_to_int >= 1000000 or google_civic_election_id|convert_to_int == 0 %}
 {# If here, we are looking at a We Vote election (or new election) - 2016-08-10 This filter turned off for now #}
 {% endif %}
+
+
+<p>
+  <br />
+  <br />
+  <a href="{% url 'import_export_batches:batch_list' %}?kind_of_batch=IMPORT_BALLOT_ITEM&google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}&polling_location_we_vote_id={{ polling_location_we_vote_id }}">
+        Import Complete Ballot at One Location (Import/Export Batches)</a>
+</p>
 
 {% if ballot_returned and ballot_returned.id %}
     <br />

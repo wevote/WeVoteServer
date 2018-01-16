@@ -33,7 +33,7 @@ logger = wevote_functions.admin.get_logger(__name__)
 
 @login_required
 def import_one_candidate_ratings_view(request, vote_smart_candidate_id):
-    authority_required = {'admin'}  # admin, verified_volunteer
+    authority_required = {'verified_volunteer'}  # admin, verified_volunteer
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
@@ -85,7 +85,7 @@ def import_one_politician_ratings_view(request, vote_smart_candidate_id):  # TOD
 
 @login_required
 def import_group_ratings_view(request):
-    authority_required = {'admin'}  # admin, verified_volunteer
+    authority_required = {'verified_volunteer'}  # admin, verified_volunteer
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
@@ -117,7 +117,7 @@ def import_group_ratings_view(request):
 
 @login_required
 def import_one_group_ratings_view(request, special_interest_group_id):
-    authority_required = {'admin'}  # admin, verified_volunteer
+    authority_required = {'verified_volunteer'}  # admin, verified_volunteer
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
@@ -138,7 +138,7 @@ def import_one_group_ratings_view(request, special_interest_group_id):
 def import_states_view(request):
     """
     """
-    authority_required = {'admin'}  # admin, verified_volunteer
+    authority_required = {'verified_volunteer'}  # admin, verified_volunteer
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
@@ -152,7 +152,7 @@ def import_states_view(request):
 
 @login_required
 def import_photo_view(request):
-    authority_required = {'admin'}  # admin, verified_volunteer
+    authority_required = {'verified_volunteer'}  # admin, verified_volunteer
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
@@ -183,7 +183,7 @@ def import_photo_view(request):
 
 @login_required
 def import_special_interest_groups_view(request):
-    authority_required = {'admin'}  # admin, verified_volunteer
+    authority_required = {'verified_volunteer'}  # admin, verified_volunteer
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
@@ -385,7 +385,7 @@ def vote_smart_special_interest_group_list_view(request):
 
 @login_required
 def import_vote_smart_position_categories_view(request):
-    authority_required = {'admin'}  # admin, verified_volunteer
+    authority_required = {'verified_volunteer'}  # admin, verified_volunteer
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
@@ -399,7 +399,7 @@ def import_vote_smart_position_categories_view(request):
 
 
 def retrieve_positions_from_vote_smart_for_election_view(request):
-    authority_required = {'admin'}  # admin, verified_volunteer
+    authority_required = {'verified_volunteer'}  # admin, verified_volunteer
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
@@ -497,7 +497,7 @@ def retrieve_positions_from_vote_smart_for_election_view(request):
 
 @login_required
 def transfer_vote_smart_ratings_to_positions_for_candidate_view(request, candidate_campaign_id):
-    authority_required = {'admin'}  # admin, verified_volunteer
+    authority_required = {'verified_volunteer'}  # admin, verified_volunteer
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
@@ -513,7 +513,7 @@ def transfer_vote_smart_ratings_to_positions_for_candidate_view(request, candida
 
 @login_required
 def transfer_vote_smart_ratings_to_positions_for_politician_view(request, politician_id):
-    authority_required = {'admin'}  # admin, verified_volunteer
+    authority_required = {'verified_volunteer'}  # admin, verified_volunteer
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
@@ -529,7 +529,7 @@ def transfer_vote_smart_ratings_to_positions_for_politician_view(request, politi
 
 @login_required
 def transfer_vote_smart_sigs_to_we_vote_orgs_view(request):
-    authority_required = {'admin'}  # admin, verified_volunteer
+    authority_required = {'verified_volunteer'}  # admin, verified_volunteer
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
