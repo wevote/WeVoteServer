@@ -451,6 +451,7 @@ def election_edit_process_view(request):
                 state_code=state_code,
                 include_in_list_for_voters=include_in_list_for_voters,
             )
+            election_on_stage.save()
             status += "CREATED_NEW_ELECTION "
             messages.add_message(request, messages.INFO, 'New election ' + str(election_name) + ' saved.')
         except Exception as e:

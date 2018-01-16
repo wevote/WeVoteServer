@@ -1058,7 +1058,7 @@ def candidate_merge_process_view(request):
 
 @login_required
 def find_and_remove_duplicate_candidates_view(request):
-    authority_required = {'admin'}  # admin, verified_volunteer
+    authority_required = {'verified_volunteer'}  # admin, verified_volunteer
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
@@ -1182,7 +1182,7 @@ def render_candidate_merge_form(
 
 @login_required
 def find_duplicate_candidate_view(request, candidate_id):
-    authority_required = {'admin'}  # admin, verified_volunteer
+    authority_required = {'verified_volunteer'}  # admin, verified_volunteer
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
