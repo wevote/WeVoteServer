@@ -22,7 +22,7 @@
     </tr>
     <tr>
         <th>Vote Smart ID:</th>
-        <td>{{ organization.vote_smart_id|default_if_none:"" }}</td>
+        <td><a href="https://votesmart.org/interest-group/{{ organization.vote_smart_id }}" target="_blank">{{ organization.vote_smart_id|default_if_none:"" }}</a></td>
     </tr>
     <tr>
         <th>Website:</th>

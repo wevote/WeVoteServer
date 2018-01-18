@@ -62,7 +62,7 @@ span.nobr { white-space: nowrap; }
                value="{% if organization %}{{ organization.organization_name }}{% else %}{{ organization_name }}{% endif %}" />
         {% if organization %}
             {{ organization.we_vote_id }}
-            &nbsp;&nbsp;&nbsp;&nbsp;Vote Smart Id: {{ organization.vote_smart_id }}
+            &nbsp;&nbsp;&nbsp;&nbsp;Vote Smart Id: <a href="https://votesmart.org/interest-group/{{ organization.vote_smart_id }}" target="_blank">{{ organization.vote_smart_id }}</a>
             &nbsp;&nbsp;&nbsp;&nbsp;Internal Id: {{ organization.id }}
         {% endif %}
     </div>
