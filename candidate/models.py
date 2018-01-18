@@ -1872,6 +1872,41 @@ class CandidateCampaignManager(models.Model):
 
         return results
 
+    def count_candidates_for_election(self, google_civic_election_id):
+        """
+        Return count of candidates found for a given election        
+        :param google_civic_election_id: 
+        :return: 
+        """
+        candidates_count = 0
+        success = False
+        if positive_value_exists(google_civic_election_id):
+            try:
+                candidate_item_queryset = CandidateCampaign.objects.all()
+                candidate_item_queryset = candidate_item_queryset.filter(
+                    google_civic_election_id=google_civic_election_id)
+                candidates_count = candidate_item_queryset.count()
+
+                status = 'CANDIDATES_ITEMS_FOUND '
+                success = True
+            except CandidateCampaign.DoesNotExist:
+                # No candidate items found. Not a problem.
+                status = 'NO_CANDIDATE_ITEMS_FOUND '
+                success = True
+            except Exception as e:
+                handle_exception(e, logger=logger)
+                status = 'FAILED retrieve_candidate_items_for_election ' \
+                         '{error} [type: {error_type}]'.format(error=e.message, error_type=type(e))
+        else:
+            status = 'INVALID_GOOGLE_CIVIC_ELECTION_ID'
+        results = {
+            'success':          success,
+            'status':           status,
+            'candidates_count': candidates_count
+        }
+        return results
+
+
 
 class CandidatesAreNotDuplicates(models.Model):
     """

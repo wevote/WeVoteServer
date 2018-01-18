@@ -552,6 +552,40 @@ class ContestOfficeManager(models.Model):
             }
         return results
 
+    def count_contest_offices_for_election(self, google_civic_election_id):
+        """
+        Return count of contest offices found for a given election
+        :param google_civic_election_id: 
+        :return: 
+        """
+        contest_offices_count = 0
+        success = False
+        if positive_value_exists(google_civic_election_id):
+            try:
+                contest_office_item_queryset = ContestOffice.objects.all()
+                contest_office_item_queryset = contest_office_item_queryset.filter(
+                    google_civic_election_id=google_civic_election_id)
+                contest_offices_count = contest_office_item_queryset.count()
+
+                status = 'CONTEST_OFFICE_ITEMS_FOUND '
+                success = True
+            except ContestOffice.DoesNotExist:
+                # No contest office items found. Not a problem.
+                status = 'NO_CONTEST_OFFICE_ITEMS_FOUND '
+                success = True
+            except Exception as e:
+                handle_exception(e, logger=logger)
+                status = 'FAILED retrieve_contest_office_items_for_election ' \
+                         '{error} [type: {error_type}]'.format(error=e.message, error_type=type(e))
+        else:
+            status = 'INVALID_GOOGLE_CIVIC_ELECTION_ID'
+        results = {
+            'success':                  success,
+            'status':                   status,
+            'contest_offices_count':   contest_offices_count,
+        }
+        return results
+
 
 class ContestOfficeListManager(models.Model):
     """

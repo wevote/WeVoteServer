@@ -5858,6 +5858,61 @@ class PositionManager(models.Model):
 
         return position_object
 
+    def count_positions_for_election(self, google_civic_election_id):
+        """
+        Return count of positions for a given election
+        :param google_civic_election_id: 
+        :return: 
+        """
+
+        positions_count = 0
+        success = False
+        if positive_value_exists(google_civic_election_id):
+            # get count of positions for PositionEntered
+            try:
+                position_item_queryset = PositionEntered.objects.all()
+                position_item_queryset = position_item_queryset.filter(
+                    google_civic_election_id=google_civic_election_id)
+                positions_count = position_item_queryset.count()
+
+                status = 'POSITION_ITEMS_FOUND '
+                success = True
+            except PositionEntered.DoesNotExist:
+                # No position items found. Not a problem.
+                status = 'NO_POSITION_ITEMS_FOUND '
+                success = True
+            except Exception as e:
+                handle_exception(e, logger=logger)
+                status = 'FAILED retrieve_position_items_for_election ' \
+                         '{error} [type: {error_type}]'.format(error=e.message, error_type=type(e))
+
+            # get count of positions for PositionForFriends
+            try:
+                position_for_friends_item_queryset = PositionForFriends.objects.all()
+                position_for_friends_item_queryset = position_for_friends_item_queryset.filter(
+                    google_civic_election_id=google_civic_election_id)
+                positions_count += position_for_friends_item_queryset.count()
+
+                status = 'POSITION_FOR_FRIENDS_ITEMS_FOUND '
+                success = True
+            except PositionForFriends.DoesNotExist:
+                # No position items found. Not a problem.
+                status += 'NO_POSITION_FOR_FRIEND_ITEMS_FOUND '
+                success = True
+            except Exception as e:
+                handle_exception(e, logger=logger)
+                status = 'FAILED retrieve_position_for_friends_items_for_election ' \
+                         '{error} [type: {error_type}]'.format(error=e.message, error_type=type(e))
+        else:
+            status = 'INVALID_GOOGLE_CIVIC_ELECTION_ID'
+
+        results = {
+            'success':          success,
+            'status':           status,
+            'positions_count': positions_count
+        }
+        return results
+
 
 class PositionMetricsManager(models.Model):
 
