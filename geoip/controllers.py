@@ -13,6 +13,7 @@ logger = wevote_functions.admin.get_logger(__name__)
 def voter_location_retrieve_from_ip_for_api(request, ip_address=''):
     """
     Used by the api voterLocationRetrieveFromIP
+    :param request:
     :param ip_address:
     :return:
     """

@@ -296,29 +296,36 @@ def issues_retrieve_for_api(voter_device_id, sort_formula, voter_issues_only=Non
 
 def retrieve_issues_to_follow_for_api(voter_device_id, sort_formula):  # retrieveIssuesToFollow
     """
-    Used by the api
+
+    :param voter_device_id:
+    :param sort_formula:
     :return:
     """
-
     issue_list = []
     issues_to_display = []
+    status = ""
 
     voter_we_vote_id = fetch_voter_we_vote_id_from_voter_device_link(voter_device_id)
     if not positive_value_exists(voter_we_vote_id):
-        status = 'FAILED retrieve_issues_to_follow VOTER_WE_VOTE_ID_COULD_NOT_BE_FETCHED'
-        json_data = {
-            'status': status,
-            'success': False,
-            'issue_list': [],
-        }
-        return HttpResponse(json.dumps(json_data), content_type='application/json')
+        status += 'retrieve_issues_to_follow VOTER_WE_VOTE_ID_COULD_NOT_BE_FETCHED '
+        # We want to always retrieve issues, even if there isn't a valid voter_we_vote_id
+        # json_data = {
+        #     'status': status,
+        #     'success': False,
+        #     'issue_list': [],
+        # }
+        # return HttpResponse(json.dumps(json_data), content_type='application/json')
 
     follow_issue_list_manager = FollowIssueList()
-    follow_issue_we_vote_id_list_for_voter = follow_issue_list_manager. \
-        retrieve_follow_issue_following_we_vote_id_list_by_voter_we_vote_id(voter_we_vote_id)
-    ignore_issue_we_vote_id_list_for_voter = follow_issue_list_manager. \
-        retrieve_follow_issue_ignore_we_vote_id_list_by_voter_we_vote_id(voter_we_vote_id)
-    issue_we_vote_id_list_to_exclude = follow_issue_we_vote_id_list_for_voter + ignore_issue_we_vote_id_list_for_voter
+    if positive_value_exists(voter_we_vote_id):
+        follow_issue_we_vote_id_list_for_voter = follow_issue_list_manager. \
+            retrieve_follow_issue_following_we_vote_id_list_by_voter_we_vote_id(voter_we_vote_id)
+        ignore_issue_we_vote_id_list_for_voter = follow_issue_list_manager. \
+            retrieve_follow_issue_ignore_we_vote_id_list_by_voter_we_vote_id(voter_we_vote_id)
+        issue_we_vote_id_list_to_exclude = follow_issue_we_vote_id_list_for_voter + \
+            ignore_issue_we_vote_id_list_for_voter
+    else:
+        issue_we_vote_id_list_to_exclude = []
 
     try:
         issue_list_object = IssueListManager()
@@ -326,7 +333,7 @@ def retrieve_issues_to_follow_for_api(voter_device_id, sort_formula):  # retriev
         results = issue_list_object.retrieve_issues(sort_formula, issue_we_vote_id_list_to_filter,
                                                     issue_we_vote_id_list_to_exclude)
         success = results['success']
-        status = results['status']
+        status += results['status']
         issue_list = results['issue_list']
     except Exception as e:
         status = 'FAILED retrieve_issues_to_follow ' \
