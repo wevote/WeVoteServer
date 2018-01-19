@@ -91,47 +91,18 @@
         <tr>
             <td colspan="3">{{ we_vote_election.election_name }} - {{ we_vote_election_id }}</td>
             <td># Positions</td>
-            <td>&#8594;</td>
-            <td>{{ google_civic_election.election_name }} - {{ google_civic_election_id }}</td>
-            <td># Positions</td>
-            <td>&nbsp;</td>
         </tr>
+    {% if we_vote_election_office_list %}
     {% for we_vote_election_office in we_vote_election_office_list %}
         <tr>
             <td colspan="3">
-                <strong>{{ we_vote_election_office.office_name }} - {{ we_vote_election_office.we_vote_id }}</strong>
+                <strong><a href="{% url 'office:office_summary' we_vote_election_office.id %}">{{ we_vote_election_office.office_name }} - {{ we_vote_election_office.we_vote_id }}</strong>
             </td>
-            <td>&nbsp;</td>
-            <td>&#8594;</td>
-            <td>
-                {% if google_civic_election_office_list %}
-                    <select id="contest_office_id" name="contest_office_id">
-                        <option value="0" {% if 0 == candidate.contest_office_id|convert_to_int %} selected="selected"{% endif %}>
-                            -- Offices from Google Civic --</option>
-                    {% for office in google_civic_election_office_list %}
-                        <option value="{{ office.id }}"
-                                {% if office.id|slugify == candidate.contest_office_id|slugify %} selected="selected"{% endif %}>
-                            {{ office.office_name }}
-                            {% if office.district_id %}
-                                - District {{ office.district_id }}
-                            {% endif %}
-                            {% if office.state_code %}
-                                - {{ office.state_code }}
-                            {% endif %}
-                            - {{ office.we_vote_id }}</option>
-                    {% endfor %}
-                    </select>
-                {% else %}
-                    (no offices found)
-                {% endif %}
-            </td>
-            <td>&nbsp;</td>
             <td>&nbsp;</td>
         </tr>
 
         {% for candidate in we_vote_election_office.candidate_list %}
         <tr>
-            <td>&nbsp;&nbsp;&nbsp;&nbsp;</td>
             <td>
                 {% if candidate.candidate_photo_url %}
                 <img src='{{ candidate.candidate_photo_url }}' height="25px" />
@@ -139,21 +110,22 @@
                     &nbsp;
                 {% endif %}
             </td>
-            <td>
-                {{ candidate.candidate_name }} - {{ candidate.we_vote_id }}
-            </td>
+            <td><a href="{% url 'candidate:candidate_edit' candidate.id %}?google_civic_election_id={{ google_civic_election_id }}">{{ candidate.candidate_name }} - {{ candidate.we_vote_id }}</td>
             <td>{{ candidate.position_count }}</td>
-            <td>&#8594;</td>
             <td>
 
             </td>
-            <td>0</td>
-            <td><a href="#">Migrate positions</a></td>
         </tr>
         {% endfor %}
     {% endfor %}
+    {% else %}
+        no offices found
+        {% endif %}
 
     </table>
+   <input type="hidden" name="change_now" value="1" />
+ <input type="submit" value="Migrate all now" /></p>
+
 {% endif %}
 
 </form>
