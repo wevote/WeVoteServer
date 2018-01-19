@@ -56,8 +56,9 @@ def position_list_for_opinion_maker_doc_template_values(url_root):
         {
             'name':         'google_civic_election_id',
             'value':        'integer',  # boolean, integer, long, string
-            'description':  'The unique identifier for a particular election. If not provided, return all positions'
-                            ' for this organization. If this variable is included, state_code will be ignored.',
+            'description':  'The unique identifier for a particular election. If not provided, return positions'
+                            ' for the election that the server thinks the voter is looking at. '
+                            ' If this variable is included, state_code will be ignored.',
         },
         {
             'name':         'state_code',
