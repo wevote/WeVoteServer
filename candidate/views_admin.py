@@ -1291,7 +1291,7 @@ def remove_duplicate_candidate_view(request):
 
 @login_required
 def retrieve_candidate_photos_for_election_view(request, election_id):
-    authority_required = {'admin'}  # admin, verified_volunteer
+    authority_required = {'verified_volunteer'}  # admin, verified_volunteer
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 

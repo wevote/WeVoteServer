@@ -2,7 +2,7 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
-from .models import PollingLocation
+from .models import PollingLocation, PollingLocationManager
 from .controllers import import_and_save_all_polling_locations_data, polling_locations_import_from_master_server
 from admin_tools.views import redirect_to_sign_in_page
 from django.http import HttpResponseRedirect
@@ -175,34 +175,76 @@ def polling_location_edit_process_view(request):
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
+    status = ""
+    google_civic_election_id = request.POST.get('google_civic_election_id', 0)
+    state_code = request.POST.get('state_code', "")
+
     polling_location_id = convert_to_int(request.POST['polling_location_id'])
-    polling_location_name = request.POST.get('polling_location_name', False)
+    location_name = request.POST.get('location_name', False)
+    line1 = request.POST.get('line1', False)
+    line2 = request.POST.get('line2', False)
+    city = request.POST.get('city', False)
+    zip_long = request.POST.get('zip_long', False)
 
     # Check to see if this polling_location is already being used anywhere
     polling_location_on_stage_found = False
     polling_location_on_stage = PollingLocation()
+    polling_location_manager = PollingLocationManager()
+    polling_location_we_vote_id = ""
     try:
         polling_location_query = PollingLocation.objects.filter(id=polling_location_id)
         if len(polling_location_query):
             polling_location_on_stage = polling_location_query[0]
             polling_location_on_stage_found = True
     except Exception as e:
-        handle_record_not_found_exception(e, logger=logger)
+        pass
 
     try:
+        if not polling_location_on_stage_found:
+            # Create new
+            polling_location_on_stage = PollingLocation.objects.create(
+                state=state_code,
+                zip_long=zip_long,
+            )
+
+        if positive_value_exists(location_name):
+            polling_location_on_stage.location_name = location_name
+        if positive_value_exists(state_code):
+            polling_location_on_stage.state = state_code
+        if positive_value_exists(line1):
+            polling_location_on_stage.line1 = line1
+        if positive_value_exists(line2):
+            polling_location_on_stage.line2 = line2
+        if positive_value_exists(city):
+            polling_location_on_stage.city = city
+        if positive_value_exists(zip_long):
+            polling_location_on_stage.zip_long = zip_long
+
+        polling_location_on_stage.save()
+        polling_location_id = polling_location_on_stage.id
+        polling_location_we_vote_id = polling_location_on_stage.we_vote_id
+
+        lat_long_results = polling_location_manager.populate_latitude_and_longitude_for_polling_location(
+            polling_location_on_stage)
+        status += lat_long_results['status']
+
         if polling_location_on_stage_found:
             # Update
-            polling_location_on_stage.polling_location_name = polling_location_name
-            polling_location_on_stage.save()
-            messages.add_message(request, messages.INFO, 'PollingLocation updated.')
+            messages.add_message(request, messages.INFO, 'Polling location updated. ' + status)
         else:
             # Create new
-            messages.add_message(request, messages.INFO, 'We do not support adding new polling locations.')
-    except Exception as e:
-        handle_record_not_saved_exception(e, logger=logger)
-        messages.add_message(request, messages.ERROR, 'Could not save polling_location.')
+            messages.add_message(request, messages.INFO, 'Polling location created. ' + status)
 
-    return HttpResponseRedirect(reverse('polling_location:polling_location_list', args=()))
+    except Exception as e:
+        messages.add_message(request, messages.ERROR, 'Could not save polling_location. ' + status)
+
+    url_variables = "?google_civic_election_id=" + str(google_civic_election_id) + \
+                    "&state_code=" + str(state_code)
+    if positive_value_exists(polling_location_we_vote_id):
+        return HttpResponseRedirect(reverse('polling_location:polling_location_summary_by_we_vote_id',
+                                    args=(polling_location_we_vote_id,)) + url_variables)
+    else:
+        return HttpResponseRedirect(reverse('polling_location:polling_location_list', args=()) + url_variables)
 
 
 @login_required
@@ -210,6 +252,9 @@ def polling_location_edit_view(request, polling_location_local_id):
     authority_required = {'verified_volunteer'}  # admin, verified_volunteer
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
+
+    google_civic_election_id = request.GET.get('google_civic_election_id', 0)
+    state_code = request.GET.get('state_code', "")
 
     messages_on_stage = get_messages(request)
     polling_location_local_id = convert_to_int(polling_location_local_id)
@@ -226,12 +271,18 @@ def polling_location_edit_view(request, polling_location_local_id):
 
     if polling_location_on_stage_found:
         template_values = {
+            'google_civic_election_id': google_civic_election_id,
             'messages_on_stage': messages_on_stage,
             'polling_location': polling_location_on_stage,
+            'polling_location_id': polling_location_on_stage.id,
+            'state_code': state_code,
         }
     else:
         template_values = {
+            'google_civic_election_id': google_civic_election_id,
             'messages_on_stage': messages_on_stage,
+            'polling_location_id': 0,
+            'state_code': state_code,
         }
     return render(request, 'polling_location/polling_location_edit.html', template_values)
 

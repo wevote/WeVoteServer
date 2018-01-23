@@ -14,6 +14,8 @@ urlpatterns = [
     url(r'^import_ballot_returned/$',
         views_admin.ballot_returned_import_from_master_server_view,
         name='ballot_returned_import_from_master_server'),
+    url(r'^(?P<ballot_item_id>[0-9]+)/delete/$', views_admin.ballot_item_delete_process_view,
+        name='ballot_item_delete_process'),
     url(r'^(?P<ballot_returned_id>[0-9]+)/delete/$', views_admin.ballot_returned_delete_process_view,
         name='ballot_returned_delete_process'),
     url(r'^(?P<ballot_returned_id>[0-9]+)/list_edit/$', views_admin.ballot_item_list_edit_view,

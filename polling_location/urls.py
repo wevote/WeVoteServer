@@ -16,6 +16,8 @@ urlpatterns = [
         name='import_polling_locations_process'),
     url(r'^(?P<polling_location_local_id>[0-9]+)/edit/$', views_admin.polling_location_edit_view,
         name='polling_location_edit'),
+    url(r'^polling_location_edit_process/$', views_admin.polling_location_edit_process_view,
+        name='polling_location_edit_process'),
     url(r'^(?P<polling_location_local_id>[0-9]+)/summary/$', views_admin.polling_location_summary_view,
         name='polling_location_summary'),
     url(r'^(?P<polling_location_we_vote_id>wv[\w]{2}ploc[\w]+)/summary/$',

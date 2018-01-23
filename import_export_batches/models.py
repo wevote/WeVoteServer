@@ -2810,7 +2810,7 @@ class BatchManager(models.Model):
             organization_endorsement_url = endorsement_url.read()
             organization_endorsement_json = organization_endorsement_url.decode('utf-8')
             structured_organization_endorsement_json = json.loads(organization_endorsement_json)
-            batch_set_name_url = urlquote(organization_endorsements_api_url) + " - " + str(import_date)
+            batch_set_name_url = urlquote(organization_endorsements_api_url)
         except Exception as e:
             batch_set_id = 0
             status += " EXCEPTION_BATCH_SET "
@@ -2830,7 +2830,8 @@ class BatchManager(models.Model):
 
         # set batch_set_name as file_name
         batch_set_name_list = batch_set_name_url.split('/')
-        batch_set_name = batch_set_name_list[len(batch_set_name_list) - 1] + " - " + str(import_date)
+        batch_set_name = organization.organization_name + " - " + batch_set_name_list[len(batch_set_name_list) - 1] + \
+            " - " + str(import_date)
 
         # create batch_set object
         try:

@@ -571,6 +571,24 @@ class ContestOfficeListManager(models.Model):
         state_code = ""
         return self.retrieve_offices(google_civic_election_id, state_code, office_list, return_list_of_objects)
 
+    def fetch_office_count(self, google_civic_election_id=0, state_code=""):
+        office_count = 0
+
+        try:
+            office_queryset = ContestOffice.objects.all()
+            if positive_value_exists(google_civic_election_id):
+                office_queryset = office_queryset.filter(google_civic_election_id=google_civic_election_id)
+            if positive_value_exists(state_code):
+                office_queryset = office_queryset.filter(state_code__iexact=state_code)
+
+            office_count = office_queryset.count()
+        except ContestOffice.DoesNotExist:
+            pass
+        except Exception as e:
+            pass
+
+        return office_count
+
     def retrieve_offices(self, google_civic_election_id=0, state_code="", office_list=[],
                          return_list_of_objects=False):
         office_list_objects = []

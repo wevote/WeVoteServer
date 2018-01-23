@@ -360,6 +360,50 @@ def election_edit_view(request, election_local_id):
     return render(request, "election/election_edit.html", template_values)
 
 
+@login_required
+def election_delete_process_view(request):
+    """
+    Delete an election
+    :param request:
+    :return:
+    """
+    election_id = convert_to_int(request.POST.get('election_id', 0))
+    confirm_delete = convert_to_int(request.POST.get('confirm_delete', 0))
+
+    google_civic_election_id = request.POST.get('google_civic_election_id', 0)
+    state_code = request.POST.get('state_code', '')
+
+    if not positive_value_exists(confirm_delete):
+        messages.add_message(request, messages.ERROR,
+                             'Unable to delete this election. '
+                             'Please check the checkbox to confirm you want to delete this election.')
+        return HttpResponseRedirect(reverse('election:election_edit', args=(election_id,)) +
+                                    "?google_civic_election_id=" + str(google_civic_election_id) +
+                                    "&state_code=" + str(state_code))
+
+    election_manager = ElectionManager()
+    results = election_manager.retrieve_election(0, election_id)
+    if results['election_found']:
+        election = results['election']
+
+        office_list_manager = ContestOfficeListManager()
+        office_count = office_list_manager.fetch_office_count(election.google_civic_election_id)
+
+        if positive_value_exists(office_count):
+            messages.add_message(request, messages.ERROR, 'Could not delete -- '
+                                                          'offices still attached to this election.')
+            return HttpResponseRedirect(reverse('election:election_edit', args=(election_id,)) +
+                                        "?google_civic_election_id=" + str(google_civic_election_id) +
+                                        "&state_code=" + str(state_code))
+
+        election.delete()
+        messages.add_message(request, messages.INFO, 'Election deleted.')
+    else:
+        messages.add_message(request, messages.ERROR, 'Election not found.')
+
+    return HttpResponseRedirect(reverse('election:election_list', args=()))
+
+
 @login_required()
 def election_edit_process_view(request):
     """

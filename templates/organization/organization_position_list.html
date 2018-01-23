@@ -78,10 +78,12 @@
     {% if organization.organization_endorsements_api_url %}
     <tr>
         <th>Endorsements Importer URL:</th>
-        <td><a href="{{ organization.organization_endorsements_api_url }}" target="_blank">{{ organization.organization_endorsements_api_url }}</a></td>
+        <td>
+            <a href="{% url 'import_export_endorsements:import_organization_endorsements' organization.id %}"><strong>Import Endorsements</strong></a>
+            <a href="{{ organization.organization_endorsements_api_url }}" target="_blank">{{ organization.organization_endorsements_api_url }}</a>
+            (<a href="https://docs.google.com/document/d/1D90CslIjOPSxyB6XIBPSV07vDlVp5oMNyQPlOrq1Qj4/edit" target="_blank">see specification</a>)
+        </td>
     </tr>
-    <th><a href="{% url 'import_export_endorsements:import_organization_endorsements' organization.id %}">Import endorsements</a>
-</th>
     {% endif %}
     {% if issue_names_list %}
     <tr>
