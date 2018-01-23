@@ -105,6 +105,42 @@ class BallotItem(models.Model):
 
 
 class BallotItemManager(models.Model):
+
+    def retrieve_ballot_item(self, ballot_item_id=0):
+
+        ballot_item = BallotItem()
+        try:
+            if positive_value_exists(ballot_item_id):
+                ballot_item = BallotItem.objects.get(id=ballot_item_id)
+                if ballot_item.id:
+                    ballot_item_found = True
+                    status = "BALLOT_ITEM_FOUND_WITH_BALLOT_ITEM_ID "
+                else:
+                    ballot_item_found = False
+                    status = "ELECTION_NOT_FOUND_WITH_BALLOT_ITEM_ID "
+                success = True
+            else:
+                ballot_item_found = False
+                status = "Insufficient variables included to retrieve one ballot_item."
+                success = False
+        except BallotItem.MultipleObjectsReturned as e:
+            handle_record_found_more_than_one_exception(e, logger)
+            ballot_item_found = False
+            status = "ERROR_MORE_THAN_ONE_ELECTION_FOUND"
+            success = False
+        except BallotItem.DoesNotExist:
+            ballot_item_found = False
+            status = "ELECTION_NOT_FOUND"
+            success = True
+
+        results = {
+            'success':              success,
+            'status':               status,
+            'ballot_item_found':    ballot_item_found,
+            'ballot_item':          ballot_item,
+        }
+        return results
+
     def update_or_create_ballot_item_for_voter(
             self, voter_id, google_civic_election_id, google_ballot_placement,
             ballot_item_display_name, measure_subtitle, measure_text, local_ballot_order,

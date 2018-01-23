@@ -391,8 +391,61 @@ def ballot_item_list_edit_view(request, ballot_returned_id, polling_location_we_
         'polling_location_zip':         polling_location_zip,
         'ballot_item_list':             ballot_item_list_modified,
         'google_civic_election_id':     google_civic_election_id,
+        'state_code':                   state_code,
     }
     return render(request, 'ballot/ballot_item_list_edit.html', template_values)
+
+
+@login_required
+def ballot_item_delete_process_view(request, ballot_item_id):
+    authority_required = {'verified_volunteer'}  # admin, verified_volunteer
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
+    google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
+    state_code = request.GET.get('state_code', '')
+    ballot_returned_id = request.GET.get('ballot_returned_id', 0)
+
+    success = False
+    ballot_item_found = False
+    ballot_item = BallotItem()
+
+    ballot_item_manager = BallotItemManager()
+    results = ballot_item_manager.retrieve_ballot_item(ballot_item_id)
+    if results['ballot_item_found']:
+        ballot_item = results['ballot_item']
+        ballot_item_found = True
+
+    if not ballot_item_found:
+        messages.add_message(request, messages.ERROR, 'Could not find ballot_item, id: ' + ballot_item_id +
+                                                      '  -- required to delete this ballot item.')
+        return HttpResponseRedirect(reverse('ballot:ballot_item_list_edit', args=(ballot_returned_id,)) +
+                                    "?google_civic_election_id=" + str(google_civic_election_id) +
+                                    "&state_code=" + str(state_code)
+                                    )
+
+    try:
+        ballot_item.delete()
+        success = True
+    except Exception as e:
+        success = False
+
+    if success:
+        messages.add_message(request, messages.INFO, 'ballot_item deleted.')
+    else:
+        messages.add_message(request, messages.ERROR, 'Could not delete.')
+
+    if positive_value_exists(ballot_returned_id):
+        return HttpResponseRedirect(reverse('ballot:ballot_item_list_edit', args=(ballot_returned_id,)) +
+                                    "?google_civic_election_id=" + str(google_civic_election_id) +
+                                    "&state_code=" + str(state_code)
+                                    )
+    else:
+        election_local_id = 0
+        return HttpResponseRedirect(reverse('election:election_summary', args=(election_local_id,)) +
+                                    "?google_civic_election_id=" + str(google_civic_election_id) +
+                                    "&state_code=" + str(state_code)
+                                    )
 
 
 @login_required

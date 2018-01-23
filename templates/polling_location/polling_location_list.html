@@ -30,19 +30,7 @@
 <form name="polling_location_search_form" method="get" action="{% url 'polling_location:polling_location_list' %}">
     {% csrf_token %}
 
-
-{% if polling_location_search or issues_selected %}
-    <a href="{% url 'polling_location:polling_location_list' %}">
-         clear search</a>&nbsp;
-{% endif %}
-    <input type="text" name="polling_location_search" id="polling_location_id" value="{{ polling_location_search|default_if_none:"" }}" />
-    <input type="submit" value="Search for Polling Location" />
-</form>
-
 {% if state_list %}
-    <form name="state_code_form" method="get" action="{% url 'polling_location:polling_location_list' %}">
-        {% csrf_token %}
-
     <select id="state_code" name="state_code">
         <option value="" {% if '' == state_code %} selected="selected"{% endif %}>
             -- Filter by State --</option>
@@ -52,9 +40,19 @@
             {{ state }}</option>
     {% endfor %}
     </select>
-    </form>
 {% endif %}{# End of if state_list #}
 
+
+{% if polling_location_search or issues_selected %}
+    <a href="{% url 'polling_location:polling_location_list' %}?state_code={{ state_code }}">
+         clear search</a>&nbsp;
+{% endif %}
+    <input type="text" name="polling_location_search" id="polling_location_id" value="{{ polling_location_search|default_if_none:"" }}" />
+    <input type="submit" value="Search for Polling Location" />
+
+<a href="{% url 'polling_location:polling_location_edit' 0 %}?state_code={{ state_code }}">
+         create polling location</a>
+</form>
 
 {% if polling_location_list %}
     <table border="0" cellpadding="10">

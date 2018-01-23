@@ -21,7 +21,9 @@
     {% endif %}
     Hours: {{ polling_location.polling_hours_text }}<br />
     VIP ID: {{ polling_location.polling_location_id }}<br />
-    we_vote_id: {{ polling_location.we_vote_id }}
+    we_vote_id: {{ polling_location.we_vote_id }}<br />
+    latitude: {{ polling_location.latitude|default_if_none:"" }}<br />
+    longitude: {{ polling_location.longitude|default_if_none:"" }}<br />
     </p>
 
 <p><a href="{% url 'polling_location:polling_location_edit' polling_location.id %}">edit</a></p>

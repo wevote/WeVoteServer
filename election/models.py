@@ -175,7 +175,7 @@ class ElectionManager(models.Model):
         }
         return results
 
-    def retrieve_election(self, google_civic_election_id):
+    def retrieve_election(self, google_civic_election_id=0, election_id=0):
         google_civic_election_id = convert_to_int(google_civic_election_id)
 
         election = Election()
@@ -184,14 +184,23 @@ class ElectionManager(models.Model):
                 election = Election.objects.get(google_civic_election_id=google_civic_election_id)
                 if election.id:
                     election_found = True
-                    status = "ELECTION_FOUND_WITH_GOOGLE_CIVIC_ELECTION_ID"
+                    status = "ELECTION_FOUND_WITH_GOOGLE_CIVIC_ELECTION_ID "
                 else:
                     election_found = False
-                    status = "ELECTION_NOT_FOUND_WITH_GOOGLE_CIVIC_ELECTION_ID"
+                    status = "ELECTION_NOT_FOUND_WITH_GOOGLE_CIVIC_ELECTION_ID "
+                success = True
+            elif positive_value_exists(election_id):
+                election = Election.objects.get(id=election_id)
+                if election.id:
+                    election_found = True
+                    status = "ELECTION_FOUND_WITH_ELECTION_ID "
+                else:
+                    election_found = False
+                    status = "ELECTION_NOT_FOUND_WITH_ID "
                 success = True
             else:
                 election_found = False
-                status = "Insufficient variables included to retrieve one voter guide."
+                status = "Insufficient variables included to retrieve one election."
                 success = False
         except Election.MultipleObjectsReturned as e:
             handle_record_found_more_than_one_exception(e, logger)

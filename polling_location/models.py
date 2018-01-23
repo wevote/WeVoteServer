@@ -2,13 +2,18 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
+from config.base import get_environment_variable
 from django.db import models
 from django.db.models import Q
 from exception.models import handle_record_found_more_than_one_exception
+from geopy.geocoders import get_geocoder_for_service
+from geopy.exc import GeocoderQuotaExceeded
 import wevote_functions.admin
 from wevote_functions.functions import extract_zip_formatted_from_zip9, positive_value_exists
 from wevote_settings.models import fetch_next_we_vote_id_polling_location_integer, fetch_site_unique_id_prefix
 
+
+GOOGLE_MAPS_API_KEY = get_environment_variable("GOOGLE_MAPS_API_KEY")
 
 logger = wevote_functions.admin.get_logger(__name__)
 
@@ -178,6 +183,85 @@ class PollingLocationManager(models.Model):
             'MultipleObjectsReturned':      exception_multiple_object_returned,
             'new_polling_location':         new_polling_location,
             'new_polling_location_created': new_polling_location_created,
+        }
+        return results
+
+    def populate_latitude_and_longitude_for_polling_location(self, polling_location):
+        """
+        We use the google geocoder in partnership with geoip
+        :param polling_location:
+        :return:
+        """
+        status = ""
+        # We try to use existing google_client
+        if not hasattr(self, 'google_client') or not self.google_client:
+            self.google_client = get_geocoder_for_service('google')(GOOGLE_MAPS_API_KEY)
+
+        if not hasattr(polling_location, "line1"):
+            results = {
+                'status':                   "POPULATE_LATITUDE_AND_LONGITUDE-NOT_A_POLLING_LOCATION_OBJECT ",
+                'geocoder_quota_exceeded':  False,
+                'success':                  False,
+            }
+            return results
+
+        if not positive_value_exists(polling_location.line1) or not \
+                positive_value_exists(polling_location.city) or not \
+                positive_value_exists(polling_location.state) or not \
+                positive_value_exists(polling_location.zip_long):
+            # We require all four values
+            results = {
+                'status':                   "POPULATE_LATITUDE_AND_LONGITUDE-MISSING_REQUIRED_ADDRESS_INFO ",
+                'geocoder_quota_exceeded':  False,
+                'success':                  False,
+            }
+            return results
+
+        full_ballot_address = '{}, {}, {} {}'.format(
+            polling_location.line1,
+            polling_location.city,
+            polling_location.state,
+            polling_location.zip_long)
+        try:
+            location = self.google_client.geocode(full_ballot_address)
+        except GeocoderQuotaExceeded:
+            status += "GeocoderQuotaExceeded "
+            results = {
+                'status':                   status,
+                'geocoder_quota_exceeded':  True,
+                'success':                  False,
+            }
+            return results
+        except Exception as e:
+            status += "Geocoder-Exception: " + str(e) + " "
+            results = {
+                'status':                   status,
+                'geocoder_quota_exceeded':  False,
+                'success':                  False,
+            }
+            return results
+
+        if location is None:
+            results = {
+                'status':                   "POPULATE_LATITUDE_AND_LONGITUDE-LOCATION_NOT_RETURNED_FROM_GEOCODER ",
+                'geocoder_quota_exceeded':  False,
+                'success':                  False,
+            }
+            return results
+
+        try:
+            polling_location.latitude, polling_location.longitude = location.latitude, location.longitude
+            polling_location.save()
+            status += "POLLING_LOCATION_SAVED_WITH_LATITUDE_AND_LONGITUDE "
+            success = True
+        except Exception as e:
+            status += "POLLING_LOCATION_NOT_SAVED_WITH_LATITUDE_AND_LONGITUDE "
+            success = False
+
+        results = {
+            'status':                   status,
+            'geocoder_quota_exceeded':  False,
+            'success':                  success,
         }
         return results
 
