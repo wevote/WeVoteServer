@@ -358,6 +358,58 @@ class QuickInfoManager(models.Model):
         }
         return results
 
+    def retrieve_quick_info_list(self, google_civic_election_id, quick_info_search_str=''):
+        google_civic_election_id = convert_to_int(google_civic_election_id)
+        quick_info_list = []
+        quick_info_list_found = False
+
+        try:
+            quick_info_queryset = QuickInfo.objects.all()
+            if positive_value_exists(quick_info_search_str):
+                filters = []
+                # new_filter = Q(id__iexact=quick_info_search_str)
+                # filters.append(new_filter)
+                #
+                # new_filter = Q(ballot_location_display_name__icontains=quick_info_search_str)
+                # filters.append(new_filter)
+
+                # Add the first query
+                if len(filters):
+                    final_filters = filters.pop()
+
+                    # ...and "OR" the remaining items in the list
+                    for item in filters:
+                        final_filters |= item
+
+                    quick_info_queryset = quick_info_queryset.filter(final_filters)
+
+            quick_info_queryset = quick_info_queryset.filter(
+                google_civic_election_id=google_civic_election_id)
+            # if positive_value_exists(state_code):
+            #     quick_info_queryset = quick_info_queryset.filter(normalized_state__iexact=state_code)
+            quick_info_list = quick_info_queryset
+
+            if len(quick_info_list):
+                quick_info_list_found = True
+                status = 'QUICK_INFO_LIST_FOUND'
+            else:
+                status = 'NO_QUICK_INFO_LIST_FOUND'
+        except QuickInfo.DoesNotExist:
+            status = 'NO_QUICK_INFO_LIST_FOUND_DOES_NOT_EXIST'
+            quick_info_list = []
+        except Exception as e:
+            handle_exception(e, logger=logger)
+            status = 'FAILED retrieve_quick_info_list_for_election ' \
+                     '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
+
+        results = {
+            'success':                      True if quick_info_list_found else False,
+            'status':                       status,
+            'quick_info_list_found':   quick_info_list_found,
+            'quick_info_list':         quick_info_list,
+        }
+        return results
+
     def update_or_create_quick_info(self, quick_info_id, quick_info_we_vote_id,
                                     ballot_item_display_name,
                                     contest_office_we_vote_id,

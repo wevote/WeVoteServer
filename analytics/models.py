@@ -626,6 +626,50 @@ class AnalyticsManager(models.Model):
         }
         return results
 
+    def retrieve_organization_election_metrics_list(self, google_civic_election_id=0):
+        success = False
+        status = ""
+        organization_election_metrics_list = []
+
+        try:
+            list_query = OrganizationElectionMetrics.objects.using('analytics').all()
+            if positive_value_exists(google_civic_election_id):
+                list_query = list_query.filter(google_civic_election_id=google_civic_election_id)
+            organization_election_metrics_list = list(list_query)
+            organization_election_metrics_list_found = True
+        except Exception as e:
+            organization_election_metrics_list_found = False
+
+        results = {
+            'success':                      success,
+            'status':                       status,
+            'organization_election_metrics_list':        organization_election_metrics_list,
+            'organization_election_metrics_list_found':  organization_election_metrics_list_found,
+        }
+        return results
+
+    def retrieve_sitewide_election_metrics_list(self, google_civic_election_id=0):
+        success = False
+        status = ""
+        sitewide_election_metrics_list = []
+
+        try:
+            list_query = SitewideElectionMetrics.objects.using('analytics').all()
+            if positive_value_exists(google_civic_election_id):
+                list_query = list_query.filter(google_civic_election_id=google_civic_election_id)
+            sitewide_election_metrics_list = list(list_query)
+            sitewide_election_metrics_list_found = True
+        except Exception as e:
+            sitewide_election_metrics_list_found = False
+
+        results = {
+            'success':                      success,
+            'status':                       status,
+            'sitewide_election_metrics_list':        sitewide_election_metrics_list,
+            'sitewide_election_metrics_list_found':  sitewide_election_metrics_list_found,
+        }
+        return results
+
     def retrieve_list_of_dates_with_actions(self, date_as_integer, date_as_integer_end=0):
         success = False
         status = ""

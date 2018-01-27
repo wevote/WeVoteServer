@@ -824,6 +824,46 @@ class WeVoteImageManager(models.Model):
         }
         return results
 
+    def retrieve_we_vote_image_list_from_google_civic_election_id(self, google_civic_election_id):
+        """
+        Retrieve a voter's, candidate's, organization's or issue's we vote image list from the we_vote_id
+        :param google_civic_election_id:
+        :return:
+        """
+        we_vote_image_list = []
+        status = ""
+        try:
+            we_vote_image_queryset = WeVoteImage.objects.all()
+            we_vote_image_queryset = we_vote_image_queryset.filter(google_civic_election_id=google_civic_election_id)
+            we_vote_image_list = we_vote_image_queryset
+
+            if len(we_vote_image_list):
+                success = True
+                we_vote_image_list_found = True
+                status += ' CACHED_WE_VOTE_IMAGE_LIST_RETRIEVED '
+            else:
+                success = True
+                we_vote_image_list_found = False
+                status += ' NO_CACHED_WE_VOTE_IMAGE_LIST_RETRIEVED '
+
+        except WeVoteImage.DoesNotExist as e:
+            status += " WE_VOTE_IMAGE_DOES_NOT_EXIST "
+            success = True
+            we_vote_image_list_found = False
+        except Exception as e:
+            status += " FAILED_TO RETRIEVE_CACHED_WE_VOTE_IMAGE_LIST "
+            success = False
+            we_vote_image_list_found = False
+            handle_exception(e, logger=logger, exception_message=status)
+
+        results = {
+            'success':                  success,
+            'status':                   status,
+            'we_vote_image_list_found': we_vote_image_list_found,
+            'we_vote_image_list':       we_vote_image_list
+        }
+        return results
+
     def twitter_profile_image_url_https_original(self, twitter_profile_image_url_https):
         if twitter_profile_image_url_https:
             # check if original url is valid after stripping _normal from the url
