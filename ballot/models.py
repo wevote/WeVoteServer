@@ -392,8 +392,9 @@ class BallotItemListManager(models.Model):
             # We cannot use 'readonly' because the result set sometimes gets modified with .save()
             ballot_item_queryset = BallotItem.objects.all()
             ballot_item_queryset = ballot_item_queryset.order_by('local_ballot_order', 'google_ballot_placement')
-            ballot_item_list = ballot_item_queryset.filter(
+            ballot_item_queryset = ballot_item_queryset.filter(
                 google_civic_election_id=google_civic_election_id)
+            ballot_item_list = list(ballot_item_queryset)
 
             if positive_value_exists(ballot_item_list):
                 ballot_item_list_found = True
@@ -407,7 +408,7 @@ class BallotItemListManager(models.Model):
         except Exception as e:
             handle_exception(e, logger=logger)
             status = 'FAILED retrieve_ballot_items_for_election ' \
-                     '{error} [type: {error_type}]'.format(error=e.message, error_type=type(e))
+                     '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
 
         results = {
             'success':                  True if ballot_item_list_found else False,
@@ -2043,6 +2044,40 @@ class VoterBallotSavedManager(models.Model):
             'MultipleObjectsReturned':  exception_multiple_object_returned,
             'voter_ballot_saved_found': voter_ballot_saved_found,
             'voter_ballot_saved':       voter_ballot_saved,
+        }
+        return results
+
+    def retrieve_voter_ballot_saved_list_for_election(self, google_civic_election_id):
+        google_civic_election_id = convert_to_int(google_civic_election_id)
+        voter_ballot_saved_list = []
+        voter_ballot_saved_list_found = False
+
+        try:
+            voter_ballot_saved_queryset = VoterBallotSaved.objects.all()
+
+            voter_ballot_saved_queryset = voter_ballot_saved_queryset.filter(
+                google_civic_election_id=google_civic_election_id)
+            voter_ballot_saved_list = list(voter_ballot_saved_queryset)
+
+            if len(voter_ballot_saved_list):
+                voter_ballot_saved_list_found = True
+                status = 'VOTER_BALLOT_SAVED_LIST_FOUND'
+            else:
+                status = 'NO_VOTER_BALLOT_SAVED_LIST_FOUND'
+        except BallotReturned.DoesNotExist:
+            # No ballot items found. Not a problem.
+            status = 'NO_VOTER_BALLOT_SAVED_LIST_FOUND_DOES_NOT_EXIST'
+            voter_ballot_saved_list = []
+        except Exception as e:
+            handle_exception(e, logger=logger)
+            status = 'FAILED retrieve_voter_ballot_saved_list_for_election ' \
+                     '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
+
+        results = {
+            'success':                          True if voter_ballot_saved_list_found else False,
+            'status':                           status,
+            'voter_ballot_saved_list_found':    voter_ballot_saved_list_found,
+            'voter_ballot_saved_list':          voter_ballot_saved_list,
         }
         return results
 

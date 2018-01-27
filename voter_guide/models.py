@@ -931,7 +931,7 @@ class VoterGuideListManager(models.Model):
             success = True
         except Exception as e:
             handle_record_not_found_exception(e, logger=logger)
-            status = 'voterGuidesToFollowRetrieve: Unable to retrieve voter guides from db. ' \
+            status = 'retrieve_voter_guides_for_election: Unable to retrieve voter guides from db. ' \
                      '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
             success = False
 

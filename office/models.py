@@ -582,7 +582,7 @@ class ContestOfficeManager(models.Model):
         results = {
             'success':                  success,
             'status':                   status,
-            'contest_offices_count':   contest_offices_count,
+            'contest_offices_count':    contest_offices_count,
         }
         return results
 

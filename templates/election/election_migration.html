@@ -69,40 +69,64 @@
         </tr>
     </table>
 
-{% if not we_vote_election_id or not google_civic_election_id %}
-    {% if we_vote_election_id %}
-        <p><a href="{% url 'election:election_summary' we_vote_election.id %}">cancel</a>
+
+{% if we_vote_election_id and google_civic_election_id %}
+    {% if change_now %}
+      <p>
+          <a href="{% url 'election:election_summary' we_vote_election.id %}">Go Back to Election</a>
+          <input type="submit" value="Analyze Migration Results" />
+      </p>
     {% else %}
-        <p><a href="{% url 'election:election_list' %}">cancel</a>
+      <p>
+          <a href="{% url 'election:election_summary' we_vote_election.id %}">cancel</a>
+          <input type="hidden" name="change_now" value="1" />
+          <input type="submit" value="Migrate all now" />
+      </p>
+    {% endif %}
+{% else %}
+    <p>
+    {% if we_vote_election_id %}
+        <a href="{% url 'election:election_summary' we_vote_election.id %}">cancel</a>
+    {% else %}
+        <a href="{% url 'election:election_list' %}">cancel</a>
     {% endif %}
 
-    <input type="submit" value="Prepare to Migrate" /></p>
+        <input type="submit" value="Prepare to Migrate" />
+    </p>
 {% endif %}
 
+</form>
 
 
 
 
 <br />
-
-{% if we_vote_election_id and google_civic_election_id %}
-    {# Now show the Offices + Candidates and Measure, so we can map them, one to the next #}
-    <table border="1">
-        <tr>
-            <td colspan="3">{{ we_vote_election.election_name }} - {{ we_vote_election_id }}</td>
-            <td># Positions</td>
-        </tr>
-    {% if we_vote_election_office_list %}
+{% if we_vote_election_id %}
+    {% if we_vote_election_office_count %}
+    <h5>We Vote Election: Offices</h5>
+    <table>
     {% for we_vote_election_office in we_vote_election_office_list %}
         <tr>
+            <td>{{ forloop.counter }}</td>
             <td colspan="3">
-                <strong><a href="{% url 'office:office_summary' we_vote_election_office.id %}">{{ we_vote_election_office.office_name }} - {{ we_vote_election_office.we_vote_id }}</strong>
+                <strong><a href="{% url 'office:office_summary' we_vote_election_office.id %}">{{ we_vote_election_office.office_name }} - {{ we_vote_election_office.we_vote_id }}</a></strong>
             </td>
             <td>&nbsp;</td>
         </tr>
 
-        {% for candidate in we_vote_election_office.candidate_list %}
+    {% endfor %}
+      </table>
+    {% else %}
+    no offices found
+    {% endif %}
+
+
+    {% if we_vote_election_candidate_count %}
+    <h5>We Vote Election: Candidates</h5>
+    <table>
+        {% for candidate in we_vote_election_candidate_list %}
         <tr>
+            <td>{{ forloop.counter }}</td>
             <td>
                 {% if candidate.candidate_photo_url %}
                 <img src='{{ candidate.candidate_photo_url }}' height="25px" />
@@ -110,24 +134,15 @@
                     &nbsp;
                 {% endif %}
             </td>
-            <td><a href="{% url 'candidate:candidate_edit' candidate.id %}?google_civic_election_id={{ google_civic_election_id }}">{{ candidate.candidate_name }} - {{ candidate.we_vote_id }}</td>
+            <td><a href="{% url 'candidate:candidate_edit' candidate.id %}?google_civic_election_id={{ google_civic_election_id }}">{{ candidate.candidate_name }} - {{ candidate.we_vote_id }}</a></td>
             <td>{{ candidate.position_count }}</td>
             <td>
 
             </td>
         </tr>
         {% endfor %}
-    {% endfor %}
-    {% else %}
-        no offices found
-        {% endif %}
-
     </table>
-   <input type="hidden" name="change_now" value="1" />
- <input type="submit" value="Migrate all now" /></p>
-
+    {% endif %}
 {% endif %}
-
-</form>
 
 {% endblock %}
