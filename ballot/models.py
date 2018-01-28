@@ -1557,7 +1557,7 @@ class BallotReturnedListManager(models.Model):
         ballot_returned_list_found = False
 
         try:
-            ballot_returned_queryset = BallotReturned.objects.using('readonly').all()
+            ballot_returned_queryset = BallotReturned.objects.all()
             if positive_value_exists(ballot_returned_search_str):
                 filters = []
                 new_filter = Q(id__iexact=ballot_returned_search_str)
