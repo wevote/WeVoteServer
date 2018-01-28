@@ -1115,7 +1115,7 @@ def election_migration_view(request):
             try:
                 for one_voter_ballot_saved in we_vote_election_voter_ballot_saved_list:
                     one_voter_ballot_saved.google_civic_election_id = google_civic_election_id
-                    one_voter_ballot_saved.election_description_text = google_civic_election.election_description_text
+                    one_voter_ballot_saved.election_description_text = google_civic_election.election_name
                     one_voter_ballot_saved.save()
             except Exception as e:
                 error = True
