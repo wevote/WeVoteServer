@@ -351,3 +351,29 @@ class PledgeToVoteManager(models.Model):
             'pledge_count':             pledge_count,
         }
         return results
+
+    def retrieve_pledge_to_vote_list(self, google_civic_election_id=0, organization_we_vote_id=""):
+        success = False
+        status = ""
+        pledge_to_vote_list = []
+
+        try:
+            list_query = PledgeToVote.objects.all()
+            if positive_value_exists(google_civic_election_id):
+                list_query = list_query.filter(google_civic_election_id=google_civic_election_id)
+            if positive_value_exists(organization_we_vote_id):
+                list_query = list_query.filter(organization_we_vote_id__iexact=organization_we_vote_id)
+            pledge_to_vote_list = list(list_query)
+            pledge_to_vote_list_found = True
+            status += "PLEDGE_TO_VOTE_LIST_FOUND "
+        except Exception as e:
+            pledge_to_vote_list_found = False
+            status += "PLEDGE_TO_VOTE_LIST_NOT_FOUND-EXCEPTION "
+
+        results = {
+            'success': success,
+            'status': status,
+            'pledge_to_vote_list': pledge_to_vote_list,
+            'pledge_to_vote_list_found': pledge_to_vote_list_found,
+        }
+        return results

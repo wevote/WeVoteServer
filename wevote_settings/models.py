@@ -7,7 +7,7 @@ from exception.models import handle_record_found_more_than_one_exception,\
     handle_record_not_saved_exception
 import string
 import wevote_functions.admin
-from wevote_functions.functions import convert_to_int, generate_random_string
+from wevote_functions.functions import convert_to_int, generate_random_string, positive_value_exists
 
 
 RETRIEVE_POSSIBLE_TWITTER_HANDLES = 'RETRIEVE_POSSIBLE_TWITTER_HANDLES'
@@ -326,5 +326,29 @@ class RemoteRequestHistoryManager(models.Model):
             'status': create_status,
             'remote_request_history_entry_created': remote_request_history_entry_created,
             'remote_request_history_entry': remote_request_history_entry,
+        }
+        return results
+
+    def retrieve_remote_request_history_list(self, google_civic_election_id=0):
+        success = False
+        status = ""
+        remote_request_history_list = []
+
+        try:
+            list_query = RemoteRequestHistory.objects.all()
+            if positive_value_exists(google_civic_election_id):
+                list_query = list_query.filter(google_civic_election_id=google_civic_election_id)
+            remote_request_history_list = list(list_query)
+            remote_request_history_list_found = True
+            status += "REMOTE_REQUEST_HISTORY_LIST_FOUND "
+        except Exception as e:
+            remote_request_history_list_found = False
+            status += "REMOTE_REQUEST_HISTORY_LIST_NOT_FOUND-EXCEPTION "
+
+        results = {
+            'success': success,
+            'status': status,
+            'remote_request_history_list': remote_request_history_list,
+            'remote_request_history_list_found': remote_request_history_list_found,
         }
         return results

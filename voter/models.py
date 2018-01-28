@@ -2026,6 +2026,32 @@ class VoterDeviceLinkManager(models.Model):
         }
         return results
 
+    def retrieve_voter_device_link_list(self, google_civic_election_id=0, voter_id=0):
+        success = False
+        status = ""
+        voter_device_link_list = []
+
+        try:
+            list_query = VoterDeviceLink.objects.all()
+            if positive_value_exists(google_civic_election_id):
+                list_query = list_query.filter(google_civic_election_id=google_civic_election_id)
+            if positive_value_exists(voter_id):
+                list_query = list_query.filter(voter_id=voter_id)
+            voter_device_link_list = list(list_query)
+            voter_device_link_list_found = True
+            status += "VOTER_DEVICE_LINK_LIST_FOUND "
+        except Exception as e:
+            voter_device_link_list_found = False
+            status += "VOTER_DEVICE_LINK_LIST_NOT_FOUND-EXCEPTION "
+
+        results = {
+            'success': success,
+            'status': status,
+            'voter_device_link_list': voter_device_link_list,
+            'voter_device_link_list_found': voter_device_link_list_found,
+        }
+        return results
+
     def update_voter_device_link_with_election_id(self, voter_device_link, google_civic_election_id):
         voter_object = None
         return self.update_voter_device_link(voter_device_link, voter_object, google_civic_election_id)
@@ -2328,29 +2354,31 @@ class VoterAddressManager(models.Model):
                 ballot_map_text += voter_address.text_for_map_search
         return ballot_map_text
 
-    # # TODO TEST THIS
-    # def retrieve_addresses(self, voter_id):
-    #     error_result = False
-    #     exception_does_not_exist = False
-    #     # voter_addresses_on_stage = # How to typecast?
-    #     number_of_addresses = 0
-    #
-    #     try:
-    #         if voter_id > 0:
-    #             voter_addresses_on_stage = VoterAddress.objects.get(voter_id=voter_id)
-    #             number_of_addresses = len(voter_addresses_on_stage)
-    #     except VoterAddress.DoesNotExist:
-    #         error_result = True
-    #         exception_does_not_exist = True
-    #
-    #     results = {
-    #         'error_result':             error_result,
-    #         'DoesNotExist':             exception_does_not_exist,
-    #         'voter_addresses_found':    True if number_of_addresses > 0 else False,
-    #         'voter_addresses_on_stage': voter_addresses_on_stage,
-    #         'number_of_addresses':      number_of_addresses,
-    #     }
-    #     return results
+    def retrieve_voter_address_list(self, google_civic_election_id=0, voter_id=0):
+        success = False
+        status = ""
+        voter_address_list = []
+
+        try:
+            list_query = VoterAddress.objects.all()
+            if positive_value_exists(google_civic_election_id):
+                list_query = list_query.filter(google_civic_election_id=google_civic_election_id)
+            if positive_value_exists(voter_id):
+                list_query = list_query.filter(voter_id=voter_id)
+            voter_address_list = list(list_query)
+            voter_address_list_found = True
+            status += "VOTER_ADDRESS_LIST_FOUND "
+        except Exception as e:
+            voter_address_list_found = False
+            status += "VOTER_ADDRESS_LIST_NOT_FOUND-EXCEPTION "
+
+        results = {
+            'success': success,
+            'status': status,
+            'voter_address_list': voter_address_list,
+            'voter_address_list_found': voter_address_list_found,
+        }
+        return results
 
     def retrieve_text_for_map_search_from_voter_id(self, voter_id):
         results = self.retrieve_ballot_address_from_voter_id(voter_id)

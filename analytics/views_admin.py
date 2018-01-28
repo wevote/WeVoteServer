@@ -591,7 +591,10 @@ def sitewide_voter_metrics_view(request):
 
         # Bounce rate
         total_voters = voters_shown_count + bounce_count
-        voter_bounce_rate = bounce_count / total_voters
+        if positive_value_exists(bounce_count) and positive_value_exists(total_voters):
+            voter_bounce_rate = bounce_count / total_voters
+        else:
+            voter_bounce_rate = 0
 
         messages.add_message(request, messages.INFO, str(voters_shown_count) + ' voters shown. ' +
                              str(bounce_count) + ' welcome page bounces not shown. ' +
