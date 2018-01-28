@@ -24,10 +24,12 @@ from import_export_google_civic.controllers import retrieve_one_ballot_from_goog
     store_one_ballot_from_google_civic_api
 from measure.models import ContestMeasureList
 from office.models import ContestOfficeListManager, ContestOfficeManager
+from pledge_to_vote.models import PledgeToVoteManager
 from polling_location.models import PollingLocation
 from position.models import ANY_STANCE, PositionListManager, PositionManager
 from quick_info.models import QuickInfoManager
-from voter.models import voter_has_authority
+from wevote_settings.models import RemoteRequestHistoryManager
+from voter.models import VoterAddressManager, VoterDeviceLinkManager, voter_has_authority
 from voter_guide.models import VoterGuideListManager
 import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, get_voter_device_id, positive_value_exists, STATE_CODE_MAP
@@ -855,7 +857,8 @@ def election_migration_view(request):
 
     # ########################################
     # Organization Election Metrics
-    organization_election_metrics_results = analytics_action_manager.retrieve_organization_election_metrics_list(we_vote_election_id)
+    organization_election_metrics_results = analytics_action_manager.retrieve_organization_election_metrics_list(
+        we_vote_election_id)
     we_vote_election_organization_election_metrics_count = 0
     if organization_election_metrics_results['organization_election_metrics_list_found']:
         we_vote_election_organization_election_metrics_list = \
@@ -950,7 +953,7 @@ def election_migration_view(request):
     state_code = ''
     return_list_of_objects = True
     limit = 0
-    measure_results = measure_manager.retrieve_all_measures_for_upcoming_election(google_civic_election_id,
+    measure_results = measure_manager.retrieve_all_measures_for_upcoming_election(we_vote_election_id,
                                                                                   state_code,
                                                                                   return_list_of_objects, limit)
     we_vote_election_measure_count = 0
@@ -990,6 +993,25 @@ def election_migration_view(request):
                 status += results['status']
 
     # ########################################
+    # Pledge to Vote
+    pledge_to_vote_manager = PledgeToVoteManager()
+    results = pledge_to_vote_manager.retrieve_pledge_to_vote_list(we_vote_election_id)
+    we_vote_election_pledge_to_vote_count = 0
+    if results['pledge_to_vote_list_found']:
+        we_vote_election_pledge_to_vote_list = results['pledge_to_vote_list']
+        we_vote_election_pledge_to_vote_count = len(we_vote_election_pledge_to_vote_list)
+
+        if positive_value_exists(change_now):
+            try:
+                for one_pledge_to_vote in we_vote_election_pledge_to_vote_list:
+                    # Save the election_id we want to migrate to
+                    one_pledge_to_vote.google_civic_election_id = google_civic_election_id
+                    one_pledge_to_vote.save()
+            except Exception as e:
+                error = True
+                status += results['status']
+
+    # ########################################
     # Positions
 
     # retrieve public positions
@@ -1024,41 +1046,10 @@ def election_migration_view(request):
             except Exception as e:
                 error = True
 
-    voter_ballot_saved_manager = VoterBallotSavedManager()
-    voter_ballot_saved_results = voter_ballot_saved_manager.retrieve_voter_ballot_saved_list_for_election(google_civic_election_id)
-    we_vote_election_voter_ballot_saved_count = 0
-    if voter_ballot_saved_results['voter_ballot_saved_list_found']:
-        we_vote_election_voter_ballot_saved_list = voter_ballot_saved_results['voter_ballot_saved_list']
-        we_vote_election_voter_ballot_saved_count = len(we_vote_election_voter_ballot_saved_list)
-
-        if positive_value_exists(change_now):
-            try:
-                for one_voter_ballot_saved in we_vote_election_voter_ballot_saved_list:
-                    one_voter_ballot_saved.google_civic_election_id = google_civic_election_id
-                    one_voter_ballot_saved.save()
-            except Exception as e:
-                error = True
-                status += voter_ballot_saved_results['status']
-
-    we_vote_image_manager = WeVoteImageManager()
-    we_vote_image_results = we_vote_image_manager.retrieve_we_vote_image_list_from_google_civic_election_id(
-        google_civic_election_id)
-    we_vote_election_we_vote_image_count = 0
-    if we_vote_image_results['we_vote_image_list_found']:
-        we_vote_election_we_vote_image_list = we_vote_image_results['we_vote_image_list']
-        we_vote_election_we_vote_image_count = len(we_vote_election_we_vote_image_list)
-
-        if positive_value_exists(change_now):
-            try:
-                for one_we_vote_image in we_vote_election_we_vote_image_list:
-                    one_we_vote_image.google_civic_election_id = google_civic_election_id
-                    one_we_vote_image.save()
-            except Exception as e:
-                error = True
-                status += we_vote_image_results['status']
-
+    # ########################################
+    # Quick Info
     quick_info_manager = QuickInfoManager()
-    quick_info_results = quick_info_manager.retrieve_quick_info_list(google_civic_election_id)
+    quick_info_results = quick_info_manager.retrieve_quick_info_list(we_vote_election_id)
     we_vote_election_quick_info_count = 0
     if quick_info_results['quick_info_list_found']:
         we_vote_election_quick_info_list = quick_info_results['quick_info_list']
@@ -1073,8 +1064,86 @@ def election_migration_view(request):
                 error = True
                 status += quick_info_results['status']
 
+    # ########################################
+    # Remote Request History
+    remote_request_history_manager = RemoteRequestHistoryManager()
+    remote_request_history_results = remote_request_history_manager.retrieve_remote_request_history_list(
+        we_vote_election_id)
+    we_vote_election_remote_request_history_count = 0
+    if remote_request_history_results['remote_request_history_list_found']:
+        we_vote_election_remote_request_history_list = remote_request_history_results['remote_request_history_list']
+        we_vote_election_remote_request_history_count = len(we_vote_election_remote_request_history_list)
+
+        if positive_value_exists(change_now):
+            try:
+                for one_remote_request_history in we_vote_election_remote_request_history_list:
+                    one_remote_request_history.google_civic_election_id = google_civic_election_id
+                    one_remote_request_history.save()
+            except Exception as e:
+                error = True
+                status += remote_request_history_results['status']
+
+    # ########################################
+    # Voter Address
+    voter_address_manager = VoterAddressManager()
+    voter_address_results = voter_address_manager.retrieve_voter_address_list(we_vote_election_id)
+    we_vote_election_voter_address_count = 0
+    if voter_address_results['voter_address_list_found']:
+        we_vote_election_voter_address_list = voter_address_results['voter_address_list']
+        we_vote_election_voter_address_count = len(we_vote_election_voter_address_list)
+
+        if positive_value_exists(change_now):
+            try:
+                for one_voter_address in we_vote_election_voter_address_list:
+                    one_voter_address.google_civic_election_id = google_civic_election_id
+                    one_voter_address.save()
+            except Exception as e:
+                error = True
+                status += voter_address_results['status']
+
+    # ########################################
+    # Voter Ballot Saved
+    voter_ballot_saved_manager = VoterBallotSavedManager()
+    voter_ballot_saved_results = voter_ballot_saved_manager.retrieve_voter_ballot_saved_list_for_election(
+        we_vote_election_id)
+    we_vote_election_voter_ballot_saved_count = 0
+    if voter_ballot_saved_results['voter_ballot_saved_list_found']:
+        we_vote_election_voter_ballot_saved_list = voter_ballot_saved_results['voter_ballot_saved_list']
+        we_vote_election_voter_ballot_saved_count = len(we_vote_election_voter_ballot_saved_list)
+
+        if positive_value_exists(change_now):
+            try:
+                for one_voter_ballot_saved in we_vote_election_voter_ballot_saved_list:
+                    one_voter_ballot_saved.google_civic_election_id = google_civic_election_id
+                    one_voter_ballot_saved.election_description_text = google_civic_election.election_description_text
+                    one_voter_ballot_saved.save()
+            except Exception as e:
+                error = True
+                status += voter_ballot_saved_results['status']
+
+    # ########################################
+    # Voter Device Link
+    voter_device_link_manager = VoterDeviceLinkManager()
+    voter_device_link_results = voter_device_link_manager.retrieve_voter_device_link_list(
+        we_vote_election_id)
+    we_vote_election_voter_device_link_count = 0
+    if voter_device_link_results['voter_device_link_list_found']:
+        we_vote_election_voter_device_link_list = voter_device_link_results['voter_device_link_list']
+        we_vote_election_voter_device_link_count = len(we_vote_election_voter_device_link_list)
+
+        if positive_value_exists(change_now):
+            try:
+                for one_voter_device_link in we_vote_election_voter_device_link_list:
+                    one_voter_device_link.google_civic_election_id = google_civic_election_id
+                    one_voter_device_link.save()
+            except Exception as e:
+                error = True
+                status += voter_device_link_results['status']
+
+    # ########################################
+    # Voter Guides
     voter_guide_manager = VoterGuideListManager()
-    voter_guide_results = voter_guide_manager.retrieve_voter_guides_for_election(google_civic_election_id)
+    voter_guide_results = voter_guide_manager.retrieve_voter_guides_for_election(we_vote_election_id)
     we_vote_election_voter_guide_count = 0
     if voter_guide_results['voter_guide_list_found']:
         we_vote_election_voter_guide_list = voter_guide_results['voter_guide_list']
@@ -1088,6 +1157,25 @@ def election_migration_view(request):
             except Exception as e:
                 error = True
                 status += voter_guide_results['status']
+
+    # ########################################
+    # We Vote Images
+    we_vote_image_manager = WeVoteImageManager()
+    we_vote_image_results = we_vote_image_manager.retrieve_we_vote_image_list_from_google_civic_election_id(
+        we_vote_election_id)
+    we_vote_election_we_vote_image_count = 0
+    if we_vote_image_results['we_vote_image_list_found']:
+        we_vote_election_we_vote_image_list = we_vote_image_results['we_vote_image_list']
+        we_vote_election_we_vote_image_count = len(we_vote_election_we_vote_image_list)
+
+        if positive_value_exists(change_now):
+            try:
+                for one_we_vote_image in we_vote_election_we_vote_image_list:
+                    one_we_vote_image.google_civic_election_id = google_civic_election_id
+                    one_we_vote_image.save()
+            except Exception as e:
+                error = True
+                status += we_vote_image_results['status']
 
     message_with_summary_of_elections = 'Election Migration from We Vote Election id {we_vote_election_id} ' \
                                         'to Google Civic Election id {google_civic_election_id}. ' \
@@ -1165,7 +1253,11 @@ def election_migration_view(request):
                          'voter_ballot_saved_count: {voter_ballot_saved_count}, <br />' \
                          'we_vote_image_count: {we_vote_image_count}, <br />' \
                          'measure_count: {measure_count}, <br />' \
+                         'pledge_to_vote_count: {pledge_to_vote_count}, <br />' \
                          'quick_info_count: {quick_info_count}, <br />' \
+                         'remote_request_history_count: {remote_request_history_count}, <br />' \
+                         'voter_address_count: {voter_address_count}, <br />' \
+                         'voter_device_link_count: {voter_device_link_count}, <br />' \
                          'voter_guide_count: {voter_guide_count}, <br />' \
                          'status: {status} '.format(
                              we_vote_election_id=we_vote_election_id,
@@ -1175,6 +1267,7 @@ def election_migration_view(request):
                              public_position_count=public_position_count,
                              friend_position_count=friend_position_count,
                              analytics_action_count=we_vote_election_analytics_action_count,
+                             pledge_to_vote_count=we_vote_election_pledge_to_vote_count,
                              organization_election_metrics_count=we_vote_election_organization_election_metrics_count,
                              sitewide_election_metrics_count=we_vote_election_sitewide_election_metrics_count,
                              ballot_item_count=we_vote_election_ballot_item_count,
@@ -1183,6 +1276,9 @@ def election_migration_view(request):
                              we_vote_image_count=we_vote_election_we_vote_image_count,
                              measure_count=we_vote_election_measure_count,
                              quick_info_count=we_vote_election_quick_info_count,
+                             remote_request_history_count=we_vote_election_remote_request_history_count,
+                             voter_address_count=we_vote_election_voter_address_count,
+                             voter_device_link_count=we_vote_election_voter_device_link_count,
                              voter_guide_count=we_vote_election_voter_guide_count,
                              status=status,)
 
