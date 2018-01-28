@@ -1231,7 +1231,8 @@ def election_migration_view(request):
     #
     # # Count for we_vote_election_voter_guide_count
     if positive_value_exists(change_now):
-        info_message = message_with_summary_of_elections + '<br />Changes completed.'
+        info_message = message_with_summary_of_elections + '<br />Changes completed.' \
+                         'status: {status} '.format(status=status, )
 
         messages.add_message(request, messages.INFO, info_message)
     elif error:
