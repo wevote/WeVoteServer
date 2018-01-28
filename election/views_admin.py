@@ -1120,6 +1120,7 @@ def election_migration_view(request):
             except Exception as e:
                 error = True
                 status += voter_ballot_saved_results['status']
+                status += "ELECTION_MIGRATION-EXCEPTION_SAVING_VOTER_BALLOT_SAVED "
 
     # ########################################
     # Voter Device Link
