@@ -25,6 +25,27 @@
         {% else %}TURN ON: {{ set_this_voter_as_admin }}{% endif %}</td>
     </tr>
     <tr>
+        <td>Partner Organization?</td>
+        <td>{% if voter.is_partner_organization %}Yes
+        {% else %}No{% endif %}</td>
+        <td>{% if voter.is_partner_organization %}TURN OFF: {{ unset_as_partner_organization }}
+        {% else %}TURN ON: {{ set_as_partner_organization }}{% endif %}</td>
+    </tr>
+    <tr>
+        <td>Political Data Manager?</td>
+        <td>{% if voter.is_political_data_manager %}Yes
+        {% else %}No{% endif %}</td>
+        <td>{% if voter.is_political_data_manager %}TURN OFF: {{ unset_as_political_data_manager }}
+        {% else %}TURN ON: {{ set_as_political_data_manager }}{% endif %}</td>
+    </tr>
+    <tr>
+        <td>Political Data Viewer?</td>
+        <td>{% if voter.is_political_data_viewer %}Yes
+        {% else %}No{% endif %}</td>
+        <td>{% if voter.is_political_data_viewer %}TURN OFF: {{ unset_as_political_data_viewer }}
+        {% else %}TURN ON: {{ set_as_political_data_viewer }}{% endif %}</td>
+    </tr>
+    <tr>
         <td>Verified Volunteer?</td>
         <td>{% if voter.is_verified_volunteer %}Yes
         {% else %}No{% endif %}</td>

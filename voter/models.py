@@ -12,8 +12,8 @@ from import_export_facebook.models import FacebookManager
 from twitter.models import TwitterUserManager
 from validate_email import validate_email
 import wevote_functions.admin
-from wevote_functions.functions import extract_state_code_from_address_string, convert_to_int, generate_voter_device_id, \
-    get_voter_api_device_id, positive_value_exists
+from wevote_functions.functions import extract_state_code_from_address_string, convert_to_int, \
+    generate_voter_device_id, get_voter_api_device_id, positive_value_exists
 from wevote_settings.models import fetch_next_we_vote_id_voter_integer, fetch_site_unique_id_prefix
 
 
@@ -1588,6 +1588,9 @@ class Voter(AbstractBaseUser):
 
     is_active = models.BooleanField(default=True)
     is_admin = models.BooleanField(default=False)
+    is_partner_organization = models.BooleanField(default=False)
+    is_political_data_manager = models.BooleanField(default=False)
+    is_political_data_viewer = models.BooleanField(default=False)
     is_verified_volunteer = models.BooleanField(default=False)
 
     # Facebook session information
@@ -2153,18 +2156,24 @@ def retrieve_voter_authority(request):
     if results['voter_found']:
         voter = results['voter']
         authority_results = {
-            'voter_found':              True,
-            'is_active':                positive_value_exists(voter.is_active),
-            'is_admin':                 positive_value_exists(voter.is_admin),
-            'is_verified_volunteer':    positive_value_exists(voter.is_verified_volunteer),
+            'voter_found':                  True,
+            'is_active':                    positive_value_exists(voter.is_active),
+            'is_admin':                     positive_value_exists(voter.is_admin),
+            'is_partner_organization':      positive_value_exists(voter.is_partner_organization),
+            'is_political_data_manager':    positive_value_exists(voter.is_political_data_manager),
+            'is_political_data_viewer':     positive_value_exists(voter.is_political_data_viewer),
+            'is_verified_volunteer':        positive_value_exists(voter.is_verified_volunteer),
         }
         return authority_results
 
     authority_results = {
-        'voter_found':              False,
-        'is_active':                False,
-        'is_admin':                 False,
-        'is_verified_volunteer':    False,
+        'voter_found':                  False,
+        'is_active':                    False,
+        'is_admin':                     False,
+        'is_partner_organization':      False,
+        'is_political_data_manager':    False,
+        'is_political_data_viewer':     False,
+        'is_verified_volunteer':        False,
     }
     return authority_results
 
@@ -2176,6 +2185,19 @@ def voter_has_authority(request, authority_required, authority_results=None):
         return False
     if 'admin' in authority_required:
         if positive_value_exists(authority_results['is_admin']):
+            return True
+    if 'partner_organization' in authority_required:
+        if positive_value_exists(authority_results['is_partner_organization']) or \
+                positive_value_exists(authority_results['is_admin']):
+            return True
+    if 'political_data_manager' in authority_required:
+        if positive_value_exists(authority_results['is_political_data_manager']) or \
+                positive_value_exists(authority_results['is_admin']):
+            return True
+    if 'political_data_viewer' in authority_required:
+        if positive_value_exists(authority_results['is_political_data_viewer']) or \
+                positive_value_exists(authority_results['is_verified_volunteer']) or \
+                positive_value_exists(authority_results['is_admin']):
             return True
     if 'verified_volunteer' in authority_required:
         if positive_value_exists(authority_results['is_verified_volunteer']) or \

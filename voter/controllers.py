@@ -260,6 +260,9 @@ def merge_voter_accounts(from_voter, to_voter):
     # last_name
     # interface_status_flags
     # is_admin
+    # is_partner_organization
+    # is_political_data_manager
+    # is_political_data_viewer
     # is_verified_volunteer
     # primary_email_we_vote_id
 
@@ -268,7 +271,11 @@ def merge_voter_accounts(from_voter, to_voter):
             or positive_value_exists(from_voter.last_name) \
             or positive_value_exists(from_voter.interface_status_flags) \
             or positive_value_exists(from_voter.notification_settings_flags) \
-            or positive_value_exists(from_voter.is_admin) or positive_value_exists(from_voter.is_verified_volunteer) \
+            or positive_value_exists(from_voter.is_admin) \
+            or positive_value_exists(from_voter.is_partner_organization) \
+            or positive_value_exists(from_voter.is_political_data_manager) \
+            or positive_value_exists(from_voter.is_political_data_viewer) \
+            or positive_value_exists(from_voter.is_verified_volunteer) \
             or positive_value_exists(from_voter.primary_email_we_vote_id):
         from_voter_data_to_migrate_exists = True
     else:
@@ -289,6 +296,15 @@ def merge_voter_accounts(from_voter, to_voter):
                 to_voter.notification_settings_flags | from_voter.notification_settings_flags
             if positive_value_exists(from_voter.is_admin) and not positive_value_exists(to_voter.is_admin):
                 to_voter.is_admin = from_voter.is_admin
+            if positive_value_exists(from_voter.is_partner_organization) \
+                    and not positive_value_exists(to_voter.is_partner_organization):
+                to_voter.is_partner_organization = from_voter.is_partner_organization
+            if positive_value_exists(from_voter.is_political_data_manager) \
+                    and not positive_value_exists(to_voter.is_political_data_manager):
+                to_voter.is_political_data_manager = from_voter.is_political_data_manager
+            if positive_value_exists(from_voter.is_political_data_viewer) \
+                    and not positive_value_exists(to_voter.is_political_data_viewer):
+                to_voter.is_political_data_viewer = from_voter.is_political_data_viewer
             if positive_value_exists(from_voter.is_verified_volunteer) \
                     and not positive_value_exists(to_voter.is_verified_volunteer):
                 to_voter.is_verified_volunteer = from_voter.is_verified_volunteer
@@ -1985,6 +2001,9 @@ def voter_retrieve_for_api(voter_device_id, state_code_from_ip_address='',
             'twitter_screen_name':              voter.twitter_screen_name,
             'is_signed_in':                     voter.is_signed_in(),
             'is_admin':                         voter.is_admin,
+            'is_partner_organization':          voter.is_partner_organization,
+            'is_political_data_manager':        voter.is_political_data_manager,
+            'is_political_data_viewer':         voter.is_political_data_viewer,
             'is_verified_volunteer':            voter.is_verified_volunteer,
             'signed_in_facebook':               voter.signed_in_facebook(),
             'signed_in_google':                 voter.signed_in_google(),
@@ -2024,6 +2043,9 @@ def voter_retrieve_for_api(voter_device_id, state_code_from_ip_address='',
             'twitter_screen_name':              '',
             'is_signed_in':                     False,
             'is_admin':                         False,
+            'is_partner_organization':          False,
+            'is_political_data_manager':        False,
+            'is_political_data_viewer':         False,
             'is_verified_volunteer':            False,
             'signed_in_facebook':               False,
             'signed_in_google':                 False,

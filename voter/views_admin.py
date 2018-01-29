@@ -89,19 +89,41 @@ def voter_authenticate_manually_view(request):
         unset_this_voter_as_admin = "UPDATE voter_voter SET is_admin=False WHERE id={voter_id};".format(
             voter_id=voter_id)
 
+        set_as_partner_organization = "UPDATE voter_voter SET is_partner_organization=True WHERE id={voter_id};" \
+                                      "".format(voter_id=voter_id)
+        unset_as_partner_organization = "UPDATE voter_voter SET is_partner_organization=False WHERE id={voter_id};" \
+                                        "".format(voter_id=voter_id)
+
+        set_as_political_data_manager = "UPDATE voter_voter SET is_political_data_manager=True WHERE id={voter_id};" \
+                                        "".format(voter_id=voter_id)
+        unset_as_political_data_manager = "UPDATE voter_voter SET is_political_data_manager=False " \
+                                          "WHERE id={voter_id};" \
+                                          "".format(voter_id=voter_id)
+
+        set_as_political_data_viewer = "UPDATE voter_voter SET is_political_data_viewer=True WHERE id={voter_id};" \
+                                       "".format(voter_id=voter_id)
+        unset_as_political_data_viewer = "UPDATE voter_voter SET is_political_data_viewer=False WHERE id={voter_id};" \
+                                         "".format(voter_id=voter_id)
+
         set_as_verified_volunteer = "UPDATE voter_voter SET is_verified_volunteer=True WHERE id={voter_id};" \
                                     "".format(voter_id=voter_id)
         unset_as_verified_volunteer = "UPDATE voter_voter SET is_verified_volunteer=False WHERE id={voter_id};" \
                                       "".format(voter_id=voter_id)
         template_values = {
-            'messages_on_stage':            messages_on_stage,
-            'voter':                        voter_on_stage,
-            'voter_api_device_id':          voter_api_device_id,
-            'is_authenticated':             request.user.is_authenticated(),
-            'set_this_voter_as_admin':      set_this_voter_as_admin,
-            'unset_this_voter_as_admin':    unset_this_voter_as_admin,
-            'set_as_verified_volunteer':    set_as_verified_volunteer,
-            'unset_as_verified_volunteer':  unset_as_verified_volunteer,
+            'messages_on_stage':                messages_on_stage,
+            'voter':                            voter_on_stage,
+            'voter_api_device_id':              voter_api_device_id,
+            'is_authenticated':                 request.user.is_authenticated(),
+            'set_this_voter_as_admin':          set_this_voter_as_admin,
+            'unset_this_voter_as_admin':        unset_this_voter_as_admin,
+            'set_as_partner_organization':      set_as_partner_organization,
+            'unset_as_partner_organization':    unset_as_partner_organization,
+            'set_as_political_data_manager':    set_as_political_data_manager,
+            'unset_as_political_data_manager':  unset_as_political_data_manager,
+            'set_as_political_data_viewer':     set_as_political_data_viewer,
+            'unset_as_political_data_viewer':   unset_as_political_data_viewer,
+            'set_as_verified_volunteer':        set_as_verified_volunteer,
+            'unset_as_verified_volunteer':      unset_as_verified_volunteer,
         }
     else:
         template_values = {
@@ -707,18 +729,36 @@ def voter_change_authority_process_view(request):
 
     if voter_on_stage_found:
         try:
-            if authority_granted == 'verified_volunteer':
-                voter_on_stage.is_verified_volunteer = True
-                authority_changed = True
-            elif authority_granted == 'admin':
+            if authority_granted == 'admin':
                 voter_on_stage.is_admin = True
                 authority_changed = True
-
-            if authority_removed == 'verified_volunteer':
-                voter_on_stage.is_verified_volunteer = False
+            elif authority_granted == 'partner_organization':
+                voter_on_stage.is_partner_organization = True
                 authority_changed = True
-            elif authority_removed == 'admin':
+            elif authority_granted == 'political_data_manager':
+                voter_on_stage.is_political_data_manager = True
+                authority_changed = True
+            elif authority_granted == 'political_data_viewer':
+                voter_on_stage.is_political_data_viewer = True
+                authority_changed = True
+            elif authority_granted == 'verified_volunteer':
+                voter_on_stage.is_verified_volunteer = True
+                authority_changed = True
+
+            if authority_removed == 'admin':
                 voter_on_stage.is_admin = False
+                authority_changed = True
+            elif authority_removed == 'partner_organization':
+                voter_on_stage.is_partner_organization = False
+                authority_changed = True
+            elif authority_removed == 'political_data_manager':
+                voter_on_stage.is_political_data_manager = False
+                authority_changed = True
+            elif authority_removed == 'political_data_viewer':
+                voter_on_stage.is_political_data_viewer = False
+                authority_changed = True
+            elif authority_removed == 'verified_volunteer':
+                voter_on_stage.is_verified_volunteer = False
                 authority_changed = True
 
             if authority_changed:
