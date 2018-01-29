@@ -43,6 +43,8 @@
             <td>Email</td>
             <td>Org we_vote_id</td>
             <td>Admin</td>
+            <td>Partner Organization</td>
+            <td>Political Data</td>
             <td>Verified Volunteer</td>
             <td>Voter Images</td>
         </tr>
@@ -100,6 +102,14 @@
             <!-- Is site administrator? //-->
             <td>
             {% if voter.is_admin %}Y{% else %}{% endif %}
+            </td>
+            <!-- Is partner organization? //-->
+            <td>
+            {% if voter.is_partner_organization %}Y{% else %}{% endif %}
+            </td>
+            <!-- Political data authority? //-->
+            <td>
+            {% if voter.is_political_data_manager %}Manager{% elif voter.is_political_data_viewer %}Viewer{% endif %}
             </td>
             <!-- Is verified volunteer? //-->
             <td>

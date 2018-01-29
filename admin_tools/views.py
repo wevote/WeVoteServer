@@ -56,7 +56,9 @@ VOTER_GUIDES_SYNC_URL = get_environment_variable("VOTER_GUIDES_SYNC_URL")  # vot
 
 @login_required
 def admin_home_view(request):
-    authority_required = {'verified_volunteer'}  # admin, verified_volunteer
+    # admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'admin', 'partner_organization', 'political_data_manager', 'political_data_viewer',
+                          'verified_volunteer'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
@@ -99,7 +101,8 @@ def admin_home_view(request):
 
 @login_required
 def data_cleanup_view(request):
-    authority_required = {'admin'}  # admin, verified_volunteer
+    # admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'admin'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
@@ -117,7 +120,8 @@ def data_cleanup_organization_analysis_view(request):
     :param request:
     :return:
     """
-    authority_required = {'admin'}  # admin, verified_volunteer
+    # admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'admin'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
@@ -279,7 +283,8 @@ def data_cleanup_organization_list_analysis_view(request):
     :param request:
     :return:
     """
-    authority_required = {'admin'}  # admin, verified_volunteer
+    # admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'admin'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
@@ -526,7 +531,8 @@ def data_cleanup_organization_list_analysis_view(request):
 
 @login_required
 def data_cleanup_position_list_analysis_view(request):
-    authority_required = {'admin'}  # admin, verified_volunteer
+    # admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'admin'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
@@ -941,7 +947,8 @@ def add_organization_to_position_owner_local(voter_id, one_position):
 
 @login_required
 def data_cleanup_voter_hanging_data_process_view(request):
-    authority_required = {'admin'}  # admin, verified_volunteer
+    # admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'admin'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
@@ -1071,7 +1078,8 @@ def data_cleanup_voter_hanging_data_process_view(request):
 
 @login_required
 def data_cleanup_voter_list_analysis_view(request):
-    authority_required = {'admin'}  # admin, verified_volunteer
+    # admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'admin'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
@@ -1322,7 +1330,8 @@ def data_cleanup_voter_list_analysis_view(request):
 
 @login_required
 def data_voter_statistics_view(request):
-    authority_required = {'admin'}  # admin, verified_volunteer
+    # admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'admin'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
@@ -1525,7 +1534,8 @@ def data_voter_statistics_view(request):
 
 @login_required
 def delete_test_data_view(request):
-    authority_required = {'admin'}  # admin, verified_volunteer
+    # admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'admin'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
@@ -1541,7 +1551,8 @@ def delete_test_data_view(request):
 
 @login_required
 def import_sample_data_view(request):
-    authority_required = {'admin'}  # admin, verified_volunteer
+    # admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'admin'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
@@ -1797,7 +1808,8 @@ def redirect_to_sign_in_page(request, authority_required={}):
 
 @login_required
 def statistics_summary_view(request):
-    authority_required = {'verified_volunteer'}  # admin, verified_volunteer
+    # admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'verified_volunteer'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
@@ -1816,7 +1828,8 @@ def statistics_summary_view(request):
 
 @login_required
 def sync_data_with_master_servers_view(request):
-    authority_required = {'admin'}  # admin, verified_volunteer
+    # admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'admin'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 

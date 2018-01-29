@@ -89,7 +89,7 @@ Position on {{ organization_position.ballot_item_display_name }}{% endif %}</h1>
         <option value="0">-- no candidates found --</option>
         {% endif %}
         </select>
-        {% if voter_authority.is_verified_volunteer or voter_authority.is_admin %}
+        {% if voter_authority.is_admin or voter_authority.is_political_data_manager or voter_authority.is_verified_volunteer %}
             <a href="{% url 'candidate:candidate_new' %}?google_civic_election_id={{ google_civic_election_id }}"
                target="_blank">Add new candidate</a> (open in new window)
             <br />
@@ -116,7 +116,7 @@ Position on {{ organization_position.ballot_item_display_name }}{% endif %}</h1>
         <option value="0">-- no measures found --</option>
         {% endif %}
         </select>
-        {% if voter_authority.is_verified_volunteer or voter_authority.is_admin %}
+        {% if voter_authority.is_admin or voter_authority.is_political_data_manager or voter_authority.is_verified_volunteer %}
             <a href="{% url 'measure:measure_new' %}?google_civic_election_id={{ google_civic_election_id }}"
                target="_blank">Add new measure</a> (open in new window)
             <br />

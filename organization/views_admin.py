@@ -163,7 +163,9 @@ def organizations_import_from_master_server_view(request):
 
 @login_required
 def organization_list_view(request):
-    authority_required = {'verified_volunteer'}  # admin, verified_volunteer
+    # admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'partner_organization', 'political_data_manager', 'political_data_viewer',
+                          'verified_volunteer'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
@@ -307,7 +309,8 @@ def organization_list_view(request):
 
 @login_required
 def organization_new_view(request):
-    authority_required = {'verified_volunteer'}  # admin, verified_volunteer
+    # admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'political_data_manager', 'verified_volunteer'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
@@ -335,7 +338,8 @@ def organization_new_view(request):
 
 @login_required
 def organization_edit_view(request, organization_id=0, organization_we_vote_id=""):
-    authority_required = {'verified_volunteer'}  # admin, verified_volunteer
+    # admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'political_data_manager', 'verified_volunteer'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
@@ -457,7 +461,8 @@ def organization_edit_process_view(request):
     :param request:
     :return:
     """
-    authority_required = {'verified_volunteer'}  # admin, verified_volunteer
+    # admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'political_data_manager', 'verified_volunteer'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
@@ -641,7 +646,9 @@ def organization_edit_process_view(request):
 
 @login_required
 def organization_position_list_view(request, organization_id=0, organization_we_vote_id="", incorrect_integer=0):
-    authority_required = {'verified_volunteer'}  # admin, verified_volunteer
+    # admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'partner_organization', 'political_data_manager', 'political_data_viewer',
+                          'verified_volunteer'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
@@ -743,7 +750,8 @@ def organization_position_list_view(request, organization_id=0, organization_we_
 
 @login_required
 def organization_position_new_view(request, organization_id):
-    authority_required = {'verified_volunteer'}  # admin, verified_volunteer
+    # admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'political_data_manager', 'verified_volunteer'}
     authority_results = retrieve_voter_authority(request)
     if not voter_has_authority(request, authority_required, authority_results):
         return redirect_to_sign_in_page(request, authority_required)
@@ -861,7 +869,8 @@ def organization_delete_existing_position_process_form_view(request, organizatio
     :param position_we_vote_id:
     :return:
     """
-    authority_required = {'admin'}  # admin, verified_volunteer
+    # admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'admin', 'political_data_manager'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
@@ -905,7 +914,8 @@ def organization_position_edit_view(request, organization_id, position_we_vote_i
     :param position_we_vote_id:
     :return:
     """
-    authority_required = {'verified_volunteer'}  # admin, verified_volunteer
+    # admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'political_data_manager', 'verified_volunteer'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
@@ -968,7 +978,8 @@ def organization_position_edit_process_view(request):
     :param request:
     :return:
     """
-    authority_required = {'verified_volunteer'}  # admin, verified_volunteer
+    # admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'political_data_manager', 'verified_volunteer'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 

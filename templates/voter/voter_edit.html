@@ -81,16 +81,45 @@ linked_organization_we_vote_id: {{ voter.linked_organization_we_vote_id|default_
 
 </form>
 {% if voter %}
-    {% if voter.is_verified_volunteer %}
-<p><a href="{% url 'voter:voter_change_authority_process' %}?voter_id={{ voter_id }}&authority_removed=verified_volunteer">Remove Verified Volunteer Rights</a></p>
-    {% else %}
-<p><a href="{% url 'voter:voter_change_authority_process' %}?voter_id={{ voter_id }}&authority_granted=verified_volunteer">Grant Verified Volunteer Rights</a></p>
-    {% endif %}
 
     {% if voter.is_admin %}
-<p><a href="{% url 'voter:voter_change_authority_process' %}?voter_id={{ voter_id }}&authority_removed=admin">Remove Admin Rights</a></p>
+<p><a href="{% url 'voter:voter_change_authority_process' %}?voter_id={{ voter_id }}&authority_removed=admin">
+  Remove Admin Rights</a></p>
     {% else %}
-<p><a href="{% url 'voter:voter_change_authority_process' %}?voter_id={{ voter_id }}&authority_granted=admin">Grant Admin Rights</a></p>
+<p><a href="{% url 'voter:voter_change_authority_process' %}?voter_id={{ voter_id }}&authority_granted=admin">
+  Grant Admin Rights</a></p>
+    {% endif %}
+
+    {% if voter.is_partner_organization %}
+<p><a href="{% url 'voter:voter_change_authority_process' %}?voter_id={{ voter_id }}&authority_removed=partner_organization">
+  Remove Partner Organization Rights</a></p>
+    {% else %}
+<p><a href="{% url 'voter:voter_change_authority_process' %}?voter_id={{ voter_id }}&authority_granted=partner_organization">
+  Grant Partner Organization Rights</a></p>
+    {% endif %}
+
+    {% if voter.is_political_data_manager %}
+<p><a href="{% url 'voter:voter_change_authority_process' %}?voter_id={{ voter_id }}&authority_removed=political_data_manager">
+  Remove Political Data Manager Rights</a></p>
+    {% else %}
+<p><a href="{% url 'voter:voter_change_authority_process' %}?voter_id={{ voter_id }}&authority_granted=political_data_manager">
+  Grant Political Data Manager Rights</a></p>
+    {% endif %}
+
+    {% if voter.is_political_data_viewer %}
+<p><a href="{% url 'voter:voter_change_authority_process' %}?voter_id={{ voter_id }}&authority_removed=political_data_viewer">
+  Remove Political Data Viewer Rights</a></p>
+    {% else %}
+<p><a href="{% url 'voter:voter_change_authority_process' %}?voter_id={{ voter_id }}&authority_granted=political_data_viewer">
+  Grant Political Data Viewer Rights</a></p>
+    {% endif %}
+
+    {% if voter.is_verified_volunteer %}
+<p><a href="{% url 'voter:voter_change_authority_process' %}?voter_id={{ voter_id }}&authority_removed=verified_volunteer">
+  Remove Verified Volunteer Rights</a></p>
+    {% else %}
+<p><a href="{% url 'voter:voter_change_authority_process' %}?voter_id={{ voter_id }}&authority_granted=verified_volunteer">
+  Grant Verified Volunteer Rights</a></p>
     {% endif %}
 
 {% endif %}
@@ -151,6 +180,8 @@ linked_organization_we_vote_id: {{ voter.linked_organization_we_vote_id|default_
             <td>TwitterLinkToVoter</td>
             <td>Email</td>
             <td>Admin</td>
+            <td>Partner Organization</td>
+            <td>Political Data</td>
             <td>Verified Volunteer</td>
             <td>linked_organization_we_vote_id</td>
         </tr>
@@ -197,6 +228,14 @@ linked_organization_we_vote_id: {{ voter.linked_organization_we_vote_id|default_
             <td>
             {% if duplicate_facebook_voter.is_admin %}Y{% else %}{% endif %}
             </td>
+            <!-- Is partner organization? //-->
+            <td>
+            {% if voter.is_partner_organization %}Y{% else %}{% endif %}
+            </td>
+            <!-- Political data authority? //-->
+            <td>
+            {% if voter.is_political_data_manager %}Manager{% elif voter.is_political_data_viewer %}Viewer{% endif %}
+            </td>
             <!-- Is verified volunteer? //-->
             <td>
             {% if duplicate_facebook_voter.is_verified_volunteer %}Y{% else %}{% endif %}
@@ -237,6 +276,8 @@ linked_organization_we_vote_id: {{ voter.linked_organization_we_vote_id|default_
             <td>TwitterLinkToVoter</td>
             <td>Email</td>
             <td>Admin</td>
+            <td>Partner Organization</td>
+            <td>Political Data</td>
             <td>Verified Volunteer</td>
             <td>linked_organization_we_vote_id</td>
         </tr>
@@ -284,6 +325,14 @@ linked_organization_we_vote_id: {{ voter.linked_organization_we_vote_id|default_
             <!-- Is site administrator? //-->
             <td>
             {% if duplicate_twitter_voter.is_admin %}Y{% else %}{% endif %}
+            </td>
+            <!-- Is partner organization? //-->
+            <td>
+            {% if voter.is_partner_organization %}Y{% else %}{% endif %}
+            </td>
+            <!-- Political data authority? //-->
+            <td>
+            {% if voter.is_political_data_manager %}Manager{% elif voter.is_political_data_viewer %}Viewer{% endif %}
             </td>
             <!-- Is verified volunteer? //-->
             <td>

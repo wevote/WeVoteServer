@@ -2061,17 +2061,17 @@ class VoterBallotSavedManager(models.Model):
 
             if len(voter_ballot_saved_list):
                 voter_ballot_saved_list_found = True
-                status = 'VOTER_BALLOT_SAVED_LIST_FOUND'
+                status = 'VOTER_BALLOT_SAVED_LIST_FOUND '
             else:
-                status = 'NO_VOTER_BALLOT_SAVED_LIST_FOUND'
-        except BallotReturned.DoesNotExist:
+                status = 'NO_VOTER_BALLOT_SAVED_LIST_FOUND '
+        except VoterBallotSaved.DoesNotExist:
             # No ballot items found. Not a problem.
-            status = 'NO_VOTER_BALLOT_SAVED_LIST_FOUND_DOES_NOT_EXIST'
+            status = 'NO_VOTER_BALLOT_SAVED_LIST_FOUND_DOES_NOT_EXIST '
             voter_ballot_saved_list = []
         except Exception as e:
             handle_exception(e, logger=logger)
             status = 'FAILED retrieve_voter_ballot_saved_list_for_election ' \
-                     '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
+                     '{error} [type: {error_type}] '.format(error=e, error_type=type(e))
 
         results = {
             'success':                          True if voter_ballot_saved_list_found else False,

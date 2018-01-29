@@ -47,7 +47,8 @@ def election_all_ballots_retrieve_view(request, election_local_id=0):
     :param election_local_id:
     :return:
     """
-    authority_required = {'verified_volunteer'}  # admin, verified_volunteer
+    # admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'political_data_manager'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
@@ -205,7 +206,8 @@ def election_one_ballot_retrieve_view(request, election_local_id=0):
     :param election_local_id:
     :return:
     """
-    authority_required = {'verified_volunteer'}  # admin, verified_volunteer
+    # admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'political_data_manager'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
@@ -334,7 +336,8 @@ def election_one_ballot_retrieve_view(request, election_local_id=0):
 
 @login_required
 def election_edit_view(request, election_local_id):
-    authority_required = {'verified_volunteer'}  # admin, verified_volunteer
+    # admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'political_data_manager'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
@@ -419,7 +422,8 @@ def election_edit_process_view(request):
     :param request:
     :return:
     """
-    authority_required = {'verified_volunteer'}  # admin, verified_volunteer
+    # admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'political_data_manager'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
@@ -517,7 +521,9 @@ def election_edit_process_view(request):
 
 @login_required()
 def election_list_view(request):
-    authority_required = {'verified_volunteer'}  # admin, verified_volunteer
+    # admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'partner_organization', 'political_data_manager', 'political_data_viewer',
+                          'verified_volunteer'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
@@ -584,7 +590,8 @@ def election_remote_retrieve_view(request):
     :param request:
     :return:
     """
-    authority_required = {'verified_volunteer'}  # admin, verified_volunteer
+    # admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'political_data_manager', 'verified_volunteer'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
@@ -599,7 +606,9 @@ def election_remote_retrieve_view(request):
 
 @login_required()
 def election_summary_view(request, election_local_id):
-    authority_required = {'verified_volunteer'}  # admin, verified_volunteer
+    # admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'partner_organization', 'political_data_manager', 'political_data_viewer',
+                          'verified_volunteer'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
@@ -764,7 +773,8 @@ def elections_import_from_master_server_view(request):
 
 @login_required()
 def election_migration_view(request):
-    authority_required = {'admin'}  # admin, verified_volunteer
+    # admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'admin', 'political_data_manager'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
@@ -1120,7 +1130,7 @@ def election_migration_view(request):
             except Exception as e:
                 error = True
                 status += voter_ballot_saved_results['status']
-                status += "ELECTION_MIGRATION-EXCEPTION_SAVING_VOTER_BALLOT_SAVED , e: " + str(e) + " "
+                status += "ELECTION_MIGRATION-EXCEPTION_SAVING_VOTER_BALLOT_SAVED, e: " + str(e) + " "
 
     # ########################################
     # Voter Device Link
@@ -1231,7 +1241,7 @@ def election_migration_view(request):
     #
     # # Count for we_vote_election_voter_guide_count
     if positive_value_exists(change_now):
-        info_message = message_with_summary_of_elections + '<br />Changes completed.' \
+        info_message = message_with_summary_of_elections + '<br />Changes completed.<br />' \
                          'status: {status} '.format(status=status, )
 
         messages.add_message(request, messages.INFO, info_message)

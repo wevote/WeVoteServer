@@ -114,11 +114,11 @@ def organization_save_view(request):  # organizationSave
     facebook_email = request.GET.get('facebook_email', False)
     facebook_profile_image_url_https = request.GET.get('facebook_profile_image_url_https', False)
 
-    #  or if you are a verified volunteer or admin
-    authority_required = {'admin', 'verified_volunteer'}  # admin, verified_volunteer
-    voter_is_admin_or_verified_volunteer = False
+    # admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'admin', 'political_data_manager', 'verified_volunteer'}
+    voter_has_authority_required = False
     if voter_has_authority(request, authority_required):
-        voter_is_admin_or_verified_volunteer = True
+        voter_has_authority_required = True
     else:
         voter_manager = VoterManager()
         voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id)
@@ -141,7 +141,7 @@ def organization_save_view(request):  # organizationSave
                     and voter_twitter_handle.lower() == organization_twitter_handle.lower():
                 voter_owns_twitter_handle = True
 
-    if not voter_is_admin_or_verified_volunteer:
+    if not voter_has_authority_required:
         if not voter_owns_twitter_handle and not voter_owns_facebook_id:
             # Only refuse entry if *both* conditions are not met
             results = {
