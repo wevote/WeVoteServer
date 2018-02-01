@@ -30,6 +30,13 @@ BALLOT_INTRO_VOTE_COMPLETED = 128  # ...the voter learned about casting their vo
 INTERFACE_STATUS_THRESHOLD_ISSUES_FOLLOWED = 5
 INTERFACE_STATUS_THRESHOLD_ORGANIZATIONS_FOLLOWED = 5
 
+# Notifications that get set from the WebApp
+# notification_flag_integer_to_set, notification_flag_integer_to_unset
+# Used for notification_settings bits. Which notification options has the voter chosen?
+NOTIFICATION_ZERO = 0
+NOTIFICATION_NEWSLETTER_OPT_IN = 1  # "I would like to receive the We Vote newsletter"
+
+
 # This way of extending the base user described here:
 # https://docs.djangoproject.com/en/1.8/topics/auth/customizing/#a-full-example
 # I then altered with this: http://buildthis.com/customizing-djangos-default-user-model/

@@ -123,7 +123,14 @@
               </a>
             </td>
             <td>Type</td>
-            <td>Vote Smart ID</td>
+            <td>Issues {% if show_issues %}
+              <a href="{% url 'organization:organization_list' %}?sort_by={{ sort_by }}&state_code={{ state_code }}&organization_type_filter={{ organization_type_filter }}&organization_search={{ organization_search }}">
+              (hide)</a>
+            {% else %}
+              <a href="{% url 'organization:organization_list' %}?sort_by={{ sort_by }}&state_code={{ state_code }}&organization_type_filter={{ organization_type_filter }}&organization_search={{ organization_search }}&show_issues=1">
+              (show)</a>
+            {% endif %}</td>
+            <td>Vote Smart</td>
             <td>State</td>
             <td>Wikipedia?</td>
             <td></td>
@@ -145,7 +152,15 @@
             <td>{% if organization.organization_twitter_handle %}{{ organization.organization_twitter_handle }} <br />
                 ({{ organization.twitter_followers_count }} followers){% endif %}</td>
             <td>{{ organization.organization_type_display }}</td>
-            <td>{% if organization.vote_smart_id %}<a href="https://votesmart.org/interest-group/{{ organization.vote_smart_id }}" target="_blank">{{ organization.vote_smart_id }}</a>{% endif %}</td>
+            <td>{% if organization.display_we_vote_issues %}
+                  {{ organization.display_we_vote_issues }}
+                {% endif %}</td>
+            <td>{% if organization.vote_smart_id %}<a href="https://votesmart.org/interest-group/{{ organization.vote_smart_id }}" target="_blank">{{ organization.vote_smart_id }}</a>{% endif %}
+            {% if organization.display_vote_smart_issues %}
+              <br />
+              {{ organization.display_vote_smart_issues }}
+            {% endif %}
+            </td>
             <td>{{ organization.state_served_code|default_if_none:"" }}</td>
             <td>{% if organization.wikipedia_page_id %}
                 <a href="{{ organization.generate_wikipedia_link }}" target="_blank">W yes</a>{% endif %}</td>
