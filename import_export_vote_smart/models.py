@@ -810,7 +810,7 @@ class VoteSmartSpecialInterestGroup(models.Model):
     stateId = models.CharField(max_length=2)
     name = models.CharField(verbose_name="name of special interest group", max_length=255)
     description = models.TextField()
-    address = models.CharField(max_length=255)
+    address = models.TextField()
     city = models.CharField(max_length=255)
     state = models.CharField(max_length=255)
     zip = models.CharField(max_length=255)
@@ -866,6 +866,54 @@ class VoteSmartSpecialInterestGroupManager(models.Model):
 
     def __unicode__(self):
         return "VoteSmartSpecialInterestGroupManager"
+
+    def fetch_organization_issues_for_display(self, vote_smart_id):
+        results = self.retrieve_organization_issues_for_display(vote_smart_id)
+        return results['issues_display_string']
+
+    def retrieve_organization_issues_for_display(self, vote_smart_id):
+        issue_list_found = False
+        success = False
+        status = ""
+        issues_display_string = ""
+
+        if not positive_value_exists(vote_smart_id):
+            status += 'VOTE_SMART_ID_NOT_FOUND '
+            results = {
+                'success': success,
+                'status': status,
+                'issue_list_found': issue_list_found,
+                'issues_display_string': issues_display_string,
+            }
+            return results
+
+        try:
+            category_link_queryset = VoteSmartRatingCategoryLink.objects.using('readonly').all()
+            category_link_queryset = category_link_queryset.filter(sigId=vote_smart_id)
+            category_link_queryset = category_link_queryset.order_by('categoryName')
+
+            category_link_list = list(category_link_queryset)
+
+            if len(category_link_list):
+                issue_list_found = True
+                status += 'RETRIEVE_ISSUES_FOR_ORGANIZATION_ISSUES_RETRIEVED '
+                for one_category_link in category_link_list:
+                    issues_display_string += one_category_link.issue_name + ", "
+                issues_display_string = issues_display_string[:-2]
+            else:
+                status += 'RETRIEVE_ISSUES_FOR_ORGANIZATION_NO_ISSUES_RETRIEVED '
+            success = True
+        except Exception as e:
+            status = 'FAILED fetch_organization_issues_for_display ' \
+                     '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
+
+        results = {
+            'success': success,
+            'status': status,
+            'issue_list_found': issue_list_found,
+            'issues_display_string': issues_display_string,
+        }
+        return results
 
     def update_or_create_we_vote_organization(self, vote_smart_special_interest_group_id):
         # See if we can find an existing We Vote organization with vote_smart_special_interest_group_id

@@ -16,6 +16,7 @@ from django.shortcuts import render
 from exception.models import handle_record_found_more_than_one_exception,\
     handle_record_not_deleted_exception, handle_record_not_found_exception
 from election.models import Election, ElectionManager
+from import_export_vote_smart.models import VoteSmartSpecialInterestGroupManager
 from issue.models import ALPHABETICAL_ASCENDING, IssueListManager, IssueManager, \
     OrganizationLinkToIssueList, OrganizationLinkToIssueManager
 from measure.models import ContestMeasure, ContestMeasureList, ContestMeasureManager
@@ -176,6 +177,7 @@ def organization_list_view(request):
     selected_issue_vote_id_list = request.GET.getlist('selected_issues', '')
     sort_by = request.GET.get('sort_by', '')
     state_code = request.GET.get('state_code', '')
+    show_issues = request.GET.get('show_issues', '')
 
     messages_on_stage = get_messages(request)
     organization_list_query = Organization.objects.all()
@@ -194,6 +196,7 @@ def organization_list_view(request):
         organization_list_query = organization_list_query.filter(organization_type__iexact=organization_type_filter)
 
     link_issue_list_manager = OrganizationLinkToIssueList()
+    issue_list_manager = IssueListManager()
 
     # Only show organizations linked to specific issues
     # 2017-12-12 DALE I'm not sure this is being used yet...
@@ -278,9 +281,19 @@ def organization_list_view(request):
 
     # Now loop through these organizations and add on the linked_issues_count
     modified_organization_list = []
+    special_interest_group_manager = VoteSmartSpecialInterestGroupManager()
     for one_organization in organization_list:
-        one_organization.linked_issues_count = link_issue_list_manager. \
-            fetch_issue_count_for_organization(0, one_organization.we_vote_id)
+        # Turned off for now
+        # one_organization.linked_issues_count = \
+        #     link_issue_list_manager.fetch_issue_count_for_organization(0, one_organization.we_vote_id)
+        if positive_value_exists(show_issues):
+            # We want to look up the issues retrieved from Vote Smart and display them
+            # if positive_value_exists(one_organization.linked_issues_count):
+            one_organization.display_we_vote_issues = \
+                issue_list_manager.fetch_organization_issues_for_display(one_organization.we_vote_id)
+            if positive_value_exists(one_organization.vote_smart_id):
+                one_organization.display_vote_smart_issues = \
+                    special_interest_group_manager.fetch_organization_issues_for_display(one_organization.vote_smart_id)
         modified_organization_list.append(one_organization)
 
     state_list = STATE_CODE_MAP
@@ -300,6 +313,7 @@ def organization_list_view(request):
         'organization_types':       organization_types_list,
         'organization_list':        modified_organization_list,
         'organization_search':      organization_search,
+        'show_issues':              show_issues,
         'sort_by':                  sort_by,
         'state_code':               state_code,
         'state_list':               sorted_state_list,

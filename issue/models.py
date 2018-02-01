@@ -156,6 +156,75 @@ class IssueListManager(models.Model):
         }
         return results
 
+    def fetch_organization_issues_for_display(self, organization_we_vote_id, sort_formula=None):
+        results = self.retrieve_organization_issues_for_display(organization_we_vote_id, sort_formula)
+        return results['issues_display_string']
+
+    def retrieve_organization_issues_for_display(self, organization_we_vote_id, sort_formula=None):
+        issue_list_found = False
+        success = False
+        status = ""
+        issues_display_string = ""
+
+        if not positive_value_exists(organization_we_vote_id):
+            status += 'RETRIEVE_ISSUES_ORGANIZATION_NOT_FOUND '
+            results = {
+                'success': success,
+                'status': status,
+                'issue_list_found': issue_list_found,
+                'issues_display_string': issues_display_string,
+            }
+            return results
+
+        organization_link_to_issue_list = OrganizationLinkToIssueList()
+        issues_list = organization_link_to_issue_list.fetch_issue_we_vote_id_list_by_organization_we_vote_id(
+            organization_we_vote_id)
+
+        if len(issues_list) == 0:
+            status += 'RETRIEVE_ISSUES_FOR_ORGANIZATION_NO_ISSUES '
+            results = {
+                'success': success,
+                'status': status,
+                'issue_list_found': issue_list_found,
+                'issues_display_string': issues_display_string,
+            }
+            return results
+
+        try:
+            issue_queryset = Issue.objects.using('readonly').all()
+            issue_queryset = issue_queryset.filter(we_vote_id__in=issues_list)
+            if sort_formula == MOST_LINKED_ORGANIZATIONS:
+                issue_queryset = issue_queryset.order_by(
+                    '-linked_organization_count', 'we_vote_hosted_image_url_tiny', 'issue_name')
+            elif sort_formula == ALPHABETICAL_ASCENDING:
+                issue_queryset = issue_queryset.order_by('issue_name')
+            else:
+                issue_queryset = issue_queryset.order_by('issue_name')
+
+            issue_list = list(issue_queryset)
+
+            if len(issue_list):
+                issue_list_found = True
+                status += 'RETRIEVE_ISSUES_FOR_ORGANIZATION_ISSUES_RETRIEVED '
+                for one_issue in issue_list:
+                    issues_display_string += one_issue.issue_name + ", "
+                issues_display_string = issues_display_string[:-2]
+            else:
+                status += 'RETRIEVE_ISSUES_FOR_ORGANIZATION_NO_ISSUES_RETRIEVED '
+            success = True
+        except Exception as e:
+            handle_exception(e, logger=logger)
+            status = 'FAILED fetch_organization_issues_for_display ' \
+                     '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
+
+        results = {
+            'success': success,
+            'status': status,
+            'issue_list_found': issue_list_found,
+            'issues_display_string': issues_display_string,
+        }
+        return results
+
 
 class Issue(models.Model):
     # The we_vote_id identifier is unique across all We Vote sites, and allows us to share our data with other
