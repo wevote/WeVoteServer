@@ -888,8 +888,9 @@ class VoteSmartSpecialInterestGroupManager(models.Model):
             return results
 
         try:
+            vote_smart_id_str = str(vote_smart_id)
             category_link_queryset = VoteSmartRatingCategoryLink.objects.using('readonly').all()
-            category_link_queryset = category_link_queryset.filter(sigId=vote_smart_id)
+            category_link_queryset = category_link_queryset.filter(sigId=vote_smart_id_str)
             category_link_queryset = category_link_queryset.order_by('categoryName')
 
             category_link_list = list(category_link_queryset)
@@ -897,8 +898,11 @@ class VoteSmartSpecialInterestGroupManager(models.Model):
             if len(category_link_list):
                 issue_list_found = True
                 status += 'RETRIEVE_ISSUES_FOR_ORGANIZATION_ISSUES_RETRIEVED '
+                category_ids_already_found = []
                 for one_category_link in category_link_list:
-                    issues_display_string += one_category_link.issue_name + ", "
+                    if one_category_link.categoryId not in category_ids_already_found:
+                        issues_display_string += one_category_link.categoryName + ", "
+                        category_ids_already_found.append(one_category_link.categoryId)
                 issues_display_string = issues_display_string[:-2]
             else:
                 status += 'RETRIEVE_ISSUES_FOR_ORGANIZATION_NO_ISSUES_RETRIEVED '
