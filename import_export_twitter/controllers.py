@@ -581,11 +581,12 @@ def transfer_candidate_twitter_handles_from_google_civic(google_civic_election_i
     return results
 
 
-def twitter_sign_in_start_for_api(voter_device_id, return_url):  # twitterSignInStart
+def twitter_sign_in_start_for_api(voter_device_id, return_url, cordova):  # twitterSignInStart
     """
 
     :param voter_device_id:
     :param return_url: Where to direct the browser at the very end of the process
+    :param cordova:
     :return:
     """
     # Get voter_id from the voter_device_id
@@ -706,6 +707,7 @@ def twitter_sign_in_start_for_api(voter_device_id, return_url):  # twitterSignIn
     callback_url = WE_VOTE_SERVER_ROOT_URL + "/apis/v1/twitterSignInRequestAccessToken/"
     callback_url += "?voter_device_id=" + voter_device_id
     callback_url += "&return_url=" + return_url
+    callback_url += "&cordova=" + str(cordova)
 
     try:
         # We take the Consumer Key and the Consumer Secret, and request a token & token_secret
@@ -872,7 +874,7 @@ def twitter_native_sign_in_save_for_api(voter_device_id, twitter_access_token, t
 
 def twitter_sign_in_request_access_token_for_api(voter_device_id,
                                                  incoming_request_token, incoming_oauth_verifier,
-                                                 return_url):
+                                                 return_url, cordova):
     """
     twitterSignInRequestAccessToken
     After signing in and agreeing to the application's terms, the user is redirected back to the application with
@@ -886,6 +888,7 @@ def twitter_sign_in_request_access_token_for_api(voter_device_id,
     :param incoming_request_token:
     :param incoming_oauth_verifier:
     :param return_url: If a value is provided, return to this URL when the whole process is complete
+    :param cordova:
     :return:
     """
     # Get voter_id from the voter_device_id
@@ -897,6 +900,7 @@ def twitter_sign_in_request_access_token_for_api(voter_device_id,
             'voter_device_id':                  voter_device_id,
             'access_token_and_secret_returned': False,
             'return_url':                       return_url,
+            'cordova':                          cordova,
         }
         return results
 
@@ -909,6 +913,7 @@ def twitter_sign_in_request_access_token_for_api(voter_device_id,
             'voter_device_id':                  voter_device_id,
             'access_token_and_secret_returned': False,
             'return_url':                       return_url,
+            'cordova':                          cordova,
         }
         return results
 
@@ -923,6 +928,7 @@ def twitter_sign_in_request_access_token_for_api(voter_device_id,
             'voter_device_id':                  voter_device_id,
             'access_token_and_secret_returned': False,
             'return_url':                       return_url,
+            'cordova':                          cordova,
         }
         return results
 
@@ -935,6 +941,7 @@ def twitter_sign_in_request_access_token_for_api(voter_device_id,
             'voter_device_id':                  voter_device_id,
             'access_token_and_secret_returned': False,
             'return_url':                       return_url,
+            'cordova':                          cordova,
         }
         return results
 
@@ -980,6 +987,7 @@ def twitter_sign_in_request_access_token_for_api(voter_device_id,
             'voter_device_id':                  voter_device_id,
             'access_token_and_secret_returned': True,
             'return_url':                       return_url,
+            'cordova':                          cordova,
         }
     else:
         results = {
@@ -988,13 +996,14 @@ def twitter_sign_in_request_access_token_for_api(voter_device_id,
             'voter_device_id':                  voter_device_id,
             'access_token_and_secret_returned': False,
             'return_url':                       return_url,
+            'cordova':                          cordova,
         }
     return results
 
 
 def twitter_sign_in_request_voter_info_for_api(voter_device_id, return_url):
     """
-    twitterSignInRequestVoterInfo
+    (not directly called by) twitterSignInRequestVoterInfo
     When here, the incoming voter_device_id should already be authenticated
     :param voter_device_id:
     :param return_url: Where to return the browser when sign in process is complete

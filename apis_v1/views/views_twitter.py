@@ -3,12 +3,14 @@
 # -*- coding: UTF-8 -*-
 from config.base import get_environment_variable
 from django.http import HttpResponse, HttpResponseRedirect
+from django.shortcuts import render
 from import_export_twitter.controllers import twitter_sign_in_start_for_api, \
     twitter_sign_in_request_access_token_for_api, twitter_sign_in_request_voter_info_for_api, \
     twitter_sign_in_retrieve_for_api, twitter_retrieve_ids_i_follow_for_api, twitter_native_sign_in_save_for_api
 import json
 from twitter.controllers import twitter_identity_retrieve_for_api
 from urllib.parse import quote
+from urllib.parse import urlencode
 import wevote_functions.admin
 from wevote_functions.functions import get_voter_device_id, positive_value_exists
 
@@ -65,23 +67,24 @@ def twitter_identity_retrieve_view(request):  # twitterIdentityRetrieve
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 
 
-def twitter_sign_in_start_view(request):  # twitterSignInStart
+def twitter_sign_in_start_view(request):  # twitterSignInStart (Step 1)
     """
     Step 1 of the Twitter Sign In Process for the WebApp
     Start off the process of signing in with Twitter (twitterSignInStart)
     :param request:
     :return:
     """
-
     voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
     return_url = request.GET.get('return_url', '')
+    cordova = request.GET.get('cordova', False)
 
-    results = twitter_sign_in_start_for_api(voter_device_id, return_url)
+    results = twitter_sign_in_start_for_api(voter_device_id, return_url, cordova)
 
     if positive_value_exists(results['jump_to_request_voter_info']) and positive_value_exists(results['return_url']):
         next_step_url = WE_VOTE_SERVER_ROOT_URL + "/apis/v1/twitterSignInRequestVoterInfo/"
         next_step_url += "?voter_device_id=" + voter_device_id
         next_step_url += "&return_url=" + quote(results['return_url'], safe='')
+        next_step_url += "&cordova=" + str(cordova)
         return HttpResponseRedirect(next_step_url)
 
     json_data = {
@@ -91,11 +94,16 @@ def twitter_sign_in_start_view(request):  # twitterSignInStart
         'twitter_redirect_url': results['twitter_redirect_url'],
         'voter_info_retrieved': results['voter_info_retrieved'],
         'switch_accounts':      results['switch_accounts'],  # If true, new voter_device_id returned
+        'cordova':              cordova,
     }
-    return HttpResponse(json.dumps(json_data), content_type='application/json')
+
+    if cordova:
+        return twitter_cordova_signin_response(request, json_data)
+    else:
+        return HttpResponse(json.dumps(json_data), content_type='application/json')
 
 
-def twitter_sign_in_request_access_token_view(request):  # twitterSignInRequestAccessToken
+def twitter_sign_in_request_access_token_view(request):  # twitterSignInRequestAccessToken (Step 2)
     """
     Step 2 of the Twitter Sign In Process (twitterSignInRequestAccessToken) for the WebApp
     :param request:
@@ -106,24 +114,31 @@ def twitter_sign_in_request_access_token_view(request):  # twitterSignInRequestA
     incoming_request_token = request.GET.get('oauth_token', '')
     incoming_oauth_verifier = request.GET.get('oauth_verifier', '')
     return_url = request.GET.get('return_url', '')
+    cordova = request.GET.get('cordova', False)
 
     results = twitter_sign_in_request_access_token_for_api(voter_device_id,
                                                            incoming_request_token, incoming_oauth_verifier,
-                                                           return_url)
+                                                           return_url, cordova)
 
     if positive_value_exists(results['return_url']):
         next_step_url = WE_VOTE_SERVER_ROOT_URL + "/apis/v1/twitterSignInRequestVoterInfo/"
         next_step_url += "?voter_device_id=" + voter_device_id
         next_step_url += "&return_url=" + quote(results['return_url'], safe='')
+        next_step_url += "&cordova=" + str(cordova)
         return HttpResponseRedirect(next_step_url)
 
     json_data = {
-        'status': results['status'],
-        'success': results['success'],
-        'voter_device_id': voter_device_id,
+        'status':                           results['status'],
+        'success':                          results['success'],
+        'voter_device_id':                  voter_device_id,
         'access_token_and_secret_returned': results['access_token_and_secret_returned'],
+        'cordova':                          cordova,
     }
-    return HttpResponse(json.dumps(json_data), content_type='application/json')
+
+    if cordova:
+        return twitter_cordova_signin_response(request, json_data)
+    else:
+        return HttpResponse(json.dumps(json_data), content_type='application/json')
 
 
 def twitter_native_sign_in_save_view(request):  # twitterNativeSignInSave
@@ -158,7 +173,7 @@ def twitter_native_sign_in_save_view(request):  # twitterNativeSignInSave
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 
 
-def twitter_sign_in_request_voter_info_view(request):  # twitterSignInRequestVoterInfo
+def twitter_sign_in_request_voter_info_view(request):  # twitterSignInRequestVoterInfo (Step 3)
     """
     Step 3 of the Twitter Sign In Process (twitterSignInRequestVoterInfo)
     :param request:
@@ -167,10 +182,11 @@ def twitter_sign_in_request_voter_info_view(request):  # twitterSignInRequestVot
 
     voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
     return_url = request.GET.get('return_url', '')
+    cordova = request.GET.get('cordova', False)
 
     results = twitter_sign_in_request_voter_info_for_api(voter_device_id, return_url)
 
-    if positive_value_exists(results['return_url']):
+    if positive_value_exists(results['return_url']) and not positive_value_exists(cordova):
         return HttpResponseRedirect(results['return_url'])
 
     json_data = {
@@ -183,7 +199,28 @@ def twitter_sign_in_request_voter_info_view(request):  # twitterSignInRequestVot
         'switch_accounts':      results['switch_accounts'],
     }
 
-    return HttpResponse(json.dumps(json_data), content_type='application/json')
+    if cordova:
+        return twitter_cordova_signin_response(request, json_data)
+    else:
+        return HttpResponse(json.dumps(json_data), content_type='application/json')
+
+
+def twitter_cordova_signin_response(request, json_data):
+    """
+    https://medium.com/@jlchereau/stop-using-inappbrowser-for-your-cordova-phonegap-oauth-flow-a806b61a2dc5
+    :param request:
+    :return: A webpage that initiates a native scheme for iOS (received in Application.js in the WebApp)
+    """
+    logger.debug("twitter_cordova_signin_response: " + urlencode(json_data))
+
+    template_values = {
+        'query_string': urlencode(json_data),
+    }
+
+    # return render(request, 'cordova/cordova_ios_redirect_to_scheme.html', template_values,
+    #               content_type='text/html')
+    return render(request, 'cordova/cordova_ios_redirect_to_scheme.html', template_values,
+                  content_type='text/html')
 
 
 def twitter_sign_in_retrieve_view(request):  # twitterSignInRetrieve
@@ -215,8 +252,8 @@ def twitter_sign_in_retrieve_view(request):  # twitterSignInRetrieve
         # 'twitter_who_i_follow':                   results['twitter_who_i_follow'],
         # There are more values we currently aren't returning
     }
-    return HttpResponse(json.dumps(json_data), content_type='application/json')
 
+    return HttpResponse(json.dumps(json_data), content_type='application/json')
 
 def twitter_retrieve_ids_i_follow_view(request): # twitterRetrieveIdsIFollow
     """
