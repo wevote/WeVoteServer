@@ -545,6 +545,11 @@ def voter_guides_to_follow_retrieve_for_api(voter_device_id,  # voterGuidesToFol
             else:
                 ballot_item_we_vote_ids_this_org_opposes = []
 
+            organization_link_to_issue_list = OrganizationLinkToIssueList()
+            issue_we_vote_ids_linked = \
+                organization_link_to_issue_list.fetch_issue_we_vote_id_list_by_organization_we_vote_id(
+                    voter_guide.organization_we_vote_id)
+
             pledge_to_vote_we_vote_id = ""
             pledge_results = pledge_to_vote_manager.retrieve_pledge_to_vote(
                 pledge_to_vote_we_vote_id, voter_we_vote_id, voter_guide.we_vote_id)
@@ -573,6 +578,7 @@ def voter_guides_to_follow_retrieve_for_api(voter_device_id,  # voterGuidesToFol
                 'ballot_item_we_vote_ids_this_org_supports':    ballot_item_we_vote_ids_this_org_supports,
                 'ballot_item_we_vote_ids_this_org_info_only':   ballot_item_we_vote_ids_this_org_info_only,
                 'ballot_item_we_vote_ids_this_org_opposes':     ballot_item_we_vote_ids_this_org_opposes,
+                'issue_we_vote_ids_linked':     issue_we_vote_ids_linked,
                 'pledge_goal':                  voter_guide.pledge_goal,
                 'pledge_count':                 voter_guide.pledge_count,
                 'voter_has_pledged':            voter_has_pledged,
