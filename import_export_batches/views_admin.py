@@ -18,9 +18,10 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.contrib.messages import get_messages
 from django.core.urlresolvers import reverse
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, HttpResponse 
 from django.shortcuts import render
 from django.utils.http import urlquote
+import csv
 from election.models import Election, ElectionManager
 from polling_location.models import PollingLocation, PollingLocationManager
 from position.models import POSITION
@@ -490,6 +491,191 @@ def batch_action_list_view(request):
         'position_owner_organization_we_vote_id': position_owner_organization_we_vote_id,
     }
     return render(request, 'import_export_batches/batch_action_list.html', template_values)
+
+
+@login_required
+def batch_action_list_export_view(request):
+    """
+    Export batch list as a csv file.
+
+    :param:
+    :return:
+    """
+    authority_required = {'verified_volunteer'}  # admin, verified_volunteer
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
+    batch_set_list = []
+    polling_location_we_vote_id = ""
+
+    batch_header_id = convert_to_int(request.GET.get('batch_header_id', 0))
+    kind_of_batch = request.GET.get('kind_of_batch', '')
+    state_code = request.GET.get('state_code', '')
+    position_owner_organization_we_vote_id = request.GET.get('position_owner_organization_we_vote_id', '')
+
+    if not positive_value_exists(batch_header_id):
+        messages.add_message(request, messages.ERROR, 'Batch_header_id required.')
+        return HttpResponseRedirect(reverse('import_export_batches:batch_list', args=()) +
+                                    "?kind_of_batch=" + str(kind_of_batch))
+
+    google_civic_election_id = request.GET.get('google_civic_election_id', 0)
+
+    batch_set_id = 0
+    try:
+        batch_description = BatchDescription.objects.get(batch_header_id=batch_header_id)
+        batch_description_found = True
+        batch_set_id = batch_description.batch_set_id
+        google_civic_election_id = batch_description.google_civic_election_id
+        polling_location_we_vote_id = batch_description.polling_location_we_vote_id
+    except BatchDescription.DoesNotExist:
+        # This is fine
+        batch_description = BatchDescription()
+        batch_description_found = False
+
+    batch_set_list_found = False
+    # if batch_set_id exists, send data sets associated with this batch_set_id
+    if positive_value_exists(batch_set_id):
+        try:
+            batch_set_list = BatchSet.objects.get(id=batch_set_id)
+            if batch_set_list:
+                batch_set_list_found = True
+        except BatchSet.DoesNotExist:
+            # This is fine
+            batch_set_list = BatchSet()
+            batch_set_list_found = False
+
+    try:
+        batch_header_map = BatchHeaderMap.objects.get(batch_header_id=batch_header_id)
+    except BatchHeaderMap.DoesNotExist:
+        # This is fine
+        batch_header_map = BatchHeaderMap()
+
+    batch_list_found = False
+    try:
+        batch_row_count_query = BatchRow.objects.order_by('id')
+        batch_row_count_query = batch_row_count_query.filter(batch_header_id=batch_header_id)
+        if positive_value_exists(state_code):
+            batch_row_count_query = batch_row_count_query.filter(state_code__iexact=state_code)
+
+        batch_row_count = batch_row_count_query.count()
+
+        batch_row_query = BatchRow.objects.order_by('id')
+        batch_row_query = batch_row_query.filter(batch_header_id=batch_header_id)
+        if positive_value_exists(state_code):
+            batch_row_query = batch_row_query.filter(state_code__iexact=state_code)
+            batch_row_list = list(batch_row_query)
+        else:
+            batch_row_list = batch_row_query[:200]
+        if len(batch_row_list):
+            batch_list_found = True
+    except BatchDescription.DoesNotExist:
+        # This is fine
+        batch_row_list = []
+        batch_list_found = False
+
+    modified_batch_row_list = []
+    active_state_codes = []
+    batch_manager = BatchManager()
+    if batch_list_found:
+        for one_batch_row in batch_row_list:
+            if positive_value_exists(one_batch_row.state_code):
+                if one_batch_row.state_code not in active_state_codes:
+                    active_state_codes.append(one_batch_row.state_code)
+
+            if kind_of_batch == CANDIDATE:
+                existing_results = batch_manager.retrieve_batch_row_action_candidate(batch_header_id, one_batch_row.id)
+                if existing_results['batch_row_action_found']:
+                    one_batch_row.batch_row_action = existing_results['batch_row_action_candidate']
+                    one_batch_row.kind_of_batch = CANDIDATE
+                    one_batch_row.batch_row_action_exists = True
+                else:
+                    one_batch_row.batch_row_action_exists = False
+                modified_batch_row_list.append(one_batch_row)
+            elif kind_of_batch == CONTEST_OFFICE:
+                existing_results = batch_manager.retrieve_batch_row_action_contest_office(batch_header_id,
+                                                                                          one_batch_row.id)
+                if existing_results['batch_row_action_found']:
+                    one_batch_row.batch_row_action = existing_results['batch_row_action_contest_office']
+                    one_batch_row.kind_of_batch = CONTEST_OFFICE
+                    one_batch_row.batch_row_action_exists = True
+                else:
+                    one_batch_row.batch_row_action_exists = False
+                modified_batch_row_list.append(one_batch_row)
+            elif kind_of_batch == ELECTED_OFFICE:
+                existing_results = batch_manager.retrieve_batch_row_action_elected_office(batch_header_id,
+                                                                                          one_batch_row.id)
+                if existing_results['batch_row_action_found']:
+                    one_batch_row.batch_row_action = existing_results['batch_row_action_elected_office']
+                    one_batch_row.kind_of_batch = ELECTED_OFFICE
+                    one_batch_row.batch_row_action_exists = True
+                else:
+                    one_batch_row.batch_row_action_exists = False
+                modified_batch_row_list.append(one_batch_row)
+            elif kind_of_batch == MEASURE:
+                existing_results = batch_manager.retrieve_batch_row_action_measure(batch_header_id, one_batch_row.id)
+                if existing_results['batch_row_action_found']:
+                    one_batch_row.batch_row_action = existing_results['batch_row_action_measure']
+                    one_batch_row.kind_of_batch = MEASURE
+                    one_batch_row.batch_row_action_exists = True
+                else:
+                    one_batch_row.batch_row_action_exists = False
+                modified_batch_row_list.append(one_batch_row)
+            elif kind_of_batch == ORGANIZATION_WORD:
+                existing_results = batch_manager.retrieve_batch_row_action_organization(batch_header_id,
+                                                                                        one_batch_row.id)
+                if existing_results['batch_row_action_found']:
+                    one_batch_row.batch_row_action = existing_results['batch_row_action_organization']
+                    one_batch_row.kind_of_batch = ORGANIZATION_WORD
+                    one_batch_row.batch_row_action_exists = True
+                else:
+                    one_batch_row.batch_row_action_exists = False
+                modified_batch_row_list.append(one_batch_row)
+            elif kind_of_batch == POLITICIAN:
+                existing_results = batch_manager.retrieve_batch_row_action_politician(batch_header_id, one_batch_row.id)
+                if existing_results['batch_row_action_found']:
+                    one_batch_row.batch_row_action = existing_results['batch_row_action_politician']
+                    one_batch_row.kind_of_batch = POLITICIAN
+                    one_batch_row.batch_row_action_exists = True
+                else:
+                    one_batch_row.batch_row_action_exists = False
+                modified_batch_row_list.append(one_batch_row)
+            elif kind_of_batch == POSITION:
+                existing_results = batch_manager.retrieve_batch_row_action_position(batch_header_id, one_batch_row.id)
+                if existing_results['batch_row_action_found']:
+                    one_batch_row.batch_row_action = existing_results['batch_row_action_position']
+                    one_batch_row.kind_of_batch = POSITION
+                    one_batch_row.batch_row_action_exists = True
+                else:
+                    one_batch_row.batch_row_action_exists = False
+                modified_batch_row_list.append(one_batch_row)
+            elif kind_of_batch == IMPORT_BALLOT_ITEM:
+                existing_results = \
+                    batch_manager.retrieve_batch_row_action_ballot_item(batch_header_id, one_batch_row.id)
+                if existing_results['batch_row_action_found']:
+                    one_batch_row.batch_row_action = existing_results['batch_row_action_ballot_item']
+                    one_batch_row.kind_of_batch = IMPORT_BALLOT_ITEM
+                    one_batch_row.batch_row_action_exists = True
+                else:
+                    one_batch_row.batch_row_action_exists = False
+                modified_batch_row_list.append(one_batch_row)
+
+    # start CSV
+    response = HttpResponse(content_type="text/csv")
+    response['Content-Disposition'] = 'attachment; filename="export_csv.csv"'
+
+    opts_header = BatchHeaderMap._meta
+    header_field_names = [field.name for field in opts_header.fields]
+
+    opts = BatchRow._meta
+    field_names = [field.name for field in opts.fields]
+
+    csv_writer = csv.writer(response)
+    csv_writer.writerow([getattr(batch_header_map, field)for field in header_field_names])
+
+    for obj in batch_row_query:
+        csv_writer.writerow([getattr(obj, field) for field in field_names])
+    
+    return response
 
 
 @login_required
