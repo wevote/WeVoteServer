@@ -498,41 +498,31 @@ def batch_action_list_export_view(request):
     """
     Export batch list as a csv file.
 
-    :param:
-    :return:
+    :param request: HTTP request object.
+    :return response: HttpResponse object with csv export data.
     """
     authority_required = {'verified_volunteer'}  # admin, verified_volunteer
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
     batch_set_list = []
-    polling_location_we_vote_id = ""
-
     batch_header_id = convert_to_int(request.GET.get('batch_header_id', 0))
     kind_of_batch = request.GET.get('kind_of_batch', '')
     state_code = request.GET.get('state_code', '')
-    position_owner_organization_we_vote_id = request.GET.get('position_owner_organization_we_vote_id', '')
 
     if not positive_value_exists(batch_header_id):
         messages.add_message(request, messages.ERROR, 'Batch_header_id required.')
         return HttpResponseRedirect(reverse('import_export_batches:batch_list', args=()) +
                                     "?kind_of_batch=" + str(kind_of_batch))
 
-    google_civic_election_id = request.GET.get('google_civic_election_id', 0)
 
     batch_set_id = 0
     try:
         batch_description = BatchDescription.objects.get(batch_header_id=batch_header_id)
-        batch_description_found = True
-        batch_set_id = batch_description.batch_set_id
-        google_civic_election_id = batch_description.google_civic_election_id
-        polling_location_we_vote_id = batch_description.polling_location_we_vote_id
     except BatchDescription.DoesNotExist:
         # This is fine
         batch_description = BatchDescription()
-        batch_description_found = False
 
-    batch_set_list_found = False
     # if batch_set_id exists, send data sets associated with this batch_set_id
     if positive_value_exists(batch_set_id):
         try:
@@ -556,8 +546,6 @@ def batch_action_list_export_view(request):
         batch_row_count_query = batch_row_count_query.filter(batch_header_id=batch_header_id)
         if positive_value_exists(state_code):
             batch_row_count_query = batch_row_count_query.filter(state_code__iexact=state_code)
-
-        batch_row_count = batch_row_count_query.count()
 
         batch_row_query = BatchRow.objects.order_by('id')
         batch_row_query = batch_row_query.filter(batch_header_id=batch_header_id)
@@ -661,7 +649,7 @@ def batch_action_list_export_view(request):
 
     # create response for csv file
     response = HttpResponse(content_type="text/csv")
-    response['Content-Disposition'] = 'attachment; filename="export_csv.csv"'
+    response['Content-Disposition'] = 'attachment; filename="{0}"'.format(batch_description.batch_name)
 
     # get header/first row information
     header_fields_skipped = ['id', 'batch_header_id']
@@ -673,11 +661,10 @@ def batch_action_list_export_view(request):
     row_opts = BatchRow._meta
     row_field_names = [field.name for field in row_opts.fields if field.name not in row_fields_skipped]
 
-    # output header/first row to csv file
+    # output header/first row to csv
     csv_writer = csv.writer(response)
     csv_writer.writerow([getattr(batch_header_map, field)for field in header_field_names if getattr(batch_header_map, field) != ""])
 
-    # output individual row info to csv file
     for obj in batch_row_query:
         csv_writer.writerow([getattr(obj, field) for field in row_field_names if getattr(obj, field) != ""])
     
