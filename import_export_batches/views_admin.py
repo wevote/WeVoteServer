@@ -659,21 +659,27 @@ def batch_action_list_export_view(request):
                     one_batch_row.batch_row_action_exists = False
                 modified_batch_row_list.append(one_batch_row)
 
-    # start CSV
+    # create response for csv file
     response = HttpResponse(content_type="text/csv")
     response['Content-Disposition'] = 'attachment; filename="export_csv.csv"'
 
-    opts_header = BatchHeaderMap._meta
-    header_field_names = [field.name for field in opts_header.fields]
+    # get header/first row information
+    header_fields_skipped = ['id', 'batch_header_id']
+    header_opts = BatchHeaderMap._meta
+    header_field_names = [field.name for field in header_opts.fields if field.name not in header_fields_skipped]
 
-    opts = BatchRow._meta
-    field_names = [field.name for field in opts.fields]
+    # get row information
+    row_fields_skipped = ['id', 'batch_header_id', 'google_civic_election_id', 'state_code']
+    row_opts = BatchRow._meta
+    row_field_names = [field.name for field in row_opts.fields if field.name not in row_fields_skipped]
 
+    # output header/first row to csv file
     csv_writer = csv.writer(response)
-    csv_writer.writerow([getattr(batch_header_map, field)for field in header_field_names])
+    csv_writer.writerow([getattr(batch_header_map, field)for field in header_field_names if getattr(batch_header_map, field) != ""])
 
+    # output individual row info to csv file
     for obj in batch_row_query:
-        csv_writer.writerow([getattr(obj, field) for field in field_names])
+        csv_writer.writerow([getattr(obj, field) for field in row_field_names if getattr(obj, field) != ""])
     
     return response
 
