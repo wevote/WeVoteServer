@@ -494,6 +494,7 @@ class BatchManager(models.Model):
         }
         return results
 
+
     def create_batch_header_translation_suggestion(
             self, kind_of_batch, header_value_recognized_by_we_vote, incoming_alternate_header_value):
         """

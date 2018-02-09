@@ -29,4 +29,5 @@ urlpatterns = [
     url(r'^batch_set_list/$', views_admin.batch_set_list_view, name='batch_set_list'),
     url(r'^batch_set_list_process/$', views_admin.batch_set_list_process_view, name='batch_set_list_process'),
     url(r'^batch_set_batch_list/$', views_admin.batch_set_batch_list_view, name='batch_set_batch_list'),
+    url(r'^batch_set_batch_list_export/$', views_admin.batch_action_list_export_view, name='batch_set_batch_list_export'),
 ]
