@@ -495,10 +495,10 @@ def batch_action_list_view(request):
 
 @login_required
 def batch_action_list_export_view(request):
-    """
-    Export batch list as a csv file.
+    """Export batch list as a csv file.
 
     :param request: HTTP request object.
+
     :return response: HttpResponse object with csv export data.
     """
     authority_required = {'verified_volunteer'}  # admin, verified_volunteer
@@ -652,21 +652,29 @@ def batch_action_list_export_view(request):
     response['Content-Disposition'] = 'attachment; filename="{0}"'.format(batch_description.batch_name)
 
     # get header/first row information
-    header_fields_skipped = ['id', 'batch_header_id']
     header_opts = BatchHeaderMap._meta
-    header_field_names = [field.name for field in header_opts.fields if field.name not in header_fields_skipped]
+    header_field_names = []
+    for field in header_opts.fields:
+        if field.name not in ['id', 'batch_header_id']:
+            header_field_names.append(field.name)
 
     # get row information
-    row_fields_skipped = ['id', 'batch_header_id', 'google_civic_election_id', 'state_code']
     row_opts = BatchRow._meta
-    row_field_names = [field.name for field in row_opts.fields if field.name not in row_fields_skipped]
+    row_field_names = []
+    for field in row_opts.fields:
+        if field.name not in ['id', 'batch_header_id']:
+            row_field_names.append(field.name)
 
     # output header/first row to csv
     csv_writer = csv.writer(response)
-    csv_writer.writerow([getattr(batch_header_map, field)for field in header_field_names if getattr(batch_header_map, field) != ""])
+    header_list = [getattr(batch_header_map, field) for field in header_field_names]
+    # add headers not found in BatchHeader
+    header_list.insert(0, 'state_code')
+    header_list.insert(0, 'google_civic_election_id')
+    csv_writer.writerow(header_list)
 
-    for obj in batch_row_query:
-        csv_writer.writerow([getattr(obj, field) for field in row_field_names if getattr(obj, field) != ""])
+    for obj in modified_batch_row_list:
+        csv_writer.writerow([getattr(obj, field) for field in row_field_names])
     
     return response
 
