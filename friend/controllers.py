@@ -8,7 +8,7 @@ from .models import ACCEPTED, FriendInvitationVoterLink, FriendManager, CURRENT_
 from config.base import get_environment_variable
 from email_outbound.controllers import schedule_email_with_email_outbound_description, schedule_verification_email
 from email_outbound.models import EmailAddress, EmailManager, FRIEND_ACCEPTED_INVITATION_TEMPLATE, \
-    FRIEND_INVITATION_TEMPLATE
+    FRIEND_INVITATION_TEMPLATE, WAITING_FOR_VERIFICATION, TO_BE_PROCESSED
 from import_export_facebook.models import FacebookManager
 import json
 from organization.models import OrganizationManager, INDIVIDUAL
@@ -471,16 +471,17 @@ def send_to_one_friend(voter_device_id, sender_voter, send_now, sender_email_wit
 
     # TODO DALE - What kind of policy do we want re: sending a second email to a person?
     # Create the outbound email description, then schedule it
-    if friend_invitation_results['friend_invitation_saved'] and send_now:
+    if friend_invitation_results['friend_invitation_saved']:
         kind_of_email_template = FRIEND_INVITATION_TEMPLATE
         outbound_results = email_manager.create_email_outbound_description(
             sender_voter_we_vote_id, sender_email_with_ownership_verified, recipient_voter_we_vote_id,
             recipient_email_we_vote_id, recipient_voter_email,
             template_variables_in_json, kind_of_email_template)
         status += outbound_results['status'] + " "
-        if outbound_results['email_outbound_description_saved']:
-            email_outbound_description = outbound_results['email_outbound_description']
-            schedule_results = schedule_email_with_email_outbound_description(email_outbound_description)
+        email_outbound_description = outbound_results['email_outbound_description']
+        if outbound_results['email_outbound_description_saved'] and send_now:
+            send_status = TO_BE_PROCESSED
+            schedule_results = schedule_email_with_email_outbound_description(email_outbound_description, send_status)
             status += schedule_results['status'] + " "
             if schedule_results['email_scheduled_saved']:
                 # messages_to_send.append(schedule_results['email_scheduled_id'])
@@ -488,6 +489,10 @@ def send_to_one_friend(voter_device_id, sender_voter, send_now, sender_email_wit
                 send_results = email_manager.send_scheduled_email(email_scheduled)
                 email_scheduled_sent = send_results['email_scheduled_sent']
                 status += send_results['status']
+        elif not send_now:
+            send_status = WAITING_FOR_VERIFICATION
+            schedule_results = schedule_email_with_email_outbound_description(email_outbound_description, send_status)
+            status += schedule_results['status'] + " "
 
     results = {
         'success':                              success,
