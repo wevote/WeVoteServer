@@ -390,7 +390,7 @@ class CandidateCampaignListManager(models.Model):
         multiple_entries_found = False
         candidate_twitter_handle = extract_twitter_handle_from_text_string(candidate_twitter_handle)
         success = False
-        status = ""
+        status = "ENTERING retrieve_candidates_from_non_unique_identifiers "
 
         if keep_looking_for_duplicates and positive_value_exists(candidate_twitter_handle):
             try:
