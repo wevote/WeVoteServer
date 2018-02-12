@@ -413,17 +413,20 @@ class CandidateCampaignListManager(models.Model):
                         candidate = candidate_list[0]
                         candidate_found = True
                         keep_looking_for_duplicates = False
+                        success = True
+                        status += "CANDIDATE_FOUND_BY_TWITTER "
                     else:
                         # more than one entry found
                         candidate_list_found = True
                         multiple_entries_found = True
                         keep_looking_for_duplicates = False  # Deal with multiple Twitter duplicates manually
+                        status += "MULTIPLE_TWITTER_MATCHES "
             except CandidateCampaign.DoesNotExist:
-                # success = True
+                success = True
                 status += "BATCH_ROW_ACTION_EXISTING_CANDIDATE_NOT_FOUND "
             except Exception as e:
+                status += "BATCH_ROW_ACTION_CANDIDATE_QUERY_FAILED1 "
                 keep_looking_for_duplicates = False
-                pass
         # twitter handle does not exist, next look up against other data that might match
 
         if keep_looking_for_duplicates and positive_value_exists(candidate_name):
@@ -453,8 +456,15 @@ class CandidateCampaignListManager(models.Model):
                         candidate_list_found = True
                         keep_looking_for_duplicates = False
                         multiple_entries_found = True
+                else:
+                    success = True
+                    status += 'CANDIDATE_ENTRY_NOT_FOUND-EXACT '
+
             except CandidateCampaign.DoesNotExist:
-                status += "BATCH_ROW_ACTION_CANDIDATE_NOT_FOUND "
+                success = True
+                status += "BATCH_ROW_ACTION_CANDIDATE_NOT_FOUND-EXACT_MATCH "
+            except Exception as e:
+                status += "BATCH_ROW_ACTION_CANDIDATE_QUERY_FAILED2 "
 
         if keep_looking_for_duplicates and positive_value_exists(candidate_name):
             # Search for Candidate(s) that contains the same first and last names
@@ -487,10 +497,13 @@ class CandidateCampaignListManager(models.Model):
                         keep_looking_for_duplicates = False
                         multiple_entries_found = True
                 else:
+                    status += 'CANDIDATE_ENTRY_NOT_FOUND-FIRST_OR_LAST '
                     success = True
             except CandidateCampaign.DoesNotExist:
-                status += "BATCH_ROW_ACTION_CANDIDATE_NOT_FOUND "
+                status += "BATCH_ROW_ACTION_CANDIDATE_NOT_FOUND-FIRST_OR_LAST_NAME "
                 success = True
+            except Exception as e:
+                status += "BATCH_ROW_ACTION_CANDIDATE_QUERY_FAILED3 "
 
         results = {
             'success':                  success,
