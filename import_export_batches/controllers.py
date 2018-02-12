@@ -925,7 +925,7 @@ def create_batch_row_action_contest_office(batch_description, batch_header_map, 
                 kind_of_action = IMPORT_TO_BE_DETERMINED
                 status += "MULTIPLE_CANDIDATES_FOUND "
                 keep_looking_for_duplicates = False
-            elif not matching_results['success']:
+            elif not positive_value_exists(matching_results['success']):
                 kind_of_action = IMPORT_TO_BE_DETERMINED
                 status += "RETRIEVE_CANDIDATE_FROM_NON_UNIQUE-NO_SUCCESS "
                 status += matching_results['status']
