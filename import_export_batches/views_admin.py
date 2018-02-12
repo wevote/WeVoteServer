@@ -519,8 +519,8 @@ def batch_action_list_analyze_process_view(request):
     results = create_batch_row_actions(batch_header_id, batch_row_id, state_code)
     kind_of_batch = results['kind_of_batch']
 
-    messages.add_message(request, messages.INFO, 'Batch Actions:'
-                                                 'Batch kind:{kind_of_batch}, '
+    messages.add_message(request, messages.INFO, 'Batch Actions: '
+                                                 'Batch kind: {kind_of_batch}, '
                                                  'Created:{created} '
                                                  ''.format(kind_of_batch=kind_of_batch,
                                                            created=results['number_of_batch_actions_created']))
