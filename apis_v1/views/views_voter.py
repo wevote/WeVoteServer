@@ -29,7 +29,7 @@ from bookmark.controllers import voter_all_bookmarks_status_retrieve_for_api, vo
 from support_oppose_deciding.controllers import voter_opposing_save, voter_stop_opposing_save, \
     voter_stop_supporting_save, voter_supporting_save_for_api
 from voter.controllers import voter_address_retrieve_for_api, voter_create_for_api, voter_merge_two_accounts_for_api, \
-    voter_photo_save_for_api, voter_retrieve_for_api, voter_retrieve_list_for_api, voter_sign_out_for_api, \
+    voter_photo_save_for_api, voter_retrieve_for_api, voter_sign_out_for_api, \
     voter_split_into_two_accounts_for_api
 from voter.models import BALLOT_ADDRESS, fetch_voter_id_from_voter_device_link, VoterAddress, \
     VoterAddressManager, VoterDeviceLink, VoterDeviceLinkManager, VoterManager

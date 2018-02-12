@@ -55,7 +55,7 @@ def create_batch_row_actions(batch_header_id, batch_row_id, state_code=""):
     kind_of_batch = ""
 
     if not positive_value_exists(batch_header_id):
-        status = "CREATE_BATCH_ROW_ACTIONS-BATCH_HEADER_ID_MISSING"
+        status += "CREATE_BATCH_ROW_ACTIONS-BATCH_HEADER_ID_MISSING "
         results = {
             'success':                          success,
             'status':                           status,
@@ -734,6 +734,7 @@ def create_batch_row_action_contest_office(batch_description, batch_header_map, 
     existing_results = batch_manager.retrieve_batch_row_action_contest_office(
         batch_description.batch_header_id, one_batch_row.id)
     if existing_results['batch_row_action_found']:
+        status += "BATCH_ROW_ACTION_CONTEST_OFFICE_FOUND "
         batch_row_action_contest_office = existing_results['batch_row_action_contest_office']
         batch_row_action_updated = True
     else:
@@ -788,7 +789,7 @@ def create_batch_row_action_contest_office(batch_description, batch_header_map, 
 
     if not state_code:
         electoral_district_id = batch_manager.retrieve_value_from_batch_row("electoral_district_id", batch_header_map,
-                                                                        one_batch_row)
+                                                                            one_batch_row)
         results = retrieve_electoral_district(electoral_district_id)
         if results['electoral_district_found']:
             electoral_district = results['electoral_district']
@@ -808,7 +809,7 @@ def create_batch_row_action_contest_office(batch_description, batch_header_map, 
                     state_code = election.state_code
             else:
                 # state_code = ''
-                status = 'ELECTORAL_DISTRICT_NOT_FOUND'
+                status += 'ELECTORAL_DISTRICT_NOT_FOUND'
                 kind_of_action = 'TBD'
 
     # Find the column in the incoming batch_row with the header == contest_office_name
@@ -898,9 +899,11 @@ def create_batch_row_action_contest_office(batch_description, batch_header_map, 
                 keep_looking_for_duplicates = False
             elif matching_results['contest_office_list_found']:
                 kind_of_action = IMPORT_TO_BE_DETERMINED
+                status += "RETRIEVE_OFFICE_FROM_NON_UNIQUE-MULTIPLE_POSSIBLE_OFFICES_FOUND "
                 keep_looking_for_duplicates = False
             elif not matching_results['success']:
                 kind_of_action = IMPORT_TO_BE_DETERMINED
+                status += "RETRIEVE_OFFICE_FROM_NON_UNIQUE-NO_SUCCESS "
                 status += matching_results['status']
                 keep_looking_for_duplicates = False
             else:
@@ -920,10 +923,11 @@ def create_batch_row_action_contest_office(batch_description, batch_header_map, 
                 keep_looking_for_duplicates = False
             elif matching_results['multiple_entries_found']:
                 kind_of_action = IMPORT_TO_BE_DETERMINED
-                status += "MULTIPLE_ORGANIZATIONS_FOUND "
+                status += "MULTIPLE_CANDIDATES_FOUND "
                 keep_looking_for_duplicates = False
             elif not matching_results['success']:
                 kind_of_action = IMPORT_TO_BE_DETERMINED
+                status += "RETRIEVE_CANDIDATE_FROM_NON_UNIQUE-NO_SUCCESS "
                 status += matching_results['status']
                 keep_looking_for_duplicates = False
             else:
