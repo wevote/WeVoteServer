@@ -26,7 +26,8 @@ query_with_election_date = { "query": { "multi_match": { "type": "phrase_prefix"
                                                     "organization_name", "organization_twitter_handle",
                                                     "twitter_description", "state_name"],
                                         "slop": 5}},
-                            "sort": [{"election_day_text": {"order": "desc"}}]}
+                            "sort": [{"election_day_text": {"order": "desc"}},
+                                     {"_score": {"order": "desc"}}]}
 
 query_with_missing_last_election_date = { "query": { "multi_match": { "type": "phrase_prefix",
                                                     "query": search_term,
