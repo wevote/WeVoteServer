@@ -457,7 +457,7 @@ def send_to_one_friend(voter_device_id, sender_voter, send_now, sender_email_wit
         "invitation_message":           invitation_message,
         "sender_name":                  sender_name,
         "sender_photo":                 sender_photo,
-        "sender_email_address":         system_sender_email_address,  # TODO DALE WAS sender_email_address,
+        "sender_email_address":         sender_email_address,  # TODO DALE WAS sender_email_address,
         "sender_description":           sender_description,
         "sender_network_details":       sender_network_details,
         "recipient_name":               recipient_name,
