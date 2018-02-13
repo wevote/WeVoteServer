@@ -18,7 +18,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.contrib.messages import get_messages
 from django.core.urlresolvers import reverse
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, HttpResponse
 from django.shortcuts import render
 from django.utils.http import urlquote
 from election.models import Election, ElectionManager
@@ -27,6 +27,7 @@ from position.models import POSITION
 from voter.models import voter_has_authority
 from voter_guide.models import ORGANIZATION_WORD
 import wevote_functions.admin
+import csv
 from wevote_functions.functions import convert_to_int, positive_value_exists, STATE_CODE_MAP
 
 
@@ -490,6 +491,102 @@ def batch_action_list_view(request):
         'position_owner_organization_we_vote_id': position_owner_organization_we_vote_id,
     }
     return render(request, 'import_export_batches/batch_action_list.html', template_values)
+
+
+@login_required
+def batch_action_list_export_view(request):
+    """
+    Export batch list as a csv file.
+
+    :param request: HTTP request object.
+    :return response: HttpResponse object with csv export data.
+    """
+    authority_required = {'verified_volunteer'}  # admin, verified_volunteer
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
+    batch_set_list = []
+    batch_header_id = convert_to_int(request.GET.get('batch_header_id', 0))
+    kind_of_batch = request.GET.get('kind_of_batch', '')
+    state_code = request.GET.get('state_code', '')
+
+    if not positive_value_exists(batch_header_id):
+        messages.add_message(request, messages.ERROR, 'Batch_header_id required.')
+        return HttpResponseRedirect(reverse('import_export_batches:batch_list', args=()) +
+                                    "?kind_of_batch=" + str(kind_of_batch))
+
+    batch_set_id = 0
+    try:
+        batch_description = BatchDescription.objects.get(batch_header_id=batch_header_id)
+    except BatchDescription.DoesNotExist:
+        # This is fine
+        batch_description = BatchDescription()
+
+    # if batch_set_id exists, send data sets associated with this batch_set_id
+    if positive_value_exists(batch_set_id):
+        try:
+            batch_set_list = BatchSet.objects.get(id=batch_set_id)
+            if batch_set_list:
+                batch_set_list_found = True
+        except BatchSet.DoesNotExist:
+            # This is fine
+            batch_set_list = BatchSet()
+            batch_set_list_found = False
+
+    try:
+        batch_header_map = BatchHeaderMap.objects.get(batch_header_id=batch_header_id)
+    except BatchHeaderMap.DoesNotExist:
+        # This is fine
+        batch_header_map = BatchHeaderMap()
+
+    batch_list_found = False
+    try:
+        batch_row_count_query = BatchRow.objects.order_by('id')
+        batch_row_count_query = batch_row_count_query.filter(batch_header_id=batch_header_id)
+        if positive_value_exists(state_code):
+            batch_row_count_query = batch_row_count_query.filter(state_code__iexact=state_code)
+
+        batch_row_query = BatchRow.objects.order_by('id')
+        batch_row_query = batch_row_query.filter(batch_header_id=batch_header_id)
+        if positive_value_exists(state_code):
+            batch_row_query = batch_row_query.filter(state_code__iexact=state_code)
+        batch_row_list = list(batch_row_query)
+        if len(batch_row_list):
+            batch_list_found = True
+    except BatchDescription.DoesNotExist:
+        # This is fine
+        batch_row_list = []
+        batch_list_found = False
+
+    # create response for csv file
+    response = HttpResponse(content_type="text/csv")
+    response['Content-Disposition'] = 'attachment; filename="{0}"'.format(batch_description.batch_name)
+
+    # get header/first row information
+    header_opts = BatchHeaderMap._meta
+    header_field_names = []
+    for field in header_opts.fields:
+        if field.name not in ['id', 'batch_header_id']:
+            header_field_names.append(field.name)
+
+    # get row information
+    row_opts = BatchRow._meta
+    row_field_names = []
+    for field in row_opts.fields:
+        if field.name not in ['id', 'batch_header_id']:
+            row_field_names.append(field.name)
+
+    # output header/first row to csv
+    csv_writer = csv.writer(response)
+    header_list = [getattr(batch_header_map, field)for field in header_field_names]
+    header_list.insert(0, 'google_civic_election_id')
+    header_list.insert(0, 'state_code')
+    csv_writer.writerow(header_list)
+
+    for obj in batch_row_list:
+        csv_writer.writerow([getattr(obj, field) for field in row_field_names])
+    
+    return response
 
 
 @login_required
