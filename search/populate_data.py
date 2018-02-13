@@ -68,7 +68,7 @@ for row in rows:
 		"google_civic_election_id": row[4],
 		"state_code": row[5],
 		"we_vote_id" : row[6],
-		"election_day_text": ""
+		"election_day_text": "1111-11-11"
 	})
 
 logging.info("Bulk indexing candidate data")
@@ -91,7 +91,7 @@ for row in rows:
 		"measure_title": row[4],
 		"google_civic_election_id": row[5],
 		"state_code": row[6],
-		"election_day_text": ""
+		"election_day_text": "1111-11-11"
 	})
 
 logging.info("Bulk indexing measure data")
@@ -112,7 +112,7 @@ for row in rows:
 		"office_name": row[2],
 		"google_civic_election_id": row[3],
 		"state_code": row[4],
-		"election_day_text": ""
+		"election_day_text": "1111-11-11"
 	})
 
 logging.info("Bulk indexing office data")
@@ -156,7 +156,7 @@ for row in rows:
 		"organization_website": row[4],
 		"twitter_description": row[5],
 		"state_served_code": row[6],
-		"election_day_text": ""
+		"election_day_text": "1111-11-11"
 	})
 
 logging.info("Bulk indexing organization data")
