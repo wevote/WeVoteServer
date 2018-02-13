@@ -651,10 +651,14 @@ def candidate_edit_process_view(request):
                 candidate_on_stage.candidate_twitter_handle = candidate_twitter_handle
             if candidate_url is not False:
                 candidate_on_stage.candidate_url = candidate_url
-            if ballot_guide_official_statement is not False:
-                candidate_on_stage.ballot_guide_official_statement = ballot_guide_official_statement
             if party is not False:
                 candidate_on_stage.party = party
+            if ballot_guide_official_statement is not False:
+                candidate_on_stage.ballot_guide_official_statement = ballot_guide_official_statement
+            if vote_smart_id is not False:
+                candidate_on_stage.vote_smart_id = vote_smart_id
+            if maplight_id is not False:
+                candidate_on_stage.maplight_id = maplight_id
             if google_civic_candidate_name is not False:
                 candidate_on_stage.google_civic_candidate_name = google_civic_candidate_name
 
