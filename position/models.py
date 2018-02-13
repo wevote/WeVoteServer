@@ -1824,13 +1824,13 @@ class PositionListManager(models.Model):
             for one_position in position_list:
                 if stance_we_are_looking_for == SUPPORT:
                     if one_position.stance == PERCENT_RATING:
-                        if one_position.is_support():
+                        if one_position.is_support_or_positive_rating():
                             revised_position_list.append(one_position)
                     else:
                         revised_position_list.append(one_position)
                 elif stance_we_are_looking_for == OPPOSE:
                     if one_position.stance == PERCENT_RATING:
-                        if one_position.is_oppose():
+                        if one_position.is_oppose_or_negative_rating():
                             revised_position_list.append(one_position)
                     else:
                         revised_position_list.append(one_position)
@@ -2016,13 +2016,13 @@ class PositionListManager(models.Model):
             for one_position in position_list:
                 if stance_we_are_looking_for == SUPPORT:
                     if one_position.stance == PERCENT_RATING:
-                        if one_position.is_support():
+                        if one_position.is_support_or_positive_rating():
                             revised_position_list.append(one_position)
                     else:
                         revised_position_list.append(one_position)
                 elif stance_we_are_looking_for == OPPOSE:
                     if one_position.stance == PERCENT_RATING:
-                        if one_position.is_oppose():
+                        if one_position.is_oppose_or_negative_rating():
                             revised_position_list.append(one_position)
                     else:
                         revised_position_list.append(one_position)
