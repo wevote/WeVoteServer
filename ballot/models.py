@@ -1377,6 +1377,25 @@ class BallotReturnedManager(models.Model):
             'ballot_returned':          ballot_returned,
         }
 
+    def should_election_search_data_be_saved(self, google_civic_election_id):
+        success = False
+        status = ""
+        if not google_civic_election_id:
+            status = 'MISSING_GOOGLE_CIVIC_ELECTION_ID-should_election_search_data_be_saved '
+        else:
+            ballot_returned_list_manager = BallotReturnedListManager()
+            ballot_returned_list_count = ballot_returned_list_manager.fetch_ballot_returned_list_count_for_election(
+                google_civic_election_id)
+            if ballot_returned_list_count > 0:
+                success = True
+                status = 'ELECTION SEARCH DATA BE SAVED'
+
+        results = {
+            'success':  success,
+            'status':   status,
+        }
+        return results
+
     def update_or_create_ballot_returned(
             self, polling_location_we_vote_id, voter_id, google_civic_election_id, election_day_text=False,
             election_description_text=False, latitude=False, longitude=False,
