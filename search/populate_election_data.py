@@ -117,7 +117,7 @@ for index in indexes:
 # index election_election table
 logging.info("Indexing election data")
 cur = conn.cursor()
-cur.execute("SELECT election_name, election_day_text, google_civic_election_id, state_code, id  FROM election_election")
+cur.execute("SELECT election_name, election_day_text, election_election.google_civic_election_id, state_code, id FROM election_election INNER JOIN ﻿ballot_ballotreturned ON election_election.google_civic_election_id =﻿ballot_ballotreturned.google_civic_election_id WHERE ballot_ballotreturned.ballot_location_display_option_on = true")
 rows = cur.fetchall()
 
 bulk_data = []
