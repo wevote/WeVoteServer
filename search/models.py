@@ -2,6 +2,7 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
+from ballot.models import BallotReturnedManager
 from config.base import get_environment_variable
 from candidate.models import CandidateCampaign
 from django.db.models.signals import post_save, post_delete
@@ -195,19 +196,28 @@ def delete_contest_office_signal(sender, instance, **kwargs):
 def save_election_signal(sender, instance, **kwargs):
     # logger.debug("search.save_Election_signal")
     if 'elastic_search_object' in globals():
-        doc = {
-            "election_name": instance.election_name,
-            "election_day_text": instance.election_day_text,
-            "google_civic_election_id": instance.google_civic_election_id,
-            "state_code": instance.state_code,
-            "state_name": convert_state_code_to_state_text(instance.state_code)
-        }
-        try:
-            res = elastic_search_object.index(index="elections", doc_type='election', id=instance.id, body=doc)
-            if res["_shards"]["successful"] <= 1:
-                logger.error("failed to index Election " + instance.election_name)
-        except Exception as err:
-            logger.error(err)
+        ballot_returned_manager = BallotReturnedManager()
+        if ballot_returned_manager.should_election_search_data_be_saved(instance.google_civic_election_id):
+            doc = {
+                "election_name": instance.election_name,
+                "election_day_text": instance.election_day_text,
+                "google_civic_election_id": instance.google_civic_election_id,
+                "state_code": instance.state_code,
+                "state_name": convert_state_code_to_state_text(instance.state_code)
+            }
+            try:
+                res = elastic_search_object.index(index="elections", doc_type='election', id=instance.id, body=doc)
+                if res["_shards"]["successful"] <= 1:
+                    logger.error("failed to index Election " + instance.election_name)
+            except Exception as err:
+                logger.error(err)
+        else:
+            try:
+                res = elastic_search_object.delete(index="elections", doc_type='election', id=instance.id)
+                if res["_shards"]["successful"] <= 1:
+                    logger.error("failed to delete Election " + instance.election_name)
+            except Exception as err:
+                logger.error(err)
 
 
 @receiver(post_delete, sender=Election)
