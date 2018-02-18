@@ -63,6 +63,10 @@ def office_retrieve_doc_template_values(url_root):
                    '  "ocd_division_id": string,\n' \
                    '  "maplight_id": string,\n' \
                    '  "ballotpedia_id": string,\n' \
+                   '  "ballotpedia_office_id": integer,\n' \
+                   '  "ballotpedia_office_name": string,\n' \
+                   '  "ballotpedia_office_url": string,\n' \
+                   '  "ballotpedia_race_office_level": string,\n' \
                    '  "wikipedia_id": string,\n' \
                    '  "number_voting_for": integer,\n' \
                    '  "number_elected": integer,\n' \

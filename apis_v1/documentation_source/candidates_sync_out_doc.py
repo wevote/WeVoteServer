@@ -29,9 +29,12 @@ def candidates_sync_out_doc_template_values(url_root):
 
     api_response = '[{\n' \
                    '  "we_vote_id": string,\n' \
+                   '  "ballotpedia_candidate_id": integer,\n' \
                    '  "maplight_id": integer,\n' \
                    '  "vote_smart_id": integer,\n' \
                    '  "ballot_guide_official_statement": string,\n' \
+                   '  "ballotpedia_candidate_name": string,\n' \
+                   '  "ballotpedia_candidate_url": string,\n' \
                    '  "ballotpedia_page_title": string,\n' \
                    '  "ballotpedia_photo_url": string,\n' \
                    '  "candidate_email": string,\n' \
@@ -60,6 +63,9 @@ def candidates_sync_out_doc_template_values(url_root):
                    '  "twitter_followers_count": integer,\n' \
                    '  "twitter_profile_image_url_https": string,\n' \
                    '  "twitter_description": string,\n' \
+                   '  "candidate_participation_status": string,\n' \
+                   '  "candidate_is_incumbent": boolean,\n' \
+                   '  "candidate_is_top_ticket": boolean,\n' \
                    '  "wikipedia_page_id": string,\n' \
                    '  "wikipedia_page_title": string,\n' \
                    '  "wikipedia_photo_url": string,\n' \

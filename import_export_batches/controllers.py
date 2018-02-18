@@ -813,15 +813,25 @@ def create_batch_row_action_contest_office(batch_description, batch_header_map, 
                 kind_of_action = 'TBD'
 
     # Find the column in the incoming batch_row with the header == contest_office_name
+    ballotpedia_office_id = batch_manager.retrieve_value_from_batch_row("ballotpedia_office_id",
+                                                                        batch_header_map,
+                                                                        one_batch_row)
+    ballotpedia_office_name = batch_manager.retrieve_value_from_batch_row("ballotpedia_office_name", batch_header_map,
+                                                                          one_batch_row)
+    ballotpedia_office_url = batch_manager.retrieve_value_from_batch_row("ballotpedia_office_url", batch_header_map,
+                                                                         one_batch_row)
+    ballotpedia_race_office_level = batch_manager.retrieve_value_from_batch_row("ballotpedia_race_office_level",
+                                                                                batch_header_map, one_batch_row)
+    candidate_name = batch_manager.retrieve_value_from_batch_row("candidate_name", batch_header_map, one_batch_row)
+    contest_office_district_name = batch_manager.retrieve_value_from_batch_row("contest_office_district_name",
+                                                                               batch_header_map, one_batch_row)
     contest_office_name = batch_manager.retrieve_value_from_batch_row("contest_office_name", batch_header_map,
                                                                       one_batch_row)
-
-    ctcl_uuid = batch_manager.retrieve_value_from_batch_row("contest_office_ctcl_uuid", batch_header_map, one_batch_row)
-
     contest_office_votes_allowed = batch_manager.retrieve_value_from_batch_row("contest_office_votes_allowed",
                                                                                batch_header_map, one_batch_row)
     contest_office_number_elected = batch_manager.retrieve_value_from_batch_row("contest_office_number_elected",
                                                                                 batch_header_map, one_batch_row)
+    ctcl_uuid = batch_manager.retrieve_value_from_batch_row("contest_office_ctcl_uuid", batch_header_map, one_batch_row)
     elected_office_ctcl_id = batch_manager.retrieve_value_from_batch_row("elected_office_id", batch_header_map,
                                                                          one_batch_row)
     candidate_selection_id1 = batch_manager.retrieve_value_from_batch_row("candidate_selection_id1", batch_header_map,
@@ -844,7 +854,6 @@ def create_batch_row_action_contest_office(batch_description, batch_header_map, 
                                                                           one_batch_row)
     candidate_selection_id10 = batch_manager.retrieve_value_from_batch_row("candidate_selection_id10", batch_header_map,
                                                                            one_batch_row)
-    candidate_name = batch_manager.retrieve_value_from_batch_row("candidate_name", batch_header_map, one_batch_row)
 
     batch_set_id = batch_description.batch_set_id
 
@@ -886,6 +895,16 @@ def create_batch_row_action_contest_office(batch_description, batch_header_map, 
                 kind_of_action = IMPORT_TO_BE_DETERMINED
                 status += "INSUFFICIENT_DATA_FOR_BATCH_ROW_ACTION_CONTEST_OFFICE_CREATE "
                 keep_looking_for_duplicates = False
+
+        if keep_looking_for_duplicates:
+            contest_office_manager = ContestOfficeManager()
+            matching_results = contest_office_manager.retrieve_contest_office_from_ballotpedia_office_id(
+                ballotpedia_office_id)
+            if matching_results['contest_office_found']:
+                contest_office = matching_results['contest_office']
+                keep_looking_for_duplicates = False
+                contest_office_we_vote_id = contest_office.we_vote_id
+                kind_of_action = IMPORT_ADD_TO_EXISTING
 
         if keep_looking_for_duplicates:
             contest_office_list_manager = ContestOfficeListManager()
@@ -963,10 +982,15 @@ def create_batch_row_action_contest_office(batch_description, batch_header_map, 
         batch_row_action_contest_office.candidate_selection_id8 = candidate_selection_id8
         batch_row_action_contest_office.candidate_selection_id9 = candidate_selection_id9
         batch_row_action_contest_office.candidate_selection_id10 = candidate_selection_id10
+        batch_row_action_contest_office.district_name = contest_office_district_name
         batch_row_action_contest_office.district_id = district_id
         batch_row_action_contest_office.district_name = district_name
         batch_row_action_contest_office.district_scope = district_scope
         batch_row_action_contest_office.ocd_division_id = ocd_division_id
+        batch_row_action_contest_office.ballotpedia_office_id = ballotpedia_office_id
+        batch_row_action_contest_office.ballotpedia_office_name = ballotpedia_office_name
+        batch_row_action_contest_office.ballotpedia_office_url = ballotpedia_office_url
+        batch_row_action_contest_office.ballotpedia_race_office_level = ballotpedia_race_office_level
         batch_row_action_contest_office.save()
         success = True
     except Exception as e:
@@ -1320,6 +1344,8 @@ def create_batch_row_action_candidate(batch_description, batch_header_map, one_b
         "candidate_is_top_ticket", batch_header_map, one_batch_row)
     candidate_is_incumbent = batch_manager.retrieve_value_from_batch_row(
         "candidate_is_incumbent", batch_header_map, one_batch_row)
+    candidate_participation_status = batch_manager.retrieve_value_from_batch_row(
+        "candidate_participation_status", batch_header_map, one_batch_row)
     candidate_party_name = batch_manager.retrieve_value_from_batch_row(
         "candidate_party_name", batch_header_map, one_batch_row)
     candidate_twitter_handle_raw = batch_manager.retrieve_value_from_batch_row(
@@ -1329,6 +1355,12 @@ def create_batch_row_action_candidate(batch_description, batch_header_map, one_b
     facebook_url = batch_manager.retrieve_value_from_batch_row("facebook_url", batch_header_map, one_batch_row)
     candidate_profile_image_url = batch_manager.retrieve_value_from_batch_row("candidate_profile_image_url",
                                                                               batch_header_map, one_batch_row)
+    ballotpedia_candidate_id = batch_manager.retrieve_value_from_batch_row("ballotpedia_candidate_id",
+                                                                           batch_header_map, one_batch_row)
+    ballotpedia_candidate_name = batch_manager.retrieve_value_from_batch_row("ballotpedia_candidate_name",
+                                                                             batch_header_map, one_batch_row)
+    ballotpedia_candidate_url = batch_manager.retrieve_value_from_batch_row("ballotpedia_candidate_url",
+                                                                            batch_header_map, one_batch_row)
     state_code = batch_manager.retrieve_value_from_batch_row("state_code", batch_header_map, one_batch_row)
     candidate_temp_id = batch_manager.retrieve_value_from_batch_row(
         "candidate_batch_id", batch_header_map, one_batch_row)  # TODO Is the name transformation correct?
@@ -1388,6 +1420,7 @@ def create_batch_row_action_candidate(batch_description, batch_header_map, one_b
     # These three parameters are needed to look up in ElectedOffice table for a match
     keep_looking_for_duplicates = True
     kind_of_action = IMPORT_TO_BE_DETERMINED
+    candidate_campaign_list_manager = CandidateCampaignListManager()
     if positive_value_exists(candidate_we_vote_id):
         # If here, then we are updating an existing known record
         keep_looking_for_duplicates = False
@@ -1395,8 +1428,22 @@ def create_batch_row_action_candidate(batch_description, batch_header_map, one_b
         # TODO We want to search the Candidate table for the existing record with this candidate_we_vote_id
         # candidate_found = True
 
+    if not positive_value_exists(candidate_name) and positive_value_exists(ballotpedia_candidate_name):
+        candidate_name = ballotpedia_candidate_name
+
     if keep_looking_for_duplicates:
-        candidate_campaign_list_manager = CandidateCampaignListManager()
+        candidate_campaign_manager = CandidateCampaignManager()
+        matching_results = candidate_campaign_manager.retrieve_candidate_campaign_from_ballotpedia_candidate_id(
+            ballotpedia_candidate_id)
+        if matching_results['candidate_campaign_found']:
+            candidate = matching_results['candidate_campaign']
+            candidate_found = True
+            keep_looking_for_duplicates = False
+            candidate_we_vote_id = candidate.we_vote_id
+            contest_office_we_vote_id = candidate.contest_office_we_vote_id
+            kind_of_action = IMPORT_ADD_TO_EXISTING
+
+    if keep_looking_for_duplicates:
         matching_results = candidate_campaign_list_manager.retrieve_candidates_from_non_unique_identifiers(
             google_civic_election_id, state_code, candidate_twitter_handle, candidate_name)
 
@@ -1471,7 +1518,9 @@ def create_batch_row_action_candidate(batch_description, batch_header_map, one_b
         batch_row_action_candidate.batch_row_action_office_ctcl_uuid = office_ctcl_uuid
         batch_row_action_candidate.ctcl_uuid = ctcl_uuid
         batch_row_action_candidate.state_code = state_code
+        batch_row_action_candidate.candidate_is_incumbent = candidate_is_incumbent
         batch_row_action_candidate.candidate_is_top_ticket = candidate_is_top_ticket
+        batch_row_action_candidate.candidate_participation_status = candidate_participation_status
         batch_row_action_candidate.kind_of_action = kind_of_action
         batch_row_action_candidate.google_civic_election_id = google_civic_election_id
         batch_row_action_candidate.status = status
@@ -1479,11 +1528,13 @@ def create_batch_row_action_candidate(batch_description, batch_header_map, one_b
         batch_row_action_candidate.contest_office_name = contest_office_name
         batch_row_action_candidate.contest_office_we_vote_id = contest_office_we_vote_id
         batch_row_action_candidate.contest_office_id = contest_office_id
-        batch_row_action_candidate.candidate_is_incumbent = candidate_is_incumbent
         batch_row_action_candidate.candidate_twitter_handle = candidate_twitter_handle
         batch_row_action_candidate.candidate_url = candidate_url
         batch_row_action_candidate.facebook_url = facebook_url
         batch_row_action_candidate.photo_url = candidate_profile_image_url
+        batch_row_action_candidate.ballotpedia_candidate_id = ballotpedia_candidate_id
+        batch_row_action_candidate.ballotpedia_candidate_name = ballotpedia_candidate_name
+        batch_row_action_candidate.ballotpedia_candidate_url = ballotpedia_candidate_url
         batch_row_action_candidate.save()
     except Exception as e:
         success = False
@@ -2550,9 +2601,13 @@ def import_contest_office_data_from_batch_row_actions(
         contest_office_number_elected = one_batch_row_action.number_elected
         state_code = one_batch_row_action.state_code
         defaults = {
-            'district_id': one_batch_row_action.district_id,
-            'district_name': one_batch_row_action.district_name,
-            'district_scope': one_batch_row_action.district_scope,
+            'district_id':                      one_batch_row_action.district_id,
+            'district_name':                    one_batch_row_action.district_name,
+            'district_scope':                   one_batch_row_action.district_scope,
+            'ballotpedia_office_id':            one_batch_row_action.ballotpedia_office_id,
+            'ballotpedia_office_name':          one_batch_row_action.ballotpedia_office_name,
+            'ballotpedia_office_url':           one_batch_row_action.ballotpedia_office_url,
+            'ballotpedia_race_office_level':    one_batch_row_action.ballotpedia_race_office_level,
         }
 
         # These three parameters are minimum variables required for the ContestOffice table
@@ -2942,12 +2997,20 @@ def import_candidate_data_from_batch_row_actions(batch_header_id, batch_row_id, 
             update_values['candidate_is_incumbent'] = one_batch_row_action.candidate_is_incumbent
         if positive_value_exists(one_batch_row_action.candidate_is_top_ticket):
             update_values['candidate_is_top_ticket'] = one_batch_row_action.candidate_is_top_ticket
+        if positive_value_exists(one_batch_row_action.candidate_participation_status):
+            update_values['candidate_participation_status'] = one_batch_row_action.candidate_participation_status
         if positive_value_exists(one_batch_row_action.ctcl_uuid):
             update_values['ctcl_uuid'] = one_batch_row_action.ctcl_uuid
         if positive_value_exists(google_civic_election_id):
             update_values['google_civic_election_id'] = google_civic_election_id
         if positive_value_exists(one_batch_row_action.state_code):
             update_values['state_code'] = one_batch_row_action.state_code
+        if positive_value_exists(one_batch_row_action.ballotpedia_candidate_id):
+            update_values['ballotpedia_candidate_id'] = one_batch_row_action.ballotpedia_candidate_id
+        if positive_value_exists(one_batch_row_action.ballotpedia_candidate_name):
+            update_values['ballotpedia_candidate_name'] = one_batch_row_action.ballotpedia_candidate_name
+        if positive_value_exists(one_batch_row_action.ballotpedia_candidate_url):
+            update_values['ballotpedia_candidate_url'] = one_batch_row_action.ballotpedia_candidate_url
         if positive_value_exists(one_batch_row_action.candidate_twitter_handle):
             update_values['candidate_twitter_handle'] = one_batch_row_action.candidate_twitter_handle
         if positive_value_exists(one_batch_row_action.candidate_url):

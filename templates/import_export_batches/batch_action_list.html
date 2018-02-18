@@ -211,7 +211,7 @@
 {% if batch_row_list %}
     <table class="table table-condensed">
         <tr>
-            <th>
+            <th colspan="2">
                 <a href="{% url 'import_export_batches:batch_header_mapping' %}?batch_header_id={{ batch_header_id }}&kind_of_batch={{ kind_of_batch }}&google_civic_election_id={{ google_civic_election_id }}">(edit header&nbsp;map)</a>
             </th>
             <th>{{ batch_header_map.batch_header_map_000 }}</th>
@@ -238,6 +238,7 @@
         </tr>
     {% for one_batch_row in batch_row_list %}
         <tr>
+            <td>{{ forloop.counter }}</td>
             <td><a href="{% url 'import_export_batches:batch_action_list_analyze_process' %}?batch_header_id={{ batch_header_id }}&batch_row_id={{ one_batch_row.id }}&state_code={{ one_batch_row.state_code }}">
                 Analyze</a>
                 {% if one_batch_row.state_code %}<br />
@@ -334,7 +335,10 @@
                                 <label for="create_actions_button_id" class="col-sm-3 control-label"></label>
                                 <button type="submit" id="create_batch_row_action_id_id" name="create_batch_row_action_id" class="btn btn-default"
                                         value={{ one_batch_row.batch_row_action.id }}>UPDATE</button>
+
+                                <a href="{% url 'candidate:candidate_edit_we_vote_id' one_batch_row.batch_row_action.candidate_we_vote_id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}" target="_blank">
                                 {{ one_batch_row.batch_row_action.candidate_we_vote_id }}
+                                </a>
                             </form>
                             {% else %}
                                 {{ one_batch_row.batch_row_action.kind_of_action }}
@@ -345,7 +349,12 @@
                             <img src="{{ one_batch_row.batch_row_action.photo_url }}" height="50"><br />
                             <br />
                             {% endif %}
-                        {{ one_batch_row.batch_row_action.candidate_name|default_if_none:"" }}</td>
+                            {{ one_batch_row.batch_row_action.candidate_name|default_if_none:"" }}
+                            {% if one_batch_row.batch_row_action.ballotpedia_candidate_name %}
+                                <br />
+                                bp: {{ one_batch_row.batch_row_action.ballotpedia_candidate_name|default_if_none:"" }}
+                            {% endif %}
+                        </td>
                         <td>
                             {{ one_batch_row.batch_row_action.contest_office_name|default_if_none:"" }}
                             {% if one_batch_row.batch_row_action.contest_office_we_vote_id %}
@@ -365,7 +374,10 @@
                         <td>{{ one_batch_row.batch_row_action.party|default_if_none:"" }}</td>
                         <td>{{ one_batch_row.batch_row_action.candidate_twitter_handle|default_if_none:"" }}</td>
                         <td>{{ one_batch_row.batch_row_action.facebook_url|default_if_none:"" }}</td>
-                        <td>{{ one_batch_row.batch_row_action.candidate_url|default_if_none:"" }}</td>
+                        <td>
+                          {{ one_batch_row.batch_row_action.candidate_url|default_if_none:"" }}
+                          {{ one_batch_row.batch_row_action.ballotpedia_candidate_url|default_if_none:"" }}
+                        </td>
                         <td>{{ one_batch_row.batch_row_action.candidate_is_incumbent|default_if_none:"" }}</td>
                     </tr>
                     {% if one_batch_row.batch_row_action.status %}

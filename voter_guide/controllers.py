@@ -986,7 +986,7 @@ def retrieve_voter_guides_to_follow_by_election_for_api(voter_id, google_civic_e
     #     key=attrgetter(sort_by))
     # But we don't, we just want to combine them with existing order
 
-    status += 'SUCCESSFUL_RETRIEVE_OF_VOTER_GUIDES_BY_ELECTION'
+    status += 'SUCCESSFUL_RETRIEVE_OF_VOTER_GUIDES_BY_ELECTION '
     success = True
 
     if len(voter_guide_list):
