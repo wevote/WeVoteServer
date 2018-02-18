@@ -1051,9 +1051,9 @@ class VoterGuideListManager(models.Model):
 
             if len(voter_guide_list):
                 voter_guide_list_found = True
-                status = 'VOTER_GUIDES_FOUND '
+                status = 'VOTER_GUIDES_FOUND_BY_ORGANIZATION_LIST '
             else:
-                status = 'NO_VOTER_GUIDES_FOUND '
+                status = 'NO_VOTER_GUIDES_FOUND_BY_ORGANIZATION_LIST '
             success = True
         except Exception as e:
             handle_record_not_found_exception(e, logger=logger)
@@ -1097,9 +1097,9 @@ class VoterGuideListManager(models.Model):
 
             if len(voter_guide_list):
                 voter_guide_list_found = True
-                status = 'VOTER_GUIDES_FOUND'
+                status = 'VOTER_GUIDES_FOUND_BY_ELECTION '
             else:
-                status = 'NO_VOTER_GUIDES_FOUND'
+                status = 'NO_VOTER_GUIDES_FOUND_BY_ELECTION '
             success = True
         except Exception as e:
             handle_record_not_found_exception(e, logger=logger)

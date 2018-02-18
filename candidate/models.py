@@ -19,13 +19,18 @@ from image.models import ORGANIZATION_ENDORSEMENTS_IMAGE_NAME
 
 logger = wevote_functions.admin.get_logger(__name__)
 
+# When merging candidates, these are the fields we check for figure_out_conflict_values
 CANDIDATE_UNIQUE_IDENTIFIERS = [
     'ballot_guide_official_statement',
+    'ballotpedia_candidate_id',
+    'ballotpedia_candidate_name',
+    'ballotpedia_candidate_url',
     'ballotpedia_page_title',
     'ballotpedia_photo_url',
     'candidate_email',
     'candidate_is_incumbent',
     'candidate_is_top_ticket',
+    'candidate_participation_status',
     'candidate_name',
     'candidate_phone',
     'candidate_twitter_handle',
@@ -298,7 +303,8 @@ class CandidateCampaignListManager(models.Model):
     def retrieve_possible_duplicate_candidates(self, candidate_name, google_civic_candidate_name,
                                                google_civic_election_id, office_we_vote_id,
                                                politician_we_vote_id,
-                                               candidate_twitter_handle, vote_smart_id, maplight_id,
+                                               candidate_twitter_handle,
+                                               ballotpedia_candidate_id, vote_smart_id, maplight_id,
                                                we_vote_id_from_master=''):
         candidate_list_objects = []
         filters = []
@@ -330,6 +336,10 @@ class CandidateCampaignListManager(models.Model):
 
             if positive_value_exists(candidate_twitter_handle):
                 new_filter = Q(candidate_twitter_handle__iexact=candidate_twitter_handle)
+                filters.append(new_filter)
+
+            if positive_value_exists(ballotpedia_candidate_id):
+                new_filter = Q(ballotpedia_candidate_id=ballotpedia_candidate_id)
                 filters.append(new_filter)
 
             if positive_value_exists(vote_smart_id):
@@ -690,6 +700,13 @@ class CandidateCampaign(models.Model):
         verbose_name="other source url of candidate", max_length=255, null=True, blank=True)
     other_source_photo_url = models.URLField(verbose_name='url of other source image', blank=True, null=True)
 
+    ballotpedia_candidate_id = models.PositiveIntegerField(
+        verbose_name="ballotpedia integer id", null=True, blank=True)
+    # The candidate's name as passed over by Ballotpedia
+    ballotpedia_candidate_name = models.CharField(verbose_name="candidate name exactly as received from ballotpedia",
+                                                  max_length=255, null=True, blank=True)
+    ballotpedia_candidate_url = models.URLField(verbose_name='url of candidate on ballotpedia', blank=True, null=True)
+    # This is just the characters in the Ballotpedia URL
     ballotpedia_page_title = models.CharField(
         verbose_name="Page title on Ballotpedia", max_length=255, null=True, blank=True)
     ballotpedia_photo_url = models.URLField(verbose_name='url of ballotpedia logo', blank=True, null=True)
@@ -699,8 +716,12 @@ class CandidateCampaign(models.Model):
                                                        null=True, blank=True, default="")
     # CTCL candidate data fields
     ctcl_uuid = models.CharField(verbose_name="ctcl uuid", max_length=80, null=True, blank=True)
+
     candidate_is_top_ticket = models.BooleanField(verbose_name="candidate is top ticket", default=False)
     candidate_is_incumbent = models.BooleanField(verbose_name="candidate is the current incumbent", default=False)
+    # Candidacy Declared, (and others for withdrawing, etc.)
+    candidate_participation_status = models.CharField(verbose_name="candidate participation status",
+                                                      max_length=255, null=True, blank=True)
 
     def election(self):
         try:
@@ -975,6 +996,16 @@ class CandidateCampaignManager(models.Model):
         return candidate_campaign_manager.retrieve_candidate_campaign(
             candidate_campaign_id, we_vote_id, candidate_maplight_id, candidate_name, candidate_vote_smart_id)
 
+    def retrieve_candidate_campaign_from_ballotpedia_candidate_id(self, ballotpedia_candidate_id):
+        candidate_campaign_id = 0
+        we_vote_id = ''
+        candidate_maplight_id = ''
+        candidate_name = ''
+        candidate_vote_smart_id = 0
+        return self.retrieve_candidate_campaign(
+            candidate_campaign_id, we_vote_id, candidate_maplight_id, candidate_name, candidate_vote_smart_id,
+            ballotpedia_candidate_id)
+
     def retrieve_candidate_campaign_from_candidate_name(self, candidate_name):
         candidate_campaign_id = 0
         we_vote_id = ''
@@ -1008,7 +1039,7 @@ class CandidateCampaignManager(models.Model):
     # NOTE: searching by all other variables seems to return a list of objects
     def retrieve_candidate_campaign(
             self, candidate_campaign_id, candidate_campaign_we_vote_id=None, candidate_maplight_id=None,
-            candidate_name=None, candidate_vote_smart_id=None):
+            candidate_name=None, candidate_vote_smart_id=None, ballotpedia_candidate_id=None):
         error_result = False
         exception_does_not_exist = False
         exception_multiple_object_returned = False
@@ -1045,6 +1076,13 @@ class CandidateCampaignManager(models.Model):
                 candidate_campaign_we_vote_id = candidate_campaign_on_stage.we_vote_id
                 candidate_campaign_found = True
                 status = "RETRIEVE_CANDIDATE_FOUND_BY_NAME"
+            elif positive_value_exists(ballotpedia_candidate_id):
+                candidate_campaign_on_stage = CandidateCampaign.objects.get(
+                    ballotpedia_candidate_id=ballotpedia_candidate_id)
+                candidate_campaign_id = candidate_campaign_on_stage.id
+                candidate_campaign_we_vote_id = candidate_campaign_on_stage.we_vote_id
+                candidate_campaign_found = True
+                status = "RETRIEVE_CANDIDATE_FOUND_BY_BALLOTPEDIA_CANDIDATE_ID"
             else:
                 candidate_campaign_found = False
                 status = "RETRIEVE_CANDIDATE_SEARCH_INDEX_MISSING"
@@ -1738,6 +1776,15 @@ class CandidateCampaignManager(models.Model):
 
             if existing_candidate_entry:
                 # found the existing entry, update the values
+                if 'ballotpedia_candidate_id' in update_values:
+                    existing_candidate_entry.ballotpedia_candidate_id = update_values['ballotpedia_candidate_id']
+                    values_changed = True
+                if 'ballotpedia_candidate_name' in update_values:
+                    existing_candidate_entry.ballotpedia_candidate_name = update_values['ballotpedia_candidate_name']
+                    values_changed = True
+                if 'ballotpedia_candidate_url' in update_values:
+                    existing_candidate_entry.ballotpedia_candidate_url = update_values['ballotpedia_candidate_url']
+                    values_changed = True
                 if 'candidate_is_incumbent' in update_values:
                     existing_candidate_entry.candidate_is_incumbent = update_values['candidate_is_incumbent']
                     values_changed = True
@@ -1746,6 +1793,10 @@ class CandidateCampaignManager(models.Model):
                     values_changed = True
                 if 'candidate_name' in update_values:
                     existing_candidate_entry.candidate_name = update_values['candidate_name']
+                    values_changed = True
+                if 'candidate_participation_status' in update_values:
+                    existing_candidate_entry.candidate_participation_status = \
+                        update_values['candidate_participation_status']
                     values_changed = True
                 if 'candidate_twitter_handle' in update_values:
                     existing_candidate_entry.candidate_twitter_handle = update_values['candidate_twitter_handle']
@@ -1918,7 +1969,6 @@ class CandidateCampaignManager(models.Model):
             'candidates_count': candidates_count
         }
         return results
-
 
 
 class CandidatesAreNotDuplicates(models.Model):

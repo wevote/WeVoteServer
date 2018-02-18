@@ -902,7 +902,6 @@ def batch_action_list_create_or_update_process_view(request):
         return redirect_to_sign_in_page(request, authority_required)
 
     batch_row_list_found = False
-    batch_row_list = []
 
     batch_header_id = convert_to_int(request.GET.get('batch_header_id', 0))
     batch_row_id = convert_to_int(request.GET.get('batch_row_id', 0))

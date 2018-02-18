@@ -45,7 +45,10 @@ def offices_sync_out_view(request):  # officesSyncOut
         # return Response(serializer.data)
         # get the data using values_list
         contest_office_list_dict = contest_office_list.values('we_vote_id', 'office_name', 'google_civic_election_id',
-                                                              'ocd_division_id', 'maplight_id', 'ballotpedia_id',
+                                                              'ocd_division_id', 'maplight_id',
+                                                              'ballotpedia_id', 'ballotpedia_office_id',
+                                                              'ballotpedia_office_name', 'ballotpedia_office_url',
+                                                              'ballotpedia_race_office_level',
                                                               'wikipedia_id', 'number_voting_for', 'number_elected',
                                                               'state_code', 'primary_party', 'district_name',
                                                               'district_scope', 'district_id', 'contest_level0',

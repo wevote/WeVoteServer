@@ -672,11 +672,12 @@ def ballot_item_list_edit_process_view(request):
                         local_ballot_order_count += 1
                         local_ballot_order_key = 'local_ballot_order_' + str(one_ballot_item.id)
                         local_ballot_order = request.POST.get(local_ballot_order_key, local_ballot_order_count)
-                        if local_ballot_order:
+                        if positive_value_exists(local_ballot_order):
                             one_ballot_item.local_ballot_order = local_ballot_order
                             one_ballot_item.save()
                     except Exception as e:
-                        pass
+                        messages.add_message(request, messages.ERROR,
+                                             'Could not save local_ballot_order: ', local_ballot_order)
 
     except Exception as e:
         messages.add_message(request, messages.ERROR, 'Could not save ballot_returned.')

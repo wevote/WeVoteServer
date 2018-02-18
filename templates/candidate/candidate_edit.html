@@ -40,9 +40,8 @@ span.wrap_word { word-break: break-word; }
                     >match to politician</a>)
             {% endif %}
             {% if candidate.candidate_merge_possibility_found %}
-                <br />
                 (<a href="{% url 'candidate:find_duplicate_candidate' candidate.id %}?google_civic_election_id={{ google_civic_election_id }}"
-                    target="_blank">check for duplicates of this candidate</a> - in new window)
+                    target="_blank">check for duplicate candidates</a> - in new window)
             {% endif %}
 
         {% else %}
@@ -90,6 +89,14 @@ span.wrap_word { word-break: break-word; }
 </div>
 
 <div class="form-group">
+    <label for="ballotpedia_candidate_name_id" class="col-sm-3 control-label">Candidate Name (from Ballotpedia)</label>
+    <div class="col-sm-8">
+        <input type="text" name="ballotpedia_candidate_name" id="ballotpedia_candidate_name_id" class="form-control"
+               value="{% if candidate %}{{ candidate.ballotpedia_candidate_name|default_if_none:"" }}{% else %}{{ ballotpedia_candidate_name|default_if_none:"" }}{% endif %}" />
+    </div>
+</div>
+
+<div class="form-group">
     <label for="office_id" class="col-sm-3 control-label">Office</label>
     <div class="col-sm-8">
         {% if office_list %}
@@ -118,6 +125,30 @@ span.wrap_word { word-break: break-word; }
 </div>
 
 <div class="form-group">
+    <label for="ballotpedia_candidate_id_id" class="col-sm-3 control-label">Ballotpedia Id</label>
+    <div class="col-sm-8">
+        <input type="text" name="ballotpedia_candidate_id" id="ballotpedia_candidate_id_id" class="form-control"
+               value="{% if candidate %}{{ candidate.ballotpedia_candidate_id|default_if_none:"" }}{% else %}{{ ballotpedia_candidate_id|default_if_none:"" }}{% endif %}" />
+    </div>
+</div>
+
+<div class="form-group">
+    <label for="vote_smart_id_id" class="col-sm-3 control-label">Vote Smart Id</label>
+    <div class="col-sm-8">
+        <input type="text" name="vote_smart_id" id="vote_smart_id_id" class="form-control"
+               value="{% if candidate %}{{ candidate.vote_smart_id|default_if_none:"" }}{% else %}{{ vote_smart_id|default_if_none:"" }}{% endif %}" />
+    </div>
+</div>
+
+{#<div class="form-group">#}
+{#    <label for="maplight_id_id" class="col-sm-3 control-label">MapLight Id</label>#}
+{#    <div class="col-sm-8">#}
+{#        <input type="text" name="maplight_id" id="maplight_id_id" class="form-control"#}
+{#               value="{% if candidate %}{{ candidate.maplight_id|default_if_none:"" }}{% else %}{{ maplight_id|default_if_none:"" }}{% endif %}" />#}
+{#    </div>#}
+{#</div>#}
+
+<div class="form-group">
     <label for="candidate_twitter_handle_id" class="col-sm-3 control-label">Twitter Handle</label>
     <div class="col-sm-8">
         <input type="text" name="candidate_twitter_handle" id="candidate_twitter_handle_id" class="form-control"
@@ -135,6 +166,7 @@ span.wrap_word { word-break: break-word; }
     (<a href="{% url 'twitter2:retrieve_possible_twitter_handles' candidate.we_vote_id %}">retrieve possible Twitter handles</a>)
     (<a href="{% url 'twitter2:delete_possible_twitter_handles' candidate.we_vote_id %}">delete possible Twitter handles</a>)
     {% endif %}
+    {% if twitter_link_possibility_list %}
     <table border="1" cellpadding="5" cellspacing="5" class="table">
         <tr>
             <th>#</th>
@@ -165,6 +197,7 @@ span.wrap_word { word-break: break-word; }
         </tr>
     {% endfor %}
     </table>
+    {% endif %}
 
     {% if twitter_link_possibility_list|length == 1 %}
         <a href="{% url 'candidate:candidate_edit' candidate.id %}?show_all_twitter_search_results=1">Show more Twitter search results</a>
@@ -181,24 +214,17 @@ span.wrap_word { word-break: break-word; }
         (<a href="{% url 'google_custom_search:retrieve_possible_google_search_users' candidate.we_vote_id %}">retrieve possible google search users</a>)
         (<a href="{% url 'google_custom_search:delete_possible_google_search_users' candidate.we_vote_id %}">delete possible google search users</a>)
         (<a href="{% url 'google_custom_search:bulk_possible_google_search_users_do_not_match' candidate.we_vote_id %}">these possible candidates don't match</a>)
-
+    {% if google_search_possibility_list %}
         {% include "candidate/google_search_users_for_candidate_table.html" with candidate=candidate google_search_possibility_list=google_search_possibility_list %}
         {% if google_search_possibility_list|length == 1 %}
             <a href="{% url 'candidate:candidate_edit' candidate.id %}?show_all_google_search_users=1">Show more Google search users</a>
         {% elif google_search_possibility_list|length > 1 %}
             <a href="{% url 'candidate:candidate_edit' candidate.id %}?show_all_google_search_users=0">Show fewer Google search users</a>
         {% endif %}
+    {% endif %}
     </div>
 </div>
     {% endif %}
-
-<div class="form-group">
-    <label for="candidate_url_id" class="col-sm-3 control-label">Candidate Website</label>
-    <div class="col-sm-8">
-        <input type="text" name="candidate_url" id="candidate_url_id" class="form-control"
-               value="{% if candidate %}{{ candidate.candidate_url|default_if_none:"" }}{% else %}{{ candidate_url|default_if_none:"" }}{% endif %}" />
-    </div>
-</div>
 
 <div class="form-group">
     <label for="party_id" class="col-sm-3 control-label">Candidate Party</label>
@@ -209,27 +235,28 @@ span.wrap_word { word-break: break-word; }
 </div>
 
 <div class="form-group">
-    <label for="measure_text_id" class="col-sm-3 control-label">Official Candidate Statement</label>
+    <label for="candidate_url_id" class="col-sm-3 control-label">Candidate Website</label>
+    <div class="col-sm-8">
+        <input type="text" name="candidate_url" id="candidate_url_id" class="form-control"
+               value="{% if candidate %}{{ candidate.candidate_url|default_if_none:"" }}{% else %}{{ candidate_url|default_if_none:"" }}{% endif %}" />
+    </div>
+</div>
+
+<div class="form-group">
+    <label for="ballotpedia_candidate_url_id" class="col-sm-3 control-label">Ballotpedia Candidate Page</label>
+    <div class="col-sm-8">
+        <input type="text" name="ballotpedia_candidate_url" id="ballotpedia_candidate_url_id" class="form-control"
+               value="{% if candidate %}{{ candidate.ballotpedia_candidate_url|default_if_none:"" }}{% else %}{{ ballotpedia_candidate_url|default_if_none:"" }}{% endif %}" />
+    </div>
+</div>
+
+<div class="form-group">
+    <label for="ballot_guide_official_statement_id" class="col-sm-3 control-label">Official Candidate Statement</label>
     <div class="col-sm-8">
         <textarea name="ballot_guide_official_statement"
                   class="form-control animated"
+                  id="ballot_guide_official_statement_id"
                   placeholder="Enter official candidate statement">{% if candidate %}{{ candidate.ballot_guide_official_statement|default_if_none:"" }}{% else %}{{ ballot_guide_official_statement|default_if_none:"" }}{% endif %}</textarea>
-    </div>
-</div>
-
-<div class="form-group">
-    <label for="vote_smart_id_id" class="col-sm-3 control-label">Vote Smart Id</label>
-    <div class="col-sm-8">
-        <input type="text" name="vote_smart_id" id="vote_smart_id_id" class="form-control"
-               value="{% if candidate %}{{ candidate.vote_smart_id|default_if_none:"" }}{% else %}{{ vote_smart_id|default_if_none:"" }}{% endif %}" />
-    </div>
-</div>
-
-<div class="form-group">
-    <label for="maplight_id_id" class="col-sm-3 control-label">MapLight Id</label>
-    <div class="col-sm-8">
-        <input type="text" name="maplight_id" id="maplight_id_id" class="form-control"
-               value="{% if candidate %}{{ candidate.maplight_id|default_if_none:"" }}{% else %}{{ maplight_id|default_if_none:"" }}{% endif %}" />
     </div>
 </div>
 

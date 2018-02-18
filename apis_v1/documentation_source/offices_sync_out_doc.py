@@ -44,6 +44,10 @@ def offices_sync_out_doc_template_values(url_root):
                    '  "electorate_specifications": string,\n' \
                    '  "google_civic_election_id": integer,\n' \
                    '  "maplight_id": integer,\n' \
+                   '  "ballotpedia_office_id": integer,\n' \
+                   '  "ballotpedia_office_name": string,\n' \
+                   '  "ballotpedia_office_url": string,\n' \
+                   '  "ballotpedia_race_office_level": string,\n' \
                    '  "number_elected": integer,\n' \
                    '  "number_voting_for": integer,\n' \
                    '  "ocd_division_id": integer,\n' \
