@@ -18,20 +18,60 @@
 
     <h1>{{ office.office_name }}{% if office.district_id %} - District {{ office.district_id }}{% endif %}{% if office.state_code %} - {{ office.state_code }}{% endif %}
 </h1>
-    <p>
-        Office Website: <strong>{{ office.office_url }}</strong><br />
-        Google Civic Election ID: <strong>{{ election.election_name }} - {{ office.google_civic_election_id }}</strong><br />
-        Office We Vote ID: <strong>{{ office.we_vote_id }}</strong>
-            (<a href="{% url 'office:office_delete_process' %}?office_id={{ office.id }}&google_civic_election_id={{ google_civic_election_id }}">delete office</a>)
-        <br />
-        <a href="{% url 'position:refresh_positions_with_contest_office_details_for_election' %}?office_id={{ office.id }}&office_we_vote_id={{ office.we_vote_id }}">
-            Refresh Positions</a><br />
-        <a href="{% url 'office:office_edit' office.id %}">edit</a><br />
-        <br />
-        <a href="{% url 'candidate:candidate_new' %}?google_civic_election_id={{ google_civic_election_id }}&contest_office_id={{ office.id }}">
-            Add New Candidate</a><br />
-    </p>
 
+    <table>
+    <tr>
+      <td>Google Civic Election ID:</td>
+      <td><strong>{{ election.election_name }} - {{ office.google_civic_election_id }}</strong></td>
+    </tr>
+    <tr>
+      <td>Office We Vote ID:</td>
+      <td>
+        <strong>{{ office.we_vote_id }}</strong>
+        (<a href="{% url 'office:office_delete_process' %}?office_id={{ office.id }}&google_civic_election_id={{ google_civic_election_id }}">delete office</a>)
+      </td>
+    </tr>
+    {% if office.office_url %}
+    <tr>
+      <td>Office Website:</td>
+      <td><strong>{{ office.office_url }}</strong></td>
+    </tr>
+    {% endif %}
+    {% if office.ballotpedia_office_id %}
+    <tr>
+      <td>Ballotpedia Office ID:</td>
+      <td><strong>{{ office.ballotpedia_office_id }}</strong></td>
+    </tr>
+    {% endif %}
+    {% if office.ballotpedia_office_name %}
+    <tr>
+      <td>Ballotpedia Office Name:</td>
+      <td><strong>{{ office.ballotpedia_office_name }}</strong></td>
+    </tr>
+    {% endif %}
+    {% if office.ballotpedia_office_url %}
+    <tr>
+      <td>Ballotpedia Office URL:</td>
+      <td><strong>{{ office.ballotpedia_office_url }}</strong></td>
+    </tr>
+    {% endif %}
+    {% if office.ballotpedia_race_office_level %}
+    <tr>
+      <td>Ballotpedia Race Office Level:</td>
+      <td><strong>{{ office.ballotpedia_race_office_level }}</strong></td>
+    </tr>
+    {% endif %}
+    </table>
+
+    <p>
+      <br />
+      <a href="{% url 'office:office_edit' office.id %}">edit</a><br />
+      <br />
+      <a href="{% url 'candidate:candidate_new' %}?google_civic_election_id={{ google_civic_election_id }}&contest_office_id={{ office.id }}">
+            Add New Candidate</a>,
+      <a href="{% url 'position:refresh_positions_with_contest_office_details_for_election' %}?office_id={{ office.id }}&office_we_vote_id={{ office.we_vote_id }}">
+            Refresh Positions</a><br />
+    </p>
 
     <table border="1" cellpadding="5" cellspacing="5">
         <tr>
