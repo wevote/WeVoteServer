@@ -131,16 +131,7 @@
     </div>
 </div>
 
-<div class="form-group">
-    <label for="update_ballot_id" class="col-sm-3 control-label">
-        <a href="{% url 'election:election_summary' election.id %}">cancel</a>
-    </label>
-    <div class="col-sm-8">
-        <input type="submit" id="update_ballot_id"
-               value="{% if ballot_returned %}Update Ballot{% else %}Save New Ballot{% endif %}" />
-    </div>
-</div>
-
+{% if ballot_item_list %}
     <h4>Existing Ballot Items</h4>
     {% for ballot_item in ballot_item_list %}
         <div class="form-group">
@@ -168,6 +159,17 @@
             </div>
         </div>
     {% endfor %}{# for ballot_item in ballot_item_list #}
+{% endif %}
+
+<div class="form-group">
+    <label for="update_ballot_id" class="col-sm-3 control-label">
+        <a href="{% url 'election:election_summary' election.id %}">cancel</a>
+    </label>
+    <div class="col-sm-8">
+        <input type="submit" id="update_ballot_id"
+               value="{% if ballot_returned %}Update Ballot{% else %}Save New Ballot{% endif %}" />
+    </div>
+</div>
 
 {% else %}
 {# If here we are creating a new ballot_returned entry #}
@@ -213,7 +215,7 @@
 {% endif %}
 
 
-
+<br />
    {# ################################### #}
     {% if contest_offices_to_choose_list %}
         <h5>Add Office to This Ballot Location</h5>

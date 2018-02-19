@@ -444,13 +444,15 @@ def send_to_one_friend(voter_device_id, sender_voter, send_now, sender_email_wit
     else:
         subject = "Invitation to be friends on We Vote"
 
+    system_sender_email_address = "We Vote <info@WeVote.US>"  # TODO DALE Make system variable
+
     if positive_value_exists(sender_email_with_ownership_verified):
         sender_email_address = sender_email_with_ownership_verified
+    else:
+        sender_email_address = ""
 
     if invitation_secret_key is None:
         invitation_secret_key = ""
-
-    system_sender_email_address = "We Vote <info@WeVote.US>"  # TODO DALE Make system variable
 
     template_variables_for_json = {
         "subject":                      subject,
@@ -464,7 +466,7 @@ def send_to_one_friend(voter_device_id, sender_voter, send_now, sender_email_wit
         "recipient_voter_email":        recipient_voter_email,
         "see_all_friend_requests_url":  WEB_APP_ROOT_URL + "/more/network",
         "confirm_friend_request_url":   WEB_APP_ROOT_URL + "/more/network/key/" + invitation_secret_key,
-        "recipient_unsubscribe_url":    WEB_APP_ROOT_URL + "/unsubscribe?email_key=1234",
+        "recipient_unsubscribe_url":    WEB_APP_ROOT_URL + "/unsubscribe?email_key=1234",  # TODO Implement this
         "email_open_url":               WE_VOTE_SERVER_ROOT_URL + "/apis/v1/emailOpen?email_key=1234",
     }
     template_variables_in_json = json.dumps(template_variables_for_json, ensure_ascii=True)
@@ -789,7 +791,6 @@ def friend_invitation_by_facebook_send_for_api(voter_device_id, recipients_faceb
     :param recipients_facebook_id_array:
     :param recipients_facebook_name_array:
     :param facebook_request_id:
-    :param sender_facebook_id:
     :return:
     """
     success = False
@@ -1255,7 +1256,6 @@ def friend_list_for_api(voter_device_id,
     :return:
     """
     success = False
-    friend_list_found = False
     friend_list = []
 
     results = is_voter_device_id_valid(voter_device_id)
@@ -1302,8 +1302,8 @@ def friend_list_for_api(voter_device_id,
                     "voter_we_vote_id":                 friend_voter.we_vote_id,
                     "voter_display_name":               friend_voter.get_full_name(),
                     "voter_photo_url_large":            friend_voter.we_vote_hosted_profile_image_url_large
-                         if positive_value_exists(friend_voter.we_vote_hosted_profile_image_url_large)
-                         else friend_voter.voter_photo_url(),
+                    if positive_value_exists(friend_voter.we_vote_hosted_profile_image_url_large)
+                    else friend_voter.voter_photo_url(),
                     'voter_photo_url_medium':           friend_voter.we_vote_hosted_profile_image_url_medium,
                     'voter_photo_url_tiny':             friend_voter.we_vote_hosted_profile_image_url_tiny,
                     "voter_email_address":              friend_voter.email,
@@ -1711,7 +1711,6 @@ def retrieve_voter_and_email_address(one_normalized_raw_email):
     """
     voter_friend_found = False
     voter_friend = Voter()
-    success = False
     status = ""
 
     voter_manager = VoterManager()

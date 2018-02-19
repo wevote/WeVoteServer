@@ -279,6 +279,8 @@ def office_edit_process_view(request):
     google_civic_election_id = request.POST.get('google_civic_election_id', 0)
     primary_party = request.POST.get('primary_party', False)
     state_code = request.POST.get('state_code', False)
+    ballotpedia_office_id = request.POST.get('ballotpedia_office_id', False)
+    ballotpedia_office_name = request.POST.get('ballotpedia_office_name', False)
 
     election_state = ''
     if state_code is not False:
@@ -312,6 +314,10 @@ def office_edit_process_view(request):
                 office_on_stage.primary_party = primary_party
             if positive_value_exists(election_state):
                 office_on_stage.state_code = election_state
+            if ballotpedia_office_id is not False:
+                office_on_stage.ballotpedia_office_id = ballotpedia_office_id
+            if ballotpedia_office_name is not False:
+                office_on_stage.ballotpedia_office_name = ballotpedia_office_name
             office_on_stage.save()
             office_on_stage_id = office_on_stage.id
             messages.add_message(request, messages.INFO, 'Office updated.')
@@ -328,8 +334,14 @@ def office_edit_process_view(request):
                 state_code=election_state,
             )
             # Removing this limitation: convert_to_int(office_on_stage.google_civic_election_id) >= 1000000 and
+            if google_civic_office_name is not False:
+                office_on_stage.google_civic_office_name = google_civic_office_name
             if primary_party is not False:
                 office_on_stage.primary_party = primary_party
+            if ballotpedia_office_id is not False:
+                office_on_stage.ballotpedia_office_id = ballotpedia_office_id
+            if ballotpedia_office_name is not False:
+                office_on_stage.ballotpedia_office_name = ballotpedia_office_name
             office_on_stage.save()
             messages.add_message(request, messages.INFO, 'New office saved.')
 
