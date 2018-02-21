@@ -81,7 +81,10 @@
                     <img src="{{ issue.we_vote_hosted_image_url_medium }}" width="50" height="50" />
                 {% endif %}
             </td>
-            <td><a href="{% url 'issue:issue_edit' issue.we_vote_id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">{{ issue.issue_name }}</a></td>
+            <td>
+              <a href="{% url 'issue:issue_edit' issue.we_vote_id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">{{ issue.issue_name }}</a><br />
+              {{ issue.we_vote_id }}
+            </td>
             <td>
                 {% if issue.we_vote_hosted_image_url_medium %}
                 AWS
