@@ -2185,7 +2185,7 @@ class PositionListManager(models.Model):
             return results
 
     def retrieve_all_positions_for_election(self, google_civic_election_id, stance_we_are_looking_for=ANY_STANCE,
-                                            public_only=False):
+                                            public_only=False, limit_to_organization_we_vote_ids=[]):
         """
         Since we don't have a single way to ask the positions tables for only the positions related to a single
         election, we need to look up the data in a round-about way. We get all candidates and measures in the election,
@@ -2193,6 +2193,7 @@ class PositionListManager(models.Model):
         :param google_civic_election_id:
         :param stance_we_are_looking_for:
         :param public_only: Do we care about public positions? Or friend's only positions?
+        :param limit_to_organization_we_vote_ids: Pass in a list of organizations
         :return:
         """
         position_list = []
@@ -2209,46 +2210,24 @@ class PositionListManager(models.Model):
             position_list = []
             return position_list
 
-        # DALE 2016-11-20 We now count on every position having a google_civic_election_id
-        # We aren't going to search directly on google_civic_election_id, but instead assemble a list of the items
-        #  on the ballot and then retrieve positions relating to any of those ballot_items (candidates or measures)
-        # # Candidate related positions
-        # candidate_campaign_we_vote_ids = []
-        # candidate_campaign_list_manager = CandidateCampaignListManager()
-        # candidate_results = candidate_campaign_list_manager.retrieve_all_candidates_for_upcoming_election(
-        #     google_civic_election_id)
-        # if candidate_results['candidate_list_found']:
-        #     candidate_list_light = candidate_results['candidate_list_light']
-        #     for one_candidate in candidate_list_light:
-        #         candidate_campaign_we_vote_ids.append(one_candidate['candidate_we_vote_id'])
-        #
-        # # Measure related positions
-        # contest_measure_we_vote_ids = []
-        # contest_measure_list_manager = ContestMeasureList()
-        # measure_results = contest_measure_list_manager.retrieve_all_measures_for_upcoming_election(
-        #     google_civic_election_id)
-        # if measure_results['measure_list_found']:
-        #     measure_list_light = measure_results['measure_list_light']
-        #     for one_measure in measure_list_light:
-        #         contest_measure_we_vote_ids.append(one_measure['measure_we_vote_id'])
-
         position_list_found = False
         try:
             if public_only:
                 # Only return public positions
-                position_list = PositionEntered.objects.order_by('date_entered')
+                position_list_query = PositionEntered.objects.order_by('date_entered')
             else:
                 # Only return PositionForFriends entries
-                position_list = PositionForFriends.objects.order_by('date_entered')
-            position_list = position_list.filter(google_civic_election_id=google_civic_election_id)
-            # OLD Approach
-            # position_list = position_list.filter(
-            #     Q(candidate_campaign_we_vote_id__in=candidate_campaign_we_vote_ids) |
-            #     Q(contest_measure_we_vote_id__in=contest_measure_we_vote_ids))
+                position_list_query = PositionForFriends.objects.order_by('date_entered')
+
+            position_list_query = position_list_query.filter(google_civic_election_id=google_civic_election_id)
             # SUPPORT, STILL_DECIDING, INFORMATION_ONLY, NO_STANCE, OPPOSE, PERCENT_RATING
             if stance_we_are_looking_for != ANY_STANCE:
                 # If we passed in the stance "ANY" it means we want to not filter down the list
-                position_list = position_list.filter(stance=stance_we_are_looking_for)
+                position_list_query = position_list_query.filter(stance=stance_we_are_looking_for)
+            if positive_value_exists(limit_to_organization_we_vote_ids) and len(limit_to_organization_we_vote_ids):
+                position_list_query = position_list_query.filter(
+                    organization_we_vote_id__in=limit_to_organization_we_vote_ids)
+            position_list = list(position_list_query)
             if len(position_list):
                 position_list_found = True
         except Exception as e:

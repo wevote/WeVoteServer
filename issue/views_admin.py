@@ -74,9 +74,11 @@ def issues_sync_out_view(request):  # issuesSyncOut
 def issues_retrieve_view(request):  # issuesRetrieve
     voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
     sort_formula = request.GET.get('sort_formula', MOST_LINKED_ORGANIZATIONS)
+    google_civic_election_id = request.GET.get('google_civic_election_id', False)
     voter_issues_only = request.GET.get('voter_issues_only', False)
     include_voter_follow_status = request.GET.get('include_voter_follow_status', False)
-    http_response = issues_retrieve_for_api(voter_device_id, sort_formula, voter_issues_only, include_voter_follow_status)
+    http_response = issues_retrieve_for_api(voter_device_id, sort_formula, google_civic_election_id,
+                                            voter_issues_only, include_voter_follow_status)
     return http_response
 
 
