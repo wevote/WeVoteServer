@@ -887,6 +887,8 @@ def create_batch_row_action_contest_office(batch_description, batch_header_map, 
     else:
         # If we are looking at a record with a ctcl_uuid, the we want to skip over a search by non unique
         #  identifiers.
+        if not positive_value_exists(contest_office_name) and positive_value_exists(ballotpedia_office_name):
+            contest_office_name = ballotpedia_office_name
 
         # These three parameters are needed to look up in ContestOffice table for a match
         if keep_looking_for_duplicates:
