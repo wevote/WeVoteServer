@@ -58,6 +58,16 @@ def issues_retrieve_doc_template_values(url_root):
                    '     "is_issue_followed": boolean,\n' \
                    '     "is_issue_ignored": boolean,\n' \
                    '   ],\n' \
+                   '  "issue_score_list": list\n' \
+                   '   [\n' \
+                   '     "ballot_item_we_vote_id": string,\n' \
+                   '     "issue_support_score": integer,\n' \
+                   '     "issue_oppose_score": integer,\n' \
+                   '     "organizations_included_list": list\n' \
+                   '      [\n' \
+                   '         "organization_we_vote_id": string,\n' \
+                   '      ],\n' \
+                   '   ],\n' \
                    '}]'
 
     template_values = {

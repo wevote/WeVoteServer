@@ -603,6 +603,14 @@ class OrganizationLinkToIssueList(models.Model):
             link_issue_we_vote_id_list.append(issue.issue_we_vote_id)
         return link_issue_we_vote_id_list
 
+    def fetch_organization_we_vote_id_list_by_issue_we_vote_id_list(self, issue_we_vote_id_list):
+        organization_we_vote_id_list = []
+        results = self.retrieve_organization_we_vote_id_list_from_issue_we_vote_id_list(
+            issue_we_vote_id_list)
+        if results['organization_we_vote_id_list_found']:
+            organization_we_vote_id_list = results['organization_we_vote_id_list']
+        return organization_we_vote_id_list
+
     def fetch_issue_count_for_organization(self, organization_id=0, organization_we_vote_id=''):
         link_active = True
         link_issue_list_count = 0
@@ -652,7 +660,7 @@ class OrganizationLinkToIssueList(models.Model):
         link_active = True
         try:
             link_queryset = OrganizationLinkToIssue.objects.all()
-            # we decided not to use case-insensitivty in favour of '__in'
+            # we decided not to use case-insensitivity in favour of '__in'
             link_queryset = link_queryset.filter(issue_we_vote_id__in=issue_we_vote_id_list)
             link_queryset = link_queryset.filter(link_active=link_active)
             link_queryset = link_queryset.values('organization_we_vote_id').distinct()
@@ -661,17 +669,17 @@ class OrganizationLinkToIssueList(models.Model):
                 organization_we_vote_id_list_found = True
                 for one_link in organization_link_to_issue_results:
                     organization_we_vote_id_list.append(one_link['organization_we_vote_id'])
-                status = 'ORGANIZATION_WE_VOTE_ID_LIST_RETRIEVED'
+                status = 'ORGANIZATION_WE_VOTE_ID_LIST_RETRIEVED '
             else:
-                status = 'NO_ORGANIZATION_WE_VOTE_IDS_RETRIEVED'
+                status = 'NO_ORGANIZATION_WE_VOTE_IDS_RETRIEVED '
         except Issue.DoesNotExist:
             # No issues found. Not a problem.
-            status = 'NO_ORGANIZATION_WE_VOTE_IDS_DO_NOT_EXIST'
+            status = 'NO_ORGANIZATION_WE_VOTE_IDS_DO_NOT_EXIST '
             organization_we_vote_id_list = []
         except Exception as e:
             handle_exception(e, logger=logger)
-            status = 'FAILED retrieve_organization_we_vote_id_list' \
-                     '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
+            status = 'FAILED retrieve_organization_we_vote_id_list_from_issue_we_vote_id_list' \
+                     '{error} [type: {error_type}] '.format(error=e, error_type=type(e))
 
         results = {
             'success': True if organization_we_vote_id_list else False,
