@@ -360,7 +360,7 @@ def voter_issue_follow_for_api(voter_device_id, issue_we_vote_id, follow_value, 
             'follow_issue_id': result['follow_issue_id'],
         }
 
-    return HttpResponse(json.dumps(new_result), content_type='application/json')
+    return new_result
 
 
 def move_organization_followers_to_another_organization(from_organization_id, from_organization_we_vote_id,
