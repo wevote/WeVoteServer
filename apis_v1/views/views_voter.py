@@ -913,16 +913,19 @@ def voter_guides_to_follow_retrieve_view(request):  # voterGuidesToFollowRetriev
 def voter_issue_follow_view(request):  # issueFollow
     voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
     issue_we_vote_id = request.GET.get('issue_we_vote_id', False)
+    google_civic_election_id = request.GET.get('google_civic_election_id', 0)
     follow_value = positive_value_exists(request.GET.get('follow', False))
     user_agent_string = request.META['HTTP_USER_AGENT']
     user_agent_object = get_user_agent(request)
     ignore_value = positive_value_exists(request.GET.get('ignore', False))
 
-    return voter_issue_follow_for_api(voter_device_id=voter_device_id,
-                                      issue_we_vote_id=issue_we_vote_id,
-                                      follow_value=follow_value,
-                                      ignore_value=ignore_value, user_agent_string=user_agent_string,
-                                      user_agent_object=user_agent_object)
+    result = voter_issue_follow_for_api(voter_device_id=voter_device_id,
+                                        issue_we_vote_id=issue_we_vote_id,
+                                        follow_value=follow_value,
+                                        ignore_value=ignore_value, user_agent_string=user_agent_string,
+                                        user_agent_object=user_agent_object)
+    result['google_civic_election_id'] = google_civic_election_id
+    return HttpResponse(json.dumps(result), content_type='application/json')
 
 
 def voter_location_retrieve_from_ip_view(request):  # voterLocationRetrieveFromIP - GeoIP geo location
