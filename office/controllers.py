@@ -2,7 +2,7 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
-from .models import ContestOfficeListManager, ContestOfficeManager
+from .models import ContestOfficeListManager, ContestOfficeManager, CONTEST_OFFICE_UNIQUE_IDENTIFIERS, ContestOffice
 from ballot.models import OFFICE
 from config.base import get_environment_variable
 from django.contrib import messages
@@ -54,6 +54,112 @@ def offices_import_from_master_server(request, google_civic_election_id='', stat
         import_results['duplicates_removed'] = duplicates_removed
 
     return import_results
+
+
+def fetch_duplicate_office_count(contest_office, ignore_office_id_list):
+    if not hasattr(contest_office, 'google_civic_election_id'):
+        return 0
+
+    if not positive_value_exists(contest_office.google_civic_election_id):
+        return 0
+
+    # Search for other offices within this election that match name and election
+    contest_office_list_manager = ContestOfficeListManager()
+    return contest_office_list_manager.fetch_offices_from_non_unique_identifiers_count(
+        contest_office.google_civic_election_id, contest_office.state_code,
+        contest_office.office_name, ignore_office_id_list)
+
+
+def find_duplicate_contest_office(contest_office, ignore_office_id_list):
+    if not hasattr(contest_office, 'google_civic_election_id'):
+        error_results = {
+            'success':                                  False,
+            'status':                                   "FIND_DUPLICATE_CONTEST_OFFICE_MISSING_OFFICE_OBJECT",
+            'contest_office_merge_possibility_found':   False,
+        }
+        return error_results
+
+    if not positive_value_exists(contest_office.google_civic_election_id):
+        error_results = {
+            'success':                                False,
+            'status':                                 "FIND_DUPLICATE_CONTEST_OFFICE_MISSING_GOOGLE_CIVIC_ELECTION_ID",
+            'contest_office_merge_possibility_found': False,
+        }
+        return error_results
+
+    # Search for other contest offices within this election that match name and election
+    contest_office_list_manager = ContestOfficeListManager()
+    try:
+        results = contest_office_list_manager.retrieve_contest_offices_from_non_unique_identifiers(
+            contest_office.office_name, contest_office.google_civic_election_id, contest_office.state_code,
+            contest_office.district_id, contest_office.district_name, ignore_office_id_list)
+
+        if results['contest_office_found']:
+            contest_office_merge_conflict_values = figure_out_conflict_values(contest_office, results['contest_office'])
+
+            results = {
+                'success':                                  True,
+                'status':                                   "FIND_DUPLICATE_CONTEST_OFFICE_DUPLICATES_FOUND",
+                'contest_office_merge_possibility_found':   True,
+                'contest_office_merge_possibility':         results['contest_office'],
+                'contest_office_merge_conflict_values':     contest_office_merge_conflict_values,
+            }
+            return results
+        elif results['contest_office_list_found']:
+            # Only deal with merging the incoming contest office and the first on found
+            contest_office_merge_conflict_values = \
+                figure_out_conflict_values(contest_office, results['contest_office_list'][0])
+
+            results = {
+                'success':                                  True,
+                'status':                                   "FIND_DUPLICATE_CONTEST_OFFICE_DUPLICATES_FOUND",
+                'contest_office_merge_possibility_found':   True,
+                'contest_office_merge_possibility':         results['contest_office_list'][0],
+                'contest_office_merge_conflict_values':     contest_office_merge_conflict_values,
+            }
+            return results
+        else:
+            results = {
+                'success':                                  True,
+                'status':                                   "FIND_DUPLICATE_CONTEST_OFFICE_NO_DUPLICATES_FOUND",
+                'contest_office_merge_possibility_found':   False,
+            }
+            return results
+
+    except ContestOffice.DoesNotExist:
+        pass
+    except Exception as e:
+        pass
+
+    results = {
+        'success':                                  True,
+        'status':                                   "FIND_DUPLICATE_CONTEST_OFFICE_NO_DUPLICATES_FOUND",
+        'contest_office_merge_possibility_found':   False,
+    }
+    return results
+
+
+def figure_out_conflict_values(contest_office1, contest_office2):
+    contest_office_merge_conflict_values = {}
+
+    for attribute in CONTEST_OFFICE_UNIQUE_IDENTIFIERS:
+        try:
+            contest_office1_attribute = getattr(contest_office1, attribute)
+            contest_office2_attribute = getattr(contest_office2, attribute)
+            if contest_office1_attribute is None and contest_office2_attribute is None:
+                contest_office_merge_conflict_values[attribute] = 'MATCHING'
+            elif contest_office1_attribute is None or contest_office1_attribute is "":
+                contest_office_merge_conflict_values[attribute] = 'CONTEST_OFFICE2'
+            elif contest_office2_attribute is None or contest_office2_attribute is "":
+                contest_office_merge_conflict_values[attribute] = 'CONTEST_OFFICE1'
+            elif contest_office1_attribute == contest_office2_attribute:
+                contest_office_merge_conflict_values[attribute] = 'MATCHING'
+            else:
+                contest_office_merge_conflict_values[attribute] = 'CONFLICT'
+        except AttributeError:
+            pass
+
+    return contest_office_merge_conflict_values
 
 
 def filter_offices_structured_json_for_local_duplicates(structured_json):

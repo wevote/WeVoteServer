@@ -413,6 +413,43 @@ def heal_geo_coordinates(text_for_map_search):
     return latitude, longitude
 
 
+def move_ballot_items_to_another_office(from_contest_office_id, from_contest_office_we_vote_id,
+                                        to_contest_office_id, to_contest_office_we_vote_id):
+    status = ''
+    success = True
+    ballot_item_entries_moved = 0
+    ballot_item_entries_not_moved = 0
+    ballot_item_list_manager = BallotItemListManager()
+
+    # We search on both from_office_id and from_office_we_vote_id in case there is some data that needs
+    # to be healed
+    all_ballot_items_results = ballot_item_list_manager.retrieve_all_ballot_items_for_contest_office(
+        from_contest_office_id, from_contest_office_we_vote_id)
+    from_ballot_item_list = all_ballot_items_results['ballot_item_list']
+    for from_ballot_item_entry in from_ballot_item_list:
+        try:
+            from_ballot_item_entry.contest_office_id = to_contest_office_id
+            from_ballot_item_entry.contest_office_we_vote_id = to_contest_office_we_vote_id
+            from_ballot_item_entry.save()
+            ballot_item_entries_moved += 1
+        except Exception as e:
+            success = False
+            status += "MOVE_TO_ANOTHER_CONTEST_OFFICE-UNABLE_TO_SAVE_NEW_ballot_item "
+            ballot_item_entries_not_moved += 1
+
+    results = {
+        'status':                           status,
+        'success':                          success,
+        'from_contest_office_id':           from_contest_office_id,
+        'from_contest_office_we_vote_id':   from_contest_office_we_vote_id,
+        'to_contest_office_id':             to_contest_office_id,
+        'to_contest_office_we_vote_id':     to_contest_office_we_vote_id,
+        'ballot_item_entries_moved':        ballot_item_entries_moved,
+        'ballot_item_entries_not_moved':    ballot_item_entries_not_moved,
+    }
+    return results
+
+
 def figure_out_google_civic_election_id_voter_is_watching(voter_device_id):
     status = ''
 

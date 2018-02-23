@@ -214,6 +214,43 @@ def merge_duplicate_candidates(candidate1, candidate2, merge_conflict_values):
     return results
 
 
+def move_candidates_to_another_office(from_contest_office_id, from_contest_office_we_vote_id,
+                                      to_contest_office_id, to_contest_office_we_vote_id):
+    status = ''
+    success = True
+    candidate_entries_moved = 0
+    candidate_entries_not_moved = 0
+    candidate_campaign_list_manager = CandidateCampaignListManager()
+
+    # We search on both from_office_id and from_office_we_vote_id in case there is some data that needs
+    # to be healed
+    all_candidates_results = candidate_campaign_list_manager.retrieve_all_candidates_for_office(
+        from_contest_office_id, from_contest_office_we_vote_id)
+    from_candidate_list = all_candidates_results['candidate_list']
+    for from_candidate_entry in from_candidate_list:
+        try:
+            from_candidate_entry.contest_office_id = to_contest_office_id
+            from_candidate_entry.contest_office_we_vote_id = to_contest_office_we_vote_id
+            from_candidate_entry.save()
+            candidate_entries_moved += 1
+        except Exception as e:
+            success = False
+            status += "MOVE_TO_ANOTHER_CONTEST_OFFICE-UNABLE_TO_SAVE_NEW_CANDIDATE "
+            candidate_entries_not_moved += 1
+
+    results = {
+        'status':                           status,
+        'success':                          success,
+        'from_contest_office_id':           from_contest_office_id,
+        'from_contest_office_we_vote_id':   from_contest_office_we_vote_id,
+        'to_contest_office_id':             to_contest_office_id,
+        'to_contest_office_we_vote_id':     to_contest_office_we_vote_id,
+        'candidate_entries_moved':          candidate_entries_moved,
+        'candidate_entries_not_moved':      candidate_entries_not_moved,
+    }
+    return results
+
+
 def filter_candidates_structured_json_for_local_duplicates(structured_json):
     """
     With this function, we remove candidates that seem to be duplicates, but have different we_vote_id's.

@@ -13,6 +13,32 @@ from wevote_functions.functions import convert_to_int, extract_state_from_ocd_di
 
 logger = wevote_functions.admin.get_logger(__name__)
 
+CONTEST_OFFICE_UNIQUE_IDENTIFIERS = [
+    'ballotpedia_id',
+    'contest_level0',
+    'contest_level1',
+    'contest_level2',
+    'cctl_uuid',
+    'district_id',
+    'district_name',
+    'district_scope',
+    'elected_office_name',
+    'electorate_specifications',
+    'google_civic_election_id',
+    'google_civic_election_id_new',
+    'google_civic_office_name',
+    'maplight_id',
+    'number_elected',
+    'number_voting_for',
+    'ocd_division_id',
+    'office_name',
+    'primary_party',
+    'special',
+    'state_code',
+    'we_vote_id',
+    'wikipedia_id',
+]
+
 
 class ContestOffice(models.Model):
     # The we_vote_id identifier is unique across all We Vote sites, and allows us to share our data with other
@@ -181,6 +207,81 @@ class ContestOfficeManager(models.Model):
         if results['success']:
             return results['contest_office_we_vote_id']
         return 0
+
+    def retrieve_offices_are_not_duplicates_list(self, contest_office_we_vote_id, for_editing=False):
+        """
+        Get a list of other office_we_vote_id's that are not duplicates
+        :param contest_office_we_vote_id:
+        :param for_editing:
+        :return:
+        """
+        # Note that the direction of the linkage does not matter
+        contest_offices_are_not_duplicates_list1 = []
+        contest_offices_are_not_duplicates_list2 = []
+        try:
+            if positive_value_exists(for_editing):
+                contest_offices_are_not_duplicates_list_query = ContestOfficesAreNotDuplicates.objects.filter(
+                    contest_office1_we_vote_id__iexact=contest_office_we_vote_id,
+                )
+            else:
+                contest_offices_are_not_duplicates_list_query = \
+                    ContestOfficesAreNotDuplicates.objects.using('readonly').filter(
+                        contest_office1_we_vote_id__iexact=contest_office_we_vote_id,
+                    )
+            contest_offices_are_not_duplicates_list1 = list(contest_offices_are_not_duplicates_list_query)
+            success = True
+            status = "CONTEST_OFFICES_NOT_DUPLICATES_LIST_UPDATED_OR_CREATED1 "
+        except ContestOfficesAreNotDuplicates.DoesNotExist:
+            # No data found. Try again below
+            success = True
+            status = 'NO_CONTEST_OFFICES_NOT_DUPLICATES_LIST_RETRIEVED_DoesNotExist1 '
+        except Exception as e:
+            success = False
+            status = "CONTEST_OFFICES_NOT_DUPLICATES_LIST_NOT_UPDATED_OR_CREATED1 "
+
+        if success:
+            try:
+                if positive_value_exists(for_editing):
+                    contest_offices_are_not_duplicates_list_query = ContestOfficesAreNotDuplicates.objects.filter(
+                        contest_office2_we_vote_id__iexact=contest_office_we_vote_id,
+                    )
+                else:
+                    contest_offices_are_not_duplicates_list_query = \
+                        ContestOfficesAreNotDuplicates.objects.using('readonly').filter(
+                            contest_office2_we_vote_id__iexact=contest_office_we_vote_id,
+                        )
+                contest_offices_are_not_duplicates_list2 = list(contest_offices_are_not_duplicates_list_query)
+                success = True
+                status = "CONTEST_OFFICES_NOT_DUPLICATES_LIST_UPDATED_OR_CREATED2 "
+            except ContestOfficesAreNotDuplicates.DoesNotExist:
+                success = True
+                status = 'NO_CONTEST_OFFICES_NOT_DUPLICATES_LIST_RETRIEVED2_DoesNotExist2 '
+            except Exception as e:
+                success = False
+                status = "CONTEST_OFFICES_NOT_DUPLICATES_LIST_NOT_UPDATED_OR_CREATED2 "
+
+        contest_offices_are_not_duplicates_list = \
+            contest_offices_are_not_duplicates_list1 + contest_offices_are_not_duplicates_list2
+        contest_offices_are_not_duplicates_list_found = positive_value_exists(len(
+            contest_offices_are_not_duplicates_list))
+        contest_offices_are_not_duplicates_list_we_vote_ids = []
+        for one_entry in contest_offices_are_not_duplicates_list:
+            if one_entry.contest_office1_we_vote_id != contest_office_we_vote_id:
+                contest_offices_are_not_duplicates_list_we_vote_ids.append(one_entry.contest_office1_we_vote_id)
+            elif one_entry.contest_office2_we_vote_id != contest_office_we_vote_id:
+                contest_offices_are_not_duplicates_list_we_vote_ids.append(one_entry.contest_office2_we_vote_id)
+        results = {
+            'success':                                              success,
+            'status':                                               status,
+            'contest_offices_are_not_duplicates_list_found':        contest_offices_are_not_duplicates_list_found,
+            'contest_offices_are_not_duplicates_list':              contest_offices_are_not_duplicates_list,
+            'contest_offices_are_not_duplicates_list_we_vote_ids':  contest_offices_are_not_duplicates_list_we_vote_ids,
+        }
+        return results
+
+    def fetch_offices_are_not_duplicates_list_we_vote_ids(self, office_we_vote_id):
+        results = self.retrieve_offices_are_not_duplicates_list(office_we_vote_id)
+        return results['contest_offices_are_not_duplicates_list_we_vote_ids']
 
     def update_or_create_contest_office(self, office_we_vote_id, maplight_id, google_civic_election_id,
                                         office_name, district_id, updated_contest_office_values):
@@ -356,6 +457,48 @@ class ContestOfficeManager(models.Model):
             'saved':                    new_office_created or office_updated,
             'updated':                  office_updated,
             'not_processed':            True if not success else False,
+        }
+        return results
+
+    def update_or_create_contest_offices_are_not_duplicates(self, contest_office1_we_vote_id,
+                                                            contest_office2_we_vote_id):
+        """
+        Either update or create a contest_office entry.
+        """
+        exception_multiple_object_returned = False
+        success = False
+        new_contest_offices_are_not_duplicates_created = False
+        contest_offices_are_not_duplicates = ContestOfficesAreNotDuplicates()
+        status = ""
+
+        if positive_value_exists(contest_office1_we_vote_id) and positive_value_exists(contest_office2_we_vote_id):
+            try:
+                updated_values = {
+                    'contest_office1_we_vote_id':    contest_office1_we_vote_id,
+                    'contest_office2_we_vote_id':    contest_office2_we_vote_id,
+                }
+                contest_offices_are_not_duplicates, new_contest_offices_are_not_duplicates_created = \
+                    ContestOfficesAreNotDuplicates.objects.update_or_create(
+                        contest_office1_we_vote_id__exact=contest_office1_we_vote_id,
+                        contest_office2_we_vote_id__iexact=contest_office2_we_vote_id,
+                        defaults=updated_values)
+                success = True
+                status += "CONTEST_OFFICES_ARE_NOT_DUPLICATES_UPDATED_OR_CREATED "
+            except ContestOfficesAreNotDuplicates.MultipleObjectsReturned as e:
+                success = False
+                status += 'MULTIPLE_MATCHING_CONTEST_OFFICES_ARE_NOT_DUPLICATES_FOUND_BY_CONTEST_OFFICE_WE_VOTE_ID '
+                exception_multiple_object_returned = True
+            except Exception as e:
+                status += 'EXCEPTION_UPDATE_OR_CREATE_CONTEST_OFFICES_ARE_NOT_DUPLICATES ' \
+                         '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
+                success = False
+
+        results = {
+            'success':                                          success,
+            'status':                                           status,
+            'MultipleObjectsReturned':                          exception_multiple_object_returned,
+            'new_contest_offices_are_not_duplicates_created':   new_contest_offices_are_not_duplicates_created,
+            'contest_offices_are_not_duplicates':               contest_offices_are_not_duplicates,
         }
         return results
 
@@ -663,6 +806,33 @@ class ContestOfficeListManager(models.Model):
 
         return office_count
 
+    def fetch_offices_from_non_unique_identifiers_count(
+            self, google_civic_election_id, state_code, office_name, ignore_office_id_list=[]):
+        keep_looking_for_duplicates = True
+        status = ""
+
+        if keep_looking_for_duplicates and positive_value_exists(office_name):
+            # Search by Contest Office name exact match
+            try:
+                contest_office_query = ContestOffice.objects.all()
+                contest_office_query = contest_office_query.filter(office_name__iexact=office_name,
+                                                                   google_civic_election_id=google_civic_election_id)
+                if positive_value_exists(state_code):
+                    contest_office_query = contest_office_query.filter(state_code__iexact=state_code)
+
+                if positive_value_exists(ignore_office_id_list):
+                    contest_office_query = contest_office_query.exclude(we_vote_id__in=ignore_office_id_list)
+
+                contest_office_count = contest_office_query.count()
+                if positive_value_exists(contest_office_count):
+                    return contest_office_count
+            except ContestOffice.DoesNotExist:
+                status += "BATCH_ROW_ACTION_OFFICE_NOT_FOUND "
+            except Exception as e:
+                keep_looking_for_duplicates = False
+
+        return 0
+
     def retrieve_offices(self, google_civic_election_id=0, state_code="", office_list=[],
                          return_list_of_objects=False):
         office_list_objects = []
@@ -779,7 +949,8 @@ class ContestOfficeListManager(models.Model):
         return results
 
     def retrieve_contest_offices_from_non_unique_identifiers(
-            self, contest_office_name, google_civic_election_id, state_code, district_id='', district_name=''):
+            self, contest_office_name, google_civic_election_id, state_code, district_id='', district_name='',
+            ignore_office_id_list=[]):
         keep_looking_for_duplicates = True
         success = False
         contest_office = ContestOffice()
@@ -799,6 +970,9 @@ class ContestOfficeListManager(models.Model):
                 contest_office_query = contest_office_query.filter(district_id=district_id)
             elif positive_value_exists(district_name):
                 contest_office_query = contest_office_query.filter(district_name__iexact=district_name)
+
+            if positive_value_exists(ignore_office_id_list):
+                contest_office_query = contest_office_query.exclude(we_vote_id__in=ignore_office_id_list)
 
             contest_office_list = list(contest_office_query)
             if len(contest_office_list):
@@ -863,6 +1037,25 @@ class ContestOfficeListManager(models.Model):
             'multiple_entries_found':       multiple_entries_found,
         }
         return results
+
+
+class ContestOfficesAreNotDuplicates(models.Model):
+    """
+    When checking for duplicates, there are times when we want to explicitly mark two contest offices as NOT duplicates
+    """
+    contest_office1_we_vote_id = models.CharField(
+        verbose_name="first contest office we are tracking", max_length=255, null=True, unique=False)
+    contest_office2_we_vote_id = models.CharField(
+        verbose_name="second contest office we are tracking", max_length=255, null=True, unique=False)
+
+    def fetch_other_office_we_vote_id(self, one_we_vote_id):
+        if one_we_vote_id == self.contest_office1_we_vote_id:
+            return self.contest_office2_we_vote_id
+        elif one_we_vote_id == self.contest_office2_we_vote_id:
+            return self.contest_office1_we_vote_id
+        else:
+            # If the we_vote_id passed in wasn't found, don't return another we_vote_id
+            return ""
 
 
 class ElectedOffice(models.Model):

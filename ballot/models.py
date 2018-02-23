@@ -482,6 +482,56 @@ class BallotItemListManager(models.Model):
         }
         return results
 
+    def retrieve_all_ballot_items_for_contest_office(self, office_id, office_we_vote_id):
+        ballot_item_list = []
+        ballot_item_list_found = False
+
+        if not positive_value_exists(office_id) and not positive_value_exists(office_we_vote_id):
+            status = 'VALID_OFFICE_ID_AND_OFFICE_WE_VOTE_ID_MISSING'
+            results = {
+                'success':                  True if ballot_item_list_found else False,
+                'status':                   status,
+                'office_id':                office_id,
+                'office_we_vote_id':        office_we_vote_id,
+                'ballot_item_list_found':   ballot_item_list_found,
+                'ballot_item_list':         ballot_item_list,
+            }
+            return results
+
+        try:
+            ballot_item_queryset = BallotItem.objects.using('readonly').all()
+            if positive_value_exists(office_id):
+                ballot_item_queryset = ballot_item_queryset.filter(contest_office_id=office_id)
+            elif positive_value_exists(office_we_vote_id):
+                ballot_item_queryset = ballot_item_queryset.filter(contest_office_we_vote_id=office_we_vote_id)
+
+            ballot_item_queryset = ballot_item_queryset.order_by('local_ballot_order', 'google_ballot_placement')
+            ballot_item_list = ballot_item_queryset
+
+            if len(ballot_item_list):
+                ballot_item_list_found = True
+                status = 'BALLOT_ITEMS_FOUND, retrieve_all_ballot_items_for_contest_office '
+            else:
+                status = 'NO_BALLOT_ITEMS_FOUND, retrieve_all_ballot_items_for_contest_office '
+        except BallotItem.DoesNotExist:
+            # No ballot items found. Not a problem.
+            status = 'NO_BALLOT_ITEMS_FOUND_DoesNotExist, retrieve_all_ballot_items_for_contest_office '
+            ballot_item_list = []
+        except Exception as e:
+            handle_exception(e, logger=logger)
+            status = 'FAILED retrieve_all_ballot_items_for_contest_office ' \
+                     '{error} [type: {error_type}]'.format(error=e.message, error_type=type(e))
+
+        results = {
+            'success':                      True if ballot_item_list_found else False,
+            'status':                       status,
+            'office_id':                    office_id,
+            'office_we_vote_id':            office_we_vote_id,
+            'ballot_item_list_found':       ballot_item_list_found,
+            'ballot_item_list':             ballot_item_list,
+        }
+        return results
+
     def retrieve_all_ballot_items_for_voter(self, voter_id, google_civic_election_id):
         polling_location_we_vote_id = ''
         ballot_item_list = []
