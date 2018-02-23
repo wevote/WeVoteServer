@@ -78,6 +78,7 @@ BATCH_IMPORT_KEYS_ACCEPTED_FOR_CANDIDATES = {
     'ballotpedia_candidate_id': 'ballotpedia_candidate_id',
     'ballotpedia_candidate_name': 'ballotpedia_candidate_name',
     'ballotpedia_candidate_url': 'ballotpedia_candidate_url',
+    'ballotpedia_office_id': 'ballotpedia_office_id *',  # For matching only
     'contest_office_we_vote_id': 'contest_office_we_vote_id *',  # For matching only
     'contest_office_name': 'contest_office_name *',  # For matching only
 }
