@@ -1299,55 +1299,53 @@ def organization_save_for_api(voter_device_id, organization_id, organization_we_
 
 
 def organization_search_for_api(organization_name, organization_twitter_handle, organization_website,
-                                organization_email):
+                                organization_email, organization_search_term, exact_match):
+    organization_search_term = organization_search_term.strip()
     organization_name = organization_name.strip()
     organization_twitter_handle = organization_twitter_handle.strip()
     organization_website = organization_website.strip()
     organization_email = organization_email.strip()
 
     # We need at least one term to search for
-    if not positive_value_exists(organization_name) \
+    if not positive_value_exists(organization_search_term) \
+            and not positive_value_exists(organization_name)\
             and not positive_value_exists(organization_twitter_handle)\
             and not positive_value_exists(organization_website)\
             and not positive_value_exists(organization_email):
         json_data = {
-            'status':               "ORGANIZATION_SEARCH_ALL_TERMS_MISSING",
-            'success':              False,
-            'organization_name':    organization_name,
-            'organization_twitter_handle': organization_twitter_handle,
-            'organization_website': organization_website,
-            'organization_email':   organization_email,
-            'organizations_list':   [],
+            'status':                       "ORGANIZATION_SEARCH_ALL_TERMS_MISSING",
+            'success':                      False,
+            'exact_match':                  exact_match,
+            'organization_search_term':     organization_search_term,
+            'organization_name':            organization_name,
+            'organization_twitter_handle':  organization_twitter_handle,
+            'organization_website':         organization_website,
+            'organization_email':           organization_email,
+            'organizations_list':           [],
         }
         return HttpResponse(json.dumps(json_data), content_type='application/json')
 
     organization_list_manager = OrganizationListManager()
+    organization_facebook = None
     results = organization_list_manager.organization_search_find_any_possibilities(
-        organization_name, organization_twitter_handle, organization_website, organization_email)
+        organization_name, organization_twitter_handle, organization_website, organization_email,
+        organization_facebook, organization_search_term, exact_match)
 
+    organizations_list = []
     if results['organizations_found']:
         organizations_list = results['organizations_list']
-        json_data = {
-            'status': results['status'],
-            'success': True,
-            'organization_name':    organization_name,
-            'organization_twitter_handle': organization_twitter_handle,
-            'organization_website': organization_website,
-            'organization_email':   organization_email,
-            'organizations_list':   organizations_list,
-        }
-        return HttpResponse(json.dumps(json_data), content_type='application/json')
-    else:
-        json_data = {
-            'status':               results['status'],
-            'success':              False,
-            'organization_name':    organization_name,
-            'organization_twitter_handle': organization_twitter_handle,
-            'organization_website': organization_website,
-            'organization_email':   organization_email,
-            'organizations_list':   [],
-        }
-        return HttpResponse(json.dumps(json_data), content_type='application/json')
+    json_data = {
+        'status':                       results['status'],
+        'success':                      True,
+        'exact_match':                  exact_match,
+        'organization_search_term':     organization_search_term,
+        'organization_name':            organization_name,
+        'organization_twitter_handle':  organization_twitter_handle,
+        'organization_website':         organization_website,
+        'organization_email':           organization_email,
+        'organizations_list':           organizations_list,
+    }
+    return HttpResponse(json.dumps(json_data), content_type='application/json')
 
 
 def refresh_organization_data_from_master_tables(organization_we_vote_id):

@@ -21,6 +21,11 @@ def organization_search_doc_template_values(url_root):
     ]
     optional_query_parameter_list = [
         {
+            'name':         'organization_search_term',
+            'value':        'string',  # boolean, integer, long, string
+            'description':  'String of text used in AND search.',
+        },
+        {
             'name':         'organization_name',
             'value':        'string',  # boolean, integer, long, string
             'description':  'Name of the organization that is displayed.',
@@ -39,6 +44,11 @@ def organization_search_doc_template_values(url_root):
             'name':         'organization_twitter_handle',
             'value':        'string',  # boolean, integer, long, string
             'description':  'Twitter handle of the organization.',
+        },
+        {
+            'name':         'exact_match',
+            'value':        'boolean',  # boolean, integer, long, string
+            'description':  'Require an exact match (case insensitive) of all fields submitted.',
         },
     ]
 
@@ -73,10 +83,12 @@ def organization_search_doc_template_values(url_root):
                    '  "status": string,\n' \
                    '  "success": boolean,\n' \
                    '  "voter_device_id": string (88 characters long),\n' \
+                   '  "organization_search_term": string (the original search term passed in),\n' \
                    '  "organization_email": string (the original search term passed in),\n' \
                    '  "organization_name": string (the original search term passed in),\n' \
                    '  "organization_twitter_handle": string (the original search term passed in),\n' \
                    '  "organization_website": string (the original search term passed in),\n' \
+                   '  "exact_match": boolean (did the search require exact match?),\n' \
                    '  "organizations_list": list\n' \
                    '   [\n' \
                    '     "organization_id": integer,\n' \
