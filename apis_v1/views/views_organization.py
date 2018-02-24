@@ -185,14 +185,18 @@ def organization_search_view(request):
     :param request:
     :return:
     """
+    organization_search_term = request.GET.get('organization_search_term', '')
     organization_name = request.GET.get('organization_name', '')
     organization_twitter_handle = request.GET.get('organization_twitter_handle', '')
     organization_website = request.GET.get('organization_website', '')
     organization_email = request.GET.get('organization_email', '')
-    return organization_search_for_api(organization_name=organization_name,
+    exact_match = positive_value_exists(request.GET.get('exact_match', False))
+    return organization_search_for_api(organization_search_term=organization_search_term,
+                                       organization_name=organization_name,
                                        organization_twitter_handle=organization_twitter_handle,
                                        organization_website=organization_website,
-                                       organization_email=organization_email)
+                                       organization_email=organization_email,
+                                       exact_match=exact_match)
 
 
 def organization_suggestion_tasks_view(request):

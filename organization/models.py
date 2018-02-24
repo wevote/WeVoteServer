@@ -1422,7 +1422,8 @@ class OrganizationListManager(models.Manager):
 
     def organization_search_find_any_possibilities(self, organization_name, organization_twitter_handle='',
                                                    organization_website='', organization_email='',
-                                                   organization_facebook=''):
+                                                   organization_facebook='', organization_search_term='',
+                                                   exact_match=False):
         """
         We want to find *any* possible organization that includes any of the search terms
         :param organization_name:
@@ -1430,6 +1431,8 @@ class OrganizationListManager(models.Manager):
         :param organization_website:
         :param organization_email:
         :param organization_facebook:
+        :param organization_search_term:
+        :param exact_match:
         :return:
         """
         organization_list_for_json = {}
@@ -1437,31 +1440,65 @@ class OrganizationListManager(models.Manager):
             filters = []
             organization_list_for_json = []
             organization_objects_list = []
+            if positive_value_exists(organization_search_term):
+                if positive_value_exists(exact_match):
+                    new_filter = Q(organization_name__iexact=organization_search_term)
+                    filters.append(new_filter)
+                    new_filter = Q(organization_twitter_handle__iexact=organization_search_term)
+                    filters.append(new_filter)
+                    new_filter = Q(organization_website__iexact=organization_search_term)
+                    filters.append(new_filter)
+                    new_filter = Q(organization_email__iexact=organization_search_term)
+                    filters.append(new_filter)
+                    new_filter = Q(organization_facebook__iexact=organization_search_term)
+                    filters.append(new_filter)
+                else:
+                    new_filter = Q(organization_name__icontains=organization_search_term)
+                    filters.append(new_filter)
+                    new_filter = Q(organization_twitter_handle__icontains=organization_search_term)
+                    filters.append(new_filter)
+                    new_filter = Q(organization_website__icontains=organization_search_term)
+                    filters.append(new_filter)
+                    new_filter = Q(organization_email__icontains=organization_search_term)
+                    filters.append(new_filter)
+                    new_filter = Q(organization_facebook__icontains=organization_search_term)
+                    filters.append(new_filter)
+
             if positive_value_exists(organization_name):
-                new_filter = Q(organization_name__icontains=organization_name)
-                # # Find entries with any word in the string - DALE 2016-05-06 This didn't feel right
-                # from functools import reduce
-                # organization_name_list = organization_name.split(" ")
-                # new_filter = reduce(lambda x, y: x | y,
-                #                     [Q(organization_name__icontains=word) for word in organization_name_list])
+                if positive_value_exists(exact_match):
+                    new_filter = Q(organization_name__iexact=organization_name)
+                else:
+                    new_filter = Q(organization_name__icontains=organization_name)
                 filters.append(new_filter)
 
             # The master organization twitter_handle data is in TwitterLinkToOrganization but we try to keep
             # organization_twitter_handle up-to-date for rapid searches like this.
             if positive_value_exists(organization_twitter_handle):
-                new_filter = Q(organization_twitter_handle__icontains=organization_twitter_handle)
+                if positive_value_exists(exact_match):
+                    new_filter = Q(organization_twitter_handle__iexact=organization_twitter_handle)
+                else:
+                    new_filter = Q(organization_twitter_handle__icontains=organization_twitter_handle)
                 filters.append(new_filter)
 
             if positive_value_exists(organization_website):
-                new_filter = Q(organization_website__icontains=organization_website)
+                if positive_value_exists(exact_match):
+                    new_filter = Q(organization_website__iexact=organization_website)
+                else:
+                    new_filter = Q(organization_website__icontains=organization_website)
                 filters.append(new_filter)
 
             if positive_value_exists(organization_email):
-                new_filter = Q(organization_email__icontains=organization_email)
+                if positive_value_exists(exact_match):
+                    new_filter = Q(organization_email__iexact=organization_email)
+                else:
+                    new_filter = Q(organization_email__icontains=organization_email)
                 filters.append(new_filter)
 
             if positive_value_exists(organization_facebook):
-                new_filter = Q(organization_facebook__icontains=organization_facebook)
+                if positive_value_exists(exact_match):
+                    new_filter = Q(organization_facebook__iexact=organization_facebook)
+                else:
+                    new_filter = Q(organization_facebook__icontains=organization_facebook)
                 filters.append(new_filter)
 
             # Add the first query
