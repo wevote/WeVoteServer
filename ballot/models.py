@@ -499,7 +499,7 @@ class BallotItemListManager(models.Model):
             return results
 
         try:
-            ballot_item_queryset = BallotItem.objects.using('readonly').all()
+            ballot_item_queryset = BallotItem.objects.all()
             if positive_value_exists(office_id):
                 ballot_item_queryset = ballot_item_queryset.filter(contest_office_id=office_id)
             elif positive_value_exists(office_we_vote_id):
