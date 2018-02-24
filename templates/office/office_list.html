@@ -73,6 +73,15 @@
         <input type="text" name="office_search" id="office_search_id" value="{{ office_search }}" style="width: 450px" />
         <input type="submit" value="Search for Office" />
         {# End of if state_list #}
+{% if office_list %}
+    {% if google_civic_election_id %}
+    <ul>
+        <li>Prepare: <a href="{% url 'office:find_and_remove_duplicate_offices' %}?google_civic_election_id={{ google_civic_election_id }}" >
+        Find and Remove Duplicate Contest Offices for this Election</a> (about 1 minute)</li>
+    </ul>
+
+    {% endif %}
+{% endif %}
 
 {% if office_list %}
     <table border="1" cellpadding="5" cellspacing="5">

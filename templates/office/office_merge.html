@@ -1,0 +1,274 @@
+{# templates/office/office_merge.html #}
+{% extends "template_base.html" %}
+
+{% block title %}{% if contest_office_option1 %}{{ contest_office_option1.contest_office_name  }}{% else %}CANNOT MERGE{% endif %}{% endblock %}
+
+{%  block content %}
+<a href="{% url 'office:office_list' %}">< Back to Offices</a>
+  <br /></r />
+<a href="{% url 'office:find_and_remove_duplicate_offices' %}?google_civic_election_id={{ google_civic_election_id }}&find_duplicates_count=1" >Click to find out the number of possible duplicates</a> (takes 30-60 seconds)
+
+<h1>{% if contest_office_option1 %}Merge {{ contest_office_option1.office_name }}{% else %}CANNOT MERGE{% endif %}</h1>
+{% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
+
+<form action="{% url 'office:office_merge_process' %}" method="post">
+{% csrf_token %}
+{% if contest_office_option1 and contest_office_option2 %}
+<table>
+    <tr>
+        <th>&nbsp;</th>
+        <th>Contest Office Option 1</th>
+        <th>Contest Office Option 2</th>
+    </tr>
+    <tr>
+        <td>&nbsp;</td>
+        <td><a href="{% url 'office:office_edit_we_vote_id' contest_office_we_vote_id=contest_office_option1.we_vote_id %}" target="_blank">view (in new window)</a></td>
+        <td><a href="{% url 'office:office_edit_we_vote_id' contest_office_we_vote_id=contest_office_option2.we_vote_id %}" target="_blank">view (in new window)</a></td>
+    </tr>
+    {% if contest_office_option1.office_name != None or contest_office_option2.office_name != None %}
+    <tr>
+        <td>Contest Office Name</td>
+        {% if conflict_values.office_name == "CONFLICT" %}
+        <td><input type="radio" name="contest_office_name_choice" value="{{ contest_office_option1.we_vote_id }}" checked /><span class="bold-select"> {{ contest_office_option1.contest_office_name|default_if_none:"" }}</span></td>
+        <td><input type="radio" name="contest_office_name_choice" value="{{ contest_office_option2.we_vote_id }}" /><span class="bold-select"> {{ contest_office_option2.contest_office_name|default_if_none:"" }}</span></td>
+        {% else %}
+        <td>{% if conflict_values.office_name == "CONTEST_OFFICE1" %}<strong>{{ contest_office_option1.office_name|default_if_none:"" }}</strong>{% else %}{{ contest_office_option1.office_name|default_if_none:"" }}{% endif %}</td>
+        <td>{% if conflict_values.office_name == "CONTEST_OFFICE2" %}<strong>{{ contest_office_option2.office_name|default_if_none:"" }}</strong>{% else %}{{ contest_office_option2.office_name|default_if_none:"" }}{% endif %}</td>
+        {% endif %}
+    </tr>
+    {% endif %}
+
+    {% if contest_office_option1.google_civic_office_name != None or contest_office_option2.google_civic_office_name != None %}
+    <tr>
+        <td>Contest Office Name (from Google Civic)</td>
+        {% if conflict_values.google_civic_office_name == "CONFLICT" %}
+        <td><input type="radio" name="google_civic_office_name_choice" value="{{ contest_office_option1.we_vote_id }}" checked /><span class="bold-select"> {{ contest_office_option1.google_civic_office_name|default_if_none:"" }}</span></td>
+        <td><input type="radio" name="google_civic_office_name_choice" value="{{ contest_office_option2.we_vote_id }}" /><span class="bold-select"> {{ contest_office_option2.google_civic_office_name|default_if_none:"" }}</span></td>
+        {% else %}
+        <td>{% if conflict_values.google_civic_office_name == "CONTEST_OFFICE1" %}<strong>{{ contest_office_option1.google_civic_office_name|default_if_none:"" }}</strong>{% else %}{{ contest_office_option1.google_civic_office_name|default_if_none:"" }}{% endif %}</td>
+        <td>{% if conflict_values.google_civic_office_name == "CONTEST_OFFICE2" %}<strong>{{ contest_office_option2.google_civic_office_name|default_if_none:"" }}</strong>{% else %}{{ contest_office_option2.google_civic_office_name|default_if_none:"" }}{% endif %}</td>
+        {% endif %}
+    </tr>
+    {% endif %}
+
+    {% if contest_office_option1.we_vote_id != None or contest_office_option2.we_vote_id != None %}
+    <tr>
+        <td>Office We Vote Id</td>
+        {% if conflict_values.we_vote_id == "CONFLICT" %}
+        <td><input type="radio" name="contest_office_we_vote_id_choice" value="{{ contest_office_option1.we_vote_id }}" checked /><span class="bold-select"> {{ contest_office_option1.we_vote_id|default_if_none:"" }}</span></td>
+        <td><input type="radio" name="contest_office_we_vote_id_choice" value="{{ contest_office_option2.we_vote_id }}" /><span class="bold-select"> {{ contest_office_option2.we_vote_id|default_if_none:"" }}</span></td>
+        {% else %}
+        <td>{% if conflict_values.office_name == "CONTEST_OFFICE1" %}<strong>{{ contest_office_option1.we_vote_id|default_if_none:"" }}</strong>{% else %}{{ contest_office_option1.we_vote_id|default_if_none:"" }}{% endif %}</td>
+        <td>{% if conflict_values.office_name == "CONTEST_OFFICE2" %}<strong>{{ contest_office_option2.we_vote_id|default_if_none:"" }}</strong>{% else %}{{ contest_office_option2.we_vote_id|default_if_none:"" }}{% endif %}</td>
+        {% endif %}
+    </tr>
+    {% endif %}
+
+    {% if contest_office_option1.primary_party != None or contest_office_option2.primary_party != None %}
+    <tr>
+        <td>Primary Party</td>
+        {% if conflict_values.primary_party == "CONFLICT" %}
+        <td><input type="radio" name="party_choice" value="{{ contest_office_option1.we_vote_id }}" checked /><span class="bold-select"> {{ contest_office_option1.party }}</span></td>
+        <td><input type="radio" name="party_choice" value="{{ contest_office_option2.we_vote_id }}" /><span class="bold-select"> {{ contest_office_option2.party }}</span></td>
+        {% else %}
+        <td>{% if conflict_values.primary_party == "CONTEST_OFFICE1" %}<strong>{{ contest_office_option1.primary_party }}</strong>{% else %}{{ contest_office_option1.primary_party|default_if_none:"" }}{% endif %}</td>
+        <td>{% if conflict_values.primary_party == "CONTEST_OFFICE2" %}<strong>{{ contest_office_option2.primary_party }}</strong>{% else %}{{ contest_office_option2.primary_party|default_if_none:"" }}{% endif %}</td>
+        {% endif %}
+    </tr>
+    {% endif %}
+
+    {% if contest_office_option1.id != None or contest_office_option2.id != None %}
+    <tr>
+        <td>ID</td>
+        <td>{{ contest_office_option1.id|default_if_none:"" }}</td>
+        <td>{{ contest_office_option2.id|default_if_none:"" }}</td>
+    </tr>
+    {% endif %}
+
+    {% if contest_office_option1.district_id != None or contest_office_option2.district_id != None %}
+    <tr>
+        <td>District ID</td>
+        {% if conflict_values.district_id == "CONFLICT" %}
+        <td><input type="radio" name="district_id_choice" value="{{ contest_office_option1.we_vote_id }}" checked /><span class="bold-select"> {{ contest_office_option1.district_id }}</span></td>
+        <td><input type="radio" name="district_id_choice" value="{{ contest_office_option2.we_vote_id }}" /><span class="bold-select"> {{ contest_office_option2.district_id }}</span></td>
+        {% else %}
+        <td>{% if conflict_values.district_id == "CONTEST_OFFICE1" %}<strong>{{ contest_office_option1.district_id }}</strong>{% else %}{{ contest_office_option1.district_id|default_if_none:"" }}{% endif %}</td>
+        <td>{% if conflict_values.district_id == "CONTEST_OFFICE2" %}<strong>{{ contest_office_option2.district_id }}</strong>{% else %}{{ contest_office_option2.district_id|default_if_none:"" }}{% endif %}</td>
+        {% endif %}
+    </tr>
+    {% endif %}
+    {% if contest_office_option1.district_name != None or contest_office_option2.district_name != None %}
+    <tr>
+        <td>District Name</td>
+        {% if conflict_values.district_name == "CONFLICT" %}
+        <td><input type="radio" name="district_name_choice" value="{{ contest_office_option1.we_vote_id }}" checked /><span class="bold-select"> {{ contest_office_option1.district_name }}</span></td>
+        <td><input type="radio" name="district_name_choice" value="{{ contest_office_option2.we_vote_id }}" /><span class="bold-select"> {{ contest_office_option2.district_name }}</span></td>
+        {% else %}
+        <td>{% if conflict_values.district_name == "CONTEST_OFFICE1" %}<strong>{{ contest_office_option1.district_name }}</strong>{% else %}{{ contest_office_option1.district_name|default_if_none:"" }}{% endif %}</td>
+        <td>{% if conflict_values.district_name == "CONTEST_OFFICE2" %}<strong>{{ contest_office_option2.district_name }}</strong>{% else %}{{ contest_office_option2.district_name|default_if_none:"" }}{% endif %}</td>
+        {% endif %}
+    </tr>
+    {% endif %}
+    {% if contest_office_option1.district_scope != None or contest_office_option2.district_scope != None %}
+    <tr>
+        <td>District Scope</td>
+        {% if conflict_values.district_scope == "CONFLICT" %}
+        <td><input type="radio" name="district_scope_choice" value="{{ contest_office_option1.we_vote_id }}" checked /><span class="bold-select"> {{ contest_office_option1.district_scope }}</span></td>
+        <td><input type="radio" name="district_scope_choice" value="{{ contest_office_option2.we_vote_id }}" /><span class="bold-select"> {{ contest_office_option2.district_scope }}</span></td>
+        {% else %}
+        <td>{% if conflict_values.district_scope == "CONTEST_OFFICE1" %}<strong>{{ contest_office_option1.district_scope }}</strong>{% else %}{{ contest_office_option1.district_scope|default_if_none:"" }}{% endif %}</td>
+        <td>{% if conflict_values.district_scope == "CONTEST_OFFICE2" %}<strong>{{ contest_office_option2.district_scope }}</strong>{% else %}{{ contest_office_option2.district_scope|default_if_none:"" }}{% endif %}</td>
+        {% endif %}
+    </tr>
+    {% endif %}
+    
+    {% if contest_office_option1.elected_office_name != None or contest_office_option2.elected_office_name != None %}
+    <tr>
+        <td>Elected Office Name</td>
+        {% if conflict_values.elected_office_name == "CONFLICT" %}
+        <td><input type="radio" name="elected_office_name_choice" value="{{ contest_office_option1.we_vote_id }}" checked /><span class="bold-select"> {{ contest_office_option1.elected_office_name }}</span></td>
+        <td><input type="radio" name="elected_office_name_choice" value="{{ contest_office_option2.we_vote_id }}" /><span class="bold-select"> {{ contest_office_option2.elected_office_name }}</span></td>
+        {% else %}
+        <td>{% if conflict_values.elected_office_name == "CONTEST_OFFICE1" %}<strong>{{ contest_office_option1.elected_office_name }}</strong>{% else %}{{ contest_office_option1.elected_office_name|default_if_none:"" }}{% endif %}</td>
+        <td>{% if conflict_values.elected_office_name == "CONTEST_OFFICE2" %}<strong>{{ contest_office_option2.elected_office_name }}</strong>{% else %}{{ contest_office_option2.elected_office_name|default_if_none:"" }}{% endif %}</td>
+        {% endif %}
+    </tr>
+    {% endif %}
+
+    {% if contest_office_option1.google_civic_election_id != None or contest_office_option2.google_civic_election_id != None %}
+    <tr>
+        <td>Election ID</td>
+        {% if conflict_values.google_civic_election_id == "CONFLICT" %}
+        <td><input type="radio" name="google_civic_election_id_choice" value="{{ contest_office_option1.we_vote_id }}" checked /><span class="bold-select"> {{ contest_office_option1.google_civic_election_id }}</span></td>
+        <td><input type="radio" name="google_civic_election_id_choice" value="{{ contest_office_option2.we_vote_id }}" /><span class="bold-select"> {{ contest_office_option2.google_civic_election_id }}</span></td>
+        {% else %}
+        <td>{% if conflict_values.google_civic_election_id == "CONTEST_OFFICE1" %}<strong>{{ contest_office_option1.google_civic_election_id }}</strong>{% else %}{{ contest_office_option1.google_civic_election_id|default_if_none:"" }}{% endif %}</td>
+        <td>{% if conflict_values.google_civic_election_id == "CONTEST_OFFICE2" %}<strong>{{ contest_office_option2.google_civic_election_id }}</strong>{% else %}{{ contest_office_option2.google_civic_election_id|default_if_none:"" }}{% endif %}</td>
+        {% endif %}
+    </tr>
+    {% endif %}
+
+    {% if contest_office_option1.ctcl_uuid != None or contest_office_option2.ctcl_uuid != None %}
+    <tr>
+        <td>CTCL UUID</td>
+        {% if conflict_values.ctcl_uuid == "CONFLICT" %}
+        <td><input type="radio" name="ctcl_uuid_choice" value="{{ contest_office_option1.we_vote_id }}" checked /><span class="bold-select"> {{ contest_office_option1.ctcl_uuid|default_if_none:"" }}</span></td>
+        <td><input type="radio" name="ctcl_uuid_choice" value="{{ contest_office_option2.we_vote_id }}" /><span class="bold-select"> {{ contest_office_option2.ctcl_uuid|default_if_none:"" }}</span></td>
+        {% else %}
+        <td>{% if conflict_values.ctcl_uuid == "CONTEST_OFFICE1" %}<strong>{{ contest_office_option1.ctcl_uuid|default_if_none:"" }}</strong>{% else %}{{ contest_office_option1.ctcl_uuid|default_if_none:"" }}{% endif %}</td>
+        <td>{% if conflict_values.ctcl_uuid == "CONTEST_OFFICE2" %}<strong>{{ contest_office_option2.ctcl_uuid|default_if_none:"" }}</strong>{% else %}{{ contest_office_option2.ctcl_uuid|default_if_none:"" }}{% endif %}</td>
+        {% endif %}
+    </tr>
+    {% endif %}
+    
+    {% if contest_office_option1.maplight_id != None or contest_office_option2.maplight_id != None %}
+    <tr>
+        <td>MapLight ID</td>
+        {% if conflict_values.maplight_id == "CONFLICT" %}
+        <td><input type="radio" name="maplight_id_choice" value="{{ contest_office_option1.we_vote_id }}" checked /><span class="bold-select"> {{ contest_office_option1.maplight_id }}</span></td>
+        <td><input type="radio" name="maplight_id_choice" value="{{ contest_office_option2.we_vote_id }}" /><span class="bold-select"> {{ contest_office_option2.maplight_id }}</span></td>
+        {% else %}
+        <td>{% if conflict_values.maplight_id == "CONTEST_OFFICE1" %}<strong>{{ contest_office_option1.maplight_id }}</strong>{% else %}{{ contest_office_option1.maplight_id|default_if_none:"" }}{% endif %}</td>
+        <td>{% if conflict_values.maplight_id == "CONTEST_OFFICE2" %}<strong>{{ contest_office_option2.maplight_id }}</strong>{% else %}{{ contest_office_option2.maplight_id|default_if_none:"" }}{% endif %}</td>
+        {% endif %}
+    </tr>
+    {% endif %}
+    {% if contest_office_option1.ocd_division_id != None or contest_office_option2.ocd_division_id != None %}
+    <tr>
+        <td>OCD Division ID</td>
+        {% if conflict_values.ocd_division_id == "CONFLICT" %}
+        <td><input type="radio" name="ocd_division_id_choice" value="{{ contest_office_option1.we_vote_id }}" checked /><span class="bold-select"> {{ contest_office_option1.ocd_division_id|default_if_none:"" }}</span></td>
+        <td><input type="radio" name="ocd_division_id_choice" value="{{ contest_office_option2.we_vote_id }}" /><span class="bold-select"> {{ contest_office_option2.ocd_division_id|default_if_none:"" }}</span></td>
+        {% else %}
+        <td>{% if conflict_values.ocd_division_id == "CONTEST_OFFICE1" %}<strong>{{ contest_office_option1.ocd_division_id }}</strong>{% else %}{{ contest_office_option1.ocd_division_id|default_if_none:"" }}{% endif %}</td>
+        <td>{% if conflict_values.ocd_division_id == "CONTEST_OFFICE2" %}<strong>{{ contest_office_option2.ocd_division_id }}</strong>{% else %}{{ contest_office_option2.ocd_division_id|default_if_none:"" }}{% endif %}</td>
+        {% endif %}
+    </tr>
+    {% endif %}
+    {% if contest_office_option1.state_code != None or contest_office_option2.state_code != None %}
+    <tr>
+        <td>State Code</td>
+        {% if conflict_values.state_code == "CONFLICT" %}
+        <td><input type="radio" name="state_code_choice" value="{{ contest_office_option1.we_vote_id }}" checked /><span class="bold-select"> {{ contest_office_option1.state_code }}</span></td>
+        <td><input type="radio" name="state_code_choice" value="{{ contest_office_option2.we_vote_id }}" /><span class="bold-select"> {{ contest_office_option2.state_code }}</span></td>
+        {% else %}
+        <td>{% if conflict_values.state_code == "CONTEST_OFFICE1" %}<strong>{{ contest_office_option1.state_code }}</strong>{% else %}{{ contest_office_option1.state_code|default_if_none:"" }}{% endif %}</td>
+        <td>{% if conflict_values.state_code == "CONTEST_OFFICE2" %}<strong>{{ contest_office_option2.state_code }}</strong>{% else %}{{ contest_office_option2.state_code|default_if_none:"" }}{% endif %}</td>
+        {% endif %}
+    </tr>
+    {% endif %}
+    {% if contest_office_option1.number_elected != None or contest_office_option2.number_elected != None %}
+    <tr>
+        <td>Number Elected</td>
+        {% if conflict_values.number_elected == "CONFLICT" %}
+        <td><input type="radio" name="number_elected_choice" value="{{ contest_office_option1.we_vote_id }}" checked /><span class="bold-select"> <a href="{{ contest_office_option1.number_elected }}">{{ contest_office_option1.number_elected }}</a></span></td>
+        <td><input type="radio" name="number_elected_choice" value="{{ contest_office_option2.we_vote_id }}" /><span class="bold-select"> <a href="{{ contest_office_option2.number_elected }}">{{ contest_office_option2.number_elected }}</a></span></td>
+        {% else %}
+        <td>{% if conflict_values.number_elected == "CONTEST_OFFICE1" %}<strong>{{ contest_office_option1.number_elected }}</strong>{% else %}{{ contest_office_option1.number_elected|default_if_none:"" }}{% endif %}</td>
+        <td>{% if conflict_values.number_elected == "CONTEST_OFFICE2" %}<strong>{{ contest_office_option2.number_elected }}</strong>{% else %}{{ contest_office_option2.number_elected|default_if_none:"" }}{% endif %}</td>
+        {% endif %}
+    </tr>
+    {% endif %}
+    {% if contest_office_option1.number_voting_for != None or contest_office_option2.number_voting_for != None %}
+    <tr>
+        <td>Number Voting For</td>
+        {% if conflict_values.number_voting_for == "CONFLICT" %}
+        <td><input type="radio" name="number_voting_for_choice" value="{{ contest_office_option1.we_vote_id }}" checked /><span class="bold-select"> {{ contest_office_option1.number_voting_for }}</span></td>
+        <td><input type="radio" name="number_voting_for_choice" value="{{ contest_office_option2.we_vote_id }}" /><span class="bold-select"> {{ contest_office_option2.number_voting_for }}</span></td>
+        {% else %}
+        <td>{% if conflict_values.number_voting_for == "CONTEST_OFFICE1" %}<strong>{{ contest_office_option1.number_voting_for }}</strong>{% else %}{{ contest_office_option1.number_voting_for|default_if_none:"" }}{% endif %}</td>
+        <td>{% if conflict_values.number_voting_for == "CONTEST_OFFICE2" %}<strong>{{ contest_office_option2.number_voting_for }}</strong>{% else %}{{ contest_office_option2.number_voting_for|default_if_none:"" }}{% endif %}</td>
+        {% endif %}
+    </tr>
+    {% endif %}
+
+    {% if contest_office_option1.ballotpedia_id != None or contest_office_option2.ballotpedia_id != None %}
+    <tr>
+        <td>Ballotpedia ID</td>
+        {% if conflict_values.ballotpedia_id == "CONFLICT" %}
+        <td><input type="radio" name="ballotpedia_id_choice" value="{{ contest_office_option1.we_vote_id }}" checked /><span class="bold-select"> {{ contest_office_option1.ballotpedia_id }}</span></td>
+        <td><input type="radio" name="ballotpedia_id_choice" value="{{ contest_office_option2.we_vote_id }}" /><span class="bold-select"> {{ contest_office_option2.ballotpedia_id }}</span></td>
+        {% else %}
+        <td>{% if conflict_values.ballotpedia_id == "CONTEST_OFFICE1" %}<strong>{{ contest_office_option1.ballotpedia_id }}</strong>{% else %}{{ contest_office_option1.ballotpedia_id|default_if_none:"" }}{% endif %}</td>
+        <td>{% if conflict_values.ballotpedia_id == "CONTEST_OFFICE2" %}<strong>{{ contest_office_option2.ballotpedia_id }}</strong>{% else %}{{ contest_office_option2.ballotpedia_id|default_if_none:"" }}{% endif %}</td>
+        {% endif %}
+    </tr>
+    {% endif %}
+    {% if contest_office_option1.wikipedia_id != None or contest_office_option2.wikipedia_id != None %}
+    <tr>
+        <td>Wikipedia ID</td>
+        {% if conflict_values.wikipedia_id == "CONFLICT" %}
+        <td><input type="radio" name="wikipedia_id_choice" value="{{ contest_office_option1.we_vote_id }}" checked /><span class="bold-select"> {{ contest_office_option1.wikipedia_id }}</span></td>
+        <td><input type="radio" name="wikipedia_id_choice" value="{{ contest_office_option2.we_vote_id }}" /><span class="bold-select"> {{ contest_office_option2.wikipedia_id }}</span></td>
+        {% else %}
+        <td>{% if conflict_values.wikipedia_id == "CONTEST_OFFICE1" %}<strong>{{ contest_office_option1.wikipedia_id }}</strong>{% else %}{{ contest_office_option1.wikipedia_id|default_if_none:"" }}{% endif %}</td>
+        <td>{% if conflict_values.wikipedia_id == "CONTEST_OFFICE2" %}<strong>{{ contest_office_option2.wikipedia_id }}</strong>{% else %}{{ contest_office_option2.wikipedia_id|default_if_none:"" }}{% endif %}</td>
+        {% endif %}
+    </tr>
+    {% endif %}
+    <tr>
+        <td>&nbsp;</td>
+        <td>&nbsp;</td>
+        <td>&nbsp;</td>
+    </tr>
+    <tr>
+        <td>
+          <a href="{% url 'office:office_list' %}">cancel</a>&nbsp; <input type="submit" value="Skip - Not Duplicates" name="skip" />&nbsp;<input type="submit" value="Merge Contest Offices" name="merge" />
+        </td>
+        <td></td>
+        <td></td>
+    </tr>
+</table>
+<input type="hidden" name="remove_duplicate_process" value="1" />
+<input type="hidden" name="state_code" value="{{ contest_office_option2.state_code }}" />
+<input type="hidden" name="google_civic_election_id" value="{{ contest_office_option1.google_civic_election_id }}" />
+<input type="hidden" name="contest_office1_we_vote_id" value="{{ contest_office_option1.we_vote_id }}" />
+<input type="hidden" name="contest_office2_we_vote_id" value="{{ contest_office_option2.we_vote_id }}" />
+{% else %}
+<input type="submit" value="CANNOT MERGE" />
+{% endif %}
+</form>
+
+<br />
+
+{% endblock %}

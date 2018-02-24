@@ -27,6 +27,7 @@
 {% csrf_token %}
 
 <input type="hidden" name="office_id" value="{% if office %}{{ office.id }}{% else %}0{% endif %}">
+<input type="hidden" name="redirect_to_contest_office_list" value="0">
 
 <div class="form-group">
     <label for="office_name_id" class="col-sm-3 control-label">Office Name</label>
@@ -34,6 +35,10 @@
         <input type="text" name="office_name" id="office_name_id" class="form-control"
                value="{% if office %}{{ office.office_name|default_if_none:"" }}{% else %}{{ office_name|default_if_none:"" }}{% endif %}" />
         {% if office %}{{ office.we_vote_id }}{% else %}{{ we_vote_id }}{% endif %}
+        {% if office.contest_office_merge_possibility_found %}
+            (<a href="{% url 'office:find_duplicate_office' office.id %}?google_civic_election_id={{ office.google_civic_election_id }}"
+                target="_blank">check for duplicate contest offices</a> - in new window)
+        {% endif %}
     </div>
 </div>
 
