@@ -63,11 +63,19 @@ def issues_retrieve_doc_template_values(url_root):
                    '     "ballot_item_we_vote_id": string,\n' \
                    '     "issue_support_score": integer,\n' \
                    '     "issue_oppose_score": integer,\n' \
-                   '     "organization_support_list": list\n' \
+                   '     "organization_we_vote_id_support_list": list\n' \
                    '      [\n' \
                    '         "organization_we_vote_id": string,\n' \
                    '      ],\n' \
-                   '     "organization_oppose_list": list\n' \
+                   '     "organization_name_support_list": list\n' \
+                   '      [\n' \
+                   '         "organization_we_vote_id": string,\n' \
+                   '      ],\n' \
+                   '     "organization_we_vote_id_oppose_list": list\n' \
+                   '      [\n' \
+                   '         "organization_we_vote_id": string,\n' \
+                   '      ],\n' \
+                   '     "organization_name_oppose_list": list\n' \
                    '      [\n' \
                    '         "organization_we_vote_id": string,\n' \
                    '      ],\n' \

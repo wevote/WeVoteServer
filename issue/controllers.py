@@ -205,7 +205,6 @@ def issues_retrieve_for_api(voter_device_id, sort_formula, google_civic_election
     Used by the api
     :return:
     """
-    # NOTE: Issues retrieve is independent of *who* wants to see the data.
 
     issue_list = []
     issue_we_vote_id_list = []
@@ -339,10 +338,11 @@ def retrieve_issue_score_list(issue_we_vote_id_list, google_civic_election_id):
     ballot_item_we_vote_ids_list = []
     organization_we_vote_ids_for_all_voter_issues = []
 
-    organization_support_by_ballot_item_list = {}  # key is ballot_item_we_vote_id, value is list of organizations
-    organization_oppose_by_ballot_item_list = {}  # key is ballot_item_we_vote_id, value is list of organizations
+    organization_we_vote_id_support_by_ballot_item_list = {}  # key ballot_item_we_vote_id, value list of organizations
+    organization_we_vote_id_oppose_by_ballot_item_list = {}  # key ballot_item_we_vote_id, value list of organizations
+    organization_name_support_by_ballot_item_list = {}  # key ballot_item_we_vote_id, value list of organizations
+    organization_name_oppose_by_ballot_item_list = {}  # key ballot_item_we_vote_id, value list of organizations
     organizations_included_by_issue_list = {}  # key is issue_we_vote_id, value is list of organizations
-    issues_included_by_ballot_item_list = {}  # key is ballot_item_we_vote_id, value is list of issues
     issue_support_score_list = {}  # key is ballot_item_we_vote_id, value is support score of all groups issue tagged
     issue_oppose_score_list = {}  # key is ballot_item_we_vote_id, value is oppose score of all groups issue tagged
 
@@ -376,20 +376,32 @@ def retrieve_issue_score_list(issue_we_vote_id_list, google_civic_election_id):
                 if one_position.candidate_campaign_we_vote_id not in issue_support_score_list:
                     issue_support_score_list[one_position.candidate_campaign_we_vote_id] = 0
                 issue_support_score_list[one_position.candidate_campaign_we_vote_id] += 1
-                # Store the organization adding to the score
-                if one_position.candidate_campaign_we_vote_id not in organization_support_by_ballot_item_list:
-                    organization_support_by_ballot_item_list[one_position.candidate_campaign_we_vote_id] = []
-                organization_support_by_ballot_item_list[one_position.candidate_campaign_we_vote_id].append(
+                # Store the organization_we_vote_id adding to the score
+                if one_position.candidate_campaign_we_vote_id \
+                        not in organization_we_vote_id_support_by_ballot_item_list:
+                    organization_we_vote_id_support_by_ballot_item_list[one_position.candidate_campaign_we_vote_id] = []
+                organization_we_vote_id_support_by_ballot_item_list[one_position.candidate_campaign_we_vote_id].append(
                     one_position.organization_we_vote_id)
+                # Store the organization_name adding to the score
+                if one_position.candidate_campaign_we_vote_id \
+                        not in organization_name_support_by_ballot_item_list:
+                    organization_name_support_by_ballot_item_list[one_position.candidate_campaign_we_vote_id] = []
+                organization_name_support_by_ballot_item_list[one_position.candidate_campaign_we_vote_id].append(
+                    one_position.speaker_display_name)
             elif one_position.is_oppose_or_negative_rating():
                 if one_position.candidate_campaign_we_vote_id not in issue_oppose_score_list:
                     issue_oppose_score_list[one_position.candidate_campaign_we_vote_id] = 0
                 issue_oppose_score_list[one_position.candidate_campaign_we_vote_id] += 1
-                # Store the organization adding to the score
-                if one_position.candidate_campaign_we_vote_id not in organization_oppose_by_ballot_item_list:
-                    organization_oppose_by_ballot_item_list[one_position.candidate_campaign_we_vote_id] = []
-                organization_oppose_by_ballot_item_list[one_position.candidate_campaign_we_vote_id].append(
+                # Store the organization_we_vote_id adding to the score
+                if one_position.candidate_campaign_we_vote_id not in organization_we_vote_id_oppose_by_ballot_item_list:
+                    organization_we_vote_id_oppose_by_ballot_item_list[one_position.candidate_campaign_we_vote_id] = []
+                organization_we_vote_id_oppose_by_ballot_item_list[one_position.candidate_campaign_we_vote_id].append(
                     one_position.organization_we_vote_id)
+                # Store the organization_name adding to the score
+                if one_position.candidate_campaign_we_vote_id not in organization_name_oppose_by_ballot_item_list:
+                    organization_name_oppose_by_ballot_item_list[one_position.candidate_campaign_we_vote_id] = []
+                organization_name_oppose_by_ballot_item_list[one_position.candidate_campaign_we_vote_id].append(
+                    one_position.speaker_display_name)
         elif positive_value_exists(one_position.contest_measure_we_vote_id):
             ballot_item_we_vote_ids_list.append(one_position.contest_measure_we_vote_id)
             # Update the score for this ballot item
@@ -397,36 +409,56 @@ def retrieve_issue_score_list(issue_we_vote_id_list, google_civic_election_id):
                 if one_position.contest_measure_we_vote_id not in issue_support_score_list:
                     issue_support_score_list[one_position.contest_measure_we_vote_id] = 0
                 issue_support_score_list[one_position.contest_measure_we_vote_id] += 1
-                # Store the organization adding to the score
-                if one_position.contest_measure_we_vote_id not in organization_support_by_ballot_item_list:
-                    organization_support_by_ballot_item_list[one_position.contest_measure_we_vote_id] = []
-                organization_support_by_ballot_item_list[one_position.contest_measure_we_vote_id].append(
+                # Store the organization_we_vote_id adding to the score
+                if one_position.contest_measure_we_vote_id not in organization_we_vote_id_support_by_ballot_item_list:
+                    organization_we_vote_id_support_by_ballot_item_list[one_position.contest_measure_we_vote_id] = []
+                organization_we_vote_id_support_by_ballot_item_list[one_position.contest_measure_we_vote_id].append(
                     one_position.organization_we_vote_id)
+                # Store the organization_name adding to the score
+                if one_position.contest_measure_we_vote_id not in organization_name_support_by_ballot_item_list:
+                    organization_name_support_by_ballot_item_list[one_position.contest_measure_we_vote_id] = []
+                organization_name_support_by_ballot_item_list[one_position.contest_measure_we_vote_id].append(
+                    one_position.speaker_display_name)
             elif one_position.is_oppose_or_negative_rating():
                 if one_position.contest_measure_we_vote_id not in issue_oppose_score_list:
                     issue_oppose_score_list[one_position.contest_measure_we_vote_id] = 0
                 issue_oppose_score_list[one_position.contest_measure_we_vote_id] += 1
-                # Store the organization adding to the score
-                if one_position.contest_measure_we_vote_id not in organization_oppose_by_ballot_item_list:
-                    organization_oppose_by_ballot_item_list[one_position.contest_measure_we_vote_id] = []
-                organization_oppose_by_ballot_item_list[one_position.contest_measure_we_vote_id].append(
+                # Store the organization_we_vote_id adding to the score
+                if one_position.contest_measure_we_vote_id not in organization_we_vote_id_oppose_by_ballot_item_list:
+                    organization_we_vote_id_oppose_by_ballot_item_list[one_position.contest_measure_we_vote_id] = []
+                organization_we_vote_id_oppose_by_ballot_item_list[one_position.contest_measure_we_vote_id].append(
                     one_position.organization_we_vote_id)
+                # Store the organization_name adding to the score
+                if one_position.contest_measure_we_vote_id not in organization_name_oppose_by_ballot_item_list:
+                    organization_name_oppose_by_ballot_item_list[one_position.contest_measure_we_vote_id] = []
+                organization_name_oppose_by_ballot_item_list[one_position.contest_measure_we_vote_id].append(
+                    one_position.speaker_display_name)
 
     for one_ballot_item_we_vote_id in ballot_item_we_vote_ids_list:
         issue_support_score = issue_support_score_list[one_ballot_item_we_vote_id] \
             if one_ballot_item_we_vote_id in issue_support_score_list else 0
         issue_oppose_score = issue_oppose_score_list[one_ballot_item_we_vote_id] \
             if one_ballot_item_we_vote_id in issue_oppose_score_list else 0
-        organization_support_list = organization_support_by_ballot_item_list[one_ballot_item_we_vote_id] \
-            if one_ballot_item_we_vote_id in organization_support_by_ballot_item_list else []
-        organization_oppose_list = organization_oppose_by_ballot_item_list[one_ballot_item_we_vote_id] \
-            if one_ballot_item_we_vote_id in organization_oppose_by_ballot_item_list else []
+        organization_we_vote_id_support_list = \
+            organization_we_vote_id_support_by_ballot_item_list[one_ballot_item_we_vote_id] \
+            if one_ballot_item_we_vote_id in organization_we_vote_id_support_by_ballot_item_list else []
+        organization_we_vote_id_oppose_list = \
+            organization_we_vote_id_oppose_by_ballot_item_list[one_ballot_item_we_vote_id] \
+            if one_ballot_item_we_vote_id in organization_we_vote_id_oppose_by_ballot_item_list else []
+        organization_name_support_list = \
+            organization_name_support_by_ballot_item_list[one_ballot_item_we_vote_id] \
+            if one_ballot_item_we_vote_id in organization_name_support_by_ballot_item_list else []
+        organization_name_oppose_list = \
+            organization_name_oppose_by_ballot_item_list[one_ballot_item_we_vote_id] \
+            if one_ballot_item_we_vote_id in organization_name_oppose_by_ballot_item_list else []
         one_ballot_item = {
-            "ballot_item_we_vote_id":       one_ballot_item_we_vote_id,
-            "issue_support_score":          issue_support_score,
-            "issue_oppose_score":           issue_oppose_score,
-            "organization_support_list":    organization_support_list,
-            "organization_oppose_list":     organization_oppose_list,
+            "ballot_item_we_vote_id":               one_ballot_item_we_vote_id,
+            "issue_support_score":                  issue_support_score,
+            "issue_oppose_score":                   issue_oppose_score,
+            "organization_we_vote_id_support_list": organization_we_vote_id_support_list,
+            "organization_name_support_list":       organization_name_support_list,
+            "organization_we_vote_id_oppose_list":  organization_we_vote_id_oppose_list,
+            "organization_name_oppose_list":        organization_name_oppose_list,
         }
         issue_score_list.append(one_ballot_item)
 
