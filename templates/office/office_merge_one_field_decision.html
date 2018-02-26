@@ -1,0 +1,14 @@
+{# templates/office/office_merge_one_field_decision.html #}
+
+{% if contest_office1_field_value != None or contest_office2_field_value != None %}
+<tr>
+    <td>{{ field_label }}</td>
+    {% if conflict_status == "CONFLICT" %}
+    <td><input type="radio" name="{{ field_name }}_choice" value="{{ contest_office1.we_vote_id }}" checked /><span class="bold-select"> {{ contest_office1_field_value|default_if_none:"" }}</span></td>
+    <td><input type="radio" name="{{ field_name }}_choice" value="{{ contest_office2.we_vote_id }}" /><span class="bold-select"> {{ contest_office2_field_value|default_if_none:"" }}</span></td>
+    {% else %}
+    <td>{% if conflict_status == "OFFICE1" %}<strong>{{ contest_office1_field_value|default_if_none:"" }}</strong>{% else %}{{ contest_office1_field_value|default_if_none:"" }}{% endif %}</td>
+    <td>{% if conflict_status == "OFFICE2" %}<strong>{{ contest_office2_field_value|default_if_none:"" }}</strong>{% else %}{{ contest_office2_field_value|default_if_none:"" }}{% endif %}</td>
+    {% endif %}
+</tr>
+{% endif %}
