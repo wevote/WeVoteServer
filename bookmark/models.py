@@ -293,7 +293,8 @@ class BookmarkItemList(models.Model):
     def retrieve_bookmark_item_list_for_contest_office(self, contest_office_we_vote_id):
         return self.retrieve_bookmark_item_list(contest_office_we_vote_id=contest_office_we_vote_id, read_only=False)
 
-    def retrieve_bookmark_item_list(self, voter_id=0, candidate_campaign_we_vote_id="", contest_office_we_vote_id="", read_only=True):
+    def retrieve_bookmark_item_list(self, voter_id=0, candidate_campaign_we_vote_id="", contest_office_we_vote_id="",
+                                    read_only=True):
         # Retrieve a list of bookmark_item entries
         bookmark_item_list_found = False
         bookmark_item_list = []

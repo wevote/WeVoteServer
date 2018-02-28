@@ -85,21 +85,37 @@
         </td>
     </tr>
     {% endif %}
-    {% if issue_names_list %}
+    {% if organization_issues_list %}
     <tr>
-        <th>Issue Linked:</th>
-        <td>{% for issue_name in issue_names_list %}
-            &bullet; <td>{{ issue_name }}</td> &nbsp;
+        <th>Issues Linked:</th>
+        <td>
+            <ul class="list-inline">
+            {% for issue in organization_issues_list %}
+              <li class="list-inline-item">
+                {% if issue.hide_issue %}
+                <span style="text-decoration: line-through">{{ issue.issue_name }}</span>
+                {% else %}
+                {{ issue.issue_name }}
+                {% endif %}
+              </li>
             {% endfor %}
+            </ul>
         </td>
     </tr>
     {% endif %}
-    {% if issue_blocked_names_list %}
+    {% if organization_blocked_issues_list %}
     <tr>
-        <th>Issue Blocked:</th>
-        <td>{% for issue_name in issue_blocked_names_list %}
-            &bullet; <td>{{ issue_name }}</td> &nbsp;
+        <th>Issues Blocked:</th>
+        <td>
+            <ul class="list-inline">
+            {% for issue in organization_blocked_issues_list %}
+                {% if issue.hide_issue %}
+                <span style="text-decoration: line-through">{{ issue.issue_name }}</span>
+                {% else %}
+                {{ issue.issue_name }}
+                {% endif %}
             {% endfor %}
+            </ul>
         </td>
     </tr>
     {% endif %}

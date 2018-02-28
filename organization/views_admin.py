@@ -18,7 +18,7 @@ from exception.models import handle_record_found_more_than_one_exception,\
 from election.models import Election, ElectionManager
 from import_export_vote_smart.models import VoteSmartSpecialInterestGroupManager
 from issue.models import ALPHABETICAL_ASCENDING, IssueListManager, IssueManager, \
-    OrganizationLinkToIssueList, OrganizationLinkToIssueManager
+    OrganizationLinkToIssueList, OrganizationLinkToIssueManager, MOST_LINKED_ORGANIZATIONS
 from measure.models import ContestMeasure, ContestMeasureList, ContestMeasureManager
 import operator
 from organization.models import OrganizationListManager, OrganizationManager, ORGANIZATION_TYPE_MAP, UNKNOWN
@@ -289,11 +289,14 @@ def organization_list_view(request):
         if positive_value_exists(show_issues):
             # We want to look up the issues retrieved from Vote Smart and display them
             # if positive_value_exists(one_organization.linked_issues_count):
+            show_hidden_issues = True
             one_organization.display_we_vote_issues = \
-                issue_list_manager.fetch_organization_issues_for_display(one_organization.we_vote_id)
+                issue_list_manager.fetch_organization_issues_for_display(
+                    one_organization.we_vote_id, MOST_LINKED_ORGANIZATIONS, show_hidden_issues)
             if positive_value_exists(one_organization.vote_smart_id):
                 one_organization.display_vote_smart_issues = \
-                    special_interest_group_manager.fetch_organization_issues_for_display(one_organization.vote_smart_id)
+                    special_interest_group_manager.fetch_vote_smart_organization_issues_for_display(
+                        one_organization.vote_smart_id)
         modified_organization_list.append(one_organization)
 
     state_list = STATE_CODE_MAP
@@ -375,7 +378,7 @@ def organization_edit_view(request, organization_id=0, organization_we_vote_id="
         state_served_code = organization_on_stage.state_served_code
         organization_on_stage_found = True
         issue_list_manager = IssueListManager()
-        issue_list_results = issue_list_manager.retrieve_issues(ALPHABETICAL_ASCENDING)
+        issue_list_results = issue_list_manager.retrieve_issues(ALPHABETICAL_ASCENDING, show_hidden_issues=True)
         if issue_list_results["issue_list_found"]:
             issue_list = issue_list_results["issue_list"]
             link_issue_list_manager = OrganizationLinkToIssueList()
@@ -674,8 +677,8 @@ def organization_position_list_view(request, organization_id=0, organization_we_
 
     organization_on_stage = Organization()
     organization_on_stage_found = False
-    issue_names_list = []
-    issue_blocked_names_list = []
+    organization_issues_list = []
+    organization_blocked_issues_list = []
     try:
         if positive_value_exists(organization_id):
             organization_query = Organization.objects.filter(id=organization_id)
@@ -712,14 +715,14 @@ def organization_position_list_view(request, organization_id=0, organization_we_
                 retrieve_issue_list_by_organization_we_vote_id(organization_we_vote_id)
             issue_manager = IssueManager()
             for link_issue in organization_link_issue_list:
-                issue_name = issue_manager.fetch_issue_name_from_we_vote_id(link_issue.issue_we_vote_id)
-                issue_names_list.append(issue_name)
+                issue_object = issue_manager.fetch_issue_from_we_vote_id(link_issue.issue_we_vote_id)
+                organization_issues_list.append(issue_object)
 
             organization_link_block_issue_list = link_issue_list_manager.\
                 retrieve_issue_blocked_list_by_organization_we_vote_id(organization_we_vote_id)
             for blocked_issue in organization_link_block_issue_list:
-                issue_name = issue_manager.fetch_issue_name_from_we_vote_id(blocked_issue.issue_we_vote_id)
-                issue_blocked_names_list.append(issue_name)
+                issue_object = issue_manager.fetch_issue_from_we_vote_id(blocked_issue.issue_we_vote_id)
+                organization_blocked_issues_list.append(issue_object)
 
         except Exception as e:
             organization_position_list = []
@@ -756,8 +759,8 @@ def organization_position_list_view(request, organization_id=0, organization_we_
             'candidate_we_vote_id':             candidate_we_vote_id,
             'show_all_elections':               show_all_elections,
             'voter':                            voter,
-            'issue_names_list':                 issue_names_list,
-            'issue_blocked_names_list':         issue_blocked_names_list,
+            'organization_issues_list':         organization_issues_list,
+            'organization_blocked_issues_list': organization_blocked_issues_list,
         }
     return render(request, 'organization/organization_position_list.html', template_values)
 

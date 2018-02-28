@@ -72,10 +72,10 @@ class IssueListManager(models.Model):
     """
 
     def retrieve_issues(self, sort_formula=None, issue_we_vote_id_list_to_filter=None,
-                        issue_we_vote_id_list_to_exclude=None, require_filter_or_exclude=False):
+                        issue_we_vote_id_list_to_exclude=None, require_filter_or_exclude=False,
+                        show_hidden_issues=False):
         issue_list = []
         issue_list_found = False
-        my_list = []
         success = False
 
         if require_filter_or_exclude and issue_we_vote_id_list_to_filter is None and \
@@ -91,6 +91,9 @@ class IssueListManager(models.Model):
 
         try:
             issue_queryset = Issue.objects.using('readonly').all()
+            # By default, we only show the issues marked "hide_issue=False"
+            if not show_hidden_issues:
+                issue_queryset = issue_queryset.filter(hide_issue=False)
             if issue_we_vote_id_list_to_filter is not None:
                 issue_queryset = issue_queryset.filter(we_vote_id__in=issue_we_vote_id_list_to_filter)
             if issue_we_vote_id_list_to_exclude is not None:
@@ -132,9 +135,9 @@ class IssueListManager(models.Model):
     def retrieve_issue_count(self):
         try:
             issue_queryset = Issue.objects.using('readonly').all()
-            issue_list = issue_queryset
-
-            issue_count = issue_list.count()
+            # We only show the issues marked "hide_issue=False"
+            issue_queryset = issue_queryset.filter(hide_issue=False)
+            issue_count = issue_queryset.count()
             success = True
             status = "ISSUE_COUNT_FOUND"
         except Issue.DoesNotExist:
@@ -156,11 +159,14 @@ class IssueListManager(models.Model):
         }
         return results
 
-    def fetch_organization_issues_for_display(self, organization_we_vote_id, sort_formula=None):
-        results = self.retrieve_organization_issues_for_display(organization_we_vote_id, sort_formula)
+    def fetch_organization_issues_for_display(self, organization_we_vote_id, sort_formula=None,
+                                              show_hidden_issues=False):
+        results = self.retrieve_organization_issues_for_display(organization_we_vote_id, sort_formula,
+                                                                show_hidden_issues)
         return results['issues_display_string']
 
-    def retrieve_organization_issues_for_display(self, organization_we_vote_id, sort_formula=None):
+    def retrieve_organization_issues_for_display(self, organization_we_vote_id, sort_formula=None,
+                                                 show_hidden_issues=False):
         issue_list_found = False
         success = False
         status = ""
@@ -192,6 +198,9 @@ class IssueListManager(models.Model):
 
         try:
             issue_queryset = Issue.objects.using('readonly').all()
+            # By default, we only show the issues marked "hide_issue=False"
+            if not show_hidden_issues:
+                issue_queryset = issue_queryset.filter(hide_issue=False)
             issue_queryset = issue_queryset.filter(we_vote_id__in=issues_list)
             if sort_formula == MOST_LINKED_ORGANIZATIONS:
                 issue_queryset = issue_queryset.order_by(
@@ -242,7 +251,8 @@ class Issue(models.Model):
     issue_followers_count = models.PositiveIntegerField(verbose_name="number of followers of this issue",
                                                         null=False, blank=True, default=0)
     linked_organization_count = models.PositiveIntegerField(verbose_name="number of organizations linked to the issue",
-                                                        null=False, blank=True, default=0)
+                                                            null=False, blank=True, default=0)
+    hide_issue = models.BooleanField(default=True)  # Do not show issue to voters or partners (admins/volunteers only)
 
     # A default image field for hard-coded local images
     issue_image_url = models.TextField(
@@ -311,6 +321,14 @@ class IssueManager(models.Model):
         if results['success']:
             return results['issue_we_vote_id']
         return ''
+
+    def fetch_issue_from_we_vote_id(self, we_vote_id):
+        issue_id = 0
+        issue_manager = IssueManager()
+        results = issue_manager.retrieve_issue(issue_id, we_vote_id)
+        if results['issue_found']:
+            return results['issue']
+        return None
 
     def retrieve_issue_from_issue_name(self, issue_name):
         issue_id = 0
@@ -396,6 +414,7 @@ class IssueManager(models.Model):
             updated_issue_values["issue_name"] = issue_name
         if positive_value_exists(issue_description):
             updated_issue_values["issue_description"] = issue_description
+        # Should we deal with hide_issue?
 
         if not positive_value_exists(issue_name) and not positive_value_exists(issue_we_vote_id):
             success = False

@@ -159,12 +159,21 @@ span.nobr { white-space: nowrap; }
 <div class="form-group">
     <label class="col-sm-3 control-label">Select Issues</label>
     <div class="col-sm-8 ">
+    <ul class="list-inline">
     {% for issue in issue_list %}
-        <span class="nobr">
+      {% if not issue.hide_issue or issue.followed_by_organization %}
+        <li class="list-inline-item">
         <input type="checkbox" name="selected_issues" id="selected_issues" value={{ issue.we_vote_id }}
-                {% if issue.followed_by_organization %}checked{% endif %} />&nbsp;{{ issue.issue_name }} &nbsp;
-        </span>
+                {% if issue.followed_by_organization %}checked{% endif %} />
+          {% if issue.hide_issue %}
+          <span style="text-decoration: line-through">{{ issue.issue_name }}</span>
+          {% else %}
+          {{ issue.issue_name }}
+          {% endif %}
+        </li>
+      {% endif %}
     {% endfor %}
+    </ul>
     </div>
 </div>
 {% endif %}

@@ -867,11 +867,11 @@ class VoteSmartSpecialInterestGroupManager(models.Model):
     def __unicode__(self):
         return "VoteSmartSpecialInterestGroupManager"
 
-    def fetch_organization_issues_for_display(self, vote_smart_id):
-        results = self.retrieve_organization_issues_for_display(vote_smart_id)
+    def fetch_vote_smart_organization_issues_for_display(self, vote_smart_id):
+        results = self.retrieve_vote_smart_organization_issues_for_display(vote_smart_id)
         return results['issues_display_string']
 
-    def retrieve_organization_issues_for_display(self, vote_smart_id):
+    def retrieve_vote_smart_organization_issues_for_display(self, vote_smart_id):
         issue_list_found = False
         success = False
         status = ""
@@ -908,7 +908,7 @@ class VoteSmartSpecialInterestGroupManager(models.Model):
                 status += 'RETRIEVE_ISSUES_FOR_ORGANIZATION_NO_ISSUES_RETRIEVED '
             success = True
         except Exception as e:
-            status = 'FAILED fetch_organization_issues_for_display ' \
+            status = 'FAILED retrieve_vote_smart_organization_issues_for_display ' \
                      '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
 
         results = {

@@ -169,11 +169,11 @@ def candidate_list_view(request):
     google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
     candidate_search = request.GET.get('candidate_search', '')
     state_code = request.GET.get('state_code', '')
-    show_all = request.GET.get('show_all', False)
-    show_all_elections = request.GET.get('show_all_elections', False)
-
     state_list = STATE_CODE_MAP
     sorted_state_list = sorted(state_list.items())
+
+    show_all = request.GET.get('show_all', False)
+    show_all_elections = request.GET.get('show_all_elections', False)
 
     candidate_list = []
     candidate_list_count = 0

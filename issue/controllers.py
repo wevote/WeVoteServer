@@ -48,6 +48,7 @@ def issues_import_from_structured_json(structured_json):
     for one_issue in structured_json:
         # Bring variables from the structure_json in, with error checking
         we_vote_id = one_issue["we_vote_id"] if "we_vote_id" in one_issue else False
+        hide_issue = one_issue["hide_issue"] if "hide_issue" in one_issue else True  # We want to default to hiding
         issue_name = one_issue["issue_name"] if "issue_name" in one_issue else False
         issue_description = one_issue["issue_description"] if "issue_description" in one_issue else False
         issue_image_url = one_issue["issue_image_url"] if "issue_image_url" in one_issue else False
@@ -109,6 +110,7 @@ def issues_import_from_structured_json(structured_json):
                 issue_on_stage.we_vote_hosted_image_url_medium = we_vote_hosted_image_url_medium
             if we_vote_hosted_image_url_tiny is not False:
                 issue_on_stage.we_vote_hosted_image_url_tiny = we_vote_hosted_image_url_tiny
+            issue_on_stage.hide_issue = hide_issue
 
             issue_on_stage.save()
             if issue_on_stage_found:
@@ -185,6 +187,7 @@ def issue_retrieve_for_api(issue_id, issue_we_vote_id):  # issueRetrieve
             else issue.issue_image_url,
             'issue_photo_url_medium':   issue.we_vote_hosted_image_url_medium,
             'issue_photo_url_tiny':     issue.we_vote_hosted_image_url_tiny,
+            'hide_issue':               issue.hide_issue,
         }
     else:
         json_data = {
@@ -666,6 +669,7 @@ def retrieve_issues_linked_to_organization_for_api(organization_we_vote_id):
                 'issue_photo_url_large':    issue.we_vote_hosted_image_url_large,
                 'issue_photo_url_medium':   issue.we_vote_hosted_image_url_medium,
                 'issue_photo_url_tiny':     issue.we_vote_hosted_image_url_tiny,
+                'hide_issue':               issue.hide_issue,
             }
             issues_linked.append(one_issue)
 
