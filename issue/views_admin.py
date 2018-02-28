@@ -12,14 +12,16 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.messages import get_messages
 from django.shortcuts import render
+from election.models import Election, ElectionManager
 from exception.models import handle_record_found_more_than_one_exception
 from image.controllers import cache_issue_image_master, cache_resized_image_locally, delete_cached_images_for_issue
 from image.models import WeVoteImageManager
-from organization.models import OrganizationListManager
+from organization.models import OrganizationManager, OrganizationListManager
 from position.models import PositionListManager
 from voter.models import voter_has_authority
+from voter_guide.models import VoterGuideListManager
 import wevote_functions.admin
-from wevote_functions.functions import convert_to_int, positive_value_exists, get_voter_device_id
+from wevote_functions.functions import convert_to_int, positive_value_exists, get_voter_device_id, STATE_CODE_MAP
 from django.http import HttpResponse
 import json
 
@@ -54,7 +56,8 @@ def issues_sync_out_view(request):  # issuesSyncOut
 
                 issue_list = issue_list.filter(final_filters)
 
-        issue_list_dict = issue_list.values('we_vote_id', 'issue_name', 'issue_description', 'issue_image_url',
+        issue_list_dict = issue_list.values('we_vote_id', 'hide_issue',
+                                            'issue_name', 'issue_description', 'issue_image_url',
                                             'issue_followers_count', 'linked_organization_count',
                                             'we_vote_hosted_image_url_large', 'we_vote_hosted_image_url_medium',
                                             'we_vote_hosted_image_url_tiny')
@@ -122,15 +125,69 @@ def issue_list_view(request):
 
     google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
     state_code = request.GET.get('state_code', '')
+    state_list = STATE_CODE_MAP
+    sorted_state_list = sorted(state_list.items())
 
     issue_search = request.GET.get('issue_search', '')
-    show_all = request.GET.get('show_all', False)
+    show_hidden_issues = request.GET.get('show_hidden_issues', False)
+    show_all_elections = request.GET.get('show_all_elections', False)
 
-    issue_list = []
     issue_list_count = 0
+
+    issue_we_vote_id_list = []
+    organization_we_vote_id_in_this_election_list = []
+    organization_retrieved_list = {}
+    organization_link_to_issue_list = []
+    organizations_attached_to_this_issue = {}
+    if positive_value_exists(google_civic_election_id):
+        # If we are just looking at one election, then we want to retrieve a list of the voter guides associated
+        #  with this election. This way we can order the issues based on the number of organizations with positions
+        #  in this election linked to issues.
+        voter_guide_list_manager = VoterGuideListManager()
+        organization_manager = OrganizationManager()
+        results = voter_guide_list_manager.retrieve_voter_guides_for_election(google_civic_election_id)
+        if results['voter_guide_list_found']:
+            voter_guide_list = results['voter_guide_list']
+            for one_voter_guide in voter_guide_list:
+                organization_we_vote_id_in_this_election_list.append(one_voter_guide.organization_we_vote_id)
+            # try:
+            if positive_value_exists(len(organization_we_vote_id_in_this_election_list)):
+                organization_link_to_issue_list_query = OrganizationLinkToIssue.objects.all()
+                organization_link_to_issue_list_query = organization_link_to_issue_list_query.filter(
+                    organization_we_vote_id__in=organization_we_vote_id_in_this_election_list)
+                organization_link_to_issue_list = list(organization_link_to_issue_list_query)
+            for one_organization_link_to_issue in organization_link_to_issue_list:
+                if one_organization_link_to_issue.organization_we_vote_id not in organization_retrieved_list:
+                    # If here, we need to retrieve the organization
+                    organization_results = organization_manager.retrieve_organization_from_we_vote_id(
+                        one_organization_link_to_issue.organization_we_vote_id)
+                    if organization_results['organization_found']:
+                        organization_object = organization_results['organization']
+                        organization_retrieved_list[one_organization_link_to_issue.organization_we_vote_id] = \
+                            organization_object
+                if one_organization_link_to_issue.issue_we_vote_id not in organizations_attached_to_this_issue:
+                    organizations_attached_to_this_issue[one_organization_link_to_issue.issue_we_vote_id] = []
+                organizations_attached_to_this_issue[one_organization_link_to_issue.issue_we_vote_id].\
+                    append(
+                    organization_retrieved_list[one_organization_link_to_issue.organization_we_vote_id])
+                # if one_organization_link_to_issue.issue_we_vote_id not in issue_we_vote_id_list:
+                #     issue_we_vote_id_list.append(one_organization_link_to_issue.issue_we_vote_id)
+
+            # except Exception as e:
+            #     pass
 
     try:
         issue_list_query = Issue.objects.all()
+
+        if positive_value_exists(show_hidden_issues) or positive_value_exists(issue_search):
+            # If trying to show hidden issues, no change to the query needed
+            pass
+        else:
+            # By default, we only show the issues marked "hide_issue=False"
+            issue_list_query = issue_list_query.filter(hide_issue=False)
+
+        # if positive_value_exists(len(issue_we_vote_id_list)):
+        #     issue_list_query = issue_list_query.filter(we_vote_id__in=issue_we_vote_id_list)
 
         if positive_value_exists(issue_search):
             search_words = issue_search.split()
@@ -158,10 +215,7 @@ def issue_list_view(request):
         issue_list_query = issue_list_query.order_by('issue_name')
         issue_list_count = issue_list_query.count()
 
-        if not positive_value_exists(show_all):
-            issue_list = issue_list_query[:200]
-        else:
-            issue_list = list(issue_list_query)
+        issue_list = list(issue_list_query)
 
         if issue_list_count:
             altered_issue_list = []
@@ -174,6 +228,12 @@ def issue_list_view(request):
                     one_issue.save()
                 except Exception as e:
                     pass
+                if one_issue.we_vote_id in organizations_attached_to_this_issue:
+                    one_issue.linked_organization_list = organizations_attached_to_this_issue[one_issue.we_vote_id]
+                    one_issue.linked_organization_list_count = len(one_issue.linked_organization_list)
+                else:
+                    one_issue.linked_organization_list = []
+                    one_issue.linked_organization_list_count = 0
                 altered_issue_list.append(one_issue)
         else:
             altered_issue_list = issue_list
@@ -181,6 +241,9 @@ def issue_list_view(request):
         # This is fine
         altered_issue_list = []
         pass
+
+    # Order based on number of organizations per issue
+    altered_issue_list.sort(key=lambda x: x.linked_organization_list_count, reverse=True)
 
     status_print_list = ""
     status_print_list += "issue_list_count: " + \
@@ -190,12 +253,23 @@ def issue_list_view(request):
 
     messages_on_stage = get_messages(request)
 
+    election_manager = ElectionManager()
+    if positive_value_exists(show_all_elections):
+        results = election_manager.retrieve_elections()
+        election_list = results['election_list']
+    else:
+        results = election_manager.retrieve_upcoming_elections()
+        election_list = results['election_list']
+
     template_values = {
-        'messages_on_stage':        messages_on_stage,
+        'election_list':            election_list,
+        'google_civic_election_id': google_civic_election_id,
         'issue_list':               altered_issue_list,
         'issue_search':             issue_search,
-        'google_civic_election_id': google_civic_election_id,
+        'messages_on_stage':        messages_on_stage,
+        'show_hidden_issues':       positive_value_exists(show_hidden_issues),
         'state_code':               state_code,
+        'state_list':               sorted_state_list,
     }
     return render(request, 'issue/issue_list.html', template_values)
 
@@ -214,6 +288,7 @@ def issue_new_view(request):
     issue_name = request.GET.get('issue_name', "")
     issue_description = request.GET.get('issue_description', "")
     issue_image_url = request.GET.get('issue_image_url', "")
+    hide_issue = request.GET.get('hide_issue', True)  # Default to true
 
     # Its helpful to see existing issues when entering a new issue
     issue_list = []
@@ -226,12 +301,13 @@ def issue_new_view(request):
 
     messages_on_stage = get_messages(request)
     template_values = {
-        'messages_on_stage':    messages_on_stage,
+        'google_civic_election_id': google_civic_election_id,
+        'hide_issue':           hide_issue,
         'issue_list':           issue_list,
         'issue_name':           issue_name,
         'issue_description':    issue_description,
         'issue_image_url':      issue_image_url,
-        'google_civic_election_id': google_civic_election_id,
+        'messages_on_stage':    messages_on_stage,
         'state_code': state_code,
     }
     return render(request, 'issue/issue_edit.html', template_values)
@@ -248,6 +324,7 @@ def issue_edit_view(request, issue_we_vote_id):
     state_code = request.GET.get('state_code', '')
 
     # These variables are here in case there was an error on the edit_process_view and the voter needs to try again
+    hide_issue = request.GET.get('hide_issue', True)
     issue_name = request.GET.get('issue_name', '')
     issue_description = request.GET.get('issue_description', '')
     issue_image_url = request.GET.get('issue_image_url', '')
@@ -294,6 +371,7 @@ def issue_edit_view(request, issue_we_vote_id):
 
     template_values = {
         'messages_on_stage':        messages_on_stage,
+        'hide_issue':               hide_issue,
         'issue_list':               issue_list,
         'issue':                    issue_on_stage,
         'issue_name':               issue_name,
@@ -328,6 +406,7 @@ def issue_edit_process_view(request):
     we_vote_hosted_image_url_medium = None
     we_vote_hosted_image_url_tiny = None
 
+    hide_issue = request.POST.get('hide_issue', False)
     issue_we_vote_id = request.POST.get('issue_we_vote_id', False)
     issue_name = request.POST.get('issue_name', False)
     issue_description = request.POST.get('issue_description', False)
@@ -411,6 +490,7 @@ def issue_edit_process_view(request):
             issue_on_stage.we_vote_hosted_image_url_medium = we_vote_hosted_image_url_medium
         if we_vote_hosted_image_url_tiny is not None:
             issue_on_stage.we_vote_hosted_image_url_tiny = we_vote_hosted_image_url_tiny
+        issue_on_stage.hide_issue = hide_issue
 
         issue_on_stage.save()
         issue_we_vote_id = issue_on_stage.we_vote_id
@@ -433,6 +513,7 @@ def issue_edit_process_view(request):
                 issue_on_stage.we_vote_hosted_image_url_medium = we_vote_hosted_image_url_medium
             if we_vote_hosted_image_url_tiny is not None:
                 issue_on_stage.we_vote_hosted_image_url_tiny = we_vote_hosted_image_url_tiny
+            issue_on_stage.hide_issue = hide_issue
 
             issue_on_stage.save()
             issue_we_vote_id = issue_on_stage.we_vote_id

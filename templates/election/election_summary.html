@@ -24,12 +24,11 @@
     </div>
 
     <div class="form-group">
-        <label for="include_in_list_for_voters_id" class="col-sm-3 control-label">Show:&nbsp;
+        <label for="include_in_list_for_voters_id" class="col-sm-3 control-label"></label>
+        <div class="col-sm-8">
             <input type="checkbox" name="include_in_list_for_voters" id="include_in_list_for_voters_id" disabled
                value={% if election %}{% if election.include_in_list_for_voters %}True{% else %}False{% endif %}{% else %}False{% endif %}
                {% if election.include_in_list_for_voters %}checked{% endif %} />
-        </label>
-        <div class="col-sm-8">
             Show in lists of elections for voters (<a href="{% url 'election:election_edit' election.id %}">edit</a>)
         </div>
     </div>
@@ -66,12 +65,16 @@
 {#                   value="{% if election %}{{ election.raw_ocd_division_id|default_if_none:"" }}{% endif %}" />#}
 {#        </div>#}
 {#    </div>#}
+
+    <div class="form-group">
+        <label for="state_id" class="col-sm-3 control-label"></label>
+        <div class="col-sm-8">
+            <a href="{% url 'election:election_edit' election.id %}">edit election</a>
+        </div>
+    </div>
 </form>
 
 <div class="col-sm-12">
-
-    <p><a href="{% url 'election:election_edit' election.id %}">edit</a></p>
-
 
     <p>
         <a href="{% url 'office:office_list' %}?google_civic_election_id={{ election.google_civic_election_id }}&state_code={{ state_code }}">
