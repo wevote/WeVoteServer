@@ -352,6 +352,121 @@ class BallotItemManager(models.Model):
         }
         return results
 
+    def create_ballot_item_row_entry(self, ballot_item_display_name, local_ballot_order, state_code,
+                                     google_civic_election_id, defaults):
+        """
+        Create BallotItem table entry with BallotItem details
+        :param ballot_item_display_name:
+        :param local_ballot_order:
+        :param state_code:
+        :param google_civic_election_id:
+        :param defaults:
+        :return:
+        """
+
+        new_ballot_item_created = False
+        new_ballot_item = ''
+
+        try:
+            new_ballot_item = BallotItem.objects.create(
+                ballot_item_display_name=ballot_item_display_name,
+                local_ballot_order=local_ballot_order,
+                state_code=state_code,
+                google_civic_election_id=google_civic_election_id)
+            if new_ballot_item:
+                success = True
+                status = "CONTEST_OFFICE_CREATED"
+                new_ballot_item_created = True
+                new_ballot_item.contest_office_id = defaults['contest_office_id']
+                new_ballot_item.contest_office_we_vote_id = defaults['contest_office_we_vote_id']
+                new_ballot_item.contest_measure_id = defaults['contest_measure_id']
+                new_ballot_item.contest_measure_we_vote_id = defaults['contest_measure_we_vote_id']
+                new_ballot_item.measure_subtitle = defaults['measure_subtitle']
+                new_ballot_item.polling_location_we_vote_id = defaults['polling_location_we_vote_id']
+                new_ballot_item.save()
+            else:
+                success = False
+                status = "BALLOT_ITEM_CREATE_FAILED"
+        except Exception as e:
+            success = False
+            new_ballot_item_created = False
+            status = "BALLOT_ITEM_RETRIEVE_ERROR"
+            handle_exception(e, logger=logger, exception_message=status)
+
+        results = {
+                'success':                      success,
+                'status':                       status,
+                'new_ballot_item_created':      new_ballot_item_created,
+                'ballot_item':                  new_ballot_item,
+            }
+        return results
+
+    def update_ballot_item_row_entry(self, ballot_item_display_name, local_ballot_order, state_code,
+                                     google_civic_election_id, defaults):
+        """
+        Update BallotItem table entry with matching we_vote_id
+        :param ballot_item_display_name:
+        :param local_ballot_order:
+        :param state_code:
+        :param google_civic_election_id:
+        :param defaults:
+        :return:
+        """
+
+        success = False
+        status = ""
+        ballot_item_updated = False
+        existing_ballot_item_entry = ''
+        ballot_item_found = False
+
+        try:
+            if positive_value_exists(defaults['contest_office_we_vote_id']):
+                existing_ballot_item_entry = BallotItem.objects.get(
+                    contest_office_we_vote_id__iexact=defaults['contest_office_we_vote_id'])
+                ballot_item_found = True
+            elif positive_value_exists(defaults['contest_office_id']):
+                existing_ballot_item_entry = BallotItem.objects.get(contest_office_id=defaults['contest_office_id'])
+                ballot_item_found = True
+            elif positive_value_exists(defaults['contest_measure_we_vote_id']):
+                existing_ballot_item_entry = BallotItem.objects.get(
+                    contest_measure_we_vote_id__iexact=defaults['contest_measure_we_vote_id'])
+                ballot_item_found = True
+            elif positive_value_exists(defaults['contest_measure_id']):
+                existing_ballot_item_entry = BallotItem.objects.get(contest_measure_id=defaults['contest_measure_id'])
+                ballot_item_found = True
+
+            if ballot_item_found:
+                # found the existing entry, update the values
+                existing_ballot_item_entry.ballot_item_display_name = ballot_item_display_name
+                existing_ballot_item_entry.local_ballot_order = local_ballot_order
+                existing_ballot_item_entry.google_civic_election_id = google_civic_election_id
+                existing_ballot_item_entry.state_code = state_code
+                existing_ballot_item_entry.contest_office_id = defaults['contest_office_id']
+                existing_ballot_item_entry.contest_office_we_vote_id = defaults['contest_office_we_vote_id']
+                existing_ballot_item_entry.contest_measure_id = defaults['contest_measure_id']
+                existing_ballot_item_entry.contest_measure_we_vote_id = defaults['contest_measure_we_vote_id']
+                existing_ballot_item_entry.measure_subtitle = defaults['measure_subtitle']
+                existing_ballot_item_entry.polling_location_we_vote_id = defaults['polling_location_we_vote_id']
+
+                # now go ahead and save this entry (update)
+                existing_ballot_item_entry.save()
+                ballot_item_updated = True
+                success = True
+                status = "BALLOT_ITEM_UPDATED"
+        except Exception as e:
+            success = False
+            ballot_item_updated = False
+            status = "BALLOT_ITEM_RETRIEVE_ERROR"
+            handle_exception(e, logger=logger, exception_message=status)
+
+        results = {
+                'success':                   success,
+                'status':                    status,
+                'ballot_item_updated':       ballot_item_updated,
+                'ballot_item':               existing_ballot_item_entry,
+            }
+        return results
+
 
 class BallotItemListManager(models.Model):
     """
