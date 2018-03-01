@@ -95,7 +95,7 @@
     {% elif kind_of_batch == "POLITICIAN" %}
         Process Politician Data
     {% elif kind_of_batch == "IMPORT_BALLOT_ITEM" %}
-        Ballot at One Location - STILL WORK IN PROGRESS
+        Ballot at One Location
     {% else %}
         Kind of data not recognized: Please STOP
     {% endif %}
@@ -864,9 +864,11 @@
                         table-danger
                         {% endif %}">
                         <th></th>
+                        <th>local ballot order</th>
                         <th>ballot item</th>
                         <th>election</th>
                         <th>polling location</th>
+                        <th>ballot item display name</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -902,22 +904,22 @@
                                 <label for="create_actions_button_id" class="col-sm-3 control-label"></label>
                                 <button type="submit" id="create_batch_row_action_id_id" name="create_batch_row_action_id" class="btn btn-default"
                                         value={{ one_batch_row.batch_row_action.id }}>UPDATE</button>
-                                {{ one_batch_row.batch_row_action.contest_office_we_vote_id|default_if_none:"" }}
-                                {{ one_batch_row.batch_row_action.measure_we_vote_id|default_if_none:"" }}
                             </form>
                             {% else %}
                                 {{ one_batch_row.batch_row_action.kind_of_action }}
                             {% endif %}
                         </td>
+                        <td>{{ one_batch_row.batch_row_action.local_ballot_order|default_if_none:"" }}</td>
                         <td>{{ one_batch_row.batch_row_action.ballot_item_display_name|default_if_none:"" }}
                             {% if one_batch_row.batch_row_action.contest_office_we_vote_id %}
-                            <span> ({{ one_batch_row.batch_row_action.contest_office_we_vote_id|default_if_none:"" }})</span>
+                            <span> {{ one_batch_row.batch_row_action.contest_office_we_vote_id|default_if_none:"" }}</span>
                             {% elif one_batch_row.batch_row_action.measure_we_vote_id %}
-                            <span> ({{ one_batch_row.batch_row_action.measure_we_vote_id|default_if_none:"" }})</span>
+                            <span> {{ one_batch_row.batch_row_action.measure_we_vote_id|default_if_none:"" }}</span>
                             {% endif %}
                         </td>
                         <td>{{ one_batch_row.batch_row_action.google_civic_election_id|default_if_none:"" }}</td>
                         <td>{{ one_batch_row.batch_row_action.polling_location_we_vote_id|default_if_none:"" }}</td>
+                        <td>{{ one_batch_row.batch_row_action.ballot_item_display_name|default_if_none:"" }}</td>
                     </tr>
                     {% if one_batch_row.batch_row_action.status %}
                     <tr class="{% if one_batch_row.batch_row_action.kind_of_action == "IMPORT_CREATE" %}
