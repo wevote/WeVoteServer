@@ -125,6 +125,10 @@
         <td>{{ organization_type_display_text }}</td>
     </tr>
      {% endif %}
+    <tr>
+        <th></th>
+        <td><a href="{% url 'organization:organization_edit' organization.id %}?google_civic_election_id={{ google_civic_election_id }}">edit {{ organization.organization_name }}</a></td>
+    </tr>
     </table>
 <p>
     <a href="{% url 'import_export_wikipedia:import_organization_logo' organization.id %}">Retrieve photos from Wikipedia</a>,
