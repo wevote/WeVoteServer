@@ -134,6 +134,14 @@ class FollowIssueManager(models.Model):
         follow_issue_id = 0
         results = follow_issue_manager.retrieve_follow_issue(follow_issue_id, voter_we_vote_id, issue_id,
                                                              issue_we_vote_id)
+        if results['MultipleObjectsReturned']:
+            status += 'TOGGLE_FOLLOWING_ISSUE MultipleObjectsReturned ' + following_status
+            delete_results = follow_issue_manager.delete_follow_issue(
+                follow_issue_id, voter_we_vote_id, issue_id, issue_we_vote_id)
+            status += delete_results['status']
+
+            results = follow_issue_manager.retrieve_follow_issue(follow_issue_id, voter_we_vote_id, issue_id,
+                                                                 issue_we_vote_id)
 
         if results['follow_issue_found']:
             follow_issue_on_stage = results['follow_issue']
@@ -147,13 +155,10 @@ class FollowIssueManager(models.Model):
                 follow_issue_changed = True
                 follow_issue_on_stage_id = follow_issue_on_stage.id
                 follow_issue_on_stage_found = True
-                status = 'FOLLOW_STATUS_UPDATED_AS ' + following_status
+                status += 'FOLLOW_STATUS_UPDATED_AS ' + following_status
             except Exception as e:
-                status = 'FAILED_TO_UPDATE ' + following_status
+                status += 'FAILED_TO_UPDATE ' + following_status
                 handle_record_not_saved_exception(e, logger=logger, exception_message_optional=status)
-        elif results['MultipleObjectsReturned']:
-            logger.warning("follow_issue: delete all but one and take it over?")
-            status = 'TOGGLE_FOLLOWING MultipleObjectsReturned ' + following_status
         elif results['DoesNotExist']:
             try:
                 # Create new follow_issue entry
@@ -177,14 +182,14 @@ class FollowIssueManager(models.Model):
                     follow_issue_changed = True
                     follow_issue_on_stage_id = follow_issue_on_stage.id
                     follow_issue_on_stage_found = True
-                    status = 'CREATE ' + following_status
+                    status += 'CREATE ' + following_status
                 else:
                     status = 'ISSUE_NOT_FOUND_ON_CREATE ' + following_status
             except Exception as e:
-                status = 'FAILED_TO_UPDATE ' + following_status
+                status += 'FAILED_TO_UPDATE ' + following_status
                 handle_record_not_saved_exception(e, logger=logger, exception_message_optional=status)
         else:
-            status = results['status']
+            status += results['status']
 
         results = {
             'success':               True if follow_issue_on_stage_found else False,
@@ -265,8 +270,56 @@ class FollowIssueManager(models.Model):
         }
         return results
 
+    def delete_follow_issue(self, follow_issue_id, voter_we_vote_id, issue_id, issue_we_vote_id):
+        """
+        Remove any follow issue entries (we may have duplicate entries)
+        """
+        follow_issue_deleted = False
+        status = ''
+
+        try:
+            if positive_value_exists(follow_issue_id):
+                follow_issue_on_stage = FollowIssue.objects.get(id=follow_issue_id)
+                follow_issue_on_stage.delete()
+                follow_issue_deleted = True
+                success = True
+                status += 'FOLLOW_ISSUE_DELETED_BY_ID '
+            elif positive_value_exists(voter_we_vote_id) and positive_value_exists(issue_id):
+                follow_issue_query = FollowIssue.objects.filter(
+                    voter_we_vote_id__iexact=voter_we_vote_id,
+                    issue_id=issue_id)
+                follow_issue_list = list(follow_issue_query)
+                for one_follow_issue in follow_issue_list:
+                    one_follow_issue.delete()
+                    follow_issue_deleted = True
+                success = True
+                status += 'FOLLOW_ISSUE_DELETED_BY_VOTER_WE_VOTE_ID_AND_ISSUE_ID '
+            elif positive_value_exists(voter_we_vote_id) and positive_value_exists(issue_we_vote_id):
+                follow_issue_query = FollowIssue.objects.filter(
+                    voter_we_vote_id__iexact=voter_we_vote_id,
+                    issue_we_vote_id__iexact=issue_we_vote_id)
+                follow_issue_list = list(follow_issue_query)
+                for one_follow_issue in follow_issue_list:
+                    one_follow_issue.delete()
+                    follow_issue_deleted = True
+                success = True
+                status += 'FOLLOW_ISSUE_DELETE_BY_VOTER_WE_VOTE_ID_AND_ISSUE_WE_VOTE_ID '
+            else:
+                success = False
+                status += 'FOLLOW_ISSUE_DELETE_MISSING_REQUIRED_VARIABLES '
+        except FollowIssue.DoesNotExist:
+            success = True
+            status = 'FOLLOW_ISSUE_DELETE_NOT_FOUND_DoesNotExist '
+
+        results = {
+            'status':               status,
+            'success':              success,
+            'follow_issue_deleted': follow_issue_deleted,
+        }
+        return results
+
     def create_or_update_suggested_issue_to_follow(self, viewer_voter_we_vote_id, issue_we_vote_id,
-                                                          from_twitter=False):
+                                                   from_twitter=False):
         """
         Create or update the SuggestedIssueToFollow table with suggested issues from twitter ids i follow
         or issue of my friends follow.
@@ -662,7 +715,7 @@ class FollowOrganizationManager(models.Model):
                 handle_record_not_saved_exception(e, logger=logger, exception_message_optional=status)
         elif results['MultipleObjectsReturned']:
             logger.warning("follow_organization: delete all but one and take it over?")
-            status = 'TOGGLE_FOLLOWING MultipleObjectsReturned ' + following_status
+            status = 'TOGGLE_FOLLOWING_ORGANIZATION MultipleObjectsReturned ' + following_status
         elif results['DoesNotExist']:
             try:
                 # Create new follow_organization entry
