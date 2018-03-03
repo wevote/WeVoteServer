@@ -27,7 +27,10 @@ import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, positive_value_exists
 import json
 
+BALLOT_ITEMS_SYNC_URL = get_environment_variable("BALLOT_ITEMS_SYNC_URL")  # ballotItemsSyncOut
+BALLOT_RETURNED_SYNC_URL = get_environment_variable("BALLOT_RETURNED_SYNC_URL")  # ballotReturnedSyncOut
 GOOGLE_MAPS_API_KEY = get_environment_variable("GOOGLE_MAPS_API_KEY")
+WE_VOTE_SERVER_ROOT_URL = get_environment_variable("WE_VOTE_SERVER_ROOT_URL")
 
 logger = wevote_functions.admin.get_logger(__name__)
 
@@ -194,6 +197,15 @@ def ballot_items_import_from_master_server_view(request):
     :param request:
     :return:
     """
+    # admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'admin'}
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
+    if WE_VOTE_SERVER_ROOT_URL in BALLOT_ITEMS_SYNC_URL:
+        messages.add_message(request, messages.ERROR, "Cannot sync with Master We Vote Server -- "
+                                                      "this is the Master We Vote Server.")
+        return HttpResponseRedirect(reverse('admin_tools:admin_home', args=()))
 
     google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
     state_code = request.GET.get('state_code', '')
@@ -218,6 +230,16 @@ def ballot_items_import_from_master_server_view(request):
 
 @login_required
 def ballot_returned_import_from_master_server_view(request):
+    # admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'admin'}
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
+    if WE_VOTE_SERVER_ROOT_URL in BALLOT_RETURNED_SYNC_URL:
+        messages.add_message(request, messages.ERROR, "Cannot sync with Master We Vote Server -- "
+                                                      "this is the Master We Vote Server.")
+        return HttpResponseRedirect(reverse('admin_tools:admin_home', args=()))
+
     google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
     state_code = request.GET.get('state_code', '')
 

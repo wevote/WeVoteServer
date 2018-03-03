@@ -5,6 +5,7 @@
 from .controllers import *
 from .models import Issue, MOST_LINKED_ORGANIZATIONS, OrganizationLinkToIssue
 from admin_tools.views import redirect_to_sign_in_page
+from config.base import get_environment_variable
 from django.db.models import Q
 from django.http import HttpResponseRedirect
 from django.core.urlresolvers import reverse
@@ -17,7 +18,6 @@ from exception.models import handle_record_found_more_than_one_exception
 from image.controllers import cache_issue_image_master, cache_resized_image_locally, delete_cached_images_for_issue
 from image.models import WeVoteImageManager
 from organization.models import OrganizationManager, OrganizationListManager
-from position.models import PositionListManager
 from voter.models import voter_has_authority
 from voter_guide.models import VoterGuideListManager
 import wevote_functions.admin
@@ -25,6 +25,10 @@ from wevote_functions.functions import convert_to_int, positive_value_exists, ge
 from django.http import HttpResponse
 import json
 
+ORGANIZATION_LINK_TO_ISSUE_SYNC_URL = \
+    get_environment_variable("ORGANIZATION_LINK_TO_ISSUE_SYNC_URL")  # organizationLinkToIssueSyncOut
+ISSUES_SYNC_URL = get_environment_variable("ISSUES_SYNC_URL")  # issuesSyncOut
+WE_VOTE_SERVER_ROOT_URL = get_environment_variable("WE_VOTE_SERVER_ROOT_URL")
 
 logger = wevote_functions.admin.get_logger(__name__)
 
@@ -97,6 +101,16 @@ def retrieve_issues_to_follow_view(request):  # retrieveIssuesToFollow
 
 @login_required
 def issues_import_from_master_server_view(request):
+    # admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'admin'}
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
+    if WE_VOTE_SERVER_ROOT_URL in ISSUES_SYNC_URL:
+        messages.add_message(request, messages.ERROR, "Cannot sync with Master We Vote Server -- "
+                                                      "this is the Master We Vote Server.")
+        return HttpResponseRedirect(reverse('admin_tools:admin_home', args=()))
+
     google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
     state_code = request.GET.get('state_code', '')
 
@@ -667,6 +681,16 @@ def issue_delete_process_view(request):
 
 @login_required
 def organization_link_to_issue_import_from_master_server_view(request):
+    # admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'admin'}
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
+    if WE_VOTE_SERVER_ROOT_URL in ORGANIZATION_LINK_TO_ISSUE_SYNC_URL:
+        messages.add_message(request, messages.ERROR, "Cannot sync with Master We Vote Server -- "
+                                                      "this is the Master We Vote Server.")
+        return HttpResponseRedirect(reverse('admin_tools:admin_home', args=()))
+
     google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
     state_code = request.GET.get('state_code', '')
 
