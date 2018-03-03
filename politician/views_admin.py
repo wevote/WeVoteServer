@@ -6,6 +6,7 @@ from .controllers import politicians_import_from_master_server
 from .models import Politician, PoliticianManager
 from admin_tools.views import redirect_to_sign_in_page
 from candidate.models import CandidateCampaign
+from config.base import get_environment_variable
 from office.models import ContestOffice, ContestOfficeManager
 from django.db.models import Q
 from django.http import HttpResponseRedirect
@@ -31,12 +32,24 @@ from wevote_functions.functions import convert_to_int, convert_to_political_part
     extract_last_name_from_full_name, extract_twitter_handle_from_text_string, \
     positive_value_exists, STATE_CODE_MAP
 
+POLITICIANS_SYNC_URL = get_environment_variable("POLITICIANS_SYNC_URL")  # politiciansSyncOut
+WE_VOTE_SERVER_ROOT_URL = get_environment_variable("WE_VOTE_SERVER_ROOT_URL")
 
 logger = wevote_functions.admin.get_logger(__name__)
 
 
 @login_required
 def politicians_import_from_master_server_view(request):
+    # admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'admin'}
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
+    if WE_VOTE_SERVER_ROOT_URL in POLITICIANS_SYNC_URL:
+        messages.add_message(request, messages.ERROR, "Cannot sync with Master We Vote Server -- "
+                                                      "this is the Master We Vote Server.")
+        return HttpResponseRedirect(reverse('admin_tools:admin_home', args=()))
+
     google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
     state_code = request.GET.get('state_code', '')
 

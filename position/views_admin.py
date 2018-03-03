@@ -8,6 +8,7 @@ from .controllers import positions_import_from_master_server, refresh_positions_
 from .models import ANY_STANCE, PositionEntered
 from admin_tools.views import redirect_to_sign_in_page
 from candidate.models import CandidateCampaign
+from config.base import get_environment_variable
 from django.core.urlresolvers import reverse
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -27,6 +28,9 @@ from wevote_functions.functions import convert_to_int, positive_value_exists
 from django.http import HttpResponse
 import json
 
+POSITIONS_SYNC_URL = get_environment_variable("POSITIONS_SYNC_URL")  # positionsSyncOut
+WE_VOTE_SERVER_ROOT_URL = get_environment_variable("WE_VOTE_SERVER_ROOT_URL")
+
 logger = wevote_functions.admin.get_logger(__name__)
 
 
@@ -34,19 +38,31 @@ logger = wevote_functions.admin.get_logger(__name__)
 def positions_sync_out_view(request):  # positionsSyncOut
     google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
 
-    position_list_manager = PositionListManager()
-    public_only = True
-    position_list = position_list_manager.retrieve_all_positions_for_election(google_civic_election_id, ANY_STANCE,
-                                                                              public_only)
+    if not positive_value_exists(google_civic_election_id):
+        json_data = {
+            'success': False,
+            'status': 'POSITION_LIST_CANNOT_BE_RETURNED-ELECTION_ID_REQUIRED'
+        }
+        return HttpResponse(json.dumps(json_data), content_type='application/json')
 
-    if position_list:
+    stance_we_are_looking_for = ANY_STANCE
+    try:
+        # Only return public positions
+        position_list_query = PositionEntered.objects.order_by('date_entered')
+
+        position_list_query = position_list_query.filter(google_civic_election_id=google_civic_election_id)
+        # SUPPORT, STILL_DECIDING, INFORMATION_ONLY, NO_STANCE, OPPOSE, PERCENT_RATING
+        if stance_we_are_looking_for != ANY_STANCE:
+            # If we passed in the stance "ANY" it means we want to not filter down the list
+            position_list_query = position_list_query.filter(stance=stance_we_are_looking_for)
+
         # convert datetime to str for date_entered and date_last_changed columns
-        position_list = position_list.extra(
+        position_list_query = position_list_query.extra(
             select={'date_entered': "to_char(date_entered, 'YYYY-MM-DD HH24:MI:SS')"})
-        position_list = position_list.extra(
+        position_list_query = position_list_query.extra(
             select={'date_last_changed': "to_char(date_last_changed, 'YYYY-MM-DD HH24:MI:SS')"})
 
-        position_list_dict = position_list.values(
+        position_list_dict = position_list_query.values(
             'we_vote_id', 'ballot_item_display_name', 'ballot_item_image_url_https',
             'ballot_item_twitter_handle', 'speaker_display_name',
             'speaker_image_url_https', 'speaker_twitter_handle', 'date_entered',
@@ -59,19 +75,32 @@ def positions_sync_out_view(request):  # positionsSyncOut
             'statement_text', 'statement_html', 'more_info_url', 'from_scraper',
             'organization_certified', 'volunteer_certified', 'voter_entering_position',
             'tweet_source_id', 'twitter_user_entered_position')
+
         if position_list_dict:
             position_list_json = list(position_list_dict)
             return HttpResponse(json.dumps(position_list_json), content_type='application/json')
-    else:
-        json_data = {
-            'success': False,
-            'status': 'POSITION_LIST_MISSING'
-        }
-        return HttpResponse(json.dumps(json_data), content_type='application/json')
+    except Exception as e:
+        handle_record_not_found_exception(e, logger=logger)
+
+    json_data = {
+        'success': False,
+        'status': 'POSITION_LIST_MISSING'
+    }
+    return HttpResponse(json.dumps(json_data), content_type='application/json')
 
 
 @login_required
 def positions_import_from_master_server_view(request):
+    # admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'admin'}
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
+    if WE_VOTE_SERVER_ROOT_URL in POSITIONS_SYNC_URL:
+        messages.add_message(request, messages.ERROR, "Cannot sync with Master We Vote Server -- "
+                                                      "this is the Master We Vote Server.")
+        return HttpResponseRedirect(reverse('admin_tools:admin_home', args=()))
+
     google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
     state_code = request.GET.get('state_code', '')
 
