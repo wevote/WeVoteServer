@@ -287,7 +287,7 @@ span.wrap_word { word-break: break-word; }
     {% endif %}
 
     {% if candidate.we_vote_hosted_profile_image_url_large %}
-        we_vote_hosted_profile_image_url_large: {{ candidate.we_vote_hosted_profile_image_url_large }}<br />
+        we_vote_hosted_profile_image_url_large: <a href="{{ candidate.we_vote_hosted_profile_image_url_large }}" target="_blank">{{ candidate.we_vote_hosted_profile_image_url_large }}</a><br />
         <br />
     {% endif %}
 
