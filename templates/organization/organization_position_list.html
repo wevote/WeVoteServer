@@ -245,8 +245,7 @@
     {% endif %}
 
     {% if organization.we_vote_hosted_profile_image_url_large %}
-        we_vote_hosted_profile_image_url_large: {{ organization.we_vote_hosted_profile_image_url_large }}<br />
-        <img src="{{ organization.we_vote_hosted_profile_image_url_large }}"><br />
+        we_vote_hosted_profile_image_url_large: <a href="{{ organization.we_vote_hosted_profile_image_url_large }}" target="_blank">{{ organization.we_vote_hosted_profile_image_url_large }}</a><br />
         <br />
     {% endif %}
 
