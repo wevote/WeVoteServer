@@ -874,7 +874,7 @@ class WeVoteImageManager(models.Model):
                 # if stripping _normal from url doesn't work, replace _normal with _400x400
                 return twitter_profile_image_url_https.replace("_normal", "_400x400")
             else:
-                return twitter_profile_image_url_https
+                return image_url_https_original
         else:
             return None
 
