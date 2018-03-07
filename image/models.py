@@ -918,7 +918,8 @@ class WeVoteImageManager(models.Model):
         # Getting original image url
         twitter_profile_image_url_https = self.twitter_profile_image_url_https_original(twitter_profile_image_url_https)
         try:
-            we_vote_image_on_stage = WeVoteImage.objects.get(
+            # check if multiple records exist
+            we_vote_image_on_stage_query = WeVoteImage.objects.filter(
                 voter_we_vote_id__iexact=voter_we_vote_id,
                 candidate_we_vote_id__iexact=candidate_we_vote_id,
                 organization_we_vote_id__iexact=organization_we_vote_id,
@@ -939,7 +940,11 @@ class WeVoteImageManager(models.Model):
                 kind_of_image_large=kind_of_image_large,
                 kind_of_image_medium=kind_of_image_medium,
                 kind_of_image_tiny=kind_of_image_tiny
-            )
+            ).order_by('-date_image_saved')
+            we_vote_image_on_stage_list = list(we_vote_image_on_stage_query)
+            no_of_existing_entries = len(we_vote_image_on_stage_list)
+            if no_of_existing_entries:
+                we_vote_image_on_stage = we_vote_image_on_stage_query.first()
             we_vote_image_found = True
             success = True
         except WeVoteImage.MultipleObjectsReturned as e:
