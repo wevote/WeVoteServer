@@ -41,8 +41,8 @@ from apis_v1.documentation_source import ballot_item_options_retrieve_doc, ballo
     voter_follow_all_organizations_followed_by_organization_doc, \
     voter_guide_possibility_retrieve_doc, voter_guide_possibility_save_doc, \
     voter_guides_followed_retrieve_doc, voter_guides_followed_by_organization_retrieve_doc, \
-    voter_guide_followers_retrieve_doc, voter_guides_ignored_retrieve_doc, voter_guides_sync_out_doc, \
-    voter_guides_to_follow_retrieve_doc, \
+    voter_guide_followers_retrieve_doc, voter_guides_ignored_retrieve_doc, \
+    voter_guides_retrieve_doc, voter_guides_sync_out_doc, voter_guides_to_follow_retrieve_doc, \
     voter_location_retrieve_from_ip_doc, voter_merge_two_accounts_doc, voter_photo_save_doc, \
     voter_position_like_off_save_doc, voter_position_like_on_save_doc, voter_position_like_status_retrieve_doc, \
     voter_position_comment_save_doc, voter_position_retrieve_doc, voter_position_visibility_save_doc, \
@@ -937,6 +937,16 @@ def voter_guides_ignored_retrieve_doc_view(request):
     """
     url_root = WE_VOTE_SERVER_ROOT_URL
     template_values = voter_guides_ignored_retrieve_doc.voter_guides_ignored_retrieve_doc_template_values(url_root)
+    template_values['voter_api_device_id'] = get_voter_api_device_id(request)
+    return render(request, 'apis_v1/api_doc_page.html', template_values)
+
+
+def voter_guides_retrieve_doc_view(request):
+    """
+    Show documentation about voterGuidesRetrieve
+    """
+    url_root = WE_VOTE_SERVER_ROOT_URL
+    template_values = voter_guides_retrieve_doc.voter_guides_retrieve_doc_template_values(url_root)
     template_values['voter_api_device_id'] = get_voter_api_device_id(request)
     return render(request, 'apis_v1/api_doc_page.html', template_values)
 

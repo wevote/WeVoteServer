@@ -1051,13 +1051,13 @@ class VoterGuideListManager(models.Model):
 
             if len(voter_guide_list):
                 voter_guide_list_found = True
-                status = 'VOTER_GUIDES_FOUND_BY_ORGANIZATION_LIST '
+                status = 'VOTER_GUIDES_FOUND_BY_RETRIEVE_ALL_VOTER_GUIDES '
             else:
-                status = 'NO_VOTER_GUIDES_FOUND_BY_ORGANIZATION_LIST '
+                status = 'NO_VOTER_GUIDES_FOUND_BY_RETRIEVE_ALL_VOTER_GUIDES '
             success = True
         except Exception as e:
             handle_record_not_found_exception(e, logger=logger)
-            status = 'retrieve_all_voter_guides_by_organization_we_vote_id: Unable to retrieve voter guides from db. ' \
+            status = 'retrieve_all_voter_guides: Unable to retrieve voter guides from db. ' \
                      '{error} [type: {error_type}]'.format(error=e.message, error_type=type(e))
             success = False
 
