@@ -64,19 +64,23 @@ def organization_retrieve_doc_template_values(url_root):
     api_response = '{\n' \
                    '  "success": boolean,\n' \
                    '  "status": string,\n' \
-                   '  "organization_id": integer (the id of the organization found),\n' \
-                   '  "organization_we_vote_id": string (the organization identifier that moves server-to-server),\n' \
-                   '  "organization_name": string (value from Google),\n' \
-                   '  "organization_website": string (website address),\n' \
+                   '  "facebook_id": integer,\n' \
+                   '  "organization_banner_url": string,\n' \
+                   '  "organization_description": string,\n' \
                    '  "organization_email": string,\n' \
                    '  "organization_facebook": string,\n' \
+                   '  "organization_id": integer (the id of the organization found),\n' \
+                   '  "organization_instagram_handle": string,\n' \
+                   '  "organization_name": string (value from Google),\n' \
                    '  "organization_photo_url_large": string,\n' \
                    '  "organization_photo_url_medium": string,\n' \
                    '  "organization_photo_url_tiny": string,\n' \
+                   '  "organization_type": string,\n' \
                    '  "organization_twitter_handle": string (twitter address),\n' \
-                   '  "twitter_followers_count": integer,\n' \
+                   '  "organization_we_vote_id": string (the organization identifier that moves server-to-server),\n' \
+                   '  "organization_website": string (website address),\n' \
                    '  "twitter_description": string,\n' \
-                   '  "facebook_id": integer,\n' \
+                   '  "twitter_followers_count": integer,\n' \
                    '}'
 
     template_values = {

@@ -22,7 +22,7 @@ from measure.models import ContestMeasure, ContestMeasureManager, ContestMeasure
 from office.models import ContestOffice, ContestOfficeListManager, ContestOfficeManager, \
     ElectedOffice, ElectedOfficeManager
 from organization.models import Organization, OrganizationListManager, OrganizationManager, \
-    NONPROFIT_501C3, NONPROFIT_501C4, POLITICAL_ACTION_COMMITTEE, \
+    NONPROFIT_501C3, NONPROFIT_501C4, POLITICAL_ACTION_COMMITTEE, PUBLIC_FIGURE, \
     CORPORATION, NEWS_ORGANIZATION, UNKNOWN
 from politician.models import Politician, PoliticianManager
 from position.models import PositionManager, INFORMATION_ONLY, OPPOSE, SUPPORT

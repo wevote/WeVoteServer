@@ -37,28 +37,6 @@ def organization_save_doc_template_values(url_root):
     ]
     optional_query_parameter_list = [
         {
-            'name':         'organization_name',
-            'value':        'string',  # boolean, integer, long, string
-            'description':  'Name of the organization that is displayed.',
-        },
-        {
-            'name':         'organization_email',
-            'value':        'string',  # boolean, integer, long, string
-            'description':  'Contact email of the organization.',
-        },
-        {
-            'name':         'organization_website',
-            'value':        'string',  # boolean, integer, long, string
-            'description':  'Website of the organization.',
-        },
-        {
-            'name':         'organization_twitter_handle',
-            'value':        'string',  # boolean, integer, long, string
-            'description':  'Twitter handle of the organization. '
-                            '(NOTE: In order to create a new organization, you may pass in '
-                            'either organization_twitter_handle OR facebook_id)',
-        },
-        {
             'name':         'facebook_id',
             'value':        'string',  # boolean, integer, long, string
             'description':  'Facebook identifier of the voter who wants to share a voter guide. '
@@ -76,6 +54,16 @@ def organization_save_doc_template_values(url_root):
             'description':  'Personal photo returned upon Facebook sign in.',
         },
         {
+            'name':         'organization_description',
+            'value':        'string',  # boolean, integer, long, string
+            'description':  'The description of the organization that is displayed.',
+        },
+        {
+            'name':         'organization_email',
+            'value':        'string',  # boolean, integer, long, string
+            'description':  'Contact email of the organization.',
+        },
+        {
             'name':         'organization_facebook',
             'value':        'string',  # boolean, integer, long, string
             'description':  'Facebook page of the organization.',
@@ -84,6 +72,32 @@ def organization_save_doc_template_values(url_root):
             'name':         'organization_image',
             'value':        'string',  # boolean, integer, long, string
             'description':  'Logo of the organization that is displayed.',
+        },
+        {
+            'name':         'organization_name',
+            'value':        'string',  # boolean, integer, long, string
+            'description':  'Name of the organization that is displayed.',
+        },
+        {
+            'name':         'organization_twitter_handle',
+            'value':        'string',  # boolean, integer, long, string
+            'description':  'Twitter handle of the organization. '
+                            '(NOTE: In order to create a new organization, you may pass in '
+                            'either organization_twitter_handle OR facebook_id)',
+        },
+        {
+            'name':         'organization_type',
+            'value':        'string',  # boolean, integer, long, string
+            'description':  'The type of the organization: '
+                            'C = Corporation, G = Group of people (not an individual), but org status unknown, '
+                            'I = One person, C3 = 501(c)(3) Nonprofit, C4 = 501(c)(3) Nonprofit, '
+                            'NP = Nonprofit other than C3 or C4, NW = News organization, '
+                            'P = Political Action Committee, C = Company,  PF = Politician, U = Other',
+        },
+        {
+            'name':         'organization_website',
+            'value':        'string',  # boolean, integer, long, string
+            'description':  'Website of the organization.',
         },
         {
             'name':         'refresh_from_twitter',
@@ -126,19 +140,22 @@ def organization_save_doc_template_values(url_root):
     api_response = '{\n' \
                    '  "status": string,\n' \
                    '  "success": boolean,\n' \
-                   '  "organization_id": integer,\n' \
-                   '  "organization_we_vote_id": string,\n' \
+                   '  "facebook_id": integer,\n' \
                    '  "new_organization_created": boolean,\n' \
-                   '  "organization_name": string,\n' \
                    '  "organization_email": string,\n' \
-                   '  "organization_website": string,\n' \
                    '  "organization_facebook": string,\n' \
+                   '  "organization_instagram_handle": string,\n' \
+                   '  "organization_id": integer,\n' \
+                   '  "organization_description": string,\n' \
+                   '  "organization_name": string,\n' \
                    '  "organization_photo_url": string,\n' \
                    '  "organization_twitter_handle": string,\n' \
+                   '  "organization_type": string,\n' \
+                   '  "organization_website": string,\n' \
+                   '  "organization_we_vote_id": string,\n' \
+                   '  "refresh_from_twitter": boolean,\n' \
                    '  "twitter_followers_count": integer,\n' \
                    '  "twitter_description": string,\n' \
-                   '  "refresh_from_twitter": boolean,\n' \
-                   '  "facebook_id": integer,\n' \
                    '}'
 
     template_values = {
