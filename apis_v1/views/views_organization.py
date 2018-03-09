@@ -91,15 +91,18 @@ def organization_save_view(request):  # organizationSave
     :return:
     """
     voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
-    organization_id = request.GET.get('organization_id', 0)
-    organization_we_vote_id = request.GET.get('organization_we_vote_id', '')
-    organization_name = request.GET.get('organization_name', False)
     organization_email = request.GET.get('organization_email', False)
-    organization_website = request.GET.get('organization_website', False)
+    organization_description = request.GET.get('organization_description', False)
     organization_facebook = request.GET.get('organization_facebook', False)
+    organization_id = request.GET.get('organization_id', 0)
     organization_image = request.GET.get('organization_image', False)
-    organization_type = request.GET.get('organization_type', UNKNOWN)
+    organization_instagram_handle = request.GET.get('organization_instagram_handle', False)
+    organization_name = request.GET.get('organization_name', False)
+    organization_type = request.GET.get('organization_type', False)
+    organization_we_vote_id = request.GET.get('organization_we_vote_id', '')
+    organization_website = request.GET.get('organization_website', False)
     # We only want to allow save if either this is your organization (i.e., you have the Twitter handle)
+    organization_linked_to_this_voter = False
     voter_owns_twitter_handle = False
     voter_owns_facebook_id = False
 
@@ -125,6 +128,12 @@ def organization_save_view(request):  # organizationSave
         if voter_results['voter_found']:
             voter = voter_results['voter']
 
+            # Is this voter linked to this organization?
+            if positive_value_exists(voter.linked_organization_we_vote_id) \
+                    and positive_value_exists(organization_we_vote_id) \
+                    and voter.linked_organization_we_vote_id == organization_we_vote_id:
+                organization_linked_to_this_voter = True
+
             # Does this voter have the same Facebook id as this organization? If so, link this organization to
             #  this particular voter
             voter_facebook_id = voter_manager.fetch_facebook_id_from_voter_we_vote_id(voter.we_vote_id)
@@ -142,35 +151,40 @@ def organization_save_view(request):  # organizationSave
                 voter_owns_twitter_handle = True
 
     if not voter_has_authority_required:
-        if not voter_owns_twitter_handle and not voter_owns_facebook_id:
+        if not voter_owns_twitter_handle and not voter_owns_facebook_id and not organization_linked_to_this_voter:
             # Only refuse entry if *both* conditions are not met
             results = {
                 'status': "VOTER_LACKS_AUTHORITY_TO_SAVE_ORGANIZATION",
                 'success': False,
-                'organization_id': organization_id,
-                'organization_we_vote_id': organization_we_vote_id,
-                'new_organization_created': False,
-                'organization_name': organization_name,
-                'organization_email': organization_email,
-                'organization_website': organization_website,
-                'organization_facebook': organization_facebook,
-                'organization_photo_url': organization_image,
-                'organization_twitter_handle': organization_twitter_handle,
-                'refresh_from_twitter': refresh_from_twitter,
-                'twitter_followers_count': 0,
-                'twitter_description': "",
                 'facebook_id': facebook_id,
                 'facebook_email': facebook_email,
                 'facebook_profile_image_url_https': facebook_profile_image_url_https,
+                'new_organization_created': False,
+                'organization_description': organization_description,
+                'organization_email': organization_email,
+                'organization_facebook': organization_facebook,
+                'organization_id': organization_id,
+                'organization_instagram_handle': organization_instagram_handle,
+                'organization_name': organization_name,
+                'organization_photo_url': organization_image,
+                'organization_twitter_handle': organization_twitter_handle,
+                'organization_type': organization_type,
+                'organization_we_vote_id': organization_we_vote_id,
+                'organization_website': organization_website,
+                'refresh_from_twitter': refresh_from_twitter,
+                'twitter_followers_count': 0,
+                'twitter_description': "",
             }
             return HttpResponse(json.dumps(results), content_type='application/json')
 
     results = organization_save_for_api(
         voter_device_id=voter_device_id, organization_id=organization_id,
         organization_we_vote_id=organization_we_vote_id,
-        organization_name=organization_name, organization_email=organization_email,
+        organization_name=organization_name, organization_description=organization_description,
+        organization_email=organization_email,
         organization_website=organization_website, organization_twitter_handle=organization_twitter_handle,
-        organization_facebook=organization_facebook, organization_image=organization_image,
+        organization_facebook=organization_facebook, organization_instagram_handle=organization_instagram_handle,
+        organization_image=organization_image,
         organization_type=organization_type, refresh_from_twitter=refresh_from_twitter,
         facebook_id=facebook_id, facebook_email=facebook_email,
         facebook_profile_image_url_https=facebook_profile_image_url_https,

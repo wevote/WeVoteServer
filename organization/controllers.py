@@ -959,20 +959,23 @@ def organization_retrieve_for_api(organization_id, organization_we_vote_id, vote
         json_data = {
             'status':                           "ORGANIZATION_RETRIEVE_BOTH_IDS_MISSING",
             'success':                          False,
-            'organization_id':                  organization_id,
-            'organization_we_vote_id':          organization_we_vote_id,
-            'organization_name':                '',
-            'organization_email':               '',
-            'organization_website':             '',
-            'organization_twitter_handle':      '',
-            'twitter_description':              '',
-            'twitter_followers_count':          '',
             'facebook_id':                      0,
+            'organization_banner_url':          '',
+            'organization_description':         '',
+            'organization_email':               '',
             'organization_facebook':            '',
+            'organization_id':                  organization_id,
+            'organization_instagram_handle':                '',
+            'organization_name':                '',
             'organization_photo_url_large':     '',
             'organization_photo_url_medium':    '',
             'organization_photo_url_tiny':      '',
-            'organization_banner_url':          '',
+            'organization_type':      '',
+            'organization_twitter_handle':      '',
+            'organization_we_vote_id':          organization_we_vote_id,
+            'organization_website':             '',
+            'twitter_description': '',
+            'twitter_followers_count': '',
         }
         return HttpResponse(json.dumps(json_data), content_type='application/json')
 
@@ -1010,59 +1013,71 @@ def organization_retrieve_for_api(organization_id, organization_we_vote_id, vote
         json_data = {
             'success': True,
             'status': results['status'],
+            'organization_banner_url': organization_banner_url,
             'organization_id': organization.id,
             'organization_we_vote_id': organization.we_vote_id,  # this is the we_vote_id for this organization
+            'organization_description':
+                organization.organization_description if positive_value_exists(organization.organization_description)
+                else '',
+            'organization_email':
+                organization.organization_email if positive_value_exists(organization.organization_email) else '',
+            'organization_facebook':
+                organization.organization_facebook if positive_value_exists(organization.organization_facebook) else '',
+            'organization_instagram_handle':
+                organization.organization_instagram_handle
+                if positive_value_exists(organization.organization_instagram_handle) else '',
             'organization_name':
                 organization.organization_name if positive_value_exists(organization.organization_name) else '',
-            'organization_website': organization.organization_website if positive_value_exists(
-                organization.organization_website) else '',
+            'organization_type':
+                organization.organization_type if positive_value_exists(organization.organization_type) else '',
             'organization_twitter_handle':
                 organization.organization_twitter_handle if positive_value_exists(
                     organization.organization_twitter_handle) else '',
+            'organization_website': organization.organization_website if positive_value_exists(
+                organization.organization_website) else '',
+            'facebook_id':
+                organization.facebook_id if positive_value_exists(organization.facebook_id) else 0,
+            'organization_photo_url_large': we_vote_hosted_profile_image_url_large,
+            'organization_photo_url_medium': organization.we_vote_hosted_profile_image_url_medium,
+            'organization_photo_url_tiny': organization.we_vote_hosted_profile_image_url_tiny,
             'twitter_description':
                 organization.twitter_description if positive_value_exists(
                     organization.twitter_description) else '',
             'twitter_followers_count':
                 organization.twitter_followers_count if positive_value_exists(
                     organization.twitter_followers_count) else 0,
-            'organization_email':
-                organization.organization_email if positive_value_exists(organization.organization_email) else '',
-            'organization_facebook':
-                organization.organization_facebook if positive_value_exists(organization.organization_facebook) else '',
-            'facebook_id':
-                organization.facebook_id if positive_value_exists(organization.facebook_id) else 0,
-            'organization_photo_url_large': we_vote_hosted_profile_image_url_large,
-            'organization_photo_url_medium': organization.we_vote_hosted_profile_image_url_medium,
-            'organization_photo_url_tiny': organization.we_vote_hosted_profile_image_url_tiny,
-            'organization_banner_url': organization_banner_url,
         }
         return HttpResponse(json.dumps(json_data), content_type='application/json')
     else:
         json_data = {
             'status':                           results['status'],
             'success':                          False,
-            'organization_id':                  organization_id,
-            'organization_we_vote_id':          organization_we_vote_id,
-            'organization_name':                '',
-            'organization_email':               '',
-            'organization_website':             '',
-            'organization_twitter_handle':      '',
-            'twitter_description':              '',
-            'twitter_followers_count':          '',
-            'organization_facebook':            '',
             'facebook_id':                      0,
+            'organization_banner_url':          '',
+            'organization_description':         '',
+            'organization_email':               '',
+            'organization_facebook':            '',
+            'organization_id':                  organization_id,
+            'organization_instagram_handle':    '',
+            'organization_name':                '',
             'organization_photo_url_large':     '',
             'organization_photo_url_medium':    '',
             'organization_photo_url_tiny':      '',
-            'organization_banner_url':          '',
+            'organization_twitter_handle':      '',
+            'organization_type':                '',
+            'organization_website':             '',
+            'organization_we_vote_id':          organization_we_vote_id,
+            'twitter_description':              '',
+            'twitter_followers_count':          '',
         }
         return HttpResponse(json.dumps(json_data), content_type='application/json')
 
 
 def organization_save_for_api(voter_device_id, organization_id, organization_we_vote_id,   # organizationSave
-                              organization_name,
+                              organization_name, organization_description,
                               organization_email, organization_website,
-                              organization_twitter_handle, organization_facebook, organization_image, organization_type,
+                              organization_twitter_handle, organization_facebook, organization_instagram_handle,
+                              organization_image, organization_type,
                               refresh_from_twitter,
                               facebook_id, facebook_email, facebook_profile_image_url_https):
     """
@@ -1072,10 +1087,12 @@ def organization_save_for_api(voter_device_id, organization_id, organization_we_
     :param organization_id:
     :param organization_we_vote_id:
     :param organization_name:
+    :param organization_description:
     :param organization_email:
     :param organization_website:
     :param organization_twitter_handle:
     :param organization_facebook:
+    :param organization_instagram_handle:
     :param organization_image:
     :param organization_type
     :param refresh_from_twitter:
@@ -1105,34 +1122,40 @@ def organization_save_for_api(voter_device_id, organization_id, organization_we_
         results = {
             'status':                       "ORGANIZATION_REQUIRED_UNIQUE_IDENTIFIER_VARIABLES_MISSING",
             'success':                      False,
-            'organization_id':              organization_id,
-            'organization_we_vote_id':      organization_we_vote_id,
+            'facebook_id':                  facebook_id,
             'new_organization_created':     False,
-            'organization_name':            organization_name,
+            'organization_description':     organization_description,
             'organization_email':           organization_email,
-            'organization_website':         organization_website,
             'organization_facebook':        organization_facebook,
+            'organization_id':              organization_id,
+            'organization_instagram_handle': organization_instagram_handle,
+            'organization_name':            organization_name,
             'organization_photo_url':       organization_image,
             'organization_twitter_handle':  organization_twitter_handle,
+            'organization_type':            organization_type,
+            'organization_we_vote_id':      organization_we_vote_id,
+            'organization_website':         organization_website,
+            'refresh_from_twitter':         refresh_from_twitter,
             'twitter_followers_count':      0,
             'twitter_description':          "",
-            'refresh_from_twitter':         refresh_from_twitter,
-            'facebook_id':                  facebook_id,
         }
         return results
     elif not existing_unique_identifier_found and not required_variables_for_new_entry:
         results = {
             'status':                       "NEW_ORGANIZATION_REQUIRED_VARIABLES_MISSING",
             'success':                      False,
-            'organization_id':              organization_id,
-            'organization_we_vote_id':      organization_we_vote_id,
             'new_organization_created':     False,
-            'organization_name':            organization_name,
+            'organization_description':     organization_description,
             'organization_email':           organization_email,
-            'organization_website':         organization_website,
             'organization_facebook':        organization_facebook,
+            'organization_id':              organization_id,
+            'organization_instagram_handle': organization_instagram_handle,
+            'organization_name':            organization_name,
             'organization_photo_url':       organization_image,
             'organization_twitter_handle':  organization_twitter_handle,
+            'organization_type':            organization_type,
+            'organization_we_vote_id':      organization_we_vote_id,
+            'organization_website':         organization_website,
             'twitter_followers_count':      0,
             'twitter_description':          "",
             'refresh_from_twitter':         refresh_from_twitter,
@@ -1181,9 +1204,11 @@ def organization_save_for_api(voter_device_id, organization_id, organization_we_
     save_results = organization_manager.update_or_create_organization(
         organization_id=organization_id, we_vote_id=organization_we_vote_id,
         organization_website_search=organization_website, organization_twitter_search=organization_twitter_handle,
-        organization_name=organization_name, organization_website=organization_website,
+        organization_name=organization_name, organization_description=organization_description,
+        organization_website=organization_website,
         organization_twitter_handle=organization_twitter_handle, organization_email=organization_email,
-        organization_facebook=organization_facebook, organization_image=organization_image,
+        organization_facebook=organization_facebook, organization_instagram_handle=organization_instagram_handle,
+        organization_image=organization_image,
         organization_type=organization_type, refresh_from_twitter=refresh_from_twitter,
         facebook_id=facebook_id, facebook_email=facebook_email,
         facebook_profile_image_url_https=facebook_profile_image_url_https,
@@ -1249,6 +1274,25 @@ def organization_save_for_api(voter_device_id, organization_id, organization_we_
                     success = False
                     status += " UNABLE_TO_UPDATE_VOTER_WITH_ORGANIZATION_WE_VOTE_ID_FROM_FACEBOOK "
 
+        # Favor the Twitter banner and profile image if they exist
+        # From Dale September 1, 2017:  Eventually we would like to let a person choose which they want to display,
+        # but for now Twitter always wins out.
+        we_vote_hosted_profile_image_url_large = organization.we_vote_hosted_profile_image_url_large if \
+            positive_value_exists(organization.we_vote_hosted_profile_image_url_large) else \
+            organization.organization_photo_url()
+
+        if positive_value_exists(organization.twitter_profile_banner_url_https):
+            organization_banner_url = organization.twitter_profile_banner_url_https
+        else:
+            organization_banner_url = organization.facebook_background_image_url_https
+
+        if isinstance(organization_banner_url, list):
+            # If a list, just return the first one
+            organization_banner_url = organization_banner_url.pop()
+        elif isinstance(organization_banner_url, tuple):
+            # If a tuple, just return the first one
+            organization_banner_url = organization_banner_url[0]
+
         results = {
             'success':                      success,
             'status':                       status,
@@ -1258,20 +1302,32 @@ def organization_save_for_api(voter_device_id, organization_id, organization_we_
             'new_organization_created':     save_results['new_organization_created'],
             'organization_name':
                 organization.organization_name if positive_value_exists(organization.organization_name) else '',
+            'organization_description':
+                organization.organization_description if positive_value_exists(organization.organization_description)
+                else '',
             'organization_email':
                 organization.organization_email if positive_value_exists(organization.organization_email) else '',
             'organization_website':
                 organization.organization_website if positive_value_exists(organization.organization_website) else '',
             'organization_facebook':
                 organization.organization_facebook if positive_value_exists(organization.organization_facebook) else '',
+            'organization_instagram_handle':
+                organization.organization_instagram_handle
+                if positive_value_exists(organization.organization_instagram_handle) else '',
+            'organization_banner_url':      organization_banner_url,
             'organization_photo_url':       organization.organization_photo_url()
                 if positive_value_exists(organization.organization_photo_url()) else '',
+            'organization_photo_url_large': we_vote_hosted_profile_image_url_large,
+            'organization_photo_url_medium': organization.we_vote_hosted_profile_image_url_medium,
+            'organization_photo_url_tiny': organization.we_vote_hosted_profile_image_url_tiny,
             'organization_twitter_handle':  organization.organization_twitter_handle if positive_value_exists(
-                    organization.organization_twitter_handle) else '',
+                organization.organization_twitter_handle) else '',
+            'organization_type':            organization.organization_type if positive_value_exists(
+                organization.organization_type) else '',
             'twitter_followers_count':      organization.twitter_followers_count if positive_value_exists(
-                    organization.twitter_followers_count) else 0,
+                organization.twitter_followers_count) else 0,
             'twitter_description':          organization.twitter_description if positive_value_exists(
-                    organization.twitter_description) else '',
+                organization.twitter_description) else '',
             'refresh_from_twitter':         refresh_from_twitter,
             'facebook_id': organization.facebook_id if positive_value_exists(organization.facebook_id) else 0,
         }
@@ -1290,6 +1346,7 @@ def organization_save_for_api(voter_device_id, organization_id, organization_we_
             'organization_facebook':    organization_facebook,
             'organization_photo_url':   organization_image,
             'organization_twitter_handle': organization_twitter_handle,
+            'organization_type':        organization_type,
             'twitter_followers_count':  0,
             'twitter_description':      "",
             'refresh_from_twitter':     refresh_from_twitter,

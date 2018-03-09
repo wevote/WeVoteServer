@@ -693,16 +693,20 @@ class OrganizationManager(models.Manager):
     # We can use any of these four unique identifiers:
     #   organization.id, we_vote_id, organization_website, organization_twitter_handle
     # Pass in the value if we want it saved. Pass in "False" if we want to leave it the same.
-    def update_or_create_organization(self, organization_id, we_vote_id,
-                                      organization_website_search, organization_twitter_search,
-                                      organization_name=False, organization_website=False,
-                                      organization_twitter_handle=False, organization_email=False,
-                                      organization_facebook=False, organization_image=False,
-                                      organization_type=UNKNOWN, refresh_from_twitter=False,
-                                      facebook_id=False, facebook_email=False,
-                                      facebook_profile_image_url_https=False,
-                                      facebook_background_image_url_https=False,
-                                      ):
+    def update_or_create_organization(
+            self,
+            organization_id, we_vote_id,
+            organization_website_search, organization_twitter_search,
+            organization_name=False, organization_description=False,
+            organization_website=False,
+            organization_twitter_handle=False, organization_email=False,
+            organization_facebook=False, organization_instagram_handle=False,
+            organization_image=False,
+            organization_type=False, refresh_from_twitter=False,
+            facebook_id=False, facebook_email=False,
+            facebook_profile_image_url_https=False,
+            facebook_background_image_url_https=False,
+            ):
         """
         Either update or create an organization entry.
         :param organization_id:
@@ -710,11 +714,14 @@ class OrganizationManager(models.Manager):
         :param organization_website_search:
         :param organization_twitter_search:
         :param organization_name:
+        :param organization_description:
         :param organization_website:
         :param organization_twitter_handle:
         :param organization_email:
         :param organization_facebook:
+        :param organization_instagram_handle:
         :param organization_image:
+        :param organization_type:
         :param refresh_from_twitter:
         :param facebook_id:
         :param facebook_email:
@@ -735,6 +742,7 @@ class OrganizationManager(models.Manager):
         organization_website_search = organization_website_search.strip() if organization_website_search else False
         organization_twitter_search = organization_twitter_search.strip() if organization_twitter_search else False
         organization_name = organization_name.strip() if organization_name else False
+        organization_description = organization_description.strip() if organization_description else False
         organization_website = organization_website.strip() if organization_website else False
         # TODO DALE We should stop saving organization_twitter_handle without saving a TwitterLinkToOrganization
         if organization_twitter_handle is False or organization_twitter_handle == 'False':
@@ -742,8 +750,10 @@ class OrganizationManager(models.Manager):
         organization_twitter_handle = organization_twitter_handle.strip() if organization_twitter_handle else False
         organization_email = organization_email.strip() if organization_email else False
         organization_facebook = organization_facebook.strip() if organization_facebook else False
+        organization_instagram_handle = organization_instagram_handle.strip() if organization_instagram_handle \
+            else False
         organization_image = organization_image.strip() if organization_image else False
-        organization_type = organization_type.strip() if organization_type else UNKNOWN
+        organization_type = organization_type.strip() if organization_type else False
 
         # Values that can only be updated by a refresh_from_twitter
         twitter_user_id = False
@@ -806,11 +816,14 @@ class OrganizationManager(models.Manager):
                         twitter_location = twitter_json['location']
 
                 value_changed = False
-                if organization_name or organization_website or organization_twitter_handle \
+                if organization_name or organization_description or organization_website \
+                        or organization_twitter_handle \
                         or organization_email or organization_facebook or organization_image:
                     value_changed = True
                     if organization_name:
                         organization_on_stage.organization_name = organization_name
+                    if organization_description:
+                        organization_on_stage.organization_description = organization_description
                     if organization_website:
                         organization_on_stage.organization_website = organization_website
                     if organization_twitter_handle:
@@ -858,6 +871,18 @@ class OrganizationManager(models.Manager):
                     if facebook_background_image_url_https:
                         organization_on_stage.facebook_background_image_url_https = \
                             facebook_background_image_url_https
+
+                if positive_value_exists(organization_description):
+                    value_changed = True
+                    organization_on_stage.organization_description = organization_description
+
+                if positive_value_exists(organization_instagram_handle):
+                    value_changed = True
+                    organization_on_stage.organization_instagram_handle = organization_instagram_handle
+
+                if positive_value_exists(organization_type):
+                    value_changed = True
+                    organization_on_stage.organization_type = organization_type
 
                 if value_changed:
                     try:
@@ -983,25 +1008,34 @@ class OrganizationManager(models.Manager):
                             twitter_description = twitter_json['description']
                             twitter_location = twitter_json['location']
 
-                    if organization_name or organization_website or organization_twitter_handle \
-                            or organization_email or organization_facebook or organization_image:
+                    if positive_value_exists(organization_name) or positive_value_exists(organization_description) \
+                            or positive_value_exists(organization_website) \
+                            or positive_value_exists(organization_twitter_handle) \
+                            or positive_value_exists(organization_email) \
+                            or positive_value_exists(organization_facebook) \
+                            or positive_value_exists(organization_image):
                         value_changed = True
-                        if organization_name:
+                        if positive_value_exists(organization_name):
                             organization_on_stage.organization_name = organization_name
-                        if organization_website:
+                        if positive_value_exists(organization_description):
+                            organization_on_stage.organization_description = organization_description
+                        if positive_value_exists(organization_website):
                             organization_on_stage.organization_website = organization_website
-                        if organization_twitter_handle:
+                        if positive_value_exists(organization_twitter_handle):
                             organization_on_stage.organization_twitter_handle = organization_twitter_handle
-                        if organization_email:
+                        if positive_value_exists(organization_email):
                             organization_on_stage.organization_email = organization_email
-                        if organization_facebook:
+                        if positive_value_exists(organization_facebook):
                             organization_on_stage.organization_facebook = organization_facebook
-                        if organization_image:
+                        if positive_value_exists(organization_image):
                             organization_on_stage.organization_image = organization_image
 
-                    if twitter_user_id or twitter_name or twitter_followers_count or twitter_profile_image_url_https \
-                            or twitter_profile_banner_url_https or twitter_profile_background_image_url_https \
-                            or twitter_description or twitter_location:
+                    if positive_value_exists(twitter_user_id) or positive_value_exists(twitter_name) \
+                            or positive_value_exists(twitter_followers_count) \
+                            or positive_value_exists(twitter_profile_image_url_https) \
+                            or positive_value_exists(twitter_profile_banner_url_https) \
+                            or positive_value_exists(twitter_profile_background_image_url_https) \
+                            or positive_value_exists(twitter_description) or positive_value_exists(twitter_location):
                         # Values that can only be added by a refresh_from_twitter
                         value_changed = True
                         if twitter_user_id:
@@ -1021,6 +1055,14 @@ class OrganizationManager(models.Manager):
                             organization_on_stage.twitter_description = twitter_description
                         if twitter_location:
                             organization_on_stage.twitter_location = twitter_location
+
+                    if positive_value_exists(organization_type):
+                        value_changed = True
+                        organization_on_stage.organization_type = organization_type
+
+                    if positive_value_exists(organization_instagram_handle):
+                        value_changed = True
+                        organization_on_stage.organization_instagram_handle = organization_instagram_handle
 
                     if value_changed:
                         try:
@@ -1062,11 +1104,16 @@ class OrganizationManager(models.Manager):
                         twitter_description = twitter_json['description']
                         twitter_location = twitter_json['location']
 
+                if positive_value_exists(organization_type):
+                    new_organization_type = organization_type
+                else:
+                    new_organization_type = UNKNOWN
+
                 # If here, create new organization
                 results = Organization.objects.create_organization(organization_name, organization_website,
                                                                    organization_twitter_handle, organization_email,
                                                                    organization_facebook, organization_image,
-                                                                   twitter_user_id, organization_type)
+                                                                   twitter_user_id, new_organization_type)
                 if results['success']:
                     new_organization_created = True
                     success = True
@@ -1112,6 +1159,9 @@ class OrganizationManager(models.Manager):
                         if facebook_background_image_url_https:
                             organization_on_stage.facebook_background_image_url_https = \
                                 facebook_background_image_url_https
+
+                    if positive_value_exists(organization_instagram_handle):
+                        organization_on_stage.organization_instagram_handle = organization_instagram_handle
 
                     if value_changed:
                         try:
