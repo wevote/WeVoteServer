@@ -193,7 +193,7 @@ def organization_save_view(request):  # organizationSave
     return HttpResponse(json.dumps(results), content_type='application/json')
 
 
-def organization_search_view(request):
+def organization_search_view(request):  # organizationSearch
     """
     Search for organizations based on a few search terms
     :param request:
