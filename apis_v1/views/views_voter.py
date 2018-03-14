@@ -34,6 +34,7 @@ from voter.controllers import voter_address_retrieve_for_api, voter_create_for_a
 from voter.models import BALLOT_ADDRESS, fetch_voter_id_from_voter_device_link, VoterAddress, \
     VoterAddressManager, VoterDeviceLink, VoterDeviceLinkManager, VoterManager
 from voter_guide.controllers import voter_guide_possibility_retrieve_for_api, voter_guide_possibility_save_for_api, \
+    voter_guide_save_for_api, \
     voter_guides_followed_retrieve_for_api, voter_guides_ignored_retrieve_for_api, voter_guides_retrieve_for_api, \
     voter_guides_to_follow_retrieve_for_api, voter_guides_followed_by_organization_retrieve_for_api, \
     voter_guide_followers_retrieve_for_api, voter_follow_all_organizations_followed_by_organization_for_api
@@ -843,6 +844,15 @@ def voter_guide_followers_retrieve_view(request):  # voterGuideFollowersRetrieve
     return voter_guide_followers_retrieve_for_api(
         voter_device_id, organization_we_vote_id=organization_we_vote_id,
         maximum_number_to_retrieve=maximum_number_to_retrieve)
+
+
+def voter_guide_save_view(request):  # voterGuideSave
+    voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
+    voter_guide_we_vote_id = request.GET.get('voter_guide_we_vote_id', '')
+    google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
+    return voter_guide_save_for_api(voter_device_id=voter_device_id,
+                                    voter_guide_we_vote_id=voter_guide_we_vote_id,
+                                    google_civic_election_id=google_civic_election_id)
 
 
 def voter_guides_ignored_retrieve_view(request):  # voterGuidesIgnoredRetrieve

@@ -28,8 +28,6 @@ from wevote_functions.functions import convert_to_int, extract_twitter_handle_fr
     process_request_from_master
 import tweepy
 import re
-from organization.models import OrganizationLinkToHashtag
-from import_export_twitter.models import TwitterAuthManager
 
 
 logger = wevote_functions.admin.get_logger(__name__)
@@ -1081,8 +1079,8 @@ def organization_save_for_api(voter_device_id, organization_id, organization_we_
                               refresh_from_twitter,
                               facebook_id, facebook_email, facebook_profile_image_url_https):
     """
-    DALE NOTE: I believe we only use this to save an organization in order to link it to a voter
-    NOTE September 2017:  I think the note above is outdated, we now use this to store displayable organization data
+    We use this to store displayable organization data
+    TODO: Make sure voter's can't change their Twitter handles here.
     :param voter_device_id:
     :param organization_id:
     :param organization_we_vote_id:
@@ -1274,6 +1272,10 @@ def organization_save_for_api(voter_device_id, organization_id, organization_we_
                     success = False
                     status += " UNABLE_TO_UPDATE_VOTER_WITH_ORGANIZATION_WE_VOTE_ID_FROM_FACEBOOK "
 
+        # Voter guide names are currently locked to the organization name, so we want to update all voter guides
+        voter_guide_manager = VoterGuideManager()
+        results = voter_guide_manager.update_organization_voter_guides_with_organization_data(organization)
+
         # Favor the Twitter banner and profile image if they exist
         # From Dale September 1, 2017:  Eventually we would like to let a person choose which they want to display,
         # but for now Twitter always wins out.
@@ -1357,6 +1359,16 @@ def organization_save_for_api(voter_device_id, organization_id, organization_we_
 
 def organization_search_for_api(organization_name, organization_twitter_handle, organization_website,
                                 organization_email, organization_search_term, exact_match):
+    """
+    organization_search_for_api  # organizationSearch
+    :param organization_name:
+    :param organization_twitter_handle:
+    :param organization_website:
+    :param organization_email:
+    :param organization_search_term:
+    :param exact_match:
+    :return:
+    """
     organization_search_term = organization_search_term.strip()
     organization_name = organization_name.strip()
     organization_twitter_handle = organization_twitter_handle.strip()

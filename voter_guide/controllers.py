@@ -19,7 +19,7 @@ from position.models import ANY_STANCE, INFORMATION_ONLY, OPPOSE, \
     PositionEntered, PositionManager, PositionListManager, SUPPORT
 from voter.models import fetch_voter_id_from_voter_device_link, fetch_voter_we_vote_id_from_voter_device_link, \
     fetch_voter_we_vote_id_from_voter_id, VoterManager
-from voter_guide.models import VoterGuideListManager, VoterGuideManager, VoterGuidePossibilityManager
+from voter_guide.models import VoterGuide, VoterGuideListManager, VoterGuideManager, VoterGuidePossibilityManager
 import wevote_functions.admin
 from wevote_functions.functions import is_voter_device_id_valid, positive_value_exists, process_request_from_master, \
     is_link_to_video
@@ -1117,6 +1117,214 @@ def retrieve_voter_guides_to_follow_generic_for_api(voter_id, search_string, fil
         'voter_guide_list':             voter_guide_list,
     }
     return results
+
+
+def voter_guide_save_for_api(voter_device_id, voter_guide_we_vote_id, google_civic_election_id):  # voterGuideSave
+    """
+    This function lets us create a new voter guide or update an existing one.
+    :param voter_device_id:
+    :param voter_guide_we_vote_id:
+    :param google_civic_election_id:
+    :return:
+    """
+    success = False
+    status = ""
+    voter_guide = VoterGuide()
+    # organization = Organization()
+    if not positive_value_exists(voter_device_id):
+        status += 'VALID_VOTER_DEVICE_ID_MISSING'
+        json_data = {
+            'status':                       status,
+            'success':                      False,
+            'we_vote_id':                   voter_guide_we_vote_id,
+            'google_civic_election_id':     google_civic_election_id,
+            'time_span':                    "",
+            'voter_guide_display_name':     "",
+            'voter_guide_image_url_large':  "",
+            'voter_guide_image_url_medium': "",
+            'voter_guide_image_url_tiny':   "",
+            'voter_guide_owner_type':       "",
+            'organization_we_vote_id':      "",
+            'public_figure_we_vote_id':     "",
+            'twitter_description':          "",
+            'twitter_followers_count':      0,
+            'twitter_handle':               "",
+            'owner_voter_id':               0,
+            'pledge_goal':                  0,
+            'pledge_count':                 0,
+            'last_updated':                 "",
+        }
+        return HttpResponse(json.dumps(json_data), content_type='application/json')
+
+    voter_manager = VoterManager()
+    voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id)
+    voter_id = 0
+    linked_organization_we_vote_id = ""
+    if voter_results['voter_found']:
+        voter = voter_results['voter']
+        voter_id = voter.id
+        linked_organization_we_vote_id = voter.linked_organization_we_vote_id
+    if not positive_value_exists(voter_id):
+        status += 'VALID_VOTER_ID_MISSING'
+        json_data = {
+            'status':                       status,
+            'success':                      False,
+            'we_vote_id':                   voter_guide_we_vote_id,
+            'google_civic_election_id':     google_civic_election_id,
+            'time_span':                    "",
+            'voter_guide_display_name':     "",
+            'voter_guide_image_url_large':  "",
+            'voter_guide_image_url_medium': "",
+            'voter_guide_image_url_tiny':   "",
+            'voter_guide_owner_type':       "",
+            'organization_we_vote_id':      linked_organization_we_vote_id,
+            'public_figure_we_vote_id':     "",
+            'twitter_description':          "",
+            'twitter_followers_count':      0,
+            'twitter_handle':               "",
+            'owner_voter_id':               0,
+            'pledge_goal':                  0,
+            'pledge_count':                 0,
+            'last_updated':                 "",
+        }
+        return HttpResponse(json.dumps(json_data), content_type='application/json')
+
+    voter_guide_manager = VoterGuideManager()
+    if positive_value_exists(voter_guide_we_vote_id):
+        results = voter_guide_manager.retrieve_voter_guide(voter_guide_we_vote_id=voter_guide_we_vote_id)
+        voter_guide_found = False
+        status += results['status']
+        if results['voter_guide_found']:
+            voter_guide = results['voter_guide']
+            if voter_guide.id:
+                voter_guide_found = True
+        # If a voter_guide_we_vote_id is passed in and not found, we want to exit and NOT create a new one
+        if not positive_value_exists(voter_guide_found):
+            status += "VOTER_GUIDE_SAVE-VOTER_GUIDE_NOT_FOUND "
+            json_data = {
+                'status':                       status,
+                'success':                      False,
+                'we_vote_id':                   voter_guide_we_vote_id,
+                'google_civic_election_id':     google_civic_election_id,
+                'time_span':                    "",
+                'voter_guide_display_name':     "",
+                'voter_guide_image_url_large':  "",
+                'voter_guide_image_url_medium': "",
+                'voter_guide_image_url_tiny':   "",
+                'voter_guide_owner_type':       "",
+                'organization_we_vote_id':      linked_organization_we_vote_id,
+                'public_figure_we_vote_id':     "",
+                'twitter_description':          "",
+                'twitter_followers_count':      0,
+                'twitter_handle':               "",
+                'owner_voter_id':               0,
+                'pledge_goal':                  0,
+                'pledge_count':                 0,
+                'last_updated':                 "",
+            }
+            return HttpResponse(json.dumps(json_data), content_type='application/json')
+    else:
+        organization_manager = OrganizationManager()
+        if positive_value_exists(linked_organization_we_vote_id):
+            organization_results = \
+                organization_manager.retrieve_organization_from_we_vote_id(linked_organization_we_vote_id)
+            if organization_results['organization_found']:
+                organization = organization_results['organization']
+                linked_organization_we_vote_id = organization.we_vote_id
+            else:
+                organization_create_results = organization_manager.create_organization(
+                    voter.get_full_name(), organization_website="", organization_twitter_handle="",
+                    organization_type="INDIVIDUAL")
+                if organization_create_results['organization_created']:
+                    organization = organization_create_results['organization']
+                    linked_organization_we_vote_id = organization.we_vote_id
+
+        if not positive_value_exists(linked_organization_we_vote_id):
+            status += 'LINKED_ORGANIZATION_NOT_FOUND '
+            json_data = {
+                'status':                       status,
+                'success':                      False,
+                'we_vote_id':                   voter_guide_we_vote_id,
+                'google_civic_election_id':     google_civic_election_id,
+                'time_span':                    "",
+                'voter_guide_display_name':     "",
+                'voter_guide_image_url_large':  "",
+                'voter_guide_image_url_medium': "",
+                'voter_guide_image_url_tiny':   "",
+                'voter_guide_owner_type':       "",
+                'organization_we_vote_id':      linked_organization_we_vote_id,
+                'public_figure_we_vote_id':     "",
+                'twitter_description':          "",
+                'twitter_followers_count':      0,
+                'twitter_handle':               "",
+                'owner_voter_id':               0,
+                'pledge_goal':                  0,
+                'pledge_count':                 0,
+                'last_updated':                 "",
+            }
+            return HttpResponse(json.dumps(json_data), content_type='application/json')
+
+        results = voter_guide_manager.retrieve_voter_guide(google_civic_election_id=google_civic_election_id,
+                                                           organization_we_vote_id=linked_organization_we_vote_id)
+        voter_guide_found = False
+        status += results['status']
+        if results['voter_guide_found']:
+            voter_guide = results['voter_guide']
+            if voter_guide.id:
+                voter_guide_found = True
+
+        if not voter_guide_found:
+            create_results = voter_guide_manager.update_or_create_voter_voter_guide(
+                google_civic_election_id=google_civic_election_id,
+                voter=voter)
+            if create_results['voter_guide_created'] or create_results['voter_guide_saved']:
+                voter_guide_found = True
+                success = True
+                voter_guide = create_results['voter_guide']
+
+    try:
+        organization
+    except NameError:
+        organization_exists = False
+    else:
+        organization_exists = True
+
+    if voter_guide_found and linked_organization_we_vote_id and organization_exists:
+        refresh_results = voter_guide_manager.refresh_one_voter_guide_from_organization(voter_guide, organization)
+        if refresh_results['values_changed']:
+            voter_guide = refresh_results['voter_guide']
+            try:
+                voter_guide.save()
+                success = True
+                status += "VOTER_GUIDE_REFRESHED "
+            except Exception as e:
+                success = False
+                status += "COULD_NOT_REFRESH_VOTER_GUIDE "
+
+    json_data = {
+        'status': status,
+        'success': success,
+        'we_vote_id': voter_guide.we_vote_id,
+        'google_civic_election_id': voter_guide.google_civic_election_id,
+        'time_span': voter_guide.vote_smart_time_span,
+        'voter_guide_display_name': voter_guide.voter_guide_display_name(),
+        'voter_guide_image_url_large': voter_guide.we_vote_hosted_profile_image_url_large
+        if positive_value_exists(voter_guide.we_vote_hosted_profile_image_url_large)
+        else voter_guide.voter_guide_image_url(),
+        'voter_guide_image_url_medium': voter_guide.we_vote_hosted_profile_image_url_medium,
+        'voter_guide_image_url_tiny': voter_guide.we_vote_hosted_profile_image_url_tiny,
+        'voter_guide_owner_type': voter_guide.voter_guide_owner_type,
+        'organization_we_vote_id': voter_guide.organization_we_vote_id,
+        'public_figure_we_vote_id': voter_guide.public_figure_we_vote_id,
+        'twitter_description': voter_guide.twitter_description,
+        'twitter_followers_count': voter_guide.twitter_followers_count,
+        'twitter_handle': voter_guide.twitter_handle,
+        'owner_voter_id': voter_guide.owner_voter_id,
+        'pledge_goal': voter_guide.pledge_goal,
+        'pledge_count': voter_guide.pledge_count,
+        'last_updated': voter_guide.last_updated.strftime('%Y-%m-%d %H:%M'),
+    }
+    return HttpResponse(json.dumps(json_data), content_type='application/json')
 
 
 def voter_guides_followed_retrieve_for_api(voter_device_id, maximum_number_to_retrieve=0):

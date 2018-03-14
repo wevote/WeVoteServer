@@ -1787,7 +1787,9 @@ def voter_retrieve_for_api(voter_device_id, state_code_from_ip_address='',
                     except Exception as e:
                         status += "VOTER_LINKED_ORGANIZATION_COULD_NOT_BE_FIXED "
 
-            if not positive_value_exists(voter.linked_organization_we_vote_id):
+            if positive_value_exists(voter.linked_organization_we_vote_id):
+                existing_organization_for_this_voter_found = True
+            else:
                 existing_organization_for_this_voter_found = False
                 create_twitter_link_to_organization = False
                 organization_twitter_handle = ""
@@ -1882,7 +1884,7 @@ def voter_retrieve_for_api(voter_device_id, state_code_from_ip_address='',
                         try:
                             voter.linked_organization_we_vote_id = organization.we_vote_id
                             voter.save()
-
+                            existing_organization_for_this_voter_found = True
                             if create_twitter_link_to_organization:
                                 create_results = twitter_user_manager.create_twitter_link_to_organization(
                                     twitter_link_to_voter_twitter_id, organization.we_vote_id)
@@ -1944,6 +1946,32 @@ def voter_retrieve_for_api(voter_device_id, state_code_from_ip_address='',
                             except Exception as e:
                                 logger.error('FAILED organization_manager.update_or_create_organization. '
                                              '{error} [type: {error_type}]'.format(error=e, error_type=type(e)))
+
+        if not positive_value_exists(voter.linked_organization_we_vote_id):
+            # If we are here, we need to create an organization for this voter
+            organization_name = voter.get_full_name()
+            organization_website = ""
+            organization_email = ""
+            organization_facebook = ""
+            organization_twitter_handle = ""
+            organization_twitter_id = 0
+            organization_image = voter.we_vote_hosted_profile_image_url_large \
+                if positive_value_exists(voter.we_vote_hosted_profile_image_url_large) \
+                else voter.voter_photo_url()
+            organization_type = INDIVIDUAL
+            organization_manager = OrganizationManager()
+            create_results = organization_manager.create_organization(
+                organization_name, organization_website, organization_twitter_handle,
+                organization_email, organization_facebook, organization_image, organization_twitter_id,
+                organization_type)
+            if create_results['organization_created']:
+                # Add value to twitter_owner_voter.linked_organization_we_vote_id when done.
+                organization = create_results['organization']
+                try:
+                    voter.linked_organization_we_vote_id = organization.we_vote_id
+                    voter.save()
+                except Exception as e:
+                    status += "UNABLE_TO_CREATE_NEW_ORGANIZATION_TO_VOTER_FROM_RETRIEVE_VOTER2 "
 
         if repair_twitter_link_to_voter_caching_now:
             # If here then we know that we have a twitter_link_to_voter, and there was some data cleanup done

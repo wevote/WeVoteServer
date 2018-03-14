@@ -275,38 +275,68 @@ class VoterGuideManager(models.Manager):
         }
         return results
 
-    def update_or_create_voter_voter_guide(self, google_civic_election_id, owner_voter_id):
-        new_voter_guide = VoterGuide()
-        voter_guide_owner_type = new_voter_guide.VOTER
-        owner_voter_id = convert_to_int(owner_voter_id)
+    def update_or_create_voter_voter_guide(self, google_civic_election_id, voter):
+        """
+
+        :param google_civic_election_id:
+        :param voter:
+        :param organization:
+        :return:
+        """
+        google_civic_election_id = convert_to_int(google_civic_election_id)
+        success = False
+        status = ""
         exception_multiple_object_returned = False
-        if not google_civic_election_id or not owner_voter_id:
-            status = 'ERROR_VARIABLES_MISSING_FOR_VOTER_VOTER_GUIDE'
-            new_voter_guide_created = False
-            success = False
+        new_voter_guide_created = False
+        linked_organization_we_vote_id = ""
+        organization_manager = OrganizationManager()
+        voter_guide = VoterGuide()
+
+        try:
+            voter
+        except NameError:
+            voter_exists = False
         else:
+            voter_exists = True
+
+        if voter_exists and positive_value_exists(voter.linked_organization_we_vote_id):
+            organization_results = \
+                organization_manager.retrieve_organization_from_we_vote_id(voter.linked_organization_we_vote_id)
+            if organization_results['organization_found']:
+                organization = organization_results['organization']
+                linked_organization_we_vote_id = organization.we_vote_id
+
+        try:
+            organization
+        except NameError:
+            organization_exists = False
+        else:
+            organization_exists = True
+
+        if positive_value_exists(linked_organization_we_vote_id) and voter_exists and organization_exists \
+                and positive_value_exists(google_civic_election_id):
             try:
                 updated_values = {
                     # Values we search against below
                     'google_civic_election_id': google_civic_election_id,
-                    'voter_guide_owner_type': voter_guide_owner_type,
-                    'owner_voter_id': owner_voter_id,
+                    'organization_we_vote_id': organization.we_vote_id,
                     # The rest of the values
+                    'voter_guide_owner_type': organization.organization_type,
+                    'owner_voter_id': voter.id,
+                    'owner_we_vote_id': voter.we_vote_id,
                 }
-                voter_guide_on_stage, new_voter_guide_created = VoterGuide.objects.update_or_create(
+                voter_guide, new_voter_guide_created = VoterGuide.objects.update_or_create(
                     google_civic_election_id__exact=google_civic_election_id,
-                    voter_guide_owner_type__iexact=voter_guide_owner_type,
-                    owner_voter_id__exact=owner_voter_id,
+                    organization_we_vote_id__iexact=linked_organization_we_vote_id,
                     defaults=updated_values)
                 success = True
                 if new_voter_guide_created:
-                    status = 'VOTER_GUIDE_CREATED_FOR_VOTER'
+                    status += 'VOTER_GUIDE_CREATED_FOR_VOTER '
                 else:
-                    status = 'VOTER_GUIDE_UPDATED_FOR_VOTER'
+                    status += 'VOTER_GUIDE_UPDATED_FOR_VOTER '
             except VoterGuide.MultipleObjectsReturned as e:
-                handle_record_found_more_than_one_exception(e, logger=logger)
                 success = False
-                status = 'MULTIPLE_MATCHING_VOTER_GUIDES_FOUND_FOR_VOTER'
+                status += 'MULTIPLE_MATCHING_VOTER_GUIDES_FOUND_FOR_VOTER'
                 exception_multiple_object_returned = True
                 new_voter_guide_created = False
 
@@ -314,8 +344,9 @@ class VoterGuideManager(models.Manager):
             'success':                  success,
             'status':                   status,
             'MultipleObjectsReturned':  exception_multiple_object_returned,
+            'voter_guide':              voter_guide,
             'voter_guide_saved':        success,
-            'new_voter_guide_created':  new_voter_guide_created,
+            'voter_guide_created':      new_voter_guide_created,
         }
         return results
 
@@ -351,53 +382,53 @@ class VoterGuideManager(models.Manager):
         exception_multiple_object_returned = False
         voter_guide_on_stage = VoterGuide()
         voter_guide_on_stage_id = 0
-        status = "ERROR_ENTERING_RETRIEVE_VOTER_GUIDE"
+        status = "ERROR_ENTERING_RETRIEVE_VOTER_GUIDE "
         try:
             if positive_value_exists(voter_guide_id):
-                status = "ERROR_RETRIEVING_VOTER_GUIDE_WITH_ID"  # Set this in case the get fails
+                status = "ERROR_RETRIEVING_VOTER_GUIDE_WITH_ID "  # Set this in case the get fails
                 voter_guide_on_stage = VoterGuide.objects.get(id=voter_guide_id)
                 voter_guide_on_stage_id = voter_guide_on_stage.id
-                status = "VOTER_GUIDE_FOUND_WITH_ID"
+                status = "VOTER_GUIDE_FOUND_WITH_ID "
             elif positive_value_exists(voter_guide_we_vote_id):
-                status = "ERROR_RETRIEVING_VOTER_GUIDE_WITH_WE_VOTE_ID"  # Set this in case the get fails
+                status = "ERROR_RETRIEVING_VOTER_GUIDE_WITH_WE_VOTE_ID "  # Set this in case the get fails
                 voter_guide_on_stage = VoterGuide.objects.get(we_vote_id=voter_guide_we_vote_id)
                 voter_guide_on_stage_id = voter_guide_on_stage.id
-                status = "VOTER_GUIDE_FOUND_WITH_WE_VOTE_ID"
+                status = "VOTER_GUIDE_FOUND_WITH_WE_VOTE_ID "
             elif positive_value_exists(organization_we_vote_id) and positive_value_exists(google_civic_election_id):
                 status = "ERROR_RETRIEVING_VOTER_GUIDE_WITH_ORGANIZATION_WE_VOTE_ID"  # Set this in case the get fails
                 voter_guide_on_stage = VoterGuide.objects.get(google_civic_election_id=google_civic_election_id,
                                                               organization_we_vote_id__iexact=organization_we_vote_id)
                 voter_guide_on_stage_id = voter_guide_on_stage.id
-                status = "VOTER_GUIDE_FOUND_WITH_ORGANIZATION_WE_VOTE_ID"
+                status = "VOTER_GUIDE_FOUND_WITH_ORGANIZATION_WE_VOTE_ID "
             elif positive_value_exists(organization_we_vote_id) and positive_value_exists(vote_smart_time_span):
-                status = "ERROR_RETRIEVING_VOTER_GUIDE_WITH_ORGANIZATION_WE_VOTE_ID_AND_TIME_SPAN"
+                status = "ERROR_RETRIEVING_VOTER_GUIDE_WITH_ORGANIZATION_WE_VOTE_ID_AND_TIME_SPAN "
                 voter_guide_on_stage = VoterGuide.objects.get(vote_smart_time_span=vote_smart_time_span,
                                                               organization_we_vote_id__iexact=organization_we_vote_id)
                 voter_guide_on_stage_id = voter_guide_on_stage.id
-                status = "VOTER_GUIDE_FOUND_WITH_ORGANIZATION_WE_VOTE_ID_AND_TIME_SPAN"
+                status = "VOTER_GUIDE_FOUND_WITH_ORGANIZATION_WE_VOTE_ID_AND_TIME_SPAN "
             elif positive_value_exists(public_figure_we_vote_id) and positive_value_exists(google_civic_election_id):
                 status = "ERROR_RETRIEVING_VOTER_GUIDE_WITH_PUBLIC_FIGURE_WE_VOTE_ID"  # Set this in case the get fails
                 voter_guide_on_stage = VoterGuide.objects.get(google_civic_election_id=google_civic_election_id,
                                                               public_figure_we_vote_id__iexact=public_figure_we_vote_id)
                 voter_guide_on_stage_id = voter_guide_on_stage.id
-                status = "VOTER_GUIDE_FOUND_WITH_PUBLIC_FIGURE_WE_VOTE_ID"
+                status = "VOTER_GUIDE_FOUND_WITH_PUBLIC_FIGURE_WE_VOTE_ID "
             elif positive_value_exists(owner_we_vote_id) and positive_value_exists(google_civic_election_id):
-                status = "ERROR_RETRIEVING_VOTER_GUIDE_WITH_VOTER_WE_VOTE_ID"  # Set this in case the get fails
+                status = "ERROR_RETRIEVING_VOTER_GUIDE_WITH_VOTER_WE_VOTE_ID "  # Set this in case the get fails
                 voter_guide_on_stage = VoterGuide.objects.get(google_civic_election_id=google_civic_election_id,
                                                               owner_we_vote_id__iexact=owner_we_vote_id)
                 voter_guide_on_stage_id = voter_guide_on_stage.id
-                status = "VOTER_GUIDE_FOUND_WITH_VOTER_WE_VOTE_ID"
+                status = "VOTER_GUIDE_FOUND_WITH_VOTER_WE_VOTE_ID "
             else:
                 status = "Insufficient variables included to retrieve one voter guide."
         except VoterGuide.MultipleObjectsReturned as e:
             handle_record_found_more_than_one_exception(e, logger)
             error_result = True
             exception_multiple_object_returned = True
-            status += ", ERROR_MORE_THAN_ONE_VOTER_GUIDE_FOUND"
+            status += ", ERROR_MORE_THAN_ONE_VOTER_GUIDE_FOUND "
         except VoterGuide.DoesNotExist:
             error_result = True
             exception_does_not_exist = True
-            status += ", VOTER_GUIDE_NOT_FOUND"
+            status += ", VOTER_GUIDE_DOES_NOT_EXIST "
 
         voter_guide_on_stage_found = True if voter_guide_on_stage_id > 0 else False
         results = {
@@ -591,7 +622,19 @@ class VoterGuideManager(models.Manager):
         return results
 
     def refresh_one_voter_guide_from_organization(self, voter_guide, organization):
+        """
+        This function does not save voter_guide
+        :param voter_guide:
+        :param organization:
+        :return:
+        """
         values_changed = False
+        if voter_guide.display_name != organization.organization_name:
+            voter_guide.display_name = organization.organization_name
+            values_changed = True
+        # if voter_guide.display_name != organization.organization_descripgi:
+        #     voter_guide.display_name = organization.organization_name
+        #     values_changed = True
         if voter_guide.voter_guide_owner_type != organization.organization_type:
             voter_guide.voter_guide_owner_type = organization.organization_type
             values_changed = True
@@ -1026,7 +1069,7 @@ class VoterGuideListManager(models.Model):
 
         if not positive_value_exists(organization_we_vote_id) and not positive_value_exists(owner_voter_id) and \
                 not positive_value_exists(owner_voter_we_vote_id):
-            status = 'NO_VOTER_GUIDES_FOUND-MISSING_REQUIRED_VARIABLE'
+            status = 'NO_VOTER_GUIDES_FOUND-MISSING_REQUIRED_VARIABLE '
             success = False
             results = {
                 'success':                      success,
