@@ -1613,29 +1613,23 @@ def voter_update_view(request):  # voterUpdate
     except KeyError:
         facebook_profile_image_url_https = False
 
-    try:
-        first_name = request.GET['first_name']
+    first_name = request.GET.get('first_name', False)
+    if first_name is not False:
         first_name = first_name.strip()
         if first_name.lower() == 'false':
             first_name = False
-    except KeyError:
-        first_name = False
 
-    try:
-        middle_name = request.GET['middle_name']
+    middle_name = request.GET.get('middle_name', False)
+    if middle_name is not False:
         middle_name = middle_name.strip()
         if middle_name.lower() == 'false':
             middle_name = False
-    except KeyError:
-        middle_name = False
 
-    try:
-        last_name = request.GET['last_name']
+    last_name = request.GET.get('last_name', False)
+    if last_name is not False:
         last_name = last_name.strip()
         if last_name.lower() == 'false':
             last_name = False
-    except KeyError:
-        last_name = False
 
     try:
         full_name = request.GET['full_name']
@@ -1733,12 +1727,17 @@ def voter_update_view(request):  # voterUpdate
         return response
 
     at_least_one_variable_has_changed = True if \
-        facebook_email or facebook_profile_image_url_https \
-        or first_name or middle_name or last_name \
+        facebook_email \
+        or facebook_profile_image_url_https \
+        or first_name is not False \
+        or middle_name is not False \
+        or last_name is not False \
         or full_name \
-        or interface_status_flags or flag_integer_to_unset \
+        or interface_status_flags \
+        or flag_integer_to_unset \
         or flag_integer_to_set \
-        or notification_settings_flags or notification_flag_integer_to_unset \
+        or notification_settings_flags \
+        or notification_flag_integer_to_unset \
         or notification_flag_integer_to_set \
         or send_journal_list \
         else False
