@@ -31,18 +31,20 @@
         (<a href="{% url 'office:office_delete_process' %}?office_id={{ office.id }}&google_civic_election_id={{ google_civic_election_id }}">delete office</a>)
       </td>
     </tr>
+    <tr>
+      <td>OCD Division ID:</td>
+      <td><strong>{{ office.ocd_division_id }}</strong></td>
+    </tr>
     {% if office.office_url %}
     <tr>
       <td>Office Website:</td>
       <td><strong>{{ office.office_url }}</strong></td>
     </tr>
     {% endif %}
-    {% if office.ballotpedia_office_id %}
     <tr>
       <td>Ballotpedia Office ID:</td>
       <td><strong>{{ office.ballotpedia_office_id }}</strong></td>
     </tr>
-    {% endif %}
     {% if office.ballotpedia_office_name %}
     <tr>
       <td>Ballotpedia Office Name:</td>
