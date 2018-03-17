@@ -1,7 +1,7 @@
-{# templates/office/office_list.html #}
+{# templates/office/elected_office_list.html #}
 {% extends "template_base.html" %}
 
-{% block title %}Offices{% endblock %}
+{% block title %}Elected Offices{% endblock %}
 
 {%  block content %}
 <p><a href="{% url 'admin_tools:admin_home' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">< Back to Admin Home</a></p>
@@ -19,18 +19,18 @@
     <a href="{% url 'polling_location:polling_location_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">Polling Locations</a>
 </p>
 
-<h1>Offices</h1>
+<h1>Elected Offices</h1>
 
-<p><a href="{% url 'import_export_batches:batch_list' %}?kind_of_batch=CONTEST_OFFICE&google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}"
+<p><a href="{% url 'import_export_batches:batch_list' %}?kind_of_batch=ELECTED_OFFICE&google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}"
       target="_blank">
-        Import New Offices ></a> (open in new window)
+        Import New Elected Offices ></a> (open in new window)
 </p>
 
-<p><a href="{% url 'office:office_new' %}?google_civic_election_id={{ google_civic_election_id }}">Add New Office</a></p>
+<p><a href="{% url 'elected_office:elected_office_new' %}?google_civic_election_id={{ google_civic_election_id }}">Add New Elected Office</a></p>
 <p><a href="{% url 'position:refresh_positions_with_contest_office_details_for_election' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
-    Refresh Positions from Contest Office info for this election</a></p>
+    Refresh Positions from Elected Office info for this election</a></p>
 
-    <form name="organization_position_choose_election" method="get" action="{% url 'office:office_list' %}">
+    <form name="organization_position_choose_election" method="get" action="{% url 'elected_office:elected_office_list' %}">
         {% csrf_token %}
     {% if election_list %}
         <select id="google_civic_election_id" name="google_civic_election_id">
@@ -62,67 +62,67 @@
         {% endfor %}
         </select>
         {% if state_code != "" %}
-        <a href="{% url 'office:office_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}&candidate_search={{ candidate_search }}&show_all=1">
+        <a href="{% url 'elected_office:elected_office_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}&candidate_search={{ candidate_search }}&show_all=1">
             show all</a>
         {% endif %}
         {% endif %}
         <br />
-        {% if office_search %}
-            <a href="{% url 'office:office_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
+        {% if elected_office_search %}
+            <a href="{% url 'elected_office:elected_office_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
                  clear search</a>&nbsp;
         {% endif %}
-        <input type="text" name="office_search" id="office_search_id" value="{{ office_search }}" style="width: 450px" />
-        <input type="submit" value="Search for Office" />
+        <input type="text" name="elected_office_search" id="elected_office_search_id" value="{{ elected_office_search }}" style="width: 450px" />
+        <input type="submit" value="Search for Elected Office" />
         {# End of if state_list #}
-{% if office_list %}
+{% if elected_office_list %}
     {% if google_civic_election_id %}
     <ul>
         <li>Prepare: <a href="{% url 'office:find_and_remove_duplicate_offices' %}?google_civic_election_id={{ google_civic_election_id }}" >
-        Find and Remove Duplicate Contest Offices for this Election</a> (about 1 minute)</li>
+        Find and Remove Duplicate Elected Offices for this Election</a> (about 1 minute)</li>
     </ul>
 
     {% endif %}
 {% endif %}
 
-{% if office_list %}
+{% if elected_office_list %}
     <table border="1" cellpadding="5" cellspacing="5">
         <tr>
             <td>&nbsp;</td>
             <td>ID</td>
             <td>We Vote ID</td>
-            <td>Office Name</td>
+            <td>Elected Office Name</td>
             <td>State</td>
             <td>District ID</td>
             <td># of Candidates</td>
             <td>Ocd Division ID</td>
             <td>Ballotpedia office ID</td>
         </tr>
-    {% for office in office_list %}
+    {% for elected_office in elected_office_list %}
         <tr>
             <td>{{ forloop.counter }}</td>
-            <td>{{ office.id }}</td>
-            <td>{{ office.we_vote_id }}</td>
-            <td><a href="{% url 'office:office_summary' office.id %}">{{ office.office_name }}
-{#                {% if office.district_id %}#}
-{#                    - District {{ office.district_id }}#}
+            <td>{{ elected_office.id }}</td>
+            <td>{{ elected_office.we_vote_id }}</td>
+            <td><a href="{% url 'elected_office:elected_office_summary' elected_office.id %}">{{ elected_office.elected_office_name }}
+{#                {% if elected_office.district_id %}#}
+{#                    - District {{ elected_office.district_id }}#}
 {#                {% endif %}#}
-{#                {% if office.state_code %}#}
-{#                    - {{ office.state_code }}#}
+{#                {% if elected_office.state_code %}#}
+{#                    - {{ elected_office.state_code }}#}
 {#                {% endif %}#}
             </a></td>
-            <td>{{ office.state_code }}</td>
-            <td>{{ office.district_id|default_if_none:"" }}</td>
-            <td>{{ office.candidate_count }}</td>
-            <td>{{ office.ocd_division_id }}</td>
-            <td>{{ office.ballotpedia_office_id }}</td>
+            <td>{{ elected_office.state_code }}</td>
+            <td>{{ elected_office.district_id|default_if_none:"" }}</td>
+            <td>{{ elected_office.candidate_count }}</td>   {#TODO elected office does not have candidate count#}
+            <td>{{ elected_office.ocd_division_id }}</td>
+            <td>{{ elected_office.ballotpedia_office_id }}</td> {#TODO elected office does not have ballotpedia office id#}
         </tr>
     {% endfor %}
     </table>
 
     <p></p>
-    {# <p><a href="{% url 'office:offices_export' %}?format=json" target="_blank" >Export Offices</a></p> #}
+    {# <p><a href="{% url 'office:offices_export' %}?format=json" target="_blank" >Export Elected Offices</a></p> #}
 {% else %}
-    <p>(no offices found)</p>
+    <p>(no elected offices found)</p>
 {% endif %}
     </form>
 

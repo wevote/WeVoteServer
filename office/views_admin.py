@@ -2,8 +2,8 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
-from .controllers import offices_import_from_master_server, fetch_duplicate_office_count, find_duplicate_contest_office, \
-    figure_out_conflict_values
+from .controllers import offices_import_from_master_server, fetch_duplicate_office_count, \
+    find_duplicate_contest_office, figure_out_conflict_values
 from .models import ContestOffice, ContestOfficeManager, CONTEST_OFFICE_UNIQUE_IDENTIFIERS
 from admin_tools.views import redirect_to_sign_in_page
 from ballot.controllers import move_ballot_items_to_another_office
@@ -345,7 +345,7 @@ def office_edit_process_view(request):
             if positive_value_exists(election_state):
                 office_on_stage.state_code = election_state
             if ballotpedia_office_id is not False:
-                office_on_stage.ballotpedia_office_id = ballotpedia_office_id
+                office_on_stage.ballotpedia_office_id = convert_to_int(ballotpedia_office_id)
             if ballotpedia_office_name is not False:
                 office_on_stage.ballotpedia_office_name = ballotpedia_office_name
             office_on_stage.save()
@@ -371,7 +371,7 @@ def office_edit_process_view(request):
             if primary_party is not False:
                 office_on_stage.primary_party = primary_party
             if ballotpedia_office_id is not False:
-                office_on_stage.ballotpedia_office_id = ballotpedia_office_id
+                office_on_stage.ballotpedia_office_id = convert_to_int(ballotpedia_office_id)
             if ballotpedia_office_name is not False:
                 office_on_stage.ballotpedia_office_name = ballotpedia_office_name
             office_on_stage.save()

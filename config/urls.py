@@ -36,6 +36,7 @@ urlpatterns = [
     url(r'^bookmark/', include('bookmark.urls', namespace="bookmark")),
     url(r'^c/', include('candidate.urls', namespace="candidate")),
     url(r'^e/', include('election.urls', namespace="election")),
+    url(r'^elected_office/', include('elected_office.urls', namespace="elected_office")),
     url(r'^electoral_district/', include('electoral_district.urls', namespace="electoral_district")),
     url(r'^follow/', include('follow.urls', namespace="follow")),
     url(r'^google_custom_search/', include('google_custom_search.urls', namespace="google_custom_search")),
