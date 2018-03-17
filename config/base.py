@@ -85,6 +85,7 @@ INSTALLED_APPS = (
     'candidate',
     'config',
     'donate',
+    'elected_office',
     'election',
     'electoral_district',
     'email_outbound',

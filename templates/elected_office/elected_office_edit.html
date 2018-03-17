@@ -1,0 +1,128 @@
+{# templates/office/elected_office_edit.html #}
+{% extends "template_base.html" %}
+
+{% block title %}{% if elected_office %}{{ elected_office.elected_office_name }}
+                {% if elected_office.district_id %}
+                    - District {{ elected_office.district_id }}
+                {% endif %}
+                {% if elected_office.state_code %}
+                    - {{ elected_office.state_code }}
+                {% endif %}
+{% else %}Create New Elected Office{% endif %}{% endblock %}
+
+{%  block content %}
+{% load template_filters %}
+
+<h1>{% if elected_office %}Edit {{ elected_office.elected_office_name|default_if_none:"" }}
+                {% if elected_office.district_id %}
+                    - District {{ elected_office.district_id }}
+                {% endif %}
+                {% if elected_office.state_code %}
+                    - {{ elected_office.state_code }}
+                {% endif %}
+    {% else %}
+    Create New Elected Office{% endif %}</h1>
+
+<form action="{% url "elected_office:elected_office_edit_process" %}" method="post" class="form-horizontal">
+{% csrf_token %}
+
+<input type="hidden" name="elected_office_id" value="{% if elected_office %}{{ elected_office.id }}{% else %}0{% endif %}">
+<input type="hidden" name="redirect_to_elected_office_list" value="0">
+
+<div class="form-group">
+    <label for="elected_office_name_id" class="col-sm-3 control-label">Elected Office Name</label>
+    <div class="col-sm-8">
+        <input type="text" name="elected_office_name" id="elected_office_name_id" class="form-control"
+               value="{% if elected_office %}{{ elected_office.elected_office_name|default_if_none:"" }}{% else %}{{ elected_office_name|default_if_none:"" }}{% endif %}" />
+        {% if elected_office %}{{ elected_office.we_vote_id }}{% else %}{{ we_vote_id }}{% endif %}
+        <!--TODO need to implement check office merge possibility -->
+        <!--{% if elected_office.elected_office_merge_possibility_found %}-->
+            <!--(<a href="{% url 'office:find_duplicate_office' elected_office.id %}?google_civic_election_id={{ elected_office.google_civic_election_id }}"-->
+                <!--target="_blank">check for duplicate elected offices</a> - in new window)-->
+        <!--{% endif %}-->
+    </div>
+</div>
+
+<input type="hidden" name="google_civic_election_id" value="{% if measure %}{{ elected_office.google_civic_election_id }}{% else %}{{ google_civic_election_id }}{% endif %}">
+<div class="form-group">
+    <label for="google_civic_election_id_id" class="col-sm-3 control-label">Google Civic Id</label>
+    <div class="col-sm-8">
+        {% if elected_office %}{{ elected_office.google_civic_election_id }}{% else %}{{ google_civic_election_id }}{% endif %}
+    </div>
+</div>
+
+<div class="form-group">
+    <label for="google_civic_elected_office_name_id" class="col-sm-3 control-label">Elected Office Name (for Google Civic matching)</label>
+    <div class="col-sm-8">
+        <input type="text" name="google_civic_elected_office_name" id="google_civic_elected_office_name_id" class="form-control"
+               value="{% if elected_office %}{{ elected_office.google_civic_elected_office_name|default_if_none:"" }}{% else %}{{ google_civic_elected_office_name|default_if_none:"" }}{% endif %}" />
+    </div>
+</div>
+
+<div class="form-group">
+    <label for="ocd_division_id_id" class="col-sm-3 control-label">Ocd Division ID</label>
+    <div class="col-sm-8">
+        <input type="text" name="ocd_division_id" id="ocd_division_id_id" class="form-control"
+               value="{% if elected_office %}{{ elected_office.ocd_division_id|default_if_none:"" }}{% else %}{{ ocd_division_id|default_if_none:"" }}{% endif %}" />
+    </div>
+</div>
+
+<div class="form-group">
+    <label for="primary_party_id" class="col-sm-3 control-label">Primary Party</label>
+    <div class="col-sm-8">
+        {% if elected_office %}{{ elected_office.primary_party|default_if_none:"" }}{% else %}{{ primary_party|default_if_none:"" }}{% endif %}
+    </div>
+</div>
+
+<div class="form-group">
+    <label for="state_code_id" class="col-sm-3 control-label">State Code</label>
+    <div class="col-sm-8">
+        <input type="text" name="state_code" id="state_code_id" class="form-control"
+               value="{% if elected_office %}{{ elected_office.get_office_state|default_if_none:"" }}{% else %}{{ state_code|default_if_none:"" }}{% endif %}" />
+    </div>
+</div>
+
+
+{% if elected_office %}
+<p><a href="{% url 'elected_office:elected_office_summary' elected_office.id %}?google_civic_election_id={{ google_civic_election_id }}">cancel</a>
+{% else %}
+<p><a href="{% url 'elected_office:elected_office_list' %}?google_civic_election_id={{ google_civic_election_id }}">cancel</a>
+{% endif %}
+
+<input type="submit" value="{% if elected_office %}Update Elected Office{% else %}Create Elected New Office{% endif %}" /></p>
+
+</form>
+
+
+
+{% if elected_office_list %}
+    <br />
+    <h4>Existing Elected Offices</h4>
+    <table border="1" cellpadding="5" cellspacing="5">
+        <tr>
+            <td>ID</td>
+            <td>We Vote ID</td>
+            <td>Elected Office Name</td>
+            <td>State</td>
+            <td># of Candidates</td>
+        </tr>
+    {% for elected_office in elected_office_list %}
+        <tr>
+            <td>{{ elected_office.id }}</td>
+            <td>{{ elected_office.we_vote_id }}</td>
+            <td><a href="{% url 'elected_office:elected_office_summary' elected_office.id %}">{{ elected_office.elected_office_name }}
+                {% if elected_office.district_id %}
+                    - District {{ elected_office.district_id }}
+                {% endif %}
+                {% if elected_office.state_code %}
+                    - {{ elected_office.state_code }}
+                {% endif %}
+            </a></td>
+            <td>{{ elected_office.state_code }}</td>
+            <td>{{ elected_office.candidate_count }}</td>
+        </tr>
+    {% endfor %}
+    </table>
+{% endif %}
+
+{% endblock %}

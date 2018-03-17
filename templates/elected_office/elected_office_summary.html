@@ -1,0 +1,109 @@
+{# templates/office/elected_office_summary.html #}
+{% extends "template_base.html" %}
+
+{% block title %}{% if elected_office %}{{ elected_office.elected_office_name }}
+                {% if elected_office.district_id %}
+                    - District {{ elected_office.district_id }}
+                {% endif %}
+                {% if elected_office.state_code %}
+                    - {{ elected_office.state_code }}
+                {% endif %}
+    Summary{% else %}No Elected Office Found{% endif %}{% endblock %}
+
+{%  block content %}
+
+<a href="{% url 'elected_office:elected_office_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">< Back to Elected Offices</a>
+
+{% if elected_office %}
+
+    <h1>{{ elected_office.elected_office_name }}{% if elected_office.district_id %} - District {{ elected_office.district_id }}{% endif %}{% if elected_office.state_code %} - {{ elected_office.state_code }}{% endif %}
+</h1>
+
+    <table>
+    <tr>
+      <td>Google Civic Election ID:</td>
+      <td><strong>{{ election.election_name }} - {{ elected_office.google_civic_election_id }}</strong></td>
+    </tr>
+    <tr>
+      <td>Elected Office We Vote ID:</td>
+      <td>
+        <strong>{{ elected_office.we_vote_id }}</strong>
+        (<a href="{% url 'elected_office:elected_office_delete_process' %}?elected_office_id={{ elected_office.id }}&google_civic_election_id={{ google_civic_election_id }}">delete office</a>)
+      </td>
+    </tr>
+    <tr>
+      <td>Ocd Division ID:</td>
+      <td><strong>{{ elected_office.ocd_division_id }}</strong></td>
+    </tr>
+    {% if elected_office.office_url %}
+    <tr>
+      <td>Elected Office Website:</td>
+      <td><strong>{{ elected_office.office_url }}</strong></td>
+    </tr>
+    {% endif %}
+    </table>
+
+    <p>
+      <br />
+      <a href="{% url 'elected_office:elected_office_edit' elected_office.id %}">edit</a><br />
+      <br />
+      <!--<a href="{% url 'candidate:candidate_new' %}?google_civic_election_id={{ google_civic_election_id }}&contest_office_id={{ elected_office.id }}">-->
+            <!--Add New Candidate</a>,-->
+      <!--<a href="{% url 'position:refresh_positions_with_contest_office_details_for_election' %}?office_id={{ elected_office.id }}&office_we_vote_id={{ elected_office.we_vote_id }}">-->
+            <!--Refresh Positions</a><br />-->
+    </p>
+    <!--TODO implement below code for elected officials-->
+    <!--<table border="1" cellpadding="5" cellspacing="5">-->
+        <!--<tr>-->
+            <!--<td>&nbsp;</td>-->
+            <!--<td>&nbsp;</td>-->
+            <!--<td>Candidate Name</td>-->
+            <!--<td>Party</td>-->
+            <!--<td>State</td>-->
+            <!--<td>Twitter Handle</td>-->
+            <!--<td>Website</td>-->
+            <!--<td>Id</td>-->
+            <!--<td>We Vote Id</td>-->
+            <!--<td>Vote Smart Id</td>-->
+            <!--<td>Supporters</td>-->
+            <!--<td>Opposers</td>-->
+            <!--<td>% of Support</td>-->
+            <!--<td>&nbsp;</td>-->
+        <!--</tr>-->
+    <!--{% for candidate in candidate_list %}-->
+        <!--<tr>-->
+            <!--<td>{{ forloop.counter }}</td>-->
+            <!--<td>-->
+                <!--{% if candidate.candidate_photo_url %}-->
+                <!--<a href="{% url 'candidate:candidate_edit' candidate.id %}">-->
+                    <!--<img src='{{ candidate.candidate_photo_url }}' height="25px" />-->
+                <!--</a>-->
+                <!--{% endif %}-->
+            <!--</td>-->
+            <!--<td><a href="{% url 'candidate:candidate_edit' candidate.id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">{{ candidate.candidate_name }}</a></td>-->
+            <!--<td>{{ candidate.party }}</td>-->
+            <!--<td>{{ candidate.get_candidate_state }}</td>-->
+            <!--<td>{% if candidate.candidate_twitter_handle %}<a href="https://twitter.com/{{ candidate.candidate_twitter_handle }}"-->
+                    <!--target="_blank">{{ candidate.candidate_twitter_handle }}</a><br />-->
+                <!--({{ candidate.twitter_followers_count }} followers){% endif %}</td>-->
+            <!--<td>{% if candidate.candidate_url %}<a href="{{ candidate.candidate_url }}" target="_blank">{{ candidate.candidate_url }}</a>{% endif %}</td>-->
+            <!--<td>{{ candidate.id }}</td>-->
+            <!--<td>{{ candidate.we_vote_id }}</td>-->
+            <!--<td>{{ candidate.vote_smart_id|default_if_none:"" }}</td>-->
+            <!--<td>{{ candidate.support_count }}</td>-->
+            <!--<td>{{ candidate.oppose_count }}</td>-->
+            <!--<td>{% if candidate.percentage_of_support %}{{ candidate.percentage_of_support }}%{% endif %}</td>-->
+            <!--<td><a href="{% url 'candidate:candidate_edit' candidate.id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}" style="font-size: .65em">(edit)</a></td>-->
+        <!--</tr>-->
+    <!--{% endfor %}-->
+    <!--</table>-->
+
+    <p></p>
+{% else %}
+    <p>(no candidates found)</p>
+    <p>
+        <a href="{% url 'candidate:candidate_new' %}?google_civic_election_id={{ google_civic_election_id }}">Add New Candidate</a><br />
+    </p>
+{% endif %}
+
+{% endblock %}

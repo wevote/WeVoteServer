@@ -15,12 +15,12 @@ from .models import BatchManager, BatchDescription, BatchHeaderMap, BatchRow, Ba
     BATCH_IMPORT_KEYS_ACCEPTED_FOR_POSITIONS, BATCH_IMPORT_KEYS_ACCEPTED_FOR_BALLOT_ITEMS
 from candidate.models import CandidateCampaign, CandidateCampaignListManager, CandidateCampaignManager
 from django.db.models import Q
+from elected_office.models import ElectedOffice, ElectedOfficeManager
 from electoral_district.controllers import retrieve_electoral_district
 from election.models import ElectionManager
 from exception.models import handle_exception
 from measure.models import ContestMeasure, ContestMeasureManager, ContestMeasureList
-from office.models import ContestOffice, ContestOfficeListManager, ContestOfficeManager, \
-    ElectedOffice, ElectedOfficeManager
+from office.models import ContestOffice, ContestOfficeListManager, ContestOfficeManager
 from organization.models import Organization, OrganizationListManager, OrganizationManager, \
     NONPROFIT_501C3, NONPROFIT_501C4, POLITICAL_ACTION_COMMITTEE, PUBLIC_FIGURE, \
     CORPORATION, NEWS_ORGANIZATION, UNKNOWN
