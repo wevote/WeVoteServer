@@ -30,7 +30,7 @@ from twitter.models import TwitterUserManager
 from voter_guide.controllers import refresh_existing_voter_guides
 from voter_guide.models import ORGANIZATION_WORD
 import wevote_functions.admin
-from wevote_functions.functions import positive_value_exists, extract_twitter_handle_from_text_string
+from wevote_functions.functions import convert_to_int, extract_twitter_handle_from_text_string, positive_value_exists
 
 logger = wevote_functions.admin.get_logger(__name__)
 
@@ -931,7 +931,7 @@ def create_batch_row_action_contest_office(batch_description, batch_header_map, 
                 kind_of_action = IMPORT_CREATE
 
         # we haven't found contest_office yet. Look up for existing contest_office using candidate_name & state_code
-        if keep_looking_for_duplicates:
+        if keep_looking_for_duplicates and positive_value_exists(candidate_name):
             candidate_campaign_list_manager = CandidateCampaignListManager()
             matching_results = candidate_campaign_list_manager.retrieve_candidates_from_non_unique_identifiers(
                 google_civic_election_id, state_code, '', candidate_name)
@@ -989,7 +989,7 @@ def create_batch_row_action_contest_office(batch_description, batch_header_map, 
         batch_row_action_contest_office.district_name = district_name
         batch_row_action_contest_office.district_scope = district_scope
         batch_row_action_contest_office.ocd_division_id = ocd_division_id
-        batch_row_action_contest_office.ballotpedia_office_id = ballotpedia_office_id
+        batch_row_action_contest_office.ballotpedia_office_id = convert_to_int(ballotpedia_office_id)
         batch_row_action_contest_office.ballotpedia_office_name = ballotpedia_office_name
         batch_row_action_contest_office.ballotpedia_office_url = ballotpedia_office_url
         batch_row_action_contest_office.ballotpedia_race_office_level = ballotpedia_race_office_level

@@ -1198,6 +1198,7 @@ def voter_guide_save_for_api(voter_device_id, voter_guide_we_vote_id, google_civ
             voter_guide = results['voter_guide']
             if voter_guide.id:
                 voter_guide_found = True
+                success = True
         # If a voter_guide_we_vote_id is passed in and not found, we want to exit and NOT create a new one
         if not positive_value_exists(voter_guide_found):
             status += "VOTER_GUIDE_SAVE-VOTER_GUIDE_NOT_FOUND "
@@ -1272,6 +1273,7 @@ def voter_guide_save_for_api(voter_device_id, voter_guide_we_vote_id, google_civ
             voter_guide = results['voter_guide']
             if voter_guide.id:
                 voter_guide_found = True
+                success = True
 
         if not voter_guide_found:
             create_results = voter_guide_manager.update_or_create_voter_voter_guide(
