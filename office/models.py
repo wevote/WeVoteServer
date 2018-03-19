@@ -532,7 +532,8 @@ class ContestOfficeManager(models.Model):
                 contest_office_we_vote_id = contest_office_on_stage.we_vote_id
                 status = "RETRIEVE_OFFICE_FOUND_BY_MAPLIGHT_ID"
             elif positive_value_exists(ballotpedia_office_id):
-                contest_office_on_stage = ContestOffice.objects.get(ballotpedia_office_id=ballotpedia_office_id)
+                ballotpedia_office_id_integer = convert_to_int(ballotpedia_office_id)
+                contest_office_on_stage = ContestOffice.objects.get(ballotpedia_office_id=ballotpedia_office_id_integer)
                 contest_office_id = contest_office_on_stage.id
                 contest_office_we_vote_id = contest_office_on_stage.we_vote_id
                 status = "RETRIEVE_OFFICE_FOUND_BY_BALLOTPEDIA_OFFICE_ID"
@@ -635,7 +636,7 @@ class ContestOfficeManager(models.Model):
                 new_contest_office.district_name = defaults['district_name']
                 new_contest_office.district_scope = defaults['district_scope']
                 if 'ballotpedia_office_id' in defaults:
-                    new_contest_office.ballotpedia_office_id = defaults['ballotpedia_office_id']
+                    new_contest_office.ballotpedia_office_id = convert_to_int(defaults['ballotpedia_office_id'])
                 if 'ballotpedia_office_name' in defaults:
                     new_contest_office.ballotpedia_office_name = defaults['ballotpedia_office_name']
                 if 'ballotpedia_office_url' in defaults:
@@ -709,7 +710,7 @@ class ContestOfficeManager(models.Model):
                 if 'district_scope' in defaults:
                     existing_office_entry.district_scope = defaults['district_scope']
                 if 'ballotpedia_office_id' in defaults:
-                    existing_office_entry.ballotpedia_office_id = defaults['ballotpedia_office_id']
+                    existing_office_entry.ballotpedia_office_id = convert_to_int(defaults['ballotpedia_office_id'])
                 if 'ballotpedia_office_name' in defaults:
                     existing_office_entry.ballotpedia_office_name = defaults['ballotpedia_office_name']
                 if 'ballotpedia_office_url' in defaults:

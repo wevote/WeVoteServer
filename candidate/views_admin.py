@@ -686,7 +686,7 @@ def candidate_edit_process_view(request):
             if ballot_guide_official_statement is not False:
                 candidate_on_stage.ballot_guide_official_statement = ballot_guide_official_statement
             if ballotpedia_candidate_id is not False:
-                candidate_on_stage.ballotpedia_candidate_id = ballotpedia_candidate_id
+                candidate_on_stage.ballotpedia_candidate_id = convert_to_int(ballotpedia_candidate_id)
             if ballotpedia_candidate_name is not False:
                 candidate_on_stage.ballotpedia_candidate_name = ballotpedia_candidate_name
             if ballotpedia_candidate_url is not False:
@@ -757,7 +757,7 @@ def candidate_edit_process_view(request):
                 if ballot_guide_official_statement is not False:
                     candidate_on_stage.ballot_guide_official_statement = ballot_guide_official_statement
                 if ballotpedia_candidate_id is not False:
-                    candidate_on_stage.ballotpedia_candidate_id = ballotpedia_candidate_id
+                    candidate_on_stage.ballotpedia_candidate_id = convert_to_int(ballotpedia_candidate_id)
                 if ballotpedia_candidate_name is not False:
                     candidate_on_stage.ballotpedia_candidate_name = ballotpedia_candidate_name
                 if ballotpedia_candidate_url is not False:

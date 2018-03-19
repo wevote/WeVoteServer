@@ -309,6 +309,7 @@ class CandidateCampaignListManager(models.Model):
         candidate_list_objects = []
         filters = []
         candidate_list_found = False
+        ballotpedia_candidate_id = convert_to_int(ballotpedia_candidate_id)
 
         try:
             candidate_queryset = CandidateCampaign.objects.all()
@@ -1077,8 +1078,9 @@ class CandidateCampaignManager(models.Model):
                 candidate_campaign_found = True
                 status = "RETRIEVE_CANDIDATE_FOUND_BY_NAME"
             elif positive_value_exists(ballotpedia_candidate_id):
+                ballotpedia_candidate_id_integer = convert_to_int(ballotpedia_candidate_id)
                 candidate_campaign_on_stage = CandidateCampaign.objects.get(
-                    ballotpedia_candidate_id=ballotpedia_candidate_id)
+                    ballotpedia_candidate_id=ballotpedia_candidate_id_integer)
                 candidate_campaign_id = candidate_campaign_on_stage.id
                 candidate_campaign_we_vote_id = candidate_campaign_on_stage.we_vote_id
                 candidate_campaign_found = True
@@ -1777,7 +1779,8 @@ class CandidateCampaignManager(models.Model):
             if existing_candidate_entry:
                 # found the existing entry, update the values
                 if 'ballotpedia_candidate_id' in update_values:
-                    existing_candidate_entry.ballotpedia_candidate_id = update_values['ballotpedia_candidate_id']
+                    existing_candidate_entry.ballotpedia_candidate_id = \
+                        convert_to_int(update_values['ballotpedia_candidate_id'])
                     values_changed = True
                 if 'ballotpedia_candidate_name' in update_values:
                     existing_candidate_entry.ballotpedia_candidate_name = update_values['ballotpedia_candidate_name']
