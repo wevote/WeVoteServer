@@ -1534,7 +1534,7 @@ def create_batch_row_action_candidate(batch_description, batch_header_map, one_b
         batch_row_action_candidate.candidate_url = candidate_url
         batch_row_action_candidate.facebook_url = facebook_url
         batch_row_action_candidate.photo_url = candidate_profile_image_url
-        batch_row_action_candidate.ballotpedia_candidate_id = ballotpedia_candidate_id
+        batch_row_action_candidate.ballotpedia_candidate_id = convert_to_int(ballotpedia_candidate_id)
         batch_row_action_candidate.ballotpedia_candidate_name = ballotpedia_candidate_name
         batch_row_action_candidate.ballotpedia_candidate_url = ballotpedia_candidate_url
         batch_row_action_candidate.save()
