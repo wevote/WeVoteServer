@@ -8,6 +8,8 @@
 <p>Jump to:
     <a href="{% url 'election:election_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">Elections</a> -
     <a href="{% url 'measure:measure_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">Measures</a> -
+    <a href="{% url 'elected_office:elected_office_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">Elected Offices</a> -
+    <a href="{% url 'elected_official:elected_official_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">Elected Officials</a> -
     <a href="{% url 'office:office_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">Offices</a> -
     <a href="{% url 'candidate:candidate_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">Candidates</a> -
     <a href="{% url 'elected_office:elected_office_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">Elected Offices</a> -
@@ -32,24 +34,6 @@
 
     <form name="organization_position_choose_election" method="get" action="{% url 'elected_office:elected_office_list' %}">
         {% csrf_token %}
-    {% if election_list %}
-        <select id="google_civic_election_id" name="google_civic_election_id">
-            <option value="0" {% if 0 == google_civic_election_id %} selected="selected"{% endif %}>
-                -- Filter by Election --</option>
-        {% for election in election_list %}
-            <option value="{{ election.google_civic_election_id }}"
-                    {% if election.google_civic_election_id|slugify == google_civic_election_id|slugify %} selected="selected"{% endif %}>
-                {{ election.election_name }} - {{ election.google_civic_election_id }} - {{ election.election_day_text }}</option>
-        {% endfor %}
-        </select>
-    {% endif %}{# End of if election_list #}
-
-    {# Default to showing only upcoming elections #}
-    <label for="show_all_elections_id">
-      <input type="checkbox" name="show_all_elections" id="show_all_elections_id" value="1"
-             {% if show_all_elections %}checked{% endif %} /> All Elections
-    </label>
-    &nbsp;&nbsp;&nbsp;&nbsp;
 
     {% if state_list %}
         <select id="state_code_id" name="state_code">

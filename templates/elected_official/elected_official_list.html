@@ -1,7 +1,7 @@
-{# templates/politician/politician_list.html #}
+{# templates/elected_official/elected_official_list.html #}
 {% extends "template_base.html" %}
 
-{% block title %}Politicians{% endblock %}
+{% block title %}Elected Officials{% endblock %}
 
 {%  block content %}
 {% load template_filters %}
@@ -21,11 +21,11 @@
     <a href="{% url 'polling_location:polling_location_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">Polling Locations</a>
 </p>
 
-<h1>Politicians</h1>
+<h1>Elected Officials</h1>
 
-<a href="{% url 'politician:politician_new' %}?state_code={{ state_code }}">Add New Politician</a><br />
+<a href="{% url 'elected_official:elected_official_new' %}?state_code={{ state_code }}">Add New Elected Official</a><br />
 
-<form name="state_code_form" method="get" action="{% url 'politician:politician_list' %}">
+<form name="state_code_form" method="get" action="{% url 'elected_official:elected_official_list' %}">
     {% csrf_token %}
 
     {% if state_list %}
@@ -39,64 +39,60 @@
         {% endfor %}
         </select>
         {% if state_code != "" %}
-        <a href="{% url 'politician:politician_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}&candidate_search={{ candidate_search }}&show_all=1">
+        <a href="{% url 'elected_official:elected_official_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}&elected_official_search={{ elected_official_search }}&show_all=1">
             show all</a>
         {% endif %}
     {% endif %}{# End of if state_list #}
 
-    {% if politician_search %}
-    <a href="{% url 'politician:politician_list' %}?state_code={{ state_code }}">
+    {% if elected_official_search %}
+    <a href="{% url 'elected_official:elected_official_list' %}?state_code={{ state_code }}">
          clear search</a>&nbsp;
     {% endif %}
-    <input type="text" name="politician_search" id="politician_search_id" value="{{ politician_search }}" />
-    <input type="submit" value="Search for Politician" />
+    <input type="text" name="elected_official_search" id="elected_official_search_id" value="{{ elected_official_search }}" />
+    <input type="submit" value="Search for Elected Official" />
 </form>
 
-{% if politician_list %}
+{% if elected_official_list %}
     <table border="1" cellpadding="5" cellspacing="5">
         <tr>
             <td>&nbsp;</td>
             <td>&nbsp;</td>
-            <td>Politician Name</td>
+            <td>Elected Official Name</td>
             <td>State</td>
             <td>Twitter Handle</td>
             <td>Website</td>
             <td>Id</td>
             <td>We Vote Id</td>
             <td>Vote Smart Id</td>
-            <td>Linked Candidates</td>
-            <td>Related Candidates?</td>
         </tr>
-    {% for politician in politician_list %}
+    {% for elected_official in elected_official_list %}
         <tr>
             <td>{{ forloop.counter }}</td>
             <td>
-                {% if politician.politician_photo_url %}
-                <a href="{% url 'politician:politician_edit' politician.id %}?google_civic_election_id={{ google_civic_election_id }}">
-                    <img src='{{ politician.politician_photo_url }}' height="25px" />
+                {% if elected_official.elected_official_photo_url %}
+                <a href="{% url 'elected_official:elected_official_edit' elected_official.id %}?google_civic_election_id={{ google_civic_election_id }}">
+                    <img src='{{ elected_official.photo_url }}' height="25px" />
                 </a>
                 {% endif %}
             </td>
-            <td><a href="{% url 'politician:politician_edit' politician.id %}?google_civic_election_id={{ google_civic_election_id }}">{{ politician.politician_name }}</a></td>
-            <td>{{ politician.state_code }}</td>
-            <td>{% if politician.politician_twitter_handle %}<a href="https://twitter.com/{{ politician.politician_twitter_handle }}"
-                    target="_blank">{{ politician.politician_twitter_handle }}</a><br />
-                ({{ politician.twitter_followers_count }} followers){% endif %}</td>
-            <td>{% if politician.politician_url %}<a href="{{ politician.politician_url }}" target="_blank">{{ politician.politician_url }}</a>{% endif %}</td>
-            <td>{{ politician.id }}</td>
-            <td>{{ politician.we_vote_id }}</td>
-            <td>{{ politician.vote_smart_id|default_if_none:"" }}</td>
-            <td>{{ politician.linked_candidate_list_count }}</td>
-            <td>{{ politician.related_candidate_list_count }}</td>
+            <td><a href="{% url 'elected_official:elected_official_edit' elected_official.id %}?google_civic_election_id={{ google_civic_election_id }}">{{ elected_official.elected_official_name }}</a></td>
+            <td>{{ elected_official.state_code }}</td>
+            <td>{% if elected_official.elected_official_twitter_handle %}<a href="https://twitter.com/{{ elected_official.elected_official_twitter_handle }}"
+                    target="_blank">{{ elected_official.elected_official_twitter_handle }}</a><br />
+                ({{ elected_official.twitter_followers_count }} followers){% endif %}</td>
+            <td>{% if elected_official.elected_official_url %}<a href="{{ elected_official.elected_official_url }}" target="_blank">{{ elected_official.elected_official_url }}</a>{% endif %}</td>
+            <td>{{ elected_official.id }}</td>
+            <td>{{ elected_official.we_vote_id }}</td>
+            <td>{{ elected_official.vote_smart_id|default_if_none:"" }}</td>
         </tr>
     {% endfor %}
     </table>
 
     <p></p>
 {% else %}
-    <p>(no politicians found)</p>
+    <p>(no elected_officials found)</p>
     <p>
-        <a href="{% url 'politician:politician_new' %}?google_civic_election_id={{ google_civic_election_id }}">Add New Politician</a><br />
+        <a href="{% url 'elected_official:elected_official_new' %}?google_civic_election_id={{ google_civic_election_id }}">Add New Elected Official</a><br />
     </p>
 {% endif %}
 
