@@ -18,6 +18,8 @@ urlpatterns = [
     url(r'^(?P<election_id>[0-9]+)/refresh_twitter_candidate_details_for_election/$',
         views_admin.refresh_twitter_candidate_details_for_election_view,
         name='refresh_twitter_candidate_details_for_election',),
+    url(r'^(?P<elected_official_id>[0-9]+)/refresh_twitter_elected_official_details/$',
+        views_admin.refresh_twitter_elected_official_details_view, name='refresh_twitter_elected_official_details', ),
     url(r'^(?P<organization_id>[0-9]+)/refresh_twitter_organization_details/$',
         views_admin.refresh_twitter_organization_details_view, name='refresh_twitter_organization_details',),
     url(r'^(?P<politician_id>[0-9]+)/refresh_twitter_politician_details/$',
