@@ -1492,11 +1492,12 @@ def voter_ballot_items_retrieve_for_one_election_for_api(voter_device_id, voter_
     return results
 
 
-def ballot_item_options_retrieve_for_api(google_civic_election_id=0, state_code=''):
+def ballot_item_options_retrieve_for_api(google_civic_election_id, search_string, state_code=''):
     """
     This function returns a normalized list of candidates and measures so we can pre-populate form fields.
     Not specific to one voter.
     :param google_civic_election_id:
+    :param search_string:
     :param state_code:
     :return:
     """
@@ -1504,11 +1505,11 @@ def ballot_item_options_retrieve_for_api(google_civic_election_id=0, state_code=
     status = ""
     try:
         candidate_list_object = CandidateCampaignListManager()
-        results = candidate_list_object.retrieve_all_candidates_for_upcoming_election(google_civic_election_id,
-                                                                                      state_code)
+        results = candidate_list_object.search_candidates_for_upcoming_election(
+            google_civic_election_id, search_string, state_code)
         candidate_success = results['success']
         status += results['status']
-        candidate_list = results['candidate_list_light']
+        candidate_list = results['candidate_list_json']
     except Exception as e:
         status += 'FAILED ballot_item_options_retrieve_for_api, candidate_list. ' \
                  '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
@@ -1516,55 +1517,42 @@ def ballot_item_options_retrieve_for_api(google_civic_election_id=0, state_code=
         candidate_list = []
         candidate_success = False
 
-    try:
-        office_list_object = ContestOfficeListManager()
-        results = office_list_object.retrieve_all_offices_for_upcoming_election(google_civic_election_id, state_code)
-        office_success = results['success']
-        status += ' ' + results['status']
-        office_list = results['office_list_light']
-    except Exception as e:
-        status += 'FAILED ballot_item_options_retrieve_for_api, office_list. ' \
-                 '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
-        handle_exception(e, logger=logger, exception_message=status)
-        office_list = []
-        office_success = False
-
-    try:
-        measure_list_object = ContestMeasureList()
-        results = measure_list_object.retrieve_all_measures_for_upcoming_election(google_civic_election_id, state_code)
-        measure_success = results['success']
-        status += ' ' + results['status']
-        measure_list = results['measure_list_light']
-    except Exception as e:
-        status += 'FAILED ballot_item_options_retrieve_for_api, measure_list. ' \
-                 '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
-        handle_exception(e, logger=logger, exception_message=status)
-        measure_list = []
-        measure_success = False
+    measure_success = False
+    # try:
+    #     measure_list_object = ContestMeasureList()
+    #     results = measure_list_object.retrieve_all_measures_for_upcoming_election(
+    # google_civic_election_id, state_code)
+    #     measure_success = results['success']
+    #     status += ' ' + results['status']
+    #     measure_list = results['measure_list_light']
+    # except Exception as e:
+    #     status += 'FAILED ballot_item_options_retrieve_for_api, measure_list. ' \
+    #              '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
+    #     handle_exception(e, logger=logger, exception_message=status)
+    #     measure_list = []
+    #     measure_success = False
 
     ballot_items_to_display = []
     if candidate_success and len(candidate_list):
         for candidate in candidate_list:
             ballot_items_to_display.append(candidate.copy())
 
-    if office_success and len(office_list):
-        for office in office_list:
-            ballot_items_to_display.append(office.copy())
-
-    if measure_success and len(measure_list):
-        for measure in measure_list:
-            ballot_items_to_display.append(measure.copy())
+    # if measure_success and len(measure_list):
+    #     for measure in measure_list:
+    #         ballot_items_to_display.append(measure.copy())
 
     json_data = {
-        'status': status,
-        'success': candidate_success or measure_success,
-        'ballot_item_list': ballot_items_to_display,
+        'status':                   status,
+        'success':                  candidate_success or measure_success,
+        'search_string':            search_string,
+        'ballot_item_list':         ballot_items_to_display,
         'google_civic_election_id': google_civic_election_id,
     }
     results = {
-        'status': status,
-        'success': candidate_success or measure_success,
-        'google_civic_election_id': google_civic_election_id,  # We want to save google_civic_election_id in cookie
-        'json_data': json_data,
+        'status':                   status,
+        'success':                  candidate_success or measure_success,
+        'search_string':            search_string,
+        'google_civic_election_id': google_civic_election_id,
+        'json_data':                json_data,
     }
     return results

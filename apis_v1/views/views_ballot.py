@@ -20,8 +20,9 @@ WE_VOTE_SERVER_ROOT_URL = get_environment_variable("WE_VOTE_SERVER_ROOT_URL")
 
 def ballot_item_options_retrieve_view(request):  # ballotItemOptionsRetrieve
     google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
+    search_string = request.GET.get('search_string', '')
     state_code = request.GET.get('state_code', '')
-    results = ballot_item_options_retrieve_for_api(google_civic_election_id, state_code)
+    results = ballot_item_options_retrieve_for_api(google_civic_election_id, search_string, state_code)
     response = HttpResponse(json.dumps(results['json_data']), content_type='application/json')
     return response
 

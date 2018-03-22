@@ -818,7 +818,8 @@ def voter_list_view(request):
             voter_list = voter_list.filter(final_filters)
     else:
         voter_list = Voter.objects.order_by('-is_admin', '-is_verified_volunteer', 'email', 'twitter_screen_name',
-                                            'linked_organization_we_vote_id', 'facebook_email', 'last_name', 'first_name')
+                                            'linked_organization_we_vote_id', 'facebook_email',
+                                            'last_name', 'first_name')
     voter_list = voter_list[:200]
 
     template_values = {
