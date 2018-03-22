@@ -598,6 +598,124 @@ class CandidateCampaignListManager(models.Model):
 
         return 0
 
+    def search_candidates_for_upcoming_election(self, google_civic_election_id, search_string='', state_code=''):
+        """
+
+        :param google_civic_election_id:
+        :param search_string:
+        :param state_code:
+        :return:
+        """
+        status = ""
+        candidate_list_objects = []
+        candidate_list_json = []
+        candidate_list_found = False
+
+        search_words = search_string.split()
+
+        try:
+            candidate_queryset = CandidateCampaign.objects.all()
+            candidate_queryset = candidate_queryset.filter(google_civic_election_id=google_civic_election_id)
+            if positive_value_exists(state_code):
+                candidate_queryset = candidate_queryset.filter(state_code__iexact=state_code)
+            candidate_queryset = candidate_queryset.order_by("candidate_name")
+
+            # This is an "OR" search for each term, but an "AND" search across all search_words
+            for search_word in search_words:
+                filters = []
+
+                # We want to find candidates with *any* of these values
+                new_filter = Q(ballotpedia_candidate_name__icontains=search_word)
+                filters.append(new_filter)
+
+                new_filter = Q(google_civic_candidate_name__icontains=search_word)
+                filters.append(new_filter)
+
+                new_filter = Q(candidate_name__icontains=search_word)
+                filters.append(new_filter)
+
+                new_filter = Q(candidate_twitter_handle__icontains=search_word)
+                filters.append(new_filter)
+
+                new_filter = Q(contest_office_name__icontains=search_word)
+                filters.append(new_filter)
+
+                new_filter = Q(twitter_name__icontains=search_word)
+                filters.append(new_filter)
+
+                # Add the first query
+                final_filters = filters.pop()
+
+                # ...and "OR" the remaining items in the list
+                for item in filters:
+                    final_filters |= item
+
+                candidate_queryset = candidate_queryset.filter(final_filters)
+
+            candidate_list_objects = candidate_queryset[:10]
+
+            if len(candidate_list_objects):
+                candidate_list_found = True
+                status += 'SEARCH_CANDIDATES_FOR_UPCOMING_ELECTION_FOUND '
+                success = True
+            else:
+                status += 'SEARCH_CANDIDATES_FOR_UPCOMING_ELECTION_NOT_FOUND'
+                success = True
+        except Exception as e:
+            handle_exception(e, logger=logger)
+            status = 'FAILED search_candidates_for_upcoming_election ' \
+                     '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
+            success = False
+
+        if candidate_list_found:
+            for candidate in candidate_list_objects:
+                one_candidate = {
+                    'ballot_item_display_name':     candidate.display_candidate_name(),
+                    'candidate_email':              candidate.candidate_email,
+                    'candidate_phone':              candidate.candidate_phone,
+                    'candidate_photo_url_large':    candidate.we_vote_hosted_profile_image_url_large
+                    if positive_value_exists(candidate.we_vote_hosted_profile_image_url_large)
+                    else candidate.candidate_photo_url(),
+                    'candidate_photo_url_medium':   candidate.we_vote_hosted_profile_image_url_medium,
+                    'candidate_photo_url_tiny':     candidate.we_vote_hosted_profile_image_url_tiny,
+                    'candidate_we_vote_id':         candidate.we_vote_id,
+                    'id':                           candidate.id,
+                    'office_we_vote_id':            candidate.contest_office_we_vote_id,
+                    'order_on_ballot':              candidate.order_on_ballot,
+                    'kind_of_ballot_item':          "CANDIDATE",
+                    'we_vote_id':                   candidate.we_vote_id,
+                    'google_civic_election_id':     candidate.google_civic_election_id,
+                    'ballotpedia_candidate_id':     candidate.ballotpedia_candidate_id,
+                    'ballotpedia_candidate_url':    candidate.ballotpedia_candidate_url,
+                    'maplight_id':                  candidate.maplight_id,
+                    'contest_office_id':            candidate.contest_office_id,
+                    'contest_office_we_vote_id':    candidate.contest_office_we_vote_id,
+                    'contest_office_name':          candidate.contest_office_name,
+                    'politician_id':                candidate.politician_id,
+                    'politician_we_vote_id':        candidate.politician_we_vote_id,
+                    'party':                        candidate.political_party_display(),
+                    'ocd_division_id':              candidate.ocd_division_id,
+                    'state_code':                   candidate.state_code,
+                    'candidate_url':                candidate.candidate_url,
+                    'facebook_url':                 candidate.facebook_url,
+                    'twitter_url':                  candidate.twitter_url,
+                    'twitter_handle':               candidate.fetch_twitter_handle(),
+                    'twitter_description':          candidate.twitter_description,
+                    'twitter_followers_count':      candidate.twitter_followers_count,
+                    'google_plus_url':              candidate.google_plus_url,
+                    'youtube_url':                  candidate.youtube_url,
+                }
+                candidate_list_json.append(one_candidate.copy())
+
+        results = {
+            'success': success,
+            'status': status,
+            'google_civic_election_id': google_civic_election_id,
+            'candidate_list_found': candidate_list_found,
+            'candidate_list_json': candidate_list_json,
+        }
+        return results
+
 
 class CandidateCampaign(models.Model):
     # The we_vote_id identifier is unique across all We Vote sites, and allows us to share our data with other

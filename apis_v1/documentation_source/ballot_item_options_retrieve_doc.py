@@ -18,13 +18,18 @@ def ballot_item_options_retrieve_doc_template_values(url_root):
             'value':        'string (from post, cookie, or get (in that order))',  # boolean, integer, long, string
             'description':  'The unique key provided to any organization using the WeVoteServer APIs',
         },
+        {
+            'name': 'google_civic_election_id',
+            'value': 'integer',  # boolean, integer, long, string
+            'description': 'The unique identifier for a particular election. If NOT provided, we instead use the '
+                           'google_civic_election_id for the person who is signed in.',
+        },
     ]
     optional_query_parameter_list = [
         {
-            'name':         'google_civic_election_id',
-            'value':        'integer',  # boolean, integer, long, string
-            'description':  'The unique identifier for a particular election. If NOT provided, we instead use the '
-                            'google_civic_election_id for the person who is signed in.',
+            'name':         'search_string',
+            'value':        'string',  # boolean, integer, long, string
+            'description':  'Search words to use to find the candidate or measure for voter guide.'
         },
         {
             'name':         'state_code',
@@ -51,25 +56,65 @@ def ballot_item_options_retrieve_doc_template_values(url_root):
     api_response = '{\n' \
                    '  "status": string,\n' \
                    '  "success": boolean,\n' \
-                   '  "ballot_item_list": list\n' \
+                   '  "search_string": string,\n' \
+                   '  "ballot_item_list": candidate list\n' \
                    '   [\n' \
-                   '     "ballot_item_display_name": string,\n' \
-                   '     "measure_we_vote_id": integer,\n' \
-                   '     "office_we_vote_id": string,\n' \
-                   '     "candidate_we_vote_id": string,\n' \
+                   '      "kind_of_ballot_item": string (CANDIDATE),\n' \
+                   '      "id": integer,\n' \
+                   '      "we_vote_id": string,\n' \
+                   '      "ballot_item_display_name": string,\n' \
+                   '      "candidate_photo_url_large": string,\n' \
+                   '      "candidate_photo_url_medium": string,\n' \
+                   '      "candidate_photo_url_tiny": string,\n' \
+                   '      "order_on_ballot": integer,\n' \
+                   '      "google_civic_election_id": integer,\n' \
+                   '      "ballotpedia_candidate_id": integer,\n' \
+                   '      "ballotpedia_candidate_url": string,\n' \
+                   '      "maplight_id": integer,\n' \
+                   '      "contest_office_id": integer,\n' \
+                   '      "contest_office_we_vote_id": string,\n' \
+                   '      "contest_office_name": string,\n' \
+                   '      "politician_id": integer,\n' \
+                   '      "politician_we_vote_id": string,\n' \
+                   '      "party": string,\n' \
+                   '      "ocd_division_id": string,\n' \
+                   '      "state_code": string,\n' \
+                   '      "candidate_url": string,\n' \
+                   '      "facebook_url": string,\n' \
+                   '      "twitter_url": string,\n' \
+                   '      "twitter_handle": string,\n' \
+                   '      "google_plus_url": string,\n' \
+                   '      "youtube_url": string,\n' \
+                   '      "candidate_email": string,\n' \
+                   '      "candidate_phone": string,\n' \
                    '   ],\n' \
-                   '  "google_civic_election_id": integer,\n' \
+                   '  "ballot_item_list": measure list\n' \
+                   '   [\n' \
+                   '      "kind_of_ballot_item": string (MEASURE),\n' \
+                   '      "id": integer,\n' \
+                   '      "we_vote_id": string,\n' \
+                   '      "google_civic_election_id": integer,\n' \
+                   '      "ballot_item_display_name": string,\n' \
+                   '      "measure_subtitle": string,\n' \
+                   '      "maplight_id": integer,\n' \
+                   '      "vote_smart_id": string,\n' \
+                   '      "measure_text": string,\n' \
+                   '      "measure_url": string,\n' \
+                   '      "ocd_division_id": string,\n' \
+                   '      "district_name": string,\n' \
+                   '      "state_code": string,\n' \
+                   '      "google_civic_election_id": integer,\n' \
+                   '   ],\n' \
                    '}'
 
     template_values = {
         'api_name': 'ballotItemOptionsRetrieve',
         'api_slug': 'ballotItemOptionsRetrieve',
         'api_introduction':
-            "Returns ALL of the offices, measures and candidates for a) the currently signed in voter, or "
-            "b) the election specified by the google_civic_election_id, so we can help "
+            "Returns measures and candidates based on search terms, so we can help "
             "volunteers or staff find offices, candidates or measures when they are building out organizational "
             "voter guides. This information is not organized in a "
-            "hierarchy, but is instead provided in a simple list to help with auto-complete and browser-side "
+            "hierarchy, but is instead provided in a simple list for browser-side "
             "quick search features.",
         'try_now_link': 'apis_v1:ballotItemOptionsRetrieveView',
         'try_now_link_variables_dict': try_now_link_variables_dict,
