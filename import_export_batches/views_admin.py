@@ -623,6 +623,7 @@ def batch_action_list_export_voters_view(request):
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
+    # get parameters from request object
     kind_of_batch = request.GET.get('kind_of_batch', '')
     batch_header_id = request.GET.get('batch_header_id', 0)
     google_civic_election_id = request.GET.get('google_civic_election_id', '')
