@@ -29,6 +29,7 @@ import xml.etree.ElementTree as ElementTree
 IMPORT_BALLOT_ITEM = 'IMPORT_BALLOT_ITEM'
 CONTEST_OFFICE = 'CONTEST_OFFICE'
 ELECTED_OFFICE = 'ELECTED_OFFICE'
+IMPORT_VOTER = 'IMPORT_VOTER'
 
 KIND_OF_BATCH_CHOICES = (
     (MEASURE,           'Measure'),
@@ -199,6 +200,15 @@ BATCH_IMPORT_KEYS_ACCEPTED_FOR_BALLOT_ITEMS = {
     'contest_measure_we_vote_id': 'contest_measure_we_vote_id',
     'contest_measure_name': 'contest_measure_name',
     'local_ballot_order': 'local_ballot_order',
+}
+
+BATCH_IMPORT_KEYS_ACCEPTED_FOR_VOTERS = {
+'first_name': 'first_name',
+'middle_name': 'middle_name',
+'last_name': 'last_name',
+'email': 'email',
+'we_vote_id': 'we_vote_id',
+'twitter_screen_name': 'twitter_screen_name',
 }
 
 
@@ -548,6 +558,8 @@ class BatchManager(models.Model):
             batch_import_keys_accepted = BATCH_IMPORT_KEYS_ACCEPTED_FOR_POSITIONS
         elif kind_of_batch == IMPORT_BALLOT_ITEM:
             batch_import_keys_accepted = BATCH_IMPORT_KEYS_ACCEPTED_FOR_BALLOT_ITEMS
+        elif kind_of_batch == IMPORT_VOTER:
+            batch_import_keys_accepted = BATCH_IMPORT_KEYS_ACCEPTED_FOR_VOTERS
         else:
             batch_import_keys_accepted = {}
         if incoming_alternate_header_value in batch_import_keys_accepted:

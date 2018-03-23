@@ -3,6 +3,7 @@
 # -*- coding: UTF-8 -*-
 
 from ballot.models import MEASURE, CANDIDATE, POLITICIAN, BallotItem, BallotItemListManager, BallotItemManager
+from voter.models import VoterManager
 from .models import BatchManager, BatchDescription, BatchHeaderMap, BatchRow, BatchRowActionOrganization, \
     BatchRowActionMeasure, BatchRowActionElectedOffice, BatchRowActionContestOffice, BatchRowActionPolitician, \
     BatchRowActionCandidate, BatchRowActionPosition, BatchRowActionBallotItem, \
@@ -4130,3 +4131,23 @@ def get_batch_header_id_from_batch_description(batch_set_id, kind_of_batch):
         pass
 
     return batch_header_id
+
+
+def export_voter_list():
+    """
+
+    :return:
+    """
+    voter_manager = VoterManager()
+    export_result = dict()
+    status = 'NO_EXPORT'
+    export_result = voter_manager.retrieve_voter_list()
+    if export_result and export_result['voter_list']:
+        status = 'SUCCESS'
+
+    export_result = {
+        'status':   status,
+        'voter_list':   export_result['voter_list'],
+    }
+
+    return export_result
