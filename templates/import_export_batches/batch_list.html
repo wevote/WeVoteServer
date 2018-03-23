@@ -18,6 +18,8 @@
     Import Positions
 {% elif kind_of_batch == "IMPORT_BALLOT_ITEM" %}
     Import Ballot at One Location
+{% elif kind_of_batch == "IMPORT_VOTER" %}
+    Import Ballot at One Location
 {% else %}
     List of Batches
 {% endif %}
@@ -90,6 +92,8 @@
         Import Politician Data in Bulk
     {% elif kind_of_batch == "IMPORT_BALLOT_ITEM" %}
         Import Ballot Items for One Polling Location - STILL WORK IN PROGRESS
+        {% elif kind_of_batch == "IMPORT_VOTER" %}
+        Export Voter
     {% else %}
         Kind of data not recognized: Please STOP
     {% endif %}
@@ -158,6 +162,10 @@
             {% endif %}
             </div>
         </div>
+        {% endif %}
+
+        {% if kind_of_batch == "IMPORT_VOTER" %}
+            <a href= "{% url 'import_export_batches:batch_action_list_export_voters' %}?kind_of_batch={{ kind_of_batch }}">Export Voter</a>
         {% endif %}
 
         <div class="form-group">

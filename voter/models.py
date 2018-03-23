@@ -796,6 +796,34 @@ class VoterManager(BaseUserManager):
         }
         return results
 
+
+    def retrieve_voter_list(self):
+        """
+        Retrieve list of voter that are registered for newsletter
+
+        :return result: dictionary with status and list of voters
+        """
+        voter_list = list()
+        result = dict()
+        status = 'NO_VOTER_LIST'
+        # get query set of voters with verified emails
+        voter_queryset = Voter.objects.filter(email_ownership_is_verified=True)
+        if voter_queryset.exists():
+            voter_list.extend(voter_queryset)
+
+        # remove voters not registered for newsletter
+        for voter in voter_list:
+            if voter.notification_settings_flags & NOTIFICATION_NEWSLETTER_OPT_IN != 1:
+                voter_list.remove(voter)
+
+        result = {
+            'status':   status,
+            'voter_list':   voter_list,
+        }
+
+        return result
+
+
     def create_voter_with_voter_device_id(self, voter_device_id):
         logger.info("create_voter_with_voter_device_id(voter_device_id)")
 

@@ -8,9 +8,10 @@ from .models import BatchDescription, BatchHeader, BatchHeaderMap, BatchManager,
     BATCH_IMPORT_KEYS_ACCEPTED_FOR_ELECTED_OFFICES, BATCH_IMPORT_KEYS_ACCEPTED_FOR_MEASURES, \
     BATCH_IMPORT_KEYS_ACCEPTED_FOR_ORGANIZATIONS, BATCH_IMPORT_KEYS_ACCEPTED_FOR_POLITICIANS, \
     BATCH_IMPORT_KEYS_ACCEPTED_FOR_POSITIONS, BATCH_IMPORT_KEYS_ACCEPTED_FOR_BALLOT_ITEMS, \
-    IMPORT_CREATE, IMPORT_ADD_TO_EXISTING, IMPORT_QUERY_ERROR, IMPORT_TO_BE_DETERMINED
+    IMPORT_CREATE, IMPORT_ADD_TO_EXISTING, IMPORT_QUERY_ERROR, IMPORT_TO_BE_DETERMINED, \
+    BATCH_IMPORT_KEYS_ACCEPTED_FOR_VOTERS
 from .controllers import create_batch_header_translation_suggestions, create_batch_row_actions, \
-    create_or_update_batch_header_mapping, \
+    create_or_update_batch_header_mapping, export_voter_list,\
     import_data_from_batch_row_actions, import_create_or_update_elected_office_entry
 from admin_tools.views import redirect_to_sign_in_page
 from ballot.models import MEASURE, CANDIDATE, POLITICIAN
@@ -558,9 +559,6 @@ def batch_action_list_export_view(request):
         batch_row_list = []
         batch_list_found = False
 
-    # create response for csv file
-    response = HttpResponse(content_type="text/csv")
-    response['Content-Disposition'] = 'attachment; filename="{0}"'.format(batch_description.batch_name)
 
     # get header/first row information
     header_opts = BatchHeaderMap._meta
@@ -576,17 +574,85 @@ def batch_action_list_export_view(request):
         if field.name not in ['id', 'batch_header_id']:
             row_field_names.append(field.name)
 
-    # output header/first row to csv
-    csv_writer = csv.writer(response)
-    header_list = [getattr(batch_header_map, field)for field in header_field_names]
+    header_list = [getattr(batch_header_map, field) for field in header_field_names]
     header_list.insert(0, 'google_civic_election_id')
     header_list.insert(0, 'state_code')
-    csv_writer.writerow(header_list)
 
-    for obj in batch_row_list:
-        csv_writer.writerow([getattr(obj, field) for field in row_field_names])
+    # create response for csv file
+    response = export_csv(batch_row_list, header_list, row_field_names, batch_description)
     
     return response
+
+
+def export_csv(batch_row_list, header_list, row_field_names, batch_description = None, filename = None):
+    """
+    Helper function that creates a HttpResponse with csv data
+
+    :param batch_row_list: list of objects to export as csv
+    :param header_list: list of column headers for csv data
+    :param row_field_names: list of the object fields to be exported
+    :param batch_description: optional description of the batch to export
+    :param filename: optional name of csv file
+    :return response: HttpResponse with text/csv data
+    """
+    if batch_description and not filename:
+        export_filename = batch_description.batch_name
+    elif filename:
+        export_filename = filename
+
+    response = HttpResponse(content_type="text/csv")
+    response['Content-Disposition'] = 'attachment; filename="{0}"'.format(export_filename)
+    csv_writer = csv.writer(response)
+    csv_writer.writerow(header_list)
+
+    # output header/first row to csv
+    for obj in batch_row_list:
+        csv_writer.writerow([getattr(obj, field) for field in row_field_names])
+
+    return response
+
+
+@login_required
+def batch_action_list_export_voters_view(request):
+    """
+    View used to create a csv export file of voters registered for the newsletter
+    :param request:
+    :return: HttpResponse with csv information of voters
+    """
+    authority_required = {'verified_volunteer'}  # admin, verified_volunteer
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
+    # get parameters from request object
+    kind_of_batch = request.GET.get('kind_of_batch', '')
+    batch_header_id = request.GET.get('batch_header_id', 0)
+    google_civic_election_id = request.GET.get('google_civic_election_id', '')
+    organization_we_vote_id = request.GET.get('organization_we_vote_id', '')
+
+    result = export_voter_list()
+    messages.add_message(request, messages.INFO, 'Batch Actions: '
+                                                 'Batch kind: {kind_of_batch}'
+                                                 ''.format(kind_of_batch=kind_of_batch))
+
+    filename = 'voter_export.csv'
+    batch_manager = BatchManager()
+    batch_created_result = dict()
+    if result and result['voter_list']:
+        return export_csv(result['voter_list'], BATCH_IMPORT_KEYS_ACCEPTED_FOR_VOTERS,
+                           BATCH_IMPORT_KEYS_ACCEPTED_FOR_VOTERS, filename=filename)
+        # TODO create batch of voter registred for newsletter
+        # csv_data = csv.reader(csv_response)
+        # batch_created_result = batch_manager.create_batch_from_csv_data(filename, csv_data, kind_of_batch,
+        #                                                                 google_civic_election_id,
+        #                                                                 organization_we_vote_id)
+
+    if batch_created_result and batch_created_result['batch_header_id']:
+        batch_header_id = batch_created_result['batch_header_id']
+
+    return HttpResponseRedirect(reverse('import_export_batches:batch_action_list', args=()) +
+                                "?kind_of_batch=" + str(kind_of_batch) +
+                                "&batch_header_id=" + str(batch_header_id)
+                                )
 
 
 @login_required
@@ -596,6 +662,7 @@ def batch_action_list_analyze_process_view(request):
     :param request:
     :return:
     """
+
     authority_required = {'verified_volunteer'}  # admin, verified_volunteer
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
