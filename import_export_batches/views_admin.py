@@ -619,7 +619,6 @@ def batch_action_list_export_voters_view(request):
     :param request:
     :return: HttpResponse with csv information of voters
     """
-    crea
     authority_required = {'verified_volunteer'}  # admin, verified_volunteer
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
@@ -636,7 +635,9 @@ def batch_action_list_export_voters_view(request):
                            BATCH_IMPORT_KEYS_ACCEPTED_FOR_VOTERS, filename='voter_export.csv')
 
     return HttpResponseRedirect(reverse('import_export_batches:batch_action_list', args=()) +
-                                "?kind_of_batch=" + str(kind_of_batch))
+                                "?kind_of_batch=" + str(kind_of_batch) +
+                                "&batch_header_id=" + str(batch_header_id)
+                                )
 
 
 @login_required
