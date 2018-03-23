@@ -635,6 +635,7 @@ def batch_action_list_export_voters_view(request):
 
     filename = 'voter_export.csv'
     if result and result['voter_list']:
+        # TODO create batch of voter registred for newsletter
         return export_csv(result['voter_list'], BATCH_IMPORT_KEYS_ACCEPTED_FOR_VOTERS,
                            BATCH_IMPORT_KEYS_ACCEPTED_FOR_VOTERS, filename=filename)
 

@@ -4135,8 +4135,9 @@ def get_batch_header_id_from_batch_description(batch_set_id, kind_of_batch):
 
 def export_voter_list():
     """
+    Exports voter list from VoterManager
 
-    :return:
+    :return export_result: dictionary with status and voter list
     """
     voter_manager = VoterManager()
     export_result = dict()
