@@ -635,10 +635,19 @@ def batch_action_list_export_voters_view(request):
                                                  ''.format(kind_of_batch=kind_of_batch))
 
     filename = 'voter_export.csv'
+    batch_manager = BatchManager()
+    batch_created_result = dict()
     if result and result['voter_list']:
-        # TODO create batch of voter registred for newsletter
         return export_csv(result['voter_list'], BATCH_IMPORT_KEYS_ACCEPTED_FOR_VOTERS,
                            BATCH_IMPORT_KEYS_ACCEPTED_FOR_VOTERS, filename=filename)
+        # TODO create batch of voter registred for newsletter
+        # csv_data = csv.reader(csv_response)
+        # batch_created_result = batch_manager.create_batch_from_csv_data(filename, csv_data, kind_of_batch,
+        #                                                                 google_civic_election_id,
+        #                                                                 organization_we_vote_id)
+
+    if batch_created_result and batch_created_result['batch_header_id']:
+        batch_header_id = batch_created_result['batch_header_id']
 
     return HttpResponseRedirect(reverse('import_export_batches:batch_action_list', args=()) +
                                 "?kind_of_batch=" + str(kind_of_batch) +
