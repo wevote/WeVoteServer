@@ -625,14 +625,18 @@ def batch_action_list_export_voters_view(request):
 
     kind_of_batch = request.GET.get('kind_of_batch', '')
     batch_header_id = request.GET.get('batch_header_id', 0)
+    google_civic_election_id = request.GET.get('google_civic_election_id', '')
+    organization_we_vote_id = request.GET.get('organization_we_vote_id', '')
 
     result = export_voter_list()
     messages.add_message(request, messages.INFO, 'Batch Actions: '
                                                  'Batch kind: {kind_of_batch}'
                                                  ''.format(kind_of_batch=kind_of_batch))
+
+    filename = 'voter_export.csv'
     if result and result['voter_list']:
         return export_csv(result['voter_list'], BATCH_IMPORT_KEYS_ACCEPTED_FOR_VOTERS,
-                           BATCH_IMPORT_KEYS_ACCEPTED_FOR_VOTERS, filename='voter_export.csv')
+                           BATCH_IMPORT_KEYS_ACCEPTED_FOR_VOTERS, filename=filename)
 
     return HttpResponseRedirect(reverse('import_export_batches:batch_action_list', args=()) +
                                 "?kind_of_batch=" + str(kind_of_batch) +
