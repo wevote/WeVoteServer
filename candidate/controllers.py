@@ -606,51 +606,68 @@ def candidates_retrieve_for_api(office_id, office_we_vote_id):
         # Reset office_we_vote_id and office_id so we are sure that it matches what we pull from the database
         office_id = 0
         office_we_vote_id = ''
-        for candidate in candidate_list:
+        for candidate_campaign in candidate_list:
+            if not positive_value_exists(candidate_campaign.contest_office_name):
+                candidate_manager = CandidateCampaignManager()
+                candidate_campaign = candidate_manager.refresh_cached_candidate_office_info(candidate_campaign)
             one_candidate = {
-                'id':                           candidate.id,
-                'we_vote_id':                   candidate.we_vote_id,
-                'ballot_item_display_name':     candidate.display_candidate_name(),
-                'candidate_photo_url_large':    candidate.we_vote_hosted_profile_image_url_large
-                if positive_value_exists(candidate.we_vote_hosted_profile_image_url_large)
-                else candidate.candidate_photo_url(),
-                'candidate_photo_url_medium':   candidate.we_vote_hosted_profile_image_url_medium,
-                'candidate_photo_url_tiny':     candidate.we_vote_hosted_profile_image_url_tiny,
-                'party':                        candidate.political_party_display(),
-                'order_on_ballot':              candidate.order_on_ballot,
+                'status':                       status,
+                'success':                      True,
                 'kind_of_ballot_item':          CANDIDATE,
+                'id':                           candidate_campaign.id,
+                'we_vote_id':                   candidate_campaign.we_vote_id,
+                'ballot_item_display_name':     candidate_campaign.display_candidate_name(),
+                'candidate_photo_url_large':    candidate_campaign.we_vote_hosted_profile_image_url_large
+                if positive_value_exists(candidate_campaign.we_vote_hosted_profile_image_url_large)
+                else candidate_campaign.candidate_photo_url(),
+                'candidate_photo_url_medium':   candidate_campaign.we_vote_hosted_profile_image_url_medium,
+                'candidate_photo_url_tiny':     candidate_campaign.we_vote_hosted_profile_image_url_tiny,
+                'order_on_ballot':              candidate_campaign.order_on_ballot,
+                'google_civic_election_id':     candidate_campaign.google_civic_election_id,
+                'ballotpedia_candidate_id':     candidate_campaign.ballotpedia_candidate_id,
+                'ballotpedia_candidate_url':    candidate_campaign.ballotpedia_candidate_url,
+                'maplight_id':                  candidate_campaign.maplight_id,
+                'contest_office_id':            candidate_campaign.contest_office_id,
+                'contest_office_we_vote_id':    candidate_campaign.contest_office_we_vote_id,
+                'contest_office_name':          candidate_campaign.contest_office_name,
+                'politician_id':                candidate_campaign.politician_id,
+                'politician_we_vote_id':        candidate_campaign.politician_we_vote_id,
+                'party':                        candidate_campaign.political_party_display(),
+                'ocd_division_id':              candidate_campaign.ocd_division_id,
+                'state_code':                   candidate_campaign.state_code,
+                'candidate_url':                candidate_campaign.candidate_url,
+                'facebook_url':                 candidate_campaign.facebook_url,
+                'twitter_url':                  candidate_campaign.twitter_url,
+                'twitter_handle':               candidate_campaign.fetch_twitter_handle(),
+                'twitter_description':          candidate_campaign.twitter_description,
+                'twitter_followers_count':      candidate_campaign.twitter_followers_count,
+                'google_plus_url':              candidate_campaign.google_plus_url,
+                'youtube_url':                  candidate_campaign.youtube_url,
+                'candidate_email':              candidate_campaign.candidate_email,
+                'candidate_phone':              candidate_campaign.candidate_phone,
             }
             candidates_to_display.append(one_candidate.copy())
             # Capture the office_we_vote_id and google_civic_election_id so we can return
-            if not positive_value_exists(office_id) and candidate.contest_office_id:
-                office_id = candidate.contest_office_id
-            if not positive_value_exists(office_we_vote_id) and candidate.contest_office_we_vote_id:
-                office_we_vote_id = candidate.contest_office_we_vote_id
-            if not positive_value_exists(google_civic_election_id) and candidate.google_civic_election_id:
-                google_civic_election_id = candidate.google_civic_election_id
+            if not positive_value_exists(office_id) and candidate_campaign.contest_office_id:
+                office_id = candidate_campaign.contest_office_id
+            if not positive_value_exists(office_we_vote_id) and candidate_campaign.contest_office_we_vote_id:
+                office_we_vote_id = candidate_campaign.contest_office_we_vote_id
+            if not positive_value_exists(google_civic_election_id) and candidate_campaign.google_civic_election_id:
+                google_civic_election_id = candidate_campaign.google_civic_election_id
 
         if len(candidates_to_display):
-            status = 'CANDIDATES_RETRIEVED'
+            status += 'CANDIDATES_RETRIEVED '
         else:
-            status = 'NO_CANDIDATES_RETRIEVED'
+            status += 'NO_CANDIDATES_RETRIEVED '
 
-        json_data = {
-            'status':                   status,
-            'success':                  True,
-            'office_id':                office_id,
-            'office_we_vote_id':        office_we_vote_id,
-            'google_civic_election_id': google_civic_election_id,
-            'candidate_list':           candidates_to_display,
-        }
-    else:
-        json_data = {
-            'status':                   status,
-            'success':                  False,
-            'office_id':                office_id,
-            'office_we_vote_id':        office_we_vote_id,
-            'google_civic_election_id': google_civic_election_id,
-            'candidate_list':           [],
-        }
+    json_data = {
+        'status':                   status,
+        'success':                  success,
+        'contest_office_id':        office_id,
+        'contest_office_we_vote_id': office_we_vote_id,
+        'google_civic_election_id': google_civic_election_id,
+        'candidate_list':           candidates_to_display,
+    }
 
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 
