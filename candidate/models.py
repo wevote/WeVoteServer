@@ -85,7 +85,7 @@ class CandidateCampaignListManager(models.Model):
         candidate_list_found = False
 
         if not positive_value_exists(office_id) and not positive_value_exists(office_we_vote_id):
-            status = 'VALID_OFFICE_ID_AND_OFFICE_WE_VOTE_ID_MISSING'
+            status = 'VALID_OFFICE_ID_AND_OFFICE_WE_VOTE_ID_MISSING '
             results = {
                 'success':              True if candidate_list_found else False,
                 'status':               status,
@@ -107,12 +107,12 @@ class CandidateCampaignListManager(models.Model):
 
             if len(candidate_list):
                 candidate_list_found = True
-                status = 'CANDIDATES_RETRIEVED'
+                status = 'RETRIEVE_ALL_CANDIDATES_FOR_OFFICE-CANDIDATES_RETRIEVED '
             else:
-                status = 'NO_CANDIDATES_RETRIEVED'
+                status = 'RETRIEVE_ALL_CANDIDATES_FOR_OFFICE-NO_CANDIDATES_RETRIEVED '
         except CandidateCampaign.DoesNotExist:
             # No candidates found. Not a problem.
-            status = 'NO_CANDIDATES_FOUND_DoesNotExist'
+            status = 'RETRIEVE_ALL_CANDIDATES_FOR_OFFICE-NO_CANDIDATES_FOUND_DoesNotExist '
             candidate_list = []
         except Exception as e:
             handle_exception(e, logger=logger)
