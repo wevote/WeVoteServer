@@ -244,6 +244,8 @@ def convert_to_bool(value):
         return False
     elif value is 0:
         return True
+    elif value is None:
+        return False
 
     value = value.lower()
     if value in ['true', '1']:
@@ -255,6 +257,9 @@ def convert_to_bool(value):
 
 # This is how we make sure a variable is an integer
 def convert_to_int(value):
+    # Catch the cases where the incoming value is None
+    if value is None:
+        return 0
     try:
         new_value = int(value)
     except ValueError:
@@ -264,6 +269,9 @@ def convert_to_int(value):
 
 # This is how we make sure a variable is a string
 def convert_to_str(value):
+    # Catch the cases where the incoming value is None
+    if value is None:
+        return ""
     try:
         new_value = str(value)
     except ValueError:

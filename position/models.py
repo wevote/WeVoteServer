@@ -266,9 +266,10 @@ class PositionEntered(models.Model):
     # Is the position a rating that is 66% or greater?
     def is_positive_rating(self):
         if self.stance == PERCENT_RATING:
-            rating_percentage = convert_to_int(self.vote_smart_rating)
-            if rating_percentage >= 66:
-                return True
+            if self.vote_smart_rating:
+                rating_percentage = convert_to_int(self.vote_smart_rating)
+                if rating_percentage >= 66:
+                    return True
         return False
 
     # Is the position is an actual endorsement or a rating that is 66% or greater?
@@ -288,9 +289,10 @@ class PositionEntered(models.Model):
     # Is the position a rating that is 33% or less?
     def is_negative_rating(self):
         if self.stance == PERCENT_RATING:
-            rating_percentage = convert_to_int(self.vote_smart_rating)
-            if rating_percentage <= 33:
-                return True
+            if self.vote_smart_rating:
+                rating_percentage = convert_to_int(self.vote_smart_rating)
+                if rating_percentage <= 33:
+                    return True
         return False
 
     # Is the position is an actual endorsement or a rating that is 66% or greater?
@@ -310,9 +312,10 @@ class PositionEntered(models.Model):
         if self.stance == NO_STANCE:
             return True
         elif self.stance == PERCENT_RATING:
-            rating_percentage = convert_to_int(self.vote_smart_rating)
-            if (rating_percentage > 33) and (rating_percentage < 66):
-                return True
+            if self.vote_smart_rating:
+                rating_percentage = convert_to_int(self.vote_smart_rating)
+                if (rating_percentage > 33) and (rating_percentage < 66):
+                    return True
         return False
 
     def is_information_only(self):
@@ -604,9 +607,10 @@ class PositionForFriends(models.Model):
     # Is the position a rating that is 66% or greater?
     def is_positive_rating(self):
         if self.stance == PERCENT_RATING:
-            rating_percentage = convert_to_int(self.vote_smart_rating)
-            if rating_percentage >= 66:
-                return True
+            if self.vote_smart_rating:
+                rating_percentage = convert_to_int(self.vote_smart_rating)
+                if rating_percentage >= 66:
+                    return True
         return False
 
     # Is the position is an actual endorsement or a rating that is 66% or greater?
@@ -626,9 +630,10 @@ class PositionForFriends(models.Model):
     # Is the position a rating that is 33% or less?
     def is_negative_rating(self):
         if self.stance == PERCENT_RATING:
-            rating_percentage = convert_to_int(self.vote_smart_rating)
-            if rating_percentage <= 33:
-                return True
+            if self.vote_smart_rating:
+                rating_percentage = convert_to_int(self.vote_smart_rating)
+                if rating_percentage <= 33:
+                    return True
         return False
 
     # Is the position is an actual endorsement or a rating that is 66% or greater?
@@ -648,9 +653,10 @@ class PositionForFriends(models.Model):
         if self.stance == NO_STANCE:
             return True
         elif self.stance == PERCENT_RATING:
-            rating_percentage = convert_to_int(self.vote_smart_rating)
-            if (rating_percentage > 33) and (rating_percentage < 66):
-                return True
+            if self.vote_smart_rating:
+                rating_percentage = convert_to_int(self.vote_smart_rating)
+                if (rating_percentage > 33) and (rating_percentage < 66):
+                    return True
         return False
 
     def is_information_only(self):
