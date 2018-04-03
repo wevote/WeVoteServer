@@ -40,6 +40,7 @@ def voter_guides_sync_out_view(request):  # voterGuidesSyncOut
         voter_guide_list = voter_guide_list.extra(
             select={'last_updated': "to_char(last_updated, 'YYYY-MM-DD HH24:MI:SS')"})
         voter_guide_list_dict = voter_guide_list.values('we_vote_id', 'display_name', 'google_civic_election_id',
+                                                        'election_day_text',
                                                         'image_url', 'last_updated', 'organization_we_vote_id',
                                                         'owner_we_vote_id', 'pledge_count', 'pledge_goal',
                                                         'public_figure_we_vote_id',
@@ -279,6 +280,175 @@ def refresh_existing_voter_guides_view(request):
 
 
 @login_required
+def voter_guide_edit_view(request, voter_guide_id=0, voter_guide_we_vote_id=""):
+    authority_required = {'verified_volunteer'}  # admin, verified_volunteer
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
+    # These variables are here because there was an error on the edit_process_view and the voter needs to try again
+    # voter_guide_name = request.GET.get('voter_guide_name', False)
+    # google_civic_candidate_name = request.GET.get('google_civic_candidate_name', False)
+    # candidate_twitter_handle = request.GET.get('candidate_twitter_handle', False)
+    # candidate_url = request.GET.get('candidate_url', False)
+    # party = request.GET.get('party', False)
+    # ballot_guide_official_statement = request.GET.get('ballot_guide_official_statement', False)
+    # ballotpedia_candidate_id = request.GET.get('ballotpedia_candidate_id', False)
+    # ballotpedia_candidate_name = request.GET.get('ballotpedia_candidate_name', False)
+    # ballotpedia_candidate_url = request.GET.get('ballotpedia_candidate_url', False)
+    # vote_smart_id = request.GET.get('vote_smart_id', False)
+    # maplight_id = request.GET.get('maplight_id', False)
+    # state_code = request.GET.get('state_code', "")
+    # show_all_google_search_users = request.GET.get('show_all_google_search_users', False)
+    # show_all_twitter_search_results = request.GET.get('show_all_twitter_search_results', False)
+
+    messages_on_stage = get_messages(request)
+    voter_guide_id = convert_to_int(voter_guide_id)
+    voter_guide_on_stage_found = False
+    voter_guide_on_stage = VoterGuide()
+    contest_office_id = 0
+    google_civic_election_id = 0
+
+    try:
+        if positive_value_exists(voter_guide_id):
+            voter_guide_on_stage = VoterGuide.objects.get(id=voter_guide_id)
+        else:
+            voter_guide_on_stage = VoterGuide.objects.get(we_vote_id=voter_guide_we_vote_id)
+        voter_guide_on_stage_found = True
+        voter_guide_id = voter_guide_on_stage.id
+        google_civic_election_id = voter_guide_on_stage.google_civic_election_id
+    except VoterGuide.MultipleObjectsReturned as e:
+        pass
+    except VoterGuide.DoesNotExist:
+        # This is fine, create new below
+        pass
+
+    template_values = {
+        'messages_on_stage':                messages_on_stage,
+        'voter_guide':                      voter_guide_on_stage,
+        'google_civic_election_id':         google_civic_election_id,
+        # Incoming variables, not saved yet
+        # 'voter_guide_name':                   voter_guide_name,
+    }
+    return render(request, 'voter_guide/voter_guide_edit.html', template_values)
+
+
+@login_required
+def voter_guide_edit_process_view(request):
+    """
+    Process the new or edit voter_guide forms
+    :param request:
+    :return:
+    """
+    authority_required = {'verified_volunteer'}  # admin, verified_volunteer
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
+    voter_guide_id = convert_to_int(request.POST['voter_guide_id'])
+    redirect_to_voter_guide_list = convert_to_int(request.POST['redirect_to_voter_guide_list'])
+    voter_guide_name = request.POST.get('voter_guide_name', False)
+    google_civic_election_id = request.POST.get('google_civic_election_id', 0)
+    voter_guide_url = request.POST.get('voter_guide_url', False)
+    state_code = request.POST.get('state_code', False)
+
+    # Check to see if this voter_guide is already being used anywhere
+    voter_guide_on_stage_found = False
+    voter_guide_on_stage = VoterGuide()
+    if positive_value_exists(voter_guide_id):
+        try:
+            voter_guide_query = VoterGuide.objects.filter(id=voter_guide_id)
+            if len(voter_guide_query):
+                voter_guide_on_stage = voter_guide_query[0]
+                voter_guide_on_stage_found = True
+        except Exception as e:
+            pass
+
+    election_manager = ElectionManager()
+    election_results = election_manager.retrieve_election(google_civic_election_id)
+    state_code_from_election = ""
+    if election_results['election_found']:
+        election = election_results['election']
+        election_found = election_results['election_found']
+        state_code_from_election = election.get_election_state()
+
+    best_state_code = state_code_from_election if positive_value_exists(state_code_from_election) \
+        else state_code
+
+    try:
+        if voter_guide_on_stage_found:
+            # Update
+            if voter_guide_name is not False:
+                voter_guide_on_stage.voter_guide_name = voter_guide_name
+            if voter_guide_twitter_handle is not False:
+                voter_guide_on_stage.voter_guide_twitter_handle = voter_guide_twitter_handle
+            if voter_guide_url is not False:
+                voter_guide_on_stage.voter_guide_url = voter_guide_url
+
+            voter_guide_on_stage.save()
+
+            # Now refresh the cache entries for this voter_guide
+
+            messages.add_message(request, messages.INFO, 'Candidate Campaign updated.')
+        else:
+            # Create new
+            # election must be found
+            if not election_found:
+                messages.add_message(request, messages.ERROR, 'Could not find election -- required to save voter_guide.')
+                return HttpResponseRedirect(reverse('voter_guide:voter_guide_edit', args=(voter_guide_id,)))
+
+            required_voter_guide_variables = True \
+                if positive_value_exists(voter_guide_name) and positive_value_exists(contest_office_id) \
+                else False
+            if required_voter_guide_variables:
+                voter_guide_on_stage = VoterGuide(
+                    voter_guide_name=voter_guide_name,
+                    google_civic_election_id=google_civic_election_id,
+                    contest_office_id=contest_office_id,
+                    contest_office_we_vote_id=contest_office_we_vote_id,
+                    state_code=best_state_code,
+                )
+                if voter_guide_url is not False:
+                    voter_guide_on_stage.voter_guide_url = voter_guide_url
+
+                voter_guide_on_stage.save()
+                voter_guide_id = voter_guide_on_stage.id
+                messages.add_message(request, messages.INFO, 'New voter_guide saved.')
+            else:
+                # messages.add_message(request, messages.INFO, 'Could not save -- missing required variables.')
+                url_variables = "?google_civic_election_id=" + str(google_civic_election_id) + \
+                                "&voter_guide_name=" + str(voter_guide_name) + \
+                                "&state_code=" + str(state_code) + \
+                                "&google_civic_voter_guide_name=" + str(google_civic_voter_guide_name) + \
+                                "&contest_office_id=" + str(contest_office_id) + \
+                                "&voter_guide_twitter_handle=" + str(voter_guide_twitter_handle) + \
+                                "&voter_guide_url=" + str(voter_guide_url) + \
+                                "&party=" + str(party) + \
+                                "&ballot_guide_official_statement=" + str(ballot_guide_official_statement) + \
+                                "&ballotpedia_voter_guide_id=" + str(ballotpedia_voter_guide_id) + \
+                                "&ballotpedia_voter_guide_name=" + str(ballotpedia_voter_guide_name) + \
+                                "&ballotpedia_voter_guide_url=" + str(ballotpedia_voter_guide_url) + \
+                                "&vote_smart_id=" + str(vote_smart_id) + \
+                                "&politician_we_vote_id=" + str(politician_we_vote_id) + \
+                                "&maplight_id=" + str(maplight_id)
+                if positive_value_exists(voter_guide_id):
+                    return HttpResponseRedirect(reverse('voter_guide:voter_guide_edit', args=(voter_guide_id,)) +
+                                                url_variables)
+                else:
+                    return HttpResponseRedirect(reverse('voter_guide:voter_guide_new', args=()) +
+                                                url_variables)
+
+    except Exception as e:
+        messages.add_message(request, messages.ERROR, 'Could not save voter_guide.')
+        return HttpResponseRedirect(reverse('voter_guide:voter_guide_edit', args=(voter_guide_id,)))
+
+    if redirect_to_voter_guide_list:
+        return HttpResponseRedirect(reverse('voter_guide:voter_guide_list', args=()) +
+                                    '?google_civic_election_id=' + str(google_civic_election_id) +
+                                    '&state_code=' + str(state_code))
+
+    return HttpResponseRedirect(reverse('voter_guide:voter_guide_edit', args=(voter_guide_id,)))
+
+
+@login_required
 def voter_guide_list_view(request):
     authority_required = {'verified_volunteer'}  # admin, verified_volunteer
     if not voter_has_authority(request, authority_required):
@@ -337,6 +507,7 @@ def voter_guide_list_view(request):
         'state_code':               state_code,
         'messages_on_stage':        messages_on_stage,
         'voter_guide_list':         modified_voter_guide_list,
+        'voter_guide_search':       voter_guide_search,
     }
     return render(request, 'voter_guide/voter_guide_list.html', template_values)
 

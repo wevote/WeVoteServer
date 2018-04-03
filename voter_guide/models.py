@@ -95,6 +95,13 @@ class VoterGuideManager(models.Manager):
                             we_vote_hosted_profile_image_url_medium
                     if positive_value_exists(we_vote_hosted_profile_image_url_tiny):
                         updated_values['we_vote_hosted_profile_image_url_tiny'] = we_vote_hosted_profile_image_url_tiny
+                    if positive_value_exists(google_civic_election_id):
+                        election_manager = ElectionManager()
+                        election_results = election_manager.retrieve_election(google_civic_election_id)
+                        if election_results['election_found']:
+                            election = election_results['election']
+                            updated_values['election_day_text'] = election.election_day_text
+
                     voter_guide_on_stage, new_voter_guide_created = VoterGuide.objects.update_or_create(
                         google_civic_election_id__exact=google_civic_election_id,
                         organization_we_vote_id__iexact=organization_we_vote_id,
@@ -665,6 +672,14 @@ class VoterGuideManager(models.Manager):
             voter_guide.we_vote_hosted_profile_image_url_tiny = \
                 organization.we_vote_hosted_profile_image_url_tiny
             values_changed = True
+        if positive_value_exists(voter_guide.google_civic_election_id) \
+                and not positive_value_exists(voter_guide.election_day_text):
+            election_manager = ElectionManager()
+            election_results = election_manager.retrieve_election(voter_guide.google_civic_election_id)
+            if election_results['election_found']:
+                election = election_results['election']
+                voter_guide.election_day_text = election.election_day_text
+                values_changed = True
 
         results = {
             'values_changed':   values_changed,
@@ -765,6 +780,14 @@ class VoterGuideManager(models.Manager):
 
         # TODO Add code to refresh pledge_goal and pledge_count from PledgeToVote
 
+        if positive_value_exists(voter_guide.google_civic_election_id) and not positive_value_exists(voter_guide.election_day_text):
+            election_manager = ElectionManager()
+            election_results = election_manager.retrieve_election(voter_guide.google_civic_election_id)
+            if election_results['election_found']:
+                election = election_results['election']
+                voter_guide.election_day_text = election.election_day_text
+                voter_guide_change = True
+
         if voter_guide_change:
             voter_guide.save()
 
@@ -814,6 +837,7 @@ class VoterGuide(models.Model):
     # The unique ID of this election. (Provided by Google Civic)
     google_civic_election_id = models.PositiveIntegerField(
         verbose_name="google civic election id", null=True)
+    election_day_text = models.CharField(verbose_name="election day", max_length=255, null=True, blank=True)
     state_code = models.CharField(verbose_name="state the ballot item is related to", max_length=2, null=True)
 
     # Usually in one of these two formats 2015, 2014-2015
@@ -1334,19 +1358,25 @@ class VoterGuideListManager(models.Model):
                 for one_word in search_words:
                     filters = []
 
-                    new_filter = Q(twitter_handle__icontains=one_word)
+                    new_filter = Q(display_name__icontains=one_word)
+                    filters.append(new_filter)
+
+                    new_filter = Q(google_civic_election_id__iexact=one_word)
+                    filters.append(new_filter)
+
+                    new_filter = Q(organization_we_vote_id__iexact=one_word)
                     filters.append(new_filter)
 
                     new_filter = Q(owner_we_vote_id__icontains=one_word)
                     filters.append(new_filter)
 
-                    new_filter = Q(state_code__icontains=one_word)
-                    filters.append(new_filter)
-
                     new_filter = Q(public_figure_we_vote_id__icontains=one_word)
                     filters.append(new_filter)
 
-                    new_filter = Q(display_name__icontains=one_word)
+                    new_filter = Q(state_code__icontains=one_word)
+                    filters.append(new_filter)
+
+                    new_filter = Q(twitter_handle__icontains=one_word)
                     filters.append(new_filter)
 
                     # Add the first query
