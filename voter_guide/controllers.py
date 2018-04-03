@@ -208,6 +208,9 @@ def voter_guides_import_from_structured_json(structured_json):
         voter_guide_we_vote_id = one_voter_guide['we_vote_id'] if 'we_vote_id' in one_voter_guide else ''
         google_civic_election_id = one_voter_guide['google_civic_election_id'] \
             if 'google_civic_election_id' in one_voter_guide else ''
+        # This is recalculated, so technically not needed here
+        election_day_text = one_voter_guide['election_day_text'] \
+            if 'election_day_text' in one_voter_guide else ''
         vote_smart_time_span = one_voter_guide['vote_smart_time_span'] \
             if 'vote_smart_time_span' in one_voter_guide else ''
         organization_we_vote_id = one_voter_guide['organization_we_vote_id'] \
@@ -1464,9 +1467,11 @@ def voter_guides_retrieve_for_api(voter_device_id, organization_we_vote_id="", v
     if results['voter_guide_list_found']:
         number_added_to_list = 0
         for voter_guide in voter_guide_list:
+
             one_voter_guide = {
                 'we_vote_id':                   voter_guide.we_vote_id,
                 'google_civic_election_id':     voter_guide.google_civic_election_id,
+                'election_day_text':            voter_guide.election_day_text,
                 'time_span':                    voter_guide.vote_smart_time_span,
                 'voter_guide_display_name':     voter_guide.voter_guide_display_name(),
                 'voter_guide_image_url_large':  voter_guide.we_vote_hosted_profile_image_url_large

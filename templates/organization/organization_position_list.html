@@ -220,7 +220,8 @@
 {% endif %}
 
 <p>
-    <a href="{% url 'voter_guide:refresh_existing_voter_guides' %}?organization_we_vote_id={{ organization.we_vote_id }}&google_civic_election_id={{ google_civic_election_id }}" >Refresh Voter Guides</a>
+    <a href="{% url 'voter_guide:refresh_existing_voter_guides' %}?organization_we_vote_id={{ organization.we_vote_id }}&google_civic_election_id={{ google_civic_election_id }}" >Refresh Voter Guides</a>,
+    <a href="{% url 'voter_guide:voter_guide_list' %}?voter_guide_search={{ organization.we_vote_id }}" target="_blank">Find Voter Guides for this Organization (new window)</a>
 </p>
 
 

@@ -66,6 +66,7 @@
             <td>Organization</td>
             <td>Twitter</td>
             <td>Election</td>
+            <td>Election Day</td>
             <td>Time Span</td>
             <td>Type</td>
             <td>Public<br />
@@ -93,12 +94,17 @@
             {% endif %}
             <td>{{ voter_guide.twitter_handle|default_if_none:"" }}</td>
             <td>{{ voter_guide.google_civic_election_id|default_if_none:"" }}</td>
+            <td>{{ voter_guide.election_day_text|default_if_none:"" }}</td>
             <td>{{ voter_guide.vote_smart_time_span|default_if_none:"" }}</td>
             <td>{{ voter_guide.voter_guide_owner_type|default_if_none:"" }}</td>
             <td>{{ voter_guide.number_of_public_positions|default_if_none:"" }}</td>
             <td>{{ voter_guide.number_of_friends_only_positions|default_if_none:"" }}</td>
             <td>{{ voter_guide.last_updated }}</td>
-            <td>{{ voter_guide.we_vote_id }}</td>
+            <td>
+              <a href="{% url 'voter_guide:voter_guide_edit' voter_guide.we_vote_id %}" target="_blank">
+              {{ voter_guide.we_vote_id }}
+              </a>
+            </td>
         </tr>
     {% endfor %}
     </table>
