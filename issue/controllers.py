@@ -210,8 +210,9 @@ def issues_retrieve_for_api(voter_device_id, sort_formula, google_civic_election
     """
 
     issue_list = []
-    issue_we_vote_id_list = []
+    all_issue_we_vote_ids = []
     issues_to_display = []
+    issues_under_ballot_items_list = []
     issue_score_list = []
     follow_issue_we_vote_id_list_for_voter = []
     ignore_issue_we_vote_id_list_for_voter = []
@@ -277,7 +278,7 @@ def issues_retrieve_for_api(voter_device_id, sort_formula, google_civic_election
         return HttpResponse(json.dumps(json_data), content_type='application/json')
 
     for issue in issue_list:
-        issue_we_vote_id_list.append(issue.we_vote_id)
+        all_issue_we_vote_ids.append(issue.we_vote_id)
         if positive_value_exists(include_voter_follow_status):
             is_issue_followed = issue.we_vote_id in follow_issue_we_vote_id_list_for_voter
             is_issue_ignored = issue.we_vote_id in ignore_issue_we_vote_id_list_for_voter
@@ -315,9 +316,18 @@ def issues_retrieve_for_api(voter_device_id, sort_formula, google_civic_election
                 ballot_returned = results['ballot_returned']
                 google_civic_election_id = ballot_returned.google_civic_election_id
 
-    if positive_value_exists(issue_list) and positive_value_exists(google_civic_election_id):
-        issue_score_list_results = retrieve_issue_score_list(issue_we_vote_id_list, google_civic_election_id)
+    if positive_value_exists(follow_issue_we_vote_id_list_for_voter) \
+            and positive_value_exists(google_civic_election_id):
+        # Retrieve the issue_score_list for issues that the voter is following
+        issue_score_list_results = retrieve_issue_score_list(follow_issue_we_vote_id_list_for_voter,
+                                                             google_civic_election_id)
         issue_score_list = issue_score_list_results['issue_score_list']
+
+    if positive_value_exists(all_issue_we_vote_ids) \
+            and positive_value_exists(google_civic_election_id):
+        # Retrieve the issue_score_list for issues that the voter is following
+        issue_list_results = retrieve_issues_under_ballot_items_list(all_issue_we_vote_ids, google_civic_election_id)
+        issues_under_ballot_items_list = issue_list_results['issues_under_ballot_items_list']
 
     json_data = {
         'status':                       status,
@@ -329,12 +339,19 @@ def issues_retrieve_for_api(voter_device_id, sort_formula, google_civic_election
         'include_voter_follow_status':  include_voter_follow_status,
         'issue_list':                   issues_to_display,
         'issue_score_list':             issue_score_list,
+        'issues_under_ballot_items_list': issues_under_ballot_items_list,
     }
 
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 
 
-def retrieve_issue_score_list(issue_we_vote_id_list, google_civic_election_id):
+def retrieve_issue_score_list(voters_issue_we_vote_ids, google_civic_election_id):
+    """
+
+    :param voters_issue_we_vote_ids: This should be issues the voter is following
+    :param google_civic_election_id:
+    :return:
+    """
     success = True
     status = ""
     issue_score_list = []
@@ -351,7 +368,7 @@ def retrieve_issue_score_list(issue_we_vote_id_list, google_civic_election_id):
 
     organization_link_to_issue_list = OrganizationLinkToIssueList()
     # By issue, return a list of organization_we_vote_ids tagged with that issue
-    for issue_we_vote_id in issue_we_vote_id_list:
+    for issue_we_vote_id in voters_issue_we_vote_ids:
         one_issue_list = [issue_we_vote_id]
         organization_we_vote_id_list = \
             organization_link_to_issue_list.fetch_organization_we_vote_id_list_by_issue_we_vote_id_list(one_issue_list)
@@ -374,6 +391,7 @@ def retrieve_issue_score_list(issue_we_vote_id_list, google_civic_election_id):
     for one_position in public_position_list:
         if positive_value_exists(one_position.candidate_campaign_we_vote_id):
             ballot_item_we_vote_ids_list.append(one_position.candidate_campaign_we_vote_id)
+
             # Update the score for this ballot item
             if one_position.is_support_or_positive_rating():
                 if one_position.candidate_campaign_we_vote_id not in issue_support_score_list:
@@ -469,6 +487,89 @@ def retrieve_issue_score_list(issue_we_vote_id_list, google_civic_election_id):
         'success':          success,
         'status':           status,
         'issue_score_list': issue_score_list,
+    }
+    return results
+
+
+def retrieve_issues_under_ballot_items_list(all_issue_we_vote_ids, google_civic_election_id):
+    """
+
+    :param all_issue_we_vote_ids: This should be all issues
+    :param google_civic_election_id:
+    :return:
+    """
+    success = True
+    status = ""
+    issues_under_ballot_items_list = []
+    ballot_item_we_vote_ids_list = []
+    organization_we_vote_ids_for_all_issues = []
+
+    cached_issue_we_vote_ids_under_each_organization = {}  # key organization_we_vote_id, value list issue_we_vote_ids
+    organizations_included_by_issue_list = {}  # key is issue_we_vote_id, value is list of organizations
+    issue_we_vote_id_list_by_ballot_item_list = {}  # key is ballot_item_we_vote_id, value is list of issue_we_vote_ids
+
+    organization_link_to_issue_list = OrganizationLinkToIssueList()
+    # By issue, return a list of organization_we_vote_ids tagged with that issue
+    for issue_we_vote_id in all_issue_we_vote_ids:
+        one_issue_list = [issue_we_vote_id]
+        organization_we_vote_id_list = \
+            organization_link_to_issue_list.fetch_organization_we_vote_id_list_by_issue_we_vote_id_list(one_issue_list)
+        organizations_included_by_issue_list[issue_we_vote_id] = organization_we_vote_id_list
+        for organization_we_vote_id in organization_we_vote_id_list:
+            if organization_we_vote_id not in organization_we_vote_ids_for_all_issues:
+                organization_we_vote_ids_for_all_issues.append(organization_we_vote_id)
+
+    # Retrieve public positions for this election from every group linked to an issue the voter is following
+    # (We sort them below)
+    stance_we_are_looking_for = ANY_STANCE
+    retrieve_public_positions = True
+    position_list_manager = PositionListManager()
+    # This function returns a list, not a results dict
+    public_position_list = position_list_manager.retrieve_all_positions_for_election(
+        google_civic_election_id, stance_we_are_looking_for, retrieve_public_positions,
+        organization_we_vote_ids_for_all_issues)
+
+    # Now we loop through all of these positions and assemble a list of ballot_item_we_vote_ids for all positions
+    for one_position in public_position_list:
+        if positive_value_exists(one_position.candidate_campaign_we_vote_id):
+            ballot_item_we_vote_ids_list.append(one_position.candidate_campaign_we_vote_id)
+
+            # If there is a position on the voter's ballot, we want to retrieve the issues from the organization
+            #  taking the position
+            if one_position.is_support_or_positive_rating() or one_position.is_oppose_or_negative_rating():
+                if one_position.organization_we_vote_id not in cached_issue_we_vote_ids_under_each_organization:
+                    # Only retrieve this once per organization
+                    cached_issue_we_vote_ids_under_each_organization[one_position.organization_we_vote_id] = \
+                        organization_link_to_issue_list.fetch_issue_we_vote_id_list_by_organization_we_vote_id(
+                            one_position.organization_we_vote_id)
+
+                if one_position.candidate_campaign_we_vote_id not in issue_we_vote_id_list_by_ballot_item_list:
+                    issue_we_vote_id_list_by_ballot_item_list[one_position.candidate_campaign_we_vote_id] = []
+                for issue_we_vote_id in \
+                        cached_issue_we_vote_ids_under_each_organization[one_position.organization_we_vote_id]:
+                    if issue_we_vote_id \
+                            not \
+                            in issue_we_vote_id_list_by_ballot_item_list[one_position.candidate_campaign_we_vote_id]:
+                        issue_we_vote_id_list_by_ballot_item_list[one_position.candidate_campaign_we_vote_id].append(
+                            issue_we_vote_id)
+
+        elif positive_value_exists(one_position.contest_measure_we_vote_id):
+            ballot_item_we_vote_ids_list.append(one_position.contest_measure_we_vote_id)
+
+    for one_ballot_item_we_vote_id in ballot_item_we_vote_ids_list:
+        issue_we_vote_id_list_for_one_ballot_item = \
+            issue_we_vote_id_list_by_ballot_item_list[one_ballot_item_we_vote_id] \
+            if one_ballot_item_we_vote_id in issue_we_vote_id_list_by_ballot_item_list else []
+        one_ballot_item = {
+            "ballot_item_we_vote_id":               one_ballot_item_we_vote_id,
+            "issue_we_vote_id_list":                issue_we_vote_id_list_for_one_ballot_item,
+        }
+        issues_under_ballot_items_list.append(one_ballot_item)
+
+    results = {
+        'success':          success,
+        'status':           status,
+        'issues_under_ballot_items_list': issues_under_ballot_items_list,
     }
     return results
 
