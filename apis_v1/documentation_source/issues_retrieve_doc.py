@@ -80,6 +80,14 @@ def issues_retrieve_doc_template_values(url_root):
                    '         "organization_we_vote_id": string,\n' \
                    '      ],\n' \
                    '   ],\n' \
+                   '  "issues_under_ballot_items_list": list\n' \
+                   '   [\n' \
+                   '     "ballot_item_we_vote_id": string,\n' \
+                   '     "issue_we_vote_id_list": list\n' \
+                   '      [\n' \
+                   '         "issue_we_vote_id": string,\n' \
+                   '      ],\n' \
+                   '   ],\n' \
                    '}]'
 
     template_values = {
