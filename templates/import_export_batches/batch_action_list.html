@@ -88,16 +88,18 @@
         Process Contest Office Data
     {% elif kind_of_batch == "CANDIDATE" %}
         Process Candidate Data
+    {% elif kind_of_batch == "IMPORT_BALLOT_ITEM" %}
+        Ballot at One Location
+    {% elif kind_of_batch == "IMPORT_VOTER" %}
+        Import/Export Voter
     {% elif kind_of_batch == "ORGANIZATION" %}
         Process Organization Data
     {% elif kind_of_batch == "POSITION" %}
         Process Position Data
     {% elif kind_of_batch == "POLITICIAN" %}
         Process Politician Data
-    {% elif kind_of_batch == "IMPORT_BALLOT_ITEM" %}
-        Ballot at One Location
     {% else %}
-        Kind of data not recognized: Please STOP
+        Kind of batch_action_list data not recognized: Please STOP
     {% endif %}
     : {{ batch_description.batch_name }}
     </h1>

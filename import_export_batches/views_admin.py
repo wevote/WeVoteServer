@@ -8,13 +8,15 @@ from .models import BatchDescription, BatchHeader, BatchHeaderMap, BatchManager,
     BATCH_IMPORT_KEYS_ACCEPTED_FOR_ELECTED_OFFICES, BATCH_IMPORT_KEYS_ACCEPTED_FOR_MEASURES, \
     BATCH_IMPORT_KEYS_ACCEPTED_FOR_ORGANIZATIONS, BATCH_IMPORT_KEYS_ACCEPTED_FOR_POLITICIANS, \
     BATCH_IMPORT_KEYS_ACCEPTED_FOR_POSITIONS, BATCH_IMPORT_KEYS_ACCEPTED_FOR_BALLOT_ITEMS, \
-    IMPORT_CREATE, IMPORT_ADD_TO_EXISTING, IMPORT_QUERY_ERROR, IMPORT_TO_BE_DETERMINED, \
+    IMPORT_CREATE, IMPORT_ADD_TO_EXISTING, IMPORT_QUERY_ERROR, IMPORT_TO_BE_DETERMINED, IMPORT_VOTER, \
     BATCH_IMPORT_KEYS_ACCEPTED_FOR_VOTERS
 from .controllers import create_batch_header_translation_suggestions, create_batch_row_actions, \
     create_or_update_batch_header_mapping, export_voter_list,\
     import_data_from_batch_row_actions, import_create_or_update_elected_office_entry
 from admin_tools.views import redirect_to_sign_in_page
 from ballot.models import MEASURE, CANDIDATE, POLITICIAN
+import codecs
+import csv
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.contrib.messages import get_messages
@@ -28,7 +30,6 @@ from position.models import POSITION
 from voter.models import voter_has_authority
 from voter_guide.models import ORGANIZATION_WORD
 import wevote_functions.admin
-import csv
 from wevote_functions.functions import convert_to_int, positive_value_exists, STATE_CODE_MAP
 
 
@@ -407,6 +408,26 @@ def batch_action_list_view(request):
                 else:
                     one_batch_row.batch_row_action_exists = False
                 modified_batch_row_list.append(one_batch_row)
+            elif kind_of_batch == IMPORT_BALLOT_ITEM:
+                existing_results = \
+                    batch_manager.retrieve_batch_row_action_ballot_item(batch_header_id, one_batch_row.id)
+                if existing_results['batch_row_action_found']:
+                    one_batch_row.batch_row_action = existing_results['batch_row_action_ballot_item']
+                    one_batch_row.kind_of_batch = IMPORT_BALLOT_ITEM
+                    one_batch_row.batch_row_action_exists = True
+                else:
+                    one_batch_row.batch_row_action_exists = False
+                modified_batch_row_list.append(one_batch_row)
+            elif kind_of_batch == IMPORT_VOTER:
+                existing_results = \
+                    batch_manager.retrieve_batch_row_action_ballot_item(batch_header_id, one_batch_row.id)
+                if existing_results['batch_row_action_found']:
+                    one_batch_row.batch_row_action = existing_results['batch_row_action_ballot_item']
+                    one_batch_row.kind_of_batch = IMPORT_VOTER
+                    one_batch_row.batch_row_action_exists = True
+                else:
+                    one_batch_row.batch_row_action_exists = False
+                modified_batch_row_list.append(one_batch_row)
             elif kind_of_batch == MEASURE:
                 existing_results = batch_manager.retrieve_batch_row_action_measure(batch_header_id, one_batch_row.id)
                 if existing_results['batch_row_action_found']:
@@ -440,16 +461,6 @@ def batch_action_list_view(request):
                 if existing_results['batch_row_action_found']:
                     one_batch_row.batch_row_action = existing_results['batch_row_action_position']
                     one_batch_row.kind_of_batch = POSITION
-                    one_batch_row.batch_row_action_exists = True
-                else:
-                    one_batch_row.batch_row_action_exists = False
-                modified_batch_row_list.append(one_batch_row)
-            elif kind_of_batch == IMPORT_BALLOT_ITEM:
-                existing_results = \
-                    batch_manager.retrieve_batch_row_action_ballot_item(batch_header_id, one_batch_row.id)
-                if existing_results['batch_row_action_found']:
-                    one_batch_row.batch_row_action = existing_results['batch_row_action_ballot_item']
-                    one_batch_row.kind_of_batch = IMPORT_BALLOT_ITEM
                     one_batch_row.batch_row_action_exists = True
                 else:
                     one_batch_row.batch_row_action_exists = False
@@ -624,7 +635,7 @@ def batch_action_list_export_voters_view(request):
         return redirect_to_sign_in_page(request, authority_required)
 
     # get parameters from request object
-    kind_of_batch = request.GET.get('kind_of_batch', '')
+    kind_of_batch = request.GET.get('kind_of_batch', IMPORT_VOTER)
     batch_header_id = request.GET.get('batch_header_id', 0)
     google_civic_election_id = request.GET.get('google_civic_election_id', '')
     organization_we_vote_id = request.GET.get('organization_we_vote_id', '')
@@ -638,18 +649,17 @@ def batch_action_list_export_voters_view(request):
     batch_manager = BatchManager()
     batch_created_result = dict()
     if result and result['voter_list']:
-        return export_csv(result['voter_list'], BATCH_IMPORT_KEYS_ACCEPTED_FOR_VOTERS,
-                           BATCH_IMPORT_KEYS_ACCEPTED_FOR_VOTERS, filename=filename)
-        # TODO create batch of voter registred for newsletter
+        # Create batch of voters registered for newsletter
+        csv_response = export_csv(result['voter_list'], BATCH_IMPORT_KEYS_ACCEPTED_FOR_VOTERS,
+                                  BATCH_IMPORT_KEYS_ACCEPTED_FOR_VOTERS, filename=filename)
         # csv_data = csv.reader(csv_response)
-        # batch_created_result = batch_manager.create_batch_from_csv_data(filename, csv_data, kind_of_batch,
-        #                                                                 google_civic_election_id,
-        #                                                                 organization_we_vote_id)
+        csv_data = csv.reader(codecs.iterdecode(csv_response, 'utf-8'))
+        batch_created_result = batch_manager.create_batch_from_csv_data(filename, csv_data, kind_of_batch)
 
     if batch_created_result and batch_created_result['batch_header_id']:
         batch_header_id = batch_created_result['batch_header_id']
 
-    return HttpResponseRedirect(reverse('import_export_batches:batch_action_list', args=()) +
+    return HttpResponseRedirect(reverse('import_export_batches:batch_list', args=()) +
                                 "?kind_of_batch=" + str(kind_of_batch) +
                                 "&batch_header_id=" + str(batch_header_id)
                                 )
