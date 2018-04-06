@@ -277,8 +277,8 @@ class BatchManager(models.Model):
         }
         return results
 
-    def create_batch_from_csv_data(self, file_name, csv_data, kind_of_batch, google_civic_election_id,
-                                   organization_we_vote_id, polling_location_we_vote_id=""):
+    def create_batch_from_csv_data(self, file_name, csv_data, kind_of_batch, google_civic_election_id=0,
+                                   organization_we_vote_id="", polling_location_we_vote_id=""):
         first_line = True
         success = False
         status = ""
