@@ -438,6 +438,7 @@ def election_edit_process_view(request):
     election_day_text = request.POST.get('election_day_text', False)
     state_code = request.POST.get('state_code', False)
     google_civic_election_id = request.POST.get('google_civic_election_id', '0')
+    ballotpedia_election_id = request.POST.get('ballotpedia_election_id', '0')
     include_in_list_for_voters = request.POST.get('include_in_list_for_voters', False)
 
     election_on_stage = Election()
@@ -466,6 +467,16 @@ def election_edit_process_view(request):
         except Exception as e:
             handle_record_not_found_exception(e, logger=logger)
 
+    if not election_on_stage_found and positive_value_exists(ballotpedia_election_id):
+        status += "RETRIEVING_ELECTION_BY_BALLOTPEDIA_ELECTION_ID "
+        try:
+            election_query = Election.objects.filter(ballotpedia_election_id=ballotpedia_election_id)
+            if len(election_query):
+                election_on_stage = election_query[0]
+                election_on_stage_found = True
+        except Exception as e:
+            handle_record_not_found_exception(e, logger=logger)
+
     if election_on_stage_found:
         status += "UPDATING_EXISTING_ELECTION "
         # if convert_to_int(election_on_stage.google_civic_election_id) < 1000000:  # Not supported currently
@@ -484,8 +495,13 @@ def election_edit_process_view(request):
         if state_code is not False:
             election_on_stage.state_code = state_code
 
-        if not positive_value_exists(election_on_stage.google_civic_election_id) and positive_value_exists(google_civic_election_id):
+        if not positive_value_exists(election_on_stage.google_civic_election_id) \
+                and positive_value_exists(google_civic_election_id):
             election_on_stage.google_civic_election_id = google_civic_election_id
+
+        if not positive_value_exists(election_on_stage.ballotpedia_election_id) \
+                and positive_value_exists(ballotpedia_election_id):
+            election_on_stage.ballotpedia_election_id = ballotpedia_election_id
 
         election_on_stage.include_in_list_for_voters = include_in_list_for_voters
 
@@ -505,11 +521,12 @@ def election_edit_process_view(request):
 
         try:
             election_on_stage = Election(
-                google_civic_election_id=google_civic_election_id,
+                ballotpedia_election_id=ballotpedia_election_id,
                 election_name=election_name,
                 election_day_text=election_day_text,
-                state_code=state_code,
+                google_civic_election_id=google_civic_election_id,
                 include_in_list_for_voters=include_in_list_for_voters,
+                state_code=state_code,
             )
             election_on_stage.save()
             status += "CREATED_NEW_ELECTION "

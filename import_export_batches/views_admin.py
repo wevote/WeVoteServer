@@ -4,6 +4,7 @@
 
 from .models import BatchDescription, BatchHeader, BatchHeaderMap, BatchManager, BatchRow, BatchSet, \
     CONTEST_OFFICE, ELECTED_OFFICE, IMPORT_BALLOT_ITEM, \
+    BATCH_HEADER_MAP_CANDIDATES_TO_BALLOTPEDIA_CANDIDATES, BATCH_HEADER_MAP_CONTEST_OFFICES_TO_BALLOTPEDIA_RACES, \
     BATCH_IMPORT_KEYS_ACCEPTED_FOR_CANDIDATES, BATCH_IMPORT_KEYS_ACCEPTED_FOR_CONTEST_OFFICES, \
     BATCH_IMPORT_KEYS_ACCEPTED_FOR_ELECTED_OFFICES, BATCH_IMPORT_KEYS_ACCEPTED_FOR_MEASURES, \
     BATCH_IMPORT_KEYS_ACCEPTED_FOR_ORGANIZATIONS, BATCH_IMPORT_KEYS_ACCEPTED_FOR_POLITICIANS, \
@@ -25,8 +26,10 @@ from django.http import HttpResponseRedirect, HttpResponse
 from django.shortcuts import render
 from django.utils.http import urlquote
 from election.models import Election, ElectionManager
+import json
 from polling_location.models import PollingLocation, PollingLocationManager
 from position.models import POSITION
+import requests
 from voter.models import voter_has_authority
 from voter_guide.models import ORGANIZATION_WORD
 import wevote_functions.admin
@@ -254,16 +257,97 @@ def batch_list_process_view(request):
             else:
                 messages.add_message(request, messages.ERROR, results['status'])
         elif positive_value_exists(batch_uri):
-            # check file type
-            filetype = batch_manager.find_file_type(batch_uri)
-            if "xml" in filetype:
-                # file is XML
-                # Retrieve the VIP data from XML
-                results = batch_manager.create_batch_vip_xml(batch_uri, kind_of_batch, google_civic_election_id,
-                                                             organization_we_vote_id)
+            if "api.ballotpedia.org" in batch_uri:
+                # response = requests.get(VOTER_INFO_URL, params={
+                #     "key": GOOGLE_CIVIC_API_KEY,
+                #     "address": text_for_map_search,
+                #     "electionId": incoming_google_civic_election_id,
+                # })
+                response = requests.get(batch_uri)
+                structured_json = json.loads(response.text)
+                if 'data' in structured_json:
+                    if 'meta' in structured_json:
+                        if 'table' in structured_json['meta']:
+                            if structured_json['meta']['table'] == 'races':
+                                races_json_list = structured_json['data']
+                                modified_races_json_list = []
+                                # Loop through this data and move ['office']['data'] into root level
+                                for one_office_json in races_json_list:
+                                    try:
+                                        inner_election_json = one_office_json['election']['data']
+                                        inner_office_json = one_office_json['office']['data']
+                                        # Add our own key/value pairs
+                                        # election
+                                        one_office_json['ballotpedia_election_id'] = inner_election_json['id']
+                                        # office
+                                        one_office_json['ballotpedia_district_id'] = inner_office_json['district']
+                                        one_office_json['ballotpedia_office_id'] = inner_office_json['id']
+                                    except KeyError:
+                                        pass
+                                    modified_races_json_list.append(one_office_json)
+
+                                filename = "Races from Ballotpedia API"
+                                results = batch_manager.create_batch_from_json(
+                                    filename, modified_races_json_list,
+                                    BATCH_HEADER_MAP_CONTEST_OFFICES_TO_BALLOTPEDIA_RACES, kind_of_batch,
+                                    google_civic_election_id, organization_we_vote_id)
+                            elif structured_json['meta']['table'] == 'candidates':
+                                candidates_json_list = structured_json['data']
+                                modified_candidates_json_list = []
+                                # Loop through this data and move ['office']['data'] into root level
+                                for one_candidate_json in candidates_json_list:
+                                    try:
+                                        inner_race_json = one_candidate_json['race']['data']
+                                        inner_person_json = one_candidate_json['person']['data']
+                                        inner_party_affiliation_json = one_candidate_json['party_affiliation']['data']
+                                        # Add our own key/value pairs
+                                        # root level
+                                        one_candidate_json['candidate_participation_status'] = \
+                                            one_candidate_json['status']
+                                        one_candidate_json['is_incumbent'] = one_candidate_json['is_incumbent']
+                                        # race
+                                        one_candidate_json['ballotpedia_office_id'] = inner_race_json['office']
+                                        one_candidate_json['ballotpedia_election_id'] = inner_race_json['election']
+                                        # person
+                                        one_candidate_json['ballotpedia_candidate_id'] = inner_person_json['id']
+                                        one_candidate_json['ballotpedia_candidate_name'] = inner_person_json['name']
+                                        one_candidate_json['ballotpedia_image_id'] = inner_person_json['image']
+                                        one_candidate_json['ballotpedia_candidate_url'] = inner_person_json['url']
+                                        one_candidate_json['ballotpedia_candidate_summary'] = \
+                                            inner_person_json['summary']
+                                        one_candidate_json['candidate_url'] = inner_person_json['contact_website']
+                                        one_candidate_json['facebook_url'] = inner_person_json['contact_facebook']
+                                        one_candidate_json['ballotpedia_candidate_id'] = inner_person_json['id']
+                                        one_candidate_json['candidate_twitter_handle'] = \
+                                            inner_person_json['contact_twitter']
+                                        one_candidate_json['candidate_gender'] = inner_person_json['gender']
+                                        one_candidate_json['candidate_email'] = inner_person_json['contact_email']
+                                        one_candidate_json['crowdpac_candidate_id'] = \
+                                            inner_person_json['crowdpac_candidate_id']
+                                        one_candidate_json['birth_day_text'] = inner_person_json['date_born']
+                                        # party_affiliation
+                                        one_candidate_json['candidate_party_name'] = \
+                                            inner_party_affiliation_json['name']
+                                    except KeyError:
+                                        pass
+                                    modified_candidates_json_list.append(one_candidate_json)
+
+                                filename = "Candidates from Ballotpedia API"
+                                results = batch_manager.create_batch_from_json(
+                                    filename, modified_candidates_json_list,
+                                    BATCH_HEADER_MAP_CANDIDATES_TO_BALLOTPEDIA_CANDIDATES, kind_of_batch,
+                                    google_civic_election_id, organization_we_vote_id)
             else:
-                results = batch_manager.create_batch_from_uri(
-                    batch_uri, kind_of_batch, google_civic_election_id, organization_we_vote_id)
+                # check file type
+                filetype = batch_manager.find_file_type(batch_uri)
+                if "xml" in filetype:
+                    # file is XML
+                    # Retrieve the VIP data from XML
+                    results = batch_manager.create_batch_vip_xml(batch_uri, kind_of_batch, google_civic_election_id,
+                                                                 organization_we_vote_id)
+                else:
+                    results = batch_manager.create_batch_from_uri(
+                        batch_uri, kind_of_batch, google_civic_election_id, organization_we_vote_id)
             if results['batch_saved']:
                 messages.add_message(request, messages.INFO, 'Import batch for {election_name} election saved.'
                                                              ''.format(election_name=election_name))
@@ -595,7 +679,7 @@ def batch_action_list_export_view(request):
     return response
 
 
-def export_csv(batch_row_list, header_list, row_field_names, batch_description = None, filename = None):
+def export_csv(batch_row_list, header_list, row_field_names, batch_description=None, filename=None):
     """
     Helper function that creates a HttpResponse with csv data
 

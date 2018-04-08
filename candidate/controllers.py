@@ -420,6 +420,8 @@ def candidates_import_from_structured_json(structured_json):
                 updated_candidate_values['ballotpedia_candidate_name'] = one_candidate['ballotpedia_candidate_name']
             if 'ballotpedia_candidate_url' in one_candidate:
                 updated_candidate_values['ballotpedia_candidate_url'] = one_candidate['ballotpedia_candidate_url']
+            if 'ballotpedia_candidate_summary' in one_candidate:
+                updated_candidate_values['ballotpedia_candidate_summary'] = one_candidate['ballotpedia_candidate_summary']
             if 'ballotpedia_page_title' in one_candidate:
                 updated_candidate_values['ballotpedia_page_title'] = one_candidate['ballotpedia_page_title']
             if 'ballotpedia_photo_url' in one_candidate:

@@ -61,44 +61,65 @@ BATCH_SET_SOURCE_CTCL = 'CTCL'
 BATCH_SET_SOURCE_IMPORT_EXPORT_ENDORSEMENTS = 'IMPORT_EXPORT_ENDORSEMENTS'
 
 BATCH_IMPORT_KEYS_ACCEPTED_FOR_CANDIDATES = {
+    'ballotpedia_candidate_id': 'ballotpedia_candidate_id',
+    'ballotpedia_candidate_name': 'ballotpedia_candidate_name',
+    'ballotpedia_candidate_summary': 'ballotpedia_candidate_summary',
+    'ballotpedia_candidate_url': 'ballotpedia_candidate_url',
+    'ballotpedia_election_id': 'ballotpedia_election_id',
+    'ballotpedia_image_id': 'ballotpedia_image_id',
+    'ballotpedia_office_id': 'ballotpedia_office_id *',  # For matching only
+    'birth_day_text': 'birth_day_text',
+    'candidate_batch_id': 'candidate_batch_id',
     'candidate_name': 'candidate_name',
     'candidate_ctcl_uuid': 'candidate_ctcl_uuid',
     'candidate_ctcl_person_id': 'candidate_ctcl_person_id',
+    'candidate_email': 'candidate_email',
     'candidate_is_top_ticket': 'candidate_is_top_ticket',
     'candidate_is_incumbent': 'candidate_is_incumbent',
     'candidate_participation_status': 'candidate_participation_status',
     'candidate_party_name': 'candidate_party_name',
     'candidate_profile_image_url': 'candidate_profile_image_url',
-    'candidate_batch_id': 'candidate_batch_id',
     'candidate_twitter_handle': 'candidate_twitter_handle',
     'candidate_url': 'candidate_url (website)',
+    'contest_office_name': 'contest_office_name *',  # For matching only
+    'contest_office_we_vote_id': 'contest_office_we_vote_id *',  # For matching only
+    'crowdpac_candidate_id': 'crowdpac_candidate_id',
     'election_day': 'election_day',
     'facebook_url': 'facebook_url',
     'google_civic_election_id': 'google_civic_election_id',
     'state_code': 'state_code',
+}
+
+# We Vote contest office key on the left, and Ballotpedia field name on right
+# This gives us the option of putting the same field from a remote source into two We Vote fields
+BATCH_HEADER_MAP_CANDIDATES_TO_BALLOTPEDIA_CANDIDATES = {
     'ballotpedia_candidate_id': 'ballotpedia_candidate_id',
     'ballotpedia_candidate_name': 'ballotpedia_candidate_name',
+    'ballotpedia_candidate_summary': 'ballotpedia_candidate_summary',
     'ballotpedia_candidate_url': 'ballotpedia_candidate_url',
-    'ballotpedia_office_id': 'ballotpedia_office_id *',  # For matching only
-    'contest_office_we_vote_id': 'contest_office_we_vote_id *',  # For matching only
-    'contest_office_name': 'contest_office_name *',  # For matching only
+    'ballotpedia_election_id': 'ballotpedia_election_id',
+    'ballotpedia_image_id': 'ballotpedia_image_id',
+    'ballotpedia_office_id': 'ballotpedia_office_id',
+    'birth_day_text': 'birth_day_text',
+    'candidate_email': 'candidate_email',
+    'candidate_participation_status': 'candidate_participation_status',
+    'candidate_party_name': 'candidate_party_name',
+    'candidate_twitter_handle': 'candidate_twitter_handle',
+    'candidate_url': 'candidate_url',
+    'crowdpac_candidate_id': 'crowdpac_candidate_id',
+    'facebook_url': 'facebook_url',
+    'candidate_is_incumbent': 'is_incumbent',
 }
 
 BATCH_IMPORT_KEYS_ACCEPTED_FOR_CONTEST_OFFICES = {
-    'contest_office_name': 'contest_office_name',
-    'electoral_district_id': 'electoral_district_id',
-    'contest_office_batch_id': 'contest_office_batch_id',
-    'contest_office_ctcl_uuid': 'contest_office_ctcl_uuid',
-    'contest_office_votes_allowed': 'contest_office_votes_allowed',
-    'contest_office_number_elected': 'contest_office_number_elected',
-    'contest_office_district_name': 'contest_office_district_name',
-    'candidate_name': 'candidate_name *',  # For matching only
+    'ballotpedia_candidate_id': 'ballotpedia_candidate_id *',  # For matching only
+    'ballotpedia_district_id': 'ballotpedia_district_id',
+    'ballotpedia_election_id': 'ballotpedia_election_id',
     'ballotpedia_office_id': 'ballotpedia_office_id',
     'ballotpedia_office_name': 'ballotpedia_office_name',
     'ballotpedia_office_url': 'ballotpedia_office_url',
-    'ballotpedia_candidate_id': 'ballotpedia_candidate_id *',  # For matching only
     'ballotpedia_race_office_level': 'ballotpedia_race_office_level',
-    'elected_office_id': 'elected_office_id',
+    'candidate_name': 'candidate_name *',  # For matching only
     'candidate_selection_id1': 'candidate_selection_id1 *',  # For matching only
     'candidate_selection_id2': 'candidate_selection_id2 *',  # For matching only
     'candidate_selection_id3': 'candidate_selection_id3 *',  # For matching only
@@ -109,9 +130,32 @@ BATCH_IMPORT_KEYS_ACCEPTED_FOR_CONTEST_OFFICES = {
     'candidate_selection_id8': 'candidate_selection_id8 *',  # For matching only
     'candidate_selection_id9': 'candidate_selection_id9 *',  # For matching only
     'candidate_selection_id10': 'candidate_selection_id10 *',  # For matching only
+    'contest_office_name': 'contest_office_name',
+    'contest_office_batch_id': 'contest_office_batch_id',
+    'contest_office_ctcl_uuid': 'contest_office_ctcl_uuid',
+    'contest_office_votes_allowed': 'contest_office_votes_allowed',
+    'contest_office_number_elected': 'contest_office_number_elected',
+    'contest_office_district_name': 'contest_office_district_name',
+    'elected_office_id': 'elected_office_id',
     'election_day': 'election_day',
+    'electoral_district_id': 'electoral_district_id',
     'google_civic_election_id': 'google_civic_election_id',
     'state_code': 'state_code',
+}
+
+# We Vote contest office key on the left, and Ballotpedia field name on right
+# This gives us the option of putting the same field from a remote source into two We Vote fields
+BATCH_HEADER_MAP_CONTEST_OFFICES_TO_BALLOTPEDIA_RACES = {
+    'ballotpedia_district_id': 'ballotpedia_district_id',
+    'ballotpedia_election_id': 'ballotpedia_election_id',
+    'ballotpedia_office_id': 'ballotpedia_office_id',
+    'ballotpedia_office_name': 'office_name',
+    'ballotpedia_race_office_level': 'office_level',
+    'ballotpedia_office_url': 'url',
+    'contest_office_number_elected': 'number_of_seats',
+    'contest_office_district_name': 'office_district_name',
+    'election_day': 'election_date',
+    'state_code': 'office_district_state',
 }
 
 BATCH_IMPORT_KEYS_ACCEPTED_FOR_ELECTED_OFFICES = {
@@ -203,12 +247,12 @@ BATCH_IMPORT_KEYS_ACCEPTED_FOR_BALLOT_ITEMS = {
 }
 
 BATCH_IMPORT_KEYS_ACCEPTED_FOR_VOTERS = {
-'first_name': 'first_name',
-'middle_name': 'middle_name',
-'last_name': 'last_name',
-'email': 'email',
-'we_vote_id': 'we_vote_id',
-'twitter_screen_name': 'twitter_screen_name',
+    'first_name': 'first_name',
+    'middle_name': 'middle_name',
+    'last_name': 'last_name',
+    'email': 'email',
+    'we_vote_id': 'we_vote_id',
+    'twitter_screen_name': 'twitter_screen_name',
 }
 
 
@@ -218,6 +262,15 @@ logger = wevote_functions.admin.get_logger(__name__)
 def get_value_if_index_in_list(incoming_list, index):
     try:
         return incoming_list[index]
+    except IndexError:
+        return ""
+
+
+def get_value_from_dict(structured_json, field_name):
+    try:
+        return structured_json[field_name]
+    except KeyError:
+        return ""
     except IndexError:
         return ""
 
@@ -515,6 +568,238 @@ class BatchManager(models.Model):
         }
         return results
 
+    def create_batch_from_json(self, file_name, structured_json_list, mapping_dict, kind_of_batch,
+                               google_civic_election_id=0, organization_we_vote_id="", polling_location_we_vote_id=""):
+        success = False
+        status = ""
+        number_of_batch_rows = 0
+        # limit_for_testing = 5
+
+        batch_header_id = 0
+        batch_header_map_id = 0
+        batch_name = ""
+
+        # We want an array with integers 0 - n as the keys, and the field names as the values
+        we_vote_keys = list(mapping_dict.keys())
+        remote_source_keys = list(mapping_dict.values())
+
+        try:
+            batch_header = BatchHeader.objects.create(
+                batch_header_column_000=get_value_if_index_in_list(remote_source_keys, 0),
+                batch_header_column_001=get_value_if_index_in_list(remote_source_keys, 1),
+                batch_header_column_002=get_value_if_index_in_list(remote_source_keys, 2),
+                batch_header_column_003=get_value_if_index_in_list(remote_source_keys, 3),
+                batch_header_column_004=get_value_if_index_in_list(remote_source_keys, 4),
+                batch_header_column_005=get_value_if_index_in_list(remote_source_keys, 5),
+                batch_header_column_006=get_value_if_index_in_list(remote_source_keys, 6),
+                batch_header_column_007=get_value_if_index_in_list(remote_source_keys, 7),
+                batch_header_column_008=get_value_if_index_in_list(remote_source_keys, 8),
+                batch_header_column_009=get_value_if_index_in_list(remote_source_keys, 9),
+                batch_header_column_010=get_value_if_index_in_list(remote_source_keys, 10),
+                batch_header_column_011=get_value_if_index_in_list(remote_source_keys, 11),
+                batch_header_column_012=get_value_if_index_in_list(remote_source_keys, 12),
+                batch_header_column_013=get_value_if_index_in_list(remote_source_keys, 13),
+                batch_header_column_014=get_value_if_index_in_list(remote_source_keys, 14),
+                batch_header_column_015=get_value_if_index_in_list(remote_source_keys, 15),
+                batch_header_column_016=get_value_if_index_in_list(remote_source_keys, 16),
+                batch_header_column_017=get_value_if_index_in_list(remote_source_keys, 17),
+                batch_header_column_018=get_value_if_index_in_list(remote_source_keys, 18),
+                batch_header_column_019=get_value_if_index_in_list(remote_source_keys, 19),
+                batch_header_column_020=get_value_if_index_in_list(remote_source_keys, 20),
+                batch_header_column_021=get_value_if_index_in_list(remote_source_keys, 21),
+                batch_header_column_022=get_value_if_index_in_list(remote_source_keys, 22),
+                batch_header_column_023=get_value_if_index_in_list(remote_source_keys, 23),
+                batch_header_column_024=get_value_if_index_in_list(remote_source_keys, 24),
+                batch_header_column_025=get_value_if_index_in_list(remote_source_keys, 25),
+                batch_header_column_026=get_value_if_index_in_list(remote_source_keys, 26),
+                batch_header_column_027=get_value_if_index_in_list(remote_source_keys, 27),
+                batch_header_column_028=get_value_if_index_in_list(remote_source_keys, 28),
+                batch_header_column_029=get_value_if_index_in_list(remote_source_keys, 29),
+                batch_header_column_030=get_value_if_index_in_list(remote_source_keys, 30),
+                batch_header_column_031=get_value_if_index_in_list(remote_source_keys, 31),
+                batch_header_column_032=get_value_if_index_in_list(remote_source_keys, 32),
+                batch_header_column_033=get_value_if_index_in_list(remote_source_keys, 33),
+                batch_header_column_034=get_value_if_index_in_list(remote_source_keys, 34),
+                batch_header_column_035=get_value_if_index_in_list(remote_source_keys, 35),
+                batch_header_column_036=get_value_if_index_in_list(remote_source_keys, 36),
+                batch_header_column_037=get_value_if_index_in_list(remote_source_keys, 37),
+                batch_header_column_038=get_value_if_index_in_list(remote_source_keys, 38),
+                batch_header_column_039=get_value_if_index_in_list(remote_source_keys, 39),
+                batch_header_column_040=get_value_if_index_in_list(remote_source_keys, 40),
+                batch_header_column_041=get_value_if_index_in_list(remote_source_keys, 41),
+                batch_header_column_042=get_value_if_index_in_list(remote_source_keys, 42),
+                batch_header_column_043=get_value_if_index_in_list(remote_source_keys, 43),
+                batch_header_column_044=get_value_if_index_in_list(remote_source_keys, 44),
+                batch_header_column_045=get_value_if_index_in_list(remote_source_keys, 45),
+                batch_header_column_046=get_value_if_index_in_list(remote_source_keys, 46),
+                batch_header_column_047=get_value_if_index_in_list(remote_source_keys, 47),
+                batch_header_column_048=get_value_if_index_in_list(remote_source_keys, 48),
+                batch_header_column_049=get_value_if_index_in_list(remote_source_keys, 49),
+                batch_header_column_050=get_value_if_index_in_list(remote_source_keys, 50),
+            )
+            batch_header_id = batch_header.id
+
+            if positive_value_exists(batch_header_id):
+                # Save an initial BatchHeaderMap
+
+                # For each line, check for translation suggestions
+                batch_header_map = BatchHeaderMap.objects.create(
+                    batch_header_id=batch_header_id,
+                    batch_header_map_000=get_value_if_index_in_list(we_vote_keys, 0),
+                    batch_header_map_001=get_value_if_index_in_list(we_vote_keys, 1),
+                    batch_header_map_002=get_value_if_index_in_list(we_vote_keys, 2),
+                    batch_header_map_003=get_value_if_index_in_list(we_vote_keys, 3),
+                    batch_header_map_004=get_value_if_index_in_list(we_vote_keys, 4),
+                    batch_header_map_005=get_value_if_index_in_list(we_vote_keys, 5),
+                    batch_header_map_006=get_value_if_index_in_list(we_vote_keys, 6),
+                    batch_header_map_007=get_value_if_index_in_list(we_vote_keys, 7),
+                    batch_header_map_008=get_value_if_index_in_list(we_vote_keys, 8),
+                    batch_header_map_009=get_value_if_index_in_list(we_vote_keys, 9),
+                    batch_header_map_010=get_value_if_index_in_list(we_vote_keys, 10),
+                    batch_header_map_011=get_value_if_index_in_list(we_vote_keys, 11),
+                    batch_header_map_012=get_value_if_index_in_list(we_vote_keys, 12),
+                    batch_header_map_013=get_value_if_index_in_list(we_vote_keys, 13),
+                    batch_header_map_014=get_value_if_index_in_list(we_vote_keys, 14),
+                    batch_header_map_015=get_value_if_index_in_list(we_vote_keys, 15),
+                    batch_header_map_016=get_value_if_index_in_list(we_vote_keys, 16),
+                    batch_header_map_017=get_value_if_index_in_list(we_vote_keys, 17),
+                    batch_header_map_018=get_value_if_index_in_list(we_vote_keys, 18),
+                    batch_header_map_019=get_value_if_index_in_list(we_vote_keys, 19),
+                    batch_header_map_020=get_value_if_index_in_list(we_vote_keys, 20),
+                    batch_header_map_021=get_value_if_index_in_list(we_vote_keys, 21),
+                    batch_header_map_022=get_value_if_index_in_list(we_vote_keys, 22),
+                    batch_header_map_023=get_value_if_index_in_list(we_vote_keys, 23),
+                    batch_header_map_024=get_value_if_index_in_list(we_vote_keys, 24),
+                    batch_header_map_025=get_value_if_index_in_list(we_vote_keys, 25),
+                    batch_header_map_026=get_value_if_index_in_list(we_vote_keys, 26),
+                    batch_header_map_027=get_value_if_index_in_list(we_vote_keys, 27),
+                    batch_header_map_028=get_value_if_index_in_list(we_vote_keys, 28),
+                    batch_header_map_029=get_value_if_index_in_list(we_vote_keys, 29),
+                    batch_header_map_030=get_value_if_index_in_list(we_vote_keys, 30),
+                    batch_header_map_031=get_value_if_index_in_list(we_vote_keys, 31),
+                    batch_header_map_032=get_value_if_index_in_list(we_vote_keys, 32),
+                    batch_header_map_033=get_value_if_index_in_list(we_vote_keys, 33),
+                    batch_header_map_034=get_value_if_index_in_list(we_vote_keys, 34),
+                    batch_header_map_035=get_value_if_index_in_list(we_vote_keys, 35),
+                    batch_header_map_036=get_value_if_index_in_list(we_vote_keys, 36),
+                    batch_header_map_037=get_value_if_index_in_list(we_vote_keys, 37),
+                    batch_header_map_038=get_value_if_index_in_list(we_vote_keys, 38),
+                    batch_header_map_039=get_value_if_index_in_list(we_vote_keys, 39),
+                    batch_header_map_040=get_value_if_index_in_list(we_vote_keys, 40),
+                    batch_header_map_041=get_value_if_index_in_list(we_vote_keys, 41),
+                    batch_header_map_042=get_value_if_index_in_list(we_vote_keys, 42),
+                    batch_header_map_043=get_value_if_index_in_list(we_vote_keys, 43),
+                    batch_header_map_044=get_value_if_index_in_list(we_vote_keys, 44),
+                    batch_header_map_045=get_value_if_index_in_list(we_vote_keys, 45),
+                    batch_header_map_046=get_value_if_index_in_list(we_vote_keys, 46),
+                    batch_header_map_047=get_value_if_index_in_list(we_vote_keys, 47),
+                    batch_header_map_048=get_value_if_index_in_list(we_vote_keys, 48),
+                    batch_header_map_049=get_value_if_index_in_list(we_vote_keys, 49),
+                    batch_header_map_050=get_value_if_index_in_list(we_vote_keys, 50),
+                )
+                batch_header_map_id = batch_header_map.id
+                status += "BATCH_HEADER_MAP_SAVED_FOR_JSON "
+
+            if positive_value_exists(batch_header_id) and positive_value_exists(batch_header_map_id):
+                # Now save the BatchDescription
+                if positive_value_exists(file_name):
+                    batch_name = str(batch_header_id) + ": " + file_name
+                if not positive_value_exists(batch_name):
+                    batch_name = str(batch_header_id) + ": " + kind_of_batch
+                batch_description_text = ""
+                batch_description = BatchDescription.objects.create(
+                    batch_header_id=batch_header_id,
+                    batch_header_map_id=batch_header_map_id,
+                    batch_name=batch_name,
+                    batch_description_text=batch_description_text,
+                    google_civic_election_id=google_civic_election_id,
+                    kind_of_batch=kind_of_batch,
+                    organization_we_vote_id=organization_we_vote_id,
+                    polling_location_we_vote_id=polling_location_we_vote_id,
+                    # source_uri=batch_uri,
+                )
+                status += "BATCH_DESCRIPTION_SAVED_FOR_JSON "
+                success = True
+        except Exception as e:
+            # Stop trying to save rows -- break out of the for loop
+            batch_header_id = 0
+            status += "EXCEPTION_BATCH_HEADER_FOR_JSON "
+            handle_exception(e, logger=logger, exception_message=status)
+
+        if positive_value_exists(batch_header_id):
+            for one_dict in structured_json_list:
+                # if number_of_batch_rows >= limit_for_testing:
+                #     break
+                try:
+                    batch_row = BatchRow.objects.create(
+                        batch_header_id=batch_header_id,
+                        batch_row_000=get_value_from_dict(one_dict, get_value_if_index_in_list(remote_source_keys, 0)),
+                        batch_row_001=get_value_from_dict(one_dict, get_value_if_index_in_list(remote_source_keys, 1)),
+                        batch_row_002=get_value_from_dict(one_dict, get_value_if_index_in_list(remote_source_keys, 2)),
+                        batch_row_003=get_value_from_dict(one_dict, get_value_if_index_in_list(remote_source_keys, 3)),
+                        batch_row_004=get_value_from_dict(one_dict, get_value_if_index_in_list(remote_source_keys, 4)),
+                        batch_row_005=get_value_from_dict(one_dict, get_value_if_index_in_list(remote_source_keys, 5)),
+                        batch_row_006=get_value_from_dict(one_dict, get_value_if_index_in_list(remote_source_keys, 6)),
+                        batch_row_007=get_value_from_dict(one_dict, get_value_if_index_in_list(remote_source_keys, 7)),
+                        batch_row_008=get_value_from_dict(one_dict, get_value_if_index_in_list(remote_source_keys, 8)),
+                        batch_row_009=get_value_from_dict(one_dict, get_value_if_index_in_list(remote_source_keys, 9)),
+                        batch_row_010=get_value_from_dict(one_dict, get_value_if_index_in_list(remote_source_keys, 10)),
+                        batch_row_011=get_value_from_dict(one_dict, get_value_if_index_in_list(remote_source_keys, 11)),
+                        batch_row_012=get_value_from_dict(one_dict, get_value_if_index_in_list(remote_source_keys, 12)),
+                        batch_row_013=get_value_from_dict(one_dict, get_value_if_index_in_list(remote_source_keys, 13)),
+                        batch_row_014=get_value_from_dict(one_dict, get_value_if_index_in_list(remote_source_keys, 14)),
+                        batch_row_015=get_value_from_dict(one_dict, get_value_if_index_in_list(remote_source_keys, 15)),
+                        batch_row_016=get_value_from_dict(one_dict, get_value_if_index_in_list(remote_source_keys, 16)),
+                        batch_row_017=get_value_from_dict(one_dict, get_value_if_index_in_list(remote_source_keys, 17)),
+                        batch_row_018=get_value_from_dict(one_dict, get_value_if_index_in_list(remote_source_keys, 18)),
+                        batch_row_019=get_value_from_dict(one_dict, get_value_if_index_in_list(remote_source_keys, 19)),
+                        batch_row_020=get_value_from_dict(one_dict, get_value_if_index_in_list(remote_source_keys, 20)),
+                        batch_row_021=get_value_from_dict(one_dict, get_value_if_index_in_list(remote_source_keys, 21)),
+                        batch_row_022=get_value_from_dict(one_dict, get_value_if_index_in_list(remote_source_keys, 22)),
+                        batch_row_023=get_value_from_dict(one_dict, get_value_if_index_in_list(remote_source_keys, 23)),
+                        batch_row_024=get_value_from_dict(one_dict, get_value_if_index_in_list(remote_source_keys, 24)),
+                        batch_row_025=get_value_from_dict(one_dict, get_value_if_index_in_list(remote_source_keys, 25)),
+                        batch_row_026=get_value_from_dict(one_dict, get_value_if_index_in_list(remote_source_keys, 26)),
+                        batch_row_027=get_value_from_dict(one_dict, get_value_if_index_in_list(remote_source_keys, 27)),
+                        batch_row_028=get_value_from_dict(one_dict, get_value_if_index_in_list(remote_source_keys, 28)),
+                        batch_row_029=get_value_from_dict(one_dict, get_value_if_index_in_list(remote_source_keys, 29)),
+                        batch_row_030=get_value_from_dict(one_dict, get_value_if_index_in_list(remote_source_keys, 30)),
+                        batch_row_031=get_value_from_dict(one_dict, get_value_if_index_in_list(remote_source_keys, 31)),
+                        batch_row_032=get_value_from_dict(one_dict, get_value_if_index_in_list(remote_source_keys, 32)),
+                        batch_row_033=get_value_from_dict(one_dict, get_value_if_index_in_list(remote_source_keys, 33)),
+                        batch_row_034=get_value_from_dict(one_dict, get_value_if_index_in_list(remote_source_keys, 34)),
+                        batch_row_035=get_value_from_dict(one_dict, get_value_if_index_in_list(remote_source_keys, 35)),
+                        batch_row_036=get_value_from_dict(one_dict, get_value_if_index_in_list(remote_source_keys, 36)),
+                        batch_row_037=get_value_from_dict(one_dict, get_value_if_index_in_list(remote_source_keys, 37)),
+                        batch_row_038=get_value_from_dict(one_dict, get_value_if_index_in_list(remote_source_keys, 38)),
+                        batch_row_039=get_value_from_dict(one_dict, get_value_if_index_in_list(remote_source_keys, 39)),
+                        batch_row_040=get_value_from_dict(one_dict, get_value_if_index_in_list(remote_source_keys, 40)),
+                        batch_row_041=get_value_from_dict(one_dict, get_value_if_index_in_list(remote_source_keys, 41)),
+                        batch_row_042=get_value_from_dict(one_dict, get_value_if_index_in_list(remote_source_keys, 42)),
+                        batch_row_043=get_value_from_dict(one_dict, get_value_if_index_in_list(remote_source_keys, 43)),
+                        batch_row_044=get_value_from_dict(one_dict, get_value_if_index_in_list(remote_source_keys, 44)),
+                        batch_row_045=get_value_from_dict(one_dict, get_value_if_index_in_list(remote_source_keys, 45)),
+                        batch_row_046=get_value_from_dict(one_dict, get_value_if_index_in_list(remote_source_keys, 46)),
+                        batch_row_047=get_value_from_dict(one_dict, get_value_if_index_in_list(remote_source_keys, 47)),
+                        batch_row_048=get_value_from_dict(one_dict, get_value_if_index_in_list(remote_source_keys, 48)),
+                        batch_row_049=get_value_from_dict(one_dict, get_value_if_index_in_list(remote_source_keys, 49)),
+                        batch_row_050=get_value_from_dict(one_dict, get_value_if_index_in_list(remote_source_keys, 50)),
+                    )
+                    number_of_batch_rows += 1
+                except Exception as e:
+                    # Stop trying to save rows -- break out of the for loop
+                    status += "EXCEPTION_BATCH_ROW_FOR_JSON "
+                    break
+
+            results = {
+                'success':              success,
+                'status':               status,
+                'batch_header_id':      batch_header_id,
+                'batch_saved':          success,
+                'number_of_batch_rows': number_of_batch_rows,
+            }
+            return results
+
     def create_batch_header_translation_suggestion(
             self, kind_of_batch, header_value_recognized_by_we_vote, incoming_alternate_header_value):
         """
@@ -574,7 +859,8 @@ class BatchManager(models.Model):
             return results
 
         try:
-            batch_header_translation_suggestion, suggestion_created = BatchHeaderTranslationSuggestion.objects.update_or_create(
+            batch_header_translation_suggestion, suggestion_created = \
+                BatchHeaderTranslationSuggestion.objects.update_or_create(
                 kind_of_batch=kind_of_batch,
                 header_value_recognized_by_we_vote=header_value_recognized_by_we_vote,
                 incoming_alternate_header_value=incoming_alternate_header_value)
@@ -3059,7 +3345,7 @@ class BatchManager(models.Model):
         return results
 
     def import_candidates_from_endorsement_json(self, batch_uri='', batch_set_id='', organization_we_vote_id='',
-                                             candidate_positions_list=''):
+                                                candidate_positions_list=''):
         """
         Import Candidates from organization endorsements json file
         :param batch_uri: 
@@ -3828,6 +4114,9 @@ class BatchRowActionContestOffice(models.Model):
     # 2018-02-16 It is unclear if we want to keep this field
     ballotpedia_id = models.CharField(
         verbose_name="ballotpedia unique identifier", max_length=255, null=True, blank=True)
+    ballotpedia_district_id = models.PositiveIntegerField(
+        verbose_name="ballotpedia district id", null=True, blank=True)
+    ballotpedia_election_id = models.PositiveIntegerField(verbose_name="ballotpedia election id", null=True, blank=True)
     ballotpedia_office_id = models.PositiveIntegerField(
         verbose_name="ballotpedia integer id", null=True, blank=True)
     # The office's name as passed over by Ballotpedia. This helps us do exact matches when id is missing
@@ -4105,6 +4394,9 @@ class BatchRowActionCandidate(models.Model):
     # if we edit the candidate's name locally.
     google_civic_candidate_name = models.CharField(verbose_name="candidate name exactly as received from google civic",
                                                    max_length=255, null=False, blank=False)
+    candidate_gender = models.CharField(verbose_name="candidate gender", max_length=255, null=True, blank=True)
+    # Birthday in YYYY-MM-DD format.
+    birth_day_text = models.CharField(verbose_name="birth day", max_length=10, null=True, blank=True)
     # The full name of the party the candidate is a member of.
     party = models.CharField(verbose_name="party", max_length=255, null=True, blank=True)
     # A URL for a photo of the candidate.
@@ -4162,7 +4454,12 @@ class BatchRowActionCandidate(models.Model):
     # The candidate's name as passed over by Ballotpedia
     ballotpedia_candidate_name = models.CharField(verbose_name="candidate name exactly as received from ballotpedia",
                                                   max_length=255, null=True, blank=True)
+    ballotpedia_candidate_summary = models.TextField(verbose_name="candidate summary from ballotpedia",
+                                                     null=True, blank=True, default=None)
     ballotpedia_candidate_url = models.URLField(verbose_name='url of candidate on ballotpedia', blank=True, null=True)
+    ballotpedia_election_id = models.PositiveIntegerField(verbose_name="ballotpedia election id", null=True, blank=True)
+    # The id of the image for retrieval from Ballotpedia API
+    ballotpedia_image_id = models.PositiveIntegerField(verbose_name="ballotpedia image id", null=True, blank=True)
     # This is just the characters in the Ballotpedia URL
     ballotpedia_page_title = models.CharField(
         verbose_name="Page title on Ballotpedia", max_length=255, null=True, blank=True)
@@ -4172,6 +4469,7 @@ class BatchRowActionCandidate(models.Model):
     ballot_guide_official_statement = models.TextField(verbose_name="official candidate statement from ballot guide",
                                                        null=True, blank=True, default="")
     batch_row_action_office_ctcl_uuid = models.CharField(verbose_name="ctcl uuid", max_length=80, null=True, blank=True)
+    crowdpac_candidate_id = models.PositiveIntegerField(verbose_name="crowdpac integer id", null=True, blank=True)
     ctcl_uuid = models.CharField(verbose_name="ctcl uuid", max_length=80, null=True, blank=True)
     candidate_is_top_ticket = models.BooleanField(verbose_name="candidate is top ticket", default=False)
     candidate_is_incumbent = models.BooleanField(verbose_name="candidate is currently in the office", default=False)

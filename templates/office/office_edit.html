@@ -42,11 +42,19 @@
     </div>
 </div>
 
-<input type="hidden" name="google_civic_election_id" value="{% if measure %}{{ office.google_civic_election_id }}{% else %}{{ google_civic_election_id }}{% endif %}">
+<input type="hidden" name="google_civic_election_id" value="{% if office %}{{ office.google_civic_election_id }}{% else %}{{ google_civic_election_id }}{% endif %}">
 <div class="form-group">
     <label for="google_civic_election_id_id" class="col-sm-3 control-label">Google Civic Id</label>
     <div class="col-sm-8">
         {% if office %}{{ office.google_civic_election_id }}{% else %}{{ google_civic_election_id }}{% endif %}
+    </div>
+</div>
+
+<input type="hidden" name="ballotpedia_election_id" value="{% if office %}{{ office.ballotpedia_election_id }}{% else %}{{ ballotpedia_election_id }}{% endif %}">
+<div class="form-group">
+    <label for="ballotpedia_election_id_id" class="col-sm-3 control-label">Ballotpedia Election Id</label>
+    <div class="col-sm-8">
+        {% if office %}{{ office.ballotpedia_election_id|default_if_none:"" }}{% else %}{{ ballotpedia_election_id|default_if_none:"" }}{% endif %}
     </div>
 </div>
 

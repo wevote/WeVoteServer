@@ -67,12 +67,15 @@ class ContestOffice(models.Model):
     # 2018-02-16 It is unclear if we want to keep this field
     ballotpedia_id = models.CharField(
         verbose_name="ballotpedia unique identifier", max_length=255, null=True, blank=True)
+    ballotpedia_election_id = models.PositiveIntegerField(verbose_name="ballotpedia election id", null=True, blank=True)
     ballotpedia_office_id = models.PositiveIntegerField(
         verbose_name="ballotpedia integer id", null=True, blank=True)
     # The office's name as passed over by Ballotpedia. This helps us do exact matches when id is missing
     ballotpedia_office_name = models.CharField(verbose_name="office name exactly as received from ballotpedia",
                                                max_length=255, null=True, blank=True)
     ballotpedia_office_url = models.URLField(verbose_name='url of office on ballotpedia', blank=True, null=True)
+    ballotpedia_district_id = models.PositiveIntegerField(
+        verbose_name="ballotpedia district id", null=True, blank=True)
     # Federal, State, Local,
     ballotpedia_race_office_level = models.CharField(verbose_name="race office level", max_length=255, null=True,
                                                      blank=True)
@@ -635,6 +638,10 @@ class ContestOfficeManager(models.Model):
                 new_contest_office.district_id = defaults['district_id']
                 new_contest_office.district_name = defaults['district_name']
                 new_contest_office.district_scope = defaults['district_scope']
+                if 'ballotpedia_district_id' in defaults:
+                    new_contest_office.ballotpedia_district_id = convert_to_int(defaults['ballotpedia_district_id'])
+                if 'ballotpedia_election_id' in defaults:
+                    new_contest_office.ballotpedia_election_id = convert_to_int(defaults['ballotpedia_election_id'])
                 if 'ballotpedia_office_id' in defaults:
                     new_contest_office.ballotpedia_office_id = convert_to_int(defaults['ballotpedia_office_id'])
                 if 'ballotpedia_office_name' in defaults:
@@ -709,6 +716,8 @@ class ContestOfficeManager(models.Model):
                     existing_office_entry.district_name = defaults['district_name']
                 if 'district_scope' in defaults:
                     existing_office_entry.district_scope = defaults['district_scope']
+                if 'ballotpedia_election_id' in defaults:
+                    existing_office_entry.ballotpedia_election_id = convert_to_int(defaults['ballotpedia_election_id'])
                 if 'ballotpedia_office_id' in defaults:
                     existing_office_entry.ballotpedia_office_id = convert_to_int(defaults['ballotpedia_office_id'])
                 if 'ballotpedia_office_name' in defaults:

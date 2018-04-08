@@ -30,6 +30,8 @@ class Election(models.Model):
                                                 max_length=20, null=True, unique=True)
     google_civic_election_id_new = models.PositiveIntegerField(
         verbose_name="google civic election id", null=True, unique=False)  # Make unique=True after data is migrated
+    ballotpedia_election_id = models.PositiveIntegerField(
+        verbose_name="ballotpedia election id", null=True, unique=True)
     # A displayable name for the election.
     election_name = models.CharField(verbose_name="election name", max_length=255, null=False, blank=False)
     # Day of the election in YYYY-MM-DD format.
