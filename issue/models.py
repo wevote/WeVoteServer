@@ -71,6 +71,16 @@ class IssueListManager(models.Model):
     This is a class to make it easy to retrieve lists of Issues
     """
 
+    def fetch_visible_issue_we_vote_ids(self):
+        issue_we_vote_ids_list = []
+        results = self.retrieve_issues()
+        if results['issue_list_found']:
+            issue_list = results['issue_list']
+            for issue in issue_list:
+                issue_we_vote_ids_list.append(issue.we_vote_id)
+
+        return issue_we_vote_ids_list
+
     def retrieve_issues(self, sort_formula=None, issue_we_vote_id_list_to_filter=None,
                         issue_we_vote_id_list_to_exclude=None, require_filter_or_exclude=False,
                         show_hidden_issues=False):
@@ -573,11 +583,12 @@ class OrganizationLinkToIssue(models.Model):
 class OrganizationLinkToIssueList(models.Model):
     # A way to retrieve all of the organization and issue linking information
 
-    def retrieve_issue_list_by_organization_we_vote_id(self, organization_we_vote_id):
+    def retrieve_issue_list_by_organization_we_vote_id(self, organization_we_vote_id, show_hidden_issues=False):
         # Retrieve a list of active issues linked to organization
         link_issue_list_found = False
         link_active = True
         link_issue_list = {}
+
         try:
             link_issue_query = OrganizationLinkToIssue.objects.all()
             link_issue_query = link_issue_query.filter(organization_we_vote_id__iexact=organization_we_vote_id)
@@ -589,7 +600,17 @@ class OrganizationLinkToIssueList(models.Model):
             pass
 
         if link_issue_list_found:
-            return link_issue_list
+            if show_hidden_issues:
+                return link_issue_list
+            else:
+                link_issue_list_filtered = []
+                # Get a complete list of visible issues
+                issue_list_manager = IssueListManager()
+                visible_issue_we_vote_ids = issue_list_manager.fetch_visible_issue_we_vote_ids()
+                for link_issue in link_issue_list:
+                    if link_issue.issue_we_vote_id in visible_issue_we_vote_ids:
+                        link_issue_list_filtered.append(link_issue)
+                return link_issue_list_filtered
         else:
             link_issue_list = {}
             return link_issue_list

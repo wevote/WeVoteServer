@@ -750,6 +750,9 @@ class CandidateCampaign(models.Model):
     # if we edit the candidate's name locally.
     google_civic_candidate_name = models.CharField(verbose_name="candidate name exactly as received from google civic",
                                                    max_length=255, null=False, blank=False)
+    candidate_gender = models.CharField(verbose_name="candidate gender", max_length=255, null=True, blank=True)
+    # Birthday in YYYY-MM-DD format.
+    birth_day_text = models.CharField(verbose_name="birth day", max_length=10, null=True, blank=True)
     # The full name of the party the candidate is a member of.
     party = models.CharField(verbose_name="party", max_length=255, null=True, blank=True)
     # A URL for a photo of the candidate.
@@ -819,12 +822,16 @@ class CandidateCampaign(models.Model):
         verbose_name="other source url of candidate", max_length=255, null=True, blank=True)
     other_source_photo_url = models.URLField(verbose_name='url of other source image', blank=True, null=True)
 
-    ballotpedia_candidate_id = models.PositiveIntegerField(
-        verbose_name="ballotpedia integer id", null=True, blank=True)
+    ballotpedia_candidate_id = models.PositiveIntegerField(verbose_name="ballotpedia integer id", null=True, blank=True)
     # The candidate's name as passed over by Ballotpedia
     ballotpedia_candidate_name = models.CharField(verbose_name="candidate name exactly as received from ballotpedia",
                                                   max_length=255, null=True, blank=True)
+    ballotpedia_candidate_summary = models.TextField(verbose_name="candidate summary from ballotpedia",
+                                                     null=True, blank=True, default=None)
     ballotpedia_candidate_url = models.URLField(verbose_name='url of candidate on ballotpedia', blank=True, null=True)
+    ballotpedia_election_id = models.PositiveIntegerField(verbose_name="ballotpedia election id", null=True, blank=True)
+    # The id of the image for retrieval from Ballotpedia API
+    ballotpedia_image_id = models.PositiveIntegerField(verbose_name="ballotpedia image id", null=True, blank=True)
     # This is just the characters in the Ballotpedia URL
     ballotpedia_page_title = models.CharField(
         verbose_name="Page title on Ballotpedia", max_length=255, null=True, blank=True)
@@ -833,6 +840,8 @@ class CandidateCampaign(models.Model):
     # Official Statement from Candidate in Ballot Guide
     ballot_guide_official_statement = models.TextField(verbose_name="official candidate statement from ballot guide",
                                                        null=True, blank=True, default="")
+    crowdpac_candidate_id = models.PositiveIntegerField(
+        verbose_name="crowdpac integer id", null=True, blank=True)
     # CTCL candidate data fields
     ctcl_uuid = models.CharField(verbose_name="ctcl uuid", max_length=80, null=True, blank=True)
 
@@ -1779,30 +1788,49 @@ class CandidateCampaignManager(models.Model):
         new_candidate = ''
 
         # Variables we accept
-        candidate_name = update_values['candidate_name'] if 'candidate_name' in update_values else ''
-        contest_office_we_vote_id = update_values['contest_office_we_vote_id'] \
-            if 'contest_office_we_vote_id' in update_values else False
-        contest_office_id = update_values['contest_office_id'] \
-            if 'contest_office_id' in update_values else False
-        contest_office_name = update_values['contest_office_name'] \
-            if 'contest_office_name' in update_values else False
-        candidate_party_name = update_values['party'] if 'party' in update_values else ''
+        ballotpedia_candidate_id = update_values['ballotpedia_candidate_id'] \
+            if 'ballotpedia_candidate_id' in update_values else 0
+        ballotpedia_candidate_name = update_values['ballotpedia_candidate_name'] \
+            if 'ballotpedia_candidate_name' in update_values else ''
+        ballotpedia_candidate_summary = update_values['ballotpedia_candidate_summary'] \
+            if 'ballotpedia_candidate_summary' in update_values else ''
+        ballotpedia_candidate_url = update_values['ballotpedia_candidate_url'] \
+            if 'ballotpedia_candidate_url' in update_values else ''
+        ballotpedia_election_id = update_values['ballotpedia_election_id'] \
+            if 'ballotpedia_election_id' in update_values else 0
+        ballotpedia_image_id = update_values['ballotpedia_image_id'] \
+            if 'ballotpedia_image_id' in update_values else 0
+        birth_day_text = update_values['birth_day_text'] if 'birth_day_text' in update_values else ''
+        candidate_email = update_values['candidate_email'] if 'candidate_email' in update_values else ''
+        candidate_gender = update_values['candidate_gender'] if 'candidate_gender' in update_values else ''
         candidate_is_incumbent = update_values['candidate_is_incumbent'] \
             if 'candidate_is_incumbent' in update_values else False
         candidate_is_top_ticket = update_values['candidate_is_top_ticket'] \
             if 'candidate_is_top_ticket' in update_values else False
-        ctcl_uuid = update_values['ctcl_uuid'] if 'ctcl_uuid' in update_values else ''
-        google_civic_election_id = update_values['google_civic_election_id'] \
-            if 'google_civic_election_id' in update_values else ''
-        state_code = update_values['state_code'] if 'state_code' in update_values else ''
+        candidate_name = update_values['candidate_name'] if 'candidate_name' in update_values else ''
+        candidate_participation_status = update_values['candidate_participation_status'] \
+            if 'candidate_participation_status' in update_values else ''
+        candidate_party_name = update_values['party'] if 'party' in update_values else ''
         candidate_twitter_handle = update_values['candidate_twitter_handle'] \
             if 'candidate_twitter_handle' in update_values else ''
         candidate_url = update_values['candidate_url'] \
             if 'candidate_url' in update_values else ''
+        contest_office_we_vote_id = update_values['contest_office_we_vote_id'] \
+            if 'contest_office_we_vote_id' in update_values else ''
+        contest_office_id = update_values['contest_office_id'] \
+            if 'contest_office_id' in update_values else 0
+        contest_office_name = update_values['contest_office_name'] \
+            if 'contest_office_name' in update_values else ''
+        crowdpac_candidate_id = update_values['crowdpac_candidate_id'] \
+            if 'crowdpac_candidate_id' in update_values else 0
+        ctcl_uuid = update_values['ctcl_uuid'] if 'ctcl_uuid' in update_values else ''
         facebook_url = update_values['facebook_url'] \
             if 'facebook_url' in update_values else ''
+        google_civic_election_id = update_values['google_civic_election_id'] \
+            if 'google_civic_election_id' in update_values else ''
         photo_url = update_values['photo_url'] \
             if 'photo_url' in update_values else ''
+        state_code = update_values['state_code'] if 'state_code' in update_values else ''
 
         if not positive_value_exists(candidate_name) or not positive_value_exists(contest_office_we_vote_id) \
                 or not positive_value_exists(contest_office_id) \
@@ -1838,15 +1866,26 @@ class CandidateCampaignManager(models.Model):
 
         if new_candidate_created:
             try:
-                new_candidate.contest_office_id = contest_office_id
-                new_candidate.contest_office_name = contest_office_name
-                new_candidate.party = candidate_party_name
-                new_candidate.ctcl_uuid = ctcl_uuid
+                new_candidate.ballotpedia_candidate_id = convert_to_int(ballotpedia_candidate_id)
+                new_candidate.ballotpedia_candidate_name = ballotpedia_candidate_name
+                new_candidate.ballotpedia_candidate_summary = ballotpedia_candidate_summary
+                new_candidate.ballotpedia_candidate_url = ballotpedia_candidate_url
+                new_candidate.ballotpedia_election_id = convert_to_int(ballotpedia_election_id)
+                new_candidate.ballotpedia_image_id = convert_to_int(ballotpedia_image_id)
+                new_candidate.birth_day_text = birth_day_text
+                new_candidate.candidate_email = candidate_email
+                new_candidate.candidate_gender = candidate_gender
                 new_candidate.candidate_is_incumbent = candidate_is_incumbent
                 new_candidate.candidate_is_top_ticket = candidate_is_top_ticket
+                new_candidate.candidate_participation_status = candidate_participation_status
                 new_candidate.candidate_twitter_handle = candidate_twitter_handle
                 new_candidate.candidate_url = candidate_url
+                new_candidate.contest_office_id = convert_to_int(contest_office_id)
+                new_candidate.contest_office_name = contest_office_name
+                new_candidate.crowdpac_candidate_id = convert_to_int(crowdpac_candidate_id)
+                new_candidate.ctcl_uuid = ctcl_uuid
                 new_candidate.facebook_url = facebook_url
+                new_candidate.party = candidate_party_name
                 new_candidate.photo_url = photo_url
                 if new_candidate.photo_url:
                     candidate_results = self.modify_candidate_with_organization_endorsements_image(new_candidate,
@@ -1903,14 +1942,32 @@ class CandidateCampaignManager(models.Model):
                 if 'ballotpedia_candidate_name' in update_values:
                     existing_candidate_entry.ballotpedia_candidate_name = update_values['ballotpedia_candidate_name']
                     values_changed = True
+                if 'ballotpedia_candidate_summary' in update_values:
+                    existing_candidate_entry.ballotpedia_candidate_summary = \
+                        update_values['ballotpedia_candidate_summary']
+                    values_changed = True
                 if 'ballotpedia_candidate_url' in update_values:
                     existing_candidate_entry.ballotpedia_candidate_url = update_values['ballotpedia_candidate_url']
+                    values_changed = True
+                if 'ballotpedia_district_id' in update_values:
+                    existing_candidate_entry.ballotpedia_district_id = \
+                        convert_to_int(update_values['ballotpedia_district_id'])
+                    values_changed = True
+                if 'ballotpedia_election_id' in update_values:
+                    existing_candidate_entry.ballotpedia_election_id = \
+                        convert_to_int(update_values['ballotpedia_election_id'])
+                    values_changed = True
+                if 'birth_day_text' in update_values:
+                    existing_candidate_entry.birth_day_text = update_values['birth_day_text']
                     values_changed = True
                 if 'candidate_is_incumbent' in update_values:
                     existing_candidate_entry.candidate_is_incumbent = update_values['candidate_is_incumbent']
                     values_changed = True
                 if 'candidate_is_top_ticket' in update_values:
                     existing_candidate_entry.is_top_ticket = update_values['candidate_is_top_ticket']
+                    values_changed = True
+                if 'candidate_gender' in update_values:
+                    existing_candidate_entry.candidate_gender = update_values['candidate_gender']
                     values_changed = True
                 if 'candidate_name' in update_values:
                     existing_candidate_entry.candidate_name = update_values['candidate_name']
@@ -1933,6 +1990,9 @@ class CandidateCampaignManager(models.Model):
                     values_changed = True
                 if 'contest_office_name' in update_values:
                     existing_candidate_entry.contest_office_name = update_values['contest_office_name']
+                    values_changed = True
+                if 'crowdpac_candidate_id' in update_values:
+                    existing_candidate_entry.crowdpac_candidate_id = update_values['crowdpac_candidate_id']
                     values_changed = True
                 if 'ctcl_uuid' in update_values:
                     existing_candidate_entry.ctcl_uuid = update_values['ctcl_uuid']

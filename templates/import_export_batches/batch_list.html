@@ -93,7 +93,7 @@
     {% elif kind_of_batch == "IMPORT_BALLOT_ITEM" %}
         Import Ballot Items for One Polling Location - STILL WORK IN PROGRESS
         {% elif kind_of_batch == "IMPORT_VOTER" %}
-        Export Voter
+        Import/Export Voter
     {% else %}
         Kind of data not recognized: Please STOP
     {% endif %}
@@ -164,10 +164,6 @@
         </div>
         {% endif %}
 
-        {% if kind_of_batch == "IMPORT_VOTER" %}
-            <a href= "{% url 'import_export_batches:batch_action_list_export_voters' %}?kind_of_batch={{ kind_of_batch }}">Export Voter</a>
-        {% endif %}
-
         <div class="form-group">
             <label for="batch_file_id" class="col-sm-3 control-label">Upload File</label>
             <div class="col-sm-8">
@@ -193,6 +189,10 @@
     </form>
 {% endif %}
 
+
+{% if kind_of_batch == "IMPORT_VOTER" %}
+    <a href= "{% url 'import_export_batches:batch_action_list_export_voters' %}?kind_of_batch={{ kind_of_batch }}">Export Voter</a>
+{% endif %}
 
 
 

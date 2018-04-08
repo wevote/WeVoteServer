@@ -42,6 +42,14 @@
 </div>
 
 <div class="form-group">
+    <label for="ballotpedia_election_id_id" class="col-sm-3 control-label">Ballotpedia Election Id</label>
+    <div class="col-sm-8">
+        <input type="text" name="ballotpedia_election_id" id="ballotpedia_election_id_id" class="form-control"
+               value="{% if election %}{{ election.ballotpedia_election_id|default_if_none:"" }}{% endif %}" />
+    </div>
+</div>
+
+<div class="form-group">
     <label for="election_day_text_id" class="col-sm-3 control-label">Election Day
         <span class="no_break">(Format: "YYYY-MM-DD")</span></label>
     <div class="col-sm-8">

@@ -371,14 +371,19 @@
                             <br /><span>office: {{ one_batch_row.batch_row_action.batch_row_action_office_ctcl_uuid|default_if_none:"" }}</span>
                             {% endif %}
                         </td>
-                        <td>{{ one_batch_row.batch_row_action.google_civic_election_id|default_if_none:"" }}</td>
+                        <td>
+                          {{ one_batch_row.batch_row_action.google_civic_election_id|default_if_none:"" }}
+                          {% if one_batch_row.batch_row_action.ballotpedia_election_id %}
+                            <br />bp: {{ one_batch_row.batch_row_action.ballotpedia_election_id|default_if_none:"" }}
+                          {% endif %}
+                        </td>
                         <td>{{ one_batch_row.batch_row_action.state_code|default_if_none:"" }}</td>
                         <td>{{ one_batch_row.batch_row_action.party|default_if_none:"" }}</td>
                         <td>{{ one_batch_row.batch_row_action.candidate_twitter_handle|default_if_none:"" }}</td>
                         <td>{{ one_batch_row.batch_row_action.facebook_url|default_if_none:"" }}</td>
                         <td>
-                          {{ one_batch_row.batch_row_action.candidate_url|default_if_none:"" }}
-                          {{ one_batch_row.batch_row_action.ballotpedia_candidate_url|default_if_none:"" }}
+                          url: {{ one_batch_row.batch_row_action.candidate_url|default_if_none:"" }}<br />
+                          bp: {{ one_batch_row.batch_row_action.ballotpedia_candidate_url|default_if_none:"" }}
                         </td>
                         <td>{{ one_batch_row.batch_row_action.candidate_is_incumbent|default_if_none:"" }}</td>
                     </tr>
@@ -460,12 +465,22 @@
                         </td>
                         <td>{{ one_batch_row.batch_row_action.contest_office_name|default_if_none:"" }}
                             {% if one_batch_row.batch_row_action.contest_office_we_vote_id %}
-                            <span> ({{ one_batch_row.batch_row_action.contest_office_we_vote_id|default_if_none:"" }})</span>
+                            <span> (<a href="{% url 'office:office_edit_we_vote_id' one_batch_row.batch_row_action.contest_office_we_vote_id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}" target="_blank">{{ one_batch_row.batch_row_action.contest_office_we_vote_id|default_if_none:"" }}</a>)</span>
                             {% endif %}
                         </td>
-                        <td>{{ one_batch_row.batch_row_action.google_civic_election_id|default_if_none:"" }}</td>
+                        <td>
+                          {{ one_batch_row.batch_row_action.google_civic_election_id|default_if_none:"" }}
+                          {% if one_batch_row.batch_row_action.ballotpedia_election_id %}
+                            <br />bp: {{ one_batch_row.batch_row_action.ballotpedia_election_id|default_if_none:"" }}
+                          {% endif %}
+                        </td>
                         <td>{{ one_batch_row.batch_row_action.state_code|default_if_none:"" }}</td>
-                        <td>{{ one_batch_row.batch_row_action.district_id|default_if_none:"" }}</td>
+                        <td>
+                          {{ one_batch_row.batch_row_action.district_id|default_if_none:"" }}
+                          {% if one_batch_row.batch_row_action.ballotpedia_district_id %}
+                            <br />bp: {{ one_batch_row.batch_row_action.ballotpedia_district_id|default_if_none:"" }}
+                          {% endif %}
+                        </td>
                         <td>{{ one_batch_row.batch_row_action.district_name|default_if_none:"" }}</td>
                         <td>{{ one_batch_row.batch_row_action.ocd_division_id|default_if_none:"" }}</td>
                     </tr>

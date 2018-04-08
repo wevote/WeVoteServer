@@ -796,7 +796,6 @@ class VoterManager(BaseUserManager):
         }
         return results
 
-
     def retrieve_voter_list(self):
         """
         Retrieve list of voter that are registered for newsletter
@@ -822,7 +821,6 @@ class VoterManager(BaseUserManager):
         }
 
         return result
-
 
     def create_voter_with_voter_device_id(self, voter_device_id):
         logger.info("create_voter_with_voter_device_id(voter_device_id)")
