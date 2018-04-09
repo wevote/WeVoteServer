@@ -145,10 +145,10 @@ def create_batch_row_actions(batch_header_id, batch_row_id, state_code=""):
             elif kind_of_batch == MEASURE:
                 results = create_batch_row_action_measure(batch_description, batch_header_map, one_batch_row)
 
-                if results['action_measure_updated']:
+                if results['batch_row_action_updated']:
                     number_of_batch_actions_updated += 1
                     success = True
-                elif results['new_action_measure_created']:
+                elif results['batch_row_action_created']:
                     # for now, do not handle batch_row_action_measure data
                     # batch_row_action_measure = results['batch_row_action_measure']
                     number_of_batch_actions_created += 1
@@ -380,156 +380,285 @@ def create_batch_row_action_measure(batch_description, batch_header_map, one_bat
     """
     batch_manager = BatchManager()
 
-    new_action_measure_created = False
-    action_measure_updated = False
+    # new_action_measure_created = False
+    # action_measure_updated = False
+    batch_row_action_updated = False
+    batch_row_action_created = False
     state_code = ''
-    batch_row_action_measure_status = ''
     status = ''
-    measure_we_vote_id = ''
+    success = False
+    kind_of_action = IMPORT_TO_BE_DETERMINED
+    keep_looking_for_duplicates = True
+
+    # Does a BatchRowActionContestOffice entry already exist?
+    # We want to start with the BatchRowAction... entry first so we can record our findings line by line while
+    #  we are checking for existing duplicate data
+    existing_results = batch_manager.retrieve_batch_row_action_measure(
+        batch_description.batch_header_id, one_batch_row.id)
+    if existing_results['batch_row_action_found']:
+        status += "BATCH_ROW_ACTION_MEASURE_FOUND "
+        batch_row_action_measure = existing_results['batch_row_action_measure']
+        batch_row_action_updated = True
+    else:
+        # If a BatchRowActionMeasure entry does not exist, create one
+        try:
+            batch_row_action_measure = BatchRowActionMeasure.objects.create(
+                batch_header_id=batch_description.batch_header_id,
+                batch_row_id=one_batch_row.id,
+            )
+            batch_row_action_created = True
+            status += "BATCH_ROW_ACTION_MEASURE_CREATED "
+        except Exception as e:
+            batch_row_action_created = False
+            batch_row_action_measure = BatchRowActionMeasure()
+            success = False
+            status += "BATCH_ROW_ACTION_MEASURE_NOT_CREATED "
+
+            results = {
+                'success': success,
+                'status': status,
+                'batch_row_action_updated': batch_row_action_updated,
+                'batch_row_action_created': batch_row_action_created,
+                'batch_row_action_measure': batch_row_action_measure,
+            }
+            return results
 
     # NOTE: If you add incoming header names here, make sure to update BATCH_IMPORT_KEYS_ACCEPTED_FOR_MEASURES
 
-    # Find the column in the incoming batch_row with the header == measure_title
-    measure_title = batch_manager.retrieve_value_from_batch_row("measure_title", batch_header_map, one_batch_row)
-    # Find the column in the incoming batch_row with the header == state_code
-    electoral_district_id = batch_manager.retrieve_value_from_batch_row("electoral_district_id", batch_header_map,
-                                                                        one_batch_row)
     if positive_value_exists(one_batch_row.google_civic_election_id):
         google_civic_election_id = str(one_batch_row.google_civic_election_id)
     else:
         google_civic_election_id = str(batch_description.google_civic_election_id)
 
-    # get state code from electoral_district_id
-    results = retrieve_electoral_district(electoral_district_id)
-    if results['electoral_district_found']:
-        if results['state_code_found']:
-            state_code = results['state_code']
-            # state_code = results.values_list('state_code', flat=True).get()
-    else:
-        # state_code = ''
-        batch_row_action_measure_status = 'ELECTORAL_DISTRICT_NOT_FOUND'
-        # kind_of_action = 'TBD'
-
-    measure_text = batch_manager.retrieve_value_from_batch_row("measure_name",
-                                                               batch_header_map,
-                                                               one_batch_row)
-    measure_subtitle = batch_manager.retrieve_value_from_batch_row("measure_sub_title",
-                                                                   batch_header_map,
-                                                                   one_batch_row)
+    measure_we_vote_id = batch_manager.retrieve_value_from_batch_row(
+        "measure_we_vote_id", batch_header_map, one_batch_row)
+    # Find the column in the incoming batch_row with the header == measure_title
+    measure_title = batch_manager.retrieve_value_from_batch_row("measure_title", batch_header_map, one_batch_row)
+    # Find the column in the incoming batch_row with the header == state_code
+    electoral_district_id = batch_manager.retrieve_value_from_batch_row(
+        "electoral_district_id", batch_header_map, one_batch_row)
+    measure_text = batch_manager.retrieve_value_from_batch_row(
+        "measure_name", batch_header_map, one_batch_row)
+    measure_subtitle = batch_manager.retrieve_value_from_batch_row(
+        "measure_subtitle", batch_header_map, one_batch_row)
     ctcl_uuid = batch_manager.retrieve_value_from_batch_row("ctcl_uuid", batch_header_map, one_batch_row)
+    ballotpedia_district_id = batch_manager.retrieve_value_from_batch_row(
+        "ballotpedia_district_id", batch_header_map, one_batch_row)
+    ballotpedia_election_id = batch_manager.retrieve_value_from_batch_row(
+        "ballotpedia_election_id", batch_header_map, one_batch_row)
+    ballotpedia_measure_id = batch_manager.retrieve_value_from_batch_row(
+        "ballotpedia_measure_id", batch_header_map, one_batch_row)
+    ballotpedia_measure_name = batch_manager.retrieve_value_from_batch_row(
+        "ballotpedia_measure_name", batch_header_map, one_batch_row)
+    ballotpedia_measure_status = batch_manager.retrieve_value_from_batch_row(
+        "ballotpedia_measure_status", batch_header_map, one_batch_row)
+    ballotpedia_measure_summary = batch_manager.retrieve_value_from_batch_row(
+        "ballotpedia_measure_summary", batch_header_map, one_batch_row)
+    ballotpedia_measure_text = batch_manager.retrieve_value_from_batch_row(
+        "ballotpedia_measure_text", batch_header_map, one_batch_row)
+    ballotpedia_measure_url = batch_manager.retrieve_value_from_batch_row(
+        "ballotpedia_measure_url", batch_header_map, one_batch_row)
+    election_day_text = batch_manager.retrieve_value_from_batch_row(
+        "election_day_text", batch_header_map, one_batch_row)
+    state_code = batch_manager.retrieve_value_from_batch_row(
+        "state_code", batch_header_map, one_batch_row)
+
+    if not positive_value_exists(state_code):
+        # get state code from electoral_district_id
+        results = retrieve_electoral_district(electoral_district_id)
+        if results['electoral_district_found']:
+            if results['state_code_found']:
+                state_code = results['state_code']
+        else:
+            # state_code = ''
+            # status += 'MEASURE-ELECTORAL_DISTRICT_NOT_FOUND '
+            # kind_of_action = 'TBD'
+            pass
+
+    if not positive_value_exists(measure_title):
+        measure_title = ballotpedia_measure_name
+
+    if not positive_value_exists(measure_text):
+        measure_text = ballotpedia_measure_text
+
+    if not positive_value_exists(measure_subtitle):
+        measure_subtitle = ballotpedia_measure_summary
 
     # Look up ContestMeasure to see if an entry exists
-    contest_measure = ContestMeasure()
-    # These three parameters are needed to look up in Contest Measure table for a match
-    if positive_value_exists(measure_title) and positive_value_exists(state_code) and \
-            positive_value_exists(google_civic_election_id):
+    if positive_value_exists(ballotpedia_measure_id):
         try:
-            contest_measure_query = ContestMeasure.objects.all()
-            contest_measure_item_list = contest_measure_query.filter(measure_title__iexact=measure_title,
-                                                                     state_code__iexact=state_code,
-                                                                     google_civic_election_id=google_civic_election_id)
-
-            if contest_measure_item_list or len(contest_measure_item_list):
-                # entry exists
-                batch_row_action_measure_status = 'BATCH_ROW_ACTION_MEASURE_RETRIEVED'
-                # batch_row_action_found = True
-                # new_action_measure_created = False
-                # success = True
-                batch_row_action_measure = contest_measure_item_list
-                # if a single entry matches, update that entry
-                if len(contest_measure_item_list) == 1:
-                    kind_of_action = IMPORT_ADD_TO_EXISTING
-                    measure_we_vote_id = contest_measure_item_list[0].we_vote_id
-                else:
-                    # more than one entry found with a match in ContestMeasure
-                    kind_of_action = 'DO_NOT_PROCESS'
-            else:
-                kind_of_action = IMPORT_CREATE
+            contest_measure = ContestMeasure.objects.get(ballotpedia_measure_id=ballotpedia_measure_id)
+            kind_of_action = IMPORT_ADD_TO_EXISTING
+            measure_we_vote_id = contest_measure.we_vote_id
+            keep_looking_for_duplicates = False
         except ContestMeasure.DoesNotExist:
-            batch_row_action_measure = BatchRowActionMeasure()
-            # batch_row_action_found = False
-            # success = True
-            batch_row_action_measure_status = "BATCH_ROW_ACTION_MEASURE_NOT_FOUND"
-            kind_of_action = 'TBD'
-    else:
-        kind_of_action = 'TBD'
-        batch_row_action_measure_status = "INSUFFICIENT_DATA_FOR_BATCH_ROW_ACTION_MEASURE_CREATE"
+            keep_looking_for_duplicates = True
 
-    try:
-        # check for duplicate entries in the same data set
-        # Check if measure_title, state_code match exists in BatchRowActionMeasure for this header_id
-        existing_batch_row_action_measure_query = BatchRowActionMeasure.objects.all()
-        existing_batch_row_action_measure_query = existing_batch_row_action_measure_query.filter(
-            batch_header_id=batch_description.batch_header_id, measure_title__iexact=measure_title,
-            state_code__iexact=state_code, google_civic_election_id=google_civic_election_id)
-        existing_batch_row_action_measure_list = list(existing_batch_row_action_measure_query)
-        number_of_existing_entries = len(existing_batch_row_action_measure_list)
-        if not number_of_existing_entries:
-            # no entry exists, create one
-            updated_values = {
-                'measure_title': measure_title,
-                'state_code': state_code,
-                'measure_text': measure_text,
-                'measure_subtitle': measure_subtitle,
-                'kind_of_action': kind_of_action,
-                'measure_we_vote_id': measure_we_vote_id,
-                'ctcl_uuid': ctcl_uuid,
-                'google_civic_election_id': google_civic_election_id,
-                'status': batch_row_action_measure_status
-            }
+    if keep_looking_for_duplicates:
+        # These three parameters are needed to look up in Contest Measure table for a match
+        if positive_value_exists(measure_title) and positive_value_exists(state_code) and \
+                positive_value_exists(google_civic_election_id):
+            try:
+                contest_measure_query = ContestMeasure.objects.all()
+                contest_measure_item_list = contest_measure_query.filter(
+                    measure_title__iexact=measure_title,
+                    state_code__iexact=state_code,
+                    google_civic_election_id=google_civic_election_id)
 
-            batch_row_action_measure, new_action_measure_created = BatchRowActionMeasure.objects.update_or_create(
-                batch_header_id=batch_description.batch_header_id, batch_row_id=one_batch_row.id,
-                defaults=updated_values)
-            # new_action_measure_created = True
-            success = True
-            status += "CREATE_BATCH_ROW_ACTION_MEASURE-BATCH_ROW_ACTION_MEASURE_CREATED"
+                if contest_measure_item_list or len(contest_measure_item_list):
+                    # entry exists
+                    status += 'BATCH_ROW_ACTION_MEASURE_RETRIEVED'
+                    # batch_row_action_found = True
+                    # new_action_measure_created = False
+                    # success = True
+                    batch_row_action_measure = contest_measure_item_list
+                    # if a single entry matches, update that entry
+                    if len(contest_measure_item_list) == 1:
+                        kind_of_action = IMPORT_ADD_TO_EXISTING
+                        measure_we_vote_id = contest_measure_item_list[0].we_vote_id
+                    else:
+                        # more than one entry found with a match in ContestMeasure
+                        kind_of_action = 'DO_NOT_PROCESS'
+                else:
+                    keep_looking_for_duplicates = True
+            except ContestMeasure.DoesNotExist:
+                batch_row_action_measure = BatchRowActionMeasure()
+                # batch_row_action_found = False
+                # success = True
+                status += "CONTEST_MEASURE_NOT_FOUND "
+                keep_looking_for_duplicates = True
         else:
-            # # if batch_header_id is same then it is a duplicate entry?
-            existing_measure_entry = existing_batch_row_action_measure_query.first()
-            if one_batch_row.id != existing_measure_entry.batch_row_id:
-                # duplicate entry, create a new entry but set kind_of_action as DO_NOT_PROCESS and
-                # set status as duplicate
-                # kind_of_action = 'DO_NOT_PROCESS'
-                updated_values = {
-                    'measure_title': measure_title,
-                    'state_code': state_code,
-                    'measure_text': measure_text,
-                    'measure_subtitle': measure_subtitle,
-                    'measure_we_vote_id': measure_we_vote_id,
-                    'kind_of_action': 'DO_NOT_PROCESS',
-                    'ctcl_uuid': ctcl_uuid,
-                    'google_civic_election_id': google_civic_election_id,
-                    'status': 'DUPLICATE_ELECTED_OFFICE_ENTRY'
-                }
+            kind_of_action = 'TBD'
+            status = "INSUFFICIENT_DATA_FOR_BATCH_ROW_ACTION_MEASURE_CREATE "
+            keep_looking_for_duplicates = False
 
-                batch_row_action_measure, new_action_measure_created = BatchRowActionMeasure.objects.update_or_create(
-                    batch_header_id=batch_description.batch_header_id, batch_row_id=one_batch_row.id,
-                    defaults=updated_values)
-                status += 'CREATE_BATCH_ROW_ACTION_MEASURE-BATCH_ROW_ACTION_MEASURE_DUPLICATE_ENTRY'
-                success = True
-                # TODO should duplicate entry be counted as updated?
-                action_measure_updated = True
-                # this is a duplicate entry, mark it's kind_of_action as DO_NOT_PROCESS and status as duplicate
-            else:
-                # existing entry but not duplicate
-                status += 'CREATE_BATCH_ROW_ACTION_MEASURE-BATCH_ROW_ACTION_MEASURE_ENTRY_EXISTS'
-                success = True
-                # TODO update existing entry is not yet handled
-                batch_row_action_measure = existing_batch_row_action_measure_query.get()
+    if keep_looking_for_duplicates:
+        kind_of_action = IMPORT_CREATE
+
+    # DALE 2018-04-08 I'm not sure this is correct, or in use
+    # try:
+    #     # check for duplicate entries in the same data set
+    #     # Check if measure_title, state_code match exists in BatchRowActionMeasure for this header_id
+    #     existing_batch_row_action_measure_query = BatchRowActionMeasure.objects.all()
+    #     existing_batch_row_action_measure_query = existing_batch_row_action_measure_query.filter(
+    #         batch_header_id=batch_description.batch_header_id,
+    #         measure_title__iexact=measure_title,
+    #         state_code__iexact=state_code,
+    #         google_civic_election_id=google_civic_election_id)
+    #     existing_batch_row_action_measure_list = list(existing_batch_row_action_measure_query)
+    #     number_of_existing_entries = len(existing_batch_row_action_measure_list)
+    #     if not number_of_existing_entries:
+    #         # no entry exists, create one
+    #         updated_values = {
+    #             'measure_title': measure_title,
+    #             'state_code': state_code,
+    #             'measure_text': measure_text,
+    #             'measure_subtitle': measure_subtitle,
+    #             'kind_of_action': kind_of_action,
+    #             'measure_we_vote_id': measure_we_vote_id,
+    #             'ctcl_uuid': ctcl_uuid,
+    #             'google_civic_election_id': google_civic_election_id,
+    #             'status': batch_row_action_measure_status
+    #         }
+    #
+    #         batch_row_action_measure, new_action_measure_created = BatchRowActionMeasure.objects.update_or_create(
+    #             batch_header_id=batch_description.batch_header_id,
+    #             batch_row_id=one_batch_row.id,
+    #             defaults=updated_values)
+    #         # new_action_measure_created = True
+    #         success = True
+    #         status += "CREATE_BATCH_ROW_ACTION_MEASURE-BATCH_ROW_ACTION_MEASURE_CREATED"
+    #     else:
+    #         # # if batch_header_id is same then it is a duplicate entry?
+    #         existing_measure_entry = existing_batch_row_action_measure_query.first()
+    #         if one_batch_row.id != existing_measure_entry.batch_row_id:
+    #             # duplicate entry, create a new entry but set kind_of_action as DO_NOT_PROCESS and
+    #             # set status as duplicate
+    #             # kind_of_action = 'DO_NOT_PROCESS'
+    #             updated_values = {
+    #                 'measure_title': measure_title,
+    #                 'state_code': state_code,
+    #                 'measure_text': measure_text,
+    #                 'measure_subtitle': measure_subtitle,
+    #                 'measure_we_vote_id': measure_we_vote_id,
+    #                 'kind_of_action': 'DO_NOT_PROCESS',
+    #                 'ctcl_uuid': ctcl_uuid,
+    #                 'google_civic_election_id': google_civic_election_id,
+    #                 'status': 'DUPLICATE_ELECTED_OFFICE_ENTRY'
+    #             }
+    #
+    #             batch_row_action_measure, new_action_measure_created = BatchRowActionMeasure.objects.update_or_create(
+    #                 batch_header_id=batch_description.batch_header_id,
+    #                 batch_row_id=one_batch_row.id,
+    #                 defaults=updated_values)
+    #             status += 'CREATE_BATCH_ROW_ACTION_MEASURE-BATCH_ROW_ACTION_MEASURE_DUPLICATE_ENTRY'
+    #             success = True
+    #             # TODO should duplicate entry be counted as updated?
+    #             action_measure_updated = True
+    #             # this is a duplicate entry, mark it's kind_of_action as DO_NOT_PROCESS and status as duplicate
+    #         else:
+    #             # existing entry but not duplicate
+    #             status += 'CREATE_BATCH_ROW_ACTION_MEASURE-BATCH_ROW_ACTION_MEASURE_ENTRY_EXISTS'
+    #             success = True
+    #             # TODO update existing entry is not yet handled
+    #             batch_row_action_measure = existing_batch_row_action_measure_query.get()
+    # except Exception as e:
+    #     batch_row_action_measure = BatchRowActionMeasure()
+    #     batch_row_action_found = False
+    #     success = False
+    #     new_action_measure_created = False
+    #     status = "CREATE_BATCH_ROW_ACTION_MEASURE-BATCH_ROW_ACTION_MEASURE_RETRIEVE_ERROR"
+    #     handle_exception(e, logger=logger, exception_message=status)
+
+    # If we are missing required variables, don't create
+    if kind_of_action == IMPORT_CREATE:
+        if not positive_value_exists(measure_title) or not positive_value_exists(state_code) or not \
+                positive_value_exists(google_civic_election_id):
+            kind_of_action = IMPORT_TO_BE_DETERMINED
+            status += "COULD_NOT_CREATE_MEASURE_ENTRY-MISSING_REQUIRED_VARIABLES "
+
+    # Now save the data
+    try:
+        batch_row_action_measure.ballotpedia_district_id = convert_to_int(ballotpedia_district_id)
+        batch_row_action_measure.ballotpedia_election_id = convert_to_int(ballotpedia_election_id)
+        batch_row_action_measure.ballotpedia_measure_id = convert_to_int(ballotpedia_measure_id)
+        batch_row_action_measure.ballotpedia_measure_name = ballotpedia_measure_name
+        batch_row_action_measure.ballotpedia_measure_status = ballotpedia_measure_status
+        batch_row_action_measure.ballotpedia_measure_summary = ballotpedia_measure_summary
+        batch_row_action_measure.ballotpedia_measure_text = ballotpedia_measure_text
+        batch_row_action_measure.ballotpedia_measure_url = ballotpedia_measure_url
+        batch_row_action_measure.ctcl_uuid = ctcl_uuid
+        batch_row_action_measure.election_day_text = election_day_text
+        batch_row_action_measure.electoral_district_id = electoral_district_id
+        batch_row_action_measure.google_civic_election_id = google_civic_election_id
+        batch_row_action_measure.measure_text = measure_text
+        batch_row_action_measure.measure_title = measure_title
+        batch_row_action_measure.measure_we_vote_id = measure_we_vote_id
+        batch_row_action_measure.measure_subtitle = measure_subtitle
+        batch_row_action_measure.state_code = state_code
+        batch_row_action_measure.status = status
+        batch_row_action_measure.kind_of_action = kind_of_action
+        batch_row_action_measure.save()
+        success = True
     except Exception as e:
-        batch_row_action_measure = BatchRowActionMeasure()
-        batch_row_action_found = False
         success = False
-        new_action_measure_created = False
-        status = "CREATE_BATCH_ROW_ACTION_MEASURE-BATCH_ROW_ACTION_MEASURE_RETRIEVE_ERROR"
-        handle_exception(e, logger=logger, exception_message=status)
+        status += "BATCH_ROW_ACTION_MEASURE_UNABLE_TO_SAVE "
+
+    # If a state was figured out, then update the batch_row with the state_code so we can use that for filtering
+    if positive_value_exists(state_code) and state_code.lower() != one_batch_row.state_code:
+        try:
+            one_batch_row.state_code = state_code
+            one_batch_row.save()
+        except Exception as e:
+            pass
 
     results = {
         'success':                      success,
         'status':                       status,
-        'new_action_measure_created':   new_action_measure_created,
-        'action_measure_updated':       action_measure_updated,
+        # 'new_action_measure_created':   new_action_measure_created,
+        # 'action_measure_updated':       action_measure_updated,
+        'batch_row_action_updated':     batch_row_action_updated,
+        'batch_row_action_created':     batch_row_action_created,
         'batch_row_action_measure':     batch_row_action_measure,
     }
     return results
@@ -883,6 +1012,8 @@ def create_batch_row_action_contest_office(batch_description, batch_header_map, 
             contest_office_name = contest_office.office_name
 
     if positive_value_exists(ctcl_uuid):
+        # If we are looking at a record with a ctcl_uuid, the we want to skip over a search by non unique
+        #  identifiers.
         results = contest_office_manager.retrieve_contest_office_from_ctcl_uuid(ctcl_uuid)
         if results['contest_office_found']:
             contest_office = results['contest_office']
@@ -892,8 +1023,6 @@ def create_batch_row_action_contest_office(batch_description, batch_header_map, 
         else:
             kind_of_action = IMPORT_CREATE
     else:
-        # If we are looking at a record with a ctcl_uuid, the we want to skip over a search by non unique
-        #  identifiers.
         if not positive_value_exists(contest_office_name) and positive_value_exists(ballotpedia_office_name):
             contest_office_name = ballotpedia_office_name
 
@@ -2861,6 +2990,17 @@ def import_measure_data_from_batch_row_actions(batch_header_id, batch_row_id,
         ctcl_uuid = one_batch_row_action.ctcl_uuid
         measure_text = one_batch_row_action.measure_text
         state_code = one_batch_row_action.state_code
+        defaults = {
+            'election_day_text':            one_batch_row_action.election_day_text,
+            'ballotpedia_district_id':      one_batch_row_action.ballotpedia_district_id,
+            'ballotpedia_election_id':      one_batch_row_action.ballotpedia_election_id,
+            'ballotpedia_measure_id':       one_batch_row_action.ballotpedia_measure_id,
+            'ballotpedia_measure_name':     one_batch_row_action.ballotpedia_measure_name,
+            'ballotpedia_measure_status':   one_batch_row_action.ballotpedia_measure_status,
+            'ballotpedia_measure_summary':  one_batch_row_action.ballotpedia_measure_summary,
+            'ballotpedia_measure_text':     one_batch_row_action.ballotpedia_measure_text,
+            'ballotpedia_measure_url':      one_batch_row_action.ballotpedia_measure_url,
+        }
 
         # Look up ContestMeasure to see if an entry exists
         # These five parameters are needed to look up in Measure table for a match
@@ -2870,7 +3010,8 @@ def import_measure_data_from_batch_row_actions(batch_header_id, batch_row_id,
             if create_entry_flag:
                 results = contest_measure_manager.create_measure_row_entry(measure_title, measure_subtitle,
                                                                            measure_text, state_code, ctcl_uuid,
-                                                                           google_civic_election_id)
+                                                                           google_civic_election_id,
+                                                                           defaults)
                 if results['new_measure_created']:
                     number_of_measures_created += 1
                     success = True
@@ -2888,7 +3029,8 @@ def import_measure_data_from_batch_row_actions(batch_header_id, batch_row_id,
                 measure_we_vote_id = one_batch_row_action.measure_we_vote_id
                 results = contest_measure_manager.update_measure_row_entry(measure_title, measure_subtitle,
                                                                            measure_text, state_code, ctcl_uuid,
-                                                                           google_civic_election_id, measure_we_vote_id)
+                                                                           google_civic_election_id, measure_we_vote_id,
+                                                                           defaults)
                 if results['measure_updated']:
                     number_of_measures_updated += 1
                     success = True
@@ -3036,28 +3178,6 @@ def import_candidate_data_from_batch_row_actions(batch_header_id, batch_row_id, 
         # These update values are using the field names in the CandidateCampaign class
         update_values = {}
         # We only want to add data, not remove any
-        if positive_value_exists(one_batch_row_action.candidate_name):
-            update_values['candidate_name'] = one_batch_row_action.candidate_name
-        if positive_value_exists(one_batch_row_action.contest_office_we_vote_id):
-            update_values['contest_office_we_vote_id'] = one_batch_row_action.contest_office_we_vote_id
-        if positive_value_exists(one_batch_row_action.contest_office_id):
-            update_values['contest_office_id'] = one_batch_row_action.contest_office_id
-        if positive_value_exists(one_batch_row_action.contest_office_name):
-            update_values['contest_office_name'] = one_batch_row_action.contest_office_name
-        if positive_value_exists(one_batch_row_action.party):
-            update_values['party'] = one_batch_row_action.party
-        if positive_value_exists(one_batch_row_action.candidate_is_incumbent):
-            update_values['candidate_is_incumbent'] = one_batch_row_action.candidate_is_incumbent
-        if positive_value_exists(one_batch_row_action.candidate_is_top_ticket):
-            update_values['candidate_is_top_ticket'] = one_batch_row_action.candidate_is_top_ticket
-        if positive_value_exists(one_batch_row_action.candidate_participation_status):
-            update_values['candidate_participation_status'] = one_batch_row_action.candidate_participation_status
-        if positive_value_exists(one_batch_row_action.ctcl_uuid):
-            update_values['ctcl_uuid'] = one_batch_row_action.ctcl_uuid
-        if positive_value_exists(google_civic_election_id):
-            update_values['google_civic_election_id'] = google_civic_election_id
-        if positive_value_exists(one_batch_row_action.state_code):
-            update_values['state_code'] = one_batch_row_action.state_code
         if positive_value_exists(one_batch_row_action.ballotpedia_candidate_id):
             update_values['ballotpedia_candidate_id'] = one_batch_row_action.ballotpedia_candidate_id
         if positive_value_exists(one_batch_row_action.ballotpedia_candidate_name):
@@ -3068,14 +3188,44 @@ def import_candidate_data_from_batch_row_actions(batch_header_id, batch_row_id, 
             update_values['ballotpedia_candidate_url'] = one_batch_row_action.ballotpedia_candidate_url
         if positive_value_exists(one_batch_row_action.ballotpedia_election_id):
             update_values['ballotpedia_election_id'] = one_batch_row_action.ballotpedia_election_id
+        if positive_value_exists(one_batch_row_action.ballotpedia_image_id):
+            update_values['ballotpedia_image_id'] = one_batch_row_action.ballotpedia_image_id
+        if positive_value_exists(one_batch_row_action.birth_day_text):
+            update_values['birth_day_text'] = one_batch_row_action.birth_day_text
+        if positive_value_exists(one_batch_row_action.candidate_gender):
+            update_values['candidate_gender'] = one_batch_row_action.candidate_gender
+        if positive_value_exists(one_batch_row_action.candidate_is_incumbent):
+            update_values['candidate_is_incumbent'] = one_batch_row_action.candidate_is_incumbent
+        if positive_value_exists(one_batch_row_action.candidate_is_top_ticket):
+            update_values['candidate_is_top_ticket'] = one_batch_row_action.candidate_is_top_ticket
+        if positive_value_exists(one_batch_row_action.candidate_name):
+            update_values['candidate_name'] = one_batch_row_action.candidate_name
+        if positive_value_exists(one_batch_row_action.candidate_participation_status):
+            update_values['candidate_participation_status'] = one_batch_row_action.candidate_participation_status
         if positive_value_exists(one_batch_row_action.candidate_twitter_handle):
             update_values['candidate_twitter_handle'] = one_batch_row_action.candidate_twitter_handle
         if positive_value_exists(one_batch_row_action.candidate_url):
             update_values['candidate_url'] = one_batch_row_action.candidate_url
+        if positive_value_exists(one_batch_row_action.contest_office_we_vote_id):
+            update_values['contest_office_we_vote_id'] = one_batch_row_action.contest_office_we_vote_id
+        if positive_value_exists(one_batch_row_action.contest_office_id):
+            update_values['contest_office_id'] = one_batch_row_action.contest_office_id
+        if positive_value_exists(one_batch_row_action.contest_office_name):
+            update_values['contest_office_name'] = one_batch_row_action.contest_office_name
+        if positive_value_exists(one_batch_row_action.crowdpac_candidate_id):
+            update_values['crowdpac_candidate_id'] = one_batch_row_action.crowdpac_candidate_id
+        if positive_value_exists(one_batch_row_action.ctcl_uuid):
+            update_values['ctcl_uuid'] = one_batch_row_action.ctcl_uuid
         if positive_value_exists(one_batch_row_action.facebook_url):
             update_values['facebook_url'] = one_batch_row_action.facebook_url
+        if positive_value_exists(google_civic_election_id):
+            update_values['google_civic_election_id'] = google_civic_election_id
+        if positive_value_exists(one_batch_row_action.party):
+            update_values['party'] = one_batch_row_action.party
         if positive_value_exists(one_batch_row_action.photo_url):
             update_values['photo_url'] = one_batch_row_action.photo_url
+        if positive_value_exists(one_batch_row_action.state_code):
+            update_values['state_code'] = one_batch_row_action.state_code
 
         candidate_manager = CandidateCampaignManager()
         if create_entry_flag:

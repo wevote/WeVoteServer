@@ -60,12 +60,29 @@ class ContestMeasure(models.Model):
     district_id = models.CharField(verbose_name="google civic district id", max_length=255, null=True, blank=True)
     # State code
     state_code = models.CharField(verbose_name="state this measure affects", max_length=2, null=True, blank=True)
+    # Day of the election in YYYY-MM-DD format.
+    election_day_text = models.CharField(verbose_name="election day", max_length=255, null=True, blank=True)
 
     wikipedia_page_id = models.BigIntegerField(verbose_name="pageid", null=True, blank=True)
     wikipedia_page_title = models.CharField(
         verbose_name="Page title on Wikipedia", max_length=255, null=True, blank=True)
     wikipedia_photo_url = models.URLField(verbose_name='url of wikipedia logo', blank=True, null=True)
 
+    ballotpedia_district_id = models.PositiveIntegerField(
+        verbose_name="ballotpedia district id", default=0, null=False, blank=False)
+    ballotpedia_election_id = models.PositiveIntegerField(
+        verbose_name="ballotpedia election id", default=0, null=False, blank=False)
+    ballotpedia_measure_id = models.PositiveIntegerField(
+        verbose_name="ballotpedia measure id", default=0, null=False, blank=False)
+    ballotpedia_measure_name = models.CharField(
+        verbose_name="ballotpedia measure name", max_length=255, null=True, blank=True)
+    ballotpedia_measure_status = models.CharField(
+        verbose_name="ballotpedia measure status", max_length=255, null=True, blank=True)
+    ballotpedia_measure_summary = models.TextField(
+        verbose_name="ballotpedia measure summary", null=True, blank=True, default="")
+    ballotpedia_measure_text = models.TextField(
+        verbose_name="ballotpedia measure text", null=True, blank=True, default="")
+    ballotpedia_measure_url = models.URLField(verbose_name='ballotpedia url of measure', blank=True, null=True)
     ballotpedia_page_title = models.CharField(
         verbose_name="Page title on Ballotpedia", max_length=255, null=True, blank=True)
     ballotpedia_photo_url = models.URLField(verbose_name='url of ballotpedia logo', blank=True, null=True)
@@ -445,7 +462,7 @@ class ContestMeasureManager(models.Model):
         return state_code
 
     def create_measure_row_entry(self, measure_title, measure_subtitle, measure_text, state_code, ctcl_uuid,
-                                        google_civic_election_id):
+                                 google_civic_election_id, defaults):
         """
         Create ContestMeasure table entry with Measure details from CTCL data
         :param measure_title: 
@@ -454,7 +471,8 @@ class ContestMeasureManager(models.Model):
         :param state_code: 
         :param ctcl_uuid: 
         :param google_civic_election_id: 
-        :return: 
+        :param defaults:
+        :return:
         """
         success = False
         status = ""
@@ -468,15 +486,34 @@ class ContestMeasureManager(models.Model):
                 state_code=state_code,ctcl_uuid=ctcl_uuid, google_civic_election_id=google_civic_election_id)
             if new_measure:
                 success = True
-                status = "CREATE_MEASURE_ROW_ENTRY-MEASURE_CREATED"
+                status = "CREATE_MEASURE_ROW_ENTRY-MEASURE_CREATED "
                 new_measure_created = True
+                if 'election_day_text' in defaults:
+                    new_measure.election_day_text = defaults['election_day_text']
+                if 'ballotpedia_district_id' in defaults:
+                    new_measure.ballotpedia_district_id = defaults['ballotpedia_district_id']
+                if 'ballotpedia_election_id' in defaults:
+                    new_measure.ballotpedia_election_id = defaults['ballotpedia_election_id']
+                if 'ballotpedia_measure_id' in defaults:
+                    new_measure.ballotpedia_measure_id = defaults['ballotpedia_measure_id']
+                if 'ballotpedia_measure_name' in defaults:
+                    new_measure.ballotpedia_measure_name = defaults['ballotpedia_measure_name']
+                if 'ballotpedia_measure_status' in defaults:
+                    new_measure.ballotpedia_measure_status = defaults['ballotpedia_measure_status']
+                if 'ballotpedia_measure_summary' in defaults:
+                    new_measure.ballotpedia_measure_summary = defaults['ballotpedia_measure_summary']
+                if 'ballotpedia_measure_text' in defaults:
+                    new_measure.ballotpedia_measure_text = defaults['ballotpedia_measure_text']
+                if 'ballotpedia_measure_url' in defaults:
+                    new_measure.ballotpedia_measure_url = defaults['ballotpedia_measure_url']
+                new_measure.save()
             else:
                 success = False
-                status = "CREATE_MEASURE_ROW_ENTRY-MEASURE_CREATE_FAILED"
+                status = "CREATE_MEASURE_ROW_ENTRY-MEASURE_CREATE_FAILED "
         except Exception as e:
             success = False
             new_measure_created = False
-            status = "CREATE_MEASURE_ROW_ENTRY-MEASURE_RETRIEVE_ERROR"
+            status = "CREATE_MEASURE_ROW_ENTRY-MEASURE_CREATE_ERROR "
             handle_exception(e, logger=logger, exception_message=status)
 
         results = {
@@ -489,7 +526,7 @@ class ContestMeasureManager(models.Model):
         return results
 
     def update_measure_row_entry(self, measure_title, measure_subtitle, measure_text, state_code, ctcl_uuid,
-                                 google_civic_election_id, measure_we_vote_id):
+                                 google_civic_election_id, measure_we_vote_id, defaults):
         """
             Update ContestMeasure table entry with matching we_vote_id 
         :param measure_title: 
@@ -499,7 +536,8 @@ class ContestMeasureManager(models.Model):
         :param ctcl_uuid: 
         :param google_civic_election_id: 
         :param measure_we_vote_id:  
-        :return: 
+        :param defaults:
+        :return:
         """
         success = False
         status = ""
@@ -516,6 +554,24 @@ class ContestMeasureManager(models.Model):
                 existing_measure_entry.state_code = state_code
                 existing_measure_entry.ctcl_uuid = ctcl_uuid
                 existing_measure_entry.google_civic_election_id = google_civic_election_id
+                if 'election_day_text' in defaults:
+                    existing_measure_entry.election_day_text = defaults['election_day_text']
+                if 'ballotpedia_district_id' in defaults:
+                    existing_measure_entry.ballotpedia_district_id = defaults['ballotpedia_district_id']
+                if 'ballotpedia_election_id' in defaults:
+                    existing_measure_entry.ballotpedia_election_id = defaults['ballotpedia_election_id']
+                if 'ballotpedia_measure_id' in defaults:
+                    existing_measure_entry.ballotpedia_measure_id = defaults['ballotpedia_measure_id']
+                if 'ballotpedia_measure_name' in defaults:
+                    existing_measure_entry.ballotpedia_measure_name = defaults['ballotpedia_measure_name']
+                if 'ballotpedia_measure_status' in defaults:
+                    existing_measure_entry.ballotpedia_measure_status = defaults['ballotpedia_measure_status']
+                if 'ballotpedia_measure_summary' in defaults:
+                    existing_measure_entry.ballotpedia_measure_summary = defaults['ballotpedia_measure_summary']
+                if 'ballotpedia_measure_text' in defaults:
+                    existing_measure_entry.ballotpedia_measure_text = defaults['ballotpedia_measure_text']
+                if 'ballotpedia_measure_url' in defaults:
+                    existing_measure_entry.ballotpedia_measure_url = defaults['ballotpedia_measure_url']
                 # now go ahead and save this entry (update)
                 existing_measure_entry.save()
                 measure_updated = True

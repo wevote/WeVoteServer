@@ -236,7 +236,7 @@ def measure_new_view(request):
 
 
 @login_required
-def measure_edit_view(request, measure_id):
+def measure_edit_view(request, measure_id=0, measure_we_vote_id=""):
     authority_required = {'verified_volunteer'}  # admin, verified_volunteer
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
@@ -247,8 +247,14 @@ def measure_edit_view(request, measure_id):
     measure_id = convert_to_int(measure_id)
     measure_on_stage_found = False
     try:
-        measure_on_stage = ContestMeasure.objects.get(id=measure_id)
-        measure_on_stage_found = True
+        if positive_value_exists(measure_id):
+            measure_on_stage = ContestMeasure.objects.get(id=measure_id)
+            measure_on_stage_found = True
+        elif positive_value_exists(measure_we_vote_id):
+            measure_on_stage = ContestMeasure.objects.get(we_vote_id=measure_we_vote_id)
+            measure_on_stage_found = True
+        else:
+            measure_on_stage = ContestMeasure()
     except ContestMeasure.MultipleObjectsReturned as e:
         handle_record_found_more_than_one_exception(e, logger=logger)
         measure_on_stage = ContestMeasure()

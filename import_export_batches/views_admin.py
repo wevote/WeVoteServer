@@ -5,6 +5,7 @@
 from .models import BatchDescription, BatchHeader, BatchHeaderMap, BatchManager, BatchRow, BatchSet, \
     CONTEST_OFFICE, ELECTED_OFFICE, IMPORT_BALLOT_ITEM, \
     BATCH_HEADER_MAP_CANDIDATES_TO_BALLOTPEDIA_CANDIDATES, BATCH_HEADER_MAP_CONTEST_OFFICES_TO_BALLOTPEDIA_RACES, \
+    BATCH_HEADER_MAP_MEASURES_TO_BALLOTPEDIA_MEASURES, \
     BATCH_IMPORT_KEYS_ACCEPTED_FOR_CANDIDATES, BATCH_IMPORT_KEYS_ACCEPTED_FOR_CONTEST_OFFICES, \
     BATCH_IMPORT_KEYS_ACCEPTED_FOR_ELECTED_OFFICES, BATCH_IMPORT_KEYS_ACCEPTED_FOR_MEASURES, \
     BATCH_IMPORT_KEYS_ACCEPTED_FOR_ORGANIZATIONS, BATCH_IMPORT_KEYS_ACCEPTED_FOR_POLITICIANS, \
@@ -282,6 +283,7 @@ def batch_list_process_view(request):
                                         # office
                                         one_office_json['ballotpedia_district_id'] = inner_office_json['district']
                                         one_office_json['ballotpedia_office_id'] = inner_office_json['id']
+                                        one_office_json['state_code'] = inner_office_json['district_state']
                                     except KeyError:
                                         pass
                                     modified_races_json_list.append(one_office_json)
@@ -308,6 +310,7 @@ def batch_list_process_view(request):
                                         # race
                                         one_candidate_json['ballotpedia_office_id'] = inner_race_json['office']
                                         one_candidate_json['ballotpedia_election_id'] = inner_race_json['election']
+                                        one_candidate_json['state_code'] = inner_race_json['election_district_state']
                                         # person
                                         one_candidate_json['ballotpedia_candidate_id'] = inner_person_json['id']
                                         one_candidate_json['ballotpedia_candidate_name'] = inner_person_json['name']
@@ -336,6 +339,29 @@ def batch_list_process_view(request):
                                 results = batch_manager.create_batch_from_json(
                                     filename, modified_candidates_json_list,
                                     BATCH_HEADER_MAP_CANDIDATES_TO_BALLOTPEDIA_CANDIDATES, kind_of_batch,
+                                    google_civic_election_id, organization_we_vote_id)
+                            elif structured_json['meta']['table'] == 'ballot_measures':
+                                measures_json_list = structured_json['data']
+                                modified_measures_json_list = []
+                                # Loop through this data and move ['office']['data'] into root level
+                                for one_measure_json in measures_json_list:
+                                    try:
+                                        inner_election_json = one_measure_json['election']['data']
+                                        inner_district_json = one_measure_json['district']['data']
+                                        # Add our own key/value pairs
+                                        # election
+                                        one_measure_json['ballotpedia_election_id'] = inner_election_json['id']
+                                        # district
+                                        one_measure_json['ballotpedia_district_id'] = inner_district_json['id']
+                                        one_measure_json['state_code'] = inner_district_json['state']
+                                    except KeyError:
+                                        pass
+                                    modified_measures_json_list.append(one_measure_json)
+
+                                filename = "Measures from Ballotpedia API"
+                                results = batch_manager.create_batch_from_json(
+                                    filename, modified_measures_json_list,
+                                    BATCH_HEADER_MAP_MEASURES_TO_BALLOTPEDIA_MEASURES, kind_of_batch,
                                     google_civic_election_id, organization_we_vote_id)
             else:
                 # check file type

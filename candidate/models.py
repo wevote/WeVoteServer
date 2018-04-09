@@ -24,10 +24,15 @@ CANDIDATE_UNIQUE_IDENTIFIERS = [
     'ballot_guide_official_statement',
     'ballotpedia_candidate_id',
     'ballotpedia_candidate_name',
+    'ballotpedia_candidate_summary',
     'ballotpedia_candidate_url',
+    'ballotpedia_election_id',
+    'ballotpedia_image_id',
     'ballotpedia_page_title',
     'ballotpedia_photo_url',
+    'birth_day_text',
     'candidate_email',
+    'candidate_gender',
     'candidate_is_incumbent',
     'candidate_is_top_ticket',
     'candidate_participation_status',
@@ -38,6 +43,7 @@ CANDIDATE_UNIQUE_IDENTIFIERS = [
     'contest_office_id',
     'contest_office_name',
     'contest_office_we_vote_id',
+    'crowdpac_candidate_id',
     'ctcl_uuid',
     'facebook_profile_image_url_https',
     'facebook_url',
@@ -1949,13 +1955,13 @@ class CandidateCampaignManager(models.Model):
                 if 'ballotpedia_candidate_url' in update_values:
                     existing_candidate_entry.ballotpedia_candidate_url = update_values['ballotpedia_candidate_url']
                     values_changed = True
-                if 'ballotpedia_district_id' in update_values:
-                    existing_candidate_entry.ballotpedia_district_id = \
-                        convert_to_int(update_values['ballotpedia_district_id'])
-                    values_changed = True
                 if 'ballotpedia_election_id' in update_values:
                     existing_candidate_entry.ballotpedia_election_id = \
                         convert_to_int(update_values['ballotpedia_election_id'])
+                    values_changed = True
+                if 'ballotpedia_image_id' in update_values:
+                    existing_candidate_entry.ballotpedia_image_id = \
+                        convert_to_int(update_values['ballotpedia_image_id'])
                     values_changed = True
                 if 'birth_day_text' in update_values:
                     existing_candidate_entry.birth_day_text = update_values['birth_day_text']
