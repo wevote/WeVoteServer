@@ -650,11 +650,8 @@ def batch_action_list_export_voters_view(request):
     batch_created_result = dict()
     if result and result['voter_list']:
         # Create batch of voters registered for newsletter
-        csv_response = export_csv(result['voter_list'], BATCH_IMPORT_KEYS_ACCEPTED_FOR_VOTERS,
-                                  BATCH_IMPORT_KEYS_ACCEPTED_FOR_VOTERS, filename=filename)
-        # csv_data = csv.reader(csv_response)
-        csv_data = csv.reader(codecs.iterdecode(csv_response, 'utf-8'))
-        batch_created_result = batch_manager.create_batch_from_csv_data(filename, csv_data, kind_of_batch)
+        batch_created_result = batch_manager.create_batch_from_object_list(result['voter_list'],
+                                                                          organization_we_vote_id)
 
     if batch_created_result and batch_created_result['batch_header_id']:
         batch_header_id = batch_created_result['batch_header_id']
