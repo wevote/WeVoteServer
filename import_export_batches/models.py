@@ -70,12 +70,13 @@ BATCH_IMPORT_KEYS_ACCEPTED_FOR_CANDIDATES = {
     'ballotpedia_office_id': 'ballotpedia_office_id *',  # For matching only
     'birth_day_text': 'birth_day_text',
     'candidate_batch_id': 'candidate_batch_id',
-    'candidate_name': 'candidate_name',
     'candidate_ctcl_uuid': 'candidate_ctcl_uuid',
     'candidate_ctcl_person_id': 'candidate_ctcl_person_id',
     'candidate_email': 'candidate_email',
+    'candidate_gender': 'candidate_gender',
     'candidate_is_top_ticket': 'candidate_is_top_ticket',
     'candidate_is_incumbent': 'candidate_is_incumbent',
+    'candidate_name': 'candidate_name',
     'candidate_participation_status': 'candidate_participation_status',
     'candidate_party_name': 'candidate_party_name',
     'candidate_profile_image_url': 'candidate_profile_image_url',
@@ -102,6 +103,7 @@ BATCH_HEADER_MAP_CANDIDATES_TO_BALLOTPEDIA_CANDIDATES = {
     'ballotpedia_office_id': 'ballotpedia_office_id',
     'birth_day_text': 'birth_day_text',
     'candidate_email': 'candidate_email',
+    'candidate_gender': 'candidate_gender',
     'candidate_participation_status': 'candidate_participation_status',
     'candidate_party_name': 'candidate_party_name',
     'candidate_twitter_handle': 'candidate_twitter_handle',
@@ -171,13 +173,37 @@ BATCH_IMPORT_KEYS_ACCEPTED_FOR_ELECTED_OFFICES = {
 }
 
 BATCH_IMPORT_KEYS_ACCEPTED_FOR_MEASURES = {
-    'measure_title': 'measure_title',
+    'ballotpedia_district_id': 'ballotpedia_district_id',
+    'ballotpedia_election_id': 'ballotpedia_election_id',
+    'ballotpedia_measure_id': 'ballotpedia_measure_id',
+    'ballotpedia_measure_name': 'ballotpedia_measure_name',
+    'ballotpedia_measure_status': 'ballotpedia_measure_status',
+    'ballotpedia_measure_summary': 'ballotpedia_measure_summary',
+    'ballotpedia_measure_text': 'ballotpedia_measure_text',
+    'ballotpedia_measure_url': 'ballotpedia_measure_url',
+    'ctcl_uuid': 'ctcl_uuid',
+    'election_day_text': 'election_day_text',
     'electoral_district_id': 'electoral_district_id',
-    'state_code': 'state_code',
+    'measure_title': 'measure_title',
     'measure_name': 'measure_name',
     'measure_text': 'measure_text',
-    'measure_sub_title': 'measure_sub_title',
-    'ctcl_uuid': 'ctcl_uuid',
+    'measure_subtitle': 'measure_subtitle',
+    'state_code': 'state_code',
+}
+
+# We Vote contest office key on the left, and Ballotpedia field name on right
+# This gives us the option of putting the same field from a remote source into two We Vote fields
+BATCH_HEADER_MAP_MEASURES_TO_BALLOTPEDIA_MEASURES = {
+    'ballotpedia_district_id': 'ballotpedia_district_id',
+    'ballotpedia_election_id': 'ballotpedia_election_id',
+    'ballotpedia_measure_id': 'id',
+    'ballotpedia_measure_name': 'name',
+    'ballotpedia_measure_status': 'status',
+    'ballotpedia_measure_summary': 'summary',
+    'ballotpedia_measure_text': 'text',
+    'ballotpedia_measure_url': 'url',
+    'election_day_text': 'election_date',
+    'state_code': 'state_code',
 }
 
 BATCH_IMPORT_KEYS_ACCEPTED_FOR_ORGANIZATIONS = {
@@ -1066,17 +1092,17 @@ class BatchManager(models.Model):
                                                                          batch_row_id=batch_row_id)
             batch_row_action_found = True
             success = True
-            status = "BATCH_ROW_ACTION_MEASURE_RETRIEVED"
+            status = "BATCH_ROW_ACTION_MEASURE_RETRIEVED "
         except BatchRowActionMeasure.DoesNotExist:
             batch_row_action_measure = BatchRowActionMeasure()
             batch_row_action_found = False
             success = True
-            status = "BATCH_ROW_ACTION_MEASURE_NOT_FOUND"
+            status = "BATCH_ROW_ACTION_MEASURE_NOT_FOUND "
         except Exception as e:
             batch_row_action_measure = BatchRowActionMeasure()
             batch_row_action_found = False
             success = False
-            status = "BATCH_ROW_ACTION_MEASURE_RETRIEVE_ERROR"
+            status = "BATCH_ROW_ACTION_MEASURE_RETRIEVE_ERROR "
 
         results = {
             'success':                  success,
@@ -1497,7 +1523,7 @@ class BatchManager(models.Model):
                         batch_header_map = BatchHeaderMap.objects.create(
                             batch_header_id=batch_header_id,
                             batch_header_map_000='measure_batch_id',
-                            batch_header_map_001='measure_sub_title',
+                            batch_header_map_001='measure_subtitle',
                             batch_header_map_002='measure_title',
                             batch_header_map_003='electoral_district_id',
                             batch_header_map_004='measure_ctcl_uuid',
@@ -4067,12 +4093,29 @@ class BatchRowActionMeasure(models.Model):
     district_id = models.CharField(verbose_name="google civic district id", max_length=255, null=True, blank=True)
     # State code
     state_code = models.CharField(verbose_name="state this measure affects", max_length=2, null=True, blank=True)
+    # Day of the election in YYYY-MM-DD format.
+    election_day_text = models.CharField(verbose_name="election day", max_length=255, null=True, blank=True)
 
     wikipedia_page_id = models.BigIntegerField(verbose_name="pageid", null=True, blank=True)
     wikipedia_page_title = models.CharField(
         verbose_name="Page title on Wikipedia", max_length=255, null=True, blank=True)
     wikipedia_photo_url = models.URLField(verbose_name='url of wikipedia logo', blank=True, null=True)
 
+    ballotpedia_district_id = models.PositiveIntegerField(
+        verbose_name="ballotpedia district id", default=0, null=False, blank=False)
+    ballotpedia_election_id = models.PositiveIntegerField(
+        verbose_name="ballotpedia election id", default=0, null=False, blank=False)
+    ballotpedia_measure_id = models.PositiveIntegerField(
+        verbose_name="ballotpedia measure id", default=0, null=False, blank=False)
+    ballotpedia_measure_name = models.CharField(
+        verbose_name="ballotpedia measure name", max_length=255, null=True, blank=True)
+    ballotpedia_measure_status = models.CharField(
+        verbose_name="ballotpedia measure status", max_length=255, null=True, blank=True)
+    ballotpedia_measure_summary = models.TextField(
+        verbose_name="ballotpedia measure summary", null=True, blank=True, default="")
+    ballotpedia_measure_text = models.TextField(
+        verbose_name="ballotpedia measure text", null=True, blank=True, default="")
+    ballotpedia_measure_url = models.URLField(verbose_name='ballotpedia url of measure', blank=True, null=True)
     ballotpedia_page_title = models.CharField(
         verbose_name="Page title on Ballotpedia", max_length=255, null=True, blank=True)
     ballotpedia_photo_url = models.URLField(verbose_name='url of ballotpedia logo', blank=True, null=True)

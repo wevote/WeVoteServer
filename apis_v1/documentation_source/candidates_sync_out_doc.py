@@ -28,26 +28,33 @@ def candidates_sync_out_doc_template_values(url_root):
     }
 
     api_response = '[{\n' \
-                   '  "we_vote_id": string,\n' \
-                   '  "ballotpedia_candidate_id": integer,\n' \
-                   '  "maplight_id": integer,\n' \
-                   '  "vote_smart_id": integer,\n' \
                    '  "ballot_guide_official_statement": string,\n' \
+                   '  "ballotpedia_candidate_id": integer,\n' \
                    '  "ballotpedia_candidate_name": string,\n' \
+                   '  "ballotpedia_candidate_summary": string,\n' \
                    '  "ballotpedia_candidate_url": string,\n' \
+                   '  "ballotpedia_election_id": integer,\n' \
+                   '  "ballotpedia_image_id": integer,\n' \
                    '  "ballotpedia_page_title": string,\n' \
                    '  "ballotpedia_photo_url": string,\n' \
+                   '  "birth_day_text": string,\n' \
                    '  "candidate_email": string,\n' \
+                   '  "candidate_gender": string,\n' \
+                   '  "candidate_is_incumbent": boolean,\n' \
+                   '  "candidate_is_top_ticket": boolean,\n' \
                    '  "candidate_name": string,\n' \
+                   '  "candidate_participation_status": string,\n' \
                    '  "candidate_phone": string,\n' \
                    '  "candidate_twitter_handle": string,\n' \
                    '  "candidate_url": string,\n' \
                    '  "contest_office_we_vote_id": string,\n' \
                    '  "contest_office_name": string,\n' \
+                   '  "crowdpac_candidate_id": integer,\n' \
                    '  "facebook_url": string,\n' \
                    '  "google_civic_candidate_name": string,\n' \
                    '  "google_civic_election_id": integer,\n' \
                    '  "google_plus_url": string,\n' \
+                   '  "maplight_id": integer,\n' \
                    '  "ocd_division_id": string,\n' \
                    '  "order_on_ballot": string,\n' \
                    '  "party": string,\n' \
@@ -63,9 +70,8 @@ def candidates_sync_out_doc_template_values(url_root):
                    '  "twitter_followers_count": integer,\n' \
                    '  "twitter_profile_image_url_https": string,\n' \
                    '  "twitter_description": string,\n' \
-                   '  "candidate_participation_status": string,\n' \
-                   '  "candidate_is_incumbent": boolean,\n' \
-                   '  "candidate_is_top_ticket": boolean,\n' \
+                   '  "vote_smart_id": integer,\n' \
+                   '  "we_vote_id": string,\n' \
                    '  "wikipedia_page_id": string,\n' \
                    '  "wikipedia_page_title": string,\n' \
                    '  "wikipedia_photo_url": string,\n' \
