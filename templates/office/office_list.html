@@ -94,9 +94,11 @@
             <td>Office Name</td>
             <td>State</td>
             <td>District ID</td>
+            <td>Ballotpedia District ID</td>
             <td># of Candidates</td>
             <td>Ocd Division ID</td>
-            <td>Ballotpedia office ID</td>
+            <td>Ballotpedia Race ID</td>
+            <td>Ballotpedia Elected Office ID</td>
         </tr>
     {% for office in office_list %}
         <tr>
@@ -113,8 +115,10 @@
             </a></td>
             <td>{{ office.state_code }}</td>
             <td>{{ office.district_id|default_if_none:"" }}</td>
+            <td>{{ office.ballotpedia_district_id|default_if_none:"" }}</td>
             <td>{{ office.candidate_count }}</td>
-            <td>{{ office.ocd_division_id }}</td>
+            <td>{{ office.ocd_division_id|default_if_none:"" }}</td>
+            <td>{{ office.ballotpedia_race_id }}</td>
             <td>{{ office.ballotpedia_office_id }}</td>
         </tr>
     {% endfor %}

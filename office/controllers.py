@@ -243,11 +243,14 @@ def offices_import_from_structured_json(structured_json):
             special = one_office['special'] if 'special' in one_office else ''
             maplight_id = one_office['maplight_id'] if 'maplight_id' in one_office else 0
             ballotpedia_id = one_office['ballotpedia_id'] if 'ballotpedia_id' in one_office else ''
+            # Equivalent to elected_office
             ballotpedia_office_id = one_office['ballotpedia_office_id'] if 'ballotpedia_office_id' in one_office else ''
             ballotpedia_office_name = one_office['ballotpedia_office_name'] \
                 if 'ballotpedia_office_name' in one_office else ''
             ballotpedia_office_url = one_office['ballotpedia_office_url'] \
                 if 'ballotpedia_office_url' in one_office else ''
+            # Equivalent to contest_office
+            ballotpedia_race_id = one_office['ballotpedia_race_id'] if 'ballotpedia_race_id' in one_office else ''
             ballotpedia_race_office_level = one_office['ballotpedia_race_office_level'] \
                 if 'ballotpedia_race_office_level' in one_office else ''
             wikipedia_id = one_office['wikipedia_id'] if 'wikipedia_id' in one_office else ''
@@ -274,6 +277,7 @@ def offices_import_from_structured_json(structured_json):
                 'ballotpedia_office_id': ballotpedia_office_id,
                 'ballotpedia_office_name': ballotpedia_office_name,
                 'ballotpedia_office_url': ballotpedia_office_url,
+                'ballotpedia_race_id': ballotpedia_race_id,
                 'ballotpedia_race_office_level': ballotpedia_race_office_level,
                 'wikipedia_id': wikipedia_id,
             }
@@ -364,6 +368,7 @@ def office_retrieve_for_api(office_id, office_we_vote_id):
             'ballotpedia_id':           contest_office.ballotpedia_id,
             'ballotpedia_office_id':    contest_office.ballotpedia_office_id,
             'ballotpedia_office_url':   contest_office.ballotpedia_office_url,
+            'ballotpedia_race_id':      contest_office.ballotpedia_race_id,
             'wikipedia_id':             contest_office.wikipedia_id,
             'number_voting_for':        contest_office.number_voting_for,
             'number_elected':           contest_office.number_elected,

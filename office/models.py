@@ -68,14 +68,15 @@ class ContestOffice(models.Model):
     ballotpedia_id = models.CharField(
         verbose_name="ballotpedia unique identifier", max_length=255, null=True, blank=True)
     ballotpedia_election_id = models.PositiveIntegerField(verbose_name="ballotpedia election id", null=True, blank=True)
-    ballotpedia_office_id = models.PositiveIntegerField(
-        verbose_name="ballotpedia integer id", null=True, blank=True)
+    # Equivalent to elected_office
+    ballotpedia_office_id = models.PositiveIntegerField(verbose_name="ballotpedia integer id", null=True, blank=True)
     # The office's name as passed over by Ballotpedia. This helps us do exact matches when id is missing
     ballotpedia_office_name = models.CharField(verbose_name="office name exactly as received from ballotpedia",
                                                max_length=255, null=True, blank=True)
     ballotpedia_office_url = models.URLField(verbose_name='url of office on ballotpedia', blank=True, null=True)
-    ballotpedia_district_id = models.PositiveIntegerField(
-        verbose_name="ballotpedia district id", null=True, blank=True)
+    ballotpedia_district_id = models.PositiveIntegerField(verbose_name="ballotpedia district id", null=True, blank=True)
+    # Equivalent to contest_office
+    ballotpedia_race_id = models.PositiveIntegerField(verbose_name="ballotpedia integer id", null=True, blank=True)
     # Federal, State, Local,
     ballotpedia_race_office_level = models.CharField(verbose_name="race office level", max_length=255, null=True,
                                                      blank=True)
@@ -182,14 +183,14 @@ class ContestOfficeManager(models.Model):
         contest_office_manager = ContestOfficeManager()
         return contest_office_manager.retrieve_contest_office(contest_office_id, contest_office_we_vote_id, maplight_id)
 
-    def retrieve_contest_office_from_ballotpedia_office_id(self, ballotpedia_office_id):
+    def retrieve_contest_office_from_ballotpedia_race_id(self, ballotpedia_race_id):
         contest_office_id = 0
         contest_office_we_vote_id = ''
         maplight_id = ''
         ctcl_uuid = ''
         contest_office_manager = ContestOfficeManager()
         return contest_office_manager.retrieve_contest_office(contest_office_id, contest_office_we_vote_id,
-                                                              maplight_id, ctcl_uuid, ballotpedia_office_id)
+                                                              maplight_id, ctcl_uuid, ballotpedia_race_id)
 
     def fetch_contest_office_id_from_maplight_id(self, maplight_id):
         contest_office_id = 0
@@ -507,7 +508,7 @@ class ContestOfficeManager(models.Model):
 
     # NOTE: searching by all other variables seems to return a list of objects
     def retrieve_contest_office(self, contest_office_id, contest_office_we_vote_id='',
-                                maplight_id=None, ctcl_uuid=None, ballotpedia_office_id=None):
+                                maplight_id=None, ctcl_uuid=None, ballotpedia_race_id=None):
         error_result = False
         exception_does_not_exist = False
         exception_multiple_object_returned = False
@@ -534,9 +535,9 @@ class ContestOfficeManager(models.Model):
                 contest_office_id = contest_office_on_stage.id
                 contest_office_we_vote_id = contest_office_on_stage.we_vote_id
                 status = "RETRIEVE_OFFICE_FOUND_BY_MAPLIGHT_ID"
-            elif positive_value_exists(ballotpedia_office_id):
-                ballotpedia_office_id_integer = convert_to_int(ballotpedia_office_id)
-                contest_office_on_stage = ContestOffice.objects.get(ballotpedia_office_id=ballotpedia_office_id_integer)
+            elif positive_value_exists(ballotpedia_race_id):
+                ballotpedia_race_id_integer = convert_to_int(ballotpedia_race_id)
+                contest_office_on_stage = ContestOffice.objects.get(ballotpedia_race_id=ballotpedia_race_id_integer)
                 contest_office_id = contest_office_on_stage.id
                 contest_office_we_vote_id = contest_office_on_stage.we_vote_id
                 status = "RETRIEVE_OFFICE_FOUND_BY_BALLOTPEDIA_OFFICE_ID"
@@ -648,6 +649,8 @@ class ContestOfficeManager(models.Model):
                     new_contest_office.ballotpedia_office_name = defaults['ballotpedia_office_name']
                 if 'ballotpedia_office_url' in defaults:
                     new_contest_office.ballotpedia_office_url = defaults['ballotpedia_office_url']
+                if 'ballotpedia_race_id' in defaults:
+                    new_contest_office.ballotpedia_race_id = convert_to_int(defaults['ballotpedia_race_id'])
                 if 'ballotpedia_race_office_level' in defaults:
                     new_contest_office.ballotpedia_race_office_level = defaults['ballotpedia_race_office_level']
                 new_contest_office.save()
@@ -724,6 +727,8 @@ class ContestOfficeManager(models.Model):
                     existing_office_entry.ballotpedia_office_name = defaults['ballotpedia_office_name']
                 if 'ballotpedia_office_url' in defaults:
                     existing_office_entry.ballotpedia_office_url = defaults['ballotpedia_office_url']
+                if 'ballotpedia_race_id' in defaults:
+                    existing_office_entry.ballotpedia_race_id = convert_to_int(defaults['ballotpedia_race_id'])
                 if 'ballotpedia_race_office_level' in defaults:
                     existing_office_entry.ballotpedia_race_office_level = defaults['ballotpedia_race_office_level']
                 # now go ahead and save this entry (update)

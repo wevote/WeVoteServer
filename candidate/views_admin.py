@@ -99,6 +99,8 @@ def candidates_sync_out_view(request):  # candidatesSyncOut
                                                     'ballotpedia_candidate_id', 'ballotpedia_candidate_name',
                                                     'ballotpedia_candidate_summary', 'ballotpedia_candidate_url',
                                                     'ballotpedia_election_id', 'ballotpedia_image_id',
+                                                    'ballotpedia_office_id', 'ballotpedia_person_id',
+                                                    'ballotpedia_race_id',
                                                     'ballotpedia_page_title', 'ballotpedia_photo_url',
                                                     'ballot_guide_official_statement',
                                                     'birth_day_text', 'candidate_gender',
@@ -380,6 +382,9 @@ def candidate_edit_view(request, candidate_id=0, candidate_campaign_we_vote_id="
     ballotpedia_candidate_id = request.GET.get('ballotpedia_candidate_id', False)
     ballotpedia_candidate_name = request.GET.get('ballotpedia_candidate_name', False)
     ballotpedia_candidate_url = request.GET.get('ballotpedia_candidate_url', False)
+    ballotpedia_office_id = request.GET.get('ballotpedia_office_id', False)
+    ballotpedia_person_id = request.GET.get('ballotpedia_person_id', False)
+    ballotpedia_race_id = request.GET.get('ballotpedia_race_id', False)
     vote_smart_id = request.GET.get('vote_smart_id', False)
     maplight_id = request.GET.get('maplight_id', False)
     state_code = request.GET.get('state_code', "")
@@ -490,6 +495,9 @@ def candidate_edit_view(request, candidate_id=0, candidate_campaign_we_vote_id="
             'ballotpedia_candidate_id':         ballotpedia_candidate_id,
             'ballotpedia_candidate_name':       ballotpedia_candidate_name,
             'ballotpedia_candidate_url':        ballotpedia_candidate_url,
+            'ballotpedia_office_id':            ballotpedia_office_id,
+            'ballotpedia_person_id':            ballotpedia_person_id,
+            'ballotpedia_race_id':              ballotpedia_race_id,
             'vote_smart_id':                    vote_smart_id,
             'maplight_id':                      maplight_id,
         }
@@ -532,6 +540,9 @@ def candidate_edit_process_view(request):
     ballotpedia_candidate_id = request.POST.get('ballotpedia_candidate_id', False)
     ballotpedia_candidate_name = request.POST.get('ballotpedia_candidate_name', False)
     ballotpedia_candidate_url = request.POST.get('ballotpedia_candidate_url', False)
+    ballotpedia_office_id = request.POST.get('ballotpedia_office_id', False)
+    ballotpedia_person_id = request.POST.get('ballotpedia_person_id', False)
+    ballotpedia_race_id = request.POST.get('ballotpedia_race_id', False)
     vote_smart_id = request.POST.get('vote_smart_id', False)
     maplight_id = request.POST.get('maplight_id', False)
     state_code = request.POST.get('state_code', False)
@@ -694,6 +705,12 @@ def candidate_edit_process_view(request):
                 candidate_on_stage.ballotpedia_candidate_name = ballotpedia_candidate_name
             if ballotpedia_candidate_url is not False:
                 candidate_on_stage.ballotpedia_candidate_url = ballotpedia_candidate_url
+            if ballotpedia_office_id is not False:
+                candidate_on_stage.ballotpedia_office_id = convert_to_int(ballotpedia_office_id)
+            if ballotpedia_person_id is not False:
+                candidate_on_stage.ballotpedia_person_id = convert_to_int(ballotpedia_person_id)
+            if ballotpedia_race_id is not False:
+                candidate_on_stage.ballotpedia_race_id = convert_to_int(ballotpedia_race_id)
             if vote_smart_id is not False:
                 candidate_on_stage.vote_smart_id = vote_smart_id
             if maplight_id is not False:
@@ -765,6 +782,12 @@ def candidate_edit_process_view(request):
                     candidate_on_stage.ballotpedia_candidate_name = ballotpedia_candidate_name
                 if ballotpedia_candidate_url is not False:
                     candidate_on_stage.ballotpedia_candidate_url = ballotpedia_candidate_url
+                if ballotpedia_office_id is not False:
+                    candidate_on_stage.ballotpedia_office_id = convert_to_int(ballotpedia_office_id)
+                if ballotpedia_person_id is not False:
+                    candidate_on_stage.ballotpedia_person_id = convert_to_int(ballotpedia_person_id)
+                if ballotpedia_race_id is not False:
+                    candidate_on_stage.ballotpedia_race_id = convert_to_int(ballotpedia_race_id)
                 if vote_smart_id is not False:
                     candidate_on_stage.vote_smart_id = vote_smart_id
                 if maplight_id is not False:
@@ -789,6 +812,9 @@ def candidate_edit_process_view(request):
                                 "&ballotpedia_candidate_id=" + str(ballotpedia_candidate_id) + \
                                 "&ballotpedia_candidate_name=" + str(ballotpedia_candidate_name) + \
                                 "&ballotpedia_candidate_url=" + str(ballotpedia_candidate_url) + \
+                                "&ballotpedia_office_id=" + str(ballotpedia_office_id) + \
+                                "&ballotpedia_person_id=" + str(ballotpedia_person_id) + \
+                                "&ballotpedia_race_id=" + str(ballotpedia_race_id) + \
                                 "&vote_smart_id=" + str(vote_smart_id) + \
                                 "&politician_we_vote_id=" + str(politician_we_vote_id) + \
                                 "&maplight_id=" + str(maplight_id)

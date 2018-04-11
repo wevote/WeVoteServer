@@ -98,7 +98,7 @@
             <td>{{ elected_office.district_id|default_if_none:"" }}</td>
             <td>{{ elected_office.candidate_count }}</td>   {#TODO elected office does not have candidate count#}
             <td>{{ elected_office.ocd_division_id }}</td>
-            <td>{{ elected_office.ballotpedia_office_id }}</td> {#TODO elected office does not have ballotpedia office id#}
+            <td>{{ elected_office.ballotpedia_office_id }}</td>
         </tr>
     {% endfor %}
     </table>
