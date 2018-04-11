@@ -506,6 +506,8 @@ class ContestMeasureManager(models.Model):
                     new_measure.ballotpedia_measure_text = defaults['ballotpedia_measure_text']
                 if 'ballotpedia_measure_url' in defaults:
                     new_measure.ballotpedia_measure_url = defaults['ballotpedia_measure_url']
+                if 'state_code' in defaults:
+                    new_measure.state_code = defaults['state_code']
                 new_measure.save()
             else:
                 success = False
@@ -572,6 +574,8 @@ class ContestMeasureManager(models.Model):
                     existing_measure_entry.ballotpedia_measure_text = defaults['ballotpedia_measure_text']
                 if 'ballotpedia_measure_url' in defaults:
                     existing_measure_entry.ballotpedia_measure_url = defaults['ballotpedia_measure_url']
+                if 'state_code' in defaults:
+                    existing_measure_entry.state_code = defaults['state_code']
                 # now go ahead and save this entry (update)
                 existing_measure_entry.save()
                 measure_updated = True

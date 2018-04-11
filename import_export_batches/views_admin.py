@@ -196,8 +196,8 @@ def batch_list_process_view(request):
         except KeyError:
             pass
 
-    # Make sure we have a file to process
-    if kind_of_batch in (ORGANIZATION_WORD, IMPORT_BALLOT_ITEM) and not batch_file:
+    # Make sure we have a file to process  // Used to only be able to import IMPORT_BALLOT_ITEM from file
+    if kind_of_batch in ORGANIZATION_WORD and not batch_file:
         messages.add_message(request, messages.ERROR, 'Please select a file to import.')
         return HttpResponseRedirect(reverse('import_export_batches:batch_list', args=()) +
                                     "?kind_of_batch=" + str(kind_of_batch) +
@@ -278,6 +278,8 @@ def batch_list_process_view(request):
                                         inner_election_json = one_office_json['election']['data']
                                         inner_office_json = one_office_json['office']['data']
                                         # Add our own key/value pairs
+                                        # root level
+                                        one_office_json['ballotpedia_race_id'] = one_office_json['id']
                                         # election
                                         one_office_json['ballotpedia_election_id'] = inner_election_json['id']
                                         # office
@@ -304,15 +306,17 @@ def batch_list_process_view(request):
                                         inner_party_affiliation_json = one_candidate_json['party_affiliation']['data']
                                         # Add our own key/value pairs
                                         # root level
+                                        one_candidate_json['ballotpedia_candidate_id'] = one_candidate_json['id']
                                         one_candidate_json['candidate_participation_status'] = \
                                             one_candidate_json['status']
                                         one_candidate_json['is_incumbent'] = one_candidate_json['is_incumbent']
                                         # race
+                                        one_candidate_json['ballotpedia_race_id'] = inner_race_json['id']
                                         one_candidate_json['ballotpedia_office_id'] = inner_race_json['office']
                                         one_candidate_json['ballotpedia_election_id'] = inner_race_json['election']
                                         one_candidate_json['state_code'] = inner_race_json['election_district_state']
                                         # person
-                                        one_candidate_json['ballotpedia_candidate_id'] = inner_person_json['id']
+                                        one_candidate_json['ballotpedia_person_id'] = inner_person_json['id']
                                         one_candidate_json['ballotpedia_candidate_name'] = inner_person_json['name']
                                         one_candidate_json['ballotpedia_image_id'] = inner_person_json['image']
                                         one_candidate_json['ballotpedia_candidate_url'] = inner_person_json['url']
@@ -320,7 +324,7 @@ def batch_list_process_view(request):
                                             inner_person_json['summary']
                                         one_candidate_json['candidate_url'] = inner_person_json['contact_website']
                                         one_candidate_json['facebook_url'] = inner_person_json['contact_facebook']
-                                        one_candidate_json['ballotpedia_candidate_id'] = inner_person_json['id']
+                                        one_candidate_json['ballotpedia_person_id'] = inner_person_json['id']
                                         one_candidate_json['candidate_twitter_handle'] = \
                                             inner_person_json['contact_twitter']
                                         one_candidate_json['candidate_gender'] = inner_person_json['gender']
@@ -349,6 +353,10 @@ def batch_list_process_view(request):
                                         inner_election_json = one_measure_json['election']['data']
                                         inner_district_json = one_measure_json['district']['data']
                                         # Add our own key/value pairs
+                                        # root
+                                        one_measure_json['ballotpedia_measure_id'] = one_measure_json['id']
+                                        one_measure_json['ballotpedia_measure_url'] = one_measure_json['url']
+                                        one_measure_json['election_day_text'] = one_measure_json['election_date']
                                         # election
                                         one_measure_json['ballotpedia_election_id'] = inner_election_json['id']
                                         # district
@@ -363,6 +371,21 @@ def batch_list_process_view(request):
                                     filename, modified_measures_json_list,
                                     BATCH_HEADER_MAP_MEASURES_TO_BALLOTPEDIA_MEASURES, kind_of_batch,
                                     google_civic_election_id, organization_we_vote_id)
+                elif "api/contains" in batch_uri:
+                    modified_district_json_list = []
+                    for one_district_json in structured_json:
+                        try:
+                            one_district_json['ballotpedia_district_id'] = one_district_json['id']
+                        except KeyError:
+                            pass
+                        modified_district_json_list.append(one_district_json)
+
+                    filename = "Measures from Ballotpedia API"
+                    results = batch_manager.create_batch_from_json(
+                        filename, modified_district_json_list,
+                        BATCH_HEADER_MAP_MEASURES_TO_BALLOTPEDIA_MEASURES, kind_of_batch,
+                        google_civic_election_id, organization_we_vote_id)
+
             else:
                 # check file type
                 filetype = batch_manager.find_file_type(batch_uri)

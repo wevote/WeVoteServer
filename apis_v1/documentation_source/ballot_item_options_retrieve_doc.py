@@ -70,6 +70,7 @@ def ballot_item_options_retrieve_doc_template_values(url_root):
                    '      "google_civic_election_id": integer,\n' \
                    '      "ballotpedia_candidate_id": integer,\n' \
                    '      "ballotpedia_candidate_url": string,\n' \
+                   '      "ballotpedia_person_id": integer,\n' \
                    '      "maplight_id": integer,\n' \
                    '      "contest_office_id": integer,\n' \
                    '      "contest_office_we_vote_id": string,\n' \

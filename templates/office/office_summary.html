@@ -33,7 +33,7 @@
     </tr>
     <tr>
       <td>OCD Division ID:</td>
-      <td><strong>{{ office.ocd_division_id }}</strong></td>
+      <td><strong>{{ office.ocd_division_id|default_if_none:"" }}</strong></td>
     </tr>
     {% if office.office_url %}
     <tr>
@@ -46,7 +46,11 @@
       <td><strong>{{ office.ballotpedia_election_id }}</strong></td>
     </tr>
     <tr>
-      <td>Ballotpedia Office ID:</td>
+      <td>Ballotpedia Race ID:</td>
+      <td><strong>{{ office.ballotpedia_race_id }}</strong></td>
+    </tr>
+    <tr>
+      <td>Ballotpedia Elected Office ID:</td>
       <td><strong>{{ office.ballotpedia_office_id }}</strong></td>
     </tr>
     {% if office.ballotpedia_office_name %}
@@ -90,6 +94,10 @@
             <td>Website</td>
             <td>Id</td>
             <td>We Vote Id</td>
+            <td>Ballotpedia Candidate Id</td>
+            <td>Ballotpedia Person Id</td>
+            <td>Ballotpedia Race Id</td>
+            <td>Ballotpedia Office Id</td>
             <td>Vote Smart Id</td>
             <td>Supporters</td>
             <td>Opposers</td>
@@ -115,6 +123,10 @@
             <td>{% if candidate.candidate_url %}<a href="{{ candidate.candidate_url }}" target="_blank">{{ candidate.candidate_url }}</a>{% endif %}</td>
             <td>{{ candidate.id }}</td>
             <td>{{ candidate.we_vote_id }}</td>
+            <td>{{ candidate.ballotpedia_candidate_id|default_if_none:"" }}</td>
+            <td>{{ candidate.ballotpedia_person_id|default_if_none:"" }}</td>
+            <td>{{ candidate.ballotpedia_race_id|default_if_none:"" }}</td>
+            <td>{{ candidate.ballotpedia_office_id|default_if_none:"" }}</td>
             <td>{{ candidate.vote_smart_id|default_if_none:"" }}</td>
             <td>{{ candidate.support_count }}</td>
             <td>{{ candidate.oppose_count }}</td>

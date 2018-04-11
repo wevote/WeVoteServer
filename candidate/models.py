@@ -28,8 +28,11 @@ CANDIDATE_UNIQUE_IDENTIFIERS = [
     'ballotpedia_candidate_url',
     'ballotpedia_election_id',
     'ballotpedia_image_id',
+    'ballotpedia_office_id',
+    'ballotpedia_person_id',
     'ballotpedia_page_title',
     'ballotpedia_photo_url',
+    'ballotpedia_race_id',
     'birth_day_text',
     'candidate_email',
     'candidate_gender',
@@ -693,6 +696,9 @@ class CandidateCampaignListManager(models.Model):
                     'google_civic_election_id':     candidate.google_civic_election_id,
                     'ballotpedia_candidate_id':     candidate.ballotpedia_candidate_id,
                     'ballotpedia_candidate_url':    candidate.ballotpedia_candidate_url,
+                    'ballotpedia_office_id':        candidate.ballotpedia_office_id,
+                    'ballotpedia_person_id':        candidate.ballotpedia_person_id,
+                    'ballotpedia_race_id':          candidate.ballotpedia_race_id,
                     'maplight_id':                  candidate.maplight_id,
                     'contest_office_id':            candidate.contest_office_id,
                     'contest_office_we_vote_id':    candidate.contest_office_we_vote_id,
@@ -838,10 +844,17 @@ class CandidateCampaign(models.Model):
     ballotpedia_election_id = models.PositiveIntegerField(verbose_name="ballotpedia election id", null=True, blank=True)
     # The id of the image for retrieval from Ballotpedia API
     ballotpedia_image_id = models.PositiveIntegerField(verbose_name="ballotpedia image id", null=True, blank=True)
+    # Equivalent to Elected Office
+    ballotpedia_office_id = models.PositiveIntegerField(
+        verbose_name="ballotpedia elected office integer id", null=True, blank=True)
     # This is just the characters in the Ballotpedia URL
     ballotpedia_page_title = models.CharField(
         verbose_name="Page title on Ballotpedia", max_length=255, null=True, blank=True)
+    # Equivalent to Politician
+    ballotpedia_person_id = models.PositiveIntegerField(verbose_name="ballotpedia integer id", null=True, blank=True)
     ballotpedia_photo_url = models.URLField(verbose_name='url of ballotpedia logo', blank=True, null=True)
+    # Equivalent to Contest Office
+    ballotpedia_race_id = models.PositiveIntegerField(verbose_name="ballotpedia race integer id", null=True, blank=True)
 
     # Official Statement from Candidate in Ballot Guide
     ballot_guide_official_statement = models.TextField(verbose_name="official candidate statement from ballot guide",
@@ -1806,6 +1819,12 @@ class CandidateCampaignManager(models.Model):
             if 'ballotpedia_election_id' in update_values else 0
         ballotpedia_image_id = update_values['ballotpedia_image_id'] \
             if 'ballotpedia_image_id' in update_values else 0
+        ballotpedia_office_id = update_values['ballotpedia_office_id'] \
+            if 'ballotpedia_office_id' in update_values else 0
+        ballotpedia_person_id = update_values['ballotpedia_person_id'] \
+            if 'ballotpedia_person_id' in update_values else 0
+        ballotpedia_race_id = update_values['ballotpedia_race_id'] \
+            if 'ballotpedia_race_id' in update_values else 0
         birth_day_text = update_values['birth_day_text'] if 'birth_day_text' in update_values else ''
         candidate_email = update_values['candidate_email'] if 'candidate_email' in update_values else ''
         candidate_gender = update_values['candidate_gender'] if 'candidate_gender' in update_values else ''
@@ -1878,6 +1897,9 @@ class CandidateCampaignManager(models.Model):
                 new_candidate.ballotpedia_candidate_url = ballotpedia_candidate_url
                 new_candidate.ballotpedia_election_id = convert_to_int(ballotpedia_election_id)
                 new_candidate.ballotpedia_image_id = convert_to_int(ballotpedia_image_id)
+                new_candidate.ballotpedia_office_id = convert_to_int(ballotpedia_office_id)
+                new_candidate.ballotpedia_person_id = convert_to_int(ballotpedia_person_id)
+                new_candidate.ballotpedia_race_id = convert_to_int(ballotpedia_race_id)
                 new_candidate.birth_day_text = birth_day_text
                 new_candidate.candidate_email = candidate_email
                 new_candidate.candidate_gender = candidate_gender
@@ -1962,6 +1984,18 @@ class CandidateCampaignManager(models.Model):
                 if 'ballotpedia_image_id' in update_values:
                     existing_candidate_entry.ballotpedia_image_id = \
                         convert_to_int(update_values['ballotpedia_image_id'])
+                    values_changed = True
+                if 'ballotpedia_office_id' in update_values:
+                    existing_candidate_entry.ballotpedia_office_id = \
+                        convert_to_int(update_values['ballotpedia_office_id'])
+                    values_changed = True
+                if 'ballotpedia_person_id' in update_values:
+                    existing_candidate_entry.ballotpedia_person_id = \
+                        convert_to_int(update_values['ballotpedia_person_id'])
+                    values_changed = True
+                if 'ballotpedia_race_id' in update_values:
+                    existing_candidate_entry.ballotpedia_race_id = \
+                        convert_to_int(update_values['ballotpedia_race_id'])
                     values_changed = True
                 if 'birth_day_text' in update_values:
                     existing_candidate_entry.birth_day_text = update_values['birth_day_text']

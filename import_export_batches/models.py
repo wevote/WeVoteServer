@@ -67,7 +67,9 @@ BATCH_IMPORT_KEYS_ACCEPTED_FOR_CANDIDATES = {
     'ballotpedia_candidate_url': 'ballotpedia_candidate_url',
     'ballotpedia_election_id': 'ballotpedia_election_id',
     'ballotpedia_image_id': 'ballotpedia_image_id',
-    'ballotpedia_office_id': 'ballotpedia_office_id *',  # For matching only
+    'ballotpedia_office_id': 'ballotpedia_office_id * (elected_office)',  # For matching only
+    'ballotpedia_person_id': 'ballotpedia_person_id',
+    'ballotpedia_race_id': 'ballotpedia_race_id * (contest_office)',  # For matching only
     'birth_day_text': 'birth_day_text',
     'candidate_batch_id': 'candidate_batch_id',
     'candidate_ctcl_uuid': 'candidate_ctcl_uuid',
@@ -101,6 +103,8 @@ BATCH_HEADER_MAP_CANDIDATES_TO_BALLOTPEDIA_CANDIDATES = {
     'ballotpedia_election_id': 'ballotpedia_election_id',
     'ballotpedia_image_id': 'ballotpedia_image_id',
     'ballotpedia_office_id': 'ballotpedia_office_id',
+    'ballotpedia_person_id': 'ballotpedia_person_id',
+    'ballotpedia_race_id': 'ballotpedia_race_id',
     'birth_day_text': 'birth_day_text',
     'candidate_email': 'candidate_email',
     'candidate_gender': 'candidate_gender',
@@ -120,6 +124,8 @@ BATCH_IMPORT_KEYS_ACCEPTED_FOR_CONTEST_OFFICES = {
     'ballotpedia_office_id': 'ballotpedia_office_id',
     'ballotpedia_office_name': 'ballotpedia_office_name',
     'ballotpedia_office_url': 'ballotpedia_office_url',
+    'ballotpedia_person_id': 'ballotpedia_person_id *',  # For matching only
+    'ballotpedia_race_id': 'ballotpedia_race_id',
     'ballotpedia_race_office_level': 'ballotpedia_race_office_level',
     'candidate_name': 'candidate_name *',  # For matching only
     'candidate_selection_id1': 'candidate_selection_id1 *',  # For matching only
@@ -152,6 +158,7 @@ BATCH_HEADER_MAP_CONTEST_OFFICES_TO_BALLOTPEDIA_RACES = {
     'ballotpedia_election_id': 'ballotpedia_election_id',
     'ballotpedia_office_id': 'ballotpedia_office_id',
     'ballotpedia_office_name': 'office_name',
+    'ballotpedia_race_id': 'ballotpedia_race_id',
     'ballotpedia_race_office_level': 'office_level',
     'ballotpedia_office_url': 'url',
     'contest_office_number_elected': 'number_of_seats',
@@ -196,13 +203,13 @@ BATCH_IMPORT_KEYS_ACCEPTED_FOR_MEASURES = {
 BATCH_HEADER_MAP_MEASURES_TO_BALLOTPEDIA_MEASURES = {
     'ballotpedia_district_id': 'ballotpedia_district_id',
     'ballotpedia_election_id': 'ballotpedia_election_id',
-    'ballotpedia_measure_id': 'id',
+    'ballotpedia_measure_id': 'ballotpedia_measure_id',
     'ballotpedia_measure_name': 'name',
     'ballotpedia_measure_status': 'status',
     'ballotpedia_measure_summary': 'summary',
     'ballotpedia_measure_text': 'text',
-    'ballotpedia_measure_url': 'url',
-    'election_day_text': 'election_date',
+    'ballotpedia_measure_url': 'ballotpedia_measure_url',
+    'election_day_text': 'election_day_text',
     'state_code': 'state_code',
 }
 
@@ -4160,12 +4167,15 @@ class BatchRowActionContestOffice(models.Model):
     ballotpedia_district_id = models.PositiveIntegerField(
         verbose_name="ballotpedia district id", null=True, blank=True)
     ballotpedia_election_id = models.PositiveIntegerField(verbose_name="ballotpedia election id", null=True, blank=True)
+    # Equivalent of elected_office in We Vote
     ballotpedia_office_id = models.PositiveIntegerField(
         verbose_name="ballotpedia integer id", null=True, blank=True)
     # The office's name as passed over by Ballotpedia. This helps us do exact matches when id is missing
     ballotpedia_office_name = models.CharField(verbose_name="office name exactly as received from ballotpedia",
                                                max_length=255, null=True, blank=True)
     ballotpedia_office_url = models.URLField(verbose_name='url of office on ballotpedia', blank=True, null=True)
+    # Equivalent of contest_office in We Vote
+    ballotpedia_race_id = models.PositiveIntegerField(verbose_name="ballotpedia race integer id", null=True, blank=True)
     # Federal, State, Local,
     ballotpedia_race_office_level = models.CharField(verbose_name="race office level", max_length=255, null=True,
                                                      blank=True)
@@ -4503,10 +4513,18 @@ class BatchRowActionCandidate(models.Model):
     ballotpedia_election_id = models.PositiveIntegerField(verbose_name="ballotpedia election id", null=True, blank=True)
     # The id of the image for retrieval from Ballotpedia API
     ballotpedia_image_id = models.PositiveIntegerField(verbose_name="ballotpedia image id", null=True, blank=True)
+    # Equivalent of elected_office in We Vote
+    ballotpedia_office_id = models.PositiveIntegerField(
+        verbose_name="ballotpedia elected office integer id", null=True, blank=True)
     # This is just the characters in the Ballotpedia URL
     ballotpedia_page_title = models.CharField(
         verbose_name="Page title on Ballotpedia", max_length=255, null=True, blank=True)
+    # Equivalent of politician in We Vote
+    ballotpedia_person_id = models.PositiveIntegerField(
+        verbose_name="ballotpedia person integer id", null=True, blank=True)
     ballotpedia_photo_url = models.URLField(verbose_name='url of ballotpedia logo', blank=True, null=True)
+    # Equivalent of contest_office in We Vote
+    ballotpedia_race_id = models.PositiveIntegerField(verbose_name="ballotpedia race integer id", null=True, blank=True)
 
     # Official Statement from Candidate in Ballot Guide
     ballot_guide_official_statement = models.TextField(verbose_name="official candidate statement from ballot guide",

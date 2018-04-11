@@ -35,8 +35,11 @@ def candidates_sync_out_doc_template_values(url_root):
                    '  "ballotpedia_candidate_url": string,\n' \
                    '  "ballotpedia_election_id": integer,\n' \
                    '  "ballotpedia_image_id": integer,\n' \
+                   '  "ballotpedia_office_id": integer,\n' \
                    '  "ballotpedia_page_title": string,\n' \
+                   '  "ballotpedia_person_id": integer,\n' \
                    '  "ballotpedia_photo_url": string,\n' \
+                   '  "ballotpedia_race_id": integer,\n' \
                    '  "birth_day_text": string,\n' \
                    '  "candidate_email": string,\n' \
                    '  "candidate_gender": string,\n' \

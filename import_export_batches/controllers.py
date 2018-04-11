@@ -953,6 +953,8 @@ def create_batch_row_action_contest_office(batch_description, batch_header_map, 
                                                                           one_batch_row)
     ballotpedia_office_url = batch_manager.retrieve_value_from_batch_row("ballotpedia_office_url", batch_header_map,
                                                                          one_batch_row)
+    ballotpedia_race_id = batch_manager.retrieve_value_from_batch_row("ballotpedia_race_id", batch_header_map,
+                                                                      one_batch_row)
     ballotpedia_race_office_level = batch_manager.retrieve_value_from_batch_row("ballotpedia_race_office_level",
                                                                                 batch_header_map, one_batch_row)
     candidate_name = batch_manager.retrieve_value_from_batch_row("candidate_name", batch_header_map, one_batch_row)
@@ -1036,8 +1038,8 @@ def create_batch_row_action_contest_office(batch_description, batch_header_map, 
 
         if keep_looking_for_duplicates:
             contest_office_manager = ContestOfficeManager()
-            matching_results = contest_office_manager.retrieve_contest_office_from_ballotpedia_office_id(
-                ballotpedia_office_id)
+            matching_results = contest_office_manager.retrieve_contest_office_from_ballotpedia_race_id(
+                ballotpedia_race_id)
             if matching_results['contest_office_found']:
                 contest_office = matching_results['contest_office']
                 keep_looking_for_duplicates = False
@@ -1104,6 +1106,7 @@ def create_batch_row_action_contest_office(batch_description, batch_header_map, 
         batch_row_action_contest_office.ballotpedia_office_id = convert_to_int(ballotpedia_office_id)
         batch_row_action_contest_office.ballotpedia_office_name = ballotpedia_office_name
         batch_row_action_contest_office.ballotpedia_office_url = ballotpedia_office_url
+        batch_row_action_contest_office.ballotpedia_race_id = convert_to_int(ballotpedia_race_id)
         batch_row_action_contest_office.ballotpedia_race_office_level = ballotpedia_race_office_level
         batch_row_action_contest_office.candidate_selection_id1 = candidate_selection_id1
         batch_row_action_contest_office.candidate_selection_id2 = candidate_selection_id2
@@ -1480,6 +1483,10 @@ def create_batch_row_action_candidate(batch_description, batch_header_map, one_b
                                                                        batch_header_map, one_batch_row)
     ballotpedia_office_id = batch_manager.retrieve_value_from_batch_row("ballotpedia_office_id",
                                                                         batch_header_map, one_batch_row)
+    ballotpedia_person_id = batch_manager.retrieve_value_from_batch_row("ballotpedia_person_id",
+                                                                        batch_header_map, one_batch_row)
+    ballotpedia_race_id = batch_manager.retrieve_value_from_batch_row("ballotpedia_race_id",
+                                                                      batch_header_map, one_batch_row)
     birth_day_text = batch_manager.retrieve_value_from_batch_row("birth_day_text", batch_header_map, one_batch_row)
     candidate_we_vote_id = batch_manager.retrieve_value_from_batch_row(
         "candidate_we_vote_id", batch_header_map, one_batch_row)
@@ -1624,10 +1631,10 @@ def create_batch_row_action_candidate(batch_description, batch_header_map, one_b
             contest_office_id = contest_office.id
             contest_office_found = True
 
-    if not positive_value_exists(contest_office_found) and positive_value_exists(ballotpedia_office_id):
-        # Look up the contest_office information with the ballotpedia_office_id
+    if not positive_value_exists(contest_office_found) and positive_value_exists(ballotpedia_race_id):
+        # Look up the contest_office information with the ballotpedia_race_id
         contest_manager = ContestOfficeManager()
-        contest_results = contest_manager.retrieve_contest_office_from_ballotpedia_office_id(ballotpedia_office_id)
+        contest_results = contest_manager.retrieve_contest_office_from_ballotpedia_race_id(ballotpedia_race_id)
         if contest_results['contest_office_found']:
             contest_office = contest_results['contest_office']
             contest_office_name = contest_office.office_name
@@ -1677,13 +1684,17 @@ def create_batch_row_action_candidate(batch_description, batch_header_map, one_b
         batch_row_action_candidate.ballotpedia_candidate_name = ballotpedia_candidate_name
         batch_row_action_candidate.ballotpedia_candidate_summary = ballotpedia_candidate_summary
         batch_row_action_candidate.ballotpedia_candidate_url = ballotpedia_candidate_url
+        batch_row_action_candidate.ballotpedia_office_id = convert_to_int(ballotpedia_office_id)
+        batch_row_action_candidate.ballotpedia_person_id = convert_to_int(ballotpedia_person_id)
+        batch_row_action_candidate.ballotpedia_race_id = convert_to_int(ballotpedia_race_id)
         batch_row_action_candidate.ballotpedia_election_id = convert_to_int(ballotpedia_election_id)
         batch_row_action_candidate.ballotpedia_image_id = convert_to_int(ballotpedia_image_id)
         batch_row_action_candidate.batch_row_action_office_ctcl_uuid = office_ctcl_uuid
         batch_row_action_candidate.birth_day_text = birth_day_text
         batch_row_action_candidate.candidate_ctcl_person_id = candidate_ctcl_person_id
         batch_row_action_candidate.candidate_gender = candidate_gender
-        batch_row_action_candidate.candidate_is_incumbent = candidate_is_incumbent
+        if candidate_is_incumbent is not None:
+            batch_row_action_candidate.candidate_is_incumbent = candidate_is_incumbent
         batch_row_action_candidate.candidate_is_top_ticket = candidate_is_top_ticket
         batch_row_action_candidate.candidate_name = candidate_name
         batch_row_action_candidate.candidate_participation_status = candidate_participation_status
@@ -2789,6 +2800,7 @@ def import_contest_office_data_from_batch_row_actions(
             'ballotpedia_office_id':            one_batch_row_action.ballotpedia_office_id,
             'ballotpedia_office_name':          one_batch_row_action.ballotpedia_office_name,
             'ballotpedia_office_url':           one_batch_row_action.ballotpedia_office_url,
+            'ballotpedia_race_id':              one_batch_row_action.ballotpedia_race_id,
             'ballotpedia_race_office_level':    one_batch_row_action.ballotpedia_race_office_level,
         }
 
@@ -3000,6 +3012,7 @@ def import_measure_data_from_batch_row_actions(batch_header_id, batch_row_id,
             'ballotpedia_measure_summary':  one_batch_row_action.ballotpedia_measure_summary,
             'ballotpedia_measure_text':     one_batch_row_action.ballotpedia_measure_text,
             'ballotpedia_measure_url':      one_batch_row_action.ballotpedia_measure_url,
+            'state_code':                   one_batch_row_action.state_code,
         }
 
         # Look up ContestMeasure to see if an entry exists
@@ -3190,6 +3203,12 @@ def import_candidate_data_from_batch_row_actions(batch_header_id, batch_row_id, 
             update_values['ballotpedia_election_id'] = one_batch_row_action.ballotpedia_election_id
         if positive_value_exists(one_batch_row_action.ballotpedia_image_id):
             update_values['ballotpedia_image_id'] = one_batch_row_action.ballotpedia_image_id
+        if positive_value_exists(one_batch_row_action.ballotpedia_office_id):
+            update_values['ballotpedia_office_id'] = one_batch_row_action.ballotpedia_office_id
+        if positive_value_exists(one_batch_row_action.ballotpedia_person_id):
+            update_values['ballotpedia_person_id'] = one_batch_row_action.ballotpedia_person_id
+        if positive_value_exists(one_batch_row_action.ballotpedia_race_id):
+            update_values['ballotpedia_race_id'] = one_batch_row_action.ballotpedia_race_id
         if positive_value_exists(one_batch_row_action.birth_day_text):
             update_values['birth_day_text'] = one_batch_row_action.birth_day_text
         if positive_value_exists(one_batch_row_action.candidate_gender):

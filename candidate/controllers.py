@@ -277,6 +277,7 @@ def filter_candidates_structured_json_for_local_duplicates(structured_json):
             if 'candidate_twitter_handle' in one_candidate else ''
         ballotpedia_candidate_id = one_candidate['ballotpedia_candidate_id'] \
             if 'ballotpedia_candidate_id' in one_candidate else ''
+        # Not needed here: ballotpedia_person_id
         vote_smart_id = one_candidate['vote_smart_id'] if 'vote_smart_id' in one_candidate else ''
         maplight_id = one_candidate['maplight_id'] if 'maplight_id' in one_candidate else ''
 
@@ -364,6 +365,8 @@ def candidates_import_from_structured_json(structured_json):
                 updated_candidate_values['ballotpedia_page_title'] = one_candidate['ballotpedia_page_title']
             if 'ballotpedia_photo_url' in one_candidate:
                 updated_candidate_values['ballotpedia_photo_url'] = one_candidate['ballotpedia_photo_url']
+            if 'ballotpedia_person_id' in one_candidate:
+                updated_candidate_values['ballotpedia_person_id'] = one_candidate['ballotpedia_person_id']
             if 'ballot_guide_official_statement' in one_candidate:
                 updated_candidate_values['ballot_guide_official_statement'] = \
                     one_candidate['ballot_guide_official_statement']
@@ -542,6 +545,7 @@ def candidate_retrieve_for_api(candidate_id, candidate_we_vote_id):  # candidate
             'google_civic_election_id':     candidate_campaign.google_civic_election_id,
             'ballotpedia_candidate_id':     candidate_campaign.ballotpedia_candidate_id,
             'ballotpedia_candidate_url':    candidate_campaign.ballotpedia_candidate_url,
+            'ballotpedia_person_id':        candidate_campaign.ballotpedia_person_id,
             'maplight_id':                  candidate_campaign.maplight_id,
             'contest_office_id':            candidate_campaign.contest_office_id,
             'contest_office_we_vote_id':    candidate_campaign.contest_office_we_vote_id,
@@ -637,6 +641,7 @@ def candidates_retrieve_for_api(office_id, office_we_vote_id):
                 'google_civic_election_id':     candidate_campaign.google_civic_election_id,
                 'ballotpedia_candidate_id':     candidate_campaign.ballotpedia_candidate_id,
                 'ballotpedia_candidate_url':    candidate_campaign.ballotpedia_candidate_url,
+                'ballotpedia_person_id':        candidate_campaign.ballotpedia_person_id,
                 'maplight_id':                  candidate_campaign.maplight_id,
                 'contest_office_id':            candidate_campaign.contest_office_id,
                 'contest_office_we_vote_id':    candidate_campaign.contest_office_we_vote_id,
