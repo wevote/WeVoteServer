@@ -4212,11 +4212,13 @@ def import_ballot_item_data_from_batch_row_actions(batch_header_id, batch_row_id
                     longitude = polling_location.longitude
                     polling_location_name = polling_location.location_name
                     text_for_map_search = polling_location.get_text_for_map_search()
+                    state_code = polling_location.state
 
                 create_results = ballot_returned_manager.update_or_create_ballot_returned(
                     polling_location_we_vote_id, voter_id, google_civic_election_id,
                     latitude=latitude, longitude=longitude,
-                    ballot_location_display_name=polling_location_name, text_for_map_search=text_for_map_search)
+                    ballot_location_display_name=polling_location_name, text_for_map_search=text_for_map_search,
+                    normalized_state=state_code)
 
     if number_of_ballot_items_created:
         status += "IMPORT_BALLOT_ITEM_ENTRY:BALLOT_ITEM_CREATED"
