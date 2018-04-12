@@ -588,6 +588,8 @@ def batch_action_list_export_view(request):
     header_list = [getattr(batch_header_map, field) for field in header_field_names]
     header_list.insert(0, 'google_civic_election_id')
     header_list.insert(0, 'state_code')
+    # - Filter out headers that are None.
+    header_list = list(filter(None, header_list))
 
     # create response for csv file
     response = export_csv(batch_row_list, header_list, row_field_names, batch_description)
@@ -621,7 +623,6 @@ def export_csv(batch_row_list, header_list, row_field_names, batch_description =
         csv_writer.writerow([getattr(obj, field) for field in row_field_names])
 
     return response
-
 
 @login_required
 def batch_action_list_export_voters_view(request):
@@ -660,7 +661,6 @@ def batch_action_list_export_voters_view(request):
                                 "?kind_of_batch=" + str(kind_of_batch) +
                                 "&batch_header_id=" + str(batch_header_id)
                                 )
-
 
 @login_required
 def batch_action_list_analyze_process_view(request):
@@ -701,7 +701,6 @@ def batch_action_list_analyze_process_view(request):
                                 "&batch_header_id=" + str(batch_header_id) +
                                 "&state_code=" + str(state_code)
                                 )
-
 
 @login_required
 def batch_header_mapping_view(request):

@@ -279,10 +279,13 @@ class BatchManager(models.Model):
 
     def create_batch_from_object_list(self, objects_list, organization_we_vote_id='', batch_header_list=''):
         """
+        Creates a batch from a list of objects
 
-        :param objects_list:
+        :param objects_list: list of objects
         :return:
         """
+        # TODO: make this flexible and not dependent on the class of the object list.
+
         status = ''
         success = False
         number_of_voters = 0
@@ -310,7 +313,6 @@ class BatchManager(models.Model):
 
             if first_line:
                 if first_line:
-                    # create batch_header and batch_header_map for candidate_positions
                     first_line = False
                     try:
                         batch_header = BatchHeader.objects.create(
@@ -347,7 +349,7 @@ class BatchManager(models.Model):
                                 batch_name=batch_name,
                                 batch_description_text=batch_description_text,
                                 google_civic_election_id=google_civic_election_id,
-                                kind_of_batch='IMPORT_VOTER',
+                                kind_of_batch=IMPORT_VOTER,
                                 organization_we_vote_id=organization_we_vote_id,
                             )
                             status += " BATCH_DESCRIPTION_SAVED"
