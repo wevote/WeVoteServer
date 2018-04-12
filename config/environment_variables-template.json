@@ -73,6 +73,14 @@
   "QUICK_INFO_URL":                 "https://api.wevoteusa.org/import_export/quick_info/",
   "VOTER_GUIDES_SYNC_URL":          "https://api.wevoteusa.org/apis/v1/voterGuidesSyncOut/",
 
+  "_comment":                       "import_export_ballotpedia",
+  "BALLOTPEDIA_API_KEY":            "",
+  "BALLOTPEDIA_API_CANDIDATES_URL": "https://api.ballotpedia.org/v3/api/1.1/tables/candidates/rows",
+  "BALLOTPEDIA_API_CONTAINS_URL":   "https://api.ballotpedia.org/v3/api/contains",
+  "BALLOTPEDIA_API_ELECTIONS_URL":  "https://api.ballotpedia.org/v3/api/1.1/tables/election_dates/rows",
+  "BALLOTPEDIA_API_MEASURES_URL":   "https://api.ballotpedia.org/v3/api/1.1/tables/ballot_measures/rows",
+  "BALLOTPEDIA_API_RACES_URL":      "https://api.ballotpedia.org/v3/api/1.1/tables/races/rows",
+
   "_comment":                       "import_export_google_civic",
   "GOOGLE_CIVIC_API_KEY":           "",
   "GOOGLE_MAPS_API_KEY":            "",

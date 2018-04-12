@@ -269,14 +269,33 @@ BATCH_IMPORT_KEYS_ACCEPTED_FOR_POSITIONS = {
 }
 
 BATCH_IMPORT_KEYS_ACCEPTED_FOR_BALLOT_ITEMS = {
-    'polling_location_we_vote_id': 'polling_location_we_vote_id',
     'contest_office_we_vote_id': 'contest_office_we_vote_id',
+    'contest_office_id': 'contest_office_id',
     'contest_office_name': 'contest_office_name',
     'candidate_name': 'candidate_name',
     'candidate_twitter_handle': 'candidate_twitter_handle',
     'contest_measure_we_vote_id': 'contest_measure_we_vote_id',
+    'contest_measure_id': 'contest_measure_id',
     'contest_measure_name': 'contest_measure_name',
+    'election_day_text': 'election_day_text',
     'local_ballot_order': 'local_ballot_order',
+    'polling_location_we_vote_id': 'polling_location_we_vote_id',
+    'state_code': 'state_code',
+}
+
+# We Vote contest office key on the left, and Ballotpedia field name on right
+# This gives us the option of putting the same field from a remote source into two We Vote fields
+BATCH_HEADER_MAP_BALLOT_ITEMS_TO_BALLOTPEDIA_VOTER_DISTRICTS = {
+    'ballotpedia_district_id': 'ballotpedia_district_id',
+    'ballotpedia_district_name': 'ballotpedia_district_name',
+    'contest_measure_id': 'contest_measure_id',
+    'contest_measure_we_vote_id': 'contest_measure_we_vote_id',
+    'contest_office_we_vote_id': 'contest_office_we_vote_id',
+    'contest_office_id': 'contest_office_id',
+    'election_day_text': 'election_day_text',
+    'local_ballot_order': 'local_ballot_order',
+    'polling_location_we_vote_id': 'polling_location_we_vote_id',
+    'state_code': 'state_code',
 }
 
 BATCH_IMPORT_KEYS_ACCEPTED_FOR_VOTERS = {

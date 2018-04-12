@@ -33,6 +33,7 @@ urlpatterns = [
 
     url(r'^a/', include('analytics.urls', namespace="analytics")),
     url(r'^b/', include('ballot.urls', namespace="ballot")),
+    url(r'^ballotpedia/', include('import_export_ballotpedia.urls', namespace="ballotpedia")),
     url(r'^bookmark/', include('bookmark.urls', namespace="bookmark")),
     url(r'^c/', include('candidate.urls', namespace="candidate")),
     url(r'^e/', include('election.urls', namespace="election")),
@@ -43,7 +44,7 @@ urlpatterns = [
     url(r'^follow/', include('follow.urls', namespace="follow")),
     url(r'^google_custom_search/', include('google_custom_search.urls', namespace="google_custom_search")),
     url(r'^health/', views.health_view),  # A simple health check to make sure the site is running
-    url(r'^image/', include ('image.urls', namespace="image")),
+    url(r'^image/', include('image.urls', namespace="image")),
     url(r'^import_export_batches/', include('import_export_batches.urls', namespace="import_export_batches")),
     url(r'^import_export_ctcl/', include('import_export_ctcl.urls', namespace="import_export_ctcl")),
     url(r'^import_export_google_civic/', include(

@@ -604,6 +604,62 @@ class ContestMeasureList(models.Model):
     def __unicode__(self):
         return "ContestMeasureList"
 
+    def retrieve_measures(self, google_civic_election_id=0, ballotpedia_district_id=0, state_code="", limit=0):
+        measure_list_objects = []
+        measure_list_light = []
+        measure_list_found = False
+
+        try:
+            measure_queryset = ContestMeasure.objects.all()
+            if positive_value_exists(google_civic_election_id):
+                measure_queryset = measure_queryset.filter(google_civic_election_id=google_civic_election_id)
+            if positive_value_exists(ballotpedia_district_id):
+                measure_queryset = measure_queryset.filter(ballotpedia_district_id=ballotpedia_district_id)
+            if positive_value_exists(state_code):
+                measure_queryset = measure_queryset.filter(state_code__iexact=state_code)
+            if positive_value_exists(limit):
+                measure_list_objects = measure_queryset[:limit]
+            else:
+                measure_list_objects = list(measure_queryset)
+
+            if len(measure_list_objects):
+                measure_list_found = True
+                status = 'MEASURES_RETRIEVED'
+                success = True
+            else:
+                status = 'NO_MEASURES_RETRIEVED'
+                success = True
+        except ContestMeasure.DoesNotExist:
+            # No measures found. Not a problem.
+            status = 'NO_MEASURES_FOUND_DoesNotExist'
+            measure_list_objects = []
+            success = True
+        except Exception as e:
+            handle_exception(e, logger=logger)
+            status = 'FAILED retrieve_measures ' \
+                     '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
+            success = False
+
+        if measure_list_found:
+            for measure in measure_list_objects:
+                one_measure = {
+                    'ballot_item_display_name': measure.measure_title,
+                    'measure_we_vote_id':       measure.we_vote_id,
+                    'office_we_vote_id':        '',
+                    'candidate_we_vote_id':     '',
+                }
+                measure_list_light.append(one_measure.copy())
+
+        results = {
+            'success':                  success,
+            'status':                   status,
+            'google_civic_election_id': google_civic_election_id,
+            'measure_list_found':       measure_list_found,
+            'measure_list_objects':     measure_list_objects,
+            'measure_list_light':       measure_list_light,
+        }
+        return results
+
     def retrieve_all_measures_for_upcoming_election(self, google_civic_election_id=0, state_code='',
                                                     return_list_of_objects=False, limit=300):
         measure_list_objects = []

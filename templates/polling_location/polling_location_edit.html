@@ -64,6 +64,22 @@
     </div>
 </div>
 
+<div class="form-group">
+    <label for="latitude_id" class="col-sm-3 control-label">Latitude</label>
+    <div class="col-sm-8">
+        <input type="text" name="latitude" id="latitude_id" class="form-control"
+               value="{% if polling_location %}{{ polling_location.latitude|default_if_none:"" }}{% endif %}" />
+    </div>
+</div>
+
+<div class="form-group">
+    <label for="longitude_id" class="col-sm-3 control-label">Longitude</label>
+    <div class="col-sm-8">
+        <input type="text" name="longitude" id="longitude_id" class="form-control"
+               value="{% if polling_location %}{{ polling_location.longitude|default_if_none:"" }}{% endif %}" />
+    </div>
+</div>
+
 <input type="hidden" name="polling_location_id" value="{{ polling_location_id }}">
 <input type="hidden" name="google_civic_election_id" value="{{ google_civic_election_id }}">
 <input type="hidden" name="state_code" value="{{ state_code }}">
