@@ -14,6 +14,7 @@ from .models import BatchManager, BatchDescription, BatchHeaderMap, BatchRow, Ba
     BATCH_IMPORT_KEYS_ACCEPTED_FOR_ELECTED_OFFICES, BATCH_IMPORT_KEYS_ACCEPTED_FOR_MEASURES, \
     BATCH_IMPORT_KEYS_ACCEPTED_FOR_ORGANIZATIONS, BATCH_IMPORT_KEYS_ACCEPTED_FOR_POLITICIANS, \
     BATCH_IMPORT_KEYS_ACCEPTED_FOR_POSITIONS, BATCH_IMPORT_KEYS_ACCEPTED_FOR_BALLOT_ITEMS
+from ballot.models import BallotReturnedManager
 from candidate.models import CandidateCampaign, CandidateCampaignListManager, CandidateCampaignManager
 from django.db.models import Q
 from elected_office.models import ElectedOffice, ElectedOfficeManager
@@ -26,6 +27,7 @@ from organization.models import Organization, OrganizationListManager, Organizat
     NONPROFIT_501C3, NONPROFIT_501C4, POLITICAL_ACTION_COMMITTEE, PUBLIC_FIGURE, \
     CORPORATION, NEWS_ORGANIZATION, UNKNOWN
 from politician.models import Politician, PoliticianManager
+from polling_location.models import PollingLocationManager
 from position.models import PositionManager, INFORMATION_ONLY, OPPOSE, SUPPORT
 from twitter.models import TwitterUserManager
 from voter_guide.controllers import refresh_existing_voter_guides
@@ -3995,7 +3997,6 @@ def import_create_or_update_elected_office_entry(batch_header_id, batch_row_id):
     return results
 
 
-# TODO DALE UPDATE THIS
 def import_ballot_item_data_from_batch_row_actions(batch_header_id, batch_row_id,
                                                    create_entry_flag=False, update_entry_flag=False):
     """
@@ -4015,6 +4016,8 @@ def import_ballot_item_data_from_batch_row_actions(batch_header_id, batch_row_id
     new_ballot_item = ''
     new_ballot_item_created = False
     batch_row_action_list_found = False
+    polling_location_we_vote_id = ""
+    google_civic_election_id = 0
 
     if not positive_value_exists(batch_header_id):
         status = "IMPORT_BALLOT_ITEM_ENTRY-BATCH_HEADER_ID_MISSING"
@@ -4108,6 +4111,8 @@ def import_ballot_item_data_from_batch_row_actions(batch_header_id, batch_row_id
         }
         return results
 
+    office_manager = ContestOfficeManager()
+    measure_manager = ContestMeasureManager()
     for one_batch_row_action in batch_row_action_list:
         # Find the column in the incoming batch_row with the header == ballot_item_display_name
         ballot_item_display_name = one_batch_row_action.ballot_item_display_name
@@ -4116,7 +4121,27 @@ def import_ballot_item_data_from_batch_row_actions(batch_header_id, batch_row_id
             google_civic_election_id = str(one_batch_row_action.google_civic_election_id)
         else:
             google_civic_election_id = str(batch_description.google_civic_election_id)
+        # Set this for the possible creation of BallotReturned entry
+        polling_location_we_vote_id = one_batch_row_action.polling_location_we_vote_id
         state_code = one_batch_row_action.state_code
+        # Make sure we have both ids for office
+        if positive_value_exists(one_batch_row_action.contest_office_we_vote_id) \
+                and not positive_value_exists(one_batch_row_action.contest_office_id):
+            one_batch_row_action.contest_office_id = office_manager.fetch_contest_office_id_from_we_vote_id(
+                one_batch_row_action.contest_office_we_vote_id)
+        elif positive_value_exists(one_batch_row_action.contest_office_id) \
+                and not positive_value_exists(one_batch_row_action.contest_office_we_vote_id):
+            one_batch_row_action.contest_office_we_vote_id = office_manager.fetch_contest_office_we_vote_id_from_id(
+                one_batch_row_action.contest_office_id)
+        # Make sure we have both ids for measure
+        if positive_value_exists(one_batch_row_action.contest_measure_we_vote_id) \
+                and not positive_value_exists(one_batch_row_action.contest_measure_id):
+            one_batch_row_action.contest_measure_id = measure_manager.fetch_contest_measure_id_from_we_vote_id(
+                one_batch_row_action.contest_measure_we_vote_id)
+        elif positive_value_exists(one_batch_row_action.contest_measure_id) \
+                and not positive_value_exists(one_batch_row_action.contest_measure_we_vote_id):
+            one_batch_row_action.contest_measure_we_vote_id = measure_manager.fetch_contest_measure_we_vote_id_from_id(
+                one_batch_row_action.contest_measure_id)
         defaults = {
             'contest_office_id':            one_batch_row_action.contest_office_id,
             'contest_measure_id':           one_batch_row_action.contest_measure_id,
@@ -4166,6 +4191,32 @@ def import_ballot_item_data_from_batch_row_actions(batch_header_id, batch_row_id
                     'new_ballot_item':                  new_ballot_item,
                 }
                 return results
+
+    if number_of_ballot_items_created or number_of_ballot_items_updated:
+        if positive_value_exists(polling_location_we_vote_id) and positive_value_exists(google_civic_election_id):
+            # Make sure there is a ballot_returned entry
+            ballot_returned_manager = BallotReturnedManager()
+            results = ballot_returned_manager.retrieve_ballot_returned_from_polling_location_we_vote_id(
+                polling_location_we_vote_id, google_civic_election_id)
+            if results['success'] and not results['ballot_returned_found']:
+                voter_id = 0
+                polling_location_manager = PollingLocationManager()
+                polling_location_results = polling_location_manager.retrieve_polling_location_by_id(
+                    0, polling_location_we_vote_id)
+                latitude = None
+                longitude = None
+                polling_location_name = ""
+                if polling_location_results['polling_location_found']:
+                    polling_location = polling_location_results['polling_location']
+                    latitude = polling_location.latitude
+                    longitude = polling_location.longitude
+                    polling_location_name = polling_location.location_name
+                    text_for_map_search = polling_location.get_text_for_map_search()
+
+                create_results = ballot_returned_manager.update_or_create_ballot_returned(
+                    polling_location_we_vote_id, voter_id, google_civic_election_id,
+                    latitude=latitude, longitude=longitude,
+                    ballot_location_display_name=polling_location_name, text_for_map_search=text_for_map_search)
 
     if number_of_ballot_items_created:
         status += "IMPORT_BALLOT_ITEM_ENTRY:BALLOT_ITEM_CREATED"

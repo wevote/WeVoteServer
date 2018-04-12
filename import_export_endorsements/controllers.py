@@ -47,5 +47,6 @@ def retrieve_endorsements(organization):
 def import_candidate_position(candidate_position):
     print(candidate_position)
 
+
 def import_measure_position(measure_position):
     print(measure_position)

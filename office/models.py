@@ -849,7 +849,7 @@ class ContestOfficeListManager(models.Model):
         return 0
 
     def retrieve_offices(self, google_civic_election_id=0, state_code="", office_list=[],
-                         return_list_of_objects=False):
+                         return_list_of_objects=False, ballotpedia_district_id=0):
         office_list_objects = []
         office_list_light = []
         office_list_found = False
@@ -861,6 +861,8 @@ class ContestOfficeListManager(models.Model):
             else:
                 # TODO Limit this search to upcoming_elections only
                 pass
+            if positive_value_exists(ballotpedia_district_id):
+                office_queryset = office_queryset.filter(ballotpedia_district_id=ballotpedia_district_id)
             if positive_value_exists(state_code):
                 office_queryset = office_queryset.filter(state_code__iexact=state_code)
             if len(office_list):

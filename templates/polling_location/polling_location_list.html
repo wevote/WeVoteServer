@@ -57,7 +57,18 @@
 </form>
 
 {% if polling_location_list %}
-    <table border="0" cellpadding="10">
+    <table border="1" cellpadding="10">
+    <thead>
+        <tr>
+            <th></th>
+            <th>Name</th>
+            <th>Address</th>
+            <th>we_vote_id</th>
+            <th>lat/long</th>
+            <th></th>
+        </tr>
+    </thead>
+
     {% for polling_location in polling_location_list %}
         <tr>
             <td>{{ forloop.counter }}</td>

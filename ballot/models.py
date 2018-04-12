@@ -975,7 +975,10 @@ class BallotReturned(models.Model):
         return
 
     def election_day_text(self):
-        return self.election_date.strftime('%Y-%m-%d')
+        if self.election_date:
+            return self.election_date.strftime('%Y-%m-%d')
+        else:
+            return ""
 
 
 class BallotReturnedManager(models.Model):
@@ -1556,7 +1559,7 @@ class BallotReturnedManager(models.Model):
             self, polling_location_we_vote_id, voter_id, google_civic_election_id, election_day_text=False,
             election_description_text=False, latitude=False, longitude=False,
             normalized_city=False, normalized_line1=False, normalized_line2=False, normalized_state=False,
-            normalized_zip=False, text_for_map_search=False):
+            normalized_zip=False, text_for_map_search=False, ballot_location_display_name=False):
         exception_multiple_object_returned = False
         new_ballot_returned_created = False
 
@@ -1575,11 +1578,13 @@ class BallotReturnedManager(models.Model):
                 )
 
                 if not positive_value_exists(ballot_returned.google_civic_election_id):
-                    ballot_returned.google_civic_election_id = google_civic_election_id;
+                    ballot_returned.google_civic_election_id = google_civic_election_id
                 if not positive_value_exists(ballot_returned.voter_id):
                     ballot_returned.voter_id = voter_id
+                if ballot_location_display_name is not False:
+                    ballot_returned.ballot_location_display_name = ballot_location_display_name
                 if election_day_text is not False:
-                    ballot_returned.election_date = election_day_text
+                    ballot_returned.election_date = datetime.strptime(election_day_text, "%Y-%m-%d").date()
                 if election_description_text is not False:
                     ballot_returned.election_description_text = election_description_text
                 if latitude is not False:
@@ -1724,6 +1729,56 @@ class BallotReturnedListManager(models.Model):
             pass
 
         return 0
+
+    def retrieve_ballot_returned_list(self, google_civic_election_id, polling_location_we_vote_id, limit=0):
+        google_civic_election_id = convert_to_int(google_civic_election_id)
+        ballot_returned_list = []
+        ballot_returned_list_found = False
+
+        if not positive_value_exists(google_civic_election_id) \
+                and not positive_value_exists(polling_location_we_vote_id):
+            results = {
+                'success': False,
+                'status': "RETRIEVE_BALLOT_RETURNED_MISSING_REQUIRED_VARIABLES ",
+                'ballot_returned_list_found': ballot_returned_list_found,
+                'ballot_returned_list': ballot_returned_list,
+            }
+            return results
+
+        try:
+            ballot_returned_queryset = BallotReturned.objects.all()
+            if positive_value_exists(google_civic_election_id):
+                ballot_returned_queryset = \
+                    ballot_returned_queryset.filter(google_civic_election_id=google_civic_election_id)
+            if positive_value_exists(polling_location_we_vote_id):
+                ballot_returned_queryset = \
+                    ballot_returned_queryset.filter(polling_location_we_vote_id=polling_location_we_vote_id)
+            if positive_value_exists(limit):
+                ballot_returned_list = ballot_returned_queryset[:limit]
+            else:
+                ballot_returned_list = list(ballot_returned_queryset)
+
+            if len(ballot_returned_list):
+                ballot_returned_list_found = True
+                status = 'BALLOT_RETURNED_LIST_FOUND'
+            else:
+                status = 'NO_BALLOT_RETURNED_LIST_FOUND'
+        except BallotReturned.DoesNotExist:
+            # No ballot items found. Not a problem.
+            status = 'NO_BALLOT_RETURNED_LIST_FOUND_DOES_NOT_EXIST'
+            ballot_returned_list = []
+        except Exception as e:
+            handle_exception(e, logger=logger)
+            status = 'FAILED retrieve_ballot_returned_list ' \
+                     '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
+
+        results = {
+            'success':                      True if ballot_returned_list_found else False,
+            'status':                       status,
+            'ballot_returned_list_found':   ballot_returned_list_found,
+            'ballot_returned_list':         ballot_returned_list,
+        }
+        return results
 
     def retrieve_ballot_returned_list_for_election(self, google_civic_election_id, state_code='', limit=0,
                                                    ballot_returned_search_str=''):

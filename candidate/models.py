@@ -143,11 +143,14 @@ class CandidateCampaignListManager(models.Model):
         candidate_list_objects = []
         candidate_list_light = []
         candidate_list_found = False
+        ballotpedia_election_id = 0
 
         try:
             candidate_queryset = CandidateCampaign.objects.all()
             if positive_value_exists(google_civic_election_id):
                 candidate_queryset = candidate_queryset.filter(google_civic_election_id=google_civic_election_id)
+            elif positive_value_exists(ballotpedia_election_id):
+                candidate_queryset = candidate_queryset.filter(ballotpedia_election_id=ballotpedia_election_id)
             else:
                 # TODO Limit this search to upcoming_elections only
                 pass

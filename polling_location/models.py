@@ -193,6 +193,8 @@ class PollingLocationManager(models.Model):
         :return:
         """
         status = ""
+        latitude = None
+        longitude = None
         # We try to use existing google_client
         if not hasattr(self, 'google_client') or not self.google_client:
             self.google_client = get_geocoder_for_service('google')(GOOGLE_MAPS_API_KEY)
@@ -202,6 +204,8 @@ class PollingLocationManager(models.Model):
                 'status':                   "POPULATE_LATITUDE_AND_LONGITUDE-NOT_A_POLLING_LOCATION_OBJECT ",
                 'geocoder_quota_exceeded':  False,
                 'success':                  False,
+                'latitude':                 latitude,
+                'longitude':                longitude,
             }
             return results
 
@@ -214,6 +218,8 @@ class PollingLocationManager(models.Model):
                 'status':                   "POPULATE_LATITUDE_AND_LONGITUDE-MISSING_REQUIRED_ADDRESS_INFO ",
                 'geocoder_quota_exceeded':  False,
                 'success':                  False,
+                'latitude':                 latitude,
+                'longitude':                longitude,
             }
             return results
 
@@ -230,6 +236,8 @@ class PollingLocationManager(models.Model):
                 'status':                   status,
                 'geocoder_quota_exceeded':  True,
                 'success':                  False,
+                'latitude':                 latitude,
+                'longitude':                longitude,
             }
             return results
         except Exception as e:
@@ -238,6 +246,8 @@ class PollingLocationManager(models.Model):
                 'status':                   status,
                 'geocoder_quota_exceeded':  False,
                 'success':                  False,
+                'latitude':                 latitude,
+                'longitude':                longitude,
             }
             return results
 
@@ -246,10 +256,14 @@ class PollingLocationManager(models.Model):
                 'status':                   "POPULATE_LATITUDE_AND_LONGITUDE-LOCATION_NOT_RETURNED_FROM_GEOCODER ",
                 'geocoder_quota_exceeded':  False,
                 'success':                  False,
+                'latitude':                 latitude,
+                'longitude':                longitude,
             }
             return results
 
         try:
+            latitude = location.latitude
+            longitude = location.longitude
             polling_location.latitude, polling_location.longitude = location.latitude, location.longitude
             polling_location.save()
             status += "POLLING_LOCATION_SAVED_WITH_LATITUDE_AND_LONGITUDE "
@@ -262,6 +276,8 @@ class PollingLocationManager(models.Model):
             'status':                   status,
             'geocoder_quota_exceeded':  False,
             'success':                  success,
+            'latitude':                 latitude,
+            'longitude':                longitude,
         }
         return results
 

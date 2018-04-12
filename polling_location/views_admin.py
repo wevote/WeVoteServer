@@ -5,6 +5,7 @@
 from .models import PollingLocation, PollingLocationManager
 from .controllers import import_and_save_all_polling_locations_data, polling_locations_import_from_master_server
 from admin_tools.views import redirect_to_sign_in_page
+from ballot.models import BallotReturnedListManager
 from config.base import get_environment_variable
 from django.http import HttpResponseRedirect
 from django.core.urlresolvers import reverse
@@ -199,6 +200,8 @@ def polling_location_edit_process_view(request):
     line2 = request.POST.get('line2', False)
     city = request.POST.get('city', False)
     zip_long = request.POST.get('zip_long', False)
+    latitude = request.POST.get('latitude', False)
+    longitude = request.POST.get('longitude', False)
 
     # Check to see if this polling_location is already being used anywhere
     polling_location_on_stage_found = False
@@ -233,14 +236,21 @@ def polling_location_edit_process_view(request):
             polling_location_on_stage.city = city
         if positive_value_exists(zip_long):
             polling_location_on_stage.zip_long = zip_long
+        if positive_value_exists(latitude):
+            polling_location_on_stage.latitude = latitude
+        if positive_value_exists(longitude):
+            polling_location_on_stage.longitude = longitude
 
         polling_location_on_stage.save()
         polling_location_id = polling_location_on_stage.id
         polling_location_we_vote_id = polling_location_on_stage.we_vote_id
 
-        lat_long_results = polling_location_manager.populate_latitude_and_longitude_for_polling_location(
-            polling_location_on_stage)
-        status += lat_long_results['status']
+        if not positive_value_exists(latitude) and not positive_value_exists(longitude):
+            lat_long_results = polling_location_manager.populate_latitude_and_longitude_for_polling_location(
+                polling_location_on_stage)
+            status += lat_long_results['status']
+            latitude = lat_long_results['latitude']
+            longitude = lat_long_results['longitude']
 
         if polling_location_on_stage_found:
             # Update
@@ -252,6 +262,22 @@ def polling_location_edit_process_view(request):
     except Exception as e:
         messages.add_message(request, messages.ERROR, 'Could not save polling_location. ' + status)
 
+    # Now update ballot returned with lat/long
+    try:
+        if positive_value_exists(latitude) and positive_value_exists(longitude):
+            ballot_returned_list_manager = BallotReturnedListManager()
+            results = ballot_returned_list_manager.retrieve_ballot_returned_list(
+                google_civic_election_id, polling_location_we_vote_id)
+            if results['ballot_returned_list_found']:
+                ballot_returned_list = results['ballot_returned_list']
+                for one_ballot_returned in ballot_returned_list:
+                    one_ballot_returned.latitude = latitude
+                    one_ballot_returned.longitude = longitude
+                    one_ballot_returned.save()
+
+    except Exception as e:
+        messages.add_message(request, messages.ERROR, 'Could not update ballot_returned. ' + status)
+
     url_variables = "?google_civic_election_id=" + str(google_civic_election_id) + \
                     "&state_code=" + str(state_code)
     if positive_value_exists(polling_location_we_vote_id):
@@ -262,7 +288,7 @@ def polling_location_edit_process_view(request):
 
 
 @login_required
-def polling_location_edit_view(request, polling_location_local_id):
+def polling_location_edit_view(request, polling_location_local_id=0, polling_location_we_vote_id=""):
     authority_required = {'verified_volunteer'}  # admin, verified_volunteer
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
@@ -275,8 +301,12 @@ def polling_location_edit_view(request, polling_location_local_id):
     polling_location_on_stage_found = False
     polling_location_on_stage = PollingLocation()
     try:
-        polling_location_on_stage = PollingLocation.objects.get(id=polling_location_local_id)
-        polling_location_on_stage_found = True
+        if positive_value_exists(polling_location_local_id):
+            polling_location_on_stage = PollingLocation.objects.get(id=polling_location_local_id)
+            polling_location_on_stage_found = True
+        elif positive_value_exists(polling_location_we_vote_id):
+            polling_location_on_stage = PollingLocation.objects.get(we_vote_id=polling_location_we_vote_id)
+            polling_location_on_stage_found = True
     except PollingLocation.MultipleObjectsReturned as e:
         handle_record_found_more_than_one_exception(e, logger=logger)
     except PollingLocation.DoesNotExist:

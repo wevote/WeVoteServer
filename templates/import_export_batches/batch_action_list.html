@@ -1007,9 +1007,9 @@
                         <td>{{ one_batch_row.batch_row_action.local_ballot_order|default_if_none:"" }}</td>
                         <td>{{ one_batch_row.batch_row_action.ballot_item_display_name|default_if_none:"" }}
                             {% if one_batch_row.batch_row_action.contest_office_we_vote_id %}
-                            <span> {{ one_batch_row.batch_row_action.contest_office_we_vote_id|default_if_none:"" }}</span>
+                            <span> ({{ one_batch_row.batch_row_action.contest_office_we_vote_id|default_if_none:"" }})</span>
                             {% elif one_batch_row.batch_row_action.measure_we_vote_id %}
-                            <span> {{ one_batch_row.batch_row_action.measure_we_vote_id|default_if_none:"" }}</span>
+                            <span> ({{ one_batch_row.batch_row_action.measure_we_vote_id|default_if_none:"" }})</span>
                             {% endif %}
                         </td>
                         <td>{{ one_batch_row.batch_row_action.google_civic_election_id|default_if_none:"" }}</td>
