@@ -61,12 +61,20 @@ def import_ballot_items_for_location_view(request):
                                     "&google_civic_election_id=" + str(google_civic_election_id))
     else:
         # Go to the ballot_item_list_edit page
-        return HttpResponseRedirect(reverse('ballot:ballot_item_list_by_polling_location_edit',
-                                            args=(polling_location_we_vote_id,)) +
-                                    "?google_civic_election_id=" + str(google_civic_election_id) +
-                                    "&polling_location_we_vote_id=" + str(polling_location_we_vote_id) +
-                                    "&state_code=" + str(state_code)
-                                    )
+        if positive_value_exists(polling_location_we_vote_id):
+            return HttpResponseRedirect(reverse('ballot:ballot_item_list_by_polling_location_edit',
+                                                args=(polling_location_we_vote_id,)) +
+                                        "?google_civic_election_id=" + str(google_civic_election_id) +
+                                        "&polling_location_we_vote_id=" + str(polling_location_we_vote_id) +
+                                        "&state_code=" + str(state_code)
+                                        )
+        else:
+            messages.add_message(request, messages.ERROR, "Missing polling_location_we_vote_id.")
+            return HttpResponseRedirect(reverse('election:election_list', args=()) +
+                                        "?google_civic_election_id=" + str(google_civic_election_id) +
+                                        "&polling_location_we_vote_id=" + str(polling_location_we_vote_id) +
+                                        "&state_code=" + str(state_code)
+                                        )
 
 
 def import_export_ballotpedia_index_view(request):

@@ -295,6 +295,7 @@ def ballot_item_list_edit_view(request, ballot_returned_id, polling_location_we_
             ballot_returned = results['ballot_returned']
             ballot_returned_found = True
             google_civic_election_id = ballot_returned.google_civic_election_id
+            polling_location_we_vote_id = ballot_returned.polling_location_we_vote_id
     elif positive_value_exists(polling_location_we_vote_id):
         results = ballot_returned_manager.retrieve_existing_ballot_returned_by_identifier(
             ballot_returned_id, google_civic_election_id, voter_id, polling_location_we_vote_id)
@@ -633,6 +634,7 @@ def ballot_item_list_edit_process_view(request):
             ballot_returned.ballot_location_display_option_on = ballot_location_display_option_on
             ballot_returned.ballot_location_display_name = ballot_location_display_name
             ballot_returned.ballot_location_shortcut = ballot_location_shortcut
+            ballot_returned.normalized_state = state_code
 
             ballot_returned.save()
             messages.add_message(request, messages.INFO, 'Ballot_returned updated.')
@@ -701,6 +703,8 @@ def ballot_item_list_edit_process_view(request):
                         local_ballot_order_count += 1
                         local_ballot_order_key = 'local_ballot_order_' + str(one_ballot_item.id)
                         local_ballot_order = request.POST.get(local_ballot_order_key, local_ballot_order_count)
+                        if not positive_value_exists(local_ballot_order):
+                            local_ballot_order = 0
                         if positive_value_exists(local_ballot_order):
                             one_ballot_item.local_ballot_order = local_ballot_order
                             one_ballot_item.save()
