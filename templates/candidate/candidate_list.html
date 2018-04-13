@@ -87,7 +87,7 @@
         <li><a href="{% url 'import_export_twitter:scrape_social_media_for_candidates_in_one_election' %}?google_civic_election_id={{ google_civic_election_id }}" >
         Go to Candidate Sites and get Twitter Handles for this Election</a> (1-2 minutes)</li>
 
-        <li><a href="{% url 'twitter2:bulk_retrieve_possible_twitter_handles' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}" >
+        <li><a href="{% url 'twitter2:bulk_retrieve_possible_twitter_handles' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}&page={{ current_page_number }}" >
         Retrieve Possible Twitter Handles</a> (10 at a time - about 30 seconds)</li>
 
         <li><a href="{% url 'google_custom_search:bulk_retrieve_possible_google_search_users' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}" >
@@ -118,6 +118,9 @@
     <input type="submit" value="Search for Candidate" />
 </form>
 
+  <span class="float-right"><a href="{{ previous_page_url }}">Previous page</a> | <a href="{{ next_page_url }}">Next page</a></span>
+
+
 {% if candidate_list %}
     <table border="1" cellpadding="5" cellspacing="5">
         <tr>
@@ -137,7 +140,7 @@
         </tr>
     {% for candidate in candidate_list %}
         <tr>
-            <td>{{ forloop.counter }}</td>
+            <td>{{ forloop.counter|add:candidate_count_start }}</td>
             <td>
                 {% if candidate.candidate_photo_url %}
                 <a href="{% url 'candidate:candidate_edit' candidate.id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
@@ -242,6 +245,8 @@
         </tr>
     {% endfor %}
     </table>
+
+  <span class="float-right"><a href="{{ previous_page_url }}">Previous page</a> | <a href="{{ next_page_url }}">Next page</a></span>
 
     <p>
         <a href="{% url 'apis_v1:candidatesSyncOutView' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}&candidate_search={{ candidate_search }}" target="_blank" >Export Candidates</a><br />
