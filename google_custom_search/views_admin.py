@@ -108,6 +108,7 @@ def bulk_retrieve_possible_google_search_users_view(request):
 
     voter_device_id = get_voter_api_device_id(request)
     google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
+    hide_candidate_tools = request.GET.get('hide_candidate_tools', False)
     page = request.GET.get('page', 0)
     state_code = request.GET.get('state_code', '')
     show_all = request.GET.get('show_all', False)
@@ -152,4 +153,5 @@ def bulk_retrieve_possible_google_search_users_view(request):
     return HttpResponseRedirect(reverse('candidate:candidate_list', args=()) +
                                 '?google_civic_election_id=' + str(google_civic_election_id) +
                                 '&state_code=' + str(state_code) +
+                                '&hide_candidate_tools=' + str(hide_candidate_tools) +
                                 '&page=' + str(page))
