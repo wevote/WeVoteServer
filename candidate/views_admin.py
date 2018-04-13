@@ -186,16 +186,22 @@ def candidate_list_view(request):
 
     google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
     candidate_search = request.GET.get('candidate_search', '')
+    hide_candidate_tools = request.GET.get('hide_candidate_tools', 0)
     page = convert_to_int(request.GET.get('page', 0))
+    page = page if positive_value_exists(page) else 0  # Prevent negative pages
     current_page_url = request.get_full_path()
-    # # Remove "&next_page=1"
-    # if current_page_url.endswith("&next_page=1"):
-    #     current_page_url = current_page_url[:-12]
     # Remove "&page=" and everything after
     if "&page=" in current_page_url:
         location_of_page_variable = current_page_url.find("&page=")
         if location_of_page_variable != -1:
             current_page_url = current_page_url[:location_of_page_variable]
+    # Remove "&hide_candidate_tools=1"
+    if current_page_url:
+        current_page_minus_candidate_tools_url = current_page_url.replace("&hide_candidate_tools=1", "")
+        current_page_minus_candidate_tools_url = current_page_minus_candidate_tools_url.replace(
+            "&hide_candidate_tools=0", "")
+    else:
+        current_page_minus_candidate_tools_url = current_page_url
     previous_page = page - 1
     previous_page_url = current_page_url + "&page=" + str(previous_page)
     next_page = page + 1
@@ -209,6 +215,7 @@ def candidate_list_view(request):
 
     candidate_list = []
     candidate_list_count = 0
+    candidate_count_start = 0
 
     try:
         candidate_list = CandidateCampaign.objects.all()
@@ -256,7 +263,6 @@ def candidate_list_view(request):
             number_to_show_per_page = 25
             candidate_count_start = number_to_show_per_page * page
             candidate_count_end = candidate_count_start + number_to_show_per_page
-            messages.add_message(request, messages.INFO, "candidate_count_start: " + str(candidate_count_start))
             candidate_list = candidate_list[candidate_count_start:candidate_count_end]
     except CandidateCampaign.DoesNotExist:
         # This is fine, create new
@@ -302,18 +308,21 @@ def candidate_list_view(request):
             candidate.google_search_merge_possibility = None
 
     template_values = {
-        'messages_on_stage':        messages_on_stage,
         'candidate_count_start':    candidate_count_start,
         'candidate_list':           candidate_list,
         'candidate_search':         candidate_search,
-        'election_list':            election_list,
         'current_page_number':      page,
-        'previous_page_url':        previous_page_url,
+        'current_page_url':         current_page_url,
+        'current_page_minus_candidate_tools_url':   current_page_minus_candidate_tools_url,
+        'election_list':            election_list,
+        'google_civic_election_id': google_civic_election_id,
+        'hide_candidate_tools':     hide_candidate_tools,
+        'messages_on_stage':        messages_on_stage,
         'next_page_url':            next_page_url,
+        'previous_page_url':        previous_page_url,
         'show_all_elections':       show_all_elections,
         'state_code':               state_code,
         'state_list':               sorted_state_list,
-        'google_civic_election_id': google_civic_election_id,
     }
     return render(request, 'candidate/candidate_list.html', template_values)
 
@@ -554,6 +563,7 @@ def candidate_edit_process_view(request):
     redirect_to_candidate_list = convert_to_int(request.POST['redirect_to_candidate_list'])
     candidate_name = request.POST.get('candidate_name', False)
     google_civic_candidate_name = request.POST.get('google_civic_candidate_name', False)
+    hide_candidate_tools = request.POST.get('hide_candidate_tools', False)
     google_civic_election_id = request.POST.get('google_civic_election_id', 0)
     candidate_twitter_handle = request.POST.get('candidate_twitter_handle', False)
     if positive_value_exists(candidate_twitter_handle):
@@ -862,6 +872,7 @@ def candidate_edit_process_view(request):
         return HttpResponseRedirect(reverse('candidate:candidate_list', args=()) +
                                     '?google_civic_election_id=' + str(google_civic_election_id) +
                                     '&state_code=' + str(state_code) +
+                                    '&hide_candidate_tools=' + str(hide_candidate_tools) +
                                     '&page=' + str(page))
 
     if remove_duplicate_process:

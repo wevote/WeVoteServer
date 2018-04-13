@@ -66,8 +66,7 @@
         {% endif %}
     {% endif %}{# End of if state_list #}
 
-{% if candidate_list %}
-    {% if google_civic_election_id %}
+{% if candidate_list and google_civic_election_id and hide_candidate_tools != 1 and hide_candidate_tools != '1' %}
     <ul>
         <li>Prepare: <a href="{% url 'candidate:find_and_remove_duplicate_candidates' %}?google_civic_election_id={{ google_civic_election_id }}" >
         Find and Remove Duplicate Candidates for this Election</a> (about 1 minute)</li>
@@ -105,7 +104,10 @@
         <li><a href="{% url 'position:refresh_positions_with_candidate_details_for_election' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}" >
         Refresh Positions from Candidate Info for this Election</a> (1-2 minutes)</li>
     </ol>
-    {% endif %}
+    <a href="{{ current_page_minus_candidate_tools_url }}&hide_candidate_tools=1">(Hide these Candidate Tools)</a><br />
+{% elif hide_candidate_tools %}
+    <br />
+    <a href="{{ current_page_minus_candidate_tools_url }}&hide_candidate_tools=0">(Show Candidate Tools)</a><br />
 {% endif %}
     <a href="{% url 'candidate:candidate_new' %}?google_civic_election_id={{ google_civic_election_id }}">Add New Candidate</a><br />
 
@@ -179,13 +181,13 @@
                     ({{ candidate.twitter_followers_count }} followers)
                 {% else %}
                     {% if candidate.candidate_merge_possibility %}
-                        <a href="{% url 'candidate:candidate_edit' candidate.id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
+                    <ul><li>
+                        <a href="https://twitter.com/{{ candidate.candidate_merge_possibility.twitter_handle }}" target="_blank">
                             <img src='{{ candidate.candidate_merge_possibility.twitter_profile_image_url_https }}' height="25px" /></a>&nbsp;
-                        <a href="{% url 'candidate:candidate_edit' candidate.id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
+                        <a href="https://twitter.com/{{ candidate.candidate_merge_possibility.twitter_handle }}" target="_blank">
                             {{ candidate.candidate_merge_possibility.twitter_handle }}</a>
-                        (Best Guess:
-                        <a href="{% url 'candidate:candidate_edit' candidate.id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
-                            {{ candidate.candidate_merge_possibility.likelihood_score }}</a>)<br />
+                        (<a href="{% url 'candidate:candidate_edit' candidate.id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}&show_all_twitter_search_results=1" target="_blank">
+                            Best Guess: {{ candidate.candidate_merge_possibility.likelihood_score }}</a>)<br />
                         {{ candidate.candidate_merge_possibility.twitter_description }}<br />
                         {% if candidate.candidate_merge_possibility.likelihood_score >= 60 %}
                             <form action="{% url 'candidate:candidate_edit_process' %}" id="candidate_edit" method="post" class="form-horizontal">
@@ -193,13 +195,18 @@
                                 <input type="hidden" name="candidate_twitter_handle" value="{{ candidate.candidate_merge_possibility.twitter_handle }}" />
                                 <input type="hidden" name="candidate_id" value="{{ candidate.id }}" />
                                 <input type="hidden" name="google_civic_election_id" value="{{ google_civic_election_id }}" />
+                                <input type="hidden" name="hide_candidate_tools" value="{{ hide_candidate_tools }}" />
                                 <input type="hidden" name="page" value="{{ current_page_number }}" />
                                 <input type="hidden" name="state_code" value="{{ state_code }}" />
                                 <input type="hidden" name="refresh_from_twitter" value="1" />
                                 <input type="hidden" name="redirect_to_candidate_list" value="1" />
                                 <input id="choose_{{ forloop.counter }}" type="submit" value="Choose and Update" />
                             </form>
+                        {% else %}
+                        (<a href="{% url 'candidate:candidate_edit' candidate.id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}&show_all_twitter_search_results=1" target="_blank">
+                            See all Options</a>)
                         {% endif %}
+                    </li></ul>
                     {% endif %}
                 {% endif %}
             </td>
