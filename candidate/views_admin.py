@@ -570,6 +570,7 @@ def candidate_edit_process_view(request):
     ballotpedia_race_id = request.POST.get('ballotpedia_race_id', False)
     vote_smart_id = request.POST.get('vote_smart_id', False)
     maplight_id = request.POST.get('maplight_id', False)
+    page = convert_to_int(request.POST.get('page', 0))
     state_code = request.POST.get('state_code', False)
     politician_we_vote_id = request.POST.get('politician_we_vote_id', False)
     google_search_image_file = request.POST.get('google_search_image_file', False)
@@ -860,7 +861,8 @@ def candidate_edit_process_view(request):
     if redirect_to_candidate_list:
         return HttpResponseRedirect(reverse('candidate:candidate_list', args=()) +
                                     '?google_civic_election_id=' + str(google_civic_election_id) +
-                                    '&state_code=' + str(state_code))
+                                    '&state_code=' + str(state_code) +
+                                    '&page=' + str(page))
 
     if remove_duplicate_process:
         return HttpResponseRedirect(reverse('candidate:find_and_remove_duplicate_candidates', args=()) +
