@@ -684,12 +684,16 @@ class BallotItemListManager(models.Model):
         }
         return results
 
-    def retrieve_all_ballot_items_for_polling_location(self, polling_location_we_vote_id, google_civic_election_id):
+    def retrieve_all_ballot_items_for_polling_location(self, polling_location_we_vote_id, google_civic_election_id,
+                                                       for_editing=False):
         voter_id = 0
         ballot_item_list = []
         ballot_item_list_found = False
         try:
-            ballot_item_queryset = BallotItem.objects.using('readonly').all()
+            if positive_value_exists(for_editing):
+                ballot_item_queryset = BallotItem.objects.all()
+            else:
+                ballot_item_queryset = BallotItem.objects.using('readonly').all()
             ballot_item_queryset = ballot_item_queryset.order_by('local_ballot_order', 'google_ballot_placement')
             ballot_item_queryset = ballot_item_queryset.filter(polling_location_we_vote_id=polling_location_we_vote_id)
             if positive_value_exists(google_civic_election_id):

@@ -186,6 +186,20 @@ def candidate_list_view(request):
 
     google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
     candidate_search = request.GET.get('candidate_search', '')
+    page = convert_to_int(request.GET.get('page', 0))
+    current_page_url = request.get_full_path()
+    # # Remove "&next_page=1"
+    # if current_page_url.endswith("&next_page=1"):
+    #     current_page_url = current_page_url[:-12]
+    # Remove "&page=" and everything after
+    if "&page=" in current_page_url:
+        location_of_page_variable = current_page_url.find("&page=")
+        if location_of_page_variable != -1:
+            current_page_url = current_page_url[:location_of_page_variable]
+    previous_page = page - 1
+    previous_page_url = current_page_url + "&page=" + str(previous_page)
+    next_page = page + 1
+    next_page_url = current_page_url + "&page=" + str(next_page)
     state_code = request.GET.get('state_code', '')
     state_list = STATE_CODE_MAP
     sorted_state_list = sorted(state_list.items())
@@ -235,8 +249,15 @@ def candidate_list_view(request):
         candidate_list = candidate_list.order_by('candidate_name')
         candidate_list_count = candidate_list.count()
 
-        if not positive_value_exists(show_all):
-            candidate_list = candidate_list[:25]
+        candidate_count_start = 0
+        if positive_value_exists(show_all):
+            pass
+        else:
+            number_to_show_per_page = 25
+            candidate_count_start = number_to_show_per_page * page
+            candidate_count_end = candidate_count_start + number_to_show_per_page
+            messages.add_message(request, messages.INFO, "candidate_count_start: " + str(candidate_count_start))
+            candidate_list = candidate_list[candidate_count_start:candidate_count_end]
     except CandidateCampaign.DoesNotExist:
         # This is fine, create new
         pass
@@ -282,9 +303,13 @@ def candidate_list_view(request):
 
     template_values = {
         'messages_on_stage':        messages_on_stage,
+        'candidate_count_start':    candidate_count_start,
         'candidate_list':           candidate_list,
         'candidate_search':         candidate_search,
         'election_list':            election_list,
+        'current_page_number':      page,
+        'previous_page_url':        previous_page_url,
+        'next_page_url':            next_page_url,
         'show_all_elections':       show_all_elections,
         'state_code':               state_code,
         'state_list':               sorted_state_list,
