@@ -89,7 +89,8 @@ class PollingLocationManager(models.Model):
 
     def update_or_create_polling_location(self, we_vote_id,
                                           polling_location_id, location_name, polling_hours_text, directions_text,
-                                          line1, line2, city, state, zip_long, latitude='', longitude=''):
+                                          line1, line2, city, state, zip_long, latitude='', longitude='',
+                                          use_for_bulk_retrieve=False):
         """
         Either update or create an polling_location entry.
         """
@@ -147,14 +148,14 @@ class PollingLocationManager(models.Model):
                         updated_values['latitude'] = latitude
                     if positive_value_exists(longitude):
                         updated_values['longitude'] = longitude
+                    if positive_value_exists(use_for_bulk_retrieve):
+                        updated_values['use_for_bulk_retrieve'] = use_for_bulk_retrieve
                     new_polling_location, new_polling_location_created = PollingLocation.objects.update_or_create(
                         we_vote_id__iexact=we_vote_id, defaults=updated_values)
                 else:
                     updated_values = {
-                        # Values we search against
                         'polling_location_id': polling_location_id,
                         'state': state,
-                        # The rest of the values
                         'location_name': location_name.strip() if location_name else '',
                         'polling_hours_text': polling_hours_text.strip() if polling_hours_text else '',
                         'directions_text': directions_text.strip() if directions_text else '',
@@ -169,6 +170,8 @@ class PollingLocationManager(models.Model):
                         updated_values['latitude'] = latitude
                     if positive_value_exists(longitude):
                         updated_values['longitude'] = longitude
+                    if positive_value_exists(use_for_bulk_retrieve):
+                        updated_values['use_for_bulk_retrieve'] = use_for_bulk_retrieve
                     new_polling_location, new_polling_location_created = PollingLocation.objects.update_or_create(
                         polling_location_id__exact=polling_location_id, state=state, defaults=updated_values)
                 success = True

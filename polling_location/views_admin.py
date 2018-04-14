@@ -14,10 +14,9 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.messages import get_messages
 from django.db.models import Q
 from django.shortcuts import render
-from exception.models import handle_record_found_more_than_one_exception, handle_record_not_found_exception, \
-    handle_record_not_saved_exception
+from exception.models import handle_record_found_more_than_one_exception
 from voter.models import voter_has_authority
-from wevote_functions.functions import convert_to_int, positive_value_exists
+from wevote_functions.functions import convert_to_float, convert_to_int, positive_value_exists
 import wevote_functions.admin
 from django.http import HttpResponse
 import json
@@ -98,9 +97,13 @@ def polling_locations_sync_out_view(request):  # pollingLocationsSyncOut
         if positive_value_exists(state):
             polling_location_list = polling_location_list.filter(state__iexact=state)
 
-        polling_location_list_dict = polling_location_list.values('we_vote_id', 'city', 'directions_text', 'line1',
-                                                                  'line2', 'location_name', 'polling_hours_text',
-                                                                  'polling_location_id', 'state', 'zip_long')
+        polling_location_list_dict = polling_location_list.values('we_vote_id', 'city', 'directions_text',
+                                                                  'latitude', 'longitude',
+                                                                  'line1', 'line2', 'location_name',
+                                                                  'polling_hours_text',
+                                                                  'polling_location_id', 'state',
+                                                                  'use_for_bulk_retrieve',
+                                                                  'zip_long')
         if polling_location_list_dict:
             polling_location_list_json = list(polling_location_list_dict)
             return HttpResponse(json.dumps(polling_location_list_json), content_type='application/json')
@@ -195,13 +198,13 @@ def polling_location_edit_process_view(request):
     state_code = request.POST.get('state_code', "")
 
     polling_location_id = convert_to_int(request.POST['polling_location_id'])
-    location_name = request.POST.get('location_name', False)
-    line1 = request.POST.get('line1', False)
-    line2 = request.POST.get('line2', False)
-    city = request.POST.get('city', False)
-    zip_long = request.POST.get('zip_long', False)
-    latitude = request.POST.get('latitude', False)
-    longitude = request.POST.get('longitude', False)
+    location_name = request.POST.get('location_name', "")
+    line1 = request.POST.get('line1', "")
+    line2 = request.POST.get('line2', "")
+    city = request.POST.get('city', "")
+    zip_long = request.POST.get('zip_long', "")
+    latitude = convert_to_float(request.POST.get('latitude', 0))
+    longitude = convert_to_float(request.POST.get('longitude', 0))
     use_for_bulk_retrieve = request.POST.get('use_for_bulk_retrieve', False)
 
     # Check to see if this polling_location is already being used anywhere
@@ -225,23 +228,15 @@ def polling_location_edit_process_view(request):
                 zip_long=zip_long,
             )
 
-        if positive_value_exists(location_name):
-            polling_location_on_stage.location_name = location_name
-        if positive_value_exists(state_code):
-            polling_location_on_stage.state = state_code
-        if positive_value_exists(line1):
-            polling_location_on_stage.line1 = line1
-        if positive_value_exists(line2):
-            polling_location_on_stage.line2 = line2
-        if positive_value_exists(city):
-            polling_location_on_stage.city = city
-        if positive_value_exists(zip_long):
-            polling_location_on_stage.zip_long = zip_long
-        if positive_value_exists(latitude):
-            polling_location_on_stage.latitude = latitude
-        if positive_value_exists(longitude):
-            polling_location_on_stage.longitude = longitude
-        polling_location_on_stage.use_for_bulk_retrieve = use_for_bulk_retrieve
+        polling_location_on_stage.location_name = location_name
+        polling_location_on_stage.state = state_code
+        polling_location_on_stage.line1 = line1
+        polling_location_on_stage.line2 = line2
+        polling_location_on_stage.city = city
+        polling_location_on_stage.zip_long = zip_long
+        polling_location_on_stage.latitude = latitude
+        polling_location_on_stage.longitude = longitude
+        polling_location_on_stage.use_for_bulk_retrieve = positive_value_exists(use_for_bulk_retrieve)
 
         polling_location_on_stage.save()
         polling_location_id = polling_location_on_stage.id
@@ -340,6 +335,7 @@ def polling_location_list_view(request):
         return redirect_to_sign_in_page(request, authority_required)
 
     google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
+    show_bulk_retrieve = request.GET.get('show_bulk_retrieve', 0)
     state_code = request.GET.get('state_code', '')
     polling_location_search = request.GET.get('polling_location_search', '')
 
@@ -347,6 +343,10 @@ def polling_location_list_view(request):
 
     polling_location_count_query = PollingLocation.objects.all()
     polling_location_query = PollingLocation.objects.all()
+
+    if positive_value_exists(show_bulk_retrieve):
+        polling_location_count_query = polling_location_count_query.filter(use_for_bulk_retrieve=True)
+        polling_location_query = polling_location_query.filter(use_for_bulk_retrieve=True)
 
     if positive_value_exists(state_code):
         polling_location_count_query = polling_location_count_query.filter(state__iexact=state_code)
@@ -408,8 +408,9 @@ def polling_location_list_view(request):
         'google_civic_election_id': google_civic_election_id,
         'polling_location_list':    polling_location_list,
         'polling_location_count':   polling_location_count,
-        'state_code':               state_code,
         'polling_location_search':  polling_location_search,
+        'show_bulk_retrieve':       show_bulk_retrieve,
+        'state_code':               state_code,
         'state_list':               sorted_state_list,
     }
     return render(request, 'polling_location/polling_location_list.html', template_values)

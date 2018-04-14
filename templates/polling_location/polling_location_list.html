@@ -22,12 +22,11 @@
 
 <h1>Polling Locations</h1>
 
-{#    <p><a href="{% url 'polling_location:import_polling_locations_process' %}?state_code={{ state_code }}" target="_blank">#}
-{#        Import Polling Locations File{% if state_code %} (for "{{ state_code }}"){% endif %}</a>#}
-{#        (this can take 60-90 seconds)</p>#}
-
     <p><a href="{% url 'admin_tools:sync_dashboard' %}?state_code={{ state_code }}" target="_blank">
         Go to "Import Polling Locations From Master Server" Page</a></p>
+
+    <p><a href="{% url 'polling_location:polling_location_edit' 0 %}?state_code={{ state_code }}">
+         Create polling location</a></p>
 
 <form name="polling_location_search_form" method="get" action="{% url 'polling_location:polling_location_list' %}">
     {% csrf_token %}
@@ -50,10 +49,12 @@
          clear search</a>&nbsp;
 {% endif %}
     <input type="text" name="polling_location_search" id="polling_location_id" value="{{ polling_location_search|default_if_none:"" }}" />
-    <input type="submit" value="Search for Polling Location" />
+    <input type="submit" value="Search for Polling Location" />&nbsp;&nbsp;&nbsp;
 
-<a href="{% url 'polling_location:polling_location_edit' 0 %}?state_code={{ state_code }}">
-         create polling location</a>
+    <label for="show_bulk_retrieve_id">
+      <input type="checkbox" name="show_bulk_retrieve" id="show_bulk_retrieve_id" value="1" onChange="this.form.submit()"
+             {% if show_bulk_retrieve %}checked{% endif %} /> show bulk retrieve locations
+    </label>
 </form>
 
 {% if polling_location_list %}

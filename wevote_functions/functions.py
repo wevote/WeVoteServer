@@ -255,6 +255,18 @@ def convert_to_bool(value):
     return False
 
 
+# This is how we make sure a variable is float
+def convert_to_float(value):
+    # Catch the cases where the incoming value is None
+    if value is None:
+        return 0.0
+    try:
+        new_value = float(value)
+    except ValueError:
+        new_value = 0.0
+    return new_value
+
+
 # This is how we make sure a variable is an integer
 def convert_to_int(value):
     # Catch the cases where the incoming value is None
