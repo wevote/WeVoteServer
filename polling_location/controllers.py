@@ -113,12 +113,16 @@ def polling_locations_import_from_structured_json(structured_json):
                 if 'polling_hours_text' in one_polling_location else ''
             directions_text = one_polling_location['directions_text'] \
                 if 'directions_text' in one_polling_location else ''
+            latitude = one_polling_location['latitude'] if 'latitude' in one_polling_location else 0
+            longitude = one_polling_location['longitude'] if 'longitude' in one_polling_location else 0
             line2 = one_polling_location['line2'] if 'line2' in one_polling_location else ''
+            use_for_bulk_retrieve = one_polling_location['use_for_bulk_retrieve'] \
+                if 'use_for_bulk_retrieve' in one_polling_location else ''
             zip_long = one_polling_location['zip_long'] if 'zip_long' in one_polling_location else ''
 
             results = polling_location_manager.update_or_create_polling_location(
                 we_vote_id, polling_location_id, location_name, polling_hours_text, directions_text,
-                line1, line2, city, state, zip_long)
+                line1, line2, city, state, zip_long, latitude, longitude, use_for_bulk_retrieve)
         else:
             polling_locations_not_processed += 1
             results = {
@@ -254,6 +258,11 @@ def save_polling_locations_from_list(polling_locations_list):
     polling_locations_not_processed = 0
     polling_location_we_vote_id = ''
     for polling_location in polling_locations_list:
+        latitude = polling_location['latitude'] if 'latitude' in polling_location else 0
+        longitude = polling_location['longitude'] if 'longitude' in polling_location else 0
+        use_for_bulk_retrieve = polling_location['use_for_bulk_retrieve'] \
+            if 'use_for_bulk_retrieve' in polling_location else False
+
         results = polling_location_manager.update_or_create_polling_location(
             polling_location_we_vote_id,
             polling_location['polling_location_id'],
@@ -264,7 +273,11 @@ def save_polling_locations_from_list(polling_locations_list):
             polling_location['line2'],
             polling_location['city'],
             polling_location['state'],
-            polling_location['zip_long'])
+            polling_location['zip_long'],
+            latitude,
+            longitude,
+            use_for_bulk_retrieve
+        )
         if results['success']:
             if results['new_polling_location_created']:
                 polling_locations_saved += 1
