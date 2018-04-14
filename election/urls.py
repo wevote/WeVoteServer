@@ -21,4 +21,6 @@ urlpatterns = [
     url(r'^election_remote_retrieve/$', views_admin.election_remote_retrieve_view, name='election_remote_retrieve'),
     url(r'^import/$',
         views_admin.elections_import_from_master_server_view, name='elections_import_from_master_server'),
+    url(r'^(?P<election_local_id>[0-9]+)/retrieve_distributed_ballotpedia_ballots/$',
+        views_admin.retrieve_distributed_ballotpedia_ballots_view, name='retrieve_distributed_ballotpedia_ballots'),
 ]

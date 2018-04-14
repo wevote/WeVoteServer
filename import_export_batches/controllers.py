@@ -2168,6 +2168,8 @@ def create_batch_row_action_ballot_item(batch_description, batch_header_map, one
         "contest_measure_name", batch_header_map, one_batch_row)
     local_ballot_order = batch_manager.retrieve_value_from_batch_row(
         "local_ballot_order", batch_header_map, one_batch_row)
+    voter_id = batch_manager.retrieve_value_from_batch_row(
+        "voter_id", batch_header_map, one_batch_row)
 
     # Look up contest office or measure to see if an entry exists
     # These three parameters are needed to look up in ElectedOffice table for a match
@@ -2268,12 +2270,25 @@ def create_batch_row_action_ballot_item(batch_description, batch_header_map, one
         except Exception as e:
             status += "CREATE_BATCH_ROW_ACTION_BALLOT_ITEM-BATCH_ROW_ACTION_BALLOT_ITEM_RETRIEVE_ERROR"
 
-    if positive_value_exists(existing_ballot_item_found):
-        # Update existing ballot item
-        batch_row_action_ballot_item.ballot_item_id = existing_ballot_item_id
-        kind_of_action = IMPORT_ADD_TO_EXISTING
+    # Do we have the minimum required variables?
+    polling_location_or_voter = positive_value_exists(polling_location_we_vote_id) or positive_value_exists(voter_id)
+    office_or_measure = positive_value_exists(contest_office_we_vote_id) \
+        or positive_value_exists(contest_measure_we_vote_id)
+    if polling_location_or_voter and office_or_measure and google_civic_election_id:
+        if positive_value_exists(existing_ballot_item_found):
+            # Update existing ballot item
+            batch_row_action_ballot_item.ballot_item_id = existing_ballot_item_id
+            kind_of_action = IMPORT_ADD_TO_EXISTING
+        else:
+            kind_of_action = IMPORT_CREATE
     else:
-        kind_of_action = IMPORT_CREATE
+        if not polling_location_or_voter:
+            status += "MISSING_POLLING_LOCATION_OR_VOTER_ID "
+        if not office_or_measure:
+            status += "MISSING_OFFICE_OR_MEASURE "
+        if not google_civic_election_id:
+            status += "MISSING_GOOGLE_CIVIC_ELECTION_ID "
+        kind_of_action = IMPORT_TO_BE_DETERMINED
 
     # Update the BatchRowActionBallotItem
     try:

@@ -80,6 +80,8 @@ def batch_list_view(request):
 
     messages_on_stage = get_messages(request)
     batch_list_found = False
+    modified_batch_list = []
+    batch_manager = BatchManager()
     try:
         batch_list = BatchDescription.objects.order_by('-batch_header_id')
         if positive_value_exists(google_civic_election_id):
@@ -88,9 +90,16 @@ def batch_list_view(request):
             batch_list = batch_list.filter(kind_of_batch__iexact=kind_of_batch)
         if len(batch_list):
             batch_list_found = True
+            for one_batch in batch_list:
+                one_batch.batch_row_action_count = batch_manager.fetch_batch_row_action_count(
+                    one_batch.batch_header_id, kind_of_batch)
+                one_batch.batch_row_action_to_update_count = batch_manager.fetch_batch_row_action_count(
+                    one_batch.batch_header_id, kind_of_batch, IMPORT_ADD_TO_EXISTING)
+                one_batch.batch_row_count = batch_manager.fetch_batch_row_count(one_batch.batch_header_id)
+                modified_batch_list.append(one_batch)
+
     except BatchDescription.DoesNotExist:
         # This is fine
-        batch_list = []
         batch_list_found = False
         pass
 
@@ -136,7 +145,7 @@ def batch_list_view(request):
 
     template_values = {
         'messages_on_stage':        messages_on_stage,
-        'batch_list':               batch_list,
+        'batch_list':               modified_batch_list,
         'ask_for_election':         ask_for_election,
         'election_list':            election_list,
         'kind_of_batch':            kind_of_batch,

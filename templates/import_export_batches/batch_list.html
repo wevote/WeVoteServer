@@ -203,8 +203,9 @@
             <th>Batch Header ID: Batch Name</th>
             <th>Action</th>
             <th>Election</th>
-            <th>Processed</th>
+            <th>Other ID</th>
             <th>Total Records</th>
+            <th>Analyzed / Stored</th>
             <th>Date Created (GMT)</th>
         </tr>
     {% for one_batch in batch_list %}
@@ -220,8 +221,15 @@
                     {% endif %}
                 {% endfor %}
             </td>
-            <td>{{ one_batch.rows_processed }}</td>
-            <td>{{ one_batch.total_rows }}</td>
+            <td>
+            {% if one_batch.polling_location_we_vote_id %}
+            {{ one_batch.polling_location_we_vote_id }}
+            {% elif one_batch.organization_we_vote_id %}
+            {{ one_batch.organization_we_vote_id }}
+            {% endif %}
+            </td>
+            <td>{{ one_batch.batch_row_count }}</td>
+            <td>{{ one_batch.batch_row_action_count }} / {{ one_batch.batch_row_action_to_update_count }}</td>
             <td>{{ one_batch.date_created }}</td>
         </tr>
     {% endfor %}

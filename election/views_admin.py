@@ -21,6 +21,7 @@ from election.models import ElectionManager
 from exception.models import handle_record_found_more_than_one_exception, handle_record_not_found_exception, \
     handle_record_not_saved_exception
 from image.models import WeVoteImageManager
+from import_export_ballotpedia.controllers import retrieve_districts_to_which_address_belongs_from_api
 from import_export_google_civic.controllers import retrieve_one_ballot_from_google_civic_api, \
     store_one_ballot_from_google_civic_api
 from measure.models import ContestMeasureList
@@ -200,6 +201,117 @@ def election_all_ballots_retrieve_view(request, election_local_id=0):
                                  election_name=election_on_stage.election_name,
                                  total=total_retrieved))
     return HttpResponseRedirect(reverse('election:election_summary', args=(election_local_id,)))
+
+
+@login_required
+def retrieve_distributed_ballotpedia_ballots_view(request, election_local_id=0):
+    """
+    Reach out to Ballotpedia and retrieve (for one election):
+    1) Polling locations (so we can use those addresses to retrieve a representative set of ballots)
+    2) Cycle through a portion of those polling locations, enough that we are caching all of the possible ballot items
+    :param request:
+    :param election_local_id:
+    :return:
+    """
+    # admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'political_data_manager'}
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
+    state_code = request.GET.get('state_code', '')
+    import_limit = convert_to_int(request.GET.get('import_limit', 20))
+
+    ballotpedia_election_found = False
+    google_civic_election_id = 0
+
+    try:
+        if positive_value_exists(election_local_id):
+            election_on_stage = Election.objects.get(id=election_local_id)
+            ballotpedia_election_found = election_on_stage.ballotpedia_election_id
+            google_civic_election_id = election_on_stage.google_civic_election_id
+    except Election.MultipleObjectsReturned as e:
+        handle_record_found_more_than_one_exception(e, logger=logger)
+        messages.add_message(request, messages.ERROR, 'Could not retrieve ballot data. More than one election found.')
+        return HttpResponseRedirect(reverse('election:election_list', args=()))
+    except Election.DoesNotExist:
+        messages.add_message(request, messages.ERROR, 'Could not retrieve ballot data. Election could not be found.')
+        return HttpResponseRedirect(reverse('election:election_list', args=()))
+
+    if not positive_value_exists(ballotpedia_election_found):
+        messages.add_message(request, messages.ERROR, 'Ballotpedia election could not be found.')
+        return HttpResponseRedirect(reverse('election:election_summary', args=(election_local_id,)))
+
+    # Check to see if we have polling location data related to the region(s) covered by this election
+    # We request the ballot data for each polling location as a way to build up our local data
+    if not positive_value_exists(state_code):
+        state_code = election_on_stage.get_election_state()
+        if not positive_value_exists(state_code):
+            state_code = "CA"  # TODO DALE Temp for 2016
+
+    try:
+        polling_location_count_query = PollingLocation.objects.all()
+        polling_location_count_query = polling_location_count_query.filter(state__iexact=state_code)
+        polling_location_count_query = polling_location_count_query.filter(use_for_bulk_retrieve=True)
+        polling_location_count = polling_location_count_query.count()
+
+        polling_location_list = PollingLocation.objects.all()
+        polling_location_list = polling_location_list.filter(state__iexact=state_code)
+        polling_location_list = polling_location_list.filter(use_for_bulk_retrieve=True)
+        # We used to have a limit of 500 ballots to pull per election, but now retrieve all
+        # Ordering by "location_name" creates a bit of (locational) random order
+        polling_location_list = polling_location_list.order_by('location_name')[:import_limit]
+    except PollingLocation.DoesNotExist:
+        messages.add_message(request, messages.INFO,
+                             'Could not retrieve ballot data for the {election_name}. '
+                             'No polling locations exist for the state \'{state}\'. '
+                             'Data needed from VIP.'.format(
+                                 election_name=election_on_stage.election_name,
+                                 state=state_code))
+        return HttpResponseRedirect(reverse('election:election_summary', args=(election_local_id,)))
+
+    if polling_location_count == 0:
+        messages.add_message(request, messages.ERROR,
+                             'Could not retrieve ballot data for the {election_name}. '
+                             'No polling locations returned for the state \'{state}\'. (error 2)'.format(
+                                 election_name=election_on_stage.election_name,
+                                 state=state_code))
+        return HttpResponseRedirect(reverse('election:election_summary', args=(election_local_id,)))
+
+    ballots_retrieved = 0
+    ballots_not_retrieved = 0
+    rate_limit_count = 0
+    # Step though our set of polling locations, until we find one that contains a ballot.  Some won't contain ballots
+    # due to data quality issues.
+    for polling_location in polling_location_list:
+        one_ballot_results = retrieve_districts_to_which_address_belongs_from_api(
+            google_civic_election_id, polling_location=polling_location)
+        success = False
+        if one_ballot_results['success']:
+            success = True
+
+        if success:
+            ballots_retrieved += 1
+        else:
+            ballots_not_retrieved += 1
+
+        # We used to only retrieve up to 500 locations from each state, but we don't limit now
+        # # Break out of this loop, assuming we have a minimum number of ballots with contests retrieved
+        # #  If we don't achieve the minimum number of ballots_with_contests_retrieved, break out at the emergency level
+        # emergency = (ballots_retrieved + ballots_not_retrieved) >= (3 * number_of_polling_locations_to_retrieve)
+        # if ((ballots_retrieved + ballots_not_retrieved) >= number_of_polling_locations_to_retrieve and
+        #         ballots_with_contests_retrieved > 20) or emergency:
+        #     break
+
+    messages.add_message(request, messages.INFO,
+                         'Ballot data retrieved from Ballotpedia for the {election_name}. '
+                         'ballots retrieved: {ballots_retrieved}. '
+                         ''.format(
+                             ballots_retrieved=ballots_retrieved,
+                             ballots_not_retrieved=ballots_not_retrieved,
+                             election_name=election_on_stage.election_name))
+    return HttpResponseRedirect(reverse('import_export_batches:batch_list', args=()) +
+                                '?kind_of_batch=IMPORT_BALLOT_ITEM' +
+                                '&google_civic_election_id=' + str(google_civic_election_id))
 
 
 @login_required

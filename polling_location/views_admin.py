@@ -202,6 +202,7 @@ def polling_location_edit_process_view(request):
     zip_long = request.POST.get('zip_long', False)
     latitude = request.POST.get('latitude', False)
     longitude = request.POST.get('longitude', False)
+    use_for_bulk_retrieve = request.POST.get('use_for_bulk_retrieve', False)
 
     # Check to see if this polling_location is already being used anywhere
     polling_location_on_stage_found = False
@@ -240,6 +241,7 @@ def polling_location_edit_process_view(request):
             polling_location_on_stage.latitude = latitude
         if positive_value_exists(longitude):
             polling_location_on_stage.longitude = longitude
+        polling_location_on_stage.use_for_bulk_retrieve = use_for_bulk_retrieve
 
         polling_location_on_stage.save()
         polling_location_id = polling_location_on_stage.id
