@@ -219,7 +219,7 @@ def retrieve_distributed_ballotpedia_ballots_view(request, election_local_id=0):
         return redirect_to_sign_in_page(request, authority_required)
 
     state_code = request.GET.get('state_code', '')
-    import_limit = convert_to_int(request.GET.get('import_limit', 20))
+    import_limit = convert_to_int(request.GET.get('import_limit', 100))
 
     ballotpedia_election_found = False
     google_civic_election_id = 0
