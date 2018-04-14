@@ -1052,14 +1052,14 @@ class BatchManager(models.Model):
         try:
             batch_row_query = BatchRow.objects.filter(batch_header_id=batch_header_id)
             batch_row_count = batch_row_query.count()
-        except BatchRowActionElectedOffice.DoesNotExist:
+        except BatchRow.DoesNotExist:
             batch_row_count = 0
         except Exception as e:
             batch_row_count = 0
 
         return batch_row_count
 
-    def fetch_batch_row_action_count(self, batch_header_id, kind_of_batch=''):
+    def fetch_batch_row_action_count(self, batch_header_id, kind_of_batch, kind_of_action=''):
         """
         :param batch_header_id:
         :param kind_of_batch:
@@ -1070,15 +1070,43 @@ class BatchManager(models.Model):
         try:
             if kind_of_batch == CANDIDATE:
                 batch_row_action_query = BatchRowActionCandidate.objects.filter(batch_header_id=batch_header_id)
+                if positive_value_exists(kind_of_action):
+                    batch_row_action_query = batch_row_action_query.filter(kind_of_action__iexact=kind_of_action)
                 batch_row_action_count = batch_row_action_query.count()
             elif kind_of_batch == CONTEST_OFFICE:
                 batch_row_action_query = BatchRowActionContestOffice.objects.filter(batch_header_id=batch_header_id)
+                if positive_value_exists(kind_of_action):
+                    batch_row_action_query = batch_row_action_query.filter(kind_of_action__iexact=kind_of_action)
                 batch_row_action_count = batch_row_action_query.count()
             elif kind_of_batch == ELECTED_OFFICE:
                 batch_row_action_query = BatchRowActionElectedOffice.objects.filter(batch_header_id=batch_header_id)
+                if positive_value_exists(kind_of_action):
+                    batch_row_action_query = batch_row_action_query.filter(kind_of_action__iexact=kind_of_action)
+                batch_row_action_count = batch_row_action_query.count()
+            elif kind_of_batch == IMPORT_BALLOT_ITEM:
+                batch_row_action_query = BatchRowActionBallotItem.objects.filter(batch_header_id=batch_header_id)
+                if positive_value_exists(kind_of_action):
+                    batch_row_action_query = batch_row_action_query.filter(kind_of_action__iexact=kind_of_action)
+                batch_row_action_count = batch_row_action_query.count()
+            elif kind_of_batch == MEASURE:
+                batch_row_action_query = BatchRowActionMeasure.objects.filter(batch_header_id=batch_header_id)
+                if positive_value_exists(kind_of_action):
+                    batch_row_action_query = batch_row_action_query.filter(kind_of_action__iexact=kind_of_action)
+                batch_row_action_count = batch_row_action_query.count()
+            elif kind_of_batch == ORGANIZATION_WORD:
+                batch_row_action_query = BatchRowActionOrganization.objects.filter(batch_header_id=batch_header_id)
+                if positive_value_exists(kind_of_action):
+                    batch_row_action_query = batch_row_action_query.filter(kind_of_action__iexact=kind_of_action)
                 batch_row_action_count = batch_row_action_query.count()
             elif kind_of_batch == POLITICIAN:
                 batch_row_action_query = BatchRowActionPolitician.objects.filter(batch_header_id=batch_header_id)
+                if positive_value_exists(kind_of_action):
+                    batch_row_action_query = batch_row_action_query.filter(kind_of_action__iexact=kind_of_action)
+                batch_row_action_count = batch_row_action_query.count()
+            elif kind_of_batch == POSITION:
+                batch_row_action_query = BatchRowActionPosition.objects.filter(batch_header_id=batch_header_id)
+                if positive_value_exists(kind_of_action):
+                    batch_row_action_query = batch_row_action_query.filter(kind_of_action__iexact=kind_of_action)
                 batch_row_action_count = batch_row_action_query.count()
         except Exception as e:
             batch_row_action_count = 0

@@ -42,6 +42,8 @@ class PollingLocation(models.Model):
     latitude = models.FloatField(null=True, verbose_name='latitude returned from Google')
     longitude = models.FloatField(null=True, verbose_name='longitude returned from Google')
 
+    use_for_bulk_retrieve = models.BooleanField(verbose_name="this provides geographical coverage", default=False)
+
     def get_formatted_zip(self):
         return extract_zip_formatted_from_zip9(self.zip_long)
 

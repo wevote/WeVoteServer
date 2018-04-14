@@ -102,6 +102,32 @@
     </p>
 {% endif %}
 
+
+{% if election.google_civic_election_id|convert_to_int < 1000000 %}
+    <p>
+    <a href="{% url 'election:election_all_ballots_retrieve' election.id %}?state_code={{ state_code }}" target="_blank">
+        Google: Retrieve Ballot Data for this Election{% if state_code %} (for {{ state_code }}){% endif %}</a><br />
+        Reach out to Google Civic API and ask for ballots from many polling locations so we can stitch
+        together the measures, races and candidates. Add "import_limit" as a URL variable to increase the number of
+        polling locations to retrieve ballots from.
+    </p>
+{% endif %}
+
+
+{% if election.ballotpedia_election_id|convert_to_int > 0 %}
+    <p>
+    <a href="{% url 'election:retrieve_distributed_ballotpedia_ballots' election.id %}?state_code={{ state_code }}" target="_blank">
+        Ballotpedia: Retrieve Ballot Data for this Election{% if state_code %} (for {{ state_code }}){% endif %}</a><br />
+        Reach out to Ballotpedia API and ask for ballots from many polling locations so we can stitch
+        together the measures, races and candidates. Add "import_limit" as a URL variable to increase the number of
+        polling locations to retrieve ballots from.
+    </p>
+{% endif %}
+
+
+<a href="{% url 'ballot:update_ballot_returned_latitude_and_longitude' %}?google_civic_election_id={{ election.google_civic_election_id }}&state_code={{ state_code }}">
+Update Lat/Long{% if state_code %} for {{ state_code }}{% endif %}: {{ entries_missing_latitude_longitude }} missing</a>
+
 <form name="state_code_form" method="get" action="{% url 'election:election_summary' election.id %}">
     {% csrf_token %}
 
@@ -118,17 +144,7 @@
     {% endif %}{# End of if state_list #}
 </form>
 
-{% if election.google_civic_election_id|convert_to_int < 1000000 %}
-    <p>
-    <a href="{% url 'election:election_all_ballots_retrieve' election.id %}?state_code={{ state_code }}" target="_blank">
-        Retrieve Ballot Data for this Election{% if state_code %} (for {{ state_code }}){% endif %}</a><br />
-        Reach out to Google Civic API and ask for ballots from many polling locations so we can stitch
-        together the measures, races and candidates. Add "import_limit" as a URL variable to increase the number of
-        polling locations to retrieve ballots from.
-        (<a href="{% url 'ballot:update_ballot_returned_latitude_and_longitude' %}?google_civic_election_id={{ election.google_civic_election_id }}&state_code={{ state_code }}">Update Lat/Long{% if state_code %} for {{ state_code }}{% endif %}: {{ entries_missing_latitude_longitude }} missing</a>)
-    </p>
-{% endif %}
-<form name="ballot_returned_search_form" method="get" action="{% url 'election:election_summary' election.id %}">
+  <form name="ballot_returned_search_form" method="get" action="{% url 'election:election_summary' election.id %}">
     {% csrf_token %}
 
 {% if ballot_returned_search %}

@@ -104,9 +104,11 @@ def retrieve_candidates_from_api(google_civic_election_id, zero_entries=True):
     return results
 
 
-def retrieve_districts_to_which_address_belongs_from_api(google_civic_election_id, polling_location_we_vote_id):
+def retrieve_districts_to_which_address_belongs_from_api(
+        google_civic_election_id, polling_location_we_vote_id="", polling_location=None):
     success = True
     status = ""
+    polling_location_found = False
 
     if not positive_value_exists(google_civic_election_id):
         results = {
@@ -115,19 +117,26 @@ def retrieve_districts_to_which_address_belongs_from_api(google_civic_election_i
         }
         return results
 
-    if not positive_value_exists(polling_location_we_vote_id):
+    if not positive_value_exists(polling_location_we_vote_id) and not polling_location:
         results = {
             'success': False,
-            'status': "Error: Missing polling location we vote id",
+            'status': "Error: Missing polling location we vote id and polling_location_object",
         }
         return results
 
     batch_header_id = 0
 
-    polling_location_manager = PollingLocationManager()
-    results = polling_location_manager.retrieve_polling_location_by_id(0, polling_location_we_vote_id)
-    if results['polling_location_found']:
-        polling_location = results['polling_location']
+    if polling_location:
+        polling_location_found = True
+        polling_location_we_vote_id = polling_location.we_vote_id
+    elif positive_value_exists(polling_location_we_vote_id):
+        polling_location_manager = PollingLocationManager()
+        results = polling_location_manager.retrieve_polling_location_by_id(0, polling_location_we_vote_id)
+        if results['polling_location_found']:
+            polling_location = results['polling_location']
+            polling_location_found = True
+
+    if polling_location_found:
         if not polling_location.latitude or not polling_location.longitude:
             success = False
             status += "RETRIEVE_DISTRICTS-MISSING_LATITUDE_LONGITUDE "
@@ -138,24 +147,24 @@ def retrieve_districts_to_which_address_belongs_from_api(google_civic_election_i
             }
             return results
 
-    latitude_longitude = str(polling_location.latitude) + "," + str(polling_location.longitude)
-    response = requests.get(BALLOTPEDIA_API_CONTAINS_URL, params={
-        "access_token": BALLOTPEDIA_API_KEY,
-        "point": latitude_longitude,
-    })
+        latitude_longitude = str(polling_location.latitude) + "," + str(polling_location.longitude)
+        response = requests.get(BALLOTPEDIA_API_CONTAINS_URL, params={
+            "access_token": BALLOTPEDIA_API_KEY,
+            "point": latitude_longitude,
+        })
 
-    structured_json = json.loads(response.text)
+        structured_json = json.loads(response.text)
 
-    # # Use Google Civic API call counter to track the number of queries we are doing each day
-    # google_civic_api_counter_manager = GoogleCivicApiCounterManager()
-    # google_civic_api_counter_manager.create_counter_entry('ballot', google_civic_election_id)
+        # # Use Google Civic API call counter to track the number of queries we are doing each day
+        # google_civic_api_counter_manager = GoogleCivicApiCounterManager()
+        # google_civic_api_counter_manager.create_counter_entry('ballot', google_civic_election_id)
 
-    contains_api = True
-    results = process_ballotpedia_json_response(structured_json, google_civic_election_id,
-                                                contains_api, polling_location_we_vote_id)
-    status += results['status']
-    if 'batch_header_id' in results:
-        batch_header_id = results['batch_header_id']
+        contains_api = True
+        results = process_ballotpedia_json_response(structured_json, google_civic_election_id,
+                                                    contains_api, polling_location_we_vote_id)
+        status += results['status']
+        if 'batch_header_id' in results:
+            batch_header_id = results['batch_header_id']
 
     results = {
         'success': success,
