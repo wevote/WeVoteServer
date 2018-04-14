@@ -86,7 +86,7 @@ def bulk_retrieve_possible_twitter_handles_view(request):
         candidate_list_count = candidate_list.count()
 
         # Run Twitter account search and analysis on candidates without a linked or possible Twitter account
-        number_of_candidates_to_search = 10
+        number_of_candidates_to_search = 75
         current_candidate_index = 0
         while positive_value_exists(number_of_candidates_to_search) \
                 and (current_candidate_index < candidate_list_count):
