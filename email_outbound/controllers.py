@@ -281,7 +281,7 @@ def schedule_verification_email(sender_voter_we_vote_id, recipient_voter_we_vote
 
 def schedule_link_to_sign_in_email(sender_voter_we_vote_id, recipient_voter_we_vote_id,
                                    recipient_email_we_vote_id, recipient_voter_email,
-                                   recipient_email_address_secret_key, verification_context=None):
+                                   recipient_email_address_secret_key, is_cordova, verification_context=None ):
     """
     When a voter wants to sign in with a pre-existing email, create and send an outbound email with a link
     that the voter can click to sign in.
@@ -290,6 +290,7 @@ def schedule_link_to_sign_in_email(sender_voter_we_vote_id, recipient_voter_we_v
     :param recipient_email_we_vote_id:
     :param recipient_voter_email:
     :param recipient_email_address_secret_key:
+    :param is_cordova:  If cordova, the link is not http or https, it is a custom scheme
     :param verification_context: We tell the voter the context in which the verification was triggered
     :return:
     """
@@ -317,12 +318,15 @@ def schedule_link_to_sign_in_email(sender_voter_we_vote_id, recipient_voter_we_v
         return results
 
     subject = "Sign in link you requested"
+    link_to_sign_in = WEB_APP_ROOT_URL + "/sign_in_email/" + recipient_email_address_secret_key;
+    if is_cordova :
+        link_to_sign_in = "wevotetwitterscheme://sign_in_email/" + recipient_email_address_secret_key;
 
     template_variables_for_json = {
         "subject":                      subject,
         "recipient_voter_email":        recipient_voter_email,
         "we_vote_url":                  WEB_APP_ROOT_URL,
-        "link_to_sign_in":              WEB_APP_ROOT_URL + "/sign_in_email/" + recipient_email_address_secret_key,
+        "link_to_sign_in":              link_to_sign_in,
         "recipient_unsubscribe_url":    WEB_APP_ROOT_URL + "/unsubscribe?email_key=1234",
         "email_open_url":               WE_VOTE_SERVER_ROOT_URL + "/apis/v1/emailOpen?email_key=1234",
     }
@@ -665,7 +669,8 @@ def voter_email_address_verify_for_api(voter_device_id, email_secret_key):  # vo
 
 
 def voter_email_address_save_for_api(voter_device_id, text_for_email_address, incoming_email_we_vote_id,
-                                     send_link_to_sign_in, resend_verification_email, make_primary_email, delete_email):
+                                     send_link_to_sign_in, resend_verification_email, make_primary_email, delete_email,
+                                     is_cordova):
     """
     voterEmailAddressSave
     :param voter_device_id:
@@ -675,6 +680,7 @@ def voter_email_address_save_for_api(voter_device_id, text_for_email_address, in
     :param resend_verification_email:
     :param make_primary_email:
     :param delete_email:
+    :param is_cordova:
     :return:
     """
     email_address_we_vote_id = ""
@@ -1010,7 +1016,7 @@ def voter_email_address_save_for_api(voter_device_id, text_for_email_address, in
             else incoming_email_we_vote_id
         link_send_results = schedule_link_to_sign_in_email(voter_we_vote_id, voter_we_vote_id,
                                                            email_address_we_vote_id, text_for_email_address,
-                                                           recipient_email_address_secret_key)
+                                                           recipient_email_address_secret_key, is_cordova)
         status += link_send_results['status']
         email_scheduled_saved = link_send_results['email_scheduled_saved']
         email_scheduled_id = link_send_results['email_scheduled_id']
