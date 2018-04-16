@@ -2342,7 +2342,6 @@ class VoterBallotSavedManager(models.Model):
                 'voter_id': voter_id,
                 'google_civic_election_id': google_civic_election_id,
                 'state_code': state_code,
-                'election_date': election_day_text,
                 'election_description_text': election_description_text,
                 'original_text_for_map_search': original_text_for_map_search,
                 'substituted_address_nearby': substituted_address_nearby,
@@ -2353,6 +2352,8 @@ class VoterBallotSavedManager(models.Model):
                 'ballot_location_shortcut': ballot_location_shortcut,
                 'polling_location_we_vote_id_source': polling_location_we_vote_id_source,
             }
+            if positive_value_exists(election_day_text):
+                defaults['election_date'] = election_day_text
 
             if positive_value_exists(voter_id) and positive_value_exists(ballot_returned_we_vote_id):
                 status += "SAVING_WITH_VOTER_ID_AND_BALLOT_RETURNED_WE_VOTE_ID "
@@ -2453,7 +2454,9 @@ def copy_existing_ballot_items_from_stored_ballot(voter_id, text_for_map_search,
     if positive_value_exists(ballot_returned_we_vote_id):
         find_results = ballot_returned_manager.retrieve_ballot_returned_from_ballot_returned_we_vote_id(
             ballot_returned_we_vote_id)
+        status += "CALLING-RETRIEVE_BALLOT_RETURNED_FROM_WE_VOTE_ID, status: [["
         status += find_results['status']
+        status += "]] "
 
         if not find_results['ballot_returned_found']:
             error_results = {
@@ -2478,7 +2481,9 @@ def copy_existing_ballot_items_from_stored_ballot(voter_id, text_for_map_search,
     elif positive_value_exists(ballot_location_shortcut):
         find_results = ballot_returned_manager.retrieve_ballot_returned_from_ballot_location_shortcut(
             ballot_location_shortcut)
+        status += "CALLING-RETRIEVE_BALLOT_RETURNED_FROM_BALLOT_LOCATION_SHORTCUT, status: [["
         status += find_results['status']
+        status += "]] "
 
         if not find_results['ballot_returned_found']:
             error_results = {
@@ -2503,7 +2508,9 @@ def copy_existing_ballot_items_from_stored_ballot(voter_id, text_for_map_search,
     elif positive_value_exists(google_civic_election_id) and text_for_map_search_empty:
         find_results = ballot_returned_manager.retrieve_ballot_returned_from_google_civic_election_id(
             google_civic_election_id)
+        status += "CALLING-RETRIEVE_BALLOT_RETURNED_FROM_GOOGLE_CIVIC_ELECTION_ID, status: [["
         status += find_results['status']
+        status += "]] "
 
         if not find_results['ballot_returned_found']:
             error_results = {
@@ -2528,7 +2535,9 @@ def copy_existing_ballot_items_from_stored_ballot(voter_id, text_for_map_search,
     else:
         find_results = ballot_returned_manager.find_closest_ballot_returned(
             text_for_map_search, google_civic_election_id)
+        status += "CALLING-FIND_CLOSEST_BALLOT_RETURNED, status: [["
         status += find_results['status']
+        status += "]] "
 
         if not find_results['ballot_returned_found']:
             error_results = {

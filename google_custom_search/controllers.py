@@ -14,6 +14,7 @@ from import_export_wikipedia.controllers import reach_out_to_wikipedia_with_gues
 from re import sub
 from wevote_functions.functions import positive_value_exists, convert_state_code_to_state_text, \
     POSITIVE_SEARCH_KEYWORDS, NEGATIVE_SEARCH_KEYWORDS, extract_facebook_username_from_text_string
+from wevote_settings.models import RemoteRequestHistoryManager, RETRIEVE_POSSIBLE_GOOGLE_LINKS
 
 
 def delete_possible_google_search_users(candidate_campaign):
@@ -214,6 +215,12 @@ def retrieve_possible_google_search_users(candidate_campaign, voter_device_id):
                 google_search_user_count += 1
                 if google_search_user_count == MAXIMUM_GOOGLE_SEARCH_USERS:
                     break
+
+    # Create a record denoting that we have retrieved from Google for this candidate
+    remote_request_history_manager = RemoteRequestHistoryManager()
+    save_results_history = remote_request_history_manager.create_remote_request_history_entry(
+        RETRIEVE_POSSIBLE_GOOGLE_LINKS, candidate_campaign.google_civic_election_id,
+        candidate_campaign.we_vote_id, None, len(possible_google_search_users_list), status)
 
     results = {
         'success':                  True,
