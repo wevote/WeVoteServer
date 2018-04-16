@@ -72,7 +72,18 @@ def bulk_retrieve_possible_twitter_handles_view(request):
     hide_candidate_tools = request.GET.get('hide_candidate_tools', False)
     page = request.GET.get('page', 0)
     state_code = request.GET.get('state_code', '')
-    show_all = request.GET.get('show_all', False)
+    limit = convert_to_int(request.GET.get('show_all', 0))
+
+    if not positive_value_exists(google_civic_election_id) and not positive_value_exists(state_code) \
+            and not positive_value_exists(limit):
+        messages.add_message(request, messages.ERROR,
+                             'bulk_retrieve_possible_twitter_handles_view, LIMITING_VARIABLE_REQUIRED')
+        return HttpResponseRedirect(reverse('candidate:candidate_list', args=()) +
+                                    '?google_civic_election_id=' + str(google_civic_election_id) +
+                                    '&state_code=' + str(state_code) +
+                                    '&hide_candidate_tools=' + str(hide_candidate_tools) +
+                                    '&page=' + str(page)
+                                    )
 
     try:
         candidate_list = CandidateCampaign.objects.all()
@@ -81,12 +92,12 @@ def bulk_retrieve_possible_twitter_handles_view(request):
         if positive_value_exists(state_code):
             candidate_list = candidate_list.filter(state_code__iexact=state_code)
         candidate_list = candidate_list.order_by('candidate_name')
-        if not positive_value_exists(show_all):
-            candidate_list = candidate_list[:200]
+        if positive_value_exists(limit):
+            candidate_list = candidate_list[:limit]
         candidate_list_count = candidate_list.count()
 
         # Run Twitter account search and analysis on candidates without a linked or possible Twitter account
-        number_of_candidates_to_search = 75
+        number_of_candidates_to_search = 25
         current_candidate_index = 0
         while positive_value_exists(number_of_candidates_to_search) \
                 and (current_candidate_index < candidate_list_count):
@@ -101,6 +112,7 @@ def bulk_retrieve_possible_twitter_handles_view(request):
                     # Twitter account search and analysis has not been run on this candidate yet
                     results = retrieve_possible_twitter_handles(one_candidate)
                     number_of_candidates_to_search -= 1
+
             current_candidate_index += 1
     except CandidateCampaign.DoesNotExist:
         # This is fine, do nothing

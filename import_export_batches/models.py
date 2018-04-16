@@ -3,27 +3,26 @@
 # -*- coding: UTF-8 -*-
 
 from ballot.models import MEASURE, CANDIDATE, POLITICIAN
-from party.controllers import retrieve_all_party_names_and_ids_api, party_import_from_xml_data
-from electoral_district.controllers import electoral_district_import_from_xml_data
-from import_export_ctcl.controllers import create_candidate_selection_rows, retrieve_candidate_from_candidate_selection
 import codecs
 import csv
+from datetime import date
 from django.db import models
+from django.utils.http import urlquote
+from election.models import ElectionManager
+from electoral_district.controllers import electoral_district_import_from_xml_data
+from exception.models import handle_exception
+from import_export_ctcl.controllers import create_candidate_selection_rows, retrieve_candidate_from_candidate_selection
+import json
+import magic
 from organization.models import ORGANIZATION_TYPE_CHOICES, UNKNOWN, alphanumeric
+from party.controllers import retrieve_all_party_names_and_ids_api, party_import_from_xml_data
 from position.models import POSITION, POSITION_CHOICES, NO_STANCE
 from politician.models import GENDER_CHOICES, UNKNOWN
+import urllib
 from urllib.request import Request, urlopen
-from django.utils.http import urlquote
 from voter_guide.models import ORGANIZATION_WORD
-from election.models import ElectionManager
 import wevote_functions.admin
 from wevote_functions.functions import positive_value_exists, LANGUAGE_CODE_ENGLISH, LANGUAGE_CODE_SPANISH
-import urllib
-from exception.models import handle_exception
-import magic
-from datetime import date
-import json
-
 import xml.etree.ElementTree as ElementTree
 
 IMPORT_BALLOT_ITEM = 'IMPORT_BALLOT_ITEM'

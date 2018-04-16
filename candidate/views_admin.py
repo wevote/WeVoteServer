@@ -35,6 +35,7 @@ from voter.models import voter_has_authority
 import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, extract_twitter_handle_from_text_string, \
     positive_value_exists, STATE_CODE_MAP
+from wevote_settings.models import RemoteRequestHistory
 from django.http import HttpResponse
 import json
 
@@ -291,7 +292,14 @@ def candidate_list_view(request):
             twitter_possibility_query = twitter_possibility_query.filter(
                 candidate_campaign_we_vote_id=candidate.we_vote_id)
             twitter_possibility_list = list(twitter_possibility_query)
-            candidate.candidate_merge_possibility = twitter_possibility_list[0]
+            if twitter_possibility_list and positive_value_exists(len(twitter_possibility_list)):
+                candidate.candidate_merge_possibility = twitter_possibility_list[0]
+            else:
+                request_history = RemoteRequestHistory.objects.filter(
+                    candidate_campaign_we_vote_id__iexact=candidate.we_vote_id)
+                request_history_list = list(request_history)
+                if request_history_list and positive_value_exists(len(request_history_list)):
+                    candidate.no_twitter_possibilities_found = True
         except Exception as e:
             candidate.candidate_merge_possibility = None
 

@@ -88,47 +88,64 @@
         <a href="{% url 'office:office_list' %}?google_civic_election_id={{ election.google_civic_election_id }}&state_code={{ state_code }}">
             See Offices for this Election</a>,
         <a href="{% url 'candidate:candidate_list' %}?google_civic_election_id={{ election.google_civic_election_id }}&state_code={{ state_code }}">
-            See Candidates for this Election</a><br />
-        <a href="{% url 'ballot:ballot_item_list_edit' 0 %}?google_civic_election_id={{ election.google_civic_election_id }}&state_code={{ state_code }}">
-            Create Ballot for this Election for one Location</a> (so voters can find a ballot before Google Civic data is live)<br />
-        <a href="{% url 'ballot:ballot_items_repair' %}?local_election_id={{ election.id }}&google_civic_election_id={{ election.google_civic_election_id }}&state_code={{ state_code }}">
-            Repair Ballot Items for this Election (Add State Code)</a><br />
+            See Candidates for this Election</a>
     </p>
 
-{% if election.google_civic_election_id|convert_to_int >= 1000000 %}
-    <p>
-        <a href="{% url 'election:election_migration' %}?we_vote_election_id={{ election.google_civic_election_id }}">
-            Migrate this Data into Google Civic Election</a> (after data is available from Google Civic)<br />
-    </p>
-{% endif %}
-
-
+<strong>Data Grooming</strong>
+<ul>
 {% if election.google_civic_election_id|convert_to_int < 1000000 %}
-    <p>
+  <li>
     <a href="{% url 'election:election_all_ballots_retrieve' election.id %}?state_code={{ state_code }}" target="_blank">
         Google: Retrieve Ballot Data for this Election{% if state_code %} (for {{ state_code }}){% endif %}</a><br />
         Reach out to Google Civic API and ask for ballots from many polling locations so we can stitch
         together the measures, races and candidates. Add "import_limit" as a URL variable to increase the number of
         polling locations to retrieve ballots from.
-    </p>
+  </li>
+{% else %}
+  <li>
+    (To retrieve Ballot Data from Google Civic, add google_civic_election_id from Google.)<br />
+  </li>
 {% endif %}
 
 
 {% if election.ballotpedia_election_id|convert_to_int > 0 %}
-    <p>
-    <a href="{% url 'election:retrieve_distributed_ballotpedia_ballots' election.id %}?state_code={{ state_code }}" target="_blank">
+  <li>
+    <a href="{% url 'ballotpedia:retrieve_distributed_ballotpedia_ballots' election.id %}?state_code={{ state_code }}" target="_blank">
         Ballotpedia: Retrieve Ballot Data for this Election{% if state_code %} (for {{ state_code }}){% endif %}</a><br />
         Reach out to Ballotpedia API and ask for ballots from many polling locations so we can stitch
         together the measures, races and candidates. Add "import_limit" as a URL variable to increase the number of
         polling locations to retrieve ballots from.
-    </p>
+  </li>
+{% else %}
+  <li>
+    (To retrieve Ballot Data from Ballotpedia, add ballotpedia_election_id.)<br />
+  </li>
 {% endif %}
 
+  <li>
+  <a href="{% url 'ballot:update_ballot_returned_latitude_and_longitude' %}?google_civic_election_id={{ election.google_civic_election_id }}&state_code={{ state_code }}">
+  Update Lat/Long{% if state_code %} for {{ state_code }}{% endif %}: {{ entries_missing_latitude_longitude }} missing</a>
+  </li>
 
-<a href="{% url 'ballot:update_ballot_returned_latitude_and_longitude' %}?google_civic_election_id={{ election.google_civic_election_id }}&state_code={{ state_code }}">
-Update Lat/Long{% if state_code %} for {{ state_code }}{% endif %}: {{ entries_missing_latitude_longitude }} missing</a>
+  <li>
+  <a href="{% url 'ballot:ballot_item_list_edit' 0 %}?google_civic_election_id={{ election.google_civic_election_id }}&state_code={{ state_code }}">
+      Create Ballot for this Election for one Location</a> (so voters can find a ballot before Google Civic data is live)
+  </li>
 
-<form name="state_code_form" method="get" action="{% url 'election:election_summary' election.id %}">
+  <li>
+  <a href="{% url 'ballot:ballot_items_repair' %}?local_election_id={{ election.id }}&google_civic_election_id={{ election.google_civic_election_id }}&state_code={{ state_code }}">
+      Repair Ballot Items for this Election (Add State Code)</a>
+  </li>
+
+{% if election.google_civic_election_id|convert_to_int >= 1000000 %}
+  <li>
+        <a href="{% url 'election:election_migration' %}?we_vote_election_id={{ election.google_civic_election_id }}">
+            Migrate this Data into Google Civic Election</a> (after data is available from Google Civic)
+  </li>
+{% endif %}
+</ul>
+
+<form name="ballot_returned_search_form" method="get" action="{% url 'election:election_summary' election.id %}">
     {% csrf_token %}
 
     {% if state_list %}
@@ -142,10 +159,6 @@ Update Lat/Long{% if state_code %} for {{ state_code }}{% endif %}: {{ entries_m
         {% endfor %}
         </select>
     {% endif %}{# End of if state_list #}
-</form>
-
-  <form name="ballot_returned_search_form" method="get" action="{% url 'election:election_summary' election.id %}">
-    {% csrf_token %}
 
 {% if ballot_returned_search %}
     <a href="{% url 'election:election_summary' election.id %}">
@@ -156,9 +169,7 @@ Update Lat/Long{% if state_code %} for {{ state_code }}{% endif %}: {{ entries_m
 </form>
 
 {% if ballot_returned_list %}
-    <h5>{{ ballot_returned_count_entire_election }} Ballot Returned Entries</h5>
-
-    These are ballots that voters can find from WebApp.<br />
+    {{ ballot_returned_count_entire_election }} Ballot Returned Entries. These are ballots that voters can find from WebApp.<br />
 
     <table border="1" cellpadding="10">
         <tr>
