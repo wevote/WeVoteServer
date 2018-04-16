@@ -297,6 +297,9 @@ def reach_out_to_wikipedia_with_guess(wikipedia_page_title_guess, auto_suggest=F
         # There are a few possible pages this might refer to
         status = 'WIKIPEDIA_DISAMBIGUATION_ERROR '
         page_found = False
+    except Exception as e:
+        status = "WIKIPEDIA_UNKNOWN_ERROR "
+        page_found = False
 
     results = {
         'success':          page_found,

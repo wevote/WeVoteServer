@@ -35,7 +35,8 @@ from voter.models import voter_has_authority
 import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, extract_twitter_handle_from_text_string, \
     positive_value_exists, STATE_CODE_MAP
-from wevote_settings.models import RemoteRequestHistory
+from wevote_settings.models import RemoteRequestHistory, \
+    RETRIEVE_POSSIBLE_GOOGLE_LINKS, RETRIEVE_POSSIBLE_TWITTER_HANDLES
 from django.http import HttpResponse
 import json
 
@@ -295,9 +296,10 @@ def candidate_list_view(request):
             if twitter_possibility_list and positive_value_exists(len(twitter_possibility_list)):
                 candidate.candidate_merge_possibility = twitter_possibility_list[0]
             else:
-                request_history = RemoteRequestHistory.objects.filter(
-                    candidate_campaign_we_vote_id__iexact=candidate.we_vote_id)
-                request_history_list = list(request_history)
+                request_history_query = RemoteRequestHistory.objects.filter(
+                    candidate_campaign_we_vote_id__iexact=candidate.we_vote_id,
+                    kind_of_action=RETRIEVE_POSSIBLE_TWITTER_HANDLES)
+                request_history_list = list(request_history_query)
                 if request_history_list and positive_value_exists(len(request_history_list)):
                     candidate.no_twitter_possibilities_found = True
         except Exception as e:
@@ -311,7 +313,16 @@ def candidate_list_view(request):
                 exclude(item_image__isnull=True).exclude(item_image__exact='')
             google_search_possibility_query = google_search_possibility_query.order_by(
                 '-chosen_and_updated', 'not_a_match', '-likelihood_score')
-            candidate.google_search_merge_possibility = google_search_possibility_query[0]
+            google_search_merge_possibility = list(google_search_possibility_query)
+            if google_search_merge_possibility and positive_value_exists(len(google_search_merge_possibility)):
+                candidate.google_search_merge_possibility = google_search_possibility_query[0]
+            else:
+                request_history_query = RemoteRequestHistory.objects.filter(
+                    candidate_campaign_we_vote_id__iexact=candidate.we_vote_id,
+                    kind_of_action=RETRIEVE_POSSIBLE_GOOGLE_LINKS)
+                request_history_list = list(request_history_query)
+                if request_history_list and positive_value_exists(len(request_history_list)):
+                    candidate.no_google_possibilities_found = True
         except Exception as e:
             candidate.google_search_merge_possibility = None
 

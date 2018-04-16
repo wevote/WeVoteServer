@@ -10,7 +10,15 @@ import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, generate_random_string, positive_value_exists
 
 
+RETRIEVE_POSSIBLE_GOOGLE_LINKS = 'RETRIEVE_POSSIBLE_GOOGLE_LINKS'
 RETRIEVE_POSSIBLE_TWITTER_HANDLES = 'RETRIEVE_POSSIBLE_TWITTER_HANDLES'
+STOP_BULK_SEARCH_TWITTER_LINK_POSSIBILITY = 'STOP_BULK_SEARCH_TWITTER_LINK_POSSIBILITY'
+
+KIND_OF_ACTION_CHOICES = (
+    (RETRIEVE_POSSIBLE_GOOGLE_LINKS, 'Retrieve possible google links'),
+    (RETRIEVE_POSSIBLE_TWITTER_HANDLES, 'Retrieve possible twitter handles'),
+    (STOP_BULK_SEARCH_TWITTER_LINK_POSSIBILITY, 'Stop search for Bulk twitter links'),
+)
 
 logger = wevote_functions.admin.get_logger(__name__)
 
@@ -254,16 +262,6 @@ def fetch_next_we_vote_id_electoral_district_integer():
 def fetch_next_we_vote_id_party_integer():
     return fetch_next_we_vote_id_integer('we_vote_id_party_integer')
 
-SEARCH_TWITTER_LINK_POSSIBILITY = 'SEARCH_TWITTER_LINK_POSSIBILITY'
-SEARCH_GOOGLE_LINK_POSSIBILITY = 'SEARCH_GOOGLE_LINK_POSSIBILITY'
-STOP_BULK_SEARCH_TWITTER_LINK_POSSIBILITY = 'STOP_BULK_SEARCH_TWITTER_LINK_POSSIBILITY'
-
-KIND_OF_ACTION_CHOICES = (
-    (SEARCH_TWITTER_LINK_POSSIBILITY, 'Retrieve possible twitter handles'),
-    (SEARCH_GOOGLE_LINK_POSSIBILITY, 'Retrieve possible google links'),
-    (STOP_BULK_SEARCH_TWITTER_LINK_POSSIBILITY, 'Stop search for Bulk twitter links'),
-)
-
 
 class RemoteRequestHistory(models.Model):
     """
@@ -275,10 +273,12 @@ class RemoteRequestHistory(models.Model):
     google_civic_election_id = models.PositiveIntegerField(verbose_name="google civic election id", null=True)
 
     kind_of_action = models.CharField(verbose_name="kind of action to take", max_length=50,
-                                      choices=KIND_OF_ACTION_CHOICES, default=SEARCH_TWITTER_LINK_POSSIBILITY)
-    candidate_campaign_we_vote_id = models.CharField(verbose_name="candidate we vote id", max_length=255, unique=False, null=True)
+                                      choices=KIND_OF_ACTION_CHOICES, null=True)
+    candidate_campaign_we_vote_id = models.CharField(verbose_name="candidate we vote id", max_length=255, unique=False,
+                                                     null=True)
 
-    organization_we_vote_id = models.CharField(verbose_name="we vote id for the org owner", max_length=255, unique=False, null=True)
+    organization_we_vote_id = models.CharField(verbose_name="we vote id for the org owner", max_length=255,
+                                               unique=False, null=True)
     number_of_results = models.PositiveIntegerField(verbose_name="number of results", null=True, default=0)
     status = models.CharField(verbose_name="Request status message", max_length=255, default="", null=True, blank=True)
 

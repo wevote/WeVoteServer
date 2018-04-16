@@ -13,7 +13,7 @@ from django.http import HttpResponseRedirect
 from voter.models import voter_has_authority
 from wevote_functions.functions import convert_to_int, positive_value_exists
 import wevote_functions.admin
-from wevote_settings.models import RemoteRequestHistory
+from wevote_settings.models import RemoteRequestHistory, RETRIEVE_POSSIBLE_TWITTER_HANDLES
 
 logger = wevote_functions.admin.get_logger(__name__)
 
@@ -104,9 +104,12 @@ def bulk_retrieve_possible_twitter_handles_view(request):
             one_candidate = candidate_list[current_candidate_index]
             if not positive_value_exists(one_candidate.candidate_twitter_handle):
                 # Candidate does not have a Twitter account linked
-                request_history = RemoteRequestHistory.objects.filter(
-                    candidate_campaign_we_vote_id__iexact=one_candidate.we_vote_id)
-                request_history_list = list(request_history)
+                # Check to see if we have already tried to find their information from Twitter. We don't want to
+                #  search Twitter more than once.
+                request_history_query = RemoteRequestHistory.objects.filter(
+                    candidate_campaign_we_vote_id__iexact=one_candidate.we_vote_id,
+                    kind_of_action=RETRIEVE_POSSIBLE_TWITTER_HANDLES)
+                request_history_list = list(request_history_query)
 
                 if not positive_value_exists(request_history_list):
                     # Twitter account search and analysis has not been run on this candidate yet
