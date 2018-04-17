@@ -610,6 +610,7 @@ def voter_email_address_save_view(request):  # voterEmailAddressSave
     send_link_to_sign_in = positive_value_exists(request.GET.get('send_link_to_sign_in', False))
     make_primary_email = positive_value_exists(request.GET.get('make_primary_email', False))
     delete_email = positive_value_exists(request.GET.get('delete_email', ""))
+    is_cordova = positive_value_exists(request.GET.get('is_cordova', False))
 
     results = voter_email_address_save_for_api(voter_device_id=voter_device_id,
                                                text_for_email_address=text_for_email_address,
@@ -618,6 +619,7 @@ def voter_email_address_save_view(request):  # voterEmailAddressSave
                                                resend_verification_email=resend_verification_email,
                                                make_primary_email=make_primary_email,
                                                delete_email=delete_email,
+                                               is_cordova=is_cordova,
                                                )
 
     json_data = {
