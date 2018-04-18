@@ -20,7 +20,6 @@ _only_log_once = None  # if LOG_FILE_LEVEL is misconfigured, only log that confi
 host = socket.gethostname()
 
 
-
 def _make_path(logfile):
     """Generates the string path `logfile` if it does not already exist.
     This will create directories-- make sure executing user has permissions.
@@ -92,8 +91,9 @@ def setup_logging(
         logging.getLogger('').addHandler(_fh)
 
 
+# NOTE Comment the rest of this file if you are trying to debug a circular dependency
 def catch_unhandled_exceptions(exc_type, exc_value, exc_traceback):
-    #Ignore KeyboardInterrupt so a console python program can exit with Ctrl + C.
+    # Ignore KeyboardInterrupt so a console python program can exit with Ctrl + C.
     if issubclass(exc_type, KeyboardInterrupt):
         sys.__excepthook__(exc_type, exc_value, exc_traceback)
         return
@@ -101,7 +101,7 @@ def catch_unhandled_exceptions(exc_type, exc_value, exc_traceback):
     print("Uncaught exception:::", exc_type, exc_value)
     logger = logging.getLogger(__name__)
     logger.error("Uncaught exception:", exc_type, exc_value)
-                 #exc_info=(exc_type, exc_value, exc_traceback))
+    # exc_info=(exc_type, exc_value, exc_traceback))
 
 # New in July 2017
 sys.excepthook = catch_unhandled_exceptions

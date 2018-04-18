@@ -980,24 +980,6 @@ def voter_ballot_items_retrieve_from_google_civic_for_api(
     return results
 
 
-# We will want to do this in the future
-# def process_polling_locations_from_structured_json(polling_location_structured_data):
-#     """
-#     "pollingLocations": [
-#       {
-#        "address": {
-#         "locationName": "School-Harvey Milk",
-#         "line1": "4235 19th Street",
-#         "city": "San Francisco",
-#         "state": "CA",
-#         "zip": "94114-2415"
-#        },
-#        "notes": "Between Collingwood & Diamond",
-#        "pollingHours": "07:00-20:00",
-#     """
-#     return
-
-
 def process_contest_referendum_from_structured_json(
         one_contest_referendum_structured_json, google_civic_election_id, state_code,
         ocd_division_id, local_ballot_order, voter_id, polling_location_we_vote_id):

@@ -2,7 +2,6 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
-from ballot.models import MEASURE, CANDIDATE, POLITICIAN
 import codecs
 import csv
 from datetime import date
@@ -16,7 +15,6 @@ import json
 import magic
 from organization.models import ORGANIZATION_TYPE_CHOICES, UNKNOWN, alphanumeric
 from party.controllers import retrieve_all_party_names_and_ids_api, party_import_from_xml_data
-from position.models import POSITION, POSITION_CHOICES, NO_STANCE
 from politician.models import GENDER_CHOICES, UNKNOWN
 import urllib
 from urllib.request import Request, urlopen
@@ -25,10 +23,33 @@ import wevote_functions.admin
 from wevote_functions.functions import positive_value_exists, LANGUAGE_CODE_ENGLISH, LANGUAGE_CODE_SPANISH
 import xml.etree.ElementTree as ElementTree
 
-IMPORT_BALLOT_ITEM = 'IMPORT_BALLOT_ITEM'
+POSITION = 'POSITION'
+ANY_STANCE = 'ANY_STANCE'  # This is a way to indicate when we want to return any stance (support, oppose, no_stance)
+SUPPORT = 'SUPPORT'
+STILL_DECIDING = 'STILL_DECIDING'
+NO_STANCE = 'NO_STANCE'  # DALE 2016-8-29 We will want to deprecate NO_STANCE and replace with INFORMATION_ONLY
+INFORMATION_ONLY = 'INFO_ONLY'
+OPPOSE = 'OPPOSE'
+PERCENT_RATING = 'PERCENT_RATING'
+POSITION_CHOICES = (
+    # ('SUPPORT_STRONG',    'Strong Supports'),  # I do not believe we will be offering 'SUPPORT_STRONG' as an option
+    (SUPPORT,           'Supports'),
+    (STILL_DECIDING,    'Still deciding'),  # Still undecided
+    (NO_STANCE,         'No stance'),  # We don't know the stance
+    (INFORMATION_ONLY,  'Information only'),  # This entry is meant as food-for-thought and is not advocating
+    (OPPOSE,            'Opposes'),
+    (PERCENT_RATING,    'Percentage point rating'),
+    # ('OPPOSE_STRONG',     'Strongly Opposes'),  # I do not believe we will be offering 'OPPOSE_STRONG' as an option
+)
+NO_STANCE = 'NO_STANCE'
+
+CANDIDATE = 'CANDIDATE'
 CONTEST_OFFICE = 'CONTEST_OFFICE'
 ELECTED_OFFICE = 'ELECTED_OFFICE'
+IMPORT_BALLOT_ITEM = 'IMPORT_BALLOT_ITEM'
 IMPORT_VOTER = 'IMPORT_VOTER'
+MEASURE = 'MEASURE'
+POLITICIAN = 'POLITICIAN'
 
 KIND_OF_BATCH_CHOICES = (
     (MEASURE,           'Measure'),
@@ -4967,3 +4988,11 @@ class BatchRowActionBallotItem(models.Model):
                                         null=True, blank=True, default="")
 
     status = models.TextField(verbose_name="batch row action ballot item status", null=True, blank=True, default="")
+
+
+def create_batch_from_json(file_name, structured_json_list, mapping_dict, kind_of_batch,
+                           google_civic_election_id=0, organization_we_vote_id="", polling_location_we_vote_id=""):
+    batch_manager = BatchManager()
+    return batch_manager.create_batch_from_json(
+        file_name, structured_json_list, mapping_dict, kind_of_batch,
+        google_civic_election_id, organization_we_vote_id, polling_location_we_vote_id)

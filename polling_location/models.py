@@ -144,9 +144,9 @@ class PollingLocationManager(models.Model):
                         'city': city.strip() if city else '',
                         'zip_long': zip_long,
                     }
-                    if positive_value_exists(latitude):
+                    if latitude:
                         updated_values['latitude'] = latitude
-                    if positive_value_exists(longitude):
+                    if longitude:
                         updated_values['longitude'] = longitude
                     if positive_value_exists(use_for_bulk_retrieve):
                         updated_values['use_for_bulk_retrieve'] = use_for_bulk_retrieve
@@ -166,9 +166,9 @@ class PollingLocationManager(models.Model):
                     }
                     # We use polling_location_id + state to find prior entries since I am not sure polling_location_id's
                     #  are unique from state-to-state
-                    if positive_value_exists(latitude):
+                    if latitude:
                         updated_values['latitude'] = latitude
-                    if positive_value_exists(longitude):
+                    if longitude:
                         updated_values['longitude'] = longitude
                     if positive_value_exists(use_for_bulk_retrieve):
                         updated_values['use_for_bulk_retrieve'] = use_for_bulk_retrieve

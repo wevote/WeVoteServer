@@ -148,6 +148,7 @@ class BallotItemManager(models.Model):
             contest_measure_id=0, contest_measure_we_vote_id='', state_code=''):
         exception_multiple_object_returned = False
         new_ballot_item_created = False
+        ballot_item_found = False  # At the end, does a ballot_item exist?
 
         # We require both contest_office_id and contest_office_we_vote_id
         #  OR both contest_measure_id and contest_measure_we_vote_id
@@ -198,7 +199,11 @@ class BallotItemManager(models.Model):
 
                 # if a ballot_item is found (instead of just created), *then* update it
                 # Note, we never update google_civic_election_id or voter_id
-                if not new_ballot_item_created:
+                if new_ballot_item_created:
+                    success = True
+                    status = 'BALLOT_ITEM_CREATED '
+                    ballot_item_found = True
+                else:
                     ballot_item_on_stage.contest_office_id = contest_office_id
                     ballot_item_on_stage.contest_office_we_vote_id = contest_office_we_vote_id
                     ballot_item_on_stage.contest_measure_id = contest_measure_id
@@ -209,12 +214,10 @@ class BallotItemManager(models.Model):
                     ballot_item_on_stage.measure_subtitle = measure_subtitle
                     ballot_item_on_stage.measure_text = measure_text
                     ballot_item_on_stage.save()
+                    ballot_item_found = True
 
                     success = True
                     status = 'BALLOT_ITEM_UPDATED '
-                else:
-                    success = True
-                    status = 'BALLOT_ITEM_CREATED '
 
             except BallotItemManager.MultipleObjectsReturned as e:
                 handle_record_found_more_than_one_exception(e, logger=logger)
@@ -223,10 +226,11 @@ class BallotItemManager(models.Model):
                 exception_multiple_object_returned = True
 
         results = {
-            'success':                 success,
-            'status':                  status,
-            'MultipleObjectsReturned': exception_multiple_object_returned,
-            'new_ballot_item_created': new_ballot_item_created,
+            'success':                  success,
+            'status':                   status,
+            'MultipleObjectsReturned':  exception_multiple_object_returned,
+            'ballot_item_found':        ballot_item_found,
+            'new_ballot_item_created':  new_ballot_item_created,
         }
         return results
 
@@ -237,6 +241,7 @@ class BallotItemManager(models.Model):
             contest_measure_id=0, contest_measure_we_vote_id='', state_code=''):
         exception_multiple_object_returned = False
         new_ballot_item_created = False
+        ballot_item_found = False  # At the end, does a ballot_item exist?
 
         # Make sure we have this polling_location
         polling_location_manager = PollingLocationManager()
@@ -331,12 +336,14 @@ class BallotItemManager(models.Model):
                     ballot_item_on_stage.measure_text = measure_text
                     ballot_item_on_stage.state_code = state_code
                     ballot_item_on_stage.save()
+                    ballot_item_found = True
 
                     success = True
                     status = 'BALLOT_ITEM_UPDATED-POLLING_LOCATION'
                 else:
                     success = True
                     status = 'BALLOT_ITEM_CREATED-POLLING_LOCATION'
+                    ballot_item_found = True
 
             except BallotItemManager.MultipleObjectsReturned as e:
                 handle_record_found_more_than_one_exception(e, logger=logger)
@@ -348,6 +355,7 @@ class BallotItemManager(models.Model):
             'success':                  success,
             'status':                   status,
             'MultipleObjectsReturned':  exception_multiple_object_returned,
+            'ballot_item_found':        ballot_item_found,
             'new_ballot_item_created':  new_ballot_item_created,
         }
         return results
@@ -1566,6 +1574,8 @@ class BallotReturnedManager(models.Model):
             normalized_zip=False, text_for_map_search=False, ballot_location_display_name=False):
         exception_multiple_object_returned = False
         new_ballot_returned_created = False
+        ballot_returned_found = False
+        google_civic_election_id = convert_to_int(google_civic_election_id)
 
         if not google_civic_election_id:
             success = False
@@ -1608,6 +1618,7 @@ class BallotReturnedManager(models.Model):
                 if text_for_map_search is not False:
                     ballot_returned.text_for_map_search = text_for_map_search
                 ballot_returned.save()
+                ballot_returned_found = True
 
                 if new_ballot_returned_created:
                     success = True
@@ -1626,6 +1637,8 @@ class BallotReturnedManager(models.Model):
             'success':                      success,
             'status':                       status,
             'MultipleObjectsReturned':      exception_multiple_object_returned,
+            'ballot_returned_found':        ballot_returned_found,
+            'ballot_returned':              ballot_returned,
             'new_ballot_returned_created':  new_ballot_returned_created,
         }
         return results

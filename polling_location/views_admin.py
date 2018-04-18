@@ -242,7 +242,7 @@ def polling_location_edit_process_view(request):
         polling_location_id = polling_location_on_stage.id
         polling_location_we_vote_id = polling_location_on_stage.we_vote_id
 
-        if not positive_value_exists(latitude) and not positive_value_exists(longitude):
+        if not latitude and not longitude:
             lat_long_results = polling_location_manager.populate_latitude_and_longitude_for_polling_location(
                 polling_location_on_stage)
             status += lat_long_results['status']
@@ -261,7 +261,7 @@ def polling_location_edit_process_view(request):
 
     # Now update ballot returned with lat/long
     try:
-        if positive_value_exists(latitude) and positive_value_exists(longitude):
+        if latitude and longitude:
             ballot_returned_list_manager = BallotReturnedListManager()
             results = ballot_returned_list_manager.retrieve_ballot_returned_list(
                 google_civic_election_id, polling_location_we_vote_id)

@@ -249,10 +249,14 @@ class ElectionManager(models.Model):
         }
         return results
 
-    def retrieve_upcoming_elections(self, include_test_election=False):
+    def retrieve_upcoming_elections(self, state_code="", without_state_code=False, include_test_election=False):
         upcoming_election_list = []
         try:
             election_list_query = Election.objects.using('readonly').all()
+            if positive_value_exists(without_state_code):
+                election_list_query = election_list_query.filter(Q(state_code__isnull=True) | Q(state_code__exact=''))
+            elif positive_value_exists(state_code):
+                election_list_query = election_list_query.filter(state_code__iexact=state_code)
             if not positive_value_exists(include_test_election):
                 election_list_query = election_list_query.exclude(google_civic_election_id=2000)
             election_list_query = election_list_query.order_by('election_day_text').reverse()
@@ -278,6 +282,44 @@ class ElectionManager(models.Model):
             'success':          success,
             'status':           status,
             'election_list':    upcoming_election_list,
+        }
+        return results
+
+    def retrieve_next_election_for_state(self, state_code):
+        """
+        We want either the next election in this state, or the next national election, whichever comes first
+        :param state_code:
+        :return:
+        """
+        status = ""
+        upcoming_state_elections_results = self.retrieve_upcoming_elections(state_code)
+        election_list = upcoming_state_elections_results['election_list']
+        if not len(election_list):
+            status += upcoming_state_elections_results['status']
+            without_state_code = True
+            upcoming_national_elections_results = self.retrieve_upcoming_elections("", without_state_code)
+            election_list = upcoming_national_elections_results['election_list']
+
+            if not len(election_list):
+                status += upcoming_national_elections_results['status']
+                success = True
+                status += "RETRIEVE_NEXT_ELECTION_FOR_STATE-NOT_FOUND: "
+                results = {
+                    'success':          success,
+                    'status':           status,
+                    'election_found':   False,
+                    'election':         Election(),
+                }
+                return results
+
+        success = True
+        status += "RETRIEVE_NEXT_ELECTION_FOR_STATE-FOUND "
+        election = election_list[0]
+        results = {
+            'success':          success,
+            'status':           status,
+            'election_found':   True,
+            'election':         election,
         }
         return results
 
@@ -441,3 +483,18 @@ def fetch_election_state(google_civic_election_id):
         return election.get_election_state()
     else:
         return ''
+
+
+def fetch_next_election_for_state(state_code):
+    """
+    Before using election returned, check for google_civic_election_id
+    :param state_code:
+    :return:
+    """
+    election_manager = ElectionManager()
+    results = election_manager.retrieve_next_election_for_state(state_code)
+    if results['election_found']:
+        election = results['election']
+        return election
+    else:
+        return Election()

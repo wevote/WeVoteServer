@@ -4,20 +4,17 @@
 
 from .models import BatchDescription, BatchHeader, BatchHeaderMap, BatchManager, BatchRow, BatchSet, \
     CONTEST_OFFICE, ELECTED_OFFICE, IMPORT_BALLOT_ITEM, \
-    BATCH_HEADER_MAP_CANDIDATES_TO_BALLOTPEDIA_CANDIDATES, BATCH_HEADER_MAP_CONTEST_OFFICES_TO_BALLOTPEDIA_RACES, \
-    BATCH_HEADER_MAP_MEASURES_TO_BALLOTPEDIA_MEASURES, \
     BATCH_IMPORT_KEYS_ACCEPTED_FOR_CANDIDATES, BATCH_IMPORT_KEYS_ACCEPTED_FOR_CONTEST_OFFICES, \
     BATCH_IMPORT_KEYS_ACCEPTED_FOR_ELECTED_OFFICES, BATCH_IMPORT_KEYS_ACCEPTED_FOR_MEASURES, \
     BATCH_IMPORT_KEYS_ACCEPTED_FOR_ORGANIZATIONS, BATCH_IMPORT_KEYS_ACCEPTED_FOR_POLITICIANS, \
     BATCH_IMPORT_KEYS_ACCEPTED_FOR_POSITIONS, BATCH_IMPORT_KEYS_ACCEPTED_FOR_BALLOT_ITEMS, \
-    IMPORT_CREATE, IMPORT_ADD_TO_EXISTING, IMPORT_QUERY_ERROR, IMPORT_TO_BE_DETERMINED, IMPORT_VOTER, \
-    BATCH_IMPORT_KEYS_ACCEPTED_FOR_VOTERS
+    IMPORT_CREATE, IMPORT_ADD_TO_EXISTING, IMPORT_VOTER
 from .controllers import create_batch_header_translation_suggestions, create_batch_row_actions, \
-    create_or_update_batch_header_mapping, export_voter_list,\
-    import_data_from_batch_row_actions, import_create_or_update_elected_office_entry
+    create_or_update_batch_header_mapping, export_voter_list, import_data_from_batch_row_actions
+from import_export_ballotpedia.controllers import groom_ballotpedia_data_for_processing
+from import_export_batches.controllers_ballotpedia import store_ballotpedia_json_response_to_import_batch_system
 from admin_tools.views import redirect_to_sign_in_page
 from ballot.models import MEASURE, CANDIDATE, POLITICIAN
-import codecs
 import csv
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
@@ -27,18 +24,17 @@ from django.http import HttpResponseRedirect, HttpResponse
 from django.shortcuts import render
 from django.utils.http import urlquote
 from election.models import Election, ElectionManager
-from import_export_ballotpedia.controllers import process_ballotpedia_json_response
 import json
 from polling_location.models import PollingLocation, PollingLocationManager
 from position.models import POSITION
 import requests
 from voter.models import voter_has_authority
 from voter_guide.models import ORGANIZATION_WORD
-import wevote_functions.admin
+# import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, positive_value_exists, STATE_CODE_MAP
 
 
-logger = wevote_functions.admin.get_logger(__name__)
+# logger = wevote_functions.admin.get_logger(__name__)
 
 
 @login_required
@@ -282,7 +278,13 @@ def batch_list_process_view(request):
                 else:
                     contains_api = False
 
-                results = process_ballotpedia_json_response(structured_json, google_civic_election_id, contains_api)
+                groom_results = groom_ballotpedia_data_for_processing(structured_json, google_civic_election_id,
+                                                                      contains_api, polling_location_we_vote_id)
+                modified_json_list = groom_results['modified_json_list']
+                kind_of_batch = groom_results['kind_of_batch']
+
+                results = store_ballotpedia_json_response_to_import_batch_system(
+                    modified_json_list, google_civic_election_id, kind_of_batch)
             else:
                 # check file type
                 filetype = batch_manager.find_file_type(batch_uri)
