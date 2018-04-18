@@ -4,7 +4,6 @@
 
 from .controllers import retrieve_candidates_from_api, retrieve_districts_to_which_address_belongs_from_api
 from admin_tools.views import redirect_to_sign_in_page
-from datetime import date
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.messages import get_messages
@@ -12,14 +11,20 @@ from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
 from django.shortcuts import redirect, render
 from election.models import Election
-from import_export_batches.models import BatchManager, \
-    CANDIDATE, CONTEST_OFFICE, ELECTED_OFFICE, IMPORT_BALLOT_ITEM, MEASURE
 from polling_location.models import PollingLocation
-from voter.models import VoterAddressManager, VoterDeviceLinkManager, voter_has_authority
+from voter.models import voter_has_authority
 import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, positive_value_exists
 
 logger = wevote_functions.admin.get_logger(__name__)
+
+CANDIDATE = 'CANDIDATE'
+CONTEST_OFFICE = 'CONTEST_OFFICE'
+ELECTED_OFFICE = 'ELECTED_OFFICE'
+IMPORT_BALLOT_ITEM = 'IMPORT_BALLOT_ITEM'
+IMPORT_VOTER = 'IMPORT_VOTER'
+MEASURE = 'MEASURE'
+POLITICIAN = 'POLITICIAN'
 
 
 def import_ballot_items_for_location_view(request):

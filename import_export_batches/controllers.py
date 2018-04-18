@@ -2,19 +2,17 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
-from ballot.models import MEASURE, CANDIDATE, POLITICIAN, BallotItem, BallotItemListManager, BallotItemManager
-from voter.models import VoterManager
 from .models import BatchManager, BatchDescription, BatchHeaderMap, BatchRow, BatchRowActionOrganization, \
     BatchRowActionMeasure, BatchRowActionElectedOffice, BatchRowActionContestOffice, BatchRowActionPolitician, \
     BatchRowActionCandidate, BatchRowActionPosition, BatchRowActionBallotItem, \
-    CLEAN_DATA_MANUALLY, CONTEST_OFFICE, ELECTED_OFFICE, IMPORT_BALLOT_ITEM, POSITION, \
+    CLEAN_DATA_MANUALLY, POSITION, \
     IMPORT_CREATE, IMPORT_ADD_TO_EXISTING, IMPORT_DATA_ALREADY_MATCHING, IMPORT_QUERY_ERROR, \
     IMPORT_TO_BE_DETERMINED, DO_NOT_PROCESS, \
     BATCH_IMPORT_KEYS_ACCEPTED_FOR_CANDIDATES, BATCH_IMPORT_KEYS_ACCEPTED_FOR_CONTEST_OFFICES, \
     BATCH_IMPORT_KEYS_ACCEPTED_FOR_ELECTED_OFFICES, BATCH_IMPORT_KEYS_ACCEPTED_FOR_MEASURES, \
     BATCH_IMPORT_KEYS_ACCEPTED_FOR_ORGANIZATIONS, BATCH_IMPORT_KEYS_ACCEPTED_FOR_POLITICIANS, \
     BATCH_IMPORT_KEYS_ACCEPTED_FOR_POSITIONS, BATCH_IMPORT_KEYS_ACCEPTED_FOR_BALLOT_ITEMS
-from ballot.models import BallotReturnedManager
+from ballot.models import BallotItem, BallotReturnedManager, BallotItemManager
 from candidate.models import CandidateCampaign, CandidateCampaignListManager, CandidateCampaignManager
 from django.db.models import Q
 from elected_office.models import ElectedOffice, ElectedOfficeManager
@@ -30,6 +28,7 @@ from politician.models import Politician, PoliticianManager
 from polling_location.models import PollingLocationManager
 from position.models import PositionManager, INFORMATION_ONLY, OPPOSE, SUPPORT
 from twitter.models import TwitterUserManager
+from voter.models import VoterManager
 from voter_guide.controllers import refresh_existing_voter_guides
 from voter_guide.models import ORGANIZATION_WORD
 import wevote_functions.admin
@@ -38,6 +37,13 @@ from wevote_functions.functions import convert_to_int, extract_twitter_handle_fr
 logger = wevote_functions.admin.get_logger(__name__)
 
 # VOTE_SMART_API_KEY = get_environment_variable("VOTE_SMART_API_KEY")
+CANDIDATE = 'CANDIDATE'
+CONTEST_OFFICE = 'CONTEST_OFFICE'
+ELECTED_OFFICE = 'ELECTED_OFFICE'
+IMPORT_BALLOT_ITEM = 'IMPORT_BALLOT_ITEM'
+IMPORT_VOTER = 'IMPORT_VOTER'
+MEASURE = 'MEASURE'
+POLITICIAN = 'POLITICIAN'
 
 
 def create_batch_row_actions(batch_header_id, batch_row_id, state_code=""):
@@ -4430,3 +4436,4 @@ def export_voter_list():
     }
 
     return export_result
+
