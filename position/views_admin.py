@@ -145,14 +145,12 @@ def position_list_view(request):
 
     position_search = request.GET.get('position_search', '')
 
-    position_list_manager = PositionListManager()
     if positive_value_exists(google_civic_election_id):
-        public_only = True
-        position_list = position_list_manager.retrieve_all_positions_for_election(google_civic_election_id, ANY_STANCE,
-                                                                                  public_only)
+        position_list_query = PositionEntered.objects.order_by('-id')  # This order_by is temp
+        position_list_query = position_list_query.filter(google_civic_election_id=google_civic_election_id)
     else:
-        position_list = PositionEntered.objects.order_by('-id')  # This order_by is temp
-        position_list = position_list.exclude(organization_we_vote_id=None)
+        position_list_query = PositionEntered.objects.order_by('-id')  # This order_by is temp
+        position_list_query = position_list_query.exclude(organization_we_vote_id=None)
 
     if positive_value_exists(position_search):
         search_words = position_search.split()
@@ -161,7 +159,22 @@ def position_list_view(request):
             new_filter = Q(state_code__icontains=one_word)
             filters.append(new_filter)
 
-            new_filter = Q(we_vote_id__icontains=one_word)
+            new_filter = Q(we_vote_id__iexact=one_word)
+            filters.append(new_filter)
+
+            new_filter = Q(candidate_campaign_we_vote_id__iexact=one_word)
+            filters.append(new_filter)
+
+            new_filter = Q(contest_measure_we_vote_id__iexact=one_word)
+            filters.append(new_filter)
+
+            new_filter = Q(contest_office_we_vote_id__iexact=one_word)
+            filters.append(new_filter)
+
+            new_filter = Q(organization_we_vote_id__iexact=one_word)
+            filters.append(new_filter)
+
+            new_filter = Q(voter_we_vote_id__iexact=one_word)
             filters.append(new_filter)
 
             new_filter = Q(google_civic_measure_title__icontains=one_word)
@@ -180,10 +193,9 @@ def position_list_view(request):
                 for item in filters:
                     final_filters |= item
 
-                    position_list = position_list.filter(final_filters)
+                position_list_query = position_list_query.filter(final_filters)
 
-    if not positive_value_exists(google_civic_election_id):
-        position_list = position_list[: 100]
+    position_list = position_list_query[: 100]
 
     election_manager = ElectionManager()
     if positive_value_exists(show_all_elections):
