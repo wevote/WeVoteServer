@@ -2,7 +2,8 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
-from .controllers import retrieve_candidates_from_api, retrieve_districts_to_which_address_belongs_from_api
+from .controllers import retrieve_candidates_from_api, retrieve_districts_to_which_address_belongs_from_api, \
+    retrieve_offices_from_api
 from admin_tools.views import redirect_to_sign_in_page
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -272,3 +273,46 @@ def retrieve_distributed_ballotpedia_ballots_view(request, election_local_id=0):
     return HttpResponseRedirect(reverse('import_export_batches:batch_list', args=()) +
                                 '?kind_of_batch=IMPORT_BALLOT_ITEM' +
                                 '&google_civic_election_id=' + str(google_civic_election_id))
+
+
+def retrieve_offices_from_api_view(request):
+    """
+    Reach out to Ballotpedia API to retrieve offices.
+    """
+    # If person isn't signed in, we don't want to let them visit this page yet
+    if not request.user.is_authenticated():
+        return redirect('/admin')
+
+    google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
+
+    results = retrieve_offices_from_api(google_civic_election_id)
+
+    kind_of_batch = ""
+    if 'kind_of_batch' in results:
+        kind_of_batch = results['kind_of_batch']
+    if not positive_value_exists(kind_of_batch):
+        kind_of_batch = CONTEST_OFFICE
+
+    batch_header_id = 0
+    if 'batch_saved' in results and results['batch_saved']:
+        messages.add_message(request, messages.INFO, 'Import batch for {google_civic_election_id} election saved.'
+                                                     ''.format(google_civic_election_id=google_civic_election_id))
+        batch_header_id = results['batch_header_id']
+    elif 'batch_header_id' in results and results['batch_header_id']:
+        messages.add_message(request, messages.INFO, 'Import batch for {google_civic_election_id} election saved, '
+                                                     'batch_header_id.'
+                                                     ''.format(google_civic_election_id=google_civic_election_id))
+        batch_header_id = results['batch_header_id']
+    else:
+        messages.add_message(request, messages.ERROR, results['status'])
+
+    if positive_value_exists(batch_header_id):
+        # Go straight to the new batch
+        return HttpResponseRedirect(reverse('import_export_batches:batch_action_list', args=()) +
+                                    "?batch_header_id=" + str(batch_header_id) +
+                                    "&kind_of_batch=" + str(kind_of_batch) +
+                                    "&google_civic_election_id=" + str(google_civic_election_id))
+    else:
+        # Go to the office listing page
+        return HttpResponseRedirect(reverse('office:office_list', args=()) +
+                                    "?google_civic_election_id=" + str(google_civic_election_id))

@@ -231,6 +231,9 @@ def candidate_list_view(request):
             for one_word in search_words:
                 filters = []
 
+                new_filter = Q(ballotpedia_candidate_summary__icontains=one_word)
+                filters.append(new_filter)
+
                 new_filter = Q(candidate_name__icontains=one_word)
                 filters.append(new_filter)
 
@@ -240,7 +243,13 @@ def candidate_list_view(request):
                 new_filter = Q(candidate_url__icontains=one_word)
                 filters.append(new_filter)
 
+                new_filter = Q(contest_office_name__icontains=one_word)
+                filters.append(new_filter)
+
                 new_filter = Q(party__icontains=one_word)
+                filters.append(new_filter)
+
+                new_filter = Q(twitter_description__icontains=one_word)
                 filters.append(new_filter)
 
                 new_filter = Q(we_vote_id__icontains=one_word)

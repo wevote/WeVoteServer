@@ -189,6 +189,63 @@ def retrieve_districts_to_which_address_belongs_from_api(
     return results
 
 
+def retrieve_offices_from_api(google_civic_election_id):
+    success = True
+    status = ""
+
+    if not positive_value_exists(google_civic_election_id):
+        results = {
+            'success': False,
+            'status': "Error: Missing election id",
+        }
+        return results
+
+    batch_header_id = 0
+    ballotpedia_election_id = 0
+    election_manager = ElectionManager()
+    results = election_manager.retrieve_election(google_civic_election_id)
+    if results['election_found']:
+        election = results['election']
+        if election.ballotpedia_election_id:
+            ballotpedia_election_id = election.ballotpedia_election_id
+
+    if not positive_value_exists(ballotpedia_election_id):
+        results = {
+            'success': False,
+            'status': "Error: Missing election id",
+        }
+        return results
+
+    response = requests.get(BALLOTPEDIA_API_RACES_URL, params={
+        "access_token": BALLOTPEDIA_API_KEY,
+        "filters[election][in]": str(ballotpedia_election_id),
+        "limit": 1000,
+    })
+
+    structured_json = json.loads(response.text)
+
+    # # Use Google Civic API call counter to track the number of queries we are doing each day
+    # google_civic_api_counter_manager = GoogleCivicApiCounterManager()
+    # google_civic_api_counter_manager.create_counter_entry('ballot', google_civic_election_id)
+
+    groom_results = groom_ballotpedia_data_for_processing(structured_json, google_civic_election_id)
+    modified_json_list = groom_results['modified_json_list']
+    kind_of_batch = groom_results['kind_of_batch']
+
+    results = store_ballotpedia_json_response_to_import_batch_system(
+        modified_json_list, google_civic_election_id, kind_of_batch)
+    status += results['status']
+    if 'batch_header_id' in results:
+        batch_header_id = results['batch_header_id']
+
+    results = {
+        'success': success,
+        'status': status,
+        'batch_header_id': batch_header_id,
+    }
+    return results
+
+
 def groom_ballotpedia_data_for_processing(structured_json, google_civic_election_id,
                                           contains_api=False, polling_location_we_vote_id=""):
     success = False
