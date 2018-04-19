@@ -1358,6 +1358,9 @@ class VoterGuideListManager(models.Model):
                 for one_word in search_words:
                     filters = []
 
+                    new_filter = Q(we_vote_id__iexact=one_word)
+                    filters.append(new_filter)
+
                     new_filter = Q(display_name__icontains=one_word)
                     filters.append(new_filter)
 
@@ -1367,10 +1370,10 @@ class VoterGuideListManager(models.Model):
                     new_filter = Q(organization_we_vote_id__iexact=one_word)
                     filters.append(new_filter)
 
-                    new_filter = Q(owner_we_vote_id__icontains=one_word)
+                    new_filter = Q(owner_we_vote_id__iexact=one_word)
                     filters.append(new_filter)
 
-                    new_filter = Q(public_figure_we_vote_id__icontains=one_word)
+                    new_filter = Q(public_figure_we_vote_id__iexact=one_word)
                     filters.append(new_filter)
 
                     new_filter = Q(state_code__icontains=one_word)
