@@ -20,7 +20,8 @@ MEASURE = 'MEASURE'
 POLITICIAN = 'POLITICIAN'
 
 
-def store_ballotpedia_json_response_to_import_batch_system(modified_json_list, google_civic_election_id, kind_of_batch):
+def store_ballotpedia_json_response_to_import_batch_system(modified_json_list, google_civic_election_id, kind_of_batch,
+                                                           batch_set_id=0):
     success = False
     status = ""
     batch_header_id = 0
@@ -36,7 +37,7 @@ def store_ballotpedia_json_response_to_import_batch_system(modified_json_list, g
         results = create_batch_from_json(
             filename, modified_json_list,
             BATCH_HEADER_MAP_CONTEST_OFFICES_TO_BALLOTPEDIA_RACES, kind_of_batch,
-            google_civic_election_id, organization_we_vote_id)
+            google_civic_election_id, organization_we_vote_id, batch_set_id=batch_set_id)
         return results
     elif kind_of_batch is CANDIDATE:
         filename = "Candidates from Ballotpedia API"
@@ -44,7 +45,7 @@ def store_ballotpedia_json_response_to_import_batch_system(modified_json_list, g
         results = create_batch_from_json(
             filename, modified_json_list,
             BATCH_HEADER_MAP_CANDIDATES_TO_BALLOTPEDIA_CANDIDATES, kind_of_batch,
-            google_civic_election_id, organization_we_vote_id)
+            google_civic_election_id, organization_we_vote_id, batch_set_id=batch_set_id)
         return results
     elif kind_of_batch is MEASURE:
         filename = "Measures from Ballotpedia API"
@@ -52,7 +53,7 @@ def store_ballotpedia_json_response_to_import_batch_system(modified_json_list, g
         results = create_batch_from_json(
             filename, modified_json_list,
             BATCH_HEADER_MAP_MEASURES_TO_BALLOTPEDIA_MEASURES, kind_of_batch,
-            google_civic_election_id, organization_we_vote_id)
+            google_civic_election_id, organization_we_vote_id, batch_set_id=batch_set_id)
         return results
     elif kind_of_batch is IMPORT_BALLOT_ITEM:
         filename = "Ballot Items for Address from Ballotpedia API"
@@ -60,7 +61,7 @@ def store_ballotpedia_json_response_to_import_batch_system(modified_json_list, g
         results = create_batch_from_json(
             filename, modified_json_list,
             BATCH_HEADER_MAP_BALLOT_ITEMS_TO_BALLOTPEDIA_VOTER_DISTRICTS, kind_of_batch,
-            google_civic_election_id, organization_we_vote_id)
+            google_civic_election_id, organization_we_vote_id, batch_set_id=batch_set_id)
         return results
 
     results = {

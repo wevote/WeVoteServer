@@ -79,6 +79,7 @@ KIND_OF_ACTION_CHOICES = (
 
 BATCH_SET_SOURCE_CTCL = 'CTCL'
 BATCH_SET_SOURCE_IMPORT_EXPORT_ENDORSEMENTS = 'IMPORT_EXPORT_ENDORSEMENTS'
+BATCH_SET_SOURCE_IMPORT_BALLOTPEDIA_BALLOT_ITEMS = 'IMPORT_BALLOTPEDIA_BALLOT_ITEMS'
 
 BATCH_IMPORT_KEYS_ACCEPTED_FOR_CANDIDATES = {
     'ballotpedia_candidate_id': 'ballotpedia_candidate_id',
@@ -753,7 +754,8 @@ class BatchManager(models.Model):
         return results
 
     def create_batch_from_json(self, file_name, structured_json_list, mapping_dict, kind_of_batch,
-                               google_civic_election_id=0, organization_we_vote_id="", polling_location_we_vote_id=""):
+                               google_civic_election_id=0, organization_we_vote_id="", polling_location_we_vote_id="",
+                               batch_set_id=0):
         success = False
         status = ""
         number_of_batch_rows = 0
@@ -896,6 +898,7 @@ class BatchManager(models.Model):
                     batch_header_map_id=batch_header_map_id,
                     batch_name=batch_name,
                     batch_description_text=batch_description_text,
+                    batch_set_id=batch_set_id,
                     google_civic_election_id=google_civic_election_id,
                     kind_of_batch=kind_of_batch,
                     organization_we_vote_id=organization_we_vote_id,
@@ -4991,8 +4994,9 @@ class BatchRowActionBallotItem(models.Model):
 
 
 def create_batch_from_json(file_name, structured_json_list, mapping_dict, kind_of_batch,
-                           google_civic_election_id=0, organization_we_vote_id="", polling_location_we_vote_id=""):
+                           google_civic_election_id=0, organization_we_vote_id="", polling_location_we_vote_id="",
+                           batch_set_id=0):
     batch_manager = BatchManager()
     return batch_manager.create_batch_from_json(
         file_name, structured_json_list, mapping_dict, kind_of_batch,
-        google_civic_election_id, organization_we_vote_id, polling_location_we_vote_id)
+        google_civic_election_id, organization_we_vote_id, polling_location_we_vote_id, batch_set_id)
