@@ -1372,7 +1372,7 @@ class VoterManager(BaseUserManager):
                                            first_name, middle_name, last_name)
 
     def update_voter_by_object(
-            self, voter, facebook_email, facebook_profile_image_url_https=False,
+            self, voter, facebook_email=False, facebook_profile_image_url_https=False,
             first_name=False, middle_name=False, last_name=False,
             interface_status_flags=False,
             flag_integer_to_set=False, flag_integer_to_unset=False,
@@ -1381,7 +1381,8 @@ class VoterManager(BaseUserManager):
             twitter_profile_image_url_https=False,
             we_vote_hosted_profile_image_url_large=False,
             we_vote_hosted_profile_image_url_medium=False,
-            we_vote_hosted_profile_image_url_tiny=False):
+            we_vote_hosted_profile_image_url_tiny=False,
+            data_to_preserve=False):
         voter_updated = False
 
         try:
@@ -1419,6 +1420,9 @@ class VoterManager(BaseUserManager):
                     should_save_voter = True
                 if positive_value_exists(we_vote_hosted_profile_image_url_tiny):
                     voter.we_vote_hosted_profile_image_url_tiny = we_vote_hosted_profile_image_url_tiny
+                    should_save_voter = True
+                if positive_value_exists(data_to_preserve):
+                    voter.data_to_preserve = data_to_preserve
                     should_save_voter = True
                 if interface_status_flags is not False:
                     # If here, we set the entire value to a new positive integer
@@ -1618,6 +1622,9 @@ class Voter(AbstractBaseUser):
     last_name = models.CharField(verbose_name='last name', max_length=255, null=True, blank=True)
     date_joined = models.DateTimeField(verbose_name='date joined', auto_now_add=True)
     date_last_changed = models.DateTimeField(verbose_name='date last changed', null=True, auto_now=True)
+
+    # Once a voter takes a position, follows an org or other save-worthy data, mark this true
+    data_to_preserve = models.BooleanField(default=False)
 
     is_active = models.BooleanField(default=True)
     is_admin = models.BooleanField(default=False)
@@ -1839,21 +1846,9 @@ class Voter(AbstractBaseUser):
         # Does this voter record have any values associated in this table that are unique
         if self.has_email_with_verified_ownership() or self.signed_in_twitter() or self.signed_in_facebook():
             return True
-        else:
+        elif self.data_to_preserve:
             # Has any important data been stored in other tables attached to this voter account?
-            # (Each additional query costs more server resources, so we return True as early as we can.)
-            # NOTE: We can't do this because we can't bring position classes in this file
-            # Consider caching "has_position" data in the voter table
-            # position_list_manager = PositionListManager()
-            # positions_found = position_list_manager.positions_exist_for_voter(self.we_vote_id)
-            # if positive_value_exists(positions_found):
-            #     return True
-
-            # Following any organizations?
-
-            # No need to check for friends, because you can't have any without a signed in status, which we've checked
-            # return True  # TODO DALE Set to True for testing
-            pass
+            return True
 
         return False
 
@@ -1870,7 +1865,7 @@ class Voter(AbstractBaseUser):
     # for every bit set in flag_integer_to_set,
     # corresponding bits in self.interface_status_flags will be set
     def set_interface_status_flags(self, flag_integer_to_set):
-        self.interface_status_flags = flag_integer_to_set | self.interface_status_flags
+        self.interface_status_flags |= flag_integer_to_set
 
     # for every bit set in flag_integer_to_unset,
     # corresponding bits in self.interface_status_flags will be unset
@@ -1886,7 +1881,7 @@ class Voter(AbstractBaseUser):
         return flag_integer & self.interface_status_flags
 
     def set_notification_settings_flags(self, notification_flag_integer_to_set):
-        self.notification_settings_flags = notification_flag_integer_to_set | self.notification_settings_flags
+        self.notification_settings_flags |= notification_flag_integer_to_set
 
     def unset_notification_settings_flags(self, notification_flag_integer_to_unset):
         self.notification_settings_flags = ~notification_flag_integer_to_unset & self.notification_settings_flags

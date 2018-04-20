@@ -5,7 +5,6 @@
 from datetime import date, datetime, time
 from django.db import models
 from django.db.models import Max, Q
-from exception.models import handle_record_found_more_than_one_exception
 import wevote_functions.admin
 from wevote_functions.functions import convert_date_to_date_as_integer, convert_to_int, \
     extract_state_from_ocd_division_id, positive_value_exists
@@ -140,7 +139,6 @@ class ElectionManager(models.Model):
                     election_on_stage.save()
 
             except Election.MultipleObjectsReturned as e:
-                handle_record_found_more_than_one_exception(e, logger=logger)
                 success = False
                 status = 'MULTIPLE_MATCHING_ELECTIONS_FOUND'
                 exception_multiple_object_returned = True
@@ -205,7 +203,6 @@ class ElectionManager(models.Model):
                 status = "Insufficient variables included to retrieve one election."
                 success = False
         except Election.MultipleObjectsReturned as e:
-            handle_record_found_more_than_one_exception(e, logger)
             election_found = False
             status = "ERROR_MORE_THAN_ONE_ELECTION_FOUND"
             success = False

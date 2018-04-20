@@ -3,9 +3,8 @@
 # -*- coding: UTF-8 -*-
 # Diagrams here: https://docs.google.com/drawings/d/1DsPnl97GKe9f14h41RPeZDssDUztRETGkXGaolXCeyo/edit
 
-from analytics.models import ACTION_ORGANIZATION_AUTO_FOLLOW, ACTION_POSITION_TAKEN, ACTION_VOTER_GUIDE_VISIT, \
-    AnalyticsAction, AnalyticsManager
-from candidate.models import CandidateCampaign, CandidateCampaignManager, CandidateCampaignListManager
+from analytics.models import ACTION_POSITION_TAKEN, AnalyticsManager
+from candidate.models import CandidateCampaign, CandidateCampaignManager
 from ballot.controllers import figure_out_google_civic_election_id_voter_is_watching
 from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
 from django.db import models
@@ -14,7 +13,7 @@ from election.models import Election
 from exception.models import handle_exception, handle_record_found_more_than_one_exception,\
     handle_record_not_found_exception, handle_record_not_saved_exception
 from friend.models import FriendManager
-from measure.models import ContestMeasure, ContestMeasureList, ContestMeasureManager
+from measure.models import ContestMeasure, ContestMeasureManager
 from office.models import ContestOfficeManager
 from organization.models import Organization, OrganizationManager
 import robot_detection
@@ -1137,15 +1136,15 @@ class PositionListManager(models.Model):
 
         return positions_related_to_organization
 
-    def repair_all_positions_for_voter(self, voter_id=0, voter_we_vote_id=''):
+    def repair_all_positions_for_voter(self, incoming_voter_id=0, incoming_voter_we_vote_id=''):
         """
         Make sure that every position owned by the voter has matching identifiers (voter_id, voter_we_vote_id,
         organization_we_vote_id, organization_id).
-        :param voter_id:
-        :param voter_we_vote_id:
+        :param incoming_voter_id:
+        :param incoming_voter_we_vote_id:
         :return:
         """
-        if not positive_value_exists(voter_id) and not positive_value_exists(voter_we_vote_id):
+        if not positive_value_exists(incoming_voter_id) and not positive_value_exists(incoming_voter_we_vote_id):
             results = {
                 'status':           'REPAIR_ALL_POSITIONS-MISSING_VOTER_ID_OR_WE_VOTE_ID ',
                 'success':          False,
@@ -1153,27 +1152,45 @@ class PositionListManager(models.Model):
             }
             return results
 
+        status = ""
+        organization_manager = OrganizationManager()
         voter_manager = VoterManager()
-        if positive_value_exists(voter_id):
-            results = voter_manager.retrieve_voter_by_id(voter_id)
+        if positive_value_exists(incoming_voter_id):
+            results = voter_manager.retrieve_voter_by_id(incoming_voter_id)
         else:
-            results = voter_manager.retrieve_voter_by_we_vote_id(voter_we_vote_id)
+            results = voter_manager.retrieve_voter_by_we_vote_id(incoming_voter_we_vote_id)
 
+        voter_id = 0
         voter_we_vote_id = ""
         organization_we_vote_id = ""
         organization_id = 0
         if results['voter_found']:
             voter = results['voter']
+            voter_id = voter.id
             voter_we_vote_id = voter.we_vote_id
+            if not positive_value_exists(voter.linked_organization_we_vote_id):
+                # Heal the data
+                repair_results = organization_manager.repair_missing_linked_organization_we_vote_id(voter)
+                status += repair_results['status']
+                if repair_results['voter_repaired']:
+                    voter = repair_results['voter']
+
             organization_we_vote_id = voter.linked_organization_we_vote_id
             if positive_value_exists(organization_we_vote_id):
                 # Look up the organization_id
-                organization_manager = OrganizationManager()
                 organization_results = organization_manager.retrieve_organization_from_we_vote_id(
                     voter.linked_organization_we_vote_id)
                 if organization_results['organization_found']:
                     organization = organization_results['organization']
                     organization_id = organization.id
+
+        if not positive_value_exists(voter_id) or not positive_value_exists(voter_we_vote_id):
+            results = {
+                'status':           'REPAIR_ALL_POSITIONS-MISSING_VOTER_ID_OR_WE_VOTE_ID ',
+                'success':          False,
+                'repair_complete':  False,
+            }
+            return results
 
         if not positive_value_exists(organization_id) or not positive_value_exists(organization_we_vote_id):
             results = {
@@ -1188,15 +1205,112 @@ class PositionListManager(models.Model):
         ############################
         # Retrieve public positions
         try:
+            # Retrieve by voter_id
             public_positions_list_query = PositionEntered.objects.all()
-            # Find any positions with any of the identifiers associated with this voter
-            public_positions_list_query = public_positions_list_query.filter(
-                Q(voter_id=voter_id) |
-                Q(voter_we_vote_id__iexact=voter_we_vote_id) |
-                Q(organization_we_vote_id__iexact=organization_we_vote_id) |
-                Q(organization_id=organization_id))
-
+            public_positions_list_query = public_positions_list_query.filter(voter_id=voter_id)
             public_positions_list = list(public_positions_list_query)  # Force the query to run
+            for public_position in public_positions_list:
+                public_position_to_be_saved = False
+                try:
+                    if public_position.voter_id != voter_id:
+                        public_position.voter_id = voter_id
+                        public_position_to_be_saved = True
+                    if public_position.voter_we_vote_id != voter_we_vote_id:
+                        public_position.voter_we_vote_id = voter_we_vote_id
+                        public_position_to_be_saved = True
+                    if public_position.organization_id != organization_id:
+                        public_position.organization_id = organization_id
+                        public_position_to_be_saved = True
+                    if public_position.organization_we_vote_id != organization_we_vote_id:
+                        public_position.organization_we_vote_id = organization_we_vote_id
+                        public_position_to_be_saved = True
+
+                    if public_position_to_be_saved:
+                        public_position.save()
+
+                except Exception as e:
+                    failure_counter += 1
+
+            # Retrieve by voter_we_vote_id
+            public_positions_list_query = PositionEntered.objects.all()
+            public_positions_list_query = public_positions_list_query.filter(
+                voter_we_vote_id__iexact=voter_we_vote_id)
+            public_positions_list = list(public_positions_list_query)  # Force the query to run
+            for public_position in public_positions_list:
+                public_position_to_be_saved = False
+                try:
+                    if public_position.voter_id != voter_id:
+                        public_position.voter_id = voter_id
+                        public_position_to_be_saved = True
+                    if public_position.voter_we_vote_id != voter_we_vote_id:
+                        public_position.voter_we_vote_id = voter_we_vote_id
+                        public_position_to_be_saved = True
+                    if public_position.organization_id != organization_id:
+                        public_position.organization_id = organization_id
+                        public_position_to_be_saved = True
+                    if public_position.organization_we_vote_id != organization_we_vote_id:
+                        public_position.organization_we_vote_id = organization_we_vote_id
+                        public_position_to_be_saved = True
+
+                    if public_position_to_be_saved:
+                        public_position.save()
+
+                except Exception as e:
+                    failure_counter += 1
+
+            # Retrieve by organization_id
+            public_positions_list_query = PositionEntered.objects.all()
+            public_positions_list_query = public_positions_list_query.filter(organization_id=organization_id)
+            public_positions_list = list(public_positions_list_query)  # Force the query to run
+            for public_position in public_positions_list:
+                public_position_to_be_saved = False
+                try:
+                    if public_position.voter_id != voter_id:
+                        public_position.voter_id = voter_id
+                        public_position_to_be_saved = True
+                    if public_position.voter_we_vote_id != voter_we_vote_id:
+                        public_position.voter_we_vote_id = voter_we_vote_id
+                        public_position_to_be_saved = True
+                    if public_position.organization_id != organization_id:
+                        public_position.organization_id = organization_id
+                        public_position_to_be_saved = True
+                    if public_position.organization_we_vote_id != organization_we_vote_id:
+                        public_position.organization_we_vote_id = organization_we_vote_id
+                        public_position_to_be_saved = True
+
+                    if public_position_to_be_saved:
+                        public_position.save()
+
+                except Exception as e:
+                    failure_counter += 1
+
+            # Retrieve by organization_we_vote_id
+            public_positions_list_query = PositionEntered.objects.all()
+            public_positions_list_query = public_positions_list_query.filter(
+                organization_we_vote_id__iexact=organization_we_vote_id)
+            public_positions_list = list(public_positions_list_query)  # Force the query to run
+            for public_position in public_positions_list:
+                public_position_to_be_saved = False
+                try:
+                    if public_position.voter_id != voter_id:
+                        public_position.voter_id = voter_id
+                        public_position_to_be_saved = True
+                    if public_position.voter_we_vote_id != voter_we_vote_id:
+                        public_position.voter_we_vote_id = voter_we_vote_id
+                        public_position_to_be_saved = True
+                    if public_position.organization_id != organization_id:
+                        public_position.organization_id = organization_id
+                        public_position_to_be_saved = True
+                    if public_position.organization_we_vote_id != organization_we_vote_id:
+                        public_position.organization_we_vote_id = organization_we_vote_id
+                        public_position_to_be_saved = True
+
+                    if public_position_to_be_saved:
+                        public_position.save()
+
+                except Exception as e:
+                    failure_counter += 1
+
         except Exception as e:
             results = {
                 'status':           'REPAIR-VOTER_POSITION_FOR_PUBLIC_SEARCH_FAILED ',
@@ -1205,39 +1319,115 @@ class PositionListManager(models.Model):
             }
             return results
 
-        for public_position in public_positions_list:
-            public_position_to_be_saved = False
-            try:
-                if public_position.voter_id != voter_id:
-                    public_position.voter_id = voter_id
-                    public_position_to_be_saved = True
-                if public_position.voter_we_vote_id != voter_we_vote_id:
-                    public_position.voter_we_vote_id = voter_we_vote_id
-                    public_position_to_be_saved = True
-                if public_position.organization_id != organization_id:
-                    public_position.organization_id = organization_id
-                    public_position_to_be_saved = True
-                if public_position.organization_we_vote_id != organization_we_vote_id:
-                    public_position.organization_we_vote_id = organization_we_vote_id
-                    public_position_to_be_saved = True
-
-                if public_position_to_be_saved:
-                    public_position.save()
-
-            except Exception as e:
-                failure_counter += 1
-
         ############################
         # Retrieve positions meant for friends only
         try:
+            # Retrieve by voter_id
+            friends_positions_list_query = PositionForFriends.objects.all()
+            friends_positions_list_query = friends_positions_list_query.filter(voter_id=voter_id)
+            friends_positions_list = list(friends_positions_list_query)  # Force the query to run
+            for friends_position in friends_positions_list:
+                friends_position_to_be_saved = False
+                try:
+                    if friends_position.voter_id != voter_id:
+                        friends_position.voter_id = voter_id
+                        friends_position_to_be_saved = True
+                    if friends_position.voter_we_vote_id != voter_we_vote_id:
+                        friends_position.voter_we_vote_id = voter_we_vote_id
+                        friends_position_to_be_saved = True
+                    if friends_position.organization_id != organization_id:
+                        friends_position.organization_id = organization_id
+                        friends_position_to_be_saved = True
+                    if friends_position.organization_we_vote_id != organization_we_vote_id:
+                        friends_position.organization_we_vote_id = organization_we_vote_id
+                        friends_position_to_be_saved = True
+
+                    if friends_position_to_be_saved:
+                        friends_position.save()
+
+                except Exception as e:
+                    failure_counter += 1
+
+            # Retrieve by voter_we_vote_id
             friends_positions_list_query = PositionForFriends.objects.all()
             friends_positions_list_query = friends_positions_list_query.filter(
-                Q(voter_id=voter_id) |
-                Q(voter_we_vote_id__iexact=voter_we_vote_id) |
-                Q(organization_we_vote_id__iexact=organization_we_vote_id) |
-                Q(organization_id=organization_id))
-
+                voter_we_vote_id__iexact=voter_we_vote_id)
             friends_positions_list = list(friends_positions_list_query)  # Force the query to run
+            for friends_position in friends_positions_list:
+                friends_position_to_be_saved = False
+                try:
+                    if friends_position.voter_id != voter_id:
+                        friends_position.voter_id = voter_id
+                        friends_position_to_be_saved = True
+                    if friends_position.voter_we_vote_id != voter_we_vote_id:
+                        friends_position.voter_we_vote_id = voter_we_vote_id
+                        friends_position_to_be_saved = True
+                    if friends_position.organization_id != organization_id:
+                        friends_position.organization_id = organization_id
+                        friends_position_to_be_saved = True
+                    if friends_position.organization_we_vote_id != organization_we_vote_id:
+                        friends_position.organization_we_vote_id = organization_we_vote_id
+                        friends_position_to_be_saved = True
+
+                    if friends_position_to_be_saved:
+                        friends_position.save()
+
+                except Exception as e:
+                    failure_counter += 1
+
+            # Retrieve by organization_id
+            friends_positions_list_query = PositionForFriends.objects.all()
+            friends_positions_list_query = friends_positions_list_query.filter(organization_id=organization_id)
+            friends_positions_list = list(friends_positions_list_query)  # Force the query to run
+            for friends_position in friends_positions_list:
+                friends_position_to_be_saved = False
+                try:
+                    if friends_position.voter_id != voter_id:
+                        friends_position.voter_id = voter_id
+                        friends_position_to_be_saved = True
+                    if friends_position.voter_we_vote_id != voter_we_vote_id:
+                        friends_position.voter_we_vote_id = voter_we_vote_id
+                        friends_position_to_be_saved = True
+                    if friends_position.organization_id != organization_id:
+                        friends_position.organization_id = organization_id
+                        friends_position_to_be_saved = True
+                    if friends_position.organization_we_vote_id != organization_we_vote_id:
+                        friends_position.organization_we_vote_id = organization_we_vote_id
+                        friends_position_to_be_saved = True
+
+                    if friends_position_to_be_saved:
+                        friends_position.save()
+
+                except Exception as e:
+                    failure_counter += 1
+
+            # Retrieve by organization_we_vote_id
+            friends_positions_list_query = PositionForFriends.objects.all()
+            friends_positions_list_query = friends_positions_list_query.filter(
+                organization_we_vote_id__iexact=organization_we_vote_id)
+            friends_positions_list = list(friends_positions_list_query)  # Force the query to run
+            for friends_position in friends_positions_list:
+                friends_position_to_be_saved = False
+                try:
+                    if friends_position.voter_id != voter_id:
+                        friends_position.voter_id = voter_id
+                        friends_position_to_be_saved = True
+                    if friends_position.voter_we_vote_id != voter_we_vote_id:
+                        friends_position.voter_we_vote_id = voter_we_vote_id
+                        friends_position_to_be_saved = True
+                    if friends_position.organization_id != organization_id:
+                        friends_position.organization_id = organization_id
+                        friends_position_to_be_saved = True
+                    if friends_position.organization_we_vote_id != organization_we_vote_id:
+                        friends_position.organization_we_vote_id = organization_we_vote_id
+                        friends_position_to_be_saved = True
+
+                    if friends_position_to_be_saved:
+                        friends_position.save()
+
+                except Exception as e:
+                    failure_counter += 1
+
         except Exception as e:
             results = {
                 'status':           'REPAIR-VOTER_POSITION_FOR_FRIENDS_SEARCH_FAILED ',
@@ -1245,28 +1435,6 @@ class PositionListManager(models.Model):
                 'repair_complete':  False,
             }
             return results
-
-        for friends_position in friends_positions_list:
-            friends_position_to_be_saved = False
-            try:
-                if friends_position.voter_id != voter_id:
-                    friends_position.voter_id = voter_id
-                    friends_position_to_be_saved = True
-                if friends_position.voter_we_vote_id != voter_we_vote_id:
-                    friends_position.voter_we_vote_id = voter_we_vote_id
-                    friends_position_to_be_saved = True
-                if friends_position.organization_id != organization_id:
-                    friends_position.organization_id = organization_id
-                    friends_position_to_be_saved = True
-                if friends_position.organization_we_vote_id != organization_we_vote_id:
-                    friends_position.organization_we_vote_id = organization_we_vote_id
-                    friends_position_to_be_saved = True
-
-                if friends_position_to_be_saved:
-                    friends_position.save()
-
-            except Exception as e:
-                failure_counter += 1
 
         if positive_value_exists(failure_counter):
             results = {
@@ -1871,6 +2039,7 @@ class PositionListManager(models.Model):
         :param voter_we_vote_id:
         :param friends_vs_public:
         :param google_civic_election_id:
+        :param this_election_vs_others:
         :param state_code:
         :return:
         """
@@ -4061,6 +4230,7 @@ class PositionManager(models.Model):
     def toggle_voter_position(self, voter_id, voter_position_found, voter_position_on_stage, stance,
                               candidate_campaign_id, contest_measure_id, is_public_position, user_agent_string,
                               user_agent_object):
+        status = ""
         voter_position_on_stage_found = False
         position_we_vote_id = ''
         voter_we_vote_id = ''
@@ -4068,6 +4238,7 @@ class PositionManager(models.Model):
         google_civic_election_id = 0
         candidate_campaign_we_vote_id = ""
         contest_measure_we_vote_id = ""
+        voter_manager = VoterManager()
         if voter_position_found:
             # Update this position with new values
             try:
@@ -4108,16 +4279,23 @@ class PositionManager(models.Model):
                         contest_measure_we_vote_id = voter_position_on_stage.contest_measure_we_vote_id
                         google_civic_election_id = voter_position_on_stage.google_civic_election_id
 
-                voter_manager = VoterManager()
                 results = voter_manager.retrieve_voter_by_id(voter_id)
                 if results['voter_found']:
                     voter = results['voter']
                     voter_we_vote_id = voter.we_vote_id
+                    voter_manager.update_voter_by_object(voter, data_to_preserve=True)
                     is_signed_in = voter.is_signed_in()
                     linked_organization_we_vote_id = voter.linked_organization_we_vote_id
                     # Heal the data: Make sure we have a voter_we_vote_id
                     voter_position_on_stage.voter_we_vote_id = voter_we_vote_id
                     # Heal the data
+                    if not positive_value_exists(linked_organization_we_vote_id):
+                        organization_manager = OrganizationManager()
+                        repair_results = organization_manager.repair_missing_linked_organization_we_vote_id(voter)
+                        status += repair_results['status']
+                        if repair_results['voter_repaired']:
+                            voter = repair_results['voter']
+                            linked_organization_we_vote_id = voter.linked_organization_we_vote_id
                     if positive_value_exists(linked_organization_we_vote_id):
                         voter_position_on_stage.organization_we_vote_id = linked_organization_we_vote_id
                         # Look up the organization_id
@@ -4170,18 +4348,26 @@ class PositionManager(models.Model):
 
                 # In order to show a position publicly we need to tie the position to either organization_we_vote_id,
                 # public_figure_we_vote_id or candidate_we_vote_id. For now (2016-8-17) we assume organization
-                voter_manager = VoterManager()
                 results = voter_manager.retrieve_voter_by_id(voter_id)
                 organization_id = 0
-                organization_we_vote_id = ""
+                linked_organization_we_vote_id = ""
                 voter_we_vote_id = ""
                 speaker_display_name = ""
                 if results['voter_found']:
                     voter = results['voter']
                     voter_we_vote_id = voter.we_vote_id
+                    voter_manager.update_voter_by_object(voter, data_to_preserve=True)
                     is_signed_in = voter.is_signed_in()
-                    organization_we_vote_id = voter.linked_organization_we_vote_id
-                    if positive_value_exists(organization_we_vote_id):
+                    linked_organization_we_vote_id = voter.linked_organization_we_vote_id
+                    # Heal the data
+                    if not positive_value_exists(linked_organization_we_vote_id):
+                        organization_manager = OrganizationManager()
+                        repair_results = organization_manager.repair_missing_linked_organization_we_vote_id(voter)
+                        status += repair_results['status']
+                        if repair_results['voter_repaired']:
+                            voter = repair_results['voter']
+                            linked_organization_we_vote_id = voter.linked_organization_we_vote_id
+                    if positive_value_exists(linked_organization_we_vote_id):
                         # Look up the organization_id
                         organization_manager = OrganizationManager()
                         organization_results = organization_manager.retrieve_organization_from_we_vote_id(
@@ -4203,7 +4389,7 @@ class PositionManager(models.Model):
                         google_civic_election_id=google_civic_election_id,
                         state_code=state_code,
                         organization_id=organization_id,
-                        organization_we_vote_id=organization_we_vote_id,
+                        organization_we_vote_id=linked_organization_we_vote_id,
                         ballot_item_display_name=ballot_item_display_name,
                         speaker_display_name=speaker_display_name,
                     )
@@ -4219,7 +4405,7 @@ class PositionManager(models.Model):
                         google_civic_election_id=google_civic_election_id,
                         state_code=state_code,
                         organization_id=organization_id,
-                        organization_we_vote_id=organization_we_vote_id,
+                        organization_we_vote_id=linked_organization_we_vote_id,
                         ballot_item_display_name=ballot_item_display_name,
                         speaker_display_name=speaker_display_name,
                     )
@@ -4236,14 +4422,14 @@ class PositionManager(models.Model):
             # If here, we are storing an analytics entry
             state_code = ''
             organization_id_temp = 0
-            organization_we_vote_id_temp = ""
+            organization_we_vote_id_temp = ""  # Maybe we should record organization_we_vote_id?
             if positive_value_exists(candidate_campaign_we_vote_id):
                 ballot_item_we_vote_id = candidate_campaign_we_vote_id
             elif positive_value_exists(contest_measure_we_vote_id):
                 ballot_item_we_vote_id = contest_measure_we_vote_id
             else:
                 ballot_item_we_vote_id = ""
-            is_bot = user_agent_object.is_bot or robot_detection.is_robot (user_agent_string)
+            is_bot = user_agent_object.is_bot or robot_detection.is_robot(user_agent_string)
             analytics_manager = AnalyticsManager()
             analytics_results = analytics_manager.save_action(
                 ACTION_POSITION_TAKEN, voter_we_vote_id, voter_id, is_signed_in, state_code,

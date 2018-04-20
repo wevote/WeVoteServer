@@ -7,7 +7,6 @@ from django.http import HttpResponse
 from analytics.controllers import move_analytics_info_to_another_voter
 from analytics.models import AnalyticsManager, ACTION_FACEBOOK_AUTHENTICATION_EXISTS, ACTION_GOOGLE_AUTHENTICATION_EXISTS, \
     ACTION_TWITTER_AUTHENTICATION_EXISTS, ACTION_EMAIL_AUTHENTICATION_EXISTS
-
 from email_outbound.controllers import move_email_address_entries_to_another_voter, schedule_verification_email, \
     WEB_APP_ROOT_URL, WE_VOTE_SERVER_ROOT_URL, schedule_email_with_email_outbound_description
 from email_outbound.models import EmailManager, EmailAddress, FRIEND_INVITATION_TEMPLATE, TO_BE_PROCESSED, \
@@ -1454,6 +1453,15 @@ def voter_merge_two_accounts_for_api(  # voterMergeTwoAccounts
         to_voter_linked_organization_we_vote_id = from_voter_linked_organization_we_vote_id
         to_voter_linked_organization_id = from_voter_linked_organization_id
 
+    # Data healing scripts before we try to move the positions
+    position_list_manager = PositionListManager()
+    if positive_value_exists(from_voter_id):
+        repair_results = position_list_manager.repair_all_positions_for_voter(from_voter_id)
+        status += repair_results['status']
+    if positive_value_exists(to_voter_id):
+        repair_results = position_list_manager.repair_all_positions_for_voter(to_voter_id)
+        status += repair_results['status']
+
     # Transfer positions from voter to new_owner_voter
     move_positions_results = move_positions_to_another_voter(
         from_voter_id, from_voter_we_vote_id,
@@ -1547,7 +1555,6 @@ def voter_merge_two_accounts_for_api(  # voterMergeTwoAccounts
         status += " MERGE_TWO_ACCOUNTS_VOTER_DEVICE_LINK_UPDATED"
 
     # Data healing scripts
-    position_list_manager = PositionListManager()
     repair_results = position_list_manager.repair_all_positions_for_voter(new_owner_voter.id)
     status += repair_results['status']
 

@@ -2799,7 +2799,7 @@ def voter_position_visibility_save_for_api(  # voterPositionVisibilitySave
         return json_data
 
     if switch_to_show_position_to_public:
-        # Check to see if this voter has a linked_organization_we_vote_id. If not, try to repair the data.
+        # Check to see if this voter has a linked_organization_we_vote_id. If not, try to repair the data (Heal data).
         if not positive_value_exists(voter.linked_organization_we_vote_id):
             organization_manager = OrganizationManager()
             repair_results = organization_manager.repair_missing_linked_organization_we_vote_id(voter)

@@ -252,21 +252,22 @@ def cache_image_if_not_cached(google_civic_election_id, image_url_https, voter_w
         )
         cache_image_results = cache_image_locally_results['success']
 
-        set_active_version_false_results = we_vote_image_manager.set_active_version_false_for_other_images(
-            voter_we_vote_id=voter_we_vote_id, candidate_we_vote_id=candidate_we_vote_id,
-            organization_we_vote_id=organization_we_vote_id, issue_we_vote_id=issue_we_vote_id,
-            image_url_https=image_url_https,
-            kind_of_image_twitter_profile=kind_of_image_twitter_profile,
-            kind_of_image_twitter_background=kind_of_image_twitter_background,
-            kind_of_image_twitter_banner=kind_of_image_twitter_banner,
-            kind_of_image_facebook_profile=kind_of_image_facebook_profile,
-            kind_of_image_facebook_background=kind_of_image_facebook_background,
-            kind_of_image_maplight=kind_of_image_maplight, kind_of_image_vote_smart=kind_of_image_vote_smart,
-            kind_of_image_issue=kind_of_image_issue,
-            kind_of_image_ballotpedia_profile=kind_of_image_ballotpedia_profile,
-            kind_of_image_linkedin_profile=kind_of_image_linkedin_profile,
-            kind_of_image_wikipedia_profile=kind_of_image_wikipedia_profile,
-            kind_of_image_other_source=kind_of_image_other_source,)
+        if cache_image_results:
+            set_active_version_false_results = we_vote_image_manager.set_active_version_false_for_other_images(
+                voter_we_vote_id=voter_we_vote_id, candidate_we_vote_id=candidate_we_vote_id,
+                organization_we_vote_id=organization_we_vote_id, issue_we_vote_id=issue_we_vote_id,
+                image_url_https=image_url_https,
+                kind_of_image_twitter_profile=kind_of_image_twitter_profile,
+                kind_of_image_twitter_background=kind_of_image_twitter_background,
+                kind_of_image_twitter_banner=kind_of_image_twitter_banner,
+                kind_of_image_facebook_profile=kind_of_image_facebook_profile,
+                kind_of_image_facebook_background=kind_of_image_facebook_background,
+                kind_of_image_maplight=kind_of_image_maplight, kind_of_image_vote_smart=kind_of_image_vote_smart,
+                kind_of_image_issue=kind_of_image_issue,
+                kind_of_image_ballotpedia_profile=kind_of_image_ballotpedia_profile,
+                kind_of_image_linkedin_profile=kind_of_image_linkedin_profile,
+                kind_of_image_wikipedia_profile=kind_of_image_wikipedia_profile,
+                kind_of_image_other_source=kind_of_image_other_source,)
     return cache_image_results
 
 

@@ -2,17 +2,22 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
+from analytics.controllers import move_analytics_info_to_another_voter
 from config.base import get_environment_variable
+from donate.controllers import move_donation_info_to_another_voter
+from email_outbound.controllers import move_email_address_entries_to_another_voter
 from email_outbound.models import EmailManager
 from follow.controllers import move_follow_entries_to_another_voter
 from friend.controllers import move_friend_invitations_to_another_voter, move_friends_to_another_voter
 from friend.models import FriendManager
 from image.controllers import FACEBOOK, cache_master_and_resized_image
-from image.models import WeVoteImageManager
 from import_export_facebook.models import FacebookManager
 from organization.controllers import move_organization_to_another_complete
 from organization.models import OrganizationManager, INDIVIDUAL
 from position.controllers import move_positions_to_another_voter
+from position.models import PositionListManager
+from voter.controllers import move_facebook_info_to_another_voter, move_twitter_info_to_another_voter, \
+    merge_voter_accounts
 from voter.models import VoterDeviceLinkManager, VoterManager
 import wevote_functions.admin
 from wevote_functions.functions import is_voter_device_id_valid, positive_value_exists
@@ -364,7 +369,7 @@ def voter_facebook_sign_in_retrieve_for_api(voter_device_id):  # voterFacebookSi
         success = False
         error_results = {
             'success':                                  success,
-            'status':                                   "VOTER_FACEBOOK_SIGN_IN_NO_VOTER",
+            'status':                                   "VOTER_FACEBOOK_SIGN_IN_NO_VOTER ",
             'voter_device_id':                          voter_device_id,
             'voter_we_vote_id':                         "",
             'voter_has_data_to_preserve':               False,
@@ -490,7 +495,8 @@ def voter_facebook_sign_in_retrieve_for_api(voter_device_id):  # voterFacebookSi
                     repair_facebook_related_voter_caching_now = True
 
     voter_we_vote_id_attached_to_facebook_email = ""
-    if not voter_we_vote_id_attached_to_facebook:
+    if not voter_we_vote_id_attached_to_facebook and positive_value_exists(facebook_auth_response.facebook_email) \
+            and positive_value_exists(facebook_auth_response.facebook_user_id):
         # Now we want to check on the incoming facebook_email to see if it is already in use with another account
         # We do not want to allow people to separate their facebook_email from their facebook account, but
         #  there are conditions where it might happen and we can't prevent it. (Like someone signs in with Email A,
@@ -532,7 +538,24 @@ def voter_facebook_sign_in_retrieve_for_api(voter_device_id):  # voterFacebookSi
                                                                                to_voter_we_vote_id)
                     status += " " + move_follow_results['status']
 
-                    # Transfer positions from the from_voter to the to_voter
+                    # Make sure the current voter has an organization
+                    if not positive_value_exists(voter.linked_organization_we_vote_id):
+                        # Heal the data
+                        repair_results = organization_manager.repair_missing_linked_organization_we_vote_id(voter)
+                        status += repair_results['status']
+                        if repair_results['voter_repaired']:
+                            voter = repair_results['voter']
+
+                    # Make sure the facebook voter has an organization
+                    if not positive_value_exists(facebook_linked_voter.linked_organization_we_vote_id):
+                        # Heal the data
+                        repair_results = organization_manager.repair_missing_linked_organization_we_vote_id(
+                            facebook_linked_voter)
+                        status += repair_results['status']
+                        if repair_results['voter_repaired']:
+                            facebook_linked_voter = repair_results['voter']
+
+                    # Verify we have the organization from facebook_linked_voter
                     if positive_value_exists(facebook_linked_voter.linked_organization_we_vote_id):
                         organization_results = organization_manager.retrieve_organization_from_we_vote_id(
                             facebook_linked_voter.linked_organization_we_vote_id)
@@ -540,13 +563,8 @@ def voter_facebook_sign_in_retrieve_for_api(voter_device_id):  # voterFacebookSi
                             facebook_linked_organization = organization_results['organization']
                             to_voter_linked_organization_id = facebook_linked_organization.id
                             to_voter_linked_organization_we_vote_id = facebook_linked_organization.we_vote_id
-                            move_positions_results = move_positions_to_another_voter(
-                                from_voter_id, from_voter_we_vote_id,
-                                to_voter_id, to_voter_we_vote_id,
-                                to_voter_linked_organization_id, to_voter_linked_organization_we_vote_id)
-                            status += " " + move_positions_results['status']
 
-                    # Does the current voter have an organization?
+                    # Verify we have the voter organization
                     if positive_value_exists(voter.linked_organization_we_vote_id):
                         organization_results = organization_manager.retrieve_organization_from_we_vote_id(
                             voter.linked_organization_we_vote_id)
@@ -554,27 +572,87 @@ def voter_facebook_sign_in_retrieve_for_api(voter_device_id):  # voterFacebookSi
                             from_voter_organization = organization_results['organization']
                             from_voter_linked_organization_we_vote_id = from_voter_organization.we_vote_id
 
-                        if positive_value_exists(from_voter_linked_organization_we_vote_id) and \
-                                positive_value_exists(to_voter_linked_organization_we_vote_id) and \
-                                from_voter_linked_organization_we_vote_id != to_voter_linked_organization_we_vote_id:
-                            move_organization_to_another_complete_results = move_organization_to_another_complete(
-                                from_voter_linked_organization_id, from_voter_linked_organization_we_vote_id,
-                                to_voter_linked_organization_id, to_voter_linked_organization_we_vote_id,
-                                to_voter_id, to_voter_we_vote_id
-                            )
-                            status += " " + move_organization_to_another_complete_results['status']
+                    # If we have both organizations, merge them
+                    if positive_value_exists(from_voter_linked_organization_we_vote_id) and \
+                            positive_value_exists(to_voter_linked_organization_we_vote_id) and \
+                            from_voter_linked_organization_we_vote_id != to_voter_linked_organization_we_vote_id:
+                        move_organization_to_another_complete_results = move_organization_to_another_complete(
+                            from_voter_linked_organization_id, from_voter_linked_organization_we_vote_id,
+                            to_voter_linked_organization_id, to_voter_linked_organization_we_vote_id,
+                            to_voter_id, to_voter_we_vote_id
+                        )
+                        status += " " + move_organization_to_another_complete_results['status']
 
-                        # We only run these routines if the current voter has an organization, since an org is required
-                        #  to have friends or invitations
+                    # Repair all positions before trying to move or merge them
+                    position_list_manager = PositionListManager()
+                    if positive_value_exists(from_voter_id):
+                        position_list_manager.repair_all_positions_for_voter(from_voter_id)
+                    if positive_value_exists(to_voter_id):
+                        position_list_manager.repair_all_positions_for_voter(to_voter_id)
 
-                        # Transfer friends from voter to new_owner_voter
-                        move_friends_results = move_friends_to_another_voter(from_voter_we_vote_id, to_voter_we_vote_id)
-                        status += " " + move_friends_results['status']
+                    # Transfer positions from the from_voter to the to_voter
+                    move_positions_results = move_positions_to_another_voter(
+                        from_voter_id, from_voter_we_vote_id,
+                        to_voter_id, to_voter_we_vote_id,
+                        to_voter_linked_organization_id, to_voter_linked_organization_we_vote_id)
+                    status += " " + move_positions_results['status']
 
-                        # Transfer friend invitations from voter to email_owner_voter
-                        move_friend_invitations_results = move_friend_invitations_to_another_voter(
-                            from_voter_we_vote_id, to_voter_we_vote_id)
-                        status += " " + move_friend_invitations_results['status']
+                    # Transfer friends from voter to new_owner_voter
+                    move_friends_results = move_friends_to_another_voter(from_voter_we_vote_id, to_voter_we_vote_id)
+                    status += " " + move_friends_results['status']
+
+                    # Transfer friend invitations from voter to email_owner_voter
+                    move_friend_invitations_results = move_friend_invitations_to_another_voter(
+                        from_voter_we_vote_id, to_voter_we_vote_id)
+                    status += " " + move_friend_invitations_results['status']
+
+                    # Make sure we bring over all emails from the from_voter over to the to_voter
+                    move_email_addresses_results = move_email_address_entries_to_another_voter(from_voter_we_vote_id,
+                                                                                               to_voter_we_vote_id)
+                    status += " " + move_email_addresses_results['status']
+
+                    if positive_value_exists(voter.primary_email_we_vote_id):
+                        # Remove the email information so we don't have a future conflict
+                        try:
+                            voter.email = None
+                            voter.primary_email_we_vote_id = None
+                            voter.email_ownership_is_verified = False
+                            voter.save()
+                        except Exception as e:
+                            # Fail silently
+                            pass
+
+                    if positive_value_exists(voter.linked_organization_we_vote_id):
+                        # Remove the link to the organization so we don't have a future conflict
+                        try:
+                            voter.linked_organization_we_vote_id = None
+                            voter.save()
+                            # All positions should have already been moved with move_positions_to_another_voter
+                        except Exception as e:
+                            # Fail silently
+                            pass
+
+                    # Bring over Facebook information
+                    move_facebook_results = move_facebook_info_to_another_voter(voter, facebook_linked_voter)
+                    status += " " + move_facebook_results['status']
+
+                    # Bring over Twitter information
+                    move_twitter_results = move_twitter_info_to_another_voter(voter, facebook_linked_voter)
+                    status += " " + move_twitter_results['status']
+
+                    # Bring over any donations
+                    # are complicated.  See the comments in the donate/controllers.py
+                    move_donation_results = move_donation_info_to_another_voter(voter, facebook_linked_voter)
+                    status += " " + move_donation_results['status']
+
+                    # Bring over Analytics information
+                    move_analytics_results = move_analytics_info_to_another_voter(from_voter_we_vote_id,
+                                                                                  to_voter_we_vote_id)
+                    status += " " + move_analytics_results['status']
+
+                    # Bring over the voter-table data
+                    merge_voter_accounts_results = merge_voter_accounts(voter, facebook_linked_voter)
+                    status += " " + merge_voter_accounts_results['status']
 
                     # And finally, relink the current voter_device_id to to_voter
                     voter_device_link_manager = VoterDeviceLinkManager()
@@ -588,6 +666,11 @@ def voter_facebook_sign_in_retrieve_for_api(voter_device_id):  # voterFacebookSi
                         if update_link_results['voter_device_link_updated']:
                             success = True
                             status += " FACEBOOK_SAVE_TO_CURRENT_ACCOUNT_VOTER_DEVICE_LINK_UPDATED"
+
+                    # Heal data a second time to be sure
+                    repair_results = position_list_manager.repair_all_positions_for_voter(to_voter_id)
+                    status += repair_results['status']
+
         else:
             voter_we_vote_id_attached_to_facebook_email = ""
 
