@@ -46,7 +46,7 @@ MEASURE = 'MEASURE'
 POLITICIAN = 'POLITICIAN'
 
 
-def create_batch_row_actions(batch_header_id, batch_row_id, state_code=""):
+def create_batch_row_actions(batch_header_id, batch_row_id=0, state_code=""):
     """
     Cycle through all BatchRow entries for this batch_header_id and move the values we can find into
     the BatchRowActionYYY table so we can review it before importing it

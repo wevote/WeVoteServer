@@ -695,6 +695,7 @@ def batch_action_list_export_voters_view(request):
                                 "&batch_header_id=" + str(batch_header_id)
                                 )
 
+
 @login_required
 def batch_action_list_analyze_process_view(request):
     """
@@ -734,6 +735,7 @@ def batch_action_list_analyze_process_view(request):
                                 "&batch_header_id=" + str(batch_header_id) +
                                 "&state_code=" + str(state_code)
                                 )
+
 
 @login_required
 def batch_header_mapping_view(request):
@@ -1220,13 +1222,38 @@ def batch_set_batch_list_view(request):
         return HttpResponseRedirect(reverse('import_export_batches:batch_set_list', args=()))
 
     google_civic_election_id = request.GET.get('google_civic_election_id', 0)
+    analyze_all_button = request.GET.get('analyze_all_button', 0)
+    create_all_button = request.GET.get('create_all_button', 0)
+
     batch_list_modified = []
 
     try:
         batch_manager = BatchManager()
         batch_description = BatchDescription.objects.filter(batch_set_id=batch_set_id)
-
         batch_list = list(batch_description)
+
+        retrieve_again = False
+        if positive_value_exists(analyze_all_button):
+            for one_batch_description in batch_list:
+                results = create_batch_row_actions(one_batch_description.batch_header_id)
+                if results['batch_actions_created']:
+                    retrieve_again = True
+
+            if retrieve_again:
+                batch_description = BatchDescription.objects.filter(batch_set_id=batch_set_id)
+                batch_list = list(batch_description)
+
+        retrieve_again = False
+        if positive_value_exists(create_all_button):
+            for one_batch_description in batch_list:
+                results = import_data_from_batch_row_actions(
+                    one_batch_description.kind_of_batch, IMPORT_CREATE, one_batch_description.batch_header_id)
+                if results['number_of_table_rows_created']:
+                    retrieve_again = True
+
+            if retrieve_again:
+                batch_description = BatchDescription.objects.filter(batch_set_id=batch_set_id)
+                batch_list = list(batch_description)
 
         # Loop through all batches and add count data
         for one_batch_description in batch_list:

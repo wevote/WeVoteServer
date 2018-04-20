@@ -116,7 +116,7 @@ def retrieve_candidates_from_api(google_civic_election_id, zero_entries=True):
 
 
 def retrieve_districts_to_which_address_belongs_from_api(
-        google_civic_election_id, polling_location_we_vote_id="", polling_location=None):
+        google_civic_election_id, polling_location_we_vote_id="", polling_location=None, batch_set_id=0):
     success = True
     status = ""
     polling_location_found = False
@@ -176,7 +176,7 @@ def retrieve_districts_to_which_address_belongs_from_api(
         modified_json_list = groom_results['modified_json_list']
         kind_of_batch = groom_results['kind_of_batch']
         results = store_ballotpedia_json_response_to_import_batch_system(
-            modified_json_list, google_civic_election_id, kind_of_batch)
+            modified_json_list, google_civic_election_id, kind_of_batch, batch_set_id)
         status += results['status']
         if 'batch_header_id' in results:
             batch_header_id = results['batch_header_id']

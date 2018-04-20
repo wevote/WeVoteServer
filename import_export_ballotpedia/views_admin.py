@@ -5,6 +5,8 @@
 from .controllers import retrieve_candidates_from_api, retrieve_districts_to_which_address_belongs_from_api, \
     retrieve_offices_from_api
 from admin_tools.views import redirect_to_sign_in_page
+from config.base import get_environment_variable
+from datetime import date
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.messages import get_messages
@@ -12,12 +14,15 @@ from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
 from django.shortcuts import redirect, render
 from election.models import Election
+from import_export_batches.models import BatchSet, BATCH_SET_SOURCE_IMPORT_BALLOTPEDIA_BALLOT_ITEMS
 from polling_location.models import PollingLocation
 from voter.models import voter_has_authority
 import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, positive_value_exists
 
 logger = wevote_functions.admin.get_logger(__name__)
+
+BALLOTPEDIA_API_CONTAINS_URL = get_environment_variable("BALLOTPEDIA_API_CONTAINS_URL")
 
 CANDIDATE = 'CANDIDATE'
 CONTEST_OFFICE = 'CONTEST_OFFICE'
@@ -162,12 +167,15 @@ def retrieve_distributed_ballotpedia_ballots_view(request, election_local_id=0):
     import_limit = convert_to_int(request.GET.get('import_limit', 100))
 
     ballotpedia_election_found = False
+    ballotpedia_election_id = 0
     google_civic_election_id = 0
+    status = ""
 
     try:
         if positive_value_exists(election_local_id):
             election_on_stage = Election.objects.get(id=election_local_id)
             ballotpedia_election_found = election_on_stage.ballotpedia_election_id
+            ballotpedia_election_id = election_on_stage.ballotpedia_election_id
             google_civic_election_id = election_on_stage.google_civic_election_id
     except Election.MultipleObjectsReturned as e:
         messages.add_message(request, messages.ERROR, 'Could not retrieve ballot data. More than one election found.')
@@ -220,32 +228,33 @@ def retrieve_distributed_ballotpedia_ballots_view(request, election_local_id=0):
     ballots_not_retrieved = 0
     rate_limit_count = 0
 
-    # # Create Batch Set
-    # election_name = ""
-    # import_date = date.today()
-    # batch_set_name = "Ballotpedia ballot locations " + election_name + " - ballotpedia: " + ballotpedia_election_id + \
-    #                  " - " + str(import_date)
-    #
-    # # create batch_set object
-    # try:
-    #     batch_set = BatchSet.objects.create(batch_set_description_text="", batch_set_name=batch_set_name,
-    #                                         batch_set_source=BATCH_SET_SOURCE_IMPORT_EXPORT_ENDORSEMENTS,
-    #                                         source_uri=batch_set_name_url, import_date=import_date)
-    #     batch_set_id = batch_set.id
-    #     if positive_value_exists(batch_set_id):
-    #         status += " BATCH_SET_SAVED"
-    #         success = True
-    # except Exception as e:
-    #     # Stop trying to save rows -- break out of the for loop
-    #     batch_set_id = 0
-    #     status += " EXCEPTION_BATCH_SET "
-    #     handle_exception(e, logger=logger, exception_message=status)
+    # Create Batch Set
+    election_name = ""
+    import_date = date.today()
+    batch_set_id = 0
+    batch_set_name = "Ballotpedia ballot locations" + election_name + \
+                     " - ballotpedia: " + str(ballotpedia_election_id) + \
+                     " - " + str(import_date)
+
+    # create batch_set object
+    try:
+        batch_set = BatchSet.objects.create(batch_set_description_text="", batch_set_name=batch_set_name,
+                                            batch_set_source=BATCH_SET_SOURCE_IMPORT_BALLOTPEDIA_BALLOT_ITEMS,
+                                            google_civic_election_id=google_civic_election_id,
+                                            source_uri=BALLOTPEDIA_API_CONTAINS_URL, import_date=import_date)
+        batch_set_id = batch_set.id
+        if positive_value_exists(batch_set_id):
+            status += " BATCH_SET_SAVED"
+            success = True
+    except Exception as e:
+        # Stop trying to save rows -- break out of the for loop
+        status += " EXCEPTION_BATCH_SET "
 
     # Step though our set of polling locations, until we find one that contains a ballot.  Some won't contain ballots
     # due to data quality issues.
     for polling_location in polling_location_list:
         one_ballot_results = retrieve_districts_to_which_address_belongs_from_api(
-            google_civic_election_id, polling_location=polling_location)
+            google_civic_election_id, polling_location=polling_location, batch_set_id=batch_set_id)
         success = False
         if one_ballot_results['success']:
             success = True
@@ -270,8 +279,8 @@ def retrieve_distributed_ballotpedia_ballots_view(request, election_local_id=0):
                              ballots_retrieved=ballots_retrieved,
                              ballots_not_retrieved=ballots_not_retrieved,
                              election_name=election_on_stage.election_name))
-    return HttpResponseRedirect(reverse('import_export_batches:batch_list', args=()) +
-                                '?kind_of_batch=IMPORT_BALLOT_ITEM' +
+    return HttpResponseRedirect(reverse('import_export_batches:batch_set_list', args=()) +
+                                '?kind_of_batch=IMPORT_BALLOTPEDIA_BALLOT_ITEMS' +
                                 '&google_civic_election_id=' + str(google_civic_election_id))
 
 

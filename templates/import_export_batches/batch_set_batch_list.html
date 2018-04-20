@@ -11,6 +11,28 @@
 
 <h1>List of Batches in one Batch Set</h1>
 
+    <form action="{% url 'import_export_batches:batch_set_batch_list' %}" method="get" class="form-horizontal">
+        {% csrf_token %}
+        <input type="hidden" name="batch_set_id" value="{{ batch_set_id }}">
+        <input type="hidden" name="google_civic_election_id" value="{{ google_civic_election_id }}">
+        <input type="hidden" name="state_code" value="{{ state_code }}">
+
+        <div class="form-group">
+            <label for="analyze_all_button_id" class="col-sm-3 control-label"></label>
+            <div class="col-sm-8">
+                <button type="submit" id="analyze_all_button_id" name="analyze_all_button" class="btn btn-default"
+                        value=1>Analyze Data in All Batches</button>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="create_all_button_id" class="col-sm-3 control-label"></label>
+            <div class="col-sm-8">
+                <button type="submit" id="create_all_button_id" name="create_all_button" class="btn btn-default"
+                        value=1>Create in All Batches</button>
+            </div>
+        </div>
+    </form>
 
 {% if batch_list %}
     <table border="1" cellpadding="5" cellspacing="5" class="table">
