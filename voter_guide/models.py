@@ -1143,6 +1143,7 @@ class VoterGuideListManager(models.Model):
 
     def retrieve_voter_guides_to_follow_by_election(self, google_civic_election_id, organization_we_vote_id_list,
                                                     search_string,
+                                                    start_retrieve_at_this_number=0,
                                                     maximum_number_to_retrieve=0, sort_by='', sort_order=''):
         voter_guide_list = []
         voter_guide_list_found = False
@@ -1160,12 +1161,19 @@ class VoterGuideListManager(models.Model):
                 Q(organization_we_vote_id__in=organization_we_vote_id_list)
             )
 
-            if sort_order == 'desc':
-                voter_guide_queryset = voter_guide_queryset.order_by('-' + sort_by)[:maximum_number_to_retrieve]
+            if positive_value_exists(start_retrieve_at_this_number):
+                query_start_number = start_retrieve_at_this_number
+                query_end_number = start_retrieve_at_this_number + maximum_number_to_retrieve
             else:
-                voter_guide_queryset = voter_guide_queryset.order_by(sort_by)[:maximum_number_to_retrieve]
+                query_start_number = 0
+                query_end_number = maximum_number_to_retrieve
 
-            voter_guide_list = voter_guide_queryset
+            if sort_order == 'desc':
+                voter_guide_queryset = voter_guide_queryset.order_by('-' + sort_by)[query_start_number:query_end_number]
+            else:
+                voter_guide_queryset = voter_guide_queryset.order_by(sort_by)[query_start_number:query_end_number]
+
+            voter_guide_list = list(voter_guide_queryset)
 
             if len(voter_guide_list):
                 voter_guide_list_found = True

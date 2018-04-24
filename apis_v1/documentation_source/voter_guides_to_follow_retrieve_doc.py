@@ -52,9 +52,16 @@ def voter_guides_to_follow_retrieve_doc_template_values(url_root):
                             'with voterAddressSave) is required with every election, including the test election.',
         },
         {
+            'name':         'start_retrieve_at_this_number',
+            'value':        'integer',  # boolean, integer, long, string
+            'description':  'In most elections we have well over the maximum_number_to_retrieve voter guides that '
+                            'we want to retrieve with each call. Setting this number lets us retrieve voter guides '
+                            'in "pages".',
+        },
+        {
             'name':         'maximum_number_to_retrieve',
             'value':        'integer',  # boolean, integer, long, string
-            'description':  'Defaults to 20 voter guides. Enter a value to set your own limit.',
+            'description':  'Defaults to 75 voter guides. Enter a value to set your own limit.',
         },
         {
             'name':         'filter_voter_guides_by_issue',
@@ -95,6 +102,8 @@ def voter_guides_to_follow_retrieve_doc_template_values(url_root):
                    '  "voter_device_id": string (88 characters long),\n' \
                    '  "google_civic_election_id": integer,\n' \
                    '  "search_string": string,\n' \
+                   '  "start_retrieve_at_this_number": integer\n' \
+                   '  "number_retrieved": integer\n' \
                    '  "maximum_number_to_retrieve": integer,\n' \
                    '  "voter_guides": list\n' \
                    '   [{\n' \
