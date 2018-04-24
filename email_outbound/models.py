@@ -247,6 +247,7 @@ class EmailManager(models.Model):
         email_address_object_id = 0
         email_address_list_found = False
         email_address_list = []
+        status = ""
 
         try:
             if positive_value_exists(email_address_object_we_vote_id):
@@ -265,7 +266,7 @@ class EmailManager(models.Model):
                 email_address_object_we_vote_id = email_address_object.we_vote_id
                 email_address_object_found = True
                 success = True
-                status = "RETRIEVE_EMAIL_ADDRESS_FOUND_BY_WE_VOTE_ID"
+                status += "RETRIEVE_EMAIL_ADDRESS_FOUND_BY_WE_VOTE_ID "
             elif positive_value_exists(normalized_email_address):
                 email_address_queryset = EmailAddress.objects.all()
                 if positive_value_exists(voter_we_vote_id):
@@ -292,26 +293,26 @@ class EmailManager(models.Model):
                         email_address_object_found = True
                         email_address_list_found = False
                         success = True
-                        status = "RETRIEVE_EMAIL_ADDRESS_FOUND_BY_NORMALIZED_EMAIL_ADDRESS"
+                        status += "RETRIEVE_EMAIL_ADDRESS_FOUND_BY_NORMALIZED_EMAIL_ADDRESS "
                     else:
                         success = True
                         email_address_list_found = True
-                        status = 'RETRIEVE_EMAIL_ADDRESS_OBJECT-EMAIL_ADDRESS_LIST_RETRIEVED'
+                        status += 'RETRIEVE_EMAIL_ADDRESS_OBJECT-EMAIL_ADDRESS_LIST_RETRIEVED '
                 else:
                     success = True
                     email_address_list_found = False
-                    status = 'RETRIEVE_EMAIL_ADDRESS_OBJECT-NO_EMAIL_ADDRESS_LIST_RETRIEVED'
+                    status += 'RETRIEVE_EMAIL_ADDRESS_OBJECT-NO_EMAIL_ADDRESS_LIST_RETRIEVED '
             else:
                 email_address_object_found = False
                 success = False
-                status = "RETRIEVE_EMAIL_ADDRESS_VARIABLES_MISSING"
+                status += "RETRIEVE_EMAIL_ADDRESS_VARIABLES_MISSING "
         except EmailAddress.DoesNotExist:
             exception_does_not_exist = True
             success = True
-            status = "RETRIEVE_EMAIL_ADDRESS_NOT_FOUND"
+            status += "RETRIEVE_EMAIL_ADDRESS_NOT_FOUND "
         except Exception as e:
             success = False
-            status = 'FAILED retrieve_email_address_object EmailAddress'
+            status += 'FAILED retrieve_email_address_object EmailAddress'
 
         results = {
             'success':                          success,
@@ -475,9 +476,10 @@ class EmailManager(models.Model):
         :param voter_we_vote_id:
         :return:
         """
+        status = ""
         if not positive_value_exists(voter_we_vote_id):
             success = False
-            status = 'VALID_VOTER_WE_VOTE_ID_MISSING'
+            status += 'VALID_VOTER_WE_VOTE_ID_MISSING '
             results = {
                 'success':                  success,
                 'status':                   status,
@@ -500,21 +502,21 @@ class EmailManager(models.Model):
             if len(email_address_list):
                 success = True
                 email_address_list_found = True
-                status = 'EMAIL_ADDRESS_LIST_RETRIEVED'
+                status += 'EMAIL_ADDRESS_LIST_RETRIEVED '
             else:
                 success = True
                 email_address_list_found = False
-                status = 'NO_EMAIL_ADDRESS_LIST_RETRIEVED'
+                status += 'NO_EMAIL_ADDRESS_LIST_RETRIEVED '
         except EmailAddress.DoesNotExist:
             # No data found. Not a problem.
             success = True
             email_address_list_found = False
-            status = 'NO_EMAIL_ADDRESS_LIST_RETRIEVED_DoesNotExist'
+            status += 'NO_EMAIL_ADDRESS_LIST_RETRIEVED_DoesNotExist '
             email_address_list = []
         except Exception as e:
             success = False
             email_address_list_found = False
-            status = 'FAILED retrieve_voter_email_address_list EmailAddress'
+            status += 'FAILED retrieve_voter_email_address_list EmailAddress '
 
         results = {
             'success': success,
