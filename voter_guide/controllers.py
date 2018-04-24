@@ -21,8 +21,8 @@ from voter.models import fetch_voter_id_from_voter_device_link, fetch_voter_we_v
     fetch_voter_we_vote_id_from_voter_id, VoterManager
 from voter_guide.models import VoterGuide, VoterGuideListManager, VoterGuideManager, VoterGuidePossibilityManager
 import wevote_functions.admin
-from wevote_functions.functions import is_voter_device_id_valid, positive_value_exists, process_request_from_master, \
-    is_link_to_video
+from wevote_functions.functions import convert_to_int, is_voter_device_id_valid, positive_value_exists, \
+    process_request_from_master, is_link_to_video
 
 logger = wevote_functions.admin.get_logger(__name__)
 
@@ -502,9 +502,13 @@ def voter_guide_possibility_save_for_api(voter_device_id, voter_guide_possibilit
 def voter_guides_to_follow_retrieve_for_api(voter_device_id,  # voterGuidesToFollowRetrieve
                                             kind_of_ballot_item='', ballot_item_we_vote_id='',
                                             google_civic_election_id=0, search_string='',
-                                            maximum_number_to_retrieve=0, filter_voter_guides_by_issue=False,
+                                            start_retrieve_at_this_number=0,
+                                            maximum_number_to_retrieve=0,
+                                            filter_voter_guides_by_issue=False,
                                             add_voter_guides_not_from_election=False):
     voter_we_vote_id = ""
+    start_retrieve_at_this_number = convert_to_int(start_retrieve_at_this_number)
+    number_retrieved = 0
     filter_voter_guides_by_issue = positive_value_exists(filter_voter_guides_by_issue)
     add_voter_guides_not_from_election = positive_value_exists(add_voter_guides_not_from_election)
     status = ""
@@ -516,6 +520,9 @@ def voter_guides_to_follow_retrieve_for_api(voter_device_id,  # voterGuidesToFol
             'success': False,
             'voter_device_id': voter_device_id,
             'voter_guides': [],
+            'start_retrieve_at_this_number': start_retrieve_at_this_number,
+            'number_retrieved': number_retrieved,
+            'maximum_number_to_retrieve': maximum_number_to_retrieve,
             'google_civic_election_id': google_civic_election_id,
             'search_string': search_string,
             'ballot_item_we_vote_id': ballot_item_we_vote_id,
@@ -535,6 +542,9 @@ def voter_guides_to_follow_retrieve_for_api(voter_device_id,  # voterGuidesToFol
             'success': False,
             'voter_device_id': voter_device_id,
             'voter_guides': [],
+            'start_retrieve_at_this_number': start_retrieve_at_this_number,
+            'number_retrieved': number_retrieved,
+            'maximum_number_to_retrieve': maximum_number_to_retrieve,
             'google_civic_election_id': google_civic_election_id,
             'search_string': search_string,
             'ballot_item_we_vote_id': ballot_item_we_vote_id,
@@ -558,6 +568,9 @@ def voter_guides_to_follow_retrieve_for_api(voter_device_id,  # voterGuidesToFol
                 'success': False,
                 'voter_device_id': voter_device_id,
                 'voter_guides': [],
+                'start_retrieve_at_this_number': start_retrieve_at_this_number,
+                'number_retrieved': number_retrieved,
+                'maximum_number_to_retrieve': maximum_number_to_retrieve,
                 'google_civic_election_id': google_civic_election_id,
                 'search_string': search_string,
             }
@@ -600,6 +613,7 @@ def voter_guides_to_follow_retrieve_for_api(voter_device_id,  # voterGuidesToFol
                                                                           search_string,
                                                                           filter_voter_guides_by_issue,
                                                                           organization_we_vote_id_list_for_voter_issues,
+                                                                          start_retrieve_at_this_number,
                                                                           maximum_number_to_retrieve,
                                                                           'twitter_followers_count', 'desc')
             success = results['success']
@@ -759,7 +773,8 @@ def voter_guides_to_follow_retrieve_for_api(voter_device_id,  # voterGuidesToFol
                 if number_added_to_list >= maximum_number_to_retrieve:
                     break
 
-        if len(voter_guides):
+        number_retrieved = len(voter_guides)
+        if positive_value_exists(number_retrieved):
             json_data = {
                 'status': status + ' VOTER_GUIDES_TO_FOLLOW_FOR_API_RETRIEVED',
                 'success': True,
@@ -768,6 +783,8 @@ def voter_guides_to_follow_retrieve_for_api(voter_device_id,  # voterGuidesToFol
                 'google_civic_election_id': google_civic_election_id,
                 'search_string': search_string,
                 'ballot_item_we_vote_id': ballot_item_we_vote_id,
+                'start_retrieve_at_this_number': start_retrieve_at_this_number,
+                'number_retrieved': number_retrieved,
                 'maximum_number_to_retrieve': maximum_number_to_retrieve,
                 'filter_voter_guides_by_issue': filter_voter_guides_by_issue
             }
@@ -780,6 +797,8 @@ def voter_guides_to_follow_retrieve_for_api(voter_device_id,  # voterGuidesToFol
                 'google_civic_election_id': google_civic_election_id,
                 'search_string': search_string,
                 'ballot_item_we_vote_id': ballot_item_we_vote_id,
+                'start_retrieve_at_this_number': start_retrieve_at_this_number,
+                'number_retrieved': number_retrieved,
                 'maximum_number_to_retrieve': maximum_number_to_retrieve,
                 'filter_voter_guides_by_issue': filter_voter_guides_by_issue
             }
@@ -797,10 +816,12 @@ def voter_guides_to_follow_retrieve_for_api(voter_device_id,  # voterGuidesToFol
             'success': False,
             'voter_device_id': voter_device_id,
             'voter_guides': [],
+            'start_retrieve_at_this_number': start_retrieve_at_this_number,
+            'number_retrieved': number_retrieved,
+            'maximum_number_to_retrieve': maximum_number_to_retrieve,
             'google_civic_election_id': google_civic_election_id,
             'search_string': search_string,
             'ballot_item_we_vote_id': ballot_item_we_vote_id,
-            'maximum_number_to_retrieve': maximum_number_to_retrieve,
         }
 
         results = {
@@ -962,6 +983,7 @@ def retrieve_voter_guides_to_follow_by_ballot_item(voter_id, kind_of_ballot_item
 def retrieve_voter_guides_to_follow_by_election_for_api(voter_id, google_civic_election_id, search_string,
                                                         filter_voter_guides_by_issue=False,
                                                         organization_we_vote_id_list_for_voter_issues=None,
+                                                        start_retrieve_at_this_number=0,
                                                         maximum_number_to_retrieve=0, sort_by='', sort_order=''):
     filter_voter_guides_by_issue = positive_value_exists(filter_voter_guides_by_issue)
 
@@ -1035,6 +1057,7 @@ def retrieve_voter_guides_to_follow_by_election_for_api(voter_id, google_civic_e
     if positive_value_exists(len(org_list_found_by_google_civic_election_id)):
         voter_guide_results = voter_guide_list_manager.retrieve_voter_guides_to_follow_by_election(
             google_civic_election_id, org_list_found_by_google_civic_election_id, search_string,
+            start_retrieve_at_this_number,
             maximum_number_to_retrieve, sort_by, sort_order)
 
         status += " " + voter_guide_results['status'] + " "

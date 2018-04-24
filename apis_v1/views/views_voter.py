@@ -888,6 +888,7 @@ def voter_guides_to_follow_retrieve_view(request):  # voterGuidesToFollowRetriev
     search_string = request.GET.get('search_string', '')
     use_test_election = positive_value_exists(request.GET.get('use_test_election', False))
     maximum_number_to_retrieve = get_maximum_number_to_retrieve_from_request(request)
+    start_retrieve_at_this_number = request.GET.get('start_retrieve_at_this_number', 0)
     filter_voter_guides_by_issue = positive_value_exists(request.GET.get('filter_voter_guides_by_issue', False))
     # If we want to show voter guides associated with election first, but then show more after those are exhausted,
     #  set add_voter_guides_not_from_election to True
@@ -928,7 +929,8 @@ def voter_guides_to_follow_retrieve_view(request):  # voterGuidesToFollowRetriev
 
     results = voter_guides_to_follow_retrieve_for_api(voter_device_id, kind_of_ballot_item, ballot_item_we_vote_id,
                                                       google_civic_election_id, search_string,
-                                                      maximum_number_to_retrieve, filter_voter_guides_by_issue,
+                                                      start_retrieve_at_this_number, maximum_number_to_retrieve,
+                                                      filter_voter_guides_by_issue,
                                                       add_voter_guides_not_from_election)
     return HttpResponse(json.dumps(results['json_data']), content_type='application/json')
 
