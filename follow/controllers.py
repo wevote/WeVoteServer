@@ -119,6 +119,33 @@ def move_follow_entries_to_another_voter(from_voter_id, to_voter_id, to_voter_we
     success = False
     follow_entries_moved = 0
     follow_entries_not_moved = 0
+
+    if not positive_value_exists(from_voter_id) or not positive_value_exists(to_voter_id):
+        status += "MOVE_FOLLOW_ENTRIES_TO_ANOTHER_VOTER-Missing either from_voter_id or to_voter_id "
+        results = {
+            'status':                   status,
+            'success':                  success,
+            'from_voter_id':            from_voter_id,
+            'to_voter_id':              to_voter_id,
+            'to_voter_we_vote_id':      to_voter_we_vote_id,
+            'follow_entries_moved':     follow_entries_moved,
+            'follow_entries_not_moved': follow_entries_not_moved,
+        }
+        return results
+
+    if from_voter_id == to_voter_id:
+        status += "MOVE_FOLLOW_ENTRIES_TO_ANOTHER_VOTER-from_voter_id and to_voter_id identical "
+        results = {
+            'status':                   status,
+            'success':                  success,
+            'from_voter_id':            from_voter_id,
+            'to_voter_id':              to_voter_id,
+            'to_voter_we_vote_id':      to_voter_we_vote_id,
+            'follow_entries_moved':     follow_entries_moved,
+            'follow_entries_not_moved': follow_entries_not_moved,
+        }
+        return results
+
     follow_organization_list = FollowOrganizationList()
     follow_organization_manager = FollowOrganizationManager()
     from_follow_list = follow_organization_list.retrieve_follow_organization_by_voter_id(from_voter_id)
@@ -156,6 +183,32 @@ def move_follow_issue_entries_to_another_voter(from_voter_we_vote_id, to_voter_w
     follow_issue_entries_moved = 0
     follow_issue_entries_not_moved = 0
     follow_issue_list = FollowIssueList()
+
+    if not positive_value_exists(from_voter_we_vote_id) or not positive_value_exists(to_voter_we_vote_id):
+        status += "MOVE_FOLLOW_ISSUE_ENTRIES_TO_ANOTHER_VOTER-" \
+                  "Missing either from_voter_we_vote_id or to_voter_we_vote_id "
+        results = {
+            'status': status,
+            'success': success,
+            'from_voter_we_vote_id': from_voter_we_vote_id,
+            'to_voter_we_vote_id': to_voter_we_vote_id,
+            'follow_issue_entries_moved': follow_issue_entries_moved,
+            'follow_issue_entries_not_moved': follow_issue_entries_not_moved,
+        }
+        return results
+
+    if from_voter_we_vote_id == to_voter_we_vote_id:
+        status += "MOVE_FOLLOW_ISSUE_ENTRIES_TO_ANOTHER_VOTER-from_voter_we_vote_id and to_voter_we_vote_id identical "
+        results = {
+            'status': status,
+            'success': success,
+            'from_voter_we_vote_id': from_voter_we_vote_id,
+            'to_voter_we_vote_id': to_voter_we_vote_id,
+            'follow_issue_entries_moved': follow_issue_entries_moved,
+            'follow_issue_entries_not_moved': follow_issue_entries_not_moved,
+        }
+        return results
+
     from_follow_issue_list = follow_issue_list.retrieve_follow_issue_list_by_voter_we_vote_id(from_voter_we_vote_id)
     to_follow_issue_list = follow_issue_list.retrieve_follow_issue_list_by_voter_we_vote_id(to_voter_we_vote_id)
     to_follow_issue_we_vote_id_list = \

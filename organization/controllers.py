@@ -362,6 +362,22 @@ def move_organization_to_another_complete(from_organization_id, from_organizatio
     elif positive_value_exists(to_voter_we_vote_id) and not positive_value_exists(to_voter_id):
         to_voter_id = voter_manager.fetch_local_id_from_we_vote_id(to_voter_we_vote_id)
 
+    identical_variables = False
+    if from_organization_id == to_organization_id:
+        status += "MOVE_ORGANIZATION_TO_ANOTHER_COMPLETE-from_organization_id and to_organization_id identical "
+        identical_variables = True
+    if from_organization_we_vote_id == to_organization_we_vote_id:
+        status += "MOVE_ORGANIZATION_TO_ANOTHER_COMPLETE-" \
+                  "from_organization_we_vote_id and to_organization_we_vote_id identical "
+        identical_variables = True
+
+    if identical_variables:
+        results = {
+            'status': status,
+            'success': success,
+        }
+        return results
+
     # If anyone is following the old voter's organization, move those followers to the new voter's organization
     move_organization_followers_results = move_organization_followers_to_another_organization(
         from_organization_id, from_organization_we_vote_id,

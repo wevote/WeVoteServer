@@ -470,7 +470,7 @@ def move_donation_info_to_another_voter(from_voter, to_voter):
     Within a session, if the voter donates before logging in, the donations will be created under a new unique
     voter_we_vote_id.  Subsequently when they login, their proper voter_we_vote_id will come into effect.  If we did not
     call this method before the end of the session, those "un-logged-in" donations would not be associated with the voter.
-    Unfortuately at this time "un-logged-in" donations created in a session that was ended before logging in will not
+    Unfortunately at this time "un-logged-in" donations created in a session that was ended before logging in will not
     be associated with the correct voter -- we could do this in the future by doing something with email addresses.
     :param from_voter:
     :param to_voter:
@@ -491,6 +491,9 @@ def move_donation_info_to_another_voter(from_voter, to_voter):
             'to_voter': to_voter,
         }
         return results
+
+    if from_voter.we_vote_id == to_voter.we_vote_id:
+        status += "MOVE_DONATION_INFO-FROM_AND_TO_VOTER_WE_VOTE_IDS_IDENTICAL "
 
     # All we really need to do is find the donations that are associated with the "from" voter, and change their
     # voter_we_vote_id to the "to" voter.

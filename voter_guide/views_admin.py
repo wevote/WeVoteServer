@@ -461,20 +461,14 @@ def voter_guide_list_view(request):
 
     voter_guide_list = []
     voter_guide_list_object = VoterGuideListManager()
-    if positive_value_exists(google_civic_election_id):
-        results = voter_guide_list_object.retrieve_voter_guides_for_election(
-            google_civic_election_id=google_civic_election_id)
 
-        if results['success']:
-            voter_guide_list = results['voter_guide_list']
+    order_by = "google_civic_election_id"
+    limit_number = 75
+    results = voter_guide_list_object.retrieve_all_voter_guides_order_by(
+        order_by, limit_number, voter_guide_search, google_civic_election_id)
 
-    else:
-        order_by = "google_civic_election_id"
-        limit_number = 75
-        results = voter_guide_list_object.retrieve_all_voter_guides_order_by(order_by, limit_number, voter_guide_search)
-
-        if results['success']:
-            voter_guide_list = results['voter_guide_list']
+    if results['success']:
+        voter_guide_list = results['voter_guide_list']
 
     modified_voter_guide_list = []
     position_list_manager = PositionListManager()

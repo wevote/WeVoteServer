@@ -672,7 +672,19 @@ def move_analytics_info_to_another_voter(from_voter_we_vote_id, to_voter_we_vote
     analytics_action_not_moved = 0
 
     if not positive_value_exists(from_voter_we_vote_id) or not positive_value_exists(to_voter_we_vote_id):
-        status = "MOVE_ANALYTICS_ACTION-MISSING_FROM_OR_TO_VOTER_ID"
+        status += "MOVE_ANALYTICS_ACTION-MISSING_FROM_OR_TO_VOTER_ID"
+        results = {
+            'status':                       status,
+            'success':                      success,
+            'from_voter_we_vote_id':        from_voter_we_vote_id,
+            'to_voter_we_vote_id':          to_voter_we_vote_id,
+            'analytics_action_moved':       analytics_action_moved,
+            'analytics_action_not_moved':   analytics_action_not_moved,
+        }
+        return results
+
+    if from_voter_we_vote_id == to_voter_we_vote_id:
+        status += "MOVE_ANALYTICS_ACTION-FROM_AND_TO_VOTER_WE_VOTE_ID_IDENTICAL "
         results = {
             'status':                       status,
             'success':                      success,

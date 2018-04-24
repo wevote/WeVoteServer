@@ -1075,19 +1075,21 @@ class VoterGuideListManager(models.Model):
         }
         return results
 
-    def retrieve_all_voter_guides_by_organization_we_vote_id(self, organization_we_vote_id):
-        return self.retrieve_all_voter_guides(organization_we_vote_id)
+    def retrieve_all_voter_guides_by_organization_we_vote_id(self, organization_we_vote_id, for_editing=True):
+        return self.retrieve_all_voter_guides(organization_we_vote_id, for_editing=for_editing)
 
     def retrieve_all_voter_guides_by_voter_id(self, owner_voter_id):
         organization_we_vote_id = ""
         return self.retrieve_all_voter_guides(organization_we_vote_id, owner_voter_id)
 
-    def retrieve_all_voter_guides_by_voter_we_vote_id(self, owner_voter_we_vote_id):
+    def retrieve_all_voter_guides_by_voter_we_vote_id(self, owner_voter_we_vote_id, for_editing=True):
         organization_we_vote_id = ""
         owner_voter_id = 0
-        return self.retrieve_all_voter_guides(organization_we_vote_id, owner_voter_id, owner_voter_we_vote_id)
+        return self.retrieve_all_voter_guides(organization_we_vote_id, owner_voter_id, owner_voter_we_vote_id,
+                                              for_editing)
 
-    def retrieve_all_voter_guides(self, organization_we_vote_id, owner_voter_id=0, owner_voter_we_vote_id=""):
+    def retrieve_all_voter_guides(self, organization_we_vote_id, owner_voter_id=0, owner_voter_we_vote_id="",
+                                  for_editing=True):
         voter_guide_list = []
         voter_guide_list_found = False
 
@@ -1104,7 +1106,10 @@ class VoterGuideListManager(models.Model):
             return results
 
         try:
-            voter_guide_queryset = VoterGuide.objects.all()
+            if positive_value_exists(for_editing):
+                voter_guide_queryset = VoterGuide.objects.all()
+            else:
+                voter_guide_queryset = VoterGuide.objects.using('readonly').all()
             if positive_value_exists(organization_we_vote_id):
                 voter_guide_queryset = voter_guide_queryset.filter(
                     organization_we_vote_id__iexact=organization_we_vote_id)
@@ -1113,7 +1118,7 @@ class VoterGuideListManager(models.Model):
                     owner_voter_id=owner_voter_id)
             elif positive_value_exists(owner_voter_we_vote_id):
                 voter_guide_queryset = voter_guide_queryset.filter(
-                    owner_voter_we_vote_id__iexact=owner_voter_we_vote_id)
+                    owner_we_vote_id__iexact=owner_voter_we_vote_id)
             voter_guide_list = voter_guide_queryset
 
             if len(voter_guide_list):
@@ -1125,7 +1130,7 @@ class VoterGuideListManager(models.Model):
         except Exception as e:
             handle_record_not_found_exception(e, logger=logger)
             status = 'retrieve_all_voter_guides: Unable to retrieve voter guides from db. ' \
-                     '{error} [type: {error_type}]'.format(error=e.message, error_type=type(e))
+                     '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
             success = False
 
         results = {
@@ -1342,11 +1347,14 @@ class VoterGuideListManager(models.Model):
 
         return voter_guide_list_filtered
 
-    def retrieve_all_voter_guides_order_by(self, order_by='', limit_number=0, search_string=''):
+    def retrieve_all_voter_guides_order_by(self, order_by='', limit_number=0, search_string='',
+                                           google_civic_election_id=0):
         voter_guide_list = []
         voter_guide_list_found = False
         try:
             voter_guide_queryset = VoterGuide.objects.all()
+            if positive_value_exists(google_civic_election_id):
+                voter_guide_queryset = voter_guide_queryset.filter(google_civic_election_id=google_civic_election_id)
             if order_by == 'google_civic_election_id':
                 voter_guide_queryset = voter_guide_queryset.order_by(
                     '-vote_smart_time_span', '-google_civic_election_id')

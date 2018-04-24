@@ -115,13 +115,25 @@ def augment_email_address_list(email_address_list, voter):
 
 
 def move_email_address_entries_to_another_voter(from_voter_we_vote_id, to_voter_we_vote_id):
-    status = " MOVE_EMAIL_ADDRESSES"
+    status = " MOVE_EMAIL_ADDRESSES "
     success = False
     email_addresses_moved = 0
     email_addresses_not_moved = 0
 
     if not positive_value_exists(from_voter_we_vote_id) or not positive_value_exists(to_voter_we_vote_id):
-        status = "MOVE_EMAIL_ADDRESS_ENTRIES_MISSING_FROM_OR_TO_VOTER_ID"
+        status += "MOVE_EMAIL_ADDRESS_ENTRIES_MISSING_FROM_OR_TO_VOTER_ID"
+        results = {
+            'status': status,
+            'success': success,
+            'from_voter_we_vote_id': from_voter_we_vote_id,
+            'to_voter_we_vote_id': to_voter_we_vote_id,
+            'email_addresses_moved': email_addresses_moved,
+            'email_addresses_not_moved': email_addresses_not_moved,
+        }
+        return results
+
+    if from_voter_we_vote_id == to_voter_we_vote_id:
+        status += "MOVE_EMAIL_ADDRESS_ENTRIES-IDENTICAL_FROM_AND_TO_VOTER_ID"
         results = {
             'status': status,
             'success': success,

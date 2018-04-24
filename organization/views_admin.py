@@ -289,8 +289,8 @@ def organization_list_view(request):
             # NOTE this is "exclude"
             organization_list_query = organization_list_query.exclude(final_filters)
 
-    # Limit to only showing 1000 on screen
-    organization_list = organization_list_query[:1000]
+    # Limit to only showing 200 on screen
+    organization_list = organization_list_query[:200]
 
     # Now loop through these organizations and add on the linked_issues_count
     modified_organization_list = []
