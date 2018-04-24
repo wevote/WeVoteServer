@@ -120,6 +120,125 @@ def duplicate_voter_guides(from_voter_id, from_voter_we_vote_id, from_organizati
     return results
 
 
+def move_voter_guides_to_another_voter(from_voter_we_vote_id, to_voter_we_vote_id,
+                                       from_organization_we_vote_id, to_organization_we_vote_id):
+    status = ''
+    success = False
+    to_voter_id = 0
+    voter_guide_entries_moved = 0
+    voter_guide_entries_not_moved = 0
+
+    if not positive_value_exists(from_voter_we_vote_id) or not positive_value_exists(to_voter_we_vote_id):
+        status += "MOVE_VOTER_GUIDES-MISSING_EITHER_FROM_OR_TO_VOTER_WE_VOTE_ID "
+        results = {
+            'status': status,
+            'success': success,
+            'from_voter_we_vote_id': from_voter_we_vote_id,
+            'to_voter_we_vote_id': to_voter_we_vote_id,
+            'voter_guide_entries_moved': voter_guide_entries_moved,
+            'voter_guide_entries_not_moved': voter_guide_entries_not_moved,
+        }
+        return results
+
+    if from_voter_we_vote_id == to_voter_we_vote_id:
+        status += "MOVE_VOTER_GUIDES-FROM_AND_TO_VOTER_WE_VOTE_IDS_IDENTICAL "
+        results = {
+            'status': status,
+            'success': success,
+            'from_voter_we_vote_id': from_voter_we_vote_id,
+            'to_voter_we_vote_id': to_voter_we_vote_id,
+            'voter_guide_entries_moved': voter_guide_entries_moved,
+            'voter_guide_entries_not_moved': voter_guide_entries_not_moved,
+        }
+        return results
+
+    if not positive_value_exists(from_organization_we_vote_id) or not positive_value_exists(to_organization_we_vote_id):
+        status += "MOVE_VOTER_GUIDES-MISSING_EITHER_FROM_OR_TO_ORGANIZATION_WE_VOTE_ID "
+
+    voter_guide_list_manager = VoterGuideListManager()
+    for_editing = True
+
+    from_voter_guide_results = voter_guide_list_manager.retrieve_all_voter_guides_by_voter_we_vote_id(
+        from_voter_we_vote_id, for_editing)
+    if from_voter_guide_results['voter_guide_list_found']:
+        from_voter_guide_list = from_voter_guide_results['voter_guide_list']
+    else:
+        from_voter_guide_list = []
+
+    from_voter_guide_list_count = len(from_voter_guide_list)
+
+    if not positive_value_exists(from_voter_guide_list_count):
+        status += "MOVE_VOTER_GUIDES-NO_FROM_VOTER_GUIDES_FOUND "
+        results = {
+            'status': status,
+            'success': success,
+            'from_voter_we_vote_id': from_voter_we_vote_id,
+            'to_voter_we_vote_id': to_voter_we_vote_id,
+            'voter_guide_entries_moved': voter_guide_entries_moved,
+            'voter_guide_entries_not_moved': voter_guide_entries_not_moved,
+        }
+        return results
+
+    to_voter_guide_results = voter_guide_list_manager.retrieve_all_voter_guides_by_voter_we_vote_id(
+        to_voter_we_vote_id, for_editing)
+    if to_voter_guide_results['voter_guide_list_found']:
+        to_voter_guide_list = to_voter_guide_results['voter_guide_list']
+    else:
+        to_voter_guide_list = []
+
+    voter_manager = VoterManager()
+    for from_voter_guide in from_voter_guide_list:
+        # See if the "to_voter" already has a matching entry
+        to_voter_guide_found = False
+        from_voter_guide_google_civic_election_id = from_voter_guide.google_civic_election_id
+        # Cycle through all of the "to_voter" current_friend entries and if there isn't one, create it
+        for to_voter_guide in to_voter_guide_list:
+            to_voter_guide_google_civic_election_id = to_voter_guide.google_civic_election_id
+            if to_voter_guide_google_civic_election_id == from_voter_guide_google_civic_election_id:
+                to_voter_guide_found = True
+                break
+
+        if to_voter_guide_found:
+            # We don't do anything with the from_voter_guide, and end up deleting it below
+            pass
+        else:
+            # Change the voter and organization values to the new values
+            if not positive_value_exists(to_voter_id):
+                to_voter_id = voter_manager.fetch_local_id_from_we_vote_id(to_voter_we_vote_id)
+            try:
+                from_voter_guide.owner_voter_id = to_voter_id
+                from_voter_guide.owner_voter_we_vote_id = to_voter_we_vote_id
+                from_voter_guide.organization_we_vote_id = to_organization_we_vote_id
+                from_voter_guide.save()
+                voter_guide_entries_moved += 1
+            except Exception as e:
+                voter_guide_entries_not_moved += 1
+
+    # Now remove the voter_guides where there were duplicates
+    from_voter_guide_remaining_results = voter_guide_list_manager.retrieve_all_voter_guides_by_voter_we_vote_id(
+        from_voter_we_vote_id, for_editing)
+    if from_voter_guide_remaining_results['voter_guide_list_found']:
+        from_voter_guide_list_remaining = to_voter_guide_results['voter_guide_list']
+        for from_voter_guide in from_voter_guide_list_remaining:
+            # Delete the remaining voter_guides
+            try:
+                # Leave this turned off until testing is finished
+                # from_voter_guide.delete()
+                pass
+            except Exception as e:
+                pass
+
+    results = {
+        'status': status,
+        'success': success,
+        'from_voter_we_vote_id': from_voter_we_vote_id,
+        'to_voter_we_vote_id': to_voter_we_vote_id,
+        'voter_guide_entries_moved': voter_guide_entries_moved,
+        'voter_guide_entries_not_moved': voter_guide_entries_not_moved,
+    }
+    return results
+
+
 def voter_guides_import_from_master_server(request, google_civic_election_id):
     """
     Get the json data, and either create new entries or update existing

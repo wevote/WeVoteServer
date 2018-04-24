@@ -640,6 +640,35 @@ def move_positions_to_another_voter(from_voter_id, from_voter_we_vote_id,
     position_list_manager = PositionListManager()
     organization_manager = OrganizationManager()
     to_organization_name = ""
+
+    if from_voter_id == to_voter_id:
+        status += "MOVE_POSITIONS_TO_ANOTHER_VOTER-from_voter_id and to_voter_id identical "
+        results = {
+            'status': status,
+            'success': success,
+            'from_voter_id': from_voter_id,
+            'from_voter_we_vote_id': from_voter_we_vote_id,
+            'to_voter_id': to_voter_id,
+            'to_voter_we_vote_id': to_voter_we_vote_id,
+            'position_entries_moved': position_entries_moved,
+            'position_entries_not_moved': position_entries_not_moved,
+        }
+        return results
+
+    if from_voter_we_vote_id == to_voter_we_vote_id:
+        status += "MOVE_POSITIONS_TO_ANOTHER_VOTER-from_voter_we_vote_id and to_voter_we_vote_id identical "
+        results = {
+            'status': status,
+            'success': success,
+            'from_voter_id': from_voter_id,
+            'from_voter_we_vote_id': from_voter_we_vote_id,
+            'to_voter_id': to_voter_id,
+            'to_voter_we_vote_id': to_voter_we_vote_id,
+            'position_entries_moved': position_entries_moved,
+            'position_entries_not_moved': position_entries_not_moved,
+        }
+        return results
+
     if positive_value_exists(to_voter_linked_organization_we_vote_id):
         results = organization_manager.retrieve_organization_from_we_vote_id(to_voter_linked_organization_we_vote_id)
         if results['organization_found']:

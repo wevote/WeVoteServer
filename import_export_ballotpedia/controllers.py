@@ -222,6 +222,17 @@ def retrieve_offices_from_api(google_civic_election_id):
         "limit": 1000,
     })
 
+    if not positive_value_exists(response.text):
+        status += "NO_RESPONSE_TEXT_FOUND"
+        if positive_value_exists(response.url):
+            status += ": " + response.url
+        results = {
+            'success': success,
+            'status': status,
+            'batch_header_id': batch_header_id,
+        }
+        return results
+
     structured_json = json.loads(response.text)
 
     # # Use Google Civic API call counter to track the number of queries we are doing each day
@@ -263,6 +274,7 @@ def groom_ballotpedia_data_for_processing(structured_json, google_civic_election
                     # Loop through this data and move ['office']['data'] into root level
                     for one_office_json in races_json_list:
                         try:
+                            # 2018-04-22 Split 'election' into 'primary_election' and 'general_election'
                             inner_election_json = one_office_json['election']['data']
                             inner_office_json = one_office_json['office']['data']
                             # Add our own key/value pairs

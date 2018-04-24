@@ -8,8 +8,8 @@ import sys
 es = Elasticsearch(["172.31.24.246:9200"], timeout = 120, max_retries = 5, retry_on_timeout = True)
 
 if len(sys.argv) < 2:
-        print "Usage: %s <search term>" % (sys.argv[0])
-        sys.exit(-1)
+    print "Usage: %s <search term>" % (sys.argv[0])
+    sys.exit(-1)
 
 search_term = sys.argv[1]
 #query = { "query": {"match": { "candidate_name": "Joe"}}}

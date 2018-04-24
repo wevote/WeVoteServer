@@ -19,6 +19,7 @@ from position.models import PositionListManager
 from voter.controllers import move_facebook_info_to_another_voter, move_twitter_info_to_another_voter, \
     merge_voter_accounts
 from voter.models import VoterDeviceLinkManager, VoterManager
+from voter_guide.controllers import move_voter_guides_to_another_voter
 import wevote_functions.admin
 from wevote_functions.functions import is_voter_device_id_valid, positive_value_exists
 
@@ -644,6 +645,12 @@ def voter_facebook_sign_in_retrieve_for_api(voter_device_id):  # voterFacebookSi
                     # are complicated.  See the comments in the donate/controllers.py
                     move_donation_results = move_donation_info_to_another_voter(voter, facebook_linked_voter)
                     status += " " + move_donation_results['status']
+
+                    # Bring over Voter Guides
+                    move_voter_guide_results = move_voter_guides_to_another_voter(
+                        from_voter_we_vote_id, to_voter_we_vote_id,
+                        from_voter_linked_organization_we_vote_id, to_voter_linked_organization_we_vote_id)
+                    status += " " + move_voter_guide_results['status']
 
                     # Bring over Analytics information
                     move_analytics_results = move_analytics_info_to_another_voter(from_voter_we_vote_id,

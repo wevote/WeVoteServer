@@ -4236,6 +4236,7 @@ class PositionManager(models.Model):
         voter_we_vote_id = ''
         is_signed_in = False
         google_civic_election_id = 0
+        linked_organization_we_vote_id = ""
         candidate_campaign_we_vote_id = ""
         contest_measure_we_vote_id = ""
         voter_manager = VoterManager()
@@ -4419,6 +4420,15 @@ class PositionManager(models.Model):
                 status = 'NEW_STANCE_COULD_NOT_BE_SAVED'
 
         if voter_position_on_stage_found:
+            # If here we need to make sure a voter guide exists
+            if positive_value_exists(linked_organization_we_vote_id) \
+                    and positive_value_exists(google_civic_election_id):
+                voter_guide_manager = VoterGuideManager()
+                if not voter_guide_manager.voter_guide_exists(linked_organization_we_vote_id, google_civic_election_id):
+                    # Create voter guide
+                    voter_guide_we_vote_id = ""
+                    results = voter_guide_manager.update_or_create_organization_voter_guide_by_election_id(
+                        voter_guide_we_vote_id, linked_organization_we_vote_id, google_civic_election_id)
             # If here, we are storing an analytics entry
             state_code = ''
             organization_id_temp = 0

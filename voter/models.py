@@ -1912,6 +1912,7 @@ class VoterDeviceLink(models.Model):
         verbose_name="google civic election id", default=0, null=False)
     state_code = models.CharField(verbose_name="us state the device is most recently active in",
                                   max_length=255, null=True)
+    date_last_changed = models.DateTimeField(verbose_name='date last changed', null=True, auto_now=True)  # last_updated
 
     def generate_voter_device_id(self):
         # A simple mapping to this function
@@ -2309,6 +2310,7 @@ class VoterAddress(models.Model):
         verbose_name="have normalized fields been updated from Google since address change?", default=False)
 
     voter_entered_address = models.BooleanField(verbose_name="Did the voter manually enter an address?", default=False)
+    date_last_changed = models.DateTimeField(verbose_name='date last changed', null=True, auto_now=True)  # last_updated
 
     def get_state_code_from_text_for_map_search(self):
         if positive_value_exists(self.text_for_map_search):

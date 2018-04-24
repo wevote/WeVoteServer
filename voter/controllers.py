@@ -30,7 +30,7 @@ from position.models import PositionListManager
 import robot_detection
 from twitter.models import TwitterLinkToOrganization, TwitterLinkToVoter, TwitterUserManager
 from validate_email import validate_email
-from voter_guide.controllers import duplicate_voter_guides
+from voter_guide.controllers import duplicate_voter_guides, move_voter_guides_to_another_voter
 import wevote_functions.admin
 from wevote_functions.functions import generate_voter_device_id, is_voter_device_id_valid, positive_value_exists
 from donate.controllers import donation_history_for_a_voter, move_donation_info_to_another_voter
@@ -253,6 +253,16 @@ def merge_voter_accounts(from_voter, to_voter):
         }
         return results
 
+    if from_voter.we_vote_id == to_voter.we_vote_id:
+        status += "MOVE_VOTER_INFO_FROM_AND_TO_VOTER_WE_VOTE_IDS_IDENTICAL "
+        results = {
+            'status': status,
+            'success': success,
+            'from_voter': from_voter,
+            'to_voter': to_voter,
+        }
+        return results
+
     # Transfer data in voter records
     # first_name
     # middle_name
@@ -336,6 +346,16 @@ def move_facebook_info_to_another_voter(from_voter, to_voter):
     if not hasattr(from_voter, "we_vote_id") or not positive_value_exists(from_voter.we_vote_id) \
             or not hasattr(to_voter, "we_vote_id") or not positive_value_exists(to_voter.we_vote_id):
         status += "MOVE_FACEBOOK_INFO_MISSING_FROM_OR_TO_VOTER_ID "
+        results = {
+            'status': status,
+            'success': success,
+            'from_voter': from_voter,
+            'to_voter': to_voter,
+        }
+        return results
+
+    if from_voter.we_vote_id == to_voter.we_vote_id:
+        status += "MOVE_FACEBOOK_INFO_TO_ANOTHER_VOTER-from_voter.we_vote_id and to_voter.we_vote_id identical "
         results = {
             'status': status,
             'success': success,
@@ -428,6 +448,16 @@ def move_twitter_info_to_another_voter(from_voter, to_voter):
     if not hasattr(from_voter, "we_vote_id") or not positive_value_exists(from_voter.we_vote_id) \
             or not hasattr(to_voter, "we_vote_id") or not positive_value_exists(to_voter.we_vote_id):
         status += "MOVE_TWITTER_INFO_MISSING_FROM_OR_TO_VOTER_WE_VOTE_ID "
+        results = {
+            'status': status,
+            'success': success,
+            'from_voter': from_voter,
+            'to_voter': to_voter,
+        }
+        return results
+
+    if from_voter.we_vote_id == to_voter.we_vote_id:
+        status += "MOVE_TWITTER_INFO_TO_ANOTHER_VOTER-from_voter.we_vote_id and to_voter.we_vote_id identical "
         results = {
             'status': status,
             'success': success,
@@ -1534,6 +1564,12 @@ def voter_merge_two_accounts_for_api(  # voterMergeTwoAccounts
     # are complicated.  See the comments in the donate/controllers.py
     move_donation_results = move_donation_info_to_another_voter(voter, new_owner_voter)
     status += " " + move_donation_results['status']
+
+    # Bring over Voter Guides
+    move_voter_guide_results = move_voter_guides_to_another_voter(
+        from_voter_we_vote_id, to_voter_we_vote_id,
+        from_voter_linked_organization_we_vote_id, to_voter_linked_organization_we_vote_id)
+    status += " " + move_voter_guide_results['status']
 
     # Bring over Analytics information
     move_analytics_results = move_analytics_info_to_another_voter(from_voter_we_vote_id, to_voter_we_vote_id)

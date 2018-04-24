@@ -7,14 +7,15 @@ from .models import BallotItemListManager, BallotItemManager, BallotReturnedList
     VoterBallotSaved, VoterBallotSavedManager
 from candidate.models import CandidateCampaignListManager
 from config.base import get_environment_variable
-from datetime import datetime
-from election.models import ElectionManager
+from datetime import datetime, timedelta
+from election.models import ElectionManager, fetch_next_election_for_state
 from exception.models import handle_exception
 from import_export_ballotpedia.controllers import voter_ballot_items_retrieve_from_ballotpedia_for_api
 from import_export_google_civic.controllers import voter_ballot_items_retrieve_from_google_civic_for_api
 from measure.models import ContestMeasureList, ContestMeasureManager
 from office.models import ContestOfficeManager, ContestOfficeListManager
 from polling_location.models import PollingLocationManager
+import pytz
 from voter.models import BALLOT_ADDRESS, VoterAddress, VoterAddressManager, VoterDeviceLinkManager
 import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, extract_state_code_from_address_string, positive_value_exists, \
@@ -1370,23 +1371,57 @@ def choose_election_from_existing_data(voter_device_link, google_civic_election_
             return results
 
     if positive_value_exists(voter_device_link.google_civic_election_id):
-        voter_ballot_saved_results = voter_ballot_saved_manager.retrieve_voter_ballot_saved_by_voter_id(
-            voter_id, voter_device_link.google_civic_election_id)
-        status += voter_ballot_saved_results['status']
-        if voter_ballot_saved_results['voter_ballot_saved_found']:
-            voter_ballot_saved = voter_ballot_saved_results['voter_ballot_saved']
-            status += "VOTER_BALLOT_SAVED_FOUND_FROM_VOTER_DEVICE_LINK "
-            results = {
-                'status':                   status,
-                'success':                  True,
-                'google_civic_election_id': voter_ballot_saved.google_civic_election_id,
-                'voter_ballot_saved_found': True,
-                'voter_ballot_saved':       voter_ballot_saved
-            }
-            return results
-        else:
-            # If here, then we expected a VoterBallotSaved entry, but didn't find it. Unable to repair the data
-            pass
+        # If the voter_device_link was updated more than 7 days ago, check to see if this election is in the past.
+        # We do this check because we don't want a voter to return 1 year later and be returned to the old election.
+        timezone = pytz.timezone("America/Los_Angeles")
+        datetime_now = timezone.localize(datetime.now())
+        election_choice_is_stale_duration = timedelta(days=7)
+        election_choice_is_stale_date = datetime_now - election_choice_is_stale_duration
+        state_code = ""
+        voter_device_link_election_is_current = True
+        if voter_device_link.date_last_changed and election_choice_is_stale_date:
+            if voter_device_link.date_last_changed < election_choice_is_stale_date:
+                # It it in the past, check to see if there is an upcoming election in this state or in the country.
+                if positive_value_exists(voter_device_link.state_code):
+                    state_code = voter_device_link.state_code
+                elif voter_address and positive_value_exists(voter_address.normalized_state):
+                    state_code = voter_address.normalized_state
+                elif voter_address and positive_value_exists(voter_address.get_state_code_from_text_for_map_search()):
+                    state_code = voter_address.get_state_code_from_text_for_map_search()
+                if positive_value_exists(state_code):
+                    election_manager = ElectionManager()
+                    results = election_manager.retrieve_next_election_for_state(state_code)
+                    if results['election_found']:
+                        election = results['election']
+                        if positive_value_exists(election.google_civic_election_id):
+                            # If there IS, save voter_device_link without google_civic_election_id,
+                            # then exit this branch without finding google_civic_election_id, but stay in this function.
+                            try:
+                                voter_device_link.google_civic_election_id = 0
+                                voter_device_link.save()
+                            except Exception as e:
+                                pass
+                            status += "VOTER_DEVICE_LINK_ELECTION_EXPIRED "
+                            voter_device_link_election_is_current = False
+
+        if voter_device_link_election_is_current:
+            voter_ballot_saved_results = voter_ballot_saved_manager.retrieve_voter_ballot_saved_by_voter_id(
+                voter_id, voter_device_link.google_civic_election_id)
+            status += voter_ballot_saved_results['status']
+            if voter_ballot_saved_results['voter_ballot_saved_found']:
+                voter_ballot_saved = voter_ballot_saved_results['voter_ballot_saved']
+                status += "VOTER_BALLOT_SAVED_FOUND_FROM_VOTER_DEVICE_LINK "
+                results = {
+                    'status':                   status,
+                    'success':                  True,
+                    'google_civic_election_id': voter_ballot_saved.google_civic_election_id,
+                    'voter_ballot_saved_found': True,
+                    'voter_ballot_saved':       voter_ballot_saved
+                }
+                return results
+            else:
+                # If here, then we expected a VoterBallotSaved entry, but didn't find it. Unable to repair the data
+                pass
 
     if voter_address.google_civic_election_id is None:
         voter_address_google_civic_election_id = 0
@@ -1395,24 +1430,58 @@ def choose_election_from_existing_data(voter_device_link, google_civic_election_
     voter_address_google_civic_election_id = convert_to_int(voter_address_google_civic_election_id)
     if positive_value_exists(voter_address_google_civic_election_id) \
             and voter_address_google_civic_election_id != 2000:
-        # If we have already linked an address to a VoterBallotSaved entry, use this
-        voter_ballot_saved_results = voter_ballot_saved_manager.retrieve_voter_ballot_saved_by_voter_id(
-            voter_id, voter_address_google_civic_election_id)
-        status += voter_ballot_saved_results['status']
-        if voter_ballot_saved_results['voter_ballot_saved_found']:
-            status += "VOTER_BALLOT_SAVED_FOUND_FROM_VOTER_ADDRESS "
-            voter_ballot_saved = voter_ballot_saved_results['voter_ballot_saved']
-            results = {
-                'status':                   status,
-                'success':                  True,
-                'google_civic_election_id': voter_ballot_saved.google_civic_election_id,
-                'voter_ballot_saved_found': True,
-                'voter_ballot_saved':       voter_ballot_saved
-            }
-            return results
-        else:
-            # If here, then we expected a VoterBallotSaved entry, but didn't find it. Unable to repair the data
-            pass
+        # If the voter_address was updated more than 7 days ago, check to see if this election is in the past.
+        # We do this check because we don't want a voter to return 1 year later and be returned to the old election.
+        timezone = pytz.timezone("America/Los_Angeles")
+        datetime_now = timezone.localize(datetime.now())
+        election_choice_is_stale_duration = timedelta(days=7)
+        election_choice_is_stale_date = datetime_now - election_choice_is_stale_duration
+        state_code = ""
+        voter_address_election_is_current = True
+        if voter_address.date_last_changed and election_choice_is_stale_date:
+            if voter_address.date_last_changed < election_choice_is_stale_date:
+                # It it in the past, check to see if there is an upcoming election in this state or in the country.
+                if voter_address and positive_value_exists(voter_address.normalized_state):
+                    state_code = voter_address.normalized_state
+                elif voter_address and positive_value_exists(voter_address.get_state_code_from_text_for_map_search()):
+                    state_code = voter_address.get_state_code_from_text_for_map_search()
+                elif positive_value_exists(voter_device_link.state_code):
+                    state_code = voter_device_link.state_code
+                if positive_value_exists(state_code):
+                    election_manager = ElectionManager()
+                    results = election_manager.retrieve_next_election_for_state(state_code)
+                    if results['election_found']:
+                        election = results['election']
+                        if positive_value_exists(election.google_civic_election_id):
+                            # If there IS, save voter_address without google_civic_election_id,
+                            # then exit this branch without finding google_civic_election_id, but stay in this function.
+                            try:
+                                voter_address.google_civic_election_id = 0
+                                voter_address.save()
+                            except Exception as e:
+                                pass
+                            status += "VOTER_ADDRESS_ELECTION_EXPIRED "
+                            voter_address_election_is_current = False
+
+        if voter_address_election_is_current:
+            # If we have already linked an address to a VoterBallotSaved entry, use this
+            voter_ballot_saved_results = voter_ballot_saved_manager.retrieve_voter_ballot_saved_by_voter_id(
+                voter_id, voter_address_google_civic_election_id)
+            status += voter_ballot_saved_results['status']
+            if voter_ballot_saved_results['voter_ballot_saved_found']:
+                status += "VOTER_BALLOT_SAVED_FOUND_FROM_VOTER_ADDRESS "
+                voter_ballot_saved = voter_ballot_saved_results['voter_ballot_saved']
+                results = {
+                    'status':                   status,
+                    'success':                  True,
+                    'google_civic_election_id': voter_ballot_saved.google_civic_election_id,
+                    'voter_ballot_saved_found': True,
+                    'voter_ballot_saved':       voter_ballot_saved
+                }
+                return results
+            else:
+                # If here, then we expected a VoterBallotSaved entry, but didn't find it. Unable to repair the data
+                pass
 
     status += "VOTER_BALLOT_SAVED_NOT_FOUND_FROM_EXISTING_DATA "
     error_results = {
