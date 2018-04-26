@@ -179,8 +179,12 @@ def office_list_view(request):
         success = False
 
     if office_list_found:
+        position_list_manager = PositionListManager()
         for office in office_list:
             office.candidate_count = fetch_candidate_count_for_office(office.id)
+            office.positions_count = position_list_manager.fetch_public_positions_count_for_contest_office(
+                office.id, office.we_vote_id)
+
             updated_office_list.append(office)
 
             office_list_count = len(updated_office_list)
