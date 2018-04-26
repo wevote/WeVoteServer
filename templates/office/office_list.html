@@ -99,6 +99,7 @@
             <td>District ID</td>
             <td>Ballotpedia District ID</td>
             <td># of Candidates</td>
+            <td>Public Positions</td>
             <td>Ocd Division ID</td>
             <td>Ballotpedia Race ID</td>
             <td>Ballotpedia Elected Office ID</td>
@@ -120,6 +121,7 @@
             <td>{{ office.district_id|default_if_none:"" }}</td>
             <td>{{ office.ballotpedia_district_id|default_if_none:"" }}</td>
             <td>{{ office.candidate_count }}</td>
+            <td>{{ office.positions_count }}</td>
             <td>{{ office.ocd_division_id|default_if_none:"" }}</td>
             <td>{{ office.ballotpedia_race_id }}</td>
             <td>{{ office.ballotpedia_office_id }}</td>

@@ -215,6 +215,14 @@ def candidate_list_view(request):
     show_all = request.GET.get('show_all', False)
     show_all_elections = request.GET.get('show_all_elections', False)
 
+    review_mode = request.GET.get('review_mode', False)
+    if positive_value_exists(review_mode):
+        if positive_value_exists(google_civic_election_id):
+            # Only show all if there is an election id
+            show_all = True
+        else:
+            messages.add_message(request, messages.ERROR, "Please choose election id.")
+
     candidate_list = []
     candidate_list_count = 0
     candidate_count_start = 0
@@ -295,45 +303,55 @@ def candidate_list_view(request):
         results = election_manager.retrieve_upcoming_elections()
         election_list = results['election_list']
 
-    # Attach the best guess Twitter account, if any, to each candidate in list
-    for candidate in candidate_list:
-        try:
-            twitter_possibility_query = TwitterLinkPossibility.objects.order_by('-likelihood_score')
-            twitter_possibility_query = twitter_possibility_query.filter(
-                candidate_campaign_we_vote_id=candidate.we_vote_id)
-            twitter_possibility_list = list(twitter_possibility_query)
-            if twitter_possibility_list and positive_value_exists(len(twitter_possibility_list)):
-                candidate.candidate_merge_possibility = twitter_possibility_list[0]
-            else:
-                request_history_query = RemoteRequestHistory.objects.filter(
-                    candidate_campaign_we_vote_id__iexact=candidate.we_vote_id,
-                    kind_of_action=RETRIEVE_POSSIBLE_TWITTER_HANDLES)
-                request_history_list = list(request_history_query)
-                if request_history_list and positive_value_exists(len(request_history_list)):
-                    candidate.no_twitter_possibilities_found = True
-        except Exception as e:
-            candidate.candidate_merge_possibility = None
+    total_twitter_handles = 0
+    if positive_value_exists(review_mode):
+        # Attach the positions_count, if any, to each candidate in list
+        position_list_manager = PositionListManager()
+        for candidate in candidate_list:
+            candidate.positions_count = position_list_manager.fetch_public_positions_count_for_candidate_campaign(
+                candidate.id, candidate.we_vote_id)
+            if positive_value_exists(candidate.candidate_twitter_handle):
+                total_twitter_handles += 1
+    else:
+        # Attach the best guess Twitter account, if any, to each candidate in list
+        for candidate in candidate_list:
+            try:
+                twitter_possibility_query = TwitterLinkPossibility.objects.order_by('-likelihood_score')
+                twitter_possibility_query = twitter_possibility_query.filter(
+                    candidate_campaign_we_vote_id=candidate.we_vote_id)
+                twitter_possibility_list = list(twitter_possibility_query)
+                if twitter_possibility_list and positive_value_exists(len(twitter_possibility_list)):
+                    candidate.candidate_merge_possibility = twitter_possibility_list[0]
+                else:
+                    request_history_query = RemoteRequestHistory.objects.filter(
+                        candidate_campaign_we_vote_id__iexact=candidate.we_vote_id,
+                        kind_of_action=RETRIEVE_POSSIBLE_TWITTER_HANDLES)
+                    request_history_list = list(request_history_query)
+                    if request_history_list and positive_value_exists(len(request_history_list)):
+                        candidate.no_twitter_possibilities_found = True
+            except Exception as e:
+                candidate.candidate_merge_possibility = None
 
-    # Attach the best guess google search, if any, to each candidate in list
-    for candidate in candidate_list:
-        try:
-            google_search_possibility_query = GoogleSearchUser.objects.filter(
-                candidate_campaign_we_vote_id=candidate.we_vote_id).\
-                exclude(item_image__isnull=True).exclude(item_image__exact='')
-            google_search_possibility_query = google_search_possibility_query.order_by(
-                '-chosen_and_updated', 'not_a_match', '-likelihood_score')
-            google_search_merge_possibility = list(google_search_possibility_query)
-            if google_search_merge_possibility and positive_value_exists(len(google_search_merge_possibility)):
-                candidate.google_search_merge_possibility = google_search_possibility_query[0]
-            else:
-                request_history_query = RemoteRequestHistory.objects.filter(
-                    candidate_campaign_we_vote_id__iexact=candidate.we_vote_id,
-                    kind_of_action=RETRIEVE_POSSIBLE_GOOGLE_LINKS)
-                request_history_list = list(request_history_query)
-                if request_history_list and positive_value_exists(len(request_history_list)):
-                    candidate.no_google_possibilities_found = True
-        except Exception as e:
-            candidate.google_search_merge_possibility = None
+        # Attach the best guess google search, if any, to each candidate in list
+        for candidate in candidate_list:
+            try:
+                google_search_possibility_query = GoogleSearchUser.objects.filter(
+                    candidate_campaign_we_vote_id=candidate.we_vote_id).\
+                    exclude(item_image__isnull=True).exclude(item_image__exact='')
+                google_search_possibility_query = google_search_possibility_query.order_by(
+                    '-chosen_and_updated', 'not_a_match', '-likelihood_score')
+                google_search_merge_possibility = list(google_search_possibility_query)
+                if google_search_merge_possibility and positive_value_exists(len(google_search_merge_possibility)):
+                    candidate.google_search_merge_possibility = google_search_possibility_query[0]
+                else:
+                    request_history_query = RemoteRequestHistory.objects.filter(
+                        candidate_campaign_we_vote_id__iexact=candidate.we_vote_id,
+                        kind_of_action=RETRIEVE_POSSIBLE_GOOGLE_LINKS)
+                    request_history_list = list(request_history_query)
+                    if request_history_list and positive_value_exists(len(request_history_list)):
+                        candidate.no_google_possibilities_found = True
+            except Exception as e:
+                candidate.google_search_merge_possibility = None
 
     template_values = {
         'candidate_count_start':    candidate_count_start,
@@ -348,9 +366,11 @@ def candidate_list_view(request):
         'messages_on_stage':        messages_on_stage,
         'next_page_url':            next_page_url,
         'previous_page_url':        previous_page_url,
+        'review_mode':              review_mode,
         'show_all_elections':       show_all_elections,
         'state_code':               state_code,
         'state_list':               sorted_state_list,
+        'total_twitter_handles':    total_twitter_handles,
     }
     return render(request, 'candidate/candidate_list.html', template_values)
 
