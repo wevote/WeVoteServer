@@ -3,7 +3,7 @@
 # -*- coding: UTF-8 -*-
 
 from .controllers import *
-from .models import Issue, MOST_LINKED_ORGANIZATIONS, OrganizationLinkToIssue
+from .models import ALPHABETICAL_ASCENDING, Issue, OrganizationLinkToIssue
 from admin_tools.views import redirect_to_sign_in_page
 from config.base import get_environment_variable
 from django.db.models import Q
@@ -13,7 +13,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.messages import get_messages
 from django.shortcuts import render
-from election.models import Election, ElectionManager
+from election.models import ElectionManager
 from exception.models import handle_record_found_more_than_one_exception
 from image.controllers import cache_issue_image_master, cache_resized_image_locally, delete_cached_images_for_issue
 from image.models import WeVoteImageManager
@@ -80,7 +80,7 @@ def issues_sync_out_view(request):  # issuesSyncOut
 
 def issues_retrieve_view(request):  # issuesRetrieve
     voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
-    sort_formula = request.GET.get('sort_formula', MOST_LINKED_ORGANIZATIONS)
+    sort_formula = request.GET.get('sort_formula', ALPHABETICAL_ASCENDING)  # Alternate: MOST_LINKED_ORGANIZATIONS
     ballot_location_shortcut = request.GET.get('ballot_location_shortcut', False)
     ballot_returned_we_vote_id = request.GET.get('ballot_returned_we_vote_id', False)
     google_civic_election_id = request.GET.get('google_civic_election_id', False)
@@ -94,7 +94,7 @@ def issues_retrieve_view(request):  # issuesRetrieve
 
 def retrieve_issues_to_follow_view(request):  # retrieveIssuesToFollow
     voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
-    sort_formula = request.GET.get('sort_formula', MOST_LINKED_ORGANIZATIONS)
+    sort_formula = request.GET.get('sort_formula', ALPHABETICAL_ASCENDING)  # Alternate: MOST_LINKED_ORGANIZATIONS
     http_response = retrieve_issues_to_follow_for_api(voter_device_id, sort_formula)
     return http_response
 
