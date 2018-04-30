@@ -47,9 +47,30 @@
 </div>
 
 <div class="form-group">
+    <label for="ballotpedia_yes_vote_description_id" class="col-sm-3 control-label">A "yes" vote means...</label>
+    <div class="col-sm-8">
+        <textarea name="ballotpedia_yes_vote_description"
+                  id="ballotpedia_yes_vote_description_id"
+                  class="form-control animated"
+                  placeholder="">{% if measure %}{{ measure.ballotpedia_yes_vote_description|default_if_none:"" }}{% else %}{{ ballotpedia_yes_vote_description|default_if_none:"" }}{% endif %}</textarea>
+    </div>
+</div>
+
+<div class="form-group">
+    <label for="ballotpedia_no_vote_description_id" class="col-sm-3 control-label">A "no" vote means...</label>
+    <div class="col-sm-8">
+        <textarea name="ballotpedia_no_vote_description"
+                  id="ballotpedia_no_vote_description_id"
+                  class="form-control animated"
+                  placeholder="">{% if measure %}{{ measure.ballotpedia_no_vote_description|default_if_none:"" }}{% else %}{{ ballotpedia_no_vote_description|default_if_none:"" }}{% endif %}</textarea>
+    </div>
+</div>
+
+<div class="form-group">
     <label for="measure_text_id" class="col-sm-3 control-label">Measure Text</label>
     <div class="col-sm-8">
         <textarea name="measure_text"
+                  id="measure_text_id"
                   class="form-control animated"
                   placeholder="Enter measure text">{% if measure %}{{ measure.measure_text|default_if_none:"" }}{% else %}{{ measure_text|default_if_none:"" }}{% endif %}</textarea>
     </div>

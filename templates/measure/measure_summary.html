@@ -10,9 +10,11 @@
 {% if measure %}
 
     <h1>{{ measure.measure_title }}</h1>
-    <p>{{ measure.measure_subtitle }}</p>
-    <p>{{ measure.measure_text }}</p>
-    <p>Measure Website: <strong>{{ measure.measure_url }}</strong><br />
+    <p>{{ measure.measure_subtitle|default_if_none:"" }}</p>
+    <p>{{ measure.measure_text|default_if_none:"" }}</p>
+    <p>A yes vote means...: {{ measure.ballotpedia_yes_vote_description|default_if_none:"" }}</p>
+    <p>A no vote means...: {{ measure.ballotpedia_no_vote_description|default_if_none:"" }}</p>
+    <p>Measure Website: {{ measure.measure_url|default_if_none:"" }}<br />
     <a href="{% url 'position:refresh_positions_with_contest_measure_details_for_election' %}?measure_id={{ measure.id }}&measure_we_vote_id={{ measure.we_vote_id }}">
         Refresh Positions</a><br />
     <a href="{% url 'measure:measure_edit' measure.id %}?google_civic_election_id={{ google_civic_election_id }}">edit</a>

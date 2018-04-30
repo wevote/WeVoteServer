@@ -209,6 +209,8 @@ BATCH_IMPORT_KEYS_ACCEPTED_FOR_MEASURES = {
     'ballotpedia_measure_summary': 'ballotpedia_measure_summary',
     'ballotpedia_measure_text': 'ballotpedia_measure_text',
     'ballotpedia_measure_url': 'ballotpedia_measure_url',
+    'ballotpedia_yes_vote_description': 'ballotpedia_yes_vote_description',
+    'ballotpedia_no_vote_description': 'ballotpedia_no_vote_description',
     'ctcl_uuid': 'ctcl_uuid',
     'election_day_text': 'election_day_text',
     'electoral_district_id': 'electoral_district_id',
@@ -230,6 +232,8 @@ BATCH_HEADER_MAP_MEASURES_TO_BALLOTPEDIA_MEASURES = {
     'ballotpedia_measure_summary': 'summary',
     'ballotpedia_measure_text': 'text',
     'ballotpedia_measure_url': 'ballotpedia_measure_url',
+    'ballotpedia_yes_vote_description': 'ballotpedia_yes_vote_description',
+    'ballotpedia_no_vote_description': 'ballotpedia_no_vote_description',
     'election_day_text': 'election_day_text',
     'state_code': 'state_code',
 }
@@ -298,8 +302,12 @@ BATCH_IMPORT_KEYS_ACCEPTED_FOR_BALLOT_ITEMS = {
     'contest_measure_we_vote_id': 'contest_measure_we_vote_id',
     'contest_measure_id': 'contest_measure_id',
     'contest_measure_name': 'contest_measure_name',
+    'contest_measure_text': 'contest_measure_text',
+    'contest_measure_url': 'contest_measure_url',
     'election_day_text': 'election_day_text',
     'local_ballot_order': 'local_ballot_order',
+    'no_vote_description': 'no_vote_description',
+    'yes_vote_description': 'yes_vote_description',
     'polling_location_we_vote_id': 'polling_location_we_vote_id',
     'state_code': 'state_code',
 }
@@ -4308,6 +4316,10 @@ class BatchRowActionMeasure(models.Model):
     ballotpedia_page_title = models.CharField(
         verbose_name="Page title on Ballotpedia", max_length=255, null=True, blank=True)
     ballotpedia_photo_url = models.URLField(verbose_name='url of ballotpedia logo', blank=True, null=True)
+    ballotpedia_yes_vote_description = models.TextField(
+        verbose_name="what a yes vote means", null=True, blank=True, default=None)
+    ballotpedia_no_vote_description = models.TextField(
+        verbose_name="what a no vote means", null=True, blank=True, default=None)
     ctcl_uuid = models.CharField(verbose_name="ctcl uuid", max_length=80, null=True, blank=True)
 
     status = models.TextField(verbose_name="batch row action measure status", null=True, blank=True, default="")
@@ -4989,6 +5001,10 @@ class BatchRowActionBallotItem(models.Model):
 
     measure_subtitle = models.TextField(verbose_name="google civic referendum subtitle",
                                         null=True, blank=True, default="")
+    measure_text = models.TextField(verbose_name="measure text", null=True, blank=True, default="")
+    measure_url = models.URLField(verbose_name='url of measure', blank=True, null=True)
+    yes_vote_description = models.TextField(verbose_name="what a yes vote means", null=True, blank=True, default=None)
+    no_vote_description = models.TextField(verbose_name="what a no vote means", null=True, blank=True, default=None)
 
     status = models.TextField(verbose_name="batch row action ballot item status", null=True, blank=True, default="")
 

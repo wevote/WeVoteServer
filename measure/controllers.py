@@ -74,22 +74,25 @@ def measure_retrieve_for_api(measure_id, measure_we_vote_id):  # measureRetrieve
         json_data = {
             'status':                   status,
             'success':                  True,
-            'kind_of_ballot_item':      MEASURE,
-            'id':                       contest_measure.id,
-            'we_vote_id':               contest_measure.we_vote_id,
-            'google_civic_election_id': contest_measure.google_civic_election_id,
             'ballot_item_display_name': contest_measure.measure_title,
+            'no_vote_description':      contest_measure.ballotpedia_no_vote_description,
+            'yes_vote_description':     contest_measure.ballotpedia_yes_vote_description,
+            'district_name':            contest_measure.district_name,
+            'election_display_name':    election_display_name,
+            'google_civic_election_id': contest_measure.google_civic_election_id,
+            'id':                       contest_measure.id,
+            'kind_of_ballot_item':      MEASURE,
             'measure_subtitle':         contest_measure.measure_subtitle,
             'maplight_id':              contest_measure.maplight_id,
-            'vote_smart_id':            contest_measure.vote_smart_id,
             'measure_text':             contest_measure.measure_text,
-            'measure_url':              contest_measure.measure_url,
+            'measure_url':              contest_measure.measure_url
+            if contest_measure.measure_url else contest_measure.ballotpedia_measure_url,
             'ocd_division_id':          contest_measure.ocd_division_id,
-            'district_name':            contest_measure.district_name,
+            'regional_display_name':    "",
             'state_code':               contest_measure.state_code,
             'state_display_name':       convert_state_code_to_state_text(contest_measure.state_code),
-            'election_display_name':    election_display_name,
-            'regional_display_name':    "",
+            'vote_smart_id':            contest_measure.vote_smart_id,
+            'we_vote_id':               contest_measure.we_vote_id,
         }
     else:
         json_data = {
@@ -208,6 +211,12 @@ def measures_import_from_structured_json(structured_json):
                                                                                    one_measure else '',
                 'ballotpedia_photo_url': one_measure['ballotpedia_photo_url'] if 'ballotpedia_photo_url' in
                                                                                  one_measure else '',
+                'ballotpedia_measure_url': one_measure['ballotpedia_measure_url']
+                if 'ballotpedia_measure_url' in one_measure else '',
+                'ballotpedia_no_vote_description': one_measure['ballotpedia_no_vote_description']
+                if 'ballotpedia_yes_vote_description' in one_measure else '',
+                'ballotpedia_yes_vote_description': one_measure['ballotpedia_yes_vote_description']
+                if 'ballotpedia_no_vote_description' in one_measure else '',
                 'district_id': district_id,
                 'district_name': district_name,
                 'district_scope': one_measure['district_scope'] if 'district_scope' in one_measure else '',

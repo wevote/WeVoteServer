@@ -71,12 +71,14 @@ def measure_retrieve_doc_template_values(url_root):
                    '  "ballot_item_display_name": string,\n' \
                    '  "measure_subtitle": string,\n' \
                    '  "maplight_id": integer,\n' \
+                   '  "no_vote_description": string,\n' \
                    '  "vote_smart_id": string,\n' \
                    '  "measure_text": string,\n' \
                    '  "measure_url": string,\n' \
                    '  "ocd_division_id": string,\n' \
                    '  "district_name": string,\n' \
                    '  "state_code": string,\n' \
+                   '  "yes_vote_description": string,\n' \
                    '}'
 
     template_values = {

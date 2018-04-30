@@ -62,7 +62,10 @@ def ballot_items_sync_out_view(request):  # ballotItemsSyncOut
         ballot_item_list_dict = ballot_item_list.values('ballot_item_display_name', 'contest_office_we_vote_id',
                                                         'contest_measure_we_vote_id', 'google_ballot_placement',
                                                         'google_civic_election_id', 'state_code', 'local_ballot_order',
-                                                        'measure_subtitle', 'polling_location_we_vote_id')
+                                                        'measure_subtitle', 'measure_url',
+                                                        'no_vote_description',
+                                                        'polling_location_we_vote_id',
+                                                        'yes_vote_description')
         if ballot_item_list_dict:
             ballot_item_list_json = list(ballot_item_list_dict)
             return HttpResponse(json.dumps(ballot_item_list_json), content_type='application/json')

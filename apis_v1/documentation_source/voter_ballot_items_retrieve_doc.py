@@ -89,6 +89,9 @@ def voter_ballot_items_retrieve_doc_template_values(url_root):
                    '     "kind_of_ballot_item": string (CANDIDATE, MEASURE),\n' \
                    '     "measure_subtitle": string (if kind_of_ballot_item is MEASURE)\n' \
                    '     "measure_text": string (if kind_of_ballot_item is MEASURE)\n' \
+                   '     "measure_url": string (if kind_of_ballot_item is MEASURE)\n' \
+                   '     "yes_vote_description": string (if kind_of_ballot_item is MEASURE)\n' \
+                   '     "no_vote_description": string (if kind_of_ballot_item is MEASURE)\n' \
                    '     "candidate_list": list (if kind_of_ballot_item is CANDIDATE)\n' \
                    '      [\n' \
                    '        "id": integer,\n' \

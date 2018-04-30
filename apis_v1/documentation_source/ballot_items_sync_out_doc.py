@@ -39,7 +39,11 @@ def ballot_items_sync_out_doc_template_values(url_root):
                    '  "state_code": string,\n' \
                    '  "local_ballot_order": string,\n' \
                    '  "measure_subtitle": string,\n' \
+                   '  "measure_text": string,\n' \
+                   '  "measure_url": string,\n' \
+                   '  "no_vote_description": string,\n' \
                    '  "polling_location_we_vote_id": string,\n' \
+                   '  "yes_vote_description": string,\n' \
                    '}]'
 
     template_values = {

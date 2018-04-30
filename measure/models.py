@@ -86,6 +86,10 @@ class ContestMeasure(models.Model):
     ballotpedia_page_title = models.CharField(
         verbose_name="Page title on Ballotpedia", max_length=255, null=True, blank=True)
     ballotpedia_photo_url = models.URLField(verbose_name='url of ballotpedia logo', blank=True, null=True)
+    ballotpedia_yes_vote_description = models.TextField(
+        verbose_name="what a yes vote means", null=True, blank=True, default=None)
+    ballotpedia_no_vote_description = models.TextField(
+        verbose_name="what a no vote means", null=True, blank=True, default=None)
     ctcl_uuid = models.CharField(verbose_name="ctcl uuid", max_length=80, null=True, blank=True)
 
     def get_measure_state(self):
@@ -94,6 +98,20 @@ class ContestMeasure(models.Model):
         # Pull this from ocdDivisionId
         ocd_division_id = self.ocd_division_id
         return extract_state_from_ocd_division_id(ocd_division_id)
+
+    def get_measure_text(self):
+        if positive_value_exists(self.measure_text):
+            return self.measure_text
+        if positive_value_exists(self.ballotpedia_measure_text):
+            return self.ballotpedia_measure_text
+        return ""
+
+    def get_measure_url(self):
+        if positive_value_exists(self.measure_url):
+            return self.measure_url
+        if positive_value_exists(self.ballotpedia_measure_url):
+            return self.ballotpedia_measure_url
+        return ""
 
     # We override the save function so we can auto-generate we_vote_id
     def save(self, *args, **kwargs):
@@ -483,7 +501,7 @@ class ContestMeasureManager(models.Model):
         try:
             new_measure = ContestMeasure.objects.create(
                 measure_title=measure_title, measure_subtitle=measure_subtitle, measure_text=measure_text,
-                state_code=state_code,ctcl_uuid=ctcl_uuid, google_civic_election_id=google_civic_election_id)
+                state_code=state_code, ctcl_uuid=ctcl_uuid, google_civic_election_id=google_civic_election_id)
             if new_measure:
                 success = True
                 status = "CREATE_MEASURE_ROW_ENTRY-MEASURE_CREATED "
@@ -506,6 +524,12 @@ class ContestMeasureManager(models.Model):
                     new_measure.ballotpedia_measure_text = defaults['ballotpedia_measure_text']
                 if 'ballotpedia_measure_url' in defaults:
                     new_measure.ballotpedia_measure_url = defaults['ballotpedia_measure_url']
+                if 'ballotpedia_yes_vote_description' in defaults:
+                    new_measure.ballotpedia_yes_vote_description = defaults['ballotpedia_yes_vote_description']
+                if 'ballotpedia_no_vote_description' in defaults:
+                    new_measure.ballotpedia_no_vote_description = defaults['ballotpedia_no_vote_description']
+                if 'measure_url' in defaults:
+                    new_measure.measure_url = defaults['measure_url']
                 if 'state_code' in defaults:
                     new_measure.state_code = defaults['state_code']
                 new_measure.save()
@@ -574,6 +598,13 @@ class ContestMeasureManager(models.Model):
                     existing_measure_entry.ballotpedia_measure_text = defaults['ballotpedia_measure_text']
                 if 'ballotpedia_measure_url' in defaults:
                     existing_measure_entry.ballotpedia_measure_url = defaults['ballotpedia_measure_url']
+                if 'ballotpedia_yes_vote_description' in defaults:
+                    existing_measure_entry.ballotpedia_yes_vote_description = \
+                        defaults['ballotpedia_yes_vote_description']
+                if 'ballotpedia_no_vote_description' in defaults:
+                    existing_measure_entry.ballotpedia_no_vote_description = defaults['ballotpedia_no_vote_description']
+                if 'measure_url' in defaults:
+                    existing_measure_entry.measure_url = defaults['measure_url']
                 if 'state_code' in defaults:
                     existing_measure_entry.state_code = defaults['state_code']
                 # now go ahead and save this entry (update)

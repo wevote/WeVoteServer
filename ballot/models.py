@@ -80,6 +80,9 @@ class BallotItem(models.Model):
     measure_subtitle = models.TextField(verbose_name="google civic referendum subtitle",
                                         null=True, blank=True, default="")
     measure_text = models.TextField(verbose_name="measure text", null=True, blank=True, default="")
+    measure_url = models.URLField(verbose_name='url of measure', blank=True, null=True)
+    yes_vote_description = models.TextField(verbose_name="what a yes vote means", null=True, blank=True, default=None)
+    no_vote_description = models.TextField(verbose_name="what a no vote means", null=True, blank=True, default=None)
 
     def is_contest_office(self):
         if self.contest_office_id:
@@ -145,7 +148,7 @@ class BallotItemManager(models.Model):
             self, voter_id, google_civic_election_id, google_ballot_placement,
             ballot_item_display_name, measure_subtitle, measure_text, local_ballot_order,
             contest_office_id=0, contest_office_we_vote_id='',
-            contest_measure_id=0, contest_measure_we_vote_id='', state_code=''):
+            contest_measure_id=0, contest_measure_we_vote_id='', state_code='', defaults={}):
         exception_multiple_object_returned = False
         new_ballot_item_created = False
         ballot_item_found = False  # At the end, does a ballot_item exist?
@@ -188,6 +191,13 @@ class BallotItemManager(models.Model):
                     'measure_text':                 measure_text,
                     'state_code':                   state_code,
                 }
+                if 'measure_url' in defaults:
+                    create_values['measure_url'] = defaults['measure_url']
+                if 'yes_vote_description' in defaults:
+                    create_values['yes_vote_description'] = defaults['yes_vote_description']
+                if 'no_vote_description' in defaults:
+                    create_values['no_vote_description'] = defaults['no_vote_description']
+
                 # We search with contest_measure_id and contest_office_id because they are (will be) integers,
                 #  which will be a faster search
                 ballot_item_on_stage, new_ballot_item_created = BallotItem.objects.get_or_create(
@@ -213,6 +223,15 @@ class BallotItemManager(models.Model):
                     ballot_item_on_stage.ballot_item_display_name = ballot_item_display_name
                     ballot_item_on_stage.measure_subtitle = measure_subtitle
                     ballot_item_on_stage.measure_text = measure_text
+                    if 'measure_url' in defaults:
+                        measure_url = defaults['measure_url']
+                        ballot_item_on_stage.measure_url = measure_url
+                    if 'yes_vote_description' in defaults:
+                        yes_vote_description = defaults['yes_vote_description']
+                        ballot_item_on_stage.yes_vote_description = yes_vote_description
+                    if 'no_vote_description' in defaults:
+                        no_vote_description = defaults['no_vote_description']
+                        ballot_item_on_stage.no_vote_description = no_vote_description
                     ballot_item_on_stage.save()
                     ballot_item_found = True
 
@@ -238,7 +257,7 @@ class BallotItemManager(models.Model):
             self, polling_location_we_vote_id, google_civic_election_id, google_ballot_placement,
             ballot_item_display_name, measure_subtitle, measure_text, local_ballot_order,
             contest_office_id=0, contest_office_we_vote_id='',
-            contest_measure_id=0, contest_measure_we_vote_id='', state_code=''):
+            contest_measure_id=0, contest_measure_we_vote_id='', state_code='', defaults={}):
         exception_multiple_object_returned = False
         new_ballot_item_created = False
         ballot_item_found = False  # At the end, does a ballot_item exist?
@@ -313,6 +332,14 @@ class BallotItemManager(models.Model):
                     'measure_text':                 measure_text,
                     'state_code':                   state_code,
                 }
+
+                if 'measure_url' in defaults:
+                    create_values['measure_url'] = defaults['measure_url']
+                if 'yes_vote_description' in defaults:
+                    create_values['yes_vote_description'] = defaults['yes_vote_description']
+                if 'no_vote_description' in defaults:
+                    create_values['no_vote_description'] = defaults['no_vote_description']
+
                 # We search with contest_measure_id and contest_office_id because they are (will be) integers,
                 #  which will be a faster search
                 ballot_item_on_stage, new_ballot_item_created = BallotItem.objects.get_or_create(
@@ -335,6 +362,15 @@ class BallotItemManager(models.Model):
                     ballot_item_on_stage.measure_subtitle = measure_subtitle
                     ballot_item_on_stage.measure_text = measure_text
                     ballot_item_on_stage.state_code = state_code
+                    if 'measure_url' in defaults:
+                        measure_url = defaults['measure_url']
+                        ballot_item_on_stage.measure_url = measure_url
+                    if 'yes_vote_description' in defaults:
+                        yes_vote_description = defaults['yes_vote_description']
+                        ballot_item_on_stage.yes_vote_description = yes_vote_description
+                    if 'no_vote_description' in defaults:
+                        no_vote_description = defaults['no_vote_description']
+                        ballot_item_on_stage.no_vote_description = no_vote_description
                     ballot_item_on_stage.save()
                     ballot_item_found = True
 
@@ -391,6 +427,15 @@ class BallotItemManager(models.Model):
                 new_ballot_item.contest_measure_we_vote_id = defaults['contest_measure_we_vote_id']
                 new_ballot_item.measure_subtitle = defaults['measure_subtitle']
                 new_ballot_item.polling_location_we_vote_id = defaults['polling_location_we_vote_id']
+                if 'measure_url' in defaults:
+                    measure_url = defaults['measure_url']
+                    new_ballot_item.measure_url = measure_url
+                if 'yes_vote_description' in defaults:
+                    yes_vote_description = defaults['yes_vote_description']
+                    new_ballot_item.yes_vote_description = yes_vote_description
+                if 'no_vote_description' in defaults:
+                    no_vote_description = defaults['no_vote_description']
+                    new_ballot_item.no_vote_description = no_vote_description
                 new_ballot_item.save()
             else:
                 success = False
@@ -454,6 +499,15 @@ class BallotItemManager(models.Model):
                 existing_ballot_item_entry.contest_measure_id = defaults['contest_measure_id']
                 existing_ballot_item_entry.contest_measure_we_vote_id = defaults['contest_measure_we_vote_id']
                 existing_ballot_item_entry.measure_subtitle = defaults['measure_subtitle']
+                if 'measure_url' in defaults:
+                    measure_url = defaults['measure_url']
+                    existing_ballot_item_entry.measure_url = measure_url
+                if 'yes_vote_description' in defaults:
+                    yes_vote_description = defaults['yes_vote_description']
+                    existing_ballot_item_entry.yes_vote_description = yes_vote_description
+                if 'no_vote_description' in defaults:
+                    no_vote_description = defaults['no_vote_description']
+                    existing_ballot_item_entry.no_vote_description = no_vote_description
 
                 # now go ahead and save this entry (update)
                 existing_ballot_item_entry.save()
@@ -787,13 +841,20 @@ class BallotItemListManager(models.Model):
         ballot_item_list = retrieve_results['ballot_item_list']
         ballot_item_manager = BallotItemManager()
 
-        for ballot_item in ballot_item_list:
+        for one_ballot_item in ballot_item_list:
+            defaults = {}
+            defaults['measure_url'] = one_ballot_item.measure_url
+            defaults['yes_vote_description'] = one_ballot_item.yes_vote_description
+            defaults['no_vote_description'] = one_ballot_item.no_vote_description
+
             create_results = ballot_item_manager.update_or_create_ballot_item_for_voter(
-                to_voter_id, ballot_returned.google_civic_election_id, ballot_item.google_ballot_placement,
-                ballot_item.ballot_item_display_name, ballot_item.measure_subtitle, ballot_item.measure_text,
-                ballot_item.local_ballot_order,
-                ballot_item.contest_office_id, ballot_item.contest_office_we_vote_id,
-                ballot_item.contest_measure_id, ballot_item.contest_measure_we_vote_id, ballot_item.state_code)
+                to_voter_id, ballot_returned.google_civic_election_id, one_ballot_item.google_ballot_placement,
+                one_ballot_item.ballot_item_display_name, one_ballot_item.measure_subtitle,
+                one_ballot_item.measure_text,
+                one_ballot_item.local_ballot_order,
+                one_ballot_item.contest_office_id, one_ballot_item.contest_office_we_vote_id,
+                one_ballot_item.contest_measure_id, one_ballot_item.contest_measure_we_vote_id,
+                one_ballot_item.state_code, defaults)
             if not create_results['success']:
                 status += create_results['status']
 
