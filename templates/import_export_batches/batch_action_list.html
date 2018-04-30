@@ -590,6 +590,9 @@
                         <th>state_code</th>
                         <th>district id</th>
                         <th>measure_subtitle</th>
+                        <th>ballotpedia_measure_url</th>
+                        <th>ballotpedia_yes_vote_description</th>
+                        <th>ballotpedia_no_vote_description</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -653,6 +656,9 @@
                           {% endif %}
                         </td>
                         <td>{{ one_batch_row.batch_row_action.measure_subtitle|default_if_none:"" }}</td>
+                        <td>{{ one_batch_row.batch_row_action.ballotpedia_measure_url|default_if_none:"" }}</td>
+                        <td>{{ one_batch_row.batch_row_action.ballotpedia_yes_vote_description|default_if_none:"" }}</td>
+                        <td>{{ one_batch_row.batch_row_action.ballotpedia_no_vote_description|default_if_none:"" }}</td>
                     </tr>
                     {% if one_batch_row.batch_row_action.status %}
                     <tr class="{% if one_batch_row.batch_row_action.kind_of_action == "IMPORT_CREATE" %}
@@ -960,10 +966,11 @@
                         {% endif %}">
                         <th></th>
                         <th>local ballot order</th>
-                        <th>ballot item</th>
+                        <th>ballot item display name</th>
                         <th>election</th>
                         <th>polling location</th>
-                        <th>ballot item display name</th>
+                        <th>yes vote description</th>
+                        <th>no vote description</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -1014,7 +1021,8 @@
                         </td>
                         <td>{{ one_batch_row.batch_row_action.google_civic_election_id|default_if_none:"" }}</td>
                         <td>{{ one_batch_row.batch_row_action.polling_location_we_vote_id|default_if_none:"" }}</td>
-                        <td>{{ one_batch_row.batch_row_action.ballot_item_display_name|default_if_none:"" }}</td>
+                        <td>{{ one_batch_row.batch_row_action.yes_vote_description|default_if_none:"" }}</td>
+                        <td>{{ one_batch_row.batch_row_action.no_vote_description|default_if_none:"" }}</td>
                     </tr>
                     {% if one_batch_row.batch_row_action.status %}
                     <tr class="{% if one_batch_row.batch_row_action.kind_of_action == "IMPORT_CREATE" %}

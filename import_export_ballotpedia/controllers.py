@@ -376,9 +376,14 @@ def groom_ballotpedia_data_for_processing(structured_json, google_civic_election
                             # root
                             one_measure_json['ballotpedia_measure_id'] = one_measure_json['id']
                             one_measure_json['ballotpedia_measure_url'] = one_measure_json['url']
+                            one_measure_json['ballotpedia_yes_vote_description'] = one_measure_json['yes_vote']
+                            one_measure_json['ballotpedia_no_vote_description'] = one_measure_json['no_vote']
+                            one_measure_json['ballotpedia_measure_url'] = one_measure_json['url']
                             one_measure_json['election_day_text'] = one_measure_json['election_date']
                             # election
                             one_measure_json['ballotpedia_election_id'] = inner_election_json['id']
+                            one_measure_json['ballotpedia_election_type'] = inner_election_json['type']  # TODO
+                            one_measure_json['ballotpedia_election_date'] = inner_election_json['date']  # TODO
                             # district
                             one_measure_json['ballotpedia_district_id'] = inner_district_json['id']
                             one_measure_json['state_code'] = inner_district_json['state']
@@ -909,12 +914,21 @@ def store_one_ballot_from_ballotpedia_api(ballot_item_dict_list, google_civic_el
         if positive_value_exists(ballot_item_display_name) and positive_value_exists(state_code) \
                 and positive_value_exists(google_civic_election_id):
             ballot_item_manager = BallotItemManager()
+
+            defaults = {}
+            defaults['measure_url'] = one_ballot_item_dict['ballotpedia_measure_url'] \
+                if 'ballotpedia_measure_url' in one_ballot_item_dict else ''
+            defaults['yes_vote_description'] = one_ballot_item_dict['ballotpedia_yes_vote_description'] \
+                if 'ballotpedia_yes_vote_description' in one_ballot_item_dict else ''
+            defaults['no_vote_description'] = one_ballot_item_dict['ballotpedia_no_vote_description'] \
+                if 'ballotpedia_no_vote_description' in one_ballot_item_dict else ''
+
             if positive_value_exists(voter_id):
                 results = ballot_item_manager.update_or_create_ballot_item_for_voter(
                         voter_id, google_civic_election_id, google_ballot_placement,
                         ballot_item_display_name, measure_subtitle, measure_text, local_ballot_order,
                         contest_office_id, contest_office_we_vote_id,
-                        contest_measure_id, contest_measure_we_vote_id, state_code)
+                        contest_measure_id, contest_measure_we_vote_id, state_code, defaults)
                 if results['ballot_item_found']:
                     number_of_ballot_items_updated += 1
             elif positive_value_exists(polling_location_we_vote_id):
@@ -922,7 +936,7 @@ def store_one_ballot_from_ballotpedia_api(ballot_item_dict_list, google_civic_el
                     polling_location_we_vote_id, google_civic_election_id, google_ballot_placement,
                     ballot_item_display_name, measure_subtitle, measure_text, local_ballot_order,
                     contest_office_id, contest_office_we_vote_id,
-                    contest_measure_id, contest_measure_we_vote_id, state_code)
+                    contest_measure_id, contest_measure_we_vote_id, state_code, defaults)
                 if results['ballot_item_found']:
                     number_of_ballot_items_updated += 1
 

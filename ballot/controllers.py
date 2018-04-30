@@ -253,6 +253,7 @@ def ballot_items_import_from_structured_json(structured_json):
         else:
             proceed_to_update_or_create = False
 
+        defaults = {}
         if proceed_to_update_or_create:
             ballot_item_display_name = one_ballot_item['ballot_item_display_name'] \
                 if 'ballot_item_display_name' in one_ballot_item else ''
@@ -263,6 +264,12 @@ def ballot_items_import_from_structured_json(structured_json):
             local_ballot_order = one_ballot_item['local_ballot_order'] \
                 if 'local_ballot_order' in one_ballot_item else ''
 
+            defaults['measure_url'] = one_ballot_item['measure_url'] if 'measure_url' in one_ballot_item else ''
+            defaults['yes_vote_description'] = one_ballot_item['yes_vote_description'] \
+                if 'yes_vote_description' in one_ballot_item else ''
+            defaults['no_vote_description'] = one_ballot_item['no_vote_description'] \
+                if 'no_vote_description' in one_ballot_item else ''
+
             contest_office_id = 0
             contest_measure_id = 0
 
@@ -270,7 +277,7 @@ def ballot_items_import_from_structured_json(structured_json):
                 polling_location_we_vote_id, google_civic_election_id, google_ballot_placement,
                 ballot_item_display_name, measure_subtitle, measure_text, local_ballot_order,
                 contest_office_id, contest_office_we_vote_id,
-                contest_measure_id, contest_measure_we_vote_id, state_code)
+                contest_measure_id, contest_measure_we_vote_id, state_code, defaults)
 
         else:
             ballot_items_not_processed += 1
@@ -1576,12 +1583,15 @@ def voter_ballot_items_retrieve_for_one_election_for_api(voter_device_id, voter_
                     'ballot_item_display_name':     ballot_item.ballot_item_display_name,
                     'google_civic_election_id':     ballot_item.google_civic_election_id,
                     'google_ballot_placement':      ballot_item.google_ballot_placement,
+                    'id':                           ballot_item_id,
+                    'kind_of_ballot_item':          kind_of_ballot_item,
                     'local_ballot_order':           ballot_item.local_ballot_order,
                     'measure_subtitle':             ballot_item.measure_subtitle,
                     'measure_text':                 ballot_item.measure_text,
-                    'kind_of_ballot_item':          kind_of_ballot_item,
-                    'id':                           ballot_item_id,
+                    'measure_url':                  ballot_item.measure_url,
+                    'no_vote_description':          ballot_item.no_vote_description,
                     'we_vote_id':                   we_vote_id,
+                    'yes_vote_description':         ballot_item.yes_vote_description,
                 }
                 ballot_items_to_display.append(one_ballot_item.copy())
 

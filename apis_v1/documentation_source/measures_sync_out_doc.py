@@ -33,6 +33,8 @@ def measures_sync_out_doc_template_values(url_root):
                    '  "vote_smart_id": integer,\n' \
                    '  "ballotpedia_page_title": string,\n' \
                    '  "ballotpedia_photo_url": string,\n' \
+                   '  "ballotpedia_no_vote_description": string,\n' \
+                   '  "ballotpedia_yes_vote_description": string,\n' \
                    '  "district_id": string,\n' \
                    '  "district_name": string,\n' \
                    '  "district_scope": string,\n' \
