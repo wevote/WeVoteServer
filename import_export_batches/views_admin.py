@@ -1224,6 +1224,7 @@ def batch_set_batch_list_view(request):
     google_civic_election_id = request.GET.get('google_civic_election_id', 0)
     analyze_all_button = request.GET.get('analyze_all_button', 0)
     create_all_button = request.GET.get('create_all_button', 0)
+    update_all_button = request.GET.get('update_all_button', 0)
 
     batch_list_modified = []
 
@@ -1237,6 +1238,18 @@ def batch_set_batch_list_view(request):
             for one_batch_description in batch_list:
                 results = create_batch_row_actions(one_batch_description.batch_header_id)
                 if results['batch_actions_created']:
+                    retrieve_again = True
+
+            if retrieve_again:
+                batch_description = BatchDescription.objects.filter(batch_set_id=batch_set_id)
+                batch_list = list(batch_description)
+
+        retrieve_again = False
+        if positive_value_exists(update_all_button):
+            for one_batch_description in batch_list:
+                results = import_data_from_batch_row_actions(
+                    one_batch_description.kind_of_batch, IMPORT_ADD_TO_EXISTING, one_batch_description.batch_header_id)
+                if results['number_of_table_rows_updated']:
                     retrieve_again = True
 
             if retrieve_again:
@@ -1263,22 +1276,6 @@ def batch_set_batch_list_view(request):
                 batch_manager.fetch_batch_row_action_count(batch_header_id, one_batch_description.kind_of_batch)
 
             batch_list_modified.append(one_batch_description)
-
-        # loop through all data sets in this batch and create batch_action entries
-        # for one_batch_set_row in batch_list:
-        #     batch_header_id = one_batch_set_row.batch_header_id
-        #     results = create_batch_row_actions(batch_header_id, 0)
-        #     if results['success']:
-        #         # number_of_batch_actions_created += results['number_of_batch_actions_created']
-        #         # status += results['status']
-        #         one_batch_set_row.number_of_batch_actions_created = results['number_of_batch_actions_created']
-        #         pass
-        #     else:
-        #         # rows must be existing in the action table, get the count
-        #         batch_manager = BatchManager()
-        #         kind_of_batch = one_batch_set_row.kind_of_batch
-        #         one_batch_set_row.number_of_batch_actions_created = batch_manager.count_number_of_batch_action_rows(
-        #             batch_header_id, kind_of_batch)
     except BatchDescription.DoesNotExist:
         # This is fine
         batch_description = BatchDescription()
