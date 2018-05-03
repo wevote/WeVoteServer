@@ -249,7 +249,8 @@ def generate_voter_guides_for_one_election_view(request):
                              voter_guide_created_count=voter_guide_created_count,
                              voter_guide_updated_count=voter_guide_updated_count,
                          ))
-    return HttpResponseRedirect(reverse('voter_guide:voter_guide_list', args=()))
+    return HttpResponseRedirect(reverse('voter_guide:voter_guide_list', args=()) +
+                                "?google_civic_election_id=" + str(google_civic_election_id))
 
 
 @login_required

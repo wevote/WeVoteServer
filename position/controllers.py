@@ -1424,15 +1424,43 @@ def position_list_for_ballot_item_for_api(voter_device_id, friends_vs_public,  #
             ballot_item_id = measure_id
             ballot_item_we_vote_id = measure_we_vote_id
     elif positive_value_exists(office_id) or positive_value_exists(office_we_vote_id):
-        public_positions_list = position_list_manager.retrieve_all_positions_for_contest_office(
-                office_id, office_we_vote_id, stance_we_are_looking_for)
         kind_of_ballot_item = OFFICE
 
-        # Since we want to return the id and we_vote_id, and we don't know for sure that there are any positions
-        # for this ballot_item, we retrieve the following so we can get the id and we_vote_id (per the request of
+        ############################
+        # Retrieve public positions
+        if retrieve_public_positions:
+            retrieve_public_positions_now = True  # The alternate is positions for friends-only
+            return_only_latest_position_per_speaker = True
+            public_positions_list = position_list_manager.retrieve_all_positions_for_contest_office(
+                retrieve_public_positions_now, office_id, office_we_vote_id, stance_we_are_looking_for,
+                return_only_latest_position_per_speaker)
+            is_public_position_setting = True
+            public_positions_list = position_list_manager.add_is_public_position(public_positions_list,
+                                                                                 is_public_position_setting)
+        else:
+            public_positions_list = []
+
+        ##################################
+        # Now retrieve friend's positions
+        if retrieve_friends_positions:
+            retrieve_public_positions_now = False  # This being False means: "Positions from friends-only"
+            return_only_latest_position_per_speaker = True
+            friends_positions_list = position_list_manager.retrieve_all_positions_for_contest_office(
+                retrieve_public_positions_now, office_id, office_we_vote_id, stance_we_are_looking_for,
+                return_only_latest_position_per_speaker, friends_we_vote_id_list)
+            # Now add is_public_position to each value
+            is_public_position_setting = False
+            friends_positions_list = position_list_manager.add_is_public_position(friends_positions_list,
+                                                                                  is_public_position_setting)
+        else:
+            friends_positions_list = []
+
+        # Since we want to return the id and we_vote_id for this ballot item, and we don't know for sure that
+        # there are any positions for this ballot_item (which would include both the id and we_vote_id),
+        # we retrieve the following so we can get the ballot item's id and we_vote_id (per the request of
         # the WebApp team)
         contest_office_manager = ContestOfficeManager()
-        if positive_value_exists(office_id):
+        if positive_value_exists(candidate_id):
             results = contest_office_manager.retrieve_contest_office_from_id(office_id)
         else:
             results = contest_office_manager.retrieve_contest_office_from_we_vote_id(office_we_vote_id)
@@ -1571,6 +1599,9 @@ def position_list_for_ballot_item_for_api(voter_device_id, friends_vs_public,  #
             one_position_dict_for_api = {
                 'position_we_vote_id':              one_position.we_vote_id,
                 'ballot_item_display_name':         one_position.ballot_item_display_name,
+                'kind_of_ballot_item':              one_position.get_kind_of_ballot_item(),
+                'ballot_item_id':                   one_position.get_ballot_item_id(),
+                'ballot_item_we_vote_id':           one_position.get_ballot_item_we_vote_id(),
                 'speaker_display_name':             speaker_display_name,
                 'speaker_image_url_https_large':    one_position.speaker_image_url_https_large
                 if positive_value_exists(one_position.speaker_image_url_https_large)
