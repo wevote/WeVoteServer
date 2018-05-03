@@ -607,18 +607,46 @@ class PositionForFriends(models.Model):
         if self.we_vote_id:
             self.we_vote_id = self.we_vote_id.strip().lower()
         if self.we_vote_id == "" or self.we_vote_id is None:  # If there isn't a value...
-            # ...generate a new id
-            site_unique_id_prefix = fetch_site_unique_id_prefix()
-            next_local_integer = fetch_next_we_vote_id_position_integer()
-            # "wv" = We Vote
-            # site_unique_id_prefix = a generated (or assigned) unique id for one server running We Vote
-            # "pos" = tells us this is a unique id for an pos
-            # next_integer = a unique, sequential integer for this server - not necessarily tied to database id
-            self.we_vote_id = "wv{site_unique_id_prefix}pos{next_integer}".format(
-                site_unique_id_prefix=site_unique_id_prefix,
-                next_integer=next_local_integer,
-            )
+            self.generate_new_we_vote_id()
         super(PositionForFriends, self).save(*args, **kwargs)
+
+    def generate_new_we_vote_id(self):
+        # ...generate a new id
+        site_unique_id_prefix = fetch_site_unique_id_prefix()
+        next_local_integer = fetch_next_we_vote_id_position_integer()
+        # "wv" = We Vote
+        # site_unique_id_prefix = a generated (or assigned) unique id for one server running We Vote
+        # "pos" = tells us this is a unique id for an pos
+        # next_integer = a unique, sequential integer for this server - not necessarily tied to database id
+        self.we_vote_id = "wv{site_unique_id_prefix}pos{next_integer}".format(
+            site_unique_id_prefix=site_unique_id_prefix,
+            next_integer=next_local_integer,
+        )
+        # TODO we need to deal with the situation where we_vote_id is NOT unique on save
+        return
+
+    def get_kind_of_ballot_item(self):
+        if positive_value_exists(self.candidate_campaign_we_vote_id):
+            return "CANDIDATE"
+        elif positive_value_exists(self.contest_measure_we_vote_id):
+            return "MEASURE"
+        elif positive_value_exists(self.contest_office_we_vote_id):
+            return "OFFICE"
+        return ""
+
+    def get_ballot_item_id(self):
+        if positive_value_exists(self.candidate_campaign_id):
+            return self.candidate_campaign_id
+        elif positive_value_exists(self.contest_measure_id):
+            return self.contest_measure_id
+        return ""
+
+    def get_ballot_item_we_vote_id(self):
+        if positive_value_exists(self.candidate_campaign_we_vote_id):
+            return self.candidate_campaign_we_vote_id
+        elif positive_value_exists(self.contest_measure_we_vote_id):
+            return self.contest_measure_we_vote_id
+        return ""
 
     # Is the position is an actual endorsement?
     def is_support(self):
