@@ -85,12 +85,12 @@ class BallotItem(models.Model):
     no_vote_description = models.TextField(verbose_name="what a no vote means", null=True, blank=True, default=None)
 
     def is_contest_office(self):
-        if self.contest_office_id:
+        if positive_value_exists(self.contest_office_id) or positive_value_exists(self.contest_office_we_vote_id):
             return True
         return False
 
     def is_contest_measure(self):
-        if self.contest_measure_id:
+        if positive_value_exists(self.contest_measure_id) or positive_value_exists(self.contest_measure_we_vote_id):
             return True
         return False
 
