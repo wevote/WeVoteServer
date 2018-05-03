@@ -110,9 +110,10 @@ def save_candidate_campaign_signal(sender, instance, **kwargs):
         try:
             res = elastic_search_object.index(index="candidates", doc_type='candidate', id=instance.id, body=doc)
             if res["_shards"]["successful"] <= 1:
-                logger.error("failed to index CandidateCampaign " + instance.we_vote_id)
+                logger.error("failed to index CandidateCampaign " + str(instance.we_vote_id))
         except Exception as err:
-            logger.error(err)
+            status = "SAVE_CANDIDATE_CAMPAIGN_SIGNAL, err: " + str(err)
+            logger.error(status)
 
 
 @receiver(post_delete, sender=CandidateCampaign)
@@ -122,9 +123,10 @@ def delete_candidate_campaign_signal(sender, instance, **kwargs):
         try:
             res = elastic_search_object.delete(index="candidates", doc_type='candidate', id=instance.id)
             if res["_shards"]["successful"] <= 1:
-                logger.error("failed to delete CandidateCampaign " + instance.we_vote_id)
+                logger.error("failed to delete CandidateCampaign " + str(instance.we_vote_id))
         except Exception as err:
-            logger.error(err)
+            status = "DELETE_CANDIDATE_CAMPAIGN_SIGNAL, err: " + str(err)
+            logger.error(status)
 
 
 # ContestMeasure
@@ -143,9 +145,10 @@ def save_contest_measure_signal(sender, instance, **kwargs):
         try:
             res = elastic_search_object.index(index="measures", doc_type='measure', id=instance.id, body=doc)
             if res["_shards"]["successful"] <= 1:
-                logger.error("failed to index ContestMeasure " + instance.we_vote_id)
+                logger.error("failed to index ContestMeasure " + str(instance.we_vote_id))
         except Exception as err:
-            logger.error(err)
+            status = "SAVE_CONTEST_MEASURE_SIGNAL, err: " + str(err)
+            logger.error(status)
 
 
 @receiver(post_delete, sender=ContestMeasure)
@@ -155,9 +158,10 @@ def delete_contest_measure_signal(sender, instance, **kwargs):
         try:
             res = elastic_search_object.delete(index="measures", doc_type='measure', id=instance.id)
             if res["_shards"]["successful"] <= 1:
-                logger.error("failed to delete ContestMeasure " + instance.we_vote_id)
+                logger.error("failed to delete ContestMeasure " + str(instance.we_vote_id))
         except Exception as err:
-            logger.error(err)
+            status = "DELETE_CONTEST_MEASURE_SIGNAL, err: " + str(err)
+            logger.error(status)
 
 
 # ContestOffice
@@ -174,9 +178,10 @@ def save_contest_office_signal(sender, instance, **kwargs):
         try:
             res = elastic_search_object.index(index="offices", doc_type='office', id=instance.id, body=doc)
             if res["_shards"]["successful"] <= 1:
-                logger.error("failed to index ContestMeasure " + instance.we_vote_id)
+                logger.error("failed to index ContestOffice " + str(instance.we_vote_id))
         except Exception as err:
-            logger.error(err)
+            status = "SAVE_CONTEST_OFFICE_SIGNAL, err: " + str(err)
+            logger.error(status)
 
 
 @receiver(post_delete, sender=ContestOffice)
@@ -186,9 +191,10 @@ def delete_contest_office_signal(sender, instance, **kwargs):
         try:
             res = elastic_search_object.delete(index="offices", doc_type='office', id=instance.id)
             if res["_shards"]["successful"] <= 1:
-                logger.error("failed to delete ContestMeasure " + instance.we_vote_id)
+                logger.error("failed to delete ContestOffice " + str(instance.we_vote_id))
         except Exception as err:
-            logger.error(err)
+            status = "DELETE_CONTEST_OFFICE_SIGNAL, err: " + str(err)
+            logger.error(status)
 
 
 # Election
@@ -208,16 +214,18 @@ def save_election_signal(sender, instance, **kwargs):
             try:
                 res = elastic_search_object.index(index="elections", doc_type='election', id=instance.id, body=doc)
                 if res["_shards"]["successful"] <= 1:
-                    logger.error("failed to index Election " + instance.election_name)
+                    logger.error("failed to index Election " + str(instance.election_name))
             except Exception as err:
-                logger.error(err)
+                status = "SAVE_ELECTION_SIGNAL, err: " + str(err)
+                logger.error(status)
         else:
             try:
                 res = elastic_search_object.delete(index="elections", doc_type='election', id=instance.id)
                 if res["_shards"]["successful"] <= 1:
-                    logger.error("failed to delete Election " + instance.election_name)
+                    logger.error("failed to delete1 Election " + str(instance.election_name))
             except Exception as err:
-                logger.error(err)
+                status = "DELETE_ELECTION_SIGNAL1, err: " + str(err)
+                logger.error(status)
 
 
 @receiver(post_delete, sender=Election)
@@ -227,9 +235,10 @@ def delete_election_signal(sender, instance, **kwargs):
         try:
             res = elastic_search_object.delete(index="elections", doc_type='election', id=instance.id)
             if res["_shards"]["successful"] <= 1:
-                logger.error("failed to delete Election " + instance.election_name)
+                logger.error("failed to delete2 Election " + str(instance.election_name))
         except Exception as err:
-            logger.error(err)
+            status = "DELETE_ELECTION_SIGNAL2, err: " + str(err)
+            logger.error(status)
 
 
 # Organization
@@ -248,9 +257,10 @@ def save_organization_signal(sender, instance, **kwargs):
         try:
             res = elastic_search_object.index(index="organizations", doc_type='organization', id=instance.id, body=doc)
             if res["_shards"]["successful"] <= 1:
-                logger.error("failed to index Organization " + instance.we_vote_id)
+                logger.error("failed to index Organization " + str(instance.we_vote_id))
         except Exception as err:
-            logger.error(err)
+            status = "SAVE_ORGANIZATION_SIGNAL, err: " + str(err)
+            logger.error(status)
 
 
 @receiver(post_delete, sender=Organization)
@@ -260,9 +270,10 @@ def delete_organization_signal(sender, instance, **kwargs):
         try:
             res = elastic_search_object.delete(index="organizations", doc_type='organization', id=instance.id)
             if res["_shards"]["successful"] <= 1:
-                logger.error("failed to delete Organization " + instance.we_vote_id)
+                logger.error("failed to delete Organization " + str(instance.we_vote_id))
         except Exception as err:
-            logger.error(err)
+            status = "DELETE_ORGANIZATION_SIGNAL, err: " + str(err)
+            logger.error(status)
 
 
 # @receiver(post_save)

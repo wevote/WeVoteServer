@@ -113,11 +113,16 @@
 
     <p></p>
     <p>
-        <a href="{% url 'voter_guide:generate_voter_guides' %}" >Generate Voter Guides</a>
-    </p>
-    <p>
+    {% if google_civic_election_id == 0 %}
+        <a href="{% url 'voter_guide:generate_voter_guides' %}" >Generate Voter Guides</a>,
         <a href="{% url 'voter_guide:refresh_existing_voter_guides' %}?google_civic_election_id={{ google_civic_election_id }}" >Refresh Voter Guides</a>
+    {% else %}
+        <a href="{% url 'voter_guide:generate_voter_guides_one_election' %}?google_civic_election_id={{ google_civic_election_id }}" >Generate Voter Guides for this Election</a>,
+        <a href="{% url 'voter_guide:refresh_existing_voter_guides' %}?google_civic_election_id={{ google_civic_election_id }}" >Refresh Voter Guides for this Election</a>
+    {% endif %}
     </p>
+    <br />
+    <br />
     <script>
     $(function() {
         $('#google_civic_election_id').change(function() {

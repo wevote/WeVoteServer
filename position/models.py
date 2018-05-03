@@ -256,6 +256,29 @@ class PositionEntered(models.Model):
         # TODO we need to deal with the situation where we_vote_id is NOT unique on save
         return
 
+    def get_kind_of_ballot_item(self):
+        if positive_value_exists(self.candidate_campaign_we_vote_id):
+            return "CANDIDATE"
+        elif positive_value_exists(self.contest_measure_we_vote_id):
+            return "MEASURE"
+        elif positive_value_exists(self.contest_office_we_vote_id):
+            return "OFFICE"
+        return ""
+
+    def get_ballot_item_id(self):
+        if positive_value_exists(self.candidate_campaign_id):
+            return self.candidate_campaign_id
+        elif positive_value_exists(self.contest_measure_id):
+            return self.contest_measure_id
+        return ""
+
+    def get_ballot_item_we_vote_id(self):
+        if positive_value_exists(self.candidate_campaign_we_vote_id):
+            return self.candidate_campaign_we_vote_id
+        elif positive_value_exists(self.contest_measure_we_vote_id):
+            return self.contest_measure_we_vote_id
+        return ""
+
     # Is the position is an actual endorsement?
     def is_support(self):
         if self.stance == SUPPORT:
