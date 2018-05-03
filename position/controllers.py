@@ -1460,7 +1460,7 @@ def position_list_for_ballot_item_for_api(voter_device_id, friends_vs_public,  #
         # we retrieve the following so we can get the ballot item's id and we_vote_id (per the request of
         # the WebApp team)
         contest_office_manager = ContestOfficeManager()
-        if positive_value_exists(candidate_id):
+        if positive_value_exists(office_id):
             results = contest_office_manager.retrieve_contest_office_from_id(office_id)
         else:
             results = contest_office_manager.retrieve_contest_office_from_we_vote_id(office_we_vote_id)
