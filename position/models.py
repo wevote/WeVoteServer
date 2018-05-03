@@ -809,12 +809,12 @@ class PositionListManager(models.Model):
         return outgoing_position_list
 
     def calculate_positions_followed_by_voter(
-            self, voter_id, all_positions_list, organizations_followed_by_voter, voter_friend_list=[]):
+            self, voter_id, all_positions_list, organizations_followed_by_voter_by_id, voter_friend_list=[]):
         """
         We need a list of positions that were made by an organization, public figure or friend that this voter follows
         :param voter_id:
         :param all_positions_list:
-        :param organizations_followed_by_voter:
+        :param organizations_followed_by_voter_by_id:
         :param voter_friend_list:
         :return:
         """
@@ -826,7 +826,7 @@ class PositionListManager(models.Model):
                 positions_followed_by_voter.append(position)
             elif position.voter_we_vote_id in voter_friend_list:
                 positions_followed_by_voter.append(position)
-            elif position.organization_id in organizations_followed_by_voter:
+            elif position.organization_id in organizations_followed_by_voter_by_id:
                 positions_followed_by_voter.append(position)
 
         return positions_followed_by_voter
@@ -1506,7 +1506,9 @@ class PositionListManager(models.Model):
     def retrieve_all_positions_for_candidate_campaign(self, retrieve_public_positions,
                                                       candidate_campaign_id, candidate_campaign_we_vote_id='',
                                                       stance_we_are_looking_for=ANY_STANCE, most_recent_only=True,
-                                                      friends_we_vote_id_list=False, retrieve_all_admin_override=False,
+                                                      friends_we_vote_id_list=False,
+                                                      organizations_followed_we_vote_id_list=False,
+                                                      retrieve_all_admin_override=False,
                                                       read_only=False):
         """
         We do not attempt to retrieve public positions and friend's-only positions in the same call.
@@ -1517,8 +1519,11 @@ class PositionListManager(models.Model):
         :param most_recent_only:
         :param friends_we_vote_id_list: If this comes in as a list, use that list. If it comes in as False,
          we can consider looking up the values if they are needed, but we will then need voter_device_id passed in too.
-        :param retrieve_all_admin_override
-        :param read_only
+        :param organizations_followed_we_vote_id_list: If this comes in as a list, use that list.
+         If it comes in as False, we can consider looking up the values if they are needed,
+         but we will then need voter_device_id passed in too.
+        :param retrieve_all_admin_override:
+        :param read_only:
         :return:
         """
         if stance_we_are_looking_for not \
@@ -1534,8 +1539,14 @@ class PositionListManager(models.Model):
             position_list = []
             return position_list
 
-        # If retrieving PositionForFriends, make sure we have the necessary variables
-        if not retrieve_public_positions:
+        if retrieve_public_positions:
+            # If retrieving PositionsEntered, make sure we have the necessary variables
+            if type(organizations_followed_we_vote_id_list) is list \
+                    and len(organizations_followed_we_vote_id_list) == 0:
+                position_list = []
+                return position_list
+        else:
+            # If retrieving PositionForFriends, make sure we have the necessary variables
             if not friends_we_vote_id_list and not retrieve_all_admin_override:
                 position_list = []
                 return position_list
@@ -1550,39 +1561,48 @@ class PositionListManager(models.Model):
             if retrieve_public_positions:
                 # We intentionally do not use 'readonly' here since we need to save based on the results of this query
                 if read_only:
-                    position_list = PositionEntered.objects.using('readonly').order_by('date_entered')
+                    position_list_query = PositionEntered.objects.using('readonly').order_by('date_entered')
                 else:
-                    position_list = PositionEntered.objects.order_by('date_entered')
+                    position_list_query = PositionEntered.objects.order_by('date_entered')
                 retrieve_friends_positions = False
             else:
                 # We intentionally do not use 'readonly' here since we need to save based on the results of this query
                 if read_only:
-                    position_list = PositionForFriends.objects.using('readonly').order_by('date_entered')
+                    position_list_query = PositionForFriends.objects.using('readonly').order_by('date_entered')
                 else:
-                    position_list = PositionForFriends.objects.order_by('date_entered')
+                    position_list_query = PositionForFriends.objects.order_by('date_entered')
                 retrieve_friends_positions = True
 
             if positive_value_exists(candidate_campaign_id):
-                position_list = position_list.filter(candidate_campaign_id=candidate_campaign_id)
+                position_list_query = position_list_query.filter(candidate_campaign_id=candidate_campaign_id)
             else:
-                position_list = position_list.filter(
+                position_list_query = position_list_query.filter(
                     candidate_campaign_we_vote_id__iexact=candidate_campaign_we_vote_id)
             # SUPPORT, STILL_DECIDING, INFORMATION_ONLY, NO_STANCE, OPPOSE, PERCENT_RATING
             if stance_we_are_looking_for != ANY_STANCE:
                 # If we passed in the stance "ANY_STANCE" it means we want to not filter down the list
                 if stance_we_are_looking_for == SUPPORT or stance_we_are_looking_for == OPPOSE:
-                    position_list = position_list.filter(
+                    position_list_query = position_list_query.filter(
                         Q(stance=stance_we_are_looking_for) | Q(stance=PERCENT_RATING))  # | Q(stance=GRADE_RATING))
                 else:
-                    position_list = position_list.filter(stance=stance_we_are_looking_for)
+                    position_list_query = position_list_query.filter(stance=stance_we_are_looking_for)
+
+            # Only one of these blocks will be used at a time
             if retrieve_friends_positions and friends_we_vote_id_list is not False:
                 # Find positions from friends. Look for we_vote_id case insensitive.
                 we_vote_id_filter = Q()
                 for we_vote_id in friends_we_vote_id_list:
                     we_vote_id_filter |= Q(voter_we_vote_id__iexact=we_vote_id)
-                position_list = position_list.filter(we_vote_id_filter)
+                position_list_query = position_list_query.filter(we_vote_id_filter)
+            if retrieve_public_positions and organizations_followed_we_vote_id_list is not False:
+                # Find positions from organizations voter follows.
+                we_vote_id_filter = Q()
+                for we_vote_id in organizations_followed_we_vote_id_list:
+                    we_vote_id_filter |= Q(organization_we_vote_id__iexact=we_vote_id)
+                position_list_query = position_list_query.filter(we_vote_id_filter)
             # Limit to positions in the last x years - currently we are not limiting
             # position_list = position_list.filter(election_id=election_id)
+            position_list = list(position_list_query)
 
             # Now filter out the positions that have a percent rating that doesn't match the stance_we_are_looking_for
             if stance_we_are_looking_for == SUPPORT or stance_we_are_looking_for == OPPOSE:
@@ -1628,8 +1648,25 @@ class PositionListManager(models.Model):
     def retrieve_all_positions_for_contest_measure(self, retrieve_public_positions,
                                                    contest_measure_id, contest_measure_we_vote_id,
                                                    stance_we_are_looking_for,
-                                                   most_recent_only=True, friends_we_vote_id_list=False,
+                                                   most_recent_only=True,
+                                                   friends_we_vote_id_list=False,
+                                                   organizations_followed_we_vote_id_list=False,
                                                    read_only=False):
+        """
+
+        :param retrieve_public_positions:
+        :param contest_measure_id:
+        :param contest_measure_we_vote_id:
+        :param stance_we_are_looking_for:
+        :param most_recent_only:
+        :param friends_we_vote_id_list: If this comes in as a list, use that list. If it comes in as False,
+         we can consider looking up the values if they are needed, but we will then need voter_device_id passed in too.
+        :param organizations_followed_we_vote_id_list: If this comes in as a list, use that list.
+         If it comes in as False, we can consider looking up the values if they are needed,
+         but we will then need voter_device_id passed in too.
+        :param read_only:
+        :return:
+        """
         if stance_we_are_looking_for not \
                 in(ANY_STANCE, SUPPORT, STILL_DECIDING, INFORMATION_ONLY, NO_STANCE, OPPOSE, PERCENT_RATING):
             position_list = []
@@ -1643,8 +1680,14 @@ class PositionListManager(models.Model):
             position_list = []
             return position_list
 
-        # If retrieving PositionForFriends, make sure we have the necessary variables
-        if not retrieve_public_positions:
+        if retrieve_public_positions:
+            # If retrieving PositionsEntered, make sure we have the necessary variables
+            if type(organizations_followed_we_vote_id_list) is list \
+                    and len(organizations_followed_we_vote_id_list) == 0:
+                position_list = []
+                return position_list
+        else:
+            # If retrieving PositionForFriends, make sure we have the necessary variables
             if not friends_we_vote_id_list:
                 position_list = []
                 return position_list
@@ -1685,12 +1728,19 @@ class PositionListManager(models.Model):
                 # for contest_measure (like we do for candidate_campaign) because we don't have to deal with
                 # PERCENT_RATING data with measures
 
+            # Only one of these blocks will be used at a time
             if retrieve_friends_positions and friends_we_vote_id_list is not False:
                 # Find positions from friends. Look for we_vote_id case insensitive.
                 we_vote_id_filter = Q()
                 for we_vote_id in friends_we_vote_id_list:
                     we_vote_id_filter |= Q(voter_we_vote_id__iexact=we_vote_id)
-                    position_list_query = position_list_query.filter(we_vote_id_filter)
+                position_list_query = position_list_query.filter(we_vote_id_filter)
+            if retrieve_public_positions and organizations_followed_we_vote_id_list is not False:
+                # Find positions from organizations voter follows.
+                we_vote_id_filter = Q()
+                for we_vote_id in organizations_followed_we_vote_id_list:
+                    we_vote_id_filter |= Q(organization_we_vote_id__iexact=we_vote_id)
+                position_list_query = position_list_query.filter(we_vote_id_filter)
             # Limit to positions in the last x years - currently we are not limiting
             # position_list = position_list.filter(election_id=election_id)
 

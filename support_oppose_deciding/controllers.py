@@ -108,15 +108,15 @@ def positions_count_for_candidate_campaign(voter_id, candidate_id, candidate_we_
             stance_we_are_looking_for, most_recent_only
         )
 
-    organizations_followed_by_voter = []
+    organizations_followed_by_voter_by_id = []
     if len(public_positions_list_for_candidate_campaign):
         follow_organization_list_manager = FollowOrganizationList()
-        organizations_followed_by_voter = \
+        organizations_followed_by_voter_by_id = \
             follow_organization_list_manager.retrieve_follow_organization_by_voter_id_simple_id_array(voter_id)
 
     if show_positions_this_voter_follows:
         position_objects = position_list_manager.calculate_positions_followed_by_voter(
-            voter_id, public_positions_list_for_candidate_campaign, organizations_followed_by_voter)
+            voter_id, public_positions_list_for_candidate_campaign, organizations_followed_by_voter_by_id)
 
         ##################################
         # Now retrieve friend's positions
@@ -164,7 +164,7 @@ def positions_count_for_candidate_campaign(voter_id, candidate_id, candidate_we_
         return results
     else:
         positions_not_followed = position_list_manager.calculate_positions_not_followed_by_voter(
-            public_positions_list_for_candidate_campaign, organizations_followed_by_voter)
+            public_positions_list_for_candidate_campaign, organizations_followed_by_voter_by_id)
         positions_not_followed_count = len(positions_not_followed)
         json_data = {
             'status': 'SUCCESSFUL_RETRIEVE_OF_POSITIONS_NOT_FOLLOWED_COUNT_FOR_CANDIDATE',
@@ -211,15 +211,15 @@ def positions_count_for_contest_measure(voter_id, measure_id, measure_we_vote_id
             retrieve_public_positions_now, measure_id, measure_we_vote_id,
             stance_we_are_looking_for, most_recent_only)
 
-    organizations_followed_by_voter = []
+    organizations_followed_by_voter_by_id = []
     if len(public_positions_list_for_contest_measure):
         follow_organization_list_manager = FollowOrganizationList()
-        organizations_followed_by_voter = \
+        organizations_followed_by_voter_by_id = \
             follow_organization_list_manager.retrieve_follow_organization_by_voter_id_simple_id_array(voter_id)
 
     if show_positions_this_voter_follows:
         position_objects = position_list_manager.calculate_positions_followed_by_voter(
-            voter_id, public_positions_list_for_contest_measure, organizations_followed_by_voter)
+            voter_id, public_positions_list_for_contest_measure, organizations_followed_by_voter_by_id)
 
         ##################################
         # Now retrieve friend's positions
@@ -267,7 +267,7 @@ def positions_count_for_contest_measure(voter_id, measure_id, measure_we_vote_id
         return results
     else:
         positions_not_followed = position_list_manager.calculate_positions_not_followed_by_voter(
-            public_positions_list_for_contest_measure, organizations_followed_by_voter)
+            public_positions_list_for_contest_measure, organizations_followed_by_voter_by_id)
         positions_not_followed_count = len(positions_not_followed)
         json_data = {
             'status': 'SUCCESSFUL_RETRIEVE_OF_POSITIONS_NOT_FOLLOWED_COUNT_FOR_CONTEST_MEASURE',
@@ -307,8 +307,7 @@ def position_public_support_count_for_ballot_item_for_api(candidate_id, candidat
 
 
 def positions_count_for_all_ballot_items_for_api(  # positionsCountForAllBallotItems
-        voter_device_id, google_civic_election_id=0,
-        show_positions_this_voter_follows=True):
+        voter_device_id, google_civic_election_id=0):
     """
     We want to return a JSON file with the a list of the support and oppose counts from the orgs, friends and
     public figures the voter follows
@@ -347,14 +346,14 @@ def positions_count_for_all_ballot_items_for_api(  # positionsCountForAllBallotI
     candidate_list_object = CandidateCampaignListManager()
 
     follow_organization_list_manager = FollowOrganizationList()
-    organizations_followed_by_voter = \
-        follow_organization_list_manager.retrieve_follow_organization_by_voter_id_simple_id_array(voter_id)
+    return_we_vote_id = True
+    organizations_followed_by_voter_by_we_vote_id = \
+        follow_organization_list_manager.retrieve_follow_organization_by_voter_id_simple_id_array(
+            voter_id, return_we_vote_id)
 
     # Get a list of all candidates and measures from this election (in the active election)
     ballot_item_list_manager = BallotItemListManager()
     if google_civic_election_id:
-        # ballot_item_results = voter_ballot_items_retrieve_for_one_election_for_api(voter_device_id, voter_id,
-        #                                                                            google_civic_election_id)
         results = ballot_item_list_manager.retrieve_all_ballot_items_for_voter(voter_id, google_civic_election_id)
         status += results['status']
         ballot_item_list = results['ballot_item_list']
@@ -363,14 +362,11 @@ def positions_count_for_all_ballot_items_for_api(  # positionsCountForAllBallotI
         results = figure_out_google_civic_election_id_voter_is_watching(voter_device_id)
         google_civic_election_id_local_scope = results['google_civic_election_id']
 
-        # ballot_item_results = voter_ballot_items_retrieve_for_one_election_for_api(voter_device_id, voter_id,
-        #                                                                            google_civic_election_id_local_scope)
         results = ballot_item_list_manager.retrieve_all_ballot_items_for_voter(
             voter_id, google_civic_election_id_local_scope)
         status += results['status']
         ballot_item_list = results['ballot_item_list']
-
-    # ballot_item_list = ballot_item_results['ballot_item_list']
+        google_civic_election_id = google_civic_election_id_local_scope
 
     # The list where we capture results
     position_counts_list_results = []
@@ -404,11 +400,15 @@ def positions_count_for_all_ballot_items_for_api(  # positionsCountForAllBallotI
                     public_support_positions_list_for_one_ballot_item = \
                         position_list_manager.retrieve_all_positions_for_candidate_campaign(
                             retrieve_public_positions_now, 0, candidate.we_vote_id,
-                            SUPPORT, most_recent_only, read_only=True)
+                            SUPPORT, most_recent_only,
+                            organizations_followed_we_vote_id_list=organizations_followed_by_voter_by_we_vote_id,
+                            read_only=True)
                     public_oppose_positions_list_for_one_ballot_item = \
                         position_list_manager.retrieve_all_positions_for_candidate_campaign(
                             retrieve_public_positions_now, 0, candidate.we_vote_id,
-                            OPPOSE, most_recent_only, read_only=True)
+                            OPPOSE, most_recent_only,
+                            organizations_followed_we_vote_id_list=organizations_followed_by_voter_by_we_vote_id,
+                            read_only=True)
 
                     # Friend's-only Positions
                     retrieve_public_positions_now = False  # Return friends-only positions counts
@@ -427,16 +427,10 @@ def positions_count_for_all_ballot_items_for_api(  # positionsCountForAllBallotI
                     oppose_positions_list_for_one_ballot_item = public_oppose_positions_list_for_one_ballot_item + \
                         friends_only_oppose_positions_list_for_one_ballot_item
 
-                    finalize_results = finalize_support_and_oppose_positions_count(
-                        voter_id, show_positions_this_voter_follows,
-                        organizations_followed_by_voter, friends_we_vote_id_list,
-                        support_positions_list_for_one_ballot_item,
-                        oppose_positions_list_for_one_ballot_item)
-
                     one_ballot_item_results = {
                         'ballot_item_we_vote_id': candidate.we_vote_id,
-                        'support_count': finalize_results['support_positions_count'],
-                        'oppose_count': finalize_results['oppose_positions_count'],
+                        'support_count': len(support_positions_list_for_one_ballot_item),
+                        'oppose_count': len(oppose_positions_list_for_one_ballot_item),
                     }
                     position_counts_list_results.append(one_ballot_item_results)
         elif one_ballot_item.is_contest_measure():
@@ -446,11 +440,15 @@ def positions_count_for_all_ballot_items_for_api(  # positionsCountForAllBallotI
             public_support_positions_list_for_one_ballot_item = \
                 position_list_manager.retrieve_all_positions_for_contest_measure(
                     retrieve_public_positions_now, 0, one_ballot_item.contest_measure_we_vote_id,
-                    SUPPORT, most_recent_only, read_only=True)
+                    SUPPORT, most_recent_only,
+                    organizations_followed_we_vote_id_list=organizations_followed_by_voter_by_we_vote_id,
+                    read_only=True)
             public_oppose_positions_list_for_one_ballot_item = \
                 position_list_manager.retrieve_all_positions_for_contest_measure(
                     retrieve_public_positions_now, 0, one_ballot_item.contest_measure_we_vote_id,
-                    OPPOSE, most_recent_only, read_only=True)
+                    OPPOSE, most_recent_only,
+                    organizations_followed_we_vote_id_list=organizations_followed_by_voter_by_we_vote_id,
+                    read_only=True)
 
             # Friend's-only Positions
             retrieve_public_positions_now = False  # Return friends-only positions counts
@@ -469,15 +467,10 @@ def positions_count_for_all_ballot_items_for_api(  # positionsCountForAllBallotI
             oppose_positions_list_for_one_ballot_item = public_oppose_positions_list_for_one_ballot_item + \
                 friends_oppose_positions_list_for_one_ballot_item
 
-            finalize_results = finalize_support_and_oppose_positions_count(
-                voter_id, show_positions_this_voter_follows,
-                organizations_followed_by_voter, friends_we_vote_id_list,
-                support_positions_list_for_one_ballot_item,
-                oppose_positions_list_for_one_ballot_item)
             one_ballot_item_results = {
                 'ballot_item_we_vote_id': one_ballot_item.contest_measure_we_vote_id,
-                'support_count': finalize_results['support_positions_count'],
-                'oppose_count': finalize_results['oppose_positions_count'],
+                'support_count': len(support_positions_list_for_one_ballot_item),
+                'oppose_count': len(oppose_positions_list_for_one_ballot_item),
             }
             position_counts_list_results.append(one_ballot_item_results)
         else:
@@ -541,7 +534,7 @@ def positions_count_for_one_ballot_item_for_api(voter_device_id, ballot_item_we_
     position_counts_list_results = []
 
     follow_organization_list_manager = FollowOrganizationList()
-    organizations_followed_by_voter = \
+    organizations_followed_by_voter_by_id = \
         follow_organization_list_manager.retrieve_follow_organization_by_voter_id_simple_id_array(voter_id)
 
     friends_we_vote_id_list = []
@@ -589,7 +582,7 @@ def positions_count_for_one_ballot_item_for_api(voter_device_id, ballot_item_we_
 
         finalize_results = finalize_support_and_oppose_positions_count(
             voter_id, show_positions_this_voter_follows,
-            organizations_followed_by_voter, friends_we_vote_id_list,
+            organizations_followed_by_voter_by_id, friends_we_vote_id_list,
             support_positions_list_for_one_ballot_item,
             oppose_positions_list_for_one_ballot_item)
 
@@ -634,7 +627,7 @@ def positions_count_for_one_ballot_item_for_api(voter_device_id, ballot_item_we_
 
         finalize_results = finalize_support_and_oppose_positions_count(
             voter_id, show_positions_this_voter_follows,
-            organizations_followed_by_voter, friends_we_vote_id_list,
+            organizations_followed_by_voter_by_id, friends_we_vote_id_list,
             support_positions_list_for_one_ballot_item,
             oppose_positions_list_for_one_ballot_item)
         one_ballot_item_results = {
@@ -658,29 +651,29 @@ def positions_count_for_one_ballot_item_for_api(voter_device_id, ballot_item_we_
 
 
 def finalize_support_and_oppose_positions_count(voter_id, show_positions_this_voter_follows,
-                                                organizations_followed_by_voter, friends_we_vote_id_list,
+                                                organizations_followed_by_voter_by_id, friends_we_vote_id_list,
                                                 support_positions_list_for_one_ballot_item,
                                                 oppose_positions_list_for_one_ballot_item):
     position_list_manager = PositionListManager()
     if show_positions_this_voter_follows:
         support_positions_followed = position_list_manager.calculate_positions_followed_by_voter(
-            voter_id, support_positions_list_for_one_ballot_item, organizations_followed_by_voter,
+            voter_id, support_positions_list_for_one_ballot_item, organizations_followed_by_voter_by_id,
             friends_we_vote_id_list)
         support_positions_count = len(support_positions_followed)
 
         oppose_positions_followed = position_list_manager.calculate_positions_followed_by_voter(
-            voter_id, oppose_positions_list_for_one_ballot_item, organizations_followed_by_voter,
+            voter_id, oppose_positions_list_for_one_ballot_item, organizations_followed_by_voter_by_id,
             friends_we_vote_id_list)
         oppose_positions_count = len(oppose_positions_followed)
 
     else:
         support_positions_not_followed = position_list_manager.calculate_positions_not_followed_by_voter(
-            support_positions_list_for_one_ballot_item, organizations_followed_by_voter,
+            support_positions_list_for_one_ballot_item, organizations_followed_by_voter_by_id,
             friends_we_vote_id_list)
         support_positions_count = len(support_positions_not_followed)
 
         oppose_positions_not_followed = position_list_manager.calculate_positions_not_followed_by_voter(
-            oppose_positions_list_for_one_ballot_item, organizations_followed_by_voter,
+            oppose_positions_list_for_one_ballot_item, organizations_followed_by_voter_by_id,
             friends_we_vote_id_list)
         oppose_positions_count = len(oppose_positions_not_followed)
 

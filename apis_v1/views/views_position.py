@@ -370,9 +370,10 @@ def positions_count_for_all_ballot_items_view(request):  # positionsCountForAllB
         voter_device_id=voter_device_id,
         google_civic_election_id=google_civic_election_id)
     json_data = {
-        'status':               results['status'],
-        'success':              results['success'],
-        'position_counts_list': results['position_counts_list'],
+        'status':                   results['status'],
+        'success':                  results['success'],
+        'google_civic_election_id': results['google_civic_election_id'],
+        'position_counts_list':     results['position_counts_list'],
     }
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 
