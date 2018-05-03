@@ -1740,7 +1740,7 @@ class PositionListManager(models.Model):
                 we_vote_id_filter = Q()
                 for we_vote_id in organizations_followed_we_vote_id_list:
                     we_vote_id_filter |= Q(organization_we_vote_id__iexact=we_vote_id)
-                position_list = position_list_query.filter(we_vote_id_filter)
+                position_list_query = position_list_query.filter(we_vote_id_filter)
             # Limit to positions in the last x years - currently we are not limiting
             # position_list = position_list.filter(election_id=election_id)
 
