@@ -1478,7 +1478,8 @@ class PositionListManager(models.Model):
     def retrieve_all_positions_for_candidate_campaign(self, retrieve_public_positions,
                                                       candidate_campaign_id, candidate_campaign_we_vote_id='',
                                                       stance_we_are_looking_for=ANY_STANCE, most_recent_only=True,
-                                                      friends_we_vote_id_list=False, retrieve_all_admin_override=False):
+                                                      friends_we_vote_id_list=False, retrieve_all_admin_override=False,
+                                                      read_only=False):
         """
         We do not attempt to retrieve public positions and friend's-only positions in the same call.
         :param retrieve_public_positions:
@@ -1489,6 +1490,7 @@ class PositionListManager(models.Model):
         :param friends_we_vote_id_list: If this comes in as a list, use that list. If it comes in as False,
          we can consider looking up the values if they are needed, but we will then need voter_device_id passed in too.
         :param retrieve_all_admin_override
+        :param read_only
         :return:
         """
         if stance_we_are_looking_for not \
@@ -1519,11 +1521,17 @@ class PositionListManager(models.Model):
         try:
             if retrieve_public_positions:
                 # We intentionally do not use 'readonly' here since we need to save based on the results of this query
-                position_list = PositionEntered.objects.order_by('date_entered')
+                if read_only:
+                    position_list = PositionEntered.objects.using('readonly').order_by('date_entered')
+                else:
+                    position_list = PositionEntered.objects.order_by('date_entered')
                 retrieve_friends_positions = False
             else:
                 # We intentionally do not use 'readonly' here since we need to save based on the results of this query
-                position_list = PositionForFriends.objects.order_by('date_entered')
+                if read_only:
+                    position_list = PositionForFriends.objects.using('readonly').order_by('date_entered')
+                else:
+                    position_list = PositionForFriends.objects.order_by('date_entered')
                 retrieve_friends_positions = True
 
             if positive_value_exists(candidate_campaign_id):
@@ -1592,7 +1600,8 @@ class PositionListManager(models.Model):
     def retrieve_all_positions_for_contest_measure(self, retrieve_public_positions,
                                                    contest_measure_id, contest_measure_we_vote_id,
                                                    stance_we_are_looking_for,
-                                                   most_recent_only=True, friends_we_vote_id_list=False):
+                                                   most_recent_only=True, friends_we_vote_id_list=False,
+                                                   read_only=False):
         if stance_we_are_looking_for not \
                 in(ANY_STANCE, SUPPORT, STILL_DECIDING, INFORMATION_ONLY, NO_STANCE, OPPOSE, PERCENT_RATING):
             position_list = []
@@ -1621,11 +1630,17 @@ class PositionListManager(models.Model):
         try:
             if retrieve_public_positions:
                 # We intentionally do not use 'readonly' here since we need to save based on the results of this query
-                position_list_query = PositionEntered.objects.order_by('date_entered')
+                if read_only:
+                    position_list_query = PositionEntered.objects.using('readonly').order_by('date_entered')
+                else:
+                    position_list_query = PositionEntered.objects.order_by('date_entered')
                 retrieve_friends_positions = False
             else:
                 # We intentionally do not use 'readonly' here since we need to save based on the results of this query
-                position_list_query = PositionForFriends.objects.order_by('date_entered')
+                if read_only:
+                    position_list_query = PositionForFriends.objects.using('readonly').order_by('date_entered')
+                else:
+                    position_list_query = PositionForFriends.objects.order_by('date_entered')
                 retrieve_friends_positions = True
 
             if positive_value_exists(contest_measure_id):
