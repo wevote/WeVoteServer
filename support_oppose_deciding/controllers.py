@@ -349,7 +349,7 @@ def positions_count_for_all_ballot_items_for_api(  # positionsCountForAllBallotI
     read_only = True
     organizations_followed_by_voter_by_we_vote_id = \
         follow_organization_list_manager.retrieve_follow_organization_by_voter_id_simple_id_array(
-            voter_id, return_we_vote_id, read_only)
+            voter_id, return_we_vote_id, read_only=read_only)
 
     # Get a list of all candidates and measures from this election (in the active election)
     ballot_item_list_manager = BallotItemListManager()

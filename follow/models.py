@@ -1033,7 +1033,8 @@ class FollowOrganizationList(models.Model):
                         and voter_linked_organization_we_vote_id != \
                             follow_organization.voter_linked_organization_we_vote_id:
                         try:
-                            follow_organization.voter_linked_organization_we_vote_id = voter_linked_organization_we_vote_id
+                            follow_organization.voter_linked_organization_we_vote_id = \
+                                voter_linked_organization_we_vote_id
                             follow_organization.save()
                         except Exception as e:
                             status = 'FAILED_TO_UPDATE_FOLLOW_ISSUE-voter_id ' + str(voter_id)

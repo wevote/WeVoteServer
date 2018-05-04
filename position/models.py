@@ -150,6 +150,8 @@ class PositionEntered(models.Model):
     vote_smart_rating = models.CharField(
         verbose_name="vote smart value between 0-100", max_length=255, null=True,
         blank=True, unique=False)
+    vote_smart_rating_integer = models.PositiveIntegerField(
+        verbose_name="vote smart value between 0-100", default=None, null=True, blank=True)
     vote_smart_rating_name = models.CharField(max_length=255, null=True, blank=True, unique=False)
 
     # The unique We Vote id of the tweet that is the source of the position
@@ -517,6 +519,8 @@ class PositionForFriends(models.Model):
     vote_smart_rating = models.CharField(
         verbose_name="vote smart value between 0-100", max_length=255, null=True,
         blank=True, unique=False)
+    vote_smart_rating_integer = models.PositiveIntegerField(
+        verbose_name="vote smart value between 0-100", default=None, null=True, blank=True)
     vote_smart_rating_name = models.CharField(max_length=255, null=True, blank=True, unique=False)
 
     # The unique We Vote id of the tweet that is the source of the position
@@ -1104,13 +1108,13 @@ class PositionListManager(models.Model):
                 if stance_we_are_looking_for == SUPPORT:
                     position_list = position_list.filter(
                         Q(stance=stance_we_are_looking_for) |  # Matches "is_support"
-                        (Q(stance=PERCENT_RATING) & Q(vote_smart_rating__gte=66))  # Matches "is_positive_rating"
-                    )  # | Q(stance=GRADE_RATING))
+                        (Q(stance=PERCENT_RATING) & Q(vote_smart_rating_integer__gte=66))
+                    )  # Matches "is_positive_rating"
                 elif stance_we_are_looking_for == OPPOSE:
                     position_list = position_list.filter(
                         Q(stance=stance_we_are_looking_for) |  # Matches "is_oppose"
-                        (Q(stance=PERCENT_RATING) & Q(vote_smart_rating__lte=33))  # Matches "is_negative_rating"
-                    )  # | Q(stance=GRADE_RATING))
+                        (Q(stance=PERCENT_RATING) & Q(vote_smart_rating_integer__lte=33))
+                    )  # Matches "is_negative_rating"
                 else:
                     position_list = position_list.filter(stance=stance_we_are_looking_for)
             # Limit to positions in the last x years - currently we are not limiting
@@ -2610,15 +2614,24 @@ class PositionListManager(models.Model):
             public_or_private = PUBLIC_ONLY
         if public_or_private == FRIENDS_ONLY:
             retrieve_friends_positions = True
-            position_list_query = PositionForFriends.objects.all()
+            position_list_query = PositionForFriends.objects.using('readonly').all()
         else:
             retrieve_public_positions = True
-            position_list_query = PositionEntered.objects.all()
+            position_list_query = PositionEntered.objects.using('readonly').all()
+
+        if retrieve_public_positions:
+            # If retrieving PositionsEntered, make sure we have the necessary variables
+            if type(organizations_followed_we_vote_id_list) is list \
+                    and len(organizations_followed_we_vote_id_list) == 0:
+                return 0
+        else:
+            # If retrieving PositionForFriends, make sure we have the necessary variables
+            if type(friends_we_vote_id_list) is list and len(friends_we_vote_id_list) == 0:
+                return 0
 
         # Retrieve the support positions for this candidate_campaign_id
         position_count = 0
         try:
-            position_list_query = position_list_query.using('readonly')
             if positive_value_exists(candidate_campaign_id):
                 position_list_query = position_list_query.filter(candidate_campaign_id=candidate_campaign_id)
             else:
@@ -2628,15 +2641,25 @@ class PositionListManager(models.Model):
             if stance_we_are_looking_for != ANY_STANCE:
                 # If we passed in the stance "ANY_STANCE" it means we want to not filter down the list
                 if stance_we_are_looking_for == SUPPORT:
-                    position_list_query = position_list_query.filter(
-                        Q(stance=stance_we_are_looking_for) |  # Matches "is_support"
-                        (Q(stance=PERCENT_RATING) & Q(vote_smart_rating__gte=66))  # Matches "is_positive_rating"
-                    )  # | Q(stance=GRADE_RATING))
+                    if retrieve_public_positions:
+                        # If here, include Vote Smart Ratings
+                        position_list_query = position_list_query.filter(
+                            Q(stance=stance_we_are_looking_for) |  # Matches "is_support"
+                            (Q(stance=PERCENT_RATING) & Q(vote_smart_rating_integer__gte=66))
+                        )  # Matches "is_positive_rating"
+                    else:
+                        # If looking for FRIENDS_ONLY positions, we can ignore Vote Smart data
+                        position_list_query = position_list_query.filter(stance=stance_we_are_looking_for)
                 elif stance_we_are_looking_for == OPPOSE:
-                    position_list_query = position_list_query.filter(
-                        Q(stance=stance_we_are_looking_for) |  # Matches "is_oppose"
-                        (Q(stance=PERCENT_RATING) & Q(vote_smart_rating__lte=33))  # Matches "is_negative_rating"
-                    )  # | Q(stance=GRADE_RATING))
+                    if retrieve_public_positions:
+                        # If here, include Vote Smart Ratings
+                        position_list_query = position_list_query.filter(
+                            Q(stance=stance_we_are_looking_for) |  # Matches "is_oppose"
+                            (Q(stance=PERCENT_RATING) & Q(vote_smart_rating_integer__lte=33))
+                        )  # Matches "is_negative_rating"
+                    else:
+                        # If looking for FRIENDS_ONLY positions, we can ignore Vote Smart data
+                        position_list_query = position_list_query.filter(stance=stance_we_are_looking_for)
                 else:
                     position_list_query = position_list_query.filter(stance=stance_we_are_looking_for)
 
@@ -2656,8 +2679,10 @@ class PositionListManager(models.Model):
 
             # Limit to positions in the last x years - currently we are not limiting
             # position_list = position_list.filter(election_id=election_id)
+            position_list = list(position_list_query)
 
-            position_count = position_list_query.count()
+            position_count = len(position_list)
+            # position_count = position_list_query.count()
         except Exception as e:
             handle_record_not_found_exception(e, logger=logger)
 
@@ -2698,14 +2723,13 @@ class PositionListManager(models.Model):
         if public_or_private not in(PUBLIC_ONLY, FRIENDS_ONLY):
             public_or_private = PUBLIC_ONLY
         if public_or_private == FRIENDS_ONLY:
-            position_list_query = PositionForFriends.objects.all()
+            position_list_query = PositionForFriends.objects.using('readonly').all()
         else:
-            position_list_query = PositionEntered.objects.all()
+            position_list_query = PositionEntered.objects.using('readonly').all()
 
         # Retrieve the support positions for this contest_office_id
         position_count = 0
         try:
-            position_list_query = position_list_query.using('readonly').order_by('date_entered')
             if positive_value_exists(contest_office_id):
                 position_list_query = position_list_query.filter(contest_office_id=contest_office_id)
             else:
@@ -2717,12 +2741,12 @@ class PositionListManager(models.Model):
                 if stance_we_are_looking_for == SUPPORT:
                     position_list_query = position_list_query.filter(
                         Q(stance=stance_we_are_looking_for) |  # Matches "is_support"
-                        (Q(stance=PERCENT_RATING) & Q(vote_smart_rating__gte=66))  # Matches "is_positive_rating"
+                        (Q(stance=PERCENT_RATING) & Q(vote_smart_rating_integer__gte=66))  # Matches "is_positive_rating"
                     )  # | Q(stance=GRADE_RATING))
                 elif stance_we_are_looking_for == OPPOSE:
                     position_list_query = position_list_query.filter(
                         Q(stance=stance_we_are_looking_for) |  # Matches "is_oppose"
-                        (Q(stance=PERCENT_RATING) & Q(vote_smart_rating__lte=33))  # Matches "is_negative_rating"
+                        (Q(stance=PERCENT_RATING) & Q(vote_smart_rating_integer__lte=33))  # Matches "is_negative_rating"
                     )  # | Q(stance=GRADE_RATING))
                 else:
                     position_list_query = position_list_query.filter(stance=stance_we_are_looking_for)
