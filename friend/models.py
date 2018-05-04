@@ -808,10 +808,11 @@ class FriendManager(models.Model):
         }
         return results
 
-    def retrieve_friends_we_vote_id_list(self, voter_we_vote_id):
+    def retrieve_friends_we_vote_id_list(self, voter_we_vote_id, read_only=False):
         """
         This is similar to retrieve_current_friends, but only returns the we_vote_id
         :param voter_we_vote_id:
+        :param read_only:
         :return:
         """
         current_friend_list_found = False
@@ -832,7 +833,10 @@ class FriendManager(models.Model):
             return results
 
         try:
-            current_friend_queryset = CurrentFriend.objects.all()
+            if read_only:
+                current_friend_queryset = CurrentFriend.objects.using('readonly').all()
+            else:
+                current_friend_queryset = CurrentFriend.objects.all()
             current_friend_queryset = current_friend_queryset.filter(
                 Q(viewer_voter_we_vote_id__iexact=voter_we_vote_id) |
                 Q(viewee_voter_we_vote_id__iexact=voter_we_vote_id))

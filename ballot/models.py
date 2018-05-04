@@ -708,13 +708,16 @@ class BallotItemListManager(models.Model):
         }
         return results
 
-    def retrieve_all_ballot_items_for_voter(self, voter_id, google_civic_election_id):
+    def retrieve_all_ballot_items_for_voter(self, voter_id, google_civic_election_id, read_only=False):
         polling_location_we_vote_id = ''
         ballot_item_list = []
         ballot_item_list_found = False
         try:
-            # Intentionally not using 'readonly' here
-            ballot_item_queryset = BallotItem.objects.all()
+            # Intentionally not using 'readonly' here as the default
+            if read_only:
+                ballot_item_queryset = BallotItem.objects.using('readonly').all()
+            else:
+                ballot_item_queryset = BallotItem.objects.all()
             ballot_item_queryset = ballot_item_queryset.order_by('local_ballot_order', 'google_ballot_placement')
             ballot_item_queryset = ballot_item_queryset.filter(voter_id=voter_id)
             if positive_value_exists(google_civic_election_id):
