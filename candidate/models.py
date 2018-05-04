@@ -89,7 +89,7 @@ class CandidateCampaignListManager(models.Model):
     This is a class to make it easy to retrieve lists of Candidates
     """
 
-    def retrieve_all_candidates_for_office(self, office_id, office_we_vote_id):
+    def retrieve_all_candidates_for_office(self, office_id, office_we_vote_id, read_only=False):
         candidate_list = []
         candidate_list_found = False
 
@@ -106,7 +106,10 @@ class CandidateCampaignListManager(models.Model):
             return results
 
         try:
-            candidate_queryset = CandidateCampaign.objects.all()
+            if read_only:
+                candidate_queryset = CandidateCampaign.objects.using('readonly').all()
+            else:
+                candidate_queryset = CandidateCampaign.objects.all()
             if positive_value_exists(office_id):
                 candidate_queryset = candidate_queryset.filter(contest_office_id=office_id)
             elif positive_value_exists(office_we_vote_id):

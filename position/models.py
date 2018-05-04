@@ -2590,7 +2590,9 @@ class PositionListManager(models.Model):
     def fetch_positions_count_for_candidate_campaign(candidate_campaign_id,
                                                      candidate_campaign_we_vote_id,
                                                      stance_we_are_looking_for,
-                                                     public_or_private=PUBLIC_ONLY):
+                                                     public_or_private=PUBLIC_ONLY,
+                                                     friends_we_vote_id_list=False,
+                                                     organizations_followed_we_vote_id_list=False):
         if stance_we_are_looking_for not \
                 in(ANY_STANCE, SUPPORT, STILL_DECIDING, INFORMATION_ONLY, NO_STANCE, OPPOSE, PERCENT_RATING):
             stance_we_are_looking_for = ANY_STANCE
@@ -2602,17 +2604,21 @@ class PositionListManager(models.Model):
                 positive_value_exists(candidate_campaign_we_vote_id):
             return 0
 
+        retrieve_friends_positions = False
+        retrieve_public_positions = False
         if public_or_private not in(PUBLIC_ONLY, FRIENDS_ONLY):
             public_or_private = PUBLIC_ONLY
         if public_or_private == FRIENDS_ONLY:
+            retrieve_friends_positions = True
             position_list_query = PositionForFriends.objects.all()
         else:
+            retrieve_public_positions = True
             position_list_query = PositionEntered.objects.all()
 
         # Retrieve the support positions for this candidate_campaign_id
         position_count = 0
         try:
-            position_list_query = position_list_query.using('readonly').order_by('date_entered')
+            position_list_query = position_list_query.using('readonly')
             if positive_value_exists(candidate_campaign_id):
                 position_list_query = position_list_query.filter(candidate_campaign_id=candidate_campaign_id)
             else:
@@ -2633,6 +2639,21 @@ class PositionListManager(models.Model):
                     )  # | Q(stance=GRADE_RATING))
                 else:
                     position_list_query = position_list_query.filter(stance=stance_we_are_looking_for)
+
+            # Only one of these blocks will be used at a time
+            if retrieve_friends_positions and friends_we_vote_id_list is not False:
+                # Find positions from friends. Look for we_vote_id case insensitive.
+                we_vote_id_filter = Q()
+                for we_vote_id in friends_we_vote_id_list:
+                    we_vote_id_filter |= Q(voter_we_vote_id__iexact=we_vote_id)
+                position_list_query = position_list_query.filter(we_vote_id_filter)
+            if retrieve_public_positions and organizations_followed_we_vote_id_list is not False:
+                # Find positions from organizations voter follows.
+                we_vote_id_filter = Q()
+                for we_vote_id in organizations_followed_we_vote_id_list:
+                    we_vote_id_filter |= Q(organization_we_vote_id__iexact=we_vote_id)
+                position_list_query = position_list_query.filter(we_vote_id_filter)
+
             # Limit to positions in the last x years - currently we are not limiting
             # position_list = position_list.filter(election_id=election_id)
 

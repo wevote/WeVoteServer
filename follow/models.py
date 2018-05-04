@@ -941,14 +941,18 @@ class FollowOrganizationList(models.Model):
         follow_organization_list = self.retrieve_follow_organization_by_voter_id(voter_id)
         return len(follow_organization_list)
 
-    def retrieve_follow_organization_by_voter_id(self, voter_id, auto_followed_from_twitter_suggestion=False):
+    def retrieve_follow_organization_by_voter_id(self, voter_id, auto_followed_from_twitter_suggestion=False,
+                                                 read_only=False):
         # Retrieve a list of follow_organization entries for this voter
         follow_organization_list_found = False
         following_status = FOLLOWING
         follow_organization_list = {}
         try:
-            # Should not be 'readonly' since we sometimes save the results of this call
-            follow_organization_list = FollowOrganization.objects.all()
+            # Should not default to 'readonly' since we sometimes save the results of this call
+            if read_only:
+                follow_organization_list = FollowOrganization.objects.using('readonly').all()
+            else:
+                follow_organization_list = FollowOrganization.objects.all()
             follow_organization_list = follow_organization_list.filter(voter_id=voter_id)
             follow_organization_list = follow_organization_list.filter(following_status=following_status)
             if auto_followed_from_twitter_suggestion:
@@ -1011,27 +1015,29 @@ class FollowOrganizationList(models.Model):
             return follow_organization_list
 
     def retrieve_follow_organization_by_voter_id_simple_id_array(self, voter_id, return_we_vote_id=False,
-                                                                 auto_followed_from_twitter_suggestion=False):
+                                                                 auto_followed_from_twitter_suggestion=False,
+                                                                 read_only=False):
         follow_organization_list_manager = FollowOrganizationList()
         follow_organization_list = \
             follow_organization_list_manager.retrieve_follow_organization_by_voter_id(
-                voter_id, auto_followed_from_twitter_suggestion)
+                voter_id, auto_followed_from_twitter_suggestion, read_only)
         follow_organization_list_simple_array = []
         if len(follow_organization_list):
             voter_manager = VoterManager()
             voter_linked_organization_we_vote_id = \
                 voter_manager.fetch_linked_organization_we_vote_id_from_local_id(voter_id)
             for follow_organization in follow_organization_list:
-                # Heal the data by making sure the voter's linked_organization_we_vote_id exists and is accurate
-                if positive_value_exists(voter_linked_organization_we_vote_id) \
-                    and voter_linked_organization_we_vote_id != \
-                        follow_organization.voter_linked_organization_we_vote_id:
-                    try:
-                        follow_organization.voter_linked_organization_we_vote_id = voter_linked_organization_we_vote_id
-                        follow_organization.save()
-                    except Exception as e:
-                        status = 'FAILED_TO_UPDATE_FOLLOW_ISSUE-voter_id ' + str(voter_id)
-                        handle_record_not_saved_exception(e, logger=logger, exception_message_optional=status)
+                if not read_only:
+                    # Heal the data by making sure the voter's linked_organization_we_vote_id exists and is accurate
+                    if positive_value_exists(voter_linked_organization_we_vote_id) \
+                        and voter_linked_organization_we_vote_id != \
+                            follow_organization.voter_linked_organization_we_vote_id:
+                        try:
+                            follow_organization.voter_linked_organization_we_vote_id = voter_linked_organization_we_vote_id
+                            follow_organization.save()
+                        except Exception as e:
+                            status = 'FAILED_TO_UPDATE_FOLLOW_ISSUE-voter_id ' + str(voter_id)
+                            handle_record_not_saved_exception(e, logger=logger, exception_message_optional=status)
 
                 if return_we_vote_id:
                     follow_organization_list_simple_array.append(follow_organization.organization_we_vote_id)
