@@ -73,6 +73,7 @@
             <td>ID</td>
             <td>Organization</td>
             <td>Stance</td>
+            <td>Rating</td>
             <td>Candidate/Measure</td>
             <td>Election</td>
         </tr>
@@ -99,6 +100,9 @@
             {% else %}
                 {{ position.get_stance_display }}
             {% endif %}
+            </td>
+            <td>
+              {{ position.vote_smart_rating }} / {{ position.vote_smart_rating_integer }}
             </td>
             <td>
                 {% if position.candidate_campaign %}

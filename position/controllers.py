@@ -1280,6 +1280,7 @@ def position_list_for_ballot_item_for_api(voter_device_id, friends_vs_public,  #
             'kind_of_ballot_item':  "UNKNOWN",
             'ballot_item_id':       0,
             'position_list':        position_list,
+            'show_positions_this_voter_follows': show_positions_this_voter_follows,
         }
         return HttpResponse(json.dumps(json_data), content_type='application/json')
 
@@ -1301,6 +1302,7 @@ def position_list_for_ballot_item_for_api(voter_device_id, friends_vs_public,  #
             'kind_of_ballot_item':  "UNKNOWN",
             'ballot_item_id':       0,
             'position_list':        position_list,
+            'show_positions_this_voter_follows': show_positions_this_voter_follows,
         }
         return HttpResponse(json.dumps(json_data), content_type='application/json')
 
@@ -1483,6 +1485,7 @@ def position_list_for_ballot_item_for_api(voter_device_id, friends_vs_public,  #
             'ballot_item_id':           0,
             'ballot_item_we_vote_id':   '',
             'position_list':            position_list,
+            'show_positions_this_voter_follows': show_positions_this_voter_follows,
         }
         return HttpResponse(json.dumps(json_data), content_type='application/json')
 
@@ -1496,6 +1499,7 @@ def position_list_for_ballot_item_for_api(voter_device_id, friends_vs_public,  #
             'ballot_item_id':           ballot_item_id,
             'ballot_item_we_vote_id':   ballot_item_we_vote_id,
             'position_list':            position_list,
+            'show_positions_this_voter_follows': show_positions_this_voter_follows,
         }
         return HttpResponse(json.dumps(json_data), content_type='application/json')
 
@@ -1507,12 +1511,12 @@ def position_list_for_ballot_item_for_api(voter_device_id, friends_vs_public,  #
         if show_positions_this_voter_follows:
             position_objects = position_list_manager.calculate_positions_followed_by_voter(
                 voter_id, public_positions_list, organizations_followed_by_voter)
-            status = 'SUCCESSFUL_RETRIEVE_OF_POSITIONS_FOLLOWED'
+            status += 'SUCCESSFUL_RETRIEVE_OF_POSITIONS_FOLLOWED'
             success = True
         else:
             position_objects = position_list_manager.calculate_positions_not_followed_by_voter(
                 public_positions_list, organizations_followed_by_voter)
-            status = 'SUCCESSFUL_RETRIEVE_OF_POSITIONS_NOT_FOLLOWED'
+            status += 'SUCCESSFUL_RETRIEVE_OF_POSITIONS_NOT_FOLLOWED'
             success = True
     else:
         position_objects = []
@@ -1637,6 +1641,7 @@ def position_list_for_ballot_item_for_api(voter_device_id, friends_vs_public,  #
         'ballot_item_id':           ballot_item_id,
         'ballot_item_we_vote_id':   ballot_item_we_vote_id,
         'position_list':            position_list,
+        'show_positions_this_voter_follows': show_positions_this_voter_follows,
     }
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 

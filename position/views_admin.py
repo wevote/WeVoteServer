@@ -15,13 +15,14 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.messages import get_messages
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
+from django.db import (IntegrityError)
 from django.db.models import Q
 from election.models import ElectionManager
 from exception.models import handle_record_found_more_than_one_exception,\
     handle_record_not_found_exception, handle_record_not_saved_exception
 from measure.controllers import push_contest_measure_data_to_other_table_caches
 from office.controllers import push_contest_office_data_to_other_table_caches
-from position.models import PositionListManager
+from position.models import PositionListManager, PERCENT_RATING
 from voter.models import voter_has_authority
 import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, positive_value_exists
@@ -196,6 +197,30 @@ def position_list_view(request):
                 position_list_query = position_list_query.filter(final_filters)
 
     position_list = position_list_query[: 100]
+
+    # Heal some data
+    if positive_value_exists(google_civic_election_id):
+        position_list_query = PositionEntered.objects.order_by('-id')
+        position_list_query = position_list_query.filter(google_civic_election_id=google_civic_election_id)
+        position_list_query = position_list_query.filter(vote_smart_rating_integer__isnull=True)
+        position_list_query = position_list_query.filter(stance=PERCENT_RATING)
+        position_list_query = position_list_query[:5000]
+        position_list_heal = list(position_list_query)
+        integrity_error_count = 0
+        for one_position in position_list_heal:
+            one_position.vote_smart_rating_integer = convert_to_int(one_position.vote_smart_rating)
+            try:
+                one_position.save()
+            except IntegrityError as e:
+                integrity_error_count += 1
+
+        if len(position_list_heal):
+            positions_updated = len(position_list_heal) - integrity_error_count
+            messages.add_message(request, messages.INFO, str(positions_updated) +
+                                 ' positions updated with vote_smart_rating_integer.')
+        if positive_value_exists(integrity_error_count):
+            messages.add_message(request, messages.ERROR, str(integrity_error_count) +
+                                 ' integrity errors.')
 
     election_manager = ElectionManager()
     if positive_value_exists(show_all_elections):
