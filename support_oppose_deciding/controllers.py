@@ -398,7 +398,7 @@ def positions_count_for_all_ballot_items_for_api(  # positionsCountForAllBallotI
                     # Public Positions
                     public_support_count_for_one_ballot_item = \
                         position_list_manager.fetch_positions_count_for_candidate_campaign(
-                            candidate.id,
+                            0,
                             candidate.we_vote_id,
                             SUPPORT,
                             PUBLIC_ONLY,
@@ -406,7 +406,7 @@ def positions_count_for_all_ballot_items_for_api(  # positionsCountForAllBallotI
                         )
                     public_oppose_count_for_one_ballot_item = \
                         position_list_manager.fetch_positions_count_for_candidate_campaign(
-                            candidate.id,
+                            0,
                             candidate.we_vote_id,
                             OPPOSE,
                             PUBLIC_ONLY,
@@ -416,7 +416,7 @@ def positions_count_for_all_ballot_items_for_api(  # positionsCountForAllBallotI
                     # Friend's-only Positions
                     friends_only_support_count_for_one_ballot_item = \
                         position_list_manager.fetch_positions_count_for_candidate_campaign(
-                            candidate.id,
+                            0,
                             candidate.we_vote_id,
                             SUPPORT,
                             FRIENDS_ONLY,
@@ -424,7 +424,7 @@ def positions_count_for_all_ballot_items_for_api(  # positionsCountForAllBallotI
                         )
                     friends_only_oppose_count_for_one_ballot_item = \
                         position_list_manager.fetch_positions_count_for_candidate_campaign(
-                            candidate.id,
+                            0,
                             candidate.we_vote_id,
                             OPPOSE,
                             FRIENDS_ONLY,
