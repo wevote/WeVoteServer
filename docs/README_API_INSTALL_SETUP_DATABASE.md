@@ -15,13 +15,15 @@ Please make sure you have installed PostgreSQL:
 ## Setup - Database Creation
 
 Make sure you have a database that matches the local database settings from the "config/environment_variables.json" file,
-(Search for "DATABASES"). Using the database tool you prefer create the following Database.
+(Search for "DATABASES"). Using the database tool you prefer create the following Database. (You probably already created
+the database in a previous step.)
 
     WeVoteServerDB
     
 Also make sure you are running in your virtual environment, signified by the "(WeVoteServer)".
 
-Populate your database with the latest database tables using these terminal commands:
+Populate your database with the latest database tables using these terminal commands (You probably already did this in 
+a previous step, but it doesn't hurt anything to do this twice):
 
     (WeVoteServer) $ pip install psycopg2 
     (WeVoteServer) $ python manage.py makemigrations
@@ -35,7 +37,8 @@ If you are not prompted to create a superuser, run the following command:
     
 ## Test that WeVoteServer is running
 
-Start up the WeVoteServer on Mac:
+Start up the WeVoteServer on Mac (You probably already installed requirements.txt in an earlier step, but it doesn't
+hurt to do it again.):
 
     (WeVoteServer) $ cd /Users/<YOUR NAME HERE>/PythonProjects/WeVoteServer/
     (WeVoteServer) $ source /Users/<YOUR NAME HERE>/PythonEnvironments/WeVoteServer3.4/bin/activate

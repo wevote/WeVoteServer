@@ -60,12 +60,22 @@ For mac:
     (WeVoteServer) $ pip install --upgrade pip
     (WeVoteServer) $ pip install -r requirements.txt
     (WeVoteServer) $ python3 -m pip install pyopenssl pyasn1 ndg-httpsclient
+    
+Initialize your environment_variables.json file (otherwise makemigrations will fail with an 
+'Unable to set the SECRET_KEY variable from os.environ or JSON file' error)
+
+    (WeVoteServer) $ cp ./config/environment_variables-template.json ./config/environment_variables.json
+
 
 Test with these commands:
     
     (WeVoteServer) $ python manage.py makemigrations
     (WeVoteServer) $ python manage.py migrate
     (WeVoteServer) $ python manage.py runserver
+    
+Note if you get a **Is the server running locally and accepting connections on Unix domain socket "/tmp/.s.PGSQL.5433"?**
+error, make sure that the server port shown in pgAdmin4 (default install is port 5432), matches the port in 
+`environment_variables.json`
  
 
 [NEXT: 4. Set up Environment](README_API_INSTALL_SETUP_ENVIRONMENT.md)

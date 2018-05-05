@@ -6,7 +6,9 @@
 
 Install the latest version of Postgres for your machine (see instructions further down on this page as well):
  
-MAC: Download and install the DMG from [http://postgresapp.com/](http://postgresapp.com/)
+**Mac:** Download and install the DMG from [http://postgresapp.com/](http://postgresapp.com/)
+
+![Be sure not to click the bloatware installer advertisement](docs/images/DontUseTheBloatwareInstaller.png)
  
 (Alternate: Go to [https://www.postgresql.org/download/](https://www.postgresql.org/download/).)
 
@@ -26,25 +28,31 @@ Install PGAdmin4. Go to [https://www.pgadmin.org/download/](https://www.pgadmin.
 
 ## Setup - Install pgAdmin 4
 
-We recommend installing pgAdmin 4 as a WYSIWYG database administration tool.
+We recommend installing pgAdmin 4 as a WYSIWYG database administration tool.  
+
+If you have used earlier versions MacOS versions of PgAdmin, you may be surprised to see that pgAdmin4 is no longer an 
+app, "The desktop runtime now runs as a system tray application and utilises the browser on the system to display pgAdmin."
+in other words, it is now a webapp that runs at [http://127.0.0.1:55011/browser/](http://127.0.0.1:55011/browser/)
+
 NOTE: You may need to turn off the restriction in "Security & Privacy" on "unidentified developers"
 to allow this tool to be installed.
 See: http://blog.tcs.de/program-cant-be-opened-because-it-is-from-an-unidentified-developer/
 
 In pgadmin add a server. You can use your sign in name as the server name.
 
-Open this file:
+Change the PostgreSQL server access permissions to allow administration by PGAdmin4. Open this file:
 
-    $ sudo vi "/Users/<YOUR_NAME>/Library/Application Support/Postgres/var-9.6/pg_hba.conf"
+    $ sudo vi "/Users/<YOUR_NAME>/Library/Application Support/Postgres/var-10/pg_hba.conf"
 
 Change the line:
 
-    # Database administrative login by Unix domain socket
-    local   all             postgres                                peer
+    # "local" is for Unix domain socket connections only
+    local   all             all                                     trust
 to
 
-    # Database administrative login by Unix domain socket
-    local   all             postgres                                trust
+    # "local" is for Unix domain socket connections only
+    local   all             all                                     peer
+
     
 Now you should reload the server configuration changes by stopping and staring PostgreSQL and connect pgAdmin 4 to your PostgreSQL database server.
 
@@ -52,19 +60,23 @@ Open pgAdmin 4 and navigate to:
 
     Server Groups > Servers
 
-1) Right-click on "Servers" and choose "Create > Server"
+1. Right-click on "Servers" and choose "Create > Server"
 
-2) Name: WeVoteServer
+    ![CreateServerHeirarchy](docs/images/CreateServerInPgAdmin.png)
 
-3) Switch to "Connection" tab
+2. Name: WeVoteServer
 
-3a) Host name: localhost
+    ![CreateServerDialog](docs/images/CreateServerDialog.png)
 
-3b) Port: 5432
+3. Switch to "Connection" tab
+   * Host name: localhost
+   * Port: 5432
+   * Maintenance database: postgres
+   * User name: postgres
 
-3c) Maintenance database: postgres
+    ![ConnectionTab](docs/images/CreateServerConnection.png)
 
-3d) User name: postgres
+4. Press Save
 
 ## Create Database
 

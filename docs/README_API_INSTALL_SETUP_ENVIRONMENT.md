@@ -33,7 +33,8 @@ in the WeVoteServer/config/environment_variables.json file to "INFO".
 
 ## Set up GeoIP
 
-###  Install the C library on Mac (see below for Linux)
+
+###  Only for Mac:  Install the C library on Mac (see below for Linux)
 
     $ cd /Users/<YOUR NAME HERE>/PythonProjects/WeVoteServer/
     $ git clone https://github.com/maxmind/geoip-api-c.git
@@ -59,19 +60,20 @@ These errors won't prevent geoip from working.
     $ make install
     $ cd ..
 
-### Install the C library on Linux
+### Only for Linux:  Install the C library on Linux
 
     $ git clone https://github.com/maxmind/geoip-api-c.git
     $ cd geoip-api-c
     $ ./bootstrap
 
-### Pull data
+### Mac and Linux:  Pull data
 
 Run the command that downloads the GeoLite database from the WeVoteServer root folder (Where this README lives)
 
+    $ cd ..
     $ ./manage.py update_geoip_data
 
-###  Install the C library on Linux
+###  Only for Linux: Install the C library on Linux
 
     $ cd ~/PythonProjects/WeVoteServer/
     $ git clone https://github.com/maxmind/geoip-api-c.git
@@ -87,11 +89,11 @@ These errors won't prevent geoip from working.
     $ make install
     $ cd ..
     
-Run the command that downloads the GeoLite database from the WeVoteServer root folder:
+### Mac and Linux:  Run the command that downloads the GeoLite database from the WeVoteServer root folder:
 
     $ ./manage.py update_geoip_data
     
-Mac: Install geoip locally:
+### Only for Mac: Install geoip locally:
 
     $ brew install geoip
     
