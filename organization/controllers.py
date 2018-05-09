@@ -15,8 +15,8 @@ from follow.models import FollowOrganizationManager, FollowOrganizationList, FOL
 from image.controllers import retrieve_all_images_for_one_organization
 from import_export_facebook.models import FacebookManager
 import json
-from position.controllers import move_positions_to_another_organization, \
-    update_position_for_friends_details_from_voter, \
+from position.controllers import add_position_network_count_entries_for_one_organization, \
+    move_positions_to_another_organization, \
     update_position_entered_details_from_organization
 from position.models import PositionListManager
 import robot_detection
@@ -427,6 +427,7 @@ def organization_follow_or_unfollow_or_ignore(voter_device_id, organization_id, 
                                               follow_kind=FOLLOWING,
                                               organization_follow_based_on_issue=None,
                                               user_agent_string='', user_agent_object=None):
+    status = ""
     if organization_follow_based_on_issue is None:
         organization_follow_based_on_issue = False
 
@@ -489,63 +490,81 @@ def organization_follow_or_unfollow_or_ignore(voter_device_id, organization_id, 
     is_bot = user_agent_object.is_bot or robot_detection.is_robot(user_agent_string)
     analytics_manager = AnalyticsManager()
     follow_organization_manager = FollowOrganizationManager()
+    position_list_manager = PositionListManager()
     if follow_kind == FOLLOWING:
         results = follow_organization_manager.toggle_on_voter_following_organization(
             voter_id, organization_id, organization_we_vote_id, voter_linked_organization_we_vote_id)
         if results['follow_organization_found']:
-            status = 'FOLLOWING'
+            status += 'FOLLOWING'
             success = True
             state_code = ''
             follow_organization = results['follow_organization']
             organization_id = follow_organization.organization_id
             organization_we_vote_id = follow_organization.organization_we_vote_id
+
+            add_results = add_position_network_count_entries_for_one_organization(
+                voter_id, organization_we_vote_id)
+            status += add_results['status']
+
             analytics_results = analytics_manager.save_action(
                 ACTION_ORGANIZATION_FOLLOW, voter_we_vote_id, voter_id, is_signed_in, state_code,
                 organization_we_vote_id, organization_id, user_agent_string=user_agent_string, is_bot=is_bot,
                 is_mobile=user_agent_object.is_mobile, is_desktop=user_agent_object.is_pc,
                 is_tablet=user_agent_object.is_tablet)
         else:
-            status = results['status']
+            status += results['status']
             success = False
 
     elif follow_kind == FOLLOW_IGNORE:
         results = follow_organization_manager.toggle_ignore_voter_following_organization(
             voter_id, organization_id, organization_we_vote_id, voter_linked_organization_we_vote_id)
         if results['follow_organization_found']:
-            status = 'IGNORING'
+            status += 'IGNORING'
             success = True
             state_code = ''
             follow_organization = results['follow_organization']
             organization_id = follow_organization.organization_id
             organization_we_vote_id = follow_organization.organization_we_vote_id
+
+            # Remove all position_network_scores from this organization for voter
+            remove_results = position_list_manager.remove_position_network_scores_when_voter_stops_following(
+                    voter_id, organization_we_vote_id)
+            status += remove_results['status']
+
             analytics_results = analytics_manager.save_action(
                 ACTION_ORGANIZATION_FOLLOW_IGNORE, voter_we_vote_id, voter_id, is_signed_in, state_code,
                 organization_we_vote_id, organization_id, user_agent_string=user_agent_string, is_bot=is_bot,
                 is_mobile=user_agent_object.is_mobile, is_desktop=user_agent_object.is_pc,
                 is_tablet=user_agent_object.is_tablet)
         else:
-            status = results['status']
+            status += results['status']
             success = False
     elif follow_kind == STOP_FOLLOWING:
         results = follow_organization_manager.toggle_off_voter_following_organization(
             voter_id, organization_id, organization_we_vote_id, voter_linked_organization_we_vote_id)
         if results['follow_organization_found']:
-            status = 'STOPPED_FOLLOWING'
+            status += 'STOPPED_FOLLOWING'
             success = True
             state_code = ''
             follow_organization = results['follow_organization']
             organization_id = follow_organization.organization_id
             organization_we_vote_id = follow_organization.organization_we_vote_id
+
+            # Remove all position_network_scores from this organization for voter
+            remove_results = position_list_manager.remove_position_network_scores_when_voter_stops_following(
+                    voter_id, organization_we_vote_id)
+            status += remove_results['status']
+
             analytics_results = analytics_manager.save_action(
                 ACTION_ORGANIZATION_STOP_FOLLOWING, voter_we_vote_id, voter_id, is_signed_in, state_code,
                 organization_we_vote_id, organization_id, user_agent_string=user_agent_string, is_bot=is_bot,
                 is_mobile=user_agent_object.is_mobile, is_desktop=user_agent_object.is_pc,
                 is_tablet=user_agent_object.is_tablet)
         else:
-            status = results['status']
+            status += results['status']
             success = False
     else:
-        status = 'INCORRECT_FOLLOW_KIND'
+        status += 'INCORRECT_FOLLOW_KIND'
         success = False
 
     if positive_value_exists(voter_id):

@@ -5,7 +5,9 @@
 from .models import PositionEntered, PositionForFriends, PositionManager, PositionListManager, ANY_STANCE, \
     FRIENDS_AND_PUBLIC, FRIENDS_ONLY, PUBLIC_ONLY, SHOW_PUBLIC, THIS_ELECTION_ONLY, ALL_OTHER_ELECTIONS, \
     ALL_ELECTIONS, SUPPORT, OPPOSE, INFORMATION_ONLY, NO_STANCE
-from ballot.models import OFFICE, CANDIDATE, MEASURE
+from ballot.controllers import figure_out_google_civic_election_id_voter_is_watching, \
+    figure_out_google_civic_election_id_voter_is_watching_by_voter_id
+from ballot.models import BallotItemListManager, OFFICE, CANDIDATE, MEASURE
 from candidate.models import CandidateCampaignManager, CandidateCampaignListManager
 from config.base import get_environment_variable
 from django.db.models import Q
@@ -29,6 +31,488 @@ logger = wevote_functions.admin.get_logger(__name__)
 
 WE_VOTE_API_KEY = get_environment_variable("WE_VOTE_API_KEY")
 POSITIONS_SYNC_URL = get_environment_variable("POSITIONS_SYNC_URL")  # positionsSyncOut
+
+
+def add_position_network_count_entries_for_one_organization(voter_id, organization_we_vote_id,
+                                                            google_civic_election_id=0):
+    status = "ADD_POSITION_NETWORK_COUNT_FOR_ONE_ORGANIZATION "
+    public_positions_updated = False
+
+    voter_manager = VoterManager()
+    voter_results = voter_manager.retrieve_voter_by_id(voter_id)
+    if voter_results['voter_found']:
+        voter = voter_results['voter']
+        voter_id = voter.id
+        voter_we_vote_id = voter.we_vote_id
+    else:
+        voter_id = 0
+        voter_we_vote_id = ""
+    if not positive_value_exists(voter_id):
+        status += "VALID_VOTER_ID_MISSING "
+        json_data = {
+            'status':                   status,
+            'success':                  False,
+            'google_civic_election_id': google_civic_election_id,
+            'public_positions_updated': public_positions_updated,
+        }
+        return json_data
+
+    position_manager = PositionManager()
+    position_list_manager = PositionListManager()
+
+    if not positive_value_exists(google_civic_election_id):
+        # Look up the current google_civic_election_id for this voter
+        results = figure_out_google_civic_election_id_voter_is_watching_by_voter_id(voter_id)
+        google_civic_election_id = results['google_civic_election_id']
+
+    organization_id = 0
+    show_positions_current_voter_election = True
+    exclude_positions_current_voter_election = False
+    position_results = position_list_manager.retrieve_all_positions_for_organization(
+        organization_id, organization_we_vote_id,
+        ANY_STANCE, PUBLIC_ONLY,
+        show_positions_current_voter_election,
+        exclude_positions_current_voter_election,
+        google_civic_election_id=google_civic_election_id)
+
+    # ballot_item_list is populated with contest_office and contest_measure entries
+    for one_position in position_results:
+        if positive_value_exists(one_position.candidate_campaign_we_vote_id):
+            # Add entry to position_network_score table
+            ignore_friend_voter_we_vote_id = None
+            ignore_measure_we_vote_id = None
+            if one_position.is_support_or_positive_rating():
+                support_or_oppose = True
+            elif one_position.is_oppose_or_negative_rating():
+                support_or_oppose = False
+            else:
+                # If not support or oppose, continue to next position
+                continue
+            update_results = position_manager.update_or_create_position_network_score(
+                voter_id, voter_we_vote_id,
+                google_civic_election_id,
+                one_position.organization_we_vote_id, ignore_friend_voter_we_vote_id,
+                one_position.speaker_display_name,
+                one_position.candidate_campaign_we_vote_id, ignore_measure_we_vote_id,
+                support_or_oppose)
+            if update_results['position_network_score_updated']:
+                public_positions_updated = True
+        elif positive_value_exists(one_position.contest_measure_we_vote_id):
+            # Add entry to position_network_score table
+            ignore_friend_voter_we_vote_id = None
+            ignore_candidate_we_vote_id = None
+            if one_position.is_support_or_positive_rating():
+                support_or_oppose = True
+            elif one_position.is_oppose_or_negative_rating():
+                support_or_oppose = False
+            else:
+                # If not support or oppose, continue to next position
+                continue
+            update_results = position_manager.update_or_create_position_network_score(
+                voter_id, voter_we_vote_id,
+                google_civic_election_id,
+                one_position.organization_we_vote_id, ignore_friend_voter_we_vote_id,
+                one_position.speaker_display_name,
+                ignore_candidate_we_vote_id, one_position.contest_measure_we_vote_id,
+                support_or_oppose)
+            if update_results['position_network_score_updated']:
+                public_positions_updated = True
+
+    json_data = {
+        'success':                  True,
+        'status':                   status,
+        'google_civic_election_id': google_civic_election_id,
+        'public_positions_updated': public_positions_updated,
+    }
+    return json_data
+
+
+def calculate_positions_count_for_all_ballot_items_for_api(  # positionsCountForAllBallotItems
+        voter_device_id, google_civic_election_id=0):
+    """
+    We want to return a JSON file with the list of the support and oppose counts from the orgs, friends and
+    public figures the voter follows, and be caching the results as we look them up
+    """
+    status = "CALCULATE_POSITIONS_COUNT_FOR_ALL_BALLOT_ITEMS "
+    support_or_oppose_exists = False
+    # Get voter_id from the voter_device_id so we can know whose bookmarks to retrieve
+    results = is_voter_device_id_valid(voter_device_id)
+    if not results['success']:
+        json_data = {
+            'status':                   "VALID_VOTER_DEVICE_ID_MISSING-CALCULATE_COUNT_FOR_ALL_BALLOT_ITEMS",
+            'success':                  False,
+            'google_civic_election_id': google_civic_election_id,
+            'support_or_oppose_exists': support_or_oppose_exists,
+        }
+        return json_data
+
+    voter_manager = VoterManager()
+    voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id)
+    if voter_results['voter_found']:
+        voter = voter_results['voter']
+        voter_id = voter.id
+        voter_we_vote_id = voter.we_vote_id
+    else:
+        voter_id = 0
+        voter_we_vote_id = ""
+    if not positive_value_exists(voter_id):
+        json_data = {
+            'status':                   "VALID_VOTER_ID_MISSING-CALCULATE_COUNT_FOR_ALL_BALLOT_ITEMS",
+            'success':                  False,
+            'google_civic_election_id': google_civic_election_id,
+            'support_or_oppose_exists': support_or_oppose_exists,
+        }
+        return json_data
+
+    position_manager = PositionManager()
+    position_list_manager = PositionListManager()
+    candidate_list_object = CandidateCampaignListManager()
+
+    follow_organization_list_manager = FollowOrganizationList()
+    return_we_vote_id = True
+    organizations_followed_by_voter_by_we_vote_id = \
+        follow_organization_list_manager.retrieve_follow_organization_by_voter_id_simple_id_array(
+            voter_id, return_we_vote_id)
+
+    # Get a list of all candidates and measures from this election (in the active election)
+    ballot_item_list_manager = BallotItemListManager()
+    if google_civic_election_id:
+        results = ballot_item_list_manager.retrieve_all_ballot_items_for_voter(voter_id, google_civic_election_id)
+        status += results['status']
+        ballot_item_list = results['ballot_item_list']
+    else:
+        # Look up the current google_civic_election_id for this voter
+        results = figure_out_google_civic_election_id_voter_is_watching(voter_device_id)
+        google_civic_election_id_local_scope = results['google_civic_election_id']
+
+        results = ballot_item_list_manager.retrieve_all_ballot_items_for_voter(
+            voter_id, google_civic_election_id_local_scope)
+        status += results['status']
+        ballot_item_list = results['ballot_item_list']
+        google_civic_election_id = google_civic_election_id_local_scope
+
+    friends_we_vote_id_list = []
+    if positive_value_exists(voter_we_vote_id):
+        friend_manager = FriendManager()
+        friend_results = friend_manager.retrieve_friends_we_vote_id_list(voter_we_vote_id)
+        if friend_results['friends_we_vote_id_list_found']:
+            friends_we_vote_id_list = friend_results['friends_we_vote_id_list']
+
+    # Add yourself as a friend so your opinions show up
+    friends_we_vote_id_list.append(voter_we_vote_id)
+
+    # ballot_item_list is populated with contest_office and contest_measure entries
+    for one_ballot_item in ballot_item_list:
+        # Retrieve all positions for each ballot item
+        if one_ballot_item.is_contest_office():
+            results = candidate_list_object.retrieve_all_candidates_for_office(
+                0, one_ballot_item.contest_office_we_vote_id)
+            success = results['success']
+            candidate_list = results['candidate_list']
+
+            if success:
+                for candidate in candidate_list:
+                    # Loop through all candidates under this office
+
+                    # Delete all prior position_network_score entries for this voter + candidate
+                    ignore_measure_we_vote_id = None
+                    position_list_manager.delete_position_network_scores_for_voter_one_ballot_item(
+                        voter_id, voter_we_vote_id,
+                        candidate.we_vote_id, ignore_measure_we_vote_id)
+
+                    # Public Positions
+                    retrieve_public_positions_now = True  # The alternate is positions for friends-only
+                    most_recent_only = True
+                    public_positions_list_for_one_ballot_item = \
+                        position_list_manager.retrieve_all_positions_for_candidate_campaign(
+                            retrieve_public_positions_now, 0, candidate.we_vote_id,
+                            ANY_STANCE, most_recent_only,
+                            organizations_followed_we_vote_id_list=organizations_followed_by_voter_by_we_vote_id,
+                            read_only=True)
+
+                    # Add entry to position_network_score table
+                    ignore_friend_voter_we_vote_id = None
+                    ignore_measure_we_vote_id = None
+                    for one_position in public_positions_list_for_one_ballot_item:
+                        if one_position.is_support_or_positive_rating():
+                            support_or_oppose = True
+                        elif one_position.is_oppose_or_negative_rating():
+                            support_or_oppose = False
+                        else:
+                            # If not support or oppose, continue to next position
+                            continue
+                        support_or_oppose_exists = True
+                        position_manager.update_or_create_position_network_score(
+                            voter_id, voter_we_vote_id,
+                            google_civic_election_id,
+                            one_position.organization_we_vote_id, ignore_friend_voter_we_vote_id,
+                            one_position.speaker_display_name,
+                            candidate.we_vote_id, ignore_measure_we_vote_id,
+                            support_or_oppose)
+
+                    # Friend's-only Positions
+                    retrieve_public_positions_now = False  # Return friends-only positions counts
+                    most_recent_only = True
+                    friends_only_positions_list_for_one_ballot_item = \
+                        position_list_manager.retrieve_all_positions_for_candidate_campaign(
+                            retrieve_public_positions_now, 0, candidate.we_vote_id,
+                            ANY_STANCE, most_recent_only, friends_we_vote_id_list, read_only=True)
+
+                    # Add entry to position_network_score table
+                    ignore_organization_voter_we_vote_id = None
+                    ignore_measure_we_vote_id = None
+                    for one_position in friends_only_positions_list_for_one_ballot_item:
+                        if one_position.is_support_or_positive_rating():
+                            support_or_oppose = True
+                        elif one_position.is_oppose_or_negative_rating():
+                            support_or_oppose = False
+                        else:
+                            # If not support or oppose, continue to next position
+                            continue
+                        support_or_oppose_exists = True
+                        position_manager.update_or_create_position_network_score(
+                            voter_id, voter_we_vote_id,
+                            google_civic_election_id,
+                            ignore_organization_voter_we_vote_id, one_position.voter_we_vote_id,
+                            one_position.speaker_display_name,
+                            candidate.we_vote_id, ignore_measure_we_vote_id,
+                            support_or_oppose)
+        elif one_ballot_item.is_contest_measure():
+            # Delete all prior position_network_score entries for this voter + candidate
+            ignore_candidate_we_vote_id = None
+            position_list_manager.delete_position_network_scores_for_voter_one_ballot_item(
+                voter_id, voter_we_vote_id,
+                ignore_candidate_we_vote_id, one_ballot_item.contest_measure_we_vote_id)
+
+            # Public Positions
+            retrieve_public_positions_now = True  # The alternate is positions for friends-only
+            most_recent_only = True
+            public_positions_list_for_one_ballot_item = \
+                position_list_manager.retrieve_all_positions_for_contest_measure(
+                    retrieve_public_positions_now, 0, one_ballot_item.contest_measure_we_vote_id,
+                    ANY_STANCE, most_recent_only,
+                    organizations_followed_we_vote_id_list=organizations_followed_by_voter_by_we_vote_id,
+                    read_only=True)
+
+            # Add entry to position_network_score table
+            ignore_friend_voter_we_vote_id = None
+            ignore_candidate_we_vote_id = None
+            for one_position in public_positions_list_for_one_ballot_item:
+                if one_position.is_support_or_positive_rating():
+                    support_or_oppose = True
+                elif one_position.is_oppose_or_negative_rating():
+                    support_or_oppose = False
+                else:
+                    # If not support or oppose, continue to next position
+                    continue
+                support_or_oppose_exists = True
+                position_manager.update_or_create_position_network_score(
+                    voter_id, voter_we_vote_id,
+                    google_civic_election_id,
+                    one_position.organization_we_vote_id, ignore_friend_voter_we_vote_id,
+                    one_position.speaker_display_name,
+                    ignore_candidate_we_vote_id, one_ballot_item.contest_measure_we_vote_id,
+                    support_or_oppose)
+
+            # Friend's-only Positions
+            retrieve_public_positions_now = False  # Return friends-only positions counts
+            most_recent_only = True
+            friends_only_positions_list_for_one_ballot_item = \
+                position_list_manager.retrieve_all_positions_for_contest_measure(
+                    retrieve_public_positions_now, 0, one_ballot_item.contest_measure_we_vote_id,
+                    ANY_STANCE, most_recent_only, friends_we_vote_id_list, read_only=True)
+
+            # Add entry to position_network_score table
+            ignore_organization_voter_we_vote_id = None
+            ignore_candidate_we_vote_id = None
+            for one_position in friends_only_positions_list_for_one_ballot_item:
+                if one_position.is_support_or_positive_rating():
+                    support_or_oppose = True
+                elif one_position.is_oppose_or_negative_rating():
+                    support_or_oppose = False
+                else:
+                    # If not support or oppose, continue to next position
+                    continue
+                support_or_oppose_exists = True
+                position_manager.update_or_create_position_network_score(
+                    voter_id, voter_we_vote_id,
+                    google_civic_election_id,
+                    ignore_organization_voter_we_vote_id, one_position.voter_we_vote_id,
+                    one_position.speaker_display_name,
+                    ignore_candidate_we_vote_id, one_ballot_item.contest_measure_we_vote_id,
+                    support_or_oppose)
+        else:
+            # Skip the rest of this loop
+            continue
+
+    json_data = {
+        'success':                  True,
+        'status':                   status,
+        'google_civic_election_id': google_civic_election_id,
+        'support_or_oppose_exists': support_or_oppose_exists,
+    }
+    return json_data
+
+
+def count_for_all_ballot_items_from_position_network_score_for_api(  # positionsCountForAllBallotItems
+        voter_device_id, google_civic_election_id=0):
+    """
+    We want to return a JSON file with the a list of the support and oppose counts from the orgs, friends and
+    public figures the voter follows
+    """
+    status = ""
+    # Get voter_id from the voter_device_id so we can know whose bookmarks to retrieve
+    results = is_voter_device_id_valid(voter_device_id)
+    if not results['success']:
+        json_data = {
+            'status':                   "VALID_VOTER_DEVICE_ID_MISSING-COUNT_FOR_ALL_BALLOT_ITEMS_FROM_CACHE",
+            'success':                  False,
+            'google_civic_election_id': google_civic_election_id,
+            'position_counts_list':     [],
+            'support_or_oppose_exists': False,
+        }
+        return json_data
+
+    voter_manager = VoterManager()
+    voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id)
+    if voter_results['voter_found']:
+        voter = voter_results['voter']
+        voter_id = voter.id
+        voter_we_vote_id = voter.we_vote_id
+    else:
+        voter_id = 0
+        voter_we_vote_id = ""
+    if not positive_value_exists(voter_id):
+        json_data = {
+            'status':                   "VALID_VOTER_ID_MISSING-COUNT_FOR_ALL_BALLOT_ITEMS_FROM_CACHE",
+            'success':                  False,
+            'google_civic_election_id': google_civic_election_id,
+            'position_counts_list':     [],
+            'support_or_oppose_exists': False,
+        }
+        return json_data
+
+    if not positive_value_exists(google_civic_election_id):
+        # Look up the current google_civic_election_id for this voter
+        results = figure_out_google_civic_election_id_voter_is_watching(voter_device_id)
+        google_civic_election_id = results['google_civic_election_id']
+
+    position_list_manager = PositionListManager()
+    # The list where we capture results
+    position_counts_list_results = []
+
+    # Get all of the individual scores for this entire election
+    position_network_score_list = position_list_manager.fetch_position_network_score_list(
+        voter_id, google_civic_election_id)
+
+    # Now organize the scores by ballot item
+    raw_entries_by_ballot_item = {}
+    for position_network_score in position_network_score_list:
+        ballot_item_we_vote_id = position_network_score.get_ballot_item_we_vote_id()
+        if ballot_item_we_vote_id not in raw_entries_by_ballot_item:
+            temp_list = []
+        else:
+            temp_list = raw_entries_by_ballot_item[ballot_item_we_vote_id]
+        temp_list.append(position_network_score)
+        raw_entries_by_ballot_item[ballot_item_we_vote_id] = temp_list
+
+    # Get a list of all candidates and measures from this election (in the active election)
+    ballot_item_list_manager = BallotItemListManager()
+    candidate_list_manager = CandidateCampaignListManager()
+    read_only = True
+    ballot_item_list = []
+    if google_civic_election_id:
+        results = ballot_item_list_manager.retrieve_all_ballot_items_for_voter(
+            voter_id, google_civic_election_id, read_only)
+        status += results['status']
+        ballot_item_list = results['ballot_item_list']
+
+    # ballot_item_list is populated with contest_office and contest_measure entries
+    support_or_oppose_exists = False
+    for one_ballot_item in ballot_item_list:
+        # Retrieve all positions for each ballot item
+        if one_ballot_item.is_contest_office():
+            results = candidate_list_manager.retrieve_all_candidates_for_office(
+                0, one_ballot_item.contest_office_we_vote_id, read_only)
+            success = results['success']
+            candidate_list = results['candidate_list']
+
+            if success:
+                # Loop through all candidates under this office
+                for candidate in candidate_list:
+                    support_count_for_one_ballot_item = 0
+                    oppose_count_for_one_ballot_item = 0
+                    support_we_vote_id_list = []
+                    oppose_we_vote_id_list = []
+                    support_name_list = []
+                    oppose_name_list = []
+
+                    if candidate.we_vote_id in raw_entries_by_ballot_item:
+                        for position_network_score in raw_entries_by_ballot_item[candidate.we_vote_id]:
+                            if position_network_score.is_support:
+                                support_or_oppose_exists = True
+                                support_count_for_one_ballot_item += 1
+                                support_we_vote_id_list.append(position_network_score.get_speaker_we_vote_id())
+                                support_name_list.append(position_network_score.speaker_display_name)
+                            elif position_network_score.is_oppose:
+                                support_or_oppose_exists = True
+                                oppose_count_for_one_ballot_item += 1
+                                oppose_we_vote_id_list.append(position_network_score.get_speaker_we_vote_id())
+                                oppose_name_list.append(position_network_score.speaker_display_name)
+
+                    one_ballot_item_results = {
+                        'ballot_item_we_vote_id':   candidate.we_vote_id,
+                        'support_count':            support_count_for_one_ballot_item,
+                        'oppose_count':             oppose_count_for_one_ballot_item,
+                        'support_we_vote_id_list':  support_we_vote_id_list,
+                        'support_name_list':        support_name_list,
+                        'oppose_we_vote_id_list':   oppose_we_vote_id_list,
+                        'oppose_name_list':         oppose_name_list,
+                    }
+                    position_counts_list_results.append(one_ballot_item_results)
+        elif one_ballot_item.is_contest_measure():
+            support_count_for_one_ballot_item = 0
+            oppose_count_for_one_ballot_item = 0
+            support_we_vote_id_list = []
+            oppose_we_vote_id_list = []
+            support_name_list = []
+            oppose_name_list = []
+
+            if one_ballot_item.contest_measure_we_vote_id in raw_entries_by_ballot_item:
+                for position_network_score in raw_entries_by_ballot_item[one_ballot_item.contest_measure_we_vote_id]:
+                    if position_network_score.is_support:
+                        support_or_oppose_exists = True
+                        support_count_for_one_ballot_item += 1
+                        support_we_vote_id_list.append(position_network_score.get_speaker_we_vote_id())
+                        support_name_list.append(position_network_score.speaker_display_name)
+                    elif position_network_score.is_oppose:
+                        support_or_oppose_exists = True
+                        oppose_count_for_one_ballot_item += 1
+                        oppose_we_vote_id_list.append(position_network_score.get_speaker_we_vote_id())
+                        oppose_name_list.append(position_network_score.speaker_display_name)
+
+            one_ballot_item_results = {
+                'ballot_item_we_vote_id':   one_ballot_item.contest_measure_we_vote_id,
+                'support_count':            support_count_for_one_ballot_item,
+                'oppose_count':             oppose_count_for_one_ballot_item,
+                'support_we_vote_id_list':  support_we_vote_id_list,
+                'support_name_list':        support_name_list,
+                'oppose_we_vote_id_list':   oppose_we_vote_id_list,
+                'oppose_name_list':         oppose_name_list,
+            }
+            position_counts_list_results.append(one_ballot_item_results)
+        else:
+            # Skip the rest of this loop
+            continue
+
+    json_data = {
+        'success':                  True,
+        'status':                   "POSITIONS_COUNT_FOR_ALL_BALLOT_ITEMS",
+        'google_civic_election_id': google_civic_election_id,
+        'position_counts_list':     position_counts_list_results,
+        'support_or_oppose_exists': support_or_oppose_exists,
+    }
+    return json_data
 
 
 def find_organizations_referenced_in_positions_for_this_voter(voter):

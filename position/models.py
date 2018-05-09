@@ -12,6 +12,7 @@ from django.db.models import Q
 from election.models import Election
 from exception.models import handle_exception, handle_record_found_more_than_one_exception,\
     handle_record_not_found_exception, handle_record_not_saved_exception
+from follow.models import FollowOrganizationManager, FollowOrganizationList
 from friend.models import FriendManager
 from measure.models import ContestMeasure, ContestMeasureManager
 from office.models import ContestOfficeManager
@@ -361,6 +362,12 @@ class PositionEntered(models.Model):
             return True
         return False
 
+    def is_friends_only_position(self):
+        return False
+
+    def is_public_position(self):
+        return True
+
     def last_updated(self):
         if positive_value_exists(self.date_last_changed):
             return str(self.date_last_changed)
@@ -485,7 +492,7 @@ class PositionForFriends(models.Model):
     # The date the this position last changed
     date_last_changed = models.DateTimeField(verbose_name='date last changed', null=True, auto_now=True)
 
-    # The organization this position is for
+    # The organization this position was taken by
     organization_id = models.BigIntegerField(null=True, blank=True)
     organization_we_vote_id = models.CharField(
         verbose_name="we vote permanent id for the organization", max_length=255, null=True,
@@ -732,6 +739,12 @@ class PositionForFriends(models.Model):
             return True
         return False
 
+    def is_friends_only_position(self):
+        return True
+
+    def is_public_position(self):
+        return False
+
     def last_updated(self):
         if positive_value_exists(self.date_last_changed):
             return str(self.date_last_changed)
@@ -803,6 +816,52 @@ class PositionForFriends(models.Model):
         return voter
 
 
+class PositionNetworkScore(models.Model):
+    """
+    Built for rapid lookup of the number of support / oppose for one ballot item, coming from one voter's network
+    """
+    # We are relying on built-in Python id field
+
+    viewing_voter_id = models.PositiveIntegerField(null=False, unique=False)
+    viewing_voter_we_vote_id = models.CharField(max_length=255, null=False, unique=False)
+
+    google_civic_election_id = models.PositiveIntegerField(
+        verbose_name="google civic election id", default=None, null=True, blank=True)
+
+    # The organization that took this position (either organization or friend will have value, or both)
+    organization_we_vote_id = models.CharField(max_length=255, null=True, unique=False)
+
+    # The friend who took this position
+    friend_voter_we_vote_id = models.CharField(max_length=255, null=True, unique=False)
+
+    # The candidate this score is about (either candidate or measure will have a value, but not both)
+    candidate_we_vote_id = models.CharField(max_length=255, null=True, unique=False)
+
+    # The measure this score is about (either candidate or measure will have a value, but not both)
+    measure_we_vote_id = models.CharField(max_length=255, null=True, unique=False)
+
+    # What is the organization name, voter name, or public figure name? We cache this here for rapid display
+    speaker_display_name = models.CharField(
+        verbose_name="name of the org or person with position", max_length=255, null=True, blank=True, unique=False)
+
+    is_support = models.BooleanField(default=False)
+    is_oppose = models.BooleanField(default=False)
+
+    def get_ballot_item_we_vote_id(self):
+        if positive_value_exists(self.candidate_we_vote_id):
+            return self.candidate_we_vote_id
+        elif positive_value_exists(self.measure_we_vote_id):
+            return self.measure_we_vote_id
+        return ""
+
+    def get_speaker_we_vote_id(self):
+        if positive_value_exists(self.organization_we_vote_id):
+            return self.organization_we_vote_id
+        elif positive_value_exists(self.friend_voter_we_vote_id):
+            return self.friend_voter_we_vote_id
+        return ""
+
+
 class PositionListManager(models.Model):
     def add_is_public_position(self, incoming_position_list, is_public_position):
         outgoing_position_list = []
@@ -861,6 +920,67 @@ class PositionListManager(models.Model):
                 positions_not_followed_by_voter.append(position)
 
         return positions_not_followed_by_voter
+
+    def delete_position_network_scores_for_voter_one_ballot_item(
+            self, viewing_voter_id, viewing_voter_we_vote_id,
+            candidate_we_vote_id, measure_we_vote_id):
+        status = ""
+        success = True
+        position_network_score_deleted = False
+
+        if not positive_value_exists(viewing_voter_id) and not positive_value_exists(viewing_voter_we_vote_id):
+            success = False
+            status += "DELETE_POSITION_NETWORK_SCORES-MISSING_VOTER_IDS "
+            results = {
+                'success': success,
+                'status': status,
+                'voter_id': viewing_voter_id,
+                'voter_we_vote_id': viewing_voter_we_vote_id,
+                'position_network_score_deleted': position_network_score_deleted,
+            }
+            return results
+
+        try:
+            if positive_value_exists(candidate_we_vote_id):
+                score_queryset = PositionNetworkScore.objects.filter(viewing_voter_id=viewing_voter_id)
+                score_queryset = score_queryset.filter(candidate_we_vote_id=candidate_we_vote_id)
+                score_queryset.delete()
+
+                score_queryset = PositionNetworkScore.objects.filter(viewing_voter_we_vote_id=viewing_voter_we_vote_id)
+                score_queryset = score_queryset.filter(candidate_we_vote_id=candidate_we_vote_id)
+                score_queryset.delete()
+
+                position_network_score_deleted = True
+                status += 'POSITION_NETWORK_SCORES_DELETED '
+                success = True
+            elif positive_value_exists(measure_we_vote_id):
+                score_queryset = PositionNetworkScore.objects.filter(viewing_voter_id=viewing_voter_id)
+                score_queryset = score_queryset.filter(measure_we_vote_id=measure_we_vote_id)
+                score_queryset.delete()
+
+                score_queryset = PositionNetworkScore.objects.filter(viewing_voter_we_vote_id=viewing_voter_we_vote_id)
+                score_queryset = score_queryset.filter(measure_we_vote_id=measure_we_vote_id)
+                score_queryset.delete()
+
+                position_network_score_deleted = True
+                status += 'POSITION_NETWORK_SCORES_DELETED '
+                success = True
+            else:
+                status += 'POSITION_NETWORK_SCORES_NOT_DELETED-MISSING_CANDIDATE_AND_MEASURE '
+                success = False
+        except Exception as e:
+            status += 'FAILED delete_position_network_scores_for_voter_one_ballot_item ' \
+                     '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
+            handle_exception(status, logger=logger)
+
+        results = {
+            'success':                          success,
+            'status':                           status,
+            'voter_id':                         viewing_voter_id,
+            'voter_we_vote_id':                 viewing_voter_we_vote_id,
+            'position_network_score_deleted':   position_network_score_deleted,
+        }
+        return results
 
     def fetch_voter_positions_count_for_candidate_campaign(
             self, candidate_campaign_id, candidate_campaign_we_vote_id='', stance_we_are_looking_for=ANY_STANCE):
@@ -2863,6 +2983,286 @@ class PositionListManager(models.Model):
         }
         return results
 
+    def fetch_position_network_score_list(self, viewing_voter_id, google_civic_election_id):
+        position_network_score_list_found = False
+        position_network_score_list = {}
+        try:
+            position_network_score_query = PositionNetworkScore.objects.using('readonly').all()
+            position_network_score_query = position_network_score_query.filter(viewing_voter_id=viewing_voter_id)
+            position_network_score_query = position_network_score_query.filter(
+                google_civic_election_id=google_civic_election_id)
+            position_network_score_list = list(position_network_score_query)
+            if len(position_network_score_list):
+                position_network_score_list_found = True
+        except Exception as e:
+            pass
+
+        if position_network_score_list_found:
+            return position_network_score_list
+        else:
+            position_network_score_list = {}
+            return position_network_score_list
+
+    def remove_position_network_scores_when_voter_stops_following(
+            self, viewing_voter_id, organization_we_vote_id):
+        success = True
+        status = "UPDATE_POSITION_NETWORK_SCORES_WHEN_ORGANIZATION_FOLLOW_CHANGES "
+        position_network_scores_deleted = False
+
+        if not positive_value_exists(organization_we_vote_id):
+            success = False
+            status += "DELETE_POSITION_NETWORK_SCORE-MISSING_ORGANIZATION "
+            results = {
+                'success':                          success,
+                'status':                           status,
+                'voter_id':                         viewing_voter_id,
+                'organization_we_vote_id':          organization_we_vote_id,
+                'position_network_scores_deleted':  position_network_scores_deleted,
+            }
+            return results
+
+        try:
+            score_queryset = PositionNetworkScore.objects.filter(viewing_voter_id=viewing_voter_id)
+            score_queryset = score_queryset.filter(organization_we_vote_id=organization_we_vote_id)
+            score_queryset.delete()
+            position_network_scores_deleted = True
+
+            status += 'POSITION_NETWORK_SCORES_DELETED-ORGANIZATION_STOP_FOLLOWING '
+        except Exception as e:
+            success = False
+            status += 'FAILED update_position_network_scores_when_organization_follow_changes ' \
+                      '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
+            handle_exception(status, logger=logger)
+
+        json_data = {
+            'success':                          success,
+            'status':                           status,
+            'voter_id':                         viewing_voter_id,
+            'organization_we_vote_id':          organization_we_vote_id,
+            'position_network_scores_deleted':  position_network_scores_deleted,
+        }
+        return json_data
+
+    def update_position_network_scores_for_one_position(self, one_position):
+        """
+        When one position changes, update all of the PositionNetworkScore entries needed for rapid score counts
+        :param one_position:
+        :return:
+        """
+        status = "UPDATE_POSITION_NETWORK_SCORES_FOR_ONE_POSITION "
+        public_positions_updated = 0
+        friends_only_positions_updated = 0
+
+        position_manager = PositionManager()
+        voter_manager = VoterManager()
+
+        voter_with_position_id = one_position.voter_id
+        voter_with_position_we_vote_id = one_position.voter_we_vote_id
+        voter_with_position_results = voter_manager.retrieve_voter_by_id(voter_with_position_id)
+        linked_organization_we_vote_id = None
+        if voter_with_position_results['voter_found']:
+            voter_with_position = voter_with_position_results['voter']
+            if positive_value_exists(voter_with_position.linked_organization_we_vote_id):
+                linked_organization_we_vote_id = voter_with_position.linked_organization_we_vote_id
+
+            if not positive_value_exists(voter_with_position_id):
+                voter_with_position_id = voter_with_position.id
+
+            if not positive_value_exists(voter_with_position_we_vote_id):
+                voter_with_position_we_vote_id = voter_with_position.we_vote_id
+
+            # If a voter_with_position exists for this position, create an entry
+            if positive_value_exists(voter_with_position_we_vote_id):
+                # Add entry to position_network_score table as a friend entry
+                save_for_position_holder = True
+                delete_for_position_holder = False
+                ignore_organization_voter_we_vote_id = None
+                candidate_we_vote_id = None
+                measure_we_vote_id = None
+                if positive_value_exists(one_position.candidate_campaign_we_vote_id):
+                    candidate_we_vote_id = one_position.candidate_campaign_we_vote_id
+                elif positive_value_exists(one_position.contest_measure_we_vote_id):
+                    measure_we_vote_id = one_position.contest_measure_we_vote_id
+                else:
+                    save_for_position_holder = False
+
+                support_or_oppose = None
+                if one_position.is_support_or_positive_rating():
+                    support_or_oppose = True
+                elif one_position.is_oppose_or_negative_rating():
+                    support_or_oppose = False
+                else:
+                    # If not support or oppose, don't save
+                    save_for_position_holder = False
+                    delete_for_position_holder = True
+
+                if save_for_position_holder:
+                    # Save the entry as a "friend" of yourself
+                    voter_with_position_speaker_display_name = one_position.speaker_display_name
+                    update_results = position_manager.update_or_create_position_network_score(
+                        voter_with_position_id, voter_with_position_we_vote_id,
+                        one_position.google_civic_election_id,
+                        ignore_organization_voter_we_vote_id, voter_with_position_we_vote_id,
+                        voter_with_position_speaker_display_name,
+                        candidate_we_vote_id, measure_we_vote_id,
+                        support_or_oppose)
+                    if update_results['position_network_score_updated']:
+                        friends_only_positions_updated += 1
+                elif delete_for_position_holder:
+                    # Delete any previous entry for yourself since you may have removed support or oppose
+                    delete_results = position_manager.delete_one_position_network_score(
+                        voter_with_position_id, voter_with_position_we_vote_id,
+                        one_position.google_civic_election_id,
+                        ignore_organization_voter_we_vote_id, voter_with_position_we_vote_id,
+                        candidate_we_vote_id, measure_we_vote_id)
+                    if delete_results['position_network_score_deleted']:
+                        friends_only_positions_updated += 1
+
+        # Public Positions
+        if positive_value_exists(one_position.organization_we_vote_id):
+            # Find all of the voter's following this organization
+            follow_organization_list_manager = FollowOrganizationList()
+            voters_following_list = \
+                follow_organization_list_manager.retrieve_follow_organization_by_organization_we_vote_id(
+                    one_position.organization_we_vote_id)
+
+            critical_variables_exist = True
+            save_public_position = True
+            delete_public_position = False
+            ignore_friend_voter_we_vote_id = None
+            candidate_we_vote_id = None
+            measure_we_vote_id = None
+            support_or_oppose = None
+            if positive_value_exists(one_position.candidate_campaign_we_vote_id):
+                candidate_we_vote_id = one_position.candidate_campaign_we_vote_id
+            elif positive_value_exists(one_position.contest_measure_we_vote_id):
+                measure_we_vote_id = one_position.contest_measure_we_vote_id
+            else:
+                # If not candidate or measure, do not save
+                save_public_position = False
+                critical_variables_exist = False
+
+            if one_position.is_support_or_positive_rating():
+                support_or_oppose = True
+            elif one_position.is_oppose_or_negative_rating():
+                support_or_oppose = False
+            else:
+                # If not support or oppose, do not save, and also delete prior entries
+                save_public_position = False
+                delete_public_position = True
+
+            organization_belongs_to_voter_with_position = \
+                one_position.organization_we_vote_id == linked_organization_we_vote_id
+
+            if critical_variables_exist and (save_public_position or delete_public_position):
+                for follow_organization in voters_following_list:
+                    voter_that_is_following_id = follow_organization.voter_id
+                    voter_that_is_following_we_vote_id = follow_organization.voter_we_vote_id()
+
+                    voter_ids_match = voter_with_position_we_vote_id == voter_that_is_following_we_vote_id
+
+                    if one_position.is_public_position():
+                        # If this is your own position, do not save it as a public position
+                        if not organization_belongs_to_voter_with_position and not voter_ids_match:
+                            if save_public_position:
+                                # Add entry to position_network_score table
+                                update_results = position_manager.update_or_create_position_network_score(
+                                    voter_that_is_following_id, voter_that_is_following_we_vote_id,
+                                    one_position.google_civic_election_id,
+                                    one_position.organization_we_vote_id, ignore_friend_voter_we_vote_id,
+                                    one_position.speaker_display_name,
+                                    candidate_we_vote_id, measure_we_vote_id,
+                                    support_or_oppose)
+                                if update_results['position_network_score_updated']:
+                                    public_positions_updated += 1
+                            elif delete_public_position:
+                                delete_results = position_manager.delete_one_position_network_score(
+                                    voter_that_is_following_id, voter_that_is_following_we_vote_id,
+                                    one_position.google_civic_election_id,
+                                    one_position.organization_we_vote_id, ignore_friend_voter_we_vote_id,
+                                    candidate_we_vote_id, measure_we_vote_id)
+                                if delete_results['position_network_score_deleted']:
+                                    public_positions_updated += 1
+                    else:
+                        # Make sure to delete entries for this position since it is no longer public
+                        delete_results = position_manager.delete_one_position_network_score(
+                            voter_that_is_following_id, voter_that_is_following_we_vote_id,
+                            one_position.google_civic_election_id,
+                            one_position.organization_we_vote_id, ignore_friend_voter_we_vote_id,
+                            candidate_we_vote_id, measure_we_vote_id)
+                        if delete_results['position_network_score_deleted']:
+                            public_positions_updated += 1
+
+        # Friends-only positions
+        if one_position.is_friends_only_position() and positive_value_exists(one_position.voter_we_vote_id):
+            friend_manager = FriendManager()
+            friend_results = friend_manager.retrieve_friends_we_vote_id_list(one_position.voter_we_vote_id)
+            friends_we_vote_id_list = []
+            if friend_results['friends_we_vote_id_list_found']:
+                friends_we_vote_id_list = friend_results['friends_we_vote_id_list']
+
+            critical_variables_exist = True
+            save_for_friends = True
+            delete_for_friends = False
+            ignore_organization_voter_we_vote_id = None
+            candidate_we_vote_id = None
+            measure_we_vote_id = None
+            support_or_oppose = None
+
+            # Don't try to
+            if positive_value_exists(one_position.candidate_campaign_we_vote_id):
+                candidate_we_vote_id = one_position.candidate_campaign_we_vote_id
+            elif positive_value_exists(one_position.contest_measure_we_vote_id):
+                measure_we_vote_id = one_position.contest_measure_we_vote_id
+            else:
+                save_for_friends = False
+                critical_variables_exist = False
+
+            if one_position.is_support_or_positive_rating():
+                support_or_oppose = True
+            elif one_position.is_oppose_or_negative_rating():
+                support_or_oppose = False
+            else:
+                # If not support or oppose, continue to next position
+                save_for_friends = False
+                delete_for_friends = True
+
+            if critical_variables_exist and (save_for_friends or delete_for_friends):
+                for current_friend in friends_we_vote_id_list:
+                    voter_friend_we_vote_id = current_friend.fetch_other_voter_we_vote_id(one_position.voter_we_vote_id)
+                    voter_friend_id = voter_manager.fetch_local_id_from_we_vote_id(voter_friend_we_vote_id)
+
+                    voter_ids_match = voter_with_position_id == voter_friend_id
+
+                    if not voter_ids_match:
+                        if save_for_friends:
+                            # Add entry to position_network_score table
+                            update_results = position_manager.update_or_create_position_network_score(
+                                voter_friend_id, voter_friend_we_vote_id,
+                                one_position.google_civic_election_id,
+                                ignore_organization_voter_we_vote_id, voter_with_position_we_vote_id,
+                                one_position.speaker_display_name,
+                                candidate_we_vote_id, measure_we_vote_id,
+                                support_or_oppose)
+                            if update_results['position_network_score_updated']:
+                                friends_only_positions_updated += 1
+                        elif delete_for_friends:
+                            delete_results = position_manager.delete_one_position_network_score(
+                                voter_friend_id, voter_friend_we_vote_id,
+                                one_position.google_civic_election_id,
+                                ignore_organization_voter_we_vote_id, voter_with_position_we_vote_id,
+                                candidate_we_vote_id, measure_we_vote_id)
+                            if delete_results['position_network_score_deleted']:
+                                friends_only_positions_updated += 1
+
+        json_data = {
+            'success':                          True,
+            'status':                           status,
+            'friends_only_positions_updated':   friends_only_positions_updated,
+            'public_positions_updated':         public_positions_updated,
+        }
+        return json_data
+
 
 class PositionManager(models.Model):
 
@@ -3045,6 +3445,103 @@ class PositionManager(models.Model):
             'position':             position_on_stage,
             'position_found':       position_found,
             'is_public_position':   is_public_position
+        }
+        return results
+
+    def delete_one_position_network_score(self, viewing_voter_id, viewing_voter_we_vote_id, google_civic_election_id,
+                                          organization_we_vote_id, friend_voter_we_vote_id,
+                                          candidate_we_vote_id, measure_we_vote_id):
+        status = ""
+        success = True
+        position_network_score_deleted = False
+
+        if not positive_value_exists(viewing_voter_id) and not positive_value_exists(viewing_voter_we_vote_id):
+            success = False
+            status += "DELETE_POSITION_NETWORK_SCORE-MISSING_VOTER_IDS "
+            results = {
+                'success': success,
+                'status': status,
+                'voter_id': viewing_voter_id,
+                'voter_we_vote_id': viewing_voter_we_vote_id,
+                'position_network_score_deleted': position_network_score_deleted,
+            }
+            return results
+
+        if not positive_value_exists(organization_we_vote_id) and not positive_value_exists(friend_voter_we_vote_id):
+            success = False
+            status += "DELETE_POSITION_NETWORK_SCORE-MISSING_ORGANIZATION_AND_FRIEND "
+            results = {
+                'success': success,
+                'status': status,
+                'voter_id': viewing_voter_id,
+                'voter_we_vote_id': viewing_voter_we_vote_id,
+                'position_network_score_deleted': position_network_score_deleted,
+            }
+            return results
+
+        try:
+            if positive_value_exists(candidate_we_vote_id):
+                score_queryset = PositionNetworkScore.objects.filter(viewing_voter_id=viewing_voter_id)
+                score_queryset = score_queryset.filter(google_civic_election_id=google_civic_election_id)
+                score_queryset = score_queryset.filter(candidate_we_vote_id=candidate_we_vote_id)
+                if positive_value_exists(organization_we_vote_id):
+                    score_queryset = score_queryset.filter(organization_we_vote_id=organization_we_vote_id)
+                    score_queryset.delete()
+                elif positive_value_exists(friend_voter_we_vote_id):
+                    score_queryset = score_queryset.filter(friend_voter_we_vote_id=friend_voter_we_vote_id)
+                    score_queryset.delete()
+
+                score_queryset = PositionNetworkScore.objects.filter(viewing_voter_we_vote_id=viewing_voter_we_vote_id)
+                score_queryset = score_queryset.filter(google_civic_election_id=google_civic_election_id)
+                score_queryset = score_queryset.filter(candidate_we_vote_id=candidate_we_vote_id)
+                if positive_value_exists(organization_we_vote_id):
+                    score_queryset = score_queryset.filter(organization_we_vote_id=organization_we_vote_id)
+                    score_queryset.delete()
+                elif positive_value_exists(friend_voter_we_vote_id):
+                    score_queryset = score_queryset.filter(friend_voter_we_vote_id=friend_voter_we_vote_id)
+                    score_queryset.delete()
+
+                position_network_score_deleted = True
+                status += 'POSITION_NETWORK_SCORE_DELETED-CANDIDATE '
+                success = True
+            elif positive_value_exists(measure_we_vote_id):
+                score_queryset = PositionNetworkScore.objects.filter(viewing_voter_id=viewing_voter_id)
+                score_queryset = score_queryset.filter(google_civic_election_id=google_civic_election_id)
+                score_queryset = score_queryset.filter(measure_we_vote_id=measure_we_vote_id)
+                if positive_value_exists(organization_we_vote_id):
+                    score_queryset = score_queryset.filter(organization_we_vote_id=organization_we_vote_id)
+                    score_queryset.delete()
+                elif positive_value_exists(friend_voter_we_vote_id):
+                    score_queryset = score_queryset.filter(friend_voter_we_vote_id=friend_voter_we_vote_id)
+                    score_queryset.delete()
+
+                score_queryset = PositionNetworkScore.objects.filter(viewing_voter_we_vote_id=viewing_voter_we_vote_id)
+                score_queryset = score_queryset.filter(google_civic_election_id=google_civic_election_id)
+                score_queryset = score_queryset.filter(measure_we_vote_id=measure_we_vote_id)
+                if positive_value_exists(organization_we_vote_id):
+                    score_queryset = score_queryset.filter(organization_we_vote_id=organization_we_vote_id)
+                    score_queryset.delete()
+                elif positive_value_exists(friend_voter_we_vote_id):
+                    score_queryset = score_queryset.filter(friend_voter_we_vote_id=friend_voter_we_vote_id)
+                    score_queryset.delete()
+
+                position_network_score_deleted = True
+                status += 'POSITION_NETWORK_SCORE_DELETED-MEASURE '
+                success = True
+            else:
+                status += 'POSITION_NETWORK_SCORES_NOT_DELETED-MISSING_CANDIDATE_AND_MEASURE '
+                success = False
+        except Exception as e:
+            status += 'FAILED delete_one_position_network_score ' \
+                     '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
+            handle_exception(status, logger=logger)
+
+        results = {
+            'success':                          success,
+            'status':                           status,
+            'voter_id':                         viewing_voter_id,
+            'voter_we_vote_id':                 viewing_voter_we_vote_id,
+            'position_network_score_deleted':   position_network_score_deleted,
         }
         return results
 
@@ -4401,6 +4898,7 @@ class PositionManager(models.Model):
         candidate_campaign_we_vote_id = ""
         contest_measure_we_vote_id = ""
         voter_manager = VoterManager()
+        position_list_manager = PositionListManager()
         if voter_position_found:
             # Update this position with new values
             try:
@@ -4473,6 +4971,7 @@ class PositionManager(models.Model):
                             voter_position_on_stage.organization_id = organization_id
 
                 voter_position_on_stage.save()
+                position_list_manager.update_position_network_scores_for_one_position(voter_position_on_stage)
                 position_we_vote_id = voter_position_on_stage.we_vote_id
                 voter_position_on_stage_found = True
                 status = 'STANCE_UPDATED'
@@ -4573,6 +5072,7 @@ class PositionManager(models.Model):
                     )
 
                 voter_position_on_stage.save()
+                position_list_manager.update_position_network_scores_for_one_position(voter_position_on_stage)
                 position_we_vote_id = voter_position_on_stage.we_vote_id
                 voter_position_on_stage_found = True
                 status = 'NEW_STANCE_SAVED'
@@ -4702,6 +5202,7 @@ class PositionManager(models.Model):
         is_public_position = False
         problem_with_duplicate_in_same_table = False
         status = ""
+        position_list_manager = PositionListManager()
 
         # Set this in case of error
         voter_position_on_stage = PositionForFriends()
@@ -4878,6 +5379,7 @@ class PositionManager(models.Model):
                     voter_position_on_stage.voter_we_vote_id = fetch_voter_we_vote_id_from_voter_id(voter_id)
 
                 voter_position_on_stage.save()
+                position_list_manager.update_position_network_scores_for_one_position(voter_position_on_stage)
                 position_we_vote_id = voter_position_on_stage.we_vote_id
                 voter_position_on_stage_found = True
                 status = 'POSITION_COMMENT_UPDATED'
@@ -4953,6 +5455,7 @@ class PositionManager(models.Model):
                 )
 
                 voter_position_on_stage.save()
+                position_list_manager.update_position_network_scores_for_one_position(voter_position_on_stage)
                 position_we_vote_id = voter_position_on_stage.we_vote_id
                 voter_position_on_stage_found = True
                 is_public_position = False
@@ -4966,6 +5469,163 @@ class PositionManager(models.Model):
             'position_we_vote_id':  position_we_vote_id,
             'position':             voter_position_on_stage,
             'is_public_position':   is_public_position
+        }
+        return results
+
+    def update_or_create_position_network_score(self, viewing_voter_id, viewing_voter_we_vote_id,
+                                                google_civic_election_id,
+                                                organization_we_vote_id, friend_voter_we_vote_id,
+                                                speaker_display_name,
+                                                candidate_we_vote_id, measure_we_vote_id,
+                                                support_or_oppose):
+        """
+
+        :param viewing_voter_id: The voter who needs to see the network score
+        :param viewing_voter_we_vote_id: The voter who needs to see the network score
+        :param google_civic_election_id:
+        :param organization_we_vote_id: The organization with the public position (not used for friends-only positions)
+        :param friend_voter_we_vote_id: The friend sharing the friends-only position
+        :param speaker_display_name: The name of the friend or organization sharing the position
+        :param candidate_we_vote_id:
+        :param measure_we_vote_id:
+        :param support_or_oppose: True for support, False for oppose
+        :return:
+        """
+        position_network_score_updated = False
+        new_position_network_score_created = False
+        status = ""
+        success = False
+
+        if not positive_value_exists(viewing_voter_id) or not positive_value_exists(viewing_voter_we_vote_id):
+            status += "UPDATE_OR_CREATE_POSITION_NETWORK_SCORE-MISSING_VOTER_ID "
+            results = {
+                'success': success,
+                'status': status,
+                'position_network_score_created': new_position_network_score_created,
+                'position_network_score_updated': position_network_score_updated,
+            }
+            return results
+
+        if positive_value_exists(support_or_oppose):
+            is_support = True
+            is_oppose = False
+        else:
+            is_support = False
+            is_oppose = True
+
+        # If we are saving the voter's own position, and they have a fabricated name, replace with "You"
+        if viewing_voter_we_vote_id and friend_voter_we_vote_id and viewing_voter_we_vote_id == friend_voter_we_vote_id:
+            if speaker_display_name.startswith("Voter-"):
+                speaker_display_name = "You"
+
+        try:
+            if positive_value_exists(organization_we_vote_id):
+                if positive_value_exists(candidate_we_vote_id):
+                    defaults = {
+                        'viewing_voter_id': viewing_voter_id,
+                        'viewing_voter_we_vote_id': viewing_voter_we_vote_id,
+                        'google_civic_election_id': google_civic_election_id,
+                        'organization_we_vote_id': organization_we_vote_id,
+                        'friend_voter_we_vote_id': None,
+                        'speaker_display_name': speaker_display_name,
+                        'candidate_we_vote_id': candidate_we_vote_id,
+                        'measure_we_vote_id': None,
+                        'is_support': is_support,
+                        'is_oppose': is_oppose,
+                    }
+                    position_network_score, new_position_network_score_created = \
+                        PositionNetworkScore.objects.update_or_create(
+                            viewing_voter_id=viewing_voter_id,
+                            organization_we_vote_id__iexact=organization_we_vote_id,
+                            candidate_we_vote_id__iexact=candidate_we_vote_id,
+                            defaults=defaults)
+                    position_network_score_updated = True
+                    success = True
+                elif positive_value_exists(measure_we_vote_id):
+                    defaults = {
+                        'viewing_voter_id': viewing_voter_id,
+                        'viewing_voter_we_vote_id': viewing_voter_we_vote_id,
+                        'google_civic_election_id': google_civic_election_id,
+                        'organization_we_vote_id': organization_we_vote_id,
+                        'friend_voter_we_vote_id': None,
+                        'speaker_display_name': speaker_display_name,
+                        'candidate_we_vote_id': None,
+                        'measure_we_vote_id': measure_we_vote_id,
+                        'is_support': is_support,
+                        'is_oppose': is_oppose,
+                    }
+                    position_network_score, new_position_network_score_created = \
+                        PositionNetworkScore.objects.update_or_create(
+                            viewing_voter_id=viewing_voter_id,
+                            organization_we_vote_id__iexact=organization_we_vote_id,
+                            measure_we_vote_id__iexact=measure_we_vote_id,
+                            defaults=defaults)
+                    position_network_score_updated = True
+                    success = True
+                else:
+                    status += "UPDATE_OR_CREATE_POSITION_NETWORK_SCORE-ORG_MISSING_CANDIDATE_OR_MEASURE_ID "
+                    position_network_score_updated = False
+                    success = False
+            elif positive_value_exists(friend_voter_we_vote_id):
+                if positive_value_exists(candidate_we_vote_id):
+                    defaults = {
+                        'viewing_voter_id': viewing_voter_id,
+                        'viewing_voter_we_vote_id': viewing_voter_we_vote_id,
+                        'google_civic_election_id': google_civic_election_id,
+                        'organization_we_vote_id': None,
+                        'friend_voter_we_vote_id': friend_voter_we_vote_id,
+                        'speaker_display_name': speaker_display_name,
+                        'candidate_we_vote_id': candidate_we_vote_id,
+                        'measure_we_vote_id': None,
+                        'is_support': is_support,
+                        'is_oppose': is_oppose,
+                    }
+                    position_network_score, new_position_network_score_created = \
+                        PositionNetworkScore.objects.update_or_create(
+                            viewing_voter_id=viewing_voter_id,
+                            friend_voter_we_vote_id__iexact=friend_voter_we_vote_id,
+                            candidate_we_vote_id__iexact=candidate_we_vote_id,
+                            defaults=defaults)
+                    position_network_score_updated = True
+                    success = True
+                elif positive_value_exists(measure_we_vote_id):
+                    defaults = {
+                        'viewing_voter_id': viewing_voter_id,
+                        'viewing_voter_we_vote_id': viewing_voter_we_vote_id,
+                        'google_civic_election_id': google_civic_election_id,
+                        'organization_we_vote_id': None,
+                        'friend_voter_we_vote_id': friend_voter_we_vote_id,
+                        'speaker_display_name': speaker_display_name,
+                        'candidate_we_vote_id': None,
+                        'measure_we_vote_id': measure_we_vote_id,
+                        'is_support': is_support,
+                        'is_oppose': is_oppose,
+                    }
+                    position_network_score, new_position_network_score_created = \
+                        PositionNetworkScore.objects.update_or_create(
+                            viewing_voter_id=viewing_voter_id,
+                            friend_voter_we_vote_id__iexact=friend_voter_we_vote_id,
+                            measure_we_vote_id__iexact=measure_we_vote_id,
+                            defaults=defaults)
+                    position_network_score_updated = True
+                    success = True
+                else:
+                    status += "UPDATE_OR_CREATE_POSITION_NETWORK_SCORE-FRIEND_MISSING_CANDIDATE_OR_MEASURE_ID "
+                    position_network_score_updated = False
+                    success = False
+            if position_network_score_updated:
+                status += 'POSITION_NETWORK_SCORE_SAVED '
+            else:
+                status += 'POSITION_NETWORK_SCORE_NOT_SAVED '
+        except Exception as e:
+            success = False
+            status += 'UNABLE_TO_UPDATE_OR_CREATE_POSITION_NETWORK_SCORE '
+
+        results = {
+            'success': success,
+            'status': status,
+            'position_network_score_created': new_position_network_score_created,
+            'position_network_score_updated': position_network_score_updated,
         }
         return results
 
@@ -5255,6 +5915,7 @@ class PositionManager(models.Model):
         :param organization:
         :return:
         """
+        position_list_manager = PositionListManager()
         position_change = False
         if positive_value_exists(organization.organization_name) and \
                 position_object.speaker_display_name != organization.organization_name:
@@ -5267,6 +5928,7 @@ class PositionManager(models.Model):
         if position_change:
             try:
                 position_object.save()
+                position_list_manager.update_position_network_scores_for_one_position(position_object)
                 success = True
                 status = "SAVED_POSITION_SPEAKER_DATA_FROM_ORGANIZATION"
             except Exception as e:
@@ -5325,6 +5987,7 @@ class PositionManager(models.Model):
         status = "ENTERING_UPDATE_OR_CREATE_POSITION "
 
         position_manager = PositionManager()
+        position_list_manager = PositionListManager()
 
         # In order of authority
         # 1) position_id exists? Find it with position_id or fail (REMOVED)
@@ -5405,6 +6068,7 @@ class PositionManager(models.Model):
                         or statement_html or more_info_url \
                         or vote_smart_time_span or vote_smart_rating_id or vote_smart_rating or vote_smart_rating_name:
                     position_on_stage.save()
+                    position_list_manager.update_position_network_scores_for_one_position(position_on_stage)
                     success = True
                     if found_with_we_vote_id:
                         status = "POSITION_SAVED_WITH_POSITION_WE_VOTE_ID"
@@ -5869,6 +6533,7 @@ class PositionManager(models.Model):
                                 position_on_stage.more_info_url = more_info_url
 
                             position_on_stage.save()
+                            position_list_manager.update_position_network_scores_for_one_position(position_on_stage)
                             success = True
                             status = found_with_status + " SAVED"
                         else:
@@ -6007,6 +6672,7 @@ class PositionManager(models.Model):
                     vote_smart_rating=vote_smart_rating,
                     vote_smart_rating_name=vote_smart_rating_name
                 )
+                position_list_manager.update_position_network_scores_for_one_position(position_on_stage)
                 status = "CREATE_POSITION_SUCCESSFUL"
                 success = True
 

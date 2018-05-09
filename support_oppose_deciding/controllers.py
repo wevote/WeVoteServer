@@ -10,7 +10,7 @@ from measure.models import ContestMeasureManager
 from django.http import HttpResponse
 from follow.models import FollowOrganizationList
 import json
-from position.models import FRIENDS_ONLY, SUPPORT, OPPOSE, PositionManager, PositionListManager, PUBLIC_ONLY
+from position.models import ANY_STANCE, FRIENDS_ONLY, SUPPORT, OPPOSE, PositionManager, PositionListManager, PUBLIC_ONLY
 from voter.models import fetch_voter_id_from_voter_device_link, VoterManager
 import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, is_voter_device_id_valid, positive_value_exists
@@ -308,7 +308,7 @@ def position_public_support_count_for_ballot_item_for_api(candidate_id, candidat
 def positions_count_for_all_ballot_items_for_api(  # positionsCountForAllBallotItems
         voter_device_id, google_civic_election_id=0):
     """
-    We want to return a JSON file with the a list of the support and oppose counts from the orgs, friends and
+    We want to return a JSON file with the list of the support and oppose counts from the orgs, friends and
     public figures the voter follows
     """
     status = ""

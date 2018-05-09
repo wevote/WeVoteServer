@@ -4,7 +4,6 @@
 
 from datetime import datetime, timedelta
 from django.db import models
-from django.utils.timezone import localtime, now
 from election.models import ElectionManager
 from exception.models import handle_record_found_more_than_one_exception,\
     handle_record_not_found_exception, handle_record_not_saved_exception
@@ -679,6 +678,7 @@ class FollowOrganizationManager(models.Model):
     def toggle_voter_following_organization(self, voter_id, organization_id, organization_we_vote_id,
                                             voter_linked_organization_we_vote_id, following_status,
                                             auto_followed_from_twitter_suggestion=False):
+        status = ""
         # Does a follow_organization entry exist from this voter already exist?
         follow_organization_manager = FollowOrganizationManager()
         results = follow_organization_manager.retrieve_follow_organization(0, voter_id,
@@ -709,13 +709,13 @@ class FollowOrganizationManager(models.Model):
                 follow_organization_on_stage.save()
                 follow_organization_on_stage_id = follow_organization_on_stage.id
                 follow_organization_on_stage_found = True
-                status = 'UPDATE ' + following_status
+                status += 'UPDATE ' + following_status
             except Exception as e:
-                status = 'FAILED_TO_UPDATE ' + following_status
+                status += 'FAILED_TO_UPDATE ' + following_status
                 handle_record_not_saved_exception(e, logger=logger, exception_message_optional=status)
         elif results['MultipleObjectsReturned']:
             logger.warning("follow_organization: delete all but one and take it over?")
-            status = 'TOGGLE_FOLLOWING_ORGANIZATION MultipleObjectsReturned ' + following_status
+            status += 'TOGGLE_FOLLOWING_ORGANIZATION MultipleObjectsReturned ' + following_status
         elif results['DoesNotExist']:
             try:
                 # Create new follow_organization entry
@@ -739,14 +739,14 @@ class FollowOrganizationManager(models.Model):
                     follow_organization_on_stage.save()
                     follow_organization_on_stage_id = follow_organization_on_stage.id
                     follow_organization_on_stage_found = True
-                    status = 'CREATE ' + following_status
+                    status += 'CREATE ' + following_status
                 else:
-                    status = 'ORGANIZATION_NOT_FOUND_ON_CREATE ' + following_status
+                    status += 'ORGANIZATION_NOT_FOUND_ON_CREATE ' + following_status
             except Exception as e:
-                status = 'FAILED_TO_UPDATE ' + following_status
+                status += 'FAILED_TO_UPDATE ' + following_status
                 handle_record_not_saved_exception(e, logger=logger, exception_message_optional=status)
         else:
-            status = results['status']
+            status += results['status']
 
         results = {
             'success':                              True if follow_organization_on_stage_found else False,
