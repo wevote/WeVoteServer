@@ -43,6 +43,22 @@ def positions_count_for_all_ballot_items_doc_template_values(url_root):
                    '     "ballot_item_we_vote_id": string,\n' \
                    '     "support_count": integer,\n' \
                    '     "oppose_count": integer,\n' \
+                   '     "support_we_vote_id_list": list\n' \
+                   '      [\n' \
+                   '         "organization or friend we_vote_id": string,\n' \
+                   '      ],\n' \
+                   '     "support_name_list": list\n' \
+                   '      [\n' \
+                   '         "Speaker Display Name": string,\n' \
+                   '      ],\n' \
+                   '     "oppose_we_vote_list": list\n' \
+                   '      [\n' \
+                   '         "organization or friend we_vote_id": string,\n' \
+                   '      ],\n' \
+                   '     "oppose_name_list": list\n' \
+                   '      [\n' \
+                   '         "Speaker Display Name": string,\n' \
+                   '      ],\n' \
                    '   ],\n' \
                    '}'
 

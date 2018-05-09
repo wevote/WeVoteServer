@@ -69,7 +69,7 @@ def issues_retrieve_doc_template_values(url_root):
                    '      ],\n' \
                    '     "organization_name_support_list": list\n' \
                    '      [\n' \
-                   '         "organization_we_vote_id": string,\n' \
+                   '         "Speaker Display Name": string,\n' \
                    '      ],\n' \
                    '     "organization_we_vote_id_oppose_list": list\n' \
                    '      [\n' \
@@ -77,7 +77,7 @@ def issues_retrieve_doc_template_values(url_root):
                    '      ],\n' \
                    '     "organization_name_oppose_list": list\n' \
                    '      [\n' \
-                   '         "organization_we_vote_id": string,\n' \
+                   '         "Speaker Display Name": string,\n' \
                    '      ],\n' \
                    '   ],\n' \
                    '  "issues_under_ballot_items_list": list\n' \
