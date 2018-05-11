@@ -1579,6 +1579,16 @@ def voter_merge_two_accounts_for_api(  # voterMergeTwoAccounts
     merge_voter_accounts_results = merge_voter_accounts(voter, new_owner_voter)
     status += " " + merge_voter_accounts_results['status']
 
+    # Delete all existing PositionNetworkScore entries for both the old account and the new account, so they
+    # have to be regenerated
+    delete_score_results = \
+        position_list_manager.delete_all_position_network_scores_for_voter(voter.id, voter.we_vote_id)
+    status += " " + delete_score_results['status']
+    delete_score_results = \
+        position_list_manager.delete_all_position_network_scores_for_voter(
+            new_owner_voter.id, new_owner_voter.we_vote_id)
+    status += " " + delete_score_results['status']
+
     # TODO Keep a record of voter_we_vote_id's associated with this voter, so we can find the
     #  latest we_vote_id
 

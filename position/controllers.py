@@ -35,6 +35,13 @@ POSITIONS_SYNC_URL = get_environment_variable("POSITIONS_SYNC_URL")  # positions
 
 def add_position_network_count_entries_for_one_organization(voter_id, organization_we_vote_id,
                                                             google_civic_election_id=0):
+    """
+    This is called when a voter follows an organization.
+    :param voter_id:
+    :param organization_we_vote_id:
+    :param google_civic_election_id:
+    :return:
+    """
     status = "ADD_POSITION_NETWORK_COUNT_FOR_ONE_ORGANIZATION "
     public_positions_updated = False
 
@@ -122,6 +129,102 @@ def add_position_network_count_entries_for_one_organization(voter_id, organizati
         'success':                  True,
         'status':                   status,
         'google_civic_election_id': google_civic_election_id,
+        'public_positions_updated': public_positions_updated,
+    }
+    return json_data
+
+
+def add_position_network_count_entries_for_one_friend(voter_id, friend_voter_we_vote_id,
+                                                      google_civic_election_id=0, voter_we_vote_id=""):
+    """
+    This is called when a voter adds a friend.
+    :param voter_id:
+    :param friend_voter_we_vote_id:
+    :param google_civic_election_id:
+    :param voter_we_vote_id:
+    :return:
+    """
+    status = "ADD_POSITION_NETWORK_COUNT_FOR_ONE_FRIEND "
+    friends_only_positions_updated = False
+    public_positions_updated = False
+
+    voter_manager = VoterManager()
+    if positive_value_exists(voter_id):
+        voter_results = voter_manager.retrieve_voter_by_id(voter_id)
+    else:
+        voter_results = voter_manager.retrieve_voter_by_we_vote_id(voter_we_vote_id)
+    if voter_results['voter_found']:
+        voter = voter_results['voter']
+        voter_id = voter.id
+        voter_we_vote_id = voter.we_vote_id
+    else:
+        voter_id = 0
+        voter_we_vote_id = ""
+    if not positive_value_exists(voter_id):
+        status += "VALID_VOTER_ID_MISSING "
+        json_data = {
+            'status':                           status,
+            'success':                          False,
+            'google_civic_election_id':         google_civic_election_id,
+            'friends_only_positions_updated':   friends_only_positions_updated,
+            'public_positions_updated':         public_positions_updated,
+        }
+        return json_data
+
+    if not positive_value_exists(google_civic_election_id):
+        # Look up the current google_civic_election_id for this voter
+        results = figure_out_google_civic_election_id_voter_is_watching_by_voter_id(voter_id)
+        google_civic_election_id = results['google_civic_election_id']
+
+    friend_voter_results = voter_manager.retrieve_voter_by_we_vote_id(friend_voter_we_vote_id)
+    if friend_voter_results['voter_found']:
+        friend_voter = friend_voter_results['voter']
+        friend_voter_linked_organization_we_vote_id = friend_voter.linked_organization_we_vote_id
+    else:
+        friend_voter_linked_organization_we_vote_id = ""
+
+    position_list_manager = PositionListManager()
+
+    # Start with the publicly visible positions from the friend
+    if positive_value_exists(friend_voter_linked_organization_we_vote_id):
+        organization_id = 0
+        show_positions_current_voter_election = True
+        exclude_positions_current_voter_election = False
+        position_list = position_list_manager.retrieve_all_positions_for_organization(
+            organization_id, friend_voter_linked_organization_we_vote_id,
+            ANY_STANCE, PUBLIC_ONLY,
+            show_positions_current_voter_election,
+            exclude_positions_current_voter_election,
+            google_civic_election_id=google_civic_election_id)
+
+        for one_position in position_list:
+            results = update_or_create_position_network_score_wrapper(voter_id, voter_we_vote_id, one_position)
+
+            if results['public_position_updated']:
+                public_positions_updated = True
+
+    # Then find friends-only positions
+    if positive_value_exists(friend_voter_linked_organization_we_vote_id):
+        friend_voter_id = 0
+        position_results = position_list_manager.retrieve_all_positions_for_voter(
+            friend_voter_id, friend_voter_we_vote_id,
+            ANY_STANCE, FRIENDS_ONLY,
+            google_civic_election_id, THIS_ELECTION_ONLY)
+
+        # ballot_item_list is populated with contest_office and contest_measure entries
+        if position_results['position_list_found']:
+            position_list = position_results['position_list']
+            for one_position in position_list:
+                results = update_or_create_position_network_score_wrapper(voter_id, voter_we_vote_id, one_position)
+
+                if results['friends_only_position_updated']:
+                    friends_only_positions_updated = True
+
+    json_data = {
+        'success':                  True,
+        'status':                   status,
+        'google_civic_election_id': google_civic_election_id,
+        'friends_only_positions_updated': friends_only_positions_updated,
         'public_positions_updated': public_positions_updated,
     }
     return json_data
@@ -4070,3 +4173,107 @@ def update_position_for_friends_details_from_voter(voter):
         'positions_not_updated_count':  positions_not_updated_count,
     }
     return results
+
+
+def update_or_create_position_network_score_wrapper(voter_id, voter_we_vote_id, one_position):
+    status = ""
+    position_manager = PositionManager()
+    friends_only_position_updated = False
+    public_position_updated = False
+
+    if one_position.is_support_or_positive_rating():
+        support_or_oppose = True
+    elif one_position.is_oppose_or_negative_rating():
+        support_or_oppose = False
+    else:
+        # If not support or oppose, exit
+        status += "UPDATE_POSITION_NETWORK_SCORE_WRAPPER_NOT_SUPPORT_OR_OPPOSE "
+        results = {
+            'success': True,
+            'status': status,
+            'google_civic_election_id': one_position.google_civic_election_id,
+            'position_network_score_updated': friends_only_position_updated or public_position_updated,
+            'friends_only_position_updated': friends_only_position_updated,
+            'public_position_updated': public_position_updated,
+        }
+        return results
+
+    friend_voter_we_vote_id = None
+    organization_we_vote_id = None
+    voter_looking_at_self = False
+    if one_position.is_public_position():
+        organization_we_vote_id = one_position.organization_we_vote_id
+    elif one_position.is_friends_only_position():
+        friend_voter_we_vote_id = one_position.voter_we_vote_id
+        voter_looking_at_self = voter_we_vote_id == friend_voter_we_vote_id
+    else:
+        status += "UPDATE_POSITION_NETWORK_SCORE_WRAPPER-MISSING_ORG_AND_FRIEND "
+        results = {
+            'success': True,
+            'status': status,
+            'google_civic_election_id': one_position.google_civic_election_id,
+            'position_network_score_updated': friends_only_position_updated or public_position_updated,
+            'friends_only_position_updated': friends_only_position_updated,
+            'public_position_updated': public_position_updated,
+        }
+        return results
+
+    speaker_display_name = one_position.speaker_display_name
+    if voter_looking_at_self and speaker_display_name.startswith("Voter-"):
+        speaker_display_name = "You"
+
+    if positive_value_exists(one_position.candidate_campaign_we_vote_id):
+        # Add entry to position_network_score table
+        ignore_measure_we_vote_id = None
+
+        update_results = position_manager.update_or_create_position_network_score(
+            voter_id, voter_we_vote_id,
+            one_position.google_civic_election_id,
+            organization_we_vote_id, friend_voter_we_vote_id,
+            speaker_display_name,
+            one_position.candidate_campaign_we_vote_id, ignore_measure_we_vote_id,
+            support_or_oppose)
+        results = {
+            'success': True,
+            'status': status,
+            'google_civic_election_id': one_position.google_civic_election_id,
+            'position_network_score_updated': update_results['position_network_score_updated'],
+            'friends_only_position_updated':
+            friend_voter_we_vote_id and update_results['position_network_score_updated'],
+            'public_position_updated': organization_we_vote_id and update_results['position_network_score_updated'],
+        }
+        return results
+    elif positive_value_exists(one_position.contest_measure_we_vote_id):
+        # Add entry to position_network_score table
+        ignore_candidate_we_vote_id = None
+
+        update_results = position_manager.update_or_create_position_network_score(
+            voter_id, voter_we_vote_id,
+            one_position.google_civic_election_id,
+            organization_we_vote_id, friend_voter_we_vote_id,
+            speaker_display_name,
+            ignore_candidate_we_vote_id, one_position.contest_measure_we_vote_id,
+            support_or_oppose)
+        results = {
+            'success': True,
+            'status': status,
+            'google_civic_election_id': one_position.google_civic_election_id,
+            'position_network_score_updated': update_results['position_network_score_updated'],
+            'friends_only_position_updated':
+            friend_voter_we_vote_id and update_results['position_network_score_updated'],
+            'public_position_updated': organization_we_vote_id and update_results['position_network_score_updated'],
+        }
+        return results
+    else:
+        status += "UPDATE_POSITION_NETWORK_SCORE_WRAPPER_NOT_CANDIDATE_OR_MEASURE "
+        public_position_updated = False
+        results = {
+            'success': True,
+            'status': status,
+            'google_civic_election_id': one_position.google_civic_election_id,
+            'position_network_score_updated': friends_only_position_updated or public_position_updated,
+            'friends_only_position_updated': friends_only_position_updated,
+            'public_position_updated': public_position_updated,
+        }
+        return results
+

@@ -10,6 +10,7 @@ from measure.models import ContestMeasureManager
 from django.http import HttpResponse
 from follow.models import FollowOrganizationList
 import json
+from position.controllers import update_or_create_position_network_score_wrapper
 from position.models import ANY_STANCE, FRIENDS_ONLY, SUPPORT, OPPOSE, PositionManager, PositionListManager, PUBLIC_ONLY
 from voter.models import fetch_voter_id_from_voter_device_link, VoterManager
 import wevote_functions.admin
@@ -556,6 +557,11 @@ def positions_count_for_one_ballot_item_for_api(voter_device_id, ballot_item_we_
     # Add yourself as a friend so your opinions show up
     friends_we_vote_id_list.append(voter_we_vote_id)
 
+    support_we_vote_id_list = []
+    support_name_list = []
+    oppose_we_vote_id_list = []
+    oppose_name_list = []
+
     # Figure out if this ballot_item is a candidate or measure
     if "cand" in ballot_item_we_vote_id:  # Is a Candidate
         # We don't need to retrieve the candidate
@@ -572,6 +578,31 @@ def positions_count_for_one_ballot_item_for_api(voter_device_id, ballot_item_we_
                 retrieve_public_positions_now, 0, ballot_item_we_vote_id,
                 OPPOSE, most_recent_only)
 
+        # Filter to only show positions of the orgs you are following
+        public_results = finalize_support_and_oppose_positions_count(
+            voter_id, show_positions_this_voter_follows,
+            organizations_followed_by_voter_by_id, friends_we_vote_id_list,
+            public_support_positions_list_for_one_ballot_item,
+            public_oppose_positions_list_for_one_ballot_item)
+        public_filtered_support_positions = public_results['support_positions_followed']
+        public_filtered_oppose_positions = public_results['oppose_positions_followed']
+
+        for one_position in public_filtered_support_positions:
+            support_we_vote_id_list.append(one_position.organization_we_vote_id)
+            support_name_list.append(one_position.speaker_display_name)
+            update_results = update_or_create_position_network_score_wrapper(
+                voter_id, voter_we_vote_id, one_position)
+            if update_results['position_network_score_updated']:
+                public_positions_updated = True
+
+        for one_position in public_filtered_oppose_positions:
+            oppose_we_vote_id_list.append(one_position.organization_we_vote_id)
+            oppose_name_list.append(one_position.speaker_display_name)
+            update_results = update_or_create_position_network_score_wrapper(
+                voter_id, voter_we_vote_id, one_position)
+            if update_results['position_network_score_updated']:
+                public_positions_updated = True
+
         # Friend's-only Positions
         retrieve_public_positions_now = False  # Return friends-only positions counts
         most_recent_only = True
@@ -584,6 +615,32 @@ def positions_count_for_one_ballot_item_for_api(voter_device_id, ballot_item_we_
                 retrieve_public_positions_now, 0, ballot_item_we_vote_id,
                 OPPOSE, most_recent_only, friends_we_vote_id_list)
 
+        # Filter to only show friend's positions
+        public_results = finalize_support_and_oppose_positions_count(
+            voter_id, show_positions_this_voter_follows,
+            organizations_followed_by_voter_by_id, friends_we_vote_id_list,
+            friends_only_support_positions_list_for_one_ballot_item,
+            friends_only_oppose_positions_list_for_one_ballot_item)
+        friend_filtered_support_positions = public_results['support_positions_followed']
+        friend_filtered_oppose_positions = public_results['oppose_positions_followed']
+
+        for one_position in friend_filtered_support_positions:
+            support_we_vote_id_list.append(one_position.voter_we_vote_id)
+            support_name_list.append(one_position.speaker_display_name)
+            update_results = update_or_create_position_network_score_wrapper(
+                voter_id, voter_we_vote_id, one_position)
+            if update_results['position_network_score_updated']:
+                public_positions_updated = True
+
+        for one_position in friend_filtered_oppose_positions:
+            oppose_we_vote_id_list.append(one_position.voter_we_vote_id)
+            oppose_name_list.append(one_position.speaker_display_name)
+            update_results = update_or_create_position_network_score_wrapper(
+                voter_id, voter_we_vote_id, one_position)
+            if update_results['position_network_score_updated']:
+                public_positions_updated = True
+
+        # Now calculate the total counts
         support_positions_list_for_one_ballot_item = public_support_positions_list_for_one_ballot_item + \
             friends_only_support_positions_list_for_one_ballot_item
         oppose_positions_list_for_one_ballot_item = public_oppose_positions_list_for_one_ballot_item + \
@@ -599,6 +656,10 @@ def positions_count_for_one_ballot_item_for_api(voter_device_id, ballot_item_we_
             'ballot_item_we_vote_id':   ballot_item_we_vote_id,
             'support_count':            finalize_results['support_positions_count'],
             'oppose_count':             finalize_results['oppose_positions_count'],
+            'support_we_vote_id_list':  support_we_vote_id_list,
+            'support_name_list':        support_name_list,
+            'oppose_we_vote_id_list':   oppose_we_vote_id_list,
+            'oppose_name_list':         oppose_name_list,
         }
         position_counts_list_results.append(one_ballot_item_results)
         success = True
@@ -634,6 +695,22 @@ def positions_count_for_one_ballot_item_for_api(voter_device_id, ballot_item_we_
         oppose_positions_list_for_one_ballot_item = public_oppose_positions_list_for_one_ballot_item + \
             friends_oppose_positions_list_for_one_ballot_item
 
+        for one_position in support_positions_list_for_one_ballot_item:
+            support_we_vote_id_list.append(one_position.get_speaker_we_vote_id())
+            support_name_list.append(one_position.speaker_display_name)
+            update_results = update_or_create_position_network_score_wrapper(
+                voter_id, voter_we_vote_id, one_position)
+            if update_results['position_network_score_updated']:
+                public_positions_updated = True
+
+        for one_position in oppose_positions_list_for_one_ballot_item:
+            oppose_we_vote_id_list.append(one_position.get_speaker_we_vote_id())
+            oppose_name_list.append(one_position.speaker_display_name)
+            update_results = update_or_create_position_network_score_wrapper(
+                voter_id, voter_we_vote_id, one_position)
+            if update_results['position_network_score_updated']:
+                public_positions_updated = True
+
         finalize_results = finalize_support_and_oppose_positions_count(
             voter_id, show_positions_this_voter_follows,
             organizations_followed_by_voter_by_id, friends_we_vote_id_list,
@@ -643,6 +720,10 @@ def positions_count_for_one_ballot_item_for_api(voter_device_id, ballot_item_we_
             'ballot_item_we_vote_id':   ballot_item_we_vote_id,
             'support_count':            finalize_results['support_positions_count'],
             'oppose_count':             finalize_results['oppose_positions_count'],
+            'support_we_vote_id_list':  support_we_vote_id_list,
+            'support_name_list':        support_name_list,
+            'oppose_we_vote_id_list':   oppose_we_vote_id_list,
+            'oppose_name_list':         oppose_name_list,
         }
         position_counts_list_results.append(one_ballot_item_results)
         success = True
@@ -687,8 +768,10 @@ def finalize_support_and_oppose_positions_count(voter_id, show_positions_this_vo
         oppose_positions_count = len(oppose_positions_not_followed)
 
     results = {
-        'support_positions_count':  support_positions_count,
-        'oppose_positions_count':   oppose_positions_count,
+        'support_positions_count':      support_positions_count,
+        'support_positions_followed':   support_positions_followed,
+        'oppose_positions_count':       oppose_positions_count,
+        'oppose_positions_followed':    oppose_positions_followed,
     }
     return results
 

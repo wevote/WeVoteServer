@@ -12,6 +12,7 @@ from email_outbound.models import EmailAddress, EmailManager, FRIEND_ACCEPTED_IN
 from import_export_facebook.models import FacebookManager
 import json
 from organization.models import OrganizationManager, INDIVIDUAL
+from position.controllers import add_position_network_count_entries_for_one_friend
 from validate_email import validate_email
 from voter.models import Voter, VoterManager
 import wevote_functions.admin
@@ -613,6 +614,12 @@ def friend_invitation_by_email_verify_for_api(voter_device_id, invitation_secret
         original_sender_we_vote_id = friend_invitation_voter_link.sender_voter_we_vote_id
         results = friend_accepted_invitation_send(accepting_voter_we_vote_id, original_sender_we_vote_id)
 
+        # Update the PositionNetworkCount entries for both friends
+        add_position_network_count_entries_for_one_friend(
+            0, accepting_voter_we_vote_id, voter_we_vote_id=original_sender_we_vote_id)
+        add_position_network_count_entries_for_one_friend(
+            0, original_sender_we_vote_id, voter_we_vote_id=accepting_voter_we_vote_id)
+
         # Now that a CurrentFriend entry exists, update the FriendInvitation...
         if friend_results['success']:
             try:
@@ -729,6 +736,12 @@ def friend_invitation_by_email_verify_for_api(voter_device_id, invitation_secret
         accepting_voter_we_vote_id = voter_we_vote_id_accepting_invitation
         original_sender_we_vote_id = friend_invitation_email_link.sender_voter_we_vote_id
         friend_accepted_invitation_send(accepting_voter_we_vote_id, original_sender_we_vote_id)
+
+        # Update the PositionNetworkCount entries for both friends
+        add_position_network_count_entries_for_one_friend(
+            0, accepting_voter_we_vote_id, voter_we_vote_id=original_sender_we_vote_id)
+        add_position_network_count_entries_for_one_friend(
+            0, original_sender_we_vote_id, voter_we_vote_id=accepting_voter_we_vote_id)
 
         if friend_results['success']:
             try:
@@ -868,8 +881,8 @@ def friend_invitation_by_facebook_send_for_api(voter_device_id, recipients_faceb
     return results
 
 
-def friend_invitation_by_facebook_verify_for_api( voter_device_id, facebook_request_id, recipient_facebook_id,
-                                                  sender_facebook_id):  # friendInvitationByFacebookVerify
+def friend_invitation_by_facebook_verify_for_api(voter_device_id, facebook_request_id, recipient_facebook_id,
+                                                sender_facebook_id):  # friendInvitationByFacebookVerify
     """
 
     :param voter_device_id:
@@ -981,6 +994,12 @@ def friend_invitation_by_facebook_verify_for_api( voter_device_id, facebook_requ
 
     friend_manager.update_suggested_friends_starting_with_one_voter(sender_voter_we_vote_id)
     friend_manager.update_suggested_friends_starting_with_one_voter(voter_we_vote_id_accepting_invitation)
+
+    # Update the PositionNetworkCount entries for both friends
+    add_position_network_count_entries_for_one_friend(
+        0, voter_we_vote_id_accepting_invitation, voter_we_vote_id=sender_voter_we_vote_id)
+    add_position_network_count_entries_for_one_friend(
+        0, sender_voter_we_vote_id, voter_we_vote_id=voter_we_vote_id_accepting_invitation)
 
     if friend_results['success']:
         try:
@@ -1186,6 +1205,7 @@ def friend_invite_response_for_api(voter_device_id, kind_of_invite_response, oth
     :param recipient_voter_email:
     :return:
     """
+    status = ""
     results = is_voter_device_id_valid(voter_device_id)
     if not results['success']:
         error_results = {
@@ -1199,8 +1219,10 @@ def friend_invite_response_for_api(voter_device_id, kind_of_invite_response, oth
     voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id)
     voter_id = voter_results['voter_id']
     if not positive_value_exists(voter_id):
+        status += voter_results['status']
+        status += "VOTER_NOT_FOUND_FROM_VOTER_DEVICE_ID "
         error_results = {
-            'status':                               "VOTER_NOT_FOUND_FROM_VOTER_DEVICE_ID",
+            'status':                               status,
             'success':                              False,
             'voter_device_id':                      voter_device_id,
         }
@@ -1210,9 +1232,11 @@ def friend_invite_response_for_api(voter_device_id, kind_of_invite_response, oth
     if kind_of_invite_response != DELETE_INVITATION_EMAIL_SENT_BY_ME:
         other_voter_results = voter_manager.retrieve_voter_by_we_vote_id(other_voter_we_vote_id)
         other_voter_id = other_voter_results['voter_id']
+        status += other_voter_results['status']
         if not positive_value_exists(other_voter_id):
+            status += "VOTER_NOT_FOUND_FROM_OTHER_VOTER_WE_VOTE_ID "
             error_results = {
-                'status':                               "VOTER_NOT_FOUND_FROM_OTHER_VOTER_WE_VOTE_ID",
+                'status':                               status,
                 'success':                              False,
                 'voter_device_id':                      voter_device_id,
             }
@@ -1224,18 +1248,27 @@ def friend_invite_response_for_api(voter_device_id, kind_of_invite_response, oth
     friend_manager = FriendManager()
     if kind_of_invite_response == UNFRIEND_CURRENT_FRIEND:
         results = friend_manager.unfriend_current_friend(voter.we_vote_id, other_voter.we_vote_id)
+        status += results['status']
     elif kind_of_invite_response == DELETE_INVITATION_EMAIL_SENT_BY_ME:
         results = friend_manager.process_friend_invitation_email_response(voter, recipient_voter_email,
                                                                           kind_of_invite_response)
+        status += results['status']
     else:
         results = friend_manager.process_friend_invitation_voter_response(other_voter, voter, kind_of_invite_response)
+        status += results['status']
         if results['friend_invitation_accepted']:
+            accepting_voter_id = voter.id
             accepting_voter_we_vote_id = voter.we_vote_id
+            original_sender_id = other_voter.id
             original_sender_we_vote_id = other_voter.we_vote_id
             friend_accepted_invitation_send(accepting_voter_we_vote_id, original_sender_we_vote_id)
+            # Update both friends
+            results1 = add_position_network_count_entries_for_one_friend(accepting_voter_id, original_sender_we_vote_id)
+            status += results1['status']
+            results2 = add_position_network_count_entries_for_one_friend(original_sender_id, accepting_voter_we_vote_id)
+            status += results2['status']
 
     success = results['success']
-    status = results['status']
 
     results = {
         'success':              success,
