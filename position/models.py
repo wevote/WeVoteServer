@@ -921,6 +921,48 @@ class PositionListManager(models.Model):
 
         return positions_not_followed_by_voter
 
+    def delete_all_position_network_scores_for_voter(
+            self, viewing_voter_id, viewing_voter_we_vote_id):
+        status = ""
+        success = True
+        position_network_score_deleted = False
+
+        if not positive_value_exists(viewing_voter_id) and not positive_value_exists(viewing_voter_we_vote_id):
+            success = False
+            status += "DELETE_ALL_POSITION_NETWORK_SCORES-MISSING_VOTER_IDS "
+            results = {
+                'success': success,
+                'status': status,
+                'voter_id': viewing_voter_id,
+                'voter_we_vote_id': viewing_voter_we_vote_id,
+                'position_network_score_deleted': position_network_score_deleted,
+            }
+            return results
+
+        try:
+            score_queryset = PositionNetworkScore.objects.filter(viewing_voter_id=viewing_voter_id)
+            score_queryset.delete()
+
+            score_queryset = PositionNetworkScore.objects.filter(viewing_voter_we_vote_id=viewing_voter_we_vote_id)
+            score_queryset.delete()
+
+            position_network_score_deleted = True
+            status += 'ALL_POSITION_NETWORK_SCORES_DELETED '
+            success = True
+        except Exception as e:
+            status += 'FAILED delete_all_position_network_scores_for_voter ' \
+                     '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
+            handle_exception(status, logger=logger)
+
+        results = {
+            'success':                          success,
+            'status':                           status,
+            'voter_id':                         viewing_voter_id,
+            'voter_we_vote_id':                 viewing_voter_we_vote_id,
+            'position_network_score_deleted':   position_network_score_deleted,
+        }
+        return results
+
     def delete_position_network_scores_for_voter_one_ballot_item(
             self, viewing_voter_id, viewing_voter_we_vote_id,
             candidate_we_vote_id, measure_we_vote_id):
@@ -3228,8 +3270,7 @@ class PositionListManager(models.Model):
                 delete_for_friends = True
 
             if critical_variables_exist and (save_for_friends or delete_for_friends):
-                for current_friend in friends_we_vote_id_list:
-                    voter_friend_we_vote_id = current_friend.fetch_other_voter_we_vote_id(one_position.voter_we_vote_id)
+                for voter_friend_we_vote_id in friends_we_vote_id_list:
                     voter_friend_id = voter_manager.fetch_local_id_from_we_vote_id(voter_friend_we_vote_id)
 
                     voter_ids_match = voter_with_position_id == voter_friend_id

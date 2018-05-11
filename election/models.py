@@ -320,6 +320,46 @@ class ElectionManager(models.Model):
         }
         return results
 
+    def retrieve_next_election_with_state_optional(self, state_code=""):
+        """
+        We want either the next election in this state, or the next national election, whichever comes first
+        :param state_code:
+        :return:
+        """
+        status = ""
+        election_list = []
+        if positive_value_exists(state_code):
+            upcoming_state_elections_results = self.retrieve_upcoming_elections(state_code)
+            election_list = upcoming_state_elections_results['election_list']
+            status += upcoming_state_elections_results['status']
+        if not len(election_list):
+            without_state_code = True
+            upcoming_national_elections_results = self.retrieve_upcoming_elections("", without_state_code)
+            election_list = upcoming_national_elections_results['election_list']
+
+            if not len(election_list):
+                status += upcoming_national_elections_results['status']
+                success = True
+                status += "RETRIEVE_NEXT_ELECTION_WITH_STATE_OPTIONAL-NOT_FOUND: "
+                results = {
+                    'success':          success,
+                    'status':           status,
+                    'election_found':   False,
+                    'election':         Election(),
+                }
+                return results
+
+        success = True
+        status += "RETRIEVE_NEXT_ELECTION_WITH_STATE_OPTIONAL-FOUND "
+        election = election_list[0]
+        results = {
+            'success':          success,
+            'status':           status,
+            'election_found':   True,
+            'election':         election,
+        }
+        return results
+
     def retrieve_we_vote_elections(self):
         """
         Only retrieve the elections we have entered without a Google Civic Election Id

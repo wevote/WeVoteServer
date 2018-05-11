@@ -3,7 +3,7 @@
 # README for WeVoteServer
 
 This WeVoteServer repository contains a Python/Django-powered API endpoints server. We take in ballot data from 
-Google Civic API, Vote Smart, MapLight, TheUnitedStates.io and the Voting Information Project. We then serve
+Google Civic API, Ballotpedia, Vote Smart, MapLight, TheUnitedStates.io and the Voting Information Project. We then serve
 it up to voters, and let voters Support/Oppose and Like ballot items. We are also building tools to capture
 and share voter guide data.
 
@@ -36,7 +36,7 @@ https://groups.google.com/forum/#!forum/wevoteengineering
 
 We meet weekly on Wednesday nights at the 
 [Code for San Francisco brigade of Code for America](http://www.meetup.com/Code-for-San-Francisco-Civic-Hack-Night/), 
-and have mini-hackathons on many weekends. Please contact Dale.McGrew@WeVoteUSA.org for more information.
+daily on a Google hangout, and have mini-hackathons on many weekends. Please contact Dale.McGrew@WeVote.US for more information.
 
 You may join our Google Group here for questions about election related data (importing and exporting):
 https://groups.google.com/forum/#!forum/electiondata
