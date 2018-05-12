@@ -1,4 +1,4 @@
-`# README for API Installation: 6. Setup Initial Data
+# README for API Installation: 6. Setup Initial Data
 
 [Back to Install Table of Contents](README_API_INSTALL.md)
 
