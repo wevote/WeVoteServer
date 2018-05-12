@@ -8,7 +8,7 @@ Install the latest version of Postgres for your machine (see instructions furthe
  
 **Mac:** Download and install the DMG from [http://postgresapp.com/](http://postgresapp.com/)
 
-![ScreenShot](docs/images/DontUseTheBloatwareInstaller.png)
+![ScreenShot](images/DontUseTheBloatwareInstaller.png)
  
 (Alternate: Go to [https://www.postgresql.org/download/](https://www.postgresql.org/download/).)
 
@@ -62,11 +62,11 @@ Open pgAdmin 4 and navigate to:
 
 1. Right-click on "Servers" and choose "Create > Server"
 
-    ![ScreenShot](docs/images/CreateServerInPgAdmin.png)
+    ![ScreenShot](images/CreateServerInPgAdmin.png)
 
 2. Name: WeVoteServer
 
-    ![ScreenShot](docs/images/CreateServerDialog.png)
+    ![ScreenShot](images/CreateServerDialog.png)
 
 3. Switch to "Connection" tab
    * Host name: localhost
@@ -74,7 +74,7 @@ Open pgAdmin 4 and navigate to:
    * Maintenance database: postgres
    * User name: postgres
 
-    ![ScreenShot](docs/images/CreateServerConnection.png)
+    ![ScreenShot](images/CreateServerConnection.png)
 
 4. Press Save
 
