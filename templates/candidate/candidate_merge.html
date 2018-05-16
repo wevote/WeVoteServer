@@ -1,7 +1,7 @@
 {# templates/candidate/candidate_merge.html #}
 {% extends "template_base.html" %}
 
-{% block title %}{% if candidate_option1 %}{{ candidate_option1.candidate_name  }}{% else %}CANNOT MERGE{% endif %}{% endblock %}
+{% block title %}{% if candidate_option1 %}Merge {{ candidate_option1.candidate_name  }}{% else %}CANNOT MERGE{% endif %}{% endblock %}
 
 {%  block content %}
 <a href="{% url 'candidate:candidate_list' %}">< Back to Candidates</a>

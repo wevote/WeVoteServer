@@ -1837,10 +1837,14 @@ class CandidateCampaignManager(models.Model):
         birth_day_text = update_values['birth_day_text'] if 'birth_day_text' in update_values else ''
         candidate_email = update_values['candidate_email'] if 'candidate_email' in update_values else ''
         candidate_gender = update_values['candidate_gender'] if 'candidate_gender' in update_values else ''
-        candidate_is_incumbent = update_values['candidate_is_incumbent'] \
-            if 'candidate_is_incumbent' in update_values else False
-        candidate_is_top_ticket = update_values['candidate_is_top_ticket'] \
-            if 'candidate_is_top_ticket' in update_values else False
+        if 'candidate_is_incumbent' in update_values:
+            candidate_is_incumbent = positive_value_exists(update_values['candidate_is_incumbent'])
+        else:
+            candidate_is_incumbent = False
+        if 'candidate_is_top_ticket' in update_values:
+            candidate_is_top_ticket = positive_value_exists(update_values['candidate_is_top_ticket'])
+        else:
+            candidate_is_top_ticket = False
         candidate_name = update_values['candidate_name'] if 'candidate_name' in update_values else ''
         candidate_participation_status = update_values['candidate_participation_status'] \
             if 'candidate_participation_status' in update_values else ''
@@ -2010,10 +2014,12 @@ class CandidateCampaignManager(models.Model):
                     existing_candidate_entry.birth_day_text = update_values['birth_day_text']
                     values_changed = True
                 if 'candidate_is_incumbent' in update_values:
-                    existing_candidate_entry.candidate_is_incumbent = update_values['candidate_is_incumbent']
+                    existing_candidate_entry.candidate_is_incumbent = \
+                        positive_value_exists(update_values['candidate_is_incumbent'])
                     values_changed = True
                 if 'candidate_is_top_ticket' in update_values:
-                    existing_candidate_entry.is_top_ticket = update_values['candidate_is_top_ticket']
+                    existing_candidate_entry.is_top_ticket = \
+                        positive_value_exists(update_values['candidate_is_top_ticket'])
                     values_changed = True
                 if 'candidate_gender' in update_values:
                     existing_candidate_entry.candidate_gender = update_values['candidate_gender']

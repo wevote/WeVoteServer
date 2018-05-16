@@ -65,6 +65,7 @@
             show all</a>
         {% endif %}
     {% endif %}{# End of if state_list #}
+</form>
 
 {% if candidate_list and google_civic_election_id and hide_candidate_tools != 1 and hide_candidate_tools != '1' %}
     <ul>
@@ -363,7 +364,6 @@
         <a href="{% url 'candidate:candidate_new' %}?google_civic_election_id={{ google_civic_election_id }}">Add New Candidate</a><br />
     </p>
 {% endif %}
-</form>
 <br />
 <br />
 <br />
