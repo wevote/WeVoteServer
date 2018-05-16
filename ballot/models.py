@@ -109,6 +109,76 @@ class BallotItem(models.Model):
 
 class BallotItemManager(models.Model):
 
+    def refresh_cached_ballot_item_measure_info(self, ballot_item):
+        """
+        The BallotItem tables cache information from other tables. This function reaches out to the source tables
+        and copies over the latest information to the BallotItem table.
+        :param ballot_item:
+        :return:
+        """
+        values_changed = False
+        measure_found = False
+        contest_measure_manager = ContestMeasureManager()
+        results = {}
+        if positive_value_exists(ballot_item.contest_measure_id):
+            results = contest_measure_manager.retrieve_contest_measure_from_id(ballot_item.contest_measure_id)
+            measure_found = results['contest_measure_found']
+        elif positive_value_exists(ballot_item.contest_measure_we_vote_id):
+            results = contest_measure_manager.retrieve_contest_measure_from_we_vote_id(
+                ballot_item.contest_measure_we_vote_id)
+            measure_found = results['contest_measure_found']
+
+        if measure_found:
+            measure_object = results['contest_measure']
+            ballot_item.contest_measure_id = measure_object.id
+            ballot_item.contest_measure_we_vote_id = measure_object.we_vote_id
+            ballot_item.ballot_item_display_name = measure_object.measure_title
+            ballot_item.measure_subtitle = measure_object.measure_subtitle
+            ballot_item.measure_text = measure_object.measure_text
+            ballot_item.measure_url = measure_object.measure_url
+            ballot_item.no_vote_description = measure_object.no_vote_description
+            ballot_item.yes_vote_description = measure_object.yes_vote_description
+            values_changed = True
+
+        if values_changed:
+            ballot_item.save()
+
+        return ballot_item
+
+    def refresh_cached_ballot_item_office_info(self, ballot_item, contest_office=None):
+        """
+        The BallotItem tables cache information from other tables. This function reaches out to the source tables
+        and copies over the latest information to the BallotItem table.
+        :param ballot_item:
+        :param contest_office: No need to retrieve again if passed in
+        :return:
+        """
+        values_changed = False
+        office_found = False
+        contest_office_manager = ContestOfficeManager()
+        if contest_office and hasattr(contest_office, 'office_name'):
+            office_found = True
+        elif positive_value_exists(ballot_item.contest_office_id):
+            results = contest_office_manager.retrieve_contest_office_from_id(ballot_item.contest_office_id)
+            office_found = results['contest_office_found']
+            contest_office = results['contest_office']
+        elif positive_value_exists(ballot_item.contest_office_we_vote_id):
+            results = contest_office_manager.retrieve_contest_office_from_we_vote_id(
+                ballot_item.contest_office_we_vote_id)
+            office_found = results['contest_office_found']
+            contest_office = results['contest_office']
+
+        if office_found:
+            ballot_item.contest_office_id = contest_office.id
+            ballot_item.contest_office_we_vote_id = contest_office.we_vote_id
+            ballot_item.ballot_item_display_name = contest_office.office_name
+            values_changed = True
+
+        if values_changed:
+            ballot_item.save()
+
+        return ballot_item
+
     def retrieve_ballot_item(self, ballot_item_id=0):
 
         ballot_item = BallotItem()
@@ -869,44 +939,38 @@ class BallotItemListManager(models.Model):
         return results
 
     def retrieve_possible_duplicate_ballot_items(self, ballot_item_display_name, google_civic_election_id,
-                                                 polling_location_we_vote_id,
-                                                 contest_office_we_vote_id, contest_measure_we_vote_id, state_code):
+                                                 polling_location_we_vote_id, voter_id,
+                                                 contest_office_we_vote_id, contest_measure_we_vote_id,
+                                                 state_code):
         ballot_item_list_objects = []
-        filters = []
         ballot_item_list_found = False
+        ballot_item_list_count = 0
 
         if not positive_value_exists(google_civic_election_id):
             # We must have a google_civic_election_id
             results = {
                 'success':                  False,
-                'status':                   "MISSING_GOOGLE_CIVIC_ELECTION_ID",
+                'status':                   "MISSING_GOOGLE_CIVIC_ELECTION_ID ",
                 'google_civic_election_id': google_civic_election_id,
                 'ballot_item_list_found':   ballot_item_list_found,
                 'ballot_item_list':         ballot_item_list_objects,
             }
             return results
-        elif not positive_value_exists(polling_location_we_vote_id):
+        elif not positive_value_exists(polling_location_we_vote_id) \
+                and not positive_value_exists(voter_id):
             # We must have a polling_location_we_vote_id to look up
             results = {
                 'success':                  False,
-                'status':                   "MISSING_POLLING_LOCATION_WE_VOTE_ID",
+                'status':                   "MISSING_POLLING_LOCATION_WE_VOTE_ID_AND_VOTER_ID ",
                 'google_civic_election_id': google_civic_election_id,
                 'ballot_item_list_found':   ballot_item_list_found,
                 'ballot_item_list':         ballot_item_list_objects,
             }
             return results
-        elif not positive_value_exists(ballot_item_display_name):
-            # We must have a ballot_item_display_name to look up
-            results = {
-                'success':                  False,
-                'status':                   "MISSING_BALLOT_ITEM_DISPLAY_NAME",
-                'google_civic_election_id': google_civic_election_id,
-                'ballot_item_list_found':   ballot_item_list_found,
-                'ballot_item_list':         ballot_item_list_objects,
-            }
-            return results
-        elif not positive_value_exists(contest_office_we_vote_id) \
+        elif not positive_value_exists(ballot_item_display_name) \
+                and not positive_value_exists(contest_office_we_vote_id) \
                 and not positive_value_exists(contest_measure_we_vote_id):
+            # We must have at least one of these
             results = {
                 'success':                  False,
                 'status':                   "MISSING_MEASURE_AND_OFFICE_WE_VOTE_ID",
@@ -919,38 +983,38 @@ class BallotItemListManager(models.Model):
         try:
             ballot_item_queryset = BallotItem.objects.all()
             ballot_item_queryset = ballot_item_queryset.filter(google_civic_election_id=google_civic_election_id)
-            ballot_item_queryset = ballot_item_queryset.filter(
-                polling_location_we_vote_id__iexact=polling_location_we_vote_id)
+            if positive_value_exists(polling_location_we_vote_id):
+                ballot_item_queryset = ballot_item_queryset.filter(
+                    polling_location_we_vote_id__iexact=polling_location_we_vote_id)
+            else:
+                ballot_item_queryset = ballot_item_queryset.filter(
+                    voter_id=voter_id)
             if positive_value_exists(state_code):
                 ballot_item_queryset = ballot_item_queryset.filter(state_code=state_code)
 
-            if positive_value_exists(contest_office_we_vote_id):
-                # Ignore entries with contest_office_we_vote_id coming in from master server
-                ballot_item_queryset = ballot_item_queryset.filter(~Q(
-                    contest_office_we_vote_id__iexact=contest_office_we_vote_id))
-            elif positive_value_exists(contest_measure_we_vote_id):
-                # Ignore entries with contest_measure_we_vote_id coming in from master server
-                ballot_item_queryset = ballot_item_queryset.filter(~Q(
-                    contest_measure_we_vote_id__iexact=contest_measure_we_vote_id))
-
             # We want to find candidates with *any* of these values
             if positive_value_exists(ballot_item_display_name):
-                new_filter = Q(ballot_item_display_name__iexact=ballot_item_display_name)
-                filters.append(new_filter)
+                ballot_item_queryset = ballot_item_queryset.filter(
+                    ballot_item_display_name__iexact=ballot_item_display_name)
+                if positive_value_exists(contest_office_we_vote_id):
+                    # Ignore entries with contest_office_we_vote_id coming in from master server
+                    ballot_item_queryset = ballot_item_queryset.filter(~Q(
+                        contest_office_we_vote_id__iexact=contest_office_we_vote_id))
+                elif positive_value_exists(contest_measure_we_vote_id):
+                    # Ignore entries with contest_measure_we_vote_id coming in from master server
+                    ballot_item_queryset = ballot_item_queryset.filter(~Q(
+                        contest_measure_we_vote_id__iexact=contest_measure_we_vote_id))
+            elif positive_value_exists(contest_office_we_vote_id):
+                ballot_item_queryset = ballot_item_queryset.filter(
+                    contest_office_we_vote_id__iexact=contest_office_we_vote_id)
+            elif positive_value_exists(contest_measure_we_vote_id):
+                ballot_item_queryset = ballot_item_queryset.filter(
+                    contest_measure_we_vote_id__iexact=contest_measure_we_vote_id)
 
-            # Add the first query
-            if len(filters):
-                final_filters = filters.pop()
+            ballot_item_list_objects = list(ballot_item_queryset)
+            ballot_item_list_count = len(ballot_item_list_objects)
 
-                # ...and "OR" the remaining items in the list
-                for item in filters:
-                    final_filters |= item
-
-                ballot_item_queryset = ballot_item_queryset.filter(final_filters)
-
-            ballot_item_list_objects = ballot_item_queryset
-
-            if len(ballot_item_list_objects):
+            if ballot_item_list_count:
                 ballot_item_list_found = True
                 status = 'DUPLICATE_BALLOT_ITEMS_RETRIEVED '
                 success = True
@@ -972,6 +1036,7 @@ class BallotItemListManager(models.Model):
             'success':                  success,
             'status':                   status,
             'google_civic_election_id': google_civic_election_id,
+            'ballot_item_list_count':   ballot_item_list_count,
             'ballot_item_list_found':   ballot_item_list_found,
             'ballot_item_list':         ballot_item_list_objects,
         }

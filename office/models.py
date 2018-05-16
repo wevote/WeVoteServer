@@ -8,13 +8,22 @@ from exception.models import handle_exception, handle_record_found_more_than_one
 from wevote_settings.models import fetch_next_we_vote_id_contest_office_integer, fetch_site_unique_id_prefix, \
     fetch_next_we_vote_id_elected_office_integer
 import wevote_functions.admin
-from wevote_functions.functions import convert_to_int, extract_state_from_ocd_division_id, positive_value_exists
+from wevote_functions.functions import convert_to_int, extract_state_from_ocd_division_id, positive_value_exists, \
+    OFFICE_NAME_COMMON_PHRASES_TO_REMOVE_FROM_SEARCHES, OFFICE_NAME_EQUIVALENT_PHRASE_PAIRS, \
+    OFFICE_NAME_EQUIVALENT_DISTRICT_PHRASE_PAIRS, STATE_CODE_MAP
 
 
 logger = wevote_functions.admin.get_logger(__name__)
 
 CONTEST_OFFICE_UNIQUE_IDENTIFIERS = [
+    'ballotpedia_district_id',
+    'ballotpedia_election_id',
     'ballotpedia_id',
+    'ballotpedia_office_id',
+    'ballotpedia_office_name',
+    'ballotpedia_office_url',
+    'ballotpedia_race_id',
+    'ballotpedia_race_office_level',
     'contest_level0',
     'contest_level1',
     'contest_level2',
@@ -966,7 +975,7 @@ class ContestOfficeListManager(models.Model):
         return results
 
     def retrieve_contest_offices_from_non_unique_identifiers(
-            self, contest_office_name, google_civic_election_id, state_code, district_id='', district_name='',
+            self, contest_office_name, google_civic_election_id, incoming_state_code, district_id='', district_name='',
             ignore_office_id_list=[]):
         keep_looking_for_duplicates = True
         success = False
@@ -981,7 +990,7 @@ class ContestOfficeListManager(models.Model):
             contest_office_query = ContestOffice.objects.all()
             # TODO Is there a way to filter with "dash" insensitivity? - vs --
             contest_office_query = contest_office_query.filter(office_name__iexact=contest_office_name,
-                                                               state_code__iexact=state_code,
+                                                               state_code__iexact=incoming_state_code,
                                                                google_civic_election_id=google_civic_election_id)
             if positive_value_exists(district_id):
                 contest_office_query = contest_office_query.filter(district_id=district_id)
@@ -1015,6 +1024,180 @@ class ContestOfficeListManager(models.Model):
             # Existing entry couldn't be found in the contest office table. We should keep looking for
             #  close matches
             success = True
+
+        # Strip away common words and look for direct matches
+        if keep_looking_for_duplicates:
+            try:
+                contest_office_query = ContestOffice.objects.all()
+                contest_office_query = contest_office_query.filter(google_civic_election_id=google_civic_election_id)
+                if positive_value_exists(incoming_state_code):
+                    contest_office_query = contest_office_query.filter(state_code__iexact=incoming_state_code)
+
+                if positive_value_exists(ignore_office_id_list):
+                    contest_office_query = contest_office_query.exclude(we_vote_id__in=ignore_office_id_list)
+
+                # Start with the contest_office_name and remove OFFICE_NAME_COMMON_PHRASES_TO_REMOVE_FROM_SEARCHES
+                stripped_down_contest_office_name = contest_office_name.lower()
+                for remove_this in OFFICE_NAME_COMMON_PHRASES_TO_REMOVE_FROM_SEARCHES:
+                    stripped_down_contest_office_name = stripped_down_contest_office_name.replace(remove_this, "")
+
+                # Remove "of State", ex/ "of California"
+                for state_code, state_name in STATE_CODE_MAP.items():
+                    remove_this = " of " + state_name.lower()
+                    stripped_down_contest_office_name = stripped_down_contest_office_name.replace(remove_this, "")
+
+                # Remove leading state, ex/ "California "
+                for state_code, state_name in STATE_CODE_MAP.items():
+                    remove_this = state_name.lower() + " "
+                    stripped_down_contest_office_name = stripped_down_contest_office_name.replace(remove_this, "")
+
+                # Remove trailing state, ex/ "California "
+                for state_code, state_name in STATE_CODE_MAP.items():
+                    remove_this = " " + state_name.lower()
+                    stripped_down_contest_office_name = stripped_down_contest_office_name.replace(remove_this, "")
+
+                # Remove leading and trailing spaces
+                stripped_down_contest_office_name = stripped_down_contest_office_name.strip()
+
+                contest_office_query = contest_office_query.filter(
+                    office_name__icontains=stripped_down_contest_office_name)
+
+                # icontains doesn't work when district ids are included
+                contest_office_query = contest_office_query.exclude(office_name__icontains="district")
+
+                contest_office_list = list(contest_office_query)
+                if len(contest_office_list):
+                    keep_looking_for_duplicates = False
+                    # if a single entry matches, update that entry
+                    if len(contest_office_list) == 1:
+                        status += 'CREATE_BATCH_ROW_ACTION_CONTEST_OFFICE-SINGLE_ROW_RETRIEVED '
+                        contest_office = contest_office_list[0]
+                        contest_office_found = True
+                        contest_office_list_found = True
+                        success = True
+                    else:
+                        # more than one entry found with a match in ContestOffice
+                        contest_office_list_found = True
+                        multiple_entries_found = True
+                        status += 'CREATE_BATCH_ROW_ACTION_CONTEST_OFFICE-MULTIPLE_ROWS_RETRIEVED '
+                        success = True
+                else:
+                    # Existing entry couldn't be found in the contest office table. We should keep looking for
+                    #  close matches
+                    success = True
+            except ContestOffice.DoesNotExist:
+                # Existing entry couldn't be found in the contest office table. We should keep looking for
+                #  close matches
+                success = True
+
+        # Factor in OFFICE_NAME_EQUIVALENT_PHRASE_PAIRS
+        if keep_looking_for_duplicates:
+            try:
+                contest_office_query = ContestOffice.objects.all()
+                contest_office_query = contest_office_query.filter(
+                    google_civic_election_id=google_civic_election_id)
+                if positive_value_exists(incoming_state_code):
+                    contest_office_query = contest_office_query.filter(state_code__iexact=incoming_state_code)
+
+                if positive_value_exists(ignore_office_id_list):
+                    contest_office_query = contest_office_query.exclude(we_vote_id__in=ignore_office_id_list)
+
+                # Start with the contest_office_name and remove OFFICE_NAME_COMMON_PHRASES_TO_REMOVE_FROM_SEARCHES
+                stripped_down_contest_office_name = contest_office_name.lower()
+                for remove_this in OFFICE_NAME_COMMON_PHRASES_TO_REMOVE_FROM_SEARCHES:
+                    stripped_down_contest_office_name = stripped_down_contest_office_name.replace(remove_this, "")
+
+                # Remove "of State", ex/ "of California"
+                for state_code, state_name in STATE_CODE_MAP.items():
+                    remove_this = " of " + state_name.lower()
+                    stripped_down_contest_office_name = stripped_down_contest_office_name.replace(remove_this, "")
+
+                # Remove leading state, ex/ "California "
+                for state_code, state_name in STATE_CODE_MAP.items():
+                    remove_this = state_name.lower() + " "
+                    stripped_down_contest_office_name = stripped_down_contest_office_name.replace(remove_this, "")
+
+                # Remove trailing state, ex/ "California "
+                for state_code, state_name in STATE_CODE_MAP.items():
+                    remove_this = " " + state_name.lower()
+                    stripped_down_contest_office_name = stripped_down_contest_office_name.replace(remove_this, "")
+
+                # Remove leading and trailing spaces
+                stripped_down_contest_office_name = stripped_down_contest_office_name.strip()
+
+                # Search through stripped_down_contest_office_name for OFFICE_NAME_EQUIVALENT_PHRASE_PAIRS
+                filters = []
+                district_found = False
+                equivalent_phrase_found = False
+                office_without_district_found = False
+                for left_term, right_term in OFFICE_NAME_EQUIVALENT_DISTRICT_PHRASE_PAIRS.items():
+                    if left_term in stripped_down_contest_office_name:
+                        new_filter = Q(office_name__icontains=right_term)
+                        filters.append(new_filter)
+                        district_found = True
+                        stripped_down_contest_office_name = stripped_down_contest_office_name.replace(left_term, "")
+                        # Break out of the for loop since we only want to match to one district
+                        break
+                    if right_term in stripped_down_contest_office_name:
+                        new_filter = Q(office_name__icontains=left_term)
+                        filters.append(new_filter)
+                        district_found = True
+                        stripped_down_contest_office_name = stripped_down_contest_office_name.replace(right_term, "")
+                        # Break out of the for loop since we only want to match to one district
+                        break
+
+                for left_term, right_term in OFFICE_NAME_EQUIVALENT_PHRASE_PAIRS.items():
+                    if left_term in stripped_down_contest_office_name:
+                        new_filter = Q(office_name__icontains=right_term)
+                        filters.append(new_filter)
+                        equivalent_phrase_found = True
+                    if right_term in stripped_down_contest_office_name:
+                        new_filter = Q(office_name__icontains=left_term)
+                        filters.append(new_filter)
+                        equivalent_phrase_found = True
+
+                if district_found and not equivalent_phrase_found:
+                    # Remove leading and trailing spaces
+                    stripped_down_contest_office_name = stripped_down_contest_office_name.strip()
+                    if positive_value_exists(stripped_down_contest_office_name):
+                        new_filter = Q(office_name__icontains=stripped_down_contest_office_name)
+                        filters.append(new_filter)
+                        office_without_district_found = True
+
+                if equivalent_phrase_found or office_without_district_found:
+                    # Add the first query
+                    final_filters = filters.pop()
+
+                    # ...and "AND" the remaining items in the list
+                    for item in filters:
+                        final_filters &= item
+
+                    contest_office_query = contest_office_query.filter(final_filters)
+
+                    contest_office_list = list(contest_office_query)
+                    if len(contest_office_list):
+                        keep_looking_for_duplicates = False
+                        # if a single entry matches, update that entry
+                        if len(contest_office_list) == 1:
+                            status += 'CREATE_BATCH_ROW_ACTION_CONTEST_OFFICE-SINGLE_ROW_RETRIEVED '
+                            contest_office = contest_office_list[0]
+                            contest_office_found = True
+                            contest_office_list_found = True
+                            success = True
+                        else:
+                            # more than one entry found with a match in ContestOffice
+                            contest_office_list_found = True
+                            multiple_entries_found = True
+                            status += 'CREATE_BATCH_ROW_ACTION_CONTEST_OFFICE-MULTIPLE_ROWS_RETRIEVED '
+                            success = True
+                    else:
+                        # Existing entry couldn't be found in the contest office table. We should keep looking for
+                        #  close matches
+                        success = True
+            except ContestOffice.DoesNotExist:
+                # Existing entry couldn't be found in the contest office table. We should keep looking for
+                #  close matches
+                success = True
 
         # TODO To build
         # if keep_looking_for_duplicates:

@@ -145,8 +145,7 @@
                     (<a href="{% url 'office:office_summary' ballot_item.contest_office_id %}">
                     {{ ballot_item.contest_office_we_vote_id }}
                     </a>)
-                    {% if ballot_item.candidates_string %}:
-                    {{ ballot_item.candidates_string }}{% endif %}
+                    {% if ballot_item.candidates_string %}: {{ ballot_item.candidates_string }}{% endif %}
                     - <a href="{% url 'ballot:ballot_item_delete_process' ballot_item.id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}&ballot_returned_id={{ ballot_returned_id }}">
                     Delete</a>
                     <br />

@@ -1288,6 +1288,50 @@ class PositionListManager(models.Model):
 
         return position_count
 
+    def migrate_position_network_scores_to_new_election_id(
+            self, we_vote_election_id, google_civic_election_id, change_now=False):
+        status = ""
+        success = False
+        we_vote_election_id = convert_to_int(we_vote_election_id)
+        google_civic_election_id = convert_to_int(google_civic_election_id)
+        position_network_scores_migrated = 0
+
+        if not positive_value_exists(we_vote_election_id) and not positive_value_exists(google_civic_election_id):
+            status += "MIGRATE_ALL_POSITION_NETWORK_SCORES-MISSING_VOTER_IDS "
+            results = {
+                'success':                          success,
+                'status':                           status,
+                'we_vote_election_id':              we_vote_election_id,
+                'google_civic_election_id':         google_civic_election_id,
+                'position_network_scores_migrated': position_network_scores_migrated,
+            }
+            return results
+
+        try:
+            score_queryset = PositionNetworkScore.objects.filter(google_civic_election_id=we_vote_election_id)
+            if positive_value_exists(change_now):
+                position_network_scores_migrated = score_queryset.update(
+                    google_civic_election_id=google_civic_election_id)
+                status += 'ALL_POSITION_NETWORK_SCORES_MIGRATED '
+            else:
+                position_network_scores_migrated = score_queryset.count()
+            status += 'ALL_POSITION_NETWORK_SCORES_COUNTED '
+
+            success = True
+        except Exception as e:
+            status += 'FAILED migrate_position_network_scores_to_new_election_id ' \
+                     '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
+            handle_exception(status, logger=logger)
+
+        results = {
+            'success':                          success,
+            'status':                           status,
+            'we_vote_election_id':              we_vote_election_id,
+            'google_civic_election_id':         google_civic_election_id,
+            'position_network_scores_migrated': position_network_scores_migrated,
+        }
+        return results
+
     def positions_exist_for_voter(self, voter_we_vote_id):
         # Don't proceed unless we have voter identifier
         if not positive_value_exists(voter_we_vote_id):

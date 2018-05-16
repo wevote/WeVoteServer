@@ -74,7 +74,7 @@ def find_duplicate_contest_office(contest_office, ignore_office_id_list):
     if not hasattr(contest_office, 'google_civic_election_id'):
         error_results = {
             'success':                                  False,
-            'status':                                   "FIND_DUPLICATE_CONTEST_OFFICE_MISSING_OFFICE_OBJECT",
+            'status':                                   "FIND_DUPLICATE_CONTEST_OFFICE_MISSING_OFFICE_OBJECT ",
             'contest_office_merge_possibility_found':   False,
         }
         return error_results
@@ -82,7 +82,7 @@ def find_duplicate_contest_office(contest_office, ignore_office_id_list):
     if not positive_value_exists(contest_office.google_civic_election_id):
         error_results = {
             'success':                                False,
-            'status':                                 "FIND_DUPLICATE_CONTEST_OFFICE_MISSING_GOOGLE_CIVIC_ELECTION_ID",
+            'status':                                 "FIND_DUPLICATE_CONTEST_OFFICE_MISSING_GOOGLE_CIVIC_ELECTION_ID ",
             'contest_office_merge_possibility_found': False,
         }
         return error_results

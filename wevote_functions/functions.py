@@ -210,6 +210,124 @@ REPUBLICAN = 'REPUBLICAN'
 LANGUAGE_CODE_ENGLISH = 'en'
 LANGUAGE_CODE_SPANISH = 'es'
 
+# U.S. House California District 33
+# UNITED STATES REPRESENTATIVE, 33rd District
+
+OFFICE_NAME_EQUIVALENT_PHRASE_PAIRS = {
+    'commissioner of insurance': 'insurance commissioner',
+    'member state board of equalization': 'state board of equalization',
+    'member of the state assembly': 'state assembly',
+    'superintendent of public instruction': 'state superintendent of public instruction',
+    'supervisor': 'board of supervisors',
+    'united states representative': 'u.s. house',
+    'united states senator': 'u.s. senate',
+}
+
+# Single digit districts go last, so we can find the double digit districts first
+OFFICE_NAME_EQUIVALENT_DISTRICT_PHRASE_PAIRS = {
+    'district 10': '10th district',
+    'district 11': '11th district',
+    'district 12': '12th district',
+    'district 13': '13th district',
+    'district 14': '14th district',
+    'district 15': '15th district',
+    'district 16': '16th district',
+    'district 17': '17th district',
+    'district 18': '18th district',
+    'district 19': '19th district',
+    'district 20': '20th district',
+    'district 21': '21st district',
+    'district 22': '22nd district',
+    'district 23': '23rd district',
+    'district 24': '24th district',
+    'district 25': '25th district',
+    'district 26': '26th district',
+    'district 27': '27th district',
+    'district 28': '28th district',
+    'district 29': '29th district',
+    'district 30': '30th district',
+    'district 31': '31st district',
+    'district 32': '32nd district',
+    'district 33': '33rd district',
+    'district 34': '34th district',
+    'district 35': '35th district',
+    'district 36': '36th district',
+    'district 37': '37th district',
+    'district 38': '38th district',
+    'district 39': '39th district',
+    'district 40': '40th district',
+    'district 41': '41st district',
+    'district 42': '42nd district',
+    'district 43': '43rd district',
+    'district 44': '44th district',
+    'district 45': '45th district',
+    'district 46': '46th district',
+    'district 47': '47th district',
+    'district 48': '48th district',
+    'district 49': '49th district',
+    'district 50': '50th district',
+    'district 51': '51st district',
+    'district 52': '52nd district',
+    'district 53': '53rd district',
+    'district 54': '54th district',
+    'district 55': '55th district',
+    'district 56': '56th district',
+    'district 57': '57th district',
+    'district 58': '58th district',
+    'district 59': '59th district',
+    'district 60': '60th district',
+    'district 61': '61st district',
+    'district 62': '62nd district',
+    'district 63': '63rd district',
+    'district 64': '64th district',
+    'district 65': '65th district',
+    'district 66': '66th district',
+    'district 67': '67th district',
+    'district 68': '68th district',
+    'district 69': '69th district',
+    'district 70': '70th district',
+    'district 71': '71st district',
+    'district 72': '72nd district',
+    'district 73': '73rd district',
+    'district 74': '74th district',
+    'district 75': '75th district',
+    'district 76': '76th district',
+    'district 77': '77th district',
+    'district 78': '78th district',
+    'district 79': '79th district',
+    'district 80': '80th district',
+    'district 81': '81st district',
+    'district 82': '82nd district',
+    'district 83': '83rd district',
+    'district 84': '84th district',
+    'district 85': '85th district',
+    'district 86': '86th district',
+    'district 87': '87th district',
+    'district 88': '88th district',
+    'district 89': '89th district',
+    'district 90': '90th district',
+    'district 1': '1st district',
+    'district 2': '2nd district',
+    'district 3': '3rd district',
+    'district 4': '4th district',
+    'district 5': '5th district',
+    'district 6': '6th district',
+    'district 7': '7th district',
+    'district 8': '8th district',
+    'district 9': '9th district',
+}
+
+# We also check generate state specific phrases like "of california"
+OFFICE_NAME_COMMON_PHRASES_TO_REMOVE_FROM_SEARCHES = [
+    "long beach",
+    "orange county",
+    "san diego",
+    "san francisco",
+    # "santa clara county",
+    # "of santa clara county",
+    "(voter nominated)",
+]
+
 
 class LocalSwitch(object):
     def __init__(self, value):
@@ -884,6 +1002,10 @@ def positive_value_exists(value):
                 return bool(len(value))
             if isinstance(value, types.DictType):
                 return bool(len(value))
+            try:
+                basestring
+            except NameError:
+                basestring = str
             if isinstance(value, basestring):
                 return bool(len(value))
             # TODO We aren't checking for datetime format and need to

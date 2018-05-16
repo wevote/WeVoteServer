@@ -30,6 +30,8 @@
 
 {% include "office/office_merge_one_field_decision.html" with field_name="google_civic_office_name" field_label="Contest Office Google Civic Name" conflict_status=conflict_values.google_civic_office_name contest_office1_field_value=contest_office_option1.google_civic_office_name contest_office2_field_value=contest_office_option2.google_civic_office_name contest_office1=contest_office_option1 contest_office2=contest_office_option2 %}
 
+{% include "office/office_merge_one_field_decision.html" with field_name="ballotpedia_office_name" field_label="Ballotpedia Office Name" conflict_status=conflict_values.ballotpedia_office_name contest_office1_field_value=contest_office_option1.ballotpedia_office_name contest_office2_field_value=contest_office_option2.ballotpedia_office_name contest_office1=contest_office_option1 contest_office2=contest_office_option2 %}
+
 {% include "office/office_merge_one_field_decision.html" with field_name="we_vote_id" field_label="We Vote Id" conflict_status=conflict_values.we_vote_id contest_office1_field_value=contest_office_option1.we_vote_id contest_office2_field_value=contest_office_option2.we_vote_id contest_office1=contest_office_option1 contest_office2=contest_office_option2 %}
 
 {% include "office/office_merge_one_field_decision.html" with field_name="primary_party" field_label="Primary Party" conflict_status=conflict_values.primary_party contest_office1_field_value=contest_office_option1.primary_party contest_office2_field_value=contest_office_option2.primary_party contest_office1=contest_office_option1 contest_office2=contest_office_option2 %}
@@ -49,8 +51,6 @@
 {% include "office/office_merge_one_field_decision.html" with field_name="ballotpedia_id" field_label="Ballotpedia Id" conflict_status=conflict_values.ballotpedia_id contest_office1_field_value=contest_office_option1.ballotpedia_id contest_office2_field_value=contest_office_option2.ballotpedia_id contest_office1=contest_office_option1 contest_office2=contest_office_option2 %}
 
 {% include "office/office_merge_one_field_decision.html" with field_name="ballotpedia_office_id" field_label="Ballotpedia Elected Office Id" conflict_status=conflict_values.ballotpedia_office_id contest_office1_field_value=contest_office_option1.ballotpedia_office_id contest_office2_field_value=contest_office_option2.ballotpedia_office_id contest_office1=contest_office_option1 contest_office2=contest_office_option2 %}
-
-{% include "office/office_merge_one_field_decision.html" with field_name="ballotpedia_office_name" field_label="Ballotpedia Office Name" conflict_status=conflict_values.ballotpedia_office_name contest_office1_field_value=contest_office_option1.ballotpedia_office_name contest_office2_field_value=contest_office_option2.ballotpedia_office_name contest_office1=contest_office_option1 contest_office2=contest_office_option2 %}
 
 {% include "office/office_merge_one_field_decision.html" with field_name="ballotpedia_office_url" field_label="Ballotpedia Office URL" conflict_status=conflict_values.ballotpedia_office_url contest_office1_field_value=contest_office_option1.ballotpedia_office_url contest_office2_field_value=contest_office_option2.ballotpedia_office_url contest_office1=contest_office_option1 contest_office2=contest_office_option2 %}
 
@@ -81,6 +81,14 @@
 {% include "office/office_merge_one_field_decision.html" with field_name="number_voting_for" field_label="Number Voting for" conflict_status=conflict_values.number_voting_for contest_office1_field_value=contest_office_option1.number_voting_for contest_office2_field_value=contest_office_option2.number_voting_for contest_office1=contest_office_option1 contest_office2=contest_office_option2 %}
 
 {% include "office/office_merge_one_field_decision.html" with field_name="wikipedia_id" field_label="Wikipedia Id" conflict_status=conflict_values.wikipedia_id contest_office1_field_value=contest_office_option1.wikipedia_id contest_office2_field_value=contest_office_option2.wikipedia_id contest_office1=contest_office_option1 contest_office2=contest_office_option2 %}
+
+    {% if contest_office_option1.candidates_string or contest_office_option2.candidates_string %}
+    <tr>
+        <td>Candidates</td>
+        <td>{{ contest_office_option1.candidates_string|default_if_none:"" }}&nbsp;&nbsp;&nbsp;</td>
+        <td>{{ contest_office_option2.candidates_string|default_if_none:"" }}</td>
+    </tr>
+    {% endif %}
 
     <tr>
         <td>&nbsp;</td>
