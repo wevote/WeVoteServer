@@ -668,7 +668,7 @@ def render_contest_office_merge_form(
         contest_office_merge_conflict_values):
     position_list_manager = PositionListManager()
 
-    bookmark_item_list = BookmarkItemList()
+    bookmark_item_list_manager = BookmarkItemList()
 
     # Get positions counts for both offices
     contest_office_option1_for_template.public_positions_count = \
@@ -677,11 +677,11 @@ def render_contest_office_merge_form(
     contest_office_option1_for_template.friends_positions_count = \
         position_list_manager.fetch_friends_only_positions_count_for_contest_office(
             contest_office_option1_for_template.id, contest_office_option1_for_template.we_vote_id)
-    # Bookmarks
-    bookmark_results = bookmark_item_list.retrieve_bookmark_item_list_for_contest_office(
+    # Bookmarks for option 1
+    bookmark_results1 = bookmark_item_list_manager.retrieve_bookmark_item_list_for_contest_office(
         contest_office_option1_for_template.we_vote_id)
-    if bookmark_results['bookmark_item_list_found']:
-        bookmark_item_list = bookmark_results['bookmark_item_list']
+    if bookmark_results1['bookmark_item_list_found']:
+        bookmark_item_list = bookmark_results1['bookmark_item_list']
         contest_office_option1_bookmark_count = len(bookmark_item_list)
     else:
         contest_office_option1_bookmark_count = 0
@@ -693,11 +693,11 @@ def render_contest_office_merge_form(
     contest_office_option2_for_template.friends_positions_count = \
         position_list_manager.fetch_friends_only_positions_count_for_contest_office(
             contest_office_option2_for_template.id, contest_office_option2_for_template.we_vote_id)
-    # Bookmarks
-    bookmark_results = bookmark_item_list.retrieve_bookmark_item_list_for_contest_office(
+    # Bookmarks for option 2
+    bookmark_results2 = bookmark_item_list_manager.retrieve_bookmark_item_list_for_contest_office(
         contest_office_option2_for_template.we_vote_id)
-    if bookmark_results['bookmark_item_list_found']:
-        bookmark_item_list = bookmark_results['bookmark_item_list']
+    if bookmark_results2['bookmark_item_list_found']:
+        bookmark_item_list = bookmark_results2['bookmark_item_list']
         contest_office_option2_bookmark_count = len(bookmark_item_list)
     else:
         contest_office_option2_bookmark_count = 0
@@ -793,8 +793,9 @@ def office_merge_process_view(request):
 
     # TODO: Merge quick_info's office details in future
     # TODO: Migrate bookmarks
-    bookmark_item_list = BookmarkItemList()
-    bookmark_results = bookmark_item_list.retrieve_bookmark_item_list_for_contest_office(contest_office2_we_vote_id)
+    bookmark_item_list_manager = BookmarkItemList()
+    bookmark_results = bookmark_item_list_manager.retrieve_bookmark_item_list_for_contest_office(
+        contest_office2_we_vote_id)
     if bookmark_results['bookmark_item_list_found']:
         messages.add_message(request, messages.ERROR, "Bookmarks found for Contest Office 2 - "
                                                       "automatic merge not working yet.")
