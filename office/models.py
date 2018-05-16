@@ -1182,12 +1182,15 @@ class ContestOfficeListManager(models.Model):
                         # We want to avoid matches like this:
                         # U.S. House California District 1 == U.S. House California District 18
                         contest_office_name_lower = contest_office_name.lower()
+                        contest_office_name_lower = contest_office_name_lower.strip()
                         if positive_value_exists(contest_office_name) and 'district' in contest_office_name_lower:
                             contest_office_name_length = len(contest_office_name)
                             for possible_match in contest_office_list:
                                 possible_match_name_length = len(possible_match.office_name)
                                 possible_match_office_name_lower = possible_match.office_name.lower()
-                                if contest_office_name_length < possible_match_name_length:
+                                possible_match_office_name_lower = possible_match_office_name_lower.strip()
+                                if contest_office_name_length < possible_match_name_length \
+                                        and 'district' in possible_match_office_name_lower:
                                     # If the incoming name is shorter than the final name, see if the beginning of
                                     # possible match is identical.
                                     possible_match_office_name_lower_cropped = \
