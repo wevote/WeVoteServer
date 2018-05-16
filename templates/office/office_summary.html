@@ -16,10 +16,15 @@
 
 {% if office %}
 
-    <h1>{{ office.office_name }}{% if office.district_id %} - District {{ office.district_id }}{% endif %}{% if office.state_code %} - {{ office.state_code }}{% endif %}
-</h1>
+    <h1>{{ office.office_name }}</h1>
 
     <table>
+    {% if office.district_id or office.state_code %}
+    <tr>
+      <td>State/District:</td>
+      <td><strong>{% if office.state_code %} {{ office.state_code }} {% endif %}{% if office.district_id %} - District {{ office.district_id }}{% endif %}</strong></td>
+    </tr>
+    {% endif %}
     <tr>
       <td>Google Civic Election ID:</td>
       <td><strong>{{ election.election_name }} - {{ office.google_civic_election_id }}</strong></td>
@@ -32,9 +37,15 @@
       </td>
     </tr>
     <tr>
-      <td>OCD Division ID:</td>
-      <td><strong>{{ office.ocd_division_id|default_if_none:"" }}</strong></td>
+      <td>Google Civic Name:</td>
+      <td><strong>{{ office.google_civic_office_name|default_if_none:"" }}</strong></td>
     </tr>
+    {% if office.ballotpedia_office_name %}
+    <tr>
+      <td>Ballotpedia Office Name:</td>
+      <td><strong>{{ office.ballotpedia_office_name }}</strong></td>
+    </tr>
+    {% endif %}
     {% if office.office_url %}
     <tr>
       <td>Office Website:</td>
@@ -43,34 +54,48 @@
     {% endif %}
     <tr>
       <td>Ballotpedia Election ID:</td>
-      <td><strong>{{ office.ballotpedia_election_id }}</strong></td>
+      <td><strong>{{ office.ballotpedia_election_id|default_if_none:"" }}</strong></td>
     </tr>
     <tr>
       <td>Ballotpedia Race ID:</td>
-      <td><strong>{{ office.ballotpedia_race_id }}</strong></td>
+      <td>
+        {% if office.ballotpedia_office_url %}
+        <strong><a href="{{ office.ballotpedia_office_url }}" target="_blank">{{ office.ballotpedia_race_id|default_if_none:"" }}</a></strong>
+        {% else %}
+        <strong>{{ office.ballotpedia_race_id|default_if_none:"" }}</strong>
+        {% endif %}
+      </td>
     </tr>
     <tr>
       <td>Ballotpedia Elected Office ID:</td>
-      <td><strong>{{ office.ballotpedia_office_id }}</strong></td>
+      <td><strong>{{ office.ballotpedia_office_id|default_if_none:"" }}</strong></td>
     </tr>
-    {% if office.ballotpedia_office_name %}
-    <tr>
-      <td>Ballotpedia Office Name:</td>
-      <td><strong>{{ office.ballotpedia_office_name }}</strong></td>
-    </tr>
-    {% endif %}
-    {% if office.ballotpedia_office_url %}
     <tr>
       <td>Ballotpedia Office URL:</td>
       <td><strong>{{ office.ballotpedia_office_url }}</strong></td>
     </tr>
-    {% endif %}
     {% if office.ballotpedia_race_office_level %}
     <tr>
       <td>Ballotpedia Race Office Level:</td>
       <td><strong>{{ office.ballotpedia_race_office_level }}</strong></td>
     </tr>
     {% endif %}
+    <tr>
+      <td>OCD Division ID:</td>
+      <td><strong>{{ office.ocd_division_id|default_if_none:"" }}</strong></td>
+    </tr>
+    <tr>
+      <td>District Name:</td>
+      <td><strong>{{ office.district_name|default_if_none:"" }}</strong></td>
+    </tr>
+    <tr>
+      <td>Number Elected:</td>
+      <td><strong>{{ office.number_elected|default_if_none:"" }}</strong></td>
+    </tr>
+    <tr>
+      <td>Number Voting For:</td>
+      <td><strong>{{ office.number_voting_for|default_if_none:"" }}</strong></td>
+    </tr>
     </table>
 
     <p>

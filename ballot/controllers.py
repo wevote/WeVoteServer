@@ -145,18 +145,21 @@ def filter_ballot_items_structured_json_for_local_duplicates(structured_json):
             if 'state_code' in one_ballot_item else ''
         polling_location_we_vote_id = one_ballot_item['polling_location_we_vote_id'] \
             if 'polling_location_we_vote_id' in one_ballot_item else ''
-        contest_office_we_vote_id = one_ballot_item['contest_office_we_vote_id'] \
-            if 'contest_office_we_vote_id' in one_ballot_item else ''
-        contest_measure_we_vote_id = one_ballot_item['contest_measure_we_vote_id'] \
-            if 'contest_measure_we_vote_id' in one_ballot_item else ''
-
+        contest_office_we_vote_id = None
+        contest_measure_we_vote_id = None
         # Check to see if there is an entry that matches in all critical ways, minus the
         # contest_office_we_vote_id or contest_measure_we_vote_id. That is, an entry for a
         # google_civic_election_id + polling_location_we_vote_id that has the same ballot_item_display_name,
         # but different contest_office_we_vote_id or contest_measure_we_vote_id
+        # contest_office_we_vote_id = one_ballot_item['contest_office_we_vote_id'] \
+        #     if 'contest_office_we_vote_id' in one_ballot_item else ''
+        # contest_measure_we_vote_id = one_ballot_item['contest_measure_we_vote_id'] \
+        #     if 'contest_measure_we_vote_id' in one_ballot_item else ''
+        voter_id = 0
         results = ballot_item_list_manager.retrieve_possible_duplicate_ballot_items(
-            ballot_item_display_name, google_civic_election_id, polling_location_we_vote_id, contest_office_we_vote_id,
-            contest_measure_we_vote_id, state_code)
+            ballot_item_display_name, google_civic_election_id,
+            polling_location_we_vote_id, voter_id,
+            contest_office_we_vote_id, contest_measure_we_vote_id, state_code)
 
         if results['ballot_item_list_found']:
             # There seems to be a duplicate already in this database using a different we_vote_id
@@ -422,12 +425,18 @@ def heal_geo_coordinates(text_for_map_search):
     return latitude, longitude
 
 
+def move_ballot_items_to_another_measure():  # TO BUILD
+    return
+
+
 def move_ballot_items_to_another_office(from_contest_office_id, from_contest_office_we_vote_id,
-                                        to_contest_office_id, to_contest_office_we_vote_id):
+                                        to_contest_office_id, to_contest_office_we_vote_id,
+                                        updated_contest_office):
     status = ''
     success = True
     ballot_item_entries_moved = 0
     ballot_item_entries_not_moved = 0
+    ballot_item_manager = BallotItemManager()
     ballot_item_list_manager = BallotItemListManager()
 
     # We search on both from_office_id and from_office_we_vote_id in case there is some data that needs
@@ -435,16 +444,43 @@ def move_ballot_items_to_another_office(from_contest_office_id, from_contest_off
     all_ballot_items_results = ballot_item_list_manager.retrieve_all_ballot_items_for_contest_office(
         from_contest_office_id, from_contest_office_we_vote_id)
     from_ballot_item_list = all_ballot_items_results['ballot_item_list']
+
     for from_ballot_item_entry in from_ballot_item_list:
-        try:
-            from_ballot_item_entry.contest_office_id = to_contest_office_id
-            from_ballot_item_entry.contest_office_we_vote_id = to_contest_office_we_vote_id
-            from_ballot_item_entry.save()
-            ballot_item_entries_moved += 1
-        except Exception as e:
-            success = False
-            status += "MOVE_TO_ANOTHER_CONTEST_OFFICE-UNABLE_TO_SAVE_NEW_ballot_item "
+        # First see if a ballot_item entry exists for the to_contest_office and polling_location or voter
+        empty_ballot_item_display_name = ""
+        empty_contest_measure_we_vote_id = ""
+        state_code = ""
+        results = ballot_item_list_manager.retrieve_possible_duplicate_ballot_items(
+            empty_ballot_item_display_name, from_ballot_item_entry.google_civic_election_id,
+            from_ballot_item_entry.polling_location_we_vote_id, from_ballot_item_entry.voter_id,
+            to_contest_office_we_vote_id, empty_contest_measure_we_vote_id, state_code)
+        if results['ballot_item_list_count'] > 0:
+            # At least one found so we don't want to create another one
+            to_ballot_item_list = results['ballot_item_list']
+            to_ballot_item_entry = to_ballot_item_list[0]
             ballot_item_entries_not_moved += 1
+            ballot_item_manager.refresh_cached_ballot_item_office_info(
+                to_ballot_item_entry, updated_contest_office)
+
+            # Delete from_ballot_item_entry
+            try:
+                from_ballot_item_entry.delete()
+            except Exception as e:
+                success = False
+                status += "MOVE_TO_ANOTHER_CONTEST_OFFICE-UNABLE_TO_DELETE_FROM_BALLOT_ITEM_ENTRY "
+        else:
+            # If duplicates weren't found, then update the existing ballot item to use the new contest_office
+            try:
+                from_ballot_item_entry.contest_office_id = to_contest_office_id
+                from_ballot_item_entry.contest_office_we_vote_id = to_contest_office_we_vote_id
+                from_ballot_item_entry.save()
+                ballot_item_entries_moved += 1
+                ballot_item_manager.refresh_cached_ballot_item_office_info(
+                    from_ballot_item_entry, updated_contest_office)
+            except Exception as e:
+                success = False
+                status += "MOVE_TO_ANOTHER_CONTEST_OFFICE-UNABLE_TO_SAVE_NEW_ballot_item "
+                ballot_item_entries_not_moved += 1
 
     results = {
         'status':                           status,

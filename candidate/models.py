@@ -1769,27 +1769,30 @@ class CandidateCampaignManager(models.Model):
         }
         return results
 
-    def refresh_cached_candidate_office_info(self, candidate_object):
+    def refresh_cached_candidate_office_info(self, candidate_object, office_object=None):
         """
         The candidate tables cache information from other tables. This function reaches out to the source tables
         and copies over the latest information to the candidate table.
         :param candidate_object:
+        :param office_object: Save the time retrieving office by using existing object
         :return:
         """
         values_changed = False
         office_found = False
         contest_office_manager = ContestOfficeManager()
-        results = {}
-        if positive_value_exists(candidate_object.contest_office_id):
+        if office_object and hasattr(office_object, 'office_name'):
+            office_found = True
+        elif positive_value_exists(candidate_object.contest_office_id):
             results = contest_office_manager.retrieve_contest_office_from_id(candidate_object.contest_office_id)
             office_found = results['contest_office_found']
+            office_object = results['contest_office']
         elif positive_value_exists(candidate_object.contest_office_we_vote_id):
             results = contest_office_manager.retrieve_contest_office_from_we_vote_id(
                 candidate_object.contest_office_we_vote_id)
             office_found = results['contest_office_found']
+            office_object = results['contest_office']
 
         if office_found:
-            office_object = results['contest_office']
             candidate_object.contest_office_id = office_object.id
             candidate_object.contest_office_we_vote_id = office_object.we_vote_id
             candidate_object.contest_office_name = office_object.office_name

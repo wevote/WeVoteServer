@@ -123,8 +123,8 @@
             <td>{{ office.candidate_count }}</td>
             <td>{{ office.positions_count }}</td>
             <td>{{ office.ocd_division_id|default_if_none:"" }}</td>
-            <td>{{ office.ballotpedia_race_id }}</td>
-            <td>{{ office.ballotpedia_office_id }}</td>
+            <td>{{ office.ballotpedia_race_id|default_if_none:"" }}</td>
+            <td>{{ office.ballotpedia_office_id|default_if_none:"" }}</td>
         </tr>
     {% endfor %}
     </table>

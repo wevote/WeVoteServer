@@ -78,8 +78,8 @@ def election_all_ballots_retrieve_view(request, election_local_id=0):
     # We request the ballot data for each polling location as a way to build up our local data
     if not positive_value_exists(state_code):
         state_code = election_on_stage.get_election_state()
-        if not positive_value_exists(state_code):
-            state_code = "CA"  # TODO DALE Temp for 2016
+        # if not positive_value_exists(state_code):
+        #     state_code = "CA"  # TODO DALE Temp for 2016
 
     try:
         polling_location_count_query = PollingLocation.objects.all()
@@ -248,8 +248,8 @@ def election_one_ballot_retrieve_view(request, election_local_id=0):
     # We request the ballot data for each polling location as a way to build up our local data
     if not positive_value_exists(state_code):
         state_code = election_on_stage.get_election_state()
-        if not positive_value_exists(state_code):
-            state_code = "CA"  # TODO DALE Temp for 2016
+        # if not positive_value_exists(state_code):
+        #     state_code = "CA"  # TODO DALE Temp for 2016
 
     try:
         polling_location = PollingLocation.objects.get(
@@ -438,7 +438,7 @@ def election_edit_process_view(request):
     election_day_text = request.POST.get('election_day_text', False)
     state_code = request.POST.get('state_code', False)
     google_civic_election_id = request.POST.get('google_civic_election_id', '0')
-    ballotpedia_election_id = request.POST.get('ballotpedia_election_id', '0')
+    ballotpedia_election_id = request.POST.get('ballotpedia_election_id', False)
     include_in_list_for_voters = request.POST.get('include_in_list_for_voters', False)
 
     election_on_stage = Election()
@@ -499,9 +499,8 @@ def election_edit_process_view(request):
                 and positive_value_exists(google_civic_election_id):
             election_on_stage.google_civic_election_id = google_civic_election_id
 
-        if not positive_value_exists(election_on_stage.ballotpedia_election_id) \
-                and positive_value_exists(ballotpedia_election_id):
-            election_on_stage.ballotpedia_election_id = ballotpedia_election_id
+        if ballotpedia_election_id is not False:
+            election_on_stage.ballotpedia_election_id = convert_to_int(ballotpedia_election_id)
 
         election_on_stage.include_in_list_for_voters = include_in_list_for_voters
 
@@ -1219,58 +1218,19 @@ def election_migration_view(request):
                 error = True
                 status += we_vote_image_results['status']
 
+    # ########################################
+    # PositionNetworkScore
+    position_network_score_results = position_list_manager.migrate_position_network_scores_to_new_election_id(
+        we_vote_election_id, google_civic_election_id, change_now)
+    position_network_scores_migrated = position_network_score_results['position_network_scores_migrated']
+    if not position_network_score_results['success']:
+        status += position_network_score_results['status']
+
     message_with_summary_of_elections = 'Election Migration from We Vote Election id {we_vote_election_id} ' \
                                         'to Google Civic Election id {google_civic_election_id}. ' \
                                         ''.format(we_vote_election_id=we_vote_election_id,
                                                   google_civic_election_id=google_civic_election_id)
 
-    # If we did migration, refresh the counts so we can see if any remain to be moved
-    # # query office table for office count with given we_vote_election_id
-    # contest_office_manager = ContestOfficeManager()
-    # contest_office_results = contest_office_manager.count_contest_offices_for_election(we_vote_election_id)
-    # if contest_office_results['success']:
-    #     we_vote_election_office_count = contest_office_results['contest_offices_count']
-    # else:
-    #     status += contest_office_results['status']
-    #
-    # # now query candidate campaign table with given we_vote_election_id
-    # candidate_campaign_manager = CandidateCampaignManager()
-    # candidate_results = candidate_campaign_manager.count_candidates_for_election(we_vote_election_id)
-    # if candidate_results['success']:
-    #     we_vote_election_candidate_count = candidate_results['candidates_count']
-    # else:
-    #     status += candidate_results['status']
-    #
-    # # query positions table with given we_vote_election_id
-    # position_manager = PositionManager()
-    #
-    # retrieve_public_positions = True
-    # position_results = position_manager.count_positions_for_election(we_vote_election_id, retrieve_public_positions)
-    # if position_results['success']:
-    #     public_position_count = position_results['positions_count']
-    # else:
-    #     status += position_results['status']
-    #
-    # retrieve_friend_positions = False
-    # position_results = position_manager.count_positions_for_election(we_vote_election_id, retrieve_friend_positions)
-    # if position_results['success']:
-    #     friend_position_count = position_results['positions_count']
-    # else:
-    #     status += position_results['status']
-    #
-    # # Count for we_vote_election_ballot_item_count
-    #
-    # # Count for we_vote_election_ballot_returned_count
-    #
-    # # Count for we_vote_election_voter_ballot_saved_count
-    #
-    # # Count for we_vote_election_we_vote_image_count
-    #
-    # # Count for we_vote_election_measure_count
-    #
-    # # Count for we_vote_election_quick_info_count
-    #
-    # # Count for we_vote_election_voter_guide_count
     if positive_value_exists(change_now):
         info_message = message_with_summary_of_elections + '<br />Changes completed.<br />' \
                          'status: {status} '.format(status=status, )
@@ -1302,6 +1262,7 @@ def election_migration_view(request):
                          'voter_address_count: {voter_address_count}, <br />' \
                          'voter_device_link_count: {voter_device_link_count}, <br />' \
                          'voter_guide_count: {voter_guide_count}, <br />' \
+                         'position_network_scores_count: {position_network_scores_migrated}, <br />' \
                          'status: {status} '.format(
                              we_vote_election_id=we_vote_election_id,
                              google_civic_election_id=google_civic_election_id,
@@ -1323,6 +1284,7 @@ def election_migration_view(request):
                              voter_address_count=we_vote_election_voter_address_count,
                              voter_device_link_count=we_vote_election_voter_device_link_count,
                              voter_guide_count=we_vote_election_voter_guide_count,
+                             position_network_scores_migrated=position_network_scores_migrated,
                              status=status,)
 
         info_message = message_with_summary_of_elections + current_counts

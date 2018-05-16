@@ -9,7 +9,7 @@ from admin_tools.views import redirect_to_sign_in_page
 from ballot.controllers import move_ballot_items_to_another_office
 from bookmark.models import BookmarkItemList
 from candidate.controllers import move_candidates_to_another_office
-from candidate.models import CandidateCampaign, fetch_candidate_count_for_office
+from candidate.models import CandidateCampaign, CandidateCampaignListManager, fetch_candidate_count_for_office
 from config.base import get_environment_variable
 from django.http import HttpResponseRedirect
 from django.core.urlresolvers import reverse
@@ -703,6 +703,28 @@ def render_contest_office_merge_form(
         contest_office_option2_bookmark_count = 0
     contest_office_option2_for_template.bookmarks_count = contest_office_option2_bookmark_count
 
+    # Show the candidates under each office
+    office_id = 0
+    candidate_list_read_only = True
+    candidate_list_manager = CandidateCampaignListManager()
+    if positive_value_exists(contest_office_option1_for_template.we_vote_id):
+        contest_office_option1_results = candidate_list_manager.retrieve_all_candidates_for_office(
+            office_id, contest_office_option1_for_template.we_vote_id, candidate_list_read_only)
+        if contest_office_option1_results['candidate_list_found']:
+            contest_office_option1_for_template.candidates_string = ""
+            candidate_list = contest_office_option1_results['candidate_list']
+            for one_candidate in candidate_list:
+                contest_office_option1_for_template.candidates_string += one_candidate.display_candidate_name() + ", "
+
+    if positive_value_exists(contest_office_option2_for_template.we_vote_id):
+        contest_office_option2_results = candidate_list_manager.retrieve_all_candidates_for_office(
+            office_id, contest_office_option2_for_template.we_vote_id, candidate_list_read_only)
+        if contest_office_option2_results['candidate_list_found']:
+            contest_office_option2_for_template.candidates_string = ""
+            candidate_list = contest_office_option2_results['candidate_list']
+            for one_candidate in candidate_list:
+                contest_office_option2_for_template.candidates_string += one_candidate.display_candidate_name() + ", "
+
     messages_on_stage = get_messages(request)
     template_values = {
         'messages_on_stage':        messages_on_stage,
@@ -781,7 +803,7 @@ def office_merge_process_view(request):
                                     "&state_code=" + str(state_code))
 
     # Merge attribute values
-    conflict_values = figure_out_conflict_values(contest_office2_on_stage, contest_office2_on_stage)
+    conflict_values = figure_out_conflict_values(contest_office1_on_stage, contest_office2_on_stage)
     for attribute in CONTEST_OFFICE_UNIQUE_IDENTIFIERS:
         conflict_value = conflict_values.get(attribute, None)
         if conflict_value == "CONFLICT":
@@ -793,7 +815,8 @@ def office_merge_process_view(request):
 
     # Merge candidate's office details
     candidates_results = move_candidates_to_another_office(contest_office2_id, contest_office2_we_vote_id,
-                                                           contest_office1_id, contest_office1_we_vote_id)
+                                                           contest_office1_id, contest_office1_we_vote_id,
+                                                           contest_office1_on_stage)
     if not candidates_results['success']:
         messages.add_message(request, messages.ERROR, candidates_results['status'])
         return HttpResponseRedirect(reverse('office:find_and_remove_duplicate_offices', args=()) +
@@ -802,7 +825,8 @@ def office_merge_process_view(request):
 
     # Merge ballot item's office details
     ballot_items_results = move_ballot_items_to_another_office(contest_office2_id, contest_office2_we_vote_id,
-                                                               contest_office1_id, contest_office1_we_vote_id)
+                                                               contest_office1_id, contest_office1_we_vote_id,
+                                                               contest_office1_on_stage)
     if not ballot_items_results['success']:
         messages.add_message(request, messages.ERROR, ballot_items_results['status'])
         return HttpResponseRedirect(reverse('office:find_and_remove_duplicate_offices', args=()) +
@@ -831,6 +855,7 @@ def office_merge_process_view(request):
 
     # Note: wait to wrap in try/except block
     contest_office1_on_stage.save()
+    # There isn't any office data to refresh from other master tables
 
     # Remove contest office 2
     contest_office2_on_stage.delete()
