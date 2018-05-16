@@ -84,13 +84,18 @@ def election_all_ballots_retrieve_view(request, election_local_id=0):
     try:
         polling_location_count_query = PollingLocation.objects.all()
         polling_location_count_query = polling_location_count_query.filter(state__iexact=state_code)
+        # If Google wasn't able to return ballot data in the past ignore that polling location
+        polling_location_count_query = polling_location_count_query.filter(
+            google_response_address_not_found__isnull=True)
         polling_location_count = polling_location_count_query.count()
 
-        polling_location_list = PollingLocation.objects.all()
-        polling_location_list = polling_location_list.filter(state__iexact=state_code)
+        polling_location_query = PollingLocation.objects.all()
+        polling_location_query = polling_location_query.filter(state__iexact=state_code)
+        polling_location_query = polling_location_query.filter(
+            google_response_address_not_found__isnull=True)
         # We used to have a limit of 500 ballots to pull per election, but now retrieve all
         # Ordering by "location_name" creates a bit of (locational) random order
-        polling_location_list = polling_location_list.order_by('location_name')[:import_limit]
+        polling_location_list = polling_location_query.order_by('location_name')[:import_limit]
     except PollingLocation.DoesNotExist:
         messages.add_message(request, messages.INFO,
                              'Could not retrieve ballot data for the {election_name}. '
@@ -143,6 +148,18 @@ def election_all_ballots_retrieve_view(request, election_local_id=0):
                 #             time.sleep(1)
                 #             # After pause, reset the limit count
                 #             rate_limit_count = 0
+        else:
+            if 'google_response_address_not_found' in one_ballot_results:
+                if positive_value_exists(one_ballot_results['google_response_address_not_found']):
+                    try:
+                        if not polling_location.google_response_address_not_found:
+                            polling_location.google_response_address_not_found = 1
+                        else:
+                            polling_location.google_response_address_not_found += 1
+                        polling_location.save()
+                        print("Updated PollingLocation google_response_address_not_found: " + str(text_for_map_search))
+                    except Exception as e:
+                        print("Cannot update PollingLocation: " + str(text_for_map_search))
 
         if success:
             ballots_retrieved += 1

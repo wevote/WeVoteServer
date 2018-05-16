@@ -1,7 +1,7 @@
 {# templates/office/office_merge.html #}
 {% extends "template_base.html" %}
 
-{% block title %}{% if contest_office_option1 %}{{ contest_office_option1.contest_office_name  }}{% else %}CANNOT MERGE{% endif %}{% endblock %}
+{% block title %}{% if contest_office_option1 %}Merge {{ contest_office_option1.office_name  }}{% else %}CANNOT MERGE{% endif %}{% endblock %}
 
 {%  block content %}
 <a href="{% url 'office:office_list' %}">< Back to Offices</a>

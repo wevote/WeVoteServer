@@ -28,8 +28,9 @@
         Import New Candidates ></a> (open in new window)
 </p>
 
+{% csrf_token %}
+
 <form name="candidate_choose_election" method="get" action="{% url 'candidate:candidate_list' %}">
-    {% csrf_token %}
 
     {% if election_list %}
     <select id="google_civic_election_id" name="google_civic_election_id">
@@ -112,13 +113,19 @@
     <br />
     <a href="{{ current_page_minus_candidate_tools_url }}&hide_candidate_tools=0">(Show Candidate Tools)</a><br />
 {% endif %}
-    <a href="{% url 'candidate:candidate_new' %}?google_civic_election_id={{ google_civic_election_id }}">Add New Candidate</a><br />
 
-    <br />
+<a href="{% url 'candidate:candidate_new' %}?google_civic_election_id={{ google_civic_election_id }}">Add New Candidate</a><br />
+
+<br />
+<form name="candidate_search" method="get" action="{% url 'candidate:candidate_list' %}">
     {% if candidate_search %}
     <a href="{% url 'candidate:candidate_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
          clear search</a>&nbsp;
     {% endif %}
+    <input type="hidden" name="google_civic_election_id" value="{{ google_civic_election_id }}" />
+    <input type="hidden" name="hide_candidate_tools" value="{{ hide_candidate_tools }}" />
+    <input type="hidden" name="page" value="{{ current_page_number }}" />
+    <input type="hidden" name="state_code" value="{{ state_code }}" />
     <input type="text" name="candidate_search" id="candidate_search_id" value="{{ candidate_search }}" />
     <input type="submit" value="Search for Candidate" />
 
@@ -131,8 +138,9 @@
     {% if not review_mode %}
         <span class="float-right"><a href="{{ previous_page_url }}">Previous page</a> | <a href="{{ next_page_url }}">Next page</a></span>
     {% endif %}
+</form>
 
-  <br style="clear:left;"/>
+<br style="clear:left;"/>
 
 {% if candidate_list %}
     {% if not review_mode %}
