@@ -1187,7 +1187,8 @@ class ContestOfficeListManager(models.Model):
                             for possible_match in contest_office_list:
                                 possible_match_name_length = len(possible_match.office_name)
                                 possible_match_office_name_lower = possible_match.office_name.lower()
-                                if contest_office_name_length < possible_match_name_length:
+                                if contest_office_name_length < possible_match_name_length \
+                                        and 'district' in possible_match_office_name_lower:
                                     # If the incoming name is shorter than the final name, see if the beginning of
                                     # possible match is identical.
                                     possible_match_office_name_lower_cropped = \
