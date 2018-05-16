@@ -391,8 +391,8 @@ def voter_all_bookmarks_status_retrieve_for_api(voter_device_id):
         }
         return HttpResponse(json.dumps(json_data), content_type='application/json')
 
-    bookmark_item_list = BookmarkItemList()
-    results = bookmark_item_list.retrieve_bookmark_item_list_for_voter(voter_id)
+    bookmark_item_list_manager = BookmarkItemList()
+    results = bookmark_item_list_manager.retrieve_bookmark_item_list_for_voter(voter_id)
     status = results['status']
     success = results['success']
 

@@ -1161,8 +1161,8 @@ def candidate_merge_process_view(request):
     # else do nothing (no parent politician for candidate 2)
 
     # TODO: Migrate bookmarks
-    bookmark_item_list = BookmarkItemList()
-    bookmark_results = bookmark_item_list.retrieve_bookmark_item_list_for_candidate(candidate2_we_vote_id)
+    bookmark_item_list_manager = BookmarkItemList()
+    bookmark_results = bookmark_item_list_manager.retrieve_bookmark_item_list_for_candidate(candidate2_we_vote_id)
     if bookmark_results['bookmark_item_list_found']:
         messages.add_message(request, messages.ERROR, "Bookmarks found for Candidate 2 - "
                                                       "automatic merge not working yet.")
@@ -1299,7 +1299,7 @@ def render_candidate_merge_form(
         request, candidate_option1_for_template, candidate_option2_for_template, candidate_merge_conflict_values):
     position_list_manager = PositionListManager()
 
-    bookmark_item_list = BookmarkItemList()
+    bookmark_item_list_manager = BookmarkItemList()
 
     # Get positions counts for both candidates
     candidate_option1_for_template.public_positions_count = \
@@ -1309,7 +1309,7 @@ def render_candidate_merge_form(
         position_list_manager.fetch_friends_only_positions_count_for_candidate_campaign(
             candidate_option1_for_template.id, candidate_option1_for_template.we_vote_id)
     # Bookmarks
-    bookmark_results = bookmark_item_list.retrieve_bookmark_item_list_for_candidate(
+    bookmark_results = bookmark_item_list_manager.retrieve_bookmark_item_list_for_candidate(
         candidate_option1_for_template.we_vote_id)
     if bookmark_results['bookmark_item_list_found']:
         bookmark_item_list = bookmark_results['bookmark_item_list']
@@ -1325,7 +1325,7 @@ def render_candidate_merge_form(
         position_list_manager.fetch_friends_only_positions_count_for_candidate_campaign(
             candidate_option2_for_template.id, candidate_option2_for_template.we_vote_id)
     # Bookmarks
-    bookmark_results = bookmark_item_list.retrieve_bookmark_item_list_for_candidate(
+    bookmark_results = bookmark_item_list_manager.retrieve_bookmark_item_list_for_candidate(
         candidate_option2_for_template.we_vote_id)
     if bookmark_results['bookmark_item_list_found']:
         bookmark_item_list = bookmark_results['bookmark_item_list']
