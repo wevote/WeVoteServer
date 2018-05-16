@@ -981,7 +981,7 @@ class ContestOfficeListManager(models.Model):
         success = False
         contest_office = ContestOffice()
         contest_office_found = False
-        contest_office_list = []
+        contest_office_list_filtered = []
         contest_office_list_found = False
         multiple_entries_found = False
         status = ""
@@ -1000,13 +1000,13 @@ class ContestOfficeListManager(models.Model):
             if positive_value_exists(ignore_office_id_list):
                 contest_office_query = contest_office_query.exclude(we_vote_id__in=ignore_office_id_list)
 
-            contest_office_list = list(contest_office_query)
-            if len(contest_office_list):
+            contest_office_list_filtered = list(contest_office_query)
+            if len(contest_office_list_filtered):
                 keep_looking_for_duplicates = False
                 # if a single entry matches, update that entry
-                if len(contest_office_list) == 1:
+                if len(contest_office_list_filtered) == 1:
                     status += 'CREATE_BATCH_ROW_ACTION_CONTEST_OFFICE-SINGLE_ROW_RETRIEVED '
-                    contest_office = contest_office_list[0]
+                    contest_office = contest_office_list_filtered[0]
                     contest_office_found = True
                     contest_office_list_found = True
                     success = True
@@ -1066,12 +1066,18 @@ class ContestOfficeListManager(models.Model):
                 contest_office_query = contest_office_query.exclude(office_name__icontains="district")
 
                 contest_office_list = list(contest_office_query)
+
+                contest_office_list_filtered = []
                 if len(contest_office_list):
+                    contest_office_list_filtered = remove_district_false_positives(
+                        contest_office_name, contest_office_list)
+
+                if len(contest_office_list_filtered):
                     keep_looking_for_duplicates = False
                     # if a single entry matches, update that entry
-                    if len(contest_office_list) == 1:
+                    if len(contest_office_list_filtered) == 1:
                         status += 'CREATE_BATCH_ROW_ACTION_CONTEST_OFFICE-SINGLE_ROW_RETRIEVED '
-                        contest_office = contest_office_list[0]
+                        contest_office = contest_office_list_filtered[0]
                         contest_office_found = True
                         contest_office_list_found = True
                         success = True
@@ -1177,36 +1183,18 @@ class ContestOfficeListManager(models.Model):
                     contest_office_query = contest_office_query.filter(final_filters)
 
                     contest_office_list = list(contest_office_query)
+
                     contest_office_list_filtered = []
                     if len(contest_office_list):
-                        # We want to avoid matches like this:
-                        # U.S. House California District 1 == U.S. House California District 18
-                        contest_office_name_lower = contest_office_name.lower()
-                        contest_office_name_lower = contest_office_name_lower.strip()
-                        if positive_value_exists(contest_office_name) and 'district' in contest_office_name_lower:
-                            contest_office_name_length = len(contest_office_name)
-                            for possible_match in contest_office_list:
-                                possible_match_name_length = len(possible_match.office_name)
-                                possible_match_office_name_lower = possible_match.office_name.lower()
-                                possible_match_office_name_lower = possible_match_office_name_lower.strip()
-                                if contest_office_name_length < possible_match_name_length \
-                                        and 'district' in possible_match_office_name_lower:
-                                    # If the incoming name is shorter than the final name, see if the beginning of
-                                    # possible match is identical.
-                                    possible_match_office_name_lower_cropped = \
-                                        possible_match_office_name_lower[:contest_office_name_length]
-                                    if contest_office_name_lower == possible_match_office_name_lower_cropped:
-                                        # If the possible match contains the full contest_office_name, then we don't
-                                        # return it because it looks like we have District 1 == District 18
-                                        continue
-                                contest_office_list_filtered.append(possible_match)
+                        contest_office_list_filtered = remove_district_false_positives(
+                            contest_office_name, contest_office_list)
 
                     if len(contest_office_list_filtered):
                         keep_looking_for_duplicates = False
                         # if a single entry matches, update that entry
-                        if len(contest_office_list) == 1:
+                        if len(contest_office_list_filtered) == 1:
                             status += 'CREATE_BATCH_ROW_ACTION_CONTEST_OFFICE-SINGLE_ROW_RETRIEVED '
-                            contest_office = contest_office_list[0]
+                            contest_office = contest_office_list_filtered[0]
                             contest_office_found = True
                             contest_office_list_found = True
                             success = True
@@ -1259,7 +1247,7 @@ class ContestOfficeListManager(models.Model):
             'contest_office_found':         contest_office_found,
             'contest_office':               contest_office,
             'contest_office_list_found':    contest_office_list_found,
-            'contest_office_list':          contest_office_list,
+            'contest_office_list':          contest_office_list_filtered,
             'multiple_entries_found':       multiple_entries_found,
         }
         return results
@@ -1282,3 +1270,27 @@ class ContestOfficesAreNotDuplicates(models.Model):
         else:
             # If the we_vote_id passed in wasn't found, don't return another we_vote_id
             return ""
+
+
+def remove_district_false_positives(contest_office_name, contest_office_list):
+    contest_office_list_filtered = []
+    # We want to avoid matches like this:
+    # U.S. House California District 1 == U.S. House California District 18
+    contest_office_name_lower = contest_office_name.lower()
+    if positive_value_exists(contest_office_name) and 'district' in contest_office_name_lower:
+        contest_office_name_length = len(contest_office_name)
+        for possible_match in contest_office_list:
+            possible_match_name_length = len(possible_match.office_name)
+            possible_match_office_name_lower = possible_match.office_name.lower()
+            if contest_office_name_length < possible_match_name_length \
+                    and 'district' in possible_match_office_name_lower:
+                # If the incoming name is shorter than the final name, see if the beginning of
+                # possible match is identical.
+                possible_match_office_name_lower_cropped = \
+                    possible_match_office_name_lower[:contest_office_name_length]
+                if contest_office_name_lower == possible_match_office_name_lower_cropped:
+                    # If the possible match contains the full contest_office_name, then we don't
+                    # return it because it looks like we have District 1 == District 18
+                    continue
+            contest_office_list_filtered.append(possible_match)
+    return contest_office_list_filtered
