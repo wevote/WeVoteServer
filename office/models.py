@@ -1132,14 +1132,14 @@ class ContestOfficeListManager(models.Model):
                 office_without_district_found = False
                 for left_term, right_term in OFFICE_NAME_EQUIVALENT_DISTRICT_PHRASE_PAIRS.items():
                     if left_term in stripped_down_contest_office_name:
-                        new_filter = Q(office_name__icontains=right_term)
+                        new_filter = Q(office_name__icontains=right_term) | Q(office_name__icontains=left_term)
                         filters.append(new_filter)
                         district_found = True
                         stripped_down_contest_office_name = stripped_down_contest_office_name.replace(left_term, "")
                         # Break out of the for loop since we only want to match to one district
                         break
                     if right_term in stripped_down_contest_office_name:
-                        new_filter = Q(office_name__icontains=left_term)
+                        new_filter = Q(office_name__icontains=left_term) | Q(office_name__icontains=right_term)
                         filters.append(new_filter)
                         district_found = True
                         stripped_down_contest_office_name = stripped_down_contest_office_name.replace(right_term, "")
@@ -1148,13 +1148,15 @@ class ContestOfficeListManager(models.Model):
 
                 for left_term, right_term in OFFICE_NAME_EQUIVALENT_PHRASE_PAIRS.items():
                     if left_term in stripped_down_contest_office_name:
-                        new_filter = Q(office_name__icontains=right_term)
+                        new_filter = Q(office_name__icontains=right_term) | Q(office_name__icontains=left_term)
                         filters.append(new_filter)
                         equivalent_phrase_found = True
+                        continue
                     if right_term in stripped_down_contest_office_name:
-                        new_filter = Q(office_name__icontains=left_term)
+                        new_filter = Q(office_name__icontains=left_term) | Q(office_name__icontains=right_term)
                         filters.append(new_filter)
                         equivalent_phrase_found = True
+                        continue
 
                 if district_found and not equivalent_phrase_found:
                     # Remove leading and trailing spaces
@@ -1175,7 +1177,28 @@ class ContestOfficeListManager(models.Model):
                     contest_office_query = contest_office_query.filter(final_filters)
 
                     contest_office_list = list(contest_office_query)
+                    contest_office_list_filtered = []
                     if len(contest_office_list):
+                        # We want to avoid matches like this:
+                        # U.S. House California District 1 == U.S. House California District 18
+                        contest_office_name_lower = contest_office_name.lower()
+                        if positive_value_exists(contest_office_name) and 'district' in contest_office_name_lower:
+                            contest_office_name_length = len(contest_office_name)
+                            for possible_match in contest_office_list:
+                                possible_match_name_length = len(possible_match.office_name)
+                                possible_match_office_name_lower = possible_match.office_name.lower()
+                                if contest_office_name_length < possible_match_name_length:
+                                    # If the incoming name is shorter than the final name, see if the beginning of
+                                    # possible match is identical.
+                                    possible_match_office_name_lower_cropped = \
+                                        possible_match_office_name_lower[:contest_office_name_length]
+                                    if contest_office_name_lower == possible_match_office_name_lower_cropped:
+                                        # If the possible match contains the full contest_office_name, then we don't
+                                        # return it because it looks like we have District 1 == District 18
+                                        continue
+                                contest_office_list_filtered.append(possible_match)
+
+                    if len(contest_office_list_filtered):
                         keep_looking_for_duplicates = False
                         # if a single entry matches, update that entry
                         if len(contest_office_list) == 1:

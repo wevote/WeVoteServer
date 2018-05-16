@@ -1638,9 +1638,14 @@ def create_batch_row_action_candidate(batch_description, batch_header_map, one_b
         batch_row_action_candidate.birth_day_text = birth_day_text
         batch_row_action_candidate.candidate_ctcl_person_id = candidate_ctcl_person_id
         batch_row_action_candidate.candidate_gender = candidate_gender
-        if candidate_is_incumbent is not None:
-            batch_row_action_candidate.candidate_is_incumbent = candidate_is_incumbent
-        batch_row_action_candidate.candidate_is_top_ticket = candidate_is_top_ticket
+        if candidate_is_incumbent is not None and positive_value_exists(candidate_is_incumbent):
+            batch_row_action_candidate.candidate_is_incumbent = True
+        else:
+            batch_row_action_candidate.candidate_is_incumbent = False
+        if candidate_is_top_ticket is not None and positive_value_exists(candidate_is_top_ticket):
+            batch_row_action_candidate.candidate_is_top_ticket = True
+        else:
+            batch_row_action_candidate.candidate_is_top_ticket = False
         batch_row_action_candidate.candidate_name = candidate_name
         batch_row_action_candidate.candidate_participation_status = candidate_participation_status
         batch_row_action_candidate.candidate_twitter_handle = candidate_twitter_handle
@@ -3208,6 +3213,8 @@ def import_candidate_data_from_batch_row_actions(batch_header_id, batch_row_id, 
             update_values['candidate_gender'] = one_batch_row_action.candidate_gender
         if positive_value_exists(one_batch_row_action.candidate_is_incumbent):
             update_values['candidate_is_incumbent'] = one_batch_row_action.candidate_is_incumbent
+        else:
+            update_values['candidate_is_incumbent'] = False
         if positive_value_exists(one_batch_row_action.candidate_is_top_ticket):
             update_values['candidate_is_top_ticket'] = one_batch_row_action.candidate_is_top_ticket
         if positive_value_exists(one_batch_row_action.candidate_name):

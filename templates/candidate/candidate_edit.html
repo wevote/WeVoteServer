@@ -1,7 +1,7 @@
 {# templates/candidate/candidate_edit.html #}
 {% extends "template_base.html" %}
 
-{% block title %}{% if candidate %}{{ candidate.candidate_name  }}{% else %}New Candidate{% endif %}{% endblock %}
+{% block title %}{% if candidate %}Edit {{ candidate.candidate_name  }}{% else %}New Candidate{% endif %}{% endblock %}
 
 {%  block content %}
 {% load template_filters %}
@@ -121,7 +121,11 @@ span.wrap_word { word-break: break-word; }
             (no offices found)
         {% endif %}
         <a href="{% url 'office:office_new' %}?google_civic_election_id={{ google_civic_election_id }}" target="_blank">
-            Add New Office</a> (in new window)
+            Add New Office</a> (in new window)&nbsp;&nbsp;&nbsp;
+        {% if candidate and candidate.contest_office_we_vote_id %}
+            <a href="{% url 'office:office_summary' office_id=candidate.contest_office_id %}" target="_blank">
+                View this Office</a> (in new window)
+        {% endif %}
     </div>
 </div>
 
