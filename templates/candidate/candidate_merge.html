@@ -170,14 +170,10 @@
     </tr>
     <tr>
         <td>
-          <a href="{% url 'candidate:candidate_list' %}">cancel</a>&nbsp; <input type="submit" value="Skip - Not Duplicates" name="skip" />&nbsp;<input type="submit" value="Merge Candidates" name="merge" />
+          <a href="{% url 'candidate:candidate_list' %}">cancel</a>&nbsp; <input type="submit" value="Skip - Not Duplicates" name="skip" />&nbsp;
         </td>
         <td></td>
-        <td></td>
-        <!--<td><a href="{% url 'candidate:remove_duplicate_candidate' %}?google_civic_election_id={{ candidate_option1.google_civic_election_id }}&candidate_id={{ candidate_option1.id }}">-->
-            <!--Delete Candidate Option 1</a></td>-->
-        <!--<td><a href="{% url 'candidate:remove_duplicate_candidate' %}?google_civic_election_id={{ candidate_option2.google_civic_election_id }}&candidate_id={{ candidate_option2.id }}">-->
-            <!--Delete Candidate Option 2</a></td>-->
+        <td><input type="submit" value="Merge Candidates" name="merge" /></td>
     </tr>
 </table>
 <input type="hidden" name="remove_duplicate_process" value="1" />
