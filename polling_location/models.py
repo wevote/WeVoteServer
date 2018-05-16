@@ -42,6 +42,9 @@ class PollingLocation(models.Model):
     latitude = models.FloatField(null=True, verbose_name='latitude returned from Google')
     longitude = models.FloatField(null=True, verbose_name='longitude returned from Google')
 
+    google_response_address_not_found = models.PositiveIntegerField(
+        verbose_name="how many times Google can't find address", default=None, null=True)
+
     use_for_bulk_retrieve = models.BooleanField(verbose_name="this provides geographical coverage", default=False)
 
     def get_formatted_zip(self):

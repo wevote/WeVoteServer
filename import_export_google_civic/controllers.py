@@ -181,6 +181,12 @@ def process_contest_office_from_structured_json(
 
     office_name = one_contest_office_structured_json['office']
 
+    if "/n" in office_name:
+        # Sometimes a line break is passed in with the office_name
+        office_name = office_name.replace("/n", " ")
+        office_name = office_name.strip()
+        one_contest_office_structured_json['office'] = office_name
+
     # The number of candidates that a voter may vote for in this contest.
     if 'numberVotingFor' in one_contest_office_structured_json:
         number_voting_for = one_contest_office_structured_json['numberVotingFor']
@@ -481,7 +487,7 @@ def retrieve_one_ballot_from_google_civic_api(text_for_map_search, incoming_goog
                                               use_test_election=False):
     # Request json file from Google servers
     # logger.info("Loading ballot for one address from voterInfoQuery from Google servers")
-    print("retrieving one ballot for " + str(incoming_google_civic_election_id))
+    print("retrieving one ballot for " + str(incoming_google_civic_election_id) + ": " + str(text_for_map_search))
     if positive_value_exists(use_test_election):
         response = requests.get(VOTER_INFO_URL, params={
             "key": GOOGLE_CIVIC_API_KEY,
@@ -526,10 +532,15 @@ def retrieve_one_ballot_from_google_civic_api(text_for_map_search, incoming_goog
     contests_retrieved = False
     election_administration_data_retrieved = False
     google_civic_election_id = 0
+    google_response_address_not_found = False
     error = structured_json.get('error', {})
     errors = error.get('errors', {})
     if len(errors):
         logger.debug("retrieve_one_ballot_from_google_civic_api failed: " + str(errors))
+        for one_error_from_google in errors:
+            if 'reason' in one_error_from_google:
+                if one_error_from_google['reason'] == "notFound":
+                    google_response_address_not_found = True
 
     if 'election' in structured_json:
         if 'id' in structured_json['election']:
@@ -564,6 +575,7 @@ def retrieve_one_ballot_from_google_civic_api(text_for_map_search, incoming_goog
         'success': success,
         'election_data_retrieved': election_data_retrieved,
         'polling_location_retrieved': polling_location_retrieved,
+        'google_response_address_not_found': google_response_address_not_found,
         'contests_retrieved': contests_retrieved,
         'election_administration_data_retrieved': election_administration_data_retrieved,
         'structured_json': structured_json,
