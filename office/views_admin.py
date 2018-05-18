@@ -36,6 +36,44 @@ WE_VOTE_SERVER_ROOT_URL = get_environment_variable("WE_VOTE_SERVER_ROOT_URL")
 logger = wevote_functions.admin.get_logger(__name__)
 
 
+@login_required
+def compare_two_offices_for_merge_view(request):
+    # admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'political_data_manager'}
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
+    contest_office1_we_vote_id = request.GET.get('contest_office1_we_vote_id', 0)
+    contest_office2_we_vote_id = request.GET.get('contest_office2_we_vote_id', 0)
+    google_civic_election_id = request.GET.get('google_civic_election_id', 0)
+    google_civic_election_id = convert_to_int(google_civic_election_id)
+
+    contest_office_manager = ContestOfficeManager()
+    contest_office_results = contest_office_manager.retrieve_contest_office_from_we_vote_id(contest_office1_we_vote_id)
+    if not contest_office_results['contest_office_found']:
+        messages.add_message(request, messages.ERROR, "Contest Office1 not found.")
+        return HttpResponseRedirect(reverse('office:office_list', args=()) +
+                                    "?google_civic_election_id=" + str(google_civic_election_id))
+
+    contest_office_option1_for_template = contest_office_results['contest_office']
+
+    contest_office_results = contest_office_manager.retrieve_contest_office_from_we_vote_id(contest_office2_we_vote_id)
+    if not contest_office_results['contest_office_found']:
+        messages.add_message(request, messages.ERROR, "Contest Office2 not found.")
+        return HttpResponseRedirect(reverse('office:office_summary', args=(contest_office_option1_for_template.id,)) +
+                                    "?google_civic_election_id=" + str(google_civic_election_id))
+
+    contest_office_option2_for_template = contest_office_results['contest_office']
+
+    contest_office_merge_conflict_values = figure_out_conflict_values(
+        contest_office_option1_for_template, contest_office_option2_for_template)
+
+    # This view function takes us to displaying a template
+    return render_contest_office_merge_form(request, contest_office_option1_for_template,
+                                            contest_office_option2_for_template,
+                                            contest_office_merge_conflict_values)
+
+
 # This page does not need to be protected.
 # NOTE: @login_required() throws an error. Needs to be figured out if we ever want to secure this page.
 # class OfficesSyncOutView(APIView):
@@ -417,13 +455,16 @@ def office_summary_view(request, office_id):
 
     messages_on_stage = get_messages(request)
     office_id = convert_to_int(office_id)
-    office_on_stage_found = False
+    office_we_vote_id = ""
+    contest_office_found = False
     google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
     state_code = request.GET.get('state_code', "")
+    office_search = request.GET.get('office_search', "")
     try:
-        office_on_stage = ContestOffice.objects.get(id=office_id)
-        office_on_stage_found = True
-        google_civic_election_id = office_on_stage.google_civic_election_id
+        contest_office = ContestOffice.objects.get(id=office_id)
+        contest_office_found = True
+        office_we_vote_id = contest_office.we_vote_id
+        google_civic_election_id = contest_office.google_civic_election_id
     except ContestOffice.MultipleObjectsReturned as e:
         handle_record_found_more_than_one_exception(e, logger=logger)
     except ContestOffice.DoesNotExist:
@@ -432,6 +473,9 @@ def office_summary_view(request, office_id):
 
     candidate_list_modified = []
     position_list_manager = PositionListManager()
+    # Cache the full names of candidates for the root contest_office so we can check to see if possible duplicate
+    # offices share the same candidates
+    root_office_candidate_last_names = ""
     try:
         candidate_list = CandidateCampaign.objects.filter(contest_office_id=office_id)
         if positive_value_exists(google_civic_election_id):
@@ -445,6 +489,7 @@ def office_summary_view(request, office_id):
             one_candidate.oppose_count = position_list_manager.fetch_voter_positions_count_for_candidate_campaign(
                 one_candidate.id, "", OPPOSE)
             support_total += one_candidate.support_count
+            root_office_candidate_last_names += " " + one_candidate.extract_last_name()
 
         for one_candidate in candidate_list:
             if positive_value_exists(support_total):
@@ -457,19 +502,83 @@ def office_summary_view(request, office_id):
         # This is fine, create new
         pass
 
+    root_office_candidate_last_names = root_office_candidate_last_names.lower()
+
     election_list = Election.objects.order_by('-election_day_text')
 
     if positive_value_exists(google_civic_election_id):
         election = Election.objects.get(google_civic_election_id=google_civic_election_id)
 
-    if office_on_stage_found:
+    office_search_results_list = []
+    if positive_value_exists(office_search):
+        office_queryset = ContestOffice.objects.all()
+        office_queryset = office_queryset.filter(google_civic_election_id=google_civic_election_id)
+        office_queryset = office_queryset.exclude(we_vote_id__iexact=office_we_vote_id)
+
+        if positive_value_exists(state_code):
+            office_queryset = office_queryset.filter(state_code__iexact=state_code)
+
+        search_words = office_search.split()
+        for one_word in search_words:
+            filters = []  # Reset for each search word
+            new_filter = Q(office_name__icontains=one_word)
+            filters.append(new_filter)
+
+            new_filter = Q(we_vote_id__icontains=one_word)
+            filters.append(new_filter)
+
+            new_filter = Q(wikipedia_id__icontains=one_word)
+            filters.append(new_filter)
+
+            # Add the first query
+            if len(filters):
+                final_filters = filters.pop()
+
+                # ...and "OR" the remaining items in the list
+                for item in filters:
+                    final_filters |= item
+
+                office_queryset = office_queryset.filter(final_filters)
+
+        office_search_results_list = list(office_queryset)
+    elif contest_office_found:
+        ignore_office_we_vote_id_list = []
+        ignore_office_we_vote_id_list.append(contest_office.we_vote_id)
+        results = find_duplicate_contest_office(contest_office, ignore_office_we_vote_id_list)
+        if results['contest_office_merge_possibility_found']:
+            office_search_results_list = results['contest_office_list']
+
+    # Show the candidates under each office
+    candidate_list_read_only = True
+    candidate_list_manager = CandidateCampaignListManager()
+    office_search_results_list_modified = []
+    for one_office in office_search_results_list:
+        office_id = 0
+        if positive_value_exists(one_office.we_vote_id):
+            contest_office_option1_results = candidate_list_manager.retrieve_all_candidates_for_office(
+                office_id, one_office.we_vote_id, candidate_list_read_only)
+            if contest_office_option1_results['candidate_list_found']:
+                one_office.candidates_string = ""
+                candidate_list = contest_office_option1_results['candidate_list']
+                for one_candidate in candidate_list:
+                    one_office.candidates_string += one_candidate.display_candidate_name() + ", "
+                    candidate_last_name = one_candidate.extract_last_name()
+                    candidate_last_name_lower = candidate_last_name.lower()
+                    if candidate_last_name_lower in root_office_candidate_last_names:
+                        one_office.candidates_match_root_office = True
+
+        office_search_results_list_modified.append(one_office)
+
+    if contest_office_found:
         template_values = {
             'messages_on_stage':        messages_on_stage,
-            'office':                   office_on_stage,
+            'office':                   contest_office,
             'candidate_list':           candidate_list_modified,
             'state_code':               state_code,
             'election':                 election,
             'election_list':            election_list,
+            'office_search':            office_search,
+            'office_search_results_list':   office_search_results_list_modified,
             'google_civic_election_id': google_civic_election_id,
         }
     else:
@@ -530,7 +639,8 @@ def office_delete_process_view(request):
 
 @login_required
 def find_duplicate_office_view(request, office_id=0):
-    authority_required = {'verified_volunteer'}  # admin, verified_volunteer
+    # admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'political_data_manager'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
@@ -557,10 +667,10 @@ def find_duplicate_office_view(request, office_id=0):
                              "Contest Office must have a google_civic_election_id in order to merge.")
         return HttpResponseRedirect(reverse('office:office_edit', args=(office_id,)))
 
-    ignore_office_id_list = []
-    ignore_office_id_list.append(contest_office.we_vote_id)
+    ignore_office_we_vote_id_list = []
+    ignore_office_we_vote_id_list.append(contest_office.we_vote_id)
 
-    results = find_duplicate_contest_office(contest_office, ignore_office_id_list)
+    results = find_duplicate_contest_office(contest_office, ignore_office_we_vote_id_list)
 
     # If we find contest offices to merge, stop and ask for confirmation
     if results['contest_office_merge_possibility_found']:
@@ -590,12 +700,13 @@ def find_duplicate_office_view(request, office_id=0):
 
 @login_required
 def find_and_remove_duplicate_offices_view(request):
-    authority_required = {'verified_volunteer'}  # admin, verified_volunteer
+    # admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'political_data_manager'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
     contest_office_list = []
-    ignore_office_id_list = []
+    ignore_office_we_vote_id_list = []
     find_duplicates_count = request.GET.get('find_duplicates_count', 0)
     google_civic_election_id = request.GET.get('google_civic_election_id', 0)
     google_civic_election_id = convert_to_int(google_civic_election_id)
@@ -618,10 +729,11 @@ def find_and_remove_duplicate_offices_view(request):
     if positive_value_exists(find_duplicates_count):
         duplicate_office_count = 0
         for contest_office in contest_office_list:
-            # Note that we don't reset the ignore_office_id_list, so we don't search for a duplicate both directions
-            ignore_office_id_list.append(contest_office.we_vote_id)
+            # Note that we don't reset the ignore_office_we_vote_id_list, so we don't search for a duplicate
+            # both directions
+            ignore_office_we_vote_id_list.append(contest_office.we_vote_id)
             duplicate_office_count_temp = fetch_duplicate_office_count(contest_office,
-                                                                       ignore_office_id_list)
+                                                                       ignore_office_we_vote_id_list)
             duplicate_office_count += duplicate_office_count_temp
 
         if positive_value_exists(duplicate_office_count):
@@ -630,18 +742,18 @@ def find_and_remove_duplicate_offices_view(request):
                                                          "".format(duplicate_office_count=duplicate_office_count))
 
     # Loop through all of the contest offices in this election
-    ignore_office_id_list = []
+    ignore_office_we_vote_id_list = []
     for contest_office in contest_office_list:
         # Add current contest office entry to the ignore list
-        ignore_office_id_list.append(contest_office.we_vote_id)
+        ignore_office_we_vote_id_list.append(contest_office.we_vote_id)
         # Now check to for other contest offices we have labeled as "not a duplicate"
         not_a_duplicate_list = contest_office_manager.fetch_offices_are_not_duplicates_list_we_vote_ids(
             contest_office.we_vote_id)
 
-        ignore_office_id_list += not_a_duplicate_list
+        ignore_office_we_vote_id_list += not_a_duplicate_list
 
-        results = find_duplicate_contest_office(contest_office, ignore_office_id_list)
-        ignore_office_id_list = []
+        results = find_duplicate_contest_office(contest_office, ignore_office_we_vote_id_list)
+        ignore_office_we_vote_id_list = []
 
         # If we find contest offices to merge, stop and ask for confirmation
         if results['contest_office_merge_possibility_found']:

@@ -9,6 +9,8 @@ from . import views_admin
 urlpatterns = [
     # views_admin
     url(r'^$', views_admin.office_list_view, name='office_list',),
+    url(r'^compare_two_offices/$',
+        views_admin.compare_two_offices_for_merge_view, name='compare_two_offices_for_merge'),
     url(r'^delete/$', views_admin.office_delete_process_view, name='office_delete_process'),
     url(r'^(?P<office_id>[0-9]+)/find_duplicate_office/$',
         views_admin.find_duplicate_office_view, name='find_duplicate_office'),

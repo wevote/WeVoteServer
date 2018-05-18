@@ -56,7 +56,7 @@ def offices_import_from_master_server(request, google_civic_election_id='', stat
     return import_results
 
 
-def fetch_duplicate_office_count(contest_office, ignore_office_id_list):
+def fetch_duplicate_office_count(contest_office, ignore_office_we_vote_id_list):
     if not hasattr(contest_office, 'google_civic_election_id'):
         return 0
 
@@ -67,15 +67,16 @@ def fetch_duplicate_office_count(contest_office, ignore_office_id_list):
     contest_office_list_manager = ContestOfficeListManager()
     return contest_office_list_manager.fetch_offices_from_non_unique_identifiers_count(
         contest_office.google_civic_election_id, contest_office.state_code,
-        contest_office.office_name, ignore_office_id_list)
+        contest_office.office_name, ignore_office_we_vote_id_list)
 
 
-def find_duplicate_contest_office(contest_office, ignore_office_id_list):
+def find_duplicate_contest_office(contest_office, ignore_office_we_vote_id_list):
     if not hasattr(contest_office, 'google_civic_election_id'):
         error_results = {
             'success':                                  False,
             'status':                                   "FIND_DUPLICATE_CONTEST_OFFICE_MISSING_OFFICE_OBJECT ",
             'contest_office_merge_possibility_found':   False,
+            'contest_office_list':                      [],
         }
         return error_results
 
@@ -84,6 +85,7 @@ def find_duplicate_contest_office(contest_office, ignore_office_id_list):
             'success':                                False,
             'status':                                 "FIND_DUPLICATE_CONTEST_OFFICE_MISSING_GOOGLE_CIVIC_ELECTION_ID ",
             'contest_office_merge_possibility_found': False,
+            'contest_office_list':                    [],
         }
         return error_results
 
@@ -92,7 +94,7 @@ def find_duplicate_contest_office(contest_office, ignore_office_id_list):
     try:
         results = contest_office_list_manager.retrieve_contest_offices_from_non_unique_identifiers(
             contest_office.office_name, contest_office.google_civic_election_id, contest_office.state_code,
-            contest_office.district_id, contest_office.district_name, ignore_office_id_list)
+            contest_office.district_id, contest_office.district_name, ignore_office_we_vote_id_list)
 
         if results['contest_office_found']:
             contest_office_merge_conflict_values = figure_out_conflict_values(contest_office, results['contest_office'])
@@ -103,6 +105,7 @@ def find_duplicate_contest_office(contest_office, ignore_office_id_list):
                 'contest_office_merge_possibility_found':   True,
                 'contest_office_merge_possibility':         results['contest_office'],
                 'contest_office_merge_conflict_values':     contest_office_merge_conflict_values,
+                'contest_office_list':                      results['contest_office_list'],
             }
             return results
         elif results['contest_office_list_found']:
@@ -116,6 +119,7 @@ def find_duplicate_contest_office(contest_office, ignore_office_id_list):
                 'contest_office_merge_possibility_found':   True,
                 'contest_office_merge_possibility':         results['contest_office_list'][0],
                 'contest_office_merge_conflict_values':     contest_office_merge_conflict_values,
+                'contest_office_list':                      results['contest_office_list'],
             }
             return results
         else:
@@ -123,6 +127,7 @@ def find_duplicate_contest_office(contest_office, ignore_office_id_list):
                 'success':                                  True,
                 'status':                                   "FIND_DUPLICATE_CONTEST_OFFICE_NO_DUPLICATES_FOUND",
                 'contest_office_merge_possibility_found':   False,
+                'contest_office_list':                      results['contest_office_list'],
             }
             return results
 

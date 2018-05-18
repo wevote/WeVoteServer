@@ -503,7 +503,8 @@ def convert_to_political_party_constant(raw_party_incoming):
     if not positive_value_exists(raw_party_incoming):
         return ""
 
-    raw_party = raw_party_incoming.lower()
+    raw_party = raw_party_incoming.strip()
+    raw_party = raw_party.lower()
     raw_party = raw_party.replace("Party Preference: ", "")
 
     if raw_party == 'amer. ind.':
