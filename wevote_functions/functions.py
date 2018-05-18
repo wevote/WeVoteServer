@@ -1164,3 +1164,85 @@ def process_request_from_master(request, message_text, get_url, get_params):
         print("... the master server returned " + str(len(structured_json)) + " items.") # Please don't remove this line
 
     return import_results, structured_json
+
+
+def add_period_to_middle_name_initial(name):
+    modified_name = name.replace(' A ', ' A. ')
+    modified_name = modified_name.replace(' B ', ' B. ')
+    modified_name = modified_name.replace(' C ', ' C. ')
+    modified_name = modified_name.replace(' D ', ' D. ')
+    modified_name = modified_name.replace(' E ', ' E. ')
+    modified_name = modified_name.replace(' F ', ' F. ')
+    modified_name = modified_name.replace(' G ', ' G. ')
+    modified_name = modified_name.replace(' H ', ' H. ')
+    modified_name = modified_name.replace(' I ', ' I. ')
+    modified_name = modified_name.replace(' J ', ' J. ')
+    modified_name = modified_name.replace(' K ', ' K. ')
+    modified_name = modified_name.replace(' L ', ' L. ')
+    modified_name = modified_name.replace(' M ', ' M. ')
+    modified_name = modified_name.replace(' N ', ' N. ')
+    modified_name = modified_name.replace(' O ', ' O. ')
+    modified_name = modified_name.replace(' P ', ' P. ')
+    modified_name = modified_name.replace(' Q ', ' Q. ')
+    modified_name = modified_name.replace(' R ', ' R. ')
+    modified_name = modified_name.replace(' S ', ' S. ')
+    modified_name = modified_name.replace(' T ', ' T. ')
+    modified_name = modified_name.replace(' U ', ' U. ')
+    modified_name = modified_name.replace(' V ', ' V. ')
+    modified_name = modified_name.replace(' W ', ' W. ')
+    modified_name = modified_name.replace(' X ', ' X. ')
+    modified_name = modified_name.replace(' Y ', ' Y. ')
+    modified_name = modified_name.replace(' Z ', ' Z. ')
+    if len(name) != len(modified_name):
+        name_changed = True
+    else:
+        name_changed = False
+    results = {
+        'status': "ADD_PERIOD_TO_MIDDLE_NAME_INITIAL ",
+        'success': True,
+        'incoming_name': name,
+        'modified_name': modified_name,
+        'name_changed': name_changed,
+    }
+    return results
+
+
+def remove_period_from_middle_name_initial(name):
+    modified_name = name.replace(' A. ', ' A ')
+    modified_name = modified_name.replace(' B. ', ' B ')
+    modified_name = modified_name.replace(' C. ', ' C ')
+    modified_name = modified_name.replace(' D. ', ' D ')
+    modified_name = modified_name.replace(' E. ', ' E ')
+    modified_name = modified_name.replace(' F. ', ' F ')
+    modified_name = modified_name.replace(' G. ', ' G ')
+    modified_name = modified_name.replace(' H. ', ' H ')
+    modified_name = modified_name.replace(' I. ', ' I ')
+    modified_name = modified_name.replace(' J. ', ' J ')
+    modified_name = modified_name.replace(' K. ', ' K ')
+    modified_name = modified_name.replace(' L. ', ' L ')
+    modified_name = modified_name.replace(' M. ', ' M ')
+    modified_name = modified_name.replace(' N. ', ' N ')
+    modified_name = modified_name.replace(' O. ', ' O ')
+    modified_name = modified_name.replace(' P. ', ' P ')
+    modified_name = modified_name.replace(' Q. ', ' Q ')
+    modified_name = modified_name.replace(' R. ', ' R ')
+    modified_name = modified_name.replace(' S. ', ' S ')
+    modified_name = modified_name.replace(' T. ', ' T ')
+    modified_name = modified_name.replace(' U. ', ' U ')
+    modified_name = modified_name.replace(' V. ', ' V ')
+    modified_name = modified_name.replace(' W. ', ' W ')
+    modified_name = modified_name.replace(' X. ', ' X ')
+    modified_name = modified_name.replace(' Y. ', ' Y ')
+    modified_name = modified_name.replace(' Z. ', ' Z ')
+    if len(name) != len(modified_name):
+        name_changed = True
+    else:
+        name_changed = False
+    results = {
+        'status': "REMOVE_PERIOD_FROM_MIDDLE_NAME_INITIAL ",
+        'success': True,
+        'incoming_name': name,
+        'modified_name': modified_name,
+        'name_changed': name_changed,
+    }
+    return results

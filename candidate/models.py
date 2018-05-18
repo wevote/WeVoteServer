@@ -10,11 +10,12 @@ from office.models import ContestOffice, ContestOfficeManager
 import re
 from wevote_settings.models import fetch_next_we_vote_id_candidate_campaign_integer, fetch_site_unique_id_prefix
 import wevote_functions.admin
-from wevote_functions.functions import convert_to_int, display_full_name_with_correct_capitalization, \
+from wevote_functions.functions import add_period_to_middle_name_initial, convert_to_int, \
+    display_full_name_with_correct_capitalization, \
     extract_title_from_full_name, extract_first_name_from_full_name, extract_middle_name_from_full_name, \
     extract_last_name_from_full_name, extract_suffix_from_full_name, extract_nickname_from_full_name, \
     extract_state_from_ocd_division_id, extract_twitter_handle_from_text_string, \
-    positive_value_exists
+    positive_value_exists, remove_period_from_middle_name_initial
 from image.models import ORGANIZATION_ENDORSEMENTS_IMAGE_NAME
 
 logger = wevote_functions.admin.get_logger(__name__)
@@ -342,9 +343,49 @@ class CandidateCampaignListManager(models.Model):
                 # We intentionally use case sensitive matching here
                 new_filter = Q(google_civic_candidate_name__exact=google_civic_candidate_name)
                 filters.append(new_filter)
+
+                # Since Google Civic doesn't provide a unique identifier, and sometimes returns initials with
+                # a period and sometimes without, we may need to try again
+                name_changed = False
+                google_civic_candidate_name_modified = ""
+                # If an initial exists in the name (ex/ " A "), then search for the name
+                # with a period added (ex/ " A. ")
+                add_results = add_period_to_middle_name_initial(google_civic_candidate_name)
+                if add_results['name_changed']:
+                    name_changed = True
+                    google_civic_candidate_name_modified = add_results['modified_name']
+                else:
+                    add_results = remove_period_from_middle_name_initial(google_civic_candidate_name)
+                    if add_results['name_changed']:
+                        name_changed = True
+                        google_civic_candidate_name_modified = add_results['modified_name']
+                if name_changed and positive_value_exists(google_civic_candidate_name_modified):
+                    # We intentionally use case sensitive matching here
+                    new_filter = Q(google_civic_candidate_name__exact=google_civic_candidate_name_modified)
+                    filters.append(new_filter)
             elif positive_value_exists(candidate_name):
                 new_filter = Q(candidate_name__iexact=candidate_name)
                 filters.append(new_filter)
+
+                # Since Google Civic doesn't provide a unique identifier, and sometimes returns initials with
+                # a period and sometimes without, we may need to try again
+                name_changed = False
+                candidate_name_modified = ""
+                # If an initial exists in the name (ex/ " A "), then search for the name
+                # with a period added (ex/ " A. ")
+                add_results = add_period_to_middle_name_initial(candidate_name)
+                if add_results['name_changed']:
+                    name_changed = True
+                    candidate_name_modified = add_results['modified_name']
+                else:
+                    add_results = remove_period_from_middle_name_initial(candidate_name)
+                    if add_results['name_changed']:
+                        name_changed = True
+                        candidate_name_modified = add_results['modified_name']
+                if name_changed and positive_value_exists(candidate_name_modified):
+                    # We intentionally use case sensitive matching here
+                    new_filter = Q(candidate_name__exact=candidate_name_modified)
+                    filters.append(new_filter)
 
             if positive_value_exists(politician_we_vote_id):
                 new_filter = Q(politician_we_vote_id__iexact=politician_we_vote_id)
@@ -1436,7 +1477,7 @@ class CandidateCampaignManager(models.Model):
                         contest_office_we_vote_id__iexact=contest_office_we_vote_id,
                         defaults=updated_candidate_campaign_values)
                 success = True
-                status += "CANDIDATE_CAMPAIGN_UPDATED_OR_CREATED "
+                status += "CANDIDATE_CAMPAIGN_UPDATED_OR_CREATED_BY_CANDIDATE_WE_VOTE_ID "
             except CandidateCampaign.MultipleObjectsReturned as e:
                 success = False
                 status += 'MULTIPLE_MATCHING_CANDIDATE_CAMPAIGNS_FOUND_BY_CANDIDATE_WE_VOTE_ID '
@@ -1456,20 +1497,56 @@ class CandidateCampaignManager(models.Model):
                 )
                 candidate_found = True
                 success = True
-                status += 'CONTEST_OFFICE_SAVED '
+                status += "CANDIDATE_CAMPAIGN_UPDATED_OR_CREATED_BY_GOOGLE_CIVIC_CANDIDATE_NAME "
             except CandidateCampaign.MultipleObjectsReturned as e:
                 success = False
-                status += 'MULTIPLE_MATCHING_CONTEST_OFFICES_FOUND_BY_GOOGLE_CIVIC_OFFICE_NAME '
+                status += 'MULTIPLE_MATCHING_CONTEST_OFFICES_FOUND_BY_GOOGLE_CIVIC_CANDIDATE_NAME '
                 exception_multiple_object_returned = True
             except CandidateCampaign.DoesNotExist:
                 exception_does_not_exist = True
-                status += "RETRIEVE_OFFICE_NOT_FOUND_BY_GOOGLE_CIVIC_CANDIDATE_NAME "
+                status += "RETRIEVE_OFFICE_NOT_FOUND_BY_GOOGLE_CIVIC_CANDIDATE_NAME1 "
+
+                # Since Google Civic doesn't provide a unique identifier, and sometimes returns initials with
+                # a period and sometimes without, we may need to try again
+                name_changed = False
+                google_civic_candidate_name_modified = ""
+                # If an initial exists in the name (ex/ " A "), then search for the name
+                # with a period added (ex/ " A. ")
+                add_results = add_period_to_middle_name_initial(google_civic_candidate_name)
+                if add_results['name_changed']:
+                    name_changed = True
+                    google_civic_candidate_name_modified = add_results['modified_name']
+                else:
+                    add_results = remove_period_from_middle_name_initial(google_civic_candidate_name)
+                    if add_results['name_changed']:
+                        name_changed = True
+                        google_civic_candidate_name_modified = add_results['modified_name']
+
+                if name_changed and positive_value_exists(google_civic_candidate_name_modified):
+                    try:
+                        candidate_campaign_on_stage = CandidateCampaign.objects.get(
+                            google_civic_election_id__exact=google_civic_election_id,
+                            google_civic_candidate_name__iexact=google_civic_candidate_name_modified
+                        )
+                        candidate_found = True
+                        success = True
+                        status += "CANDIDATE_CAMPAIGN_UPDATED_OR_CREATED_BY_GOOGLE_CIVIC_CANDIDATE_NAME_MODIFIED "
+                    except CandidateCampaign.MultipleObjectsReturned as e:
+                        success = False
+                        status += 'MULTIPLE_MATCHING_CONTEST_OFFICES_FOUND_BY_GOOGLE_CIVIC_CANDIDATE_NAME_MODIFIED '
+                        exception_multiple_object_returned = True
+                    except CandidateCampaign.DoesNotExist:
+                        exception_does_not_exist = True
+                        status += "RETRIEVE_OFFICE_NOT_FOUND_BY_GOOGLE_CIVIC_CANDIDATE_NAME_MODIFIED "
+                    except Exception as e:
+                        status += 'FAILED_TO_RETRIEVE_OFFICE_BY_GOOGLE_CIVIC_OFFICE_NAME_MODIFIED ' \
+                                  '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
             except Exception as e:
-                status += 'FAILED_TO_RETRIEVE_OFFICE_BY_GOOGLE_CIVIC_OFFICE_NAME ' \
+                status += 'FAILED_TO_RETRIEVE_OFFICE_BY_GOOGLE_CIVIC_CANDIDATE_NAME ' \
                          '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
 
             if not candidate_found and not exception_multiple_object_returned:
-                # Try to find record based on office_name (instead of google_civic_office_name)
+                # Try to find record based on candidate_name (instead of google_civic_office_name)
                 try:
                     candidate_campaign_on_stage = CandidateCampaign.objects.get(
                         google_civic_election_id__exact=google_civic_election_id,
@@ -1485,8 +1562,44 @@ class CandidateCampaignManager(models.Model):
                 except CandidateCampaign.DoesNotExist:
                     exception_does_not_exist = True
                     status += "RETRIEVE_CANDIDATE_NOT_FOUND_BY_CANDIDATE_NAME "
+
+                    # Since Google Civic doesn't provide a unique identifier, and sometimes returns initials with
+                    # a period and sometimes without, we may need to try again
+                    name_changed = False
+                    google_civic_candidate_name_modified = ""
+                    # If an initial exists in the name (ex/ " A "), then search for the name
+                    # with a period added (ex/ " A. ")
+                    add_results = add_period_to_middle_name_initial(google_civic_candidate_name)
+                    if add_results['name_changed']:
+                        name_changed = True
+                        google_civic_candidate_name_modified = add_results['modified_name']
+                    else:
+                        add_results = remove_period_from_middle_name_initial(google_civic_candidate_name)
+                        if add_results['name_changed']:
+                            name_changed = True
+                            google_civic_candidate_name_modified = add_results['modified_name']
+
+                    if name_changed and positive_value_exists(google_civic_candidate_name_modified):
+                        try:
+                            candidate_campaign_on_stage = CandidateCampaign.objects.get(
+                                google_civic_election_id__exact=google_civic_election_id,
+                                candidate_name__iexact=google_civic_candidate_name_modified
+                            )
+                            candidate_found = True
+                            success = True
+                            status += "CANDIDATE_CAMPAIGN_UPDATED_OR_CREATED_BY_CANDIDATE_NAME_MODIFIED "
+                        except CandidateCampaign.MultipleObjectsReturned as e:
+                            success = False
+                            status += 'MULTIPLE_MATCHING_CONTEST_OFFICES_FOUND_BY_CANDIDATE_NAME_MODIFIED '
+                            exception_multiple_object_returned = True
+                        except CandidateCampaign.DoesNotExist:
+                            exception_does_not_exist = True
+                            status += "RETRIEVE_OFFICE_NOT_FOUND_BY_CANDIDATE_NAME_MODIFIED "
+                        except Exception as e:
+                            status += 'FAILED_TO_RETRIEVE_OFFICE_BY_CANDIDATE_NAME_MODIFIED ' \
+                                      '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
                 except Exception as e:
-                    status += 'FAILED retrieve_all_offices_for_upcoming_election ' \
+                    status += 'FAILED_TO_RETRIEVE_OFFICE_BY_CANDIDATE_NAME ' \
                              '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
                     success = False
 
