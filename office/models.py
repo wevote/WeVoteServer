@@ -831,7 +831,7 @@ class ContestOfficeListManager(models.Model):
         return office_count
 
     def fetch_offices_from_non_unique_identifiers_count(
-            self, google_civic_election_id, state_code, office_name, ignore_office_id_list=[]):
+            self, google_civic_election_id, state_code, office_name, ignore_office_we_vote_id_list=[]):
         keep_looking_for_duplicates = True
         status = ""
 
@@ -844,8 +844,8 @@ class ContestOfficeListManager(models.Model):
                 if positive_value_exists(state_code):
                     contest_office_query = contest_office_query.filter(state_code__iexact=state_code)
 
-                if positive_value_exists(ignore_office_id_list):
-                    contest_office_query = contest_office_query.exclude(we_vote_id__in=ignore_office_id_list)
+                if positive_value_exists(ignore_office_we_vote_id_list):
+                    contest_office_query = contest_office_query.exclude(we_vote_id__in=ignore_office_we_vote_id_list)
 
                 contest_office_count = contest_office_query.count()
                 if positive_value_exists(contest_office_count):
@@ -976,7 +976,7 @@ class ContestOfficeListManager(models.Model):
 
     def retrieve_contest_offices_from_non_unique_identifiers(
             self, contest_office_name, google_civic_election_id, incoming_state_code, district_id='', district_name='',
-            ignore_office_id_list=[]):
+            ignore_office_we_vote_id_list=[]):
         keep_looking_for_duplicates = True
         success = False
         contest_office = ContestOffice()
@@ -997,8 +997,8 @@ class ContestOfficeListManager(models.Model):
             elif positive_value_exists(district_name):
                 contest_office_query = contest_office_query.filter(district_name__iexact=district_name)
 
-            if positive_value_exists(ignore_office_id_list):
-                contest_office_query = contest_office_query.exclude(we_vote_id__in=ignore_office_id_list)
+            if positive_value_exists(ignore_office_we_vote_id_list):
+                contest_office_query = contest_office_query.exclude(we_vote_id__in=ignore_office_we_vote_id_list)
 
             contest_office_list_filtered = list(contest_office_query)
             if len(contest_office_list_filtered):
@@ -1033,8 +1033,8 @@ class ContestOfficeListManager(models.Model):
                 if positive_value_exists(incoming_state_code):
                     contest_office_query = contest_office_query.filter(state_code__iexact=incoming_state_code)
 
-                if positive_value_exists(ignore_office_id_list):
-                    contest_office_query = contest_office_query.exclude(we_vote_id__in=ignore_office_id_list)
+                if positive_value_exists(ignore_office_we_vote_id_list):
+                    contest_office_query = contest_office_query.exclude(we_vote_id__in=ignore_office_we_vote_id_list)
 
                 # Start with the contest_office_name and remove OFFICE_NAME_COMMON_PHRASES_TO_REMOVE_FROM_SEARCHES
                 stripped_down_contest_office_name = contest_office_name.lower()
@@ -1105,8 +1105,8 @@ class ContestOfficeListManager(models.Model):
                 if positive_value_exists(incoming_state_code):
                     contest_office_query = contest_office_query.filter(state_code__iexact=incoming_state_code)
 
-                if positive_value_exists(ignore_office_id_list):
-                    contest_office_query = contest_office_query.exclude(we_vote_id__in=ignore_office_id_list)
+                if positive_value_exists(ignore_office_we_vote_id_list):
+                    contest_office_query = contest_office_query.exclude(we_vote_id__in=ignore_office_we_vote_id_list)
 
                 # Start with the contest_office_name and remove OFFICE_NAME_COMMON_PHRASES_TO_REMOVE_FROM_SEARCHES
                 stripped_down_contest_office_name = contest_office_name.lower()

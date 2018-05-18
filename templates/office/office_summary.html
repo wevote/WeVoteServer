@@ -169,4 +169,68 @@
     </p>
 {% endif %}
 
+{% if office %}
+<h3>Merge with Another Office</h3>
+<form name="find_another_to_merge" method="get" action="{% url 'office:office_summary' office.id %}">
+    {% csrf_token %}
+    {% if office_search %}
+        <a href="{% url 'office:office_summary' office.id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
+             clear search</a>&nbsp;
+    {% endif %}
+    <input type="text" name="office_search" id="office_search_id" value="{{ office_search }}" style="width: 450px" />
+    <input type="hidden" name="office_id" value="{{ office.id }}">
+    <input type="hidden" name="google_civic_election_id" value="{{ google_civic_election_id }}">
+    <input type="hidden" name="state_code" value="{{ state_code }}">
+    <input type="submit" value="Search for Duplicate Office" />
+</form>
+
+{% if office_search_results_list %}
+    <table border="1" cellpadding="5" cellspacing="5">
+        <tr>
+            <td>&nbsp;</td>
+            <td>ID</td>
+            <td>We Vote ID</td>
+            <td>Office Name</td>
+            <td>State</td>
+            <td>Candidates</td>
+            <td>Ballotpedia Race ID</td>
+            <td>Ballotpedia Elected Office ID</td>
+        </tr>
+    {% for found_office in office_search_results_list %}
+        <tr>
+            <td>{{ forloop.counter }}</td>
+            <td>{{ found_office.id }}</td>
+            <td>{{ found_office.we_vote_id }}</td>
+            <td>
+              {% if found_office.candidates_match_root_office %}
+                <strong>{{ found_office.office_name }}</strong>
+              {% else %}
+                {{ found_office.office_name }}
+              {% endif %}
+              <br />
+              (<a href="{% url 'office:office_summary' found_office.id %}" target="_blank">view&nbsp;summary</a>,
+              <a href="{% url 'office:compare_two_offices_for_merge' %}?contest_office1_we_vote_id={{ office.we_vote_id }}&contest_office2_we_vote_id={{ found_office.we_vote_id }}" target="_blank">compare&nbsp;for&nbsp;merge</a>)
+            </td>
+            <td>{{ found_office.state_code }}</td>
+            <td>
+            {% if found_office.candidates_match_root_office %}
+              <strong>{{ found_office.candidates_string }}</strong>
+            {% else %}
+              {{ found_office.candidates_string }}
+            {% endif %}
+            </td>
+            <td>{{ found_office.ballotpedia_race_id|default_if_none:"" }}</td>
+            <td>{{ found_office.ballotpedia_office_id|default_if_none:"" }}</td>
+        </tr>
+    {% endfor %}
+    </table>
+{% endif %}
+
+{% endif %}
+
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+
 {% endblock %}
