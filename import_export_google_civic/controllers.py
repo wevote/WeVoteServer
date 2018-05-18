@@ -540,6 +540,10 @@ def retrieve_one_ballot_from_google_civic_api(text_for_map_search, incoming_goog
         for one_error_from_google in errors:
             if 'reason' in one_error_from_google:
                 if one_error_from_google['reason'] == "notFound":
+                    # Ballot data not found at this location
+                    google_response_address_not_found = True
+                if one_error_from_google['reason'] == "parseError":
+                    # Not an address format Google can parse
                     google_response_address_not_found = True
 
     if 'election' in structured_json:
