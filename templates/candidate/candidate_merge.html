@@ -28,15 +28,37 @@
 
 {% include "candidate/candidate_merge_one_field_decision.html" with field_name="candidate_name" field_label="Candidate Name" conflict_status=conflict_values.candidate_name candidate1_field_value=candidate_option1.candidate_name candidate2_field_value=candidate_option2.candidate_name candidate1=candidate_option1 candidate2=candidate_option2 %}
 
-{% include "candidate/candidate_merge_one_field_decision.html" with field_name="google_civic_candidate_name" field_label="Candidate Name (from Google Civic)" conflict_status=conflict_values.google_civic_candidate_name candidate1_field_value=candidate_option1.google_civic_candidate_name candidate2_field_value=candidate_option2.google_civic_candidate_name candidate1=candidate_option1 candidate2=candidate_option2 %}
+    <tr>
+        <td>Google&nbsp;Civic&nbsp;Candidate&nbsp;Name&nbsp;1</td>
+        <td>{{ candidate_option1.google_civic_candidate_name|default_if_none:"" }}</td>
+        <td>{{ candidate_option2.google_civic_candidate_name|default_if_none:"" }}</td>
+    </tr>
+{% if candidate_option1.google_civic_candidate_name2 or candidate_option2.google_civic_candidate_name2 %}
+    <tr>
+        <td>Google&nbsp;Civic&nbsp;Candidate&nbsp;Name&nbsp;2</td>
+        <td>{{ candidate_option1.google_civic_candidate_name2|default_if_none:"" }}</td>
+        <td>{{ candidate_option2.google_civic_candidate_name2|default_if_none:"" }}</td>
+    </tr>
+{% endif %}
+{% if candidate_option1.google_civic_candidate_name3 or candidate_option2.google_civic_candidate_name3 %}
+    <tr>
+        <td>Google&nbsp;Civic&nbsp;Candidate&nbsp;Name&nbsp;3</td>
+        <td>{{ candidate_option1.google_civic_candidate_name3|default_if_none:"" }}</td>
+        <td>{{ candidate_option2.google_civic_candidate_name3|default_if_none:"" }}</td>
+    </tr>
+{% endif %}
 
 {% include "candidate/candidate_merge_one_field_decision.html" with field_name="ballotpedia_candidate_name" field_label="Candidate Name (from Ballotpedia)" conflict_status=conflict_values.ballotpedia_candidate_name candidate1_field_value=candidate_option1.ballotpedia_candidate_name candidate2_field_value=candidate_option2.ballotpedia_candidate_name candidate1=candidate_option1 candidate2=candidate_option2 %}
 
+{% if candidate_option1.contest_office_we_vote_id != candidate_option2.contest_office_we_vote_id %}
     <tr>
-        <td>{% if candidate_option1.contest_office_name == candidate_option2.contest_office_name %}Office Name{% else %}<strong><span style="color: red">Office Name (***mismatch***)</span></strong>{% endif %}</td>
-        <td>{{ candidate_option1.contest_office_name|default_if_none:"" }}</td>
-        <td>{{ candidate_option2.contest_office_name|default_if_none:"" }}</td>
+        <td><strong><span style="color: red">Office ***MISMATCH***</span></strong></td>
+        <td><strong><span style="color: red">************************************</span></strong></td>
+        <td><strong><span style="color: red">************************************</span></strong>
+          (<a href="{% url 'office:compare_two_offices_for_merge' %}?contest_office1_we_vote_id={{ candidate_option1.contest_office_we_vote_id }}&contest_office2_we_vote_id={{ candidate_option2.contest_office_we_vote_id }}" target="_blank">compare&nbsp;for&nbsp;merge</a>)
+</td>
     </tr>
+{% endif %}
 
 {% include "candidate/candidate_merge_one_field_decision.html" with field_name="contest_office_we_vote_id" field_label="Office We Vote Id" conflict_status=conflict_values.contest_office_we_vote_id candidate1_field_value=candidate_option1.contest_office_we_vote_id candidate2_field_value=candidate_option2.contest_office_we_vote_id candidate1=candidate_option1 candidate2=candidate_option2 %}
 
@@ -176,7 +198,7 @@
         <td><input type="submit" value="Merge Candidates" name="merge" /></td>
     </tr>
 </table>
-<input type="hidden" name="remove_duplicate_process" value="1" />
+<input type="hidden" name="remove_duplicate_process" value="{{ remove_duplicate_process }}" />
 <input type="hidden" name="state_code" value="{{ candidate_option2.state_code }}" />
 <input type="hidden" name="google_civic_election_id" value="{{ candidate_option1.google_civic_election_id }}" />
 <input type="hidden" name="candidate1_we_vote_id" value="{{ candidate_option1.we_vote_id }}" />

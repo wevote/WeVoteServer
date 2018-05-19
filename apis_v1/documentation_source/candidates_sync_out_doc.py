@@ -55,6 +55,8 @@ def candidates_sync_out_doc_template_values(url_root):
                    '  "crowdpac_candidate_id": integer,\n' \
                    '  "facebook_url": string,\n' \
                    '  "google_civic_candidate_name": string,\n' \
+                   '  "google_civic_candidate_name2": string,\n' \
+                   '  "google_civic_candidate_name3": string,\n' \
                    '  "google_civic_election_id": integer,\n' \
                    '  "google_plus_url": string,\n' \
                    '  "maplight_id": integer,\n' \

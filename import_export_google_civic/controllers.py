@@ -66,9 +66,12 @@ def process_candidates_from_structured_json(
         candidate_name = one_candidate['name'] if 'name' in one_candidate else ''
         # For some reason Google Civic API violates the JSON standard and uses a / in front of '
         candidate_name = candidate_name.replace("/'", "'")
+        candidate_name = candidate_name.strip()
         # We want to save the name exactly as it comes from the Google Civic API
         google_civic_candidate_name = one_candidate['name'] if 'name' in one_candidate else ''
+        google_civic_candidate_name = google_civic_candidate_name.strip()
         party = one_candidate['party'] if 'party' in one_candidate else ''
+        party = party.strip()
         order_on_ballot = one_candidate['orderOnBallot'] if 'orderOnBallot' in one_candidate else 0
         candidate_url = one_candidate['candidateUrl'] if 'candidateUrl' in one_candidate else ''
         photo_url = one_candidate['photoUrl'] if 'photoUrl' in one_candidate else ''

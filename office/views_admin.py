@@ -69,9 +69,11 @@ def compare_two_offices_for_merge_view(request):
         contest_office_option1_for_template, contest_office_option2_for_template)
 
     # This view function takes us to displaying a template
+    remove_duplicate_process = False  # Do not try to find another office to merge after finishing
     return render_contest_office_merge_form(request, contest_office_option1_for_template,
                                             contest_office_option2_for_template,
-                                            contest_office_merge_conflict_values)
+                                            contest_office_merge_conflict_values,
+                                            remove_duplicate_process)
 
 
 # This page does not need to be protected.
@@ -96,6 +98,8 @@ def offices_sync_out_view(request):  # officesSyncOut
                                                               'ballotpedia_id', 'ballotpedia_office_id',
                                                               'ballotpedia_office_name', 'ballotpedia_office_url',
                                                               'ballotpedia_race_id', 'ballotpedia_race_office_level',
+                                                              'google_civic_office_name', 'google_civic_office_name2',
+                                                              'google_civic_office_name3',
                                                               'wikipedia_id', 'number_voting_for', 'number_elected',
                                                               'state_code', 'primary_party', 'district_name',
                                                               'district_scope', 'district_id', 'contest_level0',
@@ -344,6 +348,8 @@ def office_edit_process_view(request):
     office_id = convert_to_int(request.POST.get('office_id', 0))
     office_name = request.POST.get('office_name', False)
     google_civic_office_name = request.POST.get('google_civic_office_name', False)
+    google_civic_office_name2 = request.POST.get('google_civic_office_name2', False)
+    google_civic_office_name3 = request.POST.get('google_civic_office_name3', False)
     google_civic_election_id = request.POST.get('google_civic_election_id', 0)
     ocd_division_id = request.POST.get('ocd_division_id', False)
     primary_party = request.POST.get('primary_party', False)
@@ -382,6 +388,10 @@ def office_edit_process_view(request):
                 office_on_stage.office_name = office_name
             if google_civic_office_name is not False:
                 office_on_stage.google_civic_office_name = google_civic_office_name
+            if google_civic_office_name2 is not False:
+                office_on_stage.google_civic_office_name2 = google_civic_office_name2
+            if google_civic_office_name3 is not False:
+                office_on_stage.google_civic_office_name3 = google_civic_office_name3
             if ocd_division_id is not False:
                 office_on_stage.ocd_division_id = ocd_division_id
             if primary_party is not False:
@@ -678,9 +688,11 @@ def find_duplicate_office_view(request, office_id=0):
         contest_office_option2_for_template = results['contest_office_merge_possibility']
 
         # This view function takes us to displaying a template
+        remove_duplicate_process = True  # Try to find another office to merge after finishing
         return render_contest_office_merge_form(request, contest_office_option1_for_template,
                                                 contest_office_option2_for_template,
-                                                results['contest_office_merge_conflict_values'])
+                                                results['contest_office_merge_conflict_values'],
+                                                remove_duplicate_process)
 
     message = "Google Civic Election ID: {election_id}, " \
               "{number_of_duplicate_contest_offices_processed} duplicates processed, " \
@@ -761,9 +773,11 @@ def find_and_remove_duplicate_offices_view(request):
             contest_office_option2_for_template = results['contest_office_merge_possibility']
 
             # This view function takes us to displaying a template
+            remove_duplicate_process = True  # Try to find another office to merge after finishing
             return render_contest_office_merge_form(request, contest_office_option1_for_template,
                                                     contest_office_option2_for_template,
-                                                    results['contest_office_merge_conflict_values'])
+                                                    results['contest_office_merge_conflict_values'],
+                                                    remove_duplicate_process)
 
     message = "Google Civic Election ID: {election_id}, " \
               "No duplicate contest offices found for this election." \
@@ -777,7 +791,7 @@ def find_and_remove_duplicate_offices_view(request):
 
 def render_contest_office_merge_form(
         request, contest_office_option1_for_template, contest_office_option2_for_template,
-        contest_office_merge_conflict_values):
+        contest_office_merge_conflict_values, remove_duplicate_process=True):
     position_list_manager = PositionListManager()
 
     bookmark_item_list_manager = BookmarkItemList()
@@ -844,6 +858,7 @@ def render_contest_office_merge_form(
         'contest_office_option2':   contest_office_option2_for_template,
         'conflict_values':          contest_office_merge_conflict_values,
         'google_civic_election_id': contest_office_option1_for_template.google_civic_election_id,
+        'remove_duplicate_process': remove_duplicate_process,
     }
     return render(request, 'office/office_merge.html', template_values)
 
@@ -868,8 +883,8 @@ def office_merge_process_view(request):
     contest_office1_we_vote_id = request.POST.get('contest_office1_we_vote_id', 0)
     contest_office2_we_vote_id = request.POST.get('contest_office2_we_vote_id', 0)
     google_civic_election_id = request.POST.get('google_civic_election_id', 0)
-    redirect_to_contest_office_list = request.POST.get('redirect_to_contest_office_list', False)
-    remove_duplicate_process = request.POST.get('remove_duplicate_process', False)
+    redirect_to_contest_office_list = positive_value_exists(request.POST.get('redirect_to_contest_office_list', False))
+    remove_duplicate_process = positive_value_exists(request.POST.get('remove_duplicate_process', False))
     state_code = request.POST.get('state_code', '')
 
     if positive_value_exists(skip):
@@ -925,6 +940,29 @@ def office_merge_process_view(request):
                 setattr(contest_office1_on_stage, attribute, getattr(contest_office2_on_stage, attribute))
         elif conflict_value == "CONTEST_OFFICE2":
             setattr(contest_office1_on_stage, attribute, getattr(contest_office2_on_stage, attribute))
+
+    # Preserve unique google_civic_office_name, _name2, and _name3
+    if positive_value_exists(contest_office2_on_stage.google_civic_office_name):
+        if not positive_value_exists(contest_office1_on_stage.google_civic_office_name):
+            contest_office1_on_stage.google_civic_office_name = contest_office2_on_stage.google_civic_office_name
+        elif not positive_value_exists(contest_office1_on_stage.google_civic_office_name2):
+            contest_office1_on_stage.google_civic_office_name2 = contest_office2_on_stage.google_civic_office_name
+        elif not positive_value_exists(contest_office1_on_stage.google_civic_office_name3):
+            contest_office1_on_stage.google_civic_office_name3 = contest_office2_on_stage.google_civic_office_name
+    if positive_value_exists(contest_office2_on_stage.google_civic_office_name2):
+        if not positive_value_exists(contest_office1_on_stage.google_civic_office_name):
+            contest_office1_on_stage.google_civic_office_name = contest_office2_on_stage.google_civic_office_name2
+        elif not positive_value_exists(contest_office1_on_stage.google_civic_office_name2):
+            contest_office1_on_stage.google_civic_office_name2 = contest_office2_on_stage.google_civic_office_name2
+        elif not positive_value_exists(contest_office1_on_stage.google_civic_office_name3):
+            contest_office1_on_stage.google_civic_office_name3 = contest_office2_on_stage.google_civic_office_name2
+    if positive_value_exists(contest_office2_on_stage.google_civic_office_name3):
+        if not positive_value_exists(contest_office1_on_stage.google_civic_office_name):
+            contest_office1_on_stage.google_civic_office_name = contest_office2_on_stage.google_civic_office_name3
+        elif not positive_value_exists(contest_office1_on_stage.google_civic_office_name2):
+            contest_office1_on_stage.google_civic_office_name2 = contest_office2_on_stage.google_civic_office_name3
+        elif not positive_value_exists(contest_office1_on_stage.google_civic_office_name3):
+            contest_office1_on_stage.google_civic_office_name3 = contest_office2_on_stage.google_civic_office_name3
 
     # Merge candidate's office details
     candidates_results = move_candidates_to_another_office(contest_office2_id, contest_office2_we_vote_id,

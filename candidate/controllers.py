@@ -270,6 +270,10 @@ def filter_candidates_structured_json_for_local_duplicates(structured_json):
         candidate_name = one_candidate['candidate_name'] if 'candidate_name' in one_candidate else ''
         google_civic_candidate_name = one_candidate['google_civic_candidate_name'] \
             if 'google_civic_candidate_name' in one_candidate else ''
+        google_civic_candidate_name2 = one_candidate['google_civic_candidate_name2'] \
+            if 'google_civic_candidate_name2' in one_candidate else ''
+        google_civic_candidate_name3 = one_candidate['google_civic_candidate_name3'] \
+            if 'google_civic_candidate_name3' in one_candidate else ''
         we_vote_id = one_candidate['we_vote_id'] if 'we_vote_id' in one_candidate else ''
         google_civic_election_id = \
             one_candidate['google_civic_election_id'] if 'google_civic_election_id' in one_candidate else ''
@@ -289,7 +293,8 @@ def filter_candidates_structured_json_for_local_duplicates(structured_json):
         we_vote_id_from_master = we_vote_id
 
         results = candidate_list_manager.retrieve_possible_duplicate_candidates(
-            candidate_name, google_civic_candidate_name, google_civic_election_id, contest_office_we_vote_id,
+            candidate_name, google_civic_candidate_name, google_civic_candidate_name2, google_civic_candidate_name3,
+            google_civic_election_id, contest_office_we_vote_id,
             politician_we_vote_id, candidate_twitter_handle, ballotpedia_candidate_id, vote_smart_id, maplight_id,
             we_vote_id_from_master)
 
@@ -401,6 +406,12 @@ def candidates_import_from_structured_json(structured_json):
             if 'google_civic_candidate_name' in one_candidate:
                 updated_candidate_values['google_civic_candidate_name'] = \
                     one_candidate['google_civic_candidate_name']
+            if 'google_civic_candidate_name2' in one_candidate:
+                updated_candidate_values['google_civic_candidate_name2'] = \
+                    one_candidate['google_civic_candidate_name2']
+            if 'google_civic_candidate_name3' in one_candidate:
+                updated_candidate_values['google_civic_candidate_name3'] = \
+                    one_candidate['google_civic_candidate_name3']
             if 'google_plus_url' in one_candidate:
                 updated_candidate_values['google_plus_url'] = one_candidate['google_plus_url']
             if 'maplight_id' in one_candidate:

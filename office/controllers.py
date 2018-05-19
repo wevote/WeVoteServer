@@ -234,6 +234,12 @@ def offices_import_from_structured_json(structured_json):
             state_code = one_office['state_code'] if 'state_code' in one_office else ''
             district_id = one_office['district_id'] if 'district_id' in one_office else ''
             office_name = one_office['office_name'] if 'office_name' in one_office else ''
+            google_civic_office_name = one_office['google_civic_office_name'] \
+                if 'google_civic_office_name' in one_office else ''
+            google_civic_office_name2 = one_office['google_civic_office_name2'] \
+                if 'google_civic_office_name' in one_office else ''
+            google_civic_office_name3 = one_office['google_civic_office_name3'] \
+                if 'google_civic_office_name' in one_office else ''
             ocd_division_id = one_office['ocd_division_id'] if 'ocd_division_id' in one_office else ''
             number_voting_for = one_office['number_voting_for'] if 'number_voting_for' in one_office else ''
             number_elected = one_office['number_elected'] if 'number_elected' in one_office else ''
@@ -266,7 +272,9 @@ def offices_import_from_structured_json(structured_json):
                 'district_id': district_id,
                 'district_name': district_name,
                 'office_name': office_name,
-                # The rest of the values
+                'google_civic_office_name': google_civic_office_name,
+                'google_civic_office_name2': google_civic_office_name2,
+                'google_civic_office_name3': google_civic_office_name3,
                 'ocd_division_id': ocd_division_id,
                 'number_voting_for': number_voting_for,
                 'number_elected': number_elected,

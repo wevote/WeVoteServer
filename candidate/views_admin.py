@@ -33,8 +33,11 @@ from position.models import PositionEntered, PositionListManager
 from twitter.models import TwitterLinkPossibility
 from voter.models import voter_has_authority
 import wevote_functions.admin
-from wevote_functions.functions import convert_to_int, extract_twitter_handle_from_text_string, \
-    positive_value_exists, STATE_CODE_MAP
+from wevote_functions.functions import add_period_to_middle_name_initial, add_period_to_name_prefix_and_suffix,\
+    convert_to_int, \
+    extract_twitter_handle_from_text_string, \
+    positive_value_exists, remove_period_from_middle_name_initial, remove_period_from_name_prefix_and_suffix, \
+    STATE_CODE_MAP
 from wevote_settings.models import RemoteRequestHistory, \
     RETRIEVE_POSSIBLE_GOOGLE_LINKS, RETRIEVE_POSSIBLE_TWITTER_HANDLES
 from django.http import HttpResponse
@@ -87,7 +90,9 @@ def candidates_sync_out_view(request):  # candidatesSyncOut
 
         candidate_list_dict = candidate_list.values('we_vote_id', 'maplight_id', 'vote_smart_id', 'contest_office_name',
                                                     'contest_office_we_vote_id', 'politician_we_vote_id',
-                                                    'candidate_name', 'google_civic_candidate_name', 'party',
+                                                    'candidate_name', 'google_civic_candidate_name',
+                                                    'google_civic_candidate_name2', 'google_civic_candidate_name3',
+                                                    'party',
                                                     'photo_url', 'photo_url_from_maplight',
                                                     'photo_url_from_vote_smart', 'order_on_ballot',
                                                     'google_civic_election_id', 'ocd_division_id', 'state_code',
@@ -458,6 +463,8 @@ def candidate_edit_view(request, candidate_id=0, candidate_campaign_we_vote_id="
     # These variables are here because there was an error on the edit_process_view and the voter needs to try again
     candidate_name = request.GET.get('candidate_name', False)
     google_civic_candidate_name = request.GET.get('google_civic_candidate_name', False)
+    google_civic_candidate_name2 = request.GET.get('google_civic_candidate_name2', False)
+    google_civic_candidate_name3 = request.GET.get('google_civic_candidate_name3', False)
     candidate_twitter_handle = request.GET.get('candidate_twitter_handle', False)
     candidate_url = request.GET.get('candidate_url', False)
     party = request.GET.get('party', False)
@@ -571,6 +578,8 @@ def candidate_edit_view(request, candidate_id=0, candidate_campaign_we_vote_id="
             # Incoming variables, not saved yet
             'candidate_name':                   candidate_name,
             'google_civic_candidate_name':      google_civic_candidate_name,
+            'google_civic_candidate_name2':     google_civic_candidate_name2,
+            'google_civic_candidate_name3':     google_civic_candidate_name3,
             'candidate_twitter_handle':         candidate_twitter_handle,
             'candidate_url':                    candidate_url,
             'party':                            party,
@@ -612,6 +621,8 @@ def candidate_edit_process_view(request):
     redirect_to_candidate_list = convert_to_int(request.POST['redirect_to_candidate_list'])
     candidate_name = request.POST.get('candidate_name', False)
     google_civic_candidate_name = request.POST.get('google_civic_candidate_name', False)
+    google_civic_candidate_name2 = request.POST.get('google_civic_candidate_name2', False)
+    google_civic_candidate_name3 = request.POST.get('google_civic_candidate_name3', False)
     hide_candidate_tools = request.POST.get('hide_candidate_tools', False)
     google_civic_election_id = request.POST.get('google_civic_election_id', 0)
     candidate_twitter_handle = request.POST.get('candidate_twitter_handle', False)
@@ -714,6 +725,8 @@ def candidate_edit_process_view(request):
                         "&candidate_name=" + str(candidate_name) + \
                         "&state_code=" + str(state_code) + \
                         "&google_civic_candidate_name=" + str(google_civic_candidate_name) + \
+                        "&google_civic_candidate_name2=" + str(google_civic_candidate_name2) + \
+                        "&google_civic_candidate_name3=" + str(google_civic_candidate_name3) + \
                         "&contest_office_id=" + str(contest_office_id) + \
                         "&candidate_twitter_handle=" + str(candidate_twitter_handle) + \
                         "&candidate_url=" + str(candidate_url) + \
@@ -760,6 +773,8 @@ def candidate_edit_process_view(request):
                             "&candidate_name=" + str(candidate_name) + \
                             "&state_code=" + str(state_code) + \
                             "&google_civic_candidate_name=" + str(google_civic_candidate_name) + \
+                            "&google_civic_candidate_name2=" + str(google_civic_candidate_name2) + \
+                            "&google_civic_candidate_name3=" + str(google_civic_candidate_name3) + \
                             "&contest_office_id=" + str(contest_office_id) + \
                             "&candidate_twitter_handle=" + str(candidate_twitter_handle) + \
                             "&candidate_url=" + str(candidate_url) + \
@@ -802,6 +817,10 @@ def candidate_edit_process_view(request):
                 candidate_on_stage.maplight_id = maplight_id
             if google_civic_candidate_name is not False:
                 candidate_on_stage.google_civic_candidate_name = google_civic_candidate_name
+            if google_civic_candidate_name2 is not False:
+                candidate_on_stage.google_civic_candidate_name2 = google_civic_candidate_name2
+            if google_civic_candidate_name3 is not False:
+                candidate_on_stage.google_civic_candidate_name3 = google_civic_candidate_name3
 
             if google_search_image_file:
                 # If google search image exist then cache master and resized images and save them to candidate table
@@ -853,6 +872,10 @@ def candidate_edit_process_view(request):
                 )
                 if google_civic_candidate_name is not False:
                     candidate_on_stage.google_civic_candidate_name = google_civic_candidate_name
+                if google_civic_candidate_name2 is not False:
+                    candidate_on_stage.google_civic_candidate_name2 = google_civic_candidate_name2
+                if google_civic_candidate_name3 is not False:
+                    candidate_on_stage.google_civic_candidate_name3 = google_civic_candidate_name3
                 if candidate_twitter_handle is not False:
                     candidate_on_stage.candidate_twitter_handle = candidate_twitter_handle
                 if candidate_url is not False:
@@ -889,6 +912,8 @@ def candidate_edit_process_view(request):
                                 "&candidate_name=" + str(candidate_name) + \
                                 "&state_code=" + str(state_code) + \
                                 "&google_civic_candidate_name=" + str(google_civic_candidate_name) + \
+                                "&google_civic_candidate_name2=" + str(google_civic_candidate_name2) + \
+                                "&google_civic_candidate_name3=" + str(google_civic_candidate_name3) + \
                                 "&contest_office_id=" + str(contest_office_id) + \
                                 "&candidate_twitter_handle=" + str(candidate_twitter_handle) + \
                                 "&candidate_url=" + str(candidate_url) + \
@@ -1181,6 +1206,149 @@ def candidate_merge_process_view(request):
         elif conflict_value == "CANDIDATE2":
             setattr(candidate1_on_stage, attribute, getattr(candidate2_on_stage, attribute))
 
+    # Preserve unique google_civic_candidate_name, _name2, and _name3
+    if positive_value_exists(candidate2_on_stage.google_civic_candidate_name):
+        # If an initial exists in the name (ex/ " A "), then search for the name
+        # with a period added (ex/ " A. ")
+        # google_civic_candidate_name
+        name_changed = False
+        google_civic_candidate_name_modified = "IGNORE_NO_NAME"
+        google_civic_candidate_name_new_start = candidate2_on_stage.google_civic_candidate_name  # For prefix/suffixes
+        add_results = add_period_to_middle_name_initial(candidate2_on_stage.google_civic_candidate_name)
+        if add_results['name_changed']:
+            name_changed = True
+            google_civic_candidate_name_modified = add_results['modified_name']
+            google_civic_candidate_name_new_start = google_civic_candidate_name_modified
+        else:
+            add_results = remove_period_from_middle_name_initial(candidate2_on_stage.google_civic_candidate_name)
+            if add_results['name_changed']:
+                name_changed = True
+                google_civic_candidate_name_modified = add_results['modified_name']
+                google_civic_candidate_name_new_start = google_civic_candidate_name_modified
+
+        # Deal with prefix and suffix
+        # If an prefix or suffix exists in the name (ex/ " JR"), then search for the name
+        # with a period added (ex/ " JR.")
+        add_results = add_period_to_name_prefix_and_suffix(google_civic_candidate_name_new_start)
+        if add_results['name_changed']:
+            name_changed = True
+            google_civic_candidate_name_modified = add_results['modified_name']
+        else:
+            add_results = remove_period_from_name_prefix_and_suffix(google_civic_candidate_name_new_start)
+            if add_results['name_changed']:
+                name_changed = True
+                google_civic_candidate_name_modified = add_results['modified_name']
+
+        if not positive_value_exists(candidate1_on_stage.google_civic_candidate_name):
+            candidate1_on_stage.google_civic_candidate_name = candidate2_on_stage.google_civic_candidate_name
+        elif name_changed and candidate1_on_stage.google_civic_candidate_name == google_civic_candidate_name_modified:
+            # If candidate1_on_stage.google_civic_candidate_name has a middle initial with/without a period
+            # don't store it if the alternate without/with the period already is stored
+            pass
+        elif not positive_value_exists(candidate1_on_stage.google_civic_candidate_name2):
+            candidate1_on_stage.google_civic_candidate_name2 = candidate2_on_stage.google_civic_candidate_name
+        elif name_changed and candidate1_on_stage.google_civic_candidate_name2 == google_civic_candidate_name_modified:
+            # If candidate1_on_stage.google_civic_candidate_name2 has a middle initial with/without a period
+            # don't store it if the alternate without/with the period already is stored
+            pass
+        elif not positive_value_exists(candidate1_on_stage.google_civic_candidate_name3):
+            candidate1_on_stage.google_civic_candidate_name3 = candidate2_on_stage.google_civic_candidate_name
+        # If candidate1_on_stage.google_civic_candidate_name3 already exists, we ignore the incoming alternate name
+    if positive_value_exists(candidate2_on_stage.google_civic_candidate_name2):
+        # If an initial exists in the name (ex/ " A "), then search for the name
+        # with a period added (ex/ " A. ")
+        # google_civic_candidate_name
+        name_changed = False
+        google_civic_candidate_name2_modified = "IGNORE_NO_NAME"
+        google_civic_candidate_name2_new_start = candidate2_on_stage.google_civic_candidate_name2  # For prefix/suffixes
+        add_results = add_period_to_middle_name_initial(candidate2_on_stage.google_civic_candidate_name2)
+        if add_results['name_changed']:
+            name_changed = True
+            google_civic_candidate_name2_modified = add_results['modified_name']
+            google_civic_candidate_name2_new_start = google_civic_candidate_name2_modified
+        else:
+            add_results = remove_period_from_middle_name_initial(candidate2_on_stage.google_civic_candidate_name2)
+            if add_results['name_changed']:
+                name_changed = True
+                google_civic_candidate_name2_modified = add_results['modified_name']
+                google_civic_candidate_name2_new_start = google_civic_candidate_name2_modified
+
+        # Deal with prefix and suffix
+        # If an prefix or suffix exists in the name (ex/ " JR"), then search for the name
+        # with a period added (ex/ " JR.")
+        add_results = add_period_to_name_prefix_and_suffix(google_civic_candidate_name2_new_start)
+        if add_results['name_changed']:
+            name_changed = True
+            google_civic_candidate_name2_modified = add_results['modified_name']
+        else:
+            add_results = remove_period_from_name_prefix_and_suffix(google_civic_candidate_name2_new_start)
+            if add_results['name_changed']:
+                name_changed = True
+                google_civic_candidate_name2_modified = add_results['modified_name']
+
+        if not positive_value_exists(candidate1_on_stage.google_civic_candidate_name):
+            candidate1_on_stage.google_civic_candidate_name = candidate2_on_stage.google_civic_candidate_name2
+        elif name_changed and candidate1_on_stage.google_civic_candidate_name == google_civic_candidate_name2_modified:
+            # If candidate1_on_stage.google_civic_candidate_name has a middle initial with/without a period
+            # don't store it if the alternate without/with the period already is stored
+            pass
+        elif not positive_value_exists(candidate1_on_stage.google_civic_candidate_name2):
+            candidate1_on_stage.google_civic_candidate_name2 = candidate2_on_stage.google_civic_candidate_name2
+        elif name_changed and candidate1_on_stage.google_civic_candidate_name2 == google_civic_candidate_name2_modified:
+            # If candidate1_on_stage.google_civic_candidate_name2 has a middle initial with/without a period
+            # don't store it if the alternate without/with the period already is stored
+            pass
+        elif not positive_value_exists(candidate1_on_stage.google_civic_candidate_name3):
+            candidate1_on_stage.google_civic_candidate_name3 = candidate2_on_stage.google_civic_candidate_name2
+        # If candidate1_on_stage.google_civic_candidate_name3 already exists, we ignore the incoming alternate name
+    if positive_value_exists(candidate2_on_stage.google_civic_candidate_name3):
+        # If an initial exists in the name (ex/ " A "), then search for the name
+        # with a period added (ex/ " A. ")
+        # google_civic_candidate_name
+        name_changed = False
+        google_civic_candidate_name3_modified = "IGNORE_NO_NAME"
+        google_civic_candidate_name3_new_start = candidate2_on_stage.google_civic_candidate_name3  # For prefix/suffixes
+        add_results = add_period_to_middle_name_initial(candidate2_on_stage.google_civic_candidate_name3)
+        if add_results['name_changed']:
+            name_changed = True
+            google_civic_candidate_name3_modified = add_results['modified_name']
+            google_civic_candidate_name3_new_start = google_civic_candidate_name3_modified
+        else:
+            add_results = remove_period_from_middle_name_initial(candidate2_on_stage.google_civic_candidate_name3)
+            if add_results['name_changed']:
+                name_changed = True
+                google_civic_candidate_name3_modified = add_results['modified_name']
+                google_civic_candidate_name3_new_start = google_civic_candidate_name3_modified
+
+        # Deal with prefix and suffix
+        # If an prefix or suffix exists in the name (ex/ " JR"), then search for the name
+        # with a period added (ex/ " JR.")
+        add_results = add_period_to_name_prefix_and_suffix(google_civic_candidate_name3_new_start)
+        if add_results['name_changed']:
+            name_changed = True
+            google_civic_candidate_name3_modified = add_results['modified_name']
+        else:
+            add_results = remove_period_from_name_prefix_and_suffix(google_civic_candidate_name3_new_start)
+            if add_results['name_changed']:
+                name_changed = True
+                google_civic_candidate_name3_modified = add_results['modified_name']
+
+        if not positive_value_exists(candidate1_on_stage.google_civic_candidate_name):
+            candidate1_on_stage.google_civic_candidate_name = candidate2_on_stage.google_civic_candidate_name3
+        elif name_changed and candidate1_on_stage.google_civic_candidate_name == google_civic_candidate_name3_modified:
+            # If candidate1_on_stage.google_civic_candidate_name has a middle initial with/without a period
+            # don't store it if the alternate without/with the period already is stored
+            pass
+        elif not positive_value_exists(candidate1_on_stage.google_civic_candidate_name2):
+            candidate1_on_stage.google_civic_candidate_name2 = candidate2_on_stage.google_civic_candidate_name3
+        elif name_changed and candidate1_on_stage.google_civic_candidate_name2 == google_civic_candidate_name3_modified:
+            # If candidate1_on_stage.google_civic_candidate_name2 has a middle initial with/without a period
+            # don't store it if the alternate without/with the period already is stored
+            pass
+        elif not positive_value_exists(candidate1_on_stage.google_civic_candidate_name3):
+            candidate1_on_stage.google_civic_candidate_name3 = candidate2_on_stage.google_civic_candidate_name3
+        # If candidate1_on_stage.google_civic_candidate_name3 already exists, we ignore the incoming alternate name
+
     # Merge public positions
     public_positions_results = move_positions_to_another_candidate(candidate2_id, candidate2_we_vote_id,
                                                                    candidate1_id, candidate1_we_vote_id,
@@ -1282,8 +1450,9 @@ def find_and_remove_duplicate_candidates_view(request):
             candidate_option2_for_template = results['candidate_merge_possibility']
 
             # This view function takes us to displaying a template
+            remove_duplicate_process = True  # Try to find another candidate to merge after finishing
             return render_candidate_merge_form(request, candidate_option1_for_template, candidate_option2_for_template,
-                                               results['candidate_merge_conflict_values'])
+                                               results['candidate_merge_conflict_values'], remove_duplicate_process)
 
     message = "Google Civic Election ID: {election_id}, " \
               "No duplicate candidates found for this election." \
@@ -1296,7 +1465,8 @@ def find_and_remove_duplicate_candidates_view(request):
 
 
 def render_candidate_merge_form(
-        request, candidate_option1_for_template, candidate_option2_for_template, candidate_merge_conflict_values):
+        request, candidate_option1_for_template, candidate_option2_for_template,
+        candidate_merge_conflict_values, remove_duplicate_process=True):
     position_list_manager = PositionListManager()
 
     bookmark_item_list_manager = BookmarkItemList()
@@ -1341,6 +1511,7 @@ def render_candidate_merge_form(
         'candidate_option2': candidate_option2_for_template,
         'conflict_values': candidate_merge_conflict_values,
         'google_civic_election_id': candidate_option1_for_template.google_civic_election_id,
+        'remove_duplicate_process': remove_duplicate_process,
     }
     return render(request, 'candidate/candidate_merge.html', template_values)
 
@@ -1385,8 +1556,9 @@ def find_duplicate_candidate_view(request, candidate_id):
         candidate_option2_for_template = results['candidate_merge_possibility']
 
         # This view function takes us to displaying a template
+        remove_duplicate_process = True  # Try to find another candidate to merge after finishing
         return render_candidate_merge_form(request, candidate_option1_for_template, candidate_option2_for_template,
-                                           results['candidate_merge_conflict_values'])
+                                           results['candidate_merge_conflict_values'], remove_duplicate_process)
 
     message = "Google Civic Election ID: {election_id}, " \
               "{number_of_duplicate_candidates_processed} duplicates processed, " \
