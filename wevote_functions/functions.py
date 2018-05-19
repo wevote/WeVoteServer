@@ -1246,3 +1246,49 @@ def remove_period_from_middle_name_initial(name):
         'name_changed': name_changed,
     }
     return results
+
+
+def add_period_to_name_prefix_and_suffix(name):
+    modified_name = name.replace(', JR', ' JR.')
+    modified_name = modified_name.replace(' JR', ' JR.')
+    modified_name = modified_name.replace(', Jr', ' Jr.')
+    modified_name = modified_name.replace(' Jr', ' Jr.')
+    modified_name = modified_name.replace(', SR', ' SR.')
+    modified_name = modified_name.replace(' SR', ' SR.')
+    modified_name = modified_name.replace(', Sr', ' Sr.')
+    modified_name = modified_name.replace(' Sr', ' Sr.')
+    if len(name) != len(modified_name):
+        name_changed = True
+    else:
+        name_changed = False
+    results = {
+        'status': "ADD_PERIOD_TO_NAME_PREFIX_OR_SUFFIX ",
+        'success': True,
+        'incoming_name': name,
+        'modified_name': modified_name,
+        'name_changed': name_changed,
+    }
+    return results
+
+
+def remove_period_from_name_prefix_and_suffix(name):
+    modified_name = name.replace(', JR. ', '  JR')
+    modified_name = modified_name.replace(' JR.', ' JR')
+    modified_name = modified_name.replace(', Jr.', ' Jr')
+    modified_name = modified_name.replace(' Jr.', ' Jr')
+    modified_name = modified_name.replace(', SR.', ' SR')
+    modified_name = modified_name.replace(' SR.', ' SR')
+    modified_name = modified_name.replace(', Sr.', ' Sr')
+    modified_name = modified_name.replace(' Sr.', ' Sr')
+    if len(name) != len(modified_name):
+        name_changed = True
+    else:
+        name_changed = False
+    results = {
+        'status': "REMOVE_PERIOD_FROM_NAME_PREFIX_OR_SUFFIX ",
+        'success': True,
+        'incoming_name': name,
+        'modified_name': modified_name,
+        'name_changed': name_changed,
+    }
+    return results

@@ -28,7 +28,25 @@
 
 {% include "office/office_merge_one_field_decision.html" with field_name="contest_office_name" field_label="Contest Office Name" conflict_status=conflict_values.office_name contest_office1_field_value=contest_office_option1.office_name contest_office2_field_value=contest_office_option2.office_name contest_office1=contest_office_option1 contest_office2=contest_office_option2 %}
 
-{% include "office/office_merge_one_field_decision.html" with field_name="google_civic_office_name" field_label="Contest Office Google Civic Name" conflict_status=conflict_values.google_civic_office_name contest_office1_field_value=contest_office_option1.google_civic_office_name contest_office2_field_value=contest_office_option2.google_civic_office_name contest_office1=contest_office_option1 contest_office2=contest_office_option2 %}
+    <tr>
+        <td>Google&nbsp;Civic&nbsp;Office&nbsp;Name&nbsp;1</td>
+        <td>{{ contest_office_option1.google_civic_office_name|default_if_none:"" }}</td>
+        <td>{{ contest_office_option2.google_civic_office_name|default_if_none:"" }}</td>
+    </tr>
+{% if contest_office_option1.google_civic_office_name2 or contest_office_option2.google_civic_office_name2 %}
+    <tr>
+        <td>Google&nbsp;Civic&nbsp;Office&nbsp;Name&nbsp;2</td>
+        <td>{{ contest_office_option1.google_civic_office_name2|default_if_none:"" }}</td>
+        <td>{{ contest_office_option2.google_civic_office_name2|default_if_none:"" }}</td>
+    </tr>
+{% endif %}
+{% if contest_office_option1.google_civic_office_name3 or contest_office_option2.google_civic_office_name3 %}
+    <tr>
+        <td>Google&nbsp;Civic&nbsp;Office&nbsp;Name&nbsp;3</td>
+        <td>{{ contest_office_option1.google_civic_office_name3|default_if_none:"" }}</td>
+        <td>{{ contest_office_option2.google_civic_office_name3|default_if_none:"" }}</td>
+    </tr>
+{% endif %}
 
 {% include "office/office_merge_one_field_decision.html" with field_name="ballotpedia_office_name" field_label="Ballotpedia Office Name" conflict_status=conflict_values.ballotpedia_office_name contest_office1_field_value=contest_office_option1.ballotpedia_office_name contest_office2_field_value=contest_office_option2.ballotpedia_office_name contest_office1=contest_office_option1 contest_office2=contest_office_option2 %}
 
@@ -103,7 +121,7 @@
         <td><input type="submit" value="Merge Contest Offices" name="merge" /></td>
     </tr>
 </table>
-<input type="hidden" name="remove_duplicate_process" value="1" />
+<input type="hidden" name="remove_duplicate_process" value="{{ remove_duplicate_process }}" />
 <input type="hidden" name="state_code" value="{{ contest_office_option2.state_code }}" />
 <input type="hidden" name="google_civic_election_id" value="{{ contest_office_option1.google_civic_election_id }}" />
 <input type="hidden" name="contest_office1_we_vote_id" value="{{ contest_office_option1.we_vote_id }}" />

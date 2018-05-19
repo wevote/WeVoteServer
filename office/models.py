@@ -61,9 +61,13 @@ class ContestOffice(models.Model):
     # The name of the office for this contest.
     office_name = models.CharField(verbose_name="name of the office", max_length=255, null=False, blank=False)
     # The offices' name as passed over by Google Civic. We save this so we can match to this office even
-    # if we edit the office's name locally.
+    # if we edit the office's name locally. Sometimes Google isn't consistent with office names.
     google_civic_office_name = models.CharField(verbose_name="office name exactly as received from google civic",
-                                                max_length=255, null=True, blank=True)
+                                                max_length=255, null=True)
+    google_civic_office_name2 = models.CharField(verbose_name="office name exactly as received from google civic",
+                                                 max_length=255, null=True)
+    google_civic_office_name3 = models.CharField(verbose_name="office name exactly as received from google civic",
+                                                 max_length=255, null=True)
     # The unique ID of the election containing this contest. (Provided by Google Civic)
     google_civic_election_id = models.CharField(verbose_name="google civic election id",
                                                 max_length=255, null=False, blank=False)
@@ -371,15 +375,19 @@ class ContestOfficeManager(models.Model):
                 # vs. "scope": "statewide"
                 if positive_value_exists(district_id):
                     contest_office_on_stage = ContestOffice.objects.get(
+                        Q(google_civic_office_name__iexact=office_name) |
+                        Q(google_civic_office_name2__iexact=office_name) |
+                        Q(google_civic_office_name3__iexact=office_name),
                         google_civic_election_id__exact=google_civic_election_id,
-                        google_civic_office_name__iexact=office_name,
                         district_id__exact=district_id,
                         state_code__iexact=updated_contest_office_values['state_code'],
                     )
                 else:
                     contest_office_on_stage = ContestOffice.objects.get(
+                        Q(google_civic_office_name__iexact=office_name) |
+                        Q(google_civic_office_name2__iexact=office_name) |
+                        Q(google_civic_office_name3__iexact=office_name),
                         google_civic_election_id__exact=google_civic_election_id,
-                        google_civic_office_name__iexact=office_name,
                         state_code__iexact=updated_contest_office_values['state_code'],
                     )
                 contest_office_found = True
@@ -436,7 +444,24 @@ class ContestOfficeManager(models.Model):
                 try:
                     for key, value in updated_contest_office_values.items():
                         if hasattr(contest_office_on_stage, key):
-                            setattr(contest_office_on_stage, key, value)
+                            # Note, the incoming google_civic_office_name may need to go in _name, _name2, or _name3
+                            if key is "google_civic_office_name":
+                                # We actually don't want to update existing values, but put the value in the first
+                                # available "slot"
+                                if not positive_value_exists(contest_office_on_stage.google_civic_office_name):
+                                    contest_office_on_stage.google_civic_office_name = value
+                                elif contest_office_on_stage.google_civic_office_name == value:
+                                    pass
+                                elif not positive_value_exists(contest_office_on_stage.google_civic_office_name1):
+                                    contest_office_on_stage.google_civic_office_name1 = value
+                                elif contest_office_on_stage.google_civic_office_name1 == value:
+                                    pass
+                                elif not positive_value_exists(contest_office_on_stage.google_civic_office_name2):
+                                    contest_office_on_stage.google_civic_office_name2 = value
+                                elif contest_office_on_stage.google_civic_office_name2 == value:
+                                    pass
+                            else:
+                                setattr(contest_office_on_stage, key, value)
                     contest_office_on_stage.save()
                     office_updated = True
                     new_office_created = False

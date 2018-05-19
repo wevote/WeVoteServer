@@ -10,12 +10,13 @@ from office.models import ContestOffice, ContestOfficeManager
 import re
 from wevote_settings.models import fetch_next_we_vote_id_candidate_campaign_integer, fetch_site_unique_id_prefix
 import wevote_functions.admin
-from wevote_functions.functions import add_period_to_middle_name_initial, convert_to_int, \
+from wevote_functions.functions import add_period_to_middle_name_initial, add_period_to_name_prefix_and_suffix, \
+    convert_to_int, \
     display_full_name_with_correct_capitalization, \
     extract_title_from_full_name, extract_first_name_from_full_name, extract_middle_name_from_full_name, \
     extract_last_name_from_full_name, extract_suffix_from_full_name, extract_nickname_from_full_name, \
     extract_state_from_ocd_division_id, extract_twitter_handle_from_text_string, \
-    positive_value_exists, remove_period_from_middle_name_initial
+    positive_value_exists, remove_period_from_middle_name_initial, remove_period_from_name_prefix_and_suffix
 from image.models import ORGANIZATION_ENDORSEMENTS_IMAGE_NAME
 
 logger = wevote_functions.admin.get_logger(__name__)
@@ -51,7 +52,6 @@ CANDIDATE_UNIQUE_IDENTIFIERS = [
     'ctcl_uuid',
     'facebook_profile_image_url_https',
     'facebook_url',
-    'google_civic_candidate_name',
     'google_civic_election_id',
     'google_plus_url',
     'linkedin_url',
@@ -317,6 +317,7 @@ class CandidateCampaignListManager(models.Model):
         return results
 
     def retrieve_possible_duplicate_candidates(self, candidate_name, google_civic_candidate_name,
+                                               google_civic_candidate_name2, google_civic_candidate_name3,
                                                google_civic_election_id, office_we_vote_id,
                                                politician_we_vote_id,
                                                candidate_twitter_handle,
@@ -343,6 +344,10 @@ class CandidateCampaignListManager(models.Model):
                 # We intentionally use case sensitive matching here
                 new_filter = Q(google_civic_candidate_name__exact=google_civic_candidate_name)
                 filters.append(new_filter)
+                new_filter = Q(google_civic_candidate_name2__exact=google_civic_candidate_name)
+                filters.append(new_filter)
+                new_filter = Q(google_civic_candidate_name3__exact=google_civic_candidate_name)
+                filters.append(new_filter)
 
                 # Since Google Civic doesn't provide a unique identifier, and sometimes returns initials with
                 # a period and sometimes without, we may need to try again
@@ -363,7 +368,147 @@ class CandidateCampaignListManager(models.Model):
                     # We intentionally use case sensitive matching here
                     new_filter = Q(google_civic_candidate_name__exact=google_civic_candidate_name_modified)
                     filters.append(new_filter)
-            elif positive_value_exists(candidate_name):
+                    new_filter = Q(google_civic_candidate_name2__exact=google_civic_candidate_name_modified)
+                    filters.append(new_filter)
+                    new_filter = Q(google_civic_candidate_name3__exact=google_civic_candidate_name_modified)
+                    filters.append(new_filter)
+
+                # Deal with prefix and suffix
+                name_changed = False
+                google_civic_candidate_name_modified = ""
+                # If an prefix or suffix exists in the name (ex/ " JR"), then search for the name
+                # with a period added (ex/ " JR.")
+                add_results = add_period_to_name_prefix_and_suffix(google_civic_candidate_name)
+                if add_results['name_changed']:
+                    name_changed = True
+                    google_civic_candidate_name_modified = add_results['modified_name']
+                else:
+                    add_results = remove_period_from_name_prefix_and_suffix(google_civic_candidate_name)
+                    if add_results['name_changed']:
+                        name_changed = True
+                        google_civic_candidate_name_modified = add_results['modified_name']
+                if name_changed and positive_value_exists(google_civic_candidate_name_modified):
+                    # We intentionally use case sensitive matching here
+                    new_filter = Q(google_civic_candidate_name__exact=google_civic_candidate_name_modified)
+                    filters.append(new_filter)
+                    new_filter = Q(google_civic_candidate_name2__exact=google_civic_candidate_name_modified)
+                    filters.append(new_filter)
+                    new_filter = Q(google_civic_candidate_name3__exact=google_civic_candidate_name_modified)
+                    filters.append(new_filter)
+
+            if positive_value_exists(google_civic_candidate_name2):
+                # We intentionally use case sensitive matching here
+                new_filter = Q(google_civic_candidate_name__exact=google_civic_candidate_name2)
+                filters.append(new_filter)
+                new_filter = Q(google_civic_candidate_name2__exact=google_civic_candidate_name2)
+                filters.append(new_filter)
+                new_filter = Q(google_civic_candidate_name3__exact=google_civic_candidate_name2)
+                filters.append(new_filter)
+
+                # Since Google Civic doesn't provide a unique identifier, and sometimes returns initials with
+                # a period and sometimes without, we may need to try again
+                name_changed = False
+                google_civic_candidate_name2_modified = ""
+                # If an initial exists in the name (ex/ " A "), then search for the name
+                # with a period added (ex/ " A. ")
+                add_results = add_period_to_middle_name_initial(google_civic_candidate_name2)
+                if add_results['name_changed']:
+                    name_changed = True
+                    google_civic_candidate_name2_modified = add_results['modified_name']
+                else:
+                    add_results = remove_period_from_middle_name_initial(google_civic_candidate_name2)
+                    if add_results['name_changed']:
+                        name_changed = True
+                        google_civic_candidate_name2_modified = add_results['modified_name']
+                if name_changed and positive_value_exists(google_civic_candidate_name2_modified):
+                    # We intentionally use case sensitive matching here
+                    new_filter = Q(google_civic_candidate_name__exact=google_civic_candidate_name2_modified)
+                    filters.append(new_filter)
+                    new_filter = Q(google_civic_candidate_name2__exact=google_civic_candidate_name2_modified)
+                    filters.append(new_filter)
+                    new_filter = Q(google_civic_candidate_name3__exact=google_civic_candidate_name2_modified)
+                    filters.append(new_filter)
+
+                # Deal with prefix and suffix
+                name_changed = False
+                google_civic_candidate_name2_modified = ""
+                # If an prefix or suffix exists in the name (ex/ " JR"), then search for the name
+                # with a period added (ex/ " JR.")
+                add_results = add_period_to_name_prefix_and_suffix(google_civic_candidate_name2)
+                if add_results['name_changed']:
+                    name_changed = True
+                    google_civic_candidate_name2_modified = add_results['modified_name']
+                else:
+                    add_results = remove_period_from_name_prefix_and_suffix(google_civic_candidate_name2)
+                    if add_results['name_changed']:
+                        name_changed = True
+                        google_civic_candidate_name2_modified = add_results['modified_name']
+                if name_changed and positive_value_exists(google_civic_candidate_name2_modified):
+                    # We intentionally use case sensitive matching here
+                    new_filter = Q(google_civic_candidate_name__exact=google_civic_candidate_name2_modified)
+                    filters.append(new_filter)
+                    new_filter = Q(google_civic_candidate_name2__exact=google_civic_candidate_name2_modified)
+                    filters.append(new_filter)
+                    new_filter = Q(google_civic_candidate_name3__exact=google_civic_candidate_name2_modified)
+                    filters.append(new_filter)
+
+            if positive_value_exists(google_civic_candidate_name3):
+                # We intentionally use case sensitive matching here
+                new_filter = Q(google_civic_candidate_name__exact=google_civic_candidate_name3)
+                filters.append(new_filter)
+                new_filter = Q(google_civic_candidate_name2__exact=google_civic_candidate_name3)
+                filters.append(new_filter)
+                new_filter = Q(google_civic_candidate_name3__exact=google_civic_candidate_name3)
+                filters.append(new_filter)
+
+                # Since Google Civic doesn't provide a unique identifier, and sometimes returns initials with
+                # a period and sometimes without, we may need to try again
+                name_changed = False
+                google_civic_candidate_name3_modified = ""
+                # If an initial exists in the name (ex/ " A "), then search for the name
+                # with a period added (ex/ " A. ")
+                add_results = add_period_to_middle_name_initial(google_civic_candidate_name3)
+                if add_results['name_changed']:
+                    name_changed = True
+                    google_civic_candidate_name3_modified = add_results['modified_name']
+                else:
+                    add_results = remove_period_from_middle_name_initial(google_civic_candidate_name3)
+                    if add_results['name_changed']:
+                        name_changed = True
+                        google_civic_candidate_name3_modified = add_results['modified_name']
+                if name_changed and positive_value_exists(google_civic_candidate_name3_modified):
+                    # We intentionally use case sensitive matching here
+                    new_filter = Q(google_civic_candidate_name__exact=google_civic_candidate_name3_modified)
+                    filters.append(new_filter)
+                    new_filter = Q(google_civic_candidate_name2__exact=google_civic_candidate_name3_modified)
+                    filters.append(new_filter)
+                    new_filter = Q(google_civic_candidate_name3__exact=google_civic_candidate_name3_modified)
+                    filters.append(new_filter)
+
+                # Deal with prefix and suffix
+                name_changed = False
+                google_civic_candidate_name3_modified = ""
+                # If an prefix or suffix exists in the name (ex/ " JR"), then search for the name
+                # with a period added (ex/ " JR.")
+                add_results = add_period_to_name_prefix_and_suffix(google_civic_candidate_name3)
+                if add_results['name_changed']:
+                    name_changed = True
+                    google_civic_candidate_name3_modified = add_results['modified_name']
+                else:
+                    add_results = remove_period_from_name_prefix_and_suffix(google_civic_candidate_name3)
+                    if add_results['name_changed']:
+                        name_changed = True
+                        google_civic_candidate_name3_modified = add_results['modified_name']
+                if name_changed and positive_value_exists(google_civic_candidate_name3_modified):
+                    # We intentionally use case sensitive matching here
+                    new_filter = Q(google_civic_candidate_name__exact=google_civic_candidate_name3_modified)
+                    filters.append(new_filter)
+                    new_filter = Q(google_civic_candidate_name2__exact=google_civic_candidate_name3_modified)
+                    filters.append(new_filter)
+                    new_filter = Q(google_civic_candidate_name3__exact=google_civic_candidate_name3_modified)
+                    filters.append(new_filter)
+
+            if positive_value_exists(candidate_name):
                 new_filter = Q(candidate_name__iexact=candidate_name)
                 filters.append(new_filter)
 
@@ -382,6 +527,7 @@ class CandidateCampaignListManager(models.Model):
                     if add_results['name_changed']:
                         name_changed = True
                         candidate_name_modified = add_results['modified_name']
+
                 if name_changed and positive_value_exists(candidate_name_modified):
                     # We intentionally use case sensitive matching here
                     new_filter = Q(candidate_name__exact=candidate_name_modified)
@@ -806,9 +952,13 @@ class CandidateCampaign(models.Model):
     # The candidate's name.
     candidate_name = models.CharField(verbose_name="candidate name", max_length=255, null=False, blank=False)
     # The candidate's name as passed over by Google Civic. We save this so we can match to this candidate even
-    # if we edit the candidate's name locally.
+    # if we edit the candidate's name locally.  Sometimes Google isn't consistent with office names.
     google_civic_candidate_name = models.CharField(verbose_name="candidate name exactly as received from google civic",
-                                                   max_length=255, null=False, blank=False)
+                                                   max_length=255, null=True)
+    google_civic_candidate_name2 = models.CharField(verbose_name="candidate name exactly as received from google civic",
+                                                    max_length=255, null=True)
+    google_civic_candidate_name3 = models.CharField(verbose_name="candidate name exactly as received from google civic",
+                                                    max_length=255, null=True)
     candidate_gender = models.CharField(verbose_name="candidate gender", max_length=255, null=True, blank=True)
     # Birthday in YYYY-MM-DD format.
     birth_day_text = models.CharField(verbose_name="birth day", max_length=10, null=True, blank=True)
@@ -1452,6 +1602,10 @@ class CandidateCampaignManager(models.Model):
         new_candidate_created = False
         candidate_campaign_on_stage = CandidateCampaign()
         status = ""
+        google_civic_candidate_name2 = updated_candidate_campaign_values['google_civic_candidate_name2'] \
+            if 'google_civic_candidate_name2' in updated_candidate_campaign_values else ""
+        google_civic_candidate_name3 = updated_candidate_campaign_values['google_civic_candidate_name3'] \
+            if 'google_civic_candidate_name3' in updated_candidate_campaign_values else ""
 
         if not positive_value_exists(google_civic_election_id):
             success = False
@@ -1491,9 +1645,23 @@ class CandidateCampaignManager(models.Model):
             # OR office_name, we need to check both before we try to create a new entry
             candidate_found = False
             try:
+                if not positive_value_exists(google_civic_candidate_name):
+                    google_civic_candidate_name = "NO_NAME_IGNORE"
+                if not positive_value_exists(google_civic_candidate_name2):
+                    google_civic_candidate_name2 = "NO_NAME_IGNORE"
+                if not positive_value_exists(google_civic_candidate_name3):
+                    google_civic_candidate_name3 = "NO_NAME_IGNORE"
                 candidate_campaign_on_stage = CandidateCampaign.objects.get(
+                    Q(google_civic_candidate_name__iexact=google_civic_candidate_name) |
+                    Q(google_civic_candidate_name2__iexact=google_civic_candidate_name) |
+                    Q(google_civic_candidate_name3__iexact=google_civic_candidate_name) |
+                    Q(google_civic_candidate_name__iexact=google_civic_candidate_name2) |
+                    Q(google_civic_candidate_name2__iexact=google_civic_candidate_name2) |
+                    Q(google_civic_candidate_name3__iexact=google_civic_candidate_name2) |
+                    Q(google_civic_candidate_name__iexact=google_civic_candidate_name3) |
+                    Q(google_civic_candidate_name2__iexact=google_civic_candidate_name3) |
+                    Q(google_civic_candidate_name3__iexact=google_civic_candidate_name3),
                     google_civic_election_id__exact=google_civic_election_id,
-                    google_civic_candidate_name__iexact=google_civic_candidate_name
                 )
                 candidate_found = True
                 success = True
@@ -1509,24 +1677,99 @@ class CandidateCampaignManager(models.Model):
                 # Since Google Civic doesn't provide a unique identifier, and sometimes returns initials with
                 # a period and sometimes without, we may need to try again
                 name_changed = False
-                google_civic_candidate_name_modified = ""
+                google_civic_candidate_name_modified = "NO_NAME_IGNORE"
+                google_civic_candidate_name2_modified = "NO_NAME_IGNORE"
+                google_civic_candidate_name3_modified = "NO_NAME_IGNORE"
+                google_civic_candidate_name_new_start = google_civic_candidate_name
+                google_civic_candidate_name2_new_start = google_civic_candidate_name2
+                google_civic_candidate_name3_new_start = google_civic_candidate_name3
+
                 # If an initial exists in the name (ex/ " A "), then search for the name
                 # with a period added (ex/ " A. ")
+                # google_civic_candidate_name
                 add_results = add_period_to_middle_name_initial(google_civic_candidate_name)
                 if add_results['name_changed']:
                     name_changed = True
                     google_civic_candidate_name_modified = add_results['modified_name']
+                    google_civic_candidate_name_new_start = google_civic_candidate_name_modified
                 else:
                     add_results = remove_period_from_middle_name_initial(google_civic_candidate_name)
                     if add_results['name_changed']:
                         name_changed = True
                         google_civic_candidate_name_modified = add_results['modified_name']
+                        google_civic_candidate_name_new_start = google_civic_candidate_name_modified
+                # google_civic_candidate_name2
+                add_results = add_period_to_middle_name_initial(google_civic_candidate_name2)
+                if add_results['name_changed']:
+                    name_changed = True
+                    google_civic_candidate_name2_modified = add_results['modified_name']
+                    google_civic_candidate_name2_new_start = google_civic_candidate_name2_modified
+                else:
+                    add_results = remove_period_from_middle_name_initial(google_civic_candidate_name2)
+                    if add_results['name_changed']:
+                        name_changed = True
+                        google_civic_candidate_name2_modified = add_results['modified_name']
+                        google_civic_candidate_name2_new_start = google_civic_candidate_name2_modified
+                # google_civic_candidate_name3
+                add_results = add_period_to_middle_name_initial(google_civic_candidate_name3)
+                if add_results['name_changed']:
+                    name_changed = True
+                    google_civic_candidate_name3_modified = add_results['modified_name']
+                    google_civic_candidate_name3_new_start = google_civic_candidate_name3_modified
+                else:
+                    add_results = remove_period_from_middle_name_initial(google_civic_candidate_name3)
+                    if add_results['name_changed']:
+                        name_changed = True
+                        google_civic_candidate_name3_modified = add_results['modified_name']
+                        google_civic_candidate_name3_new_start = google_civic_candidate_name3_modified
 
-                if name_changed and positive_value_exists(google_civic_candidate_name_modified):
+                # Deal with prefix and suffix
+                # If an prefix or suffix exists in the name (ex/ " JR"), then search for the name
+                # with a period added (ex/ " JR.")
+                # google_civic_candidate_name
+                add_results = add_period_to_name_prefix_and_suffix(google_civic_candidate_name_new_start)
+                if add_results['name_changed']:
+                    name_changed = True
+                    google_civic_candidate_name_modified = add_results['modified_name']
+                else:
+                    add_results = remove_period_from_name_prefix_and_suffix(google_civic_candidate_name_new_start)
+                    if add_results['name_changed']:
+                        name_changed = True
+                        google_civic_candidate_name_modified = add_results['modified_name']
+                # google_civic_candidate_name2
+                add_results = add_period_to_name_prefix_and_suffix(google_civic_candidate_name2_new_start)
+                if add_results['name_changed']:
+                    name_changed = True
+                    google_civic_candidate_name2_modified = add_results['modified_name']
+                else:
+                    add_results = remove_period_from_name_prefix_and_suffix(google_civic_candidate_name2_new_start)
+                    if add_results['name_changed']:
+                        name_changed = True
+                        google_civic_candidate_name2_modified = add_results['modified_name']
+                # google_civic_candidate_name3
+                add_results = add_period_to_name_prefix_and_suffix(google_civic_candidate_name3_new_start)
+                if add_results['name_changed']:
+                    name_changed = True
+                    google_civic_candidate_name3_modified = add_results['modified_name']
+                else:
+                    add_results = remove_period_from_name_prefix_and_suffix(google_civic_candidate_name3_new_start)
+                    if add_results['name_changed']:
+                        name_changed = True
+                        google_civic_candidate_name3_modified = add_results['modified_name']
+
+                if name_changed:
                     try:
                         candidate_campaign_on_stage = CandidateCampaign.objects.get(
+                            Q(google_civic_candidate_name__iexact=google_civic_candidate_name_modified) |
+                            Q(google_civic_candidate_name2__iexact=google_civic_candidate_name_modified) |
+                            Q(google_civic_candidate_name3__iexact=google_civic_candidate_name_modified) |
+                            Q(google_civic_candidate_name__iexact=google_civic_candidate_name2_modified) |
+                            Q(google_civic_candidate_name2__iexact=google_civic_candidate_name2_modified) |
+                            Q(google_civic_candidate_name3__iexact=google_civic_candidate_name2_modified) |
+                            Q(google_civic_candidate_name__iexact=google_civic_candidate_name3_modified) |
+                            Q(google_civic_candidate_name2__iexact=google_civic_candidate_name3_modified) |
+                            Q(google_civic_candidate_name3__iexact=google_civic_candidate_name3_modified),
                             google_civic_election_id__exact=google_civic_election_id,
-                            google_civic_candidate_name__iexact=google_civic_candidate_name_modified
                         )
                         candidate_found = True
                         success = True
@@ -1549,8 +1792,10 @@ class CandidateCampaignManager(models.Model):
                 # Try to find record based on candidate_name (instead of google_civic_office_name)
                 try:
                     candidate_campaign_on_stage = CandidateCampaign.objects.get(
+                        Q(candidate_name__iexact=google_civic_candidate_name) |
+                        Q(candidate_name__iexact=google_civic_candidate_name2) |
+                        Q(candidate_name__iexact=google_civic_candidate_name3),
                         google_civic_election_id__exact=google_civic_election_id,
-                        candidate_name__iexact=google_civic_candidate_name
                     )
                     candidate_found = True
                     success = True
@@ -1566,9 +1811,12 @@ class CandidateCampaignManager(models.Model):
                     # Since Google Civic doesn't provide a unique identifier, and sometimes returns initials with
                     # a period and sometimes without, we may need to try again
                     name_changed = False
-                    google_civic_candidate_name_modified = ""
+                    google_civic_candidate_name_modified = "NO_NAME_IGNORE"
+                    google_civic_candidate_name2_modified = "NO_NAME_IGNORE"
+                    google_civic_candidate_name3_modified = "NO_NAME_IGNORE"
                     # If an initial exists in the name (ex/ " A "), then search for the name
                     # with a period added (ex/ " A. ")
+                    # google_civic_candidate_name
                     add_results = add_period_to_middle_name_initial(google_civic_candidate_name)
                     if add_results['name_changed']:
                         name_changed = True
@@ -1578,12 +1826,34 @@ class CandidateCampaignManager(models.Model):
                         if add_results['name_changed']:
                             name_changed = True
                             google_civic_candidate_name_modified = add_results['modified_name']
+                    # google_civic_candidate_name2
+                    add_results = add_period_to_middle_name_initial(google_civic_candidate_name2)
+                    if add_results['name_changed']:
+                        name_changed = True
+                        google_civic_candidate_name2_modified = add_results['modified_name']
+                    else:
+                        add_results = remove_period_from_middle_name_initial(google_civic_candidate_name2)
+                        if add_results['name_changed']:
+                            name_changed = True
+                            google_civic_candidate_name2_modified = add_results['modified_name']
+                    # google_civic_candidate_name3
+                    add_results = add_period_to_middle_name_initial(google_civic_candidate_name3)
+                    if add_results['name_changed']:
+                        name_changed = True
+                        google_civic_candidate_name3_modified = add_results['modified_name']
+                    else:
+                        add_results = remove_period_from_middle_name_initial(google_civic_candidate_name3)
+                        if add_results['name_changed']:
+                            name_changed = True
+                            google_civic_candidate_name3_modified = add_results['modified_name']
 
                     if name_changed and positive_value_exists(google_civic_candidate_name_modified):
                         try:
                             candidate_campaign_on_stage = CandidateCampaign.objects.get(
-                                google_civic_election_id__exact=google_civic_election_id,
-                                candidate_name__iexact=google_civic_candidate_name_modified
+                                Q(candidate_name__iexact=google_civic_candidate_name_modified) |
+                                Q(candidate_name__iexact=google_civic_candidate_name2_modified) |
+                                Q(candidate_name__iexact=google_civic_candidate_name3_modified),
+                                google_civic_election_id__exact=google_civic_election_id
                             )
                             candidate_found = True
                             success = True
