@@ -609,11 +609,11 @@ def positions_count_for_one_ballot_item_for_api(voter_device_id, ballot_item_we_
         friends_only_support_positions_list_for_one_ballot_item = \
             position_list_manager.retrieve_all_positions_for_candidate_campaign(
                 retrieve_public_positions_now, 0, ballot_item_we_vote_id,
-                SUPPORT, most_recent_only, friends_we_vote_id_list)
+                SUPPORT, most_recent_only, friends_we_vote_id_list=friends_we_vote_id_list)
         friends_only_oppose_positions_list_for_one_ballot_item = \
             position_list_manager.retrieve_all_positions_for_candidate_campaign(
                 retrieve_public_positions_now, 0, ballot_item_we_vote_id,
-                OPPOSE, most_recent_only, friends_we_vote_id_list)
+                OPPOSE, most_recent_only, friends_we_vote_id_list=friends_we_vote_id_list)
 
         # Filter to only show friend's positions
         public_results = finalize_support_and_oppose_positions_count(

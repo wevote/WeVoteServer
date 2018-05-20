@@ -46,7 +46,6 @@ CANDIDATE_UNIQUE_IDENTIFIERS = [
     'candidate_twitter_handle',
     'candidate_url',
     'contest_office_id',
-    'contest_office_name',
     'contest_office_we_vote_id',
     'crowdpac_candidate_id',
     'ctcl_uuid',
@@ -279,17 +278,6 @@ class CandidateCampaignListManager(models.Model):
         results = {
             'success':                  success,
             'status':                   status,
-        }
-        return results
-
-    def find_and_remove_duplicate_candidates(self, google_civic_election_id, merge=False, remove=False):
-        success = False
-        status = "find_and_remove_duplicate_candidates NOT IMPLEMENTED YET"
-
-        results = {
-            'success':                  success,
-            'status':                   status,
-            'google_civic_election_id': google_civic_election_id,
         }
         return results
 

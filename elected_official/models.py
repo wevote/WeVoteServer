@@ -265,9 +265,9 @@ class ElectedOfficialListManager(models.Model):
         }
         return results
 
-    def find_and_remove_duplicate_elected_officials(self, google_civic_election_id, merge=False, remove=False):
+    def find_and_merge_duplicate_elected_officials(self, google_civic_election_id, merge=False, remove=False):
         success = False
-        status = "find_and_remove_duplicate_elected_officials NOT IMPLEMENTED YET"
+        status = "find_and_merge_duplicate_elected_officials NOT IMPLEMENTED YET"
 
         results = {
             'success':                  success,

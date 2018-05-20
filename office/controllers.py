@@ -157,10 +157,17 @@ def figure_out_conflict_values(contest_office1, contest_office2):
                 contest_office_merge_conflict_values[attribute] = 'CONTEST_OFFICE2'
             elif contest_office2_attribute is None or contest_office2_attribute is "":
                 contest_office_merge_conflict_values[attribute] = 'CONTEST_OFFICE1'
-            elif contest_office1_attribute == contest_office2_attribute:
-                contest_office_merge_conflict_values[attribute] = 'MATCHING'
             else:
-                contest_office_merge_conflict_values[attribute] = 'CONFLICT'
+                if attribute == "office_name" or attribute == "state_code":
+                    if contest_office1_attribute.lower() == contest_office2_attribute.lower():
+                        contest_office_merge_conflict_values[attribute] = 'MATCHING'
+                    else:
+                        contest_office_merge_conflict_values[attribute] = 'CONFLICT'
+                else:
+                    if contest_office1_attribute == contest_office2_attribute:
+                        contest_office_merge_conflict_values[attribute] = 'MATCHING'
+                    else:
+                        contest_office_merge_conflict_values[attribute] = 'CONFLICT'
         except AttributeError:
             pass
 
