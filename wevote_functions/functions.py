@@ -505,7 +505,7 @@ def convert_to_political_party_constant(raw_party_incoming):
 
     raw_party = raw_party_incoming.strip()
     raw_party = raw_party.lower()
-    raw_party = raw_party.replace("Party Preference: ", "")
+    raw_party = raw_party.replace("party preference: ", "")
 
     if raw_party == 'amer. ind.':
         return AMERICAN_INDEPENDENT
@@ -529,13 +529,17 @@ def convert_to_political_party_constant(raw_party_incoming):
         return GREEN
     if raw_party == 'green party':
         return GREEN
+    if raw_party == 'g-p':
+        return GREEN
     if raw_party == 'independent':
-        return INDEPENDENT
+        return NO_PARTY_PREFERENCE
     if raw_party == 'independent green':
         return INDEPENDENT_GREEN
     if raw_party == 'lib':
         return LIBERTARIAN
-    if raw_party == 'Libertarian':
+    if raw_party == 'libertarian':
+        return LIBERTARIAN
+    if raw_party == 'libertarian party':
         return LIBERTARIAN
     if raw_party == 'npp':
         return NO_PARTY_PREFERENCE
@@ -549,7 +553,11 @@ def convert_to_political_party_constant(raw_party_incoming):
         return PEACE_AND_FREEDOM
     if raw_party == 'peace and freedom':
         return PEACE_AND_FREEDOM
+    if raw_party == 'peace and freedom party':
+        return PEACE_AND_FREEDOM
     if raw_party == 'reform':
+        return REFORM
+    if raw_party == 'reform party':
         return REFORM
     if raw_party == 'rep':
         return REPUBLICAN

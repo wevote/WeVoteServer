@@ -840,12 +840,12 @@ def move_positions_to_another_candidate(from_candidate_id, from_candidate_we_vot
     # Get all positions for the "from_candidate" that we are moving away from
     from_position_list = position_list_manager.retrieve_all_positions_for_candidate_campaign(
         public_or_private, from_candidate_id, from_candidate_we_vote_id, stance_we_are_looking_for,
-        most_recent_only, friends_we_vote_id_list, retrieve_all_admin_override)
+        most_recent_only, friends_we_vote_id_list, retrieve_all_admin_override=retrieve_all_admin_override)
 
     # Get all positions for the "to_candidate" that we need to check
     to_position_list = position_list_manager.retrieve_all_positions_for_candidate_campaign(
         public_or_private, to_candidate_id, to_candidate_we_vote_id, stance_we_are_looking_for,
-        most_recent_only, friends_we_vote_id_list, retrieve_all_admin_override)
+        most_recent_only, friends_we_vote_id_list, retrieve_all_admin_override=retrieve_all_admin_override)
 
     # Put the organization_we_vote_id's of the orgs that have opinions about this candidate in a simple array
     # These are existing positions attached to the candidate we are going to keep
@@ -1936,7 +1936,7 @@ def position_list_for_ballot_item_for_api(voter_device_id, friends_vs_public,  #
             return_only_latest_position_per_speaker = True
             friends_positions_list = position_list_manager.retrieve_all_positions_for_candidate_campaign(
                 retrieve_public_positions_now, candidate_id, candidate_we_vote_id, stance_we_are_looking_for,
-                return_only_latest_position_per_speaker, friends_we_vote_id_list)
+                return_only_latest_position_per_speaker, friends_we_vote_id_list=friends_we_vote_id_list)
             # Now add is_public_position to each value
             is_public_position_setting = False
             friends_positions_list = position_list_manager.add_is_public_position(friends_positions_list,

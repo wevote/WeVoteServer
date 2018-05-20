@@ -15,7 +15,7 @@ urlpatterns = [
     url(r'^(?P<office_id>[0-9]+)/find_duplicate_office/$',
         views_admin.find_duplicate_office_view, name='find_duplicate_office'),
     url(r'^duplicate_offices/$',
-        views_admin.find_and_remove_duplicate_offices_view, name='find_and_remove_duplicate_offices'),
+        views_admin.find_and_merge_duplicate_offices_view, name='find_and_merge_duplicate_offices'),
     url(r'^edit_process/$', views_admin.office_edit_process_view, name='office_edit_process'),
     # url(r'^export/', views_admin.OfficesSyncOutView.as_view(), name='offices_export'),
     url(r'^import/$',

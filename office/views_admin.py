@@ -358,7 +358,7 @@ def office_edit_process_view(request):
     ballotpedia_race_id = request.POST.get('ballotpedia_race_id', False)  # Related to contest_office
     ballotpedia_office_name = request.POST.get('ballotpedia_office_name', False)
     remove_duplicate_process = request.POST.get('remove_duplicate_process', False)
-    redirect_to_contest_office_list = convert_to_int(request.POST['redirect_to_contest_office_list'])
+    redirect_to_contest_office_list = convert_to_int(request.POST.get('redirect_to_contest_office_list', 0))
 
     election_state = ''
     if state_code is not False:
@@ -449,7 +449,7 @@ def office_edit_process_view(request):
                                     '&state_code=' + str(state_code))
 
     if remove_duplicate_process:
-        return HttpResponseRedirect(reverse('office:find_and_remove_duplicate_offices', args=()) +
+        return HttpResponseRedirect(reverse('office:find_and_merge_duplicate_offices', args=()) +
                                     "?google_civic_election_id=" + str(google_civic_election_id) +
                                     "&state_code=" + str(state_code))
     else:
@@ -711,7 +711,7 @@ def find_duplicate_office_view(request, office_id=0):
 
 
 @login_required
-def find_and_remove_duplicate_offices_view(request):
+def find_and_merge_duplicate_offices_view(request):
     # admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
     authority_required = {'political_data_manager'}
     if not voter_has_authority(request, authority_required):
@@ -894,7 +894,7 @@ def office_merge_process_view(request):
             messages.add_message(request, messages.ERROR, 'Could not save contest_offices_are_not_duplicates entry: ' +
                                  results['status'])
         messages.add_message(request, messages.INFO, 'Prior contest offices skipped, and not merged.')
-        return HttpResponseRedirect(reverse('office:find_and_remove_duplicate_offices', args=()) +
+        return HttpResponseRedirect(reverse('office:find_and_merge_duplicate_offices', args=()) +
                                     "?google_civic_election_id=" + str(google_civic_election_id) +
                                     "&state_code=" + str(state_code))
 
@@ -926,7 +926,7 @@ def office_merge_process_view(request):
     if bookmark_results['bookmark_item_list_found']:
         messages.add_message(request, messages.ERROR, "Bookmarks found for Contest Office 2 - "
                                                       "automatic merge not working yet.")
-        return HttpResponseRedirect(reverse('office:find_and_remove_duplicate_offices', args=()) +
+        return HttpResponseRedirect(reverse('office:find_and_merge_duplicate_offices', args=()) +
                                     "?google_civic_election_id=" + str(google_civic_election_id) +
                                     "&state_code=" + str(state_code))
 
@@ -945,22 +945,46 @@ def office_merge_process_view(request):
     if positive_value_exists(contest_office2_on_stage.google_civic_office_name):
         if not positive_value_exists(contest_office1_on_stage.google_civic_office_name):
             contest_office1_on_stage.google_civic_office_name = contest_office2_on_stage.google_civic_office_name
+        elif contest_office2_on_stage.google_civic_office_name == contest_office1_on_stage.google_civic_office_name:
+            # The value is already stored in contest_office1_on_stage.google_civic_office_name so doesn't need
+            # to be added to contest_office1_on_stage.google_civic_office_name2
+            pass
         elif not positive_value_exists(contest_office1_on_stage.google_civic_office_name2):
             contest_office1_on_stage.google_civic_office_name2 = contest_office2_on_stage.google_civic_office_name
+        elif contest_office2_on_stage.google_civic_office_name == contest_office1_on_stage.google_civic_office_name2:
+            # The value is already stored in contest_office1_on_stage.google_civic_office_name2 so doesn't need
+            # to be added to contest_office1_on_stage.google_civic_office_name3
+            pass
         elif not positive_value_exists(contest_office1_on_stage.google_civic_office_name3):
             contest_office1_on_stage.google_civic_office_name3 = contest_office2_on_stage.google_civic_office_name
     if positive_value_exists(contest_office2_on_stage.google_civic_office_name2):
         if not positive_value_exists(contest_office1_on_stage.google_civic_office_name):
             contest_office1_on_stage.google_civic_office_name = contest_office2_on_stage.google_civic_office_name2
+        elif contest_office2_on_stage.google_civic_office_name2 == contest_office1_on_stage.google_civic_office_name:
+            # The value is already stored in contest_office1_on_stage.google_civic_office_name so doesn't need
+            # to be added to contest_office1_on_stage.google_civic_office_name2
+            pass
         elif not positive_value_exists(contest_office1_on_stage.google_civic_office_name2):
             contest_office1_on_stage.google_civic_office_name2 = contest_office2_on_stage.google_civic_office_name2
+        elif contest_office2_on_stage.google_civic_office_name2 == contest_office1_on_stage.google_civic_office_name2:
+            # The value is already stored in contest_office1_on_stage.google_civic_office_name2 so doesn't need
+            # to be added to contest_office1_on_stage.google_civic_office_name3
+            pass
         elif not positive_value_exists(contest_office1_on_stage.google_civic_office_name3):
             contest_office1_on_stage.google_civic_office_name3 = contest_office2_on_stage.google_civic_office_name2
     if positive_value_exists(contest_office2_on_stage.google_civic_office_name3):
         if not positive_value_exists(contest_office1_on_stage.google_civic_office_name):
             contest_office1_on_stage.google_civic_office_name = contest_office2_on_stage.google_civic_office_name3
+        elif contest_office2_on_stage.google_civic_office_name3 == contest_office1_on_stage.google_civic_office_name:
+            # The value is already stored in contest_office1_on_stage.google_civic_office_name so doesn't need
+            # to be added to contest_office1_on_stage.google_civic_office_name2
+            pass
         elif not positive_value_exists(contest_office1_on_stage.google_civic_office_name2):
             contest_office1_on_stage.google_civic_office_name2 = contest_office2_on_stage.google_civic_office_name3
+        elif contest_office2_on_stage.google_civic_office_name3 == contest_office1_on_stage.google_civic_office_name2:
+            # The value is already stored in contest_office1_on_stage.google_civic_office_name2 so doesn't need
+            # to be added to contest_office1_on_stage.google_civic_office_name3
+            pass
         elif not positive_value_exists(contest_office1_on_stage.google_civic_office_name3):
             contest_office1_on_stage.google_civic_office_name3 = contest_office2_on_stage.google_civic_office_name3
 
@@ -970,7 +994,7 @@ def office_merge_process_view(request):
                                                            contest_office1_on_stage)
     if not candidates_results['success']:
         messages.add_message(request, messages.ERROR, candidates_results['status'])
-        return HttpResponseRedirect(reverse('office:find_and_remove_duplicate_offices', args=()) +
+        return HttpResponseRedirect(reverse('office:find_and_merge_duplicate_offices', args=()) +
                                     "?google_civic_election_id=" + str(google_civic_election_id) +
                                     "&state_code=" + str(state_code))
 
@@ -980,7 +1004,7 @@ def office_merge_process_view(request):
                                                                contest_office1_on_stage)
     if not ballot_items_results['success']:
         messages.add_message(request, messages.ERROR, ballot_items_results['status'])
-        return HttpResponseRedirect(reverse('office:find_and_remove_duplicate_offices', args=()) +
+        return HttpResponseRedirect(reverse('office:find_and_merge_duplicate_offices', args=()) +
                                     "?google_civic_election_id=" + str(google_civic_election_id) +
                                     "&state_code=" + str(state_code))
 
@@ -990,7 +1014,7 @@ def office_merge_process_view(request):
                                                                 True)
     if not public_positions_results['success']:
         messages.add_message(request, messages.ERROR, public_positions_results['status'])
-        return HttpResponseRedirect(reverse('office:find_and_remove_duplicate_offices', args=()) +
+        return HttpResponseRedirect(reverse('office:find_and_merge_duplicate_offices', args=()) +
                                     "?google_civic_election_id=" + str(google_civic_election_id) +
                                     "&state_code=" + str(state_code))
 
@@ -1000,7 +1024,7 @@ def office_merge_process_view(request):
                                                                  False)
     if not friends_positions_results['success']:
         messages.add_message(request, messages.ERROR, friends_positions_results['status'])
-        return HttpResponseRedirect(reverse('office:find_and_remove_duplicate_offices', args=()) +
+        return HttpResponseRedirect(reverse('office:find_and_merge_duplicate_offices', args=()) +
                                     "?google_civic_election_id=" + str(google_civic_election_id) +
                                     "&state_code=" + str(state_code))
 
@@ -1017,7 +1041,7 @@ def office_merge_process_view(request):
                                     '&state_code=' + str(state_code))
 
     if remove_duplicate_process:
-        return HttpResponseRedirect(reverse('office:find_and_remove_duplicate_offices', args=()) +
+        return HttpResponseRedirect(reverse('office:find_and_merge_duplicate_offices', args=()) +
                                     "?google_civic_election_id=" + str(google_civic_election_id) +
                                     "&state_code=" + str(state_code))
 

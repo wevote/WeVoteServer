@@ -1798,18 +1798,21 @@ class PositionListManager(models.Model):
                     position_list_query = position_list_query.filter(stance=stance_we_are_looking_for)
 
             # Only one of these blocks will be used at a time
-            if retrieve_friends_positions and friends_we_vote_id_list is not False:
-                # Find positions from friends. Look for we_vote_id case insensitive.
-                we_vote_id_filter = Q()
-                for we_vote_id in friends_we_vote_id_list:
-                    we_vote_id_filter |= Q(voter_we_vote_id__iexact=we_vote_id)
-                position_list_query = position_list_query.filter(we_vote_id_filter)
-            if retrieve_public_positions and organizations_followed_we_vote_id_list is not False:
-                # Find positions from organizations voter follows.
-                we_vote_id_filter = Q()
-                for we_vote_id in organizations_followed_we_vote_id_list:
-                    we_vote_id_filter |= Q(organization_we_vote_id__iexact=we_vote_id)
-                position_list_query = position_list_query.filter(we_vote_id_filter)
+            if retrieve_friends_positions and friends_we_vote_id_list:
+                if type(friends_we_vote_id_list) is list and len(friends_we_vote_id_list) > 0:
+                    # Find positions from friends. Look for we_vote_id case insensitive.
+                    we_vote_id_filter = Q()
+                    for we_vote_id in friends_we_vote_id_list:
+                        we_vote_id_filter |= Q(voter_we_vote_id__iexact=we_vote_id)
+                    position_list_query = position_list_query.filter(we_vote_id_filter)
+            if retrieve_public_positions and organizations_followed_we_vote_id_list:
+                if type(organizations_followed_we_vote_id_list) is list \
+                        and len(organizations_followed_we_vote_id_list) > 0:
+                    # Find positions from organizations voter follows.
+                    we_vote_id_filter = Q()
+                    for we_vote_id in organizations_followed_we_vote_id_list:
+                        we_vote_id_filter |= Q(organization_we_vote_id__iexact=we_vote_id)
+                    position_list_query = position_list_query.filter(we_vote_id_filter)
             # Limit to positions in the last x years - currently we are not limiting
             # position_list = position_list.filter(election_id=election_id)
             position_list = list(position_list_query)

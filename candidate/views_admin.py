@@ -4,6 +4,7 @@
 
 from .controllers import candidates_import_from_master_server, candidates_import_from_sample_file, \
     candidate_politician_match, fetch_duplicate_candidate_count, figure_out_conflict_values, find_duplicate_candidate, \
+    merge_if_duplicate_candidates, merge_these_two_candidates, \
     refresh_candidate_data_from_master_tables, retrieve_candidate_photos, \
     retrieve_candidate_politician_match_options, save_google_search_image_to_candidate_table, \
     save_google_search_link_to_candidate_table
@@ -950,7 +951,7 @@ def candidate_edit_process_view(request):
                                     '&page=' + str(page))
 
     if remove_duplicate_process:
-        return HttpResponseRedirect(reverse('candidate:find_and_remove_duplicate_candidates', args=()) +
+        return HttpResponseRedirect(reverse('candidate:find_and_merge_duplicate_candidates', args=()) +
                                     "?google_civic_election_id=" + str(google_civic_election_id) +
                                     "&state_code=" + str(state_code))
     else:
@@ -1130,14 +1131,13 @@ def candidate_merge_process_view(request):
             messages.add_message(request, messages.ERROR, 'Could not save candidates_are_not_duplicates entry: ' +
                                  results['status'])
         messages.add_message(request, messages.INFO, 'Prior candidates skipped, and not merged.')
-        return HttpResponseRedirect(reverse('candidate:find_and_remove_duplicate_candidates', args=()) +
+        return HttpResponseRedirect(reverse('candidate:find_and_merge_duplicate_candidates', args=()) +
                                     "?google_civic_election_id=" + str(google_civic_election_id) +
                                     "&state_code=" + str(state_code))
 
     candidate1_results = candidate_campaign_manager.retrieve_candidate_campaign_from_we_vote_id(candidate1_we_vote_id)
     if candidate1_results['candidate_campaign_found']:
         candidate1_on_stage = candidate1_results['candidate_campaign']
-        candidate1_id = candidate1_on_stage.id
     else:
         messages.add_message(request, messages.ERROR, 'Could not retrieve candidate 1.')
         return HttpResponseRedirect(reverse('candidate:candidate_list', args=()) +
@@ -1147,234 +1147,39 @@ def candidate_merge_process_view(request):
     candidate2_results = candidate_campaign_manager.retrieve_candidate_campaign_from_we_vote_id(candidate2_we_vote_id)
     if candidate2_results['candidate_campaign_found']:
         candidate2_on_stage = candidate2_results['candidate_campaign']
-        candidate2_id = candidate2_on_stage.id
     else:
         messages.add_message(request, messages.ERROR, 'Could not retrieve candidate 2.')
         return HttpResponseRedirect(reverse('candidate:candidate_list', args=()) +
                                     '?google_civic_election_id=' + str(google_civic_election_id) +
                                     '&state_code=' + str(state_code))
 
-    # TODO: Migrate images?
-
-    # Merge politician data
-    politician1_we_vote_id = candidate1_on_stage.politician_we_vote_id
-    politician2_we_vote_id = candidate2_on_stage.politician_we_vote_id
-    if positive_value_exists(politician1_we_vote_id) and positive_value_exists(politician2_we_vote_id):
-        if politician1_we_vote_id != politician2_we_vote_id:
-            # Conflicting parent politicians
-            # TODO: Call separate politician merge process
-            messages.add_message(request, messages.ERROR, 'Unable to merge politicians at this time.')
-            return HttpResponseRedirect(reverse('candidate:find_and_remove_duplicate_candidates', args=()) +
-                                        "?google_civic_election_id=" + str(google_civic_election_id) +
-                                        "&state_code=" + str(state_code))
-        # else do nothing (same parent politician)
-    elif positive_value_exists(politician2_we_vote_id):
-        # Migrate politician from candidate 2 to candidate 1
-        politician2_id = 0
-        try:
-            # get the politician_id directly to avoid bad data
-            politician_manager = PoliticianManager()
-            results = politician_manager.retrieve_politician(0, politician2_we_vote_id)
-            if results['politician_found']:
-                politician = results['politician']
-                politician2_id = politician.id
-            pass
-        except Exception as e:
-            messages.add_message(request, messages.ERROR, 'Could not save politician.')
-        candidate1_on_stage.politician_we_vote_id = politician2_we_vote_id
-        candidate1_on_stage.politician_id = politician2_id
-    # else do nothing (no parent politician for candidate 2)
-
-    # TODO: Migrate bookmarks
-    bookmark_item_list_manager = BookmarkItemList()
-    bookmark_results = bookmark_item_list_manager.retrieve_bookmark_item_list_for_candidate(candidate2_we_vote_id)
-    if bookmark_results['bookmark_item_list_found']:
-        messages.add_message(request, messages.ERROR, "Bookmarks found for Candidate 2 - "
-                                                      "automatic merge not working yet.")
-        return HttpResponseRedirect(reverse('candidate:find_and_remove_duplicate_candidates', args=()) +
-                                    "?google_civic_election_id=" + str(google_civic_election_id) +
-                                    "&state_code=" + str(state_code))
-
-    # Merge attribute values
+    # Gather choices made from merge form
     conflict_values = figure_out_conflict_values(candidate1_on_stage, candidate2_on_stage)
+    admin_merge_choices = {}
     for attribute in CANDIDATE_UNIQUE_IDENTIFIERS:
         conflict_value = conflict_values.get(attribute, None)
         if conflict_value == "CONFLICT":
             choice = request.POST.get(attribute + '_choice', '')
             if candidate2_we_vote_id == choice:
-                setattr(candidate1_on_stage, attribute, getattr(candidate2_on_stage, attribute))
+                admin_merge_choices[attribute] = getattr(candidate2_on_stage, attribute)
         elif conflict_value == "CANDIDATE2":
-            setattr(candidate1_on_stage, attribute, getattr(candidate2_on_stage, attribute))
+            admin_merge_choices[attribute] = getattr(candidate2_on_stage, attribute)
 
-    # Preserve unique google_civic_candidate_name, _name2, and _name3
-    if positive_value_exists(candidate2_on_stage.google_civic_candidate_name):
-        # If an initial exists in the name (ex/ " A "), then search for the name
-        # with a period added (ex/ " A. ")
-        # google_civic_candidate_name
-        name_changed = False
-        google_civic_candidate_name_modified = "IGNORE_NO_NAME"
-        google_civic_candidate_name_new_start = candidate2_on_stage.google_civic_candidate_name  # For prefix/suffixes
-        add_results = add_period_to_middle_name_initial(candidate2_on_stage.google_civic_candidate_name)
-        if add_results['name_changed']:
-            name_changed = True
-            google_civic_candidate_name_modified = add_results['modified_name']
-            google_civic_candidate_name_new_start = google_civic_candidate_name_modified
-        else:
-            add_results = remove_period_from_middle_name_initial(candidate2_on_stage.google_civic_candidate_name)
-            if add_results['name_changed']:
-                name_changed = True
-                google_civic_candidate_name_modified = add_results['modified_name']
-                google_civic_candidate_name_new_start = google_civic_candidate_name_modified
+    merge_results = merge_these_two_candidates(candidate1_we_vote_id, candidate2_we_vote_id, admin_merge_choices,
+                                               candidate1_on_stage, candidate2_on_stage)
 
-        # Deal with prefix and suffix
-        # If an prefix or suffix exists in the name (ex/ " JR"), then search for the name
-        # with a period added (ex/ " JR.")
-        add_results = add_period_to_name_prefix_and_suffix(google_civic_candidate_name_new_start)
-        if add_results['name_changed']:
-            name_changed = True
-            google_civic_candidate_name_modified = add_results['modified_name']
-        else:
-            add_results = remove_period_from_name_prefix_and_suffix(google_civic_candidate_name_new_start)
-            if add_results['name_changed']:
-                name_changed = True
-                google_civic_candidate_name_modified = add_results['modified_name']
-
-        if not positive_value_exists(candidate1_on_stage.google_civic_candidate_name):
-            candidate1_on_stage.google_civic_candidate_name = candidate2_on_stage.google_civic_candidate_name
-        elif name_changed and candidate1_on_stage.google_civic_candidate_name == google_civic_candidate_name_modified:
-            # If candidate1_on_stage.google_civic_candidate_name has a middle initial with/without a period
-            # don't store it if the alternate without/with the period already is stored
-            pass
-        elif not positive_value_exists(candidate1_on_stage.google_civic_candidate_name2):
-            candidate1_on_stage.google_civic_candidate_name2 = candidate2_on_stage.google_civic_candidate_name
-        elif name_changed and candidate1_on_stage.google_civic_candidate_name2 == google_civic_candidate_name_modified:
-            # If candidate1_on_stage.google_civic_candidate_name2 has a middle initial with/without a period
-            # don't store it if the alternate without/with the period already is stored
-            pass
-        elif not positive_value_exists(candidate1_on_stage.google_civic_candidate_name3):
-            candidate1_on_stage.google_civic_candidate_name3 = candidate2_on_stage.google_civic_candidate_name
-        # If candidate1_on_stage.google_civic_candidate_name3 already exists, we ignore the incoming alternate name
-    if positive_value_exists(candidate2_on_stage.google_civic_candidate_name2):
-        # If an initial exists in the name (ex/ " A "), then search for the name
-        # with a period added (ex/ " A. ")
-        # google_civic_candidate_name
-        name_changed = False
-        google_civic_candidate_name2_modified = "IGNORE_NO_NAME"
-        google_civic_candidate_name2_new_start = candidate2_on_stage.google_civic_candidate_name2  # For prefix/suffixes
-        add_results = add_period_to_middle_name_initial(candidate2_on_stage.google_civic_candidate_name2)
-        if add_results['name_changed']:
-            name_changed = True
-            google_civic_candidate_name2_modified = add_results['modified_name']
-            google_civic_candidate_name2_new_start = google_civic_candidate_name2_modified
-        else:
-            add_results = remove_period_from_middle_name_initial(candidate2_on_stage.google_civic_candidate_name2)
-            if add_results['name_changed']:
-                name_changed = True
-                google_civic_candidate_name2_modified = add_results['modified_name']
-                google_civic_candidate_name2_new_start = google_civic_candidate_name2_modified
-
-        # Deal with prefix and suffix
-        # If an prefix or suffix exists in the name (ex/ " JR"), then search for the name
-        # with a period added (ex/ " JR.")
-        add_results = add_period_to_name_prefix_and_suffix(google_civic_candidate_name2_new_start)
-        if add_results['name_changed']:
-            name_changed = True
-            google_civic_candidate_name2_modified = add_results['modified_name']
-        else:
-            add_results = remove_period_from_name_prefix_and_suffix(google_civic_candidate_name2_new_start)
-            if add_results['name_changed']:
-                name_changed = True
-                google_civic_candidate_name2_modified = add_results['modified_name']
-
-        if not positive_value_exists(candidate1_on_stage.google_civic_candidate_name):
-            candidate1_on_stage.google_civic_candidate_name = candidate2_on_stage.google_civic_candidate_name2
-        elif name_changed and candidate1_on_stage.google_civic_candidate_name == google_civic_candidate_name2_modified:
-            # If candidate1_on_stage.google_civic_candidate_name has a middle initial with/without a period
-            # don't store it if the alternate without/with the period already is stored
-            pass
-        elif not positive_value_exists(candidate1_on_stage.google_civic_candidate_name2):
-            candidate1_on_stage.google_civic_candidate_name2 = candidate2_on_stage.google_civic_candidate_name2
-        elif name_changed and candidate1_on_stage.google_civic_candidate_name2 == google_civic_candidate_name2_modified:
-            # If candidate1_on_stage.google_civic_candidate_name2 has a middle initial with/without a period
-            # don't store it if the alternate without/with the period already is stored
-            pass
-        elif not positive_value_exists(candidate1_on_stage.google_civic_candidate_name3):
-            candidate1_on_stage.google_civic_candidate_name3 = candidate2_on_stage.google_civic_candidate_name2
-        # If candidate1_on_stage.google_civic_candidate_name3 already exists, we ignore the incoming alternate name
-    if positive_value_exists(candidate2_on_stage.google_civic_candidate_name3):
-        # If an initial exists in the name (ex/ " A "), then search for the name
-        # with a period added (ex/ " A. ")
-        # google_civic_candidate_name
-        name_changed = False
-        google_civic_candidate_name3_modified = "IGNORE_NO_NAME"
-        google_civic_candidate_name3_new_start = candidate2_on_stage.google_civic_candidate_name3  # For prefix/suffixes
-        add_results = add_period_to_middle_name_initial(candidate2_on_stage.google_civic_candidate_name3)
-        if add_results['name_changed']:
-            name_changed = True
-            google_civic_candidate_name3_modified = add_results['modified_name']
-            google_civic_candidate_name3_new_start = google_civic_candidate_name3_modified
-        else:
-            add_results = remove_period_from_middle_name_initial(candidate2_on_stage.google_civic_candidate_name3)
-            if add_results['name_changed']:
-                name_changed = True
-                google_civic_candidate_name3_modified = add_results['modified_name']
-                google_civic_candidate_name3_new_start = google_civic_candidate_name3_modified
-
-        # Deal with prefix and suffix
-        # If an prefix or suffix exists in the name (ex/ " JR"), then search for the name
-        # with a period added (ex/ " JR.")
-        add_results = add_period_to_name_prefix_and_suffix(google_civic_candidate_name3_new_start)
-        if add_results['name_changed']:
-            name_changed = True
-            google_civic_candidate_name3_modified = add_results['modified_name']
-        else:
-            add_results = remove_period_from_name_prefix_and_suffix(google_civic_candidate_name3_new_start)
-            if add_results['name_changed']:
-                name_changed = True
-                google_civic_candidate_name3_modified = add_results['modified_name']
-
-        if not positive_value_exists(candidate1_on_stage.google_civic_candidate_name):
-            candidate1_on_stage.google_civic_candidate_name = candidate2_on_stage.google_civic_candidate_name3
-        elif name_changed and candidate1_on_stage.google_civic_candidate_name == google_civic_candidate_name3_modified:
-            # If candidate1_on_stage.google_civic_candidate_name has a middle initial with/without a period
-            # don't store it if the alternate without/with the period already is stored
-            pass
-        elif not positive_value_exists(candidate1_on_stage.google_civic_candidate_name2):
-            candidate1_on_stage.google_civic_candidate_name2 = candidate2_on_stage.google_civic_candidate_name3
-        elif name_changed and candidate1_on_stage.google_civic_candidate_name2 == google_civic_candidate_name3_modified:
-            # If candidate1_on_stage.google_civic_candidate_name2 has a middle initial with/without a period
-            # don't store it if the alternate without/with the period already is stored
-            pass
-        elif not positive_value_exists(candidate1_on_stage.google_civic_candidate_name3):
-            candidate1_on_stage.google_civic_candidate_name3 = candidate2_on_stage.google_civic_candidate_name3
-        # If candidate1_on_stage.google_civic_candidate_name3 already exists, we ignore the incoming alternate name
-
-    # Merge public positions
-    public_positions_results = move_positions_to_another_candidate(candidate2_id, candidate2_we_vote_id,
-                                                                   candidate1_id, candidate1_we_vote_id,
-                                                                   True)
-    if not public_positions_results['success']:
-        messages.add_message(request, messages.ERROR, public_positions_results['status'])
-        return HttpResponseRedirect(reverse('candidate:find_and_remove_duplicate_candidates', args=()) +
+    if positive_value_exists(merge_results['candidates_merged']):
+        candidate = merge_results['candidate']
+        messages.add_message(request, messages.INFO, "Candidate '{candidate_name}' merged."
+                                                     "".format(candidate_name=candidate.candidate_name))
+    else:
+        # NOTE: We could also redirect to a page to look specifically at these two candidates, but this should
+        # also get you back to looking at the two candidates
+        messages.add_message(request, messages.ERROR, merge_results['status'])
+        return HttpResponseRedirect(reverse('candidate:find_and_merge_duplicate_candidates', args=()) +
                                     "?google_civic_election_id=" + str(google_civic_election_id) +
+                                    "&auto_merge_off=1" +
                                     "&state_code=" + str(state_code))
-
-    # Merge friends-only positions
-    friends_positions_results = move_positions_to_another_candidate(candidate2_id, candidate2_we_vote_id,
-                                                                    candidate1_id, candidate1_we_vote_id,
-                                                                    False)
-    if not friends_positions_results['success']:
-        messages.add_message(request, messages.ERROR, friends_positions_results['status'])
-        return HttpResponseRedirect(reverse('candidate:find_and_remove_duplicate_candidates', args=()) +
-                                    "?google_civic_election_id=" + str(google_civic_election_id) +
-                                    "&state_code=" + str(state_code))
-
-    # Note: wait to wrap in try/except block
-    candidate1_on_stage.save()
-    refresh_candidate_data_from_master_tables(candidate1_on_stage.we_vote_id)
-
-    # Remove candidate 2
-    candidate2_on_stage.delete()
 
     if redirect_to_candidate_list:
         return HttpResponseRedirect(reverse('candidate:candidate_list', args=()) +
@@ -1382,7 +1187,7 @@ def candidate_merge_process_view(request):
                                     '&state_code=' + str(state_code))
 
     if remove_duplicate_process:
-        return HttpResponseRedirect(reverse('candidate:find_and_remove_duplicate_candidates', args=()) +
+        return HttpResponseRedirect(reverse('candidate:find_and_merge_duplicate_candidates', args=()) +
                                     "?google_civic_election_id=" + str(google_civic_election_id) +
                                     "&state_code=" + str(state_code))
 
@@ -1390,7 +1195,7 @@ def candidate_merge_process_view(request):
 
 
 @login_required
-def find_and_remove_duplicate_candidates_view(request):
+def find_and_merge_duplicate_candidates_view(request):
     authority_required = {'verified_volunteer'}  # admin, verified_volunteer
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
@@ -1400,6 +1205,7 @@ def find_and_remove_duplicate_candidates_view(request):
     find_duplicates_count = request.GET.get('find_duplicates_count', 0)
     google_civic_election_id = request.GET.get('google_civic_election_id', 0)
     google_civic_election_id = convert_to_int(google_civic_election_id)
+    state_code = request.GET.get('state_code', "")
     candidate_manager = CandidateCampaignManager()
 
     # We only want to process if a google_civic_election_id comes in
@@ -1449,10 +1255,24 @@ def find_and_remove_duplicate_candidates_view(request):
             candidate_option1_for_template = we_vote_candidate
             candidate_option2_for_template = results['candidate_merge_possibility']
 
-            # This view function takes us to displaying a template
-            remove_duplicate_process = True  # Try to find another candidate to merge after finishing
-            return render_candidate_merge_form(request, candidate_option1_for_template, candidate_option2_for_template,
-                                               results['candidate_merge_conflict_values'], remove_duplicate_process)
+            # Can we automatically merge these candidates?
+            merge_results = merge_if_duplicate_candidates(
+                candidate_option1_for_template, candidate_option2_for_template,
+                results['candidate_merge_conflict_values'])
+
+            if merge_results['candidates_merged']:
+                candidate = merge_results['candidate']
+                messages.add_message(request, messages.INFO, "Candidate {candidate_name} automatically merged."
+                                                             "".format(candidate_name=candidate.candidate_name))
+                return HttpResponseRedirect(reverse('candidate:find_and_merge_duplicate_candidates', args=()) +
+                                            "?google_civic_election_id=" + str(google_civic_election_id) +
+                                            "&state_code=" + str(state_code))
+            else:
+                # This view function takes us to displaying a template
+                remove_duplicate_process = True  # Try to find another candidate to merge after finishing
+                return render_candidate_merge_form(request, candidate_option1_for_template,
+                                                   candidate_option2_for_template,
+                                                   results['candidate_merge_conflict_values'], remove_duplicate_process)
 
     message = "Google Civic Election ID: {election_id}, " \
               "No duplicate candidates found for this election." \
@@ -1612,7 +1432,7 @@ def remove_duplicate_candidate_view(request):
     if results['success']:
         if remove_duplicate_process:
             # Continue this process
-            return HttpResponseRedirect(reverse('candidate:find_and_remove_duplicate_candidates', args=()) +
+            return HttpResponseRedirect(reverse('candidate:find_and_merge_duplicate_candidates', args=()) +
                                         "?google_civic_election_id=" + google_civic_election_id)
         else:
             messages.add_message(request, messages.ERROR, results['status'])
@@ -1763,7 +1583,8 @@ def candidate_delete_process_view(request):
     # instance of this candidate?
     position_list_manager = PositionListManager()
     retrieve_public_positions = True  # The alternate is positions for friends-only
-    position_list = position_list_manager.retrieve_all_positions_for_candidate_campaign(retrieve_public_positions, candidate_id)
+    position_list = position_list_manager.retrieve_all_positions_for_candidate_campaign(
+        retrieve_public_positions, candidate_id)
     if positive_value_exists(len(position_list)):
         positions_found_for_this_candidate = True
     else:

@@ -385,7 +385,7 @@ def elected_office_edit_process_view(request):
                                     '&state_code=' + str(state_code))
 
     if remove_duplicate_process:
-        return HttpResponseRedirect(reverse('office:find_and_remove_duplicate_offices', args=()) +
+        return HttpResponseRedirect(reverse('office:find_and_merge_duplicate_offices', args=()) +
                                     "?google_civic_election_id=" + str(google_civic_election_id) +
                                     "&state_code=" + str(state_code))
     else:
