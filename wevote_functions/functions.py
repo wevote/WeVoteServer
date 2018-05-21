@@ -551,6 +551,8 @@ def convert_to_political_party_constant(raw_party_incoming):
         return NON_PARTISAN
     if raw_party == 'pf':
         return PEACE_AND_FREEDOM
+    if raw_party == 'p-f':
+        return PEACE_AND_FREEDOM
     if raw_party == 'peace and freedom':
         return PEACE_AND_FREEDOM
     if raw_party == 'peace and freedom party':

@@ -94,6 +94,7 @@ def find_duplicate_candidate(we_vote_candidate, ignore_candidate_id_list):
             'success':                              False,
             'status':                               "FIND_DUPLICATE_CANDIDATE_MISSING_CANDIDATE_OBJECT",
             'candidate_merge_possibility_found':    False,
+            'candidate_list':                       [],
         }
         return error_results
 
@@ -102,6 +103,7 @@ def find_duplicate_candidate(we_vote_candidate, ignore_candidate_id_list):
             'success':                              False,
             'status':                               "FIND_DUPLICATE_CANDIDATE_MISSING_GOOGLE_CIVIC_ELECTION_ID",
             'candidate_merge_possibility_found':    False,
+            'candidate_list':                       [],
         }
         return error_results
 
@@ -121,6 +123,7 @@ def find_duplicate_candidate(we_vote_candidate, ignore_candidate_id_list):
                 'candidate_merge_possibility_found':    True,
                 'candidate_merge_possibility':          results['candidate'],
                 'candidate_merge_conflict_values':      candidate_merge_conflict_values,
+                'candidate_list':                       results['candidate_list'],
             }
             return results
         elif results['candidate_list_found']:
@@ -134,6 +137,7 @@ def find_duplicate_candidate(we_vote_candidate, ignore_candidate_id_list):
                 'candidate_merge_possibility_found':    True,
                 'candidate_merge_possibility':          results['candidate_list'][0],
                 'candidate_merge_conflict_values':      candidate_merge_conflict_values,
+                'candidate_list':                       results['candidate_list'],
             }
             return results
         else:
@@ -141,6 +145,7 @@ def find_duplicate_candidate(we_vote_candidate, ignore_candidate_id_list):
                 'success':                              True,
                 'status':                               "FIND_DUPLICATE_CANDIDATE_NO_DUPLICATES_FOUND",
                 'candidate_merge_possibility_found':    False,
+                'candidate_list':                       results['candidate_list'],
             }
             return results
 
@@ -153,6 +158,7 @@ def find_duplicate_candidate(we_vote_candidate, ignore_candidate_id_list):
         'success':                              True,
         'status':                               "FIND_DUPLICATE_CANDIDATE_NO_DUPLICATES_FOUND",
         'candidate_merge_possibility_found':    False,
+        'candidate_list':                       [],
     }
     return results
 
