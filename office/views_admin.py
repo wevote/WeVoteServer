@@ -470,6 +470,7 @@ def office_summary_view(request, office_id):
     google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
     state_code = request.GET.get('state_code', "")
     office_search = request.GET.get('office_search', "")
+
     try:
         contest_office = ContestOffice.objects.get(id=office_id)
         contest_office_found = True

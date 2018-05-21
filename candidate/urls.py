@@ -26,6 +26,8 @@ urlpatterns = [
         views_admin.find_duplicate_candidate_view, name='find_duplicate_candidate'),
     url(r'^(?P<candidate_id>[0-9]+)/retrieve_photos/$',
         views_admin.candidate_retrieve_photos_view, name='candidate_retrieve_photos'),
+    url(r'^compare_two_candidates/$',
+        views_admin.compare_two_candidates_for_merge_view, name='compare_two_candidates_for_merge'),
     url(r'^duplicate_candidates/$',
         views_admin.find_and_merge_duplicate_candidates_view, name='find_and_merge_duplicate_candidates'),
     url(r'^remove_duplicate_candidate/$',

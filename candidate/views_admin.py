@@ -1525,10 +1525,19 @@ def candidate_summary_view(request, candidate_id):
 
     messages_on_stage = get_messages(request)
     candidate_id = convert_to_int(candidate_id)
+    candidate_we_vote_id = ""
+    google_civic_election_id = 0
+    state_code = ""
     candidate_on_stage_found = False
+
+    candidate_search = request.GET.get('candidate_search', "")
+
     candidate_on_stage = CandidateCampaign()
     try:
         candidate_on_stage = CandidateCampaign.objects.get(id=candidate_id)
+        candidate_we_vote_id = candidate_on_stage.we_vote_id
+        google_civic_election_id = candidate_on_stage.google_civic_election_id
+        state_code = candidate_on_stage.state_code
         candidate_on_stage_found = True
     except CandidateCampaign.MultipleObjectsReturned as e:
         handle_record_found_more_than_one_exception(e, logger=logger)
@@ -1536,14 +1545,76 @@ def candidate_summary_view(request, candidate_id):
         # This is fine, create new
         pass
 
+    candidate_search_results_list = []
+    if positive_value_exists(candidate_search) and positive_value_exists(candidate_we_vote_id):
+        candidate_queryset = CandidateCampaign.objects.all()
+        candidate_queryset = candidate_queryset.filter(google_civic_election_id=google_civic_election_id)
+        candidate_queryset = candidate_queryset.exclude(we_vote_id__iexact=candidate_we_vote_id)
+
+        if positive_value_exists(state_code):
+            candidate_queryset = candidate_queryset.filter(state_code__iexact=state_code)
+
+        search_words = candidate_search.split()
+        for one_word in search_words:
+            filters = []  # Reset for each search word
+            new_filter = Q(candidate_name__icontains=one_word)
+            filters.append(new_filter)
+
+            new_filter = Q(we_vote_id__iexact=one_word)
+            filters.append(new_filter)
+
+            new_filter = Q(contest_office_we_vote_id__iexact=one_word)
+            filters.append(new_filter)
+
+            new_filter = Q(ballotpedia_candidate_name__icontains=one_word)
+            filters.append(new_filter)
+
+            new_filter = Q(contest_office_name__icontains=one_word)
+            filters.append(new_filter)
+
+            new_filter = Q(google_civic_candidate_name__icontains=one_word)
+            filters.append(new_filter)
+
+            new_filter = Q(google_civic_candidate_name2__icontains=one_word)
+            filters.append(new_filter)
+
+            new_filter = Q(google_civic_candidate_name3__icontains=one_word)
+            filters.append(new_filter)
+
+            new_filter = Q(twitter_name__icontains=one_word)
+            filters.append(new_filter)
+
+            # Add the first query
+            if len(filters):
+                final_filters = filters.pop()
+
+                # ...and "OR" the remaining items in the list
+                for item in filters:
+                    final_filters |= item
+
+                candidate_queryset = candidate_queryset.filter(final_filters)
+
+        candidate_search_results_list = list(candidate_queryset)
+    elif candidate_on_stage_found:
+        ignore_candidate_we_vote_id_list = []
+        ignore_candidate_we_vote_id_list.append(candidate_on_stage.we_vote_id)
+        results = find_duplicate_candidate(candidate_on_stage, ignore_candidate_we_vote_id_list)
+        if results['candidate_merge_possibility_found']:
+            candidate_search_results_list = results['candidate_list']
+
     if candidate_on_stage_found:
         template_values = {
             'messages_on_stage': messages_on_stage,
             'candidate': candidate_on_stage,
+            'candidate_search_results_list': candidate_search_results_list,
+            'google_civic_election_id': google_civic_election_id,
+            'state_code': state_code,
         }
     else:
         template_values = {
             'messages_on_stage': messages_on_stage,
+            'google_civic_election_id': google_civic_election_id,
+            'state_code': state_code,
         }
     return render(request, 'candidate/candidate_summary.html', template_values)
 
@@ -1605,3 +1676,43 @@ def candidate_delete_process_view(request):
 
     return HttpResponseRedirect(reverse('candidate:candidate_list', args=()) +
                                 "?google_civic_election_id=" + str(google_civic_election_id))
+
+
+@login_required
+def compare_two_candidates_for_merge_view(request):
+    # admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'political_data_manager'}
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
+    candidate1_we_vote_id = request.GET.get('candidate1_we_vote_id', 0)
+    candidate2_we_vote_id = request.GET.get('candidate2_we_vote_id', 0)
+    google_civic_election_id = request.GET.get('google_civic_election_id', 0)
+    google_civic_election_id = convert_to_int(google_civic_election_id)
+
+    candidate_manager = CandidateCampaignManager()
+    candidate_results = candidate_manager.retrieve_candidate_campaign_from_we_vote_id(candidate1_we_vote_id)
+    if not candidate_results['candidate_campaign_found']:
+        messages.add_message(request, messages.ERROR, "Candidate1 not found.")
+        return HttpResponseRedirect(reverse('candidate:candidate_list', args=()) +
+                                    "?google_civic_election_id=" + str(google_civic_election_id))
+
+    candidate_option1_for_template = candidate_results['candidate_campaign']
+
+    candidate_results = candidate_manager.retrieve_candidate_campaign_from_we_vote_id(candidate2_we_vote_id)
+    if not candidate_results['candidate_campaign_found']:
+        messages.add_message(request, messages.ERROR, "Candidate2 not found.")
+        return HttpResponseRedirect(reverse('candidate:candidate_summary', args=(candidate_option1_for_template.id,)) +
+                                    "?google_civic_election_id=" + str(google_civic_election_id))
+
+    candidate_option2_for_template = candidate_results['candidate_campaign']
+
+    candidate_merge_conflict_values = figure_out_conflict_values(
+        candidate_option1_for_template, candidate_option2_for_template)
+
+    # This view function takes us to displaying a template
+    remove_duplicate_process = False  # Do not try to find another office to merge after finishing
+    return render_candidate_merge_form(request, candidate_option1_for_template,
+                                       candidate_option2_for_template,
+                                       candidate_merge_conflict_values,
+                                       remove_duplicate_process)

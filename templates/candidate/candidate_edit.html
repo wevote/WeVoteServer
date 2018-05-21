@@ -319,8 +319,14 @@ span.wrap_word { word-break: break-word; }
     </div>
 </div>
 
-<p><a href="{% url 'candidate:candidate_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
-    cancel</a>
+<p>
+{% if candidate %}
+    <a href="{% url 'candidate:candidate_summary' candidate.id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
+      cancel</a>
+{% else %}
+    <a href="{% url 'candidate:candidate_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
+      cancel</a>
+{% endif %}
 <input name="submit_text" type="submit" value="{% if candidate %}Update Candidate{% else %}Save New Candidate{% endif %}" /></p>
 </form>
 
