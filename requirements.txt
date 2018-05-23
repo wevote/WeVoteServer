@@ -18,14 +18,14 @@ geopy==1.14.0
 google-api-python-client==1.6.7
 gunicorn==19.8.1
 httplib2==0.11.3
-oauth2client==1.4.7
-oauthlib==0.7.2
+oauth2client==4.1.2
+oauthlib==2.1.0
 nameparser==0.5.6
 Pillow==4.0.0
 psycopg2==2.7.4
 pyasn1==0.4.2
 pyasn1-modules==0.2.1
-py3dns==3.1.0
+# py3dns==3.1.0
 pygeoip==0.3.2
 PyJWT==1.6.3
 python-magic==0.4.15  # Requires "brew install libmagic" or "brew upgrade libmagic"
@@ -33,7 +33,7 @@ python-openid==2.2.5
 python-social-auth==0.2.10
 pytz==2018.4
 requests==2.14.2
-requests-oauthlib==0.5.0
+requests-oauthlib==0.8.0
 robot-detection==0.4
 rsa==3.4.2
 selenium==3.12.0
@@ -44,7 +44,7 @@ static3==0.7.0
 stripe==1.55.2
 tweepy==3.6.0
 Unipath==1.1
-uritemplate==0.6
+uritemplate==3.0.0
 usaddress==0.5.10
 user-agents==1.1.0
 validate-email==1.3
