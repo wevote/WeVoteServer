@@ -4212,7 +4212,8 @@ def import_ballot_item_data_from_batch_row_actions(batch_header_id, batch_row_id
                     latitude = polling_location.latitude
                     longitude = polling_location.longitude
                     polling_location_name = polling_location.location_name
-                    text_for_map_search = polling_location.get_text_for_map_search()
+                    results = polling_location.get_text_for_map_search_results()
+                    text_for_map_search = results['text_for_map_search']
                     state_code = polling_location.state
 
                 create_results = ballot_returned_manager.update_or_create_ballot_returned(

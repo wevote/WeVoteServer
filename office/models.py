@@ -33,6 +33,7 @@ CONTEST_OFFICE_UNIQUE_IDENTIFIERS = [
     'district_scope',
     'elected_office_name',
     'electorate_specifications',
+    'google_ballot_placement',
     'google_civic_election_id',
     'google_civic_election_id_new',
     'google_civic_office_name',
@@ -71,6 +72,8 @@ class ContestOffice(models.Model):
     # The unique ID of the election containing this contest. (Provided by Google Civic)
     google_civic_election_id = models.CharField(verbose_name="google civic election id",
                                                 max_length=255, null=False, blank=False)
+    google_ballot_placement = models.BigIntegerField(
+        verbose_name="the order this item should appear on the ballot", null=True, blank=True, unique=False)
     state_code = models.CharField(verbose_name="state this office serves", max_length=2, null=True, blank=True)
     google_civic_election_id_new = models.PositiveIntegerField(
         verbose_name="google civic election id", default=0, null=False, blank=False)
@@ -392,7 +395,7 @@ class ContestOfficeManager(models.Model):
                     )
                 contest_office_found = True
                 success = True
-                status += 'CONTEST_OFFICE_SAVED '
+                status += 'MATCHING_CONTEST_OFFICE_FOUND '
             except ContestOffice.MultipleObjectsReturned as e:
                 success = False
                 status += 'MULTIPLE_MATCHING_CONTEST_OFFICES_FOUND_BY_GOOGLE_CIVIC_OFFICE_NAME '
@@ -452,13 +455,13 @@ class ContestOfficeManager(models.Model):
                                     contest_office_on_stage.google_civic_office_name = value
                                 elif contest_office_on_stage.google_civic_office_name == value:
                                     pass
-                                elif not positive_value_exists(contest_office_on_stage.google_civic_office_name1):
-                                    contest_office_on_stage.google_civic_office_name1 = value
-                                elif contest_office_on_stage.google_civic_office_name1 == value:
-                                    pass
                                 elif not positive_value_exists(contest_office_on_stage.google_civic_office_name2):
                                     contest_office_on_stage.google_civic_office_name2 = value
                                 elif contest_office_on_stage.google_civic_office_name2 == value:
+                                    pass
+                                elif not positive_value_exists(contest_office_on_stage.google_civic_office_name3):
+                                    contest_office_on_stage.google_civic_office_name3 = value
+                                elif contest_office_on_stage.google_civic_office_name3 == value:
                                     pass
                             else:
                                 setattr(contest_office_on_stage, key, value)

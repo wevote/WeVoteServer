@@ -597,7 +597,8 @@ def ballot_item_list_edit_process_view(request):
                                             "&polling_location_city=" + polling_location_city +
                                             "&polling_location_zip=" + str(polling_location_zip)
                                             )
-
+            results = polling_location.get_text_for_map_search_results()
+            text_for_map_search = results['text_for_map_search']
             ballot_returned = BallotReturned(
                 election_date=election.election_day_text,
                 election_description_text=election.election_name,
@@ -611,7 +612,7 @@ def ballot_item_list_edit_process_view(request):
                 ballot_location_display_name=ballot_location_display_name,
                 ballot_location_display_option_on=ballot_location_display_option_on,
                 ballot_location_shortcut=ballot_location_shortcut,
-                text_for_map_search=polling_location.get_text_for_map_search(),
+                text_for_map_search=text_for_map_search,
             )
             ballot_returned.save()
             ballot_returned_id = ballot_returned.id
@@ -639,6 +640,9 @@ def ballot_item_list_edit_process_view(request):
             ballot_returned.ballot_location_display_name = ballot_location_display_name
             ballot_returned.ballot_location_shortcut = ballot_location_shortcut
             ballot_returned.normalized_state = state_code
+            results = polling_location.get_text_for_map_search_results()
+            text_for_map_search = results['text_for_map_search']
+            ballot_returned.text_for_map_search = text_for_map_search
 
             ballot_returned.save()
             messages.add_message(request, messages.INFO, 'Ballot_returned updated.')

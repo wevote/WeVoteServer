@@ -4,7 +4,7 @@
 
 from .models import BallotItemListManager, BallotItemManager, BallotReturnedListManager, BallotReturnedManager, \
     CANDIDATE, copy_existing_ballot_items_from_stored_ballot, OFFICE, MEASURE, \
-    VoterBallotSaved, VoterBallotSavedManager
+    refresh_ballot_items_for_voter_copied_from_one_polling_location, VoterBallotSaved, VoterBallotSavedManager
 from candidate.models import CandidateCampaignListManager
 from config.base import get_environment_variable
 from datetime import datetime, timedelta
@@ -620,6 +620,68 @@ def figure_out_google_civic_election_id_voter_is_watching_by_voter_id(voter_id):
     return results
 
 
+def refresh_voter_ballots_from_polling_location(ballot_returned_from_polling_location, google_civic_election_id):
+    status = ""
+    success = True
+
+    ballot_saved_manager = VoterBallotSavedManager()
+    # When voters provide partial addresses, we copy their ballots from nearby polling locations
+    # We want to find all voter_ballot_saved entries that came from polling_location_we_vote_id_source
+    polling_location_we_vote_id_source = ballot_returned_from_polling_location.polling_location_we_vote_id
+    retrieve_results = ballot_saved_manager.retrieve_voter_ballot_saved_list_for_election(
+        google_civic_election_id, polling_location_we_vote_id_source)
+    if retrieve_results['voter_ballot_saved_list_found']:
+        voter_ballot_saved_list = retrieve_results['voter_ballot_saved_list']
+        for voter_ballot_saved in voter_ballot_saved_list:
+            # Neither BallotReturned nor VoterBallotSaved change when we get refreshed data from Google Civic
+            if positive_value_exists(voter_ballot_saved.voter_id) \
+                    and positive_value_exists(voter_ballot_saved.ballot_returned_we_vote_id):
+                refresh_results = refresh_ballot_items_for_voter_copied_from_one_polling_location(
+                    voter_ballot_saved.voter_id, ballot_returned_from_polling_location)
+
+                if not refresh_results['ballot_returned_copied']:
+                    status += refresh_results['status']
+
+    results = {
+        'status': status,
+        'success': success,
+    }
+    return results
+
+
+def refresh_voter_ballots_not_copied_from_polling_location(google_civic_election_id):
+    status = ""
+    success = True
+
+    ballot_item_list_manager = BallotItemListManager()
+    ballot_saved_manager = VoterBallotSavedManager()
+    # When voters provide complete addresses, we get their ballot straight from Google Civic
+    # We want to find all voter_ballot_saved entries for these voters with full addresses
+    # This function does NOT reach back out to Google Civic
+    retrieve_results = ballot_saved_manager.retrieve_voter_ballot_saved_list_for_election(
+        google_civic_election_id, find_only_entries_not_copied_from_polling_location=True)
+    if retrieve_results['voter_ballot_saved_list_found']:
+        voter_ballot_saved_list = retrieve_results['voter_ballot_saved_list']
+        offices_dict = {}
+        measures_dict = {}
+        for voter_ballot_saved in voter_ballot_saved_list:
+            # Neither BallotReturned nor VoterBallotSaved change when we get refreshed data from Google Civic
+            if positive_value_exists(voter_ballot_saved.voter_id):
+                refresh_results = ballot_item_list_manager.refresh_ballot_items_from_master_tables(
+                    voter_ballot_saved.voter_id, google_civic_election_id,
+                    offices_dict, measures_dict)
+                offices_dict = refresh_results['offices_dict']
+                measures_dict = refresh_results['measures_dict']
+                if not refresh_results['success']:
+                    status += refresh_results['status']
+
+    results = {
+        'status': status,
+        'success': success,
+    }
+    return results
+
+
 def repair_ballot_items_for_election(google_civic_election_id):
     saved_count = 0
     state_code_not_found_count = 0
@@ -674,6 +736,10 @@ def repair_ballot_items_for_election(google_civic_election_id):
 
     count_results = ballot_item_list_manager.count_ballot_items_for_election_lacking_state(google_civic_election_id)
     ballot_item_list_count = count_results['ballot_item_list_count']
+
+    # Now check for VoterBallotSaved entries for voter ballots that were not copied from polling locations
+    #  so we can refresh the data
+    refresh_ballot_results = refresh_voter_ballots_not_copied_from_polling_location(google_civic_election_id)
 
     status = "REPAIR_BALLOT_ITEMS, total count that need repair: {ballot_item_list_count}, " \
              "saved_count: {saved_count}, " \
@@ -1103,7 +1169,7 @@ def generate_ballot_data(voter_device_link, google_civic_election_id, voter_addr
             }
             return results
 
-        default_election_data_source_is_ballotpedia = True
+        default_election_data_source_is_ballotpedia = False
         if default_election_data_source_is_ballotpedia:
             # 1a) Get ballot data from Ballotpedia for the actual VoterAddress
             ballotpedia_retrieve_results = voter_ballot_items_retrieve_from_ballotpedia_for_api(

@@ -601,7 +601,8 @@ def elected_official_delete_process_view(request):  # TODO DALE Transition fully
 #     for polling_location in polling_location_list:
 #         success = False
 #         # Get the address for this polling place, and then retrieve the ballot from Google Civic API
-#         text_for_map_search = polling_location.get_text_for_map_search()
+#         results = polling_location.get_text_for_map_search_results()
+#         text_for_map_search = results['text_for_map_search']
 #         google_civic_api_results_for_elected_officials = retrieve_elected_officials_from_google_civic_api(
 #             text_for_map_search, elected_office_on_stage.google_civic_election_id)
 #         if one_ballot_results['success']:

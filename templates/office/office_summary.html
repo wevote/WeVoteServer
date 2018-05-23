@@ -85,6 +85,10 @@
     </tr>
     {% endif %}
     <tr>
+      <td>Google ballotPlacement:</td>
+      <td><strong>{{ office.google_ballot_placement|default_if_none:"" }}</strong></td>
+    </tr>
+    <tr>
       <td>OCD Division ID:</td>
       <td><strong>{{ office.ocd_division_id|default_if_none:"" }}</strong></td>
     </tr>
