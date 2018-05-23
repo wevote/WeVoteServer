@@ -105,3 +105,4 @@ def catch_unhandled_exceptions(exc_type, exc_value, exc_traceback):
 
 # New in July 2017
 sys.excepthook = catch_unhandled_exceptions
+
