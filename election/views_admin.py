@@ -6,6 +6,7 @@ from .controllers import election_remote_retrieve, elections_import_from_master_
 from .models import Election
 from admin_tools.views import redirect_to_sign_in_page
 from analytics.models import AnalyticsManager
+from ballot.controllers import refresh_voter_ballots_from_polling_location
 from ballot.models import BallotItemListManager, BallotReturnedListManager, BallotReturnedManager, \
     VoterBallotSavedManager
 from candidate.models import CandidateCampaignListManager, CandidateCampaignManager
@@ -63,6 +64,7 @@ def election_all_ballots_retrieve_view(request, election_local_id=0):
     try:
         if positive_value_exists(election_local_id):
             election_on_stage = Election.objects.get(id=election_local_id)
+            google_civic_election_id = election_on_stage.google_civic_election_id
         else:
             election_on_stage = Election.objects.get(google_civic_election_id=google_civic_election_id)
             election_local_id = election_on_stage.id
@@ -128,7 +130,8 @@ def election_all_ballots_retrieve_view(request, election_local_id=0):
     for polling_location in polling_location_list:
         success = False
         # Get the address for this polling place, and then retrieve the ballot from Google Civic API
-        text_for_map_search = polling_location.get_text_for_map_search()
+        results = polling_location.get_text_for_map_search_results()
+        text_for_map_search = results['text_for_map_search']
         one_ballot_results = retrieve_one_ballot_from_google_civic_api(
             text_for_map_search, election_on_stage.google_civic_election_id)
         if one_ballot_results['success']:
@@ -137,6 +140,14 @@ def election_all_ballots_retrieve_view(request, election_local_id=0):
                                                                               polling_location.we_vote_id)
             if store_one_ballot_results['success']:
                 success = True
+                if store_one_ballot_results['ballot_returned_found']:
+                    ballot_returned = store_one_ballot_results['ballot_returned']
+                    ballot_returned_id = ballot_returned.id
+                    # Now refresh all of the other copies of this ballot
+                    if positive_value_exists(polling_location.we_vote_id) \
+                            and positive_value_exists(google_civic_election_id):
+                        refresh_ballot_results = refresh_voter_ballots_from_polling_location(
+                            ballot_returned, google_civic_election_id)
                 # NOTE: We don't support retrieving ballots for polling locations AND geocoding simultaneously
                 # if store_one_ballot_results['ballot_returned_found']:
                 #     ballot_returned = store_one_ballot_results['ballot_returned']
@@ -298,7 +309,8 @@ def election_one_ballot_retrieve_view(request, election_local_id=0):
     ballots_with_contests_retrieved = 0
     success = False
     # Get the address for this polling place, and then retrieve the ballot from Google Civic API
-    text_for_map_search = polling_location.get_text_for_map_search()
+    results = polling_location.get_text_for_map_search_results()
+    text_for_map_search = results['text_for_map_search']
     one_ballot_results = retrieve_one_ballot_from_google_civic_api(
         text_for_map_search, election_on_stage.google_civic_election_id)
     if one_ballot_results['success']:
@@ -310,6 +322,11 @@ def election_one_ballot_retrieve_view(request, election_local_id=0):
             if store_one_ballot_results['ballot_returned_found']:
                 ballot_returned = store_one_ballot_results['ballot_returned']
                 ballot_returned_id = ballot_returned.id
+                # Now refresh all of the other copies of this ballot
+                if positive_value_exists(polling_location.we_vote_id) \
+                        and positive_value_exists(google_civic_election_id):
+                    refresh_ballot_results = refresh_voter_ballots_from_polling_location(
+                        ballot_returned, google_civic_election_id)
             # NOTE: We don't support retrieving ballots for polling locations AND geocoding simultaneously
             # if store_one_ballot_results['ballot_returned_found']:
             #     ballot_returned = store_one_ballot_results['ballot_returned']

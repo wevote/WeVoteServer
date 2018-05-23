@@ -40,6 +40,8 @@ class ContestMeasure(models.Model):
     measure_text = models.TextField(verbose_name="measure text", null=True, blank=False)
     # A link to the referendum. This field is only populated for contests of type 'Referendum'.
     measure_url = models.CharField(verbose_name="measure details url", max_length=255, null=True, blank=False)
+    google_ballot_placement = models.BigIntegerField(
+        verbose_name="the order this item should appear on the ballot", null=True, blank=True, unique=False)
     # The unique ID of the election containing this contest. (Provided by Google Civic)
     google_civic_election_id = models.CharField(
         verbose_name="google civic election id", max_length=255, null=True, blank=True)

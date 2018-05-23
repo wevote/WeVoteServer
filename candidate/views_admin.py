@@ -287,9 +287,13 @@ def candidate_list_view(request):
             pass
         else:
             number_to_show_per_page = 25
-            candidate_count_start = number_to_show_per_page * page
-            candidate_count_end = candidate_count_start + number_to_show_per_page
-            candidate_list = candidate_list[candidate_count_start:candidate_count_end]
+            if candidate_list_count <= number_to_show_per_page:
+                # Ignore pagination
+                pass
+            else:
+                candidate_count_start = number_to_show_per_page * page
+                candidate_count_end = candidate_count_start + number_to_show_per_page
+                candidate_list = candidate_list[candidate_count_start:candidate_count_end]
     except CandidateCampaign.DoesNotExist:
         # This is fine, create new
         pass
@@ -1545,6 +1549,28 @@ def candidate_summary_view(request, candidate_id):
         # This is fine, create new
         pass
 
+    if positive_value_exists(candidate_we_vote_id):
+        position_list_manager = PositionListManager()
+
+        bookmark_item_list_manager = BookmarkItemList()
+
+        # Get positions counts
+        candidate_on_stage.public_positions_count = \
+            position_list_manager.fetch_public_positions_count_for_candidate_campaign(
+                candidate_on_stage.id, candidate_on_stage.we_vote_id)
+        candidate_on_stage.friends_positions_count = \
+            position_list_manager.fetch_friends_only_positions_count_for_candidate_campaign(
+                candidate_on_stage.id, candidate_on_stage.we_vote_id)
+        # Bookmarks
+        bookmark_results = bookmark_item_list_manager.retrieve_bookmark_item_list_for_candidate(
+            candidate_on_stage.we_vote_id)
+        if bookmark_results['bookmark_item_list_found']:
+            bookmark_item_list = bookmark_results['bookmark_item_list']
+            candidate_bookmark_count = len(bookmark_item_list)
+        else:
+            candidate_bookmark_count = 0
+        candidate_on_stage.bookmarks_count = candidate_bookmark_count
+
     candidate_search_results_list = []
     if positive_value_exists(candidate_search) and positive_value_exists(candidate_we_vote_id):
         candidate_queryset = CandidateCampaign.objects.all()
@@ -1602,20 +1628,13 @@ def candidate_summary_view(request, candidate_id):
         if results['candidate_merge_possibility_found']:
             candidate_search_results_list = results['candidate_list']
 
-    if candidate_on_stage_found:
-        template_values = {
-            'messages_on_stage': messages_on_stage,
-            'candidate': candidate_on_stage,
-            'candidate_search_results_list': candidate_search_results_list,
-            'google_civic_election_id': google_civic_election_id,
-            'state_code': state_code,
-        }
-    else:
-        template_values = {
-            'messages_on_stage': messages_on_stage,
-            'google_civic_election_id': google_civic_election_id,
-            'state_code': state_code,
-        }
+    template_values = {
+        'messages_on_stage': messages_on_stage,
+        'candidate': candidate_on_stage,
+        'candidate_search_results_list': candidate_search_results_list,
+        'google_civic_election_id': google_civic_election_id,
+        'state_code': state_code,
+    }
     return render(request, 'candidate/candidate_summary.html', template_values)
 
 

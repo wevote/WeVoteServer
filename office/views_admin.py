@@ -98,6 +98,7 @@ def offices_sync_out_view(request):  # officesSyncOut
                                                               'ballotpedia_id', 'ballotpedia_office_id',
                                                               'ballotpedia_office_name', 'ballotpedia_office_url',
                                                               'ballotpedia_race_id', 'ballotpedia_race_office_level',
+                                                              'google_ballot_placement',
                                                               'google_civic_office_name', 'google_civic_office_name2',
                                                               'google_civic_office_name3',
                                                               'wikipedia_id', 'number_voting_for', 'number_elected',

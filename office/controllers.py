@@ -241,6 +241,8 @@ def offices_import_from_structured_json(structured_json):
             state_code = one_office['state_code'] if 'state_code' in one_office else ''
             district_id = one_office['district_id'] if 'district_id' in one_office else ''
             office_name = one_office['office_name'] if 'office_name' in one_office else ''
+            google_ballot_placement = one_office['google_ballot_placement'] \
+                if 'google_ballot_placement' in one_office else ''
             google_civic_office_name = one_office['google_civic_office_name'] \
                 if 'google_civic_office_name' in one_office else ''
             google_civic_office_name2 = one_office['google_civic_office_name2'] \
@@ -279,6 +281,7 @@ def offices_import_from_structured_json(structured_json):
                 'district_id': district_id,
                 'district_name': district_name,
                 'office_name': office_name,
+                'google_ballot_placement': google_ballot_placement,
                 'google_civic_office_name': google_civic_office_name,
                 'google_civic_office_name2': google_civic_office_name2,
                 'google_civic_office_name3': google_civic_office_name3,

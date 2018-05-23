@@ -50,8 +50,8 @@ class PollingLocation(models.Model):
     def get_formatted_zip(self):
         return extract_zip_formatted_from_zip9(self.zip_long)
 
-    def get_text_for_map_search(self):
-        text_for_map_search = ''
+    def get_text_for_map_search_results(self):
+        text_for_map_search = ""
         if self.line1:
             text_for_map_search += self.line1.strip()
         if self.city:
@@ -66,7 +66,16 @@ class PollingLocation(models.Model):
             if len(text_for_map_search):
                 text_for_map_search += " "
             text_for_map_search += self.get_formatted_zip()
-        return text_for_map_search
+        # We have to return this as results (instead of a straight string) because python interprets it as a tuple
+        # if there are commas in the string
+        results = {
+            'text_for_map_search':  text_for_map_search,
+        }
+        return results
+
+    def get_text_for_map_search(self):
+        results = self.get_text_for_map_search_results()
+        return results['text_for_map_search']
 
     # We override the save function so we can auto-generate we_vote_id
     def save(self, *args, **kwargs):

@@ -133,11 +133,12 @@ class BallotItemManager(models.Model):
             ballot_item.contest_measure_id = measure_object.id
             ballot_item.contest_measure_we_vote_id = measure_object.we_vote_id
             ballot_item.ballot_item_display_name = measure_object.measure_title
+            ballot_item.google_ballot_placement = measure_object.google_ballot_placement
             ballot_item.measure_subtitle = measure_object.measure_subtitle
             ballot_item.measure_text = measure_object.measure_text
             ballot_item.measure_url = measure_object.measure_url
-            ballot_item.no_vote_description = measure_object.no_vote_description
-            ballot_item.yes_vote_description = measure_object.yes_vote_description
+            ballot_item.no_vote_description = measure_object.ballotpedia_no_vote_description
+            ballot_item.yes_vote_description = measure_object.ballotpedia_yes_vote_description
             values_changed = True
 
         if values_changed:
@@ -172,6 +173,7 @@ class BallotItemManager(models.Model):
             ballot_item.contest_office_id = contest_office.id
             ballot_item.contest_office_we_vote_id = contest_office.we_vote_id
             ballot_item.ballot_item_display_name = contest_office.office_name
+            ballot_item.google_ballot_placement = contest_office.google_ballot_placement
             values_changed = True
 
         if values_changed:
@@ -894,16 +896,23 @@ class BallotItemListManager(models.Model):
 
     def copy_ballot_items(self, ballot_returned, to_voter_id):
         status = ""
+        ballot_item_list = []
+        ballot_item_list_found = False
         # Get all ballot items from the reference ballot_returned
         if positive_value_exists(ballot_returned.polling_location_we_vote_id):
             retrieve_results = self.retrieve_all_ballot_items_for_polling_location(
                 ballot_returned.polling_location_we_vote_id, ballot_returned.google_civic_election_id)
             status += retrieve_results['status']
-        else:
+            ballot_item_list_found = retrieve_results['ballot_item_list_found']
+            ballot_item_list = retrieve_results['ballot_item_list']
+        elif positive_value_exists(ballot_returned.voter_id):
             retrieve_results = self.retrieve_all_ballot_items_for_voter(ballot_returned.voter_id,
                                                                         ballot_returned.google_civic_election_id)
             status += retrieve_results['status']
-        if not retrieve_results['ballot_item_list_found']:
+            ballot_item_list_found = retrieve_results['ballot_item_list_found']
+            ballot_item_list = retrieve_results['ballot_item_list']
+
+        if not ballot_item_list_found:
             error_results = {
                 'ballot_returned_copied':   False,
                 'success':                  False,
@@ -911,7 +920,6 @@ class BallotItemListManager(models.Model):
             }
             return error_results
 
-        ballot_item_list = retrieve_results['ballot_item_list']
         ballot_item_manager = BallotItemManager()
 
         for one_ballot_item in ballot_item_list:
@@ -935,6 +943,116 @@ class BallotItemListManager(models.Model):
             'ballot_returned_copied':   True,
             'success':                  True,
             'status':                   status,
+        }
+        return results
+
+    def refresh_ballot_items_from_master_tables(self, voter_id, google_civic_election_id,
+                                                offices_dict={}, measures_dict={}):
+        """
+
+        :param voter_id:
+        :param google_civic_election_id:
+        :param offices_dict: # key is office_we_vote_id, value is the office object
+        :param measures_dict: # key is measure_we_vote_id, value is the measure object
+        :return:
+        """
+        status = ""
+        if not positive_value_exists(voter_id) or not positive_value_exists(google_civic_election_id):
+            status += "REFRESH_BALLOT_ITEMS_FROM_MASTER_TABLES-MISSING_VOTER_OR_ELECTION "
+            error_results = {
+                'success':                  False,
+                'status':                   status,
+                'offices_dict':             offices_dict,
+                'measures_dict':            measures_dict,
+            }
+            return error_results
+
+        # Get all ballot items for this voter
+        retrieve_results = self.retrieve_all_ballot_items_for_voter(voter_id, google_civic_election_id)
+        status += retrieve_results['status']
+        ballot_item_list_found = retrieve_results['ballot_item_list_found']
+        ballot_item_list = retrieve_results['ballot_item_list']
+
+        if not ballot_item_list_found:
+            error_results = {
+                'success':                  False,
+                'status':                   status,
+                'offices_dict':             offices_dict,
+                'measures_dict':            measures_dict,
+            }
+            return error_results
+
+        ballot_item_manager = BallotItemManager()
+        measure_manager = ContestMeasureManager()
+        office_manager = ContestOfficeManager()
+        measures_not_found = []
+        offices_not_found = []
+        for one_ballot_item in ballot_item_list:
+            defaults = {}
+            google_ballot_placement = one_ballot_item.google_ballot_placement
+            ballot_item_display_name = one_ballot_item.ballot_item_display_name
+            measure_subtitle = one_ballot_item.measure_subtitle
+            measure_text = one_ballot_item.measure_text
+            if positive_value_exists(one_ballot_item.contest_measure_we_vote_id):
+                measure_found = False
+                if one_ballot_item.contest_measure_we_vote_id in measures_dict:
+                    measure = measures_dict[one_ballot_item.contest_measure_we_vote_id]
+                    measure_found = True
+                else:
+                    if one_ballot_item.contest_measure_we_vote_id not in measures_not_found:
+                        results = measure_manager.retrieve_contest_measure_from_we_vote_id(
+                            one_ballot_item.contest_measure_we_vote_id)
+                        if results['contest_measure_found']:
+                            measure = results['contest_measure']
+                            measures_dict[measure.we_vote_id] = measure
+                            measure_found = True
+                        else:
+                            measures_not_found.append(one_ballot_item.contest_measure_we_vote_id)
+
+                if measure_found:
+                    defaults['measure_url'] = measure.get_measure_url()
+                    defaults['yes_vote_description'] = measure.ballotpedia_yes_vote_description
+                    defaults['no_vote_description'] = measure.ballotpedia_no_vote_description
+                    google_ballot_placement = measure.google_ballot_placement
+                    ballot_item_display_name = measure.measure_title
+                    measure_subtitle = measure.measure_subtitle
+                    measure_text = measure.measure_text
+            elif positive_value_exists(one_ballot_item.contest_office_we_vote_id):
+                office_found = False
+                if one_ballot_item.contest_office_we_vote_id in offices_dict:
+                    office = offices_dict[one_ballot_item.contest_office_we_vote_id]
+                    office_found = True
+                else:
+                    if one_ballot_item.contest_office_we_vote_id not in offices_not_found:
+                        results = office_manager.retrieve_contest_office_from_we_vote_id(
+                            one_ballot_item.contest_office_we_vote_id)
+                        if results['contest_office_found']:
+                            office = results['contest_office']
+                            offices_dict[office.we_vote_id] = office
+                            office_found = True
+                        else:
+                            offices_not_found.append(one_ballot_item.contest_office_we_vote_id)
+
+                if office_found:
+                    google_ballot_placement = office.google_ballot_placement
+                    ballot_item_display_name = office.office_name
+
+            create_results = ballot_item_manager.update_or_create_ballot_item_for_voter(
+                voter_id, google_civic_election_id, google_ballot_placement,
+                ballot_item_display_name, measure_subtitle,
+                measure_text,
+                one_ballot_item.local_ballot_order,
+                one_ballot_item.contest_office_id, one_ballot_item.contest_office_we_vote_id,
+                one_ballot_item.contest_measure_id, one_ballot_item.contest_measure_we_vote_id,
+                one_ballot_item.state_code, defaults)
+            if not create_results['success']:
+                status += create_results['status']
+
+        results = {
+            'success':                  True,
+            'status':                   status,
+            'offices_dict':             offices_dict,
+            'measures_dict':            measures_dict,
         }
         return results
 
@@ -2423,7 +2541,9 @@ class VoterBallotSavedManager(models.Model):
         }
         return results
 
-    def retrieve_voter_ballot_saved_list_for_election(self, google_civic_election_id):
+    def retrieve_voter_ballot_saved_list_for_election(self, google_civic_election_id,
+                                                      polling_location_we_vote_id_source="",
+                                                      find_only_entries_not_copied_from_polling_location=False):
         google_civic_election_id = convert_to_int(google_civic_election_id)
         voter_ballot_saved_list = []
         voter_ballot_saved_list_found = False
@@ -2433,6 +2553,12 @@ class VoterBallotSavedManager(models.Model):
 
             voter_ballot_saved_queryset = voter_ballot_saved_queryset.filter(
                 google_civic_election_id=google_civic_election_id)
+            if positive_value_exists(polling_location_we_vote_id_source):
+                voter_ballot_saved_queryset = voter_ballot_saved_queryset.filter(
+                    polling_location_we_vote_id_source__iexact=polling_location_we_vote_id_source)
+            elif positive_value_exists(find_only_entries_not_copied_from_polling_location):
+                voter_ballot_saved_queryset = voter_ballot_saved_queryset.filter(
+                    Q(polling_location_we_vote_id_source=None) | Q(polling_location_we_vote_id_source=""))
             voter_ballot_saved_list = list(voter_ballot_saved_queryset)
 
             if len(voter_ballot_saved_list):
@@ -2755,5 +2881,76 @@ def copy_existing_ballot_items_from_stored_ballot(voter_id, text_for_map_search,
         ballot_returned.ballot_location_shortcut else '',
         'polling_location_we_vote_id_source':   ballot_returned.polling_location_we_vote_id,
         'status':                               status,
+    }
+    return results
+
+
+def refresh_ballot_items_for_voter_copied_from_one_polling_location(voter_id, ballot_returned_from_polling_location):
+    """
+    :param voter_id:
+    :param ballot_returned_from_polling_location:
+    :return:
+    """
+    success = True
+    status = ""
+    ballot_item_list_manager = BallotItemListManager()
+
+    google_civic_election_id = ballot_returned_from_polling_location.google_civic_election_id
+
+    if not positive_value_exists(voter_id):
+        success = False
+        status += "REFRESH_EXISTING_BALLOT_ITEMS_FOR_VOTER-NO_VOTER_ID "
+        error_results = {
+            'success':                              success,
+            'status':                               status,
+            'voter_id':                             voter_id,
+            'google_civic_election_id':             google_civic_election_id,
+            'ballot_returned_copied':               False,
+            'polling_location_we_vote_id_source':   ballot_returned_from_polling_location.polling_location_we_vote_id,
+        }
+        return error_results
+
+    if not positive_value_exists(ballot_returned_from_polling_location.google_civic_election_id):
+        success = False
+        status += "REFRESH_EXISTING_BALLOT_ITEMS_FOR_VOTER-NO_GOOGLE_CIVIC_ELECTION_ID "
+        error_results = {
+            'success':                              success,
+            'status':                               status,
+            'voter_id':                             voter_id,
+            'google_civic_election_id':             google_civic_election_id,
+            'ballot_returned_copied':               False,
+            'polling_location_we_vote_id_source':   ballot_returned_from_polling_location.polling_location_we_vote_id,
+        }
+        return error_results
+
+    # Remove all prior ballot items for this voter for this election, so we make room for
+    # copy_ballot_items to save ballot items
+    ballot_item_list_manager.delete_all_ballot_items_for_voter(
+        voter_id, ballot_returned_from_polling_location.google_civic_election_id)
+
+    # Copy the ballot items from the polling location over for the voter
+    copy_item_results = ballot_item_list_manager.copy_ballot_items(ballot_returned_from_polling_location, voter_id)
+    status += copy_item_results['status']
+
+    if not copy_item_results['ballot_returned_copied']:
+        success = False
+        status += "REFRESH_EXISTING_BALLOT_ITEMS_FOR_VOTER-FAILED_TO_COPY "
+        error_results = {
+            'success':                              success,
+            'status':                               status,
+            'voter_id':                             voter_id,
+            'google_civic_election_id':             google_civic_election_id,
+            'ballot_returned_copied':               False,
+            'polling_location_we_vote_id_source':   ballot_returned_from_polling_location.polling_location_we_vote_id,
+        }
+        return error_results
+
+    results = {
+        'success':                              success,
+        'status':                               status,
+        'voter_id':                             voter_id,
+        'google_civic_election_id':             google_civic_election_id,
+        'ballot_returned_copied':               True,
+        'polling_location_we_vote_id_source':   ballot_returned_from_polling_location.polling_location_we_vote_id,
     }
     return results

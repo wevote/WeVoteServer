@@ -24,6 +24,13 @@
       <td><strong>{{ candidate.google_civic_election_id }}</strong></td>
     </tr>
     <tr>
+      <td>Contest Office:</td>
+      <td>
+        <strong>{{ candidate.contest_office_name }}</strong>
+        {% if candidate.contest_office_id %} (<a href="{% url 'office:office_summary' candidate.contest_office_id %}" target="_blank">Go</a>){% endif %}
+      </td>
+    </tr>
+    <tr>
       <td>Office We Vote ID:</td>
       <td>
         <strong>{{ candidate.contest_office_we_vote_id }}</strong>
@@ -32,13 +39,31 @@
     <tr>
       <td>Candidate Website:</td>
       <td>
-        <strong>{{ candidate.candidate_url }}</strong>
+        <strong>{{ candidate.candidate_url|default_if_none:"" }}</strong>
       </td>
     </tr>
-
+    <tr>
+      <td>Public Positions:</td>
+      <td>
+        <strong>{{ candidate.public_positions_count }}</strong>
+      </td>
+    </tr>
+    <tr>
+      <td>Friends Only Positions:</td>
+      <td>
+        <strong>{{ candidate.friends_positions_count }}</strong>
+      </td>
+    </tr>
+    <tr>
+      <td>Bookmarks:</td>
+      <td>
+        <strong>{{ candidate.bookmarks_count }}</strong>
+      </td>
+    </tr>
 </table>
 
-<p><a href="{% url 'candidate:candidate_edit' candidate.id %}">edit</a></p>
+{% if candidate.id %}
+  <p><a href="{% url 'candidate:candidate_edit' candidate.id %}">edit</a></p>
 
 
 <h3>Merge with Another Candidate</h3>
@@ -54,6 +79,7 @@
     <input type="hidden" name="state_code" value="{{ state_code }}">
     <input type="submit" value="Search for Duplicate Office" />
 </form>
+{% endif %}
 
 {% if candidate_search_results_list %}
     <table border="1" cellpadding="5" cellspacing="5">

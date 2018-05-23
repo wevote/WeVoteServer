@@ -325,6 +325,8 @@ def process_contest_office_from_structured_json(
             updated_contest_office_values["electorate_specifications"] = electorate_specifications
         if positive_value_exists(special):
             updated_contest_office_values["special"] = special
+        if positive_value_exists(google_ballot_placement):
+            updated_contest_office_values["google_ballot_placement"] = google_ballot_placement
         contest_office_manager = ContestOfficeManager()
         # TODO DALE Note that Vermont data in 2016 did not provide district_id. The unique value was in the
         # district_name. So all "VT State Senator" candidates were lumped into a single office. But I believe
@@ -450,7 +452,7 @@ def process_contests_from_structured_json(
     contests_updated = 0
     contests_not_processed = 0
     for one_contest in contests_structured_json:
-        local_ballot_order += 1  # Needed if ballotPlacement isn't provided by Google Civic
+        local_ballot_order += 1  # Needed if ballotPlacement isn't provided by Google Civic. Related to ballot_placement
         contest_type = one_contest['type']
 
         # Is the contest is a referendum/initiative/measure?
@@ -464,7 +466,7 @@ def process_contests_from_structured_json(
                 contests_updated += 1
             elif process_contest_results['not_processed']:
                 contests_not_processed += 1
-        # All other contests are for an elected office
+        # All other contests are for a contest office
         else:
             process_contest_results = process_contest_office_from_structured_json(
                 one_contest, google_civic_election_id, state_code, ocd_division_id, local_ballot_order, voter_id,
