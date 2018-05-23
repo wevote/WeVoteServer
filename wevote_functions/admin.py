@@ -92,16 +92,17 @@ def setup_logging(
 
 
 # NOTE Comment the rest of this file if you are trying to debug a circular dependency
-def catch_unhandled_exceptions(exc_type, exc_value, exc_traceback):
+#def catch_unhandled_exceptions(exc_type, exc_value, exc_traceback):
     # Ignore KeyboardInterrupt so a console python program can exit with Ctrl + C.
-    if issubclass(exc_type, KeyboardInterrupt):
-        sys.__excepthook__(exc_type, exc_value, exc_traceback)
-        return
+#    if issubclass(exc_type, KeyboardInterrupt):
+#        sys.__excepthook__(exc_type, exc_value, exc_traceback)
+#        return
 
-    print("Uncaught exception:::", exc_type, exc_value)
-    logger = logging.getLogger(__name__)
-    logger.error("Uncaught exception:", exc_type, exc_value)
+#    print("Uncaught exception:::", exc_type, exc_value)
+#    logger = logging.getLogger(__name__)
+#    logger.error("Uncaught exception:", exc_type, exc_value)
     # exc_info=(exc_type, exc_value, exc_traceback))
 
 # New in July 2017
-sys.excepthook = catch_unhandled_exceptions
+#sys.excepthook = catch_unhandled_exceptions
+

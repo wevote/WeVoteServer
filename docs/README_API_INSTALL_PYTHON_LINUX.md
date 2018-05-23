@@ -31,7 +31,7 @@ Now, whenever you start a new project, you can create a virtual environment for 
 
 Now, create a virtual environment within the project directory by typing:
 
-    $ virtualenv WeVoteServer
+    $ virtualenv --python=/usr/bin/python3 WeVoteServer
     
 Now activate this new virtual environment for WeVoteServer:
 
@@ -47,11 +47,15 @@ Now activate this new virtual environment for WeVoteServer:
     (WeVoteServer) $ pip3 install -r requirements.txt
     (WeVoteServer) $ python3 -m pip install pyopenssl pyasn1 ndg-httpsclient
 
+If installing requirements.txt does not work because of different dependencies, attempt install -r requirements.txt several times.
+Also,relying on IDEs like PyCharm may help installing the packages.
+
 Test with this command:
     
     (WeVoteServer) $ python manage.py makemigrations
     (WeVoteServer) $ python manage.py migrate
     (WeVoteServer) $ python3 manage.py runserver
+
 
     
 [NEXT: 4. Set up Environment](README_API_INSTALL_SETUP_ENVIRONMENT.md)
