@@ -475,13 +475,22 @@ class IssueManager(models.Model):
                 # Note: When we decide to start updating issue_name elsewhere within We Vote, we should stop
                 #  updating issue_name via subsequent Google Civic imports
                 try:
+                    new_issue_created = False
+                    issue_updated = False
+                    issue_has_changes = False
                     for key, value in updated_issue_values.items():
                         if hasattr(issue_on_stage, key):
+                            issue_has_changes = True
                             setattr(issue_on_stage, key, value)
-                    issue_on_stage.save()
-                    new_issue_created = False
-                    success = True
-                    status += "ISSUE_UPDATED "
+                    if issue_has_changes and positive_value_exists(issue_on_stage.we_vote_id):
+                        issue_on_stage.save()
+                        issue_updated = True
+                    if issue_updated:
+                        success = True
+                        status += "ISSUE_UPDATED "
+                    else:
+                        success = False
+                        status += "ISSUE_NOT_UPDATED "
                 except Exception as e:
                     status += 'FAILED_TO_UPDATE_ISSUE ' \
                              '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
@@ -489,14 +498,22 @@ class IssueManager(models.Model):
             else:
                 # Create record
                 try:
-                    issue_on_stage = Issue.objects.create()
-                    for key, value in updated_issue_values.items():
-                        if hasattr(issue_on_stage, key):
-                            setattr(issue_on_stage, key, value)
-                    issue_on_stage.save()
-                    new_issue_created = True
-                    success = True
-                    status += "ISSUE_CREATED "
+                    new_issue_created = False
+                    issue_on_stage = Issue.objects.create(
+                        issue_name=issue_name,
+                        issue_description=issue_description)
+                    if positive_value_exists(issue_on_stage.id):
+                        for key, value in updated_issue_values.items():
+                            if hasattr(issue_on_stage, key):
+                                setattr(issue_on_stage, key, value)
+                        issue_on_stage.save()
+                        new_issue_created = True
+                    if new_issue_created:
+                        success = True
+                        status += "ISSUE_CREATED "
+                    else:
+                        success = False
+                        status += "ISSUE_NOT_CREATED "
                 except Exception as e:
                     status += 'FAILED_TO_CREATE_ISSUE ' \
                              '{error} [type: {error_type}]'.format(error=e, error_type=type(e))

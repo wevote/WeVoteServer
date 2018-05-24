@@ -628,6 +628,17 @@ def refresh_voter_ballots_from_polling_location(ballot_returned_from_polling_loc
     # When voters provide partial addresses, we copy their ballots from nearby polling locations
     # We want to find all voter_ballot_saved entries that came from polling_location_we_vote_id_source
     polling_location_we_vote_id_source = ballot_returned_from_polling_location.polling_location_we_vote_id
+
+    if not positive_value_exists(polling_location_we_vote_id_source) \
+            or not positive_value_exists(google_civic_election_id):
+        status += "REFRESH_VOTER_BALLOTS_FROM_POLLING_LOCATION-MISSING_REQUIRED_VARIABLE(S) "
+        success = False
+        results = {
+            'status': status,
+            'success': success,
+        }
+        return results
+
     retrieve_results = ballot_saved_manager.retrieve_voter_ballot_saved_list_for_election(
         google_civic_election_id, polling_location_we_vote_id_source)
     if retrieve_results['voter_ballot_saved_list_found']:

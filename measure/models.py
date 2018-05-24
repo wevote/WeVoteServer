@@ -263,20 +263,20 @@ class ContestMeasureManager(models.Model):
             # If here, we are dealing with a measure that is new to We Vote
             if not (district_id or district_name):
                 success = False
-                status = 'MISSING_DISTRICT_ID-MEASURE_UPDATE_OR_CREATE'
+                status += 'MISSING_DISTRICT_ID-MEASURE_UPDATE_OR_CREATE'
                 proceed_to_update_or_save = False
             elif not state_code:
                 success = False
-                status = 'MISSING_STATE_CODE-MEASURE_UPDATE_OR_CREATE'
+                status += 'MISSING_STATE_CODE-MEASURE_UPDATE_OR_CREATE'
                 proceed_to_update_or_save = False
             elif not measure_title:
                 success = False
-                status = 'MISSING_MEASURE_TITLE-MEASURE_UPDATE_OR_CREATE'
+                status += 'MISSING_MEASURE_TITLE-MEASURE_UPDATE_OR_CREATE'
                 proceed_to_update_or_save = False
 
         if not google_civic_election_id:
             success = False
-            status = 'MISSING_GOOGLE_CIVIC_ELECTION_ID-MEASURE_UPDATE_OR_CREATE'
+            status += 'MISSING_GOOGLE_CIVIC_ELECTION_ID-MEASURE_UPDATE_OR_CREATE'
             proceed_to_update_or_save = False
 
         if proceed_to_update_or_save:
@@ -294,7 +294,7 @@ class ContestMeasureManager(models.Model):
                 except ContestMeasure.MultipleObjectsReturned as e:
                     handle_record_found_more_than_one_exception(e, logger=logger)
                     success = False
-                    status = 'MULTIPLE_MATCHING_CONTEST_MEASURES_FOUND'
+                    status += 'MULTIPLE_MATCHING_CONTEST_MEASURES_FOUND'
                     exception_multiple_object_returned = True
                 except Exception as e:
                     status += 'FAILED_TO_UPDATE_OR_CREATE ' \
@@ -354,14 +354,22 @@ class ContestMeasureManager(models.Model):
                 elif contest_measure_found:
                     # Update record
                     try:
+                        new_measure_created = False
+                        measure_updated = False
+                        measure_changes_found = False
                         for key, value in updated_contest_measure_values.items():
                             if hasattr(contest_measure_on_stage, key):
+                                measure_changes_found = True
                                 setattr(contest_measure_on_stage, key, value)
-                        contest_measure_on_stage.save()
-                        measure_updated = True
-                        new_measure_created = False
-                        success = True
-                        status += "CONTEST_MEASURE_UPDATED "
+                        if measure_changes_found and positive_value_exists(contest_measure_on_stage.we_vote_id):
+                            contest_measure_on_stage.save()
+                            measure_updated = True
+                        if measure_updated:
+                            success = True
+                            status += "CONTEST_MEASURE_UPDATED "
+                        else:
+                            success = False
+                            status += "CONTEST_MEASURE_NOT_UPDATED "
                     except Exception as e:
                         status += 'FAILED_TO_UPDATE_CONTEST_MEASURE ' \
                                  '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
@@ -369,15 +377,27 @@ class ContestMeasureManager(models.Model):
                 else:
                     # Create record
                     try:
-                        contest_measure_on_stage = ContestMeasure.objects.create()
-                        for key, value in updated_contest_measure_values.items():
-                            if hasattr(contest_measure_on_stage, key):
-                                setattr(contest_measure_on_stage, key, value)
-                        contest_measure_on_stage.save()
                         measure_updated = False
-                        new_measure_created = True
-                        success = True
-                        status += "CONTEST_MEASURE_CREATED "
+                        new_measure_created = False
+                        contest_measure_on_stage = ContestMeasure.objects.create(
+                            google_civic_election_id=google_civic_election_id,
+                            measure_title=measure_title,
+                            district_id=district_id,
+                            district_name=district_name,
+                            state_code=district_name,
+                        )
+                        if positive_value_exists(contest_measure_on_stage.id):
+                            for key, value in updated_contest_measure_values.items():
+                                if hasattr(contest_measure_on_stage, key):
+                                    setattr(contest_measure_on_stage, key, value)
+                            contest_measure_on_stage.save()
+                            new_measure_created = True
+                        if new_measure_created:
+                            success = True
+                            status += "CONTEST_MEASURE_CREATED "
+                        else:
+                            success = False
+                            status += "CONTEST_MEASURE_NOT_CREATED "
                     except Exception as e:
                         status += 'FAILED_TO_CREATE_CONTEST_MEASURE ' \
                                  '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
@@ -506,7 +526,7 @@ class ContestMeasureManager(models.Model):
                 state_code=state_code, ctcl_uuid=ctcl_uuid, google_civic_election_id=google_civic_election_id)
             if new_measure:
                 success = True
-                status = "CREATE_MEASURE_ROW_ENTRY-MEASURE_CREATED "
+                status += "CREATE_MEASURE_ROW_ENTRY-MEASURE_CREATED "
                 new_measure_created = True
                 if 'election_day_text' in defaults:
                     new_measure.election_day_text = defaults['election_day_text']
@@ -534,14 +554,17 @@ class ContestMeasureManager(models.Model):
                     new_measure.measure_url = defaults['measure_url']
                 if 'state_code' in defaults:
                     new_measure.state_code = defaults['state_code']
-                new_measure.save()
+                if positive_value_exists(new_measure.we_vote_id):
+                    new_measure.save()
+                else:
+                    status += "COULD_NOT_SAVE-NO_WE_VOTE_ID "
             else:
                 success = False
-                status = "CREATE_MEASURE_ROW_ENTRY-MEASURE_CREATE_FAILED "
+                status += "CREATE_MEASURE_ROW_ENTRY-MEASURE_CREATE_FAILED "
         except Exception as e:
             success = False
             new_measure_created = False
-            status = "CREATE_MEASURE_ROW_ENTRY-MEASURE_CREATE_ERROR "
+            status += "CREATE_MEASURE_ROW_ENTRY-MEASURE_CREATE_ERROR "
             handle_exception(e, logger=logger, exception_message=status)
 
         results = {
@@ -609,15 +632,20 @@ class ContestMeasureManager(models.Model):
                     existing_measure_entry.measure_url = defaults['measure_url']
                 if 'state_code' in defaults:
                     existing_measure_entry.state_code = defaults['state_code']
+                measure_updated = False
                 # now go ahead and save this entry (update)
-                existing_measure_entry.save()
-                measure_updated = True
-                success = True
-                status = "UPDATE_MEASURE_ROW_ENTRY-MEASURE_UPDATED"
+                if positive_value_exists(existing_measure_entry.we_vote_id):
+                    existing_measure_entry.save()
+                    measure_updated = True
+                    success = True
+                    status += "UPDATE_MEASURE_ROW_ENTRY-MEASURE_UPDATED "
+                else:
+                    success = False
+                    status += "UPDATE_MEASURE_ROW_ENTRY-MISSING_WE_VOTE_ID "
         except Exception as e:
             success = False
             measure_updated = False
-            status = "UPDATE_MEASURE_ROW_ENTRY-MEASURE_RETRIEVE_ERROR"
+            status += "UPDATE_MEASURE_ROW_ENTRY-MEASURE_RETRIEVE_ERROR"
             handle_exception(e, logger=logger, exception_message=status)
 
         results = {

@@ -1274,7 +1274,7 @@ class ElectedOfficialManager(models.Model):
         # elif not positive_value_exists(ocd_division_id):
         #     success = False
         #     status = 'MISSING_OCD_DIVISION_ID'
-        # DALE 2016-02-20 We are not requiring elected_office_id or elected_office_we_vote_id to match a elected_official
+        # DALE 2016-02-20 We aren't requiring elected_office_id or elected_office_we_vote_id to match a elected_official
         # elif not positive_value_exists(elected_office_we_vote_id): # and not positive_value_exists(elected_office_id):
         #     success = False
         #     status = 'MISSING_CONTEST_OFFICE_ID'
@@ -1353,13 +1353,22 @@ class ElectedOfficialManager(models.Model):
                 # Note: When we decide to start updating elected_official_name elsewhere within We Vote, we should stop
                 #  updating elected_official_name via subsequent Google Civic imports
                 try:
+                    new_elected_official_created = False
+                    elected_official_updated = False
+                    elected_official_has_changes = False
                     for key, value in updated_elected_official_values.items():
                         if hasattr(elected_official_on_stage, key):
+                            elected_official_has_changes = True
                             setattr(elected_official_on_stage, key, value)
-                    elected_official_on_stage.save()
-                    new_elected_official_created = False
-                    success = True
-                    status += "ELECTED_OFFICIAL_UPDATED "
+                    if elected_official_has_changes and positive_value_exists(elected_official_on_stage.we_vote_id):
+                        elected_official_on_stage.save()
+                        elected_official_updated = True
+                    if elected_official_updated:
+                        success = True
+                        status += "ELECTED_OFFICIAL_UPDATED "
+                    else:
+                        success = False
+                        status += "ELECTED_OFFICIAL_NOT_UPDATED "
                 except Exception as e:
                     status += 'FAILED_TO_UPDATE_ELECTED_OFFICIAL ' \
                              '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
@@ -1367,25 +1376,37 @@ class ElectedOfficialManager(models.Model):
             else:
                 # Create record
                 try:
-                    elected_official_on_stage = ElectedOfficial.objects.create()
-                    for key, value in updated_elected_official_values.items():
-                        if hasattr(elected_official_on_stage, key):
-                            setattr(elected_official_on_stage, key, value)
-                    elected_official_on_stage.save()
-                    new_elected_official_created = True
-                    success = True
-                    status += "ELECTED_OFFICIAL_CREATED "
+                    new_elected_official_created = False
+                    elected_official_on_stage = ElectedOfficial.objects.create(
+                        google_civic_election_id=google_civic_election_id,
+                        ocd_division_id=ocd_division_id,
+                        elected_office_id=elected_office_id,
+                        elected_office_we_vote_id=elected_office_we_vote_id,
+                        google_civic_elected_official_name=google_civic_elected_official_name)
+                    if positive_value_exists(elected_official_on_stage.id):
+                        for key, value in updated_elected_official_values.items():
+                            if hasattr(elected_official_on_stage, key):
+                                setattr(elected_official_on_stage, key, value)
+                        elected_official_on_stage.save()
+                        new_elected_official_created = True
+                    if positive_value_exists(new_elected_official_created):
+                        status += "ELECTED_OFFICIAL_CREATED "
+                        success = True
+                    else:
+                        status += "ELECTED_OFFICIAL_NOT_CREATED "
+                        success = False
+
                 except Exception as e:
                     status += 'FAILED_TO_CREATE_ELECTED_OFFICIAL ' \
                              '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
                     success = False
 
         results = {
-            'success':                          success,
-            'status':                           status,
-            'MultipleObjectsReturned':          exception_multiple_object_returned,
-            'new_elected_official_created':            new_elected_official_created,
-            'elected_official':               elected_official_on_stage,
+            'success':                      success,
+            'status':                       status,
+            'MultipleObjectsReturned':      exception_multiple_object_returned,
+            'new_elected_official_created': new_elected_official_created,
+            'elected_official':             elected_official_on_stage,
         }
         return results
 

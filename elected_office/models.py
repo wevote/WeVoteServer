@@ -300,13 +300,22 @@ class ElectedOfficeManager(models.Model):
             elif elected_office_found:
                 # Update record
                 try:
+                    new_elected_office_created = False
+                    elected_office_updated = False
+                    elected_office_has_changes = False
                     for key, value in updated_elected_office_values.items():
                         if hasattr(elected_office_on_stage, key):
+                            elected_office_has_changes = True
                             setattr(elected_office_on_stage, key, value)
-                    elected_office_on_stage.save()
-                    elected_office_updated = True
-                    new_elected_office_created = False
-                    success = True
+                    if elected_office_has_changes and positive_value_exists(elected_office_on_stage.we_vote_id):
+                        elected_office_on_stage.save()
+                        elected_office_updated = True
+                    if elected_office_updated:
+                        success = True
+                        status += "ELECTED_OFFICE_UPDATED "
+                    else:
+                        success = False
+                        status += "ELECTED_OFFICE_NOT_UPDATED "
                 except Exception as e:
                     status += 'FAILED_TO_UPDATE_ELECTED_OFFICE ' \
                              '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
@@ -314,14 +323,26 @@ class ElectedOfficeManager(models.Model):
             else:
                 # Create record
                 try:
-                    elected_office_on_stage = ElectedOffice.objects.create()
-                    for key, value in updated_elected_office_values.items():
-                        if hasattr(elected_office_on_stage, key):
-                            setattr(elected_office_on_stage, key, value)
-                    elected_office_on_stage.save()
                     elected_office_updated = False
-                    new_elected_office_created = True
-                    success = True
+                    new_elected_office_created = False
+                    elected_office_on_stage = ElectedOffice.objects.create(
+                        maplight_id=maplight_id,
+                        google_civic_election_id=google_civic_election_id,
+                        elected_office_name=elected_office_name,
+                        state_code=state_code,
+                        district_id=district_id)
+                    if positive_value_exists(elected_office_on_stage.id):
+                        for key, value in updated_elected_office_values.items():
+                            if hasattr(elected_office_on_stage, key):
+                                setattr(elected_office_on_stage, key, value)
+                        elected_office_on_stage.save()
+                        new_elected_office_created = True
+                    if new_elected_office_created:
+                        success = True
+                        status += "ELECTED_OFFICE_CREATED "
+                    else:
+                        success = False
+                        status += "ELECTED_OFFICE_NOT_CREATED "
                 except Exception as e:
                     status += 'FAILED_TO_CREATE_ELECTED_OFFICE ' \
                              '{error} [type: {error_type}]'.format(error=e, error_type=type(e))

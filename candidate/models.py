@@ -1869,13 +1869,22 @@ class CandidateCampaignManager(models.Model):
                 # Note: When we decide to start updating candidate_name elsewhere within We Vote, we should stop
                 #  updating candidate_name via subsequent Google Civic imports
                 try:
+                    new_candidate_created = False
+                    candidate_updated = False
+                    candidate_changes_found = False
                     for key, value in updated_candidate_campaign_values.items():
                         if hasattr(candidate_campaign_on_stage, key):
+                            candidate_changes_found = True
                             setattr(candidate_campaign_on_stage, key, value)
-                    candidate_campaign_on_stage.save()
-                    new_candidate_created = False
-                    success = True
-                    status += "CANDIDATE_UPDATED "
+                    if candidate_changes_found and positive_value_exists(candidate_campaign_on_stage.we_vote_id):
+                        candidate_campaign_on_stage.save()
+                        candidate_updated = True
+                    if candidate_updated:
+                        success = True
+                        status += "CANDIDATE_UPDATED "
+                    else:
+                        success = False
+                        status += "CANDIDATE_NOT_UPDATED "
                 except Exception as e:
                     status += 'FAILED_TO_UPDATE_CANDIDATE ' \
                              '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
@@ -1883,14 +1892,26 @@ class CandidateCampaignManager(models.Model):
             else:
                 # Create record
                 try:
-                    candidate_campaign_on_stage = CandidateCampaign.objects.create()
-                    for key, value in updated_candidate_campaign_values.items():
-                        if hasattr(candidate_campaign_on_stage, key):
-                            setattr(candidate_campaign_on_stage, key, value)
-                    candidate_campaign_on_stage.save()
-                    new_candidate_created = True
-                    success = True
-                    status += "CANDIDATE_CREATED "
+                    new_candidate_created = False
+                    candidate_campaign_on_stage = CandidateCampaign.objects.create(
+                        google_civic_election_id=google_civic_election_id,
+                        ocd_division_id=ocd_division_id,
+                        contest_office_id=contest_office_id,
+                        contest_office_we_vote_id=contest_office_we_vote_id,
+                        google_civic_candidate_name=google_civic_candidate_name)
+                    if positive_value_exists(candidate_campaign_on_stage.id):
+                        for key, value in updated_candidate_campaign_values.items():
+                            if hasattr(candidate_campaign_on_stage, key):
+                                setattr(candidate_campaign_on_stage, key, value)
+                        candidate_campaign_on_stage.save()
+                        new_candidate_created = True
+                    if new_candidate_created:
+                        success = True
+                        status += "CANDIDATE_CREATED "
+                    else:
+                        success = False
+                        status += "CANDIDATE_NOT_CREATED "
+
                 except Exception as e:
                     status += 'FAILED_TO_CREATE_CANDIDATE ' \
                              '{error} [type: {error_type}]'.format(error=e, error_type=type(e))

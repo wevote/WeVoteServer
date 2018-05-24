@@ -312,7 +312,7 @@ def election_one_ballot_retrieve_view(request, election_local_id=0):
     results = polling_location.get_text_for_map_search_results()
     text_for_map_search = results['text_for_map_search']
     one_ballot_results = retrieve_one_ballot_from_google_civic_api(
-        text_for_map_search, election_on_stage.google_civic_election_id)
+        text_for_map_search, google_civic_election_id)
     if one_ballot_results['success']:
         one_ballot_json = one_ballot_results['structured_json']
         store_one_ballot_results = store_one_ballot_from_google_civic_api(one_ballot_json, 0,
