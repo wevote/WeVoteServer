@@ -2771,13 +2771,14 @@ class PositionListManager(models.Model):
         position_included_for_this_org = {}
         for one_position in position_list:
             if one_position.organization_we_vote_id in organization_with_multiple_positions:
-                first_four_digits = convert_to_int(one_position.vote_smart_time_span[:4])
-                if (newest_position_for_org[one_position.organization_we_vote_id] == first_four_digits) and \
-                        (one_position.organization_we_vote_id not in position_included_for_this_org):
-                    # If this position is the newest from among the organization's positions, include in results
-                    position_list_filtered.append(one_position)
-                    # Only add one position to position_list_filtered once
-                    position_included_for_this_org[one_position.organization_we_vote_id] = True
+                if positive_value_exists(one_position.vote_smart_time_span):
+                    first_four_digits = convert_to_int(one_position.vote_smart_time_span[:4])
+                    if (newest_position_for_org[one_position.organization_we_vote_id] == first_four_digits) and \
+                            (one_position.organization_we_vote_id not in position_included_for_this_org):
+                        # If this position is the newest from among the organization's positions, include in results
+                        position_list_filtered.append(one_position)
+                        # Only add one position to position_list_filtered once
+                        position_included_for_this_org[one_position.organization_we_vote_id] = True
             else:
                 position_list_filtered.append(one_position)
 
