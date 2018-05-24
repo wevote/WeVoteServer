@@ -456,7 +456,7 @@ def process_contests_from_structured_json(
         contest_type = one_contest['type']
 
         # Is the contest is a referendum/initiative/measure?
-        if contest_type.lower() == 'referendum':  # Referendum
+        if contest_type.lower() == 'referendum' or 'referendumTitle' in one_contest:  # Referendum
             process_contest_results = process_contest_referendum_from_structured_json(
                 one_contest, google_civic_election_id, state_code, ocd_division_id, local_ballot_order, voter_id,
                 polling_location_we_vote_id)

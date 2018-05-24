@@ -445,6 +445,9 @@ class ContestOfficeManager(models.Model):
             elif contest_office_found:
                 # Update record
                 try:
+                    new_office_created = False
+                    office_updated = False
+                    office_has_changes = False
                     for key, value in updated_contest_office_values.items():
                         if hasattr(contest_office_on_stage, key):
                             # Note, the incoming google_civic_office_name may need to go in _name, _name2, or _name3
@@ -453,22 +456,31 @@ class ContestOfficeManager(models.Model):
                                 # available "slot"
                                 if not positive_value_exists(contest_office_on_stage.google_civic_office_name):
                                     contest_office_on_stage.google_civic_office_name = value
+                                    office_has_changes = True
                                 elif contest_office_on_stage.google_civic_office_name == value:
                                     pass
                                 elif not positive_value_exists(contest_office_on_stage.google_civic_office_name2):
                                     contest_office_on_stage.google_civic_office_name2 = value
+                                    office_has_changes = True
                                 elif contest_office_on_stage.google_civic_office_name2 == value:
                                     pass
                                 elif not positive_value_exists(contest_office_on_stage.google_civic_office_name3):
                                     contest_office_on_stage.google_civic_office_name3 = value
+                                    office_has_changes = True
                                 elif contest_office_on_stage.google_civic_office_name3 == value:
                                     pass
                             else:
                                 setattr(contest_office_on_stage, key, value)
-                    contest_office_on_stage.save()
-                    office_updated = True
-                    new_office_created = False
-                    success = True
+                                office_has_changes = True
+                    if office_has_changes and positive_value_exists(contest_office_on_stage.we_vote_id):
+                        contest_office_on_stage.save()
+                        office_updated = True
+                    if office_updated:
+                        success = True
+                        status += "CONTEST_OFFICE_UPDATED "
+                    else:
+                        success = True
+                        status += "CONTEST_OFFICE_NOT_UPDATED "
                 except Exception as e:
                     status += 'FAILED_TO_UPDATE_CONTEST_OFFICE ' \
                              '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
@@ -476,14 +488,25 @@ class ContestOfficeManager(models.Model):
             else:
                 # Create record
                 try:
-                    contest_office_on_stage = ContestOffice.objects.create()
-                    for key, value in updated_contest_office_values.items():
-                        if hasattr(contest_office_on_stage, key):
-                            setattr(contest_office_on_stage, key, value)
-                    contest_office_on_stage.save()
                     office_updated = False
-                    new_office_created = True
-                    success = True
+                    new_office_created = False
+                    contest_office_on_stage = ContestOffice.objects.create(
+                        maplight_id=maplight_id,
+                        google_civic_election_id=google_civic_election_id,
+                        office_name=office_name,
+                        district_id=district_id)
+                    if positive_value_exists(contest_office_on_stage.id):
+                        for key, value in updated_contest_office_values.items():
+                            if hasattr(contest_office_on_stage, key):
+                                setattr(contest_office_on_stage, key, value)
+                        contest_office_on_stage.save()
+                        new_office_created = True
+                    if positive_value_exists(new_office_created):
+                        success = True
+                        status += "NEW_OFFICE_CREATED "
+                    else:
+                        success = False
+                        status += "NEW_OFFICE_NOT_CREATED "
                 except Exception as e:
                     status += 'FAILED_TO_CREATE_CONTEST_OFFICE ' \
                              '{error} [type: {error_type}]'.format(error=e, error_type=type(e))

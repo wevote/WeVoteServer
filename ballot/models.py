@@ -622,7 +622,7 @@ class BallotItemListManager(models.Model):
         except Exception as e:
             handle_exception(e, logger=logger)
             status = 'FAILED delete_all_ballot_items_for_voter ' \
-                     '{error} [type: {error_type}]'.format(error=e.message, error_type=type(e))
+                     '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
 
         results = {
             'success':                  True if ballot_item_list_deleted else False,
@@ -2544,9 +2544,21 @@ class VoterBallotSavedManager(models.Model):
     def retrieve_voter_ballot_saved_list_for_election(self, google_civic_election_id,
                                                       polling_location_we_vote_id_source="",
                                                       find_only_entries_not_copied_from_polling_location=False):
+        status = ""
         google_civic_election_id = convert_to_int(google_civic_election_id)
         voter_ballot_saved_list = []
         voter_ballot_saved_list_found = False
+        polling_location_variable_received = positive_value_exists(polling_location_we_vote_id_source) \
+            or find_only_entries_not_copied_from_polling_location
+        if not positive_value_exists(google_civic_election_id) or not polling_location_variable_received:
+            status += "RETRIEVE_VOTER_BALLOT_SAVED_LIST-MISSING_REQUIRED_VARIABLE(S) "
+            results = {
+                'success':                          True if voter_ballot_saved_list_found else False,
+                'status':                           status,
+                'voter_ballot_saved_list_found':    voter_ballot_saved_list_found,
+                'voter_ballot_saved_list':          voter_ballot_saved_list,
+            }
+            return results
 
         try:
             voter_ballot_saved_queryset = VoterBallotSaved.objects.all()
@@ -2563,17 +2575,17 @@ class VoterBallotSavedManager(models.Model):
 
             if len(voter_ballot_saved_list):
                 voter_ballot_saved_list_found = True
-                status = 'VOTER_BALLOT_SAVED_LIST_FOUND '
+                status += 'VOTER_BALLOT_SAVED_LIST_FOUND '
             else:
-                status = 'NO_VOTER_BALLOT_SAVED_LIST_FOUND '
+                status += 'NO_VOTER_BALLOT_SAVED_LIST_FOUND '
         except VoterBallotSaved.DoesNotExist:
             # No ballot items found. Not a problem.
-            status = 'NO_VOTER_BALLOT_SAVED_LIST_FOUND_DOES_NOT_EXIST '
+            status += 'NO_VOTER_BALLOT_SAVED_LIST_FOUND_DOES_NOT_EXIST '
             voter_ballot_saved_list = []
         except Exception as e:
             handle_exception(e, logger=logger)
-            status = 'FAILED retrieve_voter_ballot_saved_list_for_election ' \
-                     '{error} [type: {error_type}] '.format(error=e, error_type=type(e))
+            status += 'FAILED retrieve_voter_ballot_saved_list_for_election ' \
+                      '{error} [type: {error_type}] '.format(error=e, error_type=type(e))
 
         results = {
             'success':                          True if voter_ballot_saved_list_found else False,
@@ -2910,7 +2922,7 @@ def refresh_ballot_items_for_voter_copied_from_one_polling_location(voter_id, ba
         }
         return error_results
 
-    if not positive_value_exists(ballot_returned_from_polling_location.google_civic_election_id):
+    if not positive_value_exists(google_civic_election_id):
         success = False
         status += "REFRESH_EXISTING_BALLOT_ITEMS_FOR_VOTER-NO_GOOGLE_CIVIC_ELECTION_ID "
         error_results = {
