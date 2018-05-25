@@ -8,14 +8,14 @@
       {# <img src="{{ social.profile_photo|default:'https://pbs.twimg.com/profile_images/584051530958909441/jT5oa-9w.jpg' }}" class="navimg"> #}
       <div class="navbar-text hidden-sm hidden-xs">
         {% if user.first_name %}
-          <a href="/login">{{ user.first_name }}</a> is a Voter
+          <a href="/login_we_vote">{{ user.first_name }}</a> is a Voter
         {% else %}
           <span>Hello, Voter!</span>
         {% endif %}
       </div>
     {% else %}
       <div class="navbar-text">
-        <a href="/login?next={{ request.path }}">Login</a>
+        <a href="/login_we_vote?next={{ request.path }}">Login</a>
       </div>
     {% endif %}
     </div>

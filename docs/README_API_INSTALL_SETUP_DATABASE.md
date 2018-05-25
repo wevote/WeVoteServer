@@ -68,6 +68,8 @@ login with same email id and password, otherwise create superuser with the follo
 login:
 
     python manage.py createsuperuser
+    
+Note: If you ever need to update the password for this account, you can use this command, with your email address: `python manage.py changepassword dalemcgrew@yahoo.com`
 
 or
 
