@@ -56,7 +56,7 @@ def login_complete_view(request):
     except:
         messages.add_message(request, messages.INFO, 'Voter not updated.')
 
-    return HttpResponseRedirect(reverse('login_user', args=()))
+    return HttpResponseRedirect(reverse('login_we_vote', args=()))
 
 
 # This is open to anyone, and provides psql to update the database directly

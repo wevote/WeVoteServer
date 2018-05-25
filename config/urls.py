@@ -22,9 +22,10 @@ Including another URLconf
 from django.conf import settings
 from django.conf.urls import include, url
 from django.conf.urls.static import static
-
+from django.contrib import admin
+from django.contrib.auth import views as auth_views
 from config import startup, views
-from admin_tools.views import login_user, logout_user
+from admin_tools.views import login_we_vote, logout_we_vote
 
 urlpatterns = [
     url(r'^$', views.start_view),  # Default page if none of the other patterns work
@@ -66,17 +67,20 @@ urlpatterns = [
     url(r'^pos/', include('position.urls', namespace="position")),
     url(r'^sod/', include('support_oppose_deciding.urls', namespace="support_oppose_deciding")),
     url(r'^tag/', include('tag.urls', namespace="tag")),
-    # url('', include('wevote_social.urls', namespace='wevote_social')),
-    url('social', include('social.apps.django_app.urls', namespace="social")),
     url(r'^twitter/', include('import_export_twitter.urls', namespace="twitter")),
     url(r'^twitter2/', include('twitter.urls', namespace="twitter2")),
     url(r'^voter/', include('voter.urls', namespace="voter")),
     url(r'^vg/', include('voter_guide.urls', namespace="voter_guide")),
     # Authentication
-    url(r'^login/$', login_user, name="login_user"),
-    url(r'^logout/$', logout_user, name="logout_user"),
-    url('', include('django.contrib.auth.urls', namespace="auth")),  # This line provides all of the following patterns:
+    # url(r'^login/$', auth_views.login, name="login"),
+    url(r'^login/$', login_we_vote, name="login"),
+    url(r'^logout/$', auth_views.logout, name="logout"),
+    url(r'^login_we_vote/$', login_we_vote, name="login_we_vote"),
+    url(r'^logout_we_vote/$', logout_we_vote, name="logout_we_vote"),
+    # This line provides the following patterns:
     # login, logout, password_reset, password_reset_done, password_reset_confirm, password_reset_complete
+    url('', include('social_django.urls', namespace="social")),
+    # socialcomplete/facebook - See wevote_social/utils.py
 ]
 
 # Execute start-up.

@@ -1,58 +1,7 @@
 {% extends "template_base.html" %}
-{# See admin_tools.views.login_user for the view that controls this #}
+{# See admin_tools.views.login_we_vote for the view that controls this #}
 
 {% block content %}
-{% if request.user.is_authenticated %}
-<a href="{% url 'admin_tools:admin_home' %}">< Back to Admin Home</a>
-{% endif %}
-
-{% if form.errors %}
-<p>Your username and password didn't match. Please try again.</p>
-{% endif %}
-
-{% if next %}
-    {% if request.user.is_authenticated %}
-    <p>Your account doesn't have access to this page. To proceed,
-    please login with an account that has access.</p>
-    {% else %}
-    <p>Please login to see this page.</p>
-    {% endif %}
-{% endif %}
-
-<h1>Sign-In</h1>
-
-<p><a href="{% url 'social:begin' 'facebook' %}?next={{ next }}">Sign in with Facebook</a></p>
-<p><a href="{% url 'social:begin' 'twitter' %}?next={{ next }}">Sign in with Twitter</a></p>
-
-<p>or</p>
-
-<p><strong>Sign-In with your Email</strong></p>
-<form method="post" action="{% url 'auth:login' %}">
-{% csrf_token %}
-<table>
-<tr>
-    <td>{{ form.username.label_tag }}</td>
-    <td>{{ form.username }}</td>
-</tr>
-<tr>
-    <td>{{ form.password.label_tag }}</td>
-    <td>{{ form.password }}</td>
-</tr>
-</table>
-
-<input type="submit" value="sign in" />
-<input type="hidden" name="next" value="{{ next }}" />
-</form>
-
-{# Assumes you setup the password_reset view in your URLconf #}
-{#  <p><a href="{% url 'auth:password_reset' %}">Lost password?</a></p> #}
-
-
-<p> <a href="{% url 'voter:authenticate_manually' %}">Authenticate Manually</a>
-    {% if not request.user.is_authenticated %}
-    {% endif %}
-</p>
-
-<p><a href="{% url 'auth:logout' %}">Sign Out</a></p>
+<a href="{% url 'login_we_vote' %}">Go to We Vote Login Page ></a>
 
 {% endblock %}

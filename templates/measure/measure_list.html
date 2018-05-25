@@ -70,7 +70,7 @@
 <form name="measure_search_form" method="get" action="{% url 'measure:measure_list' %}">
     {% csrf_token %}
 
-
+<br />
 {% if measure_search or issues_selected %}
     <a href="{% url 'measure:measure_list' %}">
          clear search</a>&nbsp;

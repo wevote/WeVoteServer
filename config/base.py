@@ -74,7 +74,8 @@ INSTALLED_APPS = (
     # third party
     'bootstrap3',
     'corsheaders',  # cross origin requests
-    'social.apps.django_app.default',
+    # 'social.apps.django_app.default',
+    'social_django',
 
     # project specific
     'admin_tools',
@@ -138,6 +139,8 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
+    'social_django.middleware.SocialAuthBaseException',
+    'social_django.middleware.SocialAuthExceptionMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'django.middleware.security.SecurityMiddleware',
@@ -146,9 +149,9 @@ MIDDLEWARE_CLASSES = (
 )
 
 AUTHENTICATION_BACKENDS = (
-    'social.backends.facebook.FacebookOAuth2',
-    'social.backends.google.GoogleOAuth2',
-    'social.backends.twitter.TwitterOAuth',
+    'social_core.backends.facebook.FacebookOAuth2',
+    'social_core.backends.google.GoogleOAuth2',
+    'social_core.backends.twitter.TwitterOAuth',
     'django.contrib.auth.backends.ModelBackend',
 )
 
@@ -167,8 +170,8 @@ TEMPLATES = [
                 'django.contrib.messages.context_processors.messages',
                 'django.template.context_processors.media',  # Django Cookbook
                 'django.template.context_processors.static',  # Django Cookbook
-                'social.apps.django_app.context_processors.backends',
-                'social.apps.django_app.context_processors.login_redirect',
+                'social_django.context_processors.backends',
+                'social_django.context_processors.login_redirect',
                 'wevote_social.context_processors.profile_photo',
             ],
         },
@@ -293,21 +296,23 @@ LOGIN_REDIRECT_URL = get_environment_variable("LOGIN_REDIRECT_URL")
 LOGIN_ERROR_URL = get_environment_variable("LOGIN_ERROR_URL")
 LOGIN_URL = get_environment_variable("LOGIN_URL")
 
+SOCIAL_AUTH_URL_NAMESPACE = 'social'
+
 # See description of authentication pipeline:
 # https://github.com/omab/python-social-auth/blob/master/docs/pipeline.rst
 SOCIAL_AUTH_PIPELINE = (
-    'social.pipeline.social_auth.social_details',
-    'social.pipeline.social_auth.social_uid',
-    'social.pipeline.social_auth.auth_allowed',
-    # 'social.pipeline.social_auth.social_user',
+    'social_core.pipeline.social_auth.social_details',
+    'social_core.pipeline.social_auth.social_uid',
+    'social_core.pipeline.social_auth.auth_allowed',
+    # 'social_core.pipeline.social_auth.social_user',
     'wevote_social.utils.social_user',  # Order in this pipeline matters
     'wevote_social.utils.authenticate_associate_by_email',  # Order in this pipeline matters
-    'social.pipeline.user.get_username',
-    'social.pipeline.social_auth.associate_by_email',
-    'social.pipeline.user.create_user',
-    'social.pipeline.social_auth.associate_user',
-    'social.pipeline.social_auth.load_extra_data',
-    'social.pipeline.user.user_details',
+    'social_core.pipeline.user.get_username',
+    'social_core.pipeline.social_auth.associate_by_email',
+    'social_core.pipeline.user.create_user',
+    'social_core.pipeline.social_auth.associate_user',
+    'social_core.pipeline.social_auth.load_extra_data',
+    'social_core.pipeline.user.user_details',
     'wevote_social.utils.switch_user'  # Order in this pipeline matters
 )
 

@@ -3,7 +3,8 @@
 # -*- coding: UTF-8 -*-
 
 from django.contrib.auth import logout
-from social.apps.django_app.views import _do_login
+# from social.apps.django_app.views import _do_login
+from social_django.views import _do_login
 
 from image.controllers import TWITTER, cache_master_and_resized_image
 from import_export_facebook.models import FacebookManager
@@ -24,7 +25,8 @@ def authenticate_associate_by_email(**kwargs):
             results = voter_manager.retrieve_voter_by_twitter_id(twitter_id)
         elif kwargs['backend'].name == 'facebook':
             facebook_id = kwargs['uid']
-            results = voter_manager.retrieve_voter_by_facebook_id_old(facebook_id)
+            # results = voter_manager.retrieve_voter_by_facebook_id_old(facebook_id)
+            results = voter_manager.retrieve_voter_by_facebook_id(facebook_id)
         if results['voter_found']:
             kwargs['user'] = results['voter']
         else:
@@ -35,8 +37,19 @@ def authenticate_associate_by_email(**kwargs):
 
 
 # We replace the default social_user pipeline entry so we can switch to an existing account:
-# http://www.scriptscoop.net/t/08c148b90d9a/python-authalreadyassociated-exception-in-django-social-auth.html (jacob)
 def social_user(backend, uid, details, user=None, *args, **kwargs):
+    """
+    Handles:
+    socialcomplete/facebook
+    socialcomplete/twitter
+    :param backend:
+    :param uid:
+    :param details:
+    :param user:
+    :param args:
+    :param kwargs:
+    :return:
+    """
     twitter_user_manager = TwitterUserManager()
     facebook_user_manager = FacebookManager()
     voter_manager = VoterManager()
@@ -55,7 +68,8 @@ def social_user(backend, uid, details, user=None, *args, **kwargs):
         # local_user_matches = user and user.twitter_id == uid
     elif backend.name == 'facebook':
         # Facebook: Check to see if we have a voter with a matching facebook_id
-        results = voter_manager.retrieve_voter_by_facebook_id_old(uid)
+        # results = voter_manager.retrieve_voter_by_facebook_id_old(uid)
+        results = voter_manager.retrieve_voter_by_facebook_id(uid)
         if results['voter_found']:
             user = results['voter']
             local_user_matches = True
@@ -101,7 +115,8 @@ def social_user(backend, uid, details, user=None, *args, **kwargs):
                     voter_found_that_matches_auth = True
             elif backend.name == 'facebook':
                 # Find the voter account that actually matches this facebook_id
-                results = voter_manager.retrieve_voter_by_facebook_id_old(uid)
+                # results = voter_manager.retrieve_voter_by_facebook_id_old(uid)
+                results = voter_manager.retrieve_voter_by_facebook_id(uid)
                 if results['voter_found']:
                     voter_that_matches_auth = results['voter']
                     voter_found_that_matches_auth = True

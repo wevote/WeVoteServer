@@ -1,5 +1,5 @@
 {% extends "template_base.html" %}
-{# See admin_tools.views.login_user for the view that controls this #}
+{# See admin_tools.views.login_we_vote for the view that controls this #}
 
 {% block content %}
 {% if request.user.is_authenticated %}
@@ -22,7 +22,7 @@
 {% if not voter_signed_in %}
 <h1>Sign-In</h1>
 
-<form method="post" action="{% url 'auth:login' %}">
+<form method="post" action="{% url 'login_we_vote' %}">
 {% csrf_token %}
 {% if next %}
     <input type="hidden" name="next" value="{{ next }}" />
@@ -76,7 +76,7 @@ political_data_viewer: {{ request.user.is_political_data_viewer }}<br />
 verified_volunteer: {{ request.user.is_verified_volunteer }}<br />
 
 <p><br />
-    <a href="{% url 'auth:logout' %}">Sign Out</a></p>
+    <a href="{% url 'logout_we_vote' %}">Sign Out</a></p>
 {% endif %}
 
 {% endblock %}

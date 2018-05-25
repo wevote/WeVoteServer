@@ -1636,7 +1636,7 @@ def import_sample_data_view(request):
     return HttpResponseRedirect(reverse('admin_tools:admin_home', args=()))
 
 
-def login_user(request):
+def login_we_vote(request):
     """
     This method is called when you login from the /login/ form
     :param request:
@@ -1731,7 +1731,7 @@ def login_user(request):
         'voter_signed_in':      voter_signed_in,
         'messages_on_stage':    messages_on_stage,
     }
-    response = render(request, 'registration/login_user.html', template_values)
+    response = render(request, 'registration/login_we_vote.html', template_values)
 
     # If login with facebook then save facebook details in facebookAuthResponse and facebookLinkToVoter
     if facebook_data:
@@ -1760,7 +1760,7 @@ def login_user(request):
     return response
 
 
-def logout_user(request):
+def logout_we_vote(request):
     logout(request)
 
     info_message = "You are now signed out."
@@ -1772,7 +1772,7 @@ def logout_user(request):
         'next':                 '/admin/',
         'messages_on_stage':    messages_on_stage,
     }
-    response = render(request, 'registration/login_user.html', template_values)
+    response = render(request, 'registration/login_we_vote.html', template_values)
 
     # Find current voter_api_device_id
     voter_api_device_id = get_voter_api_device_id(request)
