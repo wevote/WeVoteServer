@@ -11,7 +11,9 @@ from datetime import datetime, timedelta
 from election.models import ElectionManager, fetch_next_election_for_state
 from exception.models import handle_exception
 from import_export_ballotpedia.controllers import voter_ballot_items_retrieve_from_ballotpedia_for_api
-from import_export_google_civic.controllers import voter_ballot_items_retrieve_from_google_civic_for_api
+from import_export_google_civic.controllers import \
+    refresh_voter_ballot_items_from_google_civic_from_voter_ballot_saved, \
+    voter_ballot_items_retrieve_from_google_civic_for_api
 from measure.models import ContestMeasureList, ContestMeasureManager
 from office.models import ContestOfficeManager, ContestOfficeListManager
 from polling_location.models import PollingLocationManager
@@ -641,6 +643,7 @@ def refresh_voter_ballots_from_polling_location(ballot_returned_from_polling_loc
 
     retrieve_results = ballot_saved_manager.retrieve_voter_ballot_saved_list_for_election(
         google_civic_election_id, polling_location_we_vote_id_source)
+    ballots_refreshed = 0
     if retrieve_results['voter_ballot_saved_list_found']:
         voter_ballot_saved_list = retrieve_results['voter_ballot_saved_list']
         for voter_ballot_saved in voter_ballot_saved_list:
@@ -650,19 +653,23 @@ def refresh_voter_ballots_from_polling_location(ballot_returned_from_polling_loc
                 refresh_results = refresh_ballot_items_for_voter_copied_from_one_polling_location(
                     voter_ballot_saved.voter_id, ballot_returned_from_polling_location)
 
-                if not refresh_results['ballot_returned_copied']:
+                if refresh_results['ballot_returned_copied']:
+                    ballots_refreshed += 1
+                else:
                     status += refresh_results['status']
 
     results = {
-        'status': status,
-        'success': success,
+        'status':               status,
+        'success':              success,
+        'ballots_refreshed':    ballots_refreshed,
     }
     return results
 
 
-def refresh_voter_ballots_not_copied_from_polling_location(google_civic_election_id):
+def refresh_voter_ballots_not_copied_from_polling_location(google_civic_election_id, refresh_from_google=False):
     status = ""
     success = True
+    ballots_refreshed = 0
 
     ballot_item_list_manager = BallotItemListManager()
     ballot_saved_manager = VoterBallotSavedManager()
@@ -678,22 +685,35 @@ def refresh_voter_ballots_not_copied_from_polling_location(google_civic_election
         for voter_ballot_saved in voter_ballot_saved_list:
             # Neither BallotReturned nor VoterBallotSaved change when we get refreshed data from Google Civic
             if positive_value_exists(voter_ballot_saved.voter_id):
-                refresh_results = ballot_item_list_manager.refresh_ballot_items_from_master_tables(
-                    voter_ballot_saved.voter_id, google_civic_election_id,
-                    offices_dict, measures_dict)
-                offices_dict = refresh_results['offices_dict']
-                measures_dict = refresh_results['measures_dict']
-                if not refresh_results['success']:
-                    status += refresh_results['status']
+                if positive_value_exists(refresh_from_google):
+                    # 2018-May Note that when we have 10K+ voters with custom addresses, this process probably won't
+                    # finish and will want to be changed to update in batches
+                    refresh_results = refresh_voter_ballot_items_from_google_civic_from_voter_ballot_saved(
+                        voter_ballot_saved)
+                    if refresh_results['success']:
+                        ballots_refreshed += 1
+                    else:
+                        status += refresh_results['status']
+                else:
+                    refresh_results = ballot_item_list_manager.refresh_ballot_items_from_master_tables(
+                        voter_ballot_saved.voter_id, google_civic_election_id,
+                        offices_dict, measures_dict)
+                    offices_dict = refresh_results['offices_dict']
+                    measures_dict = refresh_results['measures_dict']
+                    if refresh_results['success']:
+                        ballots_refreshed += 1
+                    else:
+                        status += refresh_results['status']
 
     results = {
-        'status': status,
-        'success': success,
+        'status':               status,
+        'success':              success,
+        'ballots_refreshed':    ballots_refreshed,
     }
     return results
 
 
-def repair_ballot_items_for_election(google_civic_election_id):
+def repair_ballot_items_for_election(google_civic_election_id, refresh_from_google=False):
     saved_count = 0
     state_code_not_found_count = 0
     error_count = 0
@@ -750,15 +770,20 @@ def repair_ballot_items_for_election(google_civic_election_id):
 
     # Now check for VoterBallotSaved entries for voter ballots that were not copied from polling locations
     #  so we can refresh the data
-    refresh_ballot_results = refresh_voter_ballots_not_copied_from_polling_location(google_civic_election_id)
+    refresh_ballot_results = refresh_voter_ballots_not_copied_from_polling_location(google_civic_election_id,
+                                                                                    refresh_from_google)
+    ballots_refreshed = refresh_ballot_results['refresh_ballot_results']
 
     status = "REPAIR_BALLOT_ITEMS, total count that need repair: {ballot_item_list_count}, " \
              "saved_count: {saved_count}, " \
              "state_code_not_found_count: {state_code_not_found_count}, " \
-             "error_count: {error_count} ".format(ballot_item_list_count=ballot_item_list_count,
-                                                  saved_count=saved_count,
-                                                  state_code_not_found_count=state_code_not_found_count,
-                                                  error_count=error_count)
+             "error_count: {error_count}\n" \
+             "REFRESH: ballots_refreshed: {ballots_refreshed} " \
+             "".format(ballot_item_list_count=ballot_item_list_count,
+                       ballots_refreshed=ballots_refreshed,
+                       saved_count=saved_count,
+                       state_code_not_found_count=state_code_not_found_count,
+                       error_count=error_count)
     results = {
         'status': status,
         'success': success,

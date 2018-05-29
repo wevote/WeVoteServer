@@ -29,7 +29,7 @@ py3dns==3.1.0
 pygeoip==0.3.2
 pyjwkest==1.4.0
 PyJWT==1.6.3
-python-magic==0.4.15  # Requires "brew install libmagic" or "brew upgrade libmagic"
+python-magic==0.4.15  # Requires "brew install libmagic" or "brew upgrade libmagic" or "pip install libmagic"
 python-openid==2.2.5
 # python-social-auth==0.2.21
 pytz==2018.4

@@ -1,9 +1,7 @@
 {# templates/voter/voter_edit.html #}
 {% extends "template_base.html" %}
 
-{% block title %}{% if voter %}
-    {% if voter.first_name %}{{ voter.first_name }} {% endif %}{% if voter.last_name %}{{ voter.last_name }} {% endif %}
-{% else %}Create New Voter Account{% endif %}{% endblock %}
+{% block title %}Edit {% if voter %}{{ voter.get_full_name }}{% else %}Create New Voter Account{% endif %}{% endblock %}
 
 {%  block content %}
 

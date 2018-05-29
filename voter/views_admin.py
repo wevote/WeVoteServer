@@ -2,7 +2,7 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
-from .models import Voter, VoterDeviceLinkManager
+from .models import Voter, VoterAddressManager, VoterDeviceLinkManager
 from admin_tools.views import redirect_to_sign_in_page
 from django.core.urlresolvers import reverse
 from django.contrib import messages
@@ -850,10 +850,15 @@ def voter_summary_view(request, voter_id):
         # This is fine, create new
         pass
 
+    voter_address_manager = VoterAddressManager()
+    address_results = voter_address_manager.retrieve_voter_address_list(voter_id=voter_id)
+    voter_address_list = address_results['voter_address_list']
+
     if voter_on_stage_found:
         template_values = {
             'messages_on_stage':    messages_on_stage,
             'voter':                voter_on_stage,
+            'voter_address_list':   voter_address_list,
         }
     else:
         template_values = {
