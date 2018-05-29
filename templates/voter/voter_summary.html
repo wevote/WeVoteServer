@@ -2,7 +2,7 @@
 {% extends "template_base.html" %}
 
 {% block title %}{% if voter %}
-    {% if voter.first_name %}{{ voter.first_name }} {% endif %}{% if voter.last_name %}{{ voter.last_name }} {% endif %} Summary
+    {{ voter.get_full_name }} Summary
 {% else %}No Voter Found
 {% endif %}{% endblock %}
 
@@ -12,13 +12,64 @@
 
 {% if voter %}
 
-    <h1>{% if voter.first_name %}{{ voter.first_name }} {% endif %}{% if voter.last_name %}{{ voter.last_name }} {% endif %}</h1>
-    <p>ID: {{ voter.id }}<br />
-    Admin?: {% if voter.is_admin %}Yes{% else %}No{% endif %}<br />
-    </p>
+    <h1>{{ voter.get_full_name }} Summary</h1>
 
-    <p><a href="{% url 'voter:voter_edit' voter.id %}">edit</a></p>
+    <table>
+      <tr>
+        <td>Voter IDs:</td>
+        <td>
+          <strong>{{ voter.we_vote_id }} (id: {{ voter.id }})</strong>
+        </td>
+      </tr>
+      <tr>
+        <td>Admin?:</td>
+        <td><strong>{% if voter.is_admin %}Yes{% else %}No{% endif %}</strong></td>
+      </tr>
+      {% if voter.twitter_screen_name %}
+      <tr>
+        <td>Twitter Screen Name:</td>
+        <td>
+          <strong>{{ voter.twitter_screen_name }}</strong>
+        </td>
+      </tr>
+      {% endif %}
+      <tr>
+        <td>&nbsp;</td>
+        <td><a href="{% url 'voter:voter_edit' voter.id %}">edit</a></td>
+      </tr>
+    </table>
+    <br />
+    <br />
 
+    {% if voter_address_list %}
+    This is a summary of VoterAddress entries for this voter.
+    <table border="1" cellpadding="10">
+        <tr>
+            <td></td>
+            <td>Address</td>
+            <td>Election</td>
+            <td>BallotReturned</td>
+        </tr>
+    {% for voter_address in voter_address_list %}
+        <tr>
+            <td>{{ forloop.counter }}</td>
+            <td>{{ voter_address.text_for_map_search }}</td>
+            <td>
+              {% if voter_address.google_civic_election_id %}
+              <a href="{% url "election:election_summary_by_google_id" voter_address.google_civic_election_id %}" target="_blank">
+              {{ voter_address.google_civic_election_id }}
+              </a>
+              {% endif %}
+            </td>
+            <td>
+              {% if voter_address.ballot_returned_we_vote_id %}
+              <a href="{% url "ballot:ballot_item_list_edit_by_we_vote_id" voter_address.ballot_returned_we_vote_id %}" target="_blank">{{ voter_address.ballot_returned_we_vote_id }}</a>
+              {% endif %}
+            </td>
+        </tr>
+    {% endfor %}
+    </table>
+    {% endif %}
 
 {% else %}
 
