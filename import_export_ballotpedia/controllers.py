@@ -2,7 +2,7 @@
 # Brought to you by We Vote. Be good.
 
 # -*- coding: UTF-8 -*-
-
+from .models import BallotpediaApiCounterManager
 from ballot.models import BallotItemListManager, BallotItemManager, BallotReturned, BallotReturnedManager, \
     VoterBallotSavedManager
 from candidate.models import fetch_candidate_count_for_office
@@ -742,6 +742,7 @@ def retrieve_one_ballot_from_ballotpedia_api(latitude, longitude, incoming_googl
     status = ""
     contests_retrieved = False
     structured_json = []
+    ballotpedia_election_id = 0
 
     if not latitude or not longitude:
         status += "RETRIEVE_BALLOTPEDIA_API-MISSING_LATITUDE_AND_LONGITUDE "
@@ -772,8 +773,8 @@ def retrieve_one_ballot_from_ballotpedia_api(latitude, longitude, incoming_googl
         structured_json = json.loads(response.text)
 
         # Use Ballotpedia API call counter to track the number of queries we are doing each day
-        # google_civic_api_counter_manager = GoogleCivicApiCounterManager()
-        # google_civic_api_counter_manager.create_counter_entry('ballot', google_civic_election_id)
+        ballotpedia_api_counter_manager = BallotpediaApiCounterManager()
+        ballotpedia_api_counter_manager.create_counter_entry('ballot', ballotpedia_election_id)
 
         success = len(structured_json)
 

@@ -25,7 +25,7 @@ Pillow==4.0.0
 psycopg2==2.7.4
 pyasn1==0.4.3
 pyasn1-modules==0.2.1
-py3dns==3.1.0
+# py3dns==3.1.0
 pygeoip==0.3.2
 pyjwkest==1.4.0
 PyJWT==1.6.3

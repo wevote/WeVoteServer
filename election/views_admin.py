@@ -42,6 +42,9 @@ ELECTIONS_SYNC_URL = get_environment_variable("ELECTIONS_SYNC_URL")  # elections
 WE_VOTE_SERVER_ROOT_URL = get_environment_variable("WE_VOTE_SERVER_ROOT_URL")
 
 
+
+
+
 @login_required
 def election_all_ballots_retrieve_view(request, election_local_id=0):
     """
