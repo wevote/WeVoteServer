@@ -1,6 +1,5 @@
-# import_export_google_civic/models.py
+# import_export_ballotpedia/models.py
 # Brought to you by We Vote. Be good.
-# https://developers.google.com/resources/api-libraries/documentation/civicinfo/v2/python/latest/civicinfo_v2.elections.html
 # -*- coding: UTF-8 -*-
 
 
