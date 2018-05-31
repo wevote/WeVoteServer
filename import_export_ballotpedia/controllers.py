@@ -2,7 +2,7 @@
 # Brought to you by We Vote. Be good.
 
 # -*- coding: UTF-8 -*-
-
+from .models import BallotpediaApiCounterManager
 from ballot.models import BallotItemListManager, BallotItemManager, BallotReturned, BallotReturnedManager, \
     VoterBallotSavedManager
 from candidate.models import fetch_candidate_count_for_office
@@ -25,6 +25,11 @@ BALLOTPEDIA_API_ELECTIONS_URL = get_environment_variable("BALLOTPEDIA_API_ELECTI
 BALLOTPEDIA_API_MEASURES_URL = get_environment_variable("BALLOTPEDIA_API_MEASURES_URL")
 BALLOTPEDIA_API_RACES_URL = get_environment_variable("BALLOTPEDIA_API_RACES_URL")
 GOOGLE_MAPS_API_KEY = get_environment_variable("GOOGLE_MAPS_API_KEY")
+BALLOTPEDIA_API_CANDIDATES_TYPE = "candidates"
+BALLOTPEDIA_API_CONTAINS_TYPE = "contains"
+BALLOTPEDIA_API_ELECTIONS_TYPE = "elections"
+BALLOTPEDIA_API_MEASURES_TYPE = "measures"
+BALLOTPEDIA_API_RACES_TYPE = "races"
 
 
 def extract_value_from_array(structured_json, index_key, default_value):
@@ -90,9 +95,9 @@ def retrieve_candidates_from_api(google_civic_election_id, zero_entries=True):
 
         structured_json = json.loads(response.text)
 
-        # # Use Google Civic API call counter to track the number of queries we are doing each day
-        # google_civic_api_counter_manager = GoogleCivicApiCounterManager()
-        # google_civic_api_counter_manager.create_counter_entry('ballot', google_civic_election_id)
+        # Use Ballotpedia API call counter to track the number of queries we are doing each day
+        # ballotpedia_api_counter_manager = BallotpediaApiCounterManager()
+        # ballotpedia_api_counter_manager.create_counter_entry(BALLOTPEDIA_API_CANDIDATES_TYPE, google_civic_election_id=google_civic_election_id, ballotpedia_election_id=0)
 
         contains_api = False
         polling_location_we_vote_id = ""
@@ -166,9 +171,9 @@ def retrieve_districts_to_which_address_belongs_from_api(
 
         structured_json = json.loads(response.text)
 
-        # # Use Google Civic API call counter to track the number of queries we are doing each day
-        # google_civic_api_counter_manager = GoogleCivicApiCounterManager()
-        # google_civic_api_counter_manager.create_counter_entry('ballot', google_civic_election_id)
+        # # Use ballotpedia API call counter to track the number of queries we are doing each day
+        # ballotpedia_api_counter_manager = BallotpediaApiCounterManager()
+        # ballotpedia_api_counter_manager.create_counter_entry(BALLOTPEDIA_API_CONTAINS_TYPE, google_civic_election_id, ballotpedia_election_id=0)
 
         contains_api = True
         groom_results = groom_ballotpedia_data_for_processing(structured_json, google_civic_election_id,
@@ -236,8 +241,8 @@ def retrieve_offices_from_api(google_civic_election_id):
     structured_json = json.loads(response.text)
 
     # # Use Google Civic API call counter to track the number of queries we are doing each day
-    # google_civic_api_counter_manager = GoogleCivicApiCounterManager()
-    # google_civic_api_counter_manager.create_counter_entry('ballot', google_civic_election_id)
+    # ballotpedia_api_counter_manager = BallotpediaApiCounterManager()
+    # ballotpedia_api_counter_manager.create_counter_entry(BALLOTPEDIA_API_RACES_TYPE, ballotpedia_election_id)
 
     groom_results = groom_ballotpedia_data_for_processing(structured_json, google_civic_election_id)
     modified_json_list = groom_results['modified_json_list']
@@ -742,6 +747,7 @@ def retrieve_one_ballot_from_ballotpedia_api(latitude, longitude, incoming_googl
     status = ""
     contests_retrieved = False
     structured_json = []
+    ballotpedia_election_id = 0
 
     if not latitude or not longitude:
         status += "RETRIEVE_BALLOTPEDIA_API-MISSING_LATITUDE_AND_LONGITUDE "
@@ -772,8 +778,8 @@ def retrieve_one_ballot_from_ballotpedia_api(latitude, longitude, incoming_googl
         structured_json = json.loads(response.text)
 
         # Use Ballotpedia API call counter to track the number of queries we are doing each day
-        # google_civic_api_counter_manager = GoogleCivicApiCounterManager()
-        # google_civic_api_counter_manager.create_counter_entry('ballot', google_civic_election_id)
+        # ballotpedia_api_counter_manager = BallotpediaApiCounterManager()
+        # ballotpedia_api_counter_manager.create_counter_entry(BALLOTPEDIA_API_CONTAINS_TYPE, google_civic_election_id=0,  ballotpedia_election_id=0)
 
         success = len(structured_json)
 

@@ -557,7 +557,7 @@ def retrieve_one_ballot_from_google_civic_api(text_for_map_search, incoming_goog
             success = True
             google_civic_election_id = structured_json['election']['id']
 
-    # TODO DALE We can get a google_civic_election_id back even though we don't have contest data.
+    #  We can get a google_civic_election_id back even though we don't have contest data.
     #  If we get a google_civic_election_id back but no contest data, reach out again with the google_civic_election_id
     #  so we can then get contest data
 
