@@ -1,0 +1,162 @@
+{# templates/measure/measure_merge.html #}
+{% extends "template_base.html" %}
+
+{% block title %}{% if contest_measure_option1 %}Merge {{ contest_measure_option1.office_name  }}{% else %}CANNOT MERGE{% endif %}{% endblock %}
+
+{%  block content %}
+<a href="{% url 'measure:measure_list' %}">< Back to Measures</a>
+  <br /></r />
+<a href="{% url 'measure:find_and_merge_duplicate_measures' %}?google_civic_election_id={{ google_civic_election_id }}&find_number_of_duplicates=1" >Click to find out the number of possible duplicates</a> (takes 30-60 seconds)
+
+<h1>{% if contest_measure_option1 %}Merge {{ contest_measure_option1.office_name }}{% else %}CANNOT MERGE{% endif %}</h1>
+{% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
+
+<form action="{% url 'measure:measure_merge_process' %}" method="post">
+{% csrf_token %}
+{% if contest_measure_option1 and contest_measure_option2 %}
+<table>
+    <tr>
+        <th>&nbsp;</th>
+        <th>Contest Measure Option 1</th>
+        <th>Contest Measure Option 2</th>
+    </tr>
+    <tr>
+        <td>&nbsp;</td>
+        <td><a href="{% url 'measure:measure_edit_we_vote_id' measure_we_vote_id=contest_measure_option1.we_vote_id %}" target="_blank">view (in new window)</a></td>
+        <td><a href="{% url 'measure:measure_edit_we_vote_id' measure_we_vote_id=contest_measure_option2.we_vote_id %}" target="_blank">view (in new window)</a></td>
+    </tr>
+
+{% include "measure/measure_merge_one_field_decision.html" with field_name="measure_title" field_label="Measure Title" conflict_status=conflict_values.measure_title contest_measure1_field_value=contest_measure_option1.measure_title contest_measure2_field_value=contest_measure_option2.measure_title contest_measure1=contest_measure_option1 contest_measure2=contest_measure_option2 %}
+
+    <tr>
+        <td>Google&nbsp;Civic&nbsp;Measure&nbsp;Title&nbsp;1</td>
+        <td>{{ contest_measure_option1.google_civic_measure_title|default_if_none:"" }}</td>
+        <td>{{ contest_measure_option2.google_civic_measure_title|default_if_none:"" }}</td>
+    </tr>
+{% if contest_measure_option1.google_civic_measure_title2 or contest_measure_option2.google_civic_measure_title2 %}
+    <tr>
+        <td>Google&nbsp;Civic&nbsp;Measure&nbsp;Title&nbsp;2</td>
+        <td>{{ contest_measure_option1.google_civic_measure_title2|default_if_none:"" }}</td>
+        <td>{{ contest_measure_option2.google_civic_measure_title2|default_if_none:"" }}</td>
+    </tr>
+{% endif %}
+{% if contest_measure_option1.google_civic_measure_title3 or contest_measure_option2.google_civic_measure_title3 %}
+    <tr>
+        <td>Google&nbsp;Civic&nbsp;Measure&nbsp;Title&nbsp;3</td>
+        <td>{{ contest_measure_option1.google_civic_measure_title3|default_if_none:"" }}</td>
+        <td>{{ contest_measure_option2.google_civic_measure_title3|default_if_none:"" }}</td>
+    </tr>
+{% endif %}
+{% if contest_measure_option1.google_civic_measure_title4 or contest_measure_option2.google_civic_measure_title4 %}
+    <tr>
+        <td>Google&nbsp;Civic&nbsp;Measure&nbsp;Title&nbsp;4</td>
+        <td>{{ contest_measure_option1.google_civic_measure_title4|default_if_none:"" }}</td>
+        <td>{{ contest_measure_option2.google_civic_measure_title4|default_if_none:"" }}</td>
+    </tr>
+{% endif %}
+{% if contest_measure_option1.google_civic_measure_title5 or contest_measure_option2.google_civic_measure_title5 %}
+    <tr>
+        <td>Google&nbsp;Civic&nbsp;Measure&nbsp;Title&nbsp;5</td>
+        <td>{{ contest_measure_option1.google_civic_measure_title5|default_if_none:"" }}</td>
+        <td>{{ contest_measure_option2.google_civic_measure_title5|default_if_none:"" }}</td>
+    </tr>
+{% endif %}
+
+{% include "measure/measure_merge_one_field_decision.html" with field_name="ballotpedia_measure_name" field_label="Ballotpedia Measure Name" conflict_status=conflict_values.ballotpedia_measure_name contest_measure1_field_value=contest_measure_option1.ballotpedia_measure_name contest_measure2_field_value=contest_measure_option2.ballotpedia_measure_name contest_measure1=contest_measure_option1 contest_measure2=contest_measure_option2 %}
+
+{% include "measure/measure_merge_one_field_decision.html" with field_name="we_vote_id" field_label="We Vote Id" conflict_status=conflict_values.we_vote_id contest_measure1_field_value=contest_measure_option1.we_vote_id contest_measure2_field_value=contest_measure_option2.we_vote_id contest_measure1=contest_measure_option1 contest_measure2=contest_measure_option2 %}
+
+{% include "measure/measure_merge_one_field_decision.html" with field_name="measure_subtitle" field_label="Measure Subtitle" conflict_status=conflict_values.measure_subtitle contest_measure1_field_value=contest_measure_option1.measure_subtitle contest_measure2_field_value=contest_measure_option2.measure_subtitle contest_measure1=contest_measure_option1 contest_measure2=contest_measure_option2 %}
+
+{% include "measure/measure_merge_one_field_decision.html" with field_name="measure_text" field_label="Measure Text" conflict_status=conflict_values.measure_text contest_measure1_field_value=contest_measure_option1.measure_text contest_measure2_field_value=contest_measure_option2.measure_text contest_measure1=contest_measure_option1 contest_measure2=contest_measure_option2 %}
+
+{% include "measure/measure_merge_one_field_decision.html" with field_name="measure_url" field_label="Measure URL" conflict_status=conflict_values.measure_url contest_measure1_field_value=contest_measure_option1.measure_url contest_measure2_field_value=contest_measure_option2.measure_url contest_measure1=contest_measure_option1 contest_measure2=contest_measure_option2 %}
+
+{% include "measure/measure_merge_one_field_decision.html" with field_name="primary_party" field_label="Primary Party" conflict_status=conflict_values.primary_party contest_measure1_field_value=contest_measure_option1.primary_party contest_measure2_field_value=contest_measure_option2.primary_party contest_measure1=contest_measure_option1 contest_measure2=contest_measure_option2 %}
+
+    {% if contest_measure_option1.id != None or contest_measure_option2.id != None %}
+    <tr>
+        <td>ID</td>
+        <td>{{ contest_measure_option1.id|default_if_none:"" }}</td>
+        <td>{{ contest_measure_option2.id|default_if_none:"" }}</td>
+    </tr>
+    {% endif %}
+
+{% include "measure/measure_merge_one_field_decision.html" with field_name="ballotpedia_district_id" field_label="Ballotpedia District Id" conflict_status=conflict_values.ballotpedia_district_id contest_measure1_field_value=contest_measure_option1.ballotpedia_district_id contest_measure2_field_value=contest_measure_option2.ballotpedia_district_id contest_measure1=contest_measure_option1 contest_measure2=contest_measure_option2 %}
+
+{% include "measure/measure_merge_one_field_decision.html" with field_name="ballotpedia_election_id" field_label="Ballotpedia Election Id" conflict_status=conflict_values.ballotpedia_election_id contest_measure1_field_value=contest_measure_option1.ballotpedia_election_id contest_measure2_field_value=contest_measure_option2.ballotpedia_election_id contest_measure1=contest_measure_option1 contest_measure2=contest_measure_option2 %}
+
+{% include "measure/measure_merge_one_field_decision.html" with field_name="ballotpedia_measure_id" field_label="Ballotpedia Measure Id" conflict_status=conflict_values.ballotpedia_measure_id contest_measure1_field_value=contest_measure_option1.ballotpedia_measure_id contest_measure2_field_value=contest_measure_option2.ballotpedia_measure_id contest_measure1=contest_measure_option1 contest_measure2=contest_measure_option2 %}
+
+{% include "measure/measure_merge_one_field_decision.html" with field_name="ballotpedia_measure_url" field_label="Ballotpedia Measure URL" conflict_status=conflict_values.ballotpedia_measure_url contest_measure1_field_value=contest_measure_option1.ballotpedia_measure_url contest_measure2_field_value=contest_measure_option2.ballotpedia_measure_url contest_measure1=contest_measure_option1 contest_measure2=contest_measure_option2 %}
+
+{% include "measure/measure_merge_one_field_decision.html" with field_name="ballotpedia_measure_status" field_label="Ballotpedia Measure Status" conflict_status=conflict_values.ballotpedia_measure_status contest_measure1_field_value=contest_measure_option1.ballotpedia_measure_status contest_measure2_field_value=contest_measure_option2.ballotpedia_measure_status contest_measure1=contest_measure_option1 contest_measure2=contest_measure_option2 %}
+
+{% include "measure/measure_merge_one_field_decision.html" with field_name="ballotpedia_measure_summary" field_label="Ballotpedia Measure Summary" conflict_status=conflict_values.ballotpedia_measure_summary contest_measure1_field_value=contest_measure_option1.ballotpedia_measure_summary contest_measure2_field_value=contest_measure_option2.ballotpedia_measure_summary contest_measure1=contest_measure_option1 contest_measure2=contest_measure_option2 %}
+
+{% include "measure/measure_merge_one_field_decision.html" with field_name="ballotpedia_measure_text" field_label="Ballotpedia Measure Text" conflict_status=conflict_values.ballotpedia_measure_text contest_measure1_field_value=contest_measure_option1.ballotpedia_measure_text contest_measure2_field_value=contest_measure_option2.ballotpedia_measure_text contest_measure1=contest_measure_option1 contest_measure2=contest_measure_option2 %}
+
+{% include "measure/measure_merge_one_field_decision.html" with field_name="district_id" field_label="District Id" conflict_status=conflict_values.district_id contest_measure1_field_value=contest_measure_option1.district_id contest_measure2_field_value=contest_measure_option2.district_id contest_measure1=contest_measure_option1 contest_measure2=contest_measure_option2 %}
+
+{% include "measure/measure_merge_one_field_decision.html" with field_name="district_name" field_label="District Name" conflict_status=conflict_values.district_name contest_measure1_field_value=contest_measure_option1.district_name contest_measure2_field_value=contest_measure_option2.district_name contest_measure1=contest_measure_option1 contest_measure2=contest_measure_option2 %}
+
+{% include "measure/measure_merge_one_field_decision.html" with field_name="district_scope" field_label="District Scope" conflict_status=conflict_values.district_scope contest_measure1_field_value=contest_measure_option1.district_scope contest_measure2_field_value=contest_measure_option2.district_scope contest_measure1=contest_measure_option1 contest_measure2=contest_measure_option2 %}
+
+{% include "measure/measure_merge_one_field_decision.html" with field_name="election_day_text" field_label="Election Day" conflict_status=conflict_values.election_day_text contest_measure1_field_value=contest_measure_option1.election_day_text contest_measure2_field_value=contest_measure_option2.election_day_text contest_measure1=contest_measure_option1 contest_measure2=contest_measure_option2 %}
+
+{% include "measure/measure_merge_one_field_decision.html" with field_name="google_civic_election_id" field_label="Election Id" conflict_status=conflict_values.google_civic_election_id contest_measure1_field_value=contest_measure_option1.google_civic_election_id contest_measure2_field_value=contest_measure_option2.google_civic_election_id contest_measure1=contest_measure_option1 contest_measure2=contest_measure_option2 %}
+
+{% include "measure/measure_merge_one_field_decision.html" with field_name="google_ballot_placement" field_label="Google Ballot Placement" conflict_status=conflict_values.google_ballot_placement contest_measure1_field_value=contest_measure_option1.google_ballot_placement contest_measure2_field_value=contest_measure_option2.google_ballot_placement contest_measure1=contest_measure_option1 contest_measure2=contest_measure_option2 %}
+
+{% include "measure/measure_merge_one_field_decision.html" with field_name="ctcl_uuid" field_label="Cctl Uuid" conflict_status=conflict_values.ctcl_uuid contest_measure1_field_value=contest_measure_option1.ctcl_uuid contest_measure2_field_value=contest_measure_option2.ctcl_uuid contest_measure1=contest_measure_option1 contest_measure2=contest_measure_option2 %}
+
+{% include "measure/measure_merge_one_field_decision.html" with field_name="maplight_id" field_label="Maplight Id" conflict_status=conflict_values.maplight_id contest_measure1_field_value=contest_measure_option1.maplight_id contest_measure2_field_value=contest_measure_option2.maplight_id contest_measure1=contest_measure_option1 contest_measure2=contest_measure_option2 %}
+
+{% include "measure/measure_merge_one_field_decision.html" with field_name="ocd_division_id" field_label="OCD Division Id" conflict_status=conflict_values.ocd_division_id contest_measure1_field_value=contest_measure_option1.ocd_division_id contest_measure2_field_value=contest_measure_option2.ocd_division_id contest_measure1=contest_measure_option1 contest_measure2=contest_measure_option2 %}
+
+{% include "measure/measure_merge_one_field_decision.html" with field_name="state_code" field_label="State Code" conflict_status=conflict_values.state_code contest_measure1_field_value=contest_measure_option1.state_code contest_measure2_field_value=contest_measure_option2.state_code contest_measure1=contest_measure_option1 contest_measure2=contest_measure_option2 %}
+
+{% include "measure/measure_merge_one_field_decision.html" with field_name="vote_smart_id" field_label="Number Elected" conflict_status=conflict_values.vote_smart_id contest_measure1_field_value=contest_measure_option1.vote_smart_id contest_measure2_field_value=contest_measure_option2.vote_smart_id contest_measure1=contest_measure_option1 contest_measure2=contest_measure_option2 %}
+
+{% include "measure/measure_merge_one_field_decision.html" with field_name="wikipedia_page_id" field_label="Wikipedia Id" conflict_status=conflict_values.wikipedia_page_id contest_measure1_field_value=contest_measure_option1.wikipedia_page_id contest_measure2_field_value=contest_measure_option2.wikipedia_page_id contest_measure1=contest_measure_option1 contest_measure2=contest_measure_option2 %}
+    <tr>
+        <td>Public Positions Count</td>
+        <td>{{ contest_measure_option1.public_positions_count }}</td>
+        <td>{{ contest_measure_option2.public_positions_count }}</td>
+    </tr>
+    <tr>
+        <td>Friends Positions Count</td>
+        <td>{{ contest_measure_option1.friends_positions_count }}</td>
+        <td>{{ contest_measure_option2.friends_positions_count }}</td>
+    </tr>
+    <tr>
+        <td>Bookmarks Count</td>
+        <td>{{ contest_measure_option1.bookmarks_count }}</td>
+        <td>{{ contest_measure_option2.bookmarks_count }}</td>
+    </tr>
+    <tr>
+        <td>&nbsp;</td>
+        <td>&nbsp;</td>
+        <td>&nbsp;</td>
+    </tr>
+    <tr>
+        <td>
+          <a href="{% url 'measure:measure_list' %}">cancel</a>&nbsp; <input type="submit" value="Skip - Not Duplicates" name="skip" />&nbsp;
+        </td>
+        <td></td>
+        <td><input type="submit" value="Merge Contest Measures" name="merge" /></td>
+    </tr>
+</table>
+<input type="hidden" name="remove_duplicate_process" value="{{ remove_duplicate_process }}" />
+<input type="hidden" name="state_code" value="{{ contest_measure_option2.state_code }}" />
+<input type="hidden" name="google_civic_election_id" value="{{ contest_measure_option1.google_civic_election_id }}" />
+<input type="hidden" name="contest_measure1_we_vote_id" value="{{ contest_measure_option1.we_vote_id }}" />
+<input type="hidden" name="contest_measure2_we_vote_id" value="{{ contest_measure_option2.we_vote_id }}" />
+{% else %}
+<input type="submit" value="CANNOT MERGE" />
+{% endif %}
+</form>
+
+<br />
+
+{% endblock %}

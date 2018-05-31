@@ -831,27 +831,29 @@ def election_summary_view(request, election_local_id=0, google_civic_election_id
             voter_ballot_saved_list = voter_ballot_saved_results['voter_ballot_saved_list']
 
         template_values = {
-            'ballot_returned_search':   ballot_returned_search,
-            'ballot_returned_list': ballot_returned_list_modified,
+            'ballot_returned_search':                   ballot_returned_search,
+            'ballot_returned_list':                     ballot_returned_list_modified,
             'ballot_returned_count_entire_election':    ballot_returned_count_entire_election,
-            'entries_missing_latitude_longitude':   entries_missing_latitude_longitude,
-            'election':             election_on_stage,
-            'messages_on_stage':    messages_on_stage,
-            'state_code':           state_code,
-            'state_list':           sorted_state_list,
-            'voter_ballot_saved_list': voter_ballot_saved_list,
-            'voter_ballot_saved_search': voter_ballot_saved_search,
+            'entries_missing_latitude_longitude':       entries_missing_latitude_longitude,
+            'election':                                 election_on_stage,
+            'google_civic_election_id':                 google_civic_election_id,
+            'messages_on_stage':                        messages_on_stage,
+            'state_code':                               state_code,
+            'state_list':                               sorted_state_list,
+            'voter_ballot_saved_list':                  voter_ballot_saved_list,
+            'voter_ballot_saved_search':                voter_ballot_saved_search,
         }
     else:
         messages_on_stage = get_messages(request)
 
         template_values = {
             'ballot_returned_count_entire_election':    ballot_returned_count_entire_election,
-            'entries_missing_latitude_longitude':   entries_missing_latitude_longitude,
-            'messages_on_stage':    messages_on_stage,
-            'state_code':           state_code,
-            'state_list':           sorted_state_list,
-            'ballot_returned_search':   ballot_returned_search,
+            'ballot_returned_search':                   ballot_returned_search,
+            'entries_missing_latitude_longitude':       entries_missing_latitude_longitude,
+            'google_civic_election_id':                 google_civic_election_id,
+            'messages_on_stage':                        messages_on_stage,
+            'state_code':                               state_code,
+            'state_list':                               sorted_state_list,
         }
     return render(request, 'election/election_summary.html', template_values)
 

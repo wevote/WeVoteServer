@@ -21,7 +21,7 @@ from image.models import ORGANIZATION_ENDORSEMENTS_IMAGE_NAME
 
 logger = wevote_functions.admin.get_logger(__name__)
 
-# When merging candidates, these are the fields we check for figure_out_conflict_values
+# When merging candidates, these are the fields we check for figure_out_candidate_conflict_values
 CANDIDATE_UNIQUE_IDENTIFIERS = [
     'ballot_guide_official_statement',
     'ballotpedia_candidate_id',

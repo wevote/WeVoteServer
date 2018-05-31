@@ -1056,7 +1056,7 @@ class ContestOfficeListManager(models.Model):
                 keep_looking_for_duplicates = False
                 # if a single entry matches, update that entry
                 if len(contest_office_list_filtered) == 1:
-                    status += 'CREATE_BATCH_ROW_ACTION_CONTEST_OFFICE-SINGLE_ROW_RETRIEVED '
+                    status += 'RETRIEVE_CONTEST_OFFICES_FROM_NON_UNIQUE-SINGLE_ROW_RETRIEVED '
                     contest_office = contest_office_list_filtered[0]
                     contest_office_found = True
                     contest_office_list_found = True
@@ -1065,7 +1065,7 @@ class ContestOfficeListManager(models.Model):
                     # more than one entry found with a match in ContestOffice
                     contest_office_list_found = True
                     multiple_entries_found = True
-                    status += 'CREATE_BATCH_ROW_ACTION_CONTEST_OFFICE-MULTIPLE_ROWS_RETRIEVED '
+                    status += 'RETRIEVE_CONTEST_OFFICES_FROM_NON_UNIQUE-MULTIPLE_ROWS_RETRIEVED '
                     success = True
             else:
                 # Existing entry couldn't be found in the contest office table. We should keep looking for
@@ -1120,14 +1120,14 @@ class ContestOfficeListManager(models.Model):
 
                 contest_office_list_filtered = []
                 if len(contest_office_list):
-                    contest_office_list_filtered = remove_district_false_positives(
+                    contest_office_list_filtered = remove_office_district_false_positives(
                         contest_office_name, contest_office_list)
 
                 if len(contest_office_list_filtered):
                     keep_looking_for_duplicates = False
                     # if a single entry matches, update that entry
                     if len(contest_office_list_filtered) == 1:
-                        status += 'CREATE_BATCH_ROW_ACTION_CONTEST_OFFICE-SINGLE_ROW_RETRIEVED '
+                        status += 'RETRIEVE_CONTEST_OFFICES_FROM_NON_UNIQUE-SINGLE_ROW_RETRIEVED2 '
                         contest_office = contest_office_list_filtered[0]
                         contest_office_found = True
                         contest_office_list_found = True
@@ -1136,7 +1136,7 @@ class ContestOfficeListManager(models.Model):
                         # more than one entry found with a match in ContestOffice
                         contest_office_list_found = True
                         multiple_entries_found = True
-                        status += 'CREATE_BATCH_ROW_ACTION_CONTEST_OFFICE-MULTIPLE_ROWS_RETRIEVED '
+                        status += 'RETRIEVE_CONTEST_OFFICES_FROM_NON_UNIQUE-MULTIPLE_ROWS_RETRIEVED2 '
                         success = True
                 else:
                     # Existing entry couldn't be found in the contest office table. We should keep looking for
@@ -1237,14 +1237,14 @@ class ContestOfficeListManager(models.Model):
 
                     contest_office_list_filtered = []
                     if len(contest_office_list):
-                        contest_office_list_filtered = remove_district_false_positives(
+                        contest_office_list_filtered = remove_office_district_false_positives(
                             contest_office_name, contest_office_list)
 
                     if len(contest_office_list_filtered):
                         keep_looking_for_duplicates = False
                         # if a single entry matches, update that entry
                         if len(contest_office_list_filtered) == 1:
-                            status += 'CREATE_BATCH_ROW_ACTION_CONTEST_OFFICE-SINGLE_ROW_RETRIEVED '
+                            status += 'RETRIEVE_CONTEST_OFFICES_FROM_NON_UNIQUE-SINGLE_ROW_RETRIEVED3 '
                             contest_office = contest_office_list_filtered[0]
                             contest_office_found = True
                             contest_office_list_found = True
@@ -1253,7 +1253,7 @@ class ContestOfficeListManager(models.Model):
                             # more than one entry found with a match in ContestOffice
                             contest_office_list_found = True
                             multiple_entries_found = True
-                            status += 'CREATE_BATCH_ROW_ACTION_CONTEST_OFFICE-MULTIPLE_ROWS_RETRIEVED '
+                            status += 'RETRIEVE_CONTEST_OFFICES_FROM_NON_UNIQUE-MULTIPLE_ROWS_RETRIEVED3 '
                             success = True
                     else:
                         # Existing entry couldn't be found in the contest office table. We should keep looking for
@@ -1299,7 +1299,9 @@ class ContestOfficeListManager(models.Model):
             'contest_office':               contest_office,
             'contest_office_list_found':    contest_office_list_found,
             'contest_office_list':          contest_office_list_filtered,
+            'google_civic_election_id':     google_civic_election_id,
             'multiple_entries_found':       multiple_entries_found,
+            'state_code':                   incoming_state_code,
         }
         return results
 
@@ -1323,7 +1325,7 @@ class ContestOfficesAreNotDuplicates(models.Model):
             return ""
 
 
-def remove_district_false_positives(contest_office_name, contest_office_list):
+def remove_office_district_false_positives(contest_office_name, contest_office_list):
     contest_office_list_filtered = []
     # We want to avoid matches like this:
     # U.S. House California District 1 == U.S. House California District 18

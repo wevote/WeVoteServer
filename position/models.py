@@ -2951,12 +2951,12 @@ class PositionListManager(models.Model):
                 if stance_we_are_looking_for == SUPPORT:
                     position_list_query = position_list_query.filter(
                         Q(stance=stance_we_are_looking_for) |  # Matches "is_support"
-                        (Q(stance=PERCENT_RATING) & Q(vote_smart_rating_integer__gte=66))  # Matches "is_positive_rating"
+                        (Q(stance=PERCENT_RATING) & Q(vote_smart_rating_integer__gte=66))  # "is_positive_rating"
                     )  # | Q(stance=GRADE_RATING))
                 elif stance_we_are_looking_for == OPPOSE:
                     position_list_query = position_list_query.filter(
                         Q(stance=stance_we_are_looking_for) |  # Matches "is_oppose"
-                        (Q(stance=PERCENT_RATING) & Q(vote_smart_rating_integer__lte=33))  # Matches "is_negative_rating"
+                        (Q(stance=PERCENT_RATING) & Q(vote_smart_rating_integer__lte=33))  # "is_negative_rating"
                     )  # | Q(stance=GRADE_RATING))
                 else:
                     position_list_query = position_list_query.filter(stance=stance_we_are_looking_for)
@@ -2969,36 +2969,72 @@ class PositionListManager(models.Model):
 
         return position_count
 
-    def retrieve_public_positions_count_for_contest_measure(self, contest_measure_id,
-                                                            contest_measure_we_vote_id,
-                                                            stance_we_are_looking_for):
+    def fetch_public_positions_count_for_contest_measure(self, contest_measure_id,
+                                                         contest_measure_we_vote_id,
+                                                         stance_we_are_looking_for=ANY_STANCE):
+        return self.fetch_positions_count_for_contest_measure(contest_measure_id,
+                                                              contest_measure_we_vote_id,
+                                                              stance_we_are_looking_for,
+                                                              PUBLIC_ONLY)
+
+    def fetch_friends_only_positions_count_for_contest_measure(self, contest_measure_id,
+                                                               contest_measure_we_vote_id,
+                                                               stance_we_are_looking_for=ANY_STANCE):
+        return self.fetch_positions_count_for_contest_measure(contest_measure_id,
+                                                              contest_measure_we_vote_id,
+                                                              stance_we_are_looking_for,
+                                                              FRIENDS_ONLY)
+
+    @staticmethod
+    def fetch_positions_count_for_contest_measure(contest_measure_id,
+                                                  contest_measure_we_vote_id,
+                                                  stance_we_are_looking_for,
+                                                  public_or_private=PUBLIC_ONLY):
         if stance_we_are_looking_for not \
                 in(ANY_STANCE, SUPPORT, STILL_DECIDING, INFORMATION_ONLY, NO_STANCE, OPPOSE, PERCENT_RATING):
-            return 0
+            stance_we_are_looking_for = ANY_STANCE
 
-        # Note that one of the incoming options for stance_we_are_looking_for is 'ANY' which means we want to return
-        #  all stances
+        # Note that one of the incoming options for stance_we_are_looking_for is 'ANY_STANCE'
+        #  which means we want to return all stances
 
         if not positive_value_exists(contest_measure_id) and not \
                 positive_value_exists(contest_measure_we_vote_id):
             return 0
 
+        if public_or_private not in(PUBLIC_ONLY, FRIENDS_ONLY):
+            public_or_private = PUBLIC_ONLY
+        if public_or_private == FRIENDS_ONLY:
+            position_list_query = PositionForFriends.objects.using('readonly').all()
+        else:
+            position_list_query = PositionEntered.objects.using('readonly').all()
+
         # Retrieve the support positions for this contest_measure_id
         position_count = 0
         try:
-            position_list = PositionEntered.objects.using('readonly').order_by('date_entered')
             if positive_value_exists(contest_measure_id):
-                position_list = position_list.filter(contest_measure_id=contest_measure_id)
+                position_list_query = position_list_query.filter(contest_measure_id=contest_measure_id)
             else:
-                position_list = position_list.filter(
+                position_list_query = position_list_query.filter(
                     contest_measure_we_vote_id__iexact=contest_measure_we_vote_id)
             # SUPPORT, STILL_DECIDING, INFORMATION_ONLY, NO_STANCE, OPPOSE, PERCENT_RATING
             if stance_we_are_looking_for != ANY_STANCE:
-                # If we passed in the stance "ANY" it means we want to not filter down the list
-                position_list = position_list.filter(stance=stance_we_are_looking_for)
+                # If we passed in the stance "ANY_STANCE" it means we want to not filter down the list
+                if stance_we_are_looking_for == SUPPORT:
+                    position_list_query = position_list_query.filter(
+                        Q(stance=stance_we_are_looking_for) |  # Matches "is_support"
+                        (Q(stance=PERCENT_RATING) & Q(vote_smart_rating_integer__gte=66))  # "is_positive_rating"
+                    )  # | Q(stance=GRADE_RATING))
+                elif stance_we_are_looking_for == OPPOSE:
+                    position_list_query = position_list_query.filter(
+                        Q(stance=stance_we_are_looking_for) |  # Matches "is_oppose"
+                        (Q(stance=PERCENT_RATING) & Q(vote_smart_rating_integer__lte=33))  # "is_negative_rating"
+                    )  # | Q(stance=GRADE_RATING))
+                else:
+                    position_list_query = position_list_query.filter(stance=stance_we_are_looking_for)
+            # Limit to positions in the last x years - currently we are not limiting
             # position_list = position_list.filter(election_id=election_id)
 
-            position_count = position_list.count()
+            position_count = position_list_query.count()
         except Exception as e:
             handle_record_not_found_exception(e, logger=logger)
 
@@ -3016,7 +3052,7 @@ class PositionListManager(models.Model):
             position_queryset = position_queryset.filter(google_civic_election_id=google_civic_election_id)
             # We don't look for office_we_vote_id because of the chance that locally we are using a
             # different we_vote_id
-            # position_queryset = position_queryset.filter(contest_office_we_vote_id__iexact=office_we_vote_id)
+            # position_queryset = position_queryset.filter(contest_measure_we_vote_id__iexact=office_we_vote_id)
 
             # Ignore entries with we_vote_id coming in from master server
             if positive_value_exists(we_vote_id_from_master):

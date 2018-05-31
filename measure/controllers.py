@@ -2,7 +2,7 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
-from .models import ContestMeasureList, ContestMeasureManager
+from .models import ContestMeasure, ContestMeasureList, ContestMeasureManager, CONTEST_MEASURE_UNIQUE_IDENTIFIERS
 from ballot.models import MEASURE
 from config.base import get_environment_variable
 from django.http import HttpResponse
@@ -17,6 +17,165 @@ logger = wevote_functions.admin.get_logger(__name__)
 
 WE_VOTE_API_KEY = get_environment_variable("WE_VOTE_API_KEY")
 MEASURES_SYNC_URL = get_environment_variable("MEASURES_SYNC_URL")  # measuresSyncOut
+
+
+def fetch_duplicate_measure_count(contest_measure, ignore_measure_we_vote_id_list):
+    if not hasattr(contest_measure, 'google_civic_election_id'):
+        return 0
+
+    if not positive_value_exists(contest_measure.google_civic_election_id):
+        return 0
+
+    # Search for other offices within this election that match name and election
+    contest_measure_list_manager = ContestMeasureList()
+    return contest_measure_list_manager.fetch_measures_from_non_unique_identifiers_count(
+        contest_measure.google_civic_election_id, contest_measure.state_code,
+        contest_measure.office_name, ignore_measure_we_vote_id_list)
+
+
+def figure_out_measure_conflict_values(contest_measure1, contest_measure2):
+    contest_measure_merge_conflict_values = {}
+
+    for attribute in CONTEST_MEASURE_UNIQUE_IDENTIFIERS:
+        try:
+            contest_measure1_attribute = getattr(contest_measure1, attribute)
+            contest_measure2_attribute = getattr(contest_measure2, attribute)
+            if contest_measure1_attribute is None and contest_measure2_attribute is None:
+                contest_measure_merge_conflict_values[attribute] = 'MATCHING'
+            elif contest_measure1_attribute is None or contest_measure1_attribute is "":
+                contest_measure_merge_conflict_values[attribute] = 'CONTEST_MEASURE2'
+            elif contest_measure2_attribute is None or contest_measure2_attribute is "":
+                contest_measure_merge_conflict_values[attribute] = 'CONTEST_MEASURE1'
+            else:
+                if attribute == "measure_title" or attribute == "state_code":
+                    if contest_measure1_attribute.lower() == contest_measure2_attribute.lower():
+                        contest_measure_merge_conflict_values[attribute] = 'MATCHING'
+                    else:
+                        contest_measure_merge_conflict_values[attribute] = 'CONFLICT'
+                else:
+                    if contest_measure1_attribute == contest_measure2_attribute:
+                        contest_measure_merge_conflict_values[attribute] = 'MATCHING'
+                    else:
+                        contest_measure_merge_conflict_values[attribute] = 'CONFLICT'
+        except AttributeError:
+            pass
+
+    return contest_measure_merge_conflict_values
+
+
+def filter_measures_structured_json_for_local_duplicates(structured_json):
+    """
+    With this function, we remove measures that seem to be duplicates, but have different we_vote_id's.
+    :param structured_json:
+    :return:
+    """
+    duplicates_removed = 0
+    filtered_structured_json = []
+    measure_list_manager = ContestMeasureList()
+    for one_measure in structured_json:
+        measure_title = one_measure['measure_title'] if 'measure_title' in one_measure else ''
+        we_vote_id = one_measure['we_vote_id'] if 'we_vote_id' in one_measure else ''
+        google_civic_election_id = \
+            one_measure['google_civic_election_id'] if 'google_civic_election_id' in one_measure else ''
+        measure_url = one_measure['measure_url'] if 'measure_url' in one_measure else ''
+        maplight_id = one_measure['maplight_id'] if 'maplight_id' in one_measure else ''
+        vote_smart_id = one_measure['vote_smart_id'] if 'vote_smart_id' in one_measure else ''
+
+        # Check to see if there is an entry that matches in all critical ways, minus the we_vote_id
+        we_vote_id_from_master = we_vote_id
+
+        results = measure_list_manager.retrieve_possible_duplicate_measures(
+            measure_title, google_civic_election_id, measure_url, maplight_id, vote_smart_id,
+            we_vote_id_from_master)
+
+        if results['measure_list_found']:
+            # There seems to be a duplicate already in this database using a different we_vote_id
+            duplicates_removed += 1
+        else:
+            filtered_structured_json.append(one_measure)
+
+    candidates_results = {
+        'success':              True,
+        'status':               "FILTER_MEASURES_FOR_DUPLICATES_PROCESS_COMPLETE",
+        'duplicates_removed':   duplicates_removed,
+        'structured_json':      filtered_structured_json,
+    }
+    return candidates_results
+
+
+def find_duplicate_contest_measure(contest_measure, ignore_measure_we_vote_id_list):
+    if not hasattr(contest_measure, 'google_civic_election_id'):
+        error_results = {
+            'success':                                  False,
+            'status':                                   "FIND_DUPLICATE_CONTEST_MEASURE_MISSING_OFFICE_OBJECT ",
+            'contest_measure_merge_possibility_found':   False,
+            'contest_measure_list':                      [],
+        }
+        return error_results
+
+    if not positive_value_exists(contest_measure.google_civic_election_id):
+        error_results = {
+            'success':                                False,
+            'status':                                 "FIND_DUPLICATE_CONTEST_MEASURE_MISSING_GOOGLE_CIVIC_ELECTION_ID ",
+            'contest_measure_merge_possibility_found': False,
+            'contest_measure_list':                    [],
+        }
+        return error_results
+
+    # Search for other contest measures within this election that match name and election
+    contest_measure_list_manager = ContestMeasureList()
+    try:
+        results = contest_measure_list_manager.retrieve_contest_measures_from_non_unique_identifiers(
+            contest_measure.google_civic_election_id, contest_measure.state_code, contest_measure.measure_title,
+            contest_measure.district_id, contest_measure.district_name, ignore_measure_we_vote_id_list)
+
+        if results['contest_measure_found']:
+            contest_measure_merge_conflict_values = \
+                figure_out_measure_conflict_values(contest_measure, results['contest_measure'])
+
+            results = {
+                'success':                                  True,
+                'status':                                   "FIND_DUPLICATE_CONTEST_MEASURE_DUPLICATES_FOUND",
+                'contest_measure_merge_possibility_found':   True,
+                'contest_measure_merge_possibility':         results['contest_measure'],
+                'contest_measure_merge_conflict_values':     contest_measure_merge_conflict_values,
+                'contest_measure_list':                      results['contest_measure_list'],
+            }
+            return results
+        elif results['contest_measure_list_found']:
+            # Only deal with merging the incoming contest measure and the first on found
+            contest_measure_merge_conflict_values = \
+                figure_out_measure_conflict_values(contest_measure, results['contest_measure_list'][0])
+
+            results = {
+                'success':                                  True,
+                'status':                                   "FIND_DUPLICATE_CONTEST_MEASURE_DUPLICATES_FOUND",
+                'contest_measure_merge_possibility_found':   True,
+                'contest_measure_merge_possibility':         results['contest_measure_list'][0],
+                'contest_measure_merge_conflict_values':     contest_measure_merge_conflict_values,
+                'contest_measure_list':                      results['contest_measure_list'],
+            }
+            return results
+        else:
+            results = {
+                'success':                                  True,
+                'status':                                   "FIND_DUPLICATE_CONTEST_MEASURE_NO_DUPLICATES_FOUND",
+                'contest_measure_merge_possibility_found':   False,
+                'contest_measure_list':                      results['contest_measure_list'],
+            }
+            return results
+
+    except ContestMeasure.DoesNotExist:
+        pass
+    except Exception as e:
+        pass
+
+    results = {
+        'success':                                  True,
+        'status':                                   "FIND_DUPLICATE_CONTEST_MEASURE_NO_DUPLICATES_FOUND",
+        'contest_measure_merge_possibility_found':   False,
+    }
+    return results
 
 
 def measure_retrieve_for_api(measure_id, measure_we_vote_id):  # measureRetrieve
@@ -133,46 +292,6 @@ def measures_import_from_master_server(request, google_civic_election_id, state_
             import_results['status'] += ", This election may not have any measures."
 
     return import_results
-
-
-def filter_measures_structured_json_for_local_duplicates(structured_json):
-    """
-    With this function, we remove measures that seem to be duplicates, but have different we_vote_id's.
-    :param structured_json:
-    :return:
-    """
-    duplicates_removed = 0
-    filtered_structured_json = []
-    measure_list_manager = ContestMeasureList()
-    for one_measure in structured_json:
-        measure_title = one_measure['measure_title'] if 'measure_title' in one_measure else ''
-        we_vote_id = one_measure['we_vote_id'] if 'we_vote_id' in one_measure else ''
-        google_civic_election_id = \
-            one_measure['google_civic_election_id'] if 'google_civic_election_id' in one_measure else ''
-        measure_url = one_measure['measure_url'] if 'measure_url' in one_measure else ''
-        maplight_id = one_measure['maplight_id'] if 'maplight_id' in one_measure else ''
-        vote_smart_id = one_measure['vote_smart_id'] if 'vote_smart_id' in one_measure else ''
-
-        # Check to see if there is an entry that matches in all critical ways, minus the we_vote_id
-        we_vote_id_from_master = we_vote_id
-
-        results = measure_list_manager.retrieve_possible_duplicate_measures(
-            measure_title, google_civic_election_id, measure_url, maplight_id, vote_smart_id,
-            we_vote_id_from_master)
-
-        if results['measure_list_found']:
-            # There seems to be a duplicate already in this database using a different we_vote_id
-            duplicates_removed += 1
-        else:
-            filtered_structured_json.append(one_measure)
-
-    candidates_results = {
-        'success':              True,
-        'status':               "FILTER_MEASURES_FOR_DUPLICATES_PROCESS_COMPLETE",
-        'duplicates_removed':   duplicates_removed,
-        'structured_json':      filtered_structured_json,
-    }
-    return candidates_results
 
 
 def measures_import_from_structured_json(structured_json):
