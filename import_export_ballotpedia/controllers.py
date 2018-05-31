@@ -779,7 +779,7 @@ def retrieve_one_ballot_from_ballotpedia_api(latitude, longitude, incoming_googl
 
         # Use Ballotpedia API call counter to track the number of queries we are doing each day
         # ballotpedia_api_counter_manager = BallotpediaApiCounterManager()
-        # ballotpedia_api_counter_manager.create_counter_entry(BALLOTPEDIA_API_ELECTIONS_TYPE, google_civic_election_id=0,  ballotpedia_election_id=0)
+        # ballotpedia_api_counter_manager.create_counter_entry(BALLOTPEDIA_API_CONTAINS_TYPE, google_civic_election_id=0,  ballotpedia_election_id=0)
 
         success = len(structured_json)
 
