@@ -846,7 +846,7 @@ def positions_public_count_for_contest_measure(measure_id, measure_we_vote_id, s
 
     position_list_manager = PositionListManager()
     all_positions_count_for_contest_measure = \
-        position_list_manager.retrieve_public_positions_count_for_contest_measure(
+        position_list_manager.fetch_public_positions_count_for_contest_measure(
             measure_id, measure_we_vote_id, stance_we_are_looking_for)
 
     if positive_value_exists(measure_id) or positive_value_exists(measure_we_vote_id):

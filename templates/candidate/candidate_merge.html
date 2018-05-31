@@ -6,7 +6,7 @@
 {%  block content %}
 <a href="{% url 'candidate:candidate_list' %}">< Back to Candidates</a>
   <br /></r />
-<a href="{% url 'candidate:find_and_merge_duplicate_candidates' %}?google_civic_election_id={{ google_civic_election_id }}&find_duplicates_count=1" >Click to find out the number of possible duplicates</a> (takes 30-60 seconds)
+<a href="{% url 'candidate:find_and_merge_duplicate_candidates' %}?google_civic_election_id={{ google_civic_election_id }}&find_number_of_duplicates=1" >Click to find out the number of possible duplicates</a> (takes 30-60 seconds)
 
 <h1>{% if candidate_option1 %}Merge {{ candidate_option1.candidate_name }}{% else %}CANNOT MERGE{% endif %}</h1>
 {% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}

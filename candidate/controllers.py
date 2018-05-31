@@ -115,7 +115,8 @@ def find_duplicate_candidate(we_vote_candidate, ignore_candidate_id_list):
             we_vote_candidate.candidate_twitter_handle, we_vote_candidate.candidate_name, ignore_candidate_id_list)
 
         if results['candidate_found']:
-            candidate_merge_conflict_values = figure_out_conflict_values(we_vote_candidate, results['candidate'])
+            candidate_merge_conflict_values = \
+                figure_out_candidate_conflict_values(we_vote_candidate, results['candidate'])
 
             results = {
                 'success':                              True,
@@ -129,7 +130,7 @@ def find_duplicate_candidate(we_vote_candidate, ignore_candidate_id_list):
         elif results['candidate_list_found']:
             # Only deal with merging the incoming candidate and the first on found
             candidate_merge_conflict_values = \
-                figure_out_conflict_values(we_vote_candidate, results['candidate_list'][0])
+                figure_out_candidate_conflict_values(we_vote_candidate, results['candidate_list'][0])
 
             results = {
                 'success':                              True,
@@ -163,7 +164,7 @@ def find_duplicate_candidate(we_vote_candidate, ignore_candidate_id_list):
     return results
 
 
-def figure_out_conflict_values(candidate1, candidate2):
+def figure_out_candidate_conflict_values(candidate1, candidate2):
     candidate_merge_conflict_values = {}
 
     for attribute in CANDIDATE_UNIQUE_IDENTIFIERS:

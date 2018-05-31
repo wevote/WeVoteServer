@@ -28,6 +28,57 @@
 
 {% endif %}
 
+
+{% if measure %}
+<h3>Merge with Another Measure</h3>
+<form name="find_another_to_merge" method="get" action="{% url 'measure:measure_summary' measure.id %}">
+    {% csrf_token %}
+    {% if measure_search %}
+        <a href="{% url 'measure:measure_summary' measure.id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
+             clear search</a>&nbsp;
+    {% endif %}
+    <input type="text" name="measure_search" id="measure_search_id" value="{{ measure_search }}" style="width: 450px" />
+    <input type="hidden" name="measure_id" value="{{ measure.id }}">
+    <input type="hidden" name="google_civic_election_id" value="{{ google_civic_election_id }}">
+    <input type="hidden" name="state_code" value="{{ state_code }}">
+    <input type="submit" value="Search for Duplicate Offices" />
+</form>
+
+{% if measure_search_results_list %}
+    <table border="1" cellpadding="5" cellspacing="5">
+        <tr>
+            <td>&nbsp;</td>
+            <td>ID</td>
+            <td>We Vote ID</td>
+            <td>Measure Title</td>
+            <td>State</td>
+            <td>Ballotpedia Measure ID</td>
+        </tr>
+    {% for found_measure in measure_search_results_list %}
+        <tr>
+            <td>{{ forloop.counter }}</td>
+            <td>{{ found_measure.id }}</td>
+            <td>{{ found_measure.we_vote_id }}</td>
+            <td>
+                {{ found_measure.measure_title }}
+              <br />
+              (<a href="{% url 'measure:measure_summary' found_measure.id %}" target="_blank">view&nbsp;summary</a>,
+              <a href="{% url 'measure:compare_two_measures_for_merge' %}?contest_measure1_we_vote_id={{ measure.we_vote_id }}&contest_measure2_we_vote_id={{ found_measure.we_vote_id }}" target="_blank">compare&nbsp;for&nbsp;merge</a>)
+            </td>
+            <td>{{ found_measure.state_code }}</td>
+            <td>{{ found_measure.ballotpedia_measure_id|default_if_none:"" }}</td>
+        </tr>
+    {% endfor %}
+    </table>
+{% endif %}
+
+{% endif %}
+
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+
     <script>
         $(function() {
             $('#google_civic_election_id').change(function() {

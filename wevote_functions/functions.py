@@ -213,6 +213,29 @@ LANGUAGE_CODE_SPANISH = 'es'
 # U.S. House California District 33
 # UNITED STATES REPRESENTATIVE, 33rd District
 
+# We also check generate state specific phrases like "of california"
+MEASURE_TITLE_COMMON_PHRASES_TO_REMOVE_FROM_SEARCHES = [
+]
+
+# Single digit proposition names go last, so we can find the double digit names first
+MEASURE_TITLE_EQUIVALENT_MEASURE_TITLE_PAIRS = {
+    'prop 72': 'proposition 72',
+    'prop - 72': 'proposition 72',
+    'prop. 72': 'proposition 72',
+    'prop 71': 'proposition 71',
+    'prop - 71': 'proposition 71',
+    'prop. 71': 'proposition 71',
+    'prop 70': 'proposition 70',
+    'prop - 70': 'proposition 70',
+    'prop. 70': 'proposition 70',
+    'prop 69': 'proposition 69',
+    'prop - 69': 'proposition 69',
+    'prop. 69': 'proposition 69',
+    'prop 68': 'proposition 68',
+    'prop - 68': 'proposition 68',
+    'prop. 68': 'proposition 68',
+}
+
 OFFICE_NAME_EQUIVALENT_PHRASE_PAIRS = {
     'commissioner of insurance': 'insurance commissioner',
     'member state board of equalization': 'state board of equalization',

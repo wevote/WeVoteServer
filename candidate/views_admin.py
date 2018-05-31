@@ -3,7 +3,7 @@
 # -*- coding: UTF-8 -*-
 
 from .controllers import candidates_import_from_master_server, candidates_import_from_sample_file, \
-    candidate_politician_match, fetch_duplicate_candidate_count, figure_out_conflict_values, find_duplicate_candidate, \
+    candidate_politician_match, fetch_duplicate_candidate_count, figure_out_candidate_conflict_values, find_duplicate_candidate, \
     merge_if_duplicate_candidates, merge_these_two_candidates, \
     refresh_candidate_data_from_master_tables, retrieve_candidate_photos, \
     retrieve_candidate_politician_match_options, save_google_search_image_to_candidate_table, \
@@ -1158,7 +1158,7 @@ def candidate_merge_process_view(request):
                                     '&state_code=' + str(state_code))
 
     # Gather choices made from merge form
-    conflict_values = figure_out_conflict_values(candidate1_on_stage, candidate2_on_stage)
+    conflict_values = figure_out_candidate_conflict_values(candidate1_on_stage, candidate2_on_stage)
     admin_merge_choices = {}
     for attribute in CANDIDATE_UNIQUE_IDENTIFIERS:
         conflict_value = conflict_values.get(attribute, None)
@@ -1206,7 +1206,7 @@ def find_and_merge_duplicate_candidates_view(request):
 
     candidate_list = []
     ignore_candidate_id_list = []
-    find_duplicates_count = request.GET.get('find_duplicates_count', 0)
+    find_number_of_duplicates = request.GET.get('find_number_of_duplicates', 0)
     google_civic_election_id = request.GET.get('google_civic_election_id', 0)
     google_civic_election_id = convert_to_int(google_civic_election_id)
     state_code = request.GET.get('state_code', "")
@@ -1226,7 +1226,7 @@ def find_and_merge_duplicate_candidates_view(request):
         pass
 
     # Loop through all of the candidates in this election to see how many have possible duplicates
-    if positive_value_exists(find_duplicates_count):
+    if positive_value_exists(find_number_of_duplicates):
         duplicate_candidate_count = 0
         for we_vote_candidate in candidate_list:
             # Note that we don't reset the ignore_candidate_list, so we don't search for a duplicate both directions
@@ -1726,7 +1726,7 @@ def compare_two_candidates_for_merge_view(request):
 
     candidate_option2_for_template = candidate_results['candidate_campaign']
 
-    candidate_merge_conflict_values = figure_out_conflict_values(
+    candidate_merge_conflict_values = figure_out_candidate_conflict_values(
         candidate_option1_for_template, candidate_option2_for_template)
 
     # This view function takes us to displaying a template

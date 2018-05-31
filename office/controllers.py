@@ -97,7 +97,8 @@ def find_duplicate_contest_office(contest_office, ignore_office_we_vote_id_list)
             contest_office.district_id, contest_office.district_name, ignore_office_we_vote_id_list)
 
         if results['contest_office_found']:
-            contest_office_merge_conflict_values = figure_out_conflict_values(contest_office, results['contest_office'])
+            contest_office_merge_conflict_values = \
+                figure_out_office_conflict_values(contest_office, results['contest_office'])
 
             results = {
                 'success':                                  True,
@@ -111,7 +112,7 @@ def find_duplicate_contest_office(contest_office, ignore_office_we_vote_id_list)
         elif results['contest_office_list_found']:
             # Only deal with merging the incoming contest office and the first on found
             contest_office_merge_conflict_values = \
-                figure_out_conflict_values(contest_office, results['contest_office_list'][0])
+                figure_out_office_conflict_values(contest_office, results['contest_office_list'][0])
 
             results = {
                 'success':                                  True,
@@ -144,7 +145,7 @@ def find_duplicate_contest_office(contest_office, ignore_office_we_vote_id_list)
     return results
 
 
-def figure_out_conflict_values(contest_office1, contest_office2):
+def figure_out_office_conflict_values(contest_office1, contest_office2):
     contest_office_merge_conflict_values = {}
 
     for attribute in CONTEST_OFFICE_UNIQUE_IDENTIFIERS:

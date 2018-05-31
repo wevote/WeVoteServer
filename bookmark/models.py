@@ -293,7 +293,12 @@ class BookmarkItemList(models.Model):
     def retrieve_bookmark_item_list_for_contest_office(self, contest_office_we_vote_id):
         return self.retrieve_bookmark_item_list(contest_office_we_vote_id=contest_office_we_vote_id, read_only=False)
 
-    def retrieve_bookmark_item_list(self, voter_id=0, candidate_campaign_we_vote_id="", contest_office_we_vote_id="",
+    def retrieve_bookmark_item_list_for_contest_measure(self, contest_measure_we_vote_id):
+        return self.retrieve_bookmark_item_list(contest_measure_we_vote_id=contest_measure_we_vote_id, read_only=False)
+
+    def retrieve_bookmark_item_list(self, voter_id=0, candidate_campaign_we_vote_id="",
+                                    contest_office_we_vote_id="",
+                                    contest_measure_we_vote_id="",
                                     read_only=True):
         # Retrieve a list of bookmark_item entries
         bookmark_item_list_found = False
@@ -308,8 +313,12 @@ class BookmarkItemList(models.Model):
             if positive_value_exists(candidate_campaign_we_vote_id):
                 bookmark_item_list = bookmark_item_list.filter(
                     candidate_campaign_we_vote_id=candidate_campaign_we_vote_id)
+            if positive_value_exists(contest_measure_we_vote_id):
+                bookmark_item_list = bookmark_item_list.filter(
+                    contest_measure_we_vote_id__iexact=contest_measure_we_vote_id)
             if positive_value_exists(contest_office_we_vote_id):
-                bookmark_item_list = bookmark_item_list.filter(contest_office_we_vote_id=contest_office_we_vote_id)
+                bookmark_item_list = bookmark_item_list.filter(
+                    contest_office_we_vote_id__iexact=contest_office_we_vote_id)
             if len(bookmark_item_list):
                 bookmark_item_list_found = True
         except Exception as e:

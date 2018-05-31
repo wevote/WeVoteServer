@@ -8,10 +8,52 @@ from exception.models import handle_exception, handle_record_found_more_than_one
 from wevote_settings.models import fetch_next_we_vote_id_contest_measure_integer, \
     fetch_next_we_vote_id_measure_campaign_integer, fetch_site_unique_id_prefix
 import wevote_functions.admin
-from wevote_functions.functions import convert_to_int, extract_state_from_ocd_division_id, positive_value_exists
+from wevote_functions.functions import convert_to_int, extract_state_from_ocd_division_id, \
+    MEASURE_TITLE_COMMON_PHRASES_TO_REMOVE_FROM_SEARCHES, MEASURE_TITLE_EQUIVALENT_MEASURE_TITLE_PAIRS, \
+    positive_value_exists, \
+    STATE_CODE_MAP
 
 
 logger = wevote_functions.admin.get_logger(__name__)
+
+CONTEST_MEASURE_UNIQUE_IDENTIFIERS = [
+    'ballotpedia_district_id',
+    'ballotpedia_election_id',
+    'ballotpedia_measure_id',
+    'ballotpedia_measure_name',
+    'ballotpedia_measure_status',
+    'ballotpedia_measure_summary',
+    'ballotpedia_measure_text',
+    'ballotpedia_measure_url',
+    'ballotpedia_no_vote_description',
+    'ballotpedia_page_title',
+    'ballotpedia_yes_vote_description',
+    'cctl_uuid',
+    'district_id',
+    'district_name',
+    'district_scope',
+    'election_day_text',
+    'google_ballot_placement',
+    'google_civic_election_id',
+    'google_civic_measure_title',
+    # 'google_civic_measure_title2',
+    # 'google_civic_measure_title3',
+    # 'google_civic_measure_title4',
+    # 'google_civic_measure_title5',
+    'maplight_id',
+    'measure_subtitle',
+    'measure_text',
+    'measure_title',
+    'measure_url',
+    'ocd_division_id',
+    'primary_party',
+    'state_code',
+    'vote_smart_id',
+    'we_vote_id',
+    'wikipedia_page_id',
+    'wikipedia_page_title',
+    'wikipedia_photo_url',
+]
 
 
 # The measure that is on the ballot (equivalent to ContestOffice)
@@ -33,6 +75,14 @@ class ContestMeasure(models.Model):
     # if we edit the measure's name locally.
     google_civic_measure_title = models.CharField(verbose_name="measure name exactly as received from google civic",
                                                   max_length=255, null=True, blank=True)
+    google_civic_measure_title2 = models.CharField(verbose_name="measure name from google civic alternative",
+                                                   max_length=255, null=True, blank=True)
+    google_civic_measure_title3 = models.CharField(verbose_name="measure name from google civic alternative",
+                                                   max_length=255, null=True, blank=True)
+    google_civic_measure_title4 = models.CharField(verbose_name="measure name from google civic alternative",
+                                                   max_length=255, null=True, blank=True)
+    google_civic_measure_title5 = models.CharField(verbose_name="measure name from google civic alternative",
+                                                   max_length=255, null=True, blank=True)
     # A brief description of the referendum. This field is only populated for contests of type 'Referendum'.
     measure_subtitle = models.TextField(verbose_name="google civic referendum subtitle",
                                         null=True, blank=True, default="")
@@ -501,6 +551,82 @@ class ContestMeasureManager(models.Model):
 
         return state_code
 
+    def retrieve_measures_are_not_duplicates_list(self, contest_measure_we_vote_id, for_editing=False):
+        """
+        Get a list of other office_we_vote_id's that are not duplicates
+        :param contest_measure_we_vote_id:
+        :param for_editing:
+        :return:
+        """
+        # Note that the direction of the linkage does not matter
+        contest_measures_are_not_duplicates_list1 = []
+        contest_measures_are_not_duplicates_list2 = []
+        try:
+            if positive_value_exists(for_editing):
+                contest_measures_are_not_duplicates_list_query = ContestMeasuresAreNotDuplicates.objects.filter(
+                    contest_measure1_we_vote_id__iexact=contest_measure_we_vote_id,
+                )
+            else:
+                contest_measures_are_not_duplicates_list_query = \
+                    ContestMeasuresAreNotDuplicates.objects.using('readonly').filter(
+                        contest_measure1_we_vote_id__iexact=contest_measure_we_vote_id,
+                    )
+            contest_measures_are_not_duplicates_list1 = list(contest_measures_are_not_duplicates_list_query)
+            success = True
+            status = "CONTEST_MEASURES_NOT_DUPLICATES_LIST_UPDATED_OR_CREATED1 "
+        except ContestMeasuresAreNotDuplicates.DoesNotExist:
+            # No data found. Try again below
+            success = True
+            status = 'NO_CONTEST_MEASURES_NOT_DUPLICATES_LIST_RETRIEVED_DoesNotExist1 '
+        except Exception as e:
+            success = False
+            status = "CONTEST_MEASURES_NOT_DUPLICATES_LIST_NOT_UPDATED_OR_CREATED1 "
+
+        if success:
+            try:
+                if positive_value_exists(for_editing):
+                    contest_measures_are_not_duplicates_list_query = ContestMeasuresAreNotDuplicates.objects.filter(
+                        contest_measure2_we_vote_id__iexact=contest_measure_we_vote_id,
+                    )
+                else:
+                    contest_measures_are_not_duplicates_list_query = \
+                        ContestMeasuresAreNotDuplicates.objects.using('readonly').filter(
+                            contest_measure2_we_vote_id__iexact=contest_measure_we_vote_id,
+                        )
+                contest_measures_are_not_duplicates_list2 = list(contest_measures_are_not_duplicates_list_query)
+                success = True
+                status = "CONTEST_MEASURES_NOT_DUPLICATES_LIST_UPDATED_OR_CREATED2 "
+            except ContestMeasuresAreNotDuplicates.DoesNotExist:
+                success = True
+                status = 'NO_CONTEST_MEASURES_NOT_DUPLICATES_LIST_RETRIEVED2_DoesNotExist2 '
+            except Exception as e:
+                success = False
+                status = "CONTEST_MEASURES_NOT_DUPLICATES_LIST_NOT_UPDATED_OR_CREATED2 "
+
+        contest_measures_are_not_duplicates_list = \
+            contest_measures_are_not_duplicates_list1 + contest_measures_are_not_duplicates_list2
+        contest_measures_are_not_duplicates_list_found = positive_value_exists(len(
+            contest_measures_are_not_duplicates_list))
+        contest_measures_are_not_duplicates_list_we_vote_ids = []
+        for one_entry in contest_measures_are_not_duplicates_list:
+            if one_entry.contest_measure1_we_vote_id != contest_measure_we_vote_id:
+                contest_measures_are_not_duplicates_list_we_vote_ids.append(one_entry.contest_measure1_we_vote_id)
+            elif one_entry.contest_measure2_we_vote_id != contest_measure_we_vote_id:
+                contest_measures_are_not_duplicates_list_we_vote_ids.append(one_entry.contest_measure2_we_vote_id)
+        results = {
+            'success':                                              success,
+            'status':                                               status,
+            'contest_measures_are_not_duplicates_list_found':       contest_measures_are_not_duplicates_list_found,
+            'contest_measures_are_not_duplicates_list':             contest_measures_are_not_duplicates_list,
+            'contest_measures_are_not_duplicates_list_we_vote_ids':
+                contest_measures_are_not_duplicates_list_we_vote_ids,
+        }
+        return results
+
+    def fetch_measures_are_not_duplicates_list_we_vote_ids(self, measure_we_vote_id):
+        results = self.retrieve_measures_are_not_duplicates_list(measure_we_vote_id)
+        return results['contest_measures_are_not_duplicates_list_we_vote_ids']
+
     def create_measure_row_entry(self, measure_title, measure_subtitle, measure_text, state_code, ctcl_uuid,
                                  google_civic_election_id, defaults):
         """
@@ -665,6 +791,33 @@ class ContestMeasureList(models.Model):
     def __unicode__(self):
         return "ContestMeasureList"
 
+    def fetch_measures_from_non_unique_identifiers_count(
+            self, google_civic_election_id, state_code, measure_title, ignore_measure_we_vote_id_list=[]):
+        keep_looking_for_duplicates = True
+        status = ""
+
+        if keep_looking_for_duplicates and positive_value_exists(measure_title):
+            # Search by ContestMeasure name exact match
+            try:
+                contest_measure_query = ContestMeasure.objects.all()
+                contest_measure_query = contest_measure_query.filter(measure_title__iexact=measure_title,
+                                                                     google_civic_election_id=google_civic_election_id)
+                if positive_value_exists(state_code):
+                    contest_measure_query = contest_measure_query.filter(state_code__iexact=state_code)
+
+                if positive_value_exists(ignore_measure_we_vote_id_list):
+                    contest_measure_query = contest_measure_query.exclude(we_vote_id__in=ignore_measure_we_vote_id_list)
+
+                contest_measure_count = contest_measure_query.count()
+                if positive_value_exists(contest_measure_count):
+                    return contest_measure_count
+            except ContestMeasure.DoesNotExist:
+                status += "CONTEST_MEASURES_COUNT_NOT_FOUND "
+            except Exception as e:
+                keep_looking_for_duplicates = False
+
+        return 0
+
     def retrieve_measures(self, google_civic_election_id=0, ballotpedia_district_id=0, state_code="", limit=0):
         measure_list_objects = []
         measure_list_light = []
@@ -779,51 +932,231 @@ class ContestMeasureList(models.Model):
         }
         return results
 
-    def retrieve_measures_from_non_unique_identifiers(self, google_civic_election_id, state_code,
-                                                      contest_measure_title):
+    def retrieve_contest_measures_from_non_unique_identifiers(
+            self, google_civic_election_id, incoming_state_code, contest_measure_title,
+            district_id='', district_name='',
+            ignore_measure_we_vote_id_list=[]):
         keep_looking_for_duplicates = True
-        measure = ContestMeasure()
-        measure_found = False
-        measure_list = []
-        measure_list_found = False
-        multiple_entries_found = False
         success = False
+        contest_measure = ContestMeasure()
+        contest_measure_found = False
+        contest_measure_list_filtered = []
+        contest_measure_list_found = False
+        multiple_entries_found = False
         status = ""
 
-        if keep_looking_for_duplicates:
-            # Search by Candidate name exact match
-            try:
-                measure_query = ContestMeasure.objects.all()
-                measure_query = measure_query.filter(measure_title__iexact=contest_measure_title,
-                                                     state_code__iexact=state_code,
-                                                     google_civic_election_id=google_civic_election_id)
+        try:
+            contest_measure_query = ContestMeasure.objects.all()
+            # TODO Is there a way to filter with "dash" insensitivity? - vs --
+            contest_measure_query = contest_measure_query.filter(measure_title__iexact=contest_measure_title,
+                                                                 state_code__iexact=incoming_state_code,
+                                                                 google_civic_election_id=google_civic_election_id)
+            if positive_value_exists(district_id):
+                contest_measure_query = contest_measure_query.filter(district_id=district_id)
+            elif positive_value_exists(district_name):
+                contest_measure_query = contest_measure_query.filter(district_name__iexact=district_name)
 
-                measure_list = list(measure_query)
-                if len(measure_list):
-                    # entry exists
-                    status += 'MEASURE_ENTRY_EXISTS '
+            if positive_value_exists(ignore_measure_we_vote_id_list):
+                contest_measure_query = contest_measure_query.exclude(we_vote_id__in=ignore_measure_we_vote_id_list)
+
+            contest_measure_list_filtered = list(contest_measure_query)
+            if len(contest_measure_list_filtered):
+                keep_looking_for_duplicates = False
+                # if a single entry matches, update that entry
+                if len(contest_measure_list_filtered) == 1:
+                    status += 'RETRIEVE_CONTEST_MEASURES_FROM_NON_UNIQUE-SINGLE_ROW_RETRIEVED '
+                    contest_measure = contest_measure_list_filtered[0]
+                    contest_measure_found = True
+                    contest_measure_list_found = True
                     success = True
+                else:
+                    # more than one entry found with a match in ContestMeasure
+                    contest_measure_list_found = True
+                    multiple_entries_found = True
+                    status += 'RETRIEVE_CONTEST_MEASURES_FROM_NON_UNIQUE-MULTIPLE_ROWS_RETRIEVED '
+                    success = True
+            else:
+                # Existing entry couldn't be found in the contest office table. We should keep looking for
+                #  close matches
+                success = True
+        except ContestMeasure.DoesNotExist:
+            # Existing entry couldn't be found in the contest office table. We should keep looking for
+            #  close matches
+            success = True
+
+        # Strip away common words and look for direct matches
+        if keep_looking_for_duplicates:
+            try:
+                contest_measure_query = ContestMeasure.objects.all()
+                contest_measure_query = contest_measure_query.filter(google_civic_election_id=google_civic_election_id)
+                if positive_value_exists(incoming_state_code):
+                    contest_measure_query = contest_measure_query.filter(state_code__iexact=incoming_state_code)
+
+                if positive_value_exists(ignore_measure_we_vote_id_list):
+                    contest_measure_query = contest_measure_query.exclude(we_vote_id__in=ignore_measure_we_vote_id_list)
+
+                # Start with the contest_measure_title and remove MEASURE_TITLE_COMMON_PHRASES_TO_REMOVE_FROM_SEARCHES
+                stripped_down_contest_measure_title = contest_measure_title.lower()
+                for remove_this in MEASURE_TITLE_COMMON_PHRASES_TO_REMOVE_FROM_SEARCHES:
+                    stripped_down_contest_measure_title = stripped_down_contest_measure_title.replace(remove_this, "")
+
+                # Remove "of State", ex/ "of California"
+                for state_code, state_name in STATE_CODE_MAP.items():
+                    remove_this = " of " + state_name.lower()
+                    stripped_down_contest_measure_title = stripped_down_contest_measure_title.replace(remove_this, "")
+
+                # Remove leading state, ex/ "California "
+                for state_code, state_name in STATE_CODE_MAP.items():
+                    remove_this = state_name.lower() + " "
+                    stripped_down_contest_measure_title = stripped_down_contest_measure_title.replace(remove_this, "")
+
+                # Remove trailing state, ex/ "California "
+                for state_code, state_name in STATE_CODE_MAP.items():
+                    remove_this = " " + state_name.lower()
+                    stripped_down_contest_measure_title = stripped_down_contest_measure_title.replace(remove_this, "")
+
+                # Remove leading and trailing spaces
+                stripped_down_contest_measure_title = stripped_down_contest_measure_title.strip()
+
+                contest_measure_query = contest_measure_query.filter(
+                    measure_title__icontains=stripped_down_contest_measure_title)
+
+                contest_measure_list = list(contest_measure_query)
+
+                if len(contest_measure_list):
+                    keep_looking_for_duplicates = False
                     # if a single entry matches, update that entry
-                    if len(measure_list) == 1:
-                        measure = measure_list[0]
-                        measure_found = True
-                        keep_looking_for_duplicates = False
+                    if len(contest_measure_list_filtered) == 1:
+                        status += 'RETRIEVE_CONTEST_MEASURES_FROM_NON_UNIQUE-SINGLE_ROW_RETRIEVED2 '
+                        contest_measure = contest_measure_list_filtered[0]
+                        contest_measure_found = True
+                        contest_measure_list_found = True
+                        success = True
                     else:
-                        keep_looking_for_duplicates = False
+                        # more than one entry found with a match in ContestMeasure
+                        contest_measure_list_found = True
                         multiple_entries_found = True
-                        # more than one entry found with a match in CandidateCampaign
+                        status += 'RETRIEVE_CONTEST_MEASURES_FROM_NON_UNIQUE-MULTIPLE_ROWS_RETRIEVED2 '
+                        success = True
+                else:
+                    # Existing entry couldn't be found in the contest office table. We should keep looking for
+                    #  close matches
+                    success = True
             except ContestMeasure.DoesNotExist:
-                status += "BATCH_ROW_ACTION_MEASURE_NOT_FOUND "
+                # Existing entry couldn't be found in the contest office table. We should keep looking for
+                #  close matches
+                success = True
+
+        if keep_looking_for_duplicates:
+            try:
+                contest_measure_query = ContestMeasure.objects.all()
+                contest_measure_query = contest_measure_query.filter(
+                    google_civic_election_id=google_civic_election_id)
+                if positive_value_exists(incoming_state_code):
+                    contest_measure_query = contest_measure_query.filter(state_code__iexact=incoming_state_code)
+
+                if positive_value_exists(ignore_measure_we_vote_id_list):
+                    contest_measure_query = contest_measure_query.exclude(we_vote_id__in=ignore_measure_we_vote_id_list)
+
+                # Start with the contest_measure_title and remove MEASURE_TITLE_COMMON_PHRASES_TO_REMOVE_FROM_SEARCHES
+                stripped_down_contest_measure_title = contest_measure_title.lower()
+                for remove_this in MEASURE_TITLE_COMMON_PHRASES_TO_REMOVE_FROM_SEARCHES:
+                    # Currently MEASURE_TITLE_COMMON_PHRASES_TO_REMOVE_FROM_SEARCHES is empty
+                    stripped_down_contest_measure_title = stripped_down_contest_measure_title.replace(remove_this, "")
+
+                # Remove "of State", ex/ "of California"
+                for state_code, state_name in STATE_CODE_MAP.items():
+                    remove_this = " of " + state_name.lower()
+                    stripped_down_contest_measure_title = stripped_down_contest_measure_title.replace(remove_this, "")
+
+                # Remove leading state, ex/ "California "
+                for state_code, state_name in STATE_CODE_MAP.items():
+                    remove_this = state_name.lower() + " "
+                    stripped_down_contest_measure_title = stripped_down_contest_measure_title.replace(remove_this, "")
+
+                # Remove trailing state, ex/ "California "
+                for state_code, state_name in STATE_CODE_MAP.items():
+                    remove_this = " " + state_name.lower()
+                    stripped_down_contest_measure_title = stripped_down_contest_measure_title.replace(remove_this, "")
+
+                # Remove leading and trailing spaces
+                stripped_down_contest_measure_title = stripped_down_contest_measure_title.strip()
+
+                # Search through stripped_down_contest_measure_title for MEASURE_TITLE_EQUIVALENT_MEASURE_TITLE_PAIRS
+                filters = []
+                equivalent_title_found = False
+                measure_without_equivalent_title_found = False
+                for left_term, right_term in MEASURE_TITLE_EQUIVALENT_MEASURE_TITLE_PAIRS.items():
+                    if left_term in stripped_down_contest_measure_title:
+                        new_filter = Q(measure_title__icontains=right_term) | Q(measure_title__icontains=left_term)
+                        filters.append(new_filter)
+                        equivalent_title_found = True
+                        stripped_down_contest_measure_title = stripped_down_contest_measure_title.replace(left_term, "")
+                        # Break out of the for loop since we only want to match to one district
+                        break
+                    if right_term in stripped_down_contest_measure_title:
+                        new_filter = Q(measure_title__icontains=left_term) | Q(measure_title__icontains=right_term)
+                        filters.append(new_filter)
+                        equivalent_title_found = True
+                        stripped_down_contest_measure_title = \
+                            stripped_down_contest_measure_title.replace(right_term, "")
+                        # Break out of the for loop since we only want to match to one district
+                        break
+
+                if equivalent_title_found:
+                    # Remove leading and trailing spaces
+                    stripped_down_contest_measure_title = stripped_down_contest_measure_title.strip()
+                    if positive_value_exists(stripped_down_contest_measure_title):
+                        new_filter = Q(measure_title__icontains=stripped_down_contest_measure_title)
+                        filters.append(new_filter)
+                        measure_without_equivalent_title_found = True
+
+                if measure_without_equivalent_title_found:
+                    # Add the first query
+                    final_filters = filters.pop()
+
+                    # ...and "AND" the remaining items in the list
+                    for item in filters:
+                        final_filters &= item
+
+                    contest_measure_query = contest_measure_query.filter(final_filters)
+
+                    contest_measure_list = list(contest_measure_query)
+
+                    if len(contest_measure_list):
+                        keep_looking_for_duplicates = False
+                        # if a single entry matches, update that entry
+                        if len(contest_measure_list_filtered) == 1:
+                            status += 'RETRIEVE_CONTEST_MEASURES_FROM_NON_UNIQUE-SINGLE_ROW_RETRIEVED3 '
+                            contest_measure = contest_measure_list_filtered[0]
+                            contest_measure_found = True
+                            contest_measure_list_found = True
+                            success = True
+                        else:
+                            # more than one entry found with a match in ContestMeasure
+                            contest_measure_list_found = True
+                            multiple_entries_found = True
+                            status += 'RETRIEVE_CONTEST_MEASURES_FROM_NON_UNIQUE-MULTIPLE_ROWS_RETRIEVED3 '
+                            success = True
+                    else:
+                        # Existing entry couldn't be found in the contest office table. We should keep looking for
+                        #  close matches
+                        success = True
+            except ContestMeasure.DoesNotExist:
+                # Existing entry couldn't be found in the ContestMeasure table. We should keep looking for
+                #  close matches
+                success = True
 
         results = {
-            'success':                  success,
-            'status':                   status,
-            'google_civic_election_id': google_civic_election_id,
-            'measure_found':            measure_found,
-            'measure':                  measure,
-            'measure_list_found':       measure_list_found,
-            'measure_list':             measure_list,
-            'multiple_entries_found':   multiple_entries_found,
+            'success':                      success,
+            'status':                       status,
+            'contest_measure_found':        contest_measure_found,
+            'contest_measure':              contest_measure,
+            'contest_measure_list_found':   contest_measure_list_found,
+            'contest_measure_list':         contest_measure_list_filtered,
+            'google_civic_election_id':     google_civic_election_id,
+            'multiple_entries_found':       multiple_entries_found,
+            'state_code':                   incoming_state_code,
         }
         return results
 
@@ -837,9 +1170,9 @@ class ContestMeasureList(models.Model):
         try:
             measure_queryset = ContestMeasure.objects.all()
             measure_queryset = measure_queryset.filter(google_civic_election_id=google_civic_election_id)
-            # We don't look for office_we_vote_id because of the chance that locally we are using a
+            # We don't look for contest_measure_we_vote_id because of the chance that locally we are using a
             # different we_vote_id
-            # measure_queryset = measure_queryset.filter(contest_office_we_vote_id__iexact=office_we_vote_id)
+            # measure_queryset = measure_queryset.filter(contest_measure_we_vote_id__iexact=contest_measure_we_vote_id)
 
             # Ignore entries with we_vote_id coming in from master server
             if positive_value_exists(we_vote_id_from_master):
@@ -900,3 +1233,64 @@ class ContestMeasureList(models.Model):
             'measure_list':             measure_list_objects,
         }
         return results
+
+    def update_or_create_contest_measures_are_not_duplicates(self, contest_measure1_we_vote_id,
+                                                             contest_measure2_we_vote_id):
+        """
+        Either update or create a contest_measure entry.
+        """
+        exception_multiple_object_returned = False
+        success = False
+        new_contest_measures_are_not_duplicates_created = False
+        contest_measures_are_not_duplicates = ContestMeasuresAreNotDuplicates()
+        status = ""
+
+        if positive_value_exists(contest_measure1_we_vote_id) and positive_value_exists(contest_measure2_we_vote_id):
+            try:
+                updated_values = {
+                    'contest_measure1_we_vote_id': contest_measure1_we_vote_id,
+                    'contest_measure2_we_vote_id': contest_measure2_we_vote_id,
+                }
+                contest_measures_are_not_duplicates, new_contest_measures_are_not_duplicates_created = \
+                    ContestMeasuresAreNotDuplicates.objects.update_or_create(
+                        contest_measure1_we_vote_id__exact=contest_measure1_we_vote_id,
+                        contest_measure2_we_vote_id__iexact=contest_measure2_we_vote_id,
+                        defaults=updated_values)
+                success = True
+                status += "CONTEST_MEASURES_ARE_NOT_DUPLICATES_UPDATED_OR_CREATED "
+            except ContestMeasuresAreNotDuplicates.MultipleObjectsReturned as e:
+                success = False
+                status += 'MULTIPLE_MATCHING_CONTEST_MEASURES_ARE_NOT_DUPLICATES_FOUND_BY_CONTEST_MEASURE_WE_VOTE_ID '
+                exception_multiple_object_returned = True
+            except Exception as e:
+                status += 'EXCEPTION_UPDATE_OR_CREATE_CONTEST_MEASURES_ARE_NOT_DUPLICATES ' \
+                          '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
+                success = False
+
+        results = {
+            'success': success,
+            'status': status,
+            'MultipleObjectsReturned': exception_multiple_object_returned,
+            'new_contest_measures_are_not_duplicates_created': new_contest_measures_are_not_duplicates_created,
+            'contest_measures_are_not_duplicates': contest_measures_are_not_duplicates,
+        }
+        return results
+
+
+class ContestMeasuresAreNotDuplicates(models.Model):
+    """
+    When checking for duplicates, there are times when we want to explicitly mark two contest measures as NOT duplicates
+    """
+    contest_measure1_we_vote_id = models.CharField(
+        verbose_name="first contest measure we are tracking", max_length=255, null=True, unique=False)
+    contest_measure2_we_vote_id = models.CharField(
+        verbose_name="second contest measure we are tracking", max_length=255, null=True, unique=False)
+
+    def fetch_other_office_we_vote_id(self, one_we_vote_id):
+        if one_we_vote_id == self.contest_measure1_we_vote_id:
+            return self.contest_measure2_we_vote_id
+        elif one_we_vote_id == self.contest_measure2_we_vote_id:
+            return self.contest_measure1_we_vote_id
+        else:
+            # If the we_vote_id passed in wasn't found, don't return another we_vote_id
+            return ""

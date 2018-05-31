@@ -109,36 +109,40 @@ class BallotItem(models.Model):
 
 class BallotItemManager(models.Model):
 
-    def refresh_cached_ballot_item_measure_info(self, ballot_item):
+    def refresh_cached_ballot_item_measure_info(self, ballot_item, contest_measure=None):
         """
         The BallotItem tables cache information from other tables. This function reaches out to the source tables
         and copies over the latest information to the BallotItem table.
         :param ballot_item:
+        :param contest_measure: No need to retrieve again if passed in
         :return:
         """
         values_changed = False
         measure_found = False
         contest_measure_manager = ContestMeasureManager()
         results = {}
-        if positive_value_exists(ballot_item.contest_measure_id):
+        if contest_measure and hasattr(contest_measure, 'measure_title'):
+            measure_found = True
+        elif positive_value_exists(ballot_item.contest_measure_id):
             results = contest_measure_manager.retrieve_contest_measure_from_id(ballot_item.contest_measure_id)
             measure_found = results['contest_measure_found']
+            contest_measure = results['contest_measure']
         elif positive_value_exists(ballot_item.contest_measure_we_vote_id):
             results = contest_measure_manager.retrieve_contest_measure_from_we_vote_id(
                 ballot_item.contest_measure_we_vote_id)
             measure_found = results['contest_measure_found']
+            contest_measure = results['contest_measure']
 
         if measure_found:
-            measure_object = results['contest_measure']
-            ballot_item.contest_measure_id = measure_object.id
-            ballot_item.contest_measure_we_vote_id = measure_object.we_vote_id
-            ballot_item.ballot_item_display_name = measure_object.measure_title
-            ballot_item.google_ballot_placement = measure_object.google_ballot_placement
-            ballot_item.measure_subtitle = measure_object.measure_subtitle
-            ballot_item.measure_text = measure_object.measure_text
-            ballot_item.measure_url = measure_object.measure_url
-            ballot_item.no_vote_description = measure_object.ballotpedia_no_vote_description
-            ballot_item.yes_vote_description = measure_object.ballotpedia_yes_vote_description
+            ballot_item.contest_measure_id = contest_measure.id
+            ballot_item.contest_measure_we_vote_id = contest_measure.we_vote_id
+            ballot_item.ballot_item_display_name = contest_measure.measure_title
+            ballot_item.google_ballot_placement = contest_measure.google_ballot_placement
+            ballot_item.measure_subtitle = contest_measure.measure_subtitle
+            ballot_item.measure_text = contest_measure.measure_text
+            ballot_item.measure_url = contest_measure.measure_url
+            ballot_item.no_vote_description = contest_measure.ballotpedia_no_vote_description
+            ballot_item.yes_vote_description = contest_measure.ballotpedia_yes_vote_description
             values_changed = True
 
         if values_changed:
@@ -727,6 +731,56 @@ class BallotItemListManager(models.Model):
             'success':                  success,
             'status':                   status,
             'ballot_item_list_count':   ballot_item_list_count,
+        }
+        return results
+
+    def retrieve_all_ballot_items_for_contest_measure(self, measure_id, measure_we_vote_id):
+        ballot_item_list = []
+        ballot_item_list_found = False
+
+        if not positive_value_exists(measure_id) and not positive_value_exists(measure_we_vote_id):
+            status = 'VALID_MEASURE_ID_AND_MEASURE_WE_VOTE_ID_MISSING'
+            results = {
+                'success':                  True if ballot_item_list_found else False,
+                'status':                   status,
+                'measure_id':               measure_id,
+                'measure_we_vote_id':       measure_we_vote_id,
+                'ballot_item_list_found':   ballot_item_list_found,
+                'ballot_item_list':         ballot_item_list,
+            }
+            return results
+
+        try:
+            ballot_item_queryset = BallotItem.objects.all()
+            if positive_value_exists(measure_id):
+                ballot_item_queryset = ballot_item_queryset.filter(contest_measure_id=measure_id)
+            elif positive_value_exists(measure_we_vote_id):
+                ballot_item_queryset = ballot_item_queryset.filter(contest_measure_we_vote_id=measure_we_vote_id)
+
+            ballot_item_queryset = ballot_item_queryset.order_by('local_ballot_order', 'google_ballot_placement')
+            ballot_item_list = ballot_item_queryset
+
+            if len(ballot_item_list):
+                ballot_item_list_found = True
+                status = 'BALLOT_ITEMS_FOUND, retrieve_all_ballot_items_for_contest_measure '
+            else:
+                status = 'NO_BALLOT_ITEMS_FOUND, retrieve_all_ballot_items_for_contest_measure '
+        except BallotItem.DoesNotExist:
+            # No ballot items found. Not a problem.
+            status = 'NO_BALLOT_ITEMS_FOUND_DoesNotExist, retrieve_all_ballot_items_for_contest_measure '
+            ballot_item_list = []
+        except Exception as e:
+            handle_exception(e, logger=logger)
+            status = 'FAILED retrieve_all_ballot_items_for_contest_measure ' \
+                     '{error} [type: {error_type}]'.format(error=e.message, error_type=type(e))
+
+        results = {
+            'success':                      True if ballot_item_list_found else False,
+            'status':                       status,
+            'measure_id':                   measure_id,
+            'measure_we_vote_id':           measure_we_vote_id,
+            'ballot_item_list_found':       ballot_item_list_found,
+            'ballot_item_list':             ballot_item_list,
         }
         return results
 
@@ -2062,7 +2116,7 @@ class BallotReturnedListManager(models.Model):
         ballot_returned_list_found = False
 
         try:
-            ballot_returned_queryset = BallotReturned.objects.all()
+            ballot_returned_queryset = BallotReturned.objects.order_by('-id')
             if positive_value_exists(ballot_returned_search_str):
                 filters = []
                 new_filter = Q(id__iexact=ballot_returned_search_str)
@@ -2573,7 +2627,7 @@ class VoterBallotSavedManager(models.Model):
             return results
 
         try:
-            voter_ballot_saved_queryset = VoterBallotSaved.objects.all()
+            voter_ballot_saved_queryset = VoterBallotSaved.objects.order_by('-id')
 
             voter_ballot_saved_queryset = voter_ballot_saved_queryset.filter(
                 google_civic_election_id=google_civic_election_id)

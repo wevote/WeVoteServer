@@ -18,7 +18,7 @@ from image.models import ORGANIZATION_ENDORSEMENTS_IMAGE_NAME
 
 logger = wevote_functions.admin.get_logger(__name__)
 
-# When merging elected_officials, these are the fields we check for figure_out_conflict_values
+# When merging elected_officials, these are the fields we check for figure_out_elected_official_conflict_values
 ELECTED_OFFICIAL_UNIQUE_IDENTIFIERS = [
     'ballot_guide_official_statement',
     'ballotpedia_elected_official_id',

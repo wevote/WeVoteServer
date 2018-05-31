@@ -1886,11 +1886,11 @@ def create_batch_row_action_position(batch_description, batch_header_map, one_ba
             pass
     elif positive_value_exists(contest_measure_title):
         contest_measure_list_manager = ContestMeasureList()
-        matching_results = contest_measure_list_manager.retrieve_measures_from_non_unique_identifiers(
+        matching_results = contest_measure_list_manager.retrieve_contest_measures_from_non_unique_identifiers(
             google_civic_election_id, state_code, contest_measure_title)
 
-        if matching_results['measure_found']:
-            measure = matching_results['measure']
+        if matching_results['contest_measure_found']:
+            measure = matching_results['contest_measure']
             measure_found = True
             contest_measure_we_vote_id = measure.we_vote_id
             contest_measure_id = measure.id
@@ -2193,14 +2193,14 @@ def create_batch_row_action_ballot_item(batch_description, batch_header_map, one
         # See if we have an measure name
         contest_measure_list = ContestMeasureList()
         keep_looking_for_duplicates = True
-        matching_results = contest_measure_list.retrieve_measures_from_non_unique_identifiers(
+        matching_results = contest_measure_list.retrieve_contest_measures_from_non_unique_identifiers(
             google_civic_election_id, state_code, contest_measure_name)
-        if matching_results['measure_found']:
-            contest_measure = matching_results['measure']
+        if matching_results['contest_measure_found']:
+            contest_measure = matching_results['contest_measure']
             contest_measure_name = contest_measure.measure_title
             contest_measure_we_vote_id = contest_measure.we_vote_id
             keep_looking_for_duplicates = False
-        elif matching_results['measure_list_found']:
+        elif matching_results['contest_measure_list_found']:
             status += "RETRIEVE_MEASURE_FROM_NON_UNIQUE-MULTIPLE_POSSIBLE_MEASURES_FOUND "
             keep_looking_for_duplicates = False
         elif not matching_results['success']:

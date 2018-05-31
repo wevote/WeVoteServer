@@ -3,9 +3,13 @@
 # -*- coding: UTF-8 -*-
 
 
-from .controllers import measures_import_from_master_server
-from .models import ContestMeasure
+from .controllers import fetch_duplicate_measure_count, figure_out_measure_conflict_values, \
+    find_duplicate_contest_measure, \
+    measures_import_from_master_server
+from .models import ContestMeasure, ContestMeasureManager, CONTEST_MEASURE_UNIQUE_IDENTIFIERS
 from admin_tools.views import redirect_to_sign_in_page
+from ballot.controllers import move_ballot_items_to_another_measure
+from bookmark.models import BookmarkItemList
 from config.base import get_environment_variable
 from django.http import HttpResponseRedirect
 from django.core.urlresolvers import reverse
@@ -17,6 +21,7 @@ from django.shortcuts import render
 from election.models import Election, ElectionManager
 from exception.models import handle_record_found_more_than_one_exception,\
     handle_record_not_found_exception, handle_record_not_saved_exception
+from position.controllers import move_positions_to_another_measure
 from position.models import OPPOSE, PositionListManager, SUPPORT
 from voter.models import voter_has_authority
 import wevote_functions.admin
@@ -28,6 +33,128 @@ MEASURES_SYNC_URL = get_environment_variable("MEASURES_SYNC_URL")  # measuresSyn
 WE_VOTE_SERVER_ROOT_URL = get_environment_variable("WE_VOTE_SERVER_ROOT_URL")
 
 logger = wevote_functions.admin.get_logger(__name__)
+
+
+@login_required
+def compare_two_measures_for_merge_view(request):
+    # admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'political_data_manager'}
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
+    contest_measure1_we_vote_id = request.GET.get('contest_measure1_we_vote_id', 0)
+    contest_measure2_we_vote_id = request.GET.get('contest_measure2_we_vote_id', 0)
+    google_civic_election_id = request.GET.get('google_civic_election_id', 0)
+    google_civic_election_id = convert_to_int(google_civic_election_id)
+
+    contest_measure_manager = ContestMeasureManager()
+    contest_measure_results = \
+        contest_measure_manager.retrieve_contest_measure_from_we_vote_id(contest_measure1_we_vote_id)
+    if not contest_measure_results['contest_measure_found']:
+        messages.add_message(request, messages.ERROR, "Contest Office1 not found.")
+        return HttpResponseRedirect(reverse('measure:measure_list', args=()) +
+                                    "?google_civic_election_id=" + str(google_civic_election_id))
+
+    contest_measure_option1_for_template = contest_measure_results['contest_measure']
+
+    contest_measure_results = \
+        contest_measure_manager.retrieve_contest_measure_from_we_vote_id(contest_measure2_we_vote_id)
+    if not contest_measure_results['contest_measure_found']:
+        messages.add_message(request, messages.ERROR, "Contest Office2 not found.")
+        return HttpResponseRedirect(reverse('measure:measure_summary',
+                                            args=(contest_measure_option1_for_template.id,)) +
+                                    "?google_civic_election_id=" + str(google_civic_election_id))
+
+    contest_measure_option2_for_template = contest_measure_results['contest_measure']
+
+    contest_measure_merge_conflict_values = figure_out_measure_conflict_values(
+        contest_measure_option1_for_template, contest_measure_option2_for_template)
+
+    # This view function takes us to displaying a template
+    remove_duplicate_process = False  # Do not try to find another measure to merge after finishing
+    return render_contest_measure_merge_form(request, contest_measure_option1_for_template,
+                                             contest_measure_option2_for_template,
+                                             contest_measure_merge_conflict_values,
+                                             remove_duplicate_process)
+
+
+@login_required
+def find_and_merge_duplicate_measures_view(request):
+    # admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'political_data_manager'}
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
+    contest_measure_list = []
+    ignore_measure_we_vote_id_list = []
+    find_number_of_duplicates = request.GET.get('find_number_of_duplicates', 0)
+    google_civic_election_id = request.GET.get('google_civic_election_id', 0)
+    google_civic_election_id = convert_to_int(google_civic_election_id)
+    contest_measure_manager = ContestMeasureManager()
+
+    # We only want to process if a google_civic_election_id comes in
+    if not positive_value_exists(google_civic_election_id):
+        messages.add_message(request, messages.ERROR, "Google Civic Election ID required.")
+        return HttpResponseRedirect(reverse('measure:measure_list', args=()))
+
+    try:
+        # We sort by ID so that the entry which was saved first becomes the "master"
+        contest_measure_query = ContestMeasure.objects.order_by('id')
+        contest_measure_query = contest_measure_query.filter(google_civic_election_id=google_civic_election_id)
+        contest_measure_list = list(contest_measure_query)
+    except ContestMeasure.DoesNotExist:
+        pass
+
+    # Loop through all of the measures in this election to see how many have possible duplicates
+    if positive_value_exists(find_number_of_duplicates):
+        duplicate_measure_count = 0
+        for contest_measure in contest_measure_list:
+            # Note that we don't reset the ignore_measure_we_vote_id_list, so we don't search for a duplicate
+            # both directions
+            ignore_measure_we_vote_id_list.append(contest_measure.we_vote_id)
+            duplicate_measure_count_temp = fetch_duplicate_measure_count(contest_measure,
+                                                                         ignore_measure_we_vote_id_list)
+            duplicate_measure_count += duplicate_measure_count_temp
+
+        if positive_value_exists(duplicate_measure_count):
+            messages.add_message(request, messages.INFO, "There are approximately {duplicate_measure_count} "
+                                                         "possible duplicates."
+                                                         "".format(duplicate_measure_count=duplicate_measure_count))
+
+    # Loop through all of the contest measures in this election
+    ignore_measure_we_vote_id_list = []
+    for contest_measure in contest_measure_list:
+        # Add current contest measure entry to the ignore list
+        ignore_measure_we_vote_id_list.append(contest_measure.we_vote_id)
+        # Now check to for other contest measures we have labeled as "not a duplicate"
+        not_a_duplicate_list = contest_measure_manager.fetch_measures_are_not_duplicates_list_we_vote_ids(
+            contest_measure.we_vote_id)
+
+        ignore_measure_we_vote_id_list += not_a_duplicate_list
+
+        results = find_duplicate_contest_measure(contest_measure, ignore_measure_we_vote_id_list)
+        ignore_measure_we_vote_id_list = []
+
+        # If we find contest measures to merge, stop and ask for confirmation
+        if results['contest_measure_merge_possibility_found']:
+            contest_measure_option1_for_template = contest_measure
+            contest_measure_option2_for_template = results['contest_measure_merge_possibility']
+
+            # This view function takes us to displaying a template
+            remove_duplicate_process = True  # Try to find another measure to merge after finishing
+            return render_contest_measure_merge_form(request, contest_measure_option1_for_template,
+                                                     contest_measure_option2_for_template,
+                                                     results['contest_measure_merge_conflict_values'],
+                                                     remove_duplicate_process)
+
+    message = "Google Civic Election ID: {election_id}, " \
+              "No duplicate contest measures found for this election." \
+              "".format(election_id=google_civic_election_id)
+
+    messages.add_message(request, messages.INFO, message)
+
+    return HttpResponseRedirect(reverse('measure:measure_list', args=()) + "?google_civic_election_id={var}"
+                                                                           "".format(var=google_civic_election_id))
 
 
 # This page does not need to be protected.
@@ -102,6 +229,197 @@ def measures_import_from_master_server_view(request):  # GET '/m/import/?google_
                                                                not_processed=results['not_processed']))
     return HttpResponseRedirect(reverse('admin_tools:sync_dashboard', args=()) + "?google_civic_election_id=" +
                                 str(google_civic_election_id) + "&state_code=" + str(state_code))
+
+
+@login_required
+def measure_merge_process_view(request):
+    """
+    Process the merging of two measures
+    :param request:
+    :return:
+    """
+    authority_required = {'verified_volunteer'}  # admin, verified_volunteer
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
+    contest_measure_manager = ContestMeasureManager()
+
+    merge = request.POST.get('merge', False)
+    skip = request.POST.get('skip', False)
+
+    # Contest measure 1 is the one we keep, and Contest measure 2 is the one we will merge into Contest measure 1
+    contest_measure1_we_vote_id = request.POST.get('contest_measure1_we_vote_id', 0)
+    contest_measure2_we_vote_id = request.POST.get('contest_measure2_we_vote_id', 0)
+    google_civic_election_id = request.POST.get('google_civic_election_id', 0)
+    redirect_to_contest_measure_list = \
+        positive_value_exists(request.POST.get('redirect_to_contest_measure_list', False))
+    remove_duplicate_process = positive_value_exists(request.POST.get('remove_duplicate_process', False))
+    state_code = request.POST.get('state_code', '')
+
+    if positive_value_exists(skip):
+        results = contest_measure_manager.update_or_create_contest_measures_are_not_duplicates(
+            contest_measure1_we_vote_id, contest_measure2_we_vote_id)
+        if not results['new_contest_measures_are_not_duplicates_created']:
+            messages.add_message(request, messages.ERROR, 'Could not save contest_measures_are_not_duplicates entry: ' +
+                                 results['status'])
+        messages.add_message(request, messages.INFO, 'Prior contest measures skipped, and not merged.')
+        return HttpResponseRedirect(reverse('measure:find_and_merge_duplicate_measures', args=()) +
+                                    "?google_civic_election_id=" + str(google_civic_election_id) +
+                                    "&state_code=" + str(state_code))
+
+    contest_measure1_results = contest_measure_manager.retrieve_contest_measure_from_we_vote_id(
+        contest_measure1_we_vote_id)
+    if contest_measure1_results['contest_measure_found']:
+        contest_measure1_on_stage = contest_measure1_results['contest_measure']
+        contest_measure1_id = contest_measure1_on_stage.id
+    else:
+        messages.add_message(request, messages.ERROR, 'Could not retrieve measure 1.')
+        return HttpResponseRedirect(reverse('measure:measure_list', args=()) +
+                                    '?google_civic_election_id=' + str(google_civic_election_id) +
+                                    '&state_code=' + str(state_code))
+
+    contest_measure2_results = contest_measure_manager.retrieve_contest_measure_from_we_vote_id(
+        contest_measure2_we_vote_id)
+    if contest_measure2_results['contest_measure_found']:
+        contest_measure2_on_stage = contest_measure2_results['contest_measure']
+        contest_measure2_id = contest_measure2_on_stage.id
+    else:
+        messages.add_message(request, messages.ERROR, 'Could not retrieve contest measure 2.')
+        return HttpResponseRedirect(reverse('measure:measure_list', args=()) +
+                                    '?google_civic_election_id=' + str(google_civic_election_id) +
+                                    '&state_code=' + str(state_code))
+
+    # TODO: Merge quick_info's measure details in future
+    # TODO: Migrate bookmarks
+    bookmark_item_list_manager = BookmarkItemList()
+    bookmark_results = bookmark_item_list_manager.retrieve_bookmark_item_list_for_contest_measure(
+        contest_measure2_we_vote_id)
+    if bookmark_results['bookmark_item_list_found']:
+        messages.add_message(request, messages.ERROR, "Bookmarks found for Contest Office 2 - "
+                                                      "automatic merge not working yet.")
+        return HttpResponseRedirect(reverse('measure:find_and_merge_duplicate_measures', args=()) +
+                                    "?google_civic_election_id=" + str(google_civic_election_id) +
+                                    "&state_code=" + str(state_code))
+
+    # Merge attribute values
+    conflict_values = figure_out_measure_conflict_values(contest_measure1_on_stage, contest_measure2_on_stage)
+    for attribute in CONTEST_MEASURE_UNIQUE_IDENTIFIERS:
+        conflict_value = conflict_values.get(attribute, None)
+        if conflict_value == "CONFLICT":
+            choice = request.POST.get(attribute + '_choice', '')
+            if contest_measure2_we_vote_id == choice:
+                setattr(contest_measure1_on_stage, attribute, getattr(contest_measure2_on_stage, attribute))
+        elif conflict_value == "CONTEST_MEASURE2":
+            setattr(contest_measure1_on_stage, attribute, getattr(contest_measure2_on_stage, attribute))
+
+    # Preserve unique google_civic_measure_title, _title2, _title3, _title4 and _title5
+    if positive_value_exists(contest_measure2_on_stage.google_civic_measure_title):
+        if not positive_value_exists(contest_measure1_on_stage.google_civic_measure_title):
+            contest_measure1_on_stage.google_civic_measure_title = contest_measure2_on_stage.google_civic_measure_title
+        elif contest_measure2_on_stage.google_civic_measure_title == \
+                contest_measure1_on_stage.google_civic_measure_title:
+            # The value is already stored in contest_measure1_on_stage.google_civic_measure_title so doesn't need
+            # to be added to contest_measure1_on_stage.google_civic_measure_title2
+            pass
+        elif not positive_value_exists(contest_measure1_on_stage.google_civic_measure_title2):
+            contest_measure1_on_stage.google_civic_measure_title2 = contest_measure2_on_stage.google_civic_measure_title
+        elif contest_measure2_on_stage.google_civic_measure_title == \
+                contest_measure1_on_stage.google_civic_measure_title2:
+            # The value is already stored in contest_measure1_on_stage.google_civic_measure_title2 so doesn't need
+            # to be added to contest_measure1_on_stage.google_civic_measure_title3
+            pass
+        elif not positive_value_exists(contest_measure1_on_stage.google_civic_measure_title3):
+            contest_measure1_on_stage.google_civic_measure_title3 = contest_measure2_on_stage.google_civic_measure_title
+        # TODO Dale extend to google_civic_measure_title4 and google_civic_measure_title5
+    if positive_value_exists(contest_measure2_on_stage.google_civic_measure_title2):
+        if not positive_value_exists(contest_measure1_on_stage.google_civic_measure_title):
+            contest_measure1_on_stage.google_civic_measure_title = contest_measure2_on_stage.google_civic_measure_title2
+        elif contest_measure2_on_stage.google_civic_measure_title2 == \
+                contest_measure1_on_stage.google_civic_measure_title:
+            # The value is already stored in contest_measure1_on_stage.google_civic_measure_title so doesn't need
+            # to be added to contest_measure1_on_stage.google_civic_measure_title2
+            pass
+        elif not positive_value_exists(contest_measure1_on_stage.google_civic_measure_title2):
+            contest_measure1_on_stage.google_civic_measure_title2 = \
+                contest_measure2_on_stage.google_civic_measure_title2
+        elif contest_measure2_on_stage.google_civic_measure_title2 == \
+                contest_measure1_on_stage.google_civic_measure_title2:
+            # The value is already stored in contest_measure1_on_stage.google_civic_measure_title2 so doesn't need
+            # to be added to contest_measure1_on_stage.google_civic_measure_title3
+            pass
+        elif not positive_value_exists(contest_measure1_on_stage.google_civic_measure_title3):
+            contest_measure1_on_stage.google_civic_measure_title3 = \
+                contest_measure2_on_stage.google_civic_measure_title2
+        # TODO Dale extend to google_civic_measure_title4 and google_civic_measure_title5
+    if positive_value_exists(contest_measure2_on_stage.google_civic_measure_title3):
+        if not positive_value_exists(contest_measure1_on_stage.google_civic_measure_title):
+            contest_measure1_on_stage.google_civic_measure_title = contest_measure2_on_stage.google_civic_measure_title3
+        elif contest_measure2_on_stage.google_civic_measure_title3 == \
+                contest_measure1_on_stage.google_civic_measure_title:
+            # The value is already stored in contest_measure1_on_stage.google_civic_measure_title so doesn't need
+            # to be added to contest_measure1_on_stage.google_civic_measure_title2
+            pass
+        elif not positive_value_exists(contest_measure1_on_stage.google_civic_measure_title2):
+            contest_measure1_on_stage.google_civic_measure_title2 = \
+                contest_measure2_on_stage.google_civic_measure_title3
+        elif contest_measure2_on_stage.google_civic_measure_title3 == \
+                contest_measure1_on_stage.google_civic_measure_title2:
+            # The value is already stored in contest_measure1_on_stage.google_civic_measure_title2 so doesn't need
+            # to be added to contest_measure1_on_stage.google_civic_measure_title3
+            pass
+        elif not positive_value_exists(contest_measure1_on_stage.google_civic_measure_title3):
+            contest_measure1_on_stage.google_civic_measure_title3 = \
+                contest_measure2_on_stage.google_civic_measure_title3
+        # TODO Dale extend to google_civic_measure_title4 and google_civic_measure_title5
+
+    # Merge ballot item's measure details
+    ballot_items_results = move_ballot_items_to_another_measure(contest_measure2_id, contest_measure2_we_vote_id,
+                                                                contest_measure1_id, contest_measure1_we_vote_id,
+                                                                contest_measure1_on_stage)
+    if not ballot_items_results['success']:
+        messages.add_message(request, messages.ERROR, ballot_items_results['status'])
+        return HttpResponseRedirect(reverse('measure:find_and_merge_duplicate_measures', args=()) +
+                                    "?google_civic_election_id=" + str(google_civic_election_id) +
+                                    "&state_code=" + str(state_code))
+
+    # Merge public positions
+    public_positions_results = move_positions_to_another_measure(contest_measure2_id, contest_measure2_we_vote_id,
+                                                                 contest_measure1_id, contest_measure1_we_vote_id,
+                                                                 True)
+    if not public_positions_results['success']:
+        messages.add_message(request, messages.ERROR, public_positions_results['status'])
+        return HttpResponseRedirect(reverse('measure:find_and_merge_duplicate_measures', args=()) +
+                                    "?google_civic_election_id=" + str(google_civic_election_id) +
+                                    "&state_code=" + str(state_code))
+
+    # Merge friends-only positions
+    friends_positions_results = move_positions_to_another_measure(contest_measure2_id, contest_measure2_we_vote_id,
+                                                                  contest_measure1_id, contest_measure1_we_vote_id,
+                                                                  False)
+    if not friends_positions_results['success']:
+        messages.add_message(request, messages.ERROR, friends_positions_results['status'])
+        return HttpResponseRedirect(reverse('measure:find_and_merge_duplicate_measures', args=()) +
+                                    "?google_civic_election_id=" + str(google_civic_election_id) +
+                                    "&state_code=" + str(state_code))
+
+    # Note: wait to wrap in try/except block
+    contest_measure1_on_stage.save()
+    # There isn't any measure data to refresh from other master tables
+
+    # Remove contest measure 2
+    contest_measure2_on_stage.delete()
+
+    if redirect_to_contest_measure_list:
+        return HttpResponseRedirect(reverse('measure:measure_list', args=()) +
+                                    '?google_civic_election_id=' + str(google_civic_election_id) +
+                                    '&state_code=' + str(state_code))
+
+    if remove_duplicate_process:
+        return HttpResponseRedirect(reverse('measure:find_and_merge_duplicate_measures', args=()) +
+                                    "?google_civic_election_id=" + str(google_civic_election_id) +
+                                    "&state_code=" + str(state_code))
+
+    return HttpResponseRedirect(reverse('measure:measure_edit', args=(contest_measure1_on_stage.id,)))
 
 
 @login_required
@@ -386,11 +704,17 @@ def measure_summary_view(request, measure_id):
 
     messages_on_stage = get_messages(request)
     measure_id = convert_to_int(measure_id)
+    measure_we_vote_id = ''
     measure_on_stage_found = False
     measure_on_stage = ContestMeasure()
     google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
+    state_code = request.GET.get('state_code', "")
+
+    measure_search = request.GET.get('measure_search', "")
+
     try:
         measure_on_stage = ContestMeasure.objects.get(id=measure_id)
+        measure_we_vote_id = measure_on_stage.we_vote_id
         measure_on_stage_found = True
     except ContestMeasure.MultipleObjectsReturned as e:
         handle_record_found_more_than_one_exception(e, logger=logger)
@@ -400,10 +724,65 @@ def measure_summary_view(request, measure_id):
 
     election_list = Election.objects.order_by('-election_day_text')
 
+    measure_search_results_list = []
+    if positive_value_exists(measure_search) and positive_value_exists(measure_we_vote_id):
+        measure_queryset = ContestMeasure.objects.all()
+        measure_queryset = measure_queryset.filter(google_civic_election_id=google_civic_election_id)
+        measure_queryset = measure_queryset.exclude(we_vote_id__iexact=measure_we_vote_id)
+
+        if positive_value_exists(state_code):
+            measure_queryset = measure_queryset.filter(state_code__iexact=state_code)
+
+        search_words = measure_search.split()
+        for one_word in search_words:
+            filters = []  # Reset for each search word
+            new_filter = Q(measure_title__icontains=one_word)
+            filters.append(new_filter)
+
+            new_filter = Q(we_vote_id__iexact=one_word)
+            filters.append(new_filter)
+
+            new_filter = Q(ballotpedia_measure_name__icontains=one_word)
+            filters.append(new_filter)
+
+            new_filter = Q(google_civic_measure_title__icontains=one_word)
+            filters.append(new_filter)
+
+            new_filter = Q(google_civic_measure_title2__icontains=one_word)
+            filters.append(new_filter)
+
+            new_filter = Q(google_civic_measure_title3__icontains=one_word)
+            filters.append(new_filter)
+
+            new_filter = Q(google_civic_measure_title4__icontains=one_word)
+            filters.append(new_filter)
+
+            new_filter = Q(google_civic_measure_title5__icontains=one_word)
+            filters.append(new_filter)
+
+            # Add the first query
+            if len(filters):
+                final_filters = filters.pop()
+
+                # ...and "OR" the remaining items in the list
+                for item in filters:
+                    final_filters |= item
+
+                measure_queryset = measure_queryset.filter(final_filters)
+
+        measure_search_results_list = list(measure_queryset)
+    elif measure_on_stage_found:
+        ignore_measure_we_vote_id_list = []
+        ignore_measure_we_vote_id_list.append(measure_on_stage.we_vote_id)
+        results = find_duplicate_contest_measure(measure_on_stage, ignore_measure_we_vote_id_list)
+        if results['contest_measure_merge_possibility_found']:
+            measure_search_results_list = results['contest_measure_list']
+
     if measure_on_stage_found:
         template_values = {
             'messages_on_stage': messages_on_stage,
             'measure': measure_on_stage,
+            'measure_search_results_list': measure_search_results_list,
             'election_list': election_list,
             'google_civic_election_id': google_civic_election_id,
         }
@@ -412,3 +791,55 @@ def measure_summary_view(request, measure_id):
             'messages_on_stage': messages_on_stage,
         }
     return render(request, 'measure/measure_summary.html', template_values)
+
+
+def render_contest_measure_merge_form(
+        request, contest_measure_option1_for_template, contest_measure_option2_for_template,
+        contest_measure_merge_conflict_values, remove_duplicate_process=True):
+    position_list_manager = PositionListManager()
+
+    bookmark_item_list_manager = BookmarkItemList()
+
+    # Get positions counts for both measures
+    contest_measure_option1_for_template.public_positions_count = \
+        position_list_manager.fetch_public_positions_count_for_contest_measure(
+            contest_measure_option1_for_template.id, contest_measure_option1_for_template.we_vote_id)
+    contest_measure_option1_for_template.friends_positions_count = \
+        position_list_manager.fetch_friends_only_positions_count_for_contest_measure(
+            contest_measure_option1_for_template.id, contest_measure_option1_for_template.we_vote_id)
+    # Bookmarks for option 1
+    bookmark_results1 = bookmark_item_list_manager.retrieve_bookmark_item_list_for_contest_measure(
+        contest_measure_option1_for_template.we_vote_id)
+    if bookmark_results1['bookmark_item_list_found']:
+        bookmark_item_list = bookmark_results1['bookmark_item_list']
+        contest_measure_option1_bookmark_count = len(bookmark_item_list)
+    else:
+        contest_measure_option1_bookmark_count = 0
+    contest_measure_option1_for_template.bookmarks_count = contest_measure_option1_bookmark_count
+
+    contest_measure_option2_for_template.public_positions_count = \
+        position_list_manager.fetch_public_positions_count_for_contest_measure(
+            contest_measure_option2_for_template.id, contest_measure_option2_for_template.we_vote_id)
+    contest_measure_option2_for_template.friends_positions_count = \
+        position_list_manager.fetch_friends_only_positions_count_for_contest_measure(
+            contest_measure_option2_for_template.id, contest_measure_option2_for_template.we_vote_id)
+    # Bookmarks for option 2
+    bookmark_results2 = bookmark_item_list_manager.retrieve_bookmark_item_list_for_contest_measure(
+        contest_measure_option2_for_template.we_vote_id)
+    if bookmark_results2['bookmark_item_list_found']:
+        bookmark_item_list = bookmark_results2['bookmark_item_list']
+        contest_measure_option2_bookmark_count = len(bookmark_item_list)
+    else:
+        contest_measure_option2_bookmark_count = 0
+    contest_measure_option2_for_template.bookmarks_count = contest_measure_option2_bookmark_count
+
+    messages_on_stage = get_messages(request)
+    template_values = {
+        'messages_on_stage':        messages_on_stage,
+        'contest_measure_option1':  contest_measure_option1_for_template,
+        'contest_measure_option2':  contest_measure_option2_for_template,
+        'conflict_values':          contest_measure_merge_conflict_values,
+        'google_civic_election_id': contest_measure_option1_for_template.google_civic_election_id,
+        'remove_duplicate_process': remove_duplicate_process,
+    }
+    return render(request, 'measure/measure_merge.html', template_values)

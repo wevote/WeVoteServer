@@ -80,6 +80,15 @@
 </form>
 
 {% if measure_list %}
+    {% if google_civic_election_id %}
+    <ul>
+        <li>Prepare: <a href="{% url 'measure:find_and_merge_duplicate_measures' %}?google_civic_election_id={{ google_civic_election_id }}" >
+        Find and Merge Duplicate Measures for this Election</a> (about 1 minute)</li>
+    </ul>
+    {% endif %}
+{% endif %}
+
+{% if measure_list %}
     <table border="1" cellpadding="5" cellspacing="5">
         <tr>
             <td>&nbsp;</td>

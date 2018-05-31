@@ -3,7 +3,7 @@
 # -*- coding: UTF-8 -*-
 
 from .controllers import offices_import_from_master_server, fetch_duplicate_office_count, \
-    find_duplicate_contest_office, figure_out_conflict_values
+    find_duplicate_contest_office, figure_out_office_conflict_values
 from .models import ContestOffice, ContestOfficeManager, CONTEST_OFFICE_UNIQUE_IDENTIFIERS
 from admin_tools.views import redirect_to_sign_in_page
 from ballot.controllers import move_ballot_items_to_another_office
@@ -65,7 +65,7 @@ def compare_two_offices_for_merge_view(request):
 
     contest_office_option2_for_template = contest_office_results['contest_office']
 
-    contest_office_merge_conflict_values = figure_out_conflict_values(
+    contest_office_merge_conflict_values = figure_out_office_conflict_values(
         contest_office_option1_for_template, contest_office_option2_for_template)
 
     # This view function takes us to displaying a template
@@ -721,7 +721,7 @@ def find_and_merge_duplicate_offices_view(request):
 
     contest_office_list = []
     ignore_office_we_vote_id_list = []
-    find_duplicates_count = request.GET.get('find_duplicates_count', 0)
+    find_number_of_duplicates = request.GET.get('find_number_of_duplicates', 0)
     google_civic_election_id = request.GET.get('google_civic_election_id', 0)
     google_civic_election_id = convert_to_int(google_civic_election_id)
     contest_office_manager = ContestOfficeManager()
@@ -740,7 +740,7 @@ def find_and_merge_duplicate_offices_view(request):
         pass
 
     # Loop through all of the offices in this election to see how many have possible duplicates
-    if positive_value_exists(find_duplicates_count):
+    if positive_value_exists(find_number_of_duplicates):
         duplicate_office_count = 0
         for contest_office in contest_office_list:
             # Note that we don't reset the ignore_office_we_vote_id_list, so we don't search for a duplicate
@@ -933,7 +933,7 @@ def office_merge_process_view(request):
                                     "&state_code=" + str(state_code))
 
     # Merge attribute values
-    conflict_values = figure_out_conflict_values(contest_office1_on_stage, contest_office2_on_stage)
+    conflict_values = figure_out_office_conflict_values(contest_office1_on_stage, contest_office2_on_stage)
     for attribute in CONTEST_OFFICE_UNIQUE_IDENTIFIERS:
         conflict_value = conflict_values.get(attribute, None)
         if conflict_value == "CONFLICT":
