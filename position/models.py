@@ -4964,13 +4964,14 @@ class PositionManager(models.Model):
                                                         user_agent_string, user_agent_object):
         # Does a position from this voter already exist?
         position_manager = PositionManager()
-        duplicates_found = False
+        contest_measure_id = 0
         status = ""
+
         results = position_manager.retrieve_voter_candidate_campaign_position(voter_id, candidate_campaign_id)
         is_public_position = results['is_public_position']
+        status += results['status']
 
         if results['MultipleObjectsReturned']:
-            duplicates_found = True
             status += results['status']
             status += 'MultipleObjectsReturned '
 
@@ -4979,36 +4980,61 @@ class PositionManager(models.Model):
                 voter_id, candidate_campaign_id, retrieve_position_for_friends)
             status += merge_results['status']
 
-            if merge_results['duplicates_repaired']:
-                duplicates_found = False
-                results = position_manager.retrieve_voter_candidate_campaign_position(voter_id, candidate_campaign_id)
-                status += results['status']
-                is_public_position = results['is_public_position']
+            if not positive_value_exists(merge_results['duplicates_repaired']):
+                if is_public_position:
+                    voter_position_on_stage = PositionEntered()
+                else:
+                    voter_position_on_stage = PositionForFriends()
+                results = {
+                    'status': status,
+                    'success': False,
+                    'position_we_vote_id': '',
+                    'position': voter_position_on_stage,
+                }
+                return results
 
-                if results['MultipleObjectsReturned']:
-                    duplicates_found = True
-                    status += 'MultipleObjectsReturned-WORK_NEEDED2 '
+            status += 'CANDIDATE_DUPLICATES_REPAIRED '
+            results_after_repair = position_manager.retrieve_voter_candidate_campaign_position(
+                voter_id, candidate_campaign_id)
+            status += results_after_repair['status']
+            is_public_position = results_after_repair['is_public_position']
 
-        if duplicates_found:
-            if is_public_position:
-                voter_position_on_stage = PositionEntered()
-            else:
-                voter_position_on_stage = PositionForFriends()
-            results = {
-                'status':               status,
-                'success':              False,
-                'position_we_vote_id':  '',
-                'position':             voter_position_on_stage,
-            }
-            return results
+            if results_after_repair['MultipleObjectsReturned']:
+                status += 'MultipleObjectsReturned-WORK_NEEDED2 '
 
-        voter_position_found = results['position_found']
-        voter_position_on_stage = results['position']
-        contest_measure_id = 0
+                if is_public_position:
+                    voter_position_on_stage = PositionEntered()
+                else:
+                    voter_position_on_stage = PositionForFriends()
+                results = {
+                    'status':               status,
+                    'success':              False,
+                    'position_we_vote_id':  '',
+                    'position':             voter_position_on_stage,
+                }
+                return results
+            voter_position_found = results_after_repair['position_found']
+            voter_position_on_stage = results_after_repair['position']
+        else:
+            voter_position_found = results['position_found']
+            voter_position_on_stage = results['position']
 
-        return position_manager.toggle_voter_position(voter_id, voter_position_found, voter_position_on_stage,
-                                                      stance, candidate_campaign_id, contest_measure_id,
-                                                      is_public_position, user_agent_string, user_agent_object)
+        toggle_results = position_manager.toggle_voter_position(
+            voter_id, voter_position_found, voter_position_on_stage,
+            stance, candidate_campaign_id, contest_measure_id,
+            is_public_position, user_agent_string, user_agent_object)
+
+        status += toggle_results['status']
+        success = toggle_results['success']
+        voter_position_on_stage = toggle_results['position']
+        position_we_vote_id = toggle_results['position_we_vote_id']
+        results = {
+            'status':               status,
+            'success':              success,
+            'position_we_vote_id':  position_we_vote_id,
+            'position':             voter_position_on_stage,
+        }
+        return results
 
     def toggle_voter_position(self, voter_id, voter_position_found, voter_position_on_stage, stance,
                               candidate_campaign_id, contest_measure_id, is_public_position, user_agent_string,
