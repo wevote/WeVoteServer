@@ -5046,7 +5046,11 @@ class PositionManager(models.Model):
                     else:
                         candidate_campaign_we_vote_id = voter_position_on_stage.candidate_campaign_we_vote_id
                         google_civic_election_id = voter_position_on_stage.google_civic_election_id
+            except Exception as e:
+                handle_record_not_saved_exception(e, logger=logger)
+                status += 'STANCE_COULD_NOT_BE_UPDATED1 '
 
+            try:
                 if voter_position_on_stage.contest_measure_id:
                     if not positive_value_exists(voter_position_on_stage.contest_measure_we_vote_id):
                         # Heal the data, and fill in the contest_measure_we_vote_id
@@ -5063,7 +5067,11 @@ class PositionManager(models.Model):
                     else:
                         contest_measure_we_vote_id = voter_position_on_stage.contest_measure_we_vote_id
                         google_civic_election_id = voter_position_on_stage.google_civic_election_id
+            except Exception as e:
+                handle_record_not_saved_exception(e, logger=logger)
+                status += 'STANCE_COULD_NOT_BE_UPDATED2 '
 
+            try:
                 results = voter_manager.retrieve_voter_by_id(voter_id)
                 if results['voter_found']:
                     voter = results['voter']
@@ -5094,15 +5102,19 @@ class PositionManager(models.Model):
 
                             voter_position_on_stage.speaker_display_name = speaker_display_name
                             voter_position_on_stage.organization_id = organization_id
+            except Exception as e:
+                handle_record_not_saved_exception(e, logger=logger)
+                status += 'STANCE_COULD_NOT_BE_UPDATED3 '
 
+            try:
                 voter_position_on_stage.save()
                 position_list_manager.update_position_network_scores_for_one_position(voter_position_on_stage)
                 position_we_vote_id = voter_position_on_stage.we_vote_id
                 voter_position_on_stage_found = True
-                status = 'STANCE_UPDATED'
+                status += 'STANCE_UPDATED '
             except Exception as e:
                 handle_record_not_saved_exception(e, logger=logger)
-                status = 'STANCE_COULD_NOT_BE_UPDATED'
+                status += 'STANCE_COULD_NOT_BE_UPDATED4 '
         else:
             try:
                 # Create new
@@ -5200,10 +5212,10 @@ class PositionManager(models.Model):
                 position_list_manager.update_position_network_scores_for_one_position(voter_position_on_stage)
                 position_we_vote_id = voter_position_on_stage.we_vote_id
                 voter_position_on_stage_found = True
-                status = 'NEW_STANCE_SAVED'
+                status += 'NEW_STANCE_SAVED'
             except Exception as e:
                 handle_record_not_saved_exception(e, logger=logger)
-                status = 'NEW_STANCE_COULD_NOT_BE_SAVED'
+                status += 'NEW_STANCE_COULD_NOT_BE_SAVED'
 
         if voter_position_on_stage_found:
             # If here we need to make sure a voter guide exists
