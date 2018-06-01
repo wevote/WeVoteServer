@@ -3179,6 +3179,16 @@ class PositionListManager(models.Model):
         public_positions_updated = 0
         friends_only_positions_updated = 0
 
+        if not hasattr(one_position, "voter_entering_position"):
+            status += "NOT_A_POSITION_OBJECT "
+            json_data = {
+                'success': False,
+                'status': status,
+                'friends_only_positions_updated': friends_only_positions_updated,
+                'public_positions_updated': public_positions_updated,
+            }
+            return json_data
+
         position_manager = PositionManager()
         voter_manager = VoterManager()
 
