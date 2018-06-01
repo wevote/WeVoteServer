@@ -100,7 +100,8 @@ def offices_sync_out_view(request):  # officesSyncOut
                                                               'ballotpedia_race_id', 'ballotpedia_race_office_level',
                                                               'google_ballot_placement',
                                                               'google_civic_office_name', 'google_civic_office_name2',
-                                                              'google_civic_office_name3',
+                                                              'google_civic_office_name3', 'google_civic_office_name4',
+                                                              'google_civic_office_name5',
                                                               'wikipedia_id', 'number_voting_for', 'number_elected',
                                                               'state_code', 'primary_party', 'district_name',
                                                               'district_scope', 'district_id', 'contest_level0',
@@ -351,6 +352,8 @@ def office_edit_process_view(request):
     google_civic_office_name = request.POST.get('google_civic_office_name', False)
     google_civic_office_name2 = request.POST.get('google_civic_office_name2', False)
     google_civic_office_name3 = request.POST.get('google_civic_office_name3', False)
+    google_civic_office_name4 = request.POST.get('google_civic_office_name4', False)
+    google_civic_office_name5 = request.POST.get('google_civic_office_name5', False)
     google_civic_election_id = request.POST.get('google_civic_election_id', 0)
     ocd_division_id = request.POST.get('ocd_division_id', False)
     primary_party = request.POST.get('primary_party', False)
@@ -393,6 +396,10 @@ def office_edit_process_view(request):
                 office_on_stage.google_civic_office_name2 = google_civic_office_name2
             if google_civic_office_name3 is not False:
                 office_on_stage.google_civic_office_name3 = google_civic_office_name3
+            if google_civic_office_name4 is not False:
+                office_on_stage.google_civic_office_name4 = google_civic_office_name4
+            if google_civic_office_name5 is not False:
+                office_on_stage.google_civic_office_name5 = google_civic_office_name5
             if ocd_division_id is not False:
                 office_on_stage.ocd_division_id = ocd_division_id
             if primary_party is not False:
@@ -945,50 +952,20 @@ def office_merge_process_view(request):
 
     # Preserve unique google_civic_office_name, _name2, and _name3
     if positive_value_exists(contest_office2_on_stage.google_civic_office_name):
-        if not positive_value_exists(contest_office1_on_stage.google_civic_office_name):
-            contest_office1_on_stage.google_civic_office_name = contest_office2_on_stage.google_civic_office_name
-        elif contest_office2_on_stage.google_civic_office_name == contest_office1_on_stage.google_civic_office_name:
-            # The value is already stored in contest_office1_on_stage.google_civic_office_name so doesn't need
-            # to be added to contest_office1_on_stage.google_civic_office_name2
-            pass
-        elif not positive_value_exists(contest_office1_on_stage.google_civic_office_name2):
-            contest_office1_on_stage.google_civic_office_name2 = contest_office2_on_stage.google_civic_office_name
-        elif contest_office2_on_stage.google_civic_office_name == contest_office1_on_stage.google_civic_office_name2:
-            # The value is already stored in contest_office1_on_stage.google_civic_office_name2 so doesn't need
-            # to be added to contest_office1_on_stage.google_civic_office_name3
-            pass
-        elif not positive_value_exists(contest_office1_on_stage.google_civic_office_name3):
-            contest_office1_on_stage.google_civic_office_name3 = contest_office2_on_stage.google_civic_office_name
+        contest_office1_on_stage = add_contest_office_name_to_next_spot(
+            contest_office1_on_stage, contest_office2_on_stage.google_civic_office_name)
     if positive_value_exists(contest_office2_on_stage.google_civic_office_name2):
-        if not positive_value_exists(contest_office1_on_stage.google_civic_office_name):
-            contest_office1_on_stage.google_civic_office_name = contest_office2_on_stage.google_civic_office_name2
-        elif contest_office2_on_stage.google_civic_office_name2 == contest_office1_on_stage.google_civic_office_name:
-            # The value is already stored in contest_office1_on_stage.google_civic_office_name so doesn't need
-            # to be added to contest_office1_on_stage.google_civic_office_name2
-            pass
-        elif not positive_value_exists(contest_office1_on_stage.google_civic_office_name2):
-            contest_office1_on_stage.google_civic_office_name2 = contest_office2_on_stage.google_civic_office_name2
-        elif contest_office2_on_stage.google_civic_office_name2 == contest_office1_on_stage.google_civic_office_name2:
-            # The value is already stored in contest_office1_on_stage.google_civic_office_name2 so doesn't need
-            # to be added to contest_office1_on_stage.google_civic_office_name3
-            pass
-        elif not positive_value_exists(contest_office1_on_stage.google_civic_office_name3):
-            contest_office1_on_stage.google_civic_office_name3 = contest_office2_on_stage.google_civic_office_name2
+        contest_office1_on_stage = add_contest_office_name_to_next_spot(
+            contest_office1_on_stage, contest_office2_on_stage.google_civic_office_name2)
     if positive_value_exists(contest_office2_on_stage.google_civic_office_name3):
-        if not positive_value_exists(contest_office1_on_stage.google_civic_office_name):
-            contest_office1_on_stage.google_civic_office_name = contest_office2_on_stage.google_civic_office_name3
-        elif contest_office2_on_stage.google_civic_office_name3 == contest_office1_on_stage.google_civic_office_name:
-            # The value is already stored in contest_office1_on_stage.google_civic_office_name so doesn't need
-            # to be added to contest_office1_on_stage.google_civic_office_name2
-            pass
-        elif not positive_value_exists(contest_office1_on_stage.google_civic_office_name2):
-            contest_office1_on_stage.google_civic_office_name2 = contest_office2_on_stage.google_civic_office_name3
-        elif contest_office2_on_stage.google_civic_office_name3 == contest_office1_on_stage.google_civic_office_name2:
-            # The value is already stored in contest_office1_on_stage.google_civic_office_name2 so doesn't need
-            # to be added to contest_office1_on_stage.google_civic_office_name3
-            pass
-        elif not positive_value_exists(contest_office1_on_stage.google_civic_office_name3):
-            contest_office1_on_stage.google_civic_office_name3 = contest_office2_on_stage.google_civic_office_name3
+        contest_office1_on_stage = add_contest_office_name_to_next_spot(
+            contest_office1_on_stage, contest_office2_on_stage.google_civic_office_name3)
+    if positive_value_exists(contest_office2_on_stage.google_civic_office_name4):
+        contest_office1_on_stage = add_contest_office_name_to_next_spot(
+            contest_office1_on_stage, contest_office2_on_stage.google_civic_office_name4)
+    if positive_value_exists(contest_office2_on_stage.google_civic_office_name5):
+        contest_office1_on_stage = add_contest_office_name_to_next_spot(
+            contest_office1_on_stage, contest_office2_on_stage.google_civic_office_name5)
 
     # Merge candidate's office details
     candidates_results = move_candidates_to_another_office(contest_office2_id, contest_office2_we_vote_id,
@@ -1048,3 +1025,38 @@ def office_merge_process_view(request):
                                     "&state_code=" + str(state_code))
 
     return HttpResponseRedirect(reverse('office:office_edit', args=(contest_office1_on_stage.id,)))
+
+
+def add_contest_office_name_to_next_spot(contest_office_to_update, google_civic_office_name_to_add):
+
+    if not positive_value_exists(google_civic_office_name_to_add):
+        return contest_office_to_update
+
+    if not positive_value_exists(contest_office_to_update.google_civic_office_name):
+        contest_office_to_update.google_civic_office_name = google_civic_office_name_to_add
+    elif google_civic_office_name_to_add == contest_office_to_update.google_civic_office_name:
+        # The value is already stored in contest_office_to_update.google_civic_office_name so doesn't need
+        # to be added to contest_office_to_update.google_civic_office_name2
+        pass
+    elif not positive_value_exists(contest_office_to_update.google_civic_office_name2):
+        contest_office_to_update.google_civic_office_name2 = google_civic_office_name_to_add
+    elif google_civic_office_name_to_add == contest_office_to_update.google_civic_office_name2:
+        # The value is already stored in contest_office_to_update.google_civic_office_name2 so doesn't need
+        # to be added to contest_office_to_update.google_civic_office_name3
+        pass
+    elif not positive_value_exists(contest_office_to_update.google_civic_office_name3):
+        contest_office_to_update.google_civic_office_name3 = google_civic_office_name_to_add
+    elif google_civic_office_name_to_add == contest_office_to_update.google_civic_office_name3:
+        # The value is already stored in contest_office_to_update.google_civic_office_name2 so doesn't need
+        # to be added to contest_office_to_update.google_civic_office_name3
+        pass
+    elif not positive_value_exists(contest_office_to_update.google_civic_office_name4):
+        contest_office_to_update.google_civic_office_name4 = google_civic_office_name_to_add
+    elif google_civic_office_name_to_add == contest_office_to_update.google_civic_office_name4:
+        # The value is already stored in contest_office_to_update.google_civic_office_name2 so doesn't need
+        # to be added to contest_office_to_update.google_civic_office_name3
+        pass
+    elif not positive_value_exists(contest_office_to_update.google_civic_office_name5):
+        contest_office_to_update.google_civic_office_name5 = google_civic_office_name_to_add
+    # We currently only support 5 alternate names
+    return contest_office_to_update

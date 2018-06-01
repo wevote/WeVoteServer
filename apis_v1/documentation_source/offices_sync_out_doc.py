@@ -45,6 +45,8 @@ def offices_sync_out_doc_template_values(url_root):
                    '  "google_civic_office_name": string,\n' \
                    '  "google_civic_office_name2": string,\n' \
                    '  "google_civic_office_name3": string,\n' \
+                   '  "google_civic_office_name4": string,\n' \
+                   '  "google_civic_office_name5": string,\n' \
                    '  "google_civic_election_id": integer,\n' \
                    '  "maplight_id": integer,\n' \
                    '  "ballotpedia_office_id": integer,\n' \
