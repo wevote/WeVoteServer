@@ -1906,7 +1906,7 @@ def position_save_for_api(  # positionSave
             'is_negative_rating':               position.is_negative_rating(),
             'is_oppose_or_negative_rating':     position.is_oppose_or_negative_rating(),
             'is_information_only':      position.is_information_only(),
-            'is_public_position':       position.is_public_position,
+            'is_public_position':       position.is_public_position(),
             'organization_we_vote_id':  position.organization_we_vote_id,
             'google_civic_election_id': position.google_civic_election_id,
             'state_code':               position.state_code,
@@ -2037,9 +2037,9 @@ def position_list_for_ballot_item_for_api(voter_device_id, friends_vs_public,  #
             public_positions_list = position_list_manager.retrieve_all_positions_for_candidate_campaign(
                 retrieve_public_positions_now, candidate_id, candidate_we_vote_id, stance_we_are_looking_for,
                 return_only_latest_position_per_speaker)
-            is_public_position_setting = True
-            public_positions_list = position_list_manager.add_is_public_position(public_positions_list,
-                                                                                 is_public_position_setting)
+            # is_public_position_setting = True
+            # public_positions_list = position_list_manager.add_is_public_position(public_positions_list,
+            #                                                                      is_public_position_setting)
         else:
             public_positions_list = []
 
@@ -2052,9 +2052,9 @@ def position_list_for_ballot_item_for_api(voter_device_id, friends_vs_public,  #
                 retrieve_public_positions_now, candidate_id, candidate_we_vote_id, stance_we_are_looking_for,
                 return_only_latest_position_per_speaker, friends_we_vote_id_list=friends_we_vote_id_list)
             # Now add is_public_position to each value
-            is_public_position_setting = False
-            friends_positions_list = position_list_manager.add_is_public_position(friends_positions_list,
-                                                                                  is_public_position_setting)
+            # is_public_position_setting = False
+            # friends_positions_list = position_list_manager.add_is_public_position(friends_positions_list,
+            #                                                                       is_public_position_setting)
         else:
             friends_positions_list = []
 
@@ -2088,9 +2088,9 @@ def position_list_for_ballot_item_for_api(voter_device_id, friends_vs_public,  #
                 retrieve_public_positions_now,
                 measure_id, measure_we_vote_id, stance_we_are_looking_for,
                 return_only_latest_position_per_speaker)
-            is_public_position_setting = True
-            public_positions_list = position_list_manager.add_is_public_position(public_positions_list,
-                                                                                 is_public_position_setting)
+            # is_public_position_setting = True
+            # public_positions_list = position_list_manager.add_is_public_position(public_positions_list,
+            #                                                                      is_public_position_setting)
         else:
             public_positions_list = []
 
@@ -2103,9 +2103,9 @@ def position_list_for_ballot_item_for_api(voter_device_id, friends_vs_public,  #
                 retrieve_public_positions_now,
                 measure_id, measure_we_vote_id, stance_we_are_looking_for,
                 return_only_latest_position_per_speaker, friends_we_vote_id_list)
-            is_public_position_setting = False
-            friends_positions_list = position_list_manager.add_is_public_position(friends_positions_list,
-                                                                                  is_public_position_setting)
+            # is_public_position_setting = False
+            # friends_positions_list = position_list_manager.add_is_public_position(friends_positions_list,
+            #                                                                       is_public_position_setting)
         else:
             friends_positions_list = []
 
@@ -2137,9 +2137,9 @@ def position_list_for_ballot_item_for_api(voter_device_id, friends_vs_public,  #
             public_positions_list = position_list_manager.retrieve_all_positions_for_contest_office(
                 retrieve_public_positions_now, office_id, office_we_vote_id, stance_we_are_looking_for,
                 return_only_latest_position_per_speaker)
-            is_public_position_setting = True
-            public_positions_list = position_list_manager.add_is_public_position(public_positions_list,
-                                                                                 is_public_position_setting)
+            # is_public_position_setting = True
+            # public_positions_list = position_list_manager.add_is_public_position(public_positions_list,
+            #                                                                      is_public_position_setting)
         else:
             public_positions_list = []
 
@@ -2152,9 +2152,9 @@ def position_list_for_ballot_item_for_api(voter_device_id, friends_vs_public,  #
                 retrieve_public_positions_now, office_id, office_we_vote_id, stance_we_are_looking_for,
                 return_only_latest_position_per_speaker, friends_we_vote_id_list)
             # Now add is_public_position to each value
-            is_public_position_setting = False
-            friends_positions_list = position_list_manager.add_is_public_position(friends_positions_list,
-                                                                                  is_public_position_setting)
+            # is_public_position_setting = False
+            # friends_positions_list = position_list_manager.add_is_public_position(friends_positions_list,
+            #                                                                       is_public_position_setting)
         else:
             friends_positions_list = []
 
@@ -2324,7 +2324,7 @@ def position_list_for_ballot_item_for_api(voter_device_id, friends_vs_public,  #
                 'is_negative_rating':               one_position.is_negative_rating(),
                 'is_oppose_or_negative_rating':     one_position.is_oppose_or_negative_rating(),
                 'is_information_only':              one_position.is_information_only(),
-                'is_public_position':               one_position.is_public_position,
+                'is_public_position':               one_position.is_public_position(),
                 'has_video':                        is_link_to_video(one_position.more_info_url),
                 'vote_smart_rating':                one_position.vote_smart_rating,
                 'vote_smart_time_span':             one_position.vote_smart_time_span,
@@ -2619,7 +2619,7 @@ def position_list_for_opinion_maker_for_api(voter_device_id,  # positionListForO
                 'is_negative_rating':                   one_position.is_negative_rating(),
                 'is_oppose_or_negative_rating':         one_position.is_oppose_or_negative_rating(),
                 'is_information_only':                  one_position.is_information_only(),
-                'is_public_position':                   one_position.is_public_position,
+                'is_public_position':                   one_position.is_public_position(),
                 'speaker_display_name':                 one_position.speaker_display_name,  # Organization name
                 'vote_smart_rating':                    one_position.vote_smart_rating,
                 'vote_smart_time_span':                 one_position.vote_smart_time_span,
@@ -2828,7 +2828,7 @@ def position_list_for_voter_for_api(voter_device_id,
                 'is_negative_rating':                   one_position.is_negative_rating(),
                 'is_oppose_or_negative_rating':         one_position.is_oppose_or_negative_rating(),
                 'is_information_only':                  one_position.is_information_only(),
-                'is_public_position':                   one_position.is_public_position,
+                'is_public_position':                   one_position.is_public_position(),
                 'speaker_display_name':                 one_position.speaker_display_name,  # Voter name
                 'google_civic_election_id':             one_position.google_civic_election_id,
                 'state_code':                           one_position.state_code,

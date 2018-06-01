@@ -11,7 +11,7 @@ from django.db import models
 from django.db.models import Q
 from election.models import Election
 from exception.models import handle_exception, handle_record_found_more_than_one_exception,\
-    handle_record_not_found_exception, handle_record_not_saved_exception
+    handle_record_not_found_exception, handle_record_not_saved_exception, print_to_log
 from follow.models import FollowOrganizationManager, FollowOrganizationList
 from friend.models import FriendManager
 from measure.models import ContestMeasure, ContestMeasureManager
@@ -863,13 +863,14 @@ class PositionNetworkScore(models.Model):
 
 
 class PositionListManager(models.Model):
-    def add_is_public_position(self, incoming_position_list, is_public_position):
-        outgoing_position_list = []
-        for one_position in incoming_position_list:
-            one_position.is_public_position = is_public_position
-            outgoing_position_list.append(one_position)
-
-        return outgoing_position_list
+    # 2018-05 We now have an "is_public_position()" function
+    # def add_is_public_position(self, incoming_position_list, is_public_position):
+    #     outgoing_position_list = []
+    #     for one_position in incoming_position_list:
+    #         one_position.is_public_position = is_public_position
+    #         outgoing_position_list.append(one_position)
+    #
+    #     return outgoing_position_list
 
     def calculate_positions_followed_by_voter(
             self, voter_id, all_positions_list, organizations_followed_by_voter_by_id, voter_friend_list=[]):
@@ -2304,20 +2305,22 @@ class PositionListManager(models.Model):
 
         # Merge public positions and "For friends" positions
         public_positions_list = list(public_positions_list)  # Force the query to run
-        # Flag all of these entries as "is_public_position = True"
-        revised_position_list = []
-        for one_position in public_positions_list:
-            one_position.is_public_position = True  # Add this value
-            revised_position_list.append(one_position)
-        public_positions_list = revised_position_list
+        # 2018-05 We now have an "is_public_position()" function
+        # # Flag all of these entries as "is_public_position = True"
+        # revised_position_list = []
+        # for one_position in public_positions_list:
+        #     one_position.is_public_position = True  # Add this value
+        #     revised_position_list.append(one_position)
+        # public_positions_list = revised_position_list
 
         friends_positions_list = list(friends_positions_list)  # Force the query to run
-        # Flag all of these entries as "is_public_position = False"
-        revised_position_list = []
-        for one_position in friends_positions_list:
-            one_position.is_public_position = False  # Add this value
-            revised_position_list.append(one_position)
-        friends_positions_list = revised_position_list
+        # 2018-05 We now have an "is_public_position()" function
+        # # Flag all of these entries as "is_public_position = False"
+        # revised_position_list = []
+        # for one_position in friends_positions_list:
+        #     one_position.is_public_position = False  # Add this value
+        #     revised_position_list.append(one_position)
+        # friends_positions_list = revised_position_list
 
         position_list = public_positions_list + friends_positions_list
 
@@ -2498,19 +2501,21 @@ class PositionListManager(models.Model):
                 return results
 
         # Merge public positions and "For friends" positions
-        # Flag all of these entries as "is_public_position = True"
-        revised_position_list = []
-        for one_position in public_positions_list:
-            one_position.is_public_position = True  # Add this value
-            revised_position_list.append(one_position)
-        public_positions_list = revised_position_list
+        # 2018-05 We now have an "is_public_position()" function
+        # # Flag all of these entries as "is_public_position = True"
+        # revised_position_list = []
+        # for one_position in public_positions_list:
+        #     one_position.is_public_position = True  # Add this value
+        #     revised_position_list.append(one_position)
+        # public_positions_list = revised_position_list
 
-        # Flag all of these entries as "is_public_position = False"
-        revised_position_list = []
-        for one_position in friends_positions_list:
-            one_position.is_public_position = False  # Add this value
-            revised_position_list.append(one_position)
-        friends_positions_list = revised_position_list
+        # 2018-05 We now have an "is_public_position()" function
+        # # Flag all of these entries as "is_public_position = False"
+        # revised_position_list = []
+        # for one_position in friends_positions_list:
+        #     one_position.is_public_position = False  # Add this value
+        #     revised_position_list.append(one_position)
+        # friends_positions_list = revised_position_list
 
         position_list = public_positions_list + friends_positions_list
 
@@ -2635,20 +2640,21 @@ class PositionListManager(models.Model):
             }
             return results
 
-        # Mark these positions as "is_public_position"
-        public_positions_list2 = []
-        for one_public_position in public_positions_list:
-            one_public_position.is_public_position = True
-            public_positions_list2.append(one_public_position)
-
-        # Mark these positions as NOT "is_public_position"
-        friends_positions_list2 = []
-        for one_friends_position in friends_positions_list:
-            one_friends_position.is_public_position = False
-            friends_positions_list2.append(one_friends_position)
+        # 2018-05 We now have an "is_public_position()" function
+        # # Mark these positions as "is_public_position"
+        # public_positions_list2 = []
+        # for one_public_position in public_positions_list:
+        #     one_public_position.is_public_position = True
+        #     public_positions_list2.append(one_public_position)
+        #
+        # # Mark these positions as NOT "is_public_position"
+        # friends_positions_list2 = []
+        # for one_friends_position in friends_positions_list:
+        #     one_friends_position.is_public_position = False
+        #     friends_positions_list2.append(one_friends_position)
 
         # Merge public positions and "For friends" positions
-        position_list = public_positions_list2 + friends_positions_list2
+        position_list = public_positions_list + friends_positions_list
         position_list_found = len(position_list)
 
         if position_list_found:
@@ -2667,7 +2673,7 @@ class PositionListManager(models.Model):
                     'is_support':               position.is_support(),
                     'is_oppose':                position.is_oppose(),
                     'statement_text':           position.statement_text,
-                    'is_public_position':       position.is_public_position,
+                    'is_public_position':       position.is_public_position(),
                 }
                 simple_position_list.append(one_position)
 
@@ -4254,7 +4260,6 @@ class PositionManager(models.Model):
         position_found = False
         status = ""
         success = False
-        is_public_position = None
         if retrieve_position_for_friends:
             position_on_stage_starter = PositionForFriends
             position_on_stage = PositionForFriends()
@@ -4451,30 +4456,17 @@ class PositionManager(models.Model):
             status += "RETRIEVE_POSITION_MULTIPLE_FOUND "
             if retrieve_position_for_friends:
                 position_on_stage = PositionForFriends()
-                is_public_position = False
             else:
                 position_on_stage = PositionEntered()
-                is_public_position = True
         except ObjectDoesNotExist:
             error_result = False
             exception_does_not_exist = True
             success = True
             status += "RETRIEVE_POSITION_NONE_FOUND "
-            is_public_position = None
             if retrieve_position_for_friends:
                 position_on_stage = PositionForFriends()
-                is_public_position = False
             else:
                 position_on_stage = PositionEntered()
-                is_public_position = True
-
-        if success:
-            if retrieve_position_for_friends:
-                is_public_position = False
-                position_on_stage.is_public_position = is_public_position
-            else:
-                is_public_position = True
-                position_on_stage.is_public_position = is_public_position
 
         results = {
             'success':                  success,
@@ -4493,7 +4485,7 @@ class PositionManager(models.Model):
             'is_no_stance':             position_on_stage.is_no_stance(),
             'is_information_only':      position_on_stage.is_information_only(),
             'is_still_deciding':        position_on_stage.is_still_deciding(),
-            'is_public_position':       is_public_position,
+            'is_public_position':       position_on_stage.is_public_position(),
             'date_last_changed':        position_on_stage.date_last_changed,
             'date_entered':             position_on_stage.date_entered,
             'google_civic_election_id': google_civic_election_id,
@@ -5064,6 +5056,8 @@ class PositionManager(models.Model):
             # Update this position with new values
             try:
                 voter_position_on_stage.stance = stance
+                # message = "[stance: " + stance + "]"
+                # print_to_log(logger=logger, exception_message_optional=message)
                 if voter_position_on_stage.candidate_campaign_id:
                     if not positive_value_exists(voter_position_on_stage.candidate_campaign_we_vote_id):
                         # Heal the data, and fill in the candidate_campaign_we_vote_id
