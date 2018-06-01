@@ -47,6 +47,20 @@
         <td>{{ contest_office_option2.google_civic_office_name3|default_if_none:"" }}</td>
     </tr>
 {% endif %}
+{% if contest_office_option1.google_civic_office_name4 or contest_office_option2.google_civic_office_name4 %}
+    <tr>
+        <td>Google&nbsp;Civic&nbsp;Office&nbsp;Name&nbsp;4</td>
+        <td>{{ contest_office_option1.google_civic_office_name4|default_if_none:"" }}</td>
+        <td>{{ contest_office_option2.google_civic_office_name4|default_if_none:"" }}</td>
+    </tr>
+{% endif %}
+{% if contest_office_option1.google_civic_office_name5 or contest_office_option2.google_civic_office_name5 %}
+    <tr>
+        <td>Google&nbsp;Civic&nbsp;Office&nbsp;Name&nbsp;5</td>
+        <td>{{ contest_office_option1.google_civic_office_name5|default_if_none:"" }}</td>
+        <td>{{ contest_office_option2.google_civic_office_name5|default_if_none:"" }}</td>
+    </tr>
+{% endif %}
 
 {% include "office/office_merge_one_field_decision.html" with field_name="ballotpedia_office_name" field_label="Ballotpedia Office Name" conflict_status=conflict_values.ballotpedia_office_name contest_office1_field_value=contest_office_option1.ballotpedia_office_name contest_office2_field_value=contest_office_option2.ballotpedia_office_name contest_office1=contest_office_option1 contest_office2=contest_office_option2 %}
 

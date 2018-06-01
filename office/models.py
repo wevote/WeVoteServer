@@ -69,6 +69,10 @@ class ContestOffice(models.Model):
                                                  max_length=255, null=True)
     google_civic_office_name3 = models.CharField(verbose_name="office name exactly as received from google civic",
                                                  max_length=255, null=True)
+    google_civic_office_name4 = models.CharField(verbose_name="office name exactly as received from google civic",
+                                                 max_length=255, null=True)
+    google_civic_office_name5 = models.CharField(verbose_name="office name exactly as received from google civic",
+                                                 max_length=255, null=True)
     # The unique ID of the election containing this contest. (Provided by Google Civic)
     google_civic_election_id = models.CharField(verbose_name="google civic election id",
                                                 max_length=255, null=False, blank=False)
@@ -380,7 +384,9 @@ class ContestOfficeManager(models.Model):
                     contest_office_on_stage = ContestOffice.objects.get(
                         Q(google_civic_office_name__iexact=office_name) |
                         Q(google_civic_office_name2__iexact=office_name) |
-                        Q(google_civic_office_name3__iexact=office_name),
+                        Q(google_civic_office_name3__iexact=office_name) |
+                        Q(google_civic_office_name4__iexact=office_name) |
+                        Q(google_civic_office_name5__iexact=office_name),
                         google_civic_election_id__exact=google_civic_election_id,
                         district_id__exact=district_id,
                         state_code__iexact=updated_contest_office_values['state_code'],
@@ -389,7 +395,9 @@ class ContestOfficeManager(models.Model):
                     contest_office_on_stage = ContestOffice.objects.get(
                         Q(google_civic_office_name__iexact=office_name) |
                         Q(google_civic_office_name2__iexact=office_name) |
-                        Q(google_civic_office_name3__iexact=office_name),
+                        Q(google_civic_office_name3__iexact=office_name) |
+                        Q(google_civic_office_name4__iexact=office_name) |
+                        Q(google_civic_office_name5__iexact=office_name),
                         google_civic_election_id__exact=google_civic_election_id,
                         state_code__iexact=updated_contest_office_values['state_code'],
                     )
@@ -468,6 +476,16 @@ class ContestOfficeManager(models.Model):
                                     contest_office_on_stage.google_civic_office_name3 = value
                                     office_has_changes = True
                                 elif contest_office_on_stage.google_civic_office_name3 == value:
+                                    pass
+                                elif not positive_value_exists(contest_office_on_stage.google_civic_office_name4):
+                                    contest_office_on_stage.google_civic_office_name4 = value
+                                    office_has_changes = True
+                                elif contest_office_on_stage.google_civic_office_name4 == value:
+                                    pass
+                                elif not positive_value_exists(contest_office_on_stage.google_civic_office_name5):
+                                    contest_office_on_stage.google_civic_office_name5 = value
+                                    office_has_changes = True
+                                elif contest_office_on_stage.google_civic_office_name5 == value:
                                     pass
                             else:
                                 setattr(contest_office_on_stage, key, value)

@@ -42,6 +42,8 @@
         <strong>1) {{ office.google_civic_office_name|default_if_none:"" }}</strong>
         {% if office.google_civic_office_name2 %}<br /><strong>2) {{ office.google_civic_office_name2|default_if_none:"" }}</strong>{% endif %}
         {% if office.google_civic_office_name3 %}<br /><strong>3) {{ office.google_civic_office_name3|default_if_none:"" }}</strong>{% endif %}
+        {% if office.google_civic_office_name4 %}<br /><strong>4) {{ office.google_civic_office_name4|default_if_none:"" }}</strong>{% endif %}
+        {% if office.google_civic_office_name5 %}<br /><strong>5) {{ office.google_civic_office_name5|default_if_none:"" }}</strong>{% endif %}
       </td>
     </tr>
     {% if office.ballotpedia_office_name %}

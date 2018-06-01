@@ -155,12 +155,35 @@ def figure_out_office_conflict_values(contest_office1, contest_office2):
             if contest_office1_attribute is None and contest_office2_attribute is None:
                 contest_office_merge_conflict_values[attribute] = 'MATCHING'
             elif contest_office1_attribute is None or contest_office1_attribute is "":
-                contest_office_merge_conflict_values[attribute] = 'CONTEST_OFFICE2'
+                if attribute == "maplight_id":
+                    if contest_office2_attribute is None or contest_office2_attribute is "" \
+                            or contest_office2_attribute is 0 or contest_office2_attribute is '0':
+                        # In certain cases (like maplight_id) we don't want to copy over empty maplight_id
+                        contest_office_merge_conflict_values[attribute] = 'MATCHING'
+                    else:
+                        contest_office_merge_conflict_values[attribute] = 'CONTEST_OFFICE2'
+                else:
+                    contest_office_merge_conflict_values[attribute] = 'CONTEST_OFFICE2'
             elif contest_office2_attribute is None or contest_office2_attribute is "":
                 contest_office_merge_conflict_values[attribute] = 'CONTEST_OFFICE1'
             else:
                 if attribute == "office_name" or attribute == "state_code":
                     if contest_office1_attribute.lower() == contest_office2_attribute.lower():
+                        contest_office_merge_conflict_values[attribute] = 'MATCHING'
+                    else:
+                        contest_office_merge_conflict_values[attribute] = 'CONFLICT'
+                elif attribute == "maplight_id":
+                    contest_office1_attribute_empty = False
+                    contest_office2_attribute_empty = False
+                    if not contest_office1_attribute or contest_office1_attribute == 0 \
+                            or contest_office1_attribute is None:
+                        contest_office1_attribute_empty = True
+                    if not contest_office2_attribute or contest_office2_attribute == 0 \
+                            or contest_office2_attribute is None:
+                        contest_office1_attribute_empty = True
+                    if contest_office1_attribute == contest_office2_attribute:
+                        contest_office_merge_conflict_values[attribute] = 'MATCHING'
+                    elif contest_office1_attribute_empty and contest_office2_attribute_empty:
                         contest_office_merge_conflict_values[attribute] = 'MATCHING'
                     else:
                         contest_office_merge_conflict_values[attribute] = 'CONFLICT'
@@ -247,9 +270,13 @@ def offices_import_from_structured_json(structured_json):
             google_civic_office_name = one_office['google_civic_office_name'] \
                 if 'google_civic_office_name' in one_office else ''
             google_civic_office_name2 = one_office['google_civic_office_name2'] \
-                if 'google_civic_office_name' in one_office else ''
+                if 'google_civic_office_name2' in one_office else ''
             google_civic_office_name3 = one_office['google_civic_office_name3'] \
-                if 'google_civic_office_name' in one_office else ''
+                if 'google_civic_office_name3' in one_office else ''
+            google_civic_office_name4 = one_office['google_civic_office_name4'] \
+                if 'google_civic_office_name4' in one_office else ''
+            google_civic_office_name5 = one_office['google_civic_office_name5'] \
+                if 'google_civic_office_name5' in one_office else ''
             ocd_division_id = one_office['ocd_division_id'] if 'ocd_division_id' in one_office else ''
             number_voting_for = one_office['number_voting_for'] if 'number_voting_for' in one_office else ''
             number_elected = one_office['number_elected'] if 'number_elected' in one_office else ''
@@ -286,6 +313,8 @@ def offices_import_from_structured_json(structured_json):
                 'google_civic_office_name': google_civic_office_name,
                 'google_civic_office_name2': google_civic_office_name2,
                 'google_civic_office_name3': google_civic_office_name3,
+                'google_civic_office_name4': google_civic_office_name4,
+                'google_civic_office_name5': google_civic_office_name5,
                 'ocd_division_id': ocd_division_id,
                 'number_voting_for': number_voting_for,
                 'number_elected': number_elected,

@@ -353,12 +353,11 @@ class CandidateCampaignListManager(models.Model):
                         name_changed = True
                         google_civic_candidate_name_modified = add_results['modified_name']
                 if name_changed and positive_value_exists(google_civic_candidate_name_modified):
-                    # We intentionally use case sensitive matching here
-                    new_filter = Q(google_civic_candidate_name__exact=google_civic_candidate_name_modified)
+                    new_filter = Q(google_civic_candidate_name__iexact=google_civic_candidate_name_modified)
                     filters.append(new_filter)
-                    new_filter = Q(google_civic_candidate_name2__exact=google_civic_candidate_name_modified)
+                    new_filter = Q(google_civic_candidate_name2__iexact=google_civic_candidate_name_modified)
                     filters.append(new_filter)
-                    new_filter = Q(google_civic_candidate_name3__exact=google_civic_candidate_name_modified)
+                    new_filter = Q(google_civic_candidate_name3__iexact=google_civic_candidate_name_modified)
                     filters.append(new_filter)
 
                 # Deal with prefix and suffix
@@ -376,21 +375,19 @@ class CandidateCampaignListManager(models.Model):
                         name_changed = True
                         google_civic_candidate_name_modified = add_results['modified_name']
                 if name_changed and positive_value_exists(google_civic_candidate_name_modified):
-                    # We intentionally use case sensitive matching here
-                    new_filter = Q(google_civic_candidate_name__exact=google_civic_candidate_name_modified)
+                    new_filter = Q(google_civic_candidate_name__iexact=google_civic_candidate_name_modified)
                     filters.append(new_filter)
-                    new_filter = Q(google_civic_candidate_name2__exact=google_civic_candidate_name_modified)
+                    new_filter = Q(google_civic_candidate_name2__iexact=google_civic_candidate_name_modified)
                     filters.append(new_filter)
-                    new_filter = Q(google_civic_candidate_name3__exact=google_civic_candidate_name_modified)
+                    new_filter = Q(google_civic_candidate_name3__iexact=google_civic_candidate_name_modified)
                     filters.append(new_filter)
 
             if positive_value_exists(google_civic_candidate_name2):
-                # We intentionally use case sensitive matching here
-                new_filter = Q(google_civic_candidate_name__exact=google_civic_candidate_name2)
+                new_filter = Q(google_civic_candidate_name__iexact=google_civic_candidate_name2)
                 filters.append(new_filter)
-                new_filter = Q(google_civic_candidate_name2__exact=google_civic_candidate_name2)
+                new_filter = Q(google_civic_candidate_name2__iexact=google_civic_candidate_name2)
                 filters.append(new_filter)
-                new_filter = Q(google_civic_candidate_name3__exact=google_civic_candidate_name2)
+                new_filter = Q(google_civic_candidate_name3__iexact=google_civic_candidate_name2)
                 filters.append(new_filter)
 
                 # Since Google Civic doesn't provide a unique identifier, and sometimes returns initials with
@@ -409,12 +406,11 @@ class CandidateCampaignListManager(models.Model):
                         name_changed = True
                         google_civic_candidate_name2_modified = add_results['modified_name']
                 if name_changed and positive_value_exists(google_civic_candidate_name2_modified):
-                    # We intentionally use case sensitive matching here
-                    new_filter = Q(google_civic_candidate_name__exact=google_civic_candidate_name2_modified)
+                    new_filter = Q(google_civic_candidate_name__iexact=google_civic_candidate_name2_modified)
                     filters.append(new_filter)
-                    new_filter = Q(google_civic_candidate_name2__exact=google_civic_candidate_name2_modified)
+                    new_filter = Q(google_civic_candidate_name2__iexact=google_civic_candidate_name2_modified)
                     filters.append(new_filter)
-                    new_filter = Q(google_civic_candidate_name3__exact=google_civic_candidate_name2_modified)
+                    new_filter = Q(google_civic_candidate_name3__iexact=google_civic_candidate_name2_modified)
                     filters.append(new_filter)
 
                 # Deal with prefix and suffix
@@ -433,20 +429,20 @@ class CandidateCampaignListManager(models.Model):
                         google_civic_candidate_name2_modified = add_results['modified_name']
                 if name_changed and positive_value_exists(google_civic_candidate_name2_modified):
                     # We intentionally use case sensitive matching here
-                    new_filter = Q(google_civic_candidate_name__exact=google_civic_candidate_name2_modified)
+                    new_filter = Q(google_civic_candidate_name__iexact=google_civic_candidate_name2_modified)
                     filters.append(new_filter)
-                    new_filter = Q(google_civic_candidate_name2__exact=google_civic_candidate_name2_modified)
+                    new_filter = Q(google_civic_candidate_name2__iexact=google_civic_candidate_name2_modified)
                     filters.append(new_filter)
-                    new_filter = Q(google_civic_candidate_name3__exact=google_civic_candidate_name2_modified)
+                    new_filter = Q(google_civic_candidate_name3__iexact=google_civic_candidate_name2_modified)
                     filters.append(new_filter)
 
             if positive_value_exists(google_civic_candidate_name3):
                 # We intentionally use case sensitive matching here
-                new_filter = Q(google_civic_candidate_name__exact=google_civic_candidate_name3)
+                new_filter = Q(google_civic_candidate_name__iexact=google_civic_candidate_name3)
                 filters.append(new_filter)
-                new_filter = Q(google_civic_candidate_name2__exact=google_civic_candidate_name3)
+                new_filter = Q(google_civic_candidate_name2__iexact=google_civic_candidate_name3)
                 filters.append(new_filter)
-                new_filter = Q(google_civic_candidate_name3__exact=google_civic_candidate_name3)
+                new_filter = Q(google_civic_candidate_name3__iexact=google_civic_candidate_name3)
                 filters.append(new_filter)
 
                 # Since Google Civic doesn't provide a unique identifier, and sometimes returns initials with
@@ -466,11 +462,11 @@ class CandidateCampaignListManager(models.Model):
                         google_civic_candidate_name3_modified = add_results['modified_name']
                 if name_changed and positive_value_exists(google_civic_candidate_name3_modified):
                     # We intentionally use case sensitive matching here
-                    new_filter = Q(google_civic_candidate_name__exact=google_civic_candidate_name3_modified)
+                    new_filter = Q(google_civic_candidate_name__iexact=google_civic_candidate_name3_modified)
                     filters.append(new_filter)
-                    new_filter = Q(google_civic_candidate_name2__exact=google_civic_candidate_name3_modified)
+                    new_filter = Q(google_civic_candidate_name2__iexact=google_civic_candidate_name3_modified)
                     filters.append(new_filter)
-                    new_filter = Q(google_civic_candidate_name3__exact=google_civic_candidate_name3_modified)
+                    new_filter = Q(google_civic_candidate_name3__iexact=google_civic_candidate_name3_modified)
                     filters.append(new_filter)
 
                 # Deal with prefix and suffix
@@ -489,11 +485,11 @@ class CandidateCampaignListManager(models.Model):
                         google_civic_candidate_name3_modified = add_results['modified_name']
                 if name_changed and positive_value_exists(google_civic_candidate_name3_modified):
                     # We intentionally use case sensitive matching here
-                    new_filter = Q(google_civic_candidate_name__exact=google_civic_candidate_name3_modified)
+                    new_filter = Q(google_civic_candidate_name__iexact=google_civic_candidate_name3_modified)
                     filters.append(new_filter)
-                    new_filter = Q(google_civic_candidate_name2__exact=google_civic_candidate_name3_modified)
+                    new_filter = Q(google_civic_candidate_name2__iexact=google_civic_candidate_name3_modified)
                     filters.append(new_filter)
-                    new_filter = Q(google_civic_candidate_name3__exact=google_civic_candidate_name3_modified)
+                    new_filter = Q(google_civic_candidate_name3__iexact=google_civic_candidate_name3_modified)
                     filters.append(new_filter)
 
             if positive_value_exists(candidate_name):
