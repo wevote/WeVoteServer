@@ -3245,7 +3245,7 @@ class PositionListManager(models.Model):
                         friends_only_positions_updated += 1
 
         # Public Positions
-        if positive_value_exists(one_position.organization_we_vote_id):
+        if one_position.is_public_position() and positive_value_exists(one_position.organization_we_vote_id):
             # Find all of the voter's following this organization
             follow_organization_list_manager = FollowOrganizationList()
             voters_following_list = \
