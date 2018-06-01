@@ -1388,7 +1388,8 @@ class VoterManager(BaseUserManager):
         try:
             test_we_vote_id = voter.we_vote_id
             voter_found = True
-        except AttributeError:
+        except AttributeError as e:
+            handle_record_not_saved_exception(e, logger=logger)
             voter_found = False
 
         if voter_found:
@@ -1454,6 +1455,7 @@ class VoterManager(BaseUserManager):
                 status = "UPDATED_VOTER"
                 success = True
             except Exception as e:
+                handle_record_not_saved_exception(e, logger=logger)
                 status = "UNABLE_TO_UPDATE_VOTER"
                 success = False
                 voter_updated = False
