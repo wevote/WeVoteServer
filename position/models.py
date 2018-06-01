@@ -5132,15 +5132,15 @@ class PositionManager(models.Model):
                 handle_record_not_saved_exception(e, logger=logger)
                 status += 'STANCE_COULD_NOT_BE_UPDATED3 '
 
-            try:
-                voter_position_on_stage.save()
-                position_list_manager.update_position_network_scores_for_one_position(voter_position_on_stage)
-                position_we_vote_id = voter_position_on_stage.we_vote_id
-                voter_position_on_stage_found = True
-                status += 'STANCE_UPDATED '
-            except Exception as e:
-                handle_record_not_saved_exception(e, logger=logger)
-                status += 'STANCE_COULD_NOT_BE_UPDATED4 '
+            # try:
+            voter_position_on_stage.save()
+            position_list_manager.update_position_network_scores_for_one_position(voter_position_on_stage)
+            position_we_vote_id = voter_position_on_stage.we_vote_id
+            voter_position_on_stage_found = True
+            status += 'STANCE_UPDATED '
+            # except Exception as e:
+            #     handle_record_not_saved_exception(e, logger=logger)
+            #     status += 'STANCE_COULD_NOT_BE_UPDATED4 '
         else:
             try:
                 # Create new
