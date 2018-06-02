@@ -56,7 +56,7 @@ class VoterGuideManager(models.Manager):
                 organization_found = True
                 organization = results['organization']
 
-            # Now update voter_guide  # TODO DALE Get from TwitterLinkToOrganization, not organization_twitter_handle
+            # Now update voter_guide
             try:
                 if organization_found:
                     pledge_to_vote_manager = PledgeToVoteManager()

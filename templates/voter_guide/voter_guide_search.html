@@ -96,6 +96,23 @@
 </div>
 {% endif %}
 
+{% if state_list %}
+<div class="form-group">
+    <label for="state_code_id" class="col-sm-3 control-label">State Served (if only one State)</label>
+    <div class="col-sm-8">
+        <select id="state_code_id" name="state_code">
+            <option value="" {% if '' == state_code %} selected="selected"{% endif %}>
+                -- State Served (Defaults to National) --</option>
+        {% for key, state in state_list %}
+            <option value="{{ key }}"
+                    {% if key|lower == state_code|lower %} selected="selected"{% endif %}>
+                {{ state }}</option>
+        {% endfor %}
+        </select>
+    </div>
+</div>
+{% endif %}{# End of if state_list #}
+
 <div class="form-group">
     <label for="find_voter_guide_button_id" class="col-sm-3 control-label"><a href="{% url 'voter_guide:voter_guide_list' %}">cancel</a></label>
     <div class="col-sm-8">

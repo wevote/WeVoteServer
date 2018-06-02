@@ -68,23 +68,6 @@ span.nobr { white-space: nowrap; }
     </div>
 </div>
 
-{% if state_list %}
-<div class="form-group">
-    <label for="state_served_code_id" class="col-sm-3 control-label">State Served Code</label>
-    <div class="col-sm-8">
-        <select id="state_served_code_id" name="state_served_code" class="form-control">
-            <option value="" {% if '' == state_served_code %} selected="selected"{% endif %}>
-                -- State Served --</option>
-        {% for key, state in state_list %}
-            <option value="{{ key }}"
-                    {% if key|lower == state_served_code|lower %} selected="selected"{% endif %}>
-                {{ state }}</option>
-        {% endfor %}
-        </select>
-    </div>
-</div>
-{% endif %}{# End of if state_list #}
-
 
 {% if organization_types %}
 <div class="form-group">
@@ -196,6 +179,24 @@ span.nobr { white-space: nowrap; }
     </div>
 </div>
 {% endif %}
+
+
+{% if state_list %}
+<div class="form-group">
+    <label for="state_served_code_id" class="col-sm-3 control-label">State Served Code</label>
+    <div class="col-sm-8">
+        <select id="state_served_code_id" name="state_served_code" class="form-control">
+            <option value="" {% if '' == state_served_code %} selected="selected"{% endif %}>
+                -- State Served --</option>
+        {% for key, state in state_list %}
+            <option value="{{ key }}"
+                    {% if key|lower == state_served_code|lower %} selected="selected"{% endif %}>
+                {{ state }}</option>
+        {% endfor %}
+        </select>
+    </div>
+</div>
+{% endif %}{# End of if state_list #}
 
 <p>
 {% if organization %}

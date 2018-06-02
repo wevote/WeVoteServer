@@ -521,6 +521,7 @@ def voter_guide_search_view(request):  # Is this an active view?
 
     # A positive value in google_civic_election_id means we want to create a voter guide for this org for this election
     google_civic_election_id = request.GET.get('google_civic_election_id', 0)
+    state_code = request.GET.get('state_code', "")
 
     messages_on_stage = get_messages(request)
 
@@ -537,6 +538,7 @@ def voter_guide_search_view(request):  # Is this an active view?
         'messages_on_stage': messages_on_stage,
         'upcoming_election_list':   upcoming_election_list,
         'google_civic_election_id': google_civic_election_id,
+        'state_code':               state_code,
         'state_list':               sorted_state_list,
     }
     return render(request, 'voter_guide/voter_guide_search.html', template_values)
@@ -561,7 +563,7 @@ def voter_guide_search_process_view(request):
     organization_twitter_handle = request.POST.get('organization_twitter_handle', '')
     organization_facebook = request.POST.get('organization_facebook', '')
     organization_website = request.POST.get('organization_website', '')
-    # state_served_code = request.POST.get('state_served_code', False)
+    state_code = request.POST.get('state_code', "")
 
     # Save this variable so we have it on the "Add New Position" page
     google_civic_election_id = request.POST.get('google_civic_election_id', 0)
@@ -593,15 +595,20 @@ def voter_guide_search_process_view(request):
     if results['success']:
         upcoming_election_list = results['election_list']
 
+    state_list = STATE_CODE_MAP
+    sorted_state_list = sorted(state_list.items())
+
     messages_on_stage = get_messages(request)
     template_values = {
+        'google_civic_election_id':     google_civic_election_id,
         'messages_on_stage':            messages_on_stage,
         'organizations_list':           organizations_list,
         'organization_name':            organization_name,
         'organization_twitter_handle':  organization_twitter_handle,
         'organization_facebook':        organization_facebook,
         'organization_website':         organization_website,
+        'state_code':                   state_code,
+        'state_list':                   sorted_state_list,
         'upcoming_election_list':       upcoming_election_list,
-        'google_civic_election_id':     google_civic_election_id,
     }
     return render(request, 'voter_guide/voter_guide_search.html', template_values)

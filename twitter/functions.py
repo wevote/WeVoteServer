@@ -50,6 +50,7 @@ def retrieve_twitter_user_info(twitter_user_id, twitter_handle):
             success = True
             status = 'TWITTER_RETRIEVE_SUCCESSFUL-TWITTER_HANDLE ' + str(twitter_handle)
             twitter_handle_found = True
+            twitter_user_id = twitter_user.id  # Integer value. id_str would be the String value
         else:
             twitter_json = {}
             success = False
@@ -72,6 +73,7 @@ def retrieve_twitter_user_info(twitter_user_id, twitter_handle):
     results = {
         'status':               status,
         'success':              success,
+        'twitter_user_id':      twitter_user_id,
         'twitter_handle':       twitter_handle,
         'twitter_handle_found': twitter_handle_found,
         'twitter_json':         twitter_json,
