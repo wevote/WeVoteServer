@@ -54,7 +54,8 @@ urlpatterns = [
     url(r'^import_export_twitter/', include('import_export_twitter.urls', namespace="import_export_twitter")),
     url(r'^import_export_vote_smart/', include('import_export_vote_smart.urls', namespace="import_export_vote_smart")),
     url(r'^import_export_wikipedia/', include('import_export_wikipedia.urls', namespace="import_export_wikipedia")),
-    url(r'^import_export_endorsements/', include('import_export_endorsements.urls', namespace="import_export_endorsements")),
+    url(r'^import_export_endorsements/', include(
+        'import_export_endorsements.urls', namespace="import_export_endorsements")),
     url(r'^info/', include('quick_info.urls', namespace="quick_info")),
     url(r'^issue/', include('issue.urls', namespace="issue")),
     url(r'^m/', include('measure.urls', namespace="measure")),
