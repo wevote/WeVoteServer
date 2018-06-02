@@ -61,13 +61,14 @@ class GetOutOfLoopLocal(Exception):
 
 
 def refresh_twitter_candidate_details(candidate_campaign):
+    status = ""
     candidate_campaign_manager = CandidateCampaignManager()
     politician_manager = PoliticianManager()
     twitter_user_manager = TwitterUserManager()
     we_vote_image_manager = WeVoteImageManager()
 
     if not candidate_campaign:
-        status = "TWITTER_CANDIDATE_DETAILS_NOT_RETRIEVED-CANDIDATE_MISSING"
+        status += "TWITTER_CANDIDATE_DETAILS_NOT_RETRIEVED-CANDIDATE_MISSING "
         results = {
             'success':                  False,
             'status':                   status,
@@ -75,12 +76,12 @@ def refresh_twitter_candidate_details(candidate_campaign):
         return results
 
     if candidate_campaign.candidate_twitter_handle:
-        status = "TWITTER_CANDIDATE_DETAILS-REACHING_OUT_TO_TWITTER"
+        status += "TWITTER_CANDIDATE_DETAILS-REACHING_OUT_TO_TWITTER "
         twitter_user_id = 0
         results = retrieve_twitter_user_info(twitter_user_id, candidate_campaign.candidate_twitter_handle)
 
         if results['success']:
-            status = "TWITTER_CANDIDATE_DETAILS_RETRIEVED_FROM_TWITTER"
+            status += "TWITTER_CANDIDATE_DETAILS_RETRIEVED_FROM_TWITTER "
 
             # Get original image url for cache original size image
             twitter_profile_image_url_https = we_vote_image_manager.twitter_profile_image_url_https_original(
@@ -120,7 +121,7 @@ def refresh_twitter_candidate_details(candidate_campaign):
                 candidate_campaign)
             save_position_from_candidate_results = update_all_position_details_from_candidate(candidate_campaign)
     else:
-        status = "TWITTER_CANDIDATE_DETAILS-CLEARING_DETAILS"
+        status += "TWITTER_CANDIDATE_DETAILS-CLEARING_DETAILS "
         save_candidate_campaign_results = candidate_campaign_manager.clear_candidate_twitter_details(candidate_campaign)
 
     results = {
@@ -135,6 +136,9 @@ def refresh_twitter_organization_details(organization):
     twitter_user_manager = TwitterUserManager()
     voter_manager = VoterManager()
     we_vote_image_manager = WeVoteImageManager()
+    status = ""
+    twitter_user_id = 0
+    organization_twitter_handle = ""
     cached_twitter_profile_image_url_https = None
     cached_twitter_profile_background_image_url_https = None
     cached_twitter_profile_banner_url_https = None
@@ -143,22 +147,26 @@ def refresh_twitter_organization_details(organization):
     we_vote_hosted_profile_image_url_tiny = None
 
     if not organization:
-        status = "ORGANIZATION_TWITTER_DETAILS_NOT_RETRIEVED-ORG_MISSING"
+        status += "ORGANIZATION_TWITTER_DETAILS_NOT_RETRIEVED-ORG_MISSING "
         results = {
-            'success':      False,
-            'status':       status,
-            'organization': organization,
+            'success':          False,
+            'status':           status,
+            'organization':     organization,
+            'twitter_user_id':  twitter_user_id,
+            'twitter_handle':   organization_twitter_handle,
         }
         return results
 
     # TODO DALE We should stop saving organization_twitter_handle without saving a TwitterLinkToOrganization
     if organization.organization_twitter_handle:
-        status = "ORGANIZATION_TWITTER_DETAILS-REACHING_OUT_TO_TWITTER"
+        status += "ORGANIZATION_TWITTER_DETAILS-REACHING_OUT_TO_TWITTER "
         twitter_user_id = 0
+        organization_twitter_handle = organization.organization_twitter_handle
         results = retrieve_twitter_user_info(twitter_user_id, organization.organization_twitter_handle)
 
         if results['success']:
-            status = "ORGANIZATION_TWITTER_DETAILS_RETRIEVED_FROM_TWITTER"
+            status += "ORGANIZATION_TWITTER_DETAILS_RETRIEVED_FROM_TWITTER "
+            twitter_user_id = results['twitter_user_id']
 
             # Get original image url for cache original size image
             twitter_profile_image_url_https = we_vote_image_manager.twitter_profile_image_url_https_original(
@@ -219,7 +227,7 @@ def refresh_twitter_organization_details(organization):
                 we_vote_hosted_profile_image_url_large, we_vote_hosted_profile_image_url_medium,
                 we_vote_hosted_profile_image_url_tiny)
             if save_organization_results['success']:
-                status = "ORGANIZATION_TWITTER_DETAILS_RETRIEVED_FROM_TWITTER_AND_SAVED"
+                status += "ORGANIZATION_TWITTER_DETAILS_RETRIEVED_FROM_TWITTER_AND_SAVED "
 
                 # Now update the Twitter statistics information in other We Vote tables
                 organization = save_organization_results['organization']
@@ -245,17 +253,19 @@ def refresh_twitter_organization_details(organization):
                     organization)
 
     else:
-        status = "ORGANIZATION_TWITTER_DETAILS-CLEARING_DETAILS"
+        status += "ORGANIZATION_TWITTER_DETAILS-CLEARING_DETAILS "
         save_organization_results = organization_manager.clear_organization_twitter_details(organization)
 
         if save_organization_results['success']:
             results = update_social_media_statistics_in_other_tables(organization)
-            status = "ORGANIZATION_TWITTER_DETAILS_CLEARED_FROM_DB"
+            status += "ORGANIZATION_TWITTER_DETAILS_CLEARED_FROM_DB "
 
     results = {
-        'success':      True,
-        'status':       status,
-        'organization': organization,
+        'success':          True,
+        'status':           status,
+        'organization':     organization,
+        'twitter_user_id':  twitter_user_id,
+        'twitter_handle':   organization_twitter_handle,
     }
     return results
 

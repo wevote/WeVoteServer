@@ -263,7 +263,7 @@ class TwitterUserManager(models.Model):
             }
             return results
 
-        # Any attempts to save a twitter_link using either twitter_id or voter_we_vote_id that already
+        # Any attempts to save a twitter_link using either twitter_id or organization_we_vote_id that already
         #  exist in the table will fail, since those fields are required to be unique.
         try:
             twitter_link_to_organization = TwitterLinkToOrganization.objects.create(

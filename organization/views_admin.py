@@ -17,6 +17,7 @@ from django.shortcuts import render
 from exception.models import handle_record_found_more_than_one_exception,\
     handle_record_not_deleted_exception, handle_record_not_found_exception
 from election.models import Election, ElectionManager
+from import_export_twitter.controllers import refresh_twitter_organization_details
 from import_export_vote_smart.models import VoteSmartSpecialInterestGroupManager
 from issue.models import ALPHABETICAL_ASCENDING, IssueListManager, IssueManager, \
     OrganizationLinkToIssueList, OrganizationLinkToIssueManager, MOST_LINKED_ORGANIZATIONS
@@ -26,6 +27,7 @@ from organization.models import OrganizationListManager, OrganizationManager, OR
 from organization.controllers import organization_retrieve_tweets_from_twitter, organization_analyze_tweets
 from position.models import PositionEntered, PositionManager, INFORMATION_ONLY, OPPOSE, \
     STILL_DECIDING, SUPPORT
+from twitter.models import TwitterUserManager
 from voter.models import retrieve_voter_authority, voter_has_authority, VoterManager
 from voter_guide.models import VoterGuideManager
 import wevote_functions.admin
@@ -504,21 +506,28 @@ def organization_edit_process_view(request):
     wikipedia_page_title = request.POST.get('wikipedia_page_title', False)
     wikipedia_photo_url = request.POST.get('wikipedia_photo_url', False)
     organization_endorsements_api_url = request.POST.get('organization_endorsements_api_url', False)
-    state_served_code = request.POST.get('state_served_code', False)
+    state_served_code = request.POST.get('state_code', False)
     organization_link_issue_we_vote_ids = request.POST.getlist('selected_issues', False)
     organization_type = request.POST.get('organization_type', GROUP)
 
     # A positive value in google_civic_election_id or add_organization_button means we want to create a voter guide
     # for this org for this election
     google_civic_election_id = request.POST.get('google_civic_election_id', 0)
-    state_code = request.POST.get('state_code', '')
-    # add_organization_button = request.POST.get('add_organization_button', False)
+    election_manager = ElectionManager()
+
+    # Have a version of state_code that is "" instead of False
+    if positive_value_exists(state_served_code):
+        state_code = state_served_code
+    else:
+        state_code = ""
 
     # Filter incoming data
     organization_twitter_handle = extract_twitter_handle_from_text_string(organization_twitter_handle)
 
     # Check to see if this organization is already being used anywhere
     organization_on_stage_found = False
+    new_organization_created = False
+    status = ""
     try:
         organization_query = Organization.objects.filter(id=organization_id)
         if organization_query.count():
@@ -568,10 +577,19 @@ def organization_edit_process_view(request):
                 organizations_list = results['organizations_list']
                 organizations_count = len(organizations_list)
 
+                upcoming_election_list = []
+                results = election_manager.retrieve_upcoming_elections()
+                if results['success']:
+                    upcoming_election_list = results['election_list']
+
+                state_list = STATE_CODE_MAP
+                sorted_state_list = sorted(state_list.items())
+
                 messages.add_message(request, messages.INFO, 'We found {count} existing organizations '
                                                              'that might match.'.format(count=organizations_count))
                 messages_on_stage = get_messages(request)
                 template_values = {
+                    'google_civic_election_id':     google_civic_election_id,
                     'messages_on_stage':            messages_on_stage,
                     'organizations_list':           organizations_list,
                     'organization_name':            organization_name,
@@ -580,14 +598,26 @@ def organization_edit_process_view(request):
                     'organization_website':         organization_website,
                     'wikipedia_page_title':         wikipedia_page_title,
                     'wikipedia_photo_url':          wikipedia_photo_url,
+                    'state_code':                   state_code,
+                    'state_list':                   sorted_state_list,
+                    'upcoming_election_list':       upcoming_election_list,
                 }
-                return render(request, 'organization/organization_edit.html', template_values)
+                return render(request, 'voter_guide/voter_guide_search.html', template_values)
 
             minimum_required_variables_exist = positive_value_exists(organization_name)
             if not minimum_required_variables_exist:
+                upcoming_election_list = []
+                results = election_manager.retrieve_upcoming_elections()
+                if results['success']:
+                    upcoming_election_list = results['election_list']
+
+                state_list = STATE_CODE_MAP
+                sorted_state_list = sorted(state_list.items())
+
                 messages.add_message(request, messages.INFO, 'Missing name, which is required.')
                 messages_on_stage = get_messages(request)
                 template_values = {
+                    'google_civic_election_id':     google_civic_election_id,
                     'messages_on_stage':            messages_on_stage,
                     'organization_name':            organization_name,
                     'organization_twitter_handle':  organization_twitter_handle,
@@ -595,6 +625,9 @@ def organization_edit_process_view(request):
                     'organization_website':         organization_website,
                     'wikipedia_page_title':         wikipedia_page_title,
                     'wikipedia_photo_url':          wikipedia_photo_url,
+                    'state_code':                   state_code,
+                    'state_list':                   sorted_state_list,
+                    'upcoming_election_list':       upcoming_election_list,
                 }
                 return render(request, 'voter_guide/voter_guide_search.html', template_values)
 
@@ -621,11 +654,26 @@ def organization_edit_process_view(request):
             organization_id = organization_on_stage.id
             organization_we_vote_id = organization_on_stage.we_vote_id
             messages.add_message(request, messages.INFO, 'New organization saved.')
+            new_organization_created = True
     except Exception as e:
         messages.add_message(request, messages.ERROR, 'Could not save organization.'
                                                       ' {error} [type: {error_type}]'.format(error=e,
                                                                                              error_type=type(e)))
         return HttpResponseRedirect(reverse('organization:organization_list', args=()))
+
+    if positive_value_exists(new_organization_created) and positive_value_exists(organization_we_vote_id) \
+            and positive_value_exists(organization_twitter_handle):
+        # Pull Twitter information
+        results = refresh_twitter_organization_details(organization_on_stage)
+        status += results['status']
+        organization_on_stage = results['organization']
+        twitter_user_id = results['twitter_user_id']
+
+        if positive_value_exists(twitter_user_id):
+            # Try to link Twitter to this organization. If already linked, this function will fail because of
+            # database unique field requirements.
+            twitter_user_manager = TwitterUserManager()
+            results = twitter_user_manager.create_twitter_link_to_organization(twitter_user_id, organization_we_vote_id)
 
     # Create voter_guide for this election?
     if positive_value_exists(google_civic_election_id) and positive_value_exists(organization_we_vote_id):
@@ -634,10 +682,6 @@ def organization_edit_process_view(request):
         if results['election_found']:
             election = results['election']
             voter_guide_manager = VoterGuideManager()
-            if positive_value_exists(state_served_code):
-                state_code = state_served_code
-            else:
-                state_code = ""
 
             voter_guide_we_vote_id = ''
             results = voter_guide_manager.update_or_create_organization_voter_guide_by_election_id(
@@ -645,6 +689,10 @@ def organization_edit_process_view(request):
             if results['voter_guide_saved']:
                 messages.add_message(request, messages.INFO, 'Voter guide for {election_name} election saved.'
                                                              ''.format(election_name=election.election_name))
+
+    # Voter guide names are currently locked to the organization name, so we want to update all voter guides
+    voter_guide_manager = VoterGuideManager()
+    results = voter_guide_manager.update_organization_voter_guides_with_organization_data(organization_on_stage)
 
     # Link the selected issues with organization and delete any links that were unselected
     link_issue_list_manager = OrganizationLinkToIssueList()
