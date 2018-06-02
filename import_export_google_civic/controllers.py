@@ -488,6 +488,292 @@ def process_contests_from_structured_json(
     return results
 
 
+def retrieve_representatives_from_google_civic_api(text_for_map_search):
+    # Request json file from Google servers
+    # logger.info("Loading ballot for one address from voterInfoQuery from Google servers")
+
+    results = {
+        'status':               'FUNCTION_TO_BE_BUILT ',
+        'success':              False,
+        'text_for_map_search':  text_for_map_search,
+        'locations_retrieved':  False,
+    }
+    return results
+    #
+    # print("retrieving one ballot for " + str(incoming_google_civic_election_id) + ": " + str(text_for_map_search))
+    # if positive_value_exists(use_test_election):
+    #     response = requests.get(VOTER_INFO_URL, params={
+    #         "key": GOOGLE_CIVIC_API_KEY,
+    #         "address": text_for_map_search,
+    #         "electionId": 2000,  # The Google Civic API Test election
+    #     })
+    # elif positive_value_exists(incoming_google_civic_election_id):
+    #     response = requests.get(VOTER_INFO_URL, params={
+    #         "key": GOOGLE_CIVIC_API_KEY,
+    #         "address": text_for_map_search,
+    #         "electionId": incoming_google_civic_election_id,
+    #     })
+    # else:
+    #     response = requests.get(VOTER_INFO_URL, params={
+    #         "key": GOOGLE_CIVIC_API_KEY,
+    #         "address": text_for_map_search,
+    #     })
+    #
+    # structured_json = json.loads(response.text)
+    # if 'success' in structured_json and structured_json['success'] == False:
+    #     import_results = {
+    #         'success': False,
+    #         'status': "Error: " + structured_json['status'],
+    #     }
+    #     return import_results
+    #
+    # # # For internal testing. Write the json retrieved above into a local file
+    # # with open('/Users/dalemcgrew/PythonProjects/WeVoteServer/'
+    # #           'import_export_google_civic/import_data/voterInfoQuery_VA_sample.json', 'w') as f:
+    # #     json.dump(structured_json, f)
+    # #     f.closed
+    # #
+    # # # TEMP - FROM FILE (so we aren't hitting Google Civic API during development)
+    # # with open("import_export_google_civic/import_data/voterInfoQuery_VA_sample.json") as json_data:
+    # #     structured_json = json.load(json_data)
+    #
+    # # Verify that we got a ballot. (If you use an address in California for an election in New York,
+    # #  you won't get a ballot for example.)
+    # success = False
+    # election_data_retrieved = False
+    # polling_location_retrieved = False
+    # contests_retrieved = False
+    # election_administration_data_retrieved = False
+    # google_civic_election_id = 0
+    # google_response_address_not_found = False
+    # error = structured_json.get('error', {})
+    # errors = error.get('errors', {})
+    # if len(errors):
+    #     logger.debug("retrieve_one_ballot_from_google_civic_api failed: " + str(errors))
+    #     for one_error_from_google in errors:
+    #         if 'reason' in one_error_from_google:
+    #             if one_error_from_google['reason'] == "notFound":
+    #                 # Ballot data not found at this location
+    #                 google_response_address_not_found = True
+    #             if one_error_from_google['reason'] == "parseError":
+    #                 # Not an address format Google can parse
+    #                 google_response_address_not_found = True
+    #
+    # if 'election' in structured_json:
+    #     if 'id' in structured_json['election']:
+    #         election_data_retrieved = True
+    #         success = True
+    #         google_civic_election_id = structured_json['election']['id']
+    #
+    # #  We can get a google_civic_election_id back even though we don't have contest data.
+    # #  If we get a google_civic_election_id back but no contest data, reach out again with the google_civic_election_id
+    # #  so we can then get contest data
+    #
+    # # Use Google Civic API call counter to track the number of queries we are doing each day
+    # google_civic_api_counter_manager = GoogleCivicApiCounterManager()
+    # google_civic_api_counter_manager.create_counter_entry('ballot', google_civic_election_id)
+    #
+    # if 'pollingLocations' in structured_json:
+    #     polling_location_retrieved = True
+    #     success = True
+    #
+    # if 'contests' in structured_json:
+    #     if len(structured_json['contests']) > 0:
+    #         contests_retrieved = True
+    #         success = True
+    #
+    # if 'state' in structured_json:
+    #     if len(structured_json['state']) > 0:
+    #         if 'electionAdministrationBody' in structured_json['state'][0]:
+    #             election_administration_data_retrieved = True
+    #             success = True
+    #
+    # results = {
+    #     'success': success,
+    #     'election_data_retrieved': election_data_retrieved,
+    #     'polling_location_retrieved': polling_location_retrieved,
+    #     'google_response_address_not_found': google_response_address_not_found,
+    #     'contests_retrieved': contests_retrieved,
+    #     'election_administration_data_retrieved': election_administration_data_retrieved,
+    #     'structured_json': structured_json,
+    # }
+    # return results
+
+
+# See import_data/voterInfoQuery_VA_sample.json
+def store_representatives_from_google_civic_api(one_ballot_json, voter_id=0, polling_location_we_vote_id=''):
+    """
+    When we pass in a voter_id, we want to save this ballot related to the voter.
+    When we pass in polling_location_we_vote_id, we want to save a ballot for that area, which is useful for
+    getting new voters started by showing them a ballot roughly near them.
+    """
+    results = {
+        'status':                       'FUNCTION_TO_BE_BUILT ',
+        'success':                      False,
+        'polling_location_we_vote_id':  polling_location_we_vote_id,
+        'voter_id':                     voter_id,
+    }
+    return results
+
+    # #     "election": {
+    # #     "electionDay": "2015-11-03",
+    # #     "id": "4162",
+    # #     "name": "Virginia General Election",
+    # #     "ocdDivisionId": "ocd-division/country:us/state:va"
+    # # },
+    # if 'election' not in one_ballot_json:
+    #     results = {
+    #         'status': 'BALLOT_JSON_MISSING_ELECTION',
+    #         'success': False,
+    #         'google_civic_election_id': 0,
+    #     }
+    #     return results
+    #
+    # election_day_text = ''
+    # election_description_text = ''
+    # if 'electionDay' in one_ballot_json['election']:
+    #     election_day_text = one_ballot_json['election']['electionDay']
+    # if 'name' in one_ballot_json['election']:
+    #     election_description_text = one_ballot_json['election']['name']
+    #
+    # if 'id' not in one_ballot_json['election']:
+    #     results = {
+    #         'status': 'BALLOT_JSON_MISSING_ELECTION_ID',
+    #         'success': False,
+    #         'google_civic_election_id': 0,
+    #     }
+    #     return results
+    #
+    # voter_address_dict = one_ballot_json['normalizedInput'] if 'normalizedInput' in one_ballot_json else {}
+    # if positive_value_exists(voter_id):
+    #     if positive_value_exists(voter_address_dict):
+    #         # When saving a ballot for an individual voter, use this data to update voter address with the
+    #         #  normalized address information returned from Google Civic
+    #         # "normalizedInput": {
+    #         #   "line1": "254 hartford st",
+    #         #   "city": "san francisco",
+    #         #   "state": "CA",
+    #         #   "zip": "94114"
+    #         #  },
+    #         voter_address_manager = VoterAddressManager()
+    #         voter_address_manager.update_voter_address_with_normalized_values(
+    #             voter_id, voter_address_dict)
+    #         # Note that neither 'success' nor 'status' are set here because updating the voter_address with normalized
+    #         # values isn't critical to the success of storing the ballot for a voter
+    # # We don't store the normalized address information when we capture a ballot for a polling location
+    #
+    # google_civic_election_id = one_ballot_json['election']['id']
+    # ocd_division_id = one_ballot_json['election']['ocdDivisionId']
+    # state_code = extract_state_from_ocd_division_id(ocd_division_id)
+    # if not positive_value_exists(state_code):
+    #     # We have a backup method of looking up state from one_ballot_json['state']['name']
+    #     # in case the ocd state fails
+    #     state_name = ''
+    #     if 'state' in one_ballot_json:
+    #         if 'name' in one_ballot_json['state']:
+    #             state_name = one_ballot_json['state']['name']
+    #         elif len(one_ballot_json['state']) > 0:
+    #             # In some cases, like test elections 2000 a list is returned in one_ballot_json['state']
+    #             for one_state_entry in one_ballot_json['state']:
+    #                 if 'name' in one_state_entry:
+    #                     state_name = one_state_entry['name']
+    #     state_code = convert_state_text_to_state_code(state_name)
+    # if not positive_value_exists(state_code):
+    #     if 'normalizedInput' in one_ballot_json:
+    #         state_code = one_ballot_json['normalizedInput']['state']
+    #
+    # # Loop through all contests and store in local db cache
+    # if 'contests' in one_ballot_json:
+    #     results = process_contests_from_structured_json(one_ballot_json['contests'], google_civic_election_id,
+    #                                                     ocd_division_id, state_code, voter_id,
+    #                                                     polling_location_we_vote_id)
+    #
+    #     status = results['status']
+    #     success = results['success']
+    # else:
+    #     status = "STORE_ONE_BALLOT_NO_CONTESTS_FOUND"
+    #     success = False
+    #     results = {
+    #         'status':                   status,
+    #         'success':                  success,
+    #         'ballot_returned_found':    False,
+    #         'ballot_returned':          ballot_returned,
+    #         'google_civic_election_id': google_civic_election_id,
+    #     }
+    #     return results
+    #
+    # # When saving a ballot for individual voter, loop through all pollingLocations and store in local db
+    # # process_polling_locations_from_structured_json(one_ballot_json['pollingLocations'])
+    #
+    # # If we successfully save a ballot, create/update a BallotReturned entry
+    # ballot_returned_found = False
+    # if hasattr(ballot_returned, 'voter_id') and positive_value_exists(ballot_returned.voter_id):
+    #     ballot_returned_found = True
+    # elif hasattr(ballot_returned, 'polling_location_we_vote_id') \
+    #         and positive_value_exists(ballot_returned.polling_location_we_vote_id):
+    #     ballot_returned_found = True
+    # else:
+    #     ballot_returned = BallotReturned()
+    #
+    # is_test_election = True if positive_value_exists(google_civic_election_id) \
+    #     and convert_to_int(google_civic_election_id) == 2000 else False
+    #
+    # # If this is connected to a polling_location, retrieve the polling_location_information
+    # ballot_returned_manager = BallotReturnedManager()
+    # polling_location_manager = PollingLocationManager()
+    #
+    # if not is_test_election:
+    #     if not ballot_returned_found:
+    #         # If ballot_returned wasn't passed into this function, retrieve it
+    #         if positive_value_exists(voter_id) and positive_value_exists(google_civic_election_id):
+    #             results = ballot_returned_manager.retrieve_ballot_returned_from_voter_id(
+    #                 voter_id, google_civic_election_id)
+    #             if results['ballot_returned_found']:
+    #                 ballot_returned_found = True
+    #                 ballot_returned = results['ballot_returned']
+    #         elif positive_value_exists(polling_location_we_vote_id) and positive_value_exists(google_civic_election_id):
+    #             results = ballot_returned_manager.retrieve_ballot_returned_from_polling_location_we_vote_id(
+    #                 polling_location_we_vote_id, google_civic_election_id)
+    #             if results['ballot_returned_found']:
+    #                 ballot_returned_found = True  # If the update fails, return the original ballot_returned object
+    #                 ballot_returned = results['ballot_returned']
+    #
+    #     # Now update ballot_returned with latest values
+    #     if positive_value_exists(ballot_returned_found):
+    #         if positive_value_exists(voter_address_dict):
+    #             update_results = ballot_returned_manager.update_ballot_returned_with_normalized_values(
+    #                     voter_address_dict, ballot_returned)
+    #             ballot_returned = update_results['ballot_returned']
+    #     else:
+    #         create_results = ballot_returned_manager.create_ballot_returned_with_normalized_values(
+    #             voter_address_dict,
+    #             election_day_text, election_description_text,
+    #             google_civic_election_id, voter_id, polling_location_we_vote_id
+    #         )
+    #         ballot_returned_found = create_results['ballot_returned_found']
+    #         ballot_returned = create_results['ballot_returned']
+    #
+    #     # Currently we don't report the success or failure of storing ballot_returned
+    #
+    # if positive_value_exists(ballot_returned_found):
+    #     if positive_value_exists(polling_location_we_vote_id):
+    #         results = polling_location_manager.retrieve_polling_location_by_id(0, polling_location_we_vote_id)
+    #         if results['polling_location_found']:
+    #             polling_location = results['polling_location']
+    #             ballot_returned.latitude = polling_location.latitude
+    #             ballot_returned.longitude = polling_location.longitude
+    #             ballot_returned.save()
+    #
+    # results = {
+    #     'status':                   status,
+    #     'success':                  success,
+    #     'ballot_returned_found':    ballot_returned_found,
+    #     'ballot_returned':          ballot_returned,
+    #     'google_civic_election_id': google_civic_election_id,
+    # }
+    # return results
+
+
 def retrieve_one_ballot_from_google_civic_api(text_for_map_search, incoming_google_civic_election_id=0,
                                               use_test_election=False):
     # Request json file from Google servers
