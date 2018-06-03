@@ -1,7 +1,7 @@
 {# templates/position/position_list.html #}
 {% extends "template_base.html" %}
 
-{% block title %}Positions / Public Opinions{% endblock %}
+{% block title %}Opinions/Positions{% endblock %}
 
 {%  block content %}
 <p><a href="{% url 'admin_tools:admin_home' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">< Back to Admin Home</a></p>
@@ -15,12 +15,12 @@
     <a href="{% url 'politician:politician_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">Politicians</a> -
     <a href="{% url 'issue:issue_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">Issues</a> -
     <a href="{% url 'organization:organization_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">Organizations</a> -
-    <a href="{% url 'position:position_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">Public Opinions / Positions</a> -
+    <a href="{% url 'position:position_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">Opinions/Positions</a> -
     <a href="{% url 'voter_guide:voter_guide_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">Voter Guides</a> -
     <a href="{% url 'polling_location:polling_location_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">Polling Locations</a>
 </p>
 
-<h1>Positions / Public Opinions</h1>
+<h1>Opinions/Positions</h1>
 
 <p><a href="{% url 'import_export_batches:batch_list' %}?kind_of_batch=POSITION&google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}"
       target="_blank">
@@ -72,6 +72,7 @@
             <td></td>
             <td>ID</td>
             <td>Organization</td>
+            <td>Visibility?</td>
             <td>Stance</td>
             <td>Rating</td>
             <td>Candidate/Measure</td>
@@ -92,7 +93,9 @@
                 </a>
                 {% else %}
                     (organization name missing)
-                {% endif %}</td>
+                {% endif %}
+            </td>
+            <td>{% if position.is_public_position %}<strong>Public</strong>{% else %}Friends&nbsp;Only{% endif %}</td>
             <td>
             {% if position.organization %}
                 <a href="{% url 'organization:organization_position_edit' position.organization.id position.we_vote_id %}?google_civic_election_id={{ google_civic_election_id }}"
@@ -102,7 +105,9 @@
             {% endif %}
             </td>
             <td>
-              {{ position.vote_smart_rating }} / {{ position.vote_smart_rating_integer }}
+            {% if position.vote_smart_rating or position.vote_smart_rating_integer or position.vote_smart_time_span %}
+              {{ position.vote_smart_rating_integer }}%{% if position.vote_smart_time_span %}, {{ position.vote_smart_time_span }}{% endif %}
+            {% endif %}
             </td>
             <td>
                 {% if position.candidate_campaign %}
@@ -112,9 +117,9 @@
                 {% else %}
                     (name unknown)
                 {% endif %}
+                <span style="color: darkgray">&nbsp;{{ position.statement_text|default_if_none:"" }}</span>
             </td>
-            <td>{% if position.election.election_day_text %}{{ position.election.election_day_text }}{% endif %}
-                {% if position.vote_smart_time_span %}{{ position.vote_smart_time_span }}{% endif %}</td>
+            <td>{% if position.election.election_day_text %}{{ position.election.election_day_text }}{% endif %}</td>
         </tr>
     {% endfor %}
     </table>

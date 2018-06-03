@@ -1022,7 +1022,7 @@ def organization_retrieve_for_api(organization_id, organization_we_vote_id, vote
         if organization_manager.organization_name_needs_repair(organization):
             organization = organization_manager.repair_organization(organization)
             position_list_manager = PositionListManager()
-            position_list_manager.refresh_cached_position_info_for_organization(organization_we_vote_id)
+            position_list_manager.refresh_cached_public_position_info_for_organization(organization_we_vote_id)
 
         # Favor the Twitter banner and profile image if they exist
         # From Dale September 1, 2017:  Eventually we would like to let a person choose which they want to display,
