@@ -578,7 +578,7 @@ def positions_count_for_one_ballot_item_for_api(voter_device_id, ballot_item_we_
                 retrieve_public_positions_now, 0, ballot_item_we_vote_id,
                 OPPOSE, most_recent_only)
 
-        # Filter to only show positions of the orgs you are following
+        # Filter to show positions of the orgs you are following
         public_results = finalize_support_and_oppose_positions_count(
             voter_id, show_positions_this_voter_follows,
             organizations_followed_by_voter_by_id, friends_we_vote_id_list,
@@ -615,7 +615,7 @@ def positions_count_for_one_ballot_item_for_api(voter_device_id, ballot_item_we_
                 retrieve_public_positions_now, 0, ballot_item_we_vote_id,
                 OPPOSE, most_recent_only, friends_we_vote_id_list=friends_we_vote_id_list)
 
-        # Filter to only show friend's positions
+        # Filter to show friend's positions
         public_results = finalize_support_and_oppose_positions_count(
             voter_id, show_positions_this_voter_follows,
             organizations_followed_by_voter_by_id, friends_we_vote_id_list,
@@ -625,7 +625,9 @@ def positions_count_for_one_ballot_item_for_api(voter_device_id, ballot_item_we_
         friend_filtered_oppose_positions = public_results['oppose_positions_followed']
 
         for one_position in friend_filtered_support_positions:
-            support_we_vote_id_list.append(one_position.voter_we_vote_id)
+            # TODO: I think we might want to use organization_we_vote_id instead of voter_we_vote_id
+            #  but this needs to be checked
+            support_we_vote_id_list.append(one_position.voter_we_vote_id)  # Should we use organization_we_vote_id here?
             support_name_list.append(one_position.speaker_display_name)
             update_results = update_or_create_position_network_score_wrapper(
                 voter_id, voter_we_vote_id, one_position)
@@ -633,7 +635,7 @@ def positions_count_for_one_ballot_item_for_api(voter_device_id, ballot_item_we_
                 public_positions_updated = True
 
         for one_position in friend_filtered_oppose_positions:
-            oppose_we_vote_id_list.append(one_position.voter_we_vote_id)
+            oppose_we_vote_id_list.append(one_position.voter_we_vote_id)  # Should we use organization_we_vote_id here?
             oppose_name_list.append(one_position.speaker_display_name)
             update_results = update_or_create_position_network_score_wrapper(
                 voter_id, voter_we_vote_id, one_position)
@@ -696,7 +698,9 @@ def positions_count_for_one_ballot_item_for_api(voter_device_id, ballot_item_we_
             friends_oppose_positions_list_for_one_ballot_item
 
         for one_position in support_positions_list_for_one_ballot_item:
-            support_we_vote_id_list.append(one_position.get_speaker_we_vote_id())
+            # TODO We may need to separate looping through friends vs. organizations -- this *might* want to be
+            #  voter_we_vote_id instead of organization_we_vote_id (see note above)
+            support_we_vote_id_list.append(one_position.organization_we_vote_id)
             support_name_list.append(one_position.speaker_display_name)
             update_results = update_or_create_position_network_score_wrapper(
                 voter_id, voter_we_vote_id, one_position)
@@ -704,7 +708,7 @@ def positions_count_for_one_ballot_item_for_api(voter_device_id, ballot_item_we_
                 public_positions_updated = True
 
         for one_position in oppose_positions_list_for_one_ballot_item:
-            oppose_we_vote_id_list.append(one_position.get_speaker_we_vote_id())
+            oppose_we_vote_id_list.append(one_position.organization_we_vote_id)
             oppose_name_list.append(one_position.speaker_display_name)
             update_results = update_or_create_position_network_score_wrapper(
                 voter_id, voter_we_vote_id, one_position)
