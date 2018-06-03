@@ -2260,7 +2260,9 @@ def position_list_for_ballot_item_for_api(voter_device_id, friends_vs_public,  #
             one_position_success = True
             # Make sure we have this data to display
             if not positive_value_exists(one_position.speaker_display_name) \
-                    or not positive_value_exists(one_position.speaker_image_url_https) \
+                    or not positive_value_exists(one_position.speaker_image_url_https_large) \
+                    or not positive_value_exists(one_position.speaker_image_url_https_medium) \
+                    or not positive_value_exists(one_position.speaker_image_url_https_tiny) \
                     or not positive_value_exists(one_position.speaker_twitter_handle):
                 one_position = position_manager.refresh_cached_position_info(one_position)
             speaker_display_name = one_position.speaker_display_name
@@ -2275,8 +2277,9 @@ def position_list_for_ballot_item_for_api(voter_device_id, friends_vs_public,  #
             # Make sure we have this data to display
             if not positive_value_exists(one_position.speaker_display_name) \
                     or not positive_value_exists(one_position.voter_we_vote_id) \
-                    or not positive_value_exists(one_position.speaker_image_url_https) \
-                    or not positive_value_exists(one_position.speaker_twitter_handle):
+                    or not positive_value_exists(one_position.speaker_image_url_https_large) \
+                    or not positive_value_exists(one_position.speaker_image_url_https_medium) \
+                    or not positive_value_exists(one_position.speaker_image_url_https_tiny):
                 one_position = position_manager.refresh_cached_position_info(one_position)
             if positive_value_exists(one_position.speaker_display_name):
                 speaker_display_name = one_position.speaker_display_name
@@ -2289,7 +2292,9 @@ def position_list_for_ballot_item_for_api(voter_device_id, friends_vs_public,  #
             one_position_success = True
             # Make sure we have this data to display
             if not positive_value_exists(one_position.speaker_display_name) \
-                    or not positive_value_exists(one_position.speaker_image_url_https) \
+                    or not positive_value_exists(one_position.speaker_image_url_https_large) \
+                    or not positive_value_exists(one_position.speaker_image_url_https_medium) \
+                    or not positive_value_exists(one_position.speaker_image_url_https_tiny) \
                     or not positive_value_exists(one_position.speaker_twitter_handle):
                 one_position = position_manager.refresh_cached_position_info(one_position)
             speaker_display_name = one_position.speaker_display_name
@@ -2808,8 +2813,8 @@ def position_list_for_voter_for_api(voter_device_id,
                 'ballot_item_display_name':             one_position.ballot_item_display_name,  # Candidate name or
                                                                                                 # Measure
                 'ballot_item_image_url_https_large':    one_position.ballot_item_image_url_https_large
-                    if positive_value_exists(one_position.ballot_item_image_url_https_large)
-                    else one_position.ballot_item_image_url_https,
+                if positive_value_exists(one_position.ballot_item_image_url_https_large)
+                else one_position.ballot_item_image_url_https,
                 'ballot_item_image_url_https_medium':   one_position.ballot_item_image_url_https_medium,
                 'ballot_item_image_url_https_tiny':     one_position.ballot_item_image_url_https_tiny,
                 'ballot_item_twitter_handle':           one_position.ballot_item_twitter_handle,

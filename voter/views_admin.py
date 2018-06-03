@@ -792,6 +792,9 @@ def voter_list_view(request):
         new_filter = Q(first_name__icontains=voter_search)
         filters.append(new_filter)
 
+        new_filter = Q(middle_name__icontains=voter_search)
+        filters.append(new_filter)
+
         new_filter = Q(last_name__icontains=voter_search)
         filters.append(new_filter)
 
@@ -801,10 +804,16 @@ def voter_list_view(request):
         new_filter = Q(email__icontains=voter_search)
         filters.append(new_filter)
 
-        new_filter = Q(middle_name__icontains=voter_search)
+        new_filter = Q(facebook_email__icontains=voter_search)
         filters.append(new_filter)
 
         new_filter = Q(twitter_screen_name__icontains=voter_search)
+        filters.append(new_filter)
+
+        new_filter = Q(twitter_name__icontains=voter_search)
+        filters.append(new_filter)
+
+        new_filter = Q(linked_organization_we_vote_id__icontains=voter_search)
         filters.append(new_filter)
 
         # Add the first query

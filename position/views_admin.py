@@ -5,7 +5,7 @@
 from .controllers import positions_import_from_master_server, refresh_positions_with_candidate_details_for_election, \
     refresh_positions_with_contest_office_details_for_election, \
     refresh_positions_with_contest_measure_details_for_election
-from .models import ANY_STANCE, PositionEntered
+from .models import ANY_STANCE, PositionEntered, PositionForFriends, PositionListManager, PERCENT_RATING
 from admin_tools.views import redirect_to_sign_in_page
 from candidate.models import CandidateCampaign
 from config.base import get_environment_variable
@@ -22,7 +22,6 @@ from exception.models import handle_record_found_more_than_one_exception,\
     handle_record_not_found_exception, handle_record_not_saved_exception
 from measure.controllers import push_contest_measure_data_to_other_table_caches
 from office.controllers import push_contest_office_data_to_other_table_caches
-from position.models import PositionListManager, PERCENT_RATING
 from voter.models import voter_has_authority
 import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, positive_value_exists
@@ -147,12 +146,10 @@ def position_list_view(request):
 
     position_search = request.GET.get('position_search', '')
 
+    # Publicly visible positions
+    public_position_list_query = PositionEntered.objects.order_by('-id')  # This order_by is temp
     if positive_value_exists(google_civic_election_id):
-        position_list_query = PositionEntered.objects.order_by('-id')  # This order_by is temp
-        position_list_query = position_list_query.filter(google_civic_election_id=google_civic_election_id)
-    else:
-        position_list_query = PositionEntered.objects.order_by('-id')  # This order_by is temp
-        position_list_query = position_list_query.exclude(organization_we_vote_id=None)
+        public_position_list_query = public_position_list_query.filter(google_civic_election_id=google_civic_election_id)
 
     if positive_value_exists(position_search):
         search_words = position_search.split()
@@ -195,31 +192,95 @@ def position_list_view(request):
                 for item in filters:
                     final_filters |= item
 
-                position_list_query = position_list_query.filter(final_filters)
+                public_position_list_query = public_position_list_query.filter(final_filters)
 
-    position_list = position_list_query[: 100]
+    public_position_list_count_query = public_position_list_query
+    public_position_list_count = public_position_list_count_query.count()
+
+    public_position_list_query = public_position_list_query[: 50]
+    public_position_list = list(public_position_list_query)
+
+    # Friends-only visible positions
+    friends_only_position_list_query = PositionForFriends.objects.order_by('-id')  # This order_by is temp
+    if positive_value_exists(google_civic_election_id):
+        friends_only_position_list_query = friends_only_position_list_query.filter(google_civic_election_id=google_civic_election_id)
+
+    if positive_value_exists(position_search):
+        search_words = position_search.split()
+        for one_word in search_words:
+            filters = []
+            new_filter = Q(state_code__icontains=one_word)
+            filters.append(new_filter)
+
+            new_filter = Q(we_vote_id__iexact=one_word)
+            filters.append(new_filter)
+
+            new_filter = Q(candidate_campaign_we_vote_id__iexact=one_word)
+            filters.append(new_filter)
+
+            new_filter = Q(contest_measure_we_vote_id__iexact=one_word)
+            filters.append(new_filter)
+
+            new_filter = Q(contest_office_we_vote_id__iexact=one_word)
+            filters.append(new_filter)
+
+            new_filter = Q(organization_we_vote_id__iexact=one_word)
+            filters.append(new_filter)
+
+            new_filter = Q(voter_we_vote_id__iexact=one_word)
+            filters.append(new_filter)
+
+            new_filter = Q(google_civic_measure_title__icontains=one_word)
+            filters.append(new_filter)
+
+            new_filter = Q(speaker_display_name__icontains=one_word)
+            filters.append(new_filter)
+
+            new_filter = Q(ballot_item_display_name__icontains=one_word)
+            filters.append(new_filter)
+
+            if len(filters):
+                final_filters = filters.pop()
+
+                # ...and "OR" the remaining items in the list
+                for item in filters:
+                    final_filters |= item
+
+                friends_only_position_list_query = friends_only_position_list_query.filter(final_filters)
+
+    friends_only_position_list_count_query = friends_only_position_list_query
+    friends_only_position_list_count = friends_only_position_list_count_query.count()
+
+    friends_only_position_list_query = friends_only_position_list_query[: 50]
+    friends_only_position_list = list(friends_only_position_list_query)
+
+    position_list = public_position_list + friends_only_position_list
+
+    messages.add_message(request, messages.INFO, str(public_position_list_count) + ' public positions found. ' +
+                         str(friends_only_position_list_count) + ' friends-only positions found.')
 
     # Heal some data
     if positive_value_exists(google_civic_election_id):
-        position_list_query = PositionEntered.objects.order_by('-id')
-        position_list_query = position_list_query.filter(google_civic_election_id=google_civic_election_id)
-        position_list_query = position_list_query.filter(vote_smart_rating_integer__isnull=True)
-        position_list_query = position_list_query.filter(stance=PERCENT_RATING)
-        position_list_query = position_list_query[:5000]
-        position_list_heal = list(position_list_query)
+        public_position_list_query = PositionEntered.objects.order_by('-id')
+        public_position_list_query = public_position_list_query.filter(google_civic_election_id=google_civic_election_id)
+        public_position_list_query = public_position_list_query.filter(vote_smart_rating_integer__isnull=True)
+        public_position_list_query = public_position_list_query.filter(stance=PERCENT_RATING)
+        public_position_list_query = public_position_list_query[:5000]
+        public_position_list_heal = list(public_position_list_query)
         integrity_error_count = 0
-        for one_position in position_list_heal:
+        for one_position in public_position_list_heal:
             one_position.vote_smart_rating_integer = convert_to_int(one_position.vote_smart_rating)
             try:
                 one_position.save()
             except IntegrityError as e:
                 integrity_error_count += 1
 
-        if len(position_list_heal):
-            positions_updated = len(position_list_heal) - integrity_error_count
-            messages.add_message(request, messages.INFO, str(positions_updated) +
-                                 ' positions updated with vote_smart_rating_integer.')
-        if positive_value_exists(integrity_error_count):
+        if len(public_position_list_heal):
+            positions_updated = len(public_position_list_heal) - integrity_error_count
+            if positive_value_exists(positions_updated):
+                messages.add_message(request, messages.INFO, str(positions_updated) +
+                                     ' positions updated with vote_smart_rating_integer.')
+        if positive_value_exists(integrity_error_count) and positive_value_exists(positions_updated):
             messages.add_message(request, messages.ERROR, str(integrity_error_count) +
                                  ' integrity errors.')
 

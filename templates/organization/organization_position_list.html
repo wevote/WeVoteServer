@@ -171,6 +171,7 @@
     <tr>
         <td></td>
         <td>Candidate/Measure</td>
+        <td>Visibility?</td>
         <td>Stance</td>
         <td>Election ID</td>
         <td>Election Date</td>
@@ -187,7 +188,10 @@
             {% else %}
                 (missing ballot_item_display_name)
             {% endif %}
-        </a></td>
+            </a>
+        <span style="color: darkgray">&nbsp;{{ organization_position.statement_text|default_if_none:"" }}</span>
+        </td>
+        <td>{% if organization_position.is_public_position %}<strong>Public</strong>{% else %}Friends&nbsp;Only{% endif %}</td>
         <td>{{ organization_position.get_stance_display }}
             {% if organization_position.vote_smart_rating %} {{ organization_position.vote_smart_rating }}%{% endif %}</td>
         <td>{{ organization_position.election.google_civic_election_id }}</td>

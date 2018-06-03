@@ -25,8 +25,8 @@ from measure.models import ContestMeasure, ContestMeasureList, ContestMeasureMan
 import operator
 from organization.models import OrganizationListManager, OrganizationManager, ORGANIZATION_TYPE_MAP, UNKNOWN
 from organization.controllers import organization_retrieve_tweets_from_twitter, organization_analyze_tweets
-from position.models import PositionEntered, PositionManager, INFORMATION_ONLY, OPPOSE, \
-    STILL_DECIDING, SUPPORT
+from position.models import PositionEntered, PositionForFriends, PositionListManager, PositionManager, \
+    INFORMATION_ONLY, OPPOSE, STILL_DECIDING, SUPPORT
 from twitter.models import TwitterUserManager
 from voter.models import retrieve_voter_authority, voter_has_authority, VoterManager
 from voter_guide.models import VoterGuideManager
@@ -717,6 +717,9 @@ def organization_edit_process_view(request):
         for issue_we_vote_id in organization_follow_issues_we_vote_id_list_prior_to_update:
             link_issue_manager.unlink_organization_to_issue(organization_we_vote_id, issue_id, issue_we_vote_id)
 
+    position_list_manager = PositionListManager()
+    position_list_manager.refresh_cached_public_position_info_for_organization(organization_we_vote_id)
+
     return HttpResponseRedirect(reverse('organization:organization_position_list', args=(organization_id,)) +
                                 "?google_civic_election_id=" + str(google_civic_election_id) + "&state_code=" +
                                 str(state_code))
@@ -761,14 +764,26 @@ def organization_position_list_view(request, organization_id=0, organization_we_
     else:
         organization_position_list_found = False
         try:
-            organization_position_list = PositionEntered.objects.all()
-            organization_position_list = organization_position_list.filter(organization_id=organization_id)
+            public_position_query = PositionEntered.objects.all()
+            public_position_query = public_position_query.filter(organization_id=organization_id)
             if positive_value_exists(google_civic_election_id):
-                organization_position_list = organization_position_list.filter(
+                public_position_query = public_position_query.filter(
                     google_civic_election_id=google_civic_election_id)
-            organization_position_list = organization_position_list.order_by(
+            public_position_query = public_position_query.order_by(
                 '-google_civic_election_id', '-vote_smart_time_span')
-            if len(organization_position_list):
+            public_position_list = list(public_position_query)
+
+            friends_only_position_query = PositionForFriends.objects.all()
+            friends_only_position_query = friends_only_position_query.filter(organization_id=organization_id)
+            if positive_value_exists(google_civic_election_id):
+                friends_only_position_query = friends_only_position_query.filter(
+                    google_civic_election_id=google_civic_election_id)
+            friends_only_position_query = friends_only_position_query.order_by(
+                '-google_civic_election_id', '-vote_smart_time_span')
+            friends_only_position_list = list(friends_only_position_query)
+
+            organization_position_list = public_position_list + friends_only_position_list
+            if len(public_position_list) or len(friends_only_position_list):
                 organization_position_list_found = True
 
             link_issue_list_manager = OrganizationLinkToIssueList()

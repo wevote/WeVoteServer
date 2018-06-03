@@ -2067,7 +2067,7 @@ class PositionListManager(models.Model):
             position_list_filtered = []
             return position_list_filtered
 
-    def refresh_cached_position_info_for_organization(self, organization_we_vote_id):
+    def refresh_cached_public_position_info_for_organization(self, organization_we_vote_id):
         position_manager = PositionManager()
         public_positions_list = PositionEntered.objects.all()
         public_positions_list = public_positions_list.filter(organization_we_vote_id__iexact=organization_we_vote_id)
@@ -6863,97 +6863,148 @@ class PositionManager(models.Model):
         }
         return results
 
-    def refresh_cached_position_info(self, position_object, force_update=False):
+    def refresh_cached_position_info(self, position_object, force_update=False,
+                                     organizations_dict={}, voters_by_linked_org_dict={}, voters_dict={}):
         """
         The position tables cache information from other tables. This function reaches out to the source tables
         and copies over the latest information to the position tables.
         :param position_object:
         :param force_update:
+        :param organizations_dict: key = organization_we_vote_id, value = organization object
+        :param voters_by_linked_org_dict: key = linked_organization_we_vote_id, value = voter object
+        :param voters_dict: key = voter_we_vote_id, value = voter object
         :return:
         """
         position_change = False
+        organization_found = False
 
         # Start with "speaker" information (Organization, Voter, or Public Figure)
-        if positive_value_exists(position_object.organization_we_vote_id):
-            if not positive_value_exists(position_object.speaker_display_name) \
-                    or not positive_value_exists(position_object.speaker_image_url_https) \
-                    or not positive_value_exists(position_object.speaker_twitter_handle) \
-                    or force_update:
+        if not positive_value_exists(position_object.speaker_display_name) \
+                or not positive_value_exists(position_object.speaker_image_url_https) \
+                or not positive_value_exists(position_object.speaker_twitter_handle) \
+                or not positive_value_exists(position_object.speaker_image_url_https_large) \
+                or not positive_value_exists(position_object.speaker_image_url_https_medium) \
+                or not positive_value_exists(position_object.speaker_image_url_https_tiny) \
+                or force_update:
+            try:
+                # We need to look in the organization table for speaker_display_name & speaker images
+                organization_manager = OrganizationManager()
+                organization_id = 0
+                results = organization_manager.retrieve_organization(organization_id,
+                                                                     position_object.organization_we_vote_id)
+                if results['organization_found']:
+                    organization = results['organization']
+                    organization_found = True
+
+                    # Make sure we have an organization name
+                    if not positive_value_exists(organization.organization_name):
+                        try:
+                            linked_voter = Voter.objects.get(
+                                linked_organization_we_vote_id__iexact=organization.we_vote_id)
+                            if linked_voter.get_full_name():
+                                try:
+                                    organization.organization_name = linked_voter.get_full_name()
+                                    organization.save()
+                                except Exception as e:
+                                    pass
+                        except Voter.DoesNotExist:
+                            pass
+
+                    if not positive_value_exists(position_object.speaker_display_name) or force_update:
+                        # speaker_display_name is missing so look it up from source
+                        position_object.speaker_display_name = organization.organization_name
+                        position_change = True
+                    if not positive_value_exists(position_object.speaker_image_url_https) or force_update:
+                        # speaker_image_url_https is missing so look it up from source
+                        position_object.speaker_image_url_https = organization.organization_photo_url()
+                        position_change = True
+                    if not positive_value_exists(position_object.speaker_image_url_https_large) or force_update:
+                        # speaker_image_url_https_large is missing so look it up from source
+                        position_object.speaker_image_url_https_large = \
+                            organization.we_vote_hosted_profile_image_url_large
+                        position_change = True
+                    if not positive_value_exists(position_object.speaker_image_url_https_medium) or force_update:
+                        # speaker_image_url_https_medium is missing so look it up from source
+                        position_object.speaker_image_url_https_medium = \
+                            organization.we_vote_hosted_profile_image_url_medium
+                        position_change = True
+                    if not positive_value_exists(position_object.speaker_image_url_https_tiny) or force_update:
+                        # speaker_image_url_https_tiny is missing so look it up from source
+                        position_object.speaker_image_url_https_tiny = \
+                            organization.we_vote_hosted_profile_image_url_tiny
+                        position_change = True
+                    if not positive_value_exists(position_object.speaker_twitter_handle) or force_update:
+                        organization_twitter_handle = \
+                            organization_manager.fetch_twitter_handle_from_organization_we_vote_id(
+                                organization.we_vote_id)
+                        # speaker_twitter_handle is missing so look it up from source
+                        position_object.speaker_twitter_handle = organization_twitter_handle
+                        position_change = True
+                    if not positive_value_exists(position_object.organization_id) \
+                            or position_object.organization_id != organization.id:
+                        position_object.organization_id = organization.id
+                        position_change = True
+
+            except Exception as e:
+                pass
+
+        if not organization_found:
+            voter_manager = VoterManager()
+            voter_found = False
+            if positive_value_exists(position_object.voter_we_vote_id):
+                # We need to look in the voter table for speaker_display_name
+                results = voter_manager.retrieve_voter_by_we_vote_id(position_object.voter_we_vote_id)
+                if results['voter_found']:
+                    voter = results['voter']
+                    voter_found = True
+            if not voter_found and positive_value_exists(position_object.voter_id):
+                # We need to look in the voter table for speaker_display_name
+                results = voter_manager.retrieve_voter_by_id(position_object.voter_id)
+                if results['voter_found']:
+                    voter = results['voter']
+                    voter_found = True
+
+            if voter_found:
                 try:
-                    # We need to look in the organization table for speaker_display_name & speaker_image_url_https
-                    organization_manager = OrganizationManager()
-                    organization_id = 0
-                    results = organization_manager.retrieve_organization(organization_id,
-                                                                         position_object.organization_we_vote_id)
-                    if results['organization_found']:
-                        organization = results['organization']
-
-                        # Make sure we have an organization name
-                        if not positive_value_exists(organization.organization_name):
-                            try:
-                                linked_voter = Voter.objects.get(
-                                    linked_organization_we_vote_id__iexact=organization.we_vote_id)
-                                if linked_voter.get_full_name():
-                                    try:
-                                        organization.organization_name = linked_voter.get_full_name()
-                                        organization.save()
-                                    except Exception as e:
-                                        pass
-                            except Voter.DoesNotExist:
-                                pass
-
-                        if not positive_value_exists(position_object.speaker_display_name) or force_update:
-                            # speaker_display_name is missing so look it up from source
-                            position_object.speaker_display_name = organization.organization_name
-                            position_change = True
-                        if not positive_value_exists(position_object.speaker_image_url_https) or force_update:
-                            # speaker_image_url_https is missing so look it up from source
-                            position_object.speaker_image_url_https = organization.organization_photo_url()
-                            position_change = True
-                        if not positive_value_exists(position_object.speaker_twitter_handle) or force_update:
-                            organization_twitter_handle = \
-                                organization_manager.fetch_twitter_handle_from_organization_we_vote_id(
-                                    organization.we_vote_id)
-                            # speaker_twitter_handle is missing so look it up from source
-                            position_object.speaker_twitter_handle = organization_twitter_handle
-                            position_change = True
+                    if not positive_value_exists(position_object.speaker_display_name) or force_update:
+                        # speaker_display_name is missing so look it up from source
+                        position_object.speaker_display_name = voter.get_full_name()
+                        position_change = True
+                    if not positive_value_exists(position_object.voter_we_vote_id) or force_update:
+                        # voter_we_vote_id is missing so look it up from source
+                        position_object.voter_we_vote_id = voter.we_vote_id
+                        position_change = True
+                    if not positive_value_exists(position_object.voter_id) or force_update:
+                        # voter_id is missing so look it up from source
+                        position_object.voter_id = voter.id
+                        position_change = True
+                    if not positive_value_exists(position_object.speaker_image_url_https) or force_update:
+                        # speaker_image_url_https is missing so look it up from source
+                        position_object.speaker_image_url_https = voter.voter_photo_url()
+                        position_change = True
+                    if not positive_value_exists(position_object.speaker_image_url_https_large) or force_update:
+                        # speaker_image_url_https_large is missing so look it up from source
+                        position_object.speaker_image_url_https_large = \
+                            voter.we_vote_hosted_profile_image_url_large
+                        position_change = True
+                    if not positive_value_exists(position_object.speaker_image_url_https_medium) or force_update:
+                        # speaker_image_url_https_medium is missing so look it up from source
+                        position_object.speaker_image_url_https_medium = \
+                            voter.we_vote_hosted_profile_image_url_medium
+                        position_change = True
+                    if not positive_value_exists(position_object.speaker_image_url_https_tiny) or force_update:
+                        # speaker_image_url_https_tiny is missing so look it up from source
+                        position_object.speaker_image_url_https_tiny = \
+                            voter.we_vote_hosted_profile_image_url_tiny
+                        position_change = True
+                    if not positive_value_exists(position_object.speaker_twitter_handle) or force_update:
+                        # speaker_twitter_handle is missing so look it up from source
+                        voter_twitter_handle = voter_manager.fetch_twitter_handle_from_voter_we_vote_id(
+                            voter.we_vote_id)
+                        position_object.speaker_twitter_handle = voter_twitter_handle
+                        position_change = True
                 except Exception as e:
                     pass
-        elif positive_value_exists(position_object.voter_id):
-            if not positive_value_exists(position_object.speaker_display_name) \
-                    or not positive_value_exists(position_object.voter_we_vote_id) \
-                    or not positive_value_exists(position_object.speaker_image_url_https) \
-                    or not positive_value_exists(position_object.speaker_twitter_handle) \
-                    or force_update:
-                try:
-                    # We need to look in the voter table for speaker_display_name
-                    voter_manager = VoterManager()
-                    results = voter_manager.retrieve_voter_by_id(position_object.voter_id)
-                    if results['voter_found']:
-                        voter = results['voter']
-                        if not positive_value_exists(position_object.speaker_display_name) or force_update:
-                            # speaker_display_name is missing so look it up from source
-                            position_object.speaker_display_name = voter.get_full_name()
-                            position_change = True
-                        if not positive_value_exists(position_object.voter_we_vote_id) or force_update:
-                            # speaker_we_vote_id is missing so look it up from source
-                            position_object.voter_we_vote_id = voter.we_vote_id
-                            position_change = True
-                        if not positive_value_exists(position_object.speaker_image_url_https) or force_update:
-                            # speaker_image_url_https is missing so look it up from source
-                            position_object.speaker_image_url_https = voter.voter_photo_url()
-                            position_change = True
-                        if not positive_value_exists(position_object.speaker_twitter_handle) or force_update:
-                            # speaker_twitter_handle is missing so look it up from source
-                            voter_twitter_handle = voter_manager.fetch_twitter_handle_from_voter_we_vote_id(
-                                voter.we_vote_id)
-                            position_object.speaker_twitter_handle = voter_twitter_handle
-                            position_change = True
-                except Exception as e:
-                    pass
-
-        elif positive_value_exists(position_object.public_figure_we_vote_id):
-            pass
 
         # Now move onto "ballot_item" information
         # Candidate
@@ -6966,6 +7017,9 @@ class PositionManager(models.Model):
             check_for_missing_office_data = True  # We check separately
             if not positive_value_exists(position_object.ballot_item_display_name) \
                     or not positive_value_exists(position_object.ballot_item_image_url_https) \
+                    or not positive_value_exists(position_object.ballot_item_image_url_https_large) \
+                    or not positive_value_exists(position_object.ballot_item_image_url_https_medium) \
+                    or not positive_value_exists(position_object.ballot_item_image_url_https_tiny) \
                     or not positive_value_exists(position_object.ballot_item_twitter_handle) \
                     or not positive_value_exists(position_object.state_code) \
                     or not positive_value_exists(position_object.political_party) \
@@ -6994,6 +7048,22 @@ class PositionManager(models.Model):
                         if not positive_value_exists(position_object.ballot_item_image_url_https) or force_update:
                             # ballot_item_image_url_https is missing so look it up from source
                             position_object.ballot_item_image_url_https = candidate.candidate_photo_url()
+                            position_change = True
+                        if not positive_value_exists(position_object.ballot_item_image_url_https_large) or force_update:
+                            # ballot_item_image_url_https_large is missing so look it up from source
+                            position_object.ballot_item_image_url_https_large = \
+                                candidate.we_vote_hosted_profile_image_url_large
+                            position_change = True
+                        if not positive_value_exists(position_object.ballot_item_image_url_https_medium) \
+                                or force_update:
+                            # ballot_item_image_url_https_medium is missing so look it up from source
+                            position_object.ballot_item_image_url_https_medium = \
+                                candidate.we_vote_hosted_profile_image_url_medium
+                            position_change = True
+                        if not positive_value_exists(position_object.ballot_item_image_url_https_tiny) or force_update:
+                            # ballot_item_image_url_https_tiny is missing so look it up from source
+                            position_object.ballot_item_image_url_https_tiny = \
+                                candidate.we_vote_hosted_profile_image_url_tiny
                             position_change = True
                         if not positive_value_exists(position_object.ballot_item_twitter_handle) or force_update:
                             # ballot_item_image_twitter_handle is missing so look it up from source
