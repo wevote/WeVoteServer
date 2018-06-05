@@ -27,6 +27,7 @@ GOOGLE_CIVIC_API_KEY = get_environment_variable("GOOGLE_CIVIC_API_KEY")
 ELECTION_QUERY_URL = get_environment_variable("ELECTION_QUERY_URL")
 VOTER_INFO_URL = get_environment_variable("VOTER_INFO_URL")
 VOTER_INFO_JSON_FILE = get_environment_variable("VOTER_INFO_JSON_FILE")
+REPRESENTATIVES_BY_ADDRESS_URL = get_environment_variable("REPRESENTATIVES_BY_ADDRESS_URL")
 
 
 # GoogleRepresentatives
@@ -491,42 +492,31 @@ def process_contests_from_structured_json(
 def retrieve_representatives_from_google_civic_api(text_for_map_search):
     # Request json file from Google servers
     # logger.info("Loading ballot for one address from voterInfoQuery from Google servers")
+    success = True
+    status = ""
 
-    results = {
-        'status':               'FUNCTION_TO_BE_BUILT ',
-        'success':              False,
-        'text_for_map_search':  text_for_map_search,
-        'locations_retrieved':  False,
-    }
-    return results
-    #
-    # print("retrieving one ballot for " + str(incoming_google_civic_election_id) + ": " + str(text_for_map_search))
-    # if positive_value_exists(use_test_election):
-    #     response = requests.get(VOTER_INFO_URL, params={
-    #         "key": GOOGLE_CIVIC_API_KEY,
-    #         "address": text_for_map_search,
-    #         "electionId": 2000,  # The Google Civic API Test election
-    #     })
-    # elif positive_value_exists(incoming_google_civic_election_id):
-    #     response = requests.get(VOTER_INFO_URL, params={
-    #         "key": GOOGLE_CIVIC_API_KEY,
-    #         "address": text_for_map_search,
-    #         "electionId": incoming_google_civic_election_id,
-    #     })
-    # else:
-    #     response = requests.get(VOTER_INFO_URL, params={
-    #         "key": GOOGLE_CIVIC_API_KEY,
-    #         "address": text_for_map_search,
-    #     })
-    #
-    # structured_json = json.loads(response.text)
-    # if 'success' in structured_json and structured_json['success'] == False:
-    #     import_results = {
-    #         'success': False,
-    #         'status': "Error: " + structured_json['status'],
-    #     }
-    #     return import_results
-    #
+    # results = {
+    #     'status':               'FUNCTION_TO_BE_BUILT ',
+    #     'success':              False,
+    #     'text_for_map_search':  text_for_map_search,
+    #     'locations_retrieved':  False,
+    # }
+    # return results
+
+    print("retrieving one ballot for " + str(text_for_map_search))
+    response = requests.get(REPRESENTATIVES_BY_ADDRESS_URL, params={
+        "key": GOOGLE_CIVIC_API_KEY,
+        "address": text_for_map_search,
+    })
+
+    structured_json = json.loads(response.text)
+    if 'success' in structured_json and structured_json['success'] == False:
+        import_results = {
+            'success': False,
+            'status': "Error: " + structured_json['status'],
+        }
+        return import_results
+
     # # # For internal testing. Write the json retrieved above into a local file
     # # with open('/Users/dalemcgrew/PythonProjects/WeVoteServer/'
     # #           'import_export_google_civic/import_data/voterInfoQuery_VA_sample.json', 'w') as f:
@@ -566,13 +556,14 @@ def retrieve_representatives_from_google_civic_api(text_for_map_search):
     #         google_civic_election_id = structured_json['election']['id']
     #
     # #  We can get a google_civic_election_id back even though we don't have contest data.
-    # #  If we get a google_civic_election_id back but no contest data, reach out again with the google_civic_election_id
+    # #  If we get a google_civic_election_id back but no contest data,
+    # reach out again with the google_civic_election_id
     # #  so we can then get contest data
-    #
-    # # Use Google Civic API call counter to track the number of queries we are doing each day
-    # google_civic_api_counter_manager = GoogleCivicApiCounterManager()
-    # google_civic_api_counter_manager.create_counter_entry('ballot', google_civic_election_id)
-    #
+
+    # Use Google Civic API call counter to track the number of queries we are doing each day
+    google_civic_api_counter_manager = GoogleCivicApiCounterManager()
+    google_civic_api_counter_manager.create_counter_entry('representatives')
+
     # if 'pollingLocations' in structured_json:
     #     polling_location_retrieved = True
     #     success = True
@@ -587,17 +578,13 @@ def retrieve_representatives_from_google_civic_api(text_for_map_search):
     #         if 'electionAdministrationBody' in structured_json['state'][0]:
     #             election_administration_data_retrieved = True
     #             success = True
-    #
-    # results = {
-    #     'success': success,
-    #     'election_data_retrieved': election_data_retrieved,
-    #     'polling_location_retrieved': polling_location_retrieved,
-    #     'google_response_address_not_found': google_response_address_not_found,
-    #     'contests_retrieved': contests_retrieved,
-    #     'election_administration_data_retrieved': election_administration_data_retrieved,
-    #     'structured_json': structured_json,
-    # }
-    # return results
+
+    results = {
+        'success': success,
+        'status': status,
+        'structured_json': structured_json,
+    }
+    return results
 
 
 # See import_data/voterInfoQuery_VA_sample.json

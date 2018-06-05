@@ -26,6 +26,20 @@
     <p><strong>Create Voter Guide</strong>. Don't see a voter guide for this election?
     <a href="{% url 'voter_guide:voter_guide_search' %}?google_civic_election_id={{ google_civic_election_id }}">Find Voter Guide</a></p>
 
+{% if voter_guide_list and google_civic_election_id %}
+    <ul>
+        <li>Prepare: <a href="{% url 'voter_guide:generate_voter_guides_one_election' %}?google_civic_election_id={{ google_civic_election_id }}"
+                        target="_blank" >Generate Voter Guides for this Election</a> (in new window)</li>
+        <li>Prepare: <a href="{% url 'import_export_twitter:refresh_twitter_data_for_organizations' %}?organization_state={{ state_code }}&first_retrieve_only=0&google_civic_election_id={{ google_civic_election_id }}"
+                        target="_blank">Refresh Organization Twitter Data (For Organizations in this Election)</a></li>
+        <li>Prepare: <a href="{% url 'voter_guide:refresh_existing_voter_guides' %}?google_civic_election_id={{ google_civic_election_id }}"
+                        target="_blank">Refresh Voter Guides for this Election</a> (in new window)</li>
+    </ul>
+{% else %}
+    Prepare: <a href="{% url 'voter_guide:generate_voter_guides' %}" >Generate Voter Guides</a>
+{% endif %}
+
+
     <form name="voter_guide_choose_election" method="get" action="{% url 'voter_guide:voter_guide_list' %}">
         {% csrf_token %}
 {% if election_list %}
@@ -113,13 +127,6 @@
 
     <p></p>
     <p>
-    {% if google_civic_election_id == 0 %}
-        <a href="{% url 'voter_guide:generate_voter_guides' %}" >Generate Voter Guides</a>,
-        <a href="{% url 'voter_guide:refresh_existing_voter_guides' %}?google_civic_election_id={{ google_civic_election_id }}" >Refresh Voter Guides</a>
-    {% else %}
-        <a href="{% url 'voter_guide:generate_voter_guides_one_election' %}?google_civic_election_id={{ google_civic_election_id }}" >Generate Voter Guides for this Election</a>,
-        <a href="{% url 'voter_guide:refresh_existing_voter_guides' %}?google_civic_election_id={{ google_civic_election_id }}" >Refresh Voter Guides for this Election</a>
-    {% endif %}
     </p>
     <br />
     <br />

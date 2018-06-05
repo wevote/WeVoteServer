@@ -4,7 +4,11 @@
 {% block title %}Opinions/Positions{% endblock %}
 
 {%  block content %}
-<p><a href="{% url 'admin_tools:admin_home' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">< Back to Admin Home</a></p>
+<p>
+  <a href="{% url 'admin_tools:admin_home' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">< Back to Admin Home</a>&nbsp;&nbsp;&nbsp;
+  <a href="{% url 'import_export_batches:batch_list' %}?kind_of_batch=POSITION&google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}"
+     target="_blank">Import New Positions ></a> (open in new window)
+</p>
 <p>Jump to:
     <a href="{% url 'election:election_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">Elections</a> -
     <a href="{% url 'measure:measure_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">Measures</a> -
@@ -22,20 +26,19 @@
 
 <h1>Opinions/Positions</h1>
 
-<p><a href="{% url 'import_export_batches:batch_list' %}?kind_of_batch=POSITION&google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}"
-      target="_blank">
-        Import New Positions ></a> (open in new window)
-</p>
-
 <p>Also see positions listed under <a href="{% url 'organization:organization_list' %}">Organizations</a>.
-    Vote Smart ratings <a href="{% url 'import_export_vote_smart:vote_smart_rating_list' %}">here</a>.<br/>
-
-    <a href="{% url 'import_export_vote_smart:retrieve_positions_from_vote_smart_for_election' %}?google_civic_election_id={{ google_civic_election_id }}" target="_blank" >
-    Retrieve Positions from Vote Smart for this Election</a>.
-    <a href="{% url 'voter_guide:generate_voter_guides' %}" >Generate Voter Guides</a>.
-
-
+    Vote Smart ratings <a href="{% url 'import_export_vote_smart:vote_smart_rating_list' %}">here</a>.
 </p>
+
+{% if position_list and google_civic_election_id %}
+    <ul>
+        <li>Prepare: <a href="{% url 'voter_guide:generate_voter_guides' %}?google_civic_election_id={{ google_civic_election_id }}" target="_blank" >Generate Voter Guides</a> (in new window)</li>
+        <li>Prepare: <a href="{% url 'position:refresh_cached_position_info_for_election' %}?google_civic_election_id={{ google_civic_election_id }}" target="_blank" >
+            Refresh All Cached Positions for this Election</a> (about 5 minutes - in new window)</li>
+        <li>Prepare: <a href="{% url 'import_export_vote_smart:retrieve_positions_from_vote_smart_for_election' %}?google_civic_election_id={{ google_civic_election_id }}" target="_blank" >
+            Retrieve Positions from Vote Smart for this Election</a> (in new window)</li>
+    </ul>
+{% endif %}
 
 <form name="organization_position_choose_election" method="get" action="{% url 'position:position_list' %}">
     {% csrf_token %}

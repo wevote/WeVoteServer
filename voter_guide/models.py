@@ -639,9 +639,6 @@ class VoterGuideManager(models.Manager):
         if voter_guide.display_name != organization.organization_name:
             voter_guide.display_name = organization.organization_name
             values_changed = True
-        # if voter_guide.display_name != organization.organization_descripgi:
-        #     voter_guide.display_name = organization.organization_name
-        #     values_changed = True
         if voter_guide.voter_guide_owner_type != organization.organization_type:
             voter_guide.voter_guide_owner_type = organization.organization_type
             values_changed = True
