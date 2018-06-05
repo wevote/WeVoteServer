@@ -314,63 +314,20 @@ def measure_merge_process_view(request):
 
     # Preserve unique google_civic_measure_title, _title2, _title3, _title4 and _title5
     if positive_value_exists(contest_measure2_on_stage.google_civic_measure_title):
-        if not positive_value_exists(contest_measure1_on_stage.google_civic_measure_title):
-            contest_measure1_on_stage.google_civic_measure_title = contest_measure2_on_stage.google_civic_measure_title
-        elif contest_measure2_on_stage.google_civic_measure_title == \
-                contest_measure1_on_stage.google_civic_measure_title:
-            # The value is already stored in contest_measure1_on_stage.google_civic_measure_title so doesn't need
-            # to be added to contest_measure1_on_stage.google_civic_measure_title2
-            pass
-        elif not positive_value_exists(contest_measure1_on_stage.google_civic_measure_title2):
-            contest_measure1_on_stage.google_civic_measure_title2 = contest_measure2_on_stage.google_civic_measure_title
-        elif contest_measure2_on_stage.google_civic_measure_title == \
-                contest_measure1_on_stage.google_civic_measure_title2:
-            # The value is already stored in contest_measure1_on_stage.google_civic_measure_title2 so doesn't need
-            # to be added to contest_measure1_on_stage.google_civic_measure_title3
-            pass
-        elif not positive_value_exists(contest_measure1_on_stage.google_civic_measure_title3):
-            contest_measure1_on_stage.google_civic_measure_title3 = contest_measure2_on_stage.google_civic_measure_title
-        # TODO Dale extend to google_civic_measure_title4 and google_civic_measure_title5
+        contest_measure1_on_stage = add_contest_measure_title_to_next_spot(
+            contest_measure1_on_stage, contest_measure2_on_stage.google_civic_measure_title)
     if positive_value_exists(contest_measure2_on_stage.google_civic_measure_title2):
-        if not positive_value_exists(contest_measure1_on_stage.google_civic_measure_title):
-            contest_measure1_on_stage.google_civic_measure_title = contest_measure2_on_stage.google_civic_measure_title2
-        elif contest_measure2_on_stage.google_civic_measure_title2 == \
-                contest_measure1_on_stage.google_civic_measure_title:
-            # The value is already stored in contest_measure1_on_stage.google_civic_measure_title so doesn't need
-            # to be added to contest_measure1_on_stage.google_civic_measure_title2
-            pass
-        elif not positive_value_exists(contest_measure1_on_stage.google_civic_measure_title2):
-            contest_measure1_on_stage.google_civic_measure_title2 = \
-                contest_measure2_on_stage.google_civic_measure_title2
-        elif contest_measure2_on_stage.google_civic_measure_title2 == \
-                contest_measure1_on_stage.google_civic_measure_title2:
-            # The value is already stored in contest_measure1_on_stage.google_civic_measure_title2 so doesn't need
-            # to be added to contest_measure1_on_stage.google_civic_measure_title3
-            pass
-        elif not positive_value_exists(contest_measure1_on_stage.google_civic_measure_title3):
-            contest_measure1_on_stage.google_civic_measure_title3 = \
-                contest_measure2_on_stage.google_civic_measure_title2
-        # TODO Dale extend to google_civic_measure_title4 and google_civic_measure_title5
+        contest_measure1_on_stage = add_contest_measure_title_to_next_spot(
+            contest_measure1_on_stage, contest_measure2_on_stage.google_civic_measure_title2)
     if positive_value_exists(contest_measure2_on_stage.google_civic_measure_title3):
-        if not positive_value_exists(contest_measure1_on_stage.google_civic_measure_title):
-            contest_measure1_on_stage.google_civic_measure_title = contest_measure2_on_stage.google_civic_measure_title3
-        elif contest_measure2_on_stage.google_civic_measure_title3 == \
-                contest_measure1_on_stage.google_civic_measure_title:
-            # The value is already stored in contest_measure1_on_stage.google_civic_measure_title so doesn't need
-            # to be added to contest_measure1_on_stage.google_civic_measure_title2
-            pass
-        elif not positive_value_exists(contest_measure1_on_stage.google_civic_measure_title2):
-            contest_measure1_on_stage.google_civic_measure_title2 = \
-                contest_measure2_on_stage.google_civic_measure_title3
-        elif contest_measure2_on_stage.google_civic_measure_title3 == \
-                contest_measure1_on_stage.google_civic_measure_title2:
-            # The value is already stored in contest_measure1_on_stage.google_civic_measure_title2 so doesn't need
-            # to be added to contest_measure1_on_stage.google_civic_measure_title3
-            pass
-        elif not positive_value_exists(contest_measure1_on_stage.google_civic_measure_title3):
-            contest_measure1_on_stage.google_civic_measure_title3 = \
-                contest_measure2_on_stage.google_civic_measure_title3
-        # TODO Dale extend to google_civic_measure_title4 and google_civic_measure_title5
+        contest_measure1_on_stage = add_contest_measure_title_to_next_spot(
+            contest_measure1_on_stage, contest_measure2_on_stage.google_civic_measure_title3)
+    if positive_value_exists(contest_measure2_on_stage.google_civic_measure_title4):
+        contest_measure1_on_stage = add_contest_measure_title_to_next_spot(
+            contest_measure1_on_stage, contest_measure2_on_stage.google_civic_measure_title4)
+    if positive_value_exists(contest_measure2_on_stage.google_civic_measure_title5):
+        contest_measure1_on_stage = add_contest_measure_title_to_next_spot(
+            contest_measure1_on_stage, contest_measure2_on_stage.google_civic_measure_title5)
 
     # Merge ballot item's measure details
     ballot_items_results = move_ballot_items_to_another_measure(contest_measure2_id, contest_measure2_we_vote_id,
@@ -421,6 +378,29 @@ def measure_merge_process_view(request):
 
     return HttpResponseRedirect(reverse('measure:measure_edit', args=(contest_measure1_on_stage.id,)))
 
+def add_contest_measure_title_to_next_spot(contest_measure_to_update, google_civic_measure_title_to_add):
+    if not positive_value_exists(google_civic_measure_title_to_add):
+        return contest_measure_to_update
+
+    if not positive_value_exists(contest_measure_to_update.google_civic_measure_title):
+        contest_measure_to_update.google_civic_measure_title = google_civic_measure_title_to_add
+    elif google_civic_measure_title_to_add == contest_measure_to_update.google_civic_measure_title:
+        pass
+    elif not positive_value_exists(contest_measure_to_update.google_civic_measure_title2):
+        contest_measure_to_update.google_civic_measure_title2 = google_civic_measure_title_to_add
+    elif google_civic_measure_title_to_add == contest_measure_to_update.google_civic_measure_title2:
+        pass
+    elif not positive_value_exists(contest_measure_to_update.google_civic_measure_title3):
+        contest_measure_to_update.google_civic_measure_title3 = google_civic_measure_title_to_add
+    elif google_civic_measure_title_to_add == contest_measure_to_update.google_civic_measure_title3:
+        pass
+    elif not positive_value_exists(contest_measure_to_update.google_civic_measure_title4):
+        contest_measure_to_update.google_civic_measure_title4 = google_civic_measure_title_to_add
+    elif google_civic_measure_title_to_add == contest_measure_to_update.google_civic_measure_title4:
+        pass
+    elif not positive_value_exists(contest_measure_to_update.google_civic_measure_title5):
+        contest_measure_to_update.google_civic_measure_title5 = google_civic_measure_title_to_add
+    return contest_measure_to_update
 
 @login_required
 def measure_list_view(request):
