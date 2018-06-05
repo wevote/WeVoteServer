@@ -2277,8 +2277,9 @@ class PositionListManager(models.Model):
                             google_civic_election_id=google_civic_election_id_local_scope)
                     else:
                         # If no election is found for the voter, don't show any positions
-                        public_positions_list = []
-                        public_query_exists = False
+                        # public_positions_list = []
+                        # public_query_exists = False
+                        pass
                 elif positive_value_exists(exclude_positions_current_voter_election):
                     if positive_value_exists(google_civic_election_id):
                         # Please note that this option doesn't catch Vote Smart ratings, which are not
@@ -2394,8 +2395,9 @@ class PositionListManager(models.Model):
                                 google_civic_election_id=google_civic_election_id_local_scope)
                         else:
                             # If no election is found for the voter, don't show any positions
-                            friends_positions_list = []
-                            friends_query_exists = False
+                            # friends_positions_list = []
+                            # friends_query_exists = False
+                            pass
                     elif positive_value_exists(exclude_positions_current_voter_election):
                         if positive_value_exists(google_civic_election_id_local_scope):
                             # Limit positions we can retrieve for an org to only the items NOT in this election
