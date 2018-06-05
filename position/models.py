@@ -2204,9 +2204,13 @@ class PositionListManager(models.Model):
         :param state_code:
         :return:
         """
+        status = ""
         if stance_we_are_looking_for not \
                 in(ANY_STANCE, SUPPORT, STILL_DECIDING, INFORMATION_ONLY, NO_STANCE, OPPOSE, PERCENT_RATING):
             position_list = []
+            message = "[retrieve_all_positions_for_organization, missing stance: " \
+                      "" + str(stance_we_are_looking_for) + "]"
+            print_to_log(logger=logger, exception_message_optional=message)
             return position_list
 
         # Note that one of the incoming options for stance_we_are_looking_for is 'ANY_STANCE'
@@ -2215,10 +2219,18 @@ class PositionListManager(models.Model):
         if not positive_value_exists(organization_id) and not \
                 positive_value_exists(organization_we_vote_id):
             position_list = []
+            message = "[retrieve_all_positions_for_organization, missing organization id: " \
+                      "" + str(stance_we_are_looking_for) + "]"
+            print_to_log(logger=logger, exception_message_optional=message)
             return position_list
 
         retrieve_friends_positions = friends_vs_public in (FRIENDS_ONLY, FRIENDS_AND_PUBLIC)
         retrieve_public_positions = friends_vs_public in (PUBLIC_ONLY, FRIENDS_AND_PUBLIC)
+
+        if not retrieve_friends_positions and not retrieve_public_positions:
+            status += "RETRIEVE_X_POSITIONS_MISSING "
+            message = "RETRIEVE_X_POSITIONS_MISSING "
+            print_to_log(logger=logger, exception_message_optional=message)
 
         # Retrieve public positions for this organization
         public_positions_list = []
@@ -2226,6 +2238,7 @@ class PositionListManager(models.Model):
         position_list_found = False
         public_query_exists = True
         if retrieve_public_positions:
+            status += "RETRIEVE_PUBLIC_POSITIONS "
             try:
                 # We intentionally do not use 'readonly' here since we need to save based on the results of this query
                 public_positions_list = PositionEntered.objects.order_by('ballot_item_display_name',
@@ -2298,6 +2311,7 @@ class PositionListManager(models.Model):
                 handle_record_not_found_exception(e, logger=logger)
 
         if retrieve_friends_positions:
+            status += "RETRIEVE_FRIENDS_POSITIONS "
             try:
                 # Current voter visiting the site
                 current_voter_we_vote_id = ""

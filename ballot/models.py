@@ -1296,7 +1296,8 @@ class BallotReturned(models.Model):
         return
 
     def election_day_text(self):
-        if self.election_date and self.election_date is not None:
+        if isinstance(self.election_date, date):
+            # Consider using:  and isinstance(self.election_date, str)
             return self.election_date.strftime('%Y-%m-%d')
         else:
             return ""
@@ -2331,8 +2332,6 @@ class VoterBallotSaved(models.Model):
     def election_day_text(self):
         if isinstance(self.election_date, date):
             return self.election_date.strftime('%Y-%m-%d')
-        elif self.election_date:
-            return self.election_date
         else:
             return ""
 
