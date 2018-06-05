@@ -2552,6 +2552,7 @@ def position_list_for_opinion_maker_for_api(voter_device_id,  # positionListForO
     position_list_manager = PositionListManager()
     opinion_maker_found = False
     if is_speaker_type_organization(kind_of_opinion_maker):
+        status += "SPEAKER_IS_ORGANIZATION " + str(kind_of_opinion_maker) + " "
         # Since we want to return the id and we_vote_id, and we don't know for sure that there are any positions
         # for this opinion_maker, we retrieve the following so we can get the id and we_vote_id (per the request of
         # the WebApp team)
@@ -2589,6 +2590,7 @@ def position_list_for_opinion_maker_for_api(voter_device_id,  # positionListForO
             opinion_maker_id = organization_id
             opinion_maker_we_vote_id = organization_we_vote_id
     elif is_speaker_type_public_figure(kind_of_opinion_maker):
+        status += "SPEAKER_IS_PUBLIC_FIGURE " + str(kind_of_opinion_maker) + " "
         # TODO retrieve_all_positions_for_public_figure is just a stub, and doesn't do anything.  The list is empty.
         position_list_raw = position_list_manager.retrieve_all_positions_for_public_figure(
                 public_figure_id, public_figure_we_vote_id, stance_we_are_looking_for,
@@ -2614,8 +2616,9 @@ def position_list_for_opinion_maker_for_api(voter_device_id,  # positionListForO
         #     ballot_item_we_vote_id = candidate_we_vote_id
     else:
         position_list = []
+        status += 'POSITION_LIST_RETRIEVE_MISSING_OPINION_MAKER_ID '
         json_data = {
-            'status':                               'POSITION_LIST_RETRIEVE_MISSING_OPINION_MAKER_ID',
+            'status':                               status,
             'success':                              False,
             'count':                                0,
             'kind_of_opinion_maker':                kind_of_opinion_maker_text,
@@ -2638,8 +2641,9 @@ def position_list_for_opinion_maker_for_api(voter_device_id,  # positionListForO
 
     if not opinion_maker_found:
         position_list = []
+        status += 'POSITION_LIST_RETRIEVE_OPINION_MAKER_NOT_FOUND '
         json_data = {
-            'status':                               'POSITION_LIST_RETRIEVE_OPINION_MAKER_NOT_FOUND',
+            'status':                               status,
             'success':                              False,
             'count':                                0,
             'kind_of_opinion_maker':                kind_of_opinion_maker_text,
@@ -2668,6 +2672,7 @@ def position_list_for_opinion_maker_for_api(voter_device_id,  # positionListForO
     organizations_dict = {}
     voters_by_linked_org_dict = {}
     voters_dict = {}
+    status += "POSITION_LIST_RAW_COUNT: " + str(len(position_list_raw)) + " "
     for one_position in position_list_raw:
         # Whose position is it?
         missing_ballot_item_image = False
@@ -2693,6 +2698,7 @@ def position_list_for_opinion_maker_for_api(voter_device_id,  # positionListForO
             ballot_item_we_vote_id = one_position.contest_office_we_vote_id
             one_position_success = True
         else:
+            status += "UNKNOWN_BALLOT_ITEM "
             kind_of_ballot_item = "UNKNOWN_BALLOT_ITEM"
             ballot_item_id = None
             ballot_item_we_vote_id = None
@@ -2768,6 +2774,7 @@ def position_list_for_opinion_maker_for_api(voter_device_id,  # positionListForO
 
     # Now change the sort order
     if len(position_list):
+        status += "SORTING_POSITION_LIST "
         sorted_position_list = sorted(position_list, key=itemgetter('ballot_item_display_name'))
         # Add reverse=True to sort descending
     else:
@@ -2782,7 +2789,7 @@ def position_list_for_opinion_maker_for_api(voter_device_id,  # positionListForO
                 voter_guide_manager.update_or_create_organization_voter_guide_by_election_id(
                     voter_guide_we_vote_id, opinion_maker_we_vote_id, one_google_civic_election_id, state_code)
 
-    status += ' POSITION_LIST_FOR_OPINION_MAKER_SUCCEEDED'
+    status += 'POSITION_LIST_FOR_OPINION_MAKER_SUCCEEDED '
     success = True
     json_data = {
         'status':                               status,
