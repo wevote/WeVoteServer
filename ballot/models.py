@@ -1296,7 +1296,7 @@ class BallotReturned(models.Model):
         return
 
     def election_day_text(self):
-        if self.election_date:
+        if self.election_date and self.election_date is not None:
             return self.election_date.strftime('%Y-%m-%d')
         else:
             return ""
