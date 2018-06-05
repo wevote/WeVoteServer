@@ -514,6 +514,7 @@ def organization_edit_process_view(request):
     # for this org for this election
     google_civic_election_id = request.POST.get('google_civic_election_id', 0)
     election_manager = ElectionManager()
+    current_organization_with_new_twitter_handle = False
 
     # Have a version of state_code that is "" instead of False
     if positive_value_exists(state_served_code):
@@ -539,6 +540,16 @@ def organization_edit_process_view(request):
     try:
         if organization_on_stage_found:
             # Update
+            if positive_value_exists(organization_on_stage.organization_twitter_handle):
+                if positive_value_exists(organization_twitter_handle):
+                    if organization_on_stage.organization_twitter_handle != organization_twitter_handle:
+                        # Twitter handle has changed
+                        current_organization_with_new_twitter_handle = True
+            else:
+                if positive_value_exists(organization_twitter_handle):
+                    # Twitter handle added where before there wasn't one
+                    current_organization_with_new_twitter_handle = True
+
             if organization_name is not False:
                 organization_on_stage.organization_name = organization_name
             if organization_twitter_handle is not False:
@@ -560,8 +571,6 @@ def organization_edit_process_view(request):
             organization_on_stage.save()
             organization_id = organization_on_stage.id
             organization_we_vote_id = organization_on_stage.we_vote_id
-
-            push_organization_data_to_other_table_caches(organization_we_vote_id)
 
             messages.add_message(request, messages.INFO, 'Organization updated.')
         else:
@@ -661,8 +670,11 @@ def organization_edit_process_view(request):
                                                                                              error_type=type(e)))
         return HttpResponseRedirect(reverse('organization:organization_list', args=()))
 
-    if positive_value_exists(new_organization_created) and positive_value_exists(organization_we_vote_id) \
-            and positive_value_exists(organization_twitter_handle):
+    new_organization_and_new_twitter_handle = positive_value_exists(new_organization_created) \
+        and positive_value_exists(organization_we_vote_id) \
+        and positive_value_exists(organization_twitter_handle)
+    # Update Twitter information
+    if new_organization_and_new_twitter_handle or current_organization_with_new_twitter_handle:
         # Pull Twitter information
         results = refresh_twitter_organization_details(organization_on_stage)
         status += results['status']
@@ -675,13 +687,19 @@ def organization_edit_process_view(request):
             twitter_user_manager = TwitterUserManager()
             results = twitter_user_manager.create_twitter_link_to_organization(twitter_user_id, organization_we_vote_id)
 
+    if positive_value_exists(organization_we_vote_id):
+        push_organization_data_to_other_table_caches(organization_we_vote_id)
+
+    # Voter guide names are currently locked to the organization name, so we want to update all voter guides
+    voter_guide_manager = VoterGuideManager()
+    results = voter_guide_manager.update_organization_voter_guides_with_organization_data(organization_on_stage)
+
     # Create voter_guide for this election?
     if positive_value_exists(google_civic_election_id) and positive_value_exists(organization_we_vote_id):
         election_manager = ElectionManager()
         results = election_manager.retrieve_election(google_civic_election_id)
         if results['election_found']:
             election = results['election']
-            voter_guide_manager = VoterGuideManager()
 
             voter_guide_we_vote_id = ''
             results = voter_guide_manager.update_or_create_organization_voter_guide_by_election_id(
@@ -689,10 +707,6 @@ def organization_edit_process_view(request):
             if results['voter_guide_saved']:
                 messages.add_message(request, messages.INFO, 'Voter guide for {election_name} election saved.'
                                                              ''.format(election_name=election.election_name))
-
-    # Voter guide names are currently locked to the organization name, so we want to update all voter guides
-    voter_guide_manager = VoterGuideManager()
-    results = voter_guide_manager.update_organization_voter_guides_with_organization_data(organization_on_stage)
 
     # Link the selected issues with organization and delete any links that were unselected
     link_issue_list_manager = OrganizationLinkToIssueList()
@@ -718,7 +732,7 @@ def organization_edit_process_view(request):
             link_issue_manager.unlink_organization_to_issue(organization_we_vote_id, issue_id, issue_we_vote_id)
 
     position_list_manager = PositionListManager()
-    position_list_manager.refresh_cached_public_position_info_for_organization(organization_we_vote_id)
+    position_list_manager.refresh_cached_position_info_for_organization(organization_we_vote_id)
 
     return HttpResponseRedirect(reverse('organization:organization_position_list', args=(organization_id,)) +
                                 "?google_civic_election_id=" + str(google_civic_election_id) + "&state_code=" +
@@ -810,9 +824,24 @@ def organization_position_list_view(request, organization_id=0, organization_we_
         else:
             voter = None
 
+        offices_dict = {}
+        candidates_dict = {}
+        measures_dict = {}
+        organizations_dict = {}
+        voters_by_linked_org_dict = {}
+        voters_dict = {}
         for one_position in organization_position_list:
             position_manager = PositionManager()
-            one_position = position_manager.refresh_cached_position_info(one_position)
+            results = position_manager.refresh_cached_position_info(
+                one_position, offices_dict=offices_dict, candidates_dict=candidates_dict, measures_dict=measures_dict,
+                organizations_dict=organizations_dict, voters_by_linked_org_dict=voters_by_linked_org_dict,
+                voters_dict=voters_dict)
+            offices_dict = results['offices_dict']
+            candidates_dict = results['candidates_dict']
+            measures_dict = results['measures_dict']
+            organizations_dict = results['organizations_dict']
+            voters_by_linked_org_dict = results['voters_by_linked_org_dict']
+            voters_dict = results['voters_dict']
 
         election_manager = ElectionManager()
         if positive_value_exists(show_all_elections):
@@ -1271,8 +1300,7 @@ def organization_position_edit_process_view(request):
             organization_position_on_stage.state_code = state_code
             organization_position_on_stage.save()
 
-            organization_position_on_stage = position_manager.refresh_cached_position_info(
-                organization_position_on_stage)
+            results = position_manager.refresh_cached_position_info(organization_position_on_stage)
 
             success = True
 
@@ -1307,8 +1335,7 @@ def organization_position_edit_process_view(request):
             )
             organization_position_on_stage.save()
 
-            organization_position_on_stage = position_manager.refresh_cached_position_info(
-                organization_position_on_stage)
+            results = position_manager.refresh_cached_position_info(organization_position_on_stage)
             success = True
 
             if positive_value_exists(candidate_campaign_we_vote_id):

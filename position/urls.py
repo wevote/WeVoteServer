@@ -19,6 +19,9 @@ urlpatterns = [
     url(r'^(?P<position_we_vote_id>wv[\w]{2}pos[\w]+)/edit/$', views_admin.position_edit_view, name='position_edit'),
     url(r'^(?P<position_we_vote_id>wv[\w]{2}pos[\w]+)/summary/$',
         views_admin.position_summary_view, name='position_summary'),
+    url(r'^refresh_cached_position_info_for_election/',
+        views_admin.refresh_cached_position_info_for_election_view,
+        name='refresh_cached_position_info_for_election'),
     url(r'^refresh_positions_with_candidate_details/',
         views_admin.refresh_positions_with_candidate_details_for_election_view,
         name='refresh_positions_with_candidate_details_for_election'),
@@ -28,33 +31,4 @@ urlpatterns = [
     url(r'^refresh_positions_with_measure_details/',
         views_admin.refresh_positions_with_contest_measure_details_for_election_view,
         name='refresh_positions_with_contest_measure_details_for_election')
-    # # These pages are used to return the div popup page with details about all supporters, opposers, etc.
-    # # Any position that this voter isn't already following
-    # url(r'^cand/(?P<candidate_campaign_id>[0-9]+)/anyposition/$',
-    #     views_admin.positions_display_list_related_to_candidate_campaign_any_position_view,
-    #     name='positions_display_list_related_to_candidate_campaign_any_position_view'),
-    # # Candidate Supporters
-    # url(r'^cand/(?P<candidate_campaign_id>[0-9]+)/supporters/$',
-    #     views_admin.positions_display_list_related_to_candidate_campaign_supporters_view,
-    #     name='positions_display_list_related_to_candidate_campaign_supporters_view'),
-    # # Candidate Opposers
-    # url(r'^cand/(?P<candidate_campaign_id>[0-9]+)/opposers/$',
-    #     views_admin.positions_display_list_related_to_candidate_campaign_opposers_view,
-    #     name='positions_display_list_related_to_candidate_campaign_opposers_view'),
-    # # Candidate No Stance, Comments, Information only
-    # url(r'^cand/(?P<candidate_campaign_id>[0-9]+)/infoonlylist/$',
-    #     views_admin.positions_display_list_related_to_candidate_campaign_information_only_view,
-    #     name='positions_display_list_related_to_candidate_campaign_information_only_view'),
-    # # Candidate - Still Deciding
-    # url(r'^cand/(?P<candidate_campaign_id>[0-9]+)/deciders/$',
-    #     views_admin.positions_display_list_related_to_candidate_campaign_deciders_view,
-    #     name='positions_display_list_related_to_candidate_campaign_deciders_view'),
-    #
-    # # Measures
-    # url(r'^ms/(?P<contest_measure_id>[0-9]+)/oppose/$',
-    #     views.positions_related_to_contest_measure_oppose_view,
-    #     name='positions_related_to_contest_measure_oppose_view'),
-    # url(r'^ms/(?P<contest_measure_id>[0-9]+)/support/$',
-    #     views.positions_related_to_contest_measure_support_view,
-    #     name='positions_related_to_contest_measure_support_view'),
 ]

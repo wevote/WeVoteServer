@@ -2,7 +2,8 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
-from .controllers import positions_import_from_master_server, refresh_positions_with_candidate_details_for_election, \
+from .controllers import positions_import_from_master_server, refresh_cached_position_info_for_election, \
+    refresh_positions_with_candidate_details_for_election, \
     refresh_positions_with_contest_office_details_for_election, \
     refresh_positions_with_contest_measure_details_for_election
 from .models import ANY_STANCE, PositionEntered, PositionForFriends, PositionListManager, PERCENT_RATING
@@ -425,6 +426,30 @@ def position_summary_view(request, position_we_vote_id):
             'messages_on_stage': messages_on_stage,
         }
     return render(request, 'position/position_summary.html', template_values)
+
+
+@login_required
+def refresh_cached_position_info_for_election_view(request):
+    authority_required = {'verified_volunteer'}  # admin, verified_volunteer
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
+    google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
+    state_code = request.GET.get('state_code', '')
+
+    results = refresh_cached_position_info_for_election(google_civic_election_id=google_civic_election_id,
+                                                        state_code=state_code)
+    public_positions_updated = results['public_positions_updated']
+    friends_only_positions_updated = results['friends_only_positions_updated']
+
+    messages.add_message(request, messages.INFO,
+                         'public_positions_updated: {public_positions_updated}, '
+                         'friends_only_positions_updated: {friends_only_positions_updated}'
+                         ''.format(public_positions_updated=public_positions_updated,
+                                   friends_only_positions_updated=friends_only_positions_updated))
+    return HttpResponseRedirect(reverse('position:position_list', args=()) +
+                                '?google_civic_election_id=' + str(google_civic_election_id) +
+                                '&state_code=' + str(state_code))
 
 
 @login_required

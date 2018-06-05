@@ -2067,13 +2067,120 @@ class PositionListManager(models.Model):
             position_list_filtered = []
             return position_list_filtered
 
-    def refresh_cached_public_position_info_for_organization(self, organization_we_vote_id):
+    def refresh_cached_position_info_for_election(self, google_civic_election_id, state_code=''):
         position_manager = PositionManager()
+        success = True
+        status = ""
+        force_update = True
+        public_positions_updated = 0
+        friends_only_positions_updated = 0
+        offices_dict = {}
+        candidates_dict = {}
+        measures_dict = {}
+        organizations_dict = {}
+        voters_by_linked_org_dict = {}
+        voters_dict = {}
+
+        if positive_value_exists(google_civic_election_id):
+            # Visible to the Public
+            public_positions_list = PositionEntered.objects.all()
+            public_positions_list = public_positions_list.filter(
+                google_civic_election_id=google_civic_election_id)
+            for one_position in public_positions_list:
+                results = position_manager.refresh_cached_position_info(
+                    one_position, force_update,
+                    offices_dict=offices_dict,
+                    candidates_dict=candidates_dict,
+                    measures_dict=measures_dict,
+                    organizations_dict=organizations_dict,
+                    voters_by_linked_org_dict=voters_by_linked_org_dict,
+                    voters_dict=voters_dict)
+                offices_dict = results['offices_dict']
+                candidates_dict = results['candidates_dict']
+                measures_dict = results['measures_dict']
+                organizations_dict = results['organizations_dict']
+                voters_by_linked_org_dict = results['voters_by_linked_org_dict']
+                voters_dict = results['voters_dict']
+                public_positions_updated += 1
+
+            # Visible to We Vote friends only
+            friends_only_positions_list = PositionForFriends.objects.all()
+            friends_only_positions_list = friends_only_positions_list.filter(
+                google_civic_election_id=google_civic_election_id)
+            for one_position in friends_only_positions_list:
+                results = position_manager.refresh_cached_position_info(
+                    one_position, force_update,
+                    offices_dict=offices_dict,
+                    candidates_dict=candidates_dict,
+                    measures_dict=measures_dict,
+                    organizations_dict=organizations_dict,
+                    voters_by_linked_org_dict=voters_by_linked_org_dict,
+                    voters_dict=voters_dict)
+                offices_dict = results['offices_dict']
+                candidates_dict = results['candidates_dict']
+                measures_dict = results['measures_dict']
+                organizations_dict = results['organizations_dict']
+                voters_by_linked_org_dict = results['voters_by_linked_org_dict']
+                voters_dict = results['voters_dict']
+                friends_only_positions_updated += 1
+
+        results = {
+            'success':                          success,
+            'status':                           status,
+            'public_positions_updated':         public_positions_updated,
+            'friends_only_positions_updated':   friends_only_positions_updated,
+        }
+        return results
+
+    def refresh_cached_position_info_for_organization(self, organization_we_vote_id):
+        position_manager = PositionManager()
+        force_update = True
+        offices_dict = {}
+        candidates_dict = {}
+        measures_dict = {}
+        organizations_dict = {}
+        voters_by_linked_org_dict = {}
+        voters_dict = {}
+
+        # Visible to the Public
         public_positions_list = PositionEntered.objects.all()
         public_positions_list = public_positions_list.filter(organization_we_vote_id__iexact=organization_we_vote_id)
-        force_update = True
         for one_position in public_positions_list:
-            position_manager.refresh_cached_position_info(one_position, force_update)
+            results = position_manager.refresh_cached_position_info(
+                one_position, force_update,
+                offices_dict=offices_dict,
+                candidates_dict=candidates_dict,
+                measures_dict=measures_dict,
+                organizations_dict=organizations_dict,
+                voters_by_linked_org_dict=voters_by_linked_org_dict,
+                voters_dict=voters_dict)
+            offices_dict = results['offices_dict']
+            candidates_dict = results['candidates_dict']
+            measures_dict = results['measures_dict']
+            organizations_dict = results['organizations_dict']
+            voters_by_linked_org_dict = results['voters_by_linked_org_dict']
+            voters_dict = results['voters_dict']
+
+        # Visible to We Vote friends only
+        friends_only_positions_list = PositionForFriends.objects.all()
+        friends_only_positions_list = friends_only_positions_list.filter(
+            organization_we_vote_id__iexact=organization_we_vote_id)
+        for one_position in friends_only_positions_list:
+            results = position_manager.refresh_cached_position_info(
+                one_position, force_update,
+                offices_dict=offices_dict,
+                candidates_dict=candidates_dict,
+                measures_dict=measures_dict,
+                organizations_dict=organizations_dict,
+                voters_by_linked_org_dict=voters_by_linked_org_dict,
+                voters_dict=voters_dict)
+            offices_dict = results['offices_dict']
+            candidates_dict = results['candidates_dict']
+            measures_dict = results['measures_dict']
+            organizations_dict = results['organizations_dict']
+            voters_by_linked_org_dict = results['voters_by_linked_org_dict']
+            voters_dict = results['voters_dict']
+
         return True
 
     def retrieve_all_positions_for_organization(self, organization_id, organization_we_vote_id,
@@ -6863,22 +6970,35 @@ class PositionManager(models.Model):
         }
         return results
 
-    def refresh_cached_position_info(self, position_object, force_update=False,
-                                     organizations_dict={}, voters_by_linked_org_dict={}, voters_dict={}):
+    def refresh_cached_position_info(self, position_object,
+                                     force_update=False,
+                                     offices_dict={},
+                                     candidates_dict={},
+                                     measures_dict={},
+                                     organizations_dict={},
+                                     voters_by_linked_org_dict={},
+                                     voters_dict={}):
         """
         The position tables cache information from other tables. This function reaches out to the source tables
-        and copies over the latest information to the position tables.
+        and copies over the latest information to the position tables. In order to reduce the number of database calls
+        to retrieve offices, candidates, measures, etc., we pass out dicts with these values, and accept them back in
+        so we don't need to retrieve data we pulled from the database microseconds before.
         :param position_object:
         :param force_update:
+        :param offices_dict: key = office_we_vote_id, value = office object
+        :param candidates_dict: key = candidate_we_vote_id, value = candidate object
+        :param measures_dict: key = measure_we_vote_id, value = measure object
         :param organizations_dict: key = organization_we_vote_id, value = organization object
         :param voters_by_linked_org_dict: key = linked_organization_we_vote_id, value = voter object
         :param voters_dict: key = voter_we_vote_id, value = voter object
         :return:
         """
+        success = True
+        status = ""
         position_change = False
-        organization_found = False
 
         # Start with "speaker" information (Organization, Voter, or Public Figure)
+        organization_found = False
         if not positive_value_exists(position_object.speaker_display_name) \
                 or not positive_value_exists(position_object.speaker_image_url_https) \
                 or not positive_value_exists(position_object.speaker_twitter_handle) \
@@ -6889,26 +7009,42 @@ class PositionManager(models.Model):
             try:
                 # We need to look in the organization table for speaker_display_name & speaker images
                 organization_manager = OrganizationManager()
-                organization_id = 0
-                results = organization_manager.retrieve_organization(organization_id,
-                                                                     position_object.organization_we_vote_id)
-                if results['organization_found']:
-                    organization = results['organization']
+                if positive_value_exists(position_object.organization_we_vote_id) \
+                        and position_object.organization_we_vote_id in organizations_dict:
+                    organization = organizations_dict[position_object.organization_we_vote_id]
                     organization_found = True
+                else:
+                    organization_id = 0
+                    results = organization_manager.retrieve_organization(organization_id,
+                                                                         position_object.organization_we_vote_id)
+                    if results['organization_found']:
+                        organization = results['organization']
+                        organization_found = True
+                        organizations_dict[organization.we_vote_id] = organization
 
+                if organization_found:
                     # Make sure we have an organization name
                     if not positive_value_exists(organization.organization_name):
-                        try:
-                            linked_voter = Voter.objects.get(
-                                linked_organization_we_vote_id__iexact=organization.we_vote_id)
+                        linked_voter_found = False
+                        if positive_value_exists(organization.we_vote_id) \
+                                and organization.we_vote_id in voters_by_linked_org_dict:
+                            linked_voter = voters_by_linked_org_dict[organization.we_vote_id]
+                            linked_voter_found = True
+                        else:
+                            try:
+                                linked_voter = Voter.objects.get(
+                                    linked_organization_we_vote_id__iexact=organization.we_vote_id)
+                                linked_voter_found = True
+                                voters_by_linked_org_dict[organization.we_vote_id] = linked_voter
+                            except Voter.DoesNotExist:
+                                pass
+                        if linked_voter_found:
                             if linked_voter.get_full_name():
                                 try:
                                     organization.organization_name = linked_voter.get_full_name()
                                     organization.save()
                                 except Exception as e:
                                     pass
-                        except Voter.DoesNotExist:
-                            pass
 
                     if not positive_value_exists(position_object.speaker_display_name) or force_update:
                         # speaker_display_name is missing so look it up from source
@@ -6953,16 +7089,23 @@ class PositionManager(models.Model):
             voter_found = False
             if positive_value_exists(position_object.voter_we_vote_id):
                 # We need to look in the voter table for speaker_display_name
-                results = voter_manager.retrieve_voter_by_we_vote_id(position_object.voter_we_vote_id)
-                if results['voter_found']:
-                    voter = results['voter']
+                if position_object.voter_we_vote_id in voters_dict:
+                    voter = voters_dict[position_object.voter_we_vote_id]
                     voter_found = True
+                else:
+                    results = voter_manager.retrieve_voter_by_we_vote_id(position_object.voter_we_vote_id)
+                    if results['voter_found']:
+                        voter = results['voter']
+                        voter_found = True
+                        voters_dict[voter.we_vote_id] = voter
             if not voter_found and positive_value_exists(position_object.voter_id):
                 # We need to look in the voter table for speaker_display_name
                 results = voter_manager.retrieve_voter_by_id(position_object.voter_id)
                 if results['voter_found']:
                     voter = results['voter']
                     voter_found = True
+                    if voter.we_vote_id not in voters_dict:
+                        voters_dict[voter.we_vote_id] = voter
 
             if voter_found:
                 try:
@@ -7028,10 +7171,19 @@ class PositionManager(models.Model):
                     or force_update:
                 try:
                     # We need to look in the voter table for speaker_display_name
-                    results = candidate_campaign_manager.retrieve_candidate_campaign(
-                        position_object.candidate_campaign_id, position_object.candidate_campaign_we_vote_id)
-                    if results['candidate_campaign_found']:
-                        candidate = results['candidate_campaign']
+                    candidate_found = False
+                    if positive_value_exists(position_object.candidate_campaign_we_vote_id) \
+                            and position_object.candidate_campaign_we_vote_id in candidates_dict:
+                        candidate = candidates_dict[position_object.candidate_campaign_we_vote_id]
+                        candidate_found = True
+                    else:
+                        results = candidate_campaign_manager.retrieve_candidate_campaign(
+                            position_object.candidate_campaign_id, position_object.candidate_campaign_we_vote_id)
+                        if results['candidate_campaign_found']:
+                            candidate = results['candidate_campaign']
+                            candidate_found = True
+                            candidates_dict[candidate.we_vote_id] = candidate
+                    if candidate_found:
                         # Cache for further down
                         contest_office_id = candidate.contest_office_id
                         contest_office_we_vote_id = candidate.contest_office_we_vote_id
@@ -7098,11 +7250,20 @@ class PositionManager(models.Model):
                     or force_update:
                 try:
                     # We need to look in the voter table for speaker_display_name
+                    contest_measure_found = False
                     contest_measure_manager = ContestMeasureManager()
-                    results = contest_measure_manager.retrieve_contest_measure(
-                        position_object.contest_measure_id, position_object.contest_measure_we_vote_id)
-                    if results['contest_measure_found']:
-                        contest_measure = results['contest_measure']
+                    if positive_value_exists(position_object.contest_measure_we_vote_id) \
+                            and position_object.contest_measure_we_vote_id in measures_dict:
+                        contest_measure = measures_dict[position_object.contest_measure_we_vote_id]
+                        contest_measure_found = True
+                    else:
+                        results = contest_measure_manager.retrieve_contest_measure(
+                            position_object.contest_measure_id, position_object.contest_measure_we_vote_id)
+                        if results['contest_measure_found']:
+                            contest_measure = results['contest_measure']
+                            contest_measure_found = True
+                            measures_dict[contest_measure.we_vote_id] = contest_measure
+                    if contest_measure_found:
                         if not positive_value_exists(position_object.ballot_item_display_name) \
                                 or position_object.ballot_item_display_name == "None" \
                                 or force_update:
@@ -7137,10 +7298,19 @@ class PositionManager(models.Model):
                         and not positive_value_exists(position_object.contest_office_we_vote_id):
                     if not contest_office_id or not contest_office_we_vote_id:
                         # If here we need to get the contest_office identifier from the candidate
-                        candidate_results = candidate_campaign_manager.retrieve_candidate_campaign_from_we_vote_id(
-                            position_object.candidate_campaign_we_vote_id)
-                        if candidate_results['candidate_campaign_found']:
-                            candidate = candidate_results['candidate_campaign']
+                        candidate_found = False
+                        if positive_value_exists(position_object.candidate_campaign_we_vote_id) \
+                                and position_object.candidate_campaign_we_vote_id in candidates_dict:
+                            candidate = candidates_dict[position_object.candidate_campaign_we_vote_id]
+                            candidate_found = True
+                        else:
+                            candidate_results = candidate_campaign_manager.retrieve_candidate_campaign_from_we_vote_id(
+                                position_object.candidate_campaign_we_vote_id)
+                            if candidate_results['candidate_campaign_found']:
+                                candidate = candidate_results['candidate_campaign']
+                                candidate_found = True
+                                candidates_dict[candidate.we_vote_id] = candidate
+                        if candidate_found:
                             position_object.contest_office_id = candidate.contest_office_id
                             position_object.contest_office_we_vote_id = candidate.contest_office_we_vote_id
                             position_change = True
@@ -7150,30 +7320,50 @@ class PositionManager(models.Model):
                         position_change = True
                 office_found = False
                 contest_office_manager = ContestOfficeManager()
-                if positive_value_exists(position_object.contest_office_id):
-                    results = contest_office_manager.retrieve_contest_office_from_id(position_object.contest_office_id)
-                    office_found = results['contest_office_found']
+                if positive_value_exists(position_object.contest_office_we_vote_id) \
+                        and position_object.contest_office_we_vote_id in offices_dict:
+                    office = offices_dict[position_object.contest_office_we_vote_id]
+                    office_found = True
                 elif positive_value_exists(position_object.contest_office_we_vote_id):
                     results = contest_office_manager.retrieve_contest_office_from_we_vote_id(
                         position_object.contest_office_we_vote_id)
-                    office_found = results['contest_office_found']
+                    if results['contest_office_found']:
+                        office = results['contest_office']
+                        office_found = True
+                        offices_dict[office.we_vote_id] = office
+                if not office_found and positive_value_exists(position_object.contest_office_id):
+                    results = contest_office_manager.retrieve_contest_office_from_id(position_object.contest_office_id)
+                    if results['contest_office_found']:
+                        office = results['contest_office']
+                        office_found = True
+                        offices_dict[office.we_vote_id] = office
 
                 if office_found:
-                    office_object = results['contest_office']
                     if not positive_value_exists(position_object.contest_office_id) or force_update:
-                        position_object.contest_office_id = office_object.id
+                        position_object.contest_office_id = office.id
                         position_change = True
                     if not positive_value_exists(position_object.contest_office_we_vote_id) or force_update:
-                        position_object.contest_office_we_vote_id = office_object.we_vote_id
+                        position_object.contest_office_we_vote_id = office.we_vote_id
                         position_change = True
                     if not positive_value_exists(position_object.contest_office_name) or force_update:
-                        position_object.contest_office_name = office_object.office_name
+                        position_object.contest_office_name = office.office_name
                         position_change = True
 
         if position_change:
             position_object.save()
 
-        return position_object
+        results = {
+            'success':                      success,
+            'status':                       status,
+            'position':                     position_object,
+            'offices_dict':                 offices_dict,
+            'candidates_dict':              candidates_dict,
+            'measures_dict':                measures_dict,
+            'organizations_dict':           organizations_dict,
+            'voters_by_linked_org_dict':    voters_by_linked_org_dict,
+            'voters_dict':                  voters_dict,
+        }
+        return results
 
     def count_positions_for_election(self, google_civic_election_id, retrieve_public_positions=True):
         """

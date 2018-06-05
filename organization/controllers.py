@@ -22,7 +22,7 @@ from position.models import PositionListManager
 import robot_detection
 from twitter.models import TwitterUserManager
 from voter.models import fetch_voter_id_from_voter_device_link, VoterManager, Voter
-from voter_guide.models import VoterGuide, VoterGuideManager
+from voter_guide.models import VoterGuide, VoterGuideManager, VoterGuideListManager
 import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, extract_twitter_handle_from_text_string, positive_value_exists, \
     process_request_from_master
@@ -1022,7 +1022,7 @@ def organization_retrieve_for_api(organization_id, organization_we_vote_id, vote
         if organization_manager.organization_name_needs_repair(organization):
             organization = organization_manager.repair_organization(organization)
             position_list_manager = PositionListManager()
-            position_list_manager.refresh_cached_public_position_info_for_organization(organization_we_vote_id)
+            position_list_manager.refresh_cached_position_info_for_organization(organization_we_vote_id)
 
         # Favor the Twitter banner and profile image if they exist
         # From Dale September 1, 2017:  Eventually we would like to let a person choose which they want to display,
@@ -1452,6 +1452,26 @@ def organization_search_for_api(organization_name, organization_twitter_handle, 
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 
 
+def refresh_organizations_for_one_election(google_civic_election_id):
+    success = True
+    status = ""
+
+    voter_guide_list_manager = VoterGuideListManager()
+    results = voter_guide_list_manager.retrieve_voter_guides_for_election(google_civic_election_id)
+
+    if results['voter_guide_list_found']:
+        voter_guide_list = results['voter_guide_list']
+        for one_voter_guide in voter_guide_list:
+            if positive_value_exists(one_voter_guide.organization_we_vote_id):
+                refresh_results = refresh_organization_data_from_master_tables(one_voter_guide.organization_we_vote_id)
+
+    results = {
+        'success': success,
+        'status': status,
+    }
+    return results
+
+
 def refresh_organization_data_from_master_tables(organization_we_vote_id):
     twitter_profile_image_url_https = None
     twitter_profile_background_image_url_https = None
@@ -1462,6 +1482,7 @@ def refresh_organization_data_from_master_tables(organization_we_vote_id):
     twitter_json = {}
     success = False
     status = ""
+    organization_updated = True
 
     organization_manager = OrganizationManager()
     twitter_user_manager = TwitterUserManager()
@@ -1480,32 +1501,38 @@ def refresh_organization_data_from_master_tables(organization_we_vote_id):
     organization = results['organization']
 
     # Retrieve voter data from Voter table
-    voter_results = voter_manager.retrieve_voter_by_organization_we_vote_id(organization_we_vote_id)
+    # voter_results = voter_manager.retrieve_voter_by_organization_we_vote_id(organization_we_vote_id)
 
-    twitter_id_belongs_to_this_organization = True
+    twitter_id_belongs_to_this_organization = False
     twitter_user_id = organization.twitter_user_id
     twitter_link_to_org_results = twitter_user_manager.\
         retrieve_twitter_link_to_organization_from_organization_we_vote_id(organization_we_vote_id)
     if twitter_link_to_org_results['twitter_link_to_organization_found']:
         # If here, we have found a twitter_link_to_organization entry for this organization
         twitter_user_id = twitter_link_to_org_results['twitter_link_to_organization'].twitter_id
+        twitter_id_belongs_to_this_organization = True
     else:
         # If here, a twitter_link_to_organization entry was not found for the organization
-        # Is the twitter_user_id in use by any other group?
-        results = twitter_user_manager.retrieve_twitter_link_to_organization_from_twitter_user_id(twitter_user_id)
-        if results['twitter_link_to_organization_found']:
-            # If here, then we know that the Twitter id is being used by another group, so we want to wipe out the
-            # value from this organization.
-            twitter_id_belongs_to_this_organization = False
-            try:
-                organization.organization_twitter_handle = None
-                organization.twitter_user_id = None
-                organization.twitter_followers_count = 0
-                organization.save()
-            except Exception as e:
-                status += "COULD_NOT_SAVE_ORGANIZATION "
-        else:
-            twitter_user_manager.create_twitter_link_to_organization(twitter_user_id, organization_we_vote_id)
+        # Is the organization.twitter_user_id stored in the organization object in use by any other group?
+        if positive_value_exists(organization.twitter_user_id):
+            results = twitter_user_manager.retrieve_twitter_link_to_organization_from_twitter_user_id(
+                organization.twitter_user_id)
+            if results['twitter_link_to_organization_found']:
+                # If here, then we know that the Twitter id is being used by another group, so we want to wipe out the
+                # value from this organization.
+                try:
+                    organization.organization_twitter_handle = None
+                    organization.twitter_user_id = None
+                    organization.twitter_followers_count = 0
+                    organization.save()
+                except Exception as e:
+                    status += "COULD_NOT_SAVE_ORGANIZATION "
+            else:
+                # Not attached to other group, so create a TwitterLinkToOrganization entry
+                results = twitter_user_manager.create_twitter_link_to_organization(
+                    twitter_user_id, organization_we_vote_id)
+                if results['twitter_link_to_organization_saved']:
+                    twitter_id_belongs_to_this_organization = True
 
     # Retrieve twitter user data from TwitterUser Table
     if twitter_id_belongs_to_this_organization:
@@ -1551,11 +1578,14 @@ def refresh_organization_data_from_master_tables(organization_we_vote_id):
             we_vote_hosted_profile_image_url_large, we_vote_hosted_profile_image_url_medium,
             we_vote_hosted_profile_image_url_tiny)
         success = update_organization_results['success']
+        if success:
+            organization_updated = True
         status += update_organization_results['status']
 
     results = {
-        'success': success,
-        'status': status,
+        'success':              success,
+        'status':               status,
+        'organization_updated': organization_updated,
     }
     return results
 

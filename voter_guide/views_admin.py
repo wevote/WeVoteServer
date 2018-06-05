@@ -334,9 +334,10 @@ def voter_guide_edit_view(request, voter_guide_id=0, voter_guide_we_vote_id=""):
 
 
 @login_required
-def voter_guide_edit_process_view(request):
+def voter_guide_edit_process_view(request):  # NOTE: THIS FORM DOESN'T SAVE YET -- VIEW ONLY
     """
     Process the new or edit voter_guide forms
+    NOTE: We are using "voter_guide_search_process_view" instead
     :param request:
     :return:
     """
@@ -347,6 +348,7 @@ def voter_guide_edit_process_view(request):
     voter_guide_id = convert_to_int(request.POST['voter_guide_id'])
     redirect_to_voter_guide_list = convert_to_int(request.POST['redirect_to_voter_guide_list'])
     voter_guide_name = request.POST.get('voter_guide_name', False)
+    voter_guide_twitter_handle = request.POST.get('voter_guide_twitter_handle', False)
     google_civic_election_id = request.POST.get('google_civic_election_id', 0)
     voter_guide_url = request.POST.get('voter_guide_url', False)
     state_code = request.POST.get('state_code', False)
@@ -494,6 +496,14 @@ def voter_guide_list_view(request):
     else:
         results = election_manager.retrieve_upcoming_elections()
         election_list = results['election_list']
+
+    voter_guides_query = VoterGuide.objects.all()
+    if positive_value_exists(google_civic_election_id):
+        voter_guides_query = voter_guides_query.filter(google_civic_election_id=google_civic_election_id)
+    voter_guides_count = voter_guides_query.count()
+
+    messages.add_message(request, messages.INFO, 'We found {voter_guides_count} existing voter guides. '
+                                                 ''.format(voter_guides_count=voter_guides_count))
 
     messages_on_stage = get_messages(request)
     template_values = {

@@ -778,7 +778,8 @@ def combine_two_positions_for_voter_and_save(from_position, to_position):
     # Cached data like: ballot_item_display_name, ballot_item_image_url_https, ballot_item_twitter_handle,
     #  contest_office_name,
     position_manager = PositionManager()
-    to_position = position_manager.refresh_cached_position_info(to_position)
+    results = position_manager.refresh_cached_position_info(to_position)
+    to_position = results['position']
 
     try:
         to_position.save()
@@ -857,6 +858,12 @@ def move_positions_to_another_candidate(from_candidate_id, from_candidate_we_vot
         if positive_value_exists(position_object.voter_we_vote_id):
             to_voter_we_vote_ids.append(position_object.voter_we_vote_id)
 
+    offices_dict = {}
+    candidates_dict = {}
+    measures_dict = {}
+    organizations_dict = {}
+    voters_by_linked_org_dict = {}
+    voters_dict = {}
     for position_object in from_position_list:
         # Check organization_we_vote_ids for duplicate positions
         # This is a list of positions that we want to migrate to the candidate we are planning to keep
@@ -905,7 +912,20 @@ def move_positions_to_another_candidate(from_candidate_id, from_candidate_we_vot
                     position_entries_moved += 1
                     # And finally, refresh the position to use the latest information
                     force_update = True
-                    position_manager.refresh_cached_position_info(position_object, force_update)
+                    results = position_manager.refresh_cached_position_info(
+                        position_object, force_update,
+                        offices_dict=offices_dict,
+                        candidates_dict=candidates_dict,
+                        measures_dict=measures_dict,
+                        organizations_dict=organizations_dict,
+                        voters_by_linked_org_dict=voters_by_linked_org_dict,
+                        voters_dict=voters_dict)
+                    offices_dict = results['offices_dict']
+                    candidates_dict = results['candidates_dict']
+                    measures_dict = results['measures_dict']
+                    organizations_dict = results['organizations_dict']
+                    voters_by_linked_org_dict = results['voters_by_linked_org_dict']
+                    voters_dict = results['voters_dict']
                 except Exception:
                     if public_or_private:
                         status += "MOVE_TO_ANOTHER_CANDIDATE-UNABLE_TO_SAVE_NEW_PUBLIC_POSITION "
@@ -969,6 +989,12 @@ def move_positions_to_another_measure(from_contest_measure_id, from_contest_meas
         if positive_value_exists(position_object.voter_we_vote_id):
             to_voter_we_vote_ids.append(position_object.voter_we_vote_id)
 
+    offices_dict = {}
+    candidates_dict = {}
+    measures_dict = {}
+    organizations_dict = {}
+    voters_by_linked_org_dict = {}
+    voters_dict = {}
     for position_object in from_position_list:
         # Check organization_we_vote_ids for duplicate positions
         # This is a list of positions that we want to migrate to the contest_measure we are planning to keep
@@ -1017,7 +1043,20 @@ def move_positions_to_another_measure(from_contest_measure_id, from_contest_meas
                     position_entries_moved += 1
                     # And finally, refresh the position to use the latest information
                     force_update = True
-                    position_manager.refresh_cached_position_info(position_object, force_update)
+                    results = position_manager.refresh_cached_position_info(
+                        position_object, force_update,
+                        offices_dict=offices_dict,
+                        candidates_dict=candidates_dict,
+                        measures_dict=measures_dict,
+                        organizations_dict=organizations_dict,
+                        voters_by_linked_org_dict=voters_by_linked_org_dict,
+                        voters_dict=voters_dict)
+                    offices_dict = results['offices_dict']
+                    candidates_dict = results['candidates_dict']
+                    measures_dict = results['measures_dict']
+                    organizations_dict = results['organizations_dict']
+                    voters_by_linked_org_dict = results['voters_by_linked_org_dict']
+                    voters_dict = results['voters_dict']
                 except Exception:
                     if public_or_private:
                         status += "MOVE_TO_ANOTHER_CONTEST_MEASURE-UNABLE_TO_SAVE_NEW_PUBLIC_POSITION "
@@ -1083,6 +1122,12 @@ def move_positions_to_another_office(from_contest_office_id, from_contest_office
         if positive_value_exists(position_object.voter_we_vote_id):
             to_voter_we_vote_ids.append(position_object.voter_we_vote_id)
 
+    offices_dict = {}
+    candidates_dict = {}
+    measures_dict = {}
+    organizations_dict = {}
+    voters_by_linked_org_dict = {}
+    voters_dict = {}
     for position_object in from_position_list:
         # Check organization_we_vote_ids for duplicate positions
         # This is a list of positions that we want to migrate to the contest office we are planning to keep
@@ -1132,7 +1177,20 @@ def move_positions_to_another_office(from_contest_office_id, from_contest_office
                     position_entries_moved += 1
                     # And finally, refresh the position to use the latest information
                     force_update = True
-                    position_manager.refresh_cached_position_info(position_object, force_update)
+                    results = position_manager.refresh_cached_position_info(
+                        position_object, force_update,
+                        offices_dict=offices_dict,
+                        candidates_dict=candidates_dict,
+                        measures_dict=measures_dict,
+                        organizations_dict=organizations_dict,
+                        voters_by_linked_org_dict=voters_by_linked_org_dict,
+                        voters_dict=voters_dict)
+                    offices_dict = results['offices_dict']
+                    candidates_dict = results['candidates_dict']
+                    measures_dict = results['measures_dict']
+                    organizations_dict = results['organizations_dict']
+                    voters_by_linked_org_dict = results['voters_by_linked_org_dict']
+                    voters_dict = results['voters_dict']
                 except Exception:
                     if public_or_private:
                         status += "MOVE_TO_ANOTHER_CONTEST_OFFICE-UNABLE_TO_SAVE_NEW_PUBLIC_POSITION "
@@ -2237,6 +2295,12 @@ def position_list_for_ballot_item_for_api(voter_device_id, friends_vs_public,  #
             linked_organization_we_vote_id = voter.linked_organization_we_vote_id
 
     position_list = []
+    offices_dict = {}
+    candidates_dict = {}
+    measures_dict = {}
+    organizations_dict = {}
+    voters_by_linked_org_dict = {}
+    voters_dict = {}
     for one_position in position_objects:
         # Is there sufficient information in the position to display it?
         some_data_exists = True if one_position.is_support() \
@@ -2264,7 +2328,21 @@ def position_list_for_ballot_item_for_api(voter_device_id, friends_vs_public,  #
                     or not positive_value_exists(one_position.speaker_image_url_https_medium) \
                     or not positive_value_exists(one_position.speaker_image_url_https_tiny) \
                     or not positive_value_exists(one_position.speaker_twitter_handle):
-                one_position = position_manager.refresh_cached_position_info(one_position)
+                results = position_manager.refresh_cached_position_info(
+                    one_position,
+                    offices_dict=offices_dict,
+                    candidates_dict=candidates_dict,
+                    measures_dict=measures_dict,
+                    organizations_dict=organizations_dict,
+                    voters_by_linked_org_dict=voters_by_linked_org_dict,
+                    voters_dict=voters_dict)
+                one_position = results['position']
+                offices_dict = results['offices_dict']
+                candidates_dict = results['candidates_dict']
+                measures_dict = results['measures_dict']
+                organizations_dict = results['organizations_dict']
+                voters_by_linked_org_dict = results['voters_by_linked_org_dict']
+                voters_dict = results['voters_dict']
             speaker_display_name = one_position.speaker_display_name
         elif positive_value_exists(one_position.voter_id):
             if voter_id == one_position.voter_id:
@@ -2280,7 +2358,21 @@ def position_list_for_ballot_item_for_api(voter_device_id, friends_vs_public,  #
                     or not positive_value_exists(one_position.speaker_image_url_https_large) \
                     or not positive_value_exists(one_position.speaker_image_url_https_medium) \
                     or not positive_value_exists(one_position.speaker_image_url_https_tiny):
-                one_position = position_manager.refresh_cached_position_info(one_position)
+                results = position_manager.refresh_cached_position_info(
+                    one_position,
+                    offices_dict=offices_dict,
+                    candidates_dict=candidates_dict,
+                    measures_dict=measures_dict,
+                    organizations_dict=organizations_dict,
+                    voters_by_linked_org_dict=voters_by_linked_org_dict,
+                    voters_dict=voters_dict)
+                one_position = results['position']
+                offices_dict = results['offices_dict']
+                candidates_dict = results['candidates_dict']
+                measures_dict = results['measures_dict']
+                organizations_dict = results['organizations_dict']
+                voters_by_linked_org_dict = results['voters_by_linked_org_dict']
+                voters_dict = results['voters_dict']
             if positive_value_exists(one_position.speaker_display_name):
                 speaker_display_name = one_position.speaker_display_name
             else:
@@ -2296,7 +2388,21 @@ def position_list_for_ballot_item_for_api(voter_device_id, friends_vs_public,  #
                     or not positive_value_exists(one_position.speaker_image_url_https_medium) \
                     or not positive_value_exists(one_position.speaker_image_url_https_tiny) \
                     or not positive_value_exists(one_position.speaker_twitter_handle):
-                one_position = position_manager.refresh_cached_position_info(one_position)
+                results = position_manager.refresh_cached_position_info(
+                    one_position,
+                    offices_dict=offices_dict,
+                    candidates_dict=candidates_dict,
+                    measures_dict=measures_dict,
+                    organizations_dict=organizations_dict,
+                    voters_by_linked_org_dict=voters_by_linked_org_dict,
+                    voters_dict=voters_dict)
+                one_position = results['position']
+                offices_dict = results['offices_dict']
+                candidates_dict = results['candidates_dict']
+                measures_dict = results['measures_dict']
+                organizations_dict = results['organizations_dict']
+                voters_by_linked_org_dict = results['voters_by_linked_org_dict']
+                voters_dict = results['voters_dict']
             speaker_display_name = one_position.speaker_display_name
         else:
             speaker_type = UNKNOWN
@@ -2556,6 +2662,12 @@ def position_list_for_opinion_maker_for_api(voter_device_id,  # positionListForO
 
     position_list = []
     all_elections_that_have_positions = []
+    offices_dict = {}
+    candidates_dict = {}
+    measures_dict = {}
+    organizations_dict = {}
+    voters_by_linked_org_dict = {}
+    voters_dict = {}
     for one_position in position_list_raw:
         # Whose position is it?
         missing_ballot_item_image = False
@@ -2597,7 +2709,21 @@ def position_list_for_opinion_maker_for_api(voter_device_id,  # positionListForO
                     or not positive_value_exists(one_position.speaker_image_url_https) \
                     or missing_ballot_item_image \
                     or missing_office_information:
-                one_position = position_manager.refresh_cached_position_info(one_position, force_update)
+                results = position_manager.refresh_cached_position_info(
+                    one_position, force_update,
+                    offices_dict=offices_dict,
+                    candidates_dict=candidates_dict,
+                    measures_dict=measures_dict,
+                    organizations_dict=organizations_dict,
+                    voters_by_linked_org_dict=voters_by_linked_org_dict,
+                    voters_dict=voters_dict)
+                one_position = results['position']
+                offices_dict = results['offices_dict']
+                candidates_dict = results['candidates_dict']
+                measures_dict = results['measures_dict']
+                organizations_dict = results['organizations_dict']
+                voters_by_linked_org_dict = results['voters_by_linked_org_dict']
+                voters_dict = results['voters_dict']
             one_position_dict_for_api = {
                 'position_we_vote_id':                  one_position.we_vote_id,
                 'ballot_item_display_name':
@@ -2770,6 +2896,12 @@ def position_list_for_voter_for_api(voter_device_id,
         position_list_retrieved = []
 
     position_list = []
+    offices_dict = {}
+    candidates_dict = {}
+    measures_dict = {}
+    organizations_dict = {}
+    voters_by_linked_org_dict = {}
+    voters_dict = {}
     for one_position in position_list_retrieved:
         # Whose position is it?
         missing_ballot_item_image = False
@@ -2807,7 +2939,21 @@ def position_list_for_voter_for_api(voter_device_id,
                     or not positive_value_exists(one_position.speaker_image_url_https) \
                     or missing_ballot_item_image \
                     or missing_office_information:
-                one_position = position_manager.refresh_cached_position_info(one_position)
+                results = position_manager.refresh_cached_position_info(
+                    one_position,
+                    offices_dict=offices_dict,
+                    candidates_dict=candidates_dict,
+                    measures_dict=measures_dict,
+                    organizations_dict=organizations_dict,
+                    voters_by_linked_org_dict=voters_by_linked_org_dict,
+                    voters_dict=voters_dict)
+                one_position = results['position']
+                offices_dict = results['offices_dict']
+                candidates_dict = results['candidates_dict']
+                measures_dict = results['measures_dict']
+                organizations_dict = results['organizations_dict']
+                voters_by_linked_org_dict = results['voters_by_linked_org_dict']
+                voters_dict = results['voters_dict']
             one_position_dict_for_api = {
                 'position_we_vote_id':                  one_position.we_vote_id,
                 'ballot_item_display_name':             one_position.ballot_item_display_name,  # Candidate name or
@@ -3718,6 +3864,26 @@ def voter_position_visibility_save_for_api(  # voterPositionVisibilitySave
             'is_public_position':       is_public_position,
         }
         return json_data
+
+
+def refresh_cached_position_info_for_election(google_civic_election_id, state_code=''):
+    google_civic_election_id = convert_to_int(google_civic_election_id)
+
+    position_list_manager = PositionListManager()
+
+    results = position_list_manager.refresh_cached_position_info_for_election(google_civic_election_id, state_code)
+    public_positions_updated = results['public_positions_updated']
+    friends_only_positions_updated = results['friends_only_positions_updated']
+
+    status = "REFRESH_CACHED_POSITION_INFO_FOR_ELECTION-public:" + str(public_positions_updated) + \
+             ",friends_only:" + str(friends_only_positions_updated)
+    results = {
+        'success':                          True,
+        'status':                           status,
+        'public_positions_updated':         public_positions_updated,
+        'friends_only_positions_updated':   friends_only_positions_updated,
+    }
+    return results
 
 
 def refresh_positions_with_candidate_details_for_election(google_civic_election_id, state_code):
