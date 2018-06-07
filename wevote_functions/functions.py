@@ -23,6 +23,7 @@ NONPROFIT_501C3 = 'C3'
 NONPROFIT_501C4 = 'C4'
 NEWS_ORGANIZATION = 'NW'
 ORGANIZATION = 'O'  # Deprecated
+ORGANIZATION_WORD = 'ORGANIZATION'
 POLITICAL_ACTION_COMMITTEE = 'P'
 PUBLIC_FIGURE = 'PF'
 UNKNOWN = 'U'
@@ -1003,7 +1004,7 @@ def is_speaker_type_individual(speaker_type):
 
 def is_speaker_type_organization(speaker_type):
     if speaker_type in (CORPORATION, GROUP, NEWS_ORGANIZATION, NONPROFIT, NONPROFIT_501C3,
-                        NONPROFIT_501C4, ORGANIZATION, POLITICAL_ACTION_COMMITTEE, "ORGANIZATION"):
+                        NONPROFIT_501C4, ORGANIZATION, ORGANIZATION_WORD, POLITICAL_ACTION_COMMITTEE, "ORGANIZATION"):
         return True
     return False
 
