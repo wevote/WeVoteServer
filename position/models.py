@@ -2276,7 +2276,8 @@ class PositionListManager(models.Model):
                         public_positions_list = public_positions_list.filter(
                             google_civic_election_id=google_civic_election_id_local_scope)
                     else:
-                        # If no election is found for the voter, don't show any positions
+                        # Leave the position_list as is for now. TODO: We really should have election_id
+                        # # If no election is found for the voter, don't show any positions
                         # public_positions_list = []
                         # public_query_exists = False
                         pass
@@ -2394,7 +2395,8 @@ class PositionListManager(models.Model):
                             friends_positions_list = friends_positions_list.filter(
                                 google_civic_election_id=google_civic_election_id_local_scope)
                         else:
-                            # If no election is found for the voter, don't show any positions
+                            # Leave the position_list as is for now. TODO: We really should have election_id
+                            # # If no election is found for the voter, don't show any positions
                             # friends_positions_list = []
                             # friends_query_exists = False
                             pass

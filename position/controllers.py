@@ -2024,8 +2024,8 @@ def position_list_for_ballot_item_for_api(voter_device_id, friends_vs_public,  #
     We want to return a JSON file with the position identifiers from orgs, friends and public figures the voter follows
     This list of information is used to retrieve the detailed information
     """
-    status = ""
-    success = False
+    status = "POSITION_LIST_FOR_BALLOT_ITEM "
+    success = True
 
     position_manager = PositionManager()
     # Get voter_id from the voter_device_id so we can know who is supporting/opposing
@@ -2086,6 +2086,7 @@ def position_list_for_ballot_item_for_api(voter_device_id, friends_vs_public,  #
     friends_positions_list = []
     if positive_value_exists(candidate_id) or positive_value_exists(candidate_we_vote_id):
         kind_of_ballot_item = CANDIDATE
+        status += "KIND_OF_BALLOT_ITEM_CANDIDATE "
 
         ############################
         # Retrieve public positions
@@ -2136,6 +2137,7 @@ def position_list_for_ballot_item_for_api(voter_device_id, friends_vs_public,  #
             ballot_item_we_vote_id = candidate_we_vote_id
     elif positive_value_exists(measure_id) or positive_value_exists(measure_we_vote_id):
         kind_of_ballot_item = MEASURE
+        status += "KIND_OF_BALLOT_ITEM_MEASURE "
 
         ############################
         # Retrieve public positions
