@@ -175,7 +175,7 @@ def retrieve_ballotpedia_data_for_polling_locations_view(request, election_local
     retrieve_races = positive_value_exists(request.GET.get('retrieve_races', False))
     retrieve_measures = positive_value_exists(request.GET.get('retrieve_measures', False))
     election_state_code = ""
-    import_limit = convert_to_int(request.GET.get('import_limit', 10))
+    import_limit = convert_to_int(request.GET.get('import_limit', 500))
 
     ballotpedia_election_found = False
     ballotpedia_election_id = 0
