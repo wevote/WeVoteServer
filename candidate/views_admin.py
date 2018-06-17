@@ -472,6 +472,8 @@ def candidate_edit_view(request, candidate_id=0, candidate_campaign_we_vote_id="
     google_civic_candidate_name3 = request.GET.get('google_civic_candidate_name3', False)
     candidate_twitter_handle = request.GET.get('candidate_twitter_handle', False)
     candidate_url = request.GET.get('candidate_url', False)
+    facebook_url = request.GET.get('facebook_url', False)
+    candidate_email = request.GET.get('candidate_email', False)
     party = request.GET.get('party', False)
     ballot_guide_official_statement = request.GET.get('ballot_guide_official_statement', False)
     ballotpedia_candidate_id = request.GET.get('ballotpedia_candidate_id', False)
@@ -587,6 +589,8 @@ def candidate_edit_view(request, candidate_id=0, candidate_campaign_we_vote_id="
             'google_civic_candidate_name3':     google_civic_candidate_name3,
             'candidate_twitter_handle':         candidate_twitter_handle,
             'candidate_url':                    candidate_url,
+            'facebook_url':                     facebook_url,
+            'candidate_email':                  candidate_email,
             'party':                            party,
             'ballot_guide_official_statement':  ballot_guide_official_statement,
             'ballotpedia_candidate_id':         ballotpedia_candidate_id,
@@ -634,6 +638,8 @@ def candidate_edit_process_view(request):
     if positive_value_exists(candidate_twitter_handle):
         candidate_twitter_handle = extract_twitter_handle_from_text_string(candidate_twitter_handle)
     candidate_url = request.POST.get('candidate_url', False)
+    facebook_url = request.POST.get('facebook_url', False)
+    candidate_email = request.POST.get('candidate_email', False)
     contest_office_id = request.POST.get('contest_office_id', False)
     ballot_guide_official_statement = request.POST.get('ballot_guide_official_statement', False)
     party = request.POST.get('party', False)
@@ -735,6 +741,8 @@ def candidate_edit_process_view(request):
                         "&contest_office_id=" + str(contest_office_id) + \
                         "&candidate_twitter_handle=" + str(candidate_twitter_handle) + \
                         "&candidate_url=" + str(candidate_url) + \
+                        "&facebook_url=" + str(facebook_url) + \
+                        "&candidate_email=" + str(candidate_email) + \
                         "&party=" + str(party) + \
                         "&ballot_guide_official_statement=" + str(ballot_guide_official_statement) + \
                         "&vote_smart_id=" + str(vote_smart_id) + \
@@ -783,6 +791,8 @@ def candidate_edit_process_view(request):
                             "&contest_office_id=" + str(contest_office_id) + \
                             "&candidate_twitter_handle=" + str(candidate_twitter_handle) + \
                             "&candidate_url=" + str(candidate_url) + \
+                            "&facebook_url=" + str(facebook_url) + \
+                            "&candidate_email=" + str(candidate_email) + \
                             "&party=" + str(party) + \
                             "&ballot_guide_official_statement=" + str(ballot_guide_official_statement) + \
                             "&ballotpedia_candidate_id=" + str(ballotpedia_candidate_id) + \
@@ -800,6 +810,10 @@ def candidate_edit_process_view(request):
                 candidate_on_stage.candidate_twitter_handle = candidate_twitter_handle
             if candidate_url is not False:
                 candidate_on_stage.candidate_url = candidate_url
+            if facebook_url is not False:
+                candidate_on_stage.facebook_url = facebook_url
+            if candidate_email is not False:
+                candidate_on_stage.candidate_email = candidate_email
             if party is not False:
                 candidate_on_stage.party = party
             if ballot_guide_official_statement is not False:
@@ -885,6 +899,10 @@ def candidate_edit_process_view(request):
                     candidate_on_stage.candidate_twitter_handle = candidate_twitter_handle
                 if candidate_url is not False:
                     candidate_on_stage.candidate_url = candidate_url
+                if facebook_url is not False:
+                    candidate_on_stage.facebook_url = facebook_url
+                if candidate_email is not False:
+                    candidate_on_stage.candidate_email = candidate_email
                 if party is not False:
                     candidate_on_stage.party = party
                 if ballot_guide_official_statement is not False:
@@ -922,6 +940,8 @@ def candidate_edit_process_view(request):
                                 "&contest_office_id=" + str(contest_office_id) + \
                                 "&candidate_twitter_handle=" + str(candidate_twitter_handle) + \
                                 "&candidate_url=" + str(candidate_url) + \
+                                "&facebook_url=" + str(facebook_url) + \
+                                "&candidate_email=" + str(candidate_email) + \
                                 "&party=" + str(party) + \
                                 "&ballot_guide_official_statement=" + str(ballot_guide_official_statement) + \
                                 "&ballotpedia_candidate_id=" + str(ballotpedia_candidate_id) + \

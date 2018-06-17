@@ -27,7 +27,7 @@ def store_ballotpedia_json_response_to_import_batch_system(modified_json_list, g
     batch_header_id = 0
     number_of_batch_rows = 0
     # groom_results = groom_ballotpedia_data_for_processing(structured_json, google_civic_election_id,
-    #                                                       contains_api, polling_location_we_vote_id)
+    #                                                       contains_api)
 
     # modified_json_list = groom_results['modified_json_list']
     # kind_of_batch = groom_results['kind_of_batch']

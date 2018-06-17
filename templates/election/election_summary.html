@@ -90,6 +90,16 @@
 {#    </div>#}
 
     <div class="form-group">
+        <label for="ballotpedia_kind_of_election_id" class="col-sm-3 control-label">Ballotpedia Kind of Election</label>
+        <div class="col-sm-8">
+            <input type="text" name="ballotpedia_kind_of_election" id="ballotpedia_kind_of_election_id"
+                   class="form-control"
+                   disabled
+                   value="{% if election %}{{ election.ballotpedia_kind_of_election|default_if_none:"" }}{% endif %}" />
+        </div>
+    </div>
+
+    <div class="form-group">
         <label for="state_id" class="col-sm-3 control-label"></label>
         <div class="col-sm-8">
             <a href="{% url 'election:election_edit' election.id %}">edit election</a>
@@ -106,8 +116,38 @@
             See Candidates for this Election</a>
     </p>
 
-<strong>Data Grooming</strong>
-<ul>
+<strong>Steps to Prepare for Election</strong>
+<ol>
+  <li>
+    <a href="{% url 'ballotpedia:retrieve_ballotpedia_data_for_polling_locations' election.id %}?google_civic_election_id={{ election.google_civic_election_id }}&state_code={{ state_code }}&retrieve_races=1" target="_blank">
+        Ballotpedia: Retrieve Races for this Election{% if state_code %} (for {{ state_code }}){% endif %}</a> (in new window)<br />
+        Reach out to Ballotpedia API and retrieve the races for all districts covered by this election.
+        This needs to be run before trying to retrieve ballot items. It is also a good idea to merge/groom the races
+        data before "Retrieve Ballots".
+  </li>
+
+  <li>
+    <a href="{% url 'ballotpedia:retrieve_candidates' %}?google_civic_election_id={{ election.google_civic_election_id }}&state_code={{ state_code }}" target="_blank">
+        Ballotpedia: Retrieve Candidates for this Election{% if state_code %} (for {{ state_code }}){% endif %}</a> (in new window)<br />
+        Reach out to Ballotpedia API and retrieve the candidates for all offices in this election.
+  </li>
+
+  <li>
+    <a href="{% url 'ballotpedia:retrieve_ballotpedia_data_for_polling_locations' election.id %}?google_civic_election_id={{ election.google_civic_election_id }}&state_code={{ state_code }}&retrieve_measures=1" target="_blank">
+        Ballotpedia: Retrieve Measures for this Election{% if state_code %} (for {{ state_code }}){% endif %}</a> (in new window)<br />
+        Reach out to Ballotpedia API and retrieve the measures for all districts covered by this election.
+        This needs to be run before trying to retrieve ballot items. It is also a good idea to merge/groom the measures
+        data before "Retrieve Ballots".
+  </li>
+
+  <li>
+    <a href="{% url 'ballotpedia:retrieve_ballotpedia_data_for_polling_locations' election.id %}?google_civic_election_id={{ election.google_civic_election_id }}&state_code={{ state_code }}" target="_blank">
+        Ballotpedia: Retrieve Ballots (based on Polling Locations) for this Election{% if state_code %} (for {{ state_code }}){% endif %}</a> (in new window)<br />
+        Reach out to Ballotpedia API and ask for ballots from many polling locations so we can stitch
+        together the measures, races and candidates. Add "import_limit" as a URL variable to increase the number of
+        polling locations to retrieve ballots from.
+  </li>
+
 {% if election.google_civic_election_id|convert_to_int < 1000000 %}
   <li>
     <a href="{% url 'election:election_all_ballots_retrieve' election.id %}?state_code={{ state_code }}" target="_blank">
@@ -121,22 +161,11 @@
     (To retrieve Ballot Data from Google Civic, add google_civic_election_id from Google.)<br />
   </li>
 {% endif %}
+</ol>
 
+  <strong>Data Grooming Tools</strong>
 
-{% if election.ballotpedia_election_id|convert_to_int > 0 %}
-  <li>
-    <a href="{% url 'ballotpedia:retrieve_distributed_ballotpedia_ballots' election.id %}?state_code={{ state_code }}" target="_blank">
-        Ballotpedia: Retrieve Ballot Data for this Election{% if state_code %} (for {{ state_code }}){% endif %}</a><br />
-        Reach out to Ballotpedia API and ask for ballots from many polling locations so we can stitch
-        together the measures, races and candidates. Add "import_limit" as a URL variable to increase the number of
-        polling locations to retrieve ballots from.
-  </li>
-{% else %}
-  <li>
-    (To retrieve Ballot Data from Ballotpedia, add ballotpedia_election_id.)<br />
-  </li>
-{% endif %}
-
+  <ul>
   <li>
   <a href="{% url 'ballot:update_ballot_returned_latitude_and_longitude' %}?google_civic_election_id={{ election.google_civic_election_id }}&state_code={{ state_code }}">
   Update Lat/Long{% if state_code %} for {{ state_code }}{% endif %}: {{ entries_missing_latitude_longitude }} missing</a>

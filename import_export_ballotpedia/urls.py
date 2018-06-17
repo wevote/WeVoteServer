@@ -8,11 +8,14 @@ from . import views_admin
 
 
 urlpatterns = [
-    url(r'^$', views_admin.retrieve_candidates_from_api_view, name='ballotpedia_home',),
+    # url(r'^$', views_admin.retrieve_ballotpedia_candidates_by_election_from_api_view, name='ballotpedia_home',),
     url(r'^import_ballot_items_for_location/$', views_admin.import_ballot_items_for_location_view,
         name='import_ballot_items_for_location'),
-    url(r'^retrieve_candidates/$', views_admin.retrieve_candidates_from_api_view, name='retrieve_candidates'),
-    url(r'^(?P<election_local_id>[0-9]+)/retrieve_distributed_ballotpedia_ballots/$',
-        views_admin.retrieve_distributed_ballotpedia_ballots_view, name='retrieve_distributed_ballotpedia_ballots'),
-    url(r'^retrieve_offices/$', views_admin.retrieve_offices_from_api_view, name='retrieve_offices'),
+    url(r'^retrieve_candidates/$', views_admin.retrieve_ballotpedia_candidates_by_election_from_api_view,
+        name='retrieve_candidates'),
+    url(r'^(?P<election_local_id>[0-9]+)/retrieve_ballotpedia_data_for_polling_locations/$',
+        views_admin.retrieve_ballotpedia_data_for_polling_locations_view,
+        name='retrieve_ballotpedia_data_for_polling_locations'),
+    url(r'^retrieve_offices/$', views_admin.retrieve_ballotpedia_offices_by_election_from_api_view,
+        name='retrieve_offices'),
 ]

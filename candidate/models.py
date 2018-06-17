@@ -2409,6 +2409,9 @@ class CandidateCampaignManager(models.Model):
                     existing_candidate_entry.is_top_ticket = \
                         positive_value_exists(update_values['candidate_is_top_ticket'])
                     values_changed = True
+                if 'candidate_email' in update_values:
+                    existing_candidate_entry.candidate_email = update_values['candidate_email']
+                    values_changed = True
                 if 'candidate_gender' in update_values:
                     existing_candidate_entry.candidate_gender = update_values['candidate_gender']
                     values_changed = True

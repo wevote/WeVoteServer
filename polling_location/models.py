@@ -246,7 +246,7 @@ class PollingLocationManager(models.Model):
             polling_location.state,
             polling_location.zip_long)
         try:
-            location = self.google_client.geocode(full_ballot_address)
+            location = self.google_client.geocode(full_ballot_address, sensor=False)
         except GeocoderQuotaExceeded:
             status += "GeocoderQuotaExceeded "
             results = {
@@ -281,7 +281,8 @@ class PollingLocationManager(models.Model):
         try:
             latitude = location.latitude
             longitude = location.longitude
-            polling_location.latitude, polling_location.longitude = location.latitude, location.longitude
+            polling_location.latitude = location.latitude
+            polling_location.longitude = location.longitude
             polling_location.save()
             status += "POLLING_LOCATION_SAVED_WITH_LATITUDE_AND_LONGITUDE "
             success = True

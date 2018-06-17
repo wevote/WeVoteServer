@@ -298,6 +298,7 @@
                         <th>party name</th>
                         <th>twitter_handle</th>
                         <th>facebook</th>
+                        <th>email</th>
                         <th>website</th>
                         <th>incumbent</th>
                     </tr>
@@ -381,6 +382,7 @@
                         <td>{{ one_batch_row.batch_row_action.party|default_if_none:"" }}</td>
                         <td>{{ one_batch_row.batch_row_action.candidate_twitter_handle|default_if_none:"" }}</td>
                         <td>{{ one_batch_row.batch_row_action.facebook_url|default_if_none:"" }}</td>
+                        <td>{{ one_batch_row.batch_row_action.candidate_email|default_if_none:"" }}</td>
                         <td>
                           url: {{ one_batch_row.batch_row_action.candidate_url|default_if_none:"" }}<br />
                           bp: {{ one_batch_row.batch_row_action.ballotpedia_candidate_url|default_if_none:"" }}

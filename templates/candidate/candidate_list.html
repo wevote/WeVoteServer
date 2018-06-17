@@ -70,7 +70,7 @@
 
 {% if candidate_list and google_civic_election_id and hide_candidate_tools != 1 and hide_candidate_tools != '1' %}
     <ul>
-        <li>Prepare: <a href="{% url 'ballotpedia:retrieve_candidates' %}?google_civic_election_id={{ google_civic_election_id }}&zero_entries=1" target="_blank" >
+        <li>Prepare: <a href="{% url 'ballotpedia:retrieve_candidates' %}?google_civic_election_id={{ google_civic_election_id }}&only_retrieve_if_zero_candidates=0" target="_blank" >
         Ballotpedia: Retrieve Candidates for Offices with Zero Entries</a> (50 races at a time -- in new window)</li>
         <li>Prepare: <a href="{% url 'candidate:find_and_merge_duplicate_candidates' %}?google_civic_election_id={{ google_civic_election_id }}" >
         Find and Merge Duplicate Candidates for this Election</a> (about 1 minute)</li>
@@ -156,7 +156,7 @@
               {% endif %}
                 <td>Twitter Handle</td>
                 <td>Google Search Results</td>
-                <td>Website</td>
+                <td>Website / Facebook / Email</td>
                 <td>Ballotpedia</td>
                 <td>Vote Smart</td>
             </tr>
@@ -265,7 +265,11 @@
                         </li></ul>
                     {% endif %}
                 </td>
-                <td>{% if candidate.candidate_url %}<a href="{{ candidate.candidate_url }}" target="_blank">{{ candidate.candidate_url }}</a>{% endif %}</td>
+                <td>
+                  {% if candidate.candidate_url %}<a href="{{ candidate.candidate_url }}" target="_blank">{{ candidate.candidate_url }}</a><br />{% endif %}
+                  {% if candidate.facebook_url %}<a href="{{ candidate.facebook_url }}" target="_blank">{{ candidate.facebook_url }}</a><br />{% endif %}
+                  {% if candidate.candidate_email %}{{ candidate.candidate_email }}{% endif %}
+                </td>
                 <td>
                   {% if candidate.ballotpedia_candidate_id %}
                     {% if candidate.ballotpedia_candidate_url %}

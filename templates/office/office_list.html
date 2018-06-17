@@ -82,7 +82,7 @@
         Ballotpedia: Retrieve Offices for this Election</a> (in new window)</li>
         <li>Prepare: <a href="{% url 'office:find_and_merge_duplicate_offices' %}?google_civic_election_id={{ google_civic_election_id }}" >
         Find and Merge Duplicate Contest Offices for this Election</a> (about 1 minute)</li>
-        <li>Prepare: <a href="{% url 'ballotpedia:retrieve_candidates' %}?google_civic_election_id={{ google_civic_election_id }}&zero_entries=1" target="_blank" >
+        <li>Prepare: <a href="{% url 'ballotpedia:retrieve_candidates' %}?google_civic_election_id={{ google_civic_election_id }}&only_retrieve_if_zero_candidates=0" target="_blank" >
         Ballotpedia: Retrieve Candidates for Offices with Zero Entries</a> (50 races at a time -- in new window)</li>
     </ul>
     {% endif %}
