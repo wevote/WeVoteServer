@@ -25,8 +25,17 @@
     <p><a href="{% url 'admin_tools:sync_dashboard' %}?state_code={{ state_code }}" target="_blank">
         Go to "Import Polling Locations From Master Server" Page</a></p>
 
-    <p><a href="{% url 'polling_location:polling_location_edit' 0 %}?state_code={{ state_code }}">
-         Create polling location</a></p>
+    <p>
+      <a href="{% url 'polling_location:polling_location_edit' 0 %}?state_code={{ state_code }}">
+         Create polling location</a>,
+
+    {% if state_code %}
+        <a href="{% url 'polling_location:polling_locations_add_latitude_and_longitude' %}?state_code={{ state_code }}">
+           Add latitude/longitude to polling locations</a> (up to 1000)
+    {% else %}
+        (Choose state to add latitude/longitude to polling locations)
+    {% endif %}
+    </p>
 
 <form name="polling_location_search_form" method="get" action="{% url 'polling_location:polling_location_list' %}">
     {% csrf_token %}

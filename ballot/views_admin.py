@@ -658,7 +658,7 @@ def ballot_item_list_edit_process_view(request):
                     if not ballot_returned.latitude or not ballot_returned.longitude:
                         # Make sure we have saved a latitude and longitude for the ballot_returned entry
                         google_client = get_geocoder_for_service('google')(GOOGLE_MAPS_API_KEY)
-                        location = google_client.geocode(ballot_returned.text_for_map_search)
+                        location = google_client.geocode(ballot_returned.text_for_map_search, sensor=False)
                         if location is None:
                             status += 'Could not find location matching "{}"'.format(ballot_returned.text_for_map_search)
                             logger.debug(status)

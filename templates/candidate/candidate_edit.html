@@ -290,6 +290,22 @@ span.wrap_word { word-break: break-word; }
 </div>
 
 <div class="form-group">
+    <label for="facebook_url_id" class="col-sm-3 control-label">Facebook URL</label>
+    <div class="col-sm-8">
+        <input type="text" name="facebook_url" id="facebook_url_id" class="form-control"
+               value="{% if candidate %}{{ candidate.facebook_url|default_if_none:"" }}{% else %}{{ facebook_url|default_if_none:"" }}{% endif %}" />
+    </div>
+</div>
+
+<div class="form-group">
+    <label for="candidate_email_id" class="col-sm-3 control-label">Candidate Email</label>
+    <div class="col-sm-8">
+        <input type="text" name="candidate_email" id="candidate_email_id" class="form-control"
+               value="{% if candidate %}{{ candidate.candidate_email|default_if_none:"" }}{% else %}{{ candidate_email|default_if_none:"" }}{% endif %}" />
+    </div>
+</div>
+
+<div class="form-group">
     <label for="ballotpedia_candidate_url_id" class="col-sm-3 control-label">Ballotpedia Candidate Page
         {% if candidate and candidate.ballotpedia_candidate_url %}(<a href="{{ candidate.ballotpedia_candidate_url }}" target="_blank">Go</a>){% endif %}
     </label>

@@ -415,7 +415,7 @@ def heal_geo_coordinates(text_for_map_search):
     latitude = None
     try:
         google_client = get_geocoder_for_service('google')(GOOGLE_MAPS_API_KEY)
-        location = google_client.geocode(text_for_map_search)
+        location = google_client.geocode(text_for_map_search, sensor=False)
         if location is None:
             status = 'Could not find location matching "{}" '.format(text_for_map_search)
             logger.debug(status)

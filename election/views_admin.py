@@ -508,6 +508,7 @@ def election_edit_process_view(request):
     state_code = request.POST.get('state_code', False)
     google_civic_election_id = request.POST.get('google_civic_election_id', '0')
     ballotpedia_election_id = request.POST.get('ballotpedia_election_id', False)
+    ballotpedia_kind_of_election = request.POST.get('ballotpedia_kind_of_election', False)
     include_in_list_for_voters = request.POST.get('include_in_list_for_voters', False)
 
     election_on_stage = Election()
@@ -570,6 +571,9 @@ def election_edit_process_view(request):
 
         if ballotpedia_election_id is not False:
             election_on_stage.ballotpedia_election_id = convert_to_int(ballotpedia_election_id)
+
+        if ballotpedia_kind_of_election is not False:
+            election_on_stage.ballotpedia_kind_of_election = ballotpedia_kind_of_election
 
         election_on_stage.include_in_list_for_voters = include_in_list_for_voters
 
@@ -704,6 +708,7 @@ def election_summary_view(request, election_local_id=0, google_civic_election_id
     show_offices_and_candidates = request.GET.get('show_offices_and_candidates', False)
     if not positive_value_exists(google_civic_election_id):
         google_civic_election_id = request.GET.get('google_civic_election_id', 0)
+    state_code = request.GET.get('state_code', '')
     election_local_id = convert_to_int(election_local_id)
     ballot_returned_search = request.GET.get('ballot_returned_search', '')
     voter_ballot_saved_search = request.GET.get('voter_ballot_saved_search', '')
@@ -719,13 +724,13 @@ def election_summary_view(request, election_local_id=0, google_civic_election_id
         election_on_stage_found = True
         election_local_id = election_on_stage.id
         google_civic_election_id = election_on_stage.google_civic_election_id
+        state_code = election_on_stage.state_code
     except Election.MultipleObjectsReturned as e:
         handle_record_found_more_than_one_exception(e, logger=logger)
     except Election.DoesNotExist:
         # This is fine, proceed anyways
         pass
 
-    state_code = request.GET.get('state_code', '')
     sorted_state_list = []
     status_print_list = ""
     ballot_returned_count = 0

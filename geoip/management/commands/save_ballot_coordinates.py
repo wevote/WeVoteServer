@@ -14,7 +14,7 @@ class Command(BaseCommand):
         for b in BallotReturned.objects.filter(latitude=None).order_by('id'):
             full_ballot_address = '{}, {}, {} {}'.format(
                 b.normalized_line1, b.normalized_city, b.normalized_state, b.normalized_zip)
-            location = self.google_client.geocode(full_ballot_address)
+            location = self.google_client.geocode(full_ballot_address, sensor=False)
             if location is None:
                 raise Exception('Could not find a location for ballot {}'.format(b.id))
             b.latitude, b.longitude = location.latitude, location.longitude

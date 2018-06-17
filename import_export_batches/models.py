@@ -773,6 +773,17 @@ class BatchManager(models.Model):
         batch_header_map_id = 0
         batch_name = ""
 
+        if not len(structured_json_list):
+            # If there aren't any values, don't create a batch
+            results = {
+                'success': success,
+                'status': status,
+                'batch_header_id': batch_header_id,
+                'batch_saved': success,
+                'number_of_batch_rows': number_of_batch_rows,
+            }
+            return results
+
         # We want an array with integers 0 - n as the keys, and the field names as the values
         we_vote_keys = list(mapping_dict.keys())
         remote_source_keys = list(mapping_dict.values())

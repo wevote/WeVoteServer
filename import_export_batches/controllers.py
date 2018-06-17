@@ -941,9 +941,11 @@ def create_batch_row_action_contest_office(batch_description, batch_header_map, 
         contest_office_district_name = district_name
 
     # retrieve elected_office_name from elected_office_id
-    # batch_manager = BatchManager()
-    elected_office_name = batch_manager.fetch_elected_office_name_from_elected_office_ctcl_id(elected_office_ctcl_id,
-                                                                                              batch_set_id)
+    if positive_value_exists(elected_office_ctcl_id):
+        elected_office_name = batch_manager.fetch_elected_office_name_from_elected_office_ctcl_id(
+            elected_office_ctcl_id, batch_set_id)
+    else:
+        elected_office_name = ""
 
     # Look up ContestOffice to see if an entry exists
     # contest_office = ContestOffice()
@@ -1461,6 +1463,7 @@ def create_batch_row_action_candidate(batch_description, batch_header_map, one_b
     candidate_twitter_handle = extract_twitter_handle_from_text_string(candidate_twitter_handle_raw)
     candidate_url = batch_manager.retrieve_value_from_batch_row("candidate_url", batch_header_map, one_batch_row)
     facebook_url = batch_manager.retrieve_value_from_batch_row("facebook_url", batch_header_map, one_batch_row)
+    candidate_email = batch_manager.retrieve_value_from_batch_row("candidate_email", batch_header_map, one_batch_row)
     candidate_profile_image_url = batch_manager.retrieve_value_from_batch_row("candidate_profile_image_url",
                                                                               batch_header_map, one_batch_row)
     state_code = batch_manager.retrieve_value_from_batch_row("state_code", batch_header_map, one_batch_row)
@@ -1637,6 +1640,7 @@ def create_batch_row_action_candidate(batch_description, batch_header_map, one_b
         batch_row_action_candidate.batch_row_action_office_ctcl_uuid = office_ctcl_uuid
         batch_row_action_candidate.birth_day_text = birth_day_text
         batch_row_action_candidate.candidate_ctcl_person_id = candidate_ctcl_person_id
+        batch_row_action_candidate.candidate_email = candidate_email
         batch_row_action_candidate.candidate_gender = candidate_gender
         if candidate_is_incumbent is not None and positive_value_exists(candidate_is_incumbent):
             batch_row_action_candidate.candidate_is_incumbent = True
@@ -1666,7 +1670,7 @@ def create_batch_row_action_candidate(batch_description, batch_header_map, one_b
         batch_row_action_candidate.save()
     except Exception as e:
         success = False
-        status += "BATCH_ROW_ACTION_CANDIDATE_UNABLE_TO_SAVE "
+        status += "BATCH_ROW_ACTION_CANDIDATE_UNABLE_TO_SAVE " + str(e) + " "
 
     # If a state was figured out, then update the batch_row with the state_code so we can use that for filtering
     if positive_value_exists(state_code):
@@ -3225,6 +3229,8 @@ def import_candidate_data_from_batch_row_actions(batch_header_id, batch_row_id, 
             update_values['candidate_twitter_handle'] = one_batch_row_action.candidate_twitter_handle
         if positive_value_exists(one_batch_row_action.candidate_url):
             update_values['candidate_url'] = one_batch_row_action.candidate_url
+        if positive_value_exists(one_batch_row_action.candidate_email):
+            update_values['candidate_email'] = one_batch_row_action.candidate_email
         if positive_value_exists(one_batch_row_action.contest_office_we_vote_id):
             update_values['contest_office_we_vote_id'] = one_batch_row_action.contest_office_we_vote_id
         if positive_value_exists(one_batch_row_action.contest_office_id):

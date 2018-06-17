@@ -11,7 +11,8 @@ from .models import BatchDescription, BatchHeader, BatchHeaderMap, BatchManager,
     IMPORT_CREATE, IMPORT_ADD_TO_EXISTING, IMPORT_VOTER
 from .controllers import create_batch_header_translation_suggestions, create_batch_row_actions, \
     create_or_update_batch_header_mapping, export_voter_list, import_data_from_batch_row_actions
-from import_export_ballotpedia.controllers import groom_ballotpedia_data_for_processing
+from import_export_ballotpedia.controllers import groom_ballotpedia_data_for_processing, \
+    process_ballotpedia_voter_districts
 from import_export_batches.controllers_ballotpedia import store_ballotpedia_json_response_to_import_batch_system
 from admin_tools.views import redirect_to_sign_in_page
 from ballot.models import MEASURE, CANDIDATE, POLITICIAN
@@ -279,9 +280,16 @@ def batch_list_process_view(request):
                     contains_api = False
 
                 groom_results = groom_ballotpedia_data_for_processing(structured_json, google_civic_election_id,
-                                                                      contains_api, polling_location_we_vote_id)
+                                                                      contains_api)
                 modified_json_list = groom_results['modified_json_list']
                 kind_of_batch = groom_results['kind_of_batch']
+
+                if contains_api:
+                    ballot_items_results = process_ballotpedia_voter_districts(
+                        google_civic_election_id, modified_json_list, polling_location_we_vote_id)
+
+                    if ballot_items_results['ballot_items_found']:
+                        modified_json_list = ballot_items_results['ballot_item_dict_list']
 
                 results = store_ballotpedia_json_response_to_import_batch_system(
                     modified_json_list, google_civic_election_id, kind_of_batch)

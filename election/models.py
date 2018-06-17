@@ -36,6 +36,10 @@ class Election(models.Model):
     # Day of the election in YYYY-MM-DD format.
     election_day_text = models.CharField(verbose_name="election day", max_length=255, null=True, blank=True)
     ocd_division_id = models.CharField(verbose_name="ocd division id", max_length=255, null=True, blank=True)
+
+    ballotpedia_kind_of_election = models.CharField(
+        verbose_name="election filter", max_length=255, null=True, blank=True)
+
     # DALE 2015-05-01 The election type is currently in the contests, and not in the election
     # is_general_election = False  # Reset to false
     # is_primary_election = False  # Reset to false
