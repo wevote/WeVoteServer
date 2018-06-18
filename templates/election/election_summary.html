@@ -133,12 +133,18 @@
         Reach out to Ballotpedia API and retrieve the races for all districts covered by this election.
         This needs to be run before trying to retrieve ballot items. It is also a good idea to merge/groom the races
         data before "Retrieve Ballots".
+        IFF this script times
+        out, <a href="{% url 'import_export_batches:batch_list' %}?kind_of_batch=CONTEST_OFFICE&google_civic_election_id={{ election.google_civic_election_id }}&state_code={{ state_code }}" target="_blank">
+        go here after ~5 minutes to see the results.</a>
   </li>
 
   <li>
     <a href="{% url 'ballotpedia:retrieve_candidates' %}?google_civic_election_id={{ election.google_civic_election_id }}&state_code={{ state_code }}" target="_blank">
         Ballotpedia: Retrieve Candidates for this Election{% if state_code %} (for {{ state_code }}){% endif %}</a> (in new window)<br />
         Reach out to Ballotpedia API and retrieve the candidates for all offices in this election.
+        IFF this script times
+        out, <a href="{% url 'import_export_batches:batch_list' %}?kind_of_batch=CANDIDATE&google_civic_election_id={{ election.google_civic_election_id }}&state_code={{ state_code }}" target="_blank">
+        go here after ~5 minutes to see the results.</a>
   </li>
 
   <li>
@@ -147,6 +153,9 @@
         Reach out to Ballotpedia API and retrieve the measures for all districts covered by this election.
         This needs to be run before trying to retrieve ballot items. It is also a good idea to merge/groom the measures
         data before "Retrieve Ballots".
+        IFF this script times
+        out, <a href="{% url 'import_export_batches:batch_list' %}?kind_of_batch=MEASURE&google_civic_election_id={{ election.google_civic_election_id }}&state_code={{ state_code }}" target="_blank">
+        go here after ~5 minutes to see the results.</a>
   </li>
 
   <li>
@@ -155,6 +164,9 @@
         Reach out to Ballotpedia API and ask for ballots from many polling locations so we can stitch
         together the measures, races and candidates. Add "import_limit" as a URL variable to increase the number of
         polling locations to retrieve ballots from.
+        IFF this script times
+        out, <a href="{% url 'import_export_batches:batch_set_list' %}?kind_of_batch=IMPORT_BALLOT_ITEM&google_civic_election_id={{ election.google_civic_election_id }}&state_code={{ state_code }}" target="_blank">
+        go here after ~5 minutes to see the results.</a>
   </li>
 {% endif %}
 
