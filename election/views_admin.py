@@ -9,10 +9,10 @@ from analytics.models import AnalyticsManager
 from ballot.controllers import refresh_voter_ballots_from_polling_location
 from ballot.models import BallotItemListManager, BallotReturnedListManager, BallotReturnedManager, \
     VoterBallotSavedManager
-from candidate.models import CandidateCampaignListManager, CandidateCampaignManager
+from candidate.models import CandidateCampaignListManager, CandidateCampaign
 from config.base import get_environment_variable
 from datetime import datetime, timedelta
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpResponseRedirect
 from django.core.urlresolvers import reverse
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -26,17 +26,17 @@ from image.models import WeVoteImageManager
 from import_export_google_civic.controllers import retrieve_one_ballot_from_google_civic_api, \
     store_one_ballot_from_google_civic_api
 from measure.models import ContestMeasureList
-from office.models import ContestOfficeListManager, ContestOfficeManager
+from office.models import ContestOfficeListManager
 from pledge_to_vote.models import PledgeToVoteManager
 from polling_location.models import PollingLocation
-from position.models import ANY_STANCE, PositionListManager, PositionManager
+from position.models import ANY_STANCE, PositionEntered, PositionListManager
 import pytz
 from quick_info.models import QuickInfoManager
 from wevote_settings.models import RemoteRequestHistoryManager
 from voter.models import VoterAddressManager, VoterDeviceLinkManager, voter_has_authority
-from voter_guide.models import VoterGuideListManager
+from voter_guide.models import VoterGuide, VoterGuideListManager
 import wevote_functions.admin
-from wevote_functions.functions import convert_to_int, get_voter_device_id, positive_value_exists, STATE_CODE_MAP
+from wevote_functions.functions import convert_to_int, positive_value_exists, STATE_CODE_MAP
 
 logger = wevote_functions.admin.get_logger(__name__)
 
@@ -674,6 +674,31 @@ def election_list_view(request):
         election.ballot_location_display_option_on_count = \
             ballot_returned_list_manager.fetch_ballot_location_display_option_on_count_for_election(
                 election.google_civic_election_id, election.state_code)
+
+        # if not positive_value_exists(show_all_elections):
+        # If we are only looking at upcoming elections, gather some additional statistics
+        # How many candidates?
+        candidate_list_query = CandidateCampaign.objects.all()
+        candidate_list_query = candidate_list_query.filter(
+            google_civic_election_id=election.google_civic_election_id)
+        election.candidate_count = candidate_list_query.count()
+
+        # How many without photos?
+        candidate_list_query = CandidateCampaign.objects.all()
+        candidate_list_query = candidate_list_query.filter(
+            google_civic_election_id=election.google_civic_election_id)
+        candidate_list_query = candidate_list_query.filter(
+            Q(we_vote_hosted_profile_image_url_tiny__isnull=True) | Q(we_vote_hosted_profile_image_url_tiny='')
+        )
+        election.candidates_without_photo_count = candidate_list_query.count()
+
+        # Number of Voter Guides
+        voter_guide_query = VoterGuide.objects.filter(google_civic_election_id=election.google_civic_election_id)
+        election.voter_guides_count = voter_guide_query.count()
+
+        # Number of Public Positions
+        position_query = PositionEntered.objects.filter(google_civic_election_id=election.google_civic_election_id)
+        election.public_positions_count = position_query.count()
 
         election_list_modified.append(election)
 

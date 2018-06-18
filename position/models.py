@@ -1751,7 +1751,7 @@ class PositionListManager(models.Model):
             return position_list
 
         if retrieve_public_positions:
-            # If retrieving PositionsEntered, make sure we have the necessary variables
+            # If retrieving PositionEntered, make sure we have the necessary variables
             if type(organizations_followed_we_vote_id_list) is list \
                     and len(organizations_followed_we_vote_id_list) == 0:
                 position_list = []
@@ -1895,7 +1895,7 @@ class PositionListManager(models.Model):
             return position_list
 
         if retrieve_public_positions:
-            # If retrieving PositionsEntered, make sure we have the necessary variables
+            # If retrieving PositionEntered, make sure we have the necessary variables
             if type(organizations_followed_we_vote_id_list) is list \
                     and len(organizations_followed_we_vote_id_list) == 0:
                 position_list = []
@@ -2961,7 +2961,7 @@ class PositionListManager(models.Model):
             position_list_query = PositionEntered.objects.using('readonly').all()
 
         if retrieve_public_positions:
-            # If retrieving PositionsEntered, make sure we have the necessary variables
+            # If retrieving PositionEntered, make sure we have the necessary variables
             if type(organizations_followed_we_vote_id_list) is list \
                     and len(organizations_followed_we_vote_id_list) == 0:
                 return 0

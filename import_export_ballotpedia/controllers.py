@@ -816,6 +816,11 @@ def groom_ballotpedia_data_for_processing(structured_json, google_civic_election
                     modified_measures_json_list = []
                     # Loop through this data and move ['office']['data'] into root level
                     for one_measure_json in measures_json_list:
+                        if one_measure_json['status'] \
+                                not in ("On the ballot", "Qualified for the ballot"):
+                            # If the candidate is not on the ballot yet or declared, we don't want to include them
+                            continue
+
                         try:
                             inner_election_json = one_measure_json['election']['data']
                             inner_district_json = one_measure_json['district']['data']

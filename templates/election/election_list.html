@@ -56,6 +56,12 @@
             <td>State Code</td>
             <td>List?</td>
             <td>Ballot Locations</td>
+        {% if not show_all_elections %}{% endif %}
+            <td align="middle">Candidates<br />
+              (w/o Photos)</td>
+            <td align="middle">Voter Guides<br />
+              (Public Positions)</td>
+
             <td>&nbsp;</td>
         </tr>
     {% for election in election_list %}
@@ -71,6 +77,32 @@
                 {% if election.ballot_location_display_option_on_count %} / {{ election.ballot_location_display_option_on_count|default_if_none:"" }}{% endif %}
             {% endif %}
             </td>
+        {% if not show_all_elections %}{% endif %}
+            <td align="middle">
+            {% if election.candidate_count %}
+                <a href="{% url 'candidate:candidate_list' %}?google_civic_election_id={{ election.google_civic_election_id }}&state_code={{ election.state_code }}"
+                   target="_blank">
+                {{ election.candidate_count|default_if_none:"" }}</a>
+            {% endif %}
+            {% if election.candidates_without_photo_count %}
+                <a href="{% url 'candidate:candidate_list' %}?google_civic_election_id={{ election.google_civic_election_id }}&state_code={{ election.state_code }}"
+                   target="_blank">
+                ({{ election.candidates_without_photo_count|default_if_none:"" }})</a>
+            {% endif %}
+            </td>
+            <td align="middle">
+            {% if election.voter_guides_count %}
+                <a href="{% url 'voter_guide:voter_guide_list' %}?google_civic_election_id={{ election.google_civic_election_id }}&state_code={{ election.state_code }}"
+                   target="_blank">
+                {{ election.voter_guides_count|default_if_none:"" }}</a>
+            {% endif %}
+            {% if election.public_positions_count %}
+                <a href="{% url 'position:position_list' %}?google_civic_election_id={{ election.google_civic_election_id }}&state_code={{ election.state_code }}"
+                   target="_blank">
+                ({{ election.public_positions_count|default_if_none:"" }})</a>
+            {% endif %}
+            </td>
+
             <td><a href="{% url 'election:election_edit' election.id %}" style="font-size: .65em">(edit)</a></td>
         </tr>
     {% endfor %}
