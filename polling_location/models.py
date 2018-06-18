@@ -230,15 +230,23 @@ class PollingLocationManager(models.Model):
                 positive_value_exists(polling_location.city) or not \
                 positive_value_exists(polling_location.state) or not \
                 positive_value_exists(polling_location.zip_long):
-            # We require all four values
-            results = {
-                'status':                   "POPULATE_LATITUDE_AND_LONGITUDE-MISSING_REQUIRED_ADDRESS_INFO ",
-                'geocoder_quota_exceeded':  False,
-                'success':                  False,
-                'latitude':                 latitude,
-                'longitude':                longitude,
-            }
-            return results
+            if positive_value_exists(polling_location.line1) and \
+                    positive_value_exists(polling_location.city) and \
+                    positive_value_exists(polling_location.state) and \
+                    'ak' == polling_location.state.lower() and not \
+                    positive_value_exists(polling_location.zip_long):
+                # We do not need a ZIP code in Alaska
+                pass
+            else:
+                # We require all four values
+                results = {
+                    'status':                   "POPULATE_LATITUDE_AND_LONGITUDE-MISSING_REQUIRED_ADDRESS_INFO ",
+                    'geocoder_quota_exceeded':  False,
+                    'success':                  False,
+                    'latitude':                 latitude,
+                    'longitude':                longitude,
+                }
+                return results
 
         full_ballot_address = '{}, {}, {} {}'.format(
             polling_location.line1,

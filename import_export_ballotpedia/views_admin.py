@@ -2,7 +2,8 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
-from .controllers import retrieve_ballot_items_from_polling_location, \
+from .controllers import attach_ballotpedia_election_by_district_from_api, \
+    retrieve_ballot_items_from_polling_location, \
     retrieve_ballotpedia_candidates_by_election_from_api, retrieve_ballotpedia_measures_by_district_from_api, \
     retrieve_district_list_from_polling_location, retrieve_ballotpedia_offices_by_district_from_api, \
     retrieve_ballotpedia_offices_by_election_from_api
@@ -107,6 +108,116 @@ def import_export_ballotpedia_index_view(request):
         'messages_on_stage':    messages_on_stage,
     }
     return render(request, 'import_export_ballotpedia/index.html', template_values)
+
+
+@login_required
+def attach_ballotpedia_election_view(request, election_local_id=0):
+    """
+    Reach out to Ballotpedia and retrieve the details about this election needed to make other API calls.
+    :param request:
+    :param election_local_id:
+    :return:
+    """
+    # admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'political_data_manager'}
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
+    state_code = request.GET.get('state_code', '')
+    election_state_code = ""
+
+    ballotpedia_election_id = 0
+    ballotpedia_kind_of_election = ""
+    google_civic_election_id = 0
+    polling_location_list = []
+    election_name = "(election name unknown)"
+    status = ""
+
+    try:
+        election_on_stage = Election.objects.get(id=election_local_id)
+        ballotpedia_election_id = election_on_stage.ballotpedia_election_id
+        google_civic_election_id = election_on_stage.google_civic_election_id
+        ballotpedia_kind_of_election = election_on_stage.ballotpedia_kind_of_election
+        election_state_code = election_on_stage.get_election_state()
+        election_name = election_on_stage.election_name
+    except Election.MultipleObjectsReturned as e:
+        messages.add_message(request, messages.ERROR,
+                             'Could not retrieve election data. More than one election found.')
+        return HttpResponseRedirect(reverse('election:election_list', args=()))
+    except Election.DoesNotExist:
+        messages.add_message(request, messages.ERROR,
+                             'Could not retrieve election data. Election could not be found.')
+        return HttpResponseRedirect(reverse('election:election_list', args=()))
+
+    if positive_value_exists(ballotpedia_election_id) and positive_value_exists(ballotpedia_kind_of_election):
+        messages.add_message(request, messages.ERROR,
+                             'Required values already exist. (ballotpedia_election_id & ballotpedia_kind_of_election)')
+        return HttpResponseRedirect(reverse('election:election_summary', args=(election_local_id,)))
+
+    # Check to see if we have polling location data related to the region(s) covered by this election
+    # We request the ballot data for each polling location as a way to build up our local data
+    if not positive_value_exists(state_code) and positive_value_exists(google_civic_election_id):
+        state_code = election_state_code
+
+    try:
+        polling_location_count_query = PollingLocation.objects.all()
+        polling_location_count_query = polling_location_count_query.filter(state__iexact=state_code)
+        polling_location_count = polling_location_count_query.count()
+
+        if positive_value_exists(polling_location_count):
+            polling_location_query = PollingLocation.objects.all()
+            polling_location_query = polling_location_query.filter(state__iexact=state_code)
+            # Ordering by "location_name" creates a bit of (locational) random order
+            polling_location_list = polling_location_query.order_by('location_name')[:5]
+    except PollingLocation.DoesNotExist:
+        messages.add_message(request, messages.INFO,
+                             'Could not retrieve polling location data for the {election_name}. '
+                             'No polling locations exist for the state \'{state}\'. '
+                             'Data needed from VIP.'.format(
+                                 election_name=election_name,
+                                 state=state_code))
+        return HttpResponseRedirect(reverse('election:election_summary', args=(election_local_id,)))
+
+    if polling_location_count == 0:
+        messages.add_message(request, messages.ERROR,
+                             'Could not retrieve ballot data for the {election_name}. '
+                             'No polling locations returned for the state \'{state}\'. (error 2)'.format(
+                                 election_name=election_name,
+                                 state=state_code))
+        return HttpResponseRedirect(reverse('election:election_summary', args=(election_local_id,)))
+
+    # If here, we know that we have some polling_locations to use in order to retrieve ballotpedia districts
+    merged_district_list = []
+    for polling_location in polling_location_list:
+        one_ballot_results = retrieve_district_list_from_polling_location(
+            google_civic_election_id, polling_location=polling_location)
+        if one_ballot_results['success']:
+            district_list = one_ballot_results['district_list']
+            if len(district_list):
+                for one_ballotpedia_district_id in district_list:
+                    if one_ballotpedia_district_id not in merged_district_list:
+                        # Build up a list of ballotpedia districts that we need to retrieve races for
+                        merged_district_list.append(one_ballotpedia_district_id)
+
+    # Once we have a summary of all ballotpedia districts, we want to request all of the races
+    if not len(merged_district_list):
+        messages.add_message(request, messages.ERROR,
+                             'Could not find Ballotpedia districts. ')
+        return HttpResponseRedirect(reverse('election:election_summary', args=(election_local_id,)) +
+                                    '?google_civic_election_id=' + str(google_civic_election_id))
+
+    results = attach_ballotpedia_election_by_district_from_api(google_civic_election_id, merged_district_list)
+
+    if positive_value_exists(results['election_found']):
+        messages.add_message(request, messages.INFO,
+                             'Ballotpedia election information attached. ')
+    else:
+        messages.add_message(request, messages.ERROR,
+                             'Ballotpedia election information not attached. status: {status} '
+                             .format(status=results['status']))
+    return HttpResponseRedirect(reverse('election:election_summary', args=(election_local_id,)) +
+                                '?google_civic_election_id=' + str(google_civic_election_id) +
+                                '&state_code=' + str(state_code))
 
 
 @login_required
@@ -285,7 +396,7 @@ def retrieve_ballotpedia_data_for_polling_locations_view(request, election_local
             else:
                 polling_locations_without_data += 1
 
-        # Once we have a summary of all ballotpedia districts, we want to request all of the races
+        # Once we have a summary of all ballotpedia districts, we want to request all of the races or measures
         if len(merged_district_list):
             kind_of_batch = "Unknown"
             results = {}

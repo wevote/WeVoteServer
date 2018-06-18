@@ -9,6 +9,9 @@ from . import views_admin
 
 urlpatterns = [
     # url(r'^$', views_admin.retrieve_ballotpedia_candidates_by_election_from_api_view, name='ballotpedia_home',),
+    url(r'^(?P<election_local_id>[0-9]+)/attach_ballotpedia_election/$',
+        views_admin.attach_ballotpedia_election_view,
+        name='attach_ballotpedia_election'),
     url(r'^import_ballot_items_for_location/$', views_admin.import_ballot_items_for_location_view,
         name='import_ballot_items_for_location'),
     url(r'^retrieve_candidates/$', views_admin.retrieve_ballotpedia_candidates_by_election_from_api_view,
