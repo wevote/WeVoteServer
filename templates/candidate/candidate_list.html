@@ -70,8 +70,8 @@
 
 {% if candidate_list and google_civic_election_id and hide_candidate_tools != 1 and hide_candidate_tools != '1' %}
     <ul>
-        <li>Prepare: <a href="{% url 'ballotpedia:retrieve_candidates' %}?google_civic_election_id={{ google_civic_election_id }}&only_retrieve_if_zero_candidates=0" target="_blank" >
-        Ballotpedia: Retrieve Candidates for Offices with Zero Entries</a> (50 races at a time -- in new window)</li>
+        <li>Prepare: <a href="{% url 'election:election_summary_by_google_id' google_civic_election_id %}?google_civic_election_id={{ google_civic_election_id }}" target="_blank" >
+        Jump to Election so we can retrieve Offices and Candidates from Ballotpedia</a> (in new window)</li>
         <li>Prepare: <a href="{% url 'candidate:find_and_merge_duplicate_candidates' %}?google_civic_election_id={{ google_civic_election_id }}" >
         Find and Merge Duplicate Candidates for this Election</a> (about 1 minute)</li>
         <li>Prepare: <a href="{% url 'candidate:find_and_merge_duplicate_candidates' %}?google_civic_election_id={{ google_civic_election_id }}" >

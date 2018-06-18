@@ -11,6 +11,7 @@ from ballot.models import BallotItemListManager, BallotReturnedListManager, Ball
     VoterBallotSavedManager
 from candidate.models import CandidateCampaignListManager, CandidateCampaignManager
 from config.base import get_environment_variable
+from datetime import datetime, timedelta
 from django.http import HttpResponse, HttpResponseRedirect
 from django.core.urlresolvers import reverse
 from django.contrib import messages
@@ -29,6 +30,7 @@ from office.models import ContestOfficeListManager, ContestOfficeManager
 from pledge_to_vote.models import PledgeToVoteManager
 from polling_location.models import PollingLocation
 from position.models import ANY_STANCE, PositionListManager, PositionManager
+import pytz
 from quick_info.models import QuickInfoManager
 from wevote_settings.models import RemoteRequestHistoryManager
 from voter.models import VoterAddressManager, VoterDeviceLinkManager, voter_has_authority
@@ -623,11 +625,20 @@ def election_list_view(request):
     google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
     state_code = request.GET.get('state_code', '')
     election_search = request.GET.get('election_search', '')
+    show_all_elections = request.GET.get('show_all_elections', False)
 
     messages_on_stage = get_messages(request)
 
     election_list_query = Election.objects.all()
     election_list_query = election_list_query.order_by('election_day_text').reverse()
+
+    if not positive_value_exists(show_all_elections):
+        timezone = pytz.timezone("America/Los_Angeles")
+        datetime_now = timezone.localize(datetime.now())
+        two_days = timedelta(days=2)
+        datetime_two_days_ago = datetime_now - two_days
+        earliest_date_to_show = datetime_two_days_ago.strftime("%Y-%m-%d")
+        election_list_query = election_list_query.exclude(election_day_text__lt=earliest_date_to_show)
 
     if positive_value_exists(election_search):
         filters = []
@@ -671,6 +682,7 @@ def election_list_view(request):
         'election_list':            election_list_modified,
         'election_search':          election_search,
         'google_civic_election_id': google_civic_election_id,
+        'show_all_elections':       show_all_elections,
         'state_code':               state_code,
     }
     return render(request, 'election/election_list.html', template_values)

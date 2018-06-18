@@ -35,6 +35,13 @@
 {% endif %}
     <input type="text" name="election_search" id="election_search_id" value="{{ election_search }}" />
     <input type="submit" value="Search" />
+
+    {# Default to showing only upcoming elections #}
+    <label for="show_all_elections_id">
+      <input type="checkbox" name="show_all_elections" id="show_all_elections_id" value="1"
+             {% if show_all_elections %}checked{% endif %} /> All Elections
+    </label>
+    &nbsp;&nbsp;&nbsp;&nbsp;
 </form>
 
 
@@ -75,4 +82,13 @@
     <p>
         <a href="{% url 'election:election_edit' 0 %}" >Add Upcoming Election Manually</a>
     </p>
+
+<script>
+    $(function() {
+        $('#show_all_elections_id').change(function() {
+            this.form.submit();
+        });
+    });
+</script>
+
 {% endblock %}
