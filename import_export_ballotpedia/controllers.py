@@ -22,12 +22,14 @@ BALLOTPEDIA_API_KEY = get_environment_variable("BALLOTPEDIA_API_KEY")
 BALLOTPEDIA_API_CANDIDATES_URL = get_environment_variable("BALLOTPEDIA_API_CANDIDATES_URL")
 BALLOTPEDIA_API_CONTAINS_URL = get_environment_variable("BALLOTPEDIA_API_CONTAINS_URL")
 BALLOTPEDIA_API_ELECTIONS_URL = get_environment_variable("BALLOTPEDIA_API_ELECTIONS_URL")
+BALLOTPEDIA_API_FILES_URL = get_environment_variable("BALLOTPEDIA_API_FILES_URL")
 BALLOTPEDIA_API_MEASURES_URL = get_environment_variable("BALLOTPEDIA_API_MEASURES_URL")
 BALLOTPEDIA_API_RACES_URL = get_environment_variable("BALLOTPEDIA_API_RACES_URL")
 GOOGLE_MAPS_API_KEY = get_environment_variable("GOOGLE_MAPS_API_KEY")
 BALLOTPEDIA_API_CANDIDATES_TYPE = "candidates"
 BALLOTPEDIA_API_CONTAINS_TYPE = "contains"
 BALLOTPEDIA_API_ELECTIONS_TYPE = "elections"
+BALLOTPEDIA_API_FILES_TYPE = "files"
 BALLOTPEDIA_API_MEASURES_TYPE = "measures"
 BALLOTPEDIA_API_RACES_TYPE = "races"
 
@@ -314,7 +316,8 @@ def retrieve_ballot_items_from_polling_location(
         # Use Ballotpedia API call counter to track the number of queries we are doing each day
         ballotpedia_api_counter_manager = BallotpediaApiCounterManager()
         ballotpedia_api_counter_manager.create_counter_entry(BALLOTPEDIA_API_CONTAINS_TYPE,
-                                                             google_civic_election_id, ballotpedia_election_id=0)
+                                                             google_civic_election_id=google_civic_election_id,
+                                                             ballotpedia_election_id=0)
 
         contains_api = True
         groom_results = groom_ballotpedia_data_for_processing(structured_json, google_civic_election_id,
@@ -398,7 +401,8 @@ def retrieve_district_list_from_polling_location(
         # Use Ballotpedia API call counter to track the number of queries we are doing each day
         ballotpedia_api_counter_manager = BallotpediaApiCounterManager()
         ballotpedia_api_counter_manager.create_counter_entry(BALLOTPEDIA_API_CONTAINS_TYPE,
-                                                             google_civic_election_id, ballotpedia_election_id=0)
+                                                             google_civic_election_id=google_civic_election_id,
+                                                             ballotpedia_election_id=0)
 
         contains_api = True
         groom_results = groom_ballotpedia_data_for_processing(structured_json, google_civic_election_id,
@@ -461,7 +465,8 @@ def retrieve_ballotpedia_offices_by_election_from_api(google_civic_election_id):
 
     # Use Ballotpedia API call counter to track the number of queries we are doing each day
     ballotpedia_api_counter_manager = BallotpediaApiCounterManager()
-    ballotpedia_api_counter_manager.create_counter_entry(BALLOTPEDIA_API_RACES_TYPE, ballotpedia_election_id)
+    ballotpedia_api_counter_manager.create_counter_entry(BALLOTPEDIA_API_RACES_TYPE,
+                                                         ballotpedia_election_id=ballotpedia_election_id)
 
     groom_results = groom_ballotpedia_data_for_processing(structured_json, google_civic_election_id)
     modified_json_list = groom_results['modified_json_list']
@@ -557,7 +562,8 @@ def retrieve_ballotpedia_offices_by_district_from_api(google_civic_election_id, 
 
     # Use Ballotpedia API call counter to track the number of queries we are doing each day
     ballotpedia_api_counter_manager = BallotpediaApiCounterManager()
-    ballotpedia_api_counter_manager.create_counter_entry(BALLOTPEDIA_API_RACES_TYPE, ballotpedia_election_id)
+    ballotpedia_api_counter_manager.create_counter_entry(BALLOTPEDIA_API_RACES_TYPE,
+                                                         ballotpedia_election_id=ballotpedia_election_id)
 
     groom_results = groom_ballotpedia_data_for_processing(structured_json, google_civic_election_id,
                                                           kind_of_election=ballotpedia_kind_of_election)
@@ -641,7 +647,8 @@ def retrieve_ballotpedia_measures_by_district_from_api(google_civic_election_id,
 
     # Use Ballotpedia API call counter to track the number of queries we are doing each day
     ballotpedia_api_counter_manager = BallotpediaApiCounterManager()
-    ballotpedia_api_counter_manager.create_counter_entry(BALLOTPEDIA_API_MEASURES_TYPE, ballotpedia_election_id)
+    ballotpedia_api_counter_manager.create_counter_entry(BALLOTPEDIA_API_MEASURES_TYPE,
+                                                         ballotpedia_election_id=ballotpedia_election_id)
 
     groom_results = groom_ballotpedia_data_for_processing(structured_json, google_civic_election_id)
     modified_json_list = groom_results['modified_json_list']
@@ -660,6 +667,54 @@ def retrieve_ballotpedia_measures_by_district_from_api(google_civic_election_id,
         'success': success,
         'status': status,
         'batch_header_id': batch_header_id,
+    }
+    return results
+
+
+def retrieve_ballotpedia_candidate_image_from_api(ballotpedia_image_id, google_civic_election_id=0):
+    success = True
+    status = ""
+
+    if not positive_value_exists(ballotpedia_image_id):
+        results = {
+            'success': False,
+            'status': "RETRIEVE_BALLOTPEDIA_CANDIDATE_IMAGE-MISSING_IMAGE_ID ",
+        }
+        return results
+
+    response = requests.get(BALLOTPEDIA_API_FILES_URL + "/" + str(ballotpedia_image_id), params={
+        "access_token": BALLOTPEDIA_API_KEY,
+    })
+
+    if not positive_value_exists(response.text):
+        status += "NO_RESPONSE_TEXT_FOUND"
+        if positive_value_exists(response.url):
+            status += ": " + response.url
+        results = {
+            'success': success,
+            'status': status,
+        }
+        return results
+
+    structured_json = json.loads(response.text)
+
+    # Use Ballotpedia API call counter to track the number of queries we are doing each day
+    ballotpedia_api_counter_manager = BallotpediaApiCounterManager()
+    ballotpedia_api_counter_manager.create_counter_entry(
+        BALLOTPEDIA_API_FILES_TYPE, google_civic_election_id=google_civic_election_id)
+
+    profile_image_url_https = None
+    if 'data' in structured_json:
+        if 'meta' in structured_json:
+            if 'table' in structured_json['meta']:
+                if structured_json['meta']['table'] == 'directus_files':
+                    files_json = structured_json['data']
+                    profile_image_url_https = files_json['url']
+
+    results = {
+        'success': success,
+        'status': status,
+        'profile_image_url_https': profile_image_url_https,
     }
     return results
 
@@ -1234,7 +1289,9 @@ def retrieve_one_ballot_from_ballotpedia_api(latitude, longitude, incoming_googl
 
         # Use Ballotpedia API call counter to track the number of queries we are doing each day
         ballotpedia_api_counter_manager = BallotpediaApiCounterManager()
-        ballotpedia_api_counter_manager.create_counter_entry(BALLOTPEDIA_API_CONTAINS_TYPE, google_civic_election_id=0,  ballotpedia_election_id=0)
+        ballotpedia_api_counter_manager.create_counter_entry(BALLOTPEDIA_API_CONTAINS_TYPE,
+                                                             google_civic_election_id=0,
+                                                             ballotpedia_election_id=0)
 
         success = len(structured_json)
 

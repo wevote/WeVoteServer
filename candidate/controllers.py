@@ -9,7 +9,8 @@ from bookmark.models import BookmarkItemList
 from config.base import get_environment_variable
 from django.http import HttpResponse
 from exception.models import handle_exception
-from image.controllers import retrieve_all_images_for_one_candidate, cache_master_and_resized_image, BALLOTPEDIA, \
+from image.controllers import retrieve_all_images_for_one_candidate, cache_master_and_resized_image, \
+    BALLOTPEDIA_IMAGE_SOURCE, \
     LINKEDIN, TWITTER, WIKIPEDIA, FACEBOOK
 from import_export_vote_smart.controllers import retrieve_and_match_candidate_from_vote_smart, \
     retrieve_candidate_photo_from_vote_smart
@@ -1328,11 +1329,11 @@ def save_google_search_image_to_candidate_table(candidate, google_search_image_f
     }
 
     google_search_website_name = extract_website_from_url(google_search_link)
-    if BALLOTPEDIA in google_search_website_name:
+    if BALLOTPEDIA_IMAGE_SOURCE in google_search_website_name:
         cache_results = cache_master_and_resized_image(
             candidate_id=candidate.id, candidate_we_vote_id=candidate.we_vote_id,
             ballotpedia_profile_image_url=google_search_image_file,
-            image_source=BALLOTPEDIA)
+            image_source=BALLOTPEDIA_IMAGE_SOURCE)
         cached_ballotpedia_profile_image_url_https = cache_results['cached_ballotpedia_image_url_https']
         candidate.ballotpedia_photo_url = cached_ballotpedia_profile_image_url_https
         candidate.ballotpedia_page_title = google_search_link
@@ -1393,7 +1394,7 @@ def save_google_search_image_to_candidate_table(candidate, google_search_image_f
 
 def save_google_search_link_to_candidate_table(candidate, google_search_link):
     google_search_website_name = google_search_link.split("//")[1].split("/")[0]
-    if BALLOTPEDIA in google_search_website_name:
+    if BALLOTPEDIA_IMAGE_SOURCE in google_search_website_name:
         candidate.ballotpedia_page_title = google_search_link
     elif LINKEDIN in google_search_website_name:
         candidate.linkedin_url = google_search_link

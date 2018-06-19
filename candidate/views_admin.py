@@ -25,11 +25,11 @@ from election.models import Election, ElectionManager
 from exception.models import handle_record_found_more_than_one_exception,\
     handle_record_not_found_exception, handle_record_not_saved_exception, print_to_log
 from google_custom_search.models import GoogleSearchUser, GoogleSearchUserManager
+from image.controllers import retrieve_and_save_ballotpedia_candidate_images
 from import_export_twitter.controllers import refresh_twitter_candidate_details
 from import_export_vote_smart.models import VoteSmartRatingOneCandidate
 from import_export_vote_smart.votesmart_local import VotesmartApiError
 from politician.models import PoliticianManager
-from position.controllers import move_positions_to_another_candidate
 from position.models import PositionEntered, PositionListManager
 from twitter.models import TwitterLinkPossibility
 from voter.models import voter_has_authority
@@ -474,6 +474,7 @@ def candidate_edit_view(request, candidate_id=0, candidate_campaign_we_vote_id="
     candidate_url = request.GET.get('candidate_url', False)
     facebook_url = request.GET.get('facebook_url', False)
     candidate_email = request.GET.get('candidate_email', False)
+    candidate_phone = request.GET.get('candidate_phone', False)
     party = request.GET.get('party', False)
     ballot_guide_official_statement = request.GET.get('ballot_guide_official_statement', False)
     ballotpedia_candidate_id = request.GET.get('ballotpedia_candidate_id', False)
@@ -591,6 +592,7 @@ def candidate_edit_view(request, candidate_id=0, candidate_campaign_we_vote_id="
             'candidate_url':                    candidate_url,
             'facebook_url':                     facebook_url,
             'candidate_email':                  candidate_email,
+            'candidate_phone':                  candidate_phone,
             'party':                            party,
             'ballot_guide_official_statement':  ballot_guide_official_statement,
             'ballotpedia_candidate_id':         ballotpedia_candidate_id,
@@ -622,6 +624,9 @@ def candidate_edit_process_view(request):
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
+    ballotpedia_image_id = 0
+    ballotpedia_profile_image_url_https = None
+
     look_for_politician = request.POST.get('look_for_politician', False)  # If this comes in with value, don't save
     remove_duplicate_process = request.POST.get('remove_duplicate_process', False)
     refresh_from_twitter = request.POST.get('refresh_from_twitter', False)
@@ -640,6 +645,7 @@ def candidate_edit_process_view(request):
     candidate_url = request.POST.get('candidate_url', False)
     facebook_url = request.POST.get('facebook_url', False)
     candidate_email = request.POST.get('candidate_email', False)
+    candidate_phone = request.POST.get('candidate_phone', False)
     contest_office_id = request.POST.get('contest_office_id', False)
     ballot_guide_official_statement = request.POST.get('ballot_guide_official_statement', False)
     party = request.POST.get('party', False)
@@ -743,6 +749,7 @@ def candidate_edit_process_view(request):
                         "&candidate_url=" + str(candidate_url) + \
                         "&facebook_url=" + str(facebook_url) + \
                         "&candidate_email=" + str(candidate_email) + \
+                        "&candidate_phone=" + str(candidate_phone) + \
                         "&party=" + str(party) + \
                         "&ballot_guide_official_statement=" + str(ballot_guide_official_statement) + \
                         "&vote_smart_id=" + str(vote_smart_id) + \
@@ -793,6 +800,7 @@ def candidate_edit_process_view(request):
                             "&candidate_url=" + str(candidate_url) + \
                             "&facebook_url=" + str(facebook_url) + \
                             "&candidate_email=" + str(candidate_email) + \
+                            "&candidate_phone=" + str(candidate_phone) + \
                             "&party=" + str(party) + \
                             "&ballot_guide_official_statement=" + str(ballot_guide_official_statement) + \
                             "&ballotpedia_candidate_id=" + str(ballotpedia_candidate_id) + \
@@ -814,6 +822,8 @@ def candidate_edit_process_view(request):
                 candidate_on_stage.facebook_url = facebook_url
             if candidate_email is not False:
                 candidate_on_stage.candidate_email = candidate_email
+            if candidate_phone is not False:
+                candidate_on_stage.candidate_phone = candidate_phone
             if party is not False:
                 candidate_on_stage.party = party
             if ballot_guide_official_statement is not False:
@@ -868,6 +878,8 @@ def candidate_edit_process_view(request):
                 candidate_on_stage.contest_office_name = contest_office_name
             candidate_on_stage.save()
 
+            ballotpedia_image_id = candidate_on_stage.ballotpedia_image_id
+            ballotpedia_profile_image_url_https = candidate_on_stage.ballotpedia_profile_image_url_https
             # Now refresh the cache entries for this candidate
 
             messages.add_message(request, messages.INFO, 'Candidate Campaign updated.')
@@ -903,6 +915,8 @@ def candidate_edit_process_view(request):
                     candidate_on_stage.facebook_url = facebook_url
                 if candidate_email is not False:
                     candidate_on_stage.candidate_email = candidate_email
+                if candidate_phone is not False:
+                    candidate_on_stage.candidate_phone = candidate_phone
                 if party is not False:
                     candidate_on_stage.party = party
                 if ballot_guide_official_statement is not False:
@@ -928,6 +942,8 @@ def candidate_edit_process_view(request):
 
                 candidate_on_stage.save()
                 candidate_id = candidate_on_stage.id
+                ballotpedia_image_id = candidate_on_stage.ballotpedia_image_id
+                ballotpedia_profile_image_url_https = candidate_on_stage.ballotpedia_profile_image_url_https
                 messages.add_message(request, messages.INFO, 'New candidate saved.')
             else:
                 # messages.add_message(request, messages.INFO, 'Could not save -- missing required variables.')
@@ -942,6 +958,7 @@ def candidate_edit_process_view(request):
                                 "&candidate_url=" + str(candidate_url) + \
                                 "&facebook_url=" + str(facebook_url) + \
                                 "&candidate_email=" + str(candidate_email) + \
+                                "&candidate_phone=" + str(candidate_phone) + \
                                 "&party=" + str(party) + \
                                 "&ballot_guide_official_statement=" + str(ballot_guide_official_statement) + \
                                 "&ballotpedia_candidate_id=" + str(ballotpedia_candidate_id) + \
@@ -963,6 +980,9 @@ def candidate_edit_process_view(request):
     except Exception as e:
         messages.add_message(request, messages.ERROR, 'Could not save candidate.')
         return HttpResponseRedirect(reverse('candidate:candidate_edit', args=(candidate_id,)))
+
+    if positive_value_exists(ballotpedia_image_id) and not positive_value_exists(ballotpedia_profile_image_url_https):
+        results = retrieve_and_save_ballotpedia_candidate_images(candidate_on_stage)
 
     if positive_value_exists(refresh_from_twitter) or positive_value_exists(candidate_twitter_handle):
         results = refresh_twitter_candidate_details(candidate_on_stage)

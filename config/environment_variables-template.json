@@ -78,6 +78,7 @@
   "BALLOTPEDIA_API_CANDIDATES_URL": "https://api.ballotpedia.org/v3/api/1.1/tables/candidates/rows",
   "BALLOTPEDIA_API_CONTAINS_URL":   "https://api.ballotpedia.org/v3/api/contains",
   "BALLOTPEDIA_API_ELECTIONS_URL":  "https://api.ballotpedia.org/v3/api/1.1/tables/election_dates/rows",
+  "BALLOTPEDIA_API_FILES_URL":      "https://api.ballotpedia.org/v3/api/1.1/files",
   "BALLOTPEDIA_API_MEASURES_URL":   "https://api.ballotpedia.org/v3/api/1.1/tables/ballot_measures/rows",
   "BALLOTPEDIA_API_RACES_URL":      "https://api.ballotpedia.org/v3/api/1.1/tables/races/rows",
 

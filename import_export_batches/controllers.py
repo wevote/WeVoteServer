@@ -19,6 +19,7 @@ from elected_office.models import ElectedOffice, ElectedOfficeManager
 from electoral_district.controllers import retrieve_electoral_district
 from election.models import ElectionManager
 from exception.models import handle_exception
+from image.controllers import retrieve_and_save_ballotpedia_candidate_images
 from measure.models import ContestMeasure, ContestMeasureManager, ContestMeasureList
 from office.models import ContestOffice, ContestOfficeListManager, ContestOfficeManager
 from organization.models import Organization, OrganizationListManager, OrganizationManager, \
@@ -3192,6 +3193,7 @@ def import_candidate_data_from_batch_row_actions(batch_header_id, batch_row_id, 
 
         # These update values are using the field names in the CandidateCampaign class
         update_values = {}
+        retrieve_ballotpedia_image = False
         # We only want to add data, not remove any
         if positive_value_exists(one_batch_row_action.ballotpedia_candidate_id):
             update_values['ballotpedia_candidate_id'] = one_batch_row_action.ballotpedia_candidate_id
@@ -3205,6 +3207,7 @@ def import_candidate_data_from_batch_row_actions(batch_header_id, batch_row_id, 
             update_values['ballotpedia_election_id'] = one_batch_row_action.ballotpedia_election_id
         if positive_value_exists(one_batch_row_action.ballotpedia_image_id):
             update_values['ballotpedia_image_id'] = one_batch_row_action.ballotpedia_image_id
+            retrieve_ballotpedia_image = True
         if positive_value_exists(one_batch_row_action.ballotpedia_office_id):
             update_values['ballotpedia_office_id'] = one_batch_row_action.ballotpedia_office_id
         if positive_value_exists(one_batch_row_action.ballotpedia_person_id):
@@ -3270,6 +3273,12 @@ def import_candidate_data_from_batch_row_actions(batch_header_id, batch_row_id, 
                         new_candidate = results['new_candidate']
                         one_batch_row_action.candidate_we_vote_id = new_candidate.we_vote_id
                         one_batch_row_action.save()
+                        if positive_value_exists(retrieve_ballotpedia_image) \
+                                and not positive_value_exists(new_candidate.we_vote_hosted_profile_image_url_large):
+                            # Only run this if we have a ballotpedia_image_id and no saved profile image
+                            results = retrieve_and_save_ballotpedia_candidate_images(new_candidate)
+                            if results['success']:
+                                new_candidate = results['candidate']
                     except Exception as e:
                         success = False
                         status += "CANDIDATE_RETRIEVE_ERROR"
@@ -3279,8 +3288,15 @@ def import_candidate_data_from_batch_row_actions(batch_header_id, batch_row_id, 
 
             results = candidate_manager.update_candidate_row_entry(candidate_we_vote_id, update_values)
             if results['candidate_updated']:
+                new_candidate = results['updated_candidate']
                 number_of_candidates_updated += 1
                 success = True
+                if positive_value_exists(retrieve_ballotpedia_image) \
+                        and not positive_value_exists(new_candidate.we_vote_hosted_profile_image_url_large):
+                    # Only run this if we have a ballotpedia_image_id and no saved profile image
+                    results = retrieve_and_save_ballotpedia_candidate_images(new_candidate)
+                    if results['success']:
+                        new_candidate = results['candidate']
         else:
             # This is error, it shouldn't reach here, we are handling IMPORT_CREATE or UPDATE entries only.
             status += "IMPORT_CANDIDATE_ENTRY:NO_CREATE_OR_UPDATE_ERROR"
