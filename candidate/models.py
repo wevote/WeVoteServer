@@ -980,7 +980,8 @@ class CandidateCampaign(models.Model):
         verbose_name="candidate location from twitter", max_length=255, null=True, blank=True)
     twitter_followers_count = models.IntegerField(verbose_name="number of twitter followers",
                                                   null=False, blank=True, default=0)
-    twitter_profile_image_url_https = models.URLField(verbose_name='url of logo from twitter', blank=True, null=True)
+    twitter_profile_image_url_https = models.URLField(
+        verbose_name='locally cached url of candidate profile image from twitter', blank=True, null=True)
     twitter_profile_background_image_url_https = models.URLField(verbose_name='tile-able background from twitter',
                                                                  blank=True, null=True)
     twitter_profile_banner_url_https = models.URLField(verbose_name='profile banner image from twitter',
@@ -1025,6 +1026,8 @@ class CandidateCampaign(models.Model):
     ballotpedia_election_id = models.PositiveIntegerField(verbose_name="ballotpedia election id", null=True, blank=True)
     # The id of the image for retrieval from Ballotpedia API
     ballotpedia_image_id = models.PositiveIntegerField(verbose_name="ballotpedia image id", null=True, blank=True)
+    ballotpedia_profile_image_url_https = models.URLField(
+        verbose_name='locally cached url of candidate profile image from ballotpedia', blank=True, null=True)
     # Equivalent to Elected Office
     ballotpedia_office_id = models.PositiveIntegerField(
         verbose_name="ballotpedia elected office integer id", null=True, blank=True)
@@ -2002,6 +2005,48 @@ class CandidateCampaignManager(models.Model):
             'DoesNotExist':             exception_does_not_exist,
             'MultipleObjectsReturned':  exception_multiple_object_returned,
             'candidate':                candidate,
+        }
+        return results
+
+    def update_candidate_ballotpedia_image_details(
+            self, candidate,
+            cached_ballotpedia_profile_image_url_https,
+            we_vote_hosted_profile_image_url_large,
+            we_vote_hosted_profile_image_url_medium,
+            we_vote_hosted_profile_image_url_tiny):
+        """
+        Update a candidate entry with the latest image details.
+        """
+        success = False
+        status = "ENTERING_UPDATE_CANDIDATE_BALLOTPEDIA_IMAGE_DETAILS"
+        values_changed = False
+
+        if candidate:
+            if positive_value_exists(cached_ballotpedia_profile_image_url_https):
+                candidate.twitter_profile_image_url_https = cached_ballotpedia_profile_image_url_https
+                values_changed = True
+            if positive_value_exists(we_vote_hosted_profile_image_url_large):
+                candidate.we_vote_hosted_profile_image_url_large = we_vote_hosted_profile_image_url_large
+                values_changed = True
+            if positive_value_exists(we_vote_hosted_profile_image_url_medium):
+                candidate.we_vote_hosted_profile_image_url_medium = we_vote_hosted_profile_image_url_medium
+                values_changed = True
+            if positive_value_exists(we_vote_hosted_profile_image_url_tiny):
+                candidate.we_vote_hosted_profile_image_url_tiny = we_vote_hosted_profile_image_url_tiny
+                values_changed = True
+
+            if values_changed:
+                candidate.save()
+                success = True
+                status = "SAVED_BALLOTPEDIA_IMAGES "
+            else:
+                success = True
+                status = "NO_CHANGES_SAVED_TO_BALLOTPEDIA_IMAGES "
+
+        results = {
+            'success':      success,
+            'status':       status,
+            'candidate':    candidate,
         }
         return results
 

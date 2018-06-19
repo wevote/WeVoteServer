@@ -13,12 +13,14 @@ from ballot.controllers import choose_election_from_existing_data
 from candidate.models import CandidateCampaignManager
 from config.base import get_environment_variable
 from django.db.models import Q
+from import_export_ballotpedia.controllers import retrieve_ballotpedia_candidate_image_from_api
 from import_export_facebook.models import FacebookManager
 from issue.models import IssueManager
 from organization.models import OrganizationManager
 from politician.models import PoliticianManager
 from position.controllers import reset_all_position_image_details_from_candidate, \
-    reset_position_for_friends_image_details_from_voter, reset_position_entered_image_details_from_organization
+    reset_position_for_friends_image_details_from_voter, reset_position_entered_image_details_from_organization, \
+    update_all_position_details_from_candidate
 from twitter.functions import retrieve_twitter_user_info
 from twitter.models import TwitterUserManager
 from voter.models import VoterManager, VoterDeviceLinkManager, VoterAddressManager, VoterAddress, Voter
@@ -34,7 +36,7 @@ TWITTER = "twitter"
 FACEBOOK = "facebook"
 MAPLIGHT = "maplight"
 VOTE_SMART = "vote_smart"
-BALLOTPEDIA = "ballotpedia"
+BALLOTPEDIA_IMAGE_SOURCE = "ballotpedia"
 LINKEDIN = "linkedin"
 WIKIPEDIA = "wikipedia"
 OTHER_SOURCE = "other_source"  # Set "kind_of_image_other_source" to true
@@ -384,6 +386,7 @@ def cache_voter_master_images(voter_id):
     voter = voter_results['voter']
     if positive_value_exists(voter.we_vote_id):
         cache_all_kind_of_images_results['voter_we_vote_id'] = voter.we_vote_id
+        # DALE 2018-06-19 I don't see why we need a google_civic_election_id for storing a voter's photos
         voter_device_link_results = voter_device_link_manager.retrieve_voter_device_link(0, voter_id)
         if voter_device_link_results['success']:
             voter_address_results = voter_address_manager.retrieve_address(0, voter_id)
@@ -810,6 +813,67 @@ def retrieve_facebook_image_url(facebook_user_id):
         results['facebook_background_image_url'] = \
             facebook_user_results['facebook_user'].facebook_background_image_url_https
 
+    return results
+
+
+def retrieve_and_save_ballotpedia_candidate_images(candidate_campaign):
+    status = ""
+    candidate_campaign_manager = CandidateCampaignManager()
+    politician_manager = PoliticianManager()
+
+    if not candidate_campaign:
+        status += "BALLOTPEDIA_CANDIDATE_IMAGE_NOT_RETRIEVED-CANDIDATE_MISSING "
+        results = {
+            'success':      False,
+            'status':       status,
+            'candidate':    None,
+        }
+        return results
+
+    if positive_value_exists(candidate_campaign.ballotpedia_image_id):
+        status += "BALLOTPEDIA_CANDIDATE_IMAGE-REACHING_OUT_TO_BALLOTPEDIA "
+        results = retrieve_ballotpedia_candidate_image_from_api(
+            candidate_campaign.ballotpedia_image_id, candidate_campaign.google_civic_election_id)
+
+        if results['success']:
+            status += "BALLOTPEDIA_CANDIDATE_IMAGE_RETRIEVED "
+
+            # Get original image url for cache original size image
+            ballotpedia_profile_image_url_https = results['profile_image_url_https']
+
+            cache_results = cache_master_and_resized_image(
+                candidate_id=candidate_campaign.id,
+                candidate_we_vote_id=candidate_campaign.we_vote_id,
+                ballotpedia_candidate_id=candidate_campaign.ballotpedia_candidate_id,
+                ballotpedia_image_id=candidate_campaign.ballotpedia_image_id,
+                ballotpedia_profile_image_url=ballotpedia_profile_image_url_https,
+                image_source=BALLOTPEDIA_IMAGE_SOURCE)
+            cached_ballotpedia_image_url_https = cache_results['cached_ballotpedia_image_url_https']
+            we_vote_hosted_profile_image_url_large = cache_results['we_vote_hosted_profile_image_url_large']
+            we_vote_hosted_profile_image_url_medium = cache_results['we_vote_hosted_profile_image_url_medium']
+            we_vote_hosted_profile_image_url_tiny = cache_results['we_vote_hosted_profile_image_url_tiny']
+
+            save_candidate_campaign_results = candidate_campaign_manager.update_candidate_ballotpedia_image_details(
+                candidate_campaign,
+                cached_ballotpedia_image_url_https,
+                we_vote_hosted_profile_image_url_large,
+                we_vote_hosted_profile_image_url_medium,
+                we_vote_hosted_profile_image_url_tiny)
+            candidate_campaign = save_candidate_campaign_results['candidate']
+            # Need to update voter ballotpedia details for the candidate in future
+            save_politician_details_results = politician_manager.update_politician_details_from_candidate(
+                candidate_campaign)
+            save_position_from_candidate_results = update_all_position_details_from_candidate(candidate_campaign)
+    else:
+        status += "BALLOTPEDIA_CANDIDATE_IMAGE-CLEARING_DETAILS "
+        # save_candidate_campaign_results = candidate_campaign_manager.clear_candidate_twitter_details(
+        # candidate_campaign)
+
+    results = {
+        'success':      True,
+        'status':       status,
+        'candidate':    candidate_campaign,
+    }
     return results
 
 
@@ -2136,8 +2200,13 @@ def cache_master_and_resized_image(twitter_id=None, twitter_screen_name=None,
                                    facebook_background_image_offset_y=None,
                                    maplight_id=None, vote_smart_id=None,
                                    maplight_image_url_https=None, vote_smart_image_url_https=None,
-                                   ballotpedia_profile_image_url=None, linkedin_profile_image_url=None,
-                                   wikipedia_profile_image_url=None, other_source_image_url=None, other_source=None):
+                                   ballotpedia_profile_image_url=None,
+                                   ballotpedia_candidate_id=None,
+                                   ballotpedia_image_id=None,
+                                   linkedin_profile_image_url=None,
+                                   wikipedia_profile_image_url=None,
+                                   other_source_image_url=None,
+                                   other_source=None):
     """
     Cache original and re-sized images and return cached urls
     :param twitter_id:
@@ -2204,6 +2273,8 @@ def cache_master_and_resized_image(twitter_id=None, twitter_screen_name=None,
         maplight_id=maplight_id, maplight_image_url_https=maplight_image_url_https,
         vote_smart_id=vote_smart_id, vote_smart_image_url_https=vote_smart_image_url_https,
         ballotpedia_profile_image_url=ballotpedia_profile_image_url,
+        ballotpedia_candidate_id=ballotpedia_candidate_id,
+        ballotpedia_image_id=ballotpedia_image_id,
         linkedin_profile_image_url=linkedin_profile_image_url, wikipedia_profile_image_url=wikipedia_profile_image_url,
         other_source_image_url=other_source_image_url, other_source=other_source)
 
@@ -2354,8 +2425,13 @@ def cache_master_images(twitter_id=None, twitter_screen_name=None,
                         facebook_profile_image_url_https=None, facebook_background_image_url_https=None,
                         facebook_background_image_offset_x=None, facebook_background_image_offset_y=None,
                         maplight_id=None, vote_smart_id=None, maplight_image_url_https=None,
-                        vote_smart_image_url_https=None, ballotpedia_profile_image_url=None,
-                        linkedin_profile_image_url=None, wikipedia_profile_image_url=None, other_source_image_url=None,
+                        vote_smart_image_url_https=None,
+                        ballotpedia_profile_image_url=None,
+                        ballotpedia_candidate_id=None,
+                        ballotpedia_image_id=None,
+                        linkedin_profile_image_url=None,
+                        wikipedia_profile_image_url=None,
+                        other_source_image_url=None,
                         other_source=None):
     """
     Cache all kind of images locally for a candidate or an organization such as profile, background

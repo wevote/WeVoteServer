@@ -692,6 +692,15 @@ def election_list_view(request):
         )
         election.candidates_without_photo_count = candidate_list_query.count()
 
+        # How many without Ballotpedia photos?
+        candidate_list_query = CandidateCampaign.objects.all()
+        candidate_list_query = candidate_list_query.filter(
+            google_civic_election_id=election.google_civic_election_id)
+        candidate_list_query = candidate_list_query.filter(
+            Q(ballotpedia_image_id__isnull=True) | Q(ballotpedia_image_id=0)
+        )
+        election.candidates_without_ballotpedia_photo_count = candidate_list_query.count()
+
         # Number of Voter Guides
         voter_guide_query = VoterGuide.objects.filter(google_civic_election_id=election.google_civic_election_id)
         election.voter_guides_count = voter_guide_query.count()

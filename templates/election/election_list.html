@@ -84,10 +84,10 @@
                    target="_blank">
                 {{ election.candidate_count|default_if_none:"" }}</a>
             {% endif %}
-            {% if election.candidates_without_photo_count %}
+            {% if election.candidates_without_photo_count or election.candidates_without_ballotpedia_photo_count %}
                 <a href="{% url 'candidate:candidate_list' %}?google_civic_election_id={{ election.google_civic_election_id }}&state_code={{ election.state_code }}"
                    target="_blank">
-                ({{ election.candidates_without_photo_count|default_if_none:"" }})</a>
+                ({{ election.candidates_without_photo_count|default_if_none:"" }} / {{ election.candidates_without_ballotpedia_photo_count|default_if_none:"" }})</a>
             {% endif %}
             </td>
             <td align="middle">
