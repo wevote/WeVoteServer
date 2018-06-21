@@ -589,19 +589,23 @@ def election_edit_process_view(request):
         if not positive_value_exists(google_civic_election_id):
             election_manager = ElectionManager()
             google_civic_election_id = election_manager.fetch_next_local_google_civic_election_id_integer()
+            google_civic_election_id = convert_to_int(google_civic_election_id)
 
         if not state_code:
             state_code = ""
 
         try:
             election_on_stage = Election(
-                ballotpedia_election_id=ballotpedia_election_id,
-                election_name=election_name,
-                election_day_text=election_day_text,
                 google_civic_election_id=google_civic_election_id,
                 include_in_list_for_voters=include_in_list_for_voters,
                 state_code=state_code,
             )
+            if positive_value_exists(ballotpedia_election_id):
+                election_on_stage.ballotpedia_election_id = ballotpedia_election_id
+            if positive_value_exists(election_name):
+                election_on_stage.election_name = election_name
+            if positive_value_exists(election_day_text):
+                election_on_stage.election_day_text = election_day_text
             election_on_stage.save()
             status += "CREATED_NEW_ELECTION "
             messages.add_message(request, messages.INFO, 'New election ' + str(election_name) + ' saved.')
@@ -631,6 +635,7 @@ def election_list_view(request):
 
     election_list_query = Election.objects.all()
     election_list_query = election_list_query.order_by('election_day_text').reverse()
+    election_list_query = election_list_query.exclude(google_civic_election_id=2000)
 
     if not positive_value_exists(show_all_elections):
         timezone = pytz.timezone("America/Los_Angeles")
@@ -691,15 +696,6 @@ def election_list_view(request):
             Q(we_vote_hosted_profile_image_url_tiny__isnull=True) | Q(we_vote_hosted_profile_image_url_tiny='')
         )
         election.candidates_without_photo_count = candidate_list_query.count()
-
-        # How many without Ballotpedia photos?
-        candidate_list_query = CandidateCampaign.objects.all()
-        candidate_list_query = candidate_list_query.filter(
-            google_civic_election_id=election.google_civic_election_id)
-        candidate_list_query = candidate_list_query.filter(
-            Q(ballotpedia_image_id__isnull=True) | Q(ballotpedia_image_id=0)
-        )
-        election.candidates_without_ballotpedia_photo_count = candidate_list_query.count()
 
         # Number of Voter Guides
         voter_guide_query = VoterGuide.objects.filter(google_civic_election_id=election.google_civic_election_id)
