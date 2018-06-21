@@ -1524,62 +1524,100 @@ class VoterGuidePossibilityManager(models.Manager):
     """
     A class for working with the VoterGuidePossibility model
     """
-    def update_or_create_voter_guide_possibility(self, voter_guide_possibility_url, google_civic_election_id=0):
-        google_civic_election_id = convert_to_int(google_civic_election_id)
-        # TODO Implement the following to have a chance of normalizing URL's pasted in by volunteers
-        #   http://nullege.com/codes/search/scrapy.utils.url.canonicalize_url
-        # voter_guide_possibility_url =
+    def update_or_create_voter_guide_possibility(
+            self, voter_guide_possibility_url,
+            voter_guide_possibility_id=0,
+            google_civic_election_id=0,
+            updated_values={}):
         exception_multiple_object_returned = False
-        if voter_guide_possibility_url and google_civic_election_id:
+        success = False
+        new_voter_guide_possibility_created = False
+        voter_guide_possibility = VoterGuidePossibility()
+        voter_guide_possibility_found = False
+        status = ""
+
+        if positive_value_exists(voter_guide_possibility_id):
+            # Check before we try to create a new entry
             try:
-                updated_values = {
-                    # Values we search against below
-                    'google_civic_election_id': google_civic_election_id,
-                    'voter_guide_possibility_url': voter_guide_possibility_url,
-                    # The rest of the values
-                }
-                voter_guide_possibility_on_stage, new_voter_guide_possibility_created = \
-                    VoterGuidePossibility.objects.update_or_create(
-                        google_civic_election_id__exact=google_civic_election_id,
-                        voter_guide_possibility_url__iexact=voter_guide_possibility_url,
-                        defaults=updated_values)
+                voter_guide_possibility = VoterGuidePossibility.objects.get(
+                    id=voter_guide_possibility_id,
+                )
+                voter_guide_possibility_found = True
                 success = True
-                if new_voter_guide_possibility_created:
-                    status = 'VOTER_GUIDE_POSSIBILITY_CREATED_WITH_ELECTION'
-                else:
-                    status = 'VOTER_GUIDE_POSSIBILITY_UPDATED_WITH_ELECTION'
-            except VoterGuidePossibility.MultipleObjectsReturned as e:
-                handle_record_found_more_than_one_exception(e, logger=logger)
-                success = False
-                status = 'MULTIPLE_MATCHING_VOTER_GUIDE_POSSIBILITIES_FOUND_BY_URL_AND_ELECTION'
-                exception_multiple_object_returned = True
-                new_voter_guide_possibility_created = False
-        elif voter_guide_possibility_url:  # No google_civic_election_id provided
+                status += 'VOTER_GUIDE_POSSIBILITY_FOUND_BY_ID '
+            except VoterGuidePossibility.DoesNotExist:
+                exception_does_not_exist = True
+                status += "RETRIEVE_VOTER_GUIDE_POSSIBILITY_NOT_FOUND_BY_WE_VOTE_ID "
+            except Exception as e:
+                status += 'FAILED_TO_RETRIEVE_VOTER_GUIDE_POSSIBILITY_BY_WE_VOTE_ID ' \
+                         '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
+
+        if not voter_guide_possibility_found:
             try:
-                updated_values = {
-                    # Values we search against below
-                    'voter_guide_possibility_url': voter_guide_possibility_url,
-                    # The rest of the values
-                }
-                voter_guide_possibility_on_stage, new_voter_guide_possibility_created = \
-                    VoterGuidePossibility.objects.update_or_create(
-                        voter_guide_possibility_url__iexact=voter_guide_possibility_url,
-                        defaults=updated_values)
+                voter_guide_possibility = VoterGuidePossibility.objects.get(
+                    voter_guide_possibility_url__iexact=voter_guide_possibility_url,
+                    google_civic_election_id=google_civic_election_id,
+                )
+                voter_guide_possibility_found = True
                 success = True
-                if new_voter_guide_possibility_created:
-                    status = 'VOTER_GUIDE_POSSIBILITY_CREATED_WITHOUT_ELECTION'
-                else:
-                    status = 'VOTER_GUIDE_POSSIBILITY_UPDATED_WITHOUT_ELECTION'
+                status += 'VOTER_GUIDE_POSSIBILITY_FOUND_BY_URL '
             except VoterGuidePossibility.MultipleObjectsReturned as e:
-                handle_record_found_more_than_one_exception(e, logger=logger)
                 success = False
-                status = 'MULTIPLE_MATCHING_VOTER_GUIDE_POSSIBILITIES_FOUND_BY_URL'
-                exception_multiple_object_returned = True
+                status += 'MULTIPLE_MATCHING_VOTER_GUIDE_POSSIBILITIES_FOUND_BY_URL '
+            except VoterGuidePossibility.DoesNotExist:
+                status += "RETRIEVE_VOTER_GUIDE_POSSIBILITY_NOT_FOUND_BY_URL "
+            except Exception as e:
+                status += 'FAILED_TO_RETRIEVE_VOTER_GUIDE_POSSIBILITY_BY_URL ' \
+                          '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
+
+        if voter_guide_possibility_found:
+            # Update record
+            try:
                 new_voter_guide_possibility_created = False
+                voter_guide_possibility_updated = False
+                voter_guide_possibility_has_changes = False
+                for key, value in updated_values.items():
+                    if hasattr(voter_guide_possibility, key):
+                        voter_guide_possibility_has_changes = True
+                        setattr(voter_guide_possibility, key, value)
+                if voter_guide_possibility_has_changes and positive_value_exists(voter_guide_possibility.id):
+                    voter_guide_possibility.save()
+                    voter_guide_possibility_id = voter_guide_possibility.id
+                    voter_guide_possibility_updated = True
+                if voter_guide_possibility_updated:
+                    success = True
+                    status += "VOTER_GUIDE_POSSIBILITY_UPDATED "
+                else:
+                    success = False
+                    status += "VOTER_GUIDE_POSSIBILITY_NOT_UPDATED "
+            except Exception as e:
+                status += 'FAILED_TO_UPDATE_VOTER_GUIDE_POSSIBILITY ' \
+                         '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
+                success = False
         else:
-            status = 'ERROR_VARIABLES_MISSING_FOR_VOTER_GUIDE_POSSIBILITY'
-            success = False
-            new_voter_guide_possibility_created = False
+            # Create record
+            try:
+                new_voter_guide_possibility_created = False
+                voter_guide_possibility = VoterGuidePossibility.objects.create(
+                    voter_guide_possibility_url=voter_guide_possibility_url,
+                    google_civic_election_id=google_civic_election_id)
+                if positive_value_exists(voter_guide_possibility.id):
+                    for key, value in updated_values.items():
+                        if hasattr(voter_guide_possibility, key):
+                            setattr(voter_guide_possibility, key, value)
+                    voter_guide_possibility.save()
+                    voter_guide_possibility_id = voter_guide_possibility.id
+                    new_voter_guide_possibility_created = True
+                if new_voter_guide_possibility_created:
+                    success = True
+                    status += "VOTER_GUIDE_POSSIBILITY_CREATED "
+                else:
+                    success = False
+                    status += "VOTER_GUIDE_POSSIBILITY_NOT_CREATED "
+            except Exception as e:
+                status += 'FAILED_TO_CREATE_VOTER_GUIDE_POSSIBILITY ' \
+                         '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
+                success = False
 
         results = {
             'success':                              success,
@@ -1587,6 +1625,8 @@ class VoterGuidePossibilityManager(models.Manager):
             'MultipleObjectsReturned':              exception_multiple_object_returned,
             'voter_guide_possibility_saved':        success,
             'new_voter_guide_possibility_created':  new_voter_guide_possibility_created,
+            'voter_guide_possibility':              voter_guide_possibility,
+            'voter_guide_possibility_id':           voter_guide_possibility_id,
         }
         return results
 
@@ -1685,6 +1725,81 @@ class VoterGuidePossibilityManager(models.Manager):
         }
         return results
 
+    def retrieve_voter_guide_possibility_list(self, order_by='', limit_number=0, search_string='',
+                                              google_civic_election_id=0):
+        voter_guide_possibility_list = []
+        voter_guide_possibility_list_found = False
+        try:
+            voter_guide_queryset = VoterGuidePossibility.objects.all()
+            if positive_value_exists(google_civic_election_id):
+                voter_guide_queryset = voter_guide_queryset.filter(google_civic_election_id=google_civic_election_id)
+            if order_by == 'google_civic_election_id':
+                voter_guide_queryset = voter_guide_queryset.order_by(
+                    '-google_civic_election_id')
+            else:
+                voter_guide_queryset = voter_guide_queryset.order_by('-id')
+
+            if positive_value_exists(search_string):
+                search_words = search_string.split()
+                for one_word in search_words:
+                    filters = []
+
+                    new_filter = Q(ballot_items_raw__icontains=one_word)
+                    filters.append(new_filter)
+
+                    new_filter = Q(voter_guide_possibility_url__icontains=one_word)
+                    filters.append(new_filter)
+
+                    new_filter = Q(organization_name__icontains=one_word)
+                    filters.append(new_filter)
+
+                    new_filter = Q(google_civic_election_id__iexact=one_word)
+                    filters.append(new_filter)
+
+                    new_filter = Q(organization_we_vote_id__iexact=one_word)
+                    filters.append(new_filter)
+
+                    new_filter = Q(owner_we_vote_id__iexact=one_word)
+                    filters.append(new_filter)
+
+                    new_filter = Q(organization_twitter_handle__icontains=one_word)
+                    filters.append(new_filter)
+
+                    # Add the first query
+                    if len(filters):
+                        final_filters = filters.pop()
+
+                        # ...and "OR" the remaining items in the list
+                        for item in filters:
+                            final_filters |= item
+
+                        voter_guide_queryset = voter_guide_queryset.filter(final_filters)
+
+            if positive_value_exists(limit_number):
+                voter_guide_possibility_list = voter_guide_queryset[:limit_number]
+            else:
+                voter_guide_possibility_list = list(voter_guide_queryset)
+
+            if len(voter_guide_possibility_list):
+                voter_guide_possibility_list_found = True
+                status = 'VOTER_GUIDE_FOUND'
+            else:
+                status = 'NO_VOTER_GUIDES_FOUND'
+            success = True
+        except Exception as e:
+            handle_record_not_found_exception(e, logger=logger)
+            status = 'retrieve_all_voter_guides_order_by: Unable to retrieve voter guides from db. ' \
+                     '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
+            success = False
+
+        results = {
+            'success':                              success,
+            'status':                               status,
+            'voter_guide_possibility_list_found':   voter_guide_possibility_list_found,
+            'voter_guide_possibility_list':         voter_guide_possibility_list,
+        }
+        return results
+
     def delete_voter_guide_possibility(self, voter_guide_possibility_id):
         voter_guide_possibility_id = convert_to_int(voter_guide_possibility_id)
         voter_guide_deleted = False
@@ -1722,13 +1837,8 @@ class VoterGuidePossibility(models.Model):
     organization_we_vote_id = models.CharField(
         verbose_name="organization we vote id", max_length=255, null=True, blank=True, unique=False)
 
-    # The unique id of the public figure, if/when we know it
-    public_figure_we_vote_id = models.CharField(
-        verbose_name="public figure we vote id", max_length=255, null=True, blank=True, unique=False)
-
-    # The unique id of the public figure, if/when we know it
-    owner_we_vote_id = models.CharField(
-        verbose_name="individual voter's we vote id", max_length=255, null=True, blank=True, unique=False)
+    voter_we_vote_id_who_submitted = models.CharField(
+        verbose_name="voter we vote id who submitted this", max_length=255, null=True, blank=True, unique=False)
 
     # The unique ID of this election. (Provided by Google Civic)
     google_civic_election_id = models.PositiveIntegerField(verbose_name="google civic election id", null=True)
@@ -1738,15 +1848,21 @@ class VoterGuidePossibility(models.Model):
         verbose_name="is owner org, public figure, or voter?", max_length=2, choices=ORGANIZATION_TYPE_CHOICES,
         default=UNKNOWN)
 
+    organization_name = models.CharField(
+        verbose_name="organization name", max_length=255, null=True, blank=True, unique=False)
+    organization_twitter_handle = models.CharField(
+        verbose_name="organization twitter handle", max_length=255, null=True, blank=True, unique=False)
+    # These are the candidates or measures on the voter guide (comma separated, or on own lines)
+    ballot_items_raw = models.TextField(null=True, blank=True,)
+
     # The date of the last change to this voter_guide_possibility
-    # TODO Convert to date_last_changed
-    last_updated = models.DateTimeField(verbose_name='date last changed', null=True, auto_now=True)
+    date_last_changed = models.DateTimeField(verbose_name='date last changed', null=True, auto_now=True)  # last_updated
 
     def __unicode__(self):
-        return self.last_updated
+        return self.date_last_changed
 
     class Meta:
-        ordering = ('last_updated',)
+        ordering = ('date_last_changed',)
 
     objects = VoterGuideManager()
 
@@ -1755,9 +1871,9 @@ class VoterGuidePossibility(models.Model):
             organization = Organization.objects.get(we_vote_id=self.organization_we_vote_id)
         except Organization.MultipleObjectsReturned as e:
             handle_record_found_more_than_one_exception(e, logger=logger)
-            logger.error("voter_guide.organization Found multiple")
+            logger.error("voter_guide_possibility.organization Found multiple")
             return
         except Organization.DoesNotExist:
-            logger.error("voter_guide.organization did not find")
+            logger.error("voter_guide_possibility.organization did not find")
             return
         return organization

@@ -1,0 +1,151 @@
+{# templates/voter_guide/voter_guide_possibility_list.html #}
+{% extends "template_base.html" %}
+
+{% block title %}Suggested Voter Guides to Approve{% endblock %}
+
+{%  block content %}
+{% load template_filters %}
+<p><a href="{% url 'admin_tools:admin_home' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">< Back to Admin Home</a></p>
+<p>Jump to:
+    <a href="{% url 'election:election_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">Elections</a> -
+    <a href="{% url 'measure:measure_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">Measures</a> -
+    <a href="{% url 'office:office_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">Offices</a> -
+    <a href="{% url 'candidate:candidate_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">Candidates</a> -
+    <a href="{% url 'elected_office:elected_office_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">Elected Offices</a> -
+    <a href="{% url 'elected_official:elected_official_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">Elected Officials</a> -
+    <a href="{% url 'politician:politician_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">Politicians</a> -
+    <a href="{% url 'issue:issue_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">Issues</a> -
+    <a href="{% url 'organization:organization_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">Organizations</a> -
+    <a href="{% url 'position:position_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">Opinions/Positions</a> -
+    <a href="{% url 'voter_guide:voter_guide_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">Voter Guides</a> -
+    <a href="{% url 'polling_location:polling_location_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">Polling Locations</a>
+</p>
+
+<h1>Suggested Voter Guides to Approve</h1>
+
+<p>
+    <strong><a href="{% url 'voter_guide:voter_guide_create' %}?google_civic_election_id={{ google_civic_election_id }}" target="_blank">
+        Suggest Voter Guide</a></strong>.
+    Enter a new voter guide with the quick form.
+</p>
+
+<form name="voter_guide_choose_election" method="get" action="{% url 'voter_guide:voter_guide_possibility_list' %}">
+{% csrf_token %}
+{% if election_list %}
+    <select id="google_civic_election_id" name="google_civic_election_id">
+    <option value="0">-- Filter by Election --</option>
+    {% for one_election in election_list %}
+    <option value="{{ one_election.google_civic_election_id }}"
+            {% if one_election.google_civic_election_id|slugify == google_civic_election_id|slugify %} selected="selected"{% endif %}>
+        {{ one_election.election_name }} - {{ one_election.google_civic_election_id }} - {{ one_election.election_day_text }}</option>
+    {% endfor %}
+    </select>
+{% else %}
+    (no elections found)
+{% endif %}
+
+    {# Default to showing only upcoming elections #}
+    <label for="show_all_elections_id">
+      <input type="checkbox" name="show_all_elections" id="show_all_elections_id" value="1"
+             {% if show_all_elections %}checked{% endif %} /> All Elections
+    </label>
+    &nbsp;&nbsp;&nbsp;&nbsp;
+
+    {% if voter_guide_search %}
+            <a href="{% url 'voter_guide:voter_guide_possibility_list' %}?google_civic_election_id={{ google_civic_election_id }}&show_all_elections={{ show_all_elections }}">
+                 clear search</a>&nbsp;
+        {% endif %}
+    <input type="text" name="voter_guide_search" id="voter_guide_search_id" value="{{ voter_guide_search }}" />
+    <input type="submit" value="Search for Voter Guides" />
+    </form>
+
+<p></p>
+{% if voter_guide_possibility_list %}
+    <table border="1" cellpadding="5" cellspacing="5">
+        <tr>
+            <td></td>
+            <td>Voter Guide Source</td>
+            <td>&nbsp;</td>
+            <td>Organization</td>
+            <td>Twitter</td>
+            {% if google_civic_election_id == 0 %}
+            <td>Election</td>
+            {% endif %}
+            <td>Submitted By</td>
+            <td>Submitted Time (Pacific Time)</td>
+        </tr>
+    {% for voter_guide_possibility in voter_guide_possibility_list %}
+        <tr>
+            <td>{{ forloop.counter }}</td>
+            <td>
+                <a href="{{ voter_guide_possibility.voter_guide_possibility_url }}" target="_blank">
+                  {{ voter_guide_possibility.voter_guide_possibility_url|truncatechars:60 }}
+                </a>
+            {% if voter_guide_possibility.ballot_items_raw %}
+              <br />
+              {{ voter_guide_possibility.ballot_items_raw|truncatechars:80 }}
+            {% endif %}
+            <a href="{% url 'voter_guide:voter_guide_create' %}?voter_guide_possibility_id={{ voter_guide_possibility.id }}"
+               target="_blank"> (edit)</a>
+
+            </td>
+            {% if voter_guide_possibility.organization %}
+                <td>{% if voter_guide_possibility.organization.we_vote_hosted_profile_image_url_tiny %}
+                    <a href="{% url 'organization:organization_position_list' voter_guide_possibility.organization.id %}?google_civic_election_id={{ google_civic_election_id }}"
+                       target="_blank">
+                        <img src="{{ voter_guide_possibility.organization.we_vote_hosted_profile_image_url_tiny }}" width="24px" /></a>{% endif %}</td>
+                <td>
+                <a href="{% url 'organization:organization_position_list' voter_guide_possibility.organization.id %}?google_civic_election_id={{ google_civic_election_id }}"
+                   target="_blank">
+                {% if voter_guide_possibility.organization.organization_name %}
+                    {{ voter_guide_possibility.organization.organization_name }}
+                {% else %}(name missing){% endif %}</a>
+                </td>
+            {% else %}
+                <td colspan="2">
+                {% if voter_guide_possibility.organization_name %}
+                  {{ voter_guide_possibility.organization_name|default_if_none:"" }}
+                {% else %}
+                  (no org name found)
+                {% endif %}
+                </td>
+            {% endif %}
+            <td><a href="https://twitter.com/{{ voter_guide_possibility.organization_twitter_handle|default_if_none:"" }}" target="_blank">
+              {{ voter_guide_possibility.organization_twitter_handle|default_if_none:"" }}
+            </a></td>
+            {% if google_civic_election_id == 0 %}
+            <td>
+            {% if voter_guide_possibility.election %}
+                {{ voter_guide_possibility.election.election_name }} -
+                {{ voter_guide_possibility.election.google_civic_election_id }} -
+                {{ voter_guide_possibility.election.election_day_text }}
+            {% endif %}
+            </td>
+            {% endif %}
+            <td>{{ voter_guide_possibility.voter_we_vote_id_who_submitted|default_if_none:"" }}</td>
+            <td>{{ voter_guide_possibility.date_last_changed|default_if_none:"" }}</td>
+        </tr>
+    {% endfor %}
+    </table>
+{% else %}
+    <p>(no voter guide possibilities found)</p>
+{% endif %}
+
+    <p></p>
+    <p>
+    </p>
+    <br />
+    <br />
+    <script>
+    $(function() {
+        $('#google_civic_election_id').change(function() {
+            this.form.submit();
+        });
+    });
+    $(function() {
+        $('#show_all_elections_id').change(function() {
+            this.form.submit();
+        });
+    });
+    </script>
+{% endblock %}

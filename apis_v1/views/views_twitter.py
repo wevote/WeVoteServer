@@ -161,7 +161,7 @@ def twitter_native_sign_in_save_view(request):  # twitterNativeSignInSave
     resultsVoterInfo = twitter_sign_in_request_voter_info_for_api(voter_device_id, "Native API Call, No Return URL")
 
     json_data = {
-        'status':               resultsVoterInfo['status'] + ' '  + resultsNative['status'],
+        'status':               resultsVoterInfo['status'] + ' ' + resultsNative['status'],
         'success':              resultsVoterInfo['success'],
         'twitter_handle':       resultsVoterInfo['twitter_handle'],
         'twitter_handle_found': resultsVoterInfo['twitter_handle_found'],

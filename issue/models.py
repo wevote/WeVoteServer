@@ -430,8 +430,7 @@ class IssueManager(models.Model):
             success = False
             status += 'MISSING_ISSUE_NAME_AND_WE_VOTE_ID '
         else:
-            # Given we might have the office listed by google_civic_office_name
-            # OR office_name, we need to check both before we try to create a new entry
+            # Check before we try to create a new entry
             issue_found = False
             try:
                 issue_on_stage = Issue.objects.get(
