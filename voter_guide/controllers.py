@@ -3,6 +3,7 @@
 # -*- coding: UTF-8 -*-
 
 from ballot.models import OFFICE, CANDIDATE, MEASURE
+from candidate.models import CandidateCampaignManager, CandidateCampaignListManager
 from config.base import get_environment_variable
 from django.http import HttpResponse
 from follow.models import FollowOrganizationList, FollowIssueList, FOLLOWING
@@ -28,6 +29,249 @@ logger = wevote_functions.admin.get_logger(__name__)
 
 WE_VOTE_API_KEY = get_environment_variable("WE_VOTE_API_KEY")
 VOTER_GUIDES_SYNC_URL = get_environment_variable("VOTER_GUIDES_SYNC_URL")  # voterGuidesSyncOut
+CANDIDATE_NUMBER_LIST = ["001", "002", "003", "004"]
+
+
+def convert_list_of_names_to_possible_candidates(ballot_items_list, google_civic_election_id):
+    status = ""
+    success = True
+    possible_candidate_list = []
+    possible_candidate_list_found = False
+    candidate_number_list = CANDIDATE_NUMBER_LIST
+
+    number_index = 0
+    for one_name in ballot_items_list:
+        if number_index >= len(candidate_number_list):
+            break
+        if not positive_value_exists(one_name):
+            continue
+        possible_candidate = {
+            'candidate_name': one_name,
+            'candidate_we_vote_id': "",
+            'stance_about_candidate': "SUPPORT",
+            'comment_about_candidate': "",
+            'possible_candidate_number': candidate_number_list[number_index]
+        }
+        possible_candidate_list.append(possible_candidate)
+        number_index += 1
+
+    if len(possible_candidate_list):
+        possible_candidate_list_found = True
+
+    results = {
+        'status':                           status,
+        'success':                          success,
+        'possible_candidate_list':          possible_candidate_list,
+        'possible_candidate_list_found':    possible_candidate_list_found,
+    }
+    return results
+
+
+def extract_position_list_from_voter_guide_possibility(voter_guide_possibility):
+    status = ""
+    success = True
+    position_json_list = []
+    position_json_list_found = False
+    candidate_number_list = CANDIDATE_NUMBER_LIST
+
+    google_civic_election_id = voter_guide_possibility.google_civic_election_id \
+        if positive_value_exists(voter_guide_possibility.google_civic_election_id) else 0
+    # We might want to move to a link per position
+    more_info_url = voter_guide_possibility.voter_guide_possibility_url
+    organization_name = voter_guide_possibility.organization_name \
+        if positive_value_exists(voter_guide_possibility.organization_name) else ""
+    organization_we_vote_id = voter_guide_possibility.organization_we_vote_id \
+        if positive_value_exists(voter_guide_possibility.organization_we_vote_id) else ""
+    organization_twitter_handle = voter_guide_possibility.organization_twitter_handle \
+        if positive_value_exists(voter_guide_possibility.organization_twitter_handle) else ""
+    state_code = voter_guide_possibility.state_code \
+        if positive_value_exists(voter_guide_possibility.state_code) else ""
+    number_index = 0
+    for candidate_number in candidate_number_list:
+        if number_index >= len(candidate_number_list):
+            break
+        if positive_value_exists(getattr(voter_guide_possibility,
+                                         'candidate_name_' + candidate_number)) \
+                or positive_value_exists(getattr(voter_guide_possibility,
+                                         'candidate_we_vote_id_' + candidate_number)) \
+                or positive_value_exists(getattr(voter_guide_possibility,
+                                         'comment_about_candidate_' + candidate_number)):
+            candidate_name = getattr(voter_guide_possibility, 'candidate_name_' + candidate_number)
+            candidate_we_vote_id = getattr(voter_guide_possibility, 'candidate_we_vote_id_' + candidate_number)
+            stance = getattr(voter_guide_possibility, 'stance_about_candidate_' + candidate_number)
+            statement_text = getattr(voter_guide_possibility, 'comment_about_candidate_' + candidate_number)
+            position_json = {
+                # 'position_we_vote_id': 'position_we_vote_id',
+                'candidate_name': candidate_name,
+                'candidate_we_vote_id': candidate_we_vote_id,
+                # 'candidate_twitter_handle': 'candidate_twitter_handle',
+                # 'contest_office_name': 'contest_office_name',
+                # 'contest_measure_title': 'contest_measure_title',
+                # 'election_day': election_day,
+                # 'grade_rating': 'grade_rating',
+                'google_civic_election_id': google_civic_election_id,
+                'more_info_url': more_info_url,
+                'stance': stance,
+                # 'support': 'support',
+                # 'oppose': 'oppose',
+                # 'percent_rating': 'percent_rating',
+                'statement_text': statement_text,
+                'state_code': state_code,
+                'organization_name': organization_name,
+                'organization_we_vote_id': organization_we_vote_id,
+                'organization_twitter_handle': organization_twitter_handle,
+            }
+            position_json_list.append(position_json)
+        number_index += 1
+
+    if len(position_json_list):
+        position_json_list_found = True
+
+    results = {
+        'status':                   status,
+        'success':                  success,
+        'position_json_list':       position_json_list,
+        'position_json_list_found': position_json_list_found,
+    }
+    return results
+
+
+def extract_possible_candidate_list_from_database(voter_guide_possibility):
+    status = ""
+    success = True
+    possible_candidate_list = []
+    possible_candidate_list_found = False
+    candidate_number_list = CANDIDATE_NUMBER_LIST
+
+    number_index = 0
+    for candidate_number in candidate_number_list:
+        if number_index >= len(candidate_number_list):
+            break
+        if positive_value_exists(getattr(voter_guide_possibility,
+                                         'candidate_name_' + candidate_number_list[number_index])) \
+                or positive_value_exists(getattr(voter_guide_possibility,
+                                         'candidate_we_vote_id_' + candidate_number_list[number_index])) \
+                or positive_value_exists(getattr(voter_guide_possibility,
+                                         'comment_about_candidate_' + candidate_number_list[number_index])):
+            possible_candidate = {
+                'candidate_name':
+                getattr(voter_guide_possibility, 'candidate_name_' + candidate_number_list[number_index]),
+                'candidate_we_vote_id':
+                getattr(voter_guide_possibility, 'candidate_we_vote_id_' + candidate_number_list[number_index]),
+                'stance_about_candidate':
+                getattr(voter_guide_possibility, 'stance_about_candidate_' + candidate_number_list[number_index]),
+                'comment_about_candidate':
+                getattr(voter_guide_possibility, 'comment_about_candidate_' + candidate_number_list[number_index]),
+                'possible_candidate_number': candidate_number,
+            }
+            possible_candidate_list.append(possible_candidate)
+        number_index += 1
+
+    if len(possible_candidate_list):
+        possible_candidate_list_found = True
+
+    results = {
+        'status':                           status,
+        'success':                          success,
+        'possible_candidate_list':          possible_candidate_list,
+        'possible_candidate_list_found':    possible_candidate_list_found,
+    }
+    return results
+
+
+def match_candidate_list_with_candidates_in_database(possible_candidate_list, google_civic_election_id, state_code=''):
+    status = ""
+    success = True
+    possible_candidate_list_found = False
+
+    possible_candidate_list_modified = []
+    candidate_campaign_manager = CandidateCampaignManager()
+    candidate_campaign_list_manager = CandidateCampaignListManager()
+    for possible_candidate in possible_candidate_list:
+        if 'candidate_we_vote_id' in possible_candidate \
+                and positive_value_exists(possible_candidate['candidate_we_vote_id']):
+            results = candidate_campaign_manager.retrieve_candidate_campaign_from_we_vote_id(
+                possible_candidate['candidate_we_vote_id'])
+            if results['candidate_campaign_found']:
+                possible_candidate['candidate'] = results['candidate_campaign']
+                possible_candidate['candidate_name'] = possible_candidate['candidate'].display_candidate_name()
+            possible_candidate_list_modified.append(possible_candidate)
+        elif 'candidate_name' in possible_candidate and positive_value_exists(possible_candidate['candidate_name']):
+            # If here search for possible candidate matches
+            matching_results = candidate_campaign_list_manager.retrieve_candidates_from_non_unique_identifiers(
+                google_civic_election_id, state_code, '', possible_candidate['candidate_name'])
+
+            if matching_results['candidate_found']:
+                candidate = matching_results['candidate']
+
+                # If one candidate found, add we_vote_id here
+                possible_candidate['candidate_we_vote_id'] = candidate.we_vote_id
+                possible_candidate['candidate'] = candidate
+                possible_candidate['candidate_name'] = candidate.display_candidate_name()
+                possible_candidate_list_modified.append(possible_candidate)
+            elif matching_results['multiple_entries_found']:
+                status += "MULTIPLE_CANDIDATES_FOUND "
+                possible_candidate_list_modified.append(possible_candidate)
+            elif not positive_value_exists(matching_results['success']):
+                status += "RETRIEVE_CANDIDATE_FROM_NON_UNIQUE-NO_SUCCESS "
+                status += matching_results['status']
+                possible_candidate_list_modified.append(possible_candidate)
+            else:
+                status += "RETRIEVE_CANDIDATE_FROM_NON_UNIQUE-CANDIDATE_NOT_FOUND "
+                possible_candidate_list_modified.append(possible_candidate)
+
+    if len(possible_candidate_list):
+        possible_candidate_list_found = True
+
+    results = {
+        'status':                           status,
+        'success':                          success,
+        'possible_candidate_list':          possible_candidate_list_modified,
+        'possible_candidate_list_found':    possible_candidate_list_found,
+    }
+    return results
+
+
+def take_in_possible_candidate_list_from_form(request, google_civic_election_id):
+    status = ""
+    success = True
+    possible_candidate_list = []
+    possible_candidate_list_found = False
+    candidate_number_list = CANDIDATE_NUMBER_LIST
+
+    number_index = 0
+    for candidate_number in candidate_number_list:
+        if number_index >= len(candidate_number_list):
+            break
+        if positive_value_exists(request.POST.get('candidate_name_' + candidate_number_list[number_index], 0)) \
+                or positive_value_exists(request.POST.get(
+                            'candidate_we_vote_id_' + candidate_number_list[number_index], 0)) \
+                or positive_value_exists(request.POST.get(
+                            'comment_about_candidate_' + candidate_number_list[number_index], 0)):
+            possible_candidate = {
+                'candidate_name':
+                request.POST.get('candidate_name_' + candidate_number_list[number_index], ""),
+                'candidate_we_vote_id':
+                request.POST.get('candidate_we_vote_id_' + candidate_number_list[number_index], ""),
+                'stance_about_candidate':
+                request.POST.get('stance_about_candidate_' + candidate_number_list[number_index], ""),
+                'comment_about_candidate':
+                request.POST.get('comment_about_candidate_' + candidate_number_list[number_index], ""),
+                'possible_candidate_number': candidate_number,
+            }
+            possible_candidate_list.append(possible_candidate)
+        number_index += 1
+
+    if len(possible_candidate_list):
+        possible_candidate_list_found = True
+
+    results = {
+        'status':                           status,
+        'success':                          success,
+        'possible_candidate_list':          possible_candidate_list,
+        'possible_candidate_list_found':    possible_candidate_list_found,
+    }
+    return results
 
 
 def duplicate_voter_guides(from_voter_id, from_voter_we_vote_id, from_organization_we_vote_id,

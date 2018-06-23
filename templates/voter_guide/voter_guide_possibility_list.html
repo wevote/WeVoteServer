@@ -25,7 +25,7 @@
 
 <p>
     <strong><a href="{% url 'voter_guide:voter_guide_create' %}?google_civic_election_id={{ google_civic_election_id }}" target="_blank">
-        Suggest Voter Guide</a></strong>.
+        Enter Suggested Voter Guide</a></strong>.
     Enter a new voter guide with the quick form.
 </p>
 
@@ -51,89 +51,29 @@
     </label>
     &nbsp;&nbsp;&nbsp;&nbsp;
 
-    {% if voter_guide_search %}
+    {% if voter_guide_possibility_search %}
             <a href="{% url 'voter_guide:voter_guide_possibility_list' %}?google_civic_election_id={{ google_civic_election_id }}&show_all_elections={{ show_all_elections }}">
                  clear search</a>&nbsp;
         {% endif %}
-    <input type="text" name="voter_guide_search" id="voter_guide_search_id" value="{{ voter_guide_search }}" />
-    <input type="submit" value="Search for Voter Guides" />
+    <input type="text" name="voter_guide_possibility_search" id="voter_guide_possibility_search_id" value="{{ voter_guide_possibility_search }}" />
+    <input type="submit" value="Search" />
     </form>
 
 <p></p>
 {% if voter_guide_possibility_list %}
-    <table border="1" cellpadding="5" cellspacing="5">
-        <tr>
-            <td></td>
-            <td>Voter Guide Source</td>
-            <td>&nbsp;</td>
-            <td>Organization</td>
-            <td>Twitter</td>
-            {% if google_civic_election_id == 0 %}
-            <td>Election</td>
-            {% endif %}
-            <td>Submitted By</td>
-            <td>Submitted Time (Pacific Time)</td>
-        </tr>
-    {% for voter_guide_possibility in voter_guide_possibility_list %}
-        <tr>
-            <td>{{ forloop.counter }}</td>
-            <td>
-                <a href="{{ voter_guide_possibility.voter_guide_possibility_url }}" target="_blank">
-                  {{ voter_guide_possibility.voter_guide_possibility_url|truncatechars:60 }}
-                </a>
-            {% if voter_guide_possibility.ballot_items_raw %}
-              <br />
-              {{ voter_guide_possibility.ballot_items_raw|truncatechars:80 }}
-            {% endif %}
-            <a href="{% url 'voter_guide:voter_guide_create' %}?voter_guide_possibility_id={{ voter_guide_possibility.id }}"
-               target="_blank"> (edit)</a>
-
-            </td>
-            {% if voter_guide_possibility.organization %}
-                <td>{% if voter_guide_possibility.organization.we_vote_hosted_profile_image_url_tiny %}
-                    <a href="{% url 'organization:organization_position_list' voter_guide_possibility.organization.id %}?google_civic_election_id={{ google_civic_election_id }}"
-                       target="_blank">
-                        <img src="{{ voter_guide_possibility.organization.we_vote_hosted_profile_image_url_tiny }}" width="24px" /></a>{% endif %}</td>
-                <td>
-                <a href="{% url 'organization:organization_position_list' voter_guide_possibility.organization.id %}?google_civic_election_id={{ google_civic_election_id }}"
-                   target="_blank">
-                {% if voter_guide_possibility.organization.organization_name %}
-                    {{ voter_guide_possibility.organization.organization_name }}
-                {% else %}(name missing){% endif %}</a>
-                </td>
-            {% else %}
-                <td colspan="2">
-                {% if voter_guide_possibility.organization_name %}
-                  {{ voter_guide_possibility.organization_name|default_if_none:"" }}
-                {% else %}
-                  (no org name found)
-                {% endif %}
-                </td>
-            {% endif %}
-            <td><a href="https://twitter.com/{{ voter_guide_possibility.organization_twitter_handle|default_if_none:"" }}" target="_blank">
-              {{ voter_guide_possibility.organization_twitter_handle|default_if_none:"" }}
-            </a></td>
-            {% if google_civic_election_id == 0 %}
-            <td>
-            {% if voter_guide_possibility.election %}
-                {{ voter_guide_possibility.election.election_name }} -
-                {{ voter_guide_possibility.election.google_civic_election_id }} -
-                {{ voter_guide_possibility.election.election_day_text }}
-            {% endif %}
-            </td>
-            {% endif %}
-            <td>{{ voter_guide_possibility.voter_we_vote_id_who_submitted|default_if_none:"" }}</td>
-            <td>{{ voter_guide_possibility.date_last_changed|default_if_none:"" }}</td>
-        </tr>
-    {% endfor %}
-    </table>
+    {% include "voter_guide/voter_guide_possibility_table.html" with voter_guide_possibility_list=voter_guide_possibility_list google_civic_election_id=google_civic_election_id %}
 {% else %}
     <p>(no voter guide possibilities found)</p>
 {% endif %}
 
-    <p></p>
-    <p>
-    </p>
+{% if voter_guide_possibility_archive_list %}
+    <h3>Archived Suggestions - No Action Required</h3>
+    {% include "voter_guide/voter_guide_possibility_table.html" with voter_guide_possibility_list=voter_guide_possibility_archive_list google_civic_election_id=google_civic_election_id %}
+{% endif %}
+
+
+    <br />
+    <br />
     <br />
     <br />
     <script>

@@ -276,6 +276,7 @@ BATCH_IMPORT_KEYS_ACCEPTED_FOR_POSITIONS = {
     'position_we_vote_id': 'position_we_vote_id',
     'candidate_name': 'candidate_name',
     'candidate_twitter_handle': 'candidate_twitter_handle',
+    'candidate_we_vote_id': 'candidate_we_vote_id',
     'contest_office_name': 'contest_office_name',
     'contest_measure_title': 'contest_measure_title',
     'election_day': 'election_day',
@@ -291,6 +292,28 @@ BATCH_IMPORT_KEYS_ACCEPTED_FOR_POSITIONS = {
     'organization_name': 'organization_name',
     'organization_we_vote_id': 'organization_we_vote_id',
     'organization_twitter_handle': 'organization_twitter_handle (position owner)',
+}
+
+BATCH_HEADER_MAP_FOR_POSITIONS = {
+    'position_we_vote_id': 'position_we_vote_id',
+    'candidate_name': 'candidate_name',
+    'candidate_twitter_handle': 'candidate_twitter_handle',
+    'candidate_we_vote_id': 'candidate_we_vote_id',
+    'contest_office_name': 'contest_office_name',
+    'contest_measure_title': 'contest_measure_title',
+    'election_day': 'election_day',
+    'grade_rating': 'grade_rating',
+    'google_civic_election_id': 'google_civic_election_id',
+    'more_info_url': 'more_info_url',
+    'stance': 'stance',
+    'support': 'support',
+    'oppose': 'oppose',
+    'percent_rating': 'percent_rating',
+    'statement_text': 'statement_text',
+    'state_code': 'state_code',
+    'organization_name': 'organization_name',
+    'organization_we_vote_id': 'organization_we_vote_id',
+    'organization_twitter_handle': 'organization_twitter_handle',
 }
 
 BATCH_IMPORT_KEYS_ACCEPTED_FOR_BALLOT_ITEMS = {
@@ -411,14 +434,13 @@ class BatchManager(models.Model):
         }
         return results
 
-    def create_batch_from_object_list(self, objects_list, organization_we_vote_id='', batch_header_list=''):
+    def create_batch_from_voter_object_list(self, objects_list):
         """
-        Creates a batch from a list of objects
+        Creates a batch from a list of voter objects
 
-        :param objects_list: list of objects
+        :param objects_list: list of voter objects
         :return:
         """
-        # TODO: make this flexible and not dependent on the class of the object list.
 
         status = ''
         success = False
@@ -446,82 +468,83 @@ class BatchManager(models.Model):
             twitter_screen_name = one_entry.twitter_screen_name
 
             if first_line:
-                if first_line:
-                    first_line = False
-                    try:
-                        batch_header = BatchHeader.objects.create(
-                            batch_header_column_000=BATCH_IMPORT_KEYS_ACCEPTED_FOR_VOTERS['first_name'],
-                            batch_header_column_001=BATCH_IMPORT_KEYS_ACCEPTED_FOR_VOTERS['middle_name'],
-                            batch_header_column_002=BATCH_IMPORT_KEYS_ACCEPTED_FOR_VOTERS['last_name'],
-                            batch_header_column_003=BATCH_IMPORT_KEYS_ACCEPTED_FOR_VOTERS['email'],
-                            batch_header_column_004=BATCH_IMPORT_KEYS_ACCEPTED_FOR_VOTERS['we_vote_id'],
-                            batch_header_column_005=BATCH_IMPORT_KEYS_ACCEPTED_FOR_VOTERS['twitter_screen_name'],
-                        )
-                        batch_header_id = batch_header.id
-
-                        if positive_value_exists(batch_header_id):
-                            # Save an initial BatchHeaderMap
-                            batch_header_map = BatchHeaderMap.objects.create(
-                                batch_header_id=batch_header_id,
-                                batch_header_map_000='first_name',
-                                batch_header_map_001='middle_name',
-                                batch_header_map_002='last_name',
-                                batch_header_map_003='email',
-                                batch_header_map_004='we_vote_id',
-                                batch_header_map_005='twitter_screen_name',
-                            )
-                            batch_header_map_id = batch_header_map.id
-                            status += " BATCH_HEADER_MAP_SAVED"
-
-                        if positive_value_exists(batch_header_id) and positive_value_exists(batch_header_map_id):
-                            # Now save the BatchDescription
-                            batch_name = "IMPORT_VOTERS " + " batch_header_id: " + str(batch_header_id)
-                            batch_description_text = ""
-                            batch_description = BatchDescription.objects.create(
-                                batch_header_id=batch_header_id,
-                                batch_header_map_id=batch_header_map_id,
-                                batch_name=batch_name,
-                                batch_description_text=batch_description_text,
-                                google_civic_election_id=google_civic_election_id,
-                                kind_of_batch=IMPORT_VOTER,
-                                organization_we_vote_id=organization_we_vote_id,
-                            )
-                            status += " BATCH_DESCRIPTION_SAVED"
-                            success = True
-                    except Exception as e:
-                        batch_header_id = 0
-                        status += " EXCEPTION_BATCH_HEADER"
-                        handle_exception(e, logger=logger, exception_message=status)
-                        break
-                if not positive_value_exists(batch_header_id):
-                    break
-
+                first_line = False
                 try:
-                    batch_row = BatchRow.objects.create(
-                        batch_header_id=batch_header_id,
-                        batch_row_000=first_name,
-                        batch_row_001=middle_name,
-                        batch_row_002=last_name,
-                        batch_row_003=email,
-                        batch_row_004=we_vote_id,
-                        batch_row_005=twitter_screen_name,
+                    batch_header = BatchHeader.objects.create(
+                        batch_header_column_000=BATCH_IMPORT_KEYS_ACCEPTED_FOR_VOTERS['first_name'],
+                        batch_header_column_001=BATCH_IMPORT_KEYS_ACCEPTED_FOR_VOTERS['middle_name'],
+                        batch_header_column_002=BATCH_IMPORT_KEYS_ACCEPTED_FOR_VOTERS['last_name'],
+                        batch_header_column_003=BATCH_IMPORT_KEYS_ACCEPTED_FOR_VOTERS['email'],
+                        batch_header_column_004=BATCH_IMPORT_KEYS_ACCEPTED_FOR_VOTERS['we_vote_id'],
+                        batch_header_column_005=BATCH_IMPORT_KEYS_ACCEPTED_FOR_VOTERS['twitter_screen_name'],
                     )
-                    number_of_voters += 1
+                    batch_header_id = batch_header.id
+
+                    if positive_value_exists(batch_header_id):
+                        # Save an initial BatchHeaderMap
+                        batch_header_map = BatchHeaderMap.objects.create(
+                            batch_header_id=batch_header_id,
+                            batch_header_map_000='first_name',
+                            batch_header_map_001='middle_name',
+                            batch_header_map_002='last_name',
+                            batch_header_map_003='email',
+                            batch_header_map_004='we_vote_id',
+                            batch_header_map_005='twitter_screen_name',
+                        )
+                        batch_header_map_id = batch_header_map.id
+                        status += " BATCH_HEADER_MAP_SAVED"
+
+                    if positive_value_exists(batch_header_id) and positive_value_exists(batch_header_map_id):
+                        # Now save the BatchDescription
+                        batch_name = "IMPORT_VOTERS " + " batch_header_id: " + str(batch_header_id)
+                        batch_description_text = ""
+                        batch_description = BatchDescription.objects.create(
+                            batch_header_id=batch_header_id,
+                            batch_header_map_id=batch_header_map_id,
+                            batch_name=batch_name,
+                            batch_description_text=batch_description_text,
+                            google_civic_election_id=google_civic_election_id,
+                            kind_of_batch=IMPORT_VOTER,
+                            organization_we_vote_id=organization_we_vote_id,
+                        )
+                        status += " BATCH_DESCRIPTION_SAVED"
+                        success = True
                 except Exception as e:
-                    # Stop trying to save rows -- break out of the for loop
-                    status += " EXCEPTION_BATCH_ROW"
+                    batch_header_id = 0
+                    status += " EXCEPTION_BATCH_HEADER"
                     handle_exception(e, logger=logger, exception_message=status)
                     break
-                results = {
-                    'success': success,
-                    'status': status,
-                    'batch_header_id': batch_header_id,
-                    'batch_saved': success,
-                    'number_of_voters': number_of_voters,
-                    'google_civic_election_id': google_civic_election_id,
-                }
 
-                return results
+            if not positive_value_exists(batch_header_id):
+                break
+
+            try:
+                batch_row = BatchRow.objects.create(
+                    batch_header_id=batch_header_id,
+                    batch_row_000=first_name,
+                    batch_row_001=middle_name,
+                    batch_row_002=last_name,
+                    batch_row_003=email,
+                    batch_row_004=we_vote_id,
+                    batch_row_005=twitter_screen_name,
+                )
+                number_of_voters += 1
+            except Exception as e:
+                # Stop trying to save rows -- break out of the for loop
+                status += " EXCEPTION_BATCH_ROW"
+                handle_exception(e, logger=logger, exception_message=status)
+                break
+
+        results = {
+            'success': success,
+            'status': status,
+            'batch_header_id': batch_header_id,
+            'batch_saved': success,
+            'number_of_voters': number_of_voters,
+            'google_civic_election_id': google_civic_election_id,
+        }
+
+        return results
 
     def create_batch_from_csv_data(self, file_name, csv_data, kind_of_batch, google_civic_election_id=0,
                                    organization_we_vote_id="", polling_location_we_vote_id=""):
@@ -1006,6 +1029,7 @@ class BatchManager(models.Model):
             }
             return results
 
+    # I don't believe this is currently in use. There is also a function of this same name in controllers.py
     def create_batch_header_translation_suggestion(
             self, kind_of_batch, header_value_recognized_by_we_vote, incoming_alternate_header_value):
         """
@@ -1067,9 +1091,9 @@ class BatchManager(models.Model):
         try:
             batch_header_translation_suggestion, suggestion_created = \
                 BatchHeaderTranslationSuggestion.objects.update_or_create(
-                kind_of_batch=kind_of_batch,
-                header_value_recognized_by_we_vote=header_value_recognized_by_we_vote,
-                incoming_alternate_header_value=incoming_alternate_header_value)
+                    kind_of_batch=kind_of_batch,
+                    header_value_recognized_by_we_vote=header_value_recognized_by_we_vote,
+                    incoming_alternate_header_value=incoming_alternate_header_value)
             success = True
 
             status += "BATCH_HEADER_TRANSLATION_SUGGESTION_SAVED "

@@ -22,6 +22,15 @@ ORGANIZATION = 'O'  # Deprecated
 ORGANIZATION_WORD = 'ORGANIZATION'
 VOTER = 'V'  # Deprecated
 
+SUPPORT = 'SUPPORT'
+NO_STANCE = 'NO_STANCE'
+OPPOSE = 'OPPOSE'
+POSITION_CHOICES = (
+    (SUPPORT,           'Supports'),
+    (NO_STANCE,         'No stance'),
+    (OPPOSE,            'Opposes'),
+)
+
 
 class VoterGuideManager(models.Manager):
     """
@@ -835,7 +844,7 @@ class VoterGuide(models.Model):
     google_civic_election_id = models.PositiveIntegerField(
         verbose_name="google civic election id", null=True)
     election_day_text = models.CharField(verbose_name="election day", max_length=255, null=True, blank=True)
-    state_code = models.CharField(verbose_name="state the ballot item is related to", max_length=2, null=True)
+    state_code = models.CharField(verbose_name="state the voter_guide is related to", max_length=2, null=True)
 
     # Usually in one of these two formats 2015, 2014-2015
     vote_smart_time_span = models.CharField(
@@ -1644,7 +1653,6 @@ class VoterGuidePossibilityManager(models.Manager):
         voter_guide_possibility_id = convert_to_int(voter_guide_possibility_id)
         google_civic_election_id = convert_to_int(google_civic_election_id)
         organization_we_vote_id = convert_to_str(organization_we_vote_id)
-        public_figure_we_vote_id = convert_to_str(public_figure_we_vote_id)
         owner_we_vote_id = convert_to_str(owner_we_vote_id)
 
         error_result = False
@@ -1675,15 +1683,6 @@ class VoterGuidePossibilityManager(models.Manager):
                 voter_guide_possibility_on_stage_id = voter_guide_possibility_on_stage.id
                 status = "VOTER_GUIDE_POSSIBILITY_FOUND_WITH_ORGANIZATION_WE_VOTE_ID"
                 success = True
-            elif positive_value_exists(public_figure_we_vote_id) and positive_value_exists(google_civic_election_id):
-                # Set this status in case the 'get' fails
-                status = "ERROR_RETRIEVING_VOTER_GUIDE_POSSIBILITY_WITH_PUBLIC_FIGURE_WE_VOTE_ID"
-                voter_guide_possibility_on_stage = VoterGuidePossibility.objects.get(
-                    google_civic_election_id=google_civic_election_id,
-                    public_figure_we_vote_id__iexact=public_figure_we_vote_id)
-                voter_guide_possibility_on_stage_id = voter_guide_possibility_on_stage.id
-                status = "VOTER_GUIDE_POSSIBILITY_FOUND_WITH_PUBLIC_FIGURE_WE_VOTE_ID"
-                success = True
             elif positive_value_exists(owner_we_vote_id) and positive_value_exists(google_civic_election_id):
                 # Set this status in case the 'get' fails
                 status = "ERROR_RETRIEVING_VOTER_GUIDE_POSSIBILITY_WITH_VOTER_WE_VOTE_ID"
@@ -1712,13 +1711,11 @@ class VoterGuidePossibilityManager(models.Manager):
         results = {
             'success':                          success,
             'status':                           status,
+            'organization_we_vote_id':          voter_guide_possibility_on_stage.organization_we_vote_id,
+            'voter_guide_possibility':          voter_guide_possibility_on_stage,
             'voter_guide_possibility_found':    voter_guide_possibility_on_stage_found,
             'voter_guide_possibility_id':       voter_guide_possibility_on_stage_id,
             'voter_guide_possibility_url':      voter_guide_possibility_on_stage.voter_guide_possibility_url,
-            'organization_we_vote_id':          voter_guide_possibility_on_stage.organization_we_vote_id,
-            'public_figure_we_vote_id':         voter_guide_possibility_on_stage.public_figure_we_vote_id,
-            'owner_we_vote_id':                 voter_guide_possibility_on_stage.owner_we_vote_id,
-            'voter_guide':                      voter_guide_possibility_on_stage,
             'error_result':                     error_result,
             'DoesNotExist':                     exception_does_not_exist,
             'MultipleObjectsReturned':          exception_multiple_object_returned,
@@ -1726,11 +1723,12 @@ class VoterGuidePossibilityManager(models.Manager):
         return results
 
     def retrieve_voter_guide_possibility_list(self, order_by='', limit_number=0, search_string='',
-                                              google_civic_election_id=0):
+                                              google_civic_election_id=0, saved_as_batch=False):
         voter_guide_possibility_list = []
         voter_guide_possibility_list_found = False
         try:
             voter_guide_queryset = VoterGuidePossibility.objects.all()
+            voter_guide_queryset = voter_guide_queryset.filter(saved_as_batch=saved_as_batch)
             if positive_value_exists(google_civic_election_id):
                 voter_guide_queryset = voter_guide_queryset.filter(google_civic_election_id=google_civic_election_id)
             if order_by == 'google_civic_election_id':
@@ -1747,22 +1745,34 @@ class VoterGuidePossibilityManager(models.Manager):
                     new_filter = Q(ballot_items_raw__icontains=one_word)
                     filters.append(new_filter)
 
-                    new_filter = Q(voter_guide_possibility_url__icontains=one_word)
+                    new_filter = Q(candidate_we_vote_id_001__icontains=one_word)
                     filters.append(new_filter)
 
-                    new_filter = Q(organization_name__icontains=one_word)
+                    new_filter = Q(candidate_we_vote_id_002__icontains=one_word)
+                    filters.append(new_filter)
+
+                    new_filter = Q(candidate_we_vote_id_003__icontains=one_word)
+                    filters.append(new_filter)
+
+                    new_filter = Q(candidate_we_vote_id_004__icontains=one_word)
                     filters.append(new_filter)
 
                     new_filter = Q(google_civic_election_id__iexact=one_word)
                     filters.append(new_filter)
 
+                    new_filter = Q(organization_name__icontains=one_word)
+                    filters.append(new_filter)
+
                     new_filter = Q(organization_we_vote_id__iexact=one_word)
                     filters.append(new_filter)
 
-                    new_filter = Q(owner_we_vote_id__iexact=one_word)
+                    new_filter = Q(organization_twitter_handle__icontains=one_word)
                     filters.append(new_filter)
 
-                    new_filter = Q(organization_twitter_handle__icontains=one_word)
+                    new_filter = Q(voter_guide_possibility_url__icontains=one_word)
+                    filters.append(new_filter)
+
+                    new_filter = Q(voter_we_vote_id_who_submitted__iexact=one_word)
                     filters.append(new_filter)
 
                     # Add the first query
@@ -1842,6 +1852,7 @@ class VoterGuidePossibility(models.Model):
 
     # The unique ID of this election. (Provided by Google Civic)
     google_civic_election_id = models.PositiveIntegerField(verbose_name="google civic election id", null=True)
+    state_code = models.CharField(verbose_name="state the voter guide is related to", max_length=2, null=True)
 
     # Mapped directly from organization.organization_type
     voter_guide_owner_type = models.CharField(
@@ -1855,6 +1866,9 @@ class VoterGuidePossibility(models.Model):
     # These are the candidates or measures on the voter guide (comma separated, or on own lines)
     ballot_items_raw = models.TextField(null=True, blank=True,)
 
+    # Has this VoterGuidePossibility been used to create a patch in the import_export_batch system?
+    saved_as_batch = models.BooleanField(default=False)
+
     # The date of the last change to this voter_guide_possibility
     date_last_changed = models.DateTimeField(verbose_name='date last changed', null=True, auto_now=True)  # last_updated
 
@@ -1867,6 +1881,9 @@ class VoterGuidePossibility(models.Model):
     objects = VoterGuideManager()
 
     def organization(self):
+        if not positive_value_exists(self.organization_we_vote_id):
+            return
+
         try:
             organization = Organization.objects.get(we_vote_id=self.organization_we_vote_id)
         except Organization.MultipleObjectsReturned as e:
@@ -1877,3 +1894,33 @@ class VoterGuidePossibility(models.Model):
             logger.error("voter_guide_possibility.organization did not find")
             return
         return organization
+
+    def is_ready_to_save_as_batch(self):
+        organization_found = False
+        if positive_value_exists(self.organization_we_vote_id):
+            organization_found = True
+
+        if positive_value_exists(self.voter_guide_possibility_url) and organization_found:
+            return True
+
+        return False
+
+    candidate_name_001 = models.CharField(verbose_name="candidate name 001", max_length=255, null=True, unique=False)
+    candidate_we_vote_id_001 = models.CharField(max_length=255, null=True, unique=False)
+    stance_about_candidate_001 = models.CharField(max_length=15, choices=POSITION_CHOICES, default=SUPPORT)
+    comment_about_candidate_001 = models.TextField(null=True, blank=True)
+
+    candidate_name_002 = models.CharField(verbose_name="candidate name 002", max_length=255, null=True, unique=False)
+    candidate_we_vote_id_002 = models.CharField(max_length=255, null=True, unique=False)
+    stance_about_candidate_002 = models.CharField(max_length=15, choices=POSITION_CHOICES, default=SUPPORT)
+    comment_about_candidate_002 = models.TextField(null=True, blank=True)
+
+    candidate_name_003 = models.CharField(verbose_name="candidate name 003", max_length=255, null=True, unique=False)
+    candidate_we_vote_id_003 = models.CharField(max_length=255, null=True, unique=False)
+    stance_about_candidate_003 = models.CharField(max_length=15, choices=POSITION_CHOICES, default=SUPPORT)
+    comment_about_candidate_003 = models.TextField(null=True, blank=True)
+
+    candidate_name_004 = models.CharField(verbose_name="candidate name 004", max_length=255, null=True, unique=False)
+    candidate_we_vote_id_004 = models.CharField(max_length=255, null=True, unique=False)
+    stance_about_candidate_004 = models.CharField(max_length=15, choices=POSITION_CHOICES, default=SUPPORT)
+    comment_about_candidate_004 = models.TextField(null=True, blank=True)

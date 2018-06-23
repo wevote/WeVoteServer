@@ -2234,6 +2234,7 @@ def voter_has_authority(request, authority_required, authority_results=None):
             return True
     if 'partner_organization' in authority_required:
         if positive_value_exists(authority_results['is_partner_organization']) or \
+                positive_value_exists(authority_results['is_political_data_manager']) or \
                 positive_value_exists(authority_results['is_admin']):
             return True
     if 'political_data_manager' in authority_required:
@@ -2243,10 +2244,12 @@ def voter_has_authority(request, authority_required, authority_results=None):
     if 'political_data_viewer' in authority_required:
         if positive_value_exists(authority_results['is_political_data_viewer']) or \
                 positive_value_exists(authority_results['is_verified_volunteer']) or \
+                positive_value_exists(authority_results['is_political_data_manager']) or \
                 positive_value_exists(authority_results['is_admin']):
             return True
     if 'verified_volunteer' in authority_required:
         if positive_value_exists(authority_results['is_verified_volunteer']) or \
+                positive_value_exists(authority_results['is_political_data_manager']) or \
                 positive_value_exists(authority_results['is_admin']):
             return True
     return False
