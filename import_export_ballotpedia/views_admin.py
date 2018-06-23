@@ -14,6 +14,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.messages import get_messages
 from django.core.urlresolvers import reverse
+from django.db.models import Q
 from django.http import HttpResponseRedirect
 from django.shortcuts import redirect, render
 from election.models import Election
@@ -162,13 +163,17 @@ def attach_ballotpedia_election_view(request, election_local_id=0):
     try:
         polling_location_count_query = PollingLocation.objects.all()
         polling_location_count_query = polling_location_count_query.filter(state__iexact=state_code)
+        polling_location_count_query = polling_location_count_query.exclude(
+            Q(latitude__isnull=True) | Q(latitude__exact=0.0))
         polling_location_count = polling_location_count_query.count()
 
         if positive_value_exists(polling_location_count):
             polling_location_query = PollingLocation.objects.all()
             polling_location_query = polling_location_query.filter(state__iexact=state_code)
+            polling_location_query = polling_location_query.exclude(
+                Q(latitude__isnull=True) | Q(latitude__exact=0.0))
             # Ordering by "location_name" creates a bit of (locational) random order
-            polling_location_list = polling_location_query.order_by('location_name')[:5]
+            polling_location_list = polling_location_query.order_by('location_name')[:20]
     except PollingLocation.DoesNotExist:
         messages.add_message(request, messages.INFO,
                              'Could not retrieve polling location data for the {election_name}. '
