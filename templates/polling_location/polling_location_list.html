@@ -1,7 +1,7 @@
 {# templates/polling_location/polling_location_list.html #}
 {% extends "template_base.html" %}
 
-{% block title %}Polling Locations{% endblock %}
+{% block title %}{% if state_name %}{{ state_name }} {% endif %}Polling Locations{% endblock %}
 
 {%  block content %}
 <p><a href="{% url 'admin_tools:admin_home' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">< Back to Admin Home</a></p>
@@ -20,7 +20,7 @@
     <a href="{% url 'polling_location:polling_location_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">Polling Locations</a>
 </p>
 
-<h1>Polling Locations</h1>
+<h1>{% if state_name %}{{ state_name }} {% endif %}Polling Locations</h1>
 
     <p><a href="{% url 'admin_tools:sync_dashboard' %}?state_code={{ state_code }}" target="_blank">
         Go to "Import Polling Locations From Master Server" Page</a></p>

@@ -16,7 +16,8 @@ from django.db.models import Q
 from django.shortcuts import render
 from exception.models import handle_record_found_more_than_one_exception
 from voter.models import voter_has_authority
-from wevote_functions.functions import convert_to_float, convert_to_int, positive_value_exists
+from wevote_functions.functions import convert_state_code_to_state_text, convert_to_float, convert_to_int, \
+    positive_value_exists
 import wevote_functions.admin
 from django.http import HttpResponse
 import json
@@ -424,6 +425,7 @@ def polling_location_list_view(request):
         'polling_location_search':  polling_location_search,
         'show_bulk_retrieve':       show_bulk_retrieve,
         'state_code':               state_code,
+        'state_name':               convert_state_code_to_state_text(state_code),
         'state_list':               sorted_state_list,
     }
     return render(request, 'polling_location/polling_location_list.html', template_values)
