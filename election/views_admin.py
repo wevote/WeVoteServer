@@ -572,7 +572,11 @@ def election_edit_process_view(request):
             election_on_stage.google_civic_election_id = google_civic_election_id
 
         if ballotpedia_election_id is not False:
-            election_on_stage.ballotpedia_election_id = convert_to_int(ballotpedia_election_id)
+            if positive_value_exists(ballotpedia_election_id):
+                ballotpedia_election_id = convert_to_int(ballotpedia_election_id)
+            else:
+                ballotpedia_election_id = None
+            election_on_stage.ballotpedia_election_id = ballotpedia_election_id
 
         if ballotpedia_kind_of_election is not False:
             election_on_stage.ballotpedia_kind_of_election = ballotpedia_kind_of_election
