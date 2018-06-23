@@ -268,9 +268,12 @@ class ElectionManager(models.Model):
             today_date_as_integer = convert_date_to_date_as_integer(today)
 
             for one_election in raw_election_list:
-                election_date_as_simple_string = one_election.election_day_text.replace("-", "")
-                this_election_date_as_integer = convert_to_int(election_date_as_simple_string)
-                if this_election_date_as_integer >= today_date_as_integer:
+                if positive_value_exists(one_election.election_day_text):
+                    election_date_as_simple_string = one_election.election_day_text.replace("-", "")
+                    this_election_date_as_integer = convert_to_int(election_date_as_simple_string)
+                    if this_election_date_as_integer >= today_date_as_integer:
+                        upcoming_election_list.append(one_election)
+                else:
                     upcoming_election_list.append(one_election)
 
             status = 'ELECTIONS_FOUND'

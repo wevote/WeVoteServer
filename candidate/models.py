@@ -603,7 +603,7 @@ class CandidateCampaignListManager(models.Model):
                 candidate_list = list(candidate_query)
                 if len(candidate_list):
                     # At least one entry exists
-                    status += 'BATCH_ROW_ACTION_CANDIDATE_LIST_RETRIEVED '
+                    status += 'RETRIEVE_CANDIDATES_FROM_NON_UNIQUE-CANDIDATE_LIST_RETRIEVED '
                     # if a single entry matches, update that entry
                     if len(candidate_list) == 1:
                         multiple_entries_found = False
@@ -620,9 +620,9 @@ class CandidateCampaignListManager(models.Model):
                         status += "MULTIPLE_TWITTER_MATCHES "
             except CandidateCampaign.DoesNotExist:
                 success = True
-                status += "BATCH_ROW_ACTION_EXISTING_CANDIDATE_NOT_FOUND "
+                status += "RETRIEVE_CANDIDATES_FROM_NON_UNIQUE-CANDIDATE_NOT_FOUND "
             except Exception as e:
-                status += "BATCH_ROW_ACTION_CANDIDATE_QUERY_FAILED1 "
+                status += "RETRIEVE_CANDIDATES_FROM_NON_UNIQUE-CANDIDATE_QUERY_FAILED1 "
                 keep_looking_for_duplicates = False
         # twitter handle does not exist, next look up against other data that might match
 
@@ -659,9 +659,9 @@ class CandidateCampaignListManager(models.Model):
 
             except CandidateCampaign.DoesNotExist:
                 success = True
-                status += "BATCH_ROW_ACTION_CANDIDATE_NOT_FOUND-EXACT_MATCH "
+                status += "RETRIEVE_CANDIDATES_FROM_NON_UNIQUE-CANDIDATE_NOT_FOUND-EXACT_MATCH "
             except Exception as e:
-                status += "BATCH_ROW_ACTION_CANDIDATE_QUERY_FAILED2 "
+                status += "RETRIEVE_CANDIDATES_FROM_NON_UNIQUE-CANDIDATE_QUERY_FAILED2 "
 
         if keep_looking_for_duplicates and positive_value_exists(candidate_name):
             # Search for Candidate(s) that contains the same first and last names
@@ -697,10 +697,65 @@ class CandidateCampaignListManager(models.Model):
                     status += 'CANDIDATE_ENTRY_NOT_FOUND-FIRST_OR_LAST '
                     success = True
             except CandidateCampaign.DoesNotExist:
-                status += "BATCH_ROW_ACTION_CANDIDATE_NOT_FOUND-FIRST_OR_LAST_NAME "
+                status += "RETRIEVE_CANDIDATES_FROM_NON_UNIQUE-CANDIDATE_NOT_FOUND-FIRST_OR_LAST_NAME "
                 success = True
             except Exception as e:
-                status += "BATCH_ROW_ACTION_CANDIDATE_QUERY_FAILED3 "
+                status += "RETRIEVE_CANDIDATES_FROM_NON_UNIQUE-CANDIDATE_QUERY_FAILED3 "
+
+        if keep_looking_for_duplicates and positive_value_exists(candidate_name):
+            # Search for Candidate(s) by breaking up candidate_name into search words
+            try:
+                candidate_query = CandidateCampaign.objects.all()
+
+                if positive_value_exists(google_civic_election_id):
+                    candidate_query = candidate_query.filter(google_civic_election_id=google_civic_election_id)
+                if positive_value_exists(state_code):
+                    candidate_query = candidate_query.filter(state_code__iexact=state_code)
+                search_words = candidate_name.split()
+
+                filters = []
+                for one_word in search_words:
+                    new_filter = Q(candidate_name__icontains=one_word)
+                    filters.append(new_filter)
+
+                # Add the first query
+                at_least_one_filter_used = False
+                if len(filters):
+                    at_least_one_filter_used = True
+                    final_filters = filters.pop()
+
+                    # ...and "OR" the remaining items in the list
+                    for item in filters:
+                        final_filters |= item
+
+                    candidate_query = candidate_query.filter(final_filters)
+
+                if positive_value_exists(ignore_candidate_id_list):
+                    candidate_query = candidate_query.exclude(we_vote_id__in=ignore_candidate_id_list)
+
+                candidate_list = list(candidate_query)
+                if len(candidate_list) and at_least_one_filter_used:
+                    # entry exists
+                    status += 'CANDIDATE_ENTRY_EXISTS '
+                    success = True
+                    # if a single entry matches, update that entry
+                    if len(candidate_list) == 1:
+                        candidate = candidate_list[0]
+                        candidate_found = True
+                        keep_looking_for_duplicates = False
+                    else:
+                        # more than one entry found with a match in CandidateCampaign
+                        candidate_list_found = True
+                        keep_looking_for_duplicates = False
+                        multiple_entries_found = True
+                else:
+                    status += 'RETRIEVE_CANDIDATES_FROM_NON_UNIQUE-CANDIDATE_ENTRY_NOT_FOUND-KEYWORDS '
+                    success = True
+            except CandidateCampaign.DoesNotExist:
+                status += "RETRIEVE_CANDIDATES_FROM_NON_UNIQUE-CANDIDATE_NOT_FOUND-KEYWORDS "
+                success = True
+            except Exception as e:
+                status += "RETRIEVE_CANDIDATES_FROM_NON_UNIQUE-CANDIDATE_QUERY_FAILED4 "
 
         results = {
             'success':                  success,

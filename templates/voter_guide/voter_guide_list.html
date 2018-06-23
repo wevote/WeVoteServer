@@ -28,6 +28,8 @@
 
 {% if voter_guide_list and google_civic_election_id %}
     <ul>
+        <li><strong>Prepare: <a href="{% url 'voter_guide:voter_guide_possibility_list' %}?google_civic_election_id={{ google_civic_election_id }}"
+                        target="_blank" >Review Possible Voter Guides</a></strong> (in new window)</li>
         <li>Prepare: <a href="{% url 'voter_guide:generate_voter_guides_one_election' %}?google_civic_election_id={{ google_civic_election_id }}"
                         target="_blank" >Generate Voter Guides for this Election</a> (in new window)</li>
         <li>Prepare: <a href="{% url 'import_export_twitter:refresh_twitter_data_for_organizations' %}?organization_state={{ state_code }}&first_retrieve_only=0&google_civic_election_id={{ google_civic_election_id }}"

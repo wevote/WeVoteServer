@@ -2533,6 +2533,7 @@ def create_or_update_batch_header_mapping(batch_header_id, kind_of_batch, incomi
     return results
 
 
+# There is also a function of this same name in models.py
 def create_batch_header_translation_suggestions(batch_header, kind_of_batch, incoming_header_map_values):
     """
 

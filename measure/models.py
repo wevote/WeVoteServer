@@ -885,8 +885,17 @@ class ContestMeasureList(models.Model):
             if positive_value_exists(google_civic_election_id):
                 measure_queryset = measure_queryset.filter(google_civic_election_id=google_civic_election_id)
             else:
-                # TODO Limit this search to upcoming_elections only
-                pass
+                success = False
+                status = "RETRIEVE_ALL_MEASURES_FOR_UPCOMING_ELECTION-MISSING_ELECTION_ID "
+                results = {
+                    'success': success,
+                    'status': status,
+                    'google_civic_election_id': google_civic_election_id,
+                    'measure_list_found': measure_list_found,
+                    'measure_list_objects': measure_list_objects if return_list_of_objects else [],
+                    'measure_list_light': measure_list_light,
+                }
+                return results
             if positive_value_exists(state_code):
                 measure_queryset = measure_queryset.filter(state_code__iexact=state_code)
             measure_queryset = measure_queryset.order_by("measure_title")

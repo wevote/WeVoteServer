@@ -5,29 +5,72 @@
 
 {%  block content %}
 {% load template_filters %}
-<h1>Endorsements</h1>
-{% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
 
-
-{% if organization %}
-{% else %}
-    <p>Thank you for helping us gather opinions about this upcoming election!</p>
-{% endif %}
 
 <form action="{% url "voter_guide:voter_guide_create_process" %}" method="post" class="form-horizontal">
 {% csrf_token %}
+
+<input type="hidden" name="voter_we_vote_id_who_submitted" value="{{ voter_we_vote_id_who_submitted }}">
+
+{% if organization_found and organization %}
+
+<div class="form-group">
+    <label for="organization_name_id" class="col-sm-3 control-label">
+      <span class="hidden-xs">Organization<br /></span>
+      <button type="submit"
+              name="clear_organization_options"
+              class="btn btn-link btn-sm" value="1">Unlink</button>
+   </label>
+    <div class="col-sm-8">
+        {% if organization.we_vote_hosted_profile_image_url_tiny %}
+            <img src="{{ organization.we_vote_hosted_profile_image_url_tiny }}" width="32px" />
+        {% endif %}
+            <span class="h3">{{ organization.organization_name }}</span>
+            <br />
+            {% if organization.organization_twitter_handle %}
+                <a href="https://twitter.com/{{ organization.organization_twitter_handle }}"
+                   target="_blank"
+                   class="u-no-break">
+                <i class="fa fa-twitter"></i> {{ organization.organization_twitter_handle }}
+                <span class="glyphicon glyphicon-new-window"></span></a>
+            {% endif %}
+            {% if organization.organization_twitter_handle and organization.organization_website %}<br />{% endif %}
+            {% if organization.organization_website %}
+                <a href="{{ organization.organization_website }}"
+                   target="_blank"
+                   class="u-no-break">{{ organization.organization_website }}<span class="glyphicon glyphicon-new-window"></span></a>
+            {% endif %}
+    </div>
+</div>
+
+<input type="hidden" name="organization_we_vote_id" value="{{ organization_we_vote_id }}">
+<input type="hidden" name="organization_name" value="{{ organization_name }}">
+<input type="hidden" name="organization_twitter_handle" value="{{ organization_twitter_handle }}">
+{% endif %}
+
+{% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
+
+
+{% if voter_guide_possibility_url %}
+{% else %}
+    <p>Thank you for helping us gather opinions about this upcoming election!</p>
+{% endif %}
 
 <input type="hidden" name="voter_guide_possibility_id" value="{{ voter_guide_possibility_id }}">
 
 <div class="form-group">
     <label for="voter_guide_possibility_url_id" class="col-sm-3 control-label">
-        Where did you find these endorsements?
+    {% if voter_guide_possibility_url %}
+        Website with the endorsements
+    {% else %}
+        Please enter the website with the endorsements
+    {% endif %}
     </label>
     <div class="col-sm-8">
         <input type="text"
                name="voter_guide_possibility_url"
                id="voter_guide_possibility_url_id"
-               class="form-control"
+               class="form-control input-md"
                placeholder="Please enter web address, starting with 'http' or 'www'..."
                value="{{ voter_guide_possibility_url }}" />
     </div>
@@ -35,9 +78,9 @@
 
 {% if upcoming_election_list %}
 <div class="form-group">
-    <label for="google_civic_election_id" class="col-sm-3 control-label">{% if 0 == google_civic_election_id|convert_to_int %}Choose {% endif %}Election</label>
-    <div class="col-sm-8">
-        <select id="google_civic_election_id" name="google_civic_election_id" class="form-control">
+    <label for="google_civic_election_id" class="col-sm-3 control-label hidden-xs">{% if 0 == google_civic_election_id|convert_to_int %}Choose {% endif %}Election</label>
+    <div class="col-sm-8 input-md">
+        <select id="google_civic_election_id" name="google_civic_election_id" class="input-group-md">
             <option value="0" {% if 0 == google_civic_election_id|convert_to_int %} selected="selected"{% endif %}>
                 -- Choose Election --</option>
         {% for election in upcoming_election_list %}
@@ -53,34 +96,22 @@
 
 {% if organization_found and organization %}
 
-<div class="form-group">
-    <label for="organization_name_id" class="col-sm-3 control-label">Organization Name</label>
-    <div class="col-sm-8">
-        <input type="text" name="organization_name" id="organization_name_id" class="form-control"
-               value="{{ organization.organization_name }}" />
-    </div>
-</div>
-
-<div class="form-group">
-    <label for="organization_twitter_handle_id" class="col-sm-3 control-label">Organization Twitter Handle</label>
-    <div class="col-sm-8">
-        <input type="text" name="organization_twitter_handle" id="organization_twitter_handle_id" class="form-control"
-               value="{{ organization.organization_twitter_handle }}" />
-    </div>
-</div>
-
-<input type="hidden" name="organization_we_vote_id" value="{{ organization_we_vote_id }}">
+{# Interface code for this above #}
 
 {% elif organizations_list %}
 <div class="form-group">
-    <label for="organization_name_id" class="col-sm-3 control-label">Choose Organization</label>
+    <label for="organization_name_id" class="col-sm-3 control-label">
+      Choose Organization<br />
+      <button type="submit"
+              name="clear_organization_options"
+              class="btn btn-link btn-sm" value="1">Clear Organization Options</button>
+    </label>
     <div class="col-sm-8">
         <table class="table">
             <tr>
                 <th>Name</th>
                 <th></th>
-                <th>Twitter</th>
-                <th>Website</th>
+                <th>Twitter / Website</th>
             </tr>
         {% for possible_organization in organizations_list %}
             <tr>
@@ -90,12 +121,15 @@
                             class="btn btn-success btn-sm" value="{{ possible_organization.organization_we_vote_id }}">Choose</button></td>
                 <td>{% if possible_organization.organization_twitter_handle %}
                     <a href="https://twitter.com/{{ possible_organization.organization_twitter_handle }}"
-                       target="_blank">{{ possible_organization.organization_twitter_handle }}
+                       target="_blank"
+                       class="u-no-break"><i class="fa fa-twitter"></i> {{ possible_organization.organization_twitter_handle }}
                     <span class="glyphicon glyphicon-new-window"></span></a>
-                {% endif %}</td>
-                <td>{% if possible_organization.organization_website %}
+                {% endif %}
+                {% if organization.organization_twitter_handle and organization.organization_website %}<br />{% endif %}
+                {% if possible_organization.organization_website %}
                     <a href="{{ possible_organization.organization_website }}"
-                       target="_blank">{{ possible_organization.organization_website }}
+                       target="_blank"
+                       class="u-no-break">{{ possible_organization.organization_website }}
                     <span class="glyphicon glyphicon-new-window"></span></a>
                 {% endif %}</td>
             </tr>
@@ -109,40 +143,81 @@
 
 {% else %}
 
-<div class="form-group">
-    <label for="organization_name_id" class="col-sm-3 control-label">Organization Name</label>
-    <div class="col-sm-8">
-        <input type="text" name="organization_name" id="organization_name_id" class="form-control"
-               value="{{ organization_name }}" />
+    {% if voter_guide_possibility_url %}
+    <div class="form-group">
+        <label for="organization_name_id" class="col-sm-3 control-label">Organization Name</label>
+        <div class="col-sm-8">
+            <input type="text" name="organization_name" id="organization_name_id" class="form-control"
+                   value="{{ organization_name }}" />
+        </div>
     </div>
-</div>
 
-<div class="form-group">
-    <label for="organization_twitter_handle_id" class="col-sm-3 control-label">Organization Twitter Handle</label>
-    <div class="col-sm-8">
-        <input type="text" name="organization_twitter_handle" id="organization_twitter_handle_id" class="form-control"
-               value="{{ organization_twitter_handle }}" />
+    <div class="form-group">
+        <label for="organization_twitter_handle_id" class="col-sm-3 control-label">Organization Twitter Handle</label>
+        <div class="col-sm-8">
+            <input type="text" name="organization_twitter_handle" id="organization_twitter_handle_id" class="form-control"
+                   value="{{ organization_twitter_handle }}" />
+        </div>
     </div>
-</div>
+
+   {% else %}
+
+    <input type="hidden" name="organization_name" value="{{ organization_name }}">
+    <input type="hidden" name="organization_twitter_handle" value="{{ organization_twitter_handle }}">
+   {% endif %}
 
 {% endif %}
 
+{% if possible_candidate_list_found and not hide_possible_candidate_list %}
 <div class="form-group">
     <label for="ballot_items_raw_id" class="col-sm-3 control-label">
-        Candidates or Measures Supported
+        <span class="hidden-xs">Candidates with Stances</span><br />
     </label>
     <div class="col-sm-8">
-        <textarea name="ballot_items_raw"
-                  class="form-control animated"
-                  placeholder="Please enter one candidate or measure per line, or separated by commas..."
-                  >{{ ballot_items_raw|default_if_none:"" }}</textarea>
+        <table class="table">
+        {% for possible_candidate in possible_candidate_list %}
+            {% include "voter_guide/voter_guide_one_candidate_confirmation.html" with possible_candidate=possible_candidate %}
+            <br />
+        {% endfor %}
+        </table>
     </div>
 </div>
 
+<input type="hidden" name="ballot_items_raw" value="{{ ballot_items_raw }}">
+
+{% else %}
+
+    {% if voter_guide_possibility_url %}
+    <div class="form-group">
+        <label for="ballot_items_raw_id" class="col-sm-3 control-label">
+            Candidates or Measures
+        </label>
+        <div class="col-sm-8">
+            <textarea name="ballot_items_raw"
+                      class="form-control animated"
+                      placeholder="Please enter one candidate or measure per line, or separated by commas..."
+                      rows="3"
+                      >{{ ballot_items_raw|default_if_none:"" }}</textarea>
+        </div>
+    </div>
+
+    {% else %}
+
+    <input type="hidden" name="ballot_items_raw" value="{{ ballot_items_raw }}">
+    {% endif %}
+
+{% endif %}
+
+
+
 <div class="form-group">
-    <label for="find_voter_guide_button_id" class="col-sm-3 control-label"><a href="{% url 'voter_guide:voter_guide_create' %}">clear</a></label>
+    <label for="find_voter_guide_button_id" class="col-sm-3 control-label"></label>
     <div class="col-sm-8">
-        <button type="submit" class="btn btn-default" name="save_endorsements" value="1">Save Endorsements</button>
+        <a href="{% url 'voter_guide:voter_guide_create' %}">start over</a>
+        <button type="submit" class="btn btn-default" name="save_endorsements" value="1">Analyze & Save</button>
+    {% if display_all_done_button %}
+        <button type="submit" class="btn btn-success" name="all_done_with_entry" value="1">All Done!</button>
+    {% endif %}
     </div>
 </div>
 </form>
