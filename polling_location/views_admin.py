@@ -243,7 +243,7 @@ def polling_location_edit_process_view(request):
         polling_location_id = polling_location_on_stage.id
         polling_location_we_vote_id = polling_location_on_stage.we_vote_id
 
-        if not latitude and not longitude:
+        if not zip_long or not latitude or not longitude:
             lat_long_results = polling_location_manager.populate_latitude_and_longitude_for_polling_location(
                 polling_location_on_stage)
             status += lat_long_results['status']

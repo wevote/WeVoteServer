@@ -226,10 +226,10 @@ class PollingLocationManager(models.Model):
             }
             return results
 
+        #  or not positive_value_exists(polling_location.zip_long)
         if not positive_value_exists(polling_location.line1) or not \
                 positive_value_exists(polling_location.city) or not \
-                positive_value_exists(polling_location.state) or not \
-                positive_value_exists(polling_location.zip_long):
+                positive_value_exists(polling_location.state):
             if positive_value_exists(polling_location.line1) and \
                     positive_value_exists(polling_location.city) and \
                     positive_value_exists(polling_location.state) and \
@@ -289,6 +289,14 @@ class PollingLocationManager(models.Model):
         try:
             latitude = location.latitude
             longitude = location.longitude
+            if not positive_value_exists(polling_location.zip_long):
+                # Repair the polling location to include the ZIP code
+                if hasattr(location, 'raw'):
+                    if 'address_components' in location.raw:
+                        for one_address_component in location.raw['address_components']:
+                            if 'postal_code' in one_address_component['types'] \
+                                    and positive_value_exists(one_address_component['long_name']):
+                                polling_location.zip_long = one_address_component['long_name']
             polling_location.latitude = location.latitude
             polling_location.longitude = location.longitude
             polling_location.save()
