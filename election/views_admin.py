@@ -703,6 +703,9 @@ def election_list_view(request):
             if not positive_value_exists(candidate_count):
                 offices_without_candidate_count += 1
         election.offices_without_candidate_count = offices_without_candidate_count
+        if positive_value_exists(election.office_count):
+            election.offices_without_candidate_percentage = \
+                100 * (election.offices_without_candidate_count / election.office_count)
 
         # How many candidates?
         candidate_list_query = CandidateCampaign.objects.all()
@@ -718,6 +721,9 @@ def election_list_view(request):
             Q(we_vote_hosted_profile_image_url_tiny__isnull=True) | Q(we_vote_hosted_profile_image_url_tiny='')
         )
         election.candidates_without_photo_count = candidate_list_query.count()
+        if positive_value_exists(election.candidate_count):
+            election.candidates_without_photo_percentage = \
+                100 * (election.candidates_without_photo_count / election.candidate_count)
 
         # Number of Voter Guides
         voter_guide_query = VoterGuide.objects.filter(google_civic_election_id=election.google_civic_election_id)

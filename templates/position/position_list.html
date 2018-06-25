@@ -26,19 +26,22 @@
 
 <h1>Opinions/Positions</h1>
 
-<p>Also see positions listed under <a href="{% url 'organization:organization_list' %}">Organizations</a>.
+<p>
+    Also see positions listed under <a href="{% url 'organization:organization_list' %}">Organizations</a>.
     Vote Smart ratings <a href="{% url 'import_export_vote_smart:vote_smart_rating_list' %}">here</a>.
 </p>
 
+<ul>
+    <li><strong><a href="{% url 'voter_guide:voter_guide_create' %}?google_civic_election_id={{ google_civic_election_id }}" target="_blank">
+        Suggest a Voter Guide</a></strong> (in a new window). Quick public tools that feeds into import_export_batch system.</li>
 {% if position_list and google_civic_election_id %}
-    <ul>
-        <li>Prepare: <a href="{% url 'voter_guide:generate_voter_guides' %}?google_civic_election_id={{ google_civic_election_id }}" target="_blank" >Generate Voter Guides</a> (in new window)</li>
-        <li>Prepare: <a href="{% url 'position:refresh_cached_position_info_for_election' %}?google_civic_election_id={{ google_civic_election_id }}" target="_blank" >
-            Refresh All Cached Positions for this Election</a> (about 5 minutes - in new window)</li>
-        <li>Prepare: <a href="{% url 'import_export_vote_smart:retrieve_positions_from_vote_smart_for_election' %}?google_civic_election_id={{ google_civic_election_id }}" target="_blank" >
-            Retrieve Positions from Vote Smart for this Election</a> (in new window)</li>
-    </ul>
+    <li>Prepare: <a href="{% url 'voter_guide:generate_voter_guides' %}?google_civic_election_id={{ google_civic_election_id }}" target="_blank" >Generate Voter Guides</a> (in new window)</li>
+    <li>Prepare: <a href="{% url 'position:refresh_cached_position_info_for_election' %}?google_civic_election_id={{ google_civic_election_id }}" target="_blank" >
+        Refresh All Cached Positions for this Election</a> (about 5 minutes - in new window)</li>
+    <li>Prepare: <a href="{% url 'import_export_vote_smart:retrieve_positions_from_vote_smart_for_election' %}?google_civic_election_id={{ google_civic_election_id }}" target="_blank" >
+        Retrieve Positions from Vote Smart for this Election</a> (in new window)</li>
 {% endif %}
+</ul>
 
 <form name="organization_position_choose_election" method="get" action="{% url 'position:position_list' %}">
     {% csrf_token %}
@@ -120,7 +123,7 @@
                 {% else %}
                     (name unknown)
                 {% endif %}
-                <span style="color: darkgray">&nbsp;{{ position.statement_text|default_if_none:"" }}</span>
+                <span style="color: darkgray">&nbsp;{{ position.statement_text|default_if_none:""|truncatechars:450 }}</span>
             </td>
             <td>{% if position.election.election_day_text %}{{ position.election.election_day_text }}{% endif %}</td>
         </tr>

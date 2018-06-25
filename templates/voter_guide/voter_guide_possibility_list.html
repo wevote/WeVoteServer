@@ -23,11 +23,11 @@
 
 <h1>Suggested Voter Guides to Approve</h1>
 
-<p>
-    <strong><a href="{% url 'voter_guide:voter_guide_create' %}?google_civic_election_id={{ google_civic_election_id }}" target="_blank">
-        Enter Suggested Voter Guide</a></strong>.
-    Enter a new voter guide with the quick form.
-</p>
+<ul>
+    <li><strong><a href="{% url 'voter_guide:voter_guide_create' %}?google_civic_election_id={{ google_civic_election_id }}"
+                   target="_blank">Suggest a Voter Guide</a></strong> (in new window).
+        Quick public tools that feeds into import_export_batch system.</li>
+</ul>
 
 <form name="voter_guide_choose_election" method="get" action="{% url 'voter_guide:voter_guide_possibility_list' %}">
 {% csrf_token %}

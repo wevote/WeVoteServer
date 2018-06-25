@@ -87,11 +87,13 @@
                 {{ election.office_count|default_if_none:"" }}</a>
             {% endif %}
             {% if election.offices_without_candidate_count %}
-                <strong>
                 <a href="{% url 'office:office_list' %}?google_civic_election_id={{ election.google_civic_election_id }}{% if show_all_elections %}&show_all_elections=1{% endif %}"
                    target="_blank">
-                ({{ election.offices_without_candidate_count|default_if_none:"" }})</a>
-                </strong>
+                ({{ election.offices_without_candidate_count|default_if_none:"" }}
+                {% if election.offices_without_candidate_percentage %}
+                    <span class="{% if election.offices_without_candidate_percentage > 33 %}font-weight-bold text-danger{% endif %}">
+                      : {{ election.offices_without_candidate_percentage|floatformat:"0" }}%</span>
+                  {% endif %})</a>
             {% endif %}
             </td>
             <td align="middle">
@@ -103,7 +105,11 @@
             {% if election.candidates_without_photo_count %}
                 <a href="{% url 'candidate:candidate_list' %}?google_civic_election_id={{ election.google_civic_election_id }}{% if show_all_elections %}&show_all_elections=1{% endif %}"
                    target="_blank">
-                ({{ election.candidates_without_photo_count|default_if_none:"" }})</a>
+                ({{ election.candidates_without_photo_count|default_if_none:"" }}
+                  {% if election.candidates_without_photo_percentage %}
+                    <span class="{% if election.candidates_without_photo_percentage > 33 %}font-weight-bold text-danger{% endif %}">
+                      : {{ election.candidates_without_photo_percentage|floatformat:"0" }}%</span>
+                  {% endif %})</a>
             {% endif %}
             </td>
             <td align="middle">
