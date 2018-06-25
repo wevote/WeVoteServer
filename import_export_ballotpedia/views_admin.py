@@ -5,7 +5,7 @@
 from .controllers import attach_ballotpedia_election_by_district_from_api, \
     retrieve_ballot_items_from_polling_location, \
     retrieve_ballotpedia_candidates_by_election_from_api, retrieve_ballotpedia_measures_by_district_from_api, \
-    retrieve_district_list_from_polling_location, retrieve_ballotpedia_offices_by_district_from_api, \
+    retrieve_ballotpedia_district_id_list_for_polling_location, retrieve_ballotpedia_offices_by_district_from_api, \
     retrieve_ballotpedia_offices_by_election_from_api
 from admin_tools.views import redirect_to_sign_in_page
 from config.base import get_environment_variable
@@ -194,12 +194,12 @@ def attach_ballotpedia_election_view(request, election_local_id=0):
     # If here, we know that we have some polling_locations to use in order to retrieve ballotpedia districts
     merged_district_list = []
     for polling_location in polling_location_list:
-        one_ballot_results = retrieve_district_list_from_polling_location(
+        one_ballot_results = retrieve_ballotpedia_district_id_list_for_polling_location(
             google_civic_election_id, polling_location=polling_location)
         if one_ballot_results['success']:
-            district_list = one_ballot_results['district_list']
-            if len(district_list):
-                for one_ballotpedia_district_id in district_list:
+            ballotpedia_district_id_list = one_ballot_results['ballotpedia_district_id_list']
+            if len(ballotpedia_district_id_list):
+                for one_ballotpedia_district_id in ballotpedia_district_id_list:
                     if one_ballotpedia_district_id not in merged_district_list:
                         # Build up a list of ballotpedia districts that we need to retrieve races for
                         merged_district_list.append(one_ballotpedia_district_id)
@@ -347,11 +347,15 @@ def retrieve_ballotpedia_data_for_polling_locations_view(request, election_local
         # We didn't find any polling locations marked for bulk retrieve, so just retrieve the top 100 (for now)
         try:
             polling_location_count_query = PollingLocation.objects.all()
+            polling_location_count_query = \
+                polling_location_count_query.exclude(Q(latitude__isnull=True) | Q(latitude__exact=0.0))
             polling_location_count_query = polling_location_count_query.filter(state__iexact=state_code)
             polling_location_count = polling_location_count_query.count()
 
             if positive_value_exists(polling_location_count):
                 polling_location_query = PollingLocation.objects.all()
+                polling_location_query = \
+                    polling_location_query.exclude(Q(latitude__isnull=True) | Q(latitude__exact=0.0))
                 polling_location_query = polling_location_query.filter(state__iexact=state_code)
                 # Ordering by "location_name" creates a bit of (locational) random order
                 polling_location_list = polling_location_query.order_by('location_name')[:import_limit]
@@ -384,14 +388,14 @@ def retrieve_ballotpedia_data_for_polling_locations_view(request, election_local
         # If here we just want to retrieve the races for this election
         merged_district_list = []
         for polling_location in polling_location_list:
-            one_ballot_results = retrieve_district_list_from_polling_location(
+            one_ballot_results = retrieve_ballotpedia_district_id_list_for_polling_location(
                 google_civic_election_id, polling_location=polling_location)
             success = False
             if one_ballot_results['success']:
                 success = True
-                district_list = one_ballot_results['district_list']
-                if len(district_list):
-                    for one_ballotpedia_district_id in district_list:
+                ballotpedia_district_id_list = one_ballot_results['ballotpedia_district_id_list']
+                if len(ballotpedia_district_id_list):
+                    for one_ballotpedia_district_id in ballotpedia_district_id_list:
                         if one_ballotpedia_district_id not in merged_district_list:
                             # Build up a list of ballotpedia districts that we need to retrieve races for
                             merged_district_list.append(one_ballotpedia_district_id)
