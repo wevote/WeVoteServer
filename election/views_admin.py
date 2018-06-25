@@ -26,7 +26,7 @@ from image.models import WeVoteImageManager
 from import_export_google_civic.controllers import retrieve_one_ballot_from_google_civic_api, \
     store_one_ballot_from_google_civic_api
 from measure.models import ContestMeasureList
-from office.models import ContestOfficeListManager
+from office.models import ContestOffice, ContestOfficeListManager
 from pledge_to_vote.models import PledgeToVoteManager
 from polling_location.models import PollingLocation
 from position.models import ANY_STANCE, PositionEntered, PositionListManager
@@ -686,6 +686,24 @@ def election_list_view(request):
 
         # if not positive_value_exists(show_all_elections):
         # If we are only looking at upcoming elections, gather some additional statistics
+
+        # How many offices?
+        office_list_query = ContestOffice.objects.all()
+        office_list_query = office_list_query.filter(
+            google_civic_election_id=election.google_civic_election_id)
+        office_list = list(office_list_query)
+        election.office_count = len(office_list)
+
+        # How many offices with zero candidates?
+        offices_without_candidate_count = 0
+        for one_office in office_list:
+            candidate_list_query = CandidateCampaign.objects.all()
+            candidate_list_query = candidate_list_query.filter(contest_office_id=one_office.id)
+            candidate_count = candidate_list_query.count()
+            if not positive_value_exists(candidate_count):
+                offices_without_candidate_count += 1
+        election.offices_without_candidate_count = offices_without_candidate_count
+
         # How many candidates?
         candidate_list_query = CandidateCampaign.objects.all()
         candidate_list_query = candidate_list_query.filter(
