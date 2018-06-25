@@ -23,23 +23,27 @@
 
 <h1>Voter Guides</h1>
 
-    <p><strong>Create Voter Guide</strong>. Don't see a voter guide for this election?
-    <a href="{% url 'voter_guide:voter_guide_search' %}?google_civic_election_id={{ google_civic_election_id }}">Find Voter Guide</a></p>
+<ul>
+    <li><strong><a href="{% url 'voter_guide:voter_guide_create' %}?google_civic_election_id={{ google_civic_election_id }}"
+                   target="_blank">Suggest a Voter Guide</a></strong> (in new window).
+        Quick public tools that feeds into import_export_batch system.</li>
+    <li><a href="{% url 'voter_guide:voter_guide_search' %}?google_civic_election_id={{ google_civic_election_id }}"
+           target="_blank">Add Organization / Voter Guide</a> (in new window).
+        Data Manager tools that create organization and voter guide.</li>
 
 {% if voter_guide_list and google_civic_election_id %}
-    <ul>
-        <li><strong>Prepare: <a href="{% url 'voter_guide:voter_guide_possibility_list' %}?google_civic_election_id={{ google_civic_election_id }}"
-                        target="_blank" >Review Possible Voter Guides</a></strong> (in new window)</li>
-        <li>Prepare: <a href="{% url 'voter_guide:generate_voter_guides_one_election' %}?google_civic_election_id={{ google_civic_election_id }}"
-                        target="_blank" >Generate Voter Guides for this Election</a> (in new window)</li>
-        <li>Prepare: <a href="{% url 'import_export_twitter:refresh_twitter_data_for_organizations' %}?organization_state={{ state_code }}&first_retrieve_only=0&google_civic_election_id={{ google_civic_election_id }}"
-                        target="_blank">Refresh Organization Twitter Data (For Organizations in this Election)</a></li>
-        <li>Prepare: <a href="{% url 'voter_guide:refresh_existing_voter_guides' %}?google_civic_election_id={{ google_civic_election_id }}"
-                        target="_blank">Refresh Voter Guides for this Election</a> (in new window)</li>
-    </ul>
+    <li><strong>Prepare: <a href="{% url 'voter_guide:voter_guide_possibility_list' %}?google_civic_election_id={{ google_civic_election_id }}"
+                    target="_blank" >Review Possible Voter Guides</a></strong> (in new window)</li>
+    <li>Prepare: <a href="{% url 'voter_guide:generate_voter_guides_one_election' %}?google_civic_election_id={{ google_civic_election_id }}"
+                    target="_blank" >Generate Voter Guides for this Election</a> (in new window)</li>
+    <li>Prepare: <a href="{% url 'import_export_twitter:refresh_twitter_data_for_organizations' %}?organization_state={{ state_code }}&first_retrieve_only=0&google_civic_election_id={{ google_civic_election_id }}"
+                    target="_blank">Refresh Organization Twitter Data (For Organizations in this Election)</a></li>
+    <li>Prepare: <a href="{% url 'voter_guide:refresh_existing_voter_guides' %}?google_civic_election_id={{ google_civic_election_id }}"
+                    target="_blank">Refresh Voter Guides for this Election</a> (in new window)</li>
 {% else %}
-    Prepare: <a href="{% url 'voter_guide:generate_voter_guides' %}" >Generate Voter Guides</a>
+    <li>Prepare: <a href="{% url 'voter_guide:generate_voter_guides' %}" >Generate Voter Guides</a></li>
 {% endif %}
+</ul>
 
 
     <form name="voter_guide_choose_election" method="get" action="{% url 'voter_guide:voter_guide_list' %}">

@@ -20,14 +20,18 @@
         <td> {{ organization.we_vote_id }}
             (<a href="{% url 'organization:organization_edit' organization.id %}?google_civic_election_id={{ google_civic_election_id }}">edit</a>) (<a href="{% url 'image:images_for_one_organization' organization.we_vote_id %}" target="_blank">See images</a> in new window)</td>
     </tr>
+    {% if organization.vote_smart_id %}
     <tr>
         <th>Vote Smart ID:</th>
         <td><a href="https://votesmart.org/interest-group/{{ organization.vote_smart_id }}" target="_blank">{{ organization.vote_smart_id|default_if_none:"" }}</a></td>
     </tr>
+    {% endif %}
+    {% if organization.organization_website %}
     <tr>
         <th>Website:</th>
         <td><a href={{ organization.organization_website }} target="_blank">{{ organization.organization_website }}</a> (open in new window)</td>
     </tr>
+    {% endif %}
     {% if voter %}
     <tr>
         <th>Voter:</th>
@@ -45,22 +49,25 @@
         {% endif %} (<a href="{% url 'import_export_twitter:refresh_twitter_organization_details' organization.id %}?google_civic_election_id={{ google_civic_election_id }}">refresh Twitter details</a>)
         (<a href="{% url 'import_export_twitter:delete_images_view'%}?organization_id={{ organization.id }}&google_civic_election_id={{ google_civic_election_id }}">Delete Cached Images</a>)</td>
     </tr>
+    {% if organization.twitter_name %}
     <tr>
         <th>Twitter Descriptive Name:</th>
         <td>{{ organization.twitter_name|default_if_none:"" }}</td>
     </tr>
+    {% endif %}
+    {% if organization.twitter_description %}
     <tr>
         <th>Twitter Description:</th>
         <td>{{ organization.twitter_description|default_if_none:"" }}</td>
     </tr>
+    {% endif %}
+    {% if organization.twitter_location %}
     <tr>
         <th>Twitter Location:</th>
         <td>{{ organization.twitter_location|default_if_none:"" }}</td>
     </tr>
-    <tr>
-        <th>Profile Banner:</th>
-        <td>{{ organization.twitter_profile_banner_url_https|default_if_none:"" }}</td>
-    </tr>
+    {% endif %}
+    {% if organization.organization_facebook %}
     <tr>
         <th>Facebook: </th>
         <td>{% if organization.generate_facebook_link %}
@@ -69,12 +76,15 @@
             {{ organization.organization_facebook|default_if_none:"" }}
             {% endif %}</td>
     </tr>
+    {% endif %}
+    {% if organization.wikipedia_page_title %}
     <tr>
         <th>Wikipedia Page:</th>
         <td>{% if organization.wikipedia_page_title %}
                 <a href="{{ organization.generate_wikipedia_link }}" target="_blank">{{ organization.wikipedia_page_title }}</a>
             {% endif %}</td>
     </tr>
+    {% endif %}
     {% if organization.organization_endorsements_api_url %}
     <tr>
         <th>Endorsements Importer URL:</th>
@@ -127,20 +137,27 @@
      {% endif %}
     <tr>
         <th></th>
-        <td><a href="{% url 'organization:organization_edit' organization.id %}?google_civic_election_id={{ google_civic_election_id }}">edit {{ organization.organization_name }}</a></td>
+        <td><a href="{% url 'organization:organization_edit' organization.id %}?google_civic_election_id={{ google_civic_election_id }}"
+               class="btn btn-primary">Edit {{ organization.organization_name }}</a></td>
     </tr>
     </table>
-<p>
-    <a href="{% url 'import_export_wikipedia:import_organization_logo' organization.id %}">Retrieve photos from Wikipedia</a>,
-    <a href="{% url 'import_export_twitter:scrape_website_for_social_media' organization.id %}">Scrape org website for Twitter Acounts</a>,
-    <a href="{% url 'organization:organization_retrieve_tweets' organization.we_vote_id %}">Retrieve tweets for organization</a>,
-    <a href="{% url 'organization:organization_analyze_tweets' organization.we_vote_id %}">Link issues from twitter feed</a>,
-</p>
-
-<p>
-    <a href="{% url 'organization:organization_position_new' organization.id %}?google_civic_election_id={{ google_civic_election_id }}&candidate_we_vote_id={{ candidate_we_vote_id }}">
-        Add New Position</a>
-</p>
+<br />
+<ul>
+    <li><strong><a href="{% url 'voter_guide:voter_guide_create' %}?google_civic_election_id={{ google_civic_election_id }}&organization_we_vote_id={{ organization.we_vote_id }}" target="_blank">
+        Suggest a Voter Guide</a></strong> (in a new window). Quick public tools that feeds into import_export_batch system.</li>
+    <li><a href="{% url 'organization:organization_position_new' organization.id %}?google_civic_election_id={{ google_civic_election_id }}&candidate_we_vote_id={{ candidate_we_vote_id }}"
+           target="_blank">Add New Position Form</a> (in new window)</li>
+    <li><a href="{% url 'voter_guide:refresh_existing_voter_guides' %}?organization_we_vote_id={{ organization.we_vote_id }}&google_civic_election_id={{ google_civic_election_id }}" >
+        Refresh Voter Guides</a></li>
+    <li><a href="{% url 'voter_guide:voter_guide_list' %}?voter_guide_search={{ organization.we_vote_id }}&google_civic_election_id={{ google_civic_election_id }}"
+           target="_blank">Find Voter Guides for this Organization</a> (new window)</li>
+    <li>Assorted tools:
+        <a href="{% url 'import_export_wikipedia:import_organization_logo' organization.id %}">Retrieve photos from Wikipedia</a>,
+        <a href="{% url 'import_export_twitter:scrape_website_for_social_media' organization.id %}">Scrape org website for Twitter Acounts</a>,
+        <a href="{% url 'organization:organization_retrieve_tweets' organization.we_vote_id %}">Retrieve tweets for organization</a>,
+        <a href="{% url 'organization:organization_analyze_tweets' organization.we_vote_id %}">Link issues from twitter feed</a>
+    </li>
+</ul>
 
 <form name="organization_position_choose_election" method="get" action="{% url 'organization:organization_position_list' organization.id %}">
     {% csrf_token %}
@@ -222,12 +239,6 @@
     </script>
 
 {% endif %}
-
-<p>
-    <a href="{% url 'voter_guide:refresh_existing_voter_guides' %}?organization_we_vote_id={{ organization.we_vote_id }}&google_civic_election_id={{ google_civic_election_id }}" >Refresh Voter Guides</a>,
-    <a href="{% url 'voter_guide:voter_guide_list' %}?voter_guide_search={{ organization.we_vote_id }}" target="_blank">Find Voter Guides for this Organization (new window)</a>
-</p>
-
 
 
 {% if organization %}
