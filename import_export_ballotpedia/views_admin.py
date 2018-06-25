@@ -452,9 +452,14 @@ def retrieve_ballotpedia_data_for_polling_locations_view(request, election_local
                                             "&kind_of_batch=" + str(kind_of_batch) +
                                             "&google_civic_election_id=" + str(google_civic_election_id))
             else:
-                # Go to the office listing page
-                return HttpResponseRedirect(reverse('office:office_list', args=()) +
-                                            "?google_civic_election_id=" + str(google_civic_election_id))
+                if retrieve_races:
+                    # Go to the office listing page
+                    return HttpResponseRedirect(reverse('office:office_list', args=()) +
+                                                "?google_civic_election_id=" + str(google_civic_election_id))
+                elif retrieve_measures:
+                    # Go to the measure listing page
+                    return HttpResponseRedirect(reverse('measure:measure_list', args=()) +
+                                                "?google_civic_election_id=" + str(google_civic_election_id))
 
         messages.add_message(request, messages.INFO,
                              'Races retrieved from Ballotpedia for the {election_name}. '

@@ -57,6 +57,8 @@
             <td>List?</td>
             <td>Ballot Locations</td>
         {% if not show_all_elections %}{% endif %}
+            <td align="middle">Offices<br />
+              (w/ no Candidates)</td>
             <td align="middle">Candidates<br />
               (w/o Photos)</td>
             <td align="middle">Voter Guides<br />
@@ -79,25 +81,39 @@
             </td>
         {% if not show_all_elections %}{% endif %}
             <td align="middle">
+            {% if election.office_count %}
+                <a href="{% url 'office:office_list' %}?google_civic_election_id={{ election.google_civic_election_id }}{% if show_all_elections %}&show_all_elections=1{% endif %}"
+                   target="_blank">
+                {{ election.office_count|default_if_none:"" }}</a>
+            {% endif %}
+            {% if election.offices_without_candidate_count %}
+                <strong>
+                <a href="{% url 'office:office_list' %}?google_civic_election_id={{ election.google_civic_election_id }}{% if show_all_elections %}&show_all_elections=1{% endif %}"
+                   target="_blank">
+                ({{ election.offices_without_candidate_count|default_if_none:"" }})</a>
+                </strong>
+            {% endif %}
+            </td>
+            <td align="middle">
             {% if election.candidate_count %}
-                <a href="{% url 'candidate:candidate_list' %}?google_civic_election_id={{ election.google_civic_election_id }}&state_code={{ election.state_code }}"
+                <a href="{% url 'candidate:candidate_list' %}?google_civic_election_id={{ election.google_civic_election_id }}{% if show_all_elections %}&show_all_elections=1{% endif %}"
                    target="_blank">
                 {{ election.candidate_count|default_if_none:"" }}</a>
             {% endif %}
             {% if election.candidates_without_photo_count %}
-                <a href="{% url 'candidate:candidate_list' %}?google_civic_election_id={{ election.google_civic_election_id }}&state_code={{ election.state_code }}"
+                <a href="{% url 'candidate:candidate_list' %}?google_civic_election_id={{ election.google_civic_election_id }}{% if show_all_elections %}&show_all_elections=1{% endif %}"
                    target="_blank">
                 ({{ election.candidates_without_photo_count|default_if_none:"" }})</a>
             {% endif %}
             </td>
             <td align="middle">
             {% if election.voter_guides_count %}
-                <a href="{% url 'voter_guide:voter_guide_list' %}?google_civic_election_id={{ election.google_civic_election_id }}&state_code={{ election.state_code }}"
+                <a href="{% url 'voter_guide:voter_guide_list' %}?google_civic_election_id={{ election.google_civic_election_id }}{% if show_all_elections %}&show_all_elections=1{% endif %}"
                    target="_blank">
                 {{ election.voter_guides_count|default_if_none:"" }}</a>
             {% endif %}
             {% if election.public_positions_count %}
-                <a href="{% url 'position:position_list' %}?google_civic_election_id={{ election.google_civic_election_id }}&state_code={{ election.state_code }}"
+                <a href="{% url 'position:position_list' %}?google_civic_election_id={{ election.google_civic_election_id }}{% if show_all_elections %}&show_all_elections=1{% endif %}"
                    target="_blank">
                 ({{ election.public_positions_count|default_if_none:"" }})</a>
             {% endif %}
