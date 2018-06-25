@@ -669,6 +669,8 @@ def extract_district_from_ocd_division_id(ocd_division_id):
 
 
 def extract_zip5_from_zip9(zip9):
+    if zip9:
+        zip9 = zip9.strip()
     zip5_text = zip9[0:5]
     if len(zip5_text) == 5:
         return zip5_text
@@ -680,6 +682,8 @@ def extract_zip5_from_zip9(zip9):
 
 
 def extract_zip4_from_zip9(zip9):
+    if zip9:
+        zip9 = zip9.strip()
     if len(zip9) <= 5:
         return ''
     elif len(zip9) == 9:

@@ -3,10 +3,8 @@
 # -*- coding: UTF-8 -*-
 
 
-from ballot.models import BallotItem
 from datetime import date, timedelta
 from django.db import models
-import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, positive_value_exists
 
 
@@ -17,13 +15,11 @@ class BallotpediaApiCounter(models.Model):
     ballotpedia_election_id = models.PositiveIntegerField(verbose_name="ballotpedia election id", null=True)
 
 
-
 class BallotpediaApiCounterDailySummary(models.Model):
     date_of_action = models.DateField(verbose_name='date of action', null=False, auto_now=False)
     kind_of_action = models.CharField(verbose_name="kind of call to ballotpedia", max_length=50, null=True, blank=True)
     google_civic_election_id = models.PositiveIntegerField(verbose_name="google civic election id", null=True)
     ballotpedia_election_id = models.PositiveIntegerField(verbose_name="ballotpedia election id", null=True)
-
 
 
 class BallotpediaApiCounterWeeklySummary(models.Model):
@@ -90,7 +86,6 @@ class BallotpediaApiCounterManager(models.Model):
                     counter_queryset = counter_queryset.filter(google_civic_election_id=google_civic_election_id)
                 if positive_value_exists(ballotpedia_election_id):
                     counter_queryset = counter_queryset.filter(ballotpedia_election_id=ballotpedia_election_id)
-
 
                 # Find the number of these entries on that particular day
                 counter_queryset = counter_queryset.filter(datetime_of_action__contains=day_on_stage)

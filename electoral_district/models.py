@@ -60,8 +60,10 @@ class ElectoralDistrict(models.Model):
     # The unique ID of this electoral_district. (Provided by CTCL).
     # TODO ctcl_id_temp is unique for each data file, however it may not be unique across different data feeds
     ctcl_id_temp = models.CharField(verbose_name="temporary ctcl id", max_length=255, null=True, unique=True)
-    we_vote_id = models.CharField(verbose_name="google civic election id", max_length=32, null=True, unique=True)
-    # Make unique=True after data is migrated
+
+    # Needs to allow we_vote_id to be null so we can use the get_or_create... function
+    we_vote_id = models.CharField(verbose_name="permanent we vote id", max_length=255, null=True, unique=True)
+
     # required fields as per VIP specification for ElectoralDistrict are name and type, rest of the fields are optional
     electoral_district_name = models.CharField(verbose_name="electoral district name", max_length=255, null=False,
                                                unique=True)
@@ -77,8 +79,17 @@ class ElectoralDistrict(models.Model):
 
     ocd_id_external_id = models.CharField(verbose_name="ocd id external identifier", max_length=255, blank=True,
                                           null=True)
+    ballotpedia_district_id = models.PositiveIntegerField(blank=True, null=True)
+    ballotpedia_district_kml = models.URLField(verbose_name='url of kml file on ballotpedia', blank=True, null=True)
+    ballotpedia_district_latitude = models.FloatField(null=True, verbose_name='latitude')
+    ballotpedia_district_longitude = models.FloatField(null=True, verbose_name='longitude')
+    ballotpedia_district_type = models.CharField(null=True, blank=True, max_length=255)
+    ballotpedia_district_url = models.URLField(verbose_name='url of district on ballotpedia', blank=True, null=True)
+    ballotpedia_district_ocd_id = models.CharField(verbose_name="ocd id identifier", max_length=255, blank=True,
+                                          null=True)
 
     state_code = models.CharField(verbose_name="state code", max_length=3, blank=True, null=True)
+
     # for now we are only handling ocd_id from the various ExternalIdentifier nodes. Refer to this link for details
     # http://vip-specification.readthedocs.io/en/release/built_rst/xml/enumerations/identifier_type.html
     # #multi-xml-identifier-type
@@ -143,7 +154,103 @@ class ElectoralDistrict(models.Model):
 #
 
 
+class ElectoralDistrictLinkToPollingLocation(models.Model):
+    """
+    This class shows which districts a Polling location is in
+    """
+    # We are relying on built-in Python id field
+
+    # The polling location's we_vote_id linked to the electoral district
+    polling_location_we_vote_id = models.CharField(
+        verbose_name="we vote permanent id", max_length=255, null=True, blank=True, unique=False)
+
+    # The polling location's we_vote_id linked to the electoral district
+    electoral_district_we_vote_id = models.CharField(
+        verbose_name="we vote permanent id", max_length=255, null=True, blank=True, unique=False)
+
+    # The district being linked
+    ballotpedia_district_id = models.PositiveIntegerField(null=True, blank=True)
+
+    # The date the the issue link was modified
+    date_last_changed = models.DateTimeField(verbose_name='date last changed', null=True, auto_now=True)
+
+    def __unicode__(self):
+        return self.id
+
+
 class ElectoralDistrictManager(models.Model):
+
+    def retrieve_ballotpedia_district_ids_for_polling_location(self, polling_location_we_vote_id):
+        ballotpedia_district_id_list = []
+        ballotpedia_district_id_list_found = False
+        success = True
+        status = ""
+
+        results = self.retrieve_electoral_district_link_list(polling_location_we_vote_id)
+        if results['electoral_district_link_list_found']:
+            electoral_district_link_list = results['electoral_district_link_list']
+            for one_electoral_district_link in electoral_district_link_list:
+                ballotpedia_district_id_list.append(one_electoral_district_link.ballotpedia_district_id)
+            status += "ELECTORAL_DISTRICT_LIST_FOUND "
+        else:
+            status += results['status'] + "ELECTORAL_DISTRICT_LIST_NOT_FOUND "
+
+        if len(ballotpedia_district_id_list):
+            ballotpedia_district_id_list_found = True
+
+        results = {
+            'status': status,
+            'success': success,
+            'ballotpedia_district_id_list': ballotpedia_district_id_list,
+            'ballotpedia_district_id_list_found': ballotpedia_district_id_list_found,
+        }
+        return results
+
+    def retrieve_electoral_district_link_list(self, polling_location_we_vote_id="",
+                                              electoral_district_we_vote_id="",
+                                              ballotpedia_district_id=0,
+                                              read_only=True):
+        # Retrieve a list of electoral_district_link entries
+        electoral_district_link_list_found = False
+        electoral_district_link_list = []
+        try:
+            if positive_value_exists(read_only):
+                electoral_district_query = ElectoralDistrictLinkToPollingLocation.objects.using('readonly').all()
+            else:
+                electoral_district_query = ElectoralDistrictLinkToPollingLocation.objects.all()
+
+            if positive_value_exists(polling_location_we_vote_id):
+                electoral_district_query = \
+                    electoral_district_query.filter(polling_location_we_vote_id__iexact=polling_location_we_vote_id)
+            if positive_value_exists(electoral_district_we_vote_id):
+                electoral_district_query = \
+                    electoral_district_query.filter(electoral_district_we_vote_id__iexact=electoral_district_we_vote_id)
+            if positive_value_exists(ballotpedia_district_id):
+                electoral_district_query = \
+                    electoral_district_query.filter(ballotpedia_district_id=ballotpedia_district_id)
+
+            electoral_district_link_list = list(electoral_district_query)
+            if len(electoral_district_link_list):
+                electoral_district_link_list_found = True
+        except Exception as e:
+            pass
+
+        if electoral_district_link_list_found:
+            results = {
+                'status': "ELECTORAL_DISTRICT_LINK_LIST_FOUND",
+                'success': True,
+                'electoral_district_link_list': electoral_district_link_list,
+                'electoral_district_link_list_found': electoral_district_link_list_found,
+            }
+            return results
+        else:
+            results = {
+                'status': "ELECTORAL_DISTRICT_LINK_LIST_NOT_FOUND",
+                'success': True,
+                'electoral_district_link_list': [],
+                'electoral_district_link_list_found': electoral_district_link_list_found,
+            }
+            return results
 
     def update_or_create_electoral_district(self, ctcl_id_temp, electoral_district_name,
                                             updated_values):
@@ -178,6 +285,60 @@ class ElectoralDistrictManager(models.Model):
             'status':                   status,
             'MultipleObjectsReturned':  exception_multiple_object_returned,
             'new_electoral_district_created':     created,
+        }
+        return results
+
+    def update_or_create_electoral_district_link_to_polling_location(
+            self, polling_location_we_vote_id, electoral_district_we_vote_id, ballotpedia_district_id):
+        if not positive_value_exists(polling_location_we_vote_id):
+            success = False
+            status = "MISSING_POLLING_LOCATION_WE_VOTE_ID "
+            results = {
+                'success': success,
+                'status': status,
+            }
+            return results
+        if not positive_value_exists(electoral_district_we_vote_id) \
+                and not positive_value_exists(ballotpedia_district_id):
+            success = False
+            status = "MISSING_BOTH_ELECTORAL_DISTRICT_WE_VOTE_ID_AND_BALLOTPEDIA_DISTRICT_ID "
+            results = {
+                'success': success,
+                'status': status,
+            }
+            return results
+
+        try:
+            defaults = {
+                'polling_location_we_vote_id': polling_location_we_vote_id,
+            }
+            if positive_value_exists(electoral_district_we_vote_id):
+                defaults['electoral_district_we_vote_id'] = electoral_district_we_vote_id
+            if positive_value_exists(ballotpedia_district_id):
+                defaults['ballotpedia_district_id'] = ballotpedia_district_id
+
+            if positive_value_exists(ballotpedia_district_id):
+                ElectoralDistrictLinkToPollingLocation.objects.update_or_create(
+                    polling_location_we_vote_id=polling_location_we_vote_id,
+                    ballotpedia_district_id=ballotpedia_district_id,
+                    defaults=defaults,
+                    )
+            elif positive_value_exists(electoral_district_we_vote_id):
+                ElectoralDistrictLinkToPollingLocation.objects.update_or_create(
+                    polling_location_we_vote_id=polling_location_we_vote_id,
+                    electoral_district_we_vote_id=electoral_district_we_vote_id,
+                    defaults=defaults,
+                    )
+            status = "POLLING_LOCATION_LINK_TO_ELECTORAL_DISTRICT_CREATED_OR_UPDATED "
+            success = True
+
+        except Exception as e:
+            status = "POLLING_LOCATION_LINK_TO_ELECTORAL_DISTRICT_NOT_CREATED "
+            success = False
+
+        results = {
+            'success': success,
+            'status': status,
         }
         return results
 

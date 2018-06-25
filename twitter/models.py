@@ -218,7 +218,6 @@ class TwitterUserManager(models.Model):
         }
         return results
 
-
     def update_or_create_twitter_link_possibility(self, candidate_campaign_we_vote_id, twitter_json, search_term,
                                                   likelihood_score):
         try:
