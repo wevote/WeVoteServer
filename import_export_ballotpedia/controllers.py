@@ -570,8 +570,16 @@ def retrieve_ballotpedia_offices_by_district_from_api(google_civic_election_id, 
         return results
 
     office_district_string = ""
+    ballotpedia_district_id_not_used_list = []
     for one_district in ballotpedia_district_id_list:
-        office_district_string += str(one_district) + ","
+        # The url we send to Ballotpedia can only be so long. If too long, we stop adding districts to the
+        #  office_district_string, but capture the districts not used
+        # 3796 = 4096 - 300 (300 gives us room for all of the other url variables we need)
+        if len(office_district_string) < 3796:
+            office_district_string += str(one_district) + ","
+        else:
+            # In the future we might want to set up a second query to get the races for these districts
+            ballotpedia_district_id_not_used_list.append(one_district)
 
     # Remove last comma
     office_district_string = office_district_string[:-1]
@@ -604,7 +612,8 @@ def retrieve_ballotpedia_offices_by_district_from_api(google_civic_election_id, 
         success = False
         status += "NO_RESPONSE_TEXT_FOUND "
         if positive_value_exists(response.url):
-            status += ": " + response.url
+            shortened_url = response.url[:1000]
+            status += ": " + shortened_url + " "
         results = {
             'success': success,
             'status': status,
@@ -616,9 +625,27 @@ def retrieve_ballotpedia_offices_by_district_from_api(google_civic_election_id, 
         success = False
         status += "RESPONSE_SUCCESS_IS_FALSE"
         if positive_value_exists(response.url):
-            status += ": " + response.url + " "
+            shortened_url = response.url[:1000]
+            status += ": " + shortened_url + " "
         if positive_value_exists(response.error):
             status += "error: " + str(response.error)
+        results = {
+            'success': success,
+            'status': status,
+            'batch_header_id': batch_header_id,
+        }
+        return results
+
+    if hasattr(response, 'ok') and not positive_value_exists(response.ok):
+        success = False
+        status += "RESPONSE_OK_IS_FALSE"
+        if positive_value_exists(response.url):
+            shortened_url = response.url[:1000]
+            status += ": " + shortened_url + " "
+        if hasattr(response, 'status_code'):
+            status += "status_code: " + str(response.status_code)
+            if response.status_code == 414:
+                status += " Too many office_districts sent"
         results = {
             'success': success,
             'status': status,

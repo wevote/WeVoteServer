@@ -512,6 +512,7 @@ def election_edit_process_view(request):
     ballotpedia_election_id = request.POST.get('ballotpedia_election_id', False)
     ballotpedia_kind_of_election = request.POST.get('ballotpedia_kind_of_election', False)
     include_in_list_for_voters = request.POST.get('include_in_list_for_voters', False)
+    internal_notes = request.POST.get('internal_notes', False)
 
     election_on_stage = Election()
 
@@ -583,6 +584,9 @@ def election_edit_process_view(request):
 
         election_on_stage.include_in_list_for_voters = include_in_list_for_voters
 
+        if internal_notes is not False:
+            election_on_stage.internal_notes = internal_notes
+
         election_on_stage.save()
         status += "UPDATED_EXISTING_ELECTION "
         messages.add_message(request, messages.INFO, str(election_name) +
@@ -610,6 +614,8 @@ def election_edit_process_view(request):
                 election_on_stage.election_name = election_name
             if positive_value_exists(election_day_text):
                 election_on_stage.election_day_text = election_day_text
+            if positive_value_exists(internal_notes):
+                election_on_stage.internal_notes = internal_notes
             election_on_stage.save()
             status += "CREATED_NEW_ELECTION "
             messages.add_message(request, messages.INFO, 'New election ' + str(election_name) + ' saved.')
@@ -641,9 +647,9 @@ def election_list_view(request):
     election_list_query = election_list_query.order_by('election_day_text').reverse()
     election_list_query = election_list_query.exclude(google_civic_election_id=2000)
 
+    timezone = pytz.timezone("America/Los_Angeles")
+    datetime_now = timezone.localize(datetime.now())
     if not positive_value_exists(show_all_elections):
-        timezone = pytz.timezone("America/Los_Angeles")
-        datetime_now = timezone.localize(datetime.now())
         two_days = timedelta(days=2)
         datetime_two_days_ago = datetime_now - two_days
         earliest_date_to_show = datetime_two_days_ago.strftime("%Y-%m-%d")
@@ -677,6 +683,11 @@ def election_list_view(request):
     election_list_modified = []
     ballot_returned_list_manager = BallotReturnedListManager()
     for election in election_list:
+        date_of_election = timezone.localize(datetime.strptime(election.election_day_text, "%Y-%m-%d"))
+        if date_of_election > datetime_now:
+            time_until_election = date_of_election - datetime_now
+            election.days_until_election = convert_to_int("%d" % time_until_election.days)
+
         election.ballot_returned_count = \
             ballot_returned_list_manager.fetch_ballot_returned_list_count_for_election(
                 election.google_civic_election_id, election.state_code)

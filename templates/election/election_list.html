@@ -69,8 +69,16 @@
     {% for election in election_list %}
         <tr>
             <td>{{ forloop.counter }}</td>
-            <td><a href="{% url 'election:election_summary' election.id %}" target="_blank">{{ election.election_name }}</a></td>
-            <td>{{ election.election_day_text }}</td>
+            <td>
+                <a href="{% url 'election:election_summary' election.id %}" target="_blank">{{ election.election_name }}</a>
+                {% if election.internal_notes %}
+                <br /><span style="color: darkgray">{{ election.internal_notes|default_if_none:""|truncatechars:50 }}</span>
+                {% endif %}
+            </td>
+            <td>
+                {{ election.election_day_text }}
+                {% if election.days_until_election > 0 %} <span class="{% if election.days_until_election < 46 %}font-weight-bold text-danger{% endif %}">(in {{ election.days_until_election }} days)</span>{% endif %}
+            </td>
             <td align="middle">{{ election.google_civic_election_id }}</td>
             <td align="middle">{{ election.ballotpedia_election_id|default_if_none:"" }}</td>
             <td align="middle">{{ election.state_code }}</td>
