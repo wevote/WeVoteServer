@@ -116,6 +116,7 @@ def augment_email_address_list(email_address_list, voter):
 
 def merge_duplicates_in_email_address_list(email_address_list, voter):
     primary_email_address_found = False
+    primary_email_address_we_vote_id = None
 
     status = ""
     success = True
@@ -124,20 +125,22 @@ def merge_duplicates_in_email_address_list(email_address_list, voter):
             if email_address.we_vote_id == voter.primary_email_we_vote_id:
                 primary_email_address_found = True
                 primary_email_address = email_address
+                primary_email_address_we_vote_id = primary_email_address.we_vote_id
             elif email_address.normalized_email_address == voter.email:
                 primary_email_address_found = True
                 primary_email_address = email_address
+                primary_email_address_we_vote_id = primary_email_address.we_vote_id
 
     voter_manager = VoterManager()
     if primary_email_address_found:
         # Make sure the voter's cached "email" and "primary_email_we_vote_id" are both correct and match same email
         voter_data_updated = False
         if not voter.primary_email_we_vote_id:
-            voter.primary_email_we_vote_id = primary_email_address.we_vote_id
+            voter.primary_email_we_vote_id = primary_email_address_we_vote_id
             voter_data_updated = True
         elif voter.primary_email_we_vote_id and \
-                voter.primary_email_we_vote_id.lower() != primary_email_address.we_vote_id.lower():
-            voter.primary_email_we_vote_id = primary_email_address.we_vote_id
+                voter.primary_email_we_vote_id.lower() != primary_email_address_we_vote_id.lower():
+            voter.primary_email_we_vote_id = primary_email_address_we_vote_id
             voter_data_updated = True
         if not voter.email:
             voter.email = primary_email_address.normalized_email_address
@@ -158,7 +161,7 @@ def merge_duplicates_in_email_address_list(email_address_list, voter):
                     voter_manager.remove_voter_cached_email_entries_from_email_address_object(primary_email_address)
                 status += remove_cached_results['status']
                 try:
-                    voter.primary_email_we_vote_id = primary_email_address.we_vote_id
+                    voter.primary_email_we_vote_id = primary_email_address_we_vote_id
                     voter.email_ownership_is_verified = True
                     voter.email = primary_email_address.normalized_email_address
                     voter.save()
@@ -199,11 +202,12 @@ def merge_duplicates_in_email_address_list(email_address_list, voter):
     for email_address in email_address_list:
         add_to_list = True
         is_primary_email_address = False
-        if email_address.we_vote_id == voter.primary_email_we_vote_id or \
-                email_address.we_vote_id == primary_email_address.we_vote_id:
-            is_primary_email_address = True
+        if positive_value_exists(email_address.we_vote_id) and positive_value_exists(primary_email_address_we_vote_id):
+            if email_address.we_vote_id == voter.primary_email_we_vote_id or \
+                    email_address.we_vote_id == primary_email_address_we_vote_id:
+                is_primary_email_address = True
         if not is_primary_email_address:
-            if primary_email_address_found:
+            if primary_email_address_found and hasattr(primary_email_address, "normalized_email_address"):
                 # See if this email is the same as the primary email address
                 if positive_value_exists(email_address.normalized_email_address) \
                         and positive_value_exists(primary_email_address.normalized_email_address):
