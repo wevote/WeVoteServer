@@ -60,6 +60,9 @@ class Election(models.Model):
     state_code = models.CharField(verbose_name="state code for the election", max_length=2, null=True, blank=True)
     include_in_list_for_voters = models.BooleanField(default=False)
 
+    # For internal notes regarding gathering data for this election
+    internal_notes = models.TextField(null=True, blank=True, default=None)
+
     def election_is_upcoming(self):
         if not positive_value_exists(self.election_day_text):
             return False
