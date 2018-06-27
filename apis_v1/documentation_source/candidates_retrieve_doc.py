@@ -55,13 +55,19 @@ def candidates_retrieve_doc_template_values(url_root):
                    '  "candidate_list": list\n' \
                    '   [\n' \
                    '     "id": integer,\n' \
-                   '     "we_vote_id": string,\n' \
+                   '     "status": string,\n' \
+                   '     "success": boolean,\n' \
                    '     "ballot_item_display_name": string,\n' \
+                   '     "ballotpedia_candidate_id": integer,\n' \
+                   '     "ballotpedia_candidate_summary": string,\n' \
+                   '     "ballotpedia_candidate_url": string,\n' \
                    '     "candidate_photo_url_large": string,\n' \
                    '     "candidate_photo_url_medium": string,\n'\
                    '     "candidate_photo_url_tiny": string,\n' \
-                   '     "party": string,\n' \
+                   '     "kind_of_ballot_item": string,\n' \
                    '     "order_on_ballot": integer,\n' \
+                   '     "party": string,\n' \
+                   '     "we_vote_id": string,\n' \
                    '   ],\n' \
                    '}'
 
