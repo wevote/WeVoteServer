@@ -65,6 +65,7 @@ def candidate_retrieve_doc_template_values(url_root):
                    '  "order_on_ballot": integer,\n' \
                    '  "google_civic_election_id": integer,\n' \
                    '  "ballotpedia_candidate_id": integer,\n' \
+                   '  "ballotpedia_candidate_summary": string,\n' \
                    '  "ballotpedia_candidate_url": string,\n' \
                    '  "ballotpedia_person_id": integer,\n' \
                    '  "maplight_id": integer,\n' \
