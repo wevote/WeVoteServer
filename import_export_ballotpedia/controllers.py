@@ -190,7 +190,7 @@ def retrieve_ballotpedia_candidates_by_election_from_api(google_civic_election_i
         }
         return results
 
-    maximum_offices_to_retrieve = 100
+    # maximum_offices_to_retrieve = 100
     state_code = ""
     batch_header_id = 0
     office_list = []
@@ -214,9 +214,9 @@ def retrieve_ballotpedia_candidates_by_election_from_api(google_civic_election_i
                 filtered_office_list.append(one_office)
                 office_count += 1
 
-                if office_count >= maximum_offices_to_retrieve:
-                    # Limit to showing only maximum_offices_to_retrieve
-                    break
+                # if office_count >= maximum_offices_to_retrieve:
+                #     # Limit to showing only maximum_offices_to_retrieve
+                #     break
 
     if positive_value_exists(office_count):
         races_to_retrieve_string = ""

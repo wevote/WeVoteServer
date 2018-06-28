@@ -37,6 +37,12 @@
     <input type="submit" value="Search" />
 
     {# Default to showing only upcoming elections #}
+    <label for="show_all_elections_this_year_id">
+      <input type="checkbox" name="show_all_elections_this_year" id="show_all_elections_this_year_id" value="1"
+             {% if show_all_elections_this_year %}checked{% endif %} /> All Elections This Year
+    </label>
+    &nbsp;&nbsp;&nbsp;&nbsp;
+
     <label for="show_all_elections_id">
       <input type="checkbox" name="show_all_elections" id="show_all_elections_id" value="1"
              {% if show_all_elections %}checked{% endif %} /> All Elections
@@ -56,7 +62,6 @@
             <td>State Code</td>
             <td>List?</td>
             <td>Ballot Locations</td>
-        {% if not show_all_elections %}{% endif %}
             <td align="middle">Offices<br />
               (w/ no Candidates)</td>
             <td align="middle">Candidates<br />
@@ -87,15 +92,14 @@
                 {% if election.ballot_location_display_option_on_count %} / {{ election.ballot_location_display_option_on_count|default_if_none:"" }}{% endif %}
             {% endif %}
             </td>
-        {% if not show_all_elections %}{% endif %}
             <td align="middle">
             {% if election.office_count %}
-                <a href="{% url 'office:office_list' %}?google_civic_election_id={{ election.google_civic_election_id }}{% if show_all_elections %}&show_all_elections=1{% endif %}"
+                <a href="{% url 'office:office_list' %}?google_civic_election_id={{ election.google_civic_election_id }}{% if show_all_elections_this_year %}&show_all_elections_this_year=1{% elif show_all_elections %}&show_all_elections=1{% endif %}"
                    target="_blank">
                 {{ election.office_count|default_if_none:"" }}</a>
             {% endif %}
             {% if election.offices_without_candidate_count %}
-                <a href="{% url 'office:office_list' %}?google_civic_election_id={{ election.google_civic_election_id }}{% if show_all_elections %}&show_all_elections=1{% endif %}"
+                <a href="{% url 'office:office_list' %}?google_civic_election_id={{ election.google_civic_election_id }}{% if show_all_elections_this_year %}&show_all_elections_this_year=1{% elif show_all_elections %}&show_all_elections=1{% endif %}"
                    target="_blank">
                 ({{ election.offices_without_candidate_count|default_if_none:"" }}
                 {% if election.offices_without_candidate_percentage %}
@@ -106,12 +110,12 @@
             </td>
             <td align="middle">
             {% if election.candidate_count %}
-                <a href="{% url 'candidate:candidate_list' %}?google_civic_election_id={{ election.google_civic_election_id }}{% if show_all_elections %}&show_all_elections=1{% endif %}"
+                <a href="{% url 'candidate:candidate_list' %}?google_civic_election_id={{ election.google_civic_election_id }}{% if show_all_elections_this_year %}&show_all_elections_this_year=1{% elif show_all_elections %}&show_all_elections=1{% endif %}"
                    target="_blank">
                 {{ election.candidate_count|default_if_none:"" }}</a>
             {% endif %}
             {% if election.candidates_without_photo_count %}
-                <a href="{% url 'candidate:candidate_list' %}?google_civic_election_id={{ election.google_civic_election_id }}{% if show_all_elections %}&show_all_elections=1{% endif %}"
+                <a href="{% url 'candidate:candidate_list' %}?google_civic_election_id={{ election.google_civic_election_id }}{% if show_all_elections_this_year %}&show_all_elections_this_year=1{% elif show_all_elections %}&show_all_elections=1{% endif %}"
                    target="_blank">
                 ({{ election.candidates_without_photo_count|default_if_none:"" }}
                   {% if election.candidates_without_photo_percentage %}
@@ -122,12 +126,12 @@
             </td>
             <td align="middle">
             {% if election.voter_guides_count %}
-                <a href="{% url 'voter_guide:voter_guide_list' %}?google_civic_election_id={{ election.google_civic_election_id }}{% if show_all_elections %}&show_all_elections=1{% endif %}"
+                <a href="{% url 'voter_guide:voter_guide_list' %}?google_civic_election_id={{ election.google_civic_election_id }}{% if show_all_elections_this_year %}&show_all_elections_this_year=1{% elif show_all_elections %}&show_all_elections=1{% endif %}"
                    target="_blank">
                 {{ election.voter_guides_count|default_if_none:"" }}</a>
             {% endif %}
             {% if election.public_positions_count %}
-                <a href="{% url 'position:position_list' %}?google_civic_election_id={{ election.google_civic_election_id }}{% if show_all_elections %}&show_all_elections=1{% endif %}"
+                <a href="{% url 'position:position_list' %}?google_civic_election_id={{ election.google_civic_election_id }}{% if show_all_elections_this_year %}&show_all_elections_this_year=1{% elif show_all_elections %}&show_all_elections=1{% endif %}"
                    target="_blank">
                 ({{ election.public_positions_count|default_if_none:"" }})</a>
             {% endif %}
@@ -148,6 +152,13 @@
 <script>
     $(function() {
         $('#show_all_elections_id').change(function() {
+            this.form.show_all_elections_this_year.value = '0';
+            this.form.submit();
+        });
+    });
+    $(function() {
+        $('#show_all_elections_this_year_id').change(function() {
+            this.form.show_all_elections.value = '0';
             this.form.submit();
         });
     });
