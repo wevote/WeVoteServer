@@ -610,6 +610,8 @@ def election_edit_process_view(request):
             )
             if positive_value_exists(ballotpedia_election_id):
                 election_on_stage.ballotpedia_election_id = ballotpedia_election_id
+            if positive_value_exists(ballotpedia_kind_of_election):
+                election_on_stage.ballotpedia_kind_of_election = ballotpedia_kind_of_election
             if positive_value_exists(election_name):
                 election_on_stage.election_name = election_name
             if positive_value_exists(election_day_text):

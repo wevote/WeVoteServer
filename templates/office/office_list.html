@@ -63,8 +63,8 @@
         {% endfor %}
         </select>
         {% if state_code != "" %}
-        <a href="{% url 'office:office_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}&candidate_search={{ candidate_search }}&show_all=1">
-            show all</a>
+        <a href="{% url 'office:office_list' %}?google_civic_election_id={{ google_civic_election_id }}&candidate_search={{ candidate_search }}{% if show_all_elections %}&show_all_elections=1{% endif %}">
+            show all states</a>
         {% endif %}
         {% endif %}
         <br />
@@ -93,6 +93,9 @@
             <td>ID</td>
             <td>We Vote ID</td>
             <td>Office Name</td>
+          {% if google_civic_election_id == 0 %}
+            <td>Election</td>
+          {% endif %}
             <td>State</td>
             <td>District ID</td>
             <td>Ballotpedia District ID</td>
@@ -115,6 +118,9 @@
 {#                    - {{ office.state_code }}#}
 {#                {% endif %}#}
             </a></td>
+          {% if google_civic_election_id == 0 %}
+            <td>{{ office.google_civic_election_id|default_if_none:"" }}</td>
+          {% endif %}
             <td>{{ office.state_code }}</td>
             <td>{{ office.district_id|default_if_none:"" }}</td>
             <td>{{ office.ballotpedia_district_id|default_if_none:"" }}</td>

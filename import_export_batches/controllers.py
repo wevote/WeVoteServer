@@ -987,7 +987,7 @@ def create_batch_row_action_contest_office(batch_description, batch_header_map, 
         if keep_looking_for_duplicates:
             contest_office_manager = ContestOfficeManager()
             matching_results = contest_office_manager.retrieve_contest_office_from_ballotpedia_race_id(
-                ballotpedia_race_id)
+                ballotpedia_race_id, google_civic_election_id)
             if matching_results['contest_office_found']:
                 contest_office = matching_results['contest_office']
                 keep_looking_for_duplicates = False
@@ -1580,10 +1580,12 @@ def create_batch_row_action_candidate(batch_description, batch_header_map, one_b
             contest_office_id = contest_office.id
             contest_office_found = True
 
-    if not positive_value_exists(contest_office_found) and positive_value_exists(ballotpedia_race_id):
+    if not positive_value_exists(contest_office_found) and positive_value_exists(ballotpedia_race_id) \
+            and positive_value_exists(google_civic_election_id):
         # Look up the contest_office information with the ballotpedia_race_id
         contest_manager = ContestOfficeManager()
-        contest_results = contest_manager.retrieve_contest_office_from_ballotpedia_race_id(ballotpedia_race_id)
+        contest_results = contest_manager.retrieve_contest_office_from_ballotpedia_race_id(
+            ballotpedia_race_id, google_civic_election_id)
         if contest_results['contest_office_found']:
             contest_office = contest_results['contest_office']
             contest_office_name = contest_office.office_name
