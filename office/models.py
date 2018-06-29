@@ -203,14 +203,12 @@ class ContestOfficeManager(models.Model):
         contest_office_manager = ContestOfficeManager()
         return contest_office_manager.retrieve_contest_office(contest_office_id, contest_office_we_vote_id, maplight_id)
 
-    def retrieve_contest_office_from_ballotpedia_race_id(self, ballotpedia_race_id):
+    def retrieve_contest_office_from_ballotpedia_race_id(self, ballotpedia_race_id, google_civic_election_id):
         contest_office_id = 0
-        contest_office_we_vote_id = ''
-        maplight_id = ''
-        ctcl_uuid = ''
         contest_office_manager = ContestOfficeManager()
-        return contest_office_manager.retrieve_contest_office(contest_office_id, contest_office_we_vote_id,
-                                                              maplight_id, ctcl_uuid, ballotpedia_race_id)
+        return contest_office_manager.retrieve_contest_office(contest_office_id,
+                                                              ballotpedia_race_id=ballotpedia_race_id,
+                                                              google_civic_election_id=google_civic_election_id)
 
     def fetch_contest_office_id_from_maplight_id(self, maplight_id):
         contest_office_id = 0
@@ -586,7 +584,8 @@ class ContestOfficeManager(models.Model):
 
     # NOTE: searching by all other variables seems to return a list of objects
     def retrieve_contest_office(self, contest_office_id, contest_office_we_vote_id='',
-                                maplight_id=None, ctcl_uuid=None, ballotpedia_race_id=None):
+                                maplight_id=None, ctcl_uuid=None, ballotpedia_race_id=None,
+                                google_civic_election_id=None):
         error_result = False
         exception_does_not_exist = False
         exception_multiple_object_returned = False
@@ -613,9 +612,11 @@ class ContestOfficeManager(models.Model):
                 contest_office_id = contest_office_on_stage.id
                 contest_office_we_vote_id = contest_office_on_stage.we_vote_id
                 status = "RETRIEVE_OFFICE_FOUND_BY_MAPLIGHT_ID"
-            elif positive_value_exists(ballotpedia_race_id):
+            elif positive_value_exists(ballotpedia_race_id) and positive_value_exists(google_civic_election_id):
                 ballotpedia_race_id_integer = convert_to_int(ballotpedia_race_id)
-                contest_office_on_stage = ContestOffice.objects.get(ballotpedia_race_id=ballotpedia_race_id_integer)
+                contest_office_on_stage = ContestOffice.objects.get(
+                    ballotpedia_race_id=ballotpedia_race_id_integer,
+                    google_civic_election_id=google_civic_election_id)
                 contest_office_id = contest_office_on_stage.id
                 contest_office_we_vote_id = contest_office_on_stage.we_vote_id
                 status = "RETRIEVE_OFFICE_FOUND_BY_BALLOTPEDIA_OFFICE_ID"

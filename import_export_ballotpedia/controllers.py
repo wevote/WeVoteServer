@@ -175,10 +175,14 @@ def retrieve_ballotpedia_candidates_by_election_from_api(google_civic_election_i
 
     ballotpedia_kind_of_election = ""
     ballotpedia_election_id = 0
+    election_day_text = ""
+    election_state_code = ""
     election_manager = ElectionManager()
     results = election_manager.retrieve_election(google_civic_election_id)
     if results['election_found']:
         election = results['election']
+        election_day_text = election.election_day_text
+        election_state_code = election.state_code
         ballotpedia_kind_of_election = election.ballotpedia_kind_of_election
         if election.ballotpedia_election_id:
             ballotpedia_election_id = election.ballotpedia_election_id
@@ -219,21 +223,99 @@ def retrieve_ballotpedia_candidates_by_election_from_api(google_civic_election_i
                 #     break
 
     if positive_value_exists(office_count):
-        races_to_retrieve_string = ""
-        for one_office in filtered_office_list:
-            if positive_value_exists(one_office.ballotpedia_race_id):
-                races_to_retrieve_string += str(one_office.ballotpedia_race_id) + ","
+        # races_to_retrieve_string = ""
+        # ballotpedia_race_id_not_used_list = []
+        # for one_office in filtered_office_list:
+        #     if positive_value_exists(one_office.ballotpedia_race_id):
+        #         # The url we send to Ballotpedia can only be so long. If too long, we stop adding races to the
+        #         #  races_to_retrieve_string, but capture the races not used
+        #         # 3796 = 4096 - 300 (300 gives us room for all of the other url variables we need)
+        #         if len(races_to_retrieve_string) < 3796:
+        #             races_to_retrieve_string += str(one_office.ballotpedia_race_id) + ","
+        #         else:
+        #             # In the future we might want to set up a second query to get the races for these districts
+        #             ballotpedia_race_id_not_used_list.append(one_office.ballotpedia_race_id)
+        #
+        # # Remove last comma
+        # last_character = races_to_retrieve_string[-1:]
+        # if last_character == ",":
+        #     races_to_retrieve_string = races_to_retrieve_string[:-1]
 
-        # Remove last comma
-        last_character = races_to_retrieve_string[-1:]
-        if last_character == ",":
-            races_to_retrieve_string = races_to_retrieve_string[:-1]
+        race_type_date_key = ""
+        if ballotpedia_kind_of_election == "primary_election" \
+                or ballotpedia_kind_of_election == "primary_election_date":
+            race_type_date_key = "race_primary_election_date"
+            ballotpedia_kind_of_election = "primary_election"
+        elif ballotpedia_kind_of_election == "general_election" \
+                or ballotpedia_kind_of_election == "general_election_date":
+            race_type_date_key = "race_general_election_date"
+            ballotpedia_kind_of_election = "general_election"
+        elif ballotpedia_kind_of_election == "primary_runoff_election" \
+                or ballotpedia_kind_of_election == "primary_runoff_election_date":
+            race_type_date_key = "race_primary_runoff_election_date"
+            ballotpedia_kind_of_election = "primary_runoff_election"
+        elif ballotpedia_kind_of_election == "general_runoff_election" \
+                or ballotpedia_kind_of_election == "general_runoff_election_date":
+            race_type_date_key = "race_general_runoff_election_date"
+            ballotpedia_kind_of_election = "general_runoff_election"
 
+        # response = requests.get(BALLOTPEDIA_API_CANDIDATES_URL, params={
+        #     "access_token": BALLOTPEDIA_API_KEY,
+        #     "filters[race][in]": races_to_retrieve_string,
+        #     "filters[" + str(race_type_date_key) + "][eq]": election_day_text,
+        #     "limit": 1000,
+        # })
         response = requests.get(BALLOTPEDIA_API_CANDIDATES_URL, params={
             "access_token": BALLOTPEDIA_API_KEY,
-            "filters[race][in]": races_to_retrieve_string,
+            "filters[" + str(race_type_date_key) + "][eq]": election_day_text,
+            "filters[race_office_district_state][eq]": election_state_code,
             "limit": 1000,
         })
+
+        if not hasattr(response, 'text') or not positive_value_exists(response.text):
+            success = False
+            status += "NO_RESPONSE_TEXT_FOUND "
+            if positive_value_exists(response.url):
+                shortened_url = response.url[:1000]
+                status += ": " + shortened_url + " "
+            results = {
+                'success': success,
+                'status': status,
+                'batch_header_id': batch_header_id,
+            }
+            return results
+
+        if hasattr(response, 'success') and not positive_value_exists(response.success):
+            success = False
+            status += "RESPONSE_SUCCESS_IS_FALSE"
+            if positive_value_exists(response.url):
+                shortened_url = response.url[:1000]
+                status += ": " + shortened_url + " "
+            if positive_value_exists(response.error):
+                status += "error: " + str(response.error)
+            results = {
+                'success': success,
+                'status': status,
+                'batch_header_id': batch_header_id,
+            }
+            return results
+
+        if hasattr(response, 'ok') and not positive_value_exists(response.ok):
+            success = False
+            status += "RESPONSE_OK_IS_FALSE"
+            if positive_value_exists(response.url):
+                shortened_url = response.url[:1000]
+                status += ": " + shortened_url + " "
+            if hasattr(response, 'status_code'):
+                status += "status_code: " + str(response.status_code)
+                if response.status_code == 414:
+                    status += " Too many office_districts sent"
+            results = {
+                'success': success,
+                'status': status,
+                'batch_header_id': batch_header_id,
+            }
+            return results
 
         structured_json = json.loads(response.text)
 
@@ -553,11 +635,13 @@ def retrieve_ballotpedia_offices_by_district_from_api(google_civic_election_id, 
     ballotpedia_election_id = 0
     ballotpedia_kind_of_election = ""
     election_day_text = ""
+    election_day_year = ""
     election_manager = ElectionManager()
     results = election_manager.retrieve_election(google_civic_election_id)
     if results['election_found']:
         election = results['election']
         election_day_text = election.election_day_text
+        election_day_year = election_day_text[:4]
         ballotpedia_kind_of_election = election.ballotpedia_kind_of_election
         if election.ballotpedia_election_id:
             ballotpedia_election_id = election.ballotpedia_election_id
@@ -602,7 +686,7 @@ def retrieve_ballotpedia_offices_by_district_from_api(google_civic_election_id, 
 
     response = requests.get(BALLOTPEDIA_API_RACES_URL, params={
         "access_token":                                 BALLOTPEDIA_API_KEY,
-        "filters[year][eq]":                            "2018",  # TODO Make general
+        "filters[year][eq]":                            election_day_year,
         "filters[office_district][in]":                 office_district_string,
         "filters[" + str(election_day_key) + "][eq]":   election_day_text,
         "limit":                                        1000,
@@ -899,11 +983,16 @@ def groom_ballotpedia_data_for_processing(structured_json, google_civic_election
                     for one_candidate_json in candidates_json_list:
                         if kind_of_election == "primary_election":
                             one_candidate_json['candidate_participation_status'] = one_candidate_json['primary_status']
-                            # if not positive_value_exists(one_candidate_json['primary_status']):
-                            #     # I notice that some candidates are returned with the primary_status empty, but the
-                            #     #  general_status as "On the Ballot"
-                            #     one_candidate_json['candidate_participation_status'] = \
-                            #         one_candidate_json['general_status']
+                            if not positive_value_exists(one_candidate_json['candidate_participation_status']) \
+                                    and one_candidate_json['general_status'] \
+                                    and one_candidate_json['general_status'] != "NULL":
+                                # I notice that some candidates are returned with the primary_status empty, but the
+                                #  general_status as "On the Ballot"
+                                one_candidate_json['candidate_participation_status'] = \
+                                    one_candidate_json['general_status']
+                            if not positive_value_exists(one_candidate_json['candidate_participation_status']):
+                                # These values are "Pu", "Pa.R" ???
+                                one_candidate_json['candidate_participation_status'] = one_candidate_json['status']
                         elif kind_of_election == "primary_runoff_election":
                             one_candidate_json['candidate_participation_status'] = \
                                 one_candidate_json['primary_runoff_status']
@@ -916,8 +1005,12 @@ def groom_ballotpedia_data_for_processing(structured_json, google_civic_election
                             one_candidate_json['candidate_participation_status'] = "unknown"
 
                         if one_candidate_json['candidate_participation_status'] \
-                                not in ("Candidacy Declared", "On the Ballot"):
+                                not in ("Advanced", "Candidacy Declared", "Lost", "On the Ballot", "Pl", "Pu", "Pa.R"):
                             # If the candidate is not on the ballot yet or declared, we don't want to include them
+                            # Pa.R == In Runoff ?
+                            # Pl == Lost
+                            # Pt == Withdrew
+                            # Pu == Candidacy Declared
                             continue
 
                         try:

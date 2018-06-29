@@ -75,7 +75,7 @@
         <tr>
             <td>{{ forloop.counter }}</td>
             <td>
-                <a href="{% url 'election:election_summary' election.id %}" target="_blank">{{ election.election_name }}</a>
+                <a href="{% url 'election:election_summary' election.id %}{% if show_all_elections_this_year %}?show_all_elections_this_year=1{% elif show_all_elections %}?show_all_elections=1{% endif %}" target="_blank">{{ election.election_name }}</a>
                 {% if election.internal_notes %}
                 <br /><span style="color: darkgray">{{ election.internal_notes|default_if_none:""|truncatechars:50 }}</span>
                 {% endif %}
