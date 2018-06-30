@@ -44,14 +44,6 @@
 </div>
 
 <div class="form-group">
-    <label for="ballotpedia_election_id_id" class="col-sm-3 control-label">Ballotpedia Election Id</label>
-    <div class="col-sm-8">
-        <input type="text" name="ballotpedia_election_id" id="ballotpedia_election_id_id" class="form-control"
-               value="{% if election %}{{ election.ballotpedia_election_id|default_if_none:"" }}{% endif %}" />
-    </div>
-</div>
-
-<div class="form-group">
     <label for="election_day_text_id" class="col-sm-3 control-label">Election Day
         <span class="no_break">(Format: "YYYY-MM-DD")</span></label>
     <div class="col-sm-8">
@@ -77,12 +69,42 @@
 </div>
 
 <div class="form-group">
+    <label for="ballotpedia_election_id_id" class="col-sm-3 control-label">Ballotpedia Election Id</label>
+    <div class="col-sm-8">
+        {% if ballotpedia_election_list %}
+            <table class="table">
+                <tr>
+                    <th>ID</th>
+                    <th>District Name</th>
+                    <th>District Type</th>
+                    <th>Election Type</th>
+                </tr>
+            {% for ballotpedia_election in ballotpedia_election_list %}
+                <tr>
+                    <td>{{ ballotpedia_election.ballotpedia_election_id|default_if_none:"" }}</td>
+                    <td>{{ ballotpedia_election.district_name|default_if_none:"" }}</td>
+                    <td>{{ ballotpedia_election.district_type|default_if_none:"" }}</td>
+                    <td>{{ ballotpedia_election.election_description|default_if_none:"" }}</td>
+                </tr>
+            {% endfor %}
+            </table>
+        {% else %}
+          <input type="text" name="ballotpedia_election_id" id="ballotpedia_election_id_id" class="form-control"
+                 value="{% if election %}{{ election.ballotpedia_election_id|default_if_none:"" }}{% endif %}" />
+        {% endif %}{# End of if ballotpedia_election_list #}
+    </div>
+</div>
+
+{% if ballotpedia_election_list %}
+{% else %}
+<div class="form-group">
     <label for="ballotpedia_kind_of_election_id" class="col-sm-3 control-label">Ballotpedia Kind of Election</label>
     <div class="col-sm-8">
         <input type="text" name="ballotpedia_kind_of_election" id="ballotpedia_kind_of_election_id" class="form-control"
                value="{% if election %}{{ election.ballotpedia_kind_of_election|default_if_none:"" }}{% endif %}" />
     </div>
 </div>
+{% endif %}
 
 <div class="form-group">
     <label for="internal_notes_id" class="col-sm-3 control-label">Internal Notes about Election Data Gathering</label>
@@ -90,7 +112,7 @@
         <textarea name="internal_notes"
                   class="form-control animated"
                   id="internal_notes_id"
-                  placeholder="Status of data gathering?">{% if candidate %}{{ candidate.internal_notes|default_if_none:"" }}{% else %}{{ internal_notes|default_if_none:"" }}{% endif %}</textarea>
+                  placeholder="Status of data gathering?">{% if election %}{{ election.internal_notes|default_if_none:"" }}{% else %}{{ internal_notes|default_if_none:"" }}{% endif %}</textarea>
     </div>
 </div>
 

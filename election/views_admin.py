@@ -19,7 +19,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.messages import get_messages
 from django.db.models import Q
 from django.shortcuts import render
-from election.models import ElectionManager
+from election.models import BallotpediaElection, ElectionManager
 from exception.models import handle_record_found_more_than_one_exception, handle_record_not_found_exception, \
     handle_record_not_saved_exception
 from image.models import WeVoteImageManager
@@ -425,6 +425,7 @@ def election_edit_view(request, election_local_id):
         try:
             election_on_stage = Election.objects.get(id=election_local_id)
             election_on_stage_found = True
+            google_civic_election_id = election_on_stage.google_civic_election_id
         except Election.MultipleObjectsReturned as e:
             handle_record_found_more_than_one_exception(e, logger=logger)
         except Election.DoesNotExist:
@@ -435,9 +436,14 @@ def election_edit_view(request, election_local_id):
         pass
 
     if election_on_stage_found:
+        ballotpedia_election_query = BallotpediaElection.objects.filter(
+            google_civic_election_id=google_civic_election_id)
+        ballotpedia_election_list = list(ballotpedia_election_query)
+
         template_values = {
-            'messages_on_stage': messages_on_stage,
+            'ballotpedia_election_list': ballotpedia_election_list,
             'election': election_on_stage,
+            'messages_on_stage': messages_on_stage,
         }
     else:
         template_values = {
@@ -823,6 +829,12 @@ def election_summary_view(request, election_local_id=0, google_civic_election_id
         # This is fine, proceed anyways
         pass
 
+    ballotpedia_election_list = []
+    if election_on_stage_found:
+        ballotpedia_election_query = BallotpediaElection.objects.filter(
+            google_civic_election_id=google_civic_election_id)
+        ballotpedia_election_list = list(ballotpedia_election_query)
+
     sorted_state_list = []
     status_print_list = ""
     ballot_returned_count = 0
@@ -880,6 +892,7 @@ def election_summary_view(request, election_local_id=0, google_civic_election_id
                     office_list = []
                     results = ballot_item_list_manager.retrieve_all_ballot_items_for_polling_location(
                         one_ballot_returned.polling_location_we_vote_id, google_civic_election_id)
+                    ballot_items_count = 0
                     if results['ballot_item_list_found']:
                         ballot_item_list = results['ballot_item_list']
                         ballot_items_count = len(ballot_item_list)
@@ -931,6 +944,7 @@ def election_summary_view(request, election_local_id=0, google_civic_election_id
             'ballot_returned_search':                   ballot_returned_search,
             'ballot_returned_list':                     ballot_returned_list_modified,
             'ballot_returned_count_entire_election':    ballot_returned_count_entire_election,
+            'ballotpedia_election_list':                ballotpedia_election_list,
             'entries_missing_latitude_longitude':       entries_missing_latitude_longitude,
             'election':                                 election_on_stage,
             'google_civic_election_id':                 google_civic_election_id,
@@ -944,6 +958,7 @@ def election_summary_view(request, election_local_id=0, google_civic_election_id
         messages_on_stage = get_messages(request)
 
         template_values = {
+            'ballotpedia_election_list':                ballotpedia_election_list,
             'ballot_returned_count_entire_election':    ballot_returned_count_entire_election,
             'ballot_returned_search':                   ballot_returned_search,
             'entries_missing_latitude_longitude':       entries_missing_latitude_longitude,

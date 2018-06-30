@@ -23,6 +23,59 @@ TIME_SPAN_LIST = [
 logger = wevote_functions.admin.get_logger(__name__)
 
 
+class BallotpediaElection(models.Model):
+    ballotpedia_election_id = models.PositiveIntegerField(
+        verbose_name="ballotpedia election id", null=True, unique=True)
+    # The ID of this election is linked to. (Provided by Google Civic or generated internally)
+    google_civic_election_id = models.PositiveIntegerField(
+        verbose_name="google civic election id", null=True, unique=False)
+    # Called description by Ballotpedia
+    election_description = models.CharField(verbose_name="election description", max_length=255, null=True)
+    election_type = models.CharField(verbose_name="district type", max_length=255, null=True, blank=True)
+    # Day of the election in YYYY-MM-DD format.
+    election_day_text = models.CharField(verbose_name="election day", max_length=255, null=True, blank=True)
+    ocd_division_id = models.CharField(verbose_name="ocd division id", max_length=255, null=True, blank=True)
+    district_name = models.CharField(verbose_name="district name", max_length=255, null=True, blank=True)
+    district_type = models.CharField(verbose_name="district type", max_length=255, null=True, blank=True)
+
+    # The state code for the election
+    state_code = models.CharField(verbose_name="state code for the election", max_length=2, null=True, blank=True)
+
+    is_general_election = models.BooleanField(default=False)
+    is_general_runoff_election = models.BooleanField(default=False)
+    is_primary_election = models.BooleanField(default=False)
+    is_primary_runoff_election = models.BooleanField(default=False)
+
+    is_partisan = models.BooleanField(default=False)
+
+    candidate_lists_complete = models.BooleanField(default=False)
+
+    # For internal notes regarding gathering data for this election
+    internal_notes = models.TextField(null=True, blank=True, default=None)
+
+    def election_is_upcoming(self):
+        if not positive_value_exists(self.election_day_text):
+            return False
+        today = datetime.now().date()
+        today_date_as_integer = convert_date_to_date_as_integer(today)
+        election_date_as_simple_string = self.election_day_text.replace("-", "")
+        this_election_date_as_integer = convert_to_int(election_date_as_simple_string)
+        if this_election_date_as_integer > today_date_as_integer:
+            return True
+        return False
+
+    def get_election_state(self):
+        if positive_value_exists(self.state_code):
+            return self.state_code
+        else:
+            # Pull this from ocdDivisionId
+            if positive_value_exists(self.ocd_division_id):
+                ocd_division_id = self.ocd_division_id
+                return extract_state_from_ocd_division_id(ocd_division_id)
+            else:
+                return ''
+
+
 class Election(models.Model):
     # The unique ID of this election. (Provided by Google Civic)
     google_civic_election_id = models.CharField(verbose_name="google civic election id",
