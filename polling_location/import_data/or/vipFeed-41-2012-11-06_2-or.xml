@@ -1,0 +1,4188 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vip_object xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://github.com/votinginfoproject/vip-specification/blob/master/vip_spec_v3.0.xsd" schemaVersion="3.0">
+<source id="1">
+  <name>VIP</name>
+  <vip_id>41</vip_id>
+  <datetime>2012-10-29T23:00:00</datetime>
+  <description>VIP aggregates this data from official state sources</description>
+</source>
+<early_vote_site id="991">
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Monday-Friday 8am-12pm &amp; 1pm-5pm; Election Day 7am-8pm</days_times_open>
+  <address>
+    <city>Baker City</city>
+    <line1>1995 Third Street, Suite 150</line1>
+    <state>OR</state>
+    <location_name>Baker County Clerk's Office</location_name>
+    <zip>97814</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99295">
+  <directions>Ballot Drop Box located at the 4th St. Driveway</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Election Day until 8pm</days_times_open>
+  <address>
+    <city>Baker City</city>
+    <line1>1995 Third St.</line1>
+    <state>OR</state>
+    <location_name>Baker County Courthouse (Drop Site)</location_name>
+    <zip>97814</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="992">
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Monday-Friday 8am-12:30pm &amp; 1:30-5pm; Election Day 8am-12:30pm &amp; 1:30-8pm</days_times_open>
+  <address>
+    <city>Baker City</city>
+    <line1>2810 Cedar Street</line1>
+    <state>OR</state>
+    <location_name>Community Connections of Baker County</location_name>
+    <zip>97814</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="994">
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Monday-Thursday 8am-12pm &amp; 1pm-4pm; Closed Friday; Election Day 8am-12pm &amp; 1-8pm</days_times_open>
+  <address>
+    <city>Halfway</city>
+    <line1>155-B East Record St.</line1>
+    <state>OR</state>
+    <location_name>Halfway City Hall</location_name>
+    <zip>97834</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="993">
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Monday-Thursday 9am-12pm &amp; 1pm-4pm; Closed Friday; Election Day 9am-8pm</days_times_open>
+  <address>
+    <city>Huntington</city>
+    <line1>50 East Adams</line1>
+    <state>OR</state>
+    <location_name>Huntington City Hall</location_name>
+    <zip>97907</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99227">
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Monday-Thursday 8am-12pm &amp; 1pm-5pm; Friday 8am-12pm &amp; 1pm-4pm; Election Day 8am-8pm</days_times_open>
+  <address>
+    <city>Richland</city>
+    <line1>89 Main St.</line1>
+    <state>OR</state>
+    <location_name>Richland City Hall</location_name>
+    <zip>97870</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99282">
+  <directions>Outside 24 hour box next to main entrance and mailbox in the North Albany Shopping Center</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Election Day until 8pm</days_times_open>
+  <address>
+    <city>Albany</city>
+    <line1>621 NW Hickory Ave</line1>
+    <state>OR</state>
+    <location_name>Ray's Food Place</location_name>
+    <zip>97321</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="995">
+  <directions>Inside main entrance on main counter</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Monday-Saturday 6am-8pm; Sunday 7am-8pm</days_times_open>
+  <address>
+    <city>Alsea</city>
+    <line1>186 E Main St</line1>
+    <state>OR</state>
+    <location_name>John Boy's Alsea Mercantile Store</location_name>
+    <zip>97324</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99293">
+  <directions>Outside 24 hour box at handicapped entrance to the building on 5th St</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>24 hours 7 days a week</days_times_open>
+  <address>
+    <city>Corvallis</city>
+    <line1>120 NW 4th St</line1>
+    <state>OR</state>
+    <location_name>Benton County Courthouse</location_name>
+    <zip>97330</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99296">
+  <directions>Outside 24 hour box, curbside at the base of law enforcement building</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>24 hours 7 days a week</days_times_open>
+  <address>
+    <city>Corvallis</city>
+    <line1>180 NW 5th St</line1>
+    <state>OR</state>
+    <location_name>Benton County Courthouse</location_name>
+    <zip>97330</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99311">
+  <directions>Main entrance foyer at top of stairs and in the basement next to Room 13</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Monday-Friday 8am-5pm; Election Day until 8pm</days_times_open>
+  <address>
+    <city>Corvallis</city>
+    <line1>120 NW 4th St</line1>
+    <state>OR</state>
+    <location_name>Benton County Courthouse</location_name>
+    <zip>97330</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99325">
+  <directions>Front walk of Courthouse near front steps</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>24 hours 7 days a week</days_times_open>
+  <address>
+    <city>Corvallis</city>
+    <line1>120 NW 4th St</line1>
+    <state>OR</state>
+    <location_name>Benton County Courthouse</location_name>
+    <zip>97330</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="996">
+  <directions>Inside by the check out counter</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Monday-Friday 6:30am-8pm; Saturday &amp; Sunday 8am-8pm; Election Day until 8pm</days_times_open>
+  <address>
+    <city>Corvallis</city>
+    <line1>5800 NW Highway 99W</line1>
+    <state>OR</state>
+    <location_name>City Limits Market</location_name>
+    <zip>97330</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="998">
+  <directions>Inside main entrance next to main desk</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Monday-Thursday 10am-8pm; Friday &amp; Saturday 10am-6pm</days_times_open>
+  <address>
+    <city>Corvallis</city>
+    <line1>645 NW Monroe Ave</line1>
+    <state>OR</state>
+    <location_name>Corvallis Public Library</location_name>
+    <zip>97330</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99281">
+  <directions>Outside 24 hour box in parking lot</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Election Day until 8pm</days_times_open>
+  <address>
+    <city>Corvallis</city>
+    <line1>121 SE Viewmont Ave</line1>
+    <state>OR</state>
+    <location_name>Lincoln Health Center</location_name>
+    <zip>97333</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="9913">
+  <directions>Reception Lounge</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Monday-Thursday 8am-9pm; Friday 8am-4pm</days_times_open>
+  <address>
+    <city>Corvallis</city>
+    <line1>757 NW Polk Ave</line1>
+    <state>OR</state>
+    <location_name>Linn-Benton Community College - Benton Center</location_name>
+    <zip>97330</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="999">
+  <directions>Inside main entrance next to reception area</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Monday-Thursday 7:30am-midnight; Friday 7:30am-10pm; Saturday 10am-10pm; Sunday 10am-midnight</days_times_open>
+  <address>
+    <city>Corvallis</city>
+    <line1>121 The Valley Library</line1>
+    <state>OR</state>
+    <location_name>Oregon State University - Valley Library</location_name>
+    <zip>97331</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="9912">
+  <directions>Inside main entrance near main desk</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Monday-Friday 8am-4pm; Election Day until 8pm</days_times_open>
+  <address>
+    <city>Corvallis</city>
+    <line1>2601 NW Tyler Ave</line1>
+    <state>OR</state>
+    <location_name>Senior Citizens Center</location_name>
+    <zip>97330</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="997">
+  <directions>Outside 24 hour box at bank drive through</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Election Day until 8pm</days_times_open>
+  <address>
+    <city>Corvallis</city>
+    <line1>2543 NW Kings Blvd</line1>
+    <state>OR</state>
+    <location_name>Wells Fargo Bank - Timberhill Shopping Center</location_name>
+    <zip>97330</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="9910">
+  <directions>Inside main entrance by counter</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Monday-Friday 8am-5pm; Election Day until 8pm</days_times_open>
+  <address>
+    <city>Monroe</city>
+    <line1>664 Commercial St</line1>
+    <state>OR</state>
+    <location_name>Monroe City Hall</location_name>
+    <zip>97456</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="9911">
+  <directions>Inside main entrance across from check out counter</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Monday, Thursday, Friday, Saturday 10am-5pm; Tuesday-Wednesday 10am-8pm</days_times_open>
+  <address>
+    <city>Philomath</city>
+    <line1>1050 Applegate St</line1>
+    <state>OR</state>
+    <location_name>Philomath Public Library</location_name>
+    <zip>97370</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99289">
+  <directions>Ballot Drop Box</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Until 8pm on Election Day</days_times_open>
+  <address>
+    <city>Canby</city>
+    <line1>182 N. Holly Street</line1>
+    <state>OR</state>
+    <location_name>Canby City Hall</location_name>
+    <zip>97013</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99312">
+  <directions>Outdoor drop box</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Until 8pm on Election Day</days_times_open>
+  <address>
+    <city>Canby</city>
+    <line1>709 SW 1st Ave</line1>
+    <state>OR</state>
+    <location_name>Canby McDonalds</location_name>
+    <zip>97013</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99327">
+  <directions>Outdoor Ballot Drop Box on-site</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Until 8pm on Election Day</days_times_open>
+  <address>
+    <city>Clackamas</city>
+    <line1>13793 SE Sieben Park Way</line1>
+    <state>OR</state>
+    <location_name>Sunnyside Library</location_name>
+    <zip>97015</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99328">
+  <directions>Ballot Drop Box outside &amp; Ballot Drop Box inside during hours listed</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Monday 10am-6pm; Tuesday-Thursday 12pm-8pm; Friday &amp; Saturday 10am-6pm; Sunday 1pm-5pm</days_times_open>
+  <address>
+    <city>Clackamas</city>
+    <line1>13793 SE Sieben Park Way</line1>
+    <state>OR</state>
+    <location_name>Sunnyside Library</location_name>
+    <zip>97015</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99326">
+  <directions>Outdoor drop site</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Until 8pm on Election Day</days_times_open>
+  <address>
+    <city>Colton</city>
+    <line1>20983 S. Highway 211</line1>
+    <state>OR</state>
+    <location_name>Colton Telephone</location_name>
+    <zip>97017</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99234">
+  <directions>Inside office</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Monday-Friday 8am-5pm; Election Day 7am-8pm</days_times_open>
+  <address>
+    <city>Damascus</city>
+    <line1>19920 S.E. Highway 212</line1>
+    <state>OR</state>
+    <location_name>Damascus City Hall</location_name>
+    <zip>97089</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99253">
+  <directions>Ballot Drop Box</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Until 8pm on Election Day</days_times_open>
+  <address>
+    <city>Estacada</city>
+    <line1>475 SE Main St.</line1>
+    <state>OR</state>
+    <location_name>Estacada City Hall</location_name>
+    <zip>97023</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99262">
+  <directions>Inside library</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Monday and Wednesday 10am-7pm; Tuesday and Thursday 11am-7pm; Friday 11am-5pm; Saturday and Sunday 12pm-5pm</days_times_open>
+  <address>
+    <city>Estacada</city>
+    <line1>825 NW Wade St.</line1>
+    <state>OR</state>
+    <location_name>Estacada Library</location_name>
+    <zip>97023</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="9917">
+  <directions>Inside library</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Monday-Thursday 10am-8pm; Friday-Saturday 11am-5:30pm; Sunday CLOSED</days_times_open>
+  <address>
+    <city>Gladstone</city>
+    <line1>135 E. Dartmouth St.</line1>
+    <state>OR</state>
+    <location_name>Gladstone Library</location_name>
+    <zip>97027</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99260">
+  <directions>Inside office</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Monday-Friday 8am-5pm; Closed Saturday-Sunday; Open Election Day 8am-8pm</days_times_open>
+  <address>
+    <city>Happy Valley</city>
+    <line1>16000 SE Misty Drive</line1>
+    <state>OR</state>
+    <location_name>Happy Valley City Hall</location_name>
+    <zip>97086</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="9921">
+  <directions>Inside library</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Monday-Thursday 10am-9pm; Friday-Saturday 10am-6pm; Sunday 1pm-6pm</days_times_open>
+  <address>
+    <city>Lake Oswego</city>
+    <line1>706 4th Street</line1>
+    <state>OR</state>
+    <location_name>Lake Oswego Library</location_name>
+    <zip>97034</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="9923">
+  <directions>Inside library</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Monday-Thursday 10am-9pm; Friday-Saturday 10am-6pm; Sunday 12pm-6pm</days_times_open>
+  <address>
+    <city>Milwaukie</city>
+    <line1>10660 S.E. 21st Ave.</line1>
+    <state>OR</state>
+    <location_name>Ledding Library of Milwaukie</location_name>
+    <zip>97222</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="9914">
+  <directions>Inside library</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Monday-Thursday, 10am-8pm; Friday-Saturday, 10am-5pm; Sunday CLOSED</days_times_open>
+  <address>
+    <city>Molalla</city>
+    <line1>201 E. 5th Street</line1>
+    <state>OR</state>
+    <location_name>Molalla Library</location_name>
+    <zip>97038-8127</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="9916">
+  <directions>Outdoor Ballot Drop Box on-site</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Until 8pm on Election Day</days_times_open>
+  <address>
+    <city>Oak Grove</city>
+    <line1>16201 S.E. McLoughlin Blvd</line1>
+    <state>OR</state>
+    <location_name>Oak Lodge Library</location_name>
+    <zip>97267-4653</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99252">
+  <directions>Ballot Drop Box outside &amp; Ballot Drop Box inside during hours listed</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Monday 10am-6pm; Tuesday-Thursday 12pm-8pm; Friday &amp; Saturday 10am-6pm; Sunday 1pm-5pm</days_times_open>
+  <address>
+    <city>Oak Grove</city>
+    <line1>16201 S.E. McLoughlin Blvd</line1>
+    <state>OR</state>
+    <location_name>Oak Lodge Library</location_name>
+    <zip>97267-4653</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99264">
+  <directions>Inside office - Counter drop slot</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Monday-Thursday 8:30-5pm; Friday 8:30am-3pm; Open Election Day 7am-8pm</days_times_open>
+  <address>
+    <city>Oregon City</city>
+    <line1>1710 Red Soils Ct. Ste. 100</line1>
+    <state>OR</state>
+    <location_name>Clackamas County Elections - INDOOR</location_name>
+    <zip>97045</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99265">
+  <directions>Outdoor Ballot Drop Box on-site</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Until 8pm on Election Day</days_times_open>
+  <address>
+    <city>Oregon City</city>
+    <line1>1710 Red Soils Ct.</line1>
+    <state>OR</state>
+    <location_name>Clackamas County Elections - OUTDOOR</location_name>
+    <zip>97045</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99245">
+  <directions>Outdoor Ballot Drop Box on-site</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Until 8pm on Election Day</days_times_open>
+  <address>
+    <city>Oregon City</city>
+    <line1>625 Center Street</line1>
+    <state>OR</state>
+    <location_name>Oregon City - City Hall</location_name>
+    <zip>97045</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99263">
+  <directions>Outdoor Ballot Drop Box on-site</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Until 8pm on Election Day</days_times_open>
+  <address>
+    <city>Sandy</city>
+    <line1>39250 Pioneer Blvd.</line1>
+    <state>OR</state>
+    <location_name>Sandy City Hall</location_name>
+    <zip>97055</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="9918">
+  <directions>Inside library</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Monday-Friday 10am-7pm; Saturday 10am-5pm; Sunday 1pm-5pm; Until 8pm on Election Day</days_times_open>
+  <address>
+    <city>Sandy</city>
+    <line1>38980 Proctor Blvd.</line1>
+    <state>OR</state>
+    <location_name>Sandy Library</location_name>
+    <zip>97055-8040</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="9919">
+  <directions>Inside library</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Monday-Wednesday 12noon-8pm; Thursday-Saturday, 10am-5pm; Sunday CLOSED</days_times_open>
+  <address>
+    <city>Welches</city>
+    <line1>68256 E. Hwy 26</line1>
+    <state>OR</state>
+    <location_name>Hoodland Library</location_name>
+    <zip>97067-9752</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99248">
+  <directions>Ballot Drop Box</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Until 8pm on Election Day</days_times_open>
+  <address>
+    <city>West Linn</city>
+    <line1>22500 Salamo Rd.</line1>
+    <state>OR</state>
+    <location_name>West Linn City Hall</location_name>
+    <zip>97068</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="9920">
+  <directions>Inside library</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Monday-Wednesday 11am-8pm; Thursday-Friday 10am-6pm; Saturday-Sunday 12pm-5pm</days_times_open>
+  <address>
+    <city>West Linn</city>
+    <line1>1595 Burns St.</line1>
+    <state>OR</state>
+    <location_name>West Linn Library</location_name>
+    <zip>97068</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="9922">
+  <directions>Inside library</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Monday-Thursday 10am-8pm; Friday-Saturday 10am-6pm; Sunday 1pm-6pm</days_times_open>
+  <address>
+    <city>Wilsonville</city>
+    <line1>8200 S. W. Wilsonville Road</line1>
+    <state>OR</state>
+    <location_name>Wilsonville Library</location_name>
+    <zip>97070</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99274">
+  <directions>Public Services Building 820</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Monday-Friday 8:30am-5pm; Election Day 7am-8pm</days_times_open>
+  <address>
+    <city>Astoria</city>
+    <line1>820 Exchange Street</line1>
+    <state>OR</state>
+    <location_name>Clatsop County Clerk's Office</location_name>
+    <zip>97103</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="9926">
+  <directions>Ballot Drop Slot - front of building, right of the front door</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Until 8pm on Election Day</days_times_open>
+  <address>
+    <city>Astoria</city>
+    <line1>820 Exchange Street</line1>
+    <state>OR</state>
+    <location_name>Clatsop County Elections</location_name>
+    <zip>97103</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99238">
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Monday-Friday 8am-5pm; Election Day 8am-8pm</days_times_open>
+  <address>
+    <city>Cannon Beach</city>
+    <line1>163 E. Gower</line1>
+    <state>OR</state>
+    <location_name>Cannon Beach City Hall</location_name>
+    <zip>97110</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99215">
+  <directions>Official Columbia County drop site/Shared with Clatsop County</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Monday-Wednesday 10am-7pm; Thursday-Saturday 10am-5:30pm; Election Day 10am-8pm</days_times_open>
+  <address>
+    <city>Clatskanie</city>
+    <line1>11 Lillich Street</line1>
+    <state>OR</state>
+    <location_name>Clatskanie Library</location_name>
+    <zip>97016</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99313">
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Monday-Friday 8am-12pm &amp; 1pm-5pm; Election Day 8am-12pm &amp; 1pm-8pm</days_times_open>
+  <address>
+    <city>Gearhart</city>
+    <line1>698 Pacific Way</line1>
+    <state>OR</state>
+    <location_name>Gearhart City Hall</location_name>
+    <zip>97138</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="9924">
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Monday-Friday 7:30am-3pm; Election Day 7:30am-8pm</days_times_open>
+  <address>
+    <city>Knappa</city>
+    <line1>41535 Old Highway 30</line1>
+    <state>OR</state>
+    <location_name>Knappa High School</location_name>
+    <zip>97103</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99216">
+  <directions>Official Columbia County drop site/Shared with Clatsop County</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Monday-Friday 8am-5pm; Election Day 8am-8pm</days_times_open>
+  <address>
+    <city>Mist</city>
+    <line1>12525 Highway 202</line1>
+    <state>OR</state>
+    <location_name>Mist-Birkenfeld Fire Hall</location_name>
+    <zip>97016</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="9925">
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Monday-Friday 8am-5pm; Election Day 8am-8pm</days_times_open>
+  <address>
+    <city>Seaside</city>
+    <line1>989 Broadway</line1>
+    <state>OR</state>
+    <location_name>Seaside City Hall</location_name>
+    <zip>97138-7826</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99283">
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Monday-Friday 8:30am-5pm; Election Day 8:30am-8pm</days_times_open>
+  <address>
+    <city>Warrenton</city>
+    <line1>225 S Main Ave</line1>
+    <state>OR</state>
+    <location_name>Warrenton City Hall</location_name>
+    <zip>97146</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="9928">
+  <directions>Official Columbia County drop site/Shared with Clatsop County</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Regular Library Hours; Election Day 12pm-8pm</days_times_open>
+  <address>
+    <city>Clatskanie</city>
+    <line1>11 Lillich Street</line1>
+    <state>OR</state>
+    <location_name>Clatskanie Library</location_name>
+    <zip>97016</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="9929">
+  <directions>Official Columbia County drop site/Shared with Clatsop County</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Regular Office Hours; Election Day 8am-8pm</days_times_open>
+  <address>
+    <city>Mist</city>
+    <line1>12525 Highway 202</line1>
+    <state>OR</state>
+    <location_name>Mist-Birkenfeld RFPD</location_name>
+    <zip>97016</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99211">
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Regular City Hall Hours; Election Day 8am-8pm</days_times_open>
+  <address>
+    <city>Rainier</city>
+    <line1>106 'B' Street West</line1>
+    <state>OR</state>
+    <location_name>Rainier City Hall</location_name>
+    <zip>97048</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99290">
+  <directions>Monday-Friday 8am to 5pm; Election Day 8am - 8pm</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Regular City Hall Hours; Election Day 8am-8pm</days_times_open>
+  <address>
+    <city>Scappoose</city>
+    <line1>33568 E Columbia Ave.</line1>
+    <state>OR</state>
+    <location_name>Scappoose City Hall</location_name>
+    <zip>97056</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="9927">
+  <directions>Ballot Drop Box lower parking lot</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Until 8pm on Election Day</days_times_open>
+  <address>
+    <city>St. Helens</city>
+    <line1>230 Strand St.</line1>
+    <state>OR</state>
+    <location_name>Columbia County Courthouse</location_name>
+    <zip>97051</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99223">
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Regular Library Hours; Election Day 12pm-8pm</days_times_open>
+  <address>
+    <city>Vernonia</city>
+    <line1>701 Weed Ave</line1>
+    <state>OR</state>
+    <location_name>Vernonia Library</location_name>
+    <zip>97064</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="9930">
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Monday-Friday 8am-5pm; Election Day 8am-8pm</days_times_open>
+  <address>
+    <city>Bandon</city>
+    <line1>555 Hwy 101</line1>
+    <state>OR</state>
+    <location_name>Bandon City Hall</location_name>
+    <zip>97411</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="9931">
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Monday-Thursday 10am-7pm; Friday-Saturday 12pm-6pm; Election Day 10am-8pm</days_times_open>
+  <address>
+    <city>Coos Bay</city>
+    <line1>525 Anderson Ave.</line1>
+    <state>OR</state>
+    <location_name>Coos Bay City Library</location_name>
+    <zip>97420</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="9932">
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Monday-Friday 8am-5pm; Election Day 7am-8pm</days_times_open>
+  <address>
+    <city>Coquille</city>
+    <line1>250 N. Baxter</line1>
+    <state>OR</state>
+    <location_name>Coquille Courthouse</location_name>
+    <zip>97423</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="9933">
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Monday-Friday 8am-5pm; Election Day 8am-8pm</days_times_open>
+  <address>
+    <city>Lakeside</city>
+    <line1>915 N. Lake Rd.</line1>
+    <state>OR</state>
+    <location_name>Lakeside City Hall</location_name>
+    <zip>97449</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="9934">
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Monday-Wednesday 10am-8pm; Thursday-Saturday 12pm-5pm; Election Day 10am-8pm</days_times_open>
+  <address>
+    <city>Myrtle Point</city>
+    <line1>435 5th Street</line1>
+    <state>OR</state>
+    <location_name>Myrtle Point City Library</location_name>
+    <zip>97458</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="9935">
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Monday-Wednesday 11am-8pm; Thursday-Friday 11am-6pm; Saturday-Sunday 12pm-5pm; Election Day 11am-8pm</days_times_open>
+  <address>
+    <city>North Bend</city>
+    <line1>1800 Sherman Ave.</line1>
+    <state>OR</state>
+    <location_name>North Bend City Library</location_name>
+    <zip>97459</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="9936">
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>24 hours daily;  Election Day 7am-8pm</days_times_open>
+  <address>
+    <city>North Bend</city>
+    <line1>835 California Street</line1>
+    <state>OR</state>
+    <location_name>North Bend Police Department</location_name>
+    <zip>97459</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="9937">
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Monday-Friday 10am-5pm; Election Day 10am-8pm</days_times_open>
+  <address>
+    <city>Powers</city>
+    <line1>275 Fir Street</line1>
+    <state>OR</state>
+    <location_name>Powers City Hall</location_name>
+    <zip>97466</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="9943">
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>During regular business hours; Until 8 pm on Election Day</days_times_open>
+  <address>
+    <city>Post</city>
+    <line1>28550 SE Paulina Hwy</line1>
+    <state>OR</state>
+    <location_name>Post General Store and Post Office</location_name>
+    <zip>97752</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="9940">
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Monday-Friday during regular business hours; Until 8pm on Election Day</days_times_open>
+  <address>
+    <city>Powell Butte</city>
+    <line1>13650 SW Hwy 126</line1>
+    <state>OR</state>
+    <location_name>Powell Butte School</location_name>
+    <zip>97753</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="9938">
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Monday-Friday during regular business hours; Election Day 7am-8pm</days_times_open>
+  <address>
+    <city>Prineville</city>
+    <line1>300 NE Third St.</line1>
+    <state>OR</state>
+    <location_name>Crook County Clerk/Election Office, Courthouse Room 23</location_name>
+    <zip>97754</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="9939">
+  <directions>Drive-Up Ballot Drop Box</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Until 8pm on Election Day</days_times_open>
+  <address>
+    <city>Prineville</city>
+    <line1>300 NE Third St.</line1>
+    <state>OR</state>
+    <location_name>Crook County Courthouse</location_name>
+    <zip>97754</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="9941">
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Monday-Saturday during regular library hours; Until 8pm on Election Day</days_times_open>
+  <address>
+    <city>Prineville</city>
+    <line1>175 N.W. Meadow Lakes Dr.</line1>
+    <state>OR</state>
+    <location_name>Crook County Library</location_name>
+    <zip>97754</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="9942">
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Monday-Friday during regular business hours; Until 8pm on Election Day</days_times_open>
+  <address>
+    <city>Prineville</city>
+    <line1>200 NE Second St.</line1>
+    <state>OR</state>
+    <location_name>Crook County Treasurer's Office</location_name>
+    <zip>97754</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="9945">
+  <directions>Drive-Up Ballot Drop Box</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Until 8pm on Election Day</days_times_open>
+  <address>
+    <city>Brookings</city>
+    <line1>898 Elk Drive</line1>
+    <state>OR</state>
+    <location_name>Brookings City Hall</location_name>
+    <zip>97415-9648</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="9946">
+  <directions>Drive-Up Ballot Drop Box - E. Moore St. parking lot entrance</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Until 8pm on Election Day</days_times_open>
+  <address>
+    <city>Gold Beach</city>
+    <line1>29821 Ellensburg Ave.</line1>
+    <state>OR</state>
+    <location_name>Curry County Courthouse</location_name>
+    <zip>97444</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99210">
+  <directions>County Clerk/Elections Office</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Monday-Friday 9am-12pm &amp;  1-4pm; Election Day 7am-8pm</days_times_open>
+  <address>
+    <city>Gold Beach</city>
+    <line1>29821 Ellensburg Ave.</line1>
+    <state>OR</state>
+    <location_name>Curry County Elections Office</location_name>
+    <zip>97444</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="9944">
+  <directions>Drive-Up Ballot Drop Box</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Until 8pm on Election Day</days_times_open>
+  <address>
+    <city>Port Orford</city>
+    <line1>555 W. 20th St.</line1>
+    <state>OR</state>
+    <location_name>Port Orford City Hall</location_name>
+    <zip>97465</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99275">
+  <directions>Upper floor, privacy booths available</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Monday-Friday 8am-5pm; Election Day 7am-8pm</days_times_open>
+  <address>
+    <city>Bend</city>
+    <line1>1300 NW Wall Street</line1>
+    <state>OR</state>
+    <location_name>Deschutes County Clerk's Office</location_name>
+    <zip>97701-1939</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="9948">
+  <directions>Ballot Drop Box located in front of building</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Available 7 days a week; Until 8pm on Election Day</days_times_open>
+  <address>
+    <city>Bend</city>
+    <line1>61150 SE 27th Street</line1>
+    <state>OR</state>
+    <location_name>Deschutes County Road Department</location_name>
+    <zip>97702-9631</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="9947">
+  <directions>Ballot Drop Box Located on Parkway side of building</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Available 7 days a week; Until 8pm on Election Day</days_times_open>
+  <address>
+    <city>Bend</city>
+    <line1>1300 NW Wall St.</line1>
+    <state>OR</state>
+    <location_name>Deschutes Service Center</location_name>
+    <zip>97701-1939</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99237">
+  <directions>Drive-by Ballot Drop Booth in parking area</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Weekdays Oct 30 - Nov 5, 8am-6pm; Election Day 7am-8pm</days_times_open>
+  <address>
+    <city>Bend</city>
+    <line1>Corner of Lafayette Ave. &amp; Wall St.</line1>
+    <state>OR</state>
+    <location_name>Wall Street &amp; Lafayette Parking Lot</location_name>
+    <zip>97701</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99331">
+  <directions>Ballot Drop Box</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Until 8pm on Election Day</days_times_open>
+  <address>
+    <city>Metolius</city>
+    <line1>636 Jefferson Ave.</line1>
+    <state>OR</state>
+    <location_name>Metolius City Hall</location_name>
+    <zip>97741</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="9949">
+  <directions>Drive-by Ballot Drop Box in parking area (corner of 1st Street and Huntington Road)</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Beginning Friday prior to Election Day available 24 hours; Until 8pm on Election Day</days_times_open>
+  <address>
+    <city>La Pine</city>
+    <line1>16425 First Street</line1>
+    <state>OR</state>
+    <location_name>La Pine Public Library</location_name>
+    <zip>97739</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="9951">
+  <directions>Ballot Drop Box located inside City Hall</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Normal Business Days 8am-5pm; Election Day until 8pm</days_times_open>
+  <address>
+    <city>Redmond</city>
+    <line1>716 SW Evergreen Avenue</line1>
+    <state>OR</state>
+    <location_name>Redmond City Hall</location_name>
+    <zip>97756-2242</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="9950">
+  <directions>Drive-by Ballot Drop Box in parking area</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Beginning Friday prior to Election Day available 24 hours; Until 8pm on Election Day</days_times_open>
+  <address>
+    <city>Redmond</city>
+    <line1>827 SW Deschutes Avenue</line1>
+    <state>OR</state>
+    <location_name>Redmond Public Library</location_name>
+    <zip>97756-2235</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99256">
+  <directions>Ballot Drop Box located inside City Hall</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Normal Business Days 8am-5pm; Election Day 8am-8pm</days_times_open>
+  <address>
+    <city>Sisters</city>
+    <line1>520 E Cascade Ave</line1>
+    <state>OR</state>
+    <location_name>Sisters City Hall</location_name>
+    <zip>97759</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="9952">
+  <directions>Drive-by Ballot Drop Booth in parking area</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Friday prior to Election Day 8am-5pm; Monday prior to Election Day 8am-6pm; Election Day 8am-8pm</days_times_open>
+  <address>
+    <city>Sunriver</city>
+    <line1>56855 Venture Ln.</line1>
+    <state>OR</state>
+    <location_name>Sunriver Area Public Library - Sunriver Business Park</location_name>
+    <zip>97707-2100</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99266">
+  <directions>Ballot Drop Box located inside substation</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Friday &amp; Monday prior to Election Day 8am-1pm and 2pm-5pm; Election Day 8am-1pm and 2pm-8pm</days_times_open>
+  <address>
+    <city>Terrebonne</city>
+    <line1>8154 11th St, Suite 3</line1>
+    <state>OR</state>
+    <location_name>Terrebonne Sheriff's Substation</location_name>
+    <zip>97760</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99329">
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Tuesday-Sunday 7am-8pm</days_times_open>
+  <address>
+    <city>Camas Valley</city>
+    <line1>18377 Hwy 42</line1>
+    <state>OR</state>
+    <location_name>Bravo Bakery &amp; Cafe</location_name>
+    <zip>97416</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="9954">
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Monday-Friday 8am-5pm; Election Day 8am-8pm</days_times_open>
+  <address>
+    <city>Canyonville</city>
+    <line1>250 North Main Street</line1>
+    <state>OR</state>
+    <location_name>Canyonville City Hall</location_name>
+    <zip>97417</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99257">
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Monday-Friday 8:30am -1pm &amp; 2pm-5pm, Until 8pm on Election Day</days_times_open>
+  <address>
+    <city>Glendale</city>
+    <line1>124 Third Street</line1>
+    <state>OR</state>
+    <location_name>Glendale City Hall</location_name>
+    <zip>97442</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99284">
+  <directions>Drive by Ballot Drop Box</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Until 8pm on Election Day</days_times_open>
+  <address>
+    <city>Myrtle Creek</city>
+    <line1>207 NW Pleasant</line1>
+    <state>OR</state>
+    <location_name>Myrtle Creek City Hall</location_name>
+    <zip>97457</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="9953">
+  <directions>Drive-by Ballot Drop Box</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Until 8pm on Election Day</days_times_open>
+  <address>
+    <city>Reedsport</city>
+    <line1>680 Fir</line1>
+    <state>OR</state>
+    <location_name>Douglas County Annex</location_name>
+    <zip>97467</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="9957">
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Monday-Friday 8am-5pm; Until 8pm on Election Day</days_times_open>
+  <address>
+    <city>Roseburg</city>
+    <line1>1036 SE Douglas, Room 124</line1>
+    <state>OR</state>
+    <location_name>Douglas County Clerk's Office</location_name>
+    <zip>97470-3301</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99322">
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Until 8pm on Election Day</days_times_open>
+  <address>
+    <city>Roseburg</city>
+    <line1>1036 SE Douglas</line1>
+    <state>OR</state>
+    <location_name>Douglas County Courthouse</location_name>
+    <zip>97470-3301</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99219">
+  <directions>Drive-By Ballot Drop Box - East Parking Lot</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Until 8pm on Election Day</days_times_open>
+  <address>
+    <city>Roseburg</city>
+    <line1>Diamond Lake Blvd. &amp; Fowler</line1>
+    <state>OR</state>
+    <location_name>Douglas County Library</location_name>
+    <zip>97470</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="9955">
+  <directions>Drive-by Ballot Drop Box</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Until 8pm on Election Day</days_times_open>
+  <address>
+    <city>Sutherlin</city>
+    <line1>126 E. Central</line1>
+    <state>OR</state>
+    <location_name>Sutherlin City Hall</location_name>
+    <zip>97479-9556</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="9956">
+  <directions>Drive-by Ballot Drop Box</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Until 8pm on Election Day</days_times_open>
+  <address>
+    <city>Winston</city>
+    <line1>201 NW Douglas Blvd.</line1>
+    <state>OR</state>
+    <location_name>Winston City Hall</location_name>
+    <zip>97496-8551</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99239">
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Monday-Friday 8am-12:30pm &amp; 1:30pm-5pm; Until 8pm on Election Day</days_times_open>
+  <address>
+    <city>Yoncalla</city>
+    <line1>2640 Eagle Valley Rd.</line1>
+    <state>OR</state>
+    <location_name>Yoncalla City Hall</location_name>
+    <zip>97499</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="9958">
+  <directions>Ballot Drop Box</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Until 8pm on Election Day</days_times_open>
+  <address>
+    <city>Arlington</city>
+    <line1>Locust and 1st Street</line1>
+    <state>OR</state>
+    <location_name>Arlington Municipal Building</location_name>
+    <zip>97812</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="9959">
+  <directions>Ballot Drop Box</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Until 8pm on Election Day</days_times_open>
+  <address>
+    <city>Condon</city>
+    <line1>221 S. Oregon Street</line1>
+    <state>OR</state>
+    <location_name>Gilliam County Courthouse</location_name>
+    <zip>97823</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="9960">
+  <directions>County Clerk's Office</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Monday-Friday 8am-5pm; Election Day 7am-8pm</days_times_open>
+  <address>
+    <city>Canyon City</city>
+    <line1>201 S. Humboldt, Suite 290</line1>
+    <state>OR</state>
+    <location_name>Grant County Courthouse</location_name>
+    <zip>97820</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99314">
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Until 8pm on Election Day</days_times_open>
+  <address>
+    <city>Canyon City</city>
+    <line1>205 S Humbolt Street</line1>
+    <state>OR</state>
+    <location_name>Grant County Courthouse</location_name>
+    <zip>97820</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="9964">
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Monday 1pm-5pm; Tuesday 10am-12pm and 1pm-7pm; Wednesday &amp; Thurday 1pm - 5-pm;  Closed Friday; Saturday 1pm-5pm;  Election Day 12pm-8pm</days_times_open>
+  <address>
+    <city>John Day</city>
+    <line1>507 S Canyon Rd.</line1>
+    <state>OR</state>
+    <location_name>Grant County Library</location_name>
+    <zip>97820</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="9963">
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Monday-Friday 7am-3pm; Election Day 7am-8pm</days_times_open>
+  <address>
+    <city>John Day</city>
+    <line1>142 NE Dayton</line1>
+    <state>OR</state>
+    <location_name>Grant County Senior Center</location_name>
+    <zip>97820</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="9962">
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Monday-Thursday  7:30am-4:00pm; Election Day 9am-8pm</days_times_open>
+  <address>
+    <city>Mount Vernon</city>
+    <line1>199 West Main</line1>
+    <state>OR</state>
+    <location_name>Mt. Vernon City Hall</location_name>
+    <zip>97865</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="9961">
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Monday-Friday 9am-5pm; Election Day 9am-8pm</days_times_open>
+  <address>
+    <city>Prairie City</city>
+    <line1>133 S. Bridge</line1>
+    <state>OR</state>
+    <location_name>Prairie City Hall</location_name>
+    <zip>97869</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="9965">
+  <directions>County Clerk's Office</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Monday-Friday 8am-5pm; Until 8pm on Election Day</days_times_open>
+  <address>
+    <city>Burns</city>
+    <line1>450 N. Buena Vista</line1>
+    <state>OR</state>
+    <location_name>Harney County Clerk's Office</location_name>
+    <zip>97720-1533</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="9966">
+  <directions>Drive Up Ballot Drop Box - enter off of Court Street</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Until 8pm on Election Day</days_times_open>
+  <address>
+    <city>Burns</city>
+    <line1>450 N. Buena Vista</line1>
+    <state>OR</state>
+    <location_name>Harney County Court House</location_name>
+    <zip>97720-2205</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="9969">
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Monday-Saturday during regular library hours; Until 8pm on Election Day</days_times_open>
+  <address>
+    <city>Burns</city>
+    <line1>80 West "D" Street</line1>
+    <state>OR</state>
+    <location_name>Harney County Library</location_name>
+    <zip>97720-1226</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="9970">
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Monday-Friday 8am-5pm; Until 8pm on Election Day</days_times_open>
+  <address>
+    <city>Burns</city>
+    <line1>17 S. Alder</line1>
+    <state>OR</state>
+    <location_name>Harney County Senior &amp; Community Services Center</location_name>
+    <zip>97720-2048</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="9968">
+  <directions>Drive-by Ballot Drop Box, on the left through the gate</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Until 8pm on Election Day</days_times_open>
+  <address>
+    <city>Crane</city>
+    <line1>64319 Main Ave.</line1>
+    <state>OR</state>
+    <location_name>County road yard</location_name>
+    <zip>97732</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="9967">
+  <directions>Drive Up Ballot Drop Box - enter off of Barnes Ave</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Until 8pm on Election Day</days_times_open>
+  <address>
+    <city>Hines</city>
+    <line1>101 E. Barnes</line1>
+    <state>OR</state>
+    <location_name>Hines City Hall</location_name>
+    <zip>97738</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="9971">
+  <directions>City Hall</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Monday-Friday 8am-5pm; 8am- 8pm on Election Day</days_times_open>
+  <address>
+    <city>Cascade Locks</city>
+    <line1>140 WaNaPa Street</line1>
+    <state>OR</state>
+    <location_name>City of Cascade Locks</location_name>
+    <zip>97014</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99207">
+  <directions>Records and Elections Office</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Monday-Friday 8am-5pm; 7am until 8pm on Election Day</days_times_open>
+  <address>
+    <city>Hood River</city>
+    <line1>601 State St.</line1>
+    <state>OR</state>
+    <location_name>Hood River County Office Building</location_name>
+    <zip>97031-1871</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99212">
+  <directions>Ballot Drop Box</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Until 8pm on Election Day</days_times_open>
+  <address>
+    <city>Hood River</city>
+    <line1>601 State St.</line1>
+    <state>OR</state>
+    <location_name>Hood River County Office Building</location_name>
+    <zip>97031-1871</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="9972">
+  <directions>Curbside Ballot Drop Box (alley off Gresham St. by book drop)</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Until 8pm on Election Day</days_times_open>
+  <address>
+    <city>Ashland</city>
+    <line1>410 Siskiyou Blvd.</line1>
+    <state>OR</state>
+    <location_name>Ashland Library</location_name>
+    <zip>97520-2136</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99297">
+  <directions>Walk up ballot drop box (south side of library building, main entrance)</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Until 8pm on Election Day</days_times_open>
+  <address>
+    <city>Central Point</city>
+    <line1>116 S 3rd St</line1>
+    <state>OR</state>
+    <location_name>Central Point Library</location_name>
+    <zip>97502</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99330">
+  <directions>Walk up ballot drop box (north side of library building, main entrance)</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Until 8pm on Election Day</days_times_open>
+  <address>
+    <city>Eagle Point</city>
+    <line1>239 W Main St</line1>
+    <state>OR</state>
+    <location_name>Eagle Point Library</location_name>
+    <zip>97524</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="9974">
+  <directions>Ballot Drop Box on curbside of Main</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Until 8pm on Election Day</days_times_open>
+  <address>
+    <city>Medford</city>
+    <line1>1101 W. Main St</line1>
+    <state>OR</state>
+    <location_name>Jackson County</location_name>
+    <zip>97501-2369</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="9973">
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Monday-Friday 8am-4pm; Until 8pm on Election Day</days_times_open>
+  <address>
+    <city>Medford</city>
+    <line1>1101 W Main St. Suite 201</line1>
+    <state>OR</state>
+    <location_name>Jackson County Elections Office</location_name>
+    <zip>97501-2369</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99240">
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Monday-Friday 9am-12:30pm &amp; 1:30pm-5pm; Until 8pm on Election Day</days_times_open>
+  <address>
+    <city>Rogue River</city>
+    <line1>133 Broadway St.</line1>
+    <state>OR</state>
+    <location_name>Rogue River City Hall</location_name>
+    <zip>97537</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="9978">
+  <directions>Ballot Drop Box</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Until 8pm on Election Day</days_times_open>
+  <address>
+    <city>CCR</city>
+    <line1>5195 SW Clubhouse Rd.</line1>
+    <state>OR</state>
+    <location_name>Crooked River Ranch</location_name>
+    <zip>97760</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99332">
+  <directions>Ballot Drop Box</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Until 8pm on Election Day</days_times_open>
+  <address>
+    <city>Culver</city>
+    <line1>200 W 1st Street</line1>
+    <state>OR</state>
+    <location_name>Culver City Hall</location_name>
+    <zip>97734</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="9977">
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Monday-Friday 8am-5pm; Until 8pm on Election Day</days_times_open>
+  <address>
+    <city>Madras</city>
+    <line1>66 SE "D" Street</line1>
+    <state>OR</state>
+    <location_name>Jefferson County Courthouse Annex</location_name>
+    <zip>97741-1739</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99333">
+  <directions>Ballot Drop Box (across from the Post Office)</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Until 8pm on Election Day</days_times_open>
+  <address>
+    <city>Warm Springs</city>
+    <line1>2112 Wasco Street</line1>
+    <state>OR</state>
+    <location_name>Fire &amp; Safety Confederated Tribes Of Warm Springs</location_name>
+    <zip>97761</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="9980">
+  <directions>Ballot Drop Box just outside front entrance</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Until 8pm on Election Day</days_times_open>
+  <address>
+    <city>Cave Junction</city>
+    <line1>222 Lister</line1>
+    <state>OR</state>
+    <location_name>Cave Junction City Building</location_name>
+    <zip>97523</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99220">
+  <directions>Parking lot behind Josephine Community Library/Enter on 'C' Street</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Until 8pm on Election Day</days_times_open>
+  <address>
+    <city>Grants Pass</city>
+    <line1>200 NW "C" Street</line1>
+    <state>OR</state>
+    <location_name>Josephine Community Library</location_name>
+    <zip>97526</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="9979">
+  <directions>County Clerk's Office</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Monday-Friday 7:50am-5:00pm; Election Day 7am-8pm</days_times_open>
+  <address>
+    <city>Grants Pass</city>
+    <line1>500 NW 6th St.</line1>
+    <state>OR</state>
+    <location_name>Josephine County Courthouse</location_name>
+    <zip>97526</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="9981">
+  <directions>Ballot Drop Box on north side (Tax entrance)</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Until 8pm on Election Day</days_times_open>
+  <address>
+    <city>Grants Pass</city>
+    <line1>500 NW 6th St.</line1>
+    <state>OR</state>
+    <location_name>Josephine County Courthouse</location_name>
+    <zip>97528-0203</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="9982">
+  <directions>Ballot Drop Box on south side (Justice Building entrance)</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Until 8pm on Election Day</days_times_open>
+  <address>
+    <city>Grants Pass</city>
+    <line1>500 NW 6th St.</line1>
+    <state>OR</state>
+    <location_name>Josephine County Courthouse</location_name>
+    <zip>97528-0203</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99334">
+  <directions>Front parking lot</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Until 8pm on Election Day</days_times_open>
+  <address>
+    <city>Grants Pass</city>
+    <line1>290 Union Avenue</line1>
+    <state>OR</state>
+    <location_name>South Valley Bank</location_name>
+    <zip>97527</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="9983">
+  <directions>Ballot Drop Box at base of flag pole on Monument Drive</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Until 8pm on Election Day</days_times_open>
+  <address>
+    <city>Merlin</city>
+    <line1>3600 Merlin Rd</line1>
+    <state>OR</state>
+    <location_name>Umpqua Bank</location_name>
+    <zip>97532</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="9984">
+  <directions>Ballot Drop Box in front of store</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Until 8pm on Election Day</days_times_open>
+  <address>
+    <city>Murphy</city>
+    <line1>7200 Williams Highway</line1>
+    <state>OR</state>
+    <location_name>Sentry Market</location_name>
+    <zip>97533</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99310">
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Tuesday &amp; Thursday 10am-1pm; Until 8pm on Election Day</days_times_open>
+  <address>
+    <city>Bonanza</city>
+    <line1>2900 4th Ave</line1>
+    <state>OR</state>
+    <location_name>Bonanza Town Hall</location_name>
+    <zip>97623</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99298">
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Monday-Friday 10am-2pm; Until 8pm on Election Day</days_times_open>
+  <address>
+    <city>Chiloquin</city>
+    <line1>140 South First Street</line1>
+    <state>OR</state>
+    <location_name>Chiloquin Community Center</location_name>
+    <zip>97624</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99339">
+  <directions>Ballot Drop Box</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Until 8pm on Election Day</days_times_open>
+  <address>
+    <city>Crescent</city>
+    <line1>135393 Highway 97</line1>
+    <state>OR</state>
+    <location_name>Walker Range FPA</location_name>
+    <zip>97733</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="9985">
+  <directions>Parking lot in front of building</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Until 8pm on Election Day</days_times_open>
+  <address>
+    <city>Klamath Falls</city>
+    <line1>2045 Arthur Street</line1>
+    <state>OR</state>
+    <location_name>Klamath Basin Senior Center</location_name>
+    <zip>97603-4675</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99300">
+  <directions>Building 3</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Monday-Friday 8am-5pm; Until 8pm on Election Day</days_times_open>
+  <address>
+    <city>Klamath Falls</city>
+    <line1>7390 S 6th St</line1>
+    <state>OR</state>
+    <location_name>Klamath Community College</location_name>
+    <zip>97603</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="9986">
+  <directions>Ballot Drop Box by Clerk's Office in Government Center</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Monday-Friday 9am-4pm; Until 8pm on Election Day</days_times_open>
+  <address>
+    <city>Klamath Falls</city>
+    <line1>305 Main Street</line1>
+    <state>OR</state>
+    <location_name>Klamath County Clerk's Office</location_name>
+    <zip>97601-6332</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="9987">
+  <directions>Ballot Drop Box - parking lot behind building</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Until 8pm on Election Day</days_times_open>
+  <address>
+    <city>Klamath Falls</city>
+    <line1>305 Main Street</line1>
+    <state>OR</state>
+    <location_name>Klamath County Government Center</location_name>
+    <zip>97601</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99302">
+  <directions>College Union Information Desk, 1st Floor</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>7 days a week 8am-10pm; Until 8pm on Election Day</days_times_open>
+  <address>
+    <city>Klamath Falls</city>
+    <line1>3201 Campus Dr</line1>
+    <state>OR</state>
+    <location_name>Oregon Institute of Technology</location_name>
+    <zip>97601</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99315">
+  <directions>Ballot Drop Box</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Beginning May 11; Until 8pm on Election Day</days_times_open>
+  <address>
+    <city>La Pine</city>
+    <line1>16425 1st Street</line1>
+    <state>OR</state>
+    <location_name>La Pine Public Library</location_name>
+    <zip>97739</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99299">
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Monday-Friday 9am-12pm &amp; 1pm-4pm; Until 8pm on Election Day</days_times_open>
+  <address>
+    <city>Malin</city>
+    <line1>2307 3rd St</line1>
+    <state>OR</state>
+    <location_name>Malin City Hall</location_name>
+    <zip>97632</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99301">
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Monday-Friday 8am-4pm; Until 8pm on Election Day</days_times_open>
+  <address>
+    <city>Merrill</city>
+    <line1>300 E 1st St</line1>
+    <state>OR</state>
+    <location_name>Merrill City Hall</location_name>
+    <zip>97633</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="9990">
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Election Day 8am-8pm</days_times_open>
+  <address>
+    <city>Christmas Valley</city>
+    <line1>87541 Christmas Valley Hwy</line1>
+    <state>OR</state>
+    <location_name>Christmas Valley Community Center</location_name>
+    <zip>97641</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="9988">
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Monday-Friday 8:30am-5pm; Until 8pm on Election Day</days_times_open>
+  <address>
+    <city>Lakeview</city>
+    <line1>513 Center Street, Rm. 6</line1>
+    <state>OR</state>
+    <location_name>County Clerk's Office</location_name>
+    <zip>97630-1574</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="9989">
+  <directions>Next door to the post office</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Election Day 7am-8pm</days_times_open>
+  <address>
+    <city>Paisley</city>
+    <line1>723 Chewaucan</line1>
+    <state>OR</state>
+    <location_name>Paisley Community Center</location_name>
+    <zip>97636</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99101">
+  <directions>Behind City Recorder's Office, corner of N Harrison and Pearl Sts</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Until 8pm on Election Day</days_times_open>
+  <address>
+    <city>Coburg</city>
+    <line1>91069 N Willamette St</line1>
+    <state>OR</state>
+    <location_name>City of Coburg Drive By Ballot Drop Box</location_name>
+    <zip>97408</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="9999">
+  <directions>White Ballot Drop Box in front of the Community Center</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Until 8pm on Election Day</days_times_open>
+  <address>
+    <city>Cottage Grove</city>
+    <line1>700 E Gibbs Ave</line1>
+    <state>OR</state>
+    <location_name>Cottage Grove Drive By Ballot Drop Box</location_name>
+    <zip>97424-1640</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99285">
+  <directions>White Ballot Drop Box west on Oregon Ave in front of Creswell Library</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Until 8pm on Election Day</days_times_open>
+  <address>
+    <city>Creswell</city>
+    <line1>64 W Oregon Ave</line1>
+    <state>OR</state>
+    <location_name>City of Creswell Drive By Ballot Drop Box</location_name>
+    <zip>97426</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="9995">
+  <directions>White Ballot Drop Box located at Amazon Pool on island off Hilyard turning into pool parking</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Until 8pm on Election Day</days_times_open>
+  <address>
+    <city>Eugene</city>
+    <line1>2600 Hilyard St</line1>
+    <state>OR</state>
+    <location_name>Amazon Pool Drive By Ballot Drop Box</location_name>
+    <zip>97405-3685</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="9996">
+  <directions>White Ballot Drop Box Bethel Library - City of Eugene, Echo Hollow Plaza, far right drive-through</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Until 8pm on Election Day</days_times_open>
+  <address>
+    <city>Eugene</city>
+    <line1>1990 Echo Hollow Rd</line1>
+    <state>OR</state>
+    <location_name>Bethel Library Drive By Ballot Drop Box</location_name>
+    <zip>97402-7004</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99208">
+  <directions>White Ballot Drop Box at Juvenile Justice Center in front of the center's entrance - west side</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Until 8pm on Election Day</days_times_open>
+  <address>
+    <city>Eugene</city>
+    <line1>2727 Martin Luther King Jr Blvd</line1>
+    <state>OR</state>
+    <location_name>Juvenile Justice Center Drive By Ballot Drop Box</location_name>
+    <zip>97401-8005</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99224">
+  <directions>White Ballot Drop Box- Enter from Lincoln St - west side of Elections Bldg</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Until 8pm on Election Day</days_times_open>
+  <address>
+    <city>Eugene</city>
+    <line1>275 W 10th Ave</line1>
+    <state>OR</state>
+    <location_name>Lane County Elections Drive By Ballot Drop Box</location_name>
+    <zip>97401</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="9992">
+  <directions>White Ballot Drop Box  In front of Public Works Administration building &amp; Across from Home Depot</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Until 8pm on Election Day</days_times_open>
+  <address>
+    <city>Eugene</city>
+    <line1>3040 N Delta Hwy</line1>
+    <state>OR</state>
+    <location_name>Lane County Public Works Drive By Ballot Drop Box</location_name>
+    <zip>97408</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="9993">
+  <directions>White Ballot Drop box east side of Pearl St between 7th and 8th Aves across from County Public Service Building</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Until 8pm on Election Day</days_times_open>
+  <address>
+    <city>Eugene</city>
+    <line1>Between 7th and 8th</line1>
+    <state>OR</state>
+    <location_name>Pearl Street Drive By Ballot Drop Box</location_name>
+    <zip>97401</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99241">
+  <directions>White Ballot Drop Box on south island off Lake Dr, turning into River Road Park and Recreation Center parking lot</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Until 8pm on Election Day</days_times_open>
+  <address>
+    <city>Eugene</city>
+    <line1>1400 Lake Dr</line1>
+    <state>OR</state>
+    <location_name>River Rd Park &amp; Rec. Center Drive By Ballot Drop Box</location_name>
+    <zip>97404</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99100">
+  <directions>White Ballot Drop Box in front of Sheldon Library, City of Eugene in Sheldon Plaza next to Rite Aid</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Until 8pm on Election Day</days_times_open>
+  <address>
+    <city>Eugene</city>
+    <line1>1566 Coburg Rd</line1>
+    <state>OR</state>
+    <location_name>Sheldon Drive By Ballot Drop Box</location_name>
+    <zip>97401-4802</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99105">
+  <directions>White Ballot Drop Box, outside lower level, east wing, ERB Memorial Union.  Handicap Accessible.</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Until 8pm on Election Day</days_times_open>
+  <address>
+    <city>Eugene</city>
+    <line1>1222 E 13th Ave</line1>
+    <state>OR</state>
+    <location_name>University of Oregon</location_name>
+    <zip>97403</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="9991">
+  <directions>White Ballot Drop Box (North end of Wal-Mart parking lot)</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Until 8pm on Election Day</days_times_open>
+  <address>
+    <city>Eugene</city>
+    <line1>4550 W 11th Ave</line1>
+    <state>OR</state>
+    <location_name>Wal-Mart Drive By Ballot Drop Box</location_name>
+    <zip>97402</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="9998">
+  <directions>White Ballot Drop Box in front of City of Florence Police Department</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Until 8pm on Election Day</days_times_open>
+  <address>
+    <city>Florence</city>
+    <line1>900 Greenwood Street</line1>
+    <state>OR</state>
+    <location_name>Florence Drive By Ballot Drop Box</location_name>
+    <zip>97439-9492</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99102">
+  <directions>White Ballot Drop Box in parking lot north of library</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Until 8pm on Election Day</days_times_open>
+  <address>
+    <city>Junction City</city>
+    <line1>726 Greenwood St</line1>
+    <state>OR</state>
+    <location_name>Junction City Public Library Drive By Ballot Drop Box</location_name>
+    <zip>97448-1628</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99103">
+  <directions>City of Lowell. Handicap Accessible.</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Until 8pm on Election Day</days_times_open>
+  <address>
+    <city>Lowell</city>
+    <line1>107 E 3rd St</line1>
+    <state>OR</state>
+    <location_name>City of Lowell City Hall Ballot Drop Box</location_name>
+    <zip>97452</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99335">
+  <directions>Police Department - white Ballot Drop Box close to entrance</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Until 8pm on Election Day</days_times_open>
+  <address>
+    <city>Oakridge</city>
+    <line1>76435 Ash St</line1>
+    <state>OR</state>
+    <location_name>City of Oakridge Drive By Ballot Drop Box</location_name>
+    <zip>97463</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99235">
+  <directions>White Ballot Drop Box - Enter off A St - box located at north end of covered parking lot</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Until 8pm on Election Day</days_times_open>
+  <address>
+    <city>Springfield</city>
+    <line1>Between 5th St and 6th St</line1>
+    <state>OR</state>
+    <location_name>City of Springfield Drive By Ballot Drop Box</location_name>
+    <zip>97477</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="9997">
+  <directions>White Ballot Drop Box at Splash! At Lively Park just past front of building on left of driveway</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Until 8pm on Election Day</days_times_open>
+  <address>
+    <city>Springfield</city>
+    <line1>6100 Thurston Rd</line1>
+    <state>OR</state>
+    <location_name>Splash! at Lively Park Drive By Ballot Drop Box</location_name>
+    <zip>97478-6955</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99225">
+  <directions>White Ballot Drop Box in parking lot in front of City Hall</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Until 8pm on Election Day</days_times_open>
+  <address>
+    <city>Veneta</city>
+    <line1>88184 8th St</line1>
+    <state>OR</state>
+    <location_name>City of Veneta Drive By Ballot Drop Box</location_name>
+    <zip>97487</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99106">
+  <directions>Vida Community Market. Handicap Accessible</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Daily 6:30am-7pm; Election Day 6:30am-8pm</days_times_open>
+  <address>
+    <city>Vida</city>
+    <line1>45602 McKenzie Hwy</line1>
+    <state>OR</state>
+    <location_name>Vida Community Market</location_name>
+    <zip>97488-9728</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99110">
+  <directions>City Hall Lobby</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Monday-Friday 8am-5pm; Until 8pm on Election Day</days_times_open>
+  <address>
+    <city>Depoe Bay</city>
+    <line1>570 SE Shell</line1>
+    <state>OR</state>
+    <location_name>Depoe Bay City Hall</location_name>
+    <zip>97341</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99114">
+  <directions>Multi-Purpose Room</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Election Day ONLY 10am-8pm</days_times_open>
+  <address>
+    <city>Eddyville</city>
+    <line1>20742 Hwy 20</line1>
+    <state>OR</state>
+    <location_name>Eddyville Community Church</location_name>
+    <zip>97343-9713</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99109">
+  <directions>Drive-up Ballot Drop Box In lower parking lot of City Hall</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Until 8pm on Election Day</days_times_open>
+  <address>
+    <city>Lincoln City</city>
+    <line1>801 SW Hwy 101</line1>
+    <state>OR</state>
+    <location_name>Lincoln City - City Hall</location_name>
+    <zip>97367-2766</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99294">
+  <directions>City Hall Lobby-3rd Floor</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Monday-Friday 8am-5pm; until 8pm on Election Day</days_times_open>
+  <address>
+    <city>Lincoln City</city>
+    <line1>801 SW Hwy 101</line1>
+    <state>OR</state>
+    <location_name>Lincoln City - City Hall</location_name>
+    <zip>97367-2766</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99107">
+  <directions>Drive-up Ballot Drop Box in rear parking lot of Courthouse</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Until 8pm on Election Day</days_times_open>
+  <address>
+    <city>Newport</city>
+    <line1>225 W. Olive</line1>
+    <state>OR</state>
+    <location_name>Lincoln County Courthouse</location_name>
+    <zip>97365-3811</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99254">
+  <directions>Clerk's Office Lobby-Room 201</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Monday-Friday 8:30am-5pm; 7am-8pm on Election Day</days_times_open>
+  <address>
+    <city>Newport</city>
+    <line1>225 W. Olive</line1>
+    <state>OR</state>
+    <location_name>Lincoln County Courthouse</location_name>
+    <zip>97365-3811</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99108">
+  <directions>City Hall Lobby</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Monday-Friday 8am-5pm; Until 8pm on Election Day</days_times_open>
+  <address>
+    <city>Newport</city>
+    <line1>169 SW Coast Hwy</line1>
+    <state>OR</state>
+    <location_name>Newport City Hall</location_name>
+    <zip>97365-3806</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99246">
+  <directions>City Hall Lobby</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Monday-Friday 9am-5pm; Until 8pm on Election Day</days_times_open>
+  <address>
+    <city>Siletz</city>
+    <line1>215 W Buford</line1>
+    <state>OR</state>
+    <location_name>Siletz City Hall</location_name>
+    <zip>97380</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99111">
+  <directions>City Hall Lobby</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Monday-Thursday 8am-5pm; Until 8pm on Election Day</days_times_open>
+  <address>
+    <city>Toledo</city>
+    <line1>206 N. Main</line1>
+    <state>OR</state>
+    <location_name>Toledo City Hall</location_name>
+    <zip>97391-1536</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99112">
+  <directions>City Hall Lobby</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Monday-Friday 8am-5pm; Closed 12:30pm-1:30pm; Until 8pm on Election Day</days_times_open>
+  <address>
+    <city>Waldport</city>
+    <line1>125 Alsea Hwy</line1>
+    <state>OR</state>
+    <location_name>Waldport City Hall</location_name>
+    <zip>97394-9805</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99255">
+  <directions>Drive-up Ballot Drop Box in parking lot of City Hall</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Until 8pm on Election day</days_times_open>
+  <address>
+    <city>Waldport</city>
+    <line1>125 Alsea Hwy</line1>
+    <state>OR</state>
+    <location_name>Waldport City Hall</location_name>
+    <zip>97394-9805</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99113">
+  <directions>City Hall Lobby</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Monday-Friday 8:30am-4:30pm; Until 8pm on Election Day</days_times_open>
+  <address>
+    <city>Yachats</city>
+    <line1>441 Hwy 101 N</line1>
+    <state>OR</state>
+    <location_name>Yachats City Hall</location_name>
+    <zip>97498</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99222">
+  <directions>Library Lobby</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Monday-Wednesday 10am-8pm; Thursday &amp; Friday 10am-6pm; Saturday &amp; Sunday 1pm-5pm; Election Day 7am-8pm</days_times_open>
+  <address>
+    <city>Albany</city>
+    <line1>2450 14th Avenue SE</line1>
+    <state>OR</state>
+    <location_name>Albany Public Library</location_name>
+    <zip>97322</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99115">
+  <directions>5th Ave. Courthouse drive through</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Election Day until 8pm</days_times_open>
+  <address>
+    <city>Albany</city>
+    <line1>300 4th Ave. SW</line1>
+    <state>OR</state>
+    <location_name>Linn County Courthouse</location_name>
+    <zip>97321</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99244">
+  <directions>Clerk's Office</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Monday-Friday 8:30am-5pm; Election Day 7am-8pm</days_times_open>
+  <address>
+    <city>Albany</city>
+    <line1>300 4th Avenue SW, Room 205</line1>
+    <state>OR</state>
+    <location_name>Linn County Courthouse</location_name>
+    <zip>97321</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99286">
+  <directions>Located inside</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Monday-Friday 8am-5pm; Election Day 7am-8pm</days_times_open>
+  <address>
+    <city>Brownsville</city>
+    <line1>255 N Main St</line1>
+    <state>OR</state>
+    <location_name>City of Brownsville, City Hall</location_name>
+    <zip>97327</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99303">
+  <directions>Lobby</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Monday-Friday 8:30am-5pm; Election Day 7am-8pm</days_times_open>
+  <address>
+    <city>Harrisburg</city>
+    <line1>120 Smith St</line1>
+    <state>OR</state>
+    <location_name>Harrisburg City Hall</location_name>
+    <zip>97446</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99304">
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Monday-Thursday 10am-7pm; Friday &amp; Saturday 10am-5pm; Election Day 7am-8pm</days_times_open>
+  <address>
+    <city>Lebanon</city>
+    <line1>55 Academy St</line1>
+    <state>OR</state>
+    <location_name>Lebanon Public Library</location_name>
+    <zip>97355</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99229">
+  <directions>Office Lobby</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Monday-Friday 8am-4pm; Election Day 7am-8pm</days_times_open>
+  <address>
+    <city>Lebanon</city>
+    <line1>2590 S. Main St</line1>
+    <state>OR</state>
+    <location_name>Linn County Sheriff Lebanon Substation</location_name>
+    <zip>97355</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99230">
+  <directions>Office Lobby</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Monday-Friday 9am-12pm &amp; 1pm-4pm; Election Day 7am-8pm</days_times_open>
+  <address>
+    <city>Lyons</city>
+    <line1>449 5th Street</line1>
+    <state>OR</state>
+    <location_name>City of Lyons City Hall</location_name>
+    <zip>97358</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99340">
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Monday-Friday 9am-4pm; Election Day 7am-8pm</days_times_open>
+  <address>
+    <city>Mill City</city>
+    <line1>444 S. 1st Avenue</line1>
+    <state>OR</state>
+    <location_name>City of Mill City, City Hall</location_name>
+    <zip>97360</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99261">
+  <directions>Lobby</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Monday-Friday 8am-12pm &amp; 1pm-5pm; Election Day 7am-8pm</days_times_open>
+  <address>
+    <city>Scio</city>
+    <line1>38957 NW 1st Ave</line1>
+    <state>OR</state>
+    <location_name>Scio City Hall</location_name>
+    <zip>97374</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99117">
+  <directions>Lobby</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Monday-Friday 8am-5pm; Election Day 7am-8pm</days_times_open>
+  <address>
+    <city>Sweet Home</city>
+    <line1>1140 12th Ave.</line1>
+    <state>OR</state>
+    <location_name>Sweet Home City Hall</location_name>
+    <zip>97386</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99116">
+  <directions>Lobby</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Election Day until 8pm</days_times_open>
+  <address>
+    <city>Sweet Home</city>
+    <line1>1950 Main Street</line1>
+    <state>OR</state>
+    <location_name>Sweet Home Police Department</location_name>
+    <zip>97386</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99119">
+  <directions>Ballot Drop Box across from the Post Office</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Until 8pm on Election Day</days_times_open>
+  <address>
+    <city>Jordan Valley</city>
+    <line1>Yturri Blvd.</line1>
+    <state>OR</state>
+    <location_name>County Road Right of Way</location_name>
+    <zip>97910</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99121">
+  <directions>Ballot Drop Box</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Until 8pm on Election Day</days_times_open>
+  <address>
+    <city>Nyssa</city>
+    <line1>319 Main Street</line1>
+    <state>OR</state>
+    <location_name>Nyssa City Library</location_name>
+    <zip>97913-3845</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99120">
+  <directions>Ballot Drop Box</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Until 8pm on Election Day</days_times_open>
+  <address>
+    <city>Ontario</city>
+    <line1>388 S.W. 2nd Avenue</line1>
+    <state>OR</state>
+    <location_name>Malheur County Library</location_name>
+    <zip>97914-2741</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99336">
+  <directions>Ballot Drop Box corner of B St &amp; Bryant St</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Until 8pm on Election Day</days_times_open>
+  <address>
+    <city>Vale</city>
+    <line1>251 B St W</line1>
+    <state>OR</state>
+    <location_name>Malheur County Courthouse</location_name>
+    <zip>97918</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99128">
+  <directions>Lobby</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Monday-Friday 8am-5pm; Until 8pm on Election Day</days_times_open>
+  <address>
+    <city>Aumsville</city>
+    <line1>595 Main Street</line1>
+    <state>OR</state>
+    <location_name>Aumsville City Hall</location_name>
+    <zip>97325</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99305">
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Monday-Thurdsay 8am-12pm &amp; 1pm-4pm; Until 8pm on Election Day</days_times_open>
+  <address>
+    <city>Donald</city>
+    <line1>10710 Main St. NE</line1>
+    <state>OR</state>
+    <location_name>Donald City Hall</location_name>
+    <zip>97020</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99306">
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Monday-Friday 8am-1pm &amp; 2pm-5pm; Until 8pm on Election Day</days_times_open>
+  <address>
+    <city>Gervais</city>
+    <line1>592 4th Street</line1>
+    <state>OR</state>
+    <location_name>Gervais City Hall</location_name>
+    <zip>97026</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99130">
+  <directions>Lobby</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Monday-Thursday 7am-5:30pm; closed Friday; open at lunch; Until 8pm on Election Day</days_times_open>
+  <address>
+    <city>Hubbard</city>
+    <line1>3720 2nd Street</line1>
+    <state>OR</state>
+    <location_name>Hubbard City Hall</location_name>
+    <zip>97032</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99129">
+  <directions>Lobby</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Monday-Friday 8am-5pm; Until 8pm on Election Day</days_times_open>
+  <address>
+    <city>Jefferson</city>
+    <line1>189 N. Main St.</line1>
+    <state>OR</state>
+    <location_name>Jefferson Fire Department</location_name>
+    <zip>97352</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99133">
+  <directions>Lobby</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Monday-Friday 8am-5pm; Until 8pm on Election Day</days_times_open>
+  <address>
+    <city>Keizer</city>
+    <line1>930 Chemawa Rd. NE</line1>
+    <state>OR</state>
+    <location_name>Keizer City Hall</location_name>
+    <zip>97303-3716</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99307">
+  <directions>(Privacy/Handicap Booth Available)</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Monday-Friday 9am-6pm; Until 8pm on Election Day</days_times_open>
+  <address>
+    <city>Keizer</city>
+    <line1>5110 River Rd. N</line1>
+    <state>OR</state>
+    <location_name>US Bank - Keizer</location_name>
+    <zip>97303</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99122">
+  <directions>Lobby</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Monday-Friday 10am-3pm; Until 8pm on Election Day</days_times_open>
+  <address>
+    <city>Mill City</city>
+    <line1>400 N. Santiam Blvd.</line1>
+    <state>OR</state>
+    <location_name>US Bank - Mill City</location_name>
+    <zip>97360</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99268">
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Tuesday 12pm-6:30pm; Wednesday 11am-5pm; Thursday &amp; Friday 12pm-5pm; Saturday 1pm-5pm; Until 8pm on Election Day</days_times_open>
+  <address>
+    <city>Mt. Angel</city>
+    <line1>290 E. Charles St.</line1>
+    <state>OR</state>
+    <location_name>Mt. Angel Public Library</location_name>
+    <zip>97362</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99269">
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Monday, Tuesday, Thursday &amp; Friday 8am-5pm; Wednesday 9am-5pm; Until 8pm on Election Day</days_times_open>
+  <address>
+    <city>Salem</city>
+    <line1>4555 Liberty Rd. S. #300</line1>
+    <state>OR</state>
+    <location_name>DMV, Sunnyslope Shopping Center</location_name>
+    <zip>97302</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99287">
+  <directions>At front entrance</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Monday-Friday 8am-5pm; Until 8pm on Election Day</days_times_open>
+  <address>
+    <city>Salem</city>
+    <line1>100 High St NE</line1>
+    <state>OR</state>
+    <location_name>Marion County Courthouse</location_name>
+    <zip>97301</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99292">
+  <directions>Outside Drive-thru on the north side of Marion County Courthouse on Court Street</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Monday prior to Election Day and Election Day 6am-7pm</days_times_open>
+  <address>
+    <city>Salem</city>
+    <line1>550 Court St NE</line1>
+    <state>OR</state>
+    <location_name>Marion County Courthouse - Curbside</location_name>
+    <zip>97301</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99131">
+  <directions>Inside service only.  In office.  (Privacy/Handicap Booths Available)</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Monday-Friday 8:30m-5pm; Saturday prior to Election Day 8:30am-1pm; Election Day 7am-8pm</days_times_open>
+  <address>
+    <city>Salem</city>
+    <line1>4263 Commercial St. SE #300</line1>
+    <state>OR</state>
+    <location_name>Marion County Elections Office</location_name>
+    <zip>97302-3997</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99132">
+  <directions>Lobby</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Monday-Thursday 8:30am-5pm; Until 8pm on Election Day</days_times_open>
+  <address>
+    <city>Salem</city>
+    <line1>3180 Center St. NE #1361</line1>
+    <state>OR</state>
+    <location_name>Marion County OSU Extension Office</location_name>
+    <zip>97301-4593</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99242">
+  <directions>Lobby</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Monday-Friday 8am-5pm; Until 8pm on Election Day</days_times_open>
+  <address>
+    <city>Salem</city>
+    <line1>5155 Silverton Rd. NE</line1>
+    <state>OR</state>
+    <location_name>Marion County Public Works</location_name>
+    <zip>97305</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99267">
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Monday-Friday 8am-5pm; Until 8pm on Election Day</days_times_open>
+  <address>
+    <city>Salem</city>
+    <line1>4760 Portland Rd. NE</line1>
+    <state>OR</state>
+    <location_name>Oregon State Fire Marshal</location_name>
+    <zip>97305</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99126">
+  <directions>Lobby</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Monday-Friday 8am-5pm; Until 8pm on Election Day</days_times_open>
+  <address>
+    <city>Silverton</city>
+    <line1>306 S. Water St.</line1>
+    <state>OR</state>
+    <location_name>Silverton City Hall</location_name>
+    <zip>97381</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99270">
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Monday-Thursday 12pm-5pm; Friday 12pm-6pm; Until 8pm on Election Day</days_times_open>
+  <address>
+    <city>St. Paul</city>
+    <line1>20259 Main St. NE</line1>
+    <state>OR</state>
+    <location_name>US Bank - St. Paul</location_name>
+    <zip>97137</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99123">
+  <directions>Lobby</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Monday &amp; Tuesday 10am-5:30pm; Wednesday 12pm-8:30pm; Thursday 10am-8:30pm; Friday 12pm-5:30pm; Saturday 10am-4pm; Until 8pm on Election Day</days_times_open>
+  <address>
+    <city>Stayton</city>
+    <line1>515 N. First Ave.</line1>
+    <state>OR</state>
+    <location_name>Stayton Public Library</location_name>
+    <zip>97383</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99127">
+  <directions>Lobby  (Privacy/Handicap Booth Available)</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Monday-Friday 9am-12:30pm &amp; 1pm-4:30pm; Until 8pm on Election Day</days_times_open>
+  <address>
+    <city>Sublimity</city>
+    <line1>245 NW Johnson</line1>
+    <state>OR</state>
+    <location_name>Sublimity City Hall</location_name>
+    <zip>97385</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99124">
+  <directions>Lobby</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Monday-Friday 8:30am-5pm; Until 8pm on Election Day</days_times_open>
+  <address>
+    <city>Turner</city>
+    <line1>7250 3rd Street</line1>
+    <state>OR</state>
+    <location_name>Turner City Hall</location_name>
+    <zip>97392</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99125">
+  <directions>Lobby  (Privacy/Handicap Booths Available)</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Monday-Friday 8am-5:30pm; Until 8pm on Election Day</days_times_open>
+  <address>
+    <city>Woodburn</city>
+    <line1>270 Montgomery Street</line1>
+    <state>OR</state>
+    <location_name>Woodburn City Hall</location_name>
+    <zip>97071</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99338">
+  <directions>Outside drop box</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Until 8pm on Election Day</days_times_open>
+  <address>
+    <city>Boardman</city>
+    <line1>101 NW Boardman Ave</line1>
+    <state>OR</state>
+    <location_name>Morrow County Health Department parking area</location_name>
+    <zip>97818</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99135">
+  <directions>County Clerk's Office - Room 102</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Monday-Friday 8am-12pm &amp; 1pm-5pm; Election Day 7am-8pm</days_times_open>
+  <address>
+    <city>Heppner</city>
+    <line1>100 S Court St</line1>
+    <state>OR</state>
+    <location_name>Morrow County Courthouse</location_name>
+    <zip>97836-7303</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99323">
+  <directions>Outside drop box; back entrance parking lot</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Until 8pm on Election Day</days_times_open>
+  <address>
+    <city>Heppner</city>
+    <line1>100 S Court St</line1>
+    <state>OR</state>
+    <location_name>Morrow County Courthouse - Outside</location_name>
+    <zip>97836-7303</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99337">
+  <directions>Outside drop box</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Until 8pm on Election Day</days_times_open>
+  <address>
+    <city>Ione</city>
+    <line1>260 Spring St</line1>
+    <state>OR</state>
+    <location_name>Ione Curbside</location_name>
+    <zip>97843</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99134">
+  <directions>Outside drop site</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Until 8pm on Election Day</days_times_open>
+  <address>
+    <city>Irrigon</city>
+    <line1>205 NE 3rd Street</line1>
+    <state>OR</state>
+    <location_name>Irrigon Planning Department Entrance</location_name>
+    <zip>97844</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99317">
+  <directions>Outside drop site</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Until 8pm on Election Day</days_times_open>
+  <address>
+    <city>Lexington</city>
+    <line1>365 West Hwy 74</line1>
+    <state>OR</state>
+    <location_name>Morrow County Public Works parking lot</location_name>
+    <zip>97839</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99145">
+  <directions>Ballot Drop Box inside library</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Sunday 12pm-5pm; Tuesday-Wednesday 11am-8pm; Thursday-Saturday 10am-5pm; Monday before Election Day 10am-5om; Until 8pm on Election Day</days_times_open>
+  <address>
+    <city>Fairview</city>
+    <line1>1520 NE Village St.</line1>
+    <state>OR</state>
+    <location_name>Fairview-Columbia Branch Library</location_name>
+    <zip>97024-3826</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99139">
+  <directions>Ballot Drop Box/Also Ballot Drop Box inside library</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>18th day prior-election through 8pm on Election Day</days_times_open>
+  <address>
+    <city>Gresham</city>
+    <line1>385 NW Miller Ave.</line1>
+    <state>OR</state>
+    <location_name>Gresham Branch Library</location_name>
+    <zip>97030-7204</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99155">
+  <directions>Ballot Drop Box at southwest corner of parking lot.  Enter off SW Terwilliger Blvd.</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>18th day prior-election through 8pm on Election Day</days_times_open>
+  <address>
+    <city>Portland</city>
+    <line1>7365 SW Barbur Blvd.</line1>
+    <state>OR</state>
+    <location_name>A-Boy Supply</location_name>
+    <zip>97219</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99142">
+  <directions>Ballot Drop Box inside library</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Sunday 12pm-5pm; Tuesday-Wednesday 11am-8pm; Thursday-Saturday 10am-5pm; Monday before Election Day 10am-5om; Until 8pm on Election Day</days_times_open>
+  <address>
+    <city>Portland</city>
+    <line1>3605 NE 15th Ave.</line1>
+    <state>OR</state>
+    <location_name>Albina Branch Library</location_name>
+    <zip>97212-2358</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99143">
+  <directions>Ballot Drop Box inside library</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Sunday 12pm-5pm; Tuesday-Wednesday 11am-8pm; Thursday-Saturday 10am-5pm; Monday before Election Day 10am-5om; Until 8pm on Election Day</days_times_open>
+  <address>
+    <city>Portland</city>
+    <line1>1038 SE 39th Ave.</line1>
+    <state>OR</state>
+    <location_name>Belmont Branch Library</location_name>
+    <zip>97214-4318</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99144">
+  <directions>Ballot Drop Box inside library</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Sunday 12pm-5pm; Tuesday-Wednesday 11am-8pm; Thursday-Saturday 10am-5pm; Monday before Election Day 10am-5om; Until 8pm on Election Day</days_times_open>
+  <address>
+    <city>Portland</city>
+    <line1>10723 SW Capitol Highway</line1>
+    <state>OR</state>
+    <location_name>Capitol Hill Branch Library</location_name>
+    <zip>97219-6816</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99138">
+  <directions>Ballot Drop Box inside library</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Sunday 12pm-5pm; Tuesday-Wednesday 11am-8pm; Thursday-Saturday 10am-5pm; Monday before Election Day 10am-5om; Until 8pm on Election Day</days_times_open>
+  <address>
+    <city>Portland</city>
+    <line1>801 SW 10th Ave.</line1>
+    <state>OR</state>
+    <location_name>Central Library</location_name>
+    <zip>97205-2520</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99291">
+  <directions>Drive-up book drop located on the east side of SW 11th between Yamhill and Taylor</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>18th day prior-election through 8pm on Election Day</days_times_open>
+  <address>
+    <city>Portland</city>
+    <line1>801 SW 10th Ave.</line1>
+    <state>OR</state>
+    <location_name>Central Library</location_name>
+    <zip>97205-2520</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99156">
+  <directions>Ballot Drop Box at north end of one-way lane for Goodwill donations. Enter off North Knowles Avenue</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>18th day prior-election through 8pm on Election Day</days_times_open>
+  <address>
+    <city>Portland</city>
+    <line1>3134 North Lombard Street</line1>
+    <state>OR</state>
+    <location_name>Goodwill Store</location_name>
+    <zip>97217</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99146">
+  <directions>Ballot Drop Box inside library</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Sunday 12pm-5pm; Tuesday-Wednesday 11am-8pm; Thursday-Saturday 10am-5pm; Monday before Election Day 10am-5om; Until 8pm on Election Day</days_times_open>
+  <address>
+    <city>Portland</city>
+    <line1>7921 NE Sandy Blvd.</line1>
+    <state>OR</state>
+    <location_name>Gregory Heights Branch Library</location_name>
+    <zip>97213-7150</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99154">
+  <directions>Ballot Drop Box inside library</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Sunday 12pm-5pm; Tuesday &amp; Thursday 11am-8pm; Wednesday, Friday &amp; Saturday 10am-5pm; Monday before Election Day 10am-5pm; Until 8pm on Election Day</days_times_open>
+  <address>
+    <city>Portland</city>
+    <line1>1525 SW Sunset Blvd.</line1>
+    <state>OR</state>
+    <location_name>Hillsdale Branch Library</location_name>
+    <zip>97239-1937</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99147">
+  <directions>Ballot Drop Box inside library</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Sunday 12pm-5pm; Tuesday-Wednesday 11am-8pm; Thursday-Saturday 10am-5pm; Monday before Election Day 10am-5om; Until 8pm on Election Day</days_times_open>
+  <address>
+    <city>Portland</city>
+    <line1>7905 SE Holgate Blvd.</line1>
+    <state>OR</state>
+    <location_name>Holgate Branch Library</location_name>
+    <zip>97206-3367</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99140">
+  <directions>Ballot Drop Box inside library</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Sunday 12pm-5pm; Tuesday &amp; Thursday 11am-8pm; Wednesday, Friday &amp; Saturday 10am-5pm; Monday before Election Day 10am-5pm; Until 8pm on Election Day</days_times_open>
+  <address>
+    <city>Portland</city>
+    <line1>4040 NE Tillamook St.</line1>
+    <state>OR</state>
+    <location_name>Hollywood Branch Library</location_name>
+    <zip>97212-5340</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99308">
+  <directions>Ballot Drop Box inside library</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Sunday 12pm-5pm; Tuesday-Wednesday 11am-8pm; Thursday-Saturday 10am-5pm; Monday before Election Day 10am-5om; Until 8pm on Election Day</days_times_open>
+  <address>
+    <city>Portland</city>
+    <line1>8226 N Denver Ave.</line1>
+    <state>OR</state>
+    <location_name>Kenton Branch Library</location_name>
+    <zip>97217-6624</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99272">
+  <directions>Ballot Drop Box between NE Tillamook and NE Hancock</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>18th day prior-election through 8PM on Election Day</days_times_open>
+  <address>
+    <city>Portland</city>
+    <line1>2010 NE 39th Ave</line1>
+    <state>OR</state>
+    <location_name>McDonald's Restaurant</location_name>
+    <zip>97212</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99141">
+  <directions>Ballot Drop Box/Also Ballot Drop Box inside library</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>18th day prior-election through 8pm on Election Day</days_times_open>
+  <address>
+    <city>Portland</city>
+    <line1>805 SE 122nd Ave.</line1>
+    <state>OR</state>
+    <location_name>Midland Branch Library</location_name>
+    <zip>97233-1107</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99259">
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Monday-Thursday 10am-5pm; Until 8pm on Election Day</days_times_open>
+  <address>
+    <city>Elgin</city>
+    <line1>180 N 8th Ave.</line1>
+    <state>OR</state>
+    <location_name>Elgin City Hall</location_name>
+    <zip>97827</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99136">
+  <directions>Ballot Drop Box and voting booths available inside office</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Monday-Friday 8am-5pm; Election Day 7am-8pm</days_times_open>
+  <address>
+    <city>Portland</city>
+    <line1>1040 SE Morrison</line1>
+    <state>OR</state>
+    <location_name>Multnomah County Elections</location_name>
+    <zip>97214-2417</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99213">
+  <directions>Accessible slot in north window for pedestrian ballot deposit</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>18th day prior-election through 8pm on Election Day</days_times_open>
+  <address>
+    <city>Portland</city>
+    <line1>1040 SE Morrison</line1>
+    <state>OR</state>
+    <location_name>Multnomah County Elections</location_name>
+    <zip>97214-2417</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99214">
+  <directions>Ballot Drop Box across from office on 800 block of SE 11th Avenue</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>18th day prior-election through 8pm on Election Day</days_times_open>
+  <address>
+    <city>Portland</city>
+    <line1>800 Block of SE 11th</line1>
+    <state>OR</state>
+    <location_name>Multnomah County Elections</location_name>
+    <zip>97214-2417</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99236">
+  <directions>Ballot Drop Box on north side of SE Belmont between SE 10th and SE 11th AV</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>18th day prior-election through 8pm on Election Day</days_times_open>
+  <address>
+    <city>Portland</city>
+    <line1>SE Belmont between 10th &amp; 11th AVE SE</line1>
+    <state>OR</state>
+    <location_name>Multnomah County Elections</location_name>
+    <zip>97214-2417</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99148">
+  <directions>Ballot Drop Box inside library</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Sunday 12pm-5pm; Tuesday-Wednesday 11am-8pm; Thursday-Saturday 10am-5pm; Monday before Election Day 10am-5om; Until 8pm on Election Day</days_times_open>
+  <address>
+    <city>Portland</city>
+    <line1>512 N Killingsworth St.</line1>
+    <state>OR</state>
+    <location_name>North Portland Branch Library</location_name>
+    <zip>97217-2330</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99149">
+  <directions>Ballot Drop Box inside library</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Sunday 12pm-5pm; Tuesday-Wednesday 11am-8pm; Thursday-Saturday 10am-5pm; Monday before Election Day 10am-5om; Until 8pm on Election Day</days_times_open>
+  <address>
+    <city>Portland</city>
+    <line1>2300 NW Thurman St.</line1>
+    <state>OR</state>
+    <location_name>Northwest Branch Library</location_name>
+    <zip>97210-2521</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99137">
+  <directions>Ballot Drop Box on 700 block of SW Broadway (next to Starbucks and across from Nordstrom)</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>18th day prior-election through 8pm on Election Day</days_times_open>
+  <address>
+    <city>Portland</city>
+    <line1>700 Block of SW Broadway</line1>
+    <state>OR</state>
+    <location_name>Pioneer Courthouse Square</location_name>
+    <zip>97205</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99150">
+  <directions>Ballot Drop Box inside library</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Sunday 12pm-5pm; Tuesday-Wednesday 11am-8pm; Thursday-Saturday 10am-5pm; Monday before Election Day 10am-5om; Until 8pm on Election Day</days_times_open>
+  <address>
+    <city>Portland</city>
+    <line1>17917 SE Stark St.</line1>
+    <state>OR</state>
+    <location_name>Rockwood Branch Library</location_name>
+    <zip>97233-4825</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99152">
+  <directions>Ballot Drop Box inside library</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Sunday 12pm-5pm; Tuesday-Wednesday 11am-8pm; Thursday-Saturday 10am-5pm; Monday before Election Day 10am-5om; Until 8pm on Election Day</days_times_open>
+  <address>
+    <city>Portland</city>
+    <line1>7860 SE 13th Ave.</line1>
+    <state>OR</state>
+    <location_name>Sellwood-Moreland Branch Library</location_name>
+    <zip>97202-6300</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99151">
+  <directions>Ballot Drop Box inside library</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Sunday 12pm-5pm; Tuesday-Wednesday 11am-8pm; Thursday-Saturday 10am-5pm; Monday before Election Day 10am-5om; Until 8pm on Election Day</days_times_open>
+  <address>
+    <city>Portland</city>
+    <line1>7510 N. Charleston Ave.</line1>
+    <state>OR</state>
+    <location_name>St. Johns Branch Library</location_name>
+    <zip>97203-3709</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99153">
+  <directions>Ballot Drop Box inside library</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Sunday 12pm-5pm; Tuesday-Wednesday 11am-8pm; Thursday-Saturday 10am-5pm; Monday before Election Day 10am-5om; Until 8pm on Election Day</days_times_open>
+  <address>
+    <city>Portland</city>
+    <line1>6008 SE 49th Ave.</line1>
+    <state>OR</state>
+    <location_name>Woodstock Branch Library</location_name>
+    <zip>97206-6117</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99318">
+  <directions>Ballot Drop Box inside library</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Sunday 12pm-5pm; Tuesday-Wednesday 11am-8pm; Thursday-Saturday 10am-5pm; Monday before Election Day 10am-5om; Until 8pm on Election Day</days_times_open>
+  <address>
+    <city>Troutdale</city>
+    <line1>2451 SW Cherry Park Rd</line1>
+    <state>OR</state>
+    <location_name>Troutdale Branch Library</location_name>
+    <zip>97060-2933</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99157">
+  <directions>Ballot Drop Box on East Side of Courthouse</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Until 8pm on Election Day</days_times_open>
+  <address>
+    <city>Dallas</city>
+    <line1>850 Main Street</line1>
+    <state>OR</state>
+    <location_name>Polk County Courthouse</location_name>
+    <zip>97338-3128</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99276">
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Monday-Friday 8am-5pm; Election Day 7am-8pm</days_times_open>
+  <address>
+    <city>Dallas</city>
+    <line1>850 Main Street</line1>
+    <state>OR</state>
+    <location_name>Polk County Courthouse - Clerk's Office</location_name>
+    <zip>97338-3128</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99249">
+  <directions>Ballot Drop Box inside library</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Monday 1pm-6pm; Tuesday through Thursday 1pm-5pm; Closed Friday; Saturday 10am-1pm; Election Day 1pm-8pm</days_times_open>
+  <address>
+    <city>Falls City</city>
+    <line1>111 N Main St</line1>
+    <state>OR</state>
+    <location_name>Wagner Community Library</location_name>
+    <zip>97344</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99324">
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Monday &amp; Thursday 10am-7pm; Tuesday, Wednesday &amp; Friday 1pm-7pm; Saturday 10am-5pm; Election Day 8am-8pm</days_times_open>
+  <address>
+    <city>Independence</city>
+    <line1>175 Monmouth St.</line1>
+    <state>OR</state>
+    <location_name>Independence Public Library</location_name>
+    <zip>97351</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99158">
+  <directions>Ballot Drop Box inside library</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Tuesday-Thursday 10am-8pm; Friday 10am-6pm; Saturday 10am-5pm; Election Day 10am-8pm</days_times_open>
+  <address>
+    <city>Monmouth</city>
+    <line1>168 Ecols Street S</line1>
+    <state>OR</state>
+    <location_name>Monmouth Public Library</location_name>
+    <zip>97361-2331</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99159">
+  <directions>Werner University Center</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Monday-Friday 8am-10pm; Saturday 10am-10pm; Election Day 8am-8pm</days_times_open>
+  <address>
+    <city>Monmouth</city>
+    <line1>345 N. Monmouth Avenue</line1>
+    <state>OR</state>
+    <location_name>Western Oregon University</location_name>
+    <zip>97361-1314</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99273">
+  <directions>Ballot Drop Box inside store</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Sunday-Saturday 6am-10pm; 6am-8pm on Election Day</days_times_open>
+  <address>
+    <city>Salem</city>
+    <line1>1130 Wallace Rd NW</line1>
+    <state>OR</state>
+    <location_name>Roth's Fresh Market #12</location_name>
+    <zip>97304</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99162">
+  <directions>White Ballot Drop Box located next to the city payment box</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Until 8pm on Election Day</days_times_open>
+  <address>
+    <city>Grass Valley</city>
+    <line1>109 SW Mill Street</line1>
+    <state>OR</state>
+    <location_name>Grass Valley City Hall</location_name>
+    <zip>97029</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99163">
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Monday-Friday 8am-5pm; Election Day 7am-8pm</days_times_open>
+  <address>
+    <city>Moro</city>
+    <line1>500 Court Street</line1>
+    <state>OR</state>
+    <location_name>Sherman County Courthouse - Clerk's Office</location_name>
+    <zip>97039</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99160">
+  <directions>White Ballot Drop Box</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Until 8pm on Election Day</days_times_open>
+  <address>
+    <city>Rufus</city>
+    <line1>400 Main Street</line1>
+    <state>OR</state>
+    <location_name>Rufus Fire Hall</location_name>
+    <zip>97039</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99161">
+  <directions>White Ballot Drop Box located in the parking strip just east of the Fulton Street stop sign next to city hall</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Until 8pm on Election Day</days_times_open>
+  <address>
+    <city>Wasco</city>
+    <line1>1017 Clark Street</line1>
+    <state>OR</state>
+    <location_name>Wasco City Hall</location_name>
+    <zip>97065</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99258">
+  <directions>Ballot drop box</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Until 8pm on Election Day</days_times_open>
+  <address>
+    <city>Bay City</city>
+    <line1>5525 B Street</line1>
+    <state>OR</state>
+    <location_name>Bay City - City Hall</location_name>
+    <zip>97107</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99319">
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Until 8pm on Election Day</days_times_open>
+  <address>
+    <city>Cloverdale</city>
+    <line1>34370 Hwy 101 S</line1>
+    <state>OR</state>
+    <location_name>Chamber of Commerce</location_name>
+    <zip>97112</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99218">
+  <directions>Ballot Drop Box</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Until 8pm on Election Day</days_times_open>
+  <address>
+    <city>Garibaldi</city>
+    <line1>107 6th St.</line1>
+    <state>OR</state>
+    <location_name>Garibaldi City Hall</location_name>
+    <zip>97118</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99168">
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Until 8pm on Election Day</days_times_open>
+  <address>
+    <city>Manzanita</city>
+    <line1>543 Laneda Avenue</line1>
+    <state>OR</state>
+    <location_name>Manzanita City Hall</location_name>
+    <zip>97130</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99165">
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Until 8pm on Election Day</days_times_open>
+  <address>
+    <city>Pacific City</city>
+    <line1>34600 Cape Kiwanda Dr.</line1>
+    <state>OR</state>
+    <location_name>Kiawanda Community Center</location_name>
+    <zip>97135</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99167">
+  <directions>Ballot Drop Box</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Until 8pm on Election Day</days_times_open>
+  <address>
+    <city>Rockaway Beach</city>
+    <line1>276 Hwy 101 S.</line1>
+    <state>OR</state>
+    <location_name>Rockaway Beach City Hall</location_name>
+    <zip>97136</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99164">
+  <directions>County Courthouse</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Monday-Friday 8am-5pm; Election Day 7am-8pm</days_times_open>
+  <address>
+    <city>Tillamook</city>
+    <line1>201 Laurel Ave.</line1>
+    <state>OR</state>
+    <location_name>Tillamook County Clerks Office</location_name>
+    <zip>97141</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99247">
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Friday &amp; Saturday prior to Election Day 9am-5:30pm; Monday prior to Election Day  9am-9pm; Election Day 9am-8pm</days_times_open>
+  <address>
+    <city>Tillamook</city>
+    <line1>1716 3rd Street</line1>
+    <state>OR</state>
+    <location_name>Tillamook County Library</location_name>
+    <zip>97141</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99166">
+  <directions>Ballot Drop Box</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Until 8pm on Election Day</days_times_open>
+  <address>
+    <city>Tillamook</city>
+    <line1>NW corner of 3rd and Laurel</line1>
+    <state>OR</state>
+    <location_name>Tillamook Drive-Up Box</location_name>
+    <zip>97141</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99288">
+  <directions>Drive by Ballot Drop Box</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Until 8pm on Election Day</days_times_open>
+  <address>
+    <city>Hermiston</city>
+    <line1>180 NE 2nd St</line1>
+    <state>OR</state>
+    <location_name>Hermiston City Hall</location_name>
+    <zip>97838</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99169">
+  <directions>Drive by Ballot Drop Box</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Until 8pm on Election Day</days_times_open>
+  <address>
+    <city>Milton Freewater</city>
+    <line1>722 S. Main</line1>
+    <state>OR</state>
+    <location_name>Milton-Freewater City Hall/Police Station</location_name>
+    <zip>97862-1430</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99171">
+  <directions>Ballot Drop Box at the corner of SE Dorion Ave and SE 5th St.</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Until 8pm on Election Day</days_times_open>
+  <address>
+    <city>Pendleton</city>
+    <line1>SE Dorion and SE 5th St.</line1>
+    <state>OR</state>
+    <location_name>Courthouse Drive By</location_name>
+    <zip>97801</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99170">
+  <directions>Courthouse Room 18</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Monday-Friday 8am-5pm; Election Day 7am-8pm</days_times_open>
+  <address>
+    <city>Pendleton</city>
+    <line1>216 SE 4th St.</line1>
+    <state>OR</state>
+    <location_name>Election Division</location_name>
+    <zip>97801-2509</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99321">
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Monday-Friday 7:30am-4:30pm; Election Day until 8pm</days_times_open>
+  <address>
+    <city>Pendleton</city>
+    <line1>46411 Ti'Mine Way</line1>
+    <state>OR</state>
+    <location_name>Nixy'Aawii Governance Center</location_name>
+    <zip>97801</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99172">
+  <directions>Drive by Ballot Drop Box</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Until 8pm on Election Day</days_times_open>
+  <address>
+    <city>Cove</city>
+    <line1>504 Alder St.</line1>
+    <state>OR</state>
+    <location_name>Cove City Hall</location_name>
+    <zip>97824</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99173">
+  <directions>Drive by Ballot Drop Box</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Until 8pm on Election Day</days_times_open>
+  <address>
+    <city>Imbler</city>
+    <line1>180 Ruckman</line1>
+    <state>OR</state>
+    <location_name>Imbler City Hall</location_name>
+    <zip>97841-8108</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99309">
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Monday-Friday 9am-1pm; Until 8pm on Election Day</days_times_open>
+  <address>
+    <city>Island City</city>
+    <line1>10605 Island Ave.</line1>
+    <state>OR</state>
+    <location_name>Island City City Hall</location_name>
+    <zip>97850</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99174">
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Monday-Friday 8am-5pm; Until 8pm on Election Day</days_times_open>
+  <address>
+    <city>La Grande</city>
+    <line1>1000 Adams Ave.</line1>
+    <state>OR</state>
+    <location_name>La Grande City Hall</location_name>
+    <zip>97850-2604</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99177">
+  <directions>Drive by Ballot Drop Box</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Until 8pm on Election Day</days_times_open>
+  <address>
+    <city>La Grande</city>
+    <line1>1001 4th Street</line1>
+    <state>OR</state>
+    <location_name>Union County Clerk</location_name>
+    <zip>97850-2100</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99209">
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Monday-Thursday 8:30am-5pm; Friday 9am-4pm; Until 8pm on Election Day</days_times_open>
+  <address>
+    <city>La Grande</city>
+    <line1>1001 4th Street, Suite D</line1>
+    <state>OR</state>
+    <location_name>Union County Clerk</location_name>
+    <zip>97850-2100</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99175">
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Monday-Thursday 8:30am-12:30pm; Until 8pm on Election Day</days_times_open>
+  <address>
+    <city>North Powder</city>
+    <line1>635 Third Street</line1>
+    <state>OR</state>
+    <location_name>North Powder City Hall</location_name>
+    <zip>97867</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99176">
+  <directions>Outside Ballot Drop Box</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Until 8pm on Election Day</days_times_open>
+  <address>
+    <city>Union</city>
+    <line1>342 S. Main Street</line1>
+    <state>OR</state>
+    <location_name>Union City Hall</location_name>
+    <zip>97883</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99277">
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Monday-Friday 8am-5pm; Election day 7am-8pm</days_times_open>
+  <address>
+    <city>Enterprise</city>
+    <line1>101 S River Street Room 100</line1>
+    <state>OR</state>
+    <location_name>Wallowa County Clerk's Office</location_name>
+    <zip>97828</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99180">
+  <directions>Ballot Drop Box on main floor by office--24 hour drive-thru on south side of courthouse</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Until 8pm on Election Day</days_times_open>
+  <address>
+    <city>Enterprise</city>
+    <line1>101 S River Street</line1>
+    <state>OR</state>
+    <location_name>Wallowa County Courthouse</location_name>
+    <zip>97828</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99178">
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Monday-Friday 8am-4pm; 8pm Election Day</days_times_open>
+  <address>
+    <city>Joseph</city>
+    <line1>201 N. Main St.</line1>
+    <state>OR</state>
+    <location_name>Joseph City Hall</location_name>
+    <zip>97846</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99179">
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Monday-Thursday 8:30pm-4:30pm:Friday 8:30-4pm; 8pm Election Day</days_times_open>
+  <address>
+    <city>Wallowa</city>
+    <line1>211 E. 2nd St.</line1>
+    <state>OR</state>
+    <location_name>Wallowa City Hall</location_name>
+    <zip>97885</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99181">
+  <directions>City Hall</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Monday-Friday 9am-4pm; Election Day 9am-8pm</days_times_open>
+  <address>
+    <city>Maupin</city>
+    <line1>Deschutes Avenue</line1>
+    <state>OR</state>
+    <location_name>Maupin City Clerks Office</location_name>
+    <zip>97037</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99182">
+  <directions>County Courthouse</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Monday-Friday 9am-12pm; 1pm-4pm; Election Day 7am-8pm</days_times_open>
+  <address>
+    <city>The Dalles</city>
+    <line1>511 Washington St. Suite 201</line1>
+    <state>OR</state>
+    <location_name>Wasco County Clerks Office</location_name>
+    <zip>97058-2237</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99278">
+  <directions>Ballot Drop Box</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Until 8pm on Election Day</days_times_open>
+  <address>
+    <city>The Dalles</city>
+    <line1>511 Washington St.</line1>
+    <state>OR</state>
+    <location_name>Wasco County Courthouse</location_name>
+    <zip>97058-2237</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99185">
+  <directions>Ballot Drop Box</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Until 8pm on Election Day</days_times_open>
+  <address>
+    <city>Banks</city>
+    <line1>42461 NW Market St</line1>
+    <state>OR</state>
+    <location_name>Banks Library</location_name>
+    <zip>97106-9019</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99186">
+  <directions>Inside facility</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Normal Business Hours: Until 8pm on Election Day</days_times_open>
+  <address>
+    <city>Beaverton</city>
+    <line1>12375 SW 5th St.</line1>
+    <state>OR</state>
+    <location_name>Beaverton Library</location_name>
+    <zip>97005-2883</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99279">
+  <directions>Ballot Drop Box located in front lobby &amp; Ballot Drop Box in office during hours listed</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Normal Business Hours; Until 8pm on Election Day</days_times_open>
+  <address>
+    <city>Beaverton</city>
+    <line1>3700 SW Murray Blvd.</line1>
+    <state>OR</state>
+    <location_name>Service Center East, Washington County Elections</location_name>
+    <zip>97005-2355</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99183">
+  <directions>Ballot Drop Box</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Until 8pm on Election Day</days_times_open>
+  <address>
+    <city>Cornelius</city>
+    <line1>1355 N Barlow Street</line1>
+    <state>OR</state>
+    <location_name>Cornelius City Hall</location_name>
+    <zip>97113</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99188">
+  <directions>Ballot Drop Box</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Until 8pm on Election Day</days_times_open>
+  <address>
+    <city>Forest Grove</city>
+    <line1>2114 Pacific Avenue (Pacific Ave. and Birch St.)</line1>
+    <state>OR</state>
+    <location_name>Forest Grove City</location_name>
+    <zip>97116-2446</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99320">
+  <directions>Inside facility</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Normal Business Hours: Until 8pm on Election Day</days_times_open>
+  <address>
+    <city>Hillsboro</city>
+    <line1>775 SE 10th Avenue</line1>
+    <state>OR</state>
+    <location_name>Hillsboro Library - Shute Park Branch</location_name>
+    <zip>97123-4784</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99243">
+  <directions>Ballot Drop Box</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Until 8pm on Election Day</days_times_open>
+  <address>
+    <city>Hillsboro</city>
+    <line1>2850 NE Brookwood Pkwy</line1>
+    <state>OR</state>
+    <location_name>Hillsboro Library Main Branch</location_name>
+    <zip>97124-7077</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99195">
+  <directions>Ballot Drop Box</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Until 8pm on Election Day</days_times_open>
+  <address>
+    <city>Hillsboro</city>
+    <line1>155 N. 1st Avenue</line1>
+    <state>OR</state>
+    <location_name>Public Services Building</location_name>
+    <zip>97124-3084</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99193">
+  <directions>Ballot Drop Box</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Until 8pm on Election Day</days_times_open>
+  <address>
+    <city>King City</city>
+    <line1>15300 SW 116th Avenue</line1>
+    <state>OR</state>
+    <location_name>King City-City Hall</location_name>
+    <zip>97224-2658</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99221">
+  <directions>Ballot Drop Box</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Until 8pm on Election Day</days_times_open>
+  <address>
+    <city>North Plains</city>
+    <line1>31360 NW Commercial</line1>
+    <state>OR</state>
+    <location_name>North Plains City Hall</location_name>
+    <zip>97133</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99187">
+  <directions>Inside facility</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Normal Business Hours: Until 8pm on Election Day</days_times_open>
+  <address>
+    <city>Portland</city>
+    <line1>12505 NW Cornell Rd.</line1>
+    <state>OR</state>
+    <location_name>Cedar Mill Library</location_name>
+    <zip>97229-5688</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99189">
+  <directions>Inside facility</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Normal Business Hours: Until 8pm on Election Day</days_times_open>
+  <address>
+    <city>Portland</city>
+    <line1>7475 SW Oleson Road</line1>
+    <state>OR</state>
+    <location_name>Garden Home Library</location_name>
+    <zip>97223-7474</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99194">
+  <directions>Inside facility</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Normal Business Hours: Until 8pm on Election Day</days_times_open>
+  <address>
+    <city>Portland</city>
+    <line1>3678 SW 78th Street</line1>
+    <state>OR</state>
+    <location_name>West Slope Library</location_name>
+    <zip>97225-3010</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99190">
+  <directions>Ballot Drop Box</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Until 8pm on Election Day</days_times_open>
+  <address>
+    <city>Sherwood</city>
+    <line1>22560 SW Pine Street</line1>
+    <state>OR</state>
+    <location_name>Sherwood City Hall</location_name>
+    <zip>97140-8032</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99191">
+  <directions>Ballot Drop Box</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Until 8pm on Election Day</days_times_open>
+  <address>
+    <city>Tigard</city>
+    <line1>13125 SW Hall Blvd.</line1>
+    <state>OR</state>
+    <location_name>Tigard City Hall</location_name>
+    <zip>97223-8144</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99192">
+  <directions>Ballot Drop Box</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Until 8pm on Election Day</days_times_open>
+  <address>
+    <city>Tualatin</city>
+    <line1>18880 SW Martinazzi Avenue</line1>
+    <state>OR</state>
+    <location_name>Tualatin City Office Council Bldg.</location_name>
+    <zip>97062-7092</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99196">
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Monday-Friday 8:30am-12pm &amp; 1pm-4pm; Until 8pm on Election Day</days_times_open>
+  <address>
+    <city>Fossil</city>
+    <line1>701 Adams Street</line1>
+    <state>OR</state>
+    <location_name>County Courthouse</location_name>
+    <zip>97830-0327</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99280">
+  <directions>Ballot Drop Box</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Monday-Friday 8:30am-12pm &amp; 1pm-4pm; Until 8pm on Election Day</days_times_open>
+  <address>
+    <city>Fossil</city>
+    <line1>701 Adams Street</line1>
+    <state>OR</state>
+    <location_name>Wheeler Courthouse</location_name>
+    <zip>97830-0327</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99226">
+  <directions>Ballot Drop Box</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Until 8pm on Election Day</days_times_open>
+  <address>
+    <city>Mitchell</city>
+    <line1>108 S Nelson Ave</line1>
+    <state>OR</state>
+    <location_name>Mitchell Community Center</location_name>
+    <zip>97750</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99232">
+  <directions>Ballot Drop Box</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Until 8pm on Election Day</days_times_open>
+  <address>
+    <city>Spray</city>
+    <line1>807 Winlock St</line1>
+    <state>OR</state>
+    <location_name>Spray Senior Center</location_name>
+    <zip>97874</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99197">
+  <directions>Ballot Drop Box</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Until 8pm on Election Day</days_times_open>
+  <address>
+    <city>Amity</city>
+    <line1>307 S Trade St.</line1>
+    <state>OR</state>
+    <location_name>Amity City Library</location_name>
+    <zip>97101</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99198">
+  <directions>Ballot Drop Box</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Until 8pm on Election Day</days_times_open>
+  <address>
+    <city>Carlton</city>
+    <line1>191 East Main St.</line1>
+    <state>OR</state>
+    <location_name>Carlton City Hall</location_name>
+    <zip>97111</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99199">
+  <directions>Ballot Drop Box</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Until 8pm on Election Day</days_times_open>
+  <address>
+    <city>Dayton</city>
+    <line1>416 Ferry Street</line1>
+    <state>OR</state>
+    <location_name>Dayton City Hall</location_name>
+    <zip>97114-9774</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99200">
+  <directions>Ballot Drop Box</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Until 8pm on Election Day</days_times_open>
+  <address>
+    <city>Dundee</city>
+    <line1>620 SW 5th Street</line1>
+    <state>OR</state>
+    <location_name>Dundee City Hall</location_name>
+    <zip>97115-9642</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99201">
+  <directions>Ballot Drop Box</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Until 8pm on Election Day</days_times_open>
+  <address>
+    <city>Lafayette</city>
+    <line1>468 3rd Street</line1>
+    <state>OR</state>
+    <location_name>Lafayette City Hall</location_name>
+    <zip>97127-9800</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99231">
+  <directions>Stern Building - one block south of the courthouse</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Monday-Friday 9am-5pm; Election Day 7am-8pm</days_times_open>
+  <address>
+    <city>McMinnville</city>
+    <line1>414 NE Evans St</line1>
+    <state>OR</state>
+    <location_name>Yamhill County Clerks Office</location_name>
+    <zip>97128</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99206">
+  <directions>Ballot Drop Box - East end of courthouse parking lot</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Until 8pm on Election Day</days_times_open>
+  <address>
+    <city>McMinnville</city>
+    <line1>535 NE 5th St.</line1>
+    <state>OR</state>
+    <location_name>Yamhill County Courthouse</location_name>
+    <zip>97128-4593</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99202">
+  <directions>Ballot Drop Box</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Until 8pm on Election Day</days_times_open>
+  <address>
+    <city>Newberg</city>
+    <line1>1802 Haworth Ave.</line1>
+    <state>OR</state>
+    <location_name>Chehalem Aquatic Center</location_name>
+    <zip>97132-1212</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99217">
+  <directions>Ballot Drop Box (lot by Thrift Store - enter from Howard Street)</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Until 8pm on Election Day</days_times_open>
+  <address>
+    <city>Newberg</city>
+    <line1>401 E 3rd St</line1>
+    <state>OR</state>
+    <location_name>Newberg Public Safety</location_name>
+    <zip>97132</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99203">
+  <directions>Ballot Drop Box</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Until 8pm on Election Day</days_times_open>
+  <address>
+    <city>Sheridan</city>
+    <line1>120 SW Mill St.</line1>
+    <state>OR</state>
+    <location_name>Sheridan City Hall</location_name>
+    <zip>97378-1832</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99204">
+  <directions>Ballot Drop Box</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Until 8pm on Election Day</days_times_open>
+  <address>
+    <city>Willamina</city>
+    <line1>411 NE C Street</line1>
+    <state>OR</state>
+    <location_name>Willamina City Hall</location_name>
+    <zip>97396-2750</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99205">
+  <directions>Ballot Drop Box</directions>
+  <start_date>2012-10-19</start_date>
+  <end_date>2012-11-06</end_date>
+  <days_times_open>Until 8pm on Election Day</days_times_open>
+  <address>
+    <city>Yamhill</city>
+    <line1>205 S Maple St.</line1>
+    <state>OR</state>
+    <location_name>Yamhill City Hall</location_name>
+    <zip>97148</zip>
+  </address>
+</early_vote_site>
+</vip_object>

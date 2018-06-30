@@ -167,10 +167,10 @@ def import_polling_locations_process_view(request):
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
-    polling_location_state = request.GET.get('polling_location_state', '')
-    # polling_location_state = 'mo'  # State code for Missouri
+    state_code = request.GET.get('state_code', '')
+    # state_code = 'mo'  # State code for Missouri
 
-    results = import_and_save_all_polling_locations_data(polling_location_state.lower())
+    results = import_and_save_all_polling_locations_data(state_code.lower())
 
     messages.add_message(request, messages.INFO,
                          'Polling locations retrieved from file. '
@@ -179,8 +179,8 @@ def import_polling_locations_process_view(request):
                              updated=results['updated'],
                              not_processed=results['not_processed'],))
     return HttpResponseRedirect(reverse('polling_location:polling_location_list',
-                                        args=()) + "?polling_location_state={var}".format(
-        var=polling_location_state))
+                                        args=()) + "?state_code={var}".format(
+        var=state_code))
 
 
 @login_required
