@@ -8,7 +8,7 @@ from ballot.models import BallotItemListManager, BallotItemManager, BallotReturn
 from candidate.models import fetch_candidate_count_for_office
 from config.base import get_environment_variable
 from electoral_district.models import ElectoralDistrict, ElectoralDistrictManager
-from election.models import ElectionManager
+from election.models import BallotpediaElection, ElectionManager
 from geopy.geocoders import get_geocoder_for_service
 from import_export_batches.controllers_ballotpedia import store_ballotpedia_json_response_to_import_batch_system
 import json
@@ -42,11 +42,16 @@ def extract_value_from_array(structured_json, index_key, default_value):
         return default_value
 
 
-def attach_ballotpedia_election_by_district_from_api(google_civic_election_id, ballotpedia_district_id_list):
+def attach_ballotpedia_election_by_district_from_api(election, google_civic_election_id,
+                                                     ballotpedia_district_id_list):
     success = True
     status = ""
+    election_object_found = False
 
-    if not positive_value_exists(google_civic_election_id):
+    if election and positive_value_exists(election.google_civic_election_id):
+        election_object_found = True
+
+    if not election_object_found and not positive_value_exists(google_civic_election_id):
         results = {
             'success':          False,
             'status':           "Error: Missing election id for attaching",
@@ -62,17 +67,28 @@ def attach_ballotpedia_election_by_district_from_api(google_civic_election_id, b
         }
         return results
 
-    batch_header_id = 0
     election_day_text = ""
-    election_manager = ElectionManager()
-    results = election_manager.retrieve_election(google_civic_election_id)
-    if results['election_found']:
-        election = results['election']
+    if election_object_found:
         election_day_text = election.election_day_text
+        google_civic_election_id = election.google_civic_election_id
+    else:
+        election_manager = ElectionManager()
+        results = election_manager.retrieve_election(google_civic_election_id)
+        if results['election_found']:
+            election = results['election']
+            election_day_text = election.election_day_text
 
     district_string = ""
+    ballotpedia_district_id_not_used_list = []
     for one_district in ballotpedia_district_id_list:
-        district_string += str(one_district) + ","
+        # The url we send to Ballotpedia can only be so long. If too long, we stop adding districts to the
+        #  office_district_string, but capture the districts not used
+        # 3796 = 4096 - 300 (300 gives us room for all of the other url variables we need)
+        if len(district_string) < 3796:
+            district_string += str(one_district) + ","
+        else:
+            # In the future we might want to set up a second query to get the races for these districts
+            ballotpedia_district_id_not_used_list.append(one_district)
 
     # Remove last comma
     district_string = district_string[:-1]
@@ -107,9 +123,10 @@ def attach_ballotpedia_election_by_district_from_api(google_civic_election_id, b
     ballotpedia_api_counter_manager.create_counter_entry(BALLOTPEDIA_API_ELECTIONS_TYPE,
                                                          google_civic_election_id=google_civic_election_id)
 
-    election_count = 0
     ballotpedia_election_id = 0
     ballotpedia_kind_of_election = ""
+    election_count = 0
+    elections_json_list = []
     if 'data' in structured_json:
         if 'meta' in structured_json:
             if 'table' in structured_json['meta']:
@@ -117,41 +134,80 @@ def attach_ballotpedia_election_by_district_from_api(google_civic_election_id, b
                     elections_json_list = structured_json['data']
                     election_count = len(elections_json_list)
 
-                    for one_election_json in elections_json_list:
-                        try:
-                            ballotpedia_election_id = one_election_json['id']
-
-                            if one_election_json['type'] == "Primary":
-                                ballotpedia_kind_of_election = "primary_election"
-                            elif one_election_json['type'] == "General":
-                                ballotpedia_kind_of_election = "general_election"
-                            elif one_election_json['type'] == "Primary Runoff":
-                                ballotpedia_kind_of_election = "primary_runoff_election"
-                            elif one_election_json['type'] == "General Runoff":
-                                ballotpedia_kind_of_election = "general_runoff_election"
-                            else:
-                                ballotpedia_kind_of_election = "unknown"
-                        except KeyError as e:
-                            status += "ELECTIONS_KEY_ERROR: " + str(e) + " "
-
     election_found = False
-    if election_count == 1:
-        # Only one election found
-        if positive_value_exists(ballotpedia_election_id) and positive_value_exists(ballotpedia_kind_of_election):
-            try:
-                election.ballotpedia_election_id = ballotpedia_election_id
-                election.ballotpedia_kind_of_election = ballotpedia_kind_of_election
-                election.save()
-                status += "BALLOTPEDIA_ELECTION_ATTACHED "
-                election_found = True
-            except Exception as e:
-                status += "COULD_NOT_SAVE_ELECTION " + str(e) + " "
-        else:
-            status += "ONE_ELECTION-BALLOTPEDIA_ELECTION_INFO_NOT_FOUND " + str(elections_retrieve_url) + " "
-    elif election_count == 0:
+    if election_count == 0:
         status += "ZERO_ELECTIONS-BALLOTPEDIA_ELECTION_INFO_NOT_FOUND: " + str(elections_retrieve_url) + " "
     else:
-        status += "BALLOTPEDIA_MULTIPLE_ELECTIONS_FOUND: " + str(elections_retrieve_url) + " "
+        status += "BALLOTPEDIA_ELECTION_DATA_FOUND "
+        for one_election_json in elections_json_list:
+            is_general_election = False
+            is_general_runoff_election = False
+            is_primary_election = False
+            is_primary_runoff_election = False
+
+            try:
+                ballotpedia_election_id = one_election_json['id']
+
+                if one_election_json['type'] == "Primary":
+                    ballotpedia_kind_of_election = "primary_election"
+                    is_primary_election = True
+                elif one_election_json['type'] == "General":
+                    ballotpedia_kind_of_election = "general_election"
+                    is_general_election = True
+                elif one_election_json['type'] == "Primary Runoff":
+                    ballotpedia_kind_of_election = "primary_runoff_election"
+                    is_primary_runoff_election = True
+                elif one_election_json['type'] == "General Runoff":
+                    ballotpedia_kind_of_election = "general_runoff_election"
+                    is_general_runoff_election = True
+                else:
+                    ballotpedia_kind_of_election = "unknown"
+            except KeyError as e:
+                status += "ELECTIONS_KEY_ERROR: " + str(e) + " "
+
+            if positive_value_exists(ballotpedia_election_id) and positive_value_exists(ballotpedia_kind_of_election):
+                # Get or create BallotpediaElection
+                try:
+                    defaults = {
+                        'ballotpedia_election_id': one_election_json['id'],
+                        'election_description': one_election_json['description'],
+                        'election_type': one_election_json['type'],
+                        'district_name': one_election_json['district_name'],
+                        'district_type': one_election_json['district_type'],
+                        'election_day_text': one_election_json['date'],
+                        'google_civic_election_id': google_civic_election_id,
+                        'is_general_election': is_general_election,
+                        'is_general_runoff_election': is_general_runoff_election,
+                        'is_partisan': one_election_json['is_partisan'],
+                        'is_primary_election': is_primary_election,
+                        'is_primary_runoff_election': is_primary_runoff_election,
+                        'state_code': one_election_json['district_state'],
+                    }
+                    ballotpedia_election, new_ballotpedia_election_created = \
+                        BallotpediaElection.objects.update_or_create(
+                            ballotpedia_election_id=one_election_json['id'],
+                            defaults=defaults)
+                    ballotpedia_election_id = ballotpedia_election.ballotpedia_election_id
+                    status += "BALLOTPEDIA_ELECTION_LINKED " + str(ballotpedia_election_id) + " "
+                    election_found = True
+                except Exception as e:
+                    status += "COULD_NOT_SAVE_BALLOTPEDIA_ELECTION " + str(e) + " "
+            else:
+                status += "BALLOTPEDIA_ELECTION_INFO_NOT_FOUND " + str(elections_retrieve_url) + " "
+
+        if election_count == 1:
+            # Only one election found, so we also store the election info directly in the election object
+            if positive_value_exists(ballotpedia_election_id) and positive_value_exists(ballotpedia_kind_of_election):
+                try:
+                    election.ballotpedia_election_id = ballotpedia_election_id
+                    election.ballotpedia_kind_of_election = ballotpedia_kind_of_election
+                    election.save()
+                    status += "BALLOTPEDIA_ELECTION_ATTACHED_TO_ELECTION "
+                    election_found = True
+                except Exception as e:
+                    status += "COULD_NOT_SAVE_ELECTION " + str(e) + " "
+            else:
+                status += "ONE_ELECTION-BALLOTPEDIA_ELECTION_INFO_NOT_FOUND " + str(elections_retrieve_url) + " "
 
     results = {
         'success':          success,

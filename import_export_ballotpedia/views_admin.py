@@ -173,7 +173,7 @@ def attach_ballotpedia_election_view(request, election_local_id=0):
             polling_location_query = polling_location_query.exclude(
                 Q(latitude__isnull=True) | Q(latitude__exact=0.0))
             # Ordering by "location_name" creates a bit of (locational) random order
-            polling_location_list = polling_location_query.order_by('location_name')[:20]
+            polling_location_list = polling_location_query.order_by('location_name')[:400]
     except PollingLocation.DoesNotExist:
         messages.add_message(request, messages.INFO,
                              'Could not retrieve polling location data for the {election_name}. '
@@ -211,7 +211,8 @@ def attach_ballotpedia_election_view(request, election_local_id=0):
         return HttpResponseRedirect(reverse('election:election_summary', args=(election_local_id,)) +
                                     '?google_civic_election_id=' + str(google_civic_election_id))
 
-    results = attach_ballotpedia_election_by_district_from_api(google_civic_election_id, merged_district_list)
+    results = attach_ballotpedia_election_by_district_from_api(election_on_stage, google_civic_election_id,
+                                                               merged_district_list)
 
     if positive_value_exists(results['election_found']):
         messages.add_message(request, messages.INFO,
