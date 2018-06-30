@@ -164,8 +164,7 @@ def import_and_save_all_polling_locations_data(state_code=''):
                 print('  loading:', xml_path)
                 all_results.append(import_and_save_polling_location_data(xml_path))
         else:
-            print('  loading:', xml_path)
-            all_results.append(import_and_save_polling_location_data(xml_path))
+            print('  IMPORT_AND_SAVE_ALL_POLLING_LOCATIONS-STATE_REQUIRED ')
 
     return merge_polling_location_results(*all_results)
 
@@ -211,6 +210,48 @@ def retrieve_polling_locations_data_from_xml(xml_file_location):
         address = polling_location.find('address')
         if address is not None:
             location_name = address.find('location_name')
+            location_name_text = location_name.text if location_name is not None else ''
+            line1 = address.find('line1')
+            line1_text = line1.text if line1 is not None else ''
+            city = address.find('city')
+            city_text = city.text if city is not None else ''
+            if city_text == 'A BALLOT FOR EACH ELECTION':
+                # We don't want to save this polling location
+                continue
+            if city_text == '0':
+                # We don't want to save this polling location
+                continue
+            state = address.find('state')
+            state_text = state.text if state is not None else ''
+            zip_long = address.find('zip')
+            zip_long_text = zip_long.text if zip_long is not None else ''
+        else:
+            location_name_text = ''
+            line1_text = ''
+            city_text = ''
+            state_text = ''
+            zip_long_text = ''
+        polling_hours = polling_location.find('polling_hours')
+        polling_hours_text = polling_hours.text if polling_hours is not None else ''
+        directions = polling_location.find('directions')
+        directions_text = directions.text if directions is not None else ''
+        one_entry = {
+            "polling_location_id": polling_location.get('id'),
+            "location_name": location_name_text,
+            "polling_hours_text": polling_hours_text,
+            "directions": directions_text,
+            "line1": line1_text,
+            "line2": '',
+            "city": city_text,
+            "state": state_text,
+            "zip_long": zip_long_text,
+        }
+        polling_locations_list.append(one_entry)
+    # Some states, like Oregon, have early_vote_site instead of polling_location
+    for polling_location in root.findall('early_vote_site'):
+        address = polling_location.find('address')
+        if address is not None:
+            location_name = address.find('name')  # name instead of location_name
             location_name_text = location_name.text if location_name is not None else ''
             line1 = address.find('line1')
             line1_text = line1.text if line1 is not None else ''
