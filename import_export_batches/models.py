@@ -169,6 +169,10 @@ BATCH_IMPORT_KEYS_ACCEPTED_FOR_CONTEST_OFFICES = {
     'election_day': 'election_day',
     'electoral_district_id': 'electoral_district_id',
     'google_civic_election_id': 'google_civic_election_id',
+    'is_ballotpedia_general_election': 'is_ballotpedia_general_election',
+    'is_ballotpedia_general_runoff_election': 'is_ballotpedia_general_runoff_election',
+    'is_ballotpedia_primary_election': 'is_ballotpedia_primary_election',
+    'is_ballotpedia_primary_runoff_election': 'is_ballotpedia_primary_runoff_election',
     'state_code': 'state_code',
 }
 
@@ -185,6 +189,10 @@ BATCH_HEADER_MAP_CONTEST_OFFICES_TO_BALLOTPEDIA_RACES = {
     'contest_office_number_elected': 'number_of_seats',
     'contest_office_district_name': 'office_district_name',
     'election_day': 'election_date',
+    'is_ballotpedia_general_election': 'is_ballotpedia_general_election',
+    'is_ballotpedia_general_runoff_election': 'is_ballotpedia_general_runoff_election',
+    'is_ballotpedia_primary_election': 'is_ballotpedia_primary_election',
+    'is_ballotpedia_primary_runoff_election': 'is_ballotpedia_primary_runoff_election',
     'state_code': 'office_district_state',
 }
 
@@ -4396,6 +4404,10 @@ class BatchRowActionContestOffice(models.Model):
     ballotpedia_district_id = models.PositiveIntegerField(
         verbose_name="ballotpedia district id", null=True, blank=True)
     ballotpedia_election_id = models.PositiveIntegerField(verbose_name="ballotpedia election id", null=True, blank=True)
+    is_ballotpedia_general_election = models.BooleanField(default=False)
+    is_ballotpedia_general_runoff_election = models.BooleanField(default=False)
+    is_ballotpedia_primary_election = models.BooleanField(default=False)
+    is_ballotpedia_primary_runoff_election = models.BooleanField(default=False)
     # Equivalent of elected_office in We Vote
     ballotpedia_office_id = models.PositiveIntegerField(
         verbose_name="ballotpedia integer id", null=True, blank=True)

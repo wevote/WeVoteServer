@@ -935,6 +935,14 @@ def create_batch_row_action_contest_office(batch_description, batch_header_map, 
                                                                           one_batch_row)
     candidate_selection_id10 = batch_manager.retrieve_value_from_batch_row("candidate_selection_id10", batch_header_map,
                                                                            one_batch_row)
+    is_ballotpedia_general_election = batch_manager.retrieve_value_from_batch_row(
+        "is_ballotpedia_general_election", batch_header_map, one_batch_row)
+    is_ballotpedia_general_runoff_election = batch_manager.retrieve_value_from_batch_row(
+        "is_ballotpedia_general_runoff_election", batch_header_map, one_batch_row)
+    is_ballotpedia_primary_election = batch_manager.retrieve_value_from_batch_row(
+        "is_ballotpedia_primary_election", batch_header_map, one_batch_row)
+    is_ballotpedia_primary_runoff_election = batch_manager.retrieve_value_from_batch_row(
+        "is_ballotpedia_primary_runoff_election", batch_header_map, one_batch_row)
 
     batch_set_id = batch_description.batch_set_id
 
@@ -1074,6 +1082,14 @@ def create_batch_row_action_contest_office(batch_description, batch_header_map, 
         batch_row_action_contest_office.district_scope = district_scope
         batch_row_action_contest_office.elected_office_name = elected_office_name
         batch_row_action_contest_office.google_civic_election_id = google_civic_election_id
+        batch_row_action_contest_office.is_ballotpedia_general_election = \
+            positive_value_exists(is_ballotpedia_general_election)
+        batch_row_action_contest_office.is_ballotpedia_general_runoff_election = \
+            positive_value_exists(is_ballotpedia_general_runoff_election)
+        batch_row_action_contest_office.is_ballotpedia_primary_election = \
+            positive_value_exists(is_ballotpedia_primary_election)
+        batch_row_action_contest_office.is_ballotpedia_primary_runoff_election = \
+            positive_value_exists(is_ballotpedia_primary_runoff_election)
         batch_row_action_contest_office.kind_of_action = kind_of_action
         batch_row_action_contest_office.number_voting_for = contest_office_votes_allowed
         batch_row_action_contest_office.number_elected = contest_office_number_elected
@@ -2806,6 +2822,10 @@ def import_contest_office_data_from_batch_row_actions(
             'ballotpedia_office_url':           one_batch_row_action.ballotpedia_office_url,
             'ballotpedia_race_id':              one_batch_row_action.ballotpedia_race_id,
             'ballotpedia_race_office_level':    one_batch_row_action.ballotpedia_race_office_level,
+            'is_ballotpedia_general_election':          one_batch_row_action.is_ballotpedia_general_election,
+            'is_ballotpedia_general_runoff_election':   one_batch_row_action.is_ballotpedia_general_runoff_election,
+            'is_ballotpedia_primary_election':          one_batch_row_action.is_ballotpedia_primary_election,
+            'is_ballotpedia_primary_runoff_election':   one_batch_row_action.is_ballotpedia_primary_runoff_election,
         }
 
         # These three parameters are minimum variables required for the ContestOffice table

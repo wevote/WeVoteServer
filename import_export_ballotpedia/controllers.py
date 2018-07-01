@@ -46,6 +46,7 @@ def attach_ballotpedia_election_by_district_from_api(election, google_civic_elec
                                                      ballotpedia_district_id_list):
     success = True
     status = ""
+    chunks_of_district_strings = []
     election_object_found = False
 
     if election and positive_value_exists(election.google_civic_election_id):
@@ -92,54 +93,82 @@ def attach_ballotpedia_election_by_district_from_api(election, google_civic_elec
 
     # Remove last comma
     district_string = district_string[:-1]
+    chunks_of_district_strings.append(district_string)
 
-    response = requests.get(BALLOTPEDIA_API_ELECTIONS_URL, params={
-        "access_token":             BALLOTPEDIA_API_KEY,
-        "filters[district][in]":    district_string,
-        "filters[date][eq]":        election_day_text,
-        "limit":                    1000,
-    })
+    # Now add all of the districts that were missed from the first retrieve
+    while len(ballotpedia_district_id_not_used_list):
+        district_string = ""
+        temp_ballotpedia_district_id_not_used_list = []
+        for one_district in ballotpedia_district_id_not_used_list:
+            # The url we send to Ballotpedia can only be so long. If too long, we stop adding districts to the
+            #  office_district_string, but capture the districts not used
+            # 3796 = 4096 - 300 (300 gives us room for all of the other url variables we need)
+            if len(district_string) < 3796:
+                district_string += str(one_district) + ","
+            else:
+                # In the future we might want to set up a second query to get the races for these districts
+                temp_ballotpedia_district_id_not_used_list.append(one_district)
 
-    if not positive_value_exists(response.text):
-        success = False
-        status += "NO_RESPONSE_TEXT_FOUND"
+        # Remove last comma
+        district_string = district_string[:-1]
+        chunks_of_district_strings.append(district_string)
+        ballotpedia_district_id_not_used_list = temp_ballotpedia_district_id_not_used_list
+
+    elections_final_json_list = []
+    # Tests are showing that election numbers aren't reused between primary & general
+    for district_string in chunks_of_district_strings:
+        response = requests.get(BALLOTPEDIA_API_ELECTIONS_URL, params={
+            "access_token":             BALLOTPEDIA_API_KEY,
+            "filters[district][in]":    district_string,
+            "filters[date][eq]":        election_day_text,
+            "limit":                    1000,
+        })
+
+        if not positive_value_exists(response.text):
+            success = False
+            status += "NO_RESPONSE_TEXT_FOUND"
+            if positive_value_exists(response.url):
+                status += ": " + response.url
+            results = {
+                'success':          success,
+                'status':           status,
+                'election_found':   False,
+            }
+            return results
+
+        structured_json = json.loads(response.text)
+
+        elections_retrieve_url = ""
         if positive_value_exists(response.url):
-            status += ": " + response.url
-        results = {
-            'success':          success,
-            'status':           status,
-            'election_found':   False,
-        }
-        return results
+            elections_retrieve_url = response.url
 
-    structured_json = json.loads(response.text)
+        # Use Ballotpedia API call counter to track the number of queries we are doing each day
+        ballotpedia_api_counter_manager = BallotpediaApiCounterManager()
+        ballotpedia_api_counter_manager.create_counter_entry(BALLOTPEDIA_API_ELECTIONS_TYPE,
+                                                             google_civic_election_id=google_civic_election_id)
 
-    elections_retrieve_url = ""
-    if positive_value_exists(response.url):
-        elections_retrieve_url = response.url
+        ballotpedia_election_id = 0
+        ballotpedia_kind_of_election = ""
+        election_count = 0
+        elections_json_list = []
+        if 'data' in structured_json:
+            if 'meta' in structured_json:
+                if 'table' in structured_json['meta']:
+                    if structured_json['meta']['table'] == 'election_dates':
+                        elections_json_list = structured_json['data']
+                        election_count = len(elections_json_list)
 
-    # Use Ballotpedia API call counter to track the number of queries we are doing each day
-    ballotpedia_api_counter_manager = BallotpediaApiCounterManager()
-    ballotpedia_api_counter_manager.create_counter_entry(BALLOTPEDIA_API_ELECTIONS_TYPE,
-                                                         google_civic_election_id=google_civic_election_id)
+        election_found = False
+        if election_count == 0:
+            status += "ZERO_ELECTIONS-BALLOTPEDIA_ELECTION_INFO_NOT_FOUND: " + str(elections_retrieve_url) + " "
+        else:
+            elections_final_json_list = elections_final_json_list + elections_json_list
 
-    ballotpedia_election_id = 0
-    ballotpedia_kind_of_election = ""
-    election_count = 0
-    elections_json_list = []
-    if 'data' in structured_json:
-        if 'meta' in structured_json:
-            if 'table' in structured_json['meta']:
-                if structured_json['meta']['table'] == 'election_dates':
-                    elections_json_list = structured_json['data']
-                    election_count = len(elections_json_list)
-
-    election_found = False
-    if election_count == 0:
-        status += "ZERO_ELECTIONS-BALLOTPEDIA_ELECTION_INFO_NOT_FOUND: " + str(elections_retrieve_url) + " "
-    else:
+    if len(elections_final_json_list):
         status += "BALLOTPEDIA_ELECTION_DATA_FOUND "
-        for one_election_json in elections_json_list:
+        for one_election_json in elections_final_json_list:
+            ballotpedia_election_id = 0
+            ballotpedia_kind_of_election = ""
             is_general_election = False
             is_general_runoff_election = False
             is_primary_election = False
@@ -193,7 +222,7 @@ def attach_ballotpedia_election_by_district_from_api(election, google_civic_elec
                 except Exception as e:
                     status += "COULD_NOT_SAVE_BALLOTPEDIA_ELECTION " + str(e) + " "
             else:
-                status += "BALLOTPEDIA_ELECTION_INFO_NOT_FOUND " + str(elections_retrieve_url) + " "
+                status += "BALLOTPEDIA_ELECTION_INFO_NOT_FOUND "
 
         if election_count == 1:
             # Only one election found, so we also store the election info directly in the election object
@@ -217,49 +246,42 @@ def attach_ballotpedia_election_by_district_from_api(election, google_civic_elec
     return results
 
 
-def retrieve_ballotpedia_candidates_by_election_from_api(google_civic_election_id,
+def retrieve_ballotpedia_candidates_by_district_from_api(google_civic_election_id,
                                                          only_retrieve_if_zero_candidates=False):
     success = True
     status = ""
+    state_code = ""
+    batch_header_id = 0
+    return_list_of_objects = True
 
     if not positive_value_exists(google_civic_election_id):
         results = {
             'success': False,
             'status': "Error: Missing election id",
+            'batch_header_id': batch_header_id,
         }
         return results
 
-    ballotpedia_kind_of_election = ""
-    ballotpedia_election_id = 0
-    election_day_text = ""
-    election_state_code = ""
-    election_manager = ElectionManager()
-    results = election_manager.retrieve_election(google_civic_election_id)
-    if results['election_found']:
-        election = results['election']
-        election_day_text = election.election_day_text
-        election_state_code = election.state_code
-        ballotpedia_kind_of_election = election.ballotpedia_kind_of_election
-        if election.ballotpedia_election_id:
-            ballotpedia_election_id = election.ballotpedia_election_id
+    # election_day_text = ""
+    # election_state_code = ""
+    # election_manager = ElectionManager()
+    # kind_of_batch = ""
+    # results = election_manager.retrieve_election(google_civic_election_id)
+    # if results['election_found']:
+    #     election = results['election']
+    #     election_day_text = election.election_day_text
+    #     election_state_code = election.state_code
 
-    if not positive_value_exists(ballotpedia_election_id):
-        results = {
-            'success': False,
-            'status': "Error: Missing Ballotpedia election id",
-        }
-        return results
-
-    # maximum_offices_to_retrieve = 100
-    state_code = ""
-    batch_header_id = 0
-    office_list = []
-    return_list_of_objects = True
     contest_list_manager = ContestOfficeListManager()
     results = contest_list_manager.retrieve_offices(
-        google_civic_election_id, state_code, office_list, return_list_of_objects)
+        google_civic_election_id, state_code, return_list_of_objects=return_list_of_objects)
 
+    ballotpedia_race_ids_string = ""
+    ballotpedia_race_id_not_used_list = []
+    chunks_of_race_id_strings = []
     filtered_office_list = []
+    final_json_list = []
+    kind_of_election_by_race = {}
     office_count = 0
     if results['office_list_found']:
         office_list_objects = results['office_list_objects']
@@ -273,58 +295,52 @@ def retrieve_ballotpedia_candidates_by_election_from_api(google_civic_election_i
             if retrieve_candidates_for_this_office:
                 filtered_office_list.append(one_office)
                 office_count += 1
+                kind_of_election_by_race[one_office.ballotpedia_race_id] = one_office.get_kind_of_ballotpedia_election()
+                # The url we send to Ballotpedia can only be so long. If too long, we stop adding districts to the
+                #  ballotpedia_race_ids_string, but capture the races not used
+                # 3796 = 4096 - 300 (300 gives us room for all of the other url variables we need)
+                if len(ballotpedia_race_ids_string) < 3796:
+                    ballotpedia_race_ids_string += str(one_office.ballotpedia_race_id) + ","
+                else:
+                    # In the future we might want to set up a second query to get the races for these districts
+                    ballotpedia_race_id_not_used_list.append(one_office.ballotpedia_race_id)
+                    
+        chunks_of_race_id_strings.append(ballotpedia_race_ids_string)
 
-                # if office_count >= maximum_offices_to_retrieve:
-                #     # Limit to showing only maximum_offices_to_retrieve
-                #     break
+        # Now add all of the districts that were missed from the first retrieve
+        while len(ballotpedia_race_id_not_used_list):
+            ballotpedia_race_ids_string = ""
+            temp_ballotpedia_race_id_not_used_list = []
+            for one_race_id in ballotpedia_race_id_not_used_list:
+                # The url we send to Ballotpedia can only be so long. If too long, we stop adding districts to the
+                #  office_district_string, but capture the districts not used
+                # 3796 = 4096 - 300 (300 gives us room for all of the other url variables we need)
+                if len(ballotpedia_race_ids_string) < 3796:
+                    ballotpedia_race_ids_string += str(one_race_id) + ","
+                else:
+                    # In the future we might want to set up a second query to get the races for these districts
+                    temp_ballotpedia_race_id_not_used_list.append(one_race_id)
+    
+            # Remove last comma
+            ballotpedia_race_ids_string = ballotpedia_race_ids_string[:-1]
+            chunks_of_race_id_strings.append(ballotpedia_race_ids_string)
+    
+            ballotpedia_race_id_not_used_list = temp_ballotpedia_race_id_not_used_list
 
-    if positive_value_exists(office_count):
-        # races_to_retrieve_string = ""
-        # ballotpedia_race_id_not_used_list = []
-        # for one_office in filtered_office_list:
-        #     if positive_value_exists(one_office.ballotpedia_race_id):
-        #         # The url we send to Ballotpedia can only be so long. If too long, we stop adding races to the
-        #         #  races_to_retrieve_string, but capture the races not used
-        #         # 3796 = 4096 - 300 (300 gives us room for all of the other url variables we need)
-        #         if len(races_to_retrieve_string) < 3796:
-        #             races_to_retrieve_string += str(one_office.ballotpedia_race_id) + ","
-        #         else:
-        #             # In the future we might want to set up a second query to get the races for these districts
-        #             ballotpedia_race_id_not_used_list.append(one_office.ballotpedia_race_id)
-        #
-        # # Remove last comma
-        # last_character = races_to_retrieve_string[-1:]
-        # if last_character == ",":
-        #     races_to_retrieve_string = races_to_retrieve_string[:-1]
+    if not positive_value_exists(office_count):
+        status += "NO_OFFICES_FOUND_TO_USE_FOR_RETRIEVING_CANDIDATES "
+        results = {
+            'success': success,
+            'status': status,
+            'batch_header_id': batch_header_id,
+        }
+        return results
 
-        race_type_date_key = ""
-        if ballotpedia_kind_of_election == "primary_election" \
-                or ballotpedia_kind_of_election == "primary_election_date":
-            race_type_date_key = "race_primary_election_date"
-            ballotpedia_kind_of_election = "primary_election"
-        elif ballotpedia_kind_of_election == "general_election" \
-                or ballotpedia_kind_of_election == "general_election_date":
-            race_type_date_key = "race_general_election_date"
-            ballotpedia_kind_of_election = "general_election"
-        elif ballotpedia_kind_of_election == "primary_runoff_election" \
-                or ballotpedia_kind_of_election == "primary_runoff_election_date":
-            race_type_date_key = "race_primary_runoff_election_date"
-            ballotpedia_kind_of_election = "primary_runoff_election"
-        elif ballotpedia_kind_of_election == "general_runoff_election" \
-                or ballotpedia_kind_of_election == "general_runoff_election_date":
-            race_type_date_key = "race_general_runoff_election_date"
-            ballotpedia_kind_of_election = "general_runoff_election"
-
-        # response = requests.get(BALLOTPEDIA_API_CANDIDATES_URL, params={
-        #     "access_token": BALLOTPEDIA_API_KEY,
-        #     "filters[race][in]": races_to_retrieve_string,
-        #     "filters[" + str(race_type_date_key) + "][eq]": election_day_text,
-        #     "limit": 1000,
-        # })
+    kind_of_batch = ""
+    for ballotpedia_race_ids_string in chunks_of_race_id_strings:
         response = requests.get(BALLOTPEDIA_API_CANDIDATES_URL, params={
             "access_token": BALLOTPEDIA_API_KEY,
-            "filters[" + str(race_type_date_key) + "][eq]": election_day_text,
-            "filters[race_office_district_state][eq]": election_state_code,
+            "filters[race][in]": ballotpedia_race_ids_string,
             "limit": 1000,
         })
 
@@ -365,7 +381,7 @@ def retrieve_ballotpedia_candidates_by_election_from_api(google_civic_election_i
             if hasattr(response, 'status_code'):
                 status += "status_code: " + str(response.status_code)
                 if response.status_code == 414:
-                    status += " Too many office_districts sent"
+                    status += " Too many races sent"
             results = {
                 'success': success,
                 'status': status,
@@ -383,16 +399,20 @@ def retrieve_ballotpedia_candidates_by_election_from_api(google_civic_election_i
             ballotpedia_election_id=0)
 
         contains_api = False
-        groom_results = groom_ballotpedia_data_for_processing(structured_json, google_civic_election_id,
-                                                              contains_api, ballotpedia_kind_of_election)
+        groom_results = groom_ballotpedia_data_for_processing(
+            structured_json, google_civic_election_id,
+            contains_api,
+            kind_of_election_by_race=kind_of_election_by_race)
         modified_json_list = groom_results['modified_json_list']
         kind_of_batch = groom_results['kind_of_batch']
 
-        results = store_ballotpedia_json_response_to_import_batch_system(
-            modified_json_list, google_civic_election_id, kind_of_batch)
-        status += results['status']
-        if 'batch_header_id' in results:
-            batch_header_id = results['batch_header_id']
+        final_json_list = final_json_list + modified_json_list
+
+    results = store_ballotpedia_json_response_to_import_batch_system(
+        final_json_list, google_civic_election_id, kind_of_batch)
+    status += results['status']
+    if 'batch_header_id' in results:
+        batch_header_id = results['batch_header_id']
 
     results = {
         'success': success,
@@ -688,29 +708,19 @@ def retrieve_ballotpedia_offices_by_district_from_api(google_civic_election_id, 
         return results
 
     batch_header_id = 0
-    ballotpedia_election_id = 0
-    ballotpedia_kind_of_election = ""
     election_day_text = ""
     election_day_year = ""
     election_manager = ElectionManager()
+    kind_of_batch = ""
     results = election_manager.retrieve_election(google_civic_election_id)
     if results['election_found']:
         election = results['election']
         election_day_text = election.election_day_text
         election_day_year = election_day_text[:4]
-        ballotpedia_kind_of_election = election.ballotpedia_kind_of_election
-        if election.ballotpedia_election_id:
-            ballotpedia_election_id = election.ballotpedia_election_id
 
-    if not positive_value_exists(ballotpedia_election_id):
-        results = {
-            'success': False,
-            'status': "Error: Missing election id",
-        }
-        return results
-
-    office_district_string = ""
     ballotpedia_district_id_not_used_list = []
+    chunks_of_district_strings = []
+    office_district_string = ""
     for one_district in ballotpedia_district_id_list:
         # The url we send to Ballotpedia can only be so long. If too long, we stop adding districts to the
         #  office_district_string, but capture the districts not used
@@ -723,91 +733,132 @@ def retrieve_ballotpedia_offices_by_district_from_api(google_civic_election_id, 
 
     # Remove last comma
     office_district_string = office_district_string[:-1]
+    chunks_of_district_strings.append(office_district_string)
 
-    election_day_key = ""
-    if ballotpedia_kind_of_election == "primary_election" or ballotpedia_kind_of_election == "primary_election_date":
-        election_day_key = "primary_election_date"
-        ballotpedia_kind_of_election = "primary_election"
-    elif ballotpedia_kind_of_election == "general_election" or ballotpedia_kind_of_election == "general_election_date":
-        election_day_key = "general_election_date"
-        ballotpedia_kind_of_election = "general_election"
-    elif ballotpedia_kind_of_election == "primary_runoff_election" \
-            or ballotpedia_kind_of_election == "primary_runoff_election_date":
-        election_day_key = "primary_runoff_election_date"
-        ballotpedia_kind_of_election = "primary_runoff_election"
-    elif ballotpedia_kind_of_election == "general_runoff_election" \
-            or ballotpedia_kind_of_election == "general_runoff_election_date":
-        election_day_key = "general_runoff_election_date"
-        ballotpedia_kind_of_election = "general_runoff_election"
+    # Now add all of the districts that were missed from the first retrieve
+    while len(ballotpedia_district_id_not_used_list):
+        office_district_string = ""
+        temp_ballotpedia_district_id_not_used_list = []
+        for one_district in ballotpedia_district_id_not_used_list:
+            # The url we send to Ballotpedia can only be so long. If too long, we stop adding districts to the
+            #  office_district_string, but capture the districts not used
+            # 3796 = 4096 - 300 (300 gives us room for all of the other url variables we need)
+            if len(office_district_string) < 3796:
+                office_district_string += str(one_district) + ","
+            else:
+                # In the future we might want to set up a second query to get the races for these districts
+                temp_ballotpedia_district_id_not_used_list.append(one_district)
 
-    response = requests.get(BALLOTPEDIA_API_RACES_URL, params={
-        "access_token":                                 BALLOTPEDIA_API_KEY,
-        "filters[year][eq]":                            election_day_year,
-        "filters[office_district][in]":                 office_district_string,
-        "filters[" + str(election_day_key) + "][eq]":   election_day_text,
-        "limit":                                        1000,
-    })
+        # Remove last comma
+        office_district_string = office_district_string[:-1]
+        chunks_of_district_strings.append(office_district_string)
 
-    if not hasattr(response, 'text') or not positive_value_exists(response.text):
-        success = False
-        status += "NO_RESPONSE_TEXT_FOUND "
-        if positive_value_exists(response.url):
-            shortened_url = response.url[:1000]
-            status += ": " + shortened_url + " "
-        results = {
-            'success': success,
-            'status': status,
-            'batch_header_id': batch_header_id,
-        }
-        return results
+        ballotpedia_district_id_not_used_list = temp_ballotpedia_district_id_not_used_list
 
-    if hasattr(response, 'success') and not positive_value_exists(response.success):
-        success = False
-        status += "RESPONSE_SUCCESS_IS_FALSE"
-        if positive_value_exists(response.url):
-            shortened_url = response.url[:1000]
-            status += ": " + shortened_url + " "
-        if positive_value_exists(response.error):
-            status += "error: " + str(response.error)
-        results = {
-            'success': success,
-            'status': status,
-            'batch_header_id': batch_header_id,
-        }
-        return results
+    kind_of_election_list = []
+    kind_of_election_dict = {
+        'kind_of_election':             'general_election',
+        'kind_of_election_filter_key':  'general_election_date',
+    }
+    kind_of_election_list.append(kind_of_election_dict)
+    kind_of_election_dict = {
+        'kind_of_election':             'general_runoff_election',
+        'kind_of_election_filter_key':  'general_runoff_election_date',
+    }
+    kind_of_election_list.append(kind_of_election_dict)
+    kind_of_election_dict = {
+        'kind_of_election':             'primary_election',
+        'kind_of_election_filter_key':  'primary_election_date',
+    }
+    kind_of_election_list.append(kind_of_election_dict)
+    kind_of_election_dict = {
+        'kind_of_election':             'primary_runoff_election',
+        'kind_of_election_filter_key':  'primary_runoff_election_date',
+    }
+    kind_of_election_list.append(kind_of_election_dict)
 
-    if hasattr(response, 'ok') and not positive_value_exists(response.ok):
-        success = False
-        status += "RESPONSE_OK_IS_FALSE"
-        if positive_value_exists(response.url):
-            shortened_url = response.url[:1000]
-            status += ": " + shortened_url + " "
-        if hasattr(response, 'status_code'):
-            status += "status_code: " + str(response.status_code)
-            if response.status_code == 414:
-                status += " Too many office_districts sent"
-        results = {
-            'success': success,
-            'status': status,
-            'batch_header_id': batch_header_id,
-        }
-        return results
+    final_json_list = []
+    for office_district_string in chunks_of_district_strings:
+        for kind_of_election_dict in kind_of_election_list:
+            ballotpedia_kind_of_election = kind_of_election_dict['kind_of_election']
 
-    structured_json = json.loads(response.text)
+            response = requests.get(BALLOTPEDIA_API_RACES_URL, params={
+                "access_token":                                 BALLOTPEDIA_API_KEY,
+                "filters[year][eq]":                            election_day_year,
+                "filters[office_district][in]":                 office_district_string,
+                "filters[" + kind_of_election_dict['kind_of_election_filter_key'] + "][eq]":   election_day_text,
+                "limit":                                        1000,
+            })
 
-    # Use Ballotpedia API call counter to track the number of queries we are doing each day
-    ballotpedia_api_counter_manager = BallotpediaApiCounterManager()
-    ballotpedia_api_counter_manager.create_counter_entry(BALLOTPEDIA_API_RACES_TYPE,
-                                                         ballotpedia_election_id=ballotpedia_election_id)
+            if not hasattr(response, 'text') or not positive_value_exists(response.text):
+                success = False
+                status += "NO_RESPONSE_TEXT_FOUND "
+                if positive_value_exists(response.url):
+                    shortened_url = response.url[:1000]
+                    status += ": " + shortened_url + " "
+                results = {
+                    'success': success,
+                    'status': status,
+                    'batch_header_id': batch_header_id,
+                }
+                return results
 
-    groom_results = groom_ballotpedia_data_for_processing(structured_json, google_civic_election_id,
-                                                          kind_of_election=ballotpedia_kind_of_election)
-    modified_json_list = groom_results['modified_json_list']
-    kind_of_batch = groom_results['kind_of_batch']
+            if hasattr(response, 'success') and not positive_value_exists(response.success):
+                success = False
+                status += "RESPONSE_SUCCESS_IS_FALSE"
+                if positive_value_exists(response.url):
+                    shortened_url = response.url[:1000]
+                    status += ": " + shortened_url + " "
+                if positive_value_exists(response.error):
+                    status += "error: " + str(response.error)
+                results = {
+                    'success': success,
+                    'status': status,
+                    'batch_header_id': batch_header_id,
+                }
+                return results
 
-    if positive_value_exists(len(modified_json_list)):
+            if hasattr(response, 'ok') and not positive_value_exists(response.ok):
+                success = False
+                status += "RESPONSE_OK_IS_FALSE"
+                if positive_value_exists(response.url):
+                    shortened_url = response.url[:1000]
+                    status += ": " + shortened_url + " "
+                if hasattr(response, 'status_code'):
+                    status += "status_code: " + str(response.status_code)
+                    if response.status_code == 414:
+                        status += " Too many office_districts sent"
+                results = {
+                    'success': success,
+                    'status': status,
+                    'batch_header_id': batch_header_id,
+                }
+                return results
+
+            structured_json = json.loads(response.text)
+
+            # Use Ballotpedia API call counter to track the number of queries we are doing each day
+            ballotpedia_api_counter_manager = BallotpediaApiCounterManager()
+            ballotpedia_api_counter_manager.create_counter_entry(BALLOTPEDIA_API_RACES_TYPE,
+                                                                 google_civic_election_id=google_civic_election_id)
+
+            groom_results = groom_ballotpedia_data_for_processing(structured_json, google_civic_election_id,
+                                                                  kind_of_election=ballotpedia_kind_of_election)
+            modified_json_list = groom_results['modified_json_list']
+            kind_of_batch = groom_results['kind_of_batch']
+
+            for one_new_dict in modified_json_list:
+                already_in_final_dict = False
+                for one_final_dict in final_json_list:
+                    if one_new_dict['ballotpedia_race_id'] == one_final_dict['ballotpedia_race_id']:
+                        already_in_final_dict = True
+                        continue
+                if not already_in_final_dict:
+                    final_json_list.append(one_new_dict)
+
+    if positive_value_exists(len(final_json_list)):
         results = store_ballotpedia_json_response_to_import_batch_system(
-            modified_json_list, google_civic_election_id, kind_of_batch)
+            final_json_list, google_civic_election_id, kind_of_batch)
         status += results['status']
         if 'batch_header_id' in results:
             batch_header_id = results['batch_header_id']
@@ -973,7 +1024,7 @@ def retrieve_ballotpedia_candidate_image_from_api(ballotpedia_image_id, google_c
 
 
 def groom_ballotpedia_data_for_processing(structured_json, google_civic_election_id,
-                                          contains_api=False, kind_of_election=""):
+                                          contains_api=False, kind_of_election="", kind_of_election_by_race={}):
     success = False
     status = ""
     # if kind_of_batch not in (MEASURE, ELECTED_OFFICE, CONTEST_OFFICE, CANDIDATE, ORGANIZATION_WORD, POSITION,
@@ -990,21 +1041,30 @@ def groom_ballotpedia_data_for_processing(structured_json, google_civic_election
                     for one_office_json in races_json_list:
                         try:
                             # election
+                            # Default the "is_..._election" to False
+                            one_office_json['is_ballotpedia_primary_election'] = False
+                            one_office_json['is_ballotpedia_primary_runoff_election'] = False
+                            one_office_json['is_ballotpedia_general_election'] = False
+                            one_office_json['is_ballotpedia_general_runoff_election'] = False
                             if kind_of_election == "primary_election":
                                 inner_election_json = one_office_json['primary_election']['data']
                                 one_office_json['ballotpedia_election_id'] = inner_election_json['id']
+                                one_office_json['is_ballotpedia_primary_election'] = True
                                 one_office_json['election_day'] = inner_election_json['date']
                             elif kind_of_election == "primary_runoff_election":
                                 inner_election_json = one_office_json['primary_runoff_election']['data']
                                 one_office_json['ballotpedia_election_id'] = inner_election_json['id']
+                                one_office_json['is_ballotpedia_primary_runoff_election'] = True
                                 one_office_json['election_day'] = inner_election_json['date']
                             elif kind_of_election == "general_election":
                                 inner_election_json = one_office_json['general_election']['data']
                                 one_office_json['ballotpedia_election_id'] = inner_election_json['id']
+                                one_office_json['is_ballotpedia_general_election'] = True
                                 one_office_json['election_day'] = inner_election_json['date']
                             elif kind_of_election == "general_runoff_election":
                                 inner_election_json = one_office_json['general_runoff_election']['data']
                                 one_office_json['ballotpedia_election_id'] = inner_election_json['id']
+                                one_office_json['is_ballotpedia_general_runoff_election'] = True
                                 one_office_json['election_day'] = inner_election_json['date']
                             else:
                                 one_office_json['ballotpedia_election_id'] = 0
@@ -1037,7 +1097,17 @@ def groom_ballotpedia_data_for_processing(structured_json, google_civic_election
                     modified_candidates_json_list = []
                     # Loop through this data and move ['office']['data'] into root level
                     for one_candidate_json in candidates_json_list:
-                        if kind_of_election == "primary_election":
+                        ballotpedia_race_id = 0
+                        if 'race' in one_candidate_json \
+                                and one_candidate_json['race'] \
+                                and 'data' in one_candidate_json['race']:
+                            inner_race_json = one_candidate_json['race']['data']
+                            ballotpedia_race_id = inner_race_json['id']
+                        else:
+                            # If a race isn't included, then this candidate isn't running right now
+                            continue
+
+                        if kind_of_election_by_race[ballotpedia_race_id] == "primary_election":
                             one_candidate_json['candidate_participation_status'] = one_candidate_json['primary_status']
                             if not positive_value_exists(one_candidate_json['candidate_participation_status']) \
                                     and one_candidate_json['general_status'] \
@@ -1049,12 +1119,12 @@ def groom_ballotpedia_data_for_processing(structured_json, google_civic_election
                             if not positive_value_exists(one_candidate_json['candidate_participation_status']):
                                 # These values are "Pu", "Pa.R" ???
                                 one_candidate_json['candidate_participation_status'] = one_candidate_json['status']
-                        elif kind_of_election == "primary_runoff_election":
+                        elif kind_of_election_by_race[ballotpedia_race_id] == "primary_runoff_election":
                             one_candidate_json['candidate_participation_status'] = \
                                 one_candidate_json['primary_runoff_status']
-                        elif kind_of_election == "general_election":
+                        elif kind_of_election_by_race[ballotpedia_race_id] == "general_election":
                             one_candidate_json['candidate_participation_status'] = one_candidate_json['general_status']
-                        elif kind_of_election == "general_runoff_election":
+                        elif kind_of_election_by_race[ballotpedia_race_id] == "general_runoff_election":
                             one_candidate_json['candidate_participation_status'] = \
                                 one_candidate_json['general_runoff_status']
                         else:

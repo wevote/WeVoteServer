@@ -87,16 +87,19 @@
         {% if ballotpedia_election_list %}
             <table class="table">
                 <tr>
+                    <th></th>
                     <th>ID</th>
                     <th>District Name</th>
                     <th>District Type</th>
-                    <th>Election Type</th>
+                    <th colspan="2">Election Type</th>
                 </tr>
             {% for ballotpedia_election in ballotpedia_election_list %}
                 <tr>
+                    <td><span style="color: darkgray">{{ forloop.counter }}</span></td>
                     <td>{{ ballotpedia_election.ballotpedia_election_id|default_if_none:"" }}</td>
                     <td>{{ ballotpedia_election.district_name|default_if_none:"" }}</td>
-                    <td>{{ ballotpedia_election.district_type|default_if_none:"" }}</td>
+                    <td><span class="u-no-break">{{ ballotpedia_election.district_type|default_if_none:"" }}</span></td>
+                    <td>{{ ballotpedia_election.election_type|default_if_none:"" }}</td>
                     <td>{{ ballotpedia_election.election_description|default_if_none:"" }}</td>
                 </tr>
             {% endfor %}
@@ -151,15 +154,13 @@
 
 <strong>Steps to Prepare for Election</strong>
 <ol>
-{% if not election.ballotpedia_election_id or not election.ballotpedia_kind_of_election %}
+
   <li>
     <a href="{% url 'ballotpedia:attach_ballotpedia_election' election.id %}?google_civic_election_id={{ election.google_civic_election_id }}&state_code={{ state_code }}">
-        Attach Ballotpedia Election{% if state_code %} (for {{ state_code }}){% endif %}</a><br />
-        Reach out to Ballotpedia API and figure out the matching ballotpedia_election_id and kind of election.
+        Attach Ballotpedia Elections{% if state_code %} (for {{ state_code }}){% endif %}</a><br />
+        Reach out to Ballotpedia API and figure out the matching ballotpedia_election_ids.
   </li>
-{% endif %}
 
-{% if election.ballotpedia_election_id %}
   <li>
     <a href="{% url 'ballotpedia:retrieve_ballotpedia_data_for_polling_locations' election.id %}?google_civic_election_id={{ election.google_civic_election_id }}&state_code={{ state_code }}&retrieve_races=1" target="_blank">
         Ballotpedia: Retrieve Races for this Election{% if state_code %} (for {{ state_code }}){% endif %}</a> (in new window)<br />
@@ -201,7 +202,6 @@
         out, <a href="{% url 'import_export_batches:batch_set_list' %}?kind_of_batch=IMPORT_BALLOT_ITEM&google_civic_election_id={{ election.google_civic_election_id }}&state_code={{ state_code }}" target="_blank">
         go here after ~5 minutes to see the results.</a>
   </li>
-{% endif %}
 
 {% if election.google_civic_election_id|convert_to_int < 1000000 %}
   <li>
