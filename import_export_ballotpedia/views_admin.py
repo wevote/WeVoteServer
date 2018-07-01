@@ -4,7 +4,7 @@
 
 from .controllers import attach_ballotpedia_election_by_district_from_api, \
     retrieve_ballot_items_from_polling_location, \
-    retrieve_ballotpedia_candidates_by_election_from_api, retrieve_ballotpedia_measures_by_district_from_api, \
+    retrieve_ballotpedia_candidates_by_district_from_api, retrieve_ballotpedia_measures_by_district_from_api, \
     retrieve_ballotpedia_district_id_list_for_polling_location, retrieve_ballotpedia_offices_by_district_from_api, \
     retrieve_ballotpedia_offices_by_election_from_api
 from admin_tools.views import redirect_to_sign_in_page
@@ -227,7 +227,7 @@ def attach_ballotpedia_election_view(request, election_local_id=0):
 
 
 @login_required
-def retrieve_ballotpedia_candidates_by_election_from_api_view(request):
+def retrieve_ballotpedia_candidates_by_district_from_api_view(request):
     """
     Reach out to Ballotpedia API to retrieve candidates.
     """
@@ -239,7 +239,7 @@ def retrieve_ballotpedia_candidates_by_election_from_api_view(request):
     google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
     only_retrieve_if_zero_candidates = request.GET.get('only_retrieve_if_zero_candidates', False)
 
-    results = retrieve_ballotpedia_candidates_by_election_from_api(google_civic_election_id,
+    results = retrieve_ballotpedia_candidates_by_district_from_api(google_civic_election_id,
                                                                    only_retrieve_if_zero_candidates)
 
     kind_of_batch = ""

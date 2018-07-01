@@ -56,6 +56,13 @@ def candidates_sync_out_view(request):  # candidatesSyncOut
     state_code = request.GET.get('state_code', '')
     candidate_search = request.GET.get('candidate_search', '')
 
+    if not positive_value_exists(google_civic_election_id):
+        json_data = {
+            'success': False,
+            'status': 'GOOGLE_CIVIC_ELECTION_ID_REQUIRED'
+        }
+        return HttpResponse(json.dumps(json_data), content_type='application/json')
+
     try:
         candidate_list = CandidateCampaign.objects.using('readonly').all()
         if positive_value_exists(google_civic_election_id):
@@ -106,6 +113,7 @@ def candidates_sync_out_view(request):  # candidatesSyncOut
                                                     'wikipedia_photo_url',
                                                     'ballotpedia_candidate_id', 'ballotpedia_candidate_name',
                                                     'ballotpedia_candidate_summary', 'ballotpedia_candidate_url',
+                                                    'ballotpedia_profile_image_url_https',
                                                     'ballotpedia_election_id', 'ballotpedia_image_id',
                                                     'ballotpedia_office_id', 'ballotpedia_person_id',
                                                     'ballotpedia_race_id',

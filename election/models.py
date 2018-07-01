@@ -31,7 +31,7 @@ class BallotpediaElection(models.Model):
         verbose_name="google civic election id", null=True, unique=False)
     # Called description by Ballotpedia
     election_description = models.CharField(verbose_name="election description", max_length=255, null=True)
-    election_type = models.CharField(verbose_name="district type", max_length=255, null=True, blank=True)
+    election_type = models.CharField(verbose_name="election type", max_length=255, null=True, blank=True)
     # Day of the election in YYYY-MM-DD format.
     election_day_text = models.CharField(verbose_name="election day", max_length=255, null=True, blank=True)
     ocd_division_id = models.CharField(verbose_name="ocd division id", max_length=255, null=True, blank=True)

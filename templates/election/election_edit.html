@@ -74,16 +74,19 @@
         {% if ballotpedia_election_list %}
             <table class="table">
                 <tr>
+                    <th></th>
                     <th>ID</th>
                     <th>District Name</th>
                     <th>District Type</th>
-                    <th>Election Type</th>
+                    <th colspan="2">Election Type</th>
                 </tr>
             {% for ballotpedia_election in ballotpedia_election_list %}
                 <tr>
+                    <td><span style="color: darkgray">{{ forloop.counter }}</span></td>
                     <td>{{ ballotpedia_election.ballotpedia_election_id|default_if_none:"" }}</td>
                     <td>{{ ballotpedia_election.district_name|default_if_none:"" }}</td>
-                    <td>{{ ballotpedia_election.district_type|default_if_none:"" }}</td>
+                    <td><span class="u-no-break">{{ ballotpedia_election.district_type|default_if_none:"" }}</span></td>
+                    <td>{{ ballotpedia_election.election_type|default_if_none:"" }}</td>
                     <td>{{ ballotpedia_election.election_description|default_if_none:"" }}</td>
                 </tr>
             {% endfor %}

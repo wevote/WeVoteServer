@@ -123,6 +123,13 @@
                       : {{ election.candidates_without_photo_percentage|floatformat:"0" }}%</span>
                   {% endif %})</a>
             {% endif %}
+            {% if election.candidate_count %}
+                <br />
+                <a href="{% url 'apis_v1:candidatesSyncOutView' %}?google_civic_election_id={{ election.google_civic_election_id }}"
+                   target="_blank">
+                json</a>
+            {% endif %}
+
             </td>
             <td align="middle">
             {% if election.voter_guides_count %}

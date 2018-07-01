@@ -88,6 +88,14 @@ class ContestOffice(models.Model):
     ballotpedia_id = models.CharField(
         verbose_name="ballotpedia unique identifier", max_length=255, null=True, blank=True)
     ballotpedia_election_id = models.PositiveIntegerField(verbose_name="ballotpedia election id", null=True, blank=True)
+
+    # Which kind of ballotpedia election "state" is this office in. Ex/ You can have an office in a primary be labeled
+    #  general election if it is to decide on the final outcome, like for a mayor
+    is_ballotpedia_general_election = models.BooleanField(default=False)
+    is_ballotpedia_general_runoff_election = models.BooleanField(default=False)
+    is_ballotpedia_primary_election = models.BooleanField(default=False)
+    is_ballotpedia_primary_runoff_election = models.BooleanField(default=False)
+
     # Equivalent to elected_office
     ballotpedia_office_id = models.PositiveIntegerField(verbose_name="ballotpedia integer id", null=True, blank=True)
     # The office's name as passed over by Ballotpedia. This helps us do exact matches when id is missing
@@ -154,6 +162,17 @@ class ContestOffice(models.Model):
                 return extract_state_from_ocd_division_id(ocd_division_id)
             else:
                 return ''
+
+    def get_kind_of_ballotpedia_election(self):
+        if self.is_ballotpedia_general_election:
+            return "general_election"
+        if self.is_ballotpedia_general_runoff_election:
+            return "general_runoff_election"
+        if self.is_ballotpedia_primary_election:
+            return "primary_election"
+        if self.is_ballotpedia_primary_runoff_election:
+            return "primary_runoff_election"
+        return ""
 
     # We override the save function so we can auto-generate we_vote_id
     def save(self, *args, **kwargs):
@@ -732,6 +751,16 @@ class ContestOfficeManager(models.Model):
                     new_contest_office.ballotpedia_race_id = convert_to_int(defaults['ballotpedia_race_id'])
                 if 'ballotpedia_race_office_level' in defaults:
                     new_contest_office.ballotpedia_race_office_level = defaults['ballotpedia_race_office_level']
+                if 'is_ballotpedia_general_election' in defaults:
+                    new_contest_office.is_ballotpedia_general_election = defaults['is_ballotpedia_general_election']
+                if 'is_ballotpedia_general_runoff_election' in defaults:
+                    new_contest_office.is_ballotpedia_general_runoff_election = \
+                        defaults['is_ballotpedia_general_runoff_election']
+                if 'is_ballotpedia_primary_election' in defaults:
+                    new_contest_office.is_ballotpedia_primary_election = defaults['is_ballotpedia_primary_election']
+                if 'is_ballotpedia_primary_runoff_election' in defaults:
+                    new_contest_office.is_ballotpedia_primary_runoff_election = \
+                        defaults['is_ballotpedia_primary_runoff_election']
                 new_contest_office.save()
             else:
                 success = False
@@ -810,6 +839,16 @@ class ContestOfficeManager(models.Model):
                     existing_office_entry.ballotpedia_race_id = convert_to_int(defaults['ballotpedia_race_id'])
                 if 'ballotpedia_race_office_level' in defaults:
                     existing_office_entry.ballotpedia_race_office_level = defaults['ballotpedia_race_office_level']
+                if 'is_ballotpedia_general_election' in defaults:
+                    existing_office_entry.is_ballotpedia_general_election = defaults['is_ballotpedia_general_election']
+                if 'is_ballotpedia_general_runoff_election' in defaults:
+                    existing_office_entry.is_ballotpedia_general_runoff_election = \
+                        defaults['is_ballotpedia_general_runoff_election']
+                if 'is_ballotpedia_primary_election' in defaults:
+                    existing_office_entry.is_ballotpedia_primary_election = defaults['is_ballotpedia_primary_election']
+                if 'is_ballotpedia_primary_runoff_election' in defaults:
+                    existing_office_entry.is_ballotpedia_primary_runoff_election = \
+                        defaults['is_ballotpedia_primary_runoff_election']
                 # now go ahead and save this entry (update)
                 existing_office_entry.save()
                 contest_office_updated = True
@@ -927,7 +966,7 @@ class ContestOfficeListManager(models.Model):
 
         return 0
 
-    def retrieve_offices(self, google_civic_election_id=0, state_code="", office_list=[],
+    def retrieve_offices(self, google_civic_election_id=0, state_code="", retrieve_from_this_office_we_vote_id_list=[],
                          return_list_of_objects=False, ballotpedia_district_id=0):
         office_list_objects = []
         office_list_light = []
@@ -944,9 +983,9 @@ class ContestOfficeListManager(models.Model):
                 office_queryset = office_queryset.filter(ballotpedia_district_id=ballotpedia_district_id)
             if positive_value_exists(state_code):
                 office_queryset = office_queryset.filter(state_code__iexact=state_code)
-            if len(office_list):
+            if len(retrieve_from_this_office_we_vote_id_list):
                 office_queryset = office_queryset.filter(
-                    we_vote_id__in=office_list)
+                    we_vote_id__in=retrieve_from_this_office_we_vote_id_list)
             office_queryset = office_queryset.order_by("office_name")
             office_list_objects = office_queryset
 
