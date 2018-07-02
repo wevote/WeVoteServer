@@ -673,6 +673,7 @@ def candidate_edit_process_view(request):
     ballotpedia_candidate_id = request.POST.get('ballotpedia_candidate_id', False)
     ballotpedia_candidate_name = request.POST.get('ballotpedia_candidate_name', False)
     ballotpedia_candidate_url = request.POST.get('ballotpedia_candidate_url', False)
+    ballotpedia_candidate_summary = request.POST.get('ballotpedia_candidate_summary', False)
     ballotpedia_office_id = request.POST.get('ballotpedia_office_id', False)
     ballotpedia_person_id = request.POST.get('ballotpedia_person_id', False)
     ballotpedia_race_id = request.POST.get('ballotpedia_race_id', False)
@@ -855,6 +856,8 @@ def candidate_edit_process_view(request):
                 candidate_on_stage.ballotpedia_candidate_name = ballotpedia_candidate_name
             if ballotpedia_candidate_url is not False:
                 candidate_on_stage.ballotpedia_candidate_url = ballotpedia_candidate_url
+            if ballotpedia_candidate_summary is not False:
+                candidate_on_stage.ballotpedia_candidate_summary = ballotpedia_candidate_summary
             if ballotpedia_office_id is not False:
                 candidate_on_stage.ballotpedia_office_id = convert_to_int(ballotpedia_office_id)
             if ballotpedia_person_id is not False:
@@ -948,6 +951,8 @@ def candidate_edit_process_view(request):
                     candidate_on_stage.ballotpedia_candidate_name = ballotpedia_candidate_name
                 if ballotpedia_candidate_url is not False:
                     candidate_on_stage.ballotpedia_candidate_url = ballotpedia_candidate_url
+                if ballotpedia_candidate_summary is not False:
+                    candidate_on_stage.ballotpedia_candidate_summary = ballotpedia_candidate_summary
                 if ballotpedia_office_id is not False:
                     candidate_on_stage.ballotpedia_office_id = convert_to_int(ballotpedia_office_id)
                 if ballotpedia_person_id is not False:
