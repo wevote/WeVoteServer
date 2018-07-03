@@ -1769,14 +1769,16 @@ def voter_ballot_items_retrieve_for_one_election_for_api(voter_device_id, voter_
         success = False
 
     if success:
+        status += "BALLOT_ITEM_LIST_FOUND "
         for ballot_item in ballot_item_list:
             if ballot_item.contest_office_we_vote_id:
                 kind_of_ballot_item = OFFICE
                 ballot_item_id = ballot_item.contest_office_id
-                we_vote_id = ballot_item.contest_office_we_vote_id
+                office_we_vote_id = ballot_item.contest_office_we_vote_id
                 try:
                     candidate_list_object = CandidateCampaignListManager()
-                    results = candidate_list_object.retrieve_all_candidates_for_office(ballot_item_id, we_vote_id)
+                    results = candidate_list_object.retrieve_all_candidates_for_office(
+                        ballot_item_id, office_we_vote_id)
                     candidates_to_display = []
                     if results['candidate_list_found']:
                         candidate_list = results['candidate_list']
@@ -1805,21 +1807,25 @@ def voter_ballot_items_retrieve_for_one_election_for_api(voter_device_id, voter_
                     candidates_to_display = []
                     if hasattr(results, 'status'):
                         status += results['status'] + " "
-                one_ballot_item = {
-                    'ballot_item_display_name':     ballot_item.ballot_item_display_name,
-                    'google_civic_election_id':     ballot_item.google_civic_election_id,
-                    'google_ballot_placement':      ballot_item.google_ballot_placement,
-                    'local_ballot_order':           ballot_item.local_ballot_order,
-                    'kind_of_ballot_item':          kind_of_ballot_item,
-                    'id':                           ballot_item_id,
-                    'we_vote_id':                   we_vote_id,
-                    'candidate_list':               candidates_to_display,
-                }
-                ballot_items_to_display.append(one_ballot_item.copy())
+
+                if len(candidates_to_display):
+                    one_ballot_item = {
+                        'ballot_item_display_name':     ballot_item.ballot_item_display_name,
+                        'google_civic_election_id':     ballot_item.google_civic_election_id,
+                        'google_ballot_placement':      ballot_item.google_ballot_placement,
+                        'local_ballot_order':           ballot_item.local_ballot_order,
+                        'kind_of_ballot_item':          kind_of_ballot_item,
+                        'id':                           ballot_item_id,
+                        'we_vote_id':                   office_we_vote_id,
+                        'candidate_list':               candidates_to_display,
+                    }
+                    ballot_items_to_display.append(one_ballot_item.copy())
+                else:
+                    status += "NO_CANDIDATES_FOR_OFFICE:" + str(office_we_vote_id) + " "
             elif ballot_item.contest_measure_we_vote_id:
                 kind_of_ballot_item = MEASURE
                 ballot_item_id = ballot_item.contest_measure_id
-                we_vote_id = ballot_item.contest_measure_we_vote_id
+                measure_we_vote_id = ballot_item.contest_measure_we_vote_id
                 one_ballot_item = {
                     'ballot_item_display_name':     ballot_item.ballot_item_display_name,
                     'google_civic_election_id':     ballot_item.google_civic_election_id,
@@ -1831,13 +1837,13 @@ def voter_ballot_items_retrieve_for_one_election_for_api(voter_device_id, voter_
                     'measure_text':                 ballot_item.measure_text,
                     'measure_url':                  ballot_item.measure_url,
                     'no_vote_description':          ballot_item.no_vote_description,
-                    'we_vote_id':                   we_vote_id,
+                    'we_vote_id':                   measure_we_vote_id,
                     'yes_vote_description':         ballot_item.yes_vote_description,
                 }
                 ballot_items_to_display.append(one_ballot_item.copy())
 
         results = {
-            'status': 'VOTER_BALLOT_ITEMS_RETRIEVED',
+            'status': status,
             'success': True,
             'voter_device_id': voter_device_id,
             'ballot_item_list': ballot_items_to_display,

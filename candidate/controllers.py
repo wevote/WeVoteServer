@@ -1070,6 +1070,7 @@ def refresh_candidate_data_from_master_tables(candidate_we_vote_id):
     we_vote_image_list = retrieve_all_images_for_one_candidate(candidate_we_vote_id)
     if len(we_vote_image_list):
         # Retrieve all cached image for this organization
+        # TODO 2018-07-03 Right now this is focused on Twitter, but it should also take into consideration Ballotpedia
         for we_vote_image in we_vote_image_list:
             if we_vote_image.kind_of_image_twitter_profile:
                 if we_vote_image.kind_of_image_original:

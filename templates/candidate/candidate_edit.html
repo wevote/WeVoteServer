@@ -263,7 +263,7 @@ span.wrap_word { word-break: break-word; }
         (<a href="{% url 'google_custom_search:bulk_possible_google_search_users_do_not_match' candidate.we_vote_id %}">these possible candidates don't match</a>)
     {% if google_search_possibility_list %}
         {% include "candidate/google_search_users_for_candidate_table.html" with candidate=candidate google_search_possibility_list=google_search_possibility_list %}
-        {% if google_search_possibility_list|length == 1 %}
+        {% if google_search_possibility_list|length == 1 and google_search_possibility_total_count > 1 %}
             <a href="{% url 'candidate:candidate_edit' candidate.id %}?show_all_google_search_users=1">Show more Google search users</a>
         {% elif google_search_possibility_list|length > 1 %}
             <a href="{% url 'candidate:candidate_edit' candidate.id %}?show_all_google_search_users=0">Show fewer Google search users</a>

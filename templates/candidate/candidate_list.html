@@ -114,7 +114,9 @@
     <a href="{{ current_page_minus_candidate_tools_url }}&hide_candidate_tools=0">(Show Candidate Tools)</a><br />
 {% endif %}
 
-<a href="{% url 'candidate:candidate_new' %}?google_civic_election_id={{ google_civic_election_id }}">Add New Candidate</a><br />
+<a href="{% url 'candidate:candidate_new' %}?google_civic_election_id={{ google_civic_election_id }}">Add New Candidate</a>,
+<a href="{% url 'apis_v1:candidatesSyncOutView' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}&candidate_search={{ candidate_search }}" target="_blank" >Export Candidates</a>
+<br />
 
 <br />
 <form name="candidate_search" method="get" action="{% url 'candidate:candidate_list' %}">
@@ -292,7 +294,6 @@
         <span class="float-right"><a href="{{ previous_page_url }}">Previous page</a> | <a href="{{ next_page_url }}">Next page</a></span>
 
         <p>
-            <a href="{% url 'apis_v1:candidatesSyncOutView' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}&candidate_search={{ candidate_search }}" target="_blank" >Export Candidates</a><br />
         </p>
 
         <p></p>
@@ -381,7 +382,9 @@
     {# The following is shown if there is no candidate list #}
     <p>(no candidates found)</p>
     <p>
-        <a href="{% url 'candidate:candidate_new' %}?google_civic_election_id={{ google_civic_election_id }}">Add New Candidate</a><br />
+        <a href="{% url 'candidate:candidate_new' %}?google_civic_election_id={{ google_civic_election_id }}">Add New Candidate</a>,
+        <a href="{% url 'apis_v1:candidatesSyncOutView' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}&candidate_search={{ candidate_search }}" target="_blank" >Export Candidates</a><br />
+        <br />
     </p>
 {% endif %}
 <br />
