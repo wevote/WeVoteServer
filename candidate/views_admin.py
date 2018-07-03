@@ -581,15 +581,17 @@ def candidate_edit_view(request, candidate_id=0, candidate_campaign_we_vote_id="
             pass
 
         google_search_possibility_list = []
+        google_search_possibility_total_count = 0
         try:
             google_search_possibility_query = GoogleSearchUser.objects.filter(
                 candidate_campaign_we_vote_id=candidate_on_stage.we_vote_id)
             google_search_possibility_query = google_search_possibility_query.order_by(
                 '-chosen_and_updated', 'not_a_match', '-likelihood_score')
+            google_search_possibility_total_count = google_search_possibility_query.count()
             if positive_value_exists(show_all_google_search_users):
                 google_search_possibility_list = list(google_search_possibility_query)
             else:
-                google_search_possibility_list.append(google_search_possibility_query[0])
+                google_search_possibility_list = google_search_possibility_query[:1]
         except Exception as e:
             pass
 
@@ -604,6 +606,7 @@ def candidate_edit_view(request, candidate_id=0, candidate_campaign_we_vote_id="
             'state_code':                       state_code,
             'twitter_link_possibility_list':    twitter_link_possibility_list,
             'google_search_possibility_list':   google_search_possibility_list,
+            'google_search_possibility_total_count':    google_search_possibility_total_count,
             # Incoming variables, not saved yet
             'candidate_name':                   candidate_name,
             'google_civic_candidate_name':      google_civic_candidate_name,

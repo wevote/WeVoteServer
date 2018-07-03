@@ -2078,7 +2078,7 @@ class CandidateCampaignManager(models.Model):
 
         if candidate:
             if positive_value_exists(cached_ballotpedia_profile_image_url_https):
-                candidate.twitter_profile_image_url_https = cached_ballotpedia_profile_image_url_https
+                candidate.ballotpedia_profile_image_url_https = cached_ballotpedia_profile_image_url_https
                 values_changed = True
             if positive_value_exists(we_vote_hosted_profile_image_url_large):
                 candidate.we_vote_hosted_profile_image_url_large = we_vote_hosted_profile_image_url_large
