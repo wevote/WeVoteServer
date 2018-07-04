@@ -722,17 +722,18 @@ def election_list_view(request):
         election.office_count = len(office_list)
 
         # How many offices with zero candidates?
-        offices_without_candidate_count = 0
+        offices_with_candidates_count = 0
+        offices_without_candidates_count = 0
         for one_office in office_list:
             candidate_list_query = CandidateCampaign.objects.all()
             candidate_list_query = candidate_list_query.filter(contest_office_id=one_office.id)
             candidate_count = candidate_list_query.count()
-            if not positive_value_exists(candidate_count):
-                offices_without_candidate_count += 1
-        election.offices_without_candidate_count = offices_without_candidate_count
-        if positive_value_exists(election.office_count):
-            election.offices_without_candidate_percentage = \
-                100 * (election.offices_without_candidate_count / election.office_count)
+            if positive_value_exists(candidate_count):
+                offices_with_candidates_count += 1
+            else:
+                offices_without_candidates_count += 1
+        election.offices_with_candidates_count = offices_with_candidates_count
+        election.offices_without_candidates_count = offices_without_candidates_count
 
         # How many candidates?
         candidate_list_query = CandidateCampaign.objects.all()
