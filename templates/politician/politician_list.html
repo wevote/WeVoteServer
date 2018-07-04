@@ -39,8 +39,8 @@
         {% endfor %}
         </select>
         {% if state_code != "" %}
-        <a href="{% url 'politician:politician_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}&candidate_search={{ candidate_search }}&show_all=1">
-            show all</a>
+        <a href="{% url 'politician:politician_list' %}?candidate_search={{ candidate_search }}">
+            show all states</a>&nbsp;&nbsp;&nbsp;
         {% endif %}
     {% endif %}{# End of if state_list #}
 
@@ -53,20 +53,22 @@
 </form>
 
 {% if politician_list %}
-    <table border="1" cellpadding="5" cellspacing="5">
+    <table class="table">
+      <thead>
         <tr>
-            <td>&nbsp;</td>
-            <td>&nbsp;</td>
-            <td>Politician Name</td>
-            <td>State</td>
-            <td>Twitter Handle</td>
-            <td>Website</td>
-            <td>Id</td>
-            <td>We Vote Id</td>
-            <td>Vote Smart Id</td>
-            <td>Linked Candidates</td>
-            <td>Related Candidates?</td>
+            <th>&nbsp;</th>
+            <th>&nbsp;</th>
+            <th>Politician Name</th>
+            <th>State</th>
+            <th>Twitter Handle</th>
+            <th>Website</th>
+            <th>Id</th>
+            <th>We Vote Id</th>
+            <th>Vote Smart Id</th>
+            <th>Candidates Linked</th>
+            <th>Related Candidates?</th>
         </tr>
+      </thead>
     {% for politician in politician_list %}
         <tr>
             <td>{{ forloop.counter }}</td>
@@ -86,8 +88,8 @@
             <td>{{ politician.id }}</td>
             <td>{{ politician.we_vote_id }}</td>
             <td>{{ politician.vote_smart_id|default_if_none:"" }}</td>
-            <td>{{ politician.linked_candidate_list_count }}</td>
-            <td>{{ politician.related_candidate_list_count }}</td>
+            <td>{% if politician.linked_candidate_list_count > 0 %}{{ politician.linked_candidate_list_count }}{% endif %}</td>
+            <td>{% if politician.related_candidate_list_count > 0 %}{{ politician.related_candidate_list_count }}{% endif %}</td>
         </tr>
     {% endfor %}
     </table>

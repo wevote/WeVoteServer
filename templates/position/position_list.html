@@ -73,17 +73,19 @@
 </form>
 
 {% if position_list %}
-    <table border="1" cellpadding="5" cellspacing="5">
+    <table class="table">
+      <thead>
         <tr>
-            <td></td>
-            <td>ID</td>
-            <td>Organization</td>
-            <td>Visibility?</td>
-            <td>Stance</td>
-            <td>Rating</td>
-            <td>Candidate/Measure</td>
-            <td>Election</td>
+            <th></th>
+            <th>ID</th>
+            <th>Organization</th>
+            <th>Visibility?</th>
+            <th>Stance</th>
+            <th>Rating</th>
+            <th>Candidate/Measure</th>
+            <th>Election</th>
         </tr>
+      </thead>
     {% for position in position_list %}
         <tr>
             <td>{{ forloop.counter }}</td>
@@ -125,7 +127,7 @@
                 {% endif %}
                 <span style="color: darkgray">&nbsp;{{ position.statement_text|default_if_none:""|truncatechars:450 }}</span>
             </td>
-            <td>{% if position.election.election_day_text %}{{ position.election.election_day_text }}{% endif %}</td>
+            <td>{% if position.election.election_day_text %}<span class="u-no-break">{{ position.election.election_day_text }}</span>{% endif %}</td>
         </tr>
     {% endfor %}
     </table>

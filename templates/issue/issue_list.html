@@ -82,19 +82,21 @@
 </form>
 
 {% if issue_list %}
-    <table border="1" cellpadding="5" cellspacing="5">
+    <table class="table">
+      <thead>
         <tr>
-            <td>&nbsp;</td>
-            <td>&nbsp;</td>
-            <td>Issue Name</td>
-            <td>Image Notes</td>
-            <td>Linked Org Count</td>
-            <td>Followers Count</td>
-            <td>Issue Description</td>
+            <th>&nbsp;</th>
+            <th>&nbsp;</th>
+            <th>Issue Name</th>
+            <th>Image Notes</th>
+            <th>Linked Org Count</th>
+            <th>Followers Count</th>
+            <th>Issue Description</th>
         {% if google_civic_election_id %}
-            <td>Voter Guides, This Election, Linked to this Issue</td>
+            <th>Voter Guides, This Election, Linked to this Issue</th>
         {% endif %}
         </tr>
+      </thead>
     {% for issue in issue_list %}
         <tr>
             <td>{{ forloop.counter }}</td>

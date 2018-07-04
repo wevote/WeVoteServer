@@ -28,26 +28,28 @@
 
 
 {% if voter_list %}
-    <table border="1" cellpadding="10">
+    <table class="table">
+      <thead>
         <tr>
-            <td></td>
-            <td>ID</td>
-            <td>&nbsp;</td>
-            <td>We Vote ID</td>
-            <td>You</td>
-            <td>Where</td>
-            <td>FB ID (cached)</td>
-            <td>FB username</td>
-            <td>Tw (cached)</td>
-{#            <td>TwitterLinkToVoter</td> 2017-3-29 Not working#}
-            <td>Email</td>
-            <td>Org we_vote_id</td>
-            <td>Admin</td>
-            <td>Partner Organization</td>
-            <td>Political Data</td>
-            <td>Verified Volunteer</td>
-            <td>Voter Images</td>
+            <th></th>
+            <th>ID</th>
+            <th>&nbsp;</th>
+            <th>We Vote ID</th>
+            <th>You</th>
+            <th>Where</th>
+            <th>FB ID (cached)</th>
+            <th>FB username</th>
+            <th>Tw (cached)</th>
+{#            <th>TwitterLinkToVoter</th> 2017-3-29 Not working#}
+            <th>Email</th>
+            <th>Org we_vote_id</th>
+            <th>Admin</th>
+            <th>Partner Organization</th>
+            <th>Political Data</th>
+            <th>Verified Volunteer</th>
+            <th>Voter Images</th>
         </tr>
+      </thead>
     {% for voter in voter_list %}
         <tr>
             <td>{{ forloop.counter }}</td>

@@ -89,20 +89,22 @@
 {% endif %}
 
 {% if measure_list %}
-    <table border="1" cellpadding="5" cellspacing="5">
+    <table class="table">
+      <thead>
         <tr>
-            <td>&nbsp;</td>
-            <td>Measure Title</td>
-            <td>State</td>
-            <td>We Vote ID</td>
-            <td>Ballotpedia ID</td>
-            <td>Ballotpedia Status</td>
+            <th>&nbsp;</th>
+            <th>Measure Title</th>
+            <th>State</th>
+            <th>We Vote ID</th>
+            <th>Ballotpedia ID</th>
+            <th>Ballotpedia Status</th>
         {% if google_civic_election_id %}
-            <td>Support</td>
-            <td>Oppose</td>
+            <th>Support</th>
+            <th>Oppose</th>
         {% endif %}
-            <td>&nbsp;</td>
+            <th>&nbsp;</th>
         </tr>
+      </thead>
     {% for measure in measure_list %}
         <tr>
             <td>{{ forloop.counter }}</td>

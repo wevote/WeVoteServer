@@ -78,24 +78,28 @@
 
 <p></p>
 {% if voter_guide_list %}
-    <table border="1" cellpadding="5" cellspacing="5">
-        <tr>
-            <td></td>
-            <td>&nbsp;</td>
-            <td>Organization</td>
-            <td>Twitter</td>
-            <td>Election</td>
-            <td>Election Day</td>
-            <td>Time Span</td>
-            <td>Type</td>
-            <td>Public<br />
-                Positions</td>
-            <td>Friends-only<br />
-                Positions</td>
-            <td>Last Updated</td>
-            <td>we vote id</td>
-        </tr>
+    <table class="table">
     {% for voter_guide in voter_guide_list %}
+    {% if forloop.counter == 1 or forloop.counter|divisibleby:16 %}
+    {# Show the header every ~15 lines #}
+      <thead>
+        <tr>
+            <th></th>
+            <th>&nbsp;</th>
+            <th>Organization</th>
+            <th>Twitter</th>
+            <th>Election</th>
+            <th>Election Day</th>
+            <th>Time Span</th>
+            <th>Type</th>
+            <th>Public<br />
+                Positions</th>
+            <th>Friends-Only</th>
+            <th>Last Updated</th>
+            <th>we vote id</th>
+        </tr>
+      </thead>
+    {% endif %}
         <tr>
             <td>{{ forloop.counter }}</td>
             {% if voter_guide.organization %}
