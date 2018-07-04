@@ -110,34 +110,39 @@
 </form>
 
 {% if organization_list %}
-    <table cellpadding="5" cellspacing="5" border="1">
+    <table class="table">
+    {% for organization in organization_list %}
+    {% if forloop.counter == 1 or forloop.counter|divisibleby:16 %}
+    {# Show the header every ~15 lines #}
+     <thead>
         <tr>
-            <td></td>
-            <td></td>
-            <td>
+            <th></th>
+            <th></th>
+            <th>
               <a href="{% url 'organization:organization_list' %}?sort_by=organization&state_code={{ state_code }}&organization_type_filter={{ organization_type_filter }}&organization_search={{ organization_search }}">
               {% if sort_by == "organization" %}<strong>Organization</strong>{% else %}Organization{% endif %}
               </a>
-            </td>
-            <td>
+            </th>
+            <th>
               <a href="{% url 'organization:organization_list' %}?sort_by=twitter&state_code={{ state_code }}&organization_type_filter={{ organization_type_filter }}&organization_search={{ organization_search }}">
               {% if sort_by == "twitter" %}<strong>Twitter</strong>{% else %}Twitter{% endif %}
               </a>
-            </td>
-            <td>Type</td>
-            <td>Issues {% if show_issues %}
+            </th>
+            <th>Type</th>
+            <th>Issues {% if show_issues %}
               <a href="{% url 'organization:organization_list' %}?sort_by={{ sort_by }}&state_code={{ state_code }}&organization_type_filter={{ organization_type_filter }}&organization_search={{ organization_search }}">
               (hide)</a>
             {% else %}
               <a href="{% url 'organization:organization_list' %}?sort_by={{ sort_by }}&state_code={{ state_code }}&organization_type_filter={{ organization_type_filter }}&organization_search={{ organization_search }}&show_issues=1">
               (show)</a>
-            {% endif %}</td>
-            <td>Vote Smart</td>
-            <td>State</td>
-            <td>Wikipedia?</td>
-            <td></td>
+            {% endif %}</th>
+            <th>Vote Smart</th>
+            <th>State</th>
+            <th>Wikipedia?</th>
+            <th></th>
         </tr>
-    {% for organization in organization_list %}
+      </thead>
+    {% endif %}
         <tr>
             <td>{{ forloop.counter }}</td>
             <td>{% if organization.we_vote_hosted_profile_image_url_medium %}

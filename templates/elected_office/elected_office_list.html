@@ -68,18 +68,20 @@
 {% endif %}
 
 {% if elected_office_list %}
-    <table border="1" cellpadding="5" cellspacing="5">
+    <table class="table">
+      <thead>
         <tr>
-            <td>&nbsp;</td>
-            <td>ID</td>
-            <td>We Vote ID</td>
-            <td>Elected Office Name</td>
-            <td>State</td>
-            <td>District ID</td>
-            <td># of Candidates</td>
-            <td>Ocd Division ID</td>
-            <td>Ballotpedia office ID</td>
+            <th>&nbsp;</th>
+            <th>ID</th>
+            <th>We Vote ID</th>
+            <th>Elected Office Name</th>
+            <th>State</th>
+            <th>District ID</th>
+            <th># of Candidates</th>
+            <th>Ocd Division ID</th>
+            <th>Ballotpedia office ID</th>
         </tr>
+      </thead>
     {% for elected_office in elected_office_list %}
         <tr>
             <td>{{ forloop.counter }}</td>

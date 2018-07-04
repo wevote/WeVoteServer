@@ -87,25 +87,30 @@
 {% endif %}
 
 {% if office_list %}
-    <table border="1" cellpadding="5" cellspacing="5">
-        <tr>
-            <td>&nbsp;</td>
-            <td>ID</td>
-            <td>We Vote ID</td>
-            <td>Office Name</td>
-          {% if google_civic_election_id == 0 %}
-            <td>Election</td>
-          {% endif %}
-            <td>State</td>
-            <td>District ID</td>
-            <td>Ballotpedia District ID</td>
-            <td># of Candidates</td>
-            <td>Public Positions</td>
-            <td>Ocd Division ID</td>
-            <td>Ballotpedia Race ID</td>
-            <td>Ballotpedia Elected Office ID</td>
-        </tr>
+    <table class="table">
     {% for office in office_list %}
+    {% if forloop.counter == 1 or forloop.counter|divisibleby:16 %}
+    {# Show the header every ~15 lines #}
+      <thead>
+        <tr>
+            <th>&nbsp;</th>
+            <th>ID</th>
+            <th>We Vote ID</th>
+            <th>Office Name</th>
+          {% if google_civic_election_id == 0 %}
+            <th>Election</th>
+          {% endif %}
+            <th>State</th>
+            <th>District ID</th>
+            <th>Ballotpedia District ID</th>
+            <th># of Candidates</th>
+            <th>Public Positions</th>
+            <th>Ocd Division ID</th>
+            <th>Ballotpedia Race ID</th>
+            <th>Ballotpedia Elected Office ID</th>
+        </tr>
+      </thead>
+    {% endif %}
         <tr>
             <td>{{ forloop.counter }}</td>
             <td>{{ office.id }}</td>
