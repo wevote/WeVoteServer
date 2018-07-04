@@ -52,60 +52,55 @@
 
 
 {% if election_list %}
-    <table border="1" cellpadding="10">
+    <table class="table">
+    {% for election in election_list %}
+    {% if forloop.counter == 1 or forloop.counter|divisibleby:21 %}
+    {# Show the header every 20 lines #}
+      <thead>
         <tr>
-            <td></td>
-            <td>Election Name</td>
-            <td>Date</td>
-            <td>Google Civic ID</td>
-            <td>Ballotpedia ID</td>
-            <td>State Code</td>
-            <td>List?</td>
-            <td>Ballot Locations</td>
-            <td align="middle">Offices<br />
-              (w/ no Candidates)</td>
-            <td align="middle">Candidates<br />
-              (w/o Photos)</td>
-            <td align="middle">Voter Guides<br />
-              (Public Positions)</td>
+            <th></th>
+            <th>Live?</th>
+            <th>Election Name</th>
+            <th>State</th>
+            <th>Date</th>
+            <th>Google Civic ID</th>
+            <th align="middle">Offices<br />
+              (w/o Candidates)</th>
+            <th align="middle">Candidates<br />
+              (w/o Photos)</th>
+            <th>Ballot<br />
+               Locations</th>
+            <th align="middle">Voter Guides<br />
+              (Public Positions)</th>
 
             <td>&nbsp;</td>
         </tr>
-    {% for election in election_list %}
+      </thead>
+    {% endif %}
         <tr>
             <td>{{ forloop.counter }}</td>
+            <td align="middle">{% if election.include_in_list_for_voters %}<span class="font-weight-bold">Yes</span>{% endif %}</td>
             <td>
-                <a href="{% url 'election:election_summary' election.id %}{% if show_all_elections_this_year %}?show_all_elections_this_year=1{% elif show_all_elections %}?show_all_elections=1{% endif %}" target="_blank">{{ election.election_name }}</a>
+                <a href="{% url 'election:election_summary' election.id %}{% if show_all_elections_this_year %}?show_all_elections_this_year=1{% elif show_all_elections %}?show_all_elections=1{% endif %}" target="_blank">
+                  <span class="{% if election.include_in_list_for_voters %}font-weight-bold{% endif %}">{{ election.election_name }}</span></a>
                 {% if election.internal_notes %}
                 <br /><span style="color: darkgray">{{ election.internal_notes|default_if_none:""|truncatechars:50 }}</span>
                 {% endif %}
             </td>
+            <td align="middle">{{ election.state_code }}</td>
             <td>
                 {{ election.election_day_text }}
                 {% if election.days_until_election > 0 %} <span class="{% if election.days_until_election < 46 %}font-weight-bold text-danger{% endif %}">(in {{ election.days_until_election }} days)</span>{% endif %}
             </td>
             <td align="middle">{{ election.google_civic_election_id }}</td>
-            <td align="middle">{{ election.ballotpedia_election_id|default_if_none:"" }}</td>
-            <td align="middle">{{ election.state_code }}</td>
-            <td align="middle">{% if election.include_in_list_for_voters %}Yes{% endif %}</td>
-            <td align="middle">{% if election.ballot_returned_count %}{{ election.ballot_returned_count|default_if_none:"" }}
-                {% if election.ballot_location_display_option_on_count %} / {{ election.ballot_location_display_option_on_count|default_if_none:"" }}{% endif %}
-            {% endif %}
-            </td>
             <td align="middle">
-            {% if election.office_count %}
+            {% if election.offices_with_candidates_count %}
                 <a href="{% url 'office:office_list' %}?google_civic_election_id={{ election.google_civic_election_id }}{% if show_all_elections_this_year %}&show_all_elections_this_year=1{% elif show_all_elections %}&show_all_elections=1{% endif %}"
                    target="_blank">
-                {{ election.office_count|default_if_none:"" }}</a>
+                {{ election.offices_with_candidates_count|default_if_none:"" }}</a>
             {% endif %}
-            {% if election.offices_without_candidate_count %}
-                <a href="{% url 'office:office_list' %}?google_civic_election_id={{ election.google_civic_election_id }}{% if show_all_elections_this_year %}&show_all_elections_this_year=1{% elif show_all_elections %}&show_all_elections=1{% endif %}"
-                   target="_blank">
-                ({{ election.offices_without_candidate_count|default_if_none:"" }}
-                {% if election.offices_without_candidate_percentage %}
-                    <span class="{% if election.offices_without_candidate_percentage > 33 %}font-weight-bold text-danger{% endif %}">
-                      : {{ election.offices_without_candidate_percentage|floatformat:"0" }}%</span>
-                  {% endif %})</a>
+            {% if election.offices_without_candidates_count %}
+                <span style="color: darkgray">({{ election.offices_without_candidates_count|default_if_none:"" }})</span>
             {% endif %}
             </td>
             <td align="middle">
@@ -120,16 +115,19 @@
                 ({{ election.candidates_without_photo_count|default_if_none:"" }}
                   {% if election.candidates_without_photo_percentage %}
                     <span class="{% if election.candidates_without_photo_percentage > 33 %}font-weight-bold text-danger{% endif %}">
-                      : {{ election.candidates_without_photo_percentage|floatformat:"0" }}%</span>
-                  {% endif %})</a>
+                      : {{ election.candidates_without_photo_percentage|floatformat:"0" }}%</span>{% endif %})</a>
             {% endif %}
             {% if election.candidate_count %}
                 <br />
                 <a href="{% url 'apis_v1:candidatesSyncOutView' %}?google_civic_election_id={{ election.google_civic_election_id }}"
                    target="_blank">
-                json</a>
+                open&nbsp;json</a>
             {% endif %}
 
+            </td>
+            <td align="middle">{% if election.ballot_returned_count %}{{ election.ballot_returned_count|default_if_none:"" }}
+                {% if election.ballot_location_display_option_on_count %} / {{ election.ballot_location_display_option_on_count|default_if_none:"" }}{% endif %}
+            {% endif %}
             </td>
             <td align="middle">
             {% if election.voter_guides_count %}
