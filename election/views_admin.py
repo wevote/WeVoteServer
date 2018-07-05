@@ -542,6 +542,7 @@ def election_edit_process_view(request):
             election_query = Election.objects.filter(google_civic_election_id=google_civic_election_id)
             if len(election_query):
                 election_on_stage = election_query[0]
+                election_local_id = election_on_stage.id
                 election_on_stage_found = True
         except Exception as e:
             handle_record_not_found_exception(e, logger=logger)
@@ -552,6 +553,7 @@ def election_edit_process_view(request):
             election_query = Election.objects.filter(ballotpedia_election_id=ballotpedia_election_id)
             if len(election_query):
                 election_on_stage = election_query[0]
+                election_local_id = election_on_stage.id
                 election_on_stage_found = True
         except Exception as e:
             handle_record_not_found_exception(e, logger=logger)
@@ -625,6 +627,7 @@ def election_edit_process_view(request):
             if positive_value_exists(internal_notes):
                 election_on_stage.internal_notes = internal_notes
             election_on_stage.save()
+            election_local_id = election_on_stage.id
             status += "CREATED_NEW_ELECTION "
             messages.add_message(request, messages.INFO, 'New election ' + str(election_name) + ' saved.')
         except Exception as e:
@@ -633,7 +636,7 @@ def election_edit_process_view(request):
                                  str(google_civic_election_id) +
                                  '. ' + status)
 
-    return HttpResponseRedirect(reverse('election:election_list', args=()))
+    return HttpResponseRedirect(reverse('election:election_summary', args=(election_local_id,)))
 
 
 @login_required()
