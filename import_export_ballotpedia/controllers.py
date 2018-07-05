@@ -124,17 +124,13 @@ def attach_ballotpedia_election_by_district_from_api(election, google_civic_elec
             "limit":                    1000,
         })
 
-        if not positive_value_exists(response.text):
-            success = False
-            status += "NO_RESPONSE_TEXT_FOUND"
-            if positive_value_exists(response.url):
-                status += ": " + response.url
-            results = {
-                'success':          success,
-                'status':           status,
-                'election_found':   False,
-            }
-            return results
+        # if not positive_value_exists(response.text):
+        #     success = False
+        #     status += "NO_RESPONSE_TEXT_FOUND_FROM_ONE_ELECTIONS_API_CALL "
+        #     # if positive_value_exists(response.url):
+        #     #     status += ": " + response.url
+        #     # We want to continue to try to retrieve with another block of districts
+        #     continue
 
         structured_json = json.loads(response.text)
 
