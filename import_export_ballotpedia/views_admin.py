@@ -125,6 +125,7 @@ def attach_ballotpedia_election_view(request, election_local_id=0):
         return redirect_to_sign_in_page(request, authority_required)
 
     state_code = request.GET.get('state_code', '')
+    force_district_retrieve_from_ballotpedia = request.GET.get('force_district_retrieve_from_ballotpedia', False)
     election_state_code = ""
 
     ballotpedia_election_id = 0
@@ -197,7 +198,8 @@ def attach_ballotpedia_election_view(request, election_local_id=0):
     merged_district_list = []
     for polling_location in polling_location_list:
         one_ballot_results = retrieve_ballotpedia_district_id_list_for_polling_location(
-            google_civic_election_id, polling_location=polling_location)
+            google_civic_election_id, polling_location=polling_location,
+            force_district_retrieve_from_ballotpedia=force_district_retrieve_from_ballotpedia)
         if one_ballot_results['success']:
             ballotpedia_district_id_list = one_ballot_results['ballotpedia_district_id_list']
             if len(ballotpedia_district_id_list):
@@ -294,6 +296,7 @@ def retrieve_ballotpedia_data_for_polling_locations_view(request, election_local
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
+    force_district_retrieve_from_ballotpedia = request.GET.get('force_district_retrieve_from_ballotpedia', False)
     state_code = request.GET.get('state_code', '')
     retrieve_races = positive_value_exists(request.GET.get('retrieve_races', False))
     retrieve_measures = positive_value_exists(request.GET.get('retrieve_measures', False))
@@ -396,7 +399,8 @@ def retrieve_ballotpedia_data_for_polling_locations_view(request, election_local
         merged_district_list = []
         for polling_location in polling_location_list:
             one_ballot_results = retrieve_ballotpedia_district_id_list_for_polling_location(
-                google_civic_election_id, polling_location=polling_location)
+                google_civic_election_id, polling_location=polling_location,
+                force_district_retrieve_from_ballotpedia=force_district_retrieve_from_ballotpedia)
             success = False
             if one_ballot_results['success']:
                 success = True

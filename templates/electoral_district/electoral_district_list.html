@@ -1,7 +1,7 @@
-{# templates/polling_location/polling_location_list.html #}
+{# templates/electoral_district/electoral_district_list.html #}
 {% extends "template_base.html" %}
 
-{% block title %}{% if state_name %}{{ state_name }} {% endif %}Polling Locations{% endblock %}
+{% block title %}{% if state_code%}{{ state_code }} {% endif %}Electoral Districts{% if polling_location_we_vote_id %} for Polling Location {{ polling_location_we_vote_id }} {% endif %}{% endblock %}
 
 {%  block content %}
 <p><a href="{% url 'admin_tools:admin_home' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">< Back to Admin Home</a></p>
@@ -20,24 +20,9 @@
     <a href="{% url 'polling_location:polling_location_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">Polling Locations</a>
 </p>
 
-<h1>{% if state_name %}{{ state_name }} {% endif %}Polling Locations</h1>
+<h1>{% if state_code %}{{ state_code }} {% endif %}Electoral Districts{% if polling_location_we_vote_id %} for Polling Location {{ polling_location_we_vote_id }} {% endif %}</h1>
 
-    <p><a href="{% url 'admin_tools:sync_dashboard' %}?state_code={{ state_code }}" target="_blank">
-        Go to "Import Polling Locations From Master Server" Page</a></p>
-
-    <p>
-      <a href="{% url 'polling_location:polling_location_edit' 0 %}?state_code={{ state_code }}">
-         Create polling location</a>,
-
-    {% if state_code %}
-        <a href="{% url 'polling_location:polling_locations_add_latitude_and_longitude' %}?state_code={{ state_code }}">
-           Add latitude/longitude to polling locations</a> (up to 1000)
-    {% else %}
-        (Choose state to add latitude/longitude to polling locations)
-    {% endif %}
-    </p>
-
-<form name="polling_location_search_form" method="get" action="{% url 'polling_location:polling_location_list' %}">
+<form name="electoral_district_search_form" method="get" action="{% url 'electoral_district:electoral_district_list' %}">
     {% csrf_token %}
 
 {% if state_list %}
@@ -53,54 +38,49 @@
 {% endif %}{# End of if state_list #}
 
 
-{% if polling_location_search or issues_selected %}
-    <a href="{% url 'polling_location:polling_location_list' %}?state_code={{ state_code }}">
+{% if electoral_district_search or issues_selected %}
+    <a href="{% url 'electoral_district:electoral_district_list' %}?state_code={{ state_code }}">
          clear search</a>&nbsp;
 {% endif %}
-    <input type="text" name="polling_location_search" id="polling_location_id" value="{{ polling_location_search|default_if_none:"" }}" />
-    <input type="submit" value="Search for Polling Location" />&nbsp;&nbsp;&nbsp;
+    <input type="text" name="electoral_district_search" id="electoral_district_id" value="{{ electoral_district_search|default_if_none:"" }}" />
+    <input type="submit" value="Search for Electoral District" />&nbsp;&nbsp;&nbsp;
+    {% if polling_location_we_vote_id %}
+    <a href="{% url 'electoral_district:electoral_district_list' %}?state_code={{ state_code }}">
+         clear polling location</a>&nbsp;
+    {% endif %}
 
-    <label for="show_bulk_retrieve_id">
-      <input type="checkbox" name="show_bulk_retrieve" id="show_bulk_retrieve_id" value="1" onChange="this.form.submit()"
-             {% if show_bulk_retrieve %}checked{% endif %} /> show bulk retrieve locations
-    </label>
 </form>
 
-{% if polling_location_list %}
+{% if electoral_district_list %}
     <table class="table table-condensed">
     <thead>
         <tr>
             <th></th>
             <th>Name</th>
-            <th>Address</th>
+            <th>State</th>
             <th>we_vote_id</th>
             <th>lat/long</th>
-            <th>Use for bulk retrieve</th>
-            <th></th>
         </tr>
     </thead>
 
-    {% for polling_location in polling_location_list %}
+    {% for electoral_district in electoral_district_list %}
         <tr>
             <td>{{ forloop.counter }}</td>
-            <td><a href="{% url 'polling_location:polling_location_summary' polling_location.id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
-            {% if polling_location.location_name %}{{ polling_location.location_name }}{% else %}(missing location name)&nbsp;&nbsp;{% endif %}</a>
+            <td><a href="{% url 'electoral_district:electoral_district_summary' %}?electoral_district_we_vote_id=&google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
+            {% if electoral_district.electoral_district_name %}{{ electoral_district.electoral_district_name }}{% else %}(missing electoral district name)&nbsp;&nbsp;{% endif %}</a>
             </td>
             <td>
-                {{ polling_location.get_text_for_map_search }} (<a href="https://www.google.com/maps/place/{{ polling_location.get_text_for_map_search|iriencode }}" target="_blank">map</a>)&nbsp;&nbsp;
-                (<a href="{% url 'electoral_district:electoral_district_list' %}?polling_location_we_vote_id={{ polling_location.we_vote_id }}&state_code={{ polling_location.state }}" target="_blank">show districts</a>)
+                {{ electoral_district.state_code }}
             </td>
             <td>
-                {% if polling_location.we_vote_id %}&nbsp;&nbsp;&nbsp;{{ polling_location.we_vote_id }}{% endif %}
+                {% if electoral_district.we_vote_id %}&nbsp;&nbsp;&nbsp;{{ electoral_district.we_vote_id }}{% endif %}
             </td>
-            <td>{% if polling_location.latitude %}&nbsp;&nbsp;Lat/Long: yes{% endif %}</td>
-            <td>{% if polling_location.use_for_bulk_retrieve %}bulk{% endif %}</td>
-            <td><a href="{% url 'polling_location:polling_location_edit' polling_location.id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}" style="font-size: .65em">(edit)</a></td>
+            <td>{% if electoral_district.latitude %}&nbsp;&nbsp;Lat/Long: yes{% endif %}</td>
         </tr>
     {% endfor %}
     </table>
 {% else %}
-    <p>(no polling_locations found)</p>
+    <p>(no electoral_districts found)</p>
 {% endif %}
 <br />
     <script>

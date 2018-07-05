@@ -641,12 +641,13 @@ class CandidateCampaignListManager(models.Model):
                 candidate_list = list(candidate_query)
                 if len(candidate_list):
                     # entry exists
-                    status += 'CANDIDATE_ENTRY_EXISTS '
+                    status += 'CANDIDATE_ENTRY_EXISTS1 '
                     success = True
                     # if a single entry matches, update that entry
                     if len(candidate_list) == 1:
                         candidate = candidate_list[0]
                         candidate_found = True
+                        status += candidate.we_vote_id + " office: " + candidate.contest_office_we_vote_id + " "
                         keep_looking_for_duplicates = False
                     else:
                         # more than one entry found with a match in CandidateCampaign
@@ -681,12 +682,13 @@ class CandidateCampaignListManager(models.Model):
                 candidate_list = list(candidate_query)
                 if len(candidate_list):
                     # entry exists
-                    status += 'CANDIDATE_ENTRY_EXISTS '
+                    status += 'CANDIDATE_ENTRY_EXISTS2 '
                     success = True
                     # if a single entry matches, update that entry
                     if len(candidate_list) == 1:
                         candidate = candidate_list[0]
                         candidate_found = True
+                        status += candidate.we_vote_id + " office: " + candidate.contest_office_we_vote_id + " "
                         keep_looking_for_duplicates = False
                     else:
                         # more than one entry found with a match in CandidateCampaign
@@ -736,12 +738,13 @@ class CandidateCampaignListManager(models.Model):
                 candidate_list = list(candidate_query)
                 if len(candidate_list) and at_least_one_filter_used:
                     # entry exists
-                    status += 'CANDIDATE_ENTRY_EXISTS '
+                    status += 'CANDIDATE_ENTRY_EXISTS3 '
                     success = True
                     # if a single entry matches, update that entry
                     if len(candidate_list) == 1:
                         candidate = candidate_list[0]
                         candidate_found = True
+                        status += candidate.we_vote_id + " office: " + candidate.contest_office_we_vote_id + " "
                         keep_looking_for_duplicates = False
                     else:
                         # more than one entry found with a match in CandidateCampaign
