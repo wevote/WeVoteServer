@@ -116,12 +116,14 @@ def attach_ballotpedia_election_by_district_from_api(election, google_civic_elec
 
     elections_final_json_list = []
     # Tests are showing that election numbers aren't reused between primary & general
+    election_count = 0
+    election_found = False
     for district_string in chunks_of_district_strings:
         response = requests.get(BALLOTPEDIA_API_ELECTIONS_URL, params={
             "access_token":             BALLOTPEDIA_API_KEY,
             "filters[district][in]":    district_string,
             "filters[date][eq]":        election_day_text,
-            "limit":                    1000,
+            "order[date]":              "ASC",
         })
 
         # if not positive_value_exists(response.text):
@@ -145,24 +147,21 @@ def attach_ballotpedia_election_by_district_from_api(election, google_civic_elec
 
         ballotpedia_election_id = 0
         ballotpedia_kind_of_election = ""
-        election_count = 0
         elections_json_list = []
         if 'data' in structured_json:
             if 'meta' in structured_json:
                 if 'table' in structured_json['meta']:
                     if structured_json['meta']['table'] == 'election_dates':
                         elections_json_list = structured_json['data']
-                        election_count = len(elections_json_list)
 
-        election_found = False
-        if election_count == 0:
-            status += "ZERO_ELECTIONS-BALLOTPEDIA_ELECTION_INFO_NOT_FOUND: " + str(elections_retrieve_url) + " "
-        else:
+        if len(elections_json_list):
             elections_final_json_list = elections_final_json_list + elections_json_list
 
     if len(elections_final_json_list):
+        election_found = True
         status += "BALLOTPEDIA_ELECTION_DATA_FOUND "
         for one_election_json in elections_final_json_list:
+            election_count += 1
             ballotpedia_election_id = 0
             ballotpedia_kind_of_election = ""
             is_general_election = False

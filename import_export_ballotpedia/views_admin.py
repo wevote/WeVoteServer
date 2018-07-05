@@ -150,10 +150,12 @@ def attach_ballotpedia_election_view(request, election_local_id=0):
                              'Could not retrieve election data. Election could not be found.')
         return HttpResponseRedirect(reverse('election:election_list', args=()))
 
-    if positive_value_exists(ballotpedia_election_id) and positive_value_exists(ballotpedia_kind_of_election):
-        messages.add_message(request, messages.ERROR,
-                             'Required values already exist. (ballotpedia_election_id & ballotpedia_kind_of_election)')
-        return HttpResponseRedirect(reverse('election:election_summary', args=(election_local_id,)))
+    # We want to be able to run this again later in the election cycle
+    # if positive_value_exists(ballotpedia_election_id) and positive_value_exists(ballotpedia_kind_of_election):
+    #     messages.add_message(request, messages.ERROR,
+    #                          'Required values already exist. '
+    #                          '(ballotpedia_election_id & ballotpedia_kind_of_election)')
+    #     return HttpResponseRedirect(reverse('election:election_summary', args=(election_local_id,)))
 
     # Check to see if we have polling location data related to the region(s) covered by this election
     # We request the ballot data for each polling location as a way to build up our local data
