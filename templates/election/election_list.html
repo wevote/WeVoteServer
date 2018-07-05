@@ -52,7 +52,7 @@
 
 
 {% if election_list %}
-    <table class="table">
+    <table class="table table-bordered">
     {% for election in election_list %}
     {% if forloop.counter == 1 or forloop.counter|divisibleby:21 %}
     {# Show the header every 20 lines #}
@@ -68,6 +68,7 @@
               (w/o Candidates)</th>
             <th align="middle">Candidates<br />
               (w/o Photos)</th>
+            <th>Measures</th>
             <th>Ballot<br />
                Locations</th>
             <th align="middle">Voter Guides<br />
@@ -122,6 +123,13 @@
                 open&nbsp;json</a>
             {% endif %}
 
+            </td>
+            <td align="middle">
+            {% if election.measure_count %}
+                <a href="{% url 'measure:measure_list' %}?google_civic_election_id={{ election.google_civic_election_id }}{% if show_all_elections_this_year %}&show_all_elections_this_year=1{% elif show_all_elections %}&show_all_elections=1{% endif %}"
+                   target="_blank">
+                {{ election.measure_count|default_if_none:"" }}</a>
+            {% endif %}
             </td>
             <td align="middle">{% if election.ballot_returned_count %}{{ election.ballot_returned_count|default_if_none:"" }}
                 {% if election.ballot_location_display_option_on_count %} / {{ election.ballot_location_display_option_on_count|default_if_none:"" }}{% endif %}

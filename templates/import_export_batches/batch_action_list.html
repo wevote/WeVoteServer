@@ -211,10 +211,16 @@
 {% endif %}
 
 {% if batch_row_list %}
-    <table class="table table-condensed">
+    <table class="table table-bordered">
+    {% for one_batch_row in batch_row_list %}
+    {% if forloop.counter == 1 or forloop.counter|divisibleby:10 %}
+    {# Show the header every ~9 lines #}
+      <thead>
         <tr>
             <th colspan="2">
+              {% if forloop.counter == 1 %}
                 <a href="{% url 'import_export_batches:batch_header_mapping' %}?batch_header_id={{ batch_header_id }}&kind_of_batch={{ kind_of_batch }}&google_civic_election_id={{ google_civic_election_id }}">(edit header&nbsp;map)</a>
+              {% endif %}
             </th>
             <th>{{ batch_header_map.batch_header_map_000 }}</th>
             <th>{{ batch_header_map.batch_header_map_001 }}</th>
@@ -238,7 +244,8 @@
             {% if batch_header_map.batch_header_map_019 %}<th>{{ batch_header_map.batch_header_map_019 }}</th>{% endif %}
             {% if batch_header_map.batch_header_map_020 %}<th>{{ batch_header_map.batch_header_map_020 }}</th>{% endif %}
         </tr>
-    {% for one_batch_row in batch_row_list %}
+      </thead>
+    {% endif %}
         <tr>
             <td>{{ forloop.counter }}</td>
             <td><a href="{% url 'import_export_batches:batch_action_list_analyze_process' %}?batch_header_id={{ batch_header_id }}&batch_row_id={{ one_batch_row.id }}&state_code={{ one_batch_row.state_code }}">

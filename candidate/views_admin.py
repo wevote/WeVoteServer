@@ -31,6 +31,7 @@ from image.controllers import retrieve_and_save_ballotpedia_candidate_images
 from import_export_twitter.controllers import refresh_twitter_candidate_details
 from import_export_vote_smart.models import VoteSmartRatingOneCandidate
 from import_export_vote_smart.votesmart_local import VotesmartApiError
+from measure.models import ContestMeasure
 from politician.models import PoliticianManager
 from position.models import PositionEntered, PositionListManager
 import pytz
@@ -382,6 +383,12 @@ def candidate_list_view(request):
             if positive_value_exists(election.candidate_count):
                 election.candidates_without_photo_percentage = \
                     100 * (election.candidates_without_photo_count / election.candidate_count)
+
+            # How many measures?
+            measure_list_query = ContestMeasure.objects.all()
+            measure_list_query = measure_list_query.filter(
+                google_civic_election_id=election.google_civic_election_id)
+            election.measure_count = measure_list_query.count()
 
             # Number of Voter Guides
             voter_guide_query = VoterGuide.objects.filter(google_civic_election_id=election.google_civic_election_id)

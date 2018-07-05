@@ -1038,7 +1038,7 @@ def create_batch_row_action_contest_office(batch_description, batch_header_map, 
                 keep_looking_for_duplicates = False
             elif matching_results['multiple_entries_found']:
                 kind_of_action = IMPORT_TO_BE_DETERMINED
-                status += "MULTIPLE_CANDIDATES_FOUND "
+                status += "CREATE_BATCH_ROW_ACTION_OFFICE-MULTIPLE_CANDIDATES_FOUND "
                 keep_looking_for_duplicates = False
             elif not positive_value_exists(matching_results['success']):
                 kind_of_action = IMPORT_TO_BE_DETERMINED
@@ -1578,7 +1578,7 @@ def create_batch_row_action_candidate(batch_description, batch_header_map, one_b
             kind_of_action = IMPORT_ADD_TO_EXISTING
         elif matching_results['multiple_entries_found']:
             kind_of_action = CLEAN_DATA_MANUALLY
-            status += "MULTIPLE_CANDIDATES_FOUND "
+            status += "CREATE_BATCH_ROW_ACTION_CANDIDATE-MULTIPLE_CANDIDATES_FOUND: " + matching_results['status'] + " "
         elif not matching_results['success']:
             kind_of_action = IMPORT_QUERY_ERROR
         else:
@@ -1893,7 +1893,7 @@ def create_batch_row_action_position(batch_description, batch_header_map, one_ba
         elif matching_results['multiple_entries_found']:
             # Note: In some jurisdictions like NY, they list one candidate with multiple parties.
             #  We therefore have to store multiple candidates with the same name in these cases.
-            status += "MULTIPLE_CANDIDATES_FOUND "
+            status += "CREATE_BATCH_ROW_ACTION_POSITION-MULTIPLE_CANDIDATES_FOUND "
             if matching_results['candidate_list_found']:
                 # NOTE: It would be better if we matched to multiple candidates, instead of just the first one
                 candidate_list = matching_results['candidate_list']

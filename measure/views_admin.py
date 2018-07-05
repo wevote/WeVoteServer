@@ -484,6 +484,19 @@ def measure_list_view(request):
         results = election_manager.retrieve_upcoming_elections()
         election_list = results['election_list']
 
+    # Make sure we always include the current election in the election_list, even if it is older
+    if positive_value_exists(google_civic_election_id):
+        this_election_found = False
+        for one_election in election_list:
+            if convert_to_int(one_election.google_civic_election_id) == convert_to_int(google_civic_election_id):
+                this_election_found = True
+                break
+        if not this_election_found:
+            results = election_manager.retrieve_election(google_civic_election_id)
+            if results['election_found']:
+                one_election = results['election']
+                election_list.append(one_election)
+
     state_list = STATE_CODE_MAP
     sorted_state_list = sorted(state_list.items())
 
