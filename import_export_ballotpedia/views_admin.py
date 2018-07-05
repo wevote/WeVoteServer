@@ -218,9 +218,12 @@ def attach_ballotpedia_election_view(request, election_local_id=0):
         messages.add_message(request, messages.INFO,
                              'Ballotpedia election information attached. ')
     else:
+        # We limit the number of status characters we print to the screen to 2000 so we don't get
+        # the error "Not all temporary messages could be stored."
+        status += results['status']
         messages.add_message(request, messages.ERROR,
                              'Ballotpedia election information not attached. status: {status} '
-                             .format(status=results['status']))
+                             .format(status=status[:1000]))
     return HttpResponseRedirect(reverse('election:election_summary', args=(election_local_id,)) +
                                 '?google_civic_election_id=' + str(google_civic_election_id) +
                                 '&state_code=' + str(state_code))
