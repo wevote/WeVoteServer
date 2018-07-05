@@ -223,7 +223,7 @@ def attach_ballotpedia_election_view(request, election_local_id=0):
         status += results['status']
         messages.add_message(request, messages.ERROR,
                              'Ballotpedia election information not attached. status: {status} '
-                             .format(status=status[:1000]))
+                             .format(status=status[:2000]))
     return HttpResponseRedirect(reverse('election:election_summary', args=(election_local_id,)) +
                                 '?google_civic_election_id=' + str(google_civic_election_id) +
                                 '&state_code=' + str(state_code))

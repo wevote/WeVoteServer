@@ -246,8 +246,9 @@
 <ol>
 
   <li>
-    <a href="{% url 'ballotpedia:attach_ballotpedia_election' election.id %}?google_civic_election_id={{ election.google_civic_election_id }}&state_code={{ state_code }}">
-        Attach Ballotpedia Elections{% if state_code %} (for {{ state_code }}){% endif %}</a><br />
+    <a href="{% url 'ballotpedia:attach_ballotpedia_election' election.id %}?google_civic_election_id={{ election.google_civic_election_id }}&state_code={{ state_code }}"
+       target="_blank">
+        Attach Ballotpedia Elections{% if state_code %} (for {{ state_code }}){% endif %}</a> (in new window)<br />
         Reach out to Ballotpedia API and figure out the matching ballotpedia_election_ids.
   </li>
 
