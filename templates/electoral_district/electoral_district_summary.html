@@ -1,0 +1,484 @@
+{# templates/electoral_district/electoral_district_summary.html #}
+{% extends "template_base.html" %}
+
+{% block title %}{% if election %}{{ election.election_name }} Summary{% else %}No Election Found{% endif %}{% endblock %}
+
+{%  block content %}
+{% load template_filters %}
+<p>
+  <a href="{% url 'admin_tools:admin_home' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">< Back to Admin Home</a>&nbsp;&nbsp;&nbsp;
+  <a href="{% url 'election:election_list' %}">< Back to Elections</a>
+</p>
+<p>Jump to:
+    <a href="{% url 'election:election_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">Elections</a> -
+    <a href="{% url 'measure:measure_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">Measures</a> -
+    <a href="{% url 'office:office_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">Offices</a> -
+    <a href="{% url 'candidate:candidate_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">Candidates</a> -
+    <a href="{% url 'elected_office:elected_office_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">Elected Offices</a> -
+    <a href="{% url 'elected_official:elected_official_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">Elected Officials</a> -
+    <a href="{% url 'politician:politician_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">Politicians</a> -
+    <a href="{% url 'issue:issue_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">Issues</a> -
+    <a href="{% url 'organization:organization_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">Organizations</a> -
+    <a href="{% url 'position:position_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">Opinions/Positions</a> -
+    <a href="{% url 'voter_guide:voter_guide_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">Voter Guides</a> -
+    <a href="{% url 'polling_location:polling_location_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">Polling Locations</a>
+</p>
+
+{% if election %}
+
+<h1>{{ election.election_name }}</h1>
+
+{% if google_civic_election_id %}
+    <table class="table">
+        <thead>
+        <tr>
+            <th></th>
+            <th>Live?</th>
+            <th>Election Name</th>
+            <th>Date</th>
+            <th>Google Civic ID</th>
+            <th align="middle">Offices{% if election.offices_without_candidates_count %}<br />
+              (w/o Candidates){% endif %}</th>
+            <th align="middle">Candidates{% if election.candidates_without_photo_count %}<br />
+              (w/o Photos){% endif %}</th>
+            <th>Measures</th>
+            <th>Ballot<br />
+               Locations</th>
+            <th align="middle">Voter Guides<br />
+              (Public Positions)</th>
+        </tr>
+        </thead>
+        <tr>
+            <td>{{ forloop.counter }}</td>
+            <td align="middle">{% if election.include_in_list_for_voters %}<span class="font-weight-bold">Yes</span>{% endif %}</td>
+            <td>
+                <span class="{% if election.include_in_list_for_voters %}font-weight-bold{% endif %}">{{ election.election_name }}</span>
+                {% if election.internal_notes %}
+                <br /><span style="color: darkgray">{{ election.internal_notes|default_if_none:""|truncatechars:50 }}</span>
+                {% endif %}
+            </td>
+            <td>
+                {{ election.election_day_text }}
+                {% if election.days_until_election > 0 %} <span class="{% if election.days_until_election < 46 %}font-weight-bold text-danger{% endif %}">(in {{ election.days_until_election }} days)</span>{% endif %}
+            </td>
+            <td align="middle">{{ election.google_civic_election_id }}</td>
+            <td align="middle">
+            {% if election.offices_with_candidates_count %}
+                <a href="{% url 'office:office_list' %}?google_civic_election_id={{ election.google_civic_election_id }}{% if show_all_elections_this_year %}&show_all_elections_this_year=1{% elif show_all_elections %}&show_all_elections=1{% endif %}"
+                   target="_blank">
+                {{ election.offices_with_candidates_count|default_if_none:"" }}</a>
+            {% endif %}
+            {% if election.offices_without_candidates_count %}
+                <span style="color: darkgray">({{ election.offices_without_candidates_count|default_if_none:"" }})</span>
+            {% endif %}
+            </td>
+            <td align="middle">
+            {% if election.candidate_count %}
+                <a href="{% url 'candidate:candidate_list' %}?google_civic_election_id={{ election.google_civic_election_id }}{% if show_all_elections_this_year %}&show_all_elections_this_year=1{% elif show_all_elections %}&show_all_elections=1{% endif %}"
+                   target="_blank">
+                {{ election.candidate_count|default_if_none:"" }}</a>
+            {% endif %}
+            {% if election.candidates_without_photo_count %}
+                ({{ election.candidates_without_photo_count|default_if_none:"" }}
+                  {% if election.candidates_without_photo_percentage %}
+                    <span class="{% if election.candidates_without_photo_percentage > 33 %}font-weight-bold text-danger{% endif %}">
+                      : {{ election.candidates_without_photo_percentage|floatformat:"0" }}%</span>{% endif %})
+            {% endif %}
+            {% if election.candidate_count %}
+                <br />
+                <a href="{% url 'apis_v1:candidatesSyncOutView' %}?google_civic_election_id={{ election.google_civic_election_id }}"
+                   target="_blank">
+                open&nbsp;json</a>
+            {% endif %}
+            </td>
+            <td align="middle">
+            {% if election.measure_count %}
+                <a href="{% url 'measure:measure_list' %}?google_civic_election_id={{ election.google_civic_election_id }}{% if show_all_elections_this_year %}&show_all_elections_this_year=1{% elif show_all_elections %}&show_all_elections=1{% endif %}"
+                   target="_blank">
+                {{ election.measure_count|default_if_none:"" }}</a>
+            {% endif %}
+            </td>
+            <td align="middle">{% if election.ballot_returned_count %}{{ election.ballot_returned_count|default_if_none:"" }}
+                {% if election.ballot_location_display_option_on_count %} / {{ election.ballot_location_display_option_on_count|default_if_none:"" }}{% endif %}
+            {% endif %}
+            </td>
+            <td align="middle">
+            {% if election.voter_guides_count %}
+                <a href="{% url 'voter_guide:voter_guide_list' %}?google_civic_election_id={{ election.google_civic_election_id }}{% if show_all_elections_this_year %}&show_all_elections_this_year=1{% elif show_all_elections %}&show_all_elections=1{% endif %}"
+                   target="_blank">
+                {{ election.voter_guides_count|default_if_none:"" }}</a>
+            {% endif %}
+            {% if election.public_positions_count %}
+                <a href="{% url 'position:position_list' %}?google_civic_election_id={{ election.google_civic_election_id }}{% if show_all_elections_this_year %}&show_all_elections_this_year=1{% elif show_all_elections %}&show_all_elections=1{% endif %}"
+                   target="_blank">
+                ({{ election.public_positions_count|default_if_none:"" }})</a>
+            {% endif %}
+            </td>
+        </tr>
+    </table>
+{% endif %}
+
+<form action="{% url "election:election_edit_process" %}" method="post" class="form-horizontal">
+
+    <div class="form-group">
+        <label for="election_id" class="col-sm-3 control-label">Election Name{% if election %} (ID: {{ election.id }}){% endif %}</label>
+        <div class="col-sm-8">
+            <input type="text" name="election" id="election_id" class="form-control" disabled
+                   value="{% if election %}{{ election.election_name }}{% endif %}" />
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label for="include_in_list_for_voters_id" class="col-sm-3 control-label"></label>
+        <div class="col-sm-8">
+            <input type="checkbox" name="include_in_list_for_voters" id="include_in_list_for_voters_id" disabled
+               value={% if election %}{% if election.include_in_list_for_voters %}True{% else %}False{% endif %}{% else %}False{% endif %}
+               {% if election.include_in_list_for_voters %}checked{% endif %} />
+            Show in lists of elections for voters (<a href="{% url 'election:election_edit' election.id %}">edit</a>)
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label for="google_civic_election_id_id" class="col-sm-3 control-label">Google Civic ID</label>
+        <div class="col-sm-8">
+            <input type="text" name="google_civic_election_id" id="google_civic_election_id_id" class="form-control" disabled
+                   value="{% if election %}{{ election.google_civic_election_id|default_if_none:"" }}{% endif %}" />
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label for="election_day_text_id" class="col-sm-3 control-label">Election Day
+            <span class="no_break">(Format: "YYYY-MM-DD")</span></label>
+        <div class="col-sm-8">
+            <input type="text" name="election_day_text" id="election_day_text_id" class="form-control" disabled
+                   value="{% if election %}{{ election.election_day_text|default_if_none:"" }}{% endif %}" />
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label for="state_id" class="col-sm-3 control-label">State Code</label>
+        <div class="col-sm-8">
+            <input type="text" name="state" id="state_id" class="form-control" disabled
+                   value="{% if election %}{{ election.state_code|default_if_none:"" }}{% endif %}" />
+        </div>
+    </div>
+
+{#    <div class="form-group">#}
+{#        <label for="raw_ocd_division_id_id" class="col-sm-3 control-label">OCD Division ID</label>#}
+{#        <div class="col-sm-8">#}
+{#            <input type="text" name="raw_ocd_division_id" id="raw_ocd_division_id_id" class="form-control" disabled#}
+{#                   value="{% if election %}{{ election.raw_ocd_division_id|default_if_none:"" }}{% endif %}" />#}
+{#        </div>#}
+{#    </div>#}
+
+    <div class="form-group">
+        <label for="google_civic_election_id_id" class="col-sm-3 control-label">Ballotpedia Elections</label>
+        <div class="col-sm-8">
+        {% if ballotpedia_election_list %}
+            <table class="table">
+                <tr>
+                    <th></th>
+                    <th>ID</th>
+                    <th>District Name</th>
+                    <th>District Type</th>
+                    <th colspan="2">Election Type</th>
+                </tr>
+            {% for ballotpedia_election in ballotpedia_election_list %}
+                <tr>
+                    <td><span style="color: darkgray">{{ forloop.counter }}</span></td>
+                    <td>{{ ballotpedia_election.ballotpedia_election_id|default_if_none:"" }}</td>
+                    <td>{{ ballotpedia_election.district_name|default_if_none:"" }}</td>
+                    <td><span class="u-no-break">{{ ballotpedia_election.district_type|default_if_none:"" }}</span></td>
+                    <td>{{ ballotpedia_election.election_type|default_if_none:"" }}</td>
+                    <td>{{ ballotpedia_election.election_description|default_if_none:"" }}</td>
+                </tr>
+            {% endfor %}
+            </table>
+            {% if more_than_three_ballotpedia_elections %}
+                {% if all_ballotpedia_elections_shown %}
+                     <a href="{% url 'election:election_summary' election.id %}">hide most Ballotpedia elections</a>
+                {% else %}
+                     <a href="{% url 'election:election_summary' election.id %}?show_all_ballotpedia_elections=1">show all Ballotpedia elections</a>
+                {% endif %}
+            {% endif %}
+        {% else %}
+            <input type="text" name="ballotpedia_election_id" id="ballotpedia_election_id_id" class="form-control" disabled
+                   value="{% if election %}{{ election.ballotpedia_election_id|default_if_none:"" }}{% endif %}" />
+        {% endif %}{# End of if ballotpedia_election_list #}
+        </div>
+    </div>
+
+{% if ballotpedia_election_list %}
+{% else %}
+    <div class="form-group">
+        <label for="ballotpedia_kind_of_election_id" class="col-sm-3 control-label">Ballotpedia Kind of Election</label>
+        <div class="col-sm-8">
+            <input type="text" name="ballotpedia_kind_of_election" id="ballotpedia_kind_of_election_id"
+                   class="form-control"
+                   disabled
+                   value="{% if election %}{{ election.ballotpedia_kind_of_election|default_if_none:"" }}{% endif %}" />
+        </div>
+    </div>
+{% endif %}
+
+    <div class="form-group">
+        <label for="internal_notes_id" class="col-sm-3 control-label">Internal Notes about Election Data Gathering</label>
+        <div class="col-sm-8">
+            <textarea name="internal_notes"
+                      class="form-control animated"
+                      disabled
+                      id="internal_notes_id"
+                      placeholder="Status of data gathering?">{% if election %}{{ election.internal_notes|default_if_none:"" }}{% else %}{{ internal_notes|default_if_none:"" }}{% endif %}</textarea>
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label for="state_id" class="col-sm-3 control-label"></label>
+        <div class="col-sm-8">
+            <a href="{% url 'election:election_edit' election.id %}">edit election</a>
+        </div>
+    </div>
+</form>
+
+<div class="col-sm-12">
+
+    <p>
+        <a href="{% url 'office:office_list' %}?google_civic_election_id={{ election.google_civic_election_id }}&state_code={{ state_code }}">
+            See Offices for this Election</a>,
+        <a href="{% url 'candidate:candidate_list' %}?google_civic_election_id={{ election.google_civic_election_id }}&state_code={{ state_code }}">
+            See Candidates for this Election</a>
+    </p>
+
+<strong>Steps to Prepare for Election</strong>
+<ol>
+
+  <li>
+    <a href="{% url 'ballotpedia:attach_ballotpedia_election' election.id %}?google_civic_election_id={{ election.google_civic_election_id }}&state_code={{ state_code }}"
+       target="_blank">
+        Attach Ballotpedia Elections{% if state_code %} (for {{ state_code }}){% endif %}</a> (in new window)<br />
+        Reach out to Ballotpedia API and figure out the matching ballotpedia_election_ids.
+  </li>
+
+  <li>
+    <a href="{% url 'ballotpedia:retrieve_ballotpedia_data_for_polling_locations' election.id %}?google_civic_election_id={{ election.google_civic_election_id }}&state_code={{ state_code }}&retrieve_races=1" target="_blank">
+        Ballotpedia: Retrieve Races for this Election{% if state_code %} (for {{ state_code }}){% endif %}</a> (in new window)<br />
+        Reach out to Ballotpedia API and retrieve the races for all districts covered by this election.
+        This needs to be run before trying to retrieve ballot items. It is also a good idea to merge/groom the races
+        data before "Retrieve Ballots".
+        IFF this script times
+        out, <a href="{% url 'import_export_batches:batch_list' %}?kind_of_batch=CONTEST_OFFICE&google_civic_election_id={{ election.google_civic_election_id }}&state_code={{ state_code }}" target="_blank">
+        go here after ~5 minutes to see the results.</a>
+  </li>
+
+  <li>
+    <a href="{% url 'ballotpedia:retrieve_candidates' %}?google_civic_election_id={{ election.google_civic_election_id }}&state_code={{ state_code }}" target="_blank">
+        Ballotpedia: Retrieve Candidates for this Election{% if state_code %} (for {{ state_code }}){% endif %}</a> (in new window)<br />
+        Reach out to Ballotpedia API and retrieve the candidates for all offices in this election.
+        IFF this script times
+        out, <a href="{% url 'import_export_batches:batch_list' %}?kind_of_batch=CANDIDATE&google_civic_election_id={{ election.google_civic_election_id }}&state_code={{ state_code }}" target="_blank">
+        go here after ~5 minutes to see the results.</a>
+  </li>
+
+  <li>
+    <a href="{% url 'ballotpedia:retrieve_ballotpedia_data_for_polling_locations' election.id %}?google_civic_election_id={{ election.google_civic_election_id }}&state_code={{ state_code }}&retrieve_measures=1&import_limit=100" target="_blank">
+        Ballotpedia: Retrieve Measures for this Election{% if state_code %} (for {{ state_code }}){% endif %}</a> (in new window)<br />
+        Reach out to Ballotpedia API and retrieve the measures for all districts covered by this election.
+        This needs to be run before trying to retrieve ballot items. It is also a good idea to merge/groom the measures
+        data before "Retrieve Ballots".
+        IFF this script times
+        out, <a href="{% url 'import_export_batches:batch_list' %}?kind_of_batch=MEASURE&google_civic_election_id={{ election.google_civic_election_id }}&state_code={{ state_code }}" target="_blank">
+        go here after ~5 minutes to see the results.</a>
+  </li>
+
+  <li>
+    <a href="{% url 'ballotpedia:retrieve_ballotpedia_data_for_polling_locations' election.id %}?google_civic_election_id={{ election.google_civic_election_id }}&state_code={{ state_code }}" target="_blank">
+        Ballotpedia: Retrieve Ballots (based on Polling Locations) for this Election{% if state_code %} (for {{ state_code }}){% endif %}</a> (in new window)<br />
+        Reach out to Ballotpedia API and ask for ballots from many polling locations so we can stitch
+        together the measures, races and candidates. Add "import_limit" as a URL variable to increase the number of
+        polling locations to retrieve ballots from.
+        IFF this script times
+        out, <a href="{% url 'import_export_batches:batch_set_list' %}?kind_of_batch=IMPORT_BALLOT_ITEM&google_civic_election_id={{ election.google_civic_election_id }}&state_code={{ state_code }}" target="_blank">
+        go here after ~5 minutes to see the results.</a>
+  </li>
+
+{% if election.google_civic_election_id|convert_to_int < 1000000 %}
+  <li>
+    <a href="{% url 'election:election_all_ballots_retrieve' election.id %}?state_code={{ state_code }}" target="_blank">
+        Google: Retrieve Ballot Data for this Election{% if state_code %} (for {{ state_code }}){% endif %}</a><br />
+        Reach out to Google Civic API and ask for ballots from many polling locations so we can stitch
+        together the measures, races and candidates. Add "import_limit" as a URL variable to increase the number of
+        polling locations to retrieve ballots from.
+  </li>
+{% else %}
+  <li>
+    (To retrieve Ballot Data from Google Civic, add google_civic_election_id from Google.)<br />
+  </li>
+{% endif %}
+</ol>
+
+  <strong>Data Grooming Tools</strong>
+
+  <ul>
+  <li>
+  <a href="{% url 'ballot:update_ballot_returned_latitude_and_longitude' %}?google_civic_election_id={{ election.google_civic_election_id }}&state_code={{ state_code }}">
+  Update Lat/Long{% if state_code %} for {{ state_code }}{% endif %}: {{ entries_missing_latitude_longitude }} missing</a>
+  </li>
+
+  <li>
+  <a href="{% url 'ballot:ballot_item_list_edit' 0 %}?google_civic_election_id={{ election.google_civic_election_id }}&state_code={{ state_code }}">
+      Create Ballot for this Election for one Location</a> (so voters can find a ballot before Google Civic data is live)
+  </li>
+
+  <li>
+  <a href="{% url 'ballot:ballot_items_repair' %}?local_election_id={{ election.id }}&google_civic_election_id={{ election.google_civic_election_id }}&state_code={{ state_code }}">
+      Repair Ballot Items for this Election (Update Voter Ballot Items with Latest Cached Office/Measure info)</a>
+  </li>
+
+  <li>
+  <a href="{% url 'ballot:ballot_items_repair' %}?local_election_id={{ election.id }}&google_civic_election_id={{ election.google_civic_election_id }}&state_code={{ state_code }}&refresh_from_google=1">
+      Refresh Voter Ballot Items From Google for Voter-specific Addresses</a>
+  </li>
+
+{% if election.google_civic_election_id|convert_to_int >= 1000000 %}
+  <li>
+        <a href="{% url 'election:election_migration' %}?we_vote_election_id={{ election.google_civic_election_id }}">
+            Migrate this Data into Google Civic Election</a> (after data is available from Google Civic)
+  </li>
+{% endif %}
+</ul>
+
+<form name="ballot_returned_search_form" method="get" action="{% url 'election:election_summary' election.id %}">
+    {% csrf_token %}
+
+    {% if state_list %}
+        <select id="state_code_id" name="state_code">
+            <option value="" {% if '' == state_code %} selected="selected"{% endif %}>
+                -- Filter by State Served --</option>
+        {% for key, state in state_list %}
+            <option value="{{ key }}"
+                    {% if key|lower == state_code|lower %} selected="selected"{% endif %}>
+                {{ state }}</option>
+        {% endfor %}
+        </select>
+    {% endif %}{# End of if state_list #}
+
+{% if ballot_returned_search %}
+    <a href="{% url 'election:election_summary' election.id %}">
+        clear search</a>
+{% endif %}
+    <input type="text" name="ballot_returned_search" id="ballot_returned_id" value="{{ ballot_returned_search|default_if_none:"" }}" />
+    <input type="submit" value="Search for ballot returned" />
+</form>
+
+{% if ballot_returned_list %}
+    {{ ballot_returned_count_entire_election }} Ballot Returned Entries. These are ballots that voters can find from WebApp.<br />
+
+    <table class="table">
+    {% for ballot_returned in ballot_returned_list %}
+    {% if forloop.counter == 1 or forloop.counter|divisibleby:35 %}
+       <thead>
+       <tr>
+            <th></th>
+            <th><span class="u-no-break">Ballot Returned ID</span></th>
+            <th>Display Name</th>
+            <th>Shortcut?</th>
+            <th>Text for Map Search</th>
+            <th>Lat/Long?</th>
+            <th><a href="{% url 'election:election_summary' election.id %}?google_civic_election_id={{ election.google_civic_election_id }}&state_code={{ state_code }}&show_offices_and_candidates=1">
+                Offices & Candidates</a></th>
+            <th>Ballot Items</th>
+            <th>Voter</th>
+            <th>Polling Location</th>
+        </tr>
+        </thead>
+    {% endif %}
+        <tr>
+            <td>{{ forloop.counter }}</td>
+            <td><a href="{% url 'ballot:ballot_item_list_edit' ballot_returned.id %}" target="_blank">{{ ballot_returned.we_vote_id }}</a></td>
+            <td align="middle">{% if ballot_returned.ballot_location_display_name %}{{ ballot_returned.ballot_location_display_name }}{% endif %}</td>
+            <td align="middle">{% if ballot_returned.ballot_location_shortcut %}{{ ballot_returned.ballot_location_shortcut }}{% endif %}{% if ballot_returned.ballot_location_display_option_on %} ON{% endif %}</td>
+            <td>{{ ballot_returned.text_for_map_search }}</td>
+            <td align="middle">{% if ballot_returned.latitude %}yes{% endif %}</td>
+            <td align="middle">{% if ballot_returned.office_and_candidate_text %}<span class="u-no-break">{{ ballot_returned.office_and_candidate_text }}</span>{% endif %}</td>
+            <td align="middle">{% if ballot_returned.ballot_items_count %}{{ ballot_returned.ballot_items_count }}{% endif %}</td>
+            <td>{% if ballot_returned.voter_id and ballot_returned.voter_id != 0 %}
+              <a href="{% url 'voter:voter_summary' ballot_returned.voter_id %}" target="_blank">{{ ballot_returned.voter_id }}</a>
+            {% endif %}</td>
+            <td>
+                {% if ballot_returned.polling_location_we_vote_id %}
+                <a href="{% url 'polling_location:polling_location_summary_by_we_vote_id' ballot_returned.polling_location_we_vote_id %}" target="_blank">
+                {{ ballot_returned.polling_location_we_vote_id|default_if_none:"" }}
+                </a>
+                {% endif %}
+            </td>
+        </tr>
+    {% endfor %}
+    </table>
+    <br />
+    <br />
+    <br />
+    <br />
+{% else %}
+    <p>(no ballot_returned data found)</p>
+{% endif %}
+
+
+{% if voter_ballot_saved_list %}
+  {{ voter_ballot_saved_count_entire_election }} Voter Ballot Saved entries.
+  There is one entry for every voter linking the voter to a ballot.<br />
+
+     <table border="1" cellpadding="10">
+     {% for voter_ballot_saved in voter_ballot_saved_list %}
+     {% if forloop.counter == 1 or forloop.counter|divisibleby:35 %}
+        <tr>
+            <td></td>
+            <td>ID</td>
+            <td>Ballot Returned ID</td>
+            <td>Original Text for Map Search</td>
+            <td>Voter Id</td>
+            <td>Polling Location</td>
+        </tr>
+     {% endif %}
+        <tr>
+            <td>{{ forloop.counter }}</td>
+            <td>{{ voter_ballot_saved.id }}</td>
+            <td><a href="{% url 'ballot:ballot_item_list_edit_by_we_vote_id' voter_ballot_saved.ballot_returned_we_vote_id %}" target="_blank">{{ voter_ballot_saved.ballot_returned_we_vote_id }}</a></td>
+            <td>{{ voter_ballot_saved.original_text_for_map_search }}</td>
+            <td>{% if voter_ballot_saved.voter_id and voter_ballot_saved.voter_id != 0 %}
+              <a href="{% url 'voter:voter_summary' voter_ballot_saved.voter_id %}" target="_blank">{{ voter_ballot_saved.voter_id }}</a>
+            {% endif %}</td>
+            <td>
+              {% if voter_ballot_saved.polling_location_we_vote_id_source %}
+                copied from
+                <a href="{% url 'polling_location:polling_location_summary_by_we_vote_id' voter_ballot_saved.polling_location_we_vote_id_source %}" target="_blank">
+                {{ voter_ballot_saved.polling_location_we_vote_id_source }}
+                </a>
+              {% endif %}
+            </td>
+        </tr>
+     {% endfor %}
+     </table>
+     <br />
+     <br />
+     <br />
+     <br />
+{% else %}
+     <p>(no voter_ballot_saved data found)</p>
+{% endif %}
+
+    </div>
+{% else %}
+
+    <h1>No Election Found</h1>
+    Please visit the <a href="{% url 'election:election_list' %}">Election List</a> page.
+
+{% endif %}
+    <script>
+        $(function() {
+            $('#state_code_id').change(function() {
+                this.form.submit();
+            });
+        });
+    </script>
+
+{% endblock %}

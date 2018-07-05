@@ -502,11 +502,13 @@ def retrieve_ballot_items_from_polling_location(
 
 
 def retrieve_ballotpedia_district_id_list_for_polling_location(
-        google_civic_election_id, polling_location_we_vote_id="", polling_location=None):
+        google_civic_election_id, polling_location_we_vote_id="", polling_location=None,
+        force_district_retrieve_from_ballotpedia=False):
     success = True
     status = ""
     polling_location_found = False
     ballotpedia_district_id_list = []
+    force_district_retrieve_from_ballotpedia = positive_value_exists(force_district_retrieve_from_ballotpedia)
 
     if not positive_value_exists(google_civic_election_id):
         results = {
@@ -549,7 +551,7 @@ def retrieve_ballotpedia_district_id_list_for_polling_location(
         electoral_district_manager = ElectoralDistrictManager()
         results = electoral_district_manager.retrieve_ballotpedia_district_ids_for_polling_location(
             polling_location_we_vote_id)
-        if results['ballotpedia_district_id_list_found']:
+        if results['ballotpedia_district_id_list_found'] and not force_district_retrieve_from_ballotpedia:
             ballotpedia_district_id_list = results['ballotpedia_district_id_list']
         else:
             latitude_longitude = str(polling_location.latitude) + "," + str(polling_location.longitude)
