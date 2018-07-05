@@ -25,7 +25,7 @@ from exception.models import handle_record_found_more_than_one_exception, handle
 from image.models import WeVoteImageManager
 from import_export_google_civic.controllers import retrieve_one_ballot_from_google_civic_api, \
     store_one_ballot_from_google_civic_api
-from measure.models import ContestMeasureList
+from measure.models import ContestMeasure, ContestMeasureList
 from office.models import ContestOffice, ContestOfficeListManager
 from pledge_to_vote.models import PledgeToVoteManager
 from polling_location.models import PollingLocation
@@ -756,6 +756,12 @@ def election_list_view(request):
             election.candidates_without_photo_percentage = \
                 100 * (election.candidates_without_photo_count / election.candidate_count)
 
+        # How many measures?
+        measure_list_query = ContestMeasure.objects.all()
+        measure_list_query = measure_list_query.filter(
+            google_civic_election_id=election.google_civic_election_id)
+        election.measure_count = measure_list_query.count()
+
         # Number of Voter Guides
         voter_guide_query = VoterGuide.objects.filter(google_civic_election_id=election.google_civic_election_id)
         election.voter_guides_count = voter_guide_query.count()
@@ -1006,6 +1012,12 @@ def election_summary_view(request, election_local_id=0, google_civic_election_id
         if positive_value_exists(election.candidate_count):
             election.candidates_without_photo_percentage = \
                 100 * (election.candidates_without_photo_count / election.candidate_count)
+
+        # How many measures?
+        measure_list_query = ContestMeasure.objects.all()
+        measure_list_query = measure_list_query.filter(
+            google_civic_election_id=election.google_civic_election_id)
+        election.measure_count = measure_list_query.count()
 
         # Number of Voter Guides
         voter_guide_query = VoterGuide.objects.filter(
