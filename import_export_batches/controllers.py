@@ -1578,7 +1578,7 @@ def create_batch_row_action_candidate(batch_description, batch_header_map, one_b
             kind_of_action = IMPORT_ADD_TO_EXISTING
         elif matching_results['multiple_entries_found']:
             kind_of_action = CLEAN_DATA_MANUALLY
-            status += "MULTIPLE_ORGANIZATIONS_FOUND "
+            status += "MULTIPLE_CANDIDATES_FOUND "
         elif not matching_results['success']:
             kind_of_action = IMPORT_QUERY_ERROR
         else:
@@ -1859,7 +1859,7 @@ def create_batch_row_action_position(batch_description, batch_header_map, one_ba
             organization_id = organization.id
             organization_name = organization.organization_name
         elif matching_results['multiple_entries_found']:
-            status += "MULTIPLE_ORGANIZATIONS_FOUND "
+            status += "MULTIPLE_POSITIONS_FOUND "
         else:
             status += matching_results['status']
 
@@ -1918,7 +1918,7 @@ def create_batch_row_action_position(batch_description, batch_header_map, one_ba
             contest_measure_we_vote_id = measure.we_vote_id
             contest_measure_id = measure.id
         elif matching_results['multiple_entries_found']:
-            status += "MULTIPLE_ORGANIZATIONS_FOUND "
+            status += "MULTIPLE_MEASURES_FOUND "
         elif not matching_results['success']:
             status += matching_results['status']
         else:
