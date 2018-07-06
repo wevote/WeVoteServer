@@ -1187,7 +1187,8 @@ class BatchManager(models.Model):
 
         return batch_row_action_count
 
-    def retrieve_unprocessed_batch_set_info_by_election_and_kind(self, google_civic_election_id, batch_set_source):
+    def retrieve_unprocessed_batch_set_info_by_election_and_set_source(
+            self, google_civic_election_id, batch_set_source):
 
         batch_set_query = BatchSet.objects.all()
         batch_set_query = batch_set_query.filter(google_civic_election_id=google_civic_election_id)
@@ -1195,6 +1196,7 @@ class BatchManager(models.Model):
         batch_set_query = batch_set_query.order_by('-id')
         batch_set_list = list(batch_set_query)
 
+        batch_of_ballot_items_not_processed = 0
         batch_set_id = 0
         total_ballot_locations_count = 0
         if positive_value_exists(len(batch_set_list)):
@@ -1204,15 +1206,20 @@ class BatchManager(models.Model):
             batch_description_query = BatchDescription.objects.all()
             batch_description_query = batch_description_query.filter(batch_set_id=one_batch_set.id)
             total_ballot_locations_count = batch_description_query.count()
-            # batch_description_list = list(batch_description_query)
-            #
-            # for one_batch_description in batch_description_list:
-            #     pass
-
-            # Note we could do a deeper dive to figure out which batch_row_action_ballot_items were actually processed.
+            batch_description_list = list(batch_description_query)
+            for one_batch_description in batch_description_list:
+                # For each Batch Description, see if there are BatchRowActionBallotItem entries
+                batch_row_action_ballot_item_query = BatchRowActionBallotItem.objects.all()
+                batch_row_action_ballot_item_query = batch_row_action_ballot_item_query.filter(
+                    batch_header_id=one_batch_description.batch_header_id)
+                batch_row_action_ballot_item_query = batch_row_action_ballot_item_query.filter(
+                    kind_of_action=IMPORT_ADD_TO_EXISTING)
+                # If there aren't any "update" entries, count as unprocessed
+                if not positive_value_exists(batch_row_action_ballot_item_query.count()):
+                    batch_of_ballot_items_not_processed += 1
 
         results = {
-            'batch_rows_unprocessed': total_ballot_locations_count,
+            'batches_not_processed': batch_of_ballot_items_not_processed,
             'batch_set_id': batch_set_id,
         }
         return results

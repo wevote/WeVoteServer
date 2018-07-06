@@ -612,10 +612,12 @@ class BallotItemListManager(models.Model):
 
     def delete_all_ballot_items_for_voter(self, voter_id, google_civic_election_id):
         ballot_item_list_deleted = False
+        ballot_items_deleted_count = 0
         try:
             ballot_item_queryset = BallotItem.objects.filter(voter_id=voter_id)
             if positive_value_exists(google_civic_election_id):
                 ballot_item_queryset = ballot_item_queryset.filter(google_civic_election_id=google_civic_election_id)
+            ballot_items_deleted_count = ballot_item_queryset.count()
             ballot_item_queryset.delete()
 
             ballot_item_list_deleted = True
@@ -623,8 +625,10 @@ class BallotItemListManager(models.Model):
         except BallotItem.DoesNotExist:
             # No ballot items found. Not a problem.
             status = 'NO_BALLOT_ITEMS_DELETED_DoesNotExist'
+            ballot_items_deleted_count = 0
         except Exception as e:
             handle_exception(e, logger=logger)
+            ballot_items_deleted_count = 0
             status = 'FAILED delete_all_ballot_items_for_voter ' \
                      '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
 
@@ -634,6 +638,7 @@ class BallotItemListManager(models.Model):
             'google_civic_election_id': google_civic_election_id,
             'voter_id':                 voter_id,
             'ballot_item_list_deleted': ballot_item_list_deleted,
+            'ballot_items_deleted_count':   ballot_items_deleted_count,
         }
         return results
 
@@ -822,7 +827,7 @@ class BallotItemListManager(models.Model):
         except Exception as e:
             handle_exception(e, logger=logger)
             status = 'FAILED retrieve_all_ballot_items_for_contest_office ' \
-                     '{error} [type: {error_type}]'.format(error=e.message, error_type=type(e))
+                     '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
 
         results = {
             'success':                      True if ballot_item_list_found else False,
@@ -831,6 +836,48 @@ class BallotItemListManager(models.Model):
             'office_we_vote_id':            office_we_vote_id,
             'ballot_item_list_found':       ballot_item_list_found,
             'ballot_item_list':             ballot_item_list,
+        }
+        return results
+
+    def delete_all_ballot_items_for_contest_office(self, office_id, office_we_vote_id):
+        ballot_items_deleted_count = 0
+
+        if not positive_value_exists(office_id) and not positive_value_exists(office_we_vote_id):
+            status = 'VALID_OFFICE_ID_AND_OFFICE_WE_VOTE_ID_MISSING'
+            success = False
+            results = {
+                'success':                  success,
+                'status':                   status,
+                'office_id':                office_id,
+                'office_we_vote_id':        office_we_vote_id,
+                'ballot_items_deleted_count':   ballot_items_deleted_count,
+            }
+            return results
+
+        try:
+            ballot_item_queryset = BallotItem.objects.all()
+            if positive_value_exists(office_id):
+                ballot_item_queryset = ballot_item_queryset.filter(contest_office_id=office_id)
+            elif positive_value_exists(office_we_vote_id):
+                ballot_item_queryset = ballot_item_queryset.filter(contest_office_we_vote_id=office_we_vote_id)
+            ballot_items_deleted_count = ballot_item_queryset.count()
+            ballot_item_queryset.delete()
+
+            status = 'BALLOT_ITEMS_DELETE, delete_all_ballot_items_for_contest_office '
+            success = True
+        except Exception as e:
+            success = False
+            ballot_items_deleted_count = 0
+            handle_exception(e, logger=logger)
+            status = 'FAILED delete_all_ballot_items_for_contest_office ' \
+                     '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
+
+        results = {
+            'success':                      success,
+            'status':                       status,
+            'office_id':                    office_id,
+            'office_we_vote_id':            office_we_vote_id,
+            'ballot_items_deleted_count':   ballot_items_deleted_count,
         }
         return results
 
