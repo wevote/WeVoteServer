@@ -615,22 +615,22 @@ class ContestOfficeManager(models.Model):
                 contest_office_on_stage = ContestOffice.objects.get(id=contest_office_id)
                 contest_office_id = contest_office_on_stage.id
                 contest_office_we_vote_id = contest_office_on_stage.we_vote_id
-                status = "RETRIEVE_OFFICE_FOUND_BY_ID"
+                status = "RETRIEVE_OFFICE_FOUND_BY_ID "
             elif positive_value_exists(contest_office_we_vote_id):
                 contest_office_on_stage = ContestOffice.objects.get(we_vote_id__iexact=contest_office_we_vote_id)
                 contest_office_id = contest_office_on_stage.id
                 contest_office_we_vote_id = contest_office_on_stage.we_vote_id
-                status = "RETRIEVE_OFFICE_FOUND_BY_WE_VOTE_ID"
+                status = "RETRIEVE_OFFICE_FOUND_BY_WE_VOTE_ID "
             elif positive_value_exists(ctcl_uuid):
                 contest_office_on_stage = ContestOffice.objects.get(ctcl_uuid=ctcl_uuid)
                 contest_office_id = contest_office_on_stage.id
                 contest_office_we_vote_id = contest_office_on_stage.we_vote_id
-                status = "RETRIEVE_OFFICE_FOUND_BY_CTCL_UUID"
+                status = "RETRIEVE_OFFICE_FOUND_BY_CTCL_UUID "
             elif positive_value_exists(maplight_id):
                 contest_office_on_stage = ContestOffice.objects.get(maplight_id=maplight_id)
                 contest_office_id = contest_office_on_stage.id
                 contest_office_we_vote_id = contest_office_on_stage.we_vote_id
-                status = "RETRIEVE_OFFICE_FOUND_BY_MAPLIGHT_ID"
+                status = "RETRIEVE_OFFICE_FOUND_BY_MAPLIGHT_ID "
             elif positive_value_exists(ballotpedia_race_id) and positive_value_exists(google_civic_election_id):
                 ballotpedia_race_id_integer = convert_to_int(ballotpedia_race_id)
                 contest_office_on_stage = ContestOffice.objects.get(
@@ -638,16 +638,16 @@ class ContestOfficeManager(models.Model):
                     google_civic_election_id=google_civic_election_id)
                 contest_office_id = contest_office_on_stage.id
                 contest_office_we_vote_id = contest_office_on_stage.we_vote_id
-                status = "RETRIEVE_OFFICE_FOUND_BY_BALLOTPEDIA_OFFICE_ID"
+                status = "RETRIEVE_OFFICE_FOUND_BY_BALLOTPEDIA_OFFICE_ID "
             else:
-                status = "RETRIEVE_OFFICE_SEARCH_INDEX_MISSING"
+                status = "RETRIEVE_OFFICE_SEARCH_INDEX_MISSING "
         except ContestOffice.MultipleObjectsReturned as e:
             handle_record_found_more_than_one_exception(e, logger=logger)
             exception_multiple_object_returned = True
-            status = "RETRIEVE_OFFICE_MULTIPLE_OBJECTS_RETURNED"
+            status = "RETRIEVE_OFFICE_MULTIPLE_OBJECTS_RETURNED "
         except ContestOffice.DoesNotExist:
             exception_does_not_exist = True
-            status = "RETRIEVE_OFFICE_NOT_FOUND"
+            status = "RETRIEVE_OFFICE_NOT_FOUND "
 
         results = {
             'success':                      True if convert_to_int(contest_office_id) > 0 else False,

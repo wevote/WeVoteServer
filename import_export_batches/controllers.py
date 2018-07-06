@@ -992,7 +992,7 @@ def create_batch_row_action_contest_office(batch_description, batch_header_map, 
                 status += "INSUFFICIENT_DATA_FOR_BATCH_ROW_ACTION_CONTEST_OFFICE_CREATE "
                 keep_looking_for_duplicates = False
 
-        if keep_looking_for_duplicates:
+        if keep_looking_for_duplicates and positive_value_exists(ballotpedia_race_id):
             contest_office_manager = ContestOfficeManager()
             matching_results = contest_office_manager.retrieve_contest_office_from_ballotpedia_race_id(
                 ballotpedia_race_id, google_civic_election_id)
@@ -1002,7 +1002,7 @@ def create_batch_row_action_contest_office(batch_description, batch_header_map, 
                 contest_office_we_vote_id = contest_office.we_vote_id
                 kind_of_action = IMPORT_ADD_TO_EXISTING
 
-        if keep_looking_for_duplicates:
+        if keep_looking_for_duplicates and not positive_value_exists(ballotpedia_race_id):
             contest_office_list_manager = ContestOfficeListManager()
             matching_results = contest_office_list_manager.retrieve_contest_offices_from_non_unique_identifiers(
                 contest_office_name, google_civic_election_id, state_code, district_id, contest_office_district_name)
@@ -1025,7 +1025,8 @@ def create_batch_row_action_contest_office(batch_description, batch_header_map, 
                 kind_of_action = IMPORT_CREATE
 
         # we haven't found contest_office yet. Look up for existing contest_office using candidate_name & state_code
-        if keep_looking_for_duplicates and positive_value_exists(candidate_name):
+        if keep_looking_for_duplicates and positive_value_exists(candidate_name) \
+                and not positive_value_exists(ballotpedia_race_id):
             candidate_campaign_list_manager = CandidateCampaignListManager()
             matching_results = candidate_campaign_list_manager.retrieve_candidates_from_non_unique_identifiers(
                 google_civic_election_id, state_code, '', candidate_name)
@@ -1047,6 +1048,10 @@ def create_batch_row_action_contest_office(batch_description, batch_header_map, 
                 keep_looking_for_duplicates = False
             else:
                 kind_of_action = IMPORT_CREATE
+        else:
+            # If we are here, then we have exhausted all of the ways we match offices, so we can assume the
+            #  office needs to be created
+            kind_of_action = IMPORT_CREATE
 
     # If we are missing required variables, don't create
     if kind_of_action == IMPORT_CREATE:
@@ -1553,10 +1558,10 @@ def create_batch_row_action_candidate(batch_description, batch_header_map, one_b
     if not positive_value_exists(candidate_name) and positive_value_exists(ballotpedia_candidate_name):
         candidate_name = ballotpedia_candidate_name
 
-    if keep_looking_for_duplicates:
+    if keep_looking_for_duplicates and positive_value_exists(ballotpedia_candidate_id):
         candidate_campaign_manager = CandidateCampaignManager()
         matching_results = candidate_campaign_manager.retrieve_candidate_campaign_from_ballotpedia_candidate_id(
-            ballotpedia_candidate_id)
+            ballotpedia_candidate_id, google_civic_election_id=google_civic_election_id)
         if matching_results['candidate_campaign_found']:
             candidate = matching_results['candidate_campaign']
             candidate_found = True
@@ -1565,7 +1570,8 @@ def create_batch_row_action_candidate(batch_description, batch_header_map, one_b
             contest_office_we_vote_id = candidate.contest_office_we_vote_id
             kind_of_action = IMPORT_ADD_TO_EXISTING
 
-    if keep_looking_for_duplicates:
+    # We don't want to use this routine if we have a ballotpedia_candidate_id
+    if keep_looking_for_duplicates and not positive_value_exists(ballotpedia_candidate_id):
         matching_results = candidate_campaign_list_manager.retrieve_candidates_from_non_unique_identifiers(
             google_civic_election_id, state_code, candidate_twitter_handle, candidate_name)
 
@@ -1583,7 +1589,13 @@ def create_batch_row_action_candidate(batch_description, batch_header_map, one_b
             kind_of_action = IMPORT_QUERY_ERROR
         else:
             kind_of_action = IMPORT_CREATE
+    else:
+        # If here we have exhausted all of the ways we look for candidate matches, so we can assume we need to
+        #  create a new candidate
+        kind_of_action = IMPORT_CREATE
 
+    # ###############################
+    # Now we need to find the Contest Office this Candidate should be connected with
     contest_office_id = 0
     if positive_value_exists(contest_office_we_vote_id):
         # Look up the contest_office information
@@ -1608,6 +1620,8 @@ def create_batch_row_action_candidate(batch_description, batch_header_map, one_b
             contest_office_we_vote_id = contest_office.we_vote_id
             contest_office_id = contest_office.id
             contest_office_found = True
+        else:
+            status += contest_results['status']
 
     if not positive_value_exists(contest_office_found) and positive_value_exists(office_ctcl_uuid):
         # Look up the contest_office information with the ctcl_uuid
@@ -1620,6 +1634,7 @@ def create_batch_row_action_candidate(batch_description, batch_header_map, one_b
             contest_office_id = contest_office.id
             contest_office_found = True
 
+    # We don't want to use this routine if we have a ballotpedia_race_id
     if not positive_value_exists(contest_office_found):
         # Find the office even though we haven't found candidate
         contest_office_list_manager = ContestOfficeListManager()

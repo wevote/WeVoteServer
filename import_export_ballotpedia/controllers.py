@@ -339,6 +339,13 @@ def retrieve_ballotpedia_candidates_by_district_from_api(google_civic_election_i
             "limit": 1000,
         })
 
+        # Use Ballotpedia API call counter to track the number of queries we are doing each day
+        ballotpedia_api_counter_manager = BallotpediaApiCounterManager()
+        ballotpedia_api_counter_manager.create_counter_entry(
+            BALLOTPEDIA_API_CANDIDATES_TYPE,
+            google_civic_election_id=google_civic_election_id,
+            ballotpedia_election_id=0)
+
         if not hasattr(response, 'text') or not positive_value_exists(response.text):
             success = False
             status += "NO_RESPONSE_TEXT_FOUND "
@@ -385,13 +392,6 @@ def retrieve_ballotpedia_candidates_by_district_from_api(google_civic_election_i
             return results
 
         structured_json = json.loads(response.text)
-
-        # Use Ballotpedia API call counter to track the number of queries we are doing each day
-        ballotpedia_api_counter_manager = BallotpediaApiCounterManager()
-        ballotpedia_api_counter_manager.create_counter_entry(
-            BALLOTPEDIA_API_CANDIDATES_TYPE,
-            google_civic_election_id=google_civic_election_id,
-            ballotpedia_election_id=0)
 
         contains_api = False
         groom_results = groom_ballotpedia_data_for_processing(
