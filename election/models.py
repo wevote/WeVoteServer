@@ -116,6 +116,11 @@ class Election(models.Model):
     # For internal notes regarding gathering data for this election
     internal_notes = models.TextField(null=True, blank=True, default=None)
 
+    # Not an election we will be supporting
+    ignore_this_election = models.BooleanField(default=False)
+    # Have we finished all of the election preparation we want to do?
+    election_preparation_finished = models.BooleanField(default=False)
+
     def election_is_upcoming(self):
         if not positive_value_exists(self.election_day_text):
             return False

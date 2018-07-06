@@ -29,9 +29,19 @@
     <label for="include_in_list_for_voters_id" class="col-sm-3 control-label"></label>
     <div class="col-sm-8">
       <input type="checkbox" name="include_in_list_for_voters" id="include_in_list_for_voters_id"
-           value="True"
-           {% if election.include_in_list_for_voters %}checked{% endif %} />
+             value="True"
+             {% if election.include_in_list_for_voters %}checked{% endif %} />
         Show in lists of elections for voters
+      &nbsp;&nbsp;&nbsp;
+      <input type="checkbox" name="ignore_this_election" id="ignore_this_election_id"
+             value="True"
+             {% if election.ignore_this_election %}checked{% endif %} />
+        Ignore this election
+      &nbsp;&nbsp;&nbsp;
+      <input type="checkbox" name="election_preparation_finished" id="election_preparation_finished_id"
+             value="True"
+             {% if election.election_preparation_finished %}checked{% endif %} />
+        Election preparation finished
     </div>
 </div>
 
