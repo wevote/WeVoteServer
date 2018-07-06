@@ -354,7 +354,7 @@ def retrieve_ballotpedia_data_for_polling_locations_view(request, election_local
         status += "COULD_NOT_FIND_POLLING_LOCATION_LIST " + str(e) + " "
 
     if polling_location_count == 0:
-        # We didn't find any polling locations marked for bulk retrieve, so just retrieve the top 100 (for now)
+        # We didn't find any polling locations marked for bulk retrieve, so just retrieve up to the import_limit
         try:
             polling_location_count_query = PollingLocation.objects.all()
             polling_location_count_query = \
@@ -473,7 +473,7 @@ def retrieve_ballotpedia_data_for_polling_locations_view(request, election_local
                                                 "?google_civic_election_id=" + str(google_civic_election_id))
 
         messages.add_message(request, messages.INFO,
-                             'Races retrieved from Ballotpedia for the {election_name}. '
+                             'Races or measures retrieved from Ballotpedia for the {election_name}. '
                              'polling_locations_with_data: {polling_locations_with_data}, '
                              'polling_locations_without_data: {polling_locations_without_data}. '
                              ''.format(
