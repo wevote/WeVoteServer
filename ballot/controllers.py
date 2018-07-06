@@ -1267,7 +1267,7 @@ def generate_ballot_data(voter_device_link, google_civic_election_id, voter_addr
             }
             return results
 
-        default_election_data_source_is_ballotpedia = False
+        default_election_data_source_is_ballotpedia = True
         if default_election_data_source_is_ballotpedia:
             # 1a) Get ballot data from Ballotpedia for the actual VoterAddress
             ballotpedia_retrieve_results = voter_ballot_items_retrieve_from_ballotpedia_for_api(

@@ -884,6 +884,7 @@ def election_summary_view(request, election_local_id=0, google_civic_election_id
     candidate_campaign_list_manager = CandidateCampaignListManager()
 
     if election_found:
+        batch_manager = BatchManager()
         state_list = STATE_CODE_MAP
         state_list_modified = {}
         for one_state_code, one_state_name in state_list.items():
@@ -995,6 +996,13 @@ def election_summary_view(request, election_local_id=0, google_civic_election_id
         election.ballot_location_display_option_on_count = \
             ballot_returned_list_manager.fetch_ballot_location_display_option_on_count_for_election(
                 election.google_civic_election_id, election.state_code)
+        if election.ballot_returned_count < 500:
+            batch_set_source = "IMPORT_BALLOTPEDIA_BALLOT_ITEMS"
+            results = batch_manager.retrieve_unprocessed_batch_set_info_by_election_and_kind(
+                election.google_civic_election_id, batch_set_source)
+            if positive_value_exists(results['batch_rows_unprocessed']):
+                election.batch_rows_unprocessed = results['batch_rows_unprocessed'] - election.ballot_returned_count
+                election.batch_rows_unprocessed_batch_set_id = results['batch_set_id']
 
         # How many offices?
         office_list_query = ContestOffice.objects.all()
