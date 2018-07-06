@@ -732,11 +732,11 @@ def election_list_view(request):
                 election.google_civic_election_id, election.state_code)
         if election.ballot_returned_count < 500:
             batch_set_source = "IMPORT_BALLOTPEDIA_BALLOT_ITEMS"
-            results = batch_manager.retrieve_unprocessed_batch_set_info_by_election_and_kind(
+            results = batch_manager.retrieve_unprocessed_batch_set_info_by_election_and_set_source(
                 election.google_civic_election_id, batch_set_source)
-            if positive_value_exists(results['batch_rows_unprocessed']):
-                election.batch_rows_unprocessed = results['batch_rows_unprocessed'] - election.ballot_returned_count
-                election.batch_rows_unprocessed_batch_set_id = results['batch_set_id']
+            if positive_value_exists(results['batches_not_processed']):
+                election.batches_not_processed = results['batches_not_processed']
+                election.batches_not_processed_batch_set_id = results['batch_set_id']
 
         # How many offices?
         office_list_query = ContestOffice.objects.all()
@@ -998,11 +998,11 @@ def election_summary_view(request, election_local_id=0, google_civic_election_id
                 election.google_civic_election_id, election.state_code)
         if election.ballot_returned_count < 500:
             batch_set_source = "IMPORT_BALLOTPEDIA_BALLOT_ITEMS"
-            results = batch_manager.retrieve_unprocessed_batch_set_info_by_election_and_kind(
+            results = batch_manager.retrieve_unprocessed_batch_set_info_by_election_and_set_source(
                 election.google_civic_election_id, batch_set_source)
-            if positive_value_exists(results['batch_rows_unprocessed']):
-                election.batch_rows_unprocessed = results['batch_rows_unprocessed'] - election.ballot_returned_count
-                election.batch_rows_unprocessed_batch_set_id = results['batch_set_id']
+            if positive_value_exists(results['batches_not_processed']):
+                election.batches_not_processed = results['batches_not_processed']
+                election.batches_not_processed_batch_set_id = results['batch_set_id']
 
         # How many offices?
         office_list_query = ContestOffice.objects.all()
