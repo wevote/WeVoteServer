@@ -193,6 +193,9 @@ def office_list_view(request):
                 new_filter = Q(wikipedia_id__icontains=one_word)
                 filters.append(new_filter)
 
+                new_filter = Q(ballotpedia_race_id__iexact=one_word)
+                filters.append(new_filter)
+
                 # Add the first query
                 if len(filters):
                     final_filters = filters.pop()
