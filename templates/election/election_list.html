@@ -146,7 +146,8 @@
                 {% endif %}
                 {% if election.batch_rows_unprocessed %}
                     {% if election.batch_rows_unprocessed_batch_set_id %}
-                      (<span class="font-weight-bold text-danger"><a href="{% url 'import_export_batches:batch_set_batch_list' %}?batch_set_id={{ election.batch_rows_unprocessed_batch_set_id }}" target="_blank">{{ election.batch_rows_unprocessed|default_if_none:"" }}</a></span>)
+                      (<span class="font-weight-bold text-danger"><a href="{% url 'import_export_batches:batch_set_batch_list' %}?batch_set_id={{ election.batch_rows_unprocessed_batch_set_id }}"
+                                                                     target="_blank">{{ election.batch_rows_unprocessed|default_if_none:"" }}</a></span>)
                     {% else %}
                       (<span class="font-weight-bold text-danger">{{ election.batch_rows_unprocessed|default_if_none:"" }}</span>)
                     {% endif %}

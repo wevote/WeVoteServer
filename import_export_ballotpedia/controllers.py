@@ -5,7 +5,7 @@
 from .models import BallotpediaApiCounterManager
 from ballot.models import BallotItemListManager, BallotItemManager, BallotReturned, BallotReturnedManager, \
     VoterBallotSavedManager
-from candidate.models import fetch_candidate_count_for_office
+from candidate.models import CandidateCampaignListManager, fetch_candidate_count_for_office
 from config.base import get_environment_variable
 from electoral_district.models import ElectoralDistrict, ElectoralDistrictManager
 from election.models import BallotpediaElection, ElectionManager
@@ -481,6 +481,8 @@ def retrieve_ballot_items_from_polling_location(
         modified_json_list = groom_results['modified_json_list']
         kind_of_batch = groom_results['kind_of_batch']
 
+        # This function makes sure there are candidates attached to an office before including the office
+        #  on the ballot.
         ballot_items_results = process_ballotpedia_voter_districts(
             google_civic_election_id, modified_json_list, polling_location_we_vote_id)
 
@@ -1287,6 +1289,7 @@ def process_ballotpedia_voter_districts(
     ballot_item_dict_list = []
     generated_ballot_order = 0
 
+    candidate_campaign_list = CandidateCampaignListManager()
     contest_office_list_manager = ContestOfficeListManager()
     measure_list_manager = ContestMeasureList()
     return_list_of_objects = True
@@ -1299,7 +1302,15 @@ def process_ballotpedia_voter_districts(
 
             if results['office_list_found']:
                 office_list_objects = results['office_list_objects']
+
+                # Remove any offices from this list that don't have candidates
+                modified_office_list_objects = []
                 for one_office in office_list_objects:
+                    results = candidate_campaign_list.retrieve_candidate_count_for_office(one_office.id, "")
+                    if positive_value_exists(results['candidate_count']):
+                        modified_office_list_objects.append(one_office)
+
+                for one_office in modified_office_list_objects:
                     generated_ballot_order += 1
                     ballot_item_dict = {
                         'contest_office_we_vote_id': one_office.we_vote_id,
