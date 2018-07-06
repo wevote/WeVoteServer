@@ -138,9 +138,17 @@
                 {{ election.measure_count|default_if_none:"" }}</a>
             {% endif %}
             </td>
-            <td align="middle">{% if election.ballot_returned_count %}{{ election.ballot_returned_count|default_if_none:"" }}
-                {% if election.ballot_location_display_option_on_count %} / {{ election.ballot_location_display_option_on_count|default_if_none:"" }}{% endif %}
-            {% endif %}
+            <td align="middle">
+                {% if election.ballot_returned_count %}{{ election.ballot_returned_count|default_if_none:"" }}
+                  {% if election.ballot_location_display_option_on_count %} / {{ election.ballot_location_display_option_on_count|default_if_none:"" }}{% endif %}
+                {% endif %}
+                {% if election.batch_rows_unprocessed %}
+                    {% if election.batch_rows_unprocessed_batch_set_id %}
+                      (<span class="font-weight-bold text-danger"><a href="{% url 'import_export_batches:batch_set_batch_list' %}?batch_set_id={{ election.batch_rows_unprocessed_batch_set_id }}" target="_blank">{{ election.batch_rows_unprocessed|default_if_none:"" }}</a></span>)
+                    {% else %}
+                      (<span class="font-weight-bold text-danger">{{ election.batch_rows_unprocessed|default_if_none:"" }}</span>)
+                    {% endif %}
+                {% endif %}
             </td>
             <td align="middle">
             {% if election.voter_guides_count %}

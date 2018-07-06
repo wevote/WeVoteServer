@@ -28,6 +28,7 @@ from exception.models import handle_record_found_more_than_one_exception,\
     handle_record_not_found_exception, handle_record_not_saved_exception, print_to_log
 from google_custom_search.models import GoogleSearchUser, GoogleSearchUserManager
 from image.controllers import retrieve_and_save_ballotpedia_candidate_images
+from import_export_batches.models import BatchManager
 from import_export_twitter.controllers import refresh_twitter_candidate_details
 from import_export_vote_smart.models import VoteSmartRatingOneCandidate
 from import_export_vote_smart.votesmart_local import VotesmartApiError
@@ -331,6 +332,7 @@ def candidate_list_view(request):
         if results['election_found']:
             election = results['election']
             ballot_returned_list_manager = BallotReturnedListManager()
+            batch_manager = BatchManager()
             timezone = pytz.timezone("America/Los_Angeles")
             datetime_now = timezone.localize(datetime.now())
             date_of_election = timezone.localize(datetime.strptime(election.election_day_text, "%Y-%m-%d"))
@@ -344,6 +346,13 @@ def candidate_list_view(request):
             election.ballot_location_display_option_on_count = \
                 ballot_returned_list_manager.fetch_ballot_location_display_option_on_count_for_election(
                     election.google_civic_election_id, election.state_code)
+            if election.ballot_returned_count < 500:
+                batch_set_source = "IMPORT_BALLOTPEDIA_BALLOT_ITEMS"
+                results = batch_manager.retrieve_unprocessed_batch_set_info_by_election_and_kind(
+                    election.google_civic_election_id, batch_set_source)
+                if positive_value_exists(results['batch_rows_unprocessed']):
+                    election.batch_rows_unprocessed = results['batch_rows_unprocessed'] - election.ballot_returned_count
+                    election.batch_rows_unprocessed_batch_set_id = results['batch_set_id']
 
             # How many offices?
             office_list_query = ContestOffice.objects.all()
