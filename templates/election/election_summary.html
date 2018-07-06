@@ -135,6 +135,16 @@
                value={% if election %}{% if election.include_in_list_for_voters %}True{% else %}False{% endif %}{% else %}False{% endif %}
                {% if election.include_in_list_for_voters %}checked{% endif %} />
             Show in lists of elections for voters (<a href="{% url 'election:election_edit' election.id %}">edit</a>)
+            &nbsp;&nbsp;&nbsp;
+            <input type="checkbox" name="ignore_this_election" id="ignore_this_election_id" disabled
+                   value="True"
+                   {% if election.ignore_this_election %}checked{% endif %} />
+              Ignore this election
+            &nbsp;&nbsp;&nbsp;
+            <input type="checkbox" name="election_preparation_finished" id="election_preparation_finished_id" disabled
+                   value="True"
+                   {% if election.election_preparation_finished %}checked{% endif %} />
+              Election preparation finished
         </div>
     </div>
 
