@@ -134,7 +134,8 @@ def find_duplicate_contest_office(contest_office, ignore_office_we_vote_id_list)
     try:
         results = contest_office_list_manager.retrieve_contest_offices_from_non_unique_identifiers(
             contest_office.office_name, contest_office.google_civic_election_id, contest_office.state_code,
-            contest_office.district_id, contest_office.district_name, ignore_office_we_vote_id_list)
+            contest_office.district_id, contest_office.district_name, contest_office.ballotpedia_race_id,
+            ignore_office_we_vote_id_list)
 
         if results['contest_office_found']:
             contest_office_merge_conflict_values = \
