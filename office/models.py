@@ -1085,7 +1085,7 @@ class ContestOfficeListManager(models.Model):
 
     def retrieve_contest_offices_from_non_unique_identifiers(
             self, contest_office_name, google_civic_election_id, incoming_state_code, district_id='', district_name='',
-            ignore_office_we_vote_id_list=[]):
+            ballotpedia_race_id=0, ignore_office_we_vote_id_list=[]):
         keep_looking_for_duplicates = True
         success = False
         contest_office = ContestOffice()
@@ -1108,6 +1108,12 @@ class ContestOfficeListManager(models.Model):
 
             if positive_value_exists(ignore_office_we_vote_id_list):
                 contest_office_query = contest_office_query.exclude(we_vote_id__in=ignore_office_we_vote_id_list)
+
+            if positive_value_exists(ballotpedia_race_id):
+                # If we pass in ballotpedia_race_id, we need to make sure not to return results with a different value
+                contest_office_query = contest_office_query.filter(Q(ballotpedia_race_id__isnull=True) |
+                                                                   Q(ballotpedia_race_id=0) |
+                                                                   Q(ballotpedia_race_id=ballotpedia_race_id))
 
             contest_office_list_filtered = list(contest_office_query)
             if len(contest_office_list_filtered):
@@ -1144,6 +1150,12 @@ class ContestOfficeListManager(models.Model):
 
                 if positive_value_exists(ignore_office_we_vote_id_list):
                     contest_office_query = contest_office_query.exclude(we_vote_id__in=ignore_office_we_vote_id_list)
+
+                if positive_value_exists(ballotpedia_race_id):
+                    # If we pass in ballotpedia_race_id, we need to make sure not to return results with different value
+                    contest_office_query = contest_office_query.filter(Q(ballotpedia_race_id__isnull=True) |
+                                                                       Q(ballotpedia_race_id=0) |
+                                                                       Q(ballotpedia_race_id=ballotpedia_race_id))
 
                 # Start with the contest_office_name and remove OFFICE_NAME_COMMON_PHRASES_TO_REMOVE_FROM_SEARCHES
                 stripped_down_contest_office_name = contest_office_name.lower()
@@ -1216,6 +1228,12 @@ class ContestOfficeListManager(models.Model):
 
                 if positive_value_exists(ignore_office_we_vote_id_list):
                     contest_office_query = contest_office_query.exclude(we_vote_id__in=ignore_office_we_vote_id_list)
+
+                if positive_value_exists(ballotpedia_race_id):
+                    # If we pass in ballotpedia_race_id, make sure not to return results with a different value
+                    contest_office_query = contest_office_query.filter(Q(ballotpedia_race_id__isnull=True) |
+                                                                       Q(ballotpedia_race_id=0) |
+                                                                       Q(ballotpedia_race_id=ballotpedia_race_id))
 
                 # Start with the contest_office_name and remove OFFICE_NAME_COMMON_PHRASES_TO_REMOVE_FROM_SEARCHES
                 stripped_down_contest_office_name = contest_office_name.lower()
@@ -1322,34 +1340,6 @@ class ContestOfficeListManager(models.Model):
                 #  close matches
                 success = True
 
-        # TODO To build
-        # if keep_looking_for_duplicates:
-        #     # Check to see if we have a BatchRowTranslationMap for the value in contest_office_name
-        #     kind_of_batch = CONTEST_OFFICE
-        #     batch_row_name = "contest_office_name"
-        #     incoming_batch_row_value = contest_office_name
-        #     mapped_value = batch_manager.fetch_batch_row_translation_map(kind_of_batch, batch_row_name,
-        #                                                                  incoming_batch_row_value)
-        #     if positive_value_exists(mapped_value):
-        #         # Replace existing value with the
-        #         contest_office_name = mapped_value
-        #         contest_office_name_mapped = True
-        #         kind_of_action = IMPORT_ADD_TO_EXISTING
-        #         keep_looking_for_duplicates = False
-        #
-        # if keep_looking_for_duplicates:
-        #     # Are there similar office names that we might want to map this value to?
-        #     kind_of_batch = CONTEST_OFFICE
-        #     batch_row_name = "contest_office_name"
-        #     incoming_batch_row_value = contest_office_name
-        #     office_results = batch_manager.find_possible_matches(kind_of_batch, batch_row_name,
-        # incoming_batch_row_value,
-        #                                                          google_civic_election_id, state_code)
-        #     if office_results['possible_matches_found']:
-        #         pass
-        #
-        #     kind_of_action = IMPORT_TO_BE_DETERMINED
-        #     batch_row_action_contest_office_status += "INSUFFICIENT_DATA_FOR_BATCH_ROW_ACTION_CONTEST_OFFICE_CREATE "
         results = {
             'success':                      success,
             'status':                       status,
