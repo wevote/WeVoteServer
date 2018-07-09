@@ -730,13 +730,13 @@ def election_list_view(request):
         election.ballot_location_display_option_on_count = \
             ballot_returned_list_manager.fetch_ballot_location_display_option_on_count_for_election(
                 election.google_civic_election_id, election.state_code)
-        if election.ballot_returned_count < 500:
-            batch_set_source = "IMPORT_BALLOTPEDIA_BALLOT_ITEMS"
-            results = batch_manager.retrieve_unprocessed_batch_set_info_by_election_and_set_source(
-                election.google_civic_election_id, batch_set_source)
-            if positive_value_exists(results['batches_not_processed']):
-                election.batches_not_processed = results['batches_not_processed']
-                election.batches_not_processed_batch_set_id = results['batch_set_id']
+        # if election.ballot_returned_count < 500:
+        #     batch_set_source = "IMPORT_BALLOTPEDIA_BALLOT_ITEMS"
+        #     results = batch_manager.retrieve_unprocessed_batch_set_info_by_election_and_set_source(
+        #         election.google_civic_election_id, batch_set_source)
+        #     if positive_value_exists(results['batches_not_processed']):
+        #         election.batches_not_processed = results['batches_not_processed']
+        #         election.batches_not_processed_batch_set_id = results['batch_set_id']
 
         # How many offices?
         office_list_query = ContestOffice.objects.all()

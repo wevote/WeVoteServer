@@ -60,8 +60,9 @@
 {% if elected_office_list %}
     {% if google_civic_election_id %}
     <ul>
-        <li>Prepare: <a href="{% url 'office:find_and_merge_duplicate_offices' %}?google_civic_election_id={{ google_civic_election_id }}" >
-        Find and Merge Duplicate Elected Offices for this Election</a> (about 1 minute)</li>
+        <li>Prepare: <a href="{% url 'office:find_and_merge_duplicate_offices' %}?google_civic_election_id={{ google_civic_election_id }}"
+                        target="_blank" >
+        Find and Merge Duplicate Elected Offices for this Election</a> (in new window - about 1 minute)</li>
     </ul>
 
     {% endif %}
