@@ -3,12 +3,15 @@
 # -*- coding: UTF-8 -*-
 
 from .models import ContestOfficeListManager, ContestOfficeManager, CONTEST_OFFICE_UNIQUE_IDENTIFIERS, ContestOffice
+from ballot.controllers import move_ballot_items_to_another_office
 from ballot.models import OFFICE
+from bookmark.models import BookmarkItemList
+from candidate.controllers import move_candidates_to_another_office
 from config.base import get_environment_variable
 from django.contrib import messages
 from django.http import HttpResponse
 import json
-from position.controllers import update_all_position_details_from_contest_office
+from position.controllers import move_positions_to_another_office, update_all_position_details_from_contest_office
 import requests
 import wevote_functions.admin
 from wevote_functions.functions import positive_value_exists, process_request_from_master
@@ -17,6 +20,41 @@ logger = wevote_functions.admin.get_logger(__name__)
 
 WE_VOTE_API_KEY = get_environment_variable("WE_VOTE_API_KEY")
 OFFICES_SYNC_URL = get_environment_variable("OFFICES_SYNC_URL")  # officesSyncOut
+
+
+def add_contest_office_name_to_next_spot(contest_office_to_update, google_civic_office_name_to_add):
+
+    if not positive_value_exists(google_civic_office_name_to_add):
+        return contest_office_to_update
+
+    if not positive_value_exists(contest_office_to_update.google_civic_office_name):
+        contest_office_to_update.google_civic_office_name = google_civic_office_name_to_add
+    elif google_civic_office_name_to_add == contest_office_to_update.google_civic_office_name:
+        # The value is already stored in contest_office_to_update.google_civic_office_name so doesn't need
+        # to be added to contest_office_to_update.google_civic_office_name2
+        pass
+    elif not positive_value_exists(contest_office_to_update.google_civic_office_name2):
+        contest_office_to_update.google_civic_office_name2 = google_civic_office_name_to_add
+    elif google_civic_office_name_to_add == contest_office_to_update.google_civic_office_name2:
+        # The value is already stored in contest_office_to_update.google_civic_office_name2 so doesn't need
+        # to be added to contest_office_to_update.google_civic_office_name3
+        pass
+    elif not positive_value_exists(contest_office_to_update.google_civic_office_name3):
+        contest_office_to_update.google_civic_office_name3 = google_civic_office_name_to_add
+    elif google_civic_office_name_to_add == contest_office_to_update.google_civic_office_name3:
+        # The value is already stored in contest_office_to_update.google_civic_office_name2 so doesn't need
+        # to be added to contest_office_to_update.google_civic_office_name3
+        pass
+    elif not positive_value_exists(contest_office_to_update.google_civic_office_name4):
+        contest_office_to_update.google_civic_office_name4 = google_civic_office_name_to_add
+    elif google_civic_office_name_to_add == contest_office_to_update.google_civic_office_name4:
+        # The value is already stored in contest_office_to_update.google_civic_office_name2 so doesn't need
+        # to be added to contest_office_to_update.google_civic_office_name3
+        pass
+    elif not positive_value_exists(contest_office_to_update.google_civic_office_name5):
+        contest_office_to_update.google_civic_office_name5 = google_civic_office_name_to_add
+    # We currently only support 5 alternate names
+    return contest_office_to_update
 
 
 def offices_import_from_sample_file():
@@ -76,16 +114,18 @@ def find_duplicate_contest_office(contest_office, ignore_office_we_vote_id_list)
             'success':                                  False,
             'status':                                   "FIND_DUPLICATE_CONTEST_OFFICE_MISSING_OFFICE_OBJECT ",
             'contest_office_merge_possibility_found':   False,
+            'contest_office_merge_conflict_values':     {},
             'contest_office_list':                      [],
         }
         return error_results
 
     if not positive_value_exists(contest_office.google_civic_election_id):
         error_results = {
-            'success':                                False,
-            'status':                                 "FIND_DUPLICATE_CONTEST_OFFICE_MISSING_GOOGLE_CIVIC_ELECTION_ID ",
-            'contest_office_merge_possibility_found': False,
-            'contest_office_list':                    [],
+            'success':                          False,
+            'status':                           "FIND_DUPLICATE_CONTEST_OFFICE_MISSING_GOOGLE_CIVIC_ELECTION_ID ",
+            'contest_office_merge_possibility_found':   False,
+            'contest_office_merge_conflict_values':     {},
+            'contest_office_list':                      [],
         }
         return error_results
 
@@ -128,6 +168,7 @@ def find_duplicate_contest_office(contest_office, ignore_office_we_vote_id_list)
                 'success':                                  True,
                 'status':                                   "FIND_DUPLICATE_CONTEST_OFFICE_NO_DUPLICATES_FOUND",
                 'contest_office_merge_possibility_found':   False,
+                'contest_office_merge_conflict_values':     {},
                 'contest_office_list':                      results['contest_office_list'],
             }
             return results
@@ -196,6 +237,216 @@ def figure_out_office_conflict_values(contest_office1, contest_office2):
             pass
 
     return contest_office_merge_conflict_values
+
+
+def merge_if_duplicate_offices(office1_on_stage, office2_on_stage, conflict_values):
+    status = "MERGE_IF_DUPLICATE_OFFICES "
+    offices_merged = False
+    decisions_required = False
+    office1_we_vote_id = office1_on_stage.we_vote_id
+    office2_we_vote_id = office2_on_stage.we_vote_id
+
+    # Are there any comparisons that require admin intervention?
+    merge_choices = {}
+    for attribute in CONTEST_OFFICE_UNIQUE_IDENTIFIERS:
+        conflict_value = conflict_values.get(attribute, None)
+        if conflict_value == "CONFLICT":
+            decisions_required = True
+            break
+        elif conflict_value == "OFFICE2":
+            merge_choices[attribute] = getattr(office2_on_stage, attribute)
+
+    if decisions_required:
+        success = True
+        status += "DECISION_REQUIRED "
+    else:
+        status += "NO_DECISIONS_REQUIRED "
+        merge_results = merge_these_two_offices(office1_we_vote_id, office2_we_vote_id, merge_choices,
+                                                office1_on_stage, office2_on_stage)
+
+        if merge_results['offices_merged']:
+            success = True
+            offices_merged = True
+        else:
+            success = False
+            status += merge_results['status']
+
+    results = {
+        'success':              success,
+        'status':               status,
+        'offices_merged':       offices_merged,
+        'decisions_required':   decisions_required,
+        'office':               office1_on_stage,
+    }
+    return results
+
+
+def merge_these_two_offices(contest_office1_we_vote_id, contest_office2_we_vote_id, admin_merge_choices={},
+                            contest_office1_on_stage=None, contest_office2_on_stage=None):
+    """
+    Process the merging of two offices. Note that this is similar to office/views_admin.py "office_merge_process_view"
+    :param contest_office1_we_vote_id:
+    :param contest_office2_we_vote_id:
+    :param admin_merge_choices: Dictionary with the attribute name as the key, and the chosen value as the value
+    :param contest_office1_on_stage: The first office object if we have it
+    :param contest_office2_on_stage: The second office object if we have it
+    :return:
+    """
+    status = ""
+    office_manager = ContestOfficeManager()
+
+    if contest_office1_on_stage and contest_office1_on_stage.we_vote_id:
+        contest_office1_id = contest_office1_on_stage.id
+        contest_office1_we_vote_id = contest_office1_on_stage.we_vote_id
+    else:
+        # Candidate 1 is the one we keep, and Candidate 2 is the one we will merge into Candidate 1
+        contest_office1_results = \
+            office_manager.retrieve_contest_office_from_we_vote_id(contest_office1_we_vote_id)
+        if contest_office1_results['contest_office_found']:
+            contest_office1_on_stage = contest_office1_results['contest_office']
+            contest_office1_id = contest_office1_on_stage.id
+        else:
+            results = {
+                'success': False,
+                'status': "MERGE_THESE_TWO_OFFICES-COULD_NOT_RETRIEVE_OFFICE1 ",
+                'offices_merged': False,
+                'office': None,
+            }
+            return results
+
+    if contest_office2_on_stage and contest_office2_on_stage.we_vote_id:
+        contest_office2_id = contest_office2_on_stage.id
+        contest_office2_we_vote_id = contest_office2_on_stage.we_vote_id
+    else:
+        contest_office2_results = \
+            office_manager.retrieve_contest_office_from_we_vote_id(contest_office2_we_vote_id)
+        if contest_office2_results['contest_office_found']:
+            contest_office2_on_stage = contest_office2_results['contest_office']
+            contest_office2_id = contest_office2_on_stage.id
+        else:
+            results = {
+                'success': False,
+                'status': "MERGE_THESE_TWO_OFFICES-COULD_NOT_RETRIEVE_OFFICE2 ",
+                'offices_merged': False,
+                'office': None,
+            }
+            return results
+
+    # TODO: Migrate bookmarks - for now stop the merge process if there are bookmarks
+    bookmark_item_list_manager = BookmarkItemList()
+    bookmark_results = bookmark_item_list_manager.retrieve_bookmark_item_list_for_contest_office(
+        contest_office2_we_vote_id)
+    if bookmark_results['bookmark_item_list_found']:
+        status += "Bookmarks found for Contest Office 2 - automatic merge not working yet."
+        results = {
+            'success': False,
+            'status': status,
+            'offices_merged': False,
+            'office': None,
+        }
+        return results
+
+    # Merge attribute values chosen by the admin
+    for attribute in CONTEST_OFFICE_UNIQUE_IDENTIFIERS:
+        if attribute in admin_merge_choices:
+            setattr(contest_office1_on_stage, attribute, admin_merge_choices[attribute])
+
+    # Preserve unique google_civic_office_name, _name2, _name3, _name4, and _name5
+    if positive_value_exists(contest_office2_on_stage.google_civic_office_name):
+        contest_office1_on_stage = add_contest_office_name_to_next_spot(
+            contest_office1_on_stage, contest_office2_on_stage.google_civic_office_name)
+    if positive_value_exists(contest_office2_on_stage.google_civic_office_name2):
+        contest_office1_on_stage = add_contest_office_name_to_next_spot(
+            contest_office1_on_stage, contest_office2_on_stage.google_civic_office_name2)
+    if positive_value_exists(contest_office2_on_stage.google_civic_office_name3):
+        contest_office1_on_stage = add_contest_office_name_to_next_spot(
+            contest_office1_on_stage, contest_office2_on_stage.google_civic_office_name3)
+    if positive_value_exists(contest_office2_on_stage.google_civic_office_name4):
+        contest_office1_on_stage = add_contest_office_name_to_next_spot(
+            contest_office1_on_stage, contest_office2_on_stage.google_civic_office_name4)
+    if positive_value_exists(contest_office2_on_stage.google_civic_office_name5):
+        contest_office1_on_stage = add_contest_office_name_to_next_spot(
+            contest_office1_on_stage, contest_office2_on_stage.google_civic_office_name5)
+
+    # Now move candidates attached to this office
+    from_contest_office_id = contest_office2_on_stage.id
+    from_contest_office_we_vote_id = contest_office2_on_stage.we_vote_id
+    to_contest_office_id = contest_office1_on_stage.id
+    to_contest_office_we_vote_id = contest_office1_on_stage.we_vote_id
+    updated_contest_office = contest_office1_on_stage
+    results = move_candidates_to_another_office(from_contest_office_id, from_contest_office_we_vote_id,
+                                                to_contest_office_id, to_contest_office_we_vote_id,
+                                                updated_contest_office)
+
+    if not positive_value_exists(results['success']):
+        results = {
+            'success': False,
+            'status': "MERGE_THESE_TWO_OFFICES-COULD_NOT_MOVE_CANDIDATES_TO_OFFICE1 ",
+            'offices_merged': False,
+            'office': None,
+        }
+        return results
+
+    # TODO: Merge quick_info's office details in future
+
+    # Merge ballot item's office details
+    ballot_items_results = move_ballot_items_to_another_office(contest_office2_id, contest_office2_we_vote_id,
+                                                               contest_office1_id, contest_office1_we_vote_id,
+                                                               contest_office1_on_stage)
+    if not ballot_items_results['success']:
+        status += ballot_items_results['status']
+        results = {
+            'success': False,
+            'status': status,
+            'offices_merged': False,
+            'office': updated_contest_office,
+        }
+        return results
+
+    # Merge public positions
+    public_positions_results = move_positions_to_another_office(contest_office2_id, contest_office2_we_vote_id,
+                                                                contest_office1_id, contest_office1_we_vote_id,
+                                                                True)
+    if not public_positions_results['success']:
+        status += public_positions_results['status']
+        results = {
+            'success': False,
+            'status': status,
+            'offices_merged': False,
+            'office': updated_contest_office,
+        }
+        return results
+
+    # Merge friends-only positions
+    friends_positions_results = move_positions_to_another_office(contest_office2_id, contest_office2_we_vote_id,
+                                                                 contest_office1_id, contest_office1_we_vote_id,
+                                                                 False)
+    if not friends_positions_results['success']:
+        status += friends_positions_results['status']
+        results = {
+            'success': False,
+            'status': status,
+            'offices_merged': False,
+            'office': updated_contest_office,
+        }
+        return results
+
+    # TODO: Migrate images?
+
+    # Note: wait to wrap in try/except block
+    contest_office1_on_stage.save()
+    # There isn't any office data to refresh from other master tables
+
+    # Remove office 2
+    contest_office2_on_stage.delete()
+
+    results = {
+        'success': True,
+        'status': status,
+        'offices_merged': True,
+        'office': contest_office1_on_stage,
+    }
+    return results
 
 
 def filter_offices_structured_json_for_local_duplicates(structured_json):

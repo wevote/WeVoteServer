@@ -1025,30 +1025,31 @@ def create_batch_row_action_contest_office(batch_description, batch_header_map, 
                 kind_of_action = IMPORT_CREATE
 
         # we haven't found contest_office yet. Look up for existing contest_office using candidate_name & state_code
-        if keep_looking_for_duplicates and positive_value_exists(candidate_name) \
-                and not positive_value_exists(ballotpedia_race_id):
-            candidate_campaign_list_manager = CandidateCampaignListManager()
-            matching_results = candidate_campaign_list_manager.retrieve_candidates_from_non_unique_identifiers(
-                google_civic_election_id, state_code, '', candidate_name)
+        if keep_looking_for_duplicates:
+            if positive_value_exists(candidate_name) and not positive_value_exists(ballotpedia_race_id):
+                candidate_campaign_list_manager = CandidateCampaignListManager()
+                matching_results = candidate_campaign_list_manager.retrieve_candidates_from_non_unique_identifiers(
+                    google_civic_election_id, state_code, '', candidate_name)
 
-            if matching_results['candidate_found']:
-                candidate = matching_results['candidate']
-                contest_office_we_vote_id = candidate.contest_office_we_vote_id
-                contest_office_name = candidate.contest_office_name
-                kind_of_action = IMPORT_ADD_TO_EXISTING
-                keep_looking_for_duplicates = False
-            elif matching_results['multiple_entries_found']:
-                kind_of_action = IMPORT_TO_BE_DETERMINED
-                status += "CREATE_BATCH_ROW_ACTION_OFFICE-MULTIPLE_CANDIDATES_FOUND "
-                keep_looking_for_duplicates = False
-            elif not positive_value_exists(matching_results['success']):
-                kind_of_action = IMPORT_TO_BE_DETERMINED
-                status += "RETRIEVE_CANDIDATE_FROM_NON_UNIQUE-NO_SUCCESS "
-                status += matching_results['status']
-                keep_looking_for_duplicates = False
-            else:
-                kind_of_action = IMPORT_CREATE
-        else:
+                if matching_results['candidate_found']:
+                    candidate = matching_results['candidate']
+                    contest_office_we_vote_id = candidate.contest_office_we_vote_id
+                    contest_office_name = candidate.contest_office_name
+                    kind_of_action = IMPORT_ADD_TO_EXISTING
+                    keep_looking_for_duplicates = False
+                elif matching_results['multiple_entries_found']:
+                    kind_of_action = IMPORT_TO_BE_DETERMINED
+                    status += "CREATE_BATCH_ROW_ACTION_OFFICE-MULTIPLE_CANDIDATES_FOUND "
+                    keep_looking_for_duplicates = False
+                elif not positive_value_exists(matching_results['success']):
+                    kind_of_action = IMPORT_TO_BE_DETERMINED
+                    status += "RETRIEVE_CANDIDATE_FROM_NON_UNIQUE-NO_SUCCESS "
+                    status += matching_results['status']
+                    keep_looking_for_duplicates = False
+                else:
+                    kind_of_action = IMPORT_CREATE
+
+        if keep_looking_for_duplicates:
             # If we are here, then we have exhausted all of the ways we match offices, so we can assume the
             #  office needs to be created
             kind_of_action = IMPORT_CREATE
@@ -1583,13 +1584,15 @@ def create_batch_row_action_candidate(batch_description, batch_header_map, one_b
             contest_office_we_vote_id = candidate.contest_office_we_vote_id
             kind_of_action = IMPORT_ADD_TO_EXISTING
         elif matching_results['multiple_entries_found']:
+            keep_looking_for_duplicates = False
             kind_of_action = CLEAN_DATA_MANUALLY
             status += "CREATE_BATCH_ROW_ACTION_CANDIDATE-MULTIPLE_CANDIDATES_FOUND: " + matching_results['status'] + " "
         elif not matching_results['success']:
             kind_of_action = IMPORT_QUERY_ERROR
         else:
             kind_of_action = IMPORT_CREATE
-    else:
+
+    if keep_looking_for_duplicates:
         # If here we have exhausted all of the ways we look for candidate matches, so we can assume we need to
         #  create a new candidate
         kind_of_action = IMPORT_CREATE
