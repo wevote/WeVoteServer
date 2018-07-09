@@ -31,6 +31,89 @@ WE_VOTE_API_KEY = get_environment_variable("WE_VOTE_API_KEY")
 CANDIDATES_SYNC_URL = get_environment_variable("CANDIDATES_SYNC_URL")  # candidatesSyncOut
 
 
+def add_candidate_name_to_next_spot(candidate_to_update, google_civic_candidate_name_to_add):
+
+    if not positive_value_exists(google_civic_candidate_name_to_add):
+        return candidate_to_update
+
+    # If an initial exists in the name (ex/ " A "), then search for the name
+    # with a period added (ex/ " A. ") We check for an exact match AND a match with/without initial + period
+    # google_civic_candidate_name
+    name_changed = False
+    google_civic_candidate_name_modified = "IGNORE_NO_NAME"
+    google_civic_candidate_name_new_start = google_civic_candidate_name_to_add  # For prefix/suffixes
+    add_results = add_period_to_middle_name_initial(google_civic_candidate_name_to_add)
+    if add_results['name_changed']:
+        name_changed = True
+        google_civic_candidate_name_modified = add_results['modified_name']
+        google_civic_candidate_name_new_start = google_civic_candidate_name_modified
+    else:
+        add_results = remove_period_from_middle_name_initial(google_civic_candidate_name_to_add)
+        if add_results['name_changed']:
+            name_changed = True
+            google_civic_candidate_name_modified = add_results['modified_name']
+            google_civic_candidate_name_new_start = google_civic_candidate_name_modified
+
+    # Deal with prefix and suffix
+    # If an prefix or suffix exists in the name (ex/ " JR"), then search for the name
+    # with a period added (ex/ " JR.")
+    add_results = add_period_to_name_prefix_and_suffix(google_civic_candidate_name_new_start)
+    if add_results['name_changed']:
+        name_changed = True
+        google_civic_candidate_name_modified = add_results['modified_name']
+    else:
+        add_results = remove_period_from_name_prefix_and_suffix(google_civic_candidate_name_new_start)
+        if add_results['name_changed']:
+            name_changed = True
+            google_civic_candidate_name_modified = add_results['modified_name']
+
+    if not positive_value_exists(candidate_to_update.google_civic_candidate_name):
+        candidate_to_update.google_civic_candidate_name = google_civic_candidate_name_to_add
+    elif google_civic_candidate_name_to_add == candidate_to_update.google_civic_candidate_name:
+        # The value is already stored in candidate_to_update.google_civic_candidate_name so doesn't need
+        # to be added anywhere below
+        pass
+    elif name_changed and candidate_to_update.google_civic_candidate_name == google_civic_candidate_name_modified:
+        # If candidate_to_update.google_civic_candidate_name has a middle initial with/without a period
+        # don't store it if the alternate without/with the period already is stored
+        pass
+    elif not positive_value_exists(candidate_to_update.google_civic_candidate_name2):
+        candidate_to_update.google_civic_candidate_name2 = google_civic_candidate_name_to_add
+    elif google_civic_candidate_name_to_add == candidate_to_update.google_civic_candidate_name2:
+        # The value is already stored in candidate_to_update.google_civic_candidate_name2 so doesn't need
+        # to be added to candidate_to_update.google_civic_candidate_name3
+        pass
+    elif name_changed and candidate_to_update.google_civic_candidate_name2 == google_civic_candidate_name_modified:
+        # If candidate_to_update.google_civic_candidate_name2 has a middle initial with/without a period
+        # don't store it if the alternate without/with the period already is stored
+        pass
+    elif not positive_value_exists(candidate_to_update.google_civic_candidate_name3):
+        candidate_to_update.google_civic_candidate_name3 = google_civic_candidate_name_to_add
+    elif google_civic_candidate_name_to_add == candidate_to_update.google_civic_candidate_name3:
+        # The value is already stored in candidate_to_update.google_civic_candidate_name2 so doesn't need
+        # to be added to candidate_to_update.google_civic_candidate_name3
+        pass
+    elif name_changed and candidate_to_update.google_civic_candidate_name3 == google_civic_candidate_name_modified:
+        # If candidate_to_update.google_civic_candidate_name3 has a middle initial with/without a period
+        # don't store it if the alternate without/with the period already is stored
+        pass
+    # We only support 3 alternate candidate names so far
+    # elif not positive_value_exists(candidate_to_update.google_civic_candidate_name4):
+    #     candidate_to_update.google_civic_candidate_name4 = google_civic_candidate_name_to_add
+    # elif google_civic_candidate_name_to_add == candidate_to_update.google_civic_candidate_name4:
+    #     # The value is already stored in candidate_to_update.google_civic_candidate_name2 so doesn't need
+    #     # to be added to candidate_to_update.google_civic_candidate_name3
+    #     pass
+    # elif name_changed and candidate_to_update.google_civic_candidate_name4 == google_civic_candidate_name_modified:
+    #     # If candidate_to_update.google_civic_candidate_name4 has a middle initial with/without a period
+    #     # don't store it if the alternate without/with the period already is stored
+    #     pass
+    # elif not positive_value_exists(candidate_to_update.google_civic_candidate_name5):
+    #     candidate_to_update.google_civic_candidate_name5 = google_civic_candidate_name_to_add
+    # # We currently only support 5 alternate names
+    return candidate_to_update
+
+
 def candidates_import_from_sample_file():
     """
     Get the json data, and either create new entries or update existing
@@ -212,12 +295,22 @@ def merge_if_duplicate_candidates(candidate1_on_stage, candidate2_on_stage, conf
     # Are there any comparisons that require admin intervention?
     merge_choices = {}
     for attribute in CANDIDATE_UNIQUE_IDENTIFIERS:
-        conflict_value = conflict_values.get(attribute, None)
-        if conflict_value == "CONFLICT":
-            decisions_required = True
-            break
-        elif conflict_value == "CANDIDATE2":
-            merge_choices[attribute] = getattr(candidate2_on_stage, attribute)
+        if attribute is "we_vote_hosted_profile_image_url_large" \
+                or attribute is "we_vote_hosted_profile_image_url_medium" \
+                or attribute is "we_vote_hosted_profile_image_url_tiny":
+            if positive_value_exists(getattr(candidate1_on_stage, attribute)):
+                # We can proceed because candidate1 has a valid image, so we can default to choosing that one
+                pass
+            elif positive_value_exists(getattr(candidate2_on_stage, attribute)):
+                # If we are here candidate1 does NOT have image, but candidate2 does
+                merge_choices[attribute] = getattr(candidate2_on_stage, attribute)
+        else:
+            conflict_value = conflict_values.get(attribute, None)
+            if conflict_value == "CONFLICT":
+                decisions_required = True
+                break
+            elif conflict_value == "CANDIDATE2":
+                merge_choices[attribute] = getattr(candidate2_on_stage, attribute)
 
     if not decisions_required:
         status += "NO_DECISIONS_REQUIRED "
@@ -340,148 +433,23 @@ def merge_these_two_candidates(candidate1_we_vote_id, candidate2_we_vote_id, adm
         if attribute in admin_merge_choices:
             setattr(candidate1_on_stage, attribute, admin_merge_choices[attribute])
 
-    # Preserve unique google_civic_candidate_name, _name2, and _name3
+    # Preserve unique google_civic_candidate_name, _name2, _name3, _name4, and _name5
     if positive_value_exists(candidate2_on_stage.google_civic_candidate_name):
-        # If an initial exists in the name (ex/ " A "), then search for the name
-        # with a period added (ex/ " A. ")
-        # google_civic_candidate_name
-        name_changed = False
-        google_civic_candidate_name_modified = "IGNORE_NO_NAME"
-        google_civic_candidate_name_new_start = candidate2_on_stage.google_civic_candidate_name  # For prefix/suffixes
-        add_results = add_period_to_middle_name_initial(candidate2_on_stage.google_civic_candidate_name)
-        if add_results['name_changed']:
-            name_changed = True
-            google_civic_candidate_name_modified = add_results['modified_name']
-            google_civic_candidate_name_new_start = google_civic_candidate_name_modified
-        else:
-            add_results = remove_period_from_middle_name_initial(candidate2_on_stage.google_civic_candidate_name)
-            if add_results['name_changed']:
-                name_changed = True
-                google_civic_candidate_name_modified = add_results['modified_name']
-                google_civic_candidate_name_new_start = google_civic_candidate_name_modified
-
-        # Deal with prefix and suffix
-        # If an prefix or suffix exists in the name (ex/ " JR"), then search for the name
-        # with a period added (ex/ " JR.")
-        add_results = add_period_to_name_prefix_and_suffix(google_civic_candidate_name_new_start)
-        if add_results['name_changed']:
-            name_changed = True
-            google_civic_candidate_name_modified = add_results['modified_name']
-        else:
-            add_results = remove_period_from_name_prefix_and_suffix(google_civic_candidate_name_new_start)
-            if add_results['name_changed']:
-                name_changed = True
-                google_civic_candidate_name_modified = add_results['modified_name']
-
-        if not positive_value_exists(candidate1_on_stage.google_civic_candidate_name):
-            candidate1_on_stage.google_civic_candidate_name = candidate2_on_stage.google_civic_candidate_name
-        elif name_changed and candidate1_on_stage.google_civic_candidate_name == google_civic_candidate_name_modified:
-            # If candidate1_on_stage.google_civic_candidate_name has a middle initial with/without a period
-            # don't store it if the alternate without/with the period already is stored
-            pass
-        elif not positive_value_exists(candidate1_on_stage.google_civic_candidate_name2):
-            candidate1_on_stage.google_civic_candidate_name2 = candidate2_on_stage.google_civic_candidate_name
-        elif name_changed and candidate1_on_stage.google_civic_candidate_name2 == google_civic_candidate_name_modified:
-            # If candidate1_on_stage.google_civic_candidate_name2 has a middle initial with/without a period
-            # don't store it if the alternate without/with the period already is stored
-            pass
-        elif not positive_value_exists(candidate1_on_stage.google_civic_candidate_name3):
-            candidate1_on_stage.google_civic_candidate_name3 = candidate2_on_stage.google_civic_candidate_name
-        # If candidate1_on_stage.google_civic_candidate_name3 already exists, we ignore the incoming alternate name
+        candidate1_on_stage = add_candidate_name_to_next_spot(
+            candidate1_on_stage, candidate2_on_stage.google_civic_candidate_name)
     if positive_value_exists(candidate2_on_stage.google_civic_candidate_name2):
-        # If an initial exists in the name (ex/ " A "), then search for the name
-        # with a period added (ex/ " A. ")
-        # google_civic_candidate_name
-        name_changed = False
-        google_civic_candidate_name2_modified = "IGNORE_NO_NAME"
-        google_civic_candidate_name2_new_start = candidate2_on_stage.google_civic_candidate_name2  # For prefix/suffixes
-        add_results = add_period_to_middle_name_initial(candidate2_on_stage.google_civic_candidate_name2)
-        if add_results['name_changed']:
-            name_changed = True
-            google_civic_candidate_name2_modified = add_results['modified_name']
-            google_civic_candidate_name2_new_start = google_civic_candidate_name2_modified
-        else:
-            add_results = remove_period_from_middle_name_initial(candidate2_on_stage.google_civic_candidate_name2)
-            if add_results['name_changed']:
-                name_changed = True
-                google_civic_candidate_name2_modified = add_results['modified_name']
-                google_civic_candidate_name2_new_start = google_civic_candidate_name2_modified
-
-        # Deal with prefix and suffix
-        # If an prefix or suffix exists in the name (ex/ " JR"), then search for the name
-        # with a period added (ex/ " JR.")
-        add_results = add_period_to_name_prefix_and_suffix(google_civic_candidate_name2_new_start)
-        if add_results['name_changed']:
-            name_changed = True
-            google_civic_candidate_name2_modified = add_results['modified_name']
-        else:
-            add_results = remove_period_from_name_prefix_and_suffix(google_civic_candidate_name2_new_start)
-            if add_results['name_changed']:
-                name_changed = True
-                google_civic_candidate_name2_modified = add_results['modified_name']
-
-        if not positive_value_exists(candidate1_on_stage.google_civic_candidate_name):
-            candidate1_on_stage.google_civic_candidate_name = candidate2_on_stage.google_civic_candidate_name2
-        elif name_changed and candidate1_on_stage.google_civic_candidate_name == google_civic_candidate_name2_modified:
-            # If candidate1_on_stage.google_civic_candidate_name has a middle initial with/without a period
-            # don't store it if the alternate without/with the period already is stored
-            pass
-        elif not positive_value_exists(candidate1_on_stage.google_civic_candidate_name2):
-            candidate1_on_stage.google_civic_candidate_name2 = candidate2_on_stage.google_civic_candidate_name2
-        elif name_changed and candidate1_on_stage.google_civic_candidate_name2 == google_civic_candidate_name2_modified:
-            # If candidate1_on_stage.google_civic_candidate_name2 has a middle initial with/without a period
-            # don't store it if the alternate without/with the period already is stored
-            pass
-        elif not positive_value_exists(candidate1_on_stage.google_civic_candidate_name3):
-            candidate1_on_stage.google_civic_candidate_name3 = candidate2_on_stage.google_civic_candidate_name2
-        # If candidate1_on_stage.google_civic_candidate_name3 already exists, we ignore the incoming alternate name
+        candidate1_on_stage = add_candidate_name_to_next_spot(
+            candidate1_on_stage, candidate2_on_stage.google_civic_candidate_name2)
     if positive_value_exists(candidate2_on_stage.google_civic_candidate_name3):
-        # If an initial exists in the name (ex/ " A "), then search for the name
-        # with a period added (ex/ " A. ")
-        # google_civic_candidate_name
-        name_changed = False
-        google_civic_candidate_name3_modified = "IGNORE_NO_NAME"
-        google_civic_candidate_name3_new_start = candidate2_on_stage.google_civic_candidate_name3  # For prefix/suffixes
-        add_results = add_period_to_middle_name_initial(candidate2_on_stage.google_civic_candidate_name3)
-        if add_results['name_changed']:
-            name_changed = True
-            google_civic_candidate_name3_modified = add_results['modified_name']
-            google_civic_candidate_name3_new_start = google_civic_candidate_name3_modified
-        else:
-            add_results = remove_period_from_middle_name_initial(candidate2_on_stage.google_civic_candidate_name3)
-            if add_results['name_changed']:
-                name_changed = True
-                google_civic_candidate_name3_modified = add_results['modified_name']
-                google_civic_candidate_name3_new_start = google_civic_candidate_name3_modified
-
-        # Deal with prefix and suffix
-        # If an prefix or suffix exists in the name (ex/ " JR"), then search for the name
-        # with a period added (ex/ " JR.")
-        add_results = add_period_to_name_prefix_and_suffix(google_civic_candidate_name3_new_start)
-        if add_results['name_changed']:
-            name_changed = True
-            google_civic_candidate_name3_modified = add_results['modified_name']
-        else:
-            add_results = remove_period_from_name_prefix_and_suffix(google_civic_candidate_name3_new_start)
-            if add_results['name_changed']:
-                name_changed = True
-                google_civic_candidate_name3_modified = add_results['modified_name']
-
-        if not positive_value_exists(candidate1_on_stage.google_civic_candidate_name):
-            candidate1_on_stage.google_civic_candidate_name = candidate2_on_stage.google_civic_candidate_name3
-        elif name_changed and candidate1_on_stage.google_civic_candidate_name == google_civic_candidate_name3_modified:
-            # If candidate1_on_stage.google_civic_candidate_name has a middle initial with/without a period
-            # don't store it if the alternate without/with the period already is stored
-            pass
-        elif not positive_value_exists(candidate1_on_stage.google_civic_candidate_name2):
-            candidate1_on_stage.google_civic_candidate_name2 = candidate2_on_stage.google_civic_candidate_name3
-        elif name_changed and candidate1_on_stage.google_civic_candidate_name2 == google_civic_candidate_name3_modified:
-            # If candidate1_on_stage.google_civic_candidate_name2 has a middle initial with/without a period
-            # don't store it if the alternate without/with the period already is stored
-            pass
-        elif not positive_value_exists(candidate1_on_stage.google_civic_candidate_name3):
-            candidate1_on_stage.google_civic_candidate_name3 = candidate2_on_stage.google_civic_candidate_name3
-        # If candidate1_on_stage.google_civic_candidate_name3 already exists, we ignore the incoming alternate name
+        candidate1_on_stage = add_candidate_name_to_next_spot(
+            candidate1_on_stage, candidate2_on_stage.google_civic_candidate_name3)
+    # DALE 2018-07-09 We don't offer
+    # if positive_value_exists(candidate2_on_stage.google_civic_candidate_name4):
+    #     candidate1_on_stage = add_candidate_name_to_next_spot(
+    #         candidate1_on_stage, candidate2_on_stage.google_civic_candidate_name4)
+    # if positive_value_exists(candidate2_on_stage.google_civic_candidate_name5):
+    #     candidate1_on_stage = add_candidate_name_to_next_spot(
+    #         candidate1_on_stage, candidate2_on_stage.google_civic_candidate_name5)
 
     # Merge public positions
     public_positions_results = move_positions_to_another_candidate(candidate2_id, candidate2_we_vote_id,

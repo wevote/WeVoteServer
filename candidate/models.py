@@ -704,61 +704,63 @@ class CandidateCampaignListManager(models.Model):
             except Exception as e:
                 status += "RETRIEVE_CANDIDATES_FROM_NON_UNIQUE-CANDIDATE_QUERY_FAILED3 "
 
-        if keep_looking_for_duplicates and positive_value_exists(candidate_name):
-            # Search for Candidate(s) by breaking up candidate_name into search words
-            try:
-                candidate_query = CandidateCampaign.objects.all()
-
-                if positive_value_exists(google_civic_election_id):
-                    candidate_query = candidate_query.filter(google_civic_election_id=google_civic_election_id)
-                if positive_value_exists(state_code):
-                    candidate_query = candidate_query.filter(state_code__iexact=state_code)
-                search_words = candidate_name.split()
-
-                filters = []
-                for one_word in search_words:
-                    new_filter = Q(candidate_name__icontains=one_word)
-                    filters.append(new_filter)
-
-                # Add the first query
-                at_least_one_filter_used = False
-                if len(filters):
-                    at_least_one_filter_used = True
-                    final_filters = filters.pop()
-
-                    # ...and "OR" the remaining items in the list
-                    for item in filters:
-                        final_filters |= item
-
-                    candidate_query = candidate_query.filter(final_filters)
-
-                if positive_value_exists(ignore_candidate_id_list):
-                    candidate_query = candidate_query.exclude(we_vote_id__in=ignore_candidate_id_list)
-
-                candidate_list = list(candidate_query)
-                if len(candidate_list) and at_least_one_filter_used:
-                    # entry exists
-                    status += 'CANDIDATE_ENTRY_EXISTS3 '
-                    success = True
-                    # if a single entry matches, update that entry
-                    if len(candidate_list) == 1:
-                        candidate = candidate_list[0]
-                        candidate_found = True
-                        status += candidate.we_vote_id + " office: " + candidate.contest_office_we_vote_id + " "
-                        keep_looking_for_duplicates = False
-                    else:
-                        # more than one entry found with a match in CandidateCampaign
-                        candidate_list_found = True
-                        keep_looking_for_duplicates = False
-                        multiple_entries_found = True
-                else:
-                    status += 'RETRIEVE_CANDIDATES_FROM_NON_UNIQUE-CANDIDATE_ENTRY_NOT_FOUND-KEYWORDS '
-                    success = True
-            except CandidateCampaign.DoesNotExist:
-                status += "RETRIEVE_CANDIDATES_FROM_NON_UNIQUE-CANDIDATE_NOT_FOUND-KEYWORDS "
-                success = True
-            except Exception as e:
-                status += "RETRIEVE_CANDIDATES_FROM_NON_UNIQUE-CANDIDATE_QUERY_FAILED4 "
+        # 2018-07-09 This is problematic as, it considers very different candidates
+        #  (ex/ "Donna Sheldon" and "Donna McBride") to be possible duplicates.
+        # if keep_looking_for_duplicates and positive_value_exists(candidate_name):
+        #     # Search for Candidate(s) by breaking up candidate_name into search words
+        #     try:
+        #         candidate_query = CandidateCampaign.objects.all()
+        #
+        #         if positive_value_exists(google_civic_election_id):
+        #             candidate_query = candidate_query.filter(google_civic_election_id=google_civic_election_id)
+        #         if positive_value_exists(state_code):
+        #             candidate_query = candidate_query.filter(state_code__iexact=state_code)
+        #         search_words = candidate_name.split()
+        #
+        #         filters = []
+        #         for one_word in search_words:
+        #             new_filter = Q(candidate_name__icontains=one_word)
+        #             filters.append(new_filter)
+        #
+        #         # Add the first query
+        #         at_least_one_filter_used = False
+        #         if len(filters):
+        #             at_least_one_filter_used = True
+        #             final_filters = filters.pop()
+        #
+        #             # ...and "OR" the remaining items in the list
+        #             for item in filters:
+        #                 final_filters |= item
+        #
+        #             candidate_query = candidate_query.filter(final_filters)
+        #
+        #         if positive_value_exists(ignore_candidate_id_list):
+        #             candidate_query = candidate_query.exclude(we_vote_id__in=ignore_candidate_id_list)
+        #
+        #         candidate_list = list(candidate_query)
+        #         if len(candidate_list) and at_least_one_filter_used:
+        #             # entry exists
+        #             status += 'CANDIDATE_ENTRY_EXISTS3 '
+        #             success = True
+        #             # if a single entry matches, update that entry
+        #             if len(candidate_list) == 1:
+        #                 candidate = candidate_list[0]
+        #                 candidate_found = True
+        #                 status += candidate.we_vote_id + " office: " + candidate.contest_office_we_vote_id + " "
+        #                 keep_looking_for_duplicates = False
+        #             else:
+        #                 # more than one entry found with a match in CandidateCampaign
+        #                 candidate_list_found = True
+        #                 keep_looking_for_duplicates = False
+        #                 multiple_entries_found = True
+        #         else:
+        #             status += 'RETRIEVE_CANDIDATES_FROM_NON_UNIQUE-CANDIDATE_ENTRY_NOT_FOUND-KEYWORDS '
+        #             success = True
+        #     except CandidateCampaign.DoesNotExist:
+        #         status += "RETRIEVE_CANDIDATES_FROM_NON_UNIQUE-CANDIDATE_NOT_FOUND-KEYWORDS "
+        #         success = True
+        #     except Exception as e:
+        #         status += "RETRIEVE_CANDIDATES_FROM_NON_UNIQUE-CANDIDATE_QUERY_FAILED4 "
 
         results = {
             'success':                  success,

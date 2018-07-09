@@ -171,10 +171,8 @@
         <li>Prepare: <a href="{% url 'election:election_summary_by_google_id' google_civic_election_id %}?google_civic_election_id={{ google_civic_election_id }}" target="_blank" >
         Jump to Election so we can retrieve Offices and Candidates from Ballotpedia</a> (in new window)</li>
 
-        {% if google_civic_election_id < 1000000 %}
         <li>Prepare: <a href="{% url 'candidate:find_and_merge_duplicate_candidates' %}?google_civic_election_id={{ google_civic_election_id }}" >
         Find and Merge Duplicate Candidates for this Election</a> (about 1 minute)</li>
-        {% endif %}
 
         <li>Prepare: <a href="{% url 'candidate:candidate_politician_match_for_this_election' %}?google_civic_election_id={{ google_civic_election_id }}" >
         Match Candidates to Politicians (and Create Politicians)</a> (about 1 minute)</li>

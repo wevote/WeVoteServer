@@ -950,14 +950,14 @@ def get_voter_api_device_id(request, generate_if_no_cookie=False):
     voter_api_device_id = ''
     if 'voter_api_device_id' in request.COOKIES:
         voter_api_device_id = request.COOKIES['voter_api_device_id']
-        logger.debug("from cookie, voter_api_device_id: {voter_api_device_id}".format(
-            voter_api_device_id=voter_api_device_id
-        ))
+        # logger.debug("from cookie, voter_api_device_id: {voter_api_device_id}".format(
+        #     voter_api_device_id=voter_api_device_id
+        # ))
     if voter_api_device_id == '' and generate_if_no_cookie:
         voter_api_device_id = generate_voter_device_id()  # Stored in cookie below
-        logger.debug("generate_voter_device_id, voter_api_device_id: {voter_api_device_id}".format(
-            voter_api_device_id=voter_api_device_id
-        ))
+        # logger.debug("generate_voter_device_id, voter_api_device_id: {voter_api_device_id}".format(
+        #     voter_api_device_id=voter_api_device_id
+        # ))
     return voter_api_device_id
 
 

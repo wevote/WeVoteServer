@@ -45,7 +45,7 @@ CONTEST_OFFICE_UNIQUE_IDENTIFIERS = [
     'primary_party',
     'special',
     'state_code',
-    'we_vote_id',
+    # 'we_vote_id',  # We don't care which we_vote_id gets used
     'wikipedia_id',
 ]
 
