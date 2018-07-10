@@ -338,13 +338,6 @@
   <a href="{% url 'ballot:ballot_items_repair' %}?local_election_id={{ election.id }}&google_civic_election_id={{ election.google_civic_election_id }}&state_code={{ state_code }}&refresh_from_google=1">
       Refresh Voter Ballot Items From Google for Voter-specific Addresses</a>
   </li>
-
-{% if election.google_civic_election_id|convert_to_int >= 1000000 %}
-  <li>
-        <a href="{% url 'election:election_migration' %}?we_vote_election_id={{ election.google_civic_election_id }}">
-            Migrate this Data into Google Civic Election</a> (after data is available from Google Civic)
-  </li>
-{% endif %}
 </ul>
 
 <form name="ballot_returned_search_form" method="get" action="{% url 'election:election_summary' election.id %}">

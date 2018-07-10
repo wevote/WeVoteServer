@@ -359,8 +359,8 @@
 
 {% if election.google_civic_election_id|convert_to_int >= 1000000 %}
   <li>
-        <a href="{% url 'election:election_migration' %}?we_vote_election_id={{ election.google_civic_election_id }}">
-            Migrate this Data into Google Civic Election</a> (after data is available from Google Civic)
+        <a href="{% url 'election:election_migration' %}?we_vote_election_id={{ election.google_civic_election_id }}" target="_blank">
+            Migrate election {{ election.google_civic_election_id }} into official Google Civic Election Id</a> (analysis starts in new window - after data is available from Google Civic)
   </li>
 {% endif %}
 </ul>

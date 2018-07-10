@@ -4084,6 +4084,7 @@ class BatchManager(models.Model):
 
         return results
 
+
 class BatchSet(models.Model):
     """
     We call each imported CSV or JSON a “batch set”, and store basic information about it in this table.

@@ -1601,15 +1601,25 @@ def create_batch_row_action_candidate(batch_description, batch_header_map, one_b
     # Now we need to find the Contest Office this Candidate should be connected with
     contest_office_id = 0
     if positive_value_exists(contest_office_we_vote_id):
+        election_id_matches = True
         # Look up the contest_office information
         contest_manager = ContestOfficeManager()
         contest_results = contest_manager.retrieve_contest_office_from_we_vote_id(contest_office_we_vote_id)
         if contest_results['contest_office_found']:
             contest_office = contest_results['contest_office']
-            contest_office_name = contest_office.office_name
-            contest_office_we_vote_id = contest_office.we_vote_id
-            contest_office_id = contest_office.id
-            contest_office_found = True
+            if positive_value_exists(google_civic_election_id):
+                google_civic_election_id_integer = convert_to_int(google_civic_election_id)
+                office_google_civic_election_id = convert_to_int(contest_office.google_civic_election_id)
+                # Make sure the contest office linked to this candidate is for *this* election
+                if office_google_civic_election_id is not google_civic_election_id_integer:
+                    # If this candidate is linked to an office for another election, force this script to look for
+                    #  the correct contest_office below
+                    election_id_matches = False
+            if election_id_matches:
+                contest_office_name = contest_office.office_name
+                contest_office_we_vote_id = contest_office.we_vote_id
+                contest_office_id = contest_office.id
+                contest_office_found = True
 
     if not positive_value_exists(contest_office_found) and positive_value_exists(ballotpedia_race_id) \
             and positive_value_exists(google_civic_election_id):
