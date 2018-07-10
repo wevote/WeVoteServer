@@ -658,6 +658,7 @@ class AnalyticsManager(models.Model):
             if positive_value_exists(google_civic_election_id):
                 list_query = list_query.filter(google_civic_election_id=google_civic_election_id)
             sitewide_election_metrics_list = list(list_query)
+            success = True
             sitewide_election_metrics_list_found = True
         except Exception as e:
             sitewide_election_metrics_list_found = False

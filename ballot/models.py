@@ -652,7 +652,7 @@ class BallotItemListManager(models.Model):
             ballot_item_queryset = ballot_item_queryset.filter(
                 google_civic_election_id=google_civic_election_id)
             ballot_item_list = list(ballot_item_queryset)
-
+            success = True
             if positive_value_exists(ballot_item_list):
                 ballot_item_list_found = True
                 status = 'BALLOT_ITEMS_FOUND '
@@ -660,15 +660,17 @@ class BallotItemListManager(models.Model):
                 status = 'NO_BALLOT_ITEMS_FOUND, not positive_value_exists '
         except BallotItem.DoesNotExist:
             # No ballot items found. Not a problem.
+            success = True
             status = 'NO_BALLOT_ITEMS_FOUND '
             ballot_item_list = []
         except Exception as e:
+            success = False
             handle_exception(e, logger=logger)
             status = 'FAILED retrieve_ballot_items_for_election ' \
                      '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
 
         results = {
-            'success':                  True if ballot_item_list_found else False,
+            'success':                  success,
             'status':                   status,
             'ballot_item_list_found':   ballot_item_list_found,
             'ballot_item_list':         ballot_item_list,
