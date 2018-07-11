@@ -1232,14 +1232,18 @@ def batch_set_batch_list_view(request):
     google_civic_election_id = request.GET.get('google_civic_election_id', 0)
     analyze_all_button = request.GET.get('analyze_all_button', 0)
     create_all_button = request.GET.get('create_all_button', 0)
+    show_all_batches = request.GET.get('show_all_batches', False)
     update_all_button = request.GET.get('update_all_button', 0)
 
     batch_list_modified = []
+    batch_manager = BatchManager()
+    batch_set_count = 0
+    batch_set_kind_of_batch = ""
 
     try:
-        batch_manager = BatchManager()
-        batch_description = BatchDescription.objects.filter(batch_set_id=batch_set_id)
-        batch_list = list(batch_description)
+        batch_description_query = BatchDescription.objects.filter(batch_set_id=batch_set_id)
+        batch_set_count = batch_description_query.count()
+        batch_list = list(batch_description_query)
 
         retrieve_again = False
         if positive_value_exists(analyze_all_button):
@@ -1249,8 +1253,9 @@ def batch_set_batch_list_view(request):
                     retrieve_again = True
 
             if retrieve_again:
-                batch_description = BatchDescription.objects.filter(batch_set_id=batch_set_id)
-                batch_list = list(batch_description)
+                batch_description_query = BatchDescription.objects.filter(batch_set_id=batch_set_id)
+                batch_set_count = batch_description_query.count()
+                batch_list = list(batch_description_query)
 
         retrieve_again = False
         if positive_value_exists(update_all_button):
@@ -1261,8 +1266,9 @@ def batch_set_batch_list_view(request):
                     retrieve_again = True
 
             if retrieve_again:
-                batch_description = BatchDescription.objects.filter(batch_set_id=batch_set_id)
-                batch_list = list(batch_description)
+                batch_description_query = BatchDescription.objects.filter(batch_set_id=batch_set_id)
+                batch_set_count = batch_description_query.count()
+                batch_list = list(batch_description_query)
 
         retrieve_again = False
         if positive_value_exists(create_all_button):
@@ -1273,8 +1279,12 @@ def batch_set_batch_list_view(request):
                     retrieve_again = True
 
             if retrieve_again:
-                batch_description = BatchDescription.objects.filter(batch_set_id=batch_set_id)
-                batch_list = list(batch_description)
+                batch_description_query = BatchDescription.objects.filter(batch_set_id=batch_set_id)
+                batch_set_count = batch_description_query.count()
+                batch_list = list(batch_description_query)
+
+        if not positive_value_exists(show_all_batches):
+            batch_list = batch_list[:10]
 
         # Loop through all batches and add count data
         for one_batch_description in batch_list:
@@ -1282,21 +1292,50 @@ def batch_set_batch_list_view(request):
             one_batch_description.number_of_batch_rows_imported = batch_manager.fetch_batch_row_count(batch_header_id)
             one_batch_description.number_of_batch_rows_analyzed = \
                 batch_manager.fetch_batch_row_action_count(batch_header_id, one_batch_description.kind_of_batch)
+            one_batch_description.number_of_batch_actions_to_create = \
+                batch_manager.fetch_batch_row_action_count(batch_header_id, one_batch_description.kind_of_batch,
+                                                           IMPORT_CREATE)
+            one_batch_description.number_of_table_rows_to_update = \
+                batch_manager.fetch_batch_row_action_count(batch_header_id, one_batch_description.kind_of_batch,
+                                                           IMPORT_ADD_TO_EXISTING)
+            one_batch_description.number_of_batch_actions_cannot_act = \
+                one_batch_description.number_of_batch_rows_analyzed - \
+                one_batch_description.number_of_batch_actions_to_create - \
+                one_batch_description.number_of_table_rows_to_update
+
+            batch_set_kind_of_batch = one_batch_description.kind_of_batch
 
             batch_list_modified.append(one_batch_description)
     except BatchDescription.DoesNotExist:
         # This is fine
-        batch_description = BatchDescription()
+        pass
 
     election_list = Election.objects.order_by('-election_day_text')
+
+    status_message = '{batch_set_count} batches in this batch set. '.format(batch_set_count=batch_set_count)
+
+    batch_row_items_to_create_for_this_set = batch_manager.fetch_batch_row_action_count_in_batch_set(
+        batch_set_id, batch_set_kind_of_batch, IMPORT_CREATE)
+    if positive_value_exists(batch_row_items_to_create_for_this_set):
+        status_message += 'BatchRowActions to create: {batch_row_items_to_create_for_this_set} '.format(
+            batch_row_items_to_create_for_this_set=batch_row_items_to_create_for_this_set)
+
+    batch_row_items_to_update_for_this_set = batch_manager.fetch_batch_row_action_count_in_batch_set(
+        batch_set_id, batch_set_kind_of_batch, IMPORT_ADD_TO_EXISTING)
+    if positive_value_exists(batch_row_items_to_update_for_this_set):
+        status_message += 'BatchRowActions to update: {batch_row_items_to_update_for_this_set} '.format(
+            batch_row_items_to_update_for_this_set=batch_row_items_to_update_for_this_set)
+
+    messages.add_message(request, messages.INFO, status_message)
+
     messages_on_stage = get_messages(request)
 
     template_values = {
         'messages_on_stage':                messages_on_stage,
         'batch_set_id':                     batch_set_id,
-        'batch_description':                batch_description,
         'batch_list':                       batch_list_modified,
         'election_list':                    election_list,
         'google_civic_election_id':         google_civic_election_id,
+        'show_all_batches':                 show_all_batches,
     }
     return render(request, 'import_export_batches/batch_set_batch_list.html', template_values)

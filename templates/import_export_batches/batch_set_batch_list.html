@@ -60,7 +60,8 @@
         <tr>
             <td>{{ forloop.counter }}</td>
             <td>{{ one_batch.batch_name }}</td>
-            <td><a href="{% url 'import_export_batches:batch_action_list' %}?batch_header_id={{ one_batch.batch_header_id }}&kind_of_batch={{ one_batch.kind_of_batch }}&google_civic_election_id={{ google_civic_election_id }}">
+            <td><a href="{% url 'import_export_batches:batch_action_list' %}?batch_header_id={{ one_batch.batch_header_id }}&kind_of_batch={{ one_batch.kind_of_batch }}&google_civic_election_id={{ google_civic_election_id }}"
+                   target="_blank">
             review</a></td>
             <td>
                 {% for election in election_list %}
@@ -70,16 +71,25 @@
                 {% endfor %}
             </td>
             <td>{{ one_batch.number_of_batch_rows_imported }}</td>
-            <td>{{ one_batch.number_of_batch_rows_analyzed }}</td>
+            <td>{% if one_batch.number_of_batch_rows_analyzed %}{{ one_batch.number_of_batch_rows_analyzed }}{% endif %}</td>
             <td>{{ one_batch.date_created }}</td>
-            <td>{{ one_batch.number_of_batch_actions_created }}</td>
-            <td>{{ one_batch.number_of_table_rows_updated }}</td>
-            <td>{{ one_batch.number_of_batch_actions_duplicate }}</td>
+            <td>{% if one_batch.number_of_batch_actions_to_create %}{{ one_batch.number_of_batch_actions_to_create }}{% endif %}</td>
+            <td>{% if one_batch.number_of_table_rows_to_update %}{{ one_batch.number_of_table_rows_to_update }}{% endif %}</td>
+            <td>{% if one_batch.number_of_batch_actions_cannot_act %}{{ one_batch.number_of_batch_actions_cannot_act }}{% endif %}</td>
         </tr>
     {% endfor %}
     </table>
 
     <p></p>
+    {% if not show_all_batches %}
+      <a href="{% url 'import_export_batches:batch_set_batch_list' %}?batch_set_id={{ batch_set_id }}&google_civic_election_id={{ google_civic_election_id }}&show_all_batches=1">Show all Batches</a>
+      (this can take 50-90 seconds)
+    {% endif %}
+    <br />
+    <br />
+    <br />
+    <br />
+    <br />
 
 {% else %}
     <br />
