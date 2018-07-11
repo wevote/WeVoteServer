@@ -684,7 +684,7 @@ def batch_action_list_export_voters_view(request):
     organization_we_vote_id = request.GET.get('organization_we_vote_id', '')
 
     result = export_voter_list()
-    messages.add_message(request, messages.INFO, 'Batch Actions: '
+    messages.add_message(request, messages.INFO, 'Batch Action Export Voters: '
                                                  'Batch kind: {kind_of_batch}'
                                                  ''.format(kind_of_batch=kind_of_batch))
 
