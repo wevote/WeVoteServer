@@ -1574,6 +1574,10 @@ def create_batch_row_action_candidate(batch_description, batch_header_map, one_b
             candidate_we_vote_id = candidate.we_vote_id
             contest_office_we_vote_id = candidate.contest_office_we_vote_id
             kind_of_action = IMPORT_ADD_TO_EXISTING
+        elif matching_results['MultipleObjectsReturned']:
+            keep_looking_for_duplicates = False
+            kind_of_action = IMPORT_TO_BE_DETERMINED
+            status += "MORE_THAN_ONE_CANDIDATE_WITH_SAME_BALLOTPEDIA_CANDIDATE_ID "
 
     # We don't want to use this routine if we have a ballotpedia_candidate_id
     if keep_looking_for_duplicates and not positive_value_exists(ballotpedia_candidate_id):
