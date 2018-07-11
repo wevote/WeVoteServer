@@ -1137,6 +1137,7 @@ class BatchManager(models.Model):
         """
         :param batch_header_id:
         :param kind_of_batch:
+        :param kind_of_action:
         :return:
         """
 
@@ -1179,6 +1180,61 @@ class BatchManager(models.Model):
                 batch_row_action_count = batch_row_action_query.count()
             elif kind_of_batch == POSITION:
                 batch_row_action_query = BatchRowActionPosition.objects.filter(batch_header_id=batch_header_id)
+                if positive_value_exists(kind_of_action):
+                    batch_row_action_query = batch_row_action_query.filter(kind_of_action__iexact=kind_of_action)
+                batch_row_action_count = batch_row_action_query.count()
+        except Exception as e:
+            batch_row_action_count = 0
+
+        return batch_row_action_count
+
+    def fetch_batch_row_action_count_in_batch_set(self, batch_set_id, kind_of_batch, kind_of_action=''):
+        """
+        :param batch_set_id:
+        :param kind_of_batch:
+        :param kind_of_action:
+        :return:
+        """
+
+        batch_row_action_count = 0
+        try:
+            if kind_of_batch == CANDIDATE:
+                batch_row_action_query = BatchRowActionCandidate.objects.filter(batch_set_id=batch_set_id)
+                if positive_value_exists(kind_of_action):
+                    batch_row_action_query = batch_row_action_query.filter(kind_of_action__iexact=kind_of_action)
+                batch_row_action_count = batch_row_action_query.count()
+            elif kind_of_batch == CONTEST_OFFICE:
+                batch_row_action_query = BatchRowActionContestOffice.objects.filter(batch_set_id=batch_set_id)
+                if positive_value_exists(kind_of_action):
+                    batch_row_action_query = batch_row_action_query.filter(kind_of_action__iexact=kind_of_action)
+                batch_row_action_count = batch_row_action_query.count()
+            elif kind_of_batch == ELECTED_OFFICE:
+                batch_row_action_query = BatchRowActionElectedOffice.objects.filter(batch_set_id=batch_set_id)
+                if positive_value_exists(kind_of_action):
+                    batch_row_action_query = batch_row_action_query.filter(kind_of_action__iexact=kind_of_action)
+                batch_row_action_count = batch_row_action_query.count()
+            elif kind_of_batch == IMPORT_BALLOT_ITEM:
+                batch_row_action_query = BatchRowActionBallotItem.objects.filter(batch_set_id=batch_set_id)
+                if positive_value_exists(kind_of_action):
+                    batch_row_action_query = batch_row_action_query.filter(kind_of_action__iexact=kind_of_action)
+                batch_row_action_count = batch_row_action_query.count()
+            elif kind_of_batch == MEASURE:
+                batch_row_action_query = BatchRowActionMeasure.objects.filter(batch_set_id=batch_set_id)
+                if positive_value_exists(kind_of_action):
+                    batch_row_action_query = batch_row_action_query.filter(kind_of_action__iexact=kind_of_action)
+                batch_row_action_count = batch_row_action_query.count()
+            elif kind_of_batch == ORGANIZATION_WORD:
+                batch_row_action_query = BatchRowActionOrganization.objects.filter(batch_set_id=batch_set_id)
+                if positive_value_exists(kind_of_action):
+                    batch_row_action_query = batch_row_action_query.filter(kind_of_action__iexact=kind_of_action)
+                batch_row_action_count = batch_row_action_query.count()
+            elif kind_of_batch == POLITICIAN:
+                batch_row_action_query = BatchRowActionPolitician.objects.filter(batch_set_id=batch_set_id)
+                if positive_value_exists(kind_of_action):
+                    batch_row_action_query = batch_row_action_query.filter(kind_of_action__iexact=kind_of_action)
+                batch_row_action_count = batch_row_action_query.count()
+            elif kind_of_batch == POSITION:
+                batch_row_action_query = BatchRowActionPosition.objects.filter(batch_set_id=batch_set_id)
                 if positive_value_exists(kind_of_action):
                     batch_row_action_query = batch_row_action_query.filter(kind_of_action__iexact=kind_of_action)
                 batch_row_action_count = batch_row_action_query.count()
@@ -4329,6 +4385,7 @@ class BatchRowActionMeasure(models.Model):
     """
     The definition of the action for importing one Measure.
     """
+    batch_set_id = models.PositiveIntegerField(verbose_name="unique id of batch set", unique=False, null=True)
     batch_header_id = models.PositiveIntegerField(verbose_name="unique id of header row", unique=False, null=False)
     batch_row_id = models.PositiveIntegerField(verbose_name="unique id of batch row", unique=True, null=False)
     kind_of_action = models.CharField(max_length=40, choices=KIND_OF_ACTION_CHOICES, default=IMPORT_TO_BE_DETERMINED)
@@ -4410,6 +4467,7 @@ class BatchRowActionContestOffice(models.Model):
     """
     The definition of the action for importing one Office.
     """
+    batch_set_id = models.PositiveIntegerField(verbose_name="unique id of batch set", unique=False, null=True)
     batch_header_id = models.PositiveIntegerField(verbose_name="unique id of header row", unique=False, null=False)
     batch_row_id = models.PositiveIntegerField(verbose_name="unique id of batch row", unique=False, null=False)
     kind_of_action = models.CharField(max_length=40, choices=KIND_OF_ACTION_CHOICES, default=IMPORT_TO_BE_DETERMINED)
@@ -4531,6 +4589,7 @@ class BatchRowActionElectedOffice(models.Model):
     """
     The definition of the action for importing one Office.
     """
+    batch_set_id = models.PositiveIntegerField(verbose_name="unique id of batch set", unique=False, null=True)
     batch_header_id = models.PositiveIntegerField(verbose_name="unique id of header row", unique=False, null=False)
     batch_row_id = models.PositiveIntegerField(verbose_name="unique id of batch row", unique=False, null=False)
     kind_of_action = models.CharField(max_length=40, choices=KIND_OF_ACTION_CHOICES, default=IMPORT_TO_BE_DETERMINED)
@@ -4617,6 +4676,7 @@ class BatchRowActionPolitician(models.Model):
     """
     The definition of the action for importing one Politician.
     """
+    batch_set_id = models.PositiveIntegerField(verbose_name="unique id of batch set", unique=False, null=True)
     batch_header_id = models.PositiveIntegerField(verbose_name="unique id of header row", unique=False, null=False)
     batch_row_id = models.PositiveIntegerField(verbose_name="unique id of batch row", unique=False, null=False)
     kind_of_action = models.CharField(max_length=40, choices=KIND_OF_ACTION_CHOICES, default=IMPORT_TO_BE_DETERMINED)
@@ -4694,6 +4754,7 @@ class BatchRowActionCandidate(models.Model):
     """
     The definition of the action for importing one Candidate.
     """
+    batch_set_id = models.PositiveIntegerField(verbose_name="unique id of batch set", unique=False, null=True)
     batch_header_id = models.PositiveIntegerField(verbose_name="unique id of header row", unique=False, null=False)
     batch_row_id = models.PositiveIntegerField(verbose_name="unique id of batch row", unique=False, null=False)
     kind_of_action = models.CharField(max_length=40, choices=KIND_OF_ACTION_CHOICES, default=IMPORT_TO_BE_DETERMINED)
@@ -4826,6 +4887,7 @@ class BatchRowActionOrganization(models.Model):
     """
     The definition of the action for importing one Organization.
     """
+    batch_set_id = models.PositiveIntegerField(verbose_name="unique id of batch set", unique=False, null=True)
     batch_header_id = models.PositiveIntegerField(verbose_name="unique id of header row", unique=False, null=False)
     batch_row_id = models.PositiveIntegerField(verbose_name="unique id of batch row", unique=False, null=False)
     kind_of_action = models.CharField(max_length=40, choices=KIND_OF_ACTION_CHOICES, default=IMPORT_TO_BE_DETERMINED)
@@ -4909,6 +4971,7 @@ class BatchRowActionPosition(models.Model):
     """
     The definition of the action for importing one Position.
     """
+    batch_set_id = models.PositiveIntegerField(verbose_name="unique id of batch set", unique=False, null=True)
     batch_header_id = models.PositiveIntegerField(verbose_name="unique id of header row", unique=False, null=False)
     batch_row_id = models.PositiveIntegerField(verbose_name="unique id of batch row", unique=False, null=False)
     kind_of_action = models.CharField(max_length=40, choices=KIND_OF_ACTION_CHOICES, default=IMPORT_TO_BE_DETERMINED)
@@ -5042,6 +5105,7 @@ class BatchRowActionBallotItem(models.Model):
     """
     The definition of the action for importing one ballot item.
     """
+    batch_set_id = models.PositiveIntegerField(verbose_name="unique id of batch set", unique=False, null=True)
     batch_header_id = models.PositiveIntegerField(verbose_name="unique id of header row", unique=False, null=False)
     batch_row_id = models.PositiveIntegerField(verbose_name="unique id of batch row", unique=True, null=False)
     kind_of_action = models.CharField(max_length=40, choices=KIND_OF_ACTION_CHOICES, default=IMPORT_TO_BE_DETERMINED)
