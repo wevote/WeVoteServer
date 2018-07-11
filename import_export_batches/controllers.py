@@ -992,6 +992,21 @@ def create_batch_row_action_contest_office(batch_description, batch_header_map, 
                 status += "INSUFFICIENT_DATA_FOR_BATCH_ROW_ACTION_CONTEST_OFFICE_CREATE "
                 keep_looking_for_duplicates = False
 
+        # DALE 2018-07-10 Still considering this...
+        # if keep_looking_for_duplicates and positive_value_exists(ballotpedia_office_id):
+        #     contest_office_manager = ContestOfficeManager()
+        #     matching_results = contest_office_manager.retrieve_contest_office_from_ballotpedia_office_id(
+        #         ballotpedia_office_id, google_civic_election_id)
+        #     if matching_results['contest_office_found']:
+        #         contest_office = matching_results['contest_office']
+        #         keep_looking_for_duplicates = False
+        #         contest_office_we_vote_id = contest_office.we_vote_id
+        #         kind_of_action = IMPORT_ADD_TO_EXISTING
+        #     elif matching_results['MultipleObjectsReturned']:
+        #         keep_looking_for_duplicates = False
+        #         kind_of_action = IMPORT_TO_BE_DETERMINED
+        #         status += "MORE_THAN_ONE_OFFICE_WITH_SAME_BALLOTPEDIA_OFFICE_ID "
+
         if keep_looking_for_duplicates and positive_value_exists(ballotpedia_race_id):
             contest_office_manager = ContestOfficeManager()
             matching_results = contest_office_manager.retrieve_contest_office_from_ballotpedia_race_id(

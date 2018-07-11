@@ -118,8 +118,10 @@ class Election(models.Model):
 
     # Not an election we will be supporting
     ignore_this_election = models.BooleanField(default=False)
-    # Have we finished all of the election preparation we want to do?
+    # Have we finished all of the election preparation related to Offices, Candidates, Measures and Ballot Locations?
     election_preparation_finished = models.BooleanField(default=False)
+    # Have we finished all of the election preparation related to Candidate photos?
+    candidate_photos_finished = models.BooleanField(default=False)
 
     def election_is_upcoming(self):
         if not positive_value_exists(self.election_day_text):
