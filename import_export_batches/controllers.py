@@ -1001,6 +1001,10 @@ def create_batch_row_action_contest_office(batch_description, batch_header_map, 
                 keep_looking_for_duplicates = False
                 contest_office_we_vote_id = contest_office.we_vote_id
                 kind_of_action = IMPORT_ADD_TO_EXISTING
+            elif matching_results['MultipleObjectsReturned']:
+                keep_looking_for_duplicates = False
+                kind_of_action = IMPORT_TO_BE_DETERMINED
+                status += "MORE_THAN_ONE_OFFICE_WITH_SAME_BALLOTPEDIA_RACE_ID "
 
         if keep_looking_for_duplicates and not positive_value_exists(ballotpedia_race_id):
             contest_office_list_manager = ContestOfficeListManager()
