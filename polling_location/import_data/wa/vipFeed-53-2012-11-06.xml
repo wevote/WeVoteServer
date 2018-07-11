@@ -1,0 +1,2877 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vip_object xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://github.com/votinginfoproject/vip-specification/blob/master/vip_spec_v3.0.xsd" schemaVersion="3.0">
+<source id="1">
+  <name>Washington</name>
+  <vip_id>53</vip_id>
+  <datetime>2012-10-17T12:00:00</datetime>
+  <description>Washington Secretary of State is the official source of election information for Washington.</description>
+  <organization_url>http://www.sos.wa.gov/elections/</organization_url>
+</source>
+<early_vote_site id="99994770">
+  <address>
+    <city>Ritzville</city>
+    <line1>210 W Broadway Ave. Ste 200</line1>
+    <state>WA</state>
+    <location_name>Adams County Auditor's Office</location_name>
+    <zip>98512</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99998559">
+  <address>
+    <city>Othello</city>
+    <line1>425 E Main St</line1>
+    <state>WA</state>
+    <location_name>Adams County Public Services Building</location_name>
+    <zip>99344</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="999910911">
+  <address>
+    <city>Ritzville</city>
+    <line1>216 E. Main Ave</line1>
+    <state>WA</state>
+    <location_name>Ritzville City Hall</location_name>
+    <zip>99169</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99995373">
+  <address>
+    <city>Asotin</city>
+    <line1>135 Second St.</line1>
+    <state>WA</state>
+    <location_name>Asotin County Auditor's Office</location_name>
+    <zip>99402</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99995350">
+  <address>
+    <city>Prosser</city>
+    <line1>620 Market St</line1>
+    <state>WA</state>
+    <location_name>Prosser Courthouse</location_name>
+    <zip>99350</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99993814">
+  <directions>Replacement Ballots Available</directions>
+  <address>
+    <city>Richland</city>
+    <line1>101 Wellsian Way Ste E</line1>
+    <state>WA</state>
+    <location_name>Richland Auditor's Office</location_name>
+    <zip>99352</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99993815">
+  <address>
+    <city>Prosser</city>
+    <line1>620 Market St</line1>
+    <state>WA</state>
+    <location_name>Prosser Auditor's Office</location_name>
+    <zip>99350</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99993816">
+  <address>
+    <city>Kennewick</city>
+    <line1>5600 W Canal Dr</line1>
+    <state>WA</state>
+    <location_name>Kennewick Auditor's Office</location_name>
+    <zip>99336</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99993817">
+  <address>
+    <city>Richland</city>
+    <line1>101 Wellsian Way</line1>
+    <state>WA</state>
+    <location_name>Richland Auditor's Annex</location_name>
+    <zip>99352</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="999910319">
+  <address>
+    <city>Kennewick</city>
+    <line1>5600 W Canal Dr</line1>
+    <state>WA</state>
+    <location_name>Kennewick Auditor's Annex</location_name>
+    <zip>99336</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="999910320">
+  <address>
+    <city>Kennewick</city>
+    <line1>7122 W Okanogan Place</line1>
+    <state>WA</state>
+    <location_name>Kennewick Justice Center</location_name>
+    <zip>99336</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="999910321">
+  <address>
+    <city>Benton City</city>
+    <line1>708 9th St</line1>
+    <state>WA</state>
+    <location_name>Benton City City Hall</location_name>
+    <zip>99320</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99993749">
+  <address>
+    <city>Wenatchee</city>
+    <line1>310 Douglas St</line1>
+    <state>WA</state>
+    <location_name>Wenatchee Public Library</location_name>
+    <zip>98801</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99993751">
+  <address>
+    <city>Cashmere</city>
+    <line1>101 Woodring St</line1>
+    <state>WA</state>
+    <location_name>Cashmere City Hall</location_name>
+    <zip>98815</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99993752">
+  <address>
+    <city>Chelan</city>
+    <line1>135 East Johnson Ave</line1>
+    <state>WA</state>
+    <location_name>Chelan City Hall</location_name>
+    <zip>98816</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99993753">
+  <address>
+    <city>Entiat</city>
+    <line1>14070 Kinzel St</line1>
+    <state>WA</state>
+    <location_name>Entiat City Hall</location_name>
+    <zip>98822</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99993754">
+  <address>
+    <city>Leavenworth</city>
+    <line1>700 Hwy 2</line1>
+    <state>WA</state>
+    <location_name>Leavenworth City Hall</location_name>
+    <zip>98826</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99993755">
+  <address>
+    <city>Wenatchee</city>
+    <line1>350 Orondo Ave</line1>
+    <state>WA</state>
+    <location_name>Chelan County Courthouse</location_name>
+    <zip>98801</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99993800">
+  <directions>An outdoor dropbox is available in the 4th St. circular drive 24 hrs a day.</directions>
+  <address>
+    <city>Port Angeles</city>
+    <line1>223 E 4th St, Suite 1</line1>
+    <state>WA</state>
+    <location_name>Clallam County Courthouse-Auditor's Office</location_name>
+    <zip>98362</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99998478">
+  <address>
+    <city>Forks</city>
+    <line1>502 E Division St</line1>
+    <state>WA</state>
+    <location_name>Forks District Court</location_name>
+    <zip>98331</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99998522">
+  <address>
+    <city>Port Angeles</city>
+    <line1>223 E 4th St, Suite 1</line1>
+    <state>WA</state>
+    <location_name>Clallam County Auditor's Office</location_name>
+    <zip>98362</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99998538">
+  <address>
+    <city>Sequim</city>
+    <line1>152 W Cedar St</line1>
+    <state>WA</state>
+    <location_name>Sequim City Hall</location_name>
+    <zip>98382</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="999911151">
+  <address>
+    <city>Camas</city>
+    <line1>2623 NW Sierra Street</line1>
+    <state>WA</state>
+    <location_name>Dorothy Fox Elementary School</location_name>
+    <zip>98607</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="999911152">
+  <address>
+    <city>Vancouver</city>
+    <line1>512 SE Ellsworth Avenue</line1>
+    <state>WA</state>
+    <location_name>Ellsworth Elementary School</location_name>
+    <zip>98664</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99998390">
+  <address>
+    <city>Vancouver</city>
+    <line1>1408 Franklin Street</line1>
+    <state>WA</state>
+    <location_name>Clark County Elections Office</location_name>
+    <zip>98660</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99998391">
+  <address>
+    <city>Vancouver</city>
+    <line1>W. 14th Street &amp; Esther Street</line1>
+    <state>WA</state>
+    <location_name>Permanent Ballot Drop Box</location_name>
+    <zip>98660</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99998392">
+  <address>
+    <city>Battle Ground</city>
+    <line1>109 SW 1st Street</line1>
+    <state>WA</state>
+    <location_name>Battle Ground City Hall</location_name>
+    <zip>98642</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99998393">
+  <address>
+    <city>Battle Ground</city>
+    <line1>300 W. Main Street</line1>
+    <state>WA</state>
+    <location_name>Battle Ground High School</location_name>
+    <zip>98642</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99998394">
+  <address>
+    <city>Vancouver</city>
+    <line1>14015 NE 28th Street</line1>
+    <state>WA</state>
+    <location_name>Burton Elementary School</location_name>
+    <zip>98682</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99998395">
+  <address>
+    <city>Vancouver</city>
+    <line1>1900 NW Bliss Road</line1>
+    <state>WA</state>
+    <location_name>Chinook Elementary School</location_name>
+    <zip>98685</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99998396">
+  <address>
+    <city>Vancouver</city>
+    <line1>13003 SE 7th Street</line1>
+    <state>WA</state>
+    <location_name>Crestline Elementary School</location_name>
+    <zip>98683</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99998397">
+  <address>
+    <city>Camas</city>
+    <line1>3000 NW Grass Valley Drive</line1>
+    <state>WA</state>
+    <location_name>Grass Valley Elementary</location_name>
+    <zip>98607</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99998398">
+  <address>
+    <city>Vancouver</city>
+    <line1>2921 Falk Road</line1>
+    <state>WA</state>
+    <location_name>Eleanor Roosevelt Elementary School</location_name>
+    <zip>98661</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99998399">
+  <address>
+    <city>Vancouver</city>
+    <line1>2700 NW 119th Street</line1>
+    <state>WA</state>
+    <location_name>Felida Elementary School</location_name>
+    <zip>98685</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99998400">
+  <address>
+    <city>Vancouver</city>
+    <line1>3800 SE Hiddenbrook Drive</line1>
+    <state>WA</state>
+    <location_name>Fisher's Landing Elementary School</location_name>
+    <zip>98683</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99998401">
+  <address>
+    <city>Vancouver</city>
+    <line1>9716 NE 134th Street</line1>
+    <state>WA</state>
+    <location_name>Glenwood Heights Primary School</location_name>
+    <zip>98662</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99998402">
+  <address>
+    <city>Camas</city>
+    <line1>717 SE Everett Road</line1>
+    <state>WA</state>
+    <location_name>Grace Foursquare Gospel Church</location_name>
+    <zip>98607</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99998403">
+  <address>
+    <city>Vancouver</city>
+    <line1>511 NE Anderson Road</line1>
+    <state>WA</state>
+    <location_name>Hazel Dell Elementary School</location_name>
+    <zip>98665</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99998404">
+  <address>
+    <city>Camas</city>
+    <line1>1954 NE Garfield Street</line1>
+    <state>WA</state>
+    <location_name>Helen Baller Elementary School</location_name>
+    <zip>98607</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99998405">
+  <address>
+    <city>Brush Prairie</city>
+    <line1>15916 NE 192nd Avenue</line1>
+    <state>WA</state>
+    <location_name>Hockinson Middle School</location_name>
+    <zip>98606</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99998406">
+  <address>
+    <city>Vancouver</city>
+    <line1>4400 NE 122nd Avenue</line1>
+    <state>WA</state>
+    <location_name>Image Elementary School</location_name>
+    <zip>98682</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99998407">
+  <address>
+    <city>La Center</city>
+    <line1>1000 E. 4th Street</line1>
+    <state>WA</state>
+    <location_name>La Center Community Center</location_name>
+    <zip>98629</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99998408">
+  <address>
+    <city>Vancouver</city>
+    <line1>4200 Daniels Street</line1>
+    <state>WA</state>
+    <location_name>Lincoln Elementary School</location_name>
+    <zip>98660</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99998409">
+  <address>
+    <city>Vancouver</city>
+    <line1>4801 Idaho Street</line1>
+    <state>WA</state>
+    <location_name>M.L. King Elementary School</location_name>
+    <zip>98661</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99998410">
+  <address>
+    <city>Vancouver</city>
+    <line1>400 SE 164th Avenue</line1>
+    <state>WA</state>
+    <location_name>Mill Plain Elementary School</location_name>
+    <zip>98684</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99998411">
+  <address>
+    <city>Vancouver</city>
+    <line1>2800 NE 54th Street</line1>
+    <state>WA</state>
+    <location_name>Minnehaha Elementary School</location_name>
+    <zip>98663</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99998412">
+  <address>
+    <city>Vancouver</city>
+    <line1>14320 NE 50th Avenue</line1>
+    <state>WA</state>
+    <location_name>Pleasant Valley School</location_name>
+    <zip>98686</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99998413">
+  <address>
+    <city>Camas</city>
+    <line1>1601 NW Tidland Street</line1>
+    <state>WA</state>
+    <location_name>Prune Hill Elementary School</location_name>
+    <zip>98607</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99998414">
+  <address>
+    <city>Ridgefield</city>
+    <line1>747 Pioneer Street</line1>
+    <state>WA</state>
+    <location_name>Ridgefield Nazarene Church</location_name>
+    <zip>98642</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99998417">
+  <address>
+    <city>Vancouver</city>
+    <line1>12601 SE Riverridge Drive</line1>
+    <state>WA</state>
+    <location_name>Riverview Elementary School</location_name>
+    <zip>98683</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99998418">
+  <address>
+    <city>Vancouver</city>
+    <line1>1601 NE 129th Street</line1>
+    <state>WA</state>
+    <location_name>Salmon Creek Elementary School</location_name>
+    <zip>98685</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99998419">
+  <address>
+    <city>Vancouver</city>
+    <line1>2215 NE 104th Street</line1>
+    <state>WA</state>
+    <location_name>Sarah J. Anderson Elementary School</location_name>
+    <zip>98686</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99998420">
+  <address>
+    <city>Vancouver</city>
+    <line1>7301 NE 137th Avenue</line1>
+    <state>WA</state>
+    <location_name>Sifton Elementary School</location_name>
+    <zip>98682</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99998421">
+  <address>
+    <city>Vancouver</city>
+    <line1>9001 NE 95th Street</line1>
+    <state>WA</state>
+    <location_name>Sunset Elementary School</location_name>
+    <zip>98662</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99998422">
+  <address>
+    <city>Vancouver</city>
+    <line1>301 S. Lieser Road</line1>
+    <state>WA</state>
+    <location_name>Vancouver Early Childhood Center</location_name>
+    <zip>98664</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99998423">
+  <address>
+    <city>Vancouver</city>
+    <line1>6103 NE 72nd Avenue</line1>
+    <state>WA</state>
+    <location_name>Walnut Grove Elementary School</location_name>
+    <zip>98661</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99998424">
+  <address>
+    <city>Washougal</city>
+    <line1>1681 C Street</line1>
+    <state>WA</state>
+    <location_name>Washougal Community Center</location_name>
+    <zip>98671</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99998426">
+  <address>
+    <city>Yacolt</city>
+    <line1>406 W. Yacolt Road</line1>
+    <state>WA</state>
+    <location_name>Yacolt Primary School</location_name>
+    <zip>98675</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99998427">
+  <address>
+    <city>Vancouver</city>
+    <line1>3101 Main Street</line1>
+    <state>WA</state>
+    <location_name>Vancouver School of Arts and Academics</location_name>
+    <zip>98663</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99997088">
+  <address>
+    <city>Dayton</city>
+    <line1>341 E. Main St.</line1>
+    <state>WA</state>
+    <location_name>Courthouse Alley</location_name>
+    <zip>99328</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99995374">
+  <address>
+    <city>Dayton</city>
+    <line1>341 East Main Street</line1>
+    <state>WA</state>
+    <location_name>Columbia County Auditor's Office</location_name>
+    <zip>99328</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99995372">
+  <address>
+    <city>Kelso</city>
+    <line1>207 4th Avenue N. Rm 107</line1>
+    <state>WA</state>
+    <location_name>Cowlitz County Auditor's Office</location_name>
+    <zip>98626</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99995385">
+  <address>
+    <city>Longview</city>
+    <line1>1525 Broadway Street</line1>
+    <state>WA</state>
+    <location_name>Longview Civic Center Circle</location_name>
+    <zip>98632</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99995386">
+  <address>
+    <city>Longview</city>
+    <line1>1525 Broadway Street</line1>
+    <state>WA</state>
+    <location_name>Broadway Street</location_name>
+    <zip>98632</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99995387">
+  <address>
+    <city>Kelso</city>
+    <line1>100 N 3rd Avenue</line1>
+    <state>WA</state>
+    <location_name>Kelso</location_name>
+    <zip>98626</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99995388">
+  <address>
+    <city>Woodland</city>
+    <line1>230 Davidson Avenue</line1>
+    <state>WA</state>
+    <location_name>Woodland City Parking Lot</location_name>
+    <zip>98674</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99995389">
+  <address>
+    <city>Castle Rock</city>
+    <line1>137 Cowlitz St West</line1>
+    <state>WA</state>
+    <location_name>Castle Rock</location_name>
+    <zip>98611</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99995390">
+  <address>
+    <city>Kalama</city>
+    <line1>454 N 1st Street</line1>
+    <state>WA</state>
+    <location_name>Kalama</location_name>
+    <zip>98625</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99995404">
+  <address>
+    <city>Waterville</city>
+    <line1>213 S Rainier St</line1>
+    <state>WA</state>
+    <location_name>Douglas County Courthouse Drop Box</location_name>
+    <zip>98858</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99995405">
+  <address>
+    <city>Mansfield</city>
+    <line1>26 Main</line1>
+    <state>WA</state>
+    <location_name>Mansfield City Hall Drop Box</location_name>
+    <zip>98830</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99995406">
+  <address>
+    <city>Bridgeport</city>
+    <line1>1206 Columbia Ave</line1>
+    <state>WA</state>
+    <location_name>Bridgeport City Hall Drop Box</location_name>
+    <zip>98813</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99995407">
+  <address>
+    <city>Rock Island</city>
+    <line1>5 N Garden</line1>
+    <state>WA</state>
+    <location_name>Rock Island City Hall Drop Box</location_name>
+    <zip>98850</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99995408">
+  <address>
+    <city>East Wenatchee</city>
+    <line1>110 2nd St NE</line1>
+    <state>WA</state>
+    <location_name>Douglas County Law &amp; Justice Center Drop Box</location_name>
+    <zip>98802</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99995409">
+  <address>
+    <city>East Wenatchee</city>
+    <line1>140 19th Street NW</line1>
+    <state>WA</state>
+    <location_name>Douglas County Public Service Bldg Drop Box</location_name>
+    <zip>98802</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99995375">
+  <address>
+    <city>Waterville</city>
+    <line1>213 S Rainier St</line1>
+    <state>WA</state>
+    <location_name>Douglas County Auditor's Office</location_name>
+    <zip>98858</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99993364">
+  <address>
+    <city>Republic</city>
+    <line1>350 E. Delaware Ave</line1>
+    <state>WA</state>
+    <location_name>Ferry County Courthouse</location_name>
+    <zip>99166</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99993366">
+  <address>
+    <city>Republic</city>
+    <line1>987 S. Clark Ave</line1>
+    <state>WA</state>
+    <location_name>Republic City Hall</location_name>
+    <zip>99166</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99994236">
+  <address>
+    <line2>Corner of 3rd and Clark</line2>
+    <city>Pasco</city>
+    <line1>116 N 3rd Ave</line1>
+    <state>WA</state>
+    <location_name>Franklin County Annex - Elections Center</location_name>
+    <zip>99301</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99995356">
+  <address>
+    <city>Pasco</city>
+    <line1>6600 Burden Blvd</line1>
+    <state>WA</state>
+    <location_name>TRAC Center</location_name>
+    <zip>99301</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99995357">
+  <address>
+    <city>Pasco</city>
+    <line1>1016 N. 4th Ave</line1>
+    <state>WA</state>
+    <location_name>Franklin County Auditor's Office</location_name>
+    <zip>99301</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99998556">
+  <address>
+    <line2>Parking Lot</line2>
+    <city>Pasco</city>
+    <line1>1016 N. 4th Avenue</line1>
+    <state>WA</state>
+    <location_name>Franklin County Courthouse Drop Box</location_name>
+    <zip>99301</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99995376">
+  <address>
+    <city>Pomeroy</city>
+    <line1>789 Main St</line1>
+    <state>WA</state>
+    <location_name>Garfield County Auditor's Office</location_name>
+    <zip>99347</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99997089">
+  <address>
+    <city>Pomeroy</city>
+    <line1>789 Main Street</line1>
+    <state>WA</state>
+    <location_name>Garfield County Auditor's Office</location_name>
+    <zip>99347</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99995377">
+  <address>
+    <city>Ephrata</city>
+    <line1>35 C St NW</line1>
+    <state>WA</state>
+    <location_name>Grant County Auditor's Office</location_name>
+    <zip>98823</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="999910851">
+  <address>
+    <city>Grand Coulee</city>
+    <line1>555 Grand Coulee Ave</line1>
+    <state>WA</state>
+    <location_name>Grant County PUD</location_name>
+    <zip>99133</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="999910852">
+  <address>
+    <city>Moses Lake</city>
+    <line1>321 Balsam St</line1>
+    <state>WA</state>
+    <location_name>Moses Lake City Hall</location_name>
+    <zip>98837</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="999910853">
+  <address>
+    <city>Royal City</city>
+    <line1>588 Camelia St</line1>
+    <state>WA</state>
+    <location_name>Fire District #20 Fire Hall</location_name>
+    <zip>99357</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="999910854">
+  <address>
+    <city>Quincy</city>
+    <line1>208 Central Ave S</line1>
+    <state>WA</state>
+    <location_name>Quincy Public Library</location_name>
+    <zip>98848</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="999910855">
+  <address>
+    <city>Ephrata</city>
+    <line1>1st &amp; C St NW</line1>
+    <state>WA</state>
+    <location_name>Grant County Courthouse</location_name>
+    <zip>98823</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="999910856">
+  <address>
+    <city>Ephrata</city>
+    <line1>35 C St NW</line1>
+    <state>WA</state>
+    <location_name>Grant County Election Dept.</location_name>
+    <zip>98823</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99995364">
+  <address>
+    <line2>West Chance ala Mer</line2>
+    <city>Ocean Shores</city>
+    <line1>Convention Center Lobby</line1>
+    <state>WA</state>
+    <location_name>North Beach Area</location_name>
+    <zip>98569</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99995365">
+  <address>
+    <line2>2500 Simpson Ave.</line2>
+    <city>Hoquiam</city>
+    <line1>YMCA</line1>
+    <state>WA</state>
+    <location_name>Aberdeen, Hoquiam, Cosmopolis Area</location_name>
+    <zip>98550</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99995366">
+  <address>
+    <line2>204 E. Main Street</line2>
+    <city>Oakville</city>
+    <line1>Methodist Church</line1>
+    <state>WA</state>
+    <location_name>Oakville Area</location_name>
+    <zip>98568</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99995367">
+  <address>
+    <line2>506 N. Montesano</line2>
+    <city>Westport</city>
+    <line1>Council Chambers</line1>
+    <state>WA</state>
+    <location_name>South Beach Area</location_name>
+    <zip>98595</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99995368">
+  <address>
+    <line2>18 N. Summit</line2>
+    <city>McCleary</city>
+    <line1>VFW</line1>
+    <state>WA</state>
+    <location_name>McCleary Area</location_name>
+    <zip>98557</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99994093">
+  <address>
+    <line2>Ste 2</line2>
+    <city>Montesano</city>
+    <line1>100 W Broadway</line1>
+    <state>WA</state>
+    <location_name>Grays Harbor County Auditor</location_name>
+    <zip>98563</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99995382">
+  <address>
+    <line2>State Hwy 525 &amp; Woodard Rd.</line2>
+    <city>Freeland</city>
+    <line1>Election Day ONLY</line1>
+    <state>WA</state>
+    <location_name>Trinity Lutheran Church</location_name>
+    <zip>98249</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99995383">
+  <address>
+    <city>Camano Island</city>
+    <line1>121 N. East Camano Drive</line1>
+    <state>WA</state>
+    <location_name>Camano Island Annex</location_name>
+    <zip>98282</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99995378">
+  <address>
+    <city>Coupeville</city>
+    <line1>400 North Main Street</line1>
+    <state>WA</state>
+    <location_name>Island County Auditor's Office</location_name>
+    <zip>98239</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="999910957">
+  <address>
+    <city>Oak Harbor</city>
+    <line1>865 SE Barrington Dr.</line1>
+    <state>WA</state>
+    <location_name>Oak Harbor City Hall</location_name>
+    <zip>98277</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="999910958">
+  <address>
+    <city>Coupeville</city>
+    <line1>400 N. Main Street</line1>
+    <state>WA</state>
+    <location_name>Island County Auditor's Office</location_name>
+    <zip>98239</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99998271">
+  <directions>Jefferson &amp; Cass Streets</directions>
+  <address>
+    <city>Port Townsend</city>
+    <line1>1820 Jefferson St</line1>
+    <state>WA</state>
+    <location_name>Jefferson County Auditor</location_name>
+    <zip>98368</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99995369">
+  <address>
+    <city>Port Townsend</city>
+    <line1>1820 Jefferson St</line1>
+    <state>WA</state>
+    <location_name>Jefferson County Courthouse - Back Parking Lot</location_name>
+    <zip>98368</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99995370">
+  <directions>1820 Jefferson St. Cross Streets: Jefferson &amp; Cass</directions>
+  <address>
+    <city>Port Townsend Wa</city>
+    <line1>1820 Jefferson St</line1>
+    <state>WA</state>
+    <location_name>Jefferson County Auditor</location_name>
+    <zip>98368</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99995403">
+  <address>
+    <city>Port Hadlock</city>
+    <line1>620 Cedar Ave</line1>
+    <state>WA</state>
+    <location_name>Jefferson County Library</location_name>
+    <zip>98339</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="999911178">
+  <directions>South Entrance</directions>
+  <address>
+    <city>Bellevue</city>
+    <line1>15600 NE 8th Street</line1>
+    <state>WA</state>
+    <location_name>(Bellevue) Crossroads Shopping Center</location_name>
+    <zip>98008</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="999911179">
+  <address>
+    <city>Burien</city>
+    <line1>400 SW 152nd Street</line1>
+    <state>WA</state>
+    <location_name>Burien City Hall</location_name>
+    <zip>98166</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="999911180">
+  <address>
+    <city>Federal Way</city>
+    <line1>33325 8th Avenue South</line1>
+    <state>WA</state>
+    <location_name>Federal Way City Hall</location_name>
+    <zip>98003</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="999911181">
+  <address>
+    <city>Issaquah</city>
+    <line1>130 E Sunset Way</line1>
+    <state>WA</state>
+    <location_name>Issaquah City Hall</location_name>
+    <zip>98027</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="999911182">
+  <address>
+    <city>Lake Forest Park</city>
+    <line1>17425 Ballinger Way NE</line1>
+    <state>WA</state>
+    <location_name>Lake Forest Park City Hall</location_name>
+    <zip>98155</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="999911183">
+  <address>
+    <city>Kent</city>
+    <line1>401 4th Avenue N</line1>
+    <state>WA</state>
+    <location_name>(Kent) Regional Justice Center</location_name>
+    <zip>98032</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="999911184">
+  <address>
+    <city>Maple Valley</city>
+    <line1>25720 Maple Valley-Black Diamond Road SE</line1>
+    <state>WA</state>
+    <location_name>(Maple Valley) Tahoma School District Office</location_name>
+    <zip>98038</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="999911185">
+  <address>
+    <city>Redmond</city>
+    <line1>15670 NE 85th Street</line1>
+    <state>WA</state>
+    <location_name>Redmond City Hall</location_name>
+    <zip>98052</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="999911186">
+  <address>
+    <city>Renton</city>
+    <line1>919 SW Grady Way</line1>
+    <state>WA</state>
+    <location_name>(Renton) King County Elections</location_name>
+    <zip>98057</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="999911187">
+  <address>
+    <city>Seattle</city>
+    <line1>Corner of NW 57th  Street and 22nd Avenue NW</line1>
+    <state>WA</state>
+    <location_name>(Seattle) Ballard Branch Library</location_name>
+    <zip>98107</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="999911188">
+  <address>
+    <city>Seattle</city>
+    <line1>500 4th Avenue</line1>
+    <state>WA</state>
+    <location_name>(Seattle) King County Administration Building</location_name>
+    <zip>98104</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="999911189">
+  <address>
+    <city>Seattle</city>
+    <line1>6344 NE 74th Street</line1>
+    <state>WA</state>
+    <location_name>(Seattle) Magnuson Park</location_name>
+    <zip>98115</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="999911190">
+  <directions>North parking lot</directions>
+  <address>
+    <city>Kirkland</city>
+    <line1>123 5th Avenue</line1>
+    <state>WA</state>
+    <location_name>(Van) Kirkland City Hall</location_name>
+    <zip>98033</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="999911191">
+  <address>
+    <line2>University of Washington</line2>
+    <city>Seattle</city>
+    <line1>Red Square</line1>
+    <state>WA</state>
+    <location_name>(Van) Northeast Red Square, UW Campus</location_name>
+    <zip>98105</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="999911192">
+  <directions>Southwest corner of parking lot</directions>
+  <address>
+    <city>Seattle</city>
+    <line1>4432 35th Avenue SW</line1>
+    <state>WA</state>
+    <location_name>(Van) West Seattle Stadium</location_name>
+    <zip>98126</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="999910365">
+  <address>
+    <line2>619 Division St</line2>
+    <city>Port Orchard</city>
+    <line1>County Administration Building</line1>
+    <state>WA</state>
+    <location_name>South Kitsap</location_name>
+    <zip>98366</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="999911003">
+  <address>
+    <line2>8895 Madison Ave NE</line2>
+    <city>Bainbridge Island</city>
+    <line1>Bainbridge Island Fire Department</line1>
+    <state>WA</state>
+    <location_name>Bainbridge Island</location_name>
+    <zip>98110</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="999911004">
+  <address>
+    <line2>1301 Sylvan Way</line2>
+    <city>Bremerton</city>
+    <line1>Kitsap Regional Library</line1>
+    <state>WA</state>
+    <location_name>Bremerton - East</location_name>
+    <zip>98310</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="999911005">
+  <address>
+    <line2>345 Sixth St</line2>
+    <city>Bremerton</city>
+    <line1>Norm Dicks Government Center</line1>
+    <state>WA</state>
+    <location_name>Bremerton - West</location_name>
+    <zip>98337</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="999911006">
+  <address>
+    <line2>911 NE Liberty Rd</line2>
+    <city>Poulsbo</city>
+    <line1>Poulsbo Fire Station</line1>
+    <state>WA</state>
+    <location_name>Poulsbo</location_name>
+    <zip>98370</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="999911007">
+  <address>
+    <line2>9210 Silverdale Way NW</line2>
+    <city>Silverdale</city>
+    <line1>Central Kitsap School Dist Administration Bldg</line1>
+    <state>WA</state>
+    <location_name>Silverdale</location_name>
+    <zip>98383</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="999911008">
+  <directions>located on side of building at the corner of Division St and Cline Ave</directions>
+  <address>
+    <line2>619 Division St</line2>
+    <city>Port Orchard</city>
+    <line1>County Administration Building</line1>
+    <state>WA</state>
+    <location_name>South Kitsap</location_name>
+    <zip>98366</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="999911009">
+  <address>
+    <line2>911 NE Liberty Rd</line2>
+    <city>Poulsbo</city>
+    <line1>Poulsbo Fire Station</line1>
+    <state>WA</state>
+    <location_name>North Kitsap</location_name>
+    <zip>98370</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="999911175">
+  <address>
+    <city>Ellensburg</city>
+    <line1>1007 N. Chestnut St</line1>
+    <state>WA</state>
+    <location_name>Central Washington University - SURC</location_name>
+    <zip>98926</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99997977">
+  <address>
+    <city>Cle Elum</city>
+    <line1>700 E. 1st Street</line1>
+    <state>WA</state>
+    <location_name>Upper County District Court</location_name>
+    <zip>98922</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99997978">
+  <address>
+    <city>Ellensburg</city>
+    <line1>205 W 5th, Ste 105</line1>
+    <state>WA</state>
+    <location_name>Kittitas County Auditor's Office</location_name>
+    <zip>98926</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99997979">
+  <address>
+    <city>Ellensburg</city>
+    <line1>205 W 5th Ave ave</line1>
+    <state>WA</state>
+    <location_name>Drive Up Drop box</location_name>
+    <zip>98926</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99997980">
+  <address>
+    <city>Cle Elum</city>
+    <line1>700 E. 3rd Street</line1>
+    <state>WA</state>
+    <location_name>Cle Elum Senior Center</location_name>
+    <zip>98922</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99997577">
+  <address>
+    <city>White Salmon</city>
+    <line1>501 N. E. Washington St.</line1>
+    <state>WA</state>
+    <location_name>Pioneer Center Remote Ballot Box</location_name>
+    <zip>98672</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99997578">
+  <address>
+    <city>Goldendale</city>
+    <line1>115 S. Columbus Ave.</line1>
+    <state>WA</state>
+    <location_name>Goldendale Remote Ballot Box</location_name>
+    <zip>98620</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99998557">
+  <address>
+    <line2>Intersection of 5th St. and Hwy. 14</line2>
+    <city>Lyle</city>
+    <line1>Lyle Lions Club</line1>
+    <state>WA</state>
+    <location_name>Lyle Remote Ballot Box</location_name>
+    <zip>98635</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99998558">
+  <address>
+    <line2>136 6th St.</line2>
+    <city>Dallesport</city>
+    <line1>Dallesport Community Center</line1>
+    <state>WA</state>
+    <location_name>Dallesport Remote Ballot Box</location_name>
+    <zip>98617</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99994898">
+  <address>
+    <city>Goldendale</city>
+    <line1>205 S. Columbus Ave. Rm 203</line1>
+    <state>WA</state>
+    <location_name>Auditor's Office</location_name>
+    <zip>98620</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99994810">
+  <directions>Take exit 77 from I-5...</directions>
+  <address>
+    <city>Chehalis</city>
+    <line1>351 N.W. North St.</line1>
+    <state>WA</state>
+    <location_name>Lewis County Auditor's Office</location_name>
+    <zip>98532</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="999910858">
+  <address>
+    <city>Chehalis</city>
+    <line1>2545 N National Ave</line1>
+    <state>WA</state>
+    <location_name>Twin Cities Senior Center</location_name>
+    <zip>98532</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="999911177">
+  <directions>Located on the first floor of the court house in the auditor's office.</directions>
+  <address>
+    <city>Davenport</city>
+    <line1>450 Logan</line1>
+    <state>WA</state>
+    <location_name>Election Office Ballot Box</location_name>
+    <zip>99122</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99993187">
+  <directions>East side parking lot of court house.</directions>
+  <address>
+    <line2>East side of building</line2>
+    <city>Davenport</city>
+    <line1>450 Logan</line1>
+    <state>WA</state>
+    <location_name>Lincoln County Court House</location_name>
+    <zip>99122</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99993188">
+  <address>
+    <city>Davenport</city>
+    <line1>450 Logan</line1>
+    <state>WA</state>
+    <location_name>Election Office</location_name>
+    <zip>99122</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99993796">
+  <address>
+    <line2>North side parking lot</line2>
+    <city>Harrington</city>
+    <line1>11 South 3rd Street</line1>
+    <state>WA</state>
+    <location_name>Harrington City Hall</location_name>
+    <zip>99134</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99994238">
+  <address>
+    <city>Shelton</city>
+    <line1>411 N 5th Street</line1>
+    <state>WA</state>
+    <location_name>Mason County Auditor's Office</location_name>
+    <zip>98584</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99994239">
+  <address>
+    <city>Shelton</city>
+    <line1>411 N 5th Street</line1>
+    <state>WA</state>
+    <location_name>Mason County Auditor's Office</location_name>
+    <zip>98584</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99994240">
+  <address>
+    <city>Belfair</city>
+    <line1>23910 NE Hwy 3</line1>
+    <state>WA</state>
+    <location_name>North Mason County</location_name>
+    <zip>98528</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99994241">
+  <address>
+    <city>Hoodsport</city>
+    <line1>150 N Lake Cushman Rd</line1>
+    <state>WA</state>
+    <location_name>Hood Canal Visitor Center</location_name>
+    <zip>98548</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99998533">
+  <address>
+    <city>Allyn</city>
+    <line1>18560 E State Route 3</line1>
+    <state>WA</state>
+    <location_name>Port of Allyn</location_name>
+    <zip>98524</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99998534">
+  <address>
+    <city>Shelton</city>
+    <line1>710 W Alder St</line1>
+    <state>WA</state>
+    <location_name>Timberland Regional Library</location_name>
+    <zip>98584</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99997409">
+  <address>
+    <city>Okanogan</city>
+    <line1>149 3rd Ave N</line1>
+    <state>WA</state>
+    <location_name>Okanogan County Auditor</location_name>
+    <zip>98840</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="999910954">
+  <directions>Under construction and may not be open for 2012 Primary.  Check with Auditors Office before you plan to drop your ballot in this box.</directions>
+  <address>
+    <city>Tonasket</city>
+    <line1>209 S Whitcomb</line1>
+    <state>WA</state>
+    <location_name>Tonasket</location_name>
+    <zip>98855</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="999910955">
+  <directions>Under construction and may not be open for 2012 Primary.  Check with Auditors Office before you plan to drop your ballot in this box.</directions>
+  <address>
+    <city>Omak</city>
+    <line1>8 N Ash</line1>
+    <state>WA</state>
+    <location_name>Omak</location_name>
+    <zip>98841</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="999910956">
+  <directions>Under construction and may not be open for 2012 Primary.  Check with Auditors Office before you plan to drop your ballot in this box.</directions>
+  <address>
+    <city>Pateros</city>
+    <line1>180 Pateros Mall</line1>
+    <state>WA</state>
+    <location_name>Pateros</location_name>
+    <zip>98846</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99996081">
+  <address>
+    <city>Okanogan</city>
+    <line1>149 3rd Ave N</line1>
+    <state>WA</state>
+    <location_name>Okanogan County Auditor</location_name>
+    <zip>98840</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99993789">
+  <directions>The Auditor's Office is located to the right, inside the main entrance.</directions>
+  <address>
+    <city>South Bend</city>
+    <line1>300 Memorial Drive</line1>
+    <state>WA</state>
+    <location_name>Pacific County Courthouse</location_name>
+    <zip>98586</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99993798">
+  <address>
+    <city>Newport</city>
+    <line1>625 West 4th</line1>
+    <state>WA</state>
+    <location_name>Pend Oreille County Court House</location_name>
+    <zip>99156</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99993799">
+  <directions>The Auditor's Office is located in the County Court House, 1ST Floor</directions>
+  <address>
+    <city>Newport</city>
+    <line1>625 West 4th Street</line1>
+    <state>WA</state>
+    <location_name>Pend Oreille County Auditor's Office</location_name>
+    <zip>99156</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="999910959">
+  <address>
+    <city>Ione</city>
+    <line1>112 N Central</line1>
+    <state>WA</state>
+    <location_name>Between Ione Public Library and Community Center</location_name>
+    <zip>99139</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="999910442">
+  <address>
+    <city>Lakebay</city>
+    <line1>8911 Key Peninsula Hwy, KPN</line1>
+    <state>WA</state>
+    <location_name>Key Center Fire Department</location_name>
+    <zip>98349</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99997981">
+  <address>
+    <city>Tacoma</city>
+    <line1>6315 South 19th Street</line1>
+    <state>WA</state>
+    <location_name>TACID</location_name>
+    <zip>98466</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99997982">
+  <address>
+    <city>Tacoma</city>
+    <line1>2501 South 35th Street</line1>
+    <state>WA</state>
+    <location_name>Pierce County Election Center</location_name>
+    <zip>98409</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99997983">
+  <address>
+    <city>Tacoma</city>
+    <line1>S 36th &amp; Pacific Ave</line1>
+    <state>WA</state>
+    <location_name>Pierce County Community Connections</location_name>
+    <zip>98418</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99997986">
+  <address>
+    <city>Gig Harbor</city>
+    <line1>6711 Kimball Drive</line1>
+    <state>WA</state>
+    <location_name>Gig Harbor Fire Station 5-1</location_name>
+    <zip>98335</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99997990">
+  <address>
+    <city>Tacoma</city>
+    <line1>2401 South 35th Street</line1>
+    <state>WA</state>
+    <location_name>Pierce County Annex</location_name>
+    <zip>98409</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99997995">
+  <address>
+    <city>Tacoma</city>
+    <line1>13718 Pacific Ave S</line1>
+    <state>WA</state>
+    <location_name>Parkland/Spanaway Library</location_name>
+    <zip>98444</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99997996">
+  <address>
+    <city>Tacoma</city>
+    <line1>930 Tacoma Ave South</line1>
+    <state>WA</state>
+    <location_name>County-City Building</location_name>
+    <zip>98402</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="999910355">
+  <directions>Enter from Lakeview Ave SW. Building 3 is the circular buildnig located on the left side of the entrance into Clover Park.</directions>
+  <address>
+    <line2>4500 Steilacoom Blvd SW</line2>
+    <city>Lakewood</city>
+    <line1>(Enter from Lakeview Ave SW)</line1>
+    <state>WA</state>
+    <location_name>Clover Park Technical College - Rotunda Bldg 3</location_name>
+    <zip>98499</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="999910356">
+  <address>
+    <city>Gig Harbor</city>
+    <line1>33510 Grandview St</line1>
+    <state>WA</state>
+    <location_name>Gig Harbor Civic Center</location_name>
+    <zip>98335</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="999910357">
+  <directions>Located west of the Pierce County Annex.</directions>
+  <address>
+    <city>Tacoma</city>
+    <line1>2501 S 35th St, Suite C</line1>
+    <state>WA</state>
+    <location_name>Pierce County Election Center</location_name>
+    <zip>98409</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="999910358">
+  <directions>Proceed south on Canyon. Turn Rt on 196th Street. Voting center is on the left.</directions>
+  <address>
+    <city>Spanaway</city>
+    <line1>4812 196th St E (196th and Canyon Rd)</line1>
+    <state>WA</state>
+    <location_name>Pierce County Maintenance Facility</location_name>
+    <zip>98387</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="999910359">
+  <directions>Located next to the Pavillion on Meridian Street.</directions>
+  <address>
+    <city>Puyallup</city>
+    <line1>324 South Meridian</line1>
+    <state>WA</state>
+    <location_name>Puyallup Library</location_name>
+    <zip>98371</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="999910360">
+  <directions>Located adjacent to the Tacoma Community College.</directions>
+  <address>
+    <line2>6315 Soth 19th St</line2>
+    <city>Tacoma</city>
+    <line1>(TACID)</line1>
+    <state>WA</state>
+    <location_name>Tacoma Area Coalition of Individuals with Disabilities</location_name>
+    <zip>98466</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="999910362">
+  <directions>Box is located in the Pierce County Ferry Park &amp; Ride at the top of the hill.</directions>
+  <address>
+    <city>Anderson Island</city>
+    <line1>Yoman Rd near Villa Beach Road</line1>
+    <state>WA</state>
+    <location_name>Anderson Island Ferry Landing Park &amp; Ride</location_name>
+    <zip>98303</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99998846">
+  <address>
+    <city>Puyallup</city>
+    <line1>15420 Meridian E</line1>
+    <state>WA</state>
+    <location_name>South Hill Library</location_name>
+    <zip>98375</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99998847">
+  <address>
+    <city>University Place</city>
+    <line1>3631 Drexler Dr W</line1>
+    <state>WA</state>
+    <location_name>University Place Fire Department</location_name>
+    <zip>98466</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99998848">
+  <address>
+    <city>Lakewood</city>
+    <line1>10417 South Tacoma Way</line1>
+    <state>WA</state>
+    <location_name>Lakewood (SR512) Park &amp; Ride</location_name>
+    <zip>98499</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99998849">
+  <address>
+    <city>Spanaway</city>
+    <line1>SR 507 &amp; Pacific Ave S</line1>
+    <state>WA</state>
+    <location_name>Roy Y Park &amp; Ride</location_name>
+    <zip>98387</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99998850">
+  <address>
+    <city>Bonney Lake</city>
+    <line1>184th Ave E &amp; Sky Island Dr E</line1>
+    <state>WA</state>
+    <location_name>Bonney Lake South Park &amp; Ride</location_name>
+    <zip>98391</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99998851">
+  <address>
+    <city>Steilacoom</city>
+    <line1>2950 Steilacoom Blvd</line1>
+    <state>WA</state>
+    <location_name>Steilacoom Library</location_name>
+    <zip>98388</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99998852">
+  <address>
+    <city>Tacoma</city>
+    <line1>1319 E 72nd St</line1>
+    <state>WA</state>
+    <location_name>72nd Street Transit Center</location_name>
+    <zip>98404</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99998853">
+  <address>
+    <city>Tacoma</city>
+    <line1>610 Puyallup Ave E</line1>
+    <state>WA</state>
+    <location_name>Tacoma Dome Park &amp; Ride</location_name>
+    <zip>98421</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99999760">
+  <address>
+    <city>Lakewood</city>
+    <line1>6000 Main Street SW</line1>
+    <state>WA</state>
+    <location_name>Lakewood City Hall</location_name>
+    <zip>98499</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99999761">
+  <address>
+    <city>Gig Harbor</city>
+    <line1>5210 144th St NW</line1>
+    <state>WA</state>
+    <location_name>Purdy Fire Station</location_name>
+    <zip>98332</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99999762">
+  <address>
+    <city>Browns Point</city>
+    <line1>4731 Norpoint Way NW</line1>
+    <state>WA</state>
+    <location_name>Browns Pt/NE Tacoma Police Substation</location_name>
+    <zip>98422</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99999763">
+  <address>
+    <city>DuPont</city>
+    <line1>1500 Wilmington Drive</line1>
+    <state>WA</state>
+    <location_name>DuPont Ross Plaza</location_name>
+    <zip>98327</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99999764">
+  <address>
+    <city>Edgewood</city>
+    <line1>2224 104th Ave E</line1>
+    <state>WA</state>
+    <location_name>Edgewood City Hall</location_name>
+    <zip>98372</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99999765">
+  <address>
+    <city>Puyallup</city>
+    <line1>324 South Meridian</line1>
+    <state>WA</state>
+    <location_name>Puyallup Library</location_name>
+    <zip>98371</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99999766">
+  <address>
+    <city>Sumner</city>
+    <line1>1116 Fryer Ave</line1>
+    <state>WA</state>
+    <location_name>Sumner Library</location_name>
+    <zip>98390</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99999767">
+  <address>
+    <city>Gig Harbor</city>
+    <line1>4811 Pt Fosdick Square</line1>
+    <state>WA</state>
+    <location_name>Pt Fosdick Safeway</location_name>
+    <zip>98335</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99999768">
+  <address>
+    <city>Tacoma</city>
+    <line1>5140 N 26th St</line1>
+    <state>WA</state>
+    <location_name>Kandle Park Police Substation</location_name>
+    <zip>89407</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99999769">
+  <address>
+    <city>Eatonville</city>
+    <line1>40512 Clear Lake Hwy</line1>
+    <state>WA</state>
+    <location_name>Barney's Corner</location_name>
+    <zip>98328</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99999857">
+  <address>
+    <city>Fife</city>
+    <line1>3737 Pacific Hwy E</line1>
+    <state>WA</state>
+    <location_name>Fife Municipal Court</location_name>
+    <zip>98424</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="999911193">
+  <address>
+    <city>Friday Harbor</city>
+    <line1>55 Second Street, Suite A</line1>
+    <state>WA</state>
+    <location_name>Elections Office</location_name>
+    <zip>98250</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="999911194">
+  <directions>Elections Office lobby</directions>
+  <address>
+    <city>Friday Harbor</city>
+    <line1>55 Second Street, Suite A</line1>
+    <state>WA</state>
+    <location_name>Elections Office Drop Box</location_name>
+    <zip>98250</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="999911195">
+  <address>
+    <city>Friday Harbor</city>
+    <line1>350 Court Street</line1>
+    <state>WA</state>
+    <location_name>San Juan County Court House</location_name>
+    <zip>98250</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="999911196">
+  <address>
+    <city>Eastsound</city>
+    <line1>62 Henry Rd</line1>
+    <state>WA</state>
+    <location_name>Orcas Island Senior Center</location_name>
+    <zip>98245</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="999911197">
+  <address>
+    <city>Lopez Village</city>
+    <line1>2228 Fisherman Bay Road</line1>
+    <state>WA</state>
+    <location_name>Lopez Island Fire District Office</location_name>
+    <zip>98261</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="999910249">
+  <address>
+    <city>Sedro-Woolley</city>
+    <line1>111 Woodworth St.</line1>
+    <state>WA</state>
+    <location_name>Sedro-Woolley Drop Box (In the alley between Eastern Ave and Metcalf)</location_name>
+    <zip>98284</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99997090">
+  <address>
+    <city>Anacortes</city>
+    <line1>1220 10th Street</line1>
+    <state>WA</state>
+    <location_name>Anacortes Drop Box (at Ancortes Public Library)</location_name>
+    <zip>98221</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99997091">
+  <address>
+    <city>Burlington</city>
+    <line1>900 E. Fairhaven Street</line1>
+    <state>WA</state>
+    <location_name>Burlington Drop Box (at Burlington Parks and Recreation Building)</location_name>
+    <zip>98233</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99997092">
+  <address>
+    <city>Concrete</city>
+    <line1>45770 A Main Street</line1>
+    <state>WA</state>
+    <location_name>Concrete Drop Box (at Skagit Upriver Services/Library)</location_name>
+    <zip>98237</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99997093">
+  <address>
+    <city>La Conner</city>
+    <line1>614 E. Morris Street</line1>
+    <state>WA</state>
+    <location_name>La Conner Drop Box (at La Conner Regional Library)</location_name>
+    <zip>98257</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99997094">
+  <address>
+    <city>Mount Vernon</city>
+    <line1>1805 Continential Place</line1>
+    <state>WA</state>
+    <location_name>Mount Vernon (north) Drop Box (at MV Police Department)</location_name>
+    <zip>98273</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99995379">
+  <address>
+    <city>Mt Vernon</city>
+    <line1>700 S 2nd St # 201</line1>
+    <state>WA</state>
+    <location_name>Skagit County Auditor's Office</location_name>
+    <zip>98273</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99993797">
+  <address>
+    <city>Stevenson</city>
+    <line1>240 NW Vancouver Ave</line1>
+    <state>WA</state>
+    <location_name>Skamania County Auditor's Office</location_name>
+    <zip>98648</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="999911035">
+  <address>
+    <city>Washougal</city>
+    <line1>9731 Washougal River Rd</line1>
+    <state>WA</state>
+    <location_name>Canyon Creek Middle School (parking lot)</location_name>
+    <zip>98671</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="999911036">
+  <address>
+    <city>North Bonneville</city>
+    <line1>210 CBD Mall Dr</line1>
+    <state>WA</state>
+    <location_name>North Bonneville Central Business District (near city hall)</location_name>
+    <zip>98639</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="999911037">
+  <address>
+    <city>Stevenson</city>
+    <line1>240 NW Vancouver Ave</line1>
+    <state>WA</state>
+    <location_name>Skamania County Court House (north side, near door)</location_name>
+    <zip>98648</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="999911038">
+  <address>
+    <city>Carson</city>
+    <line1>11 Carson Frontage Rd</line1>
+    <state>WA</state>
+    <location_name>Carson Transit Station (near Wind River Market)</location_name>
+    <zip>98610</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="999911039">
+  <address>
+    <city>Carson (Stabler)</city>
+    <line1>342 Hemlock Rd</line1>
+    <state>WA</state>
+    <location_name>The Little Church in the Valley (parking lot)</location_name>
+    <zip>98610</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="999911040">
+  <address>
+    <city>Underwood</city>
+    <line1>951 Schoolhouse Rd</line1>
+    <state>WA</state>
+    <location_name>Underwood Community Center (parking lot)</location_name>
+    <zip>98651</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="999910912">
+  <address>
+    <city>Stanwood</city>
+    <line1>9701 271st St NW</line1>
+    <state>WA</state>
+    <location_name>Stanwood (in additional library parking lot) 24-hr Ballot Drop Box - closes 8pm Nov 6</location_name>
+    <zip>98292</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="999910909">
+  <address>
+    <city>Bothell</city>
+    <line1>1129 208th St SE</line1>
+    <state>WA</state>
+    <location_name>Bothell - Centennial Park (at Thrashers Corner) 24-hr Ballot Drop Box - closes 8pm Aug 7</location_name>
+    <zip>98012</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="999910910">
+  <address>
+    <city>Lake Stevens</city>
+    <line1>1804 Main St</line1>
+    <state>WA</state>
+    <location_name>Lake Stevens (near library) 24-hr Ballot Drop Box - closes 8pm Nov 6</location_name>
+    <zip>98258</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99998267">
+  <address>
+    <city>Everett</city>
+    <line1>3000 Rockefeller Ave</line1>
+    <state>WA</state>
+    <location_name>County Courthouse 24-hr Ballot Drop Box - closes 8pm Nov 6</location_name>
+    <zip>98201</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99998268">
+  <address>
+    <city>Everett</city>
+    <line1>3000 Rockefeller Ave</line1>
+    <state>WA</state>
+    <location_name>County Auditor's Office - first floor Admin Building</location_name>
+    <zip>98201</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99998269">
+  <address>
+    <city>Marysville</city>
+    <line1>1015 State Ave</line1>
+    <state>WA</state>
+    <location_name>Marysville (behind Municipal Court)  24-hr Ballot Drop Box - closes 8pm Nov 6</location_name>
+    <zip>98270</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99998270">
+  <address>
+    <city>Monroe</city>
+    <line1>1070 Village Way</line1>
+    <state>WA</state>
+    <location_name>Monroe (near library)  24-hr Ballot Drop Box - closes 8pm Nov 6</location_name>
+    <zip>98272</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99998535">
+  <address>
+    <city>Arlington</city>
+    <line1>135 North Washington Ave</line1>
+    <state>WA</state>
+    <location_name>Arlington (near library) 24-hr Ballot Drop Box - closes 8pm Nov 6</location_name>
+    <zip>98223</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99998536">
+  <address>
+    <city>Edmonds</city>
+    <line1>650 Main St</line1>
+    <state>WA</state>
+    <location_name>Edmonds (near library)  24-hr Ballot Drop Box - closes 8pm Nov 6</location_name>
+    <zip>98020</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99998537">
+  <address>
+    <city>Lynnwood</city>
+    <line1>19200 44th Avenue W</line1>
+    <state>WA</state>
+    <location_name>Lynnwood - accessible voting site inside library</location_name>
+    <zip>98036</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99998469">
+  <address>
+    <city>Snohomish</city>
+    <line1>311 Maple Ave</line1>
+    <state>WA</state>
+    <location_name>Snohomish (near library)  24-hr Ballot Drop Box - closes 8pm Nov 6</location_name>
+    <zip>98290</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99998470">
+  <address>
+    <city>Mukilteo</city>
+    <line1>4675 Harbour Pointe Blvd</line1>
+    <state>WA</state>
+    <location_name>Mukilteo (near library) 24-hr Ballot Drop Box - closes 8pm Nov 6</location_name>
+    <zip>98275</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99998471">
+  <address>
+    <city>Everett</city>
+    <line1>600 128th St SE</line1>
+    <state>WA</state>
+    <location_name>Everett - McCollum Park (West lot near pool) 24-hr Ballot Drop Box - closes 8pm Nov 6</location_name>
+    <zip>98208</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99998472">
+  <address>
+    <city>Lynnwood</city>
+    <line1>19100 44th Ave W</line1>
+    <state>WA</state>
+    <location_name>Lynnwood (in front of City Hall) 24-hr Ballot Drop Box - closes 8pm Nov 6</location_name>
+    <zip>98036</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99997095">
+  <address>
+    <city>Spokane</city>
+    <line1>1033 W Gardner AVe</line1>
+    <state>WA</state>
+    <location_name>Elections Office</location_name>
+    <zip>99201</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99995398">
+  <address>
+    <city>Spokane</city>
+    <line1>701 W Riverside</line1>
+    <state>WA</state>
+    <location_name>STA Plaza</location_name>
+    <zip>99201</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99995399">
+  <address>
+    <city>Spokane</city>
+    <line1>701 W Riverside</line1>
+    <state>WA</state>
+    <location_name>STA Plaza Downtown</location_name>
+    <zip>99201</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99993756">
+  <address>
+    <city>Airway Heights</city>
+    <line1>1213 S Lundstrom St</line1>
+    <state>WA</state>
+    <location_name>Airway Heights Library</location_name>
+    <zip>99001</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99993757">
+  <directions>Located at Upriver Drive and Argonne Rd in Spokane Valley</directions>
+  <address>
+    <city>Spokane Valley</city>
+    <line1>4322 N Argonne Rd</line1>
+    <state>WA</state>
+    <location_name>Argonne Library</location_name>
+    <zip>99212</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99993762">
+  <address>
+    <city>Deer Park</city>
+    <line1>208 S Forest Ave</line1>
+    <state>WA</state>
+    <location_name>Deer Park Library</location_name>
+    <zip>99006</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99993763">
+  <address>
+    <city>Spokane</city>
+    <line1>906 W Main St</line1>
+    <state>WA</state>
+    <location_name>Downtown Library</location_name>
+    <zip>99201</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99993764">
+  <address>
+    <city>Spokane</city>
+    <line1>524 S Stone St</line1>
+    <state>WA</state>
+    <location_name>East Side Library</location_name>
+    <zip>99202</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99993765">
+  <address>
+    <city>Spokane</city>
+    <line1>4005 N Cook St</line1>
+    <state>WA</state>
+    <location_name>Hillyard Library</location_name>
+    <zip>99207</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99993766">
+  <address>
+    <city>Spokane</city>
+    <line1>4909 W Barnes Rd</line1>
+    <state>WA</state>
+    <location_name>Indian Trail Library</location_name>
+    <zip>99208</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99993767">
+  <address>
+    <city>Liberty Lake</city>
+    <line1>23123 E Mission Ave</line1>
+    <state>WA</state>
+    <location_name>Liberty Lake Library</location_name>
+    <zip>99019</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99993768">
+  <address>
+    <city>Medical Lake</city>
+    <line1>321 E Herb</line1>
+    <state>WA</state>
+    <location_name>Medical Lake Library</location_name>
+    <zip>99022</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99993769">
+  <address>
+    <city>Spokane</city>
+    <line1>6004 S Regal St</line1>
+    <state>WA</state>
+    <location_name>Moran Prairie Library</location_name>
+    <zip>99223</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99993770">
+  <address>
+    <city>Spokane</city>
+    <line1>44 E Hawthorne Rd</line1>
+    <state>WA</state>
+    <location_name>North Spokane Library</location_name>
+    <zip>99218</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99993771">
+  <address>
+    <city>Otis Orchards</city>
+    <line1>22324 E Wellesley Ave</line1>
+    <state>WA</state>
+    <location_name>Otis Orchards Library</location_name>
+    <zip>99027</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99993772">
+  <address>
+    <city>Spokane</city>
+    <line1>2111 W Wellesley Ave</line1>
+    <state>WA</state>
+    <location_name>Shadle Park Library</location_name>
+    <zip>99205</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99993773">
+  <address>
+    <city>Spokane</city>
+    <line1>3324 S Perry St</line1>
+    <state>WA</state>
+    <location_name>South Hill Library</location_name>
+    <zip>99203</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99993774">
+  <address>
+    <city>Spokane Valley</city>
+    <line1>12004 E Main St</line1>
+    <state>WA</state>
+    <location_name>Spokane Valley Library</location_name>
+    <zip>99206</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99993775">
+  <address>
+    <city>Fairfield</city>
+    <line1>305 E Main St</line1>
+    <state>WA</state>
+    <location_name>Fairfield Library</location_name>
+    <zip>99012</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99993776">
+  <address>
+    <city>Spokane</city>
+    <line1>1033 W Gardner Ave</line1>
+    <state>WA</state>
+    <location_name>Elections Office</location_name>
+    <zip>99201</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99993777">
+  <address>
+    <line2>Center Place</line2>
+    <city>Spokane Valley</city>
+    <line1>2426 N Discovery Pl</line1>
+    <state>WA</state>
+    <location_name>Spokane Valley</location_name>
+    <zip>99216</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99993778">
+  <address>
+    <line2>St. Mark's Church</line2>
+    <city>Spokane</city>
+    <line1>316 E 24th Ave</line1>
+    <state>WA</state>
+    <location_name>South Hill</location_name>
+    <zip>99203</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99993779">
+  <address>
+    <line2>Cheney Library</line2>
+    <city>Spokane</city>
+    <line1>610 S First St</line1>
+    <state>WA</state>
+    <location_name>West Plains</location_name>
+    <zip>99004</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99993780">
+  <address>
+    <line2>North Spokane Library</line2>
+    <city>Spokane</city>
+    <line1>44 E Hawthorne Rd</line1>
+    <state>WA</state>
+    <location_name>North Spokane</location_name>
+    <zip>99218</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99993868">
+  <address>
+    <city>Cheney</city>
+    <line1>610 First St</line1>
+    <state>WA</state>
+    <location_name>Cheney Library</location_name>
+    <zip>99004</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99995380">
+  <address>
+    <city>Colville</city>
+    <line1>215 S Oak St # 104</line1>
+    <state>WA</state>
+    <location_name>Stevens County Auditor's Office</location_name>
+    <zip>99114</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99996093">
+  <address>
+    <city>Colville</city>
+    <line1>215 S. Oak Steet</line1>
+    <state>WA</state>
+    <location_name>Stevens County Courthouse</location_name>
+    <zip>99114</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99996094">
+  <address>
+    <city>Nine Mile Falls</city>
+    <line1>6015 Hwy 291</line1>
+    <state>WA</state>
+    <location_name>Lake Spokane Elementary School</location_name>
+    <zip>99026</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="999910992">
+  <address>
+    <city>Clayton</city>
+    <line1>4532 Railroad Ave</line1>
+    <state>WA</state>
+    <location_name>Fire District 1 -Admin Bldg</location_name>
+    <zip>99110</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99997713">
+  <address>
+    <city>Olympia</city>
+    <line1>5046 Boston Harbor Rd NE</line1>
+    <state>WA</state>
+    <location_name>Fire 7, Station 1 (North Olympia Fire)</location_name>
+    <zip>98506</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="999910318">
+  <address>
+    <city>Olympia</city>
+    <line1>5911 Black Lake Blvd SW</line1>
+    <state>WA</state>
+    <location_name>Black Lake Fire 5, Station 1 (New)</location_name>
+    <zip>98512</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99995970">
+  <address>
+    <city>Lacey</city>
+    <line1>5815 Lacey Blvd SE (next to drive-up mail boxes)</line1>
+    <state>WA</state>
+    <location_name>Lacey Post Office</location_name>
+    <zip>98503</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99994029">
+  <address>
+    <city>Olympia</city>
+    <line1>1006 4th Ave E</line1>
+    <state>WA</state>
+    <location_name>Crain's Office Supply</location_name>
+    <zip>98501</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99994054">
+  <address>
+    <city>Olympia</city>
+    <line1>1601 North St SE</line1>
+    <state>WA</state>
+    <location_name>Church of the Good Shepherd</location_name>
+    <zip>98501</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99994055">
+  <address>
+    <line2>2000 Lakeridge Drive SW</line2>
+    <city>Olympia</city>
+    <line1>Thurston County Courthouse</line1>
+    <state>WA</state>
+    <location_name>** On Election Day voting center open 7:00 am to 8:00 pm</location_name>
+    <zip>98502</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99994056">
+  <address>
+    <city>Olympia</city>
+    <line1>1313 Cooper Point Road SW</line1>
+    <state>WA</state>
+    <location_name>Westside Top Foods (Parking Lot)</location_name>
+    <zip>98502</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99994057">
+  <address>
+    <city>Lacey</city>
+    <line1>420 College St SE</line1>
+    <state>WA</state>
+    <location_name>Lacey City Hall</location_name>
+    <zip>98503</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99994058">
+  <address>
+    <city>Lacey</city>
+    <line1>8407 Steilacoom Rd SE</line1>
+    <state>WA</state>
+    <location_name>Fire 3, Station 34</location_name>
+    <zip>98513</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99994059">
+  <address>
+    <city>Lacey</city>
+    <line1>3701 Willamette Dr NE</line1>
+    <state>WA</state>
+    <location_name>Fire 3, Station 35</location_name>
+    <zip>98516</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99994060">
+  <address>
+    <city>Lacey</city>
+    <line1>4532 Intelco Loop SE</line1>
+    <state>WA</state>
+    <location_name>Woodland Retirement and Assisted Living Community</location_name>
+    <zip>98503</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99994061">
+  <address>
+    <city>Lacey</city>
+    <line1>5600 Martin Way E</line1>
+    <state>WA</state>
+    <location_name>Lacey Top Foods (Parking Lot)</location_name>
+    <zip>98516</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99994062">
+  <address>
+    <city>Tumwater</city>
+    <line1>555 Israel Rd SW</line1>
+    <state>WA</state>
+    <location_name>Tumwater City Hall</location_name>
+    <zip>98501</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99994063">
+  <address>
+    <city>Tumwater</city>
+    <line1>621 Linwood Ave SW</line1>
+    <state>WA</state>
+    <location_name>Tumwater School Administration</location_name>
+    <zip>98512</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99994064">
+  <address>
+    <city>Tenino</city>
+    <line1>301 Old Highway 99 N</line1>
+    <state>WA</state>
+    <location_name>Tenino School District Administration</location_name>
+    <zip>98589</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99994065">
+  <address>
+    <city>Bucoda</city>
+    <line1>103 S Main St</line1>
+    <state>WA</state>
+    <location_name>Bucoda (Across from Liberty Market)</location_name>
+    <zip>98589</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99994066">
+  <address>
+    <city>Rochester</city>
+    <line1>18346 Albany St SW</line1>
+    <state>WA</state>
+    <location_name>Rochester Fire 1, Station 3</location_name>
+    <zip>98579</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99994067">
+  <address>
+    <city>Olympia</city>
+    <line1>10828 Littlerock Rd SW</line1>
+    <state>WA</state>
+    <location_name>Littlerock Fire 11</location_name>
+    <zip>98501</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99994068">
+  <address>
+    <city>Rochester</city>
+    <line1>19949 Old Highway 99 SW</line1>
+    <state>WA</state>
+    <location_name>Grand Mound Center</location_name>
+    <zip>98579</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99994069">
+  <address>
+    <city>Yelm</city>
+    <line1>110 1st Street N</line1>
+    <state>WA</state>
+    <location_name>Yelm School Administration Lot (across from building)</location_name>
+    <zip>98597</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99994071">
+  <address>
+    <city>Rainier</city>
+    <line1>102 Rochester St W</line1>
+    <state>WA</state>
+    <location_name>Rainier City Hall</location_name>
+    <zip>98576</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99994072">
+  <address>
+    <city>Yelm</city>
+    <line1>16240 Bald Hill Rd SE</line1>
+    <state>WA</state>
+    <location_name>Lackamas Elementary</location_name>
+    <zip>98597</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99994074">
+  <address>
+    <city>Olympia</city>
+    <line1>3707 Steamboat Loop NW</line1>
+    <state>WA</state>
+    <location_name>Steamboat Island Area: Fire 13, Station 1</location_name>
+    <zip>98502</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99994075">
+  <address>
+    <city>Olympia</city>
+    <line1>3506 Shincke Rd NE</line1>
+    <state>WA</state>
+    <location_name>South Bay: Fire 8, Station 1</location_name>
+    <zip>98506</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99994076">
+  <address>
+    <city>Olympia</city>
+    <line1>1515 Harrison Ave NW</line1>
+    <state>WA</state>
+    <location_name>Gloria Dei Lutheran Church</location_name>
+    <zip>98502</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99993791">
+  <address>
+    <city>Cathlamet</city>
+    <line1>64 Main Street, 2nd Floor</line1>
+    <state>WA</state>
+    <location_name>Wahkiakum County Auditor's Office</location_name>
+    <zip>98612</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99993792">
+  <address>
+    <city>Rosburg</city>
+    <line1>30 Rosburg School Road</line1>
+    <state>WA</state>
+    <location_name>Johnson Park</location_name>
+    <zip>98643</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="999911145">
+  <address>
+    <city>Walla Walla</city>
+    <line1>310 W. Poplar St.</line1>
+    <state>WA</state>
+    <location_name>Walla Walla County Elections Center</location_name>
+    <zip>99362</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="999911146">
+  <address>
+    <city>Walla Walla</city>
+    <line1>315 W. Main St.  Room 201</line1>
+    <state>WA</state>
+    <location_name>Walla Walla County Auditor's Office</location_name>
+    <zip>99362</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="999911147">
+  <directions>Enter alley from 5th St.  Drop Box on left</directions>
+  <address>
+    <city>Walla Walla</city>
+    <line1>315 W. Main St.</line1>
+    <state>WA</state>
+    <location_name>Alley between Courthouse &amp; Jail</location_name>
+    <zip>99362</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="999911148">
+  <address>
+    <city>Walla Walla</city>
+    <line1>170 N. Wilbur Ave.</line1>
+    <state>WA</state>
+    <location_name>Walla Walla Fire Station #2 - Parking Lot</location_name>
+    <zip>99362</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="999911149">
+  <directions>located in the alley behind City Hall</directions>
+  <address>
+    <city>College Place</city>
+    <line1>625 S. College Avenue</line1>
+    <state>WA</state>
+    <location_name>Alley behind College Place City Hall</location_name>
+    <zip>99324</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="999911150">
+  <directions>on sidewalk by front door ouside City Hall</directions>
+  <address>
+    <city>Waitsburg</city>
+    <line1>147 Main St.</line1>
+    <state>WA</state>
+    <location_name>Waitburg City Hall - Outside</location_name>
+    <zip>99361</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="999911176">
+  <address>
+    <city>Burbank</city>
+    <line1>755 Maple St</line1>
+    <state>WA</state>
+    <location_name>Burbank School District Driveway</location_name>
+    <zip>99323</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99998068">
+  <address>
+    <city>Bellingham</city>
+    <line1>311 Grand Ave</line1>
+    <state>WA</state>
+    <location_name>Whatcom County Auditor's Office</location_name>
+    <zip>98225</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99998168">
+  <address>
+    <city>Bellingham,</city>
+    <line1>201 Grand Avenue</line1>
+    <state>WA</state>
+    <location_name>Courthouse South Parking Lot</location_name>
+    <zip>98225</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99998169">
+  <address>
+    <city>Deming</city>
+    <line1>5044 Mt Baker Hwy</line1>
+    <state>WA</state>
+    <location_name>Deming Library</location_name>
+    <zip>98244</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99998170">
+  <address>
+    <city>Blaine</city>
+    <line1>610 3rd St.</line1>
+    <state>WA</state>
+    <location_name>Blaine Library</location_name>
+    <zip>98230</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99998171">
+  <address>
+    <city>Everson</city>
+    <line1>106 W Main St</line1>
+    <state>WA</state>
+    <location_name>Everson WECU</location_name>
+    <zip>98247</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99998172">
+  <address>
+    <city>Ferndale</city>
+    <line1>2095 Main St.</line1>
+    <state>WA</state>
+    <location_name>Ferndale City Hall</location_name>
+    <zip>98248</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99998173">
+  <address>
+    <city>Lynden</city>
+    <line1>861 Ten Mile Rd.</line1>
+    <state>WA</state>
+    <location_name>Meridian Middle School</location_name>
+    <zip>98264</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99998174">
+  <address>
+    <city>Lynden</city>
+    <line1>216 4th St</line1>
+    <state>WA</state>
+    <location_name>Lynden Library</location_name>
+    <zip>98264</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99998175">
+  <address>
+    <line2>Rm 714 Viking Union</line2>
+    <city>Bellingham</city>
+    <line1>515 High Street</line1>
+    <state>WA</state>
+    <location_name>Western Washington University (Election day only)</location_name>
+    <zip>98225</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99993802">
+  <address>
+    <city>Pullman</city>
+    <line1>325 Paradise St</line1>
+    <state>WA</state>
+    <location_name>Pullman City Hall</location_name>
+    <zip>99163</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99993803">
+  <address>
+    <city>Colfax</city>
+    <line1>N 400 Main</line1>
+    <state>WA</state>
+    <location_name>Whitman County Commissioners Chambers</location_name>
+    <zip>99111</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99993804">
+  <address>
+    <line2>400 N. Main</line2>
+    <city>Colfax</city>
+    <line1>2nd Floor, Room 288</line1>
+    <state>WA</state>
+    <location_name>Whitman County Auditor's Office</location_name>
+    <zip>99111</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99993805">
+  <address>
+    <city>Colfax</city>
+    <line1>N 400 Main St</line1>
+    <state>WA</state>
+    <location_name>Whitman County Commissioners Chambers</location_name>
+    <zip>99111</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99993806">
+  <address>
+    <city>Pullman</city>
+    <line1>325 Paradise St</line1>
+    <state>WA</state>
+    <location_name>Pullman City Hall</location_name>
+    <zip>99163</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99993807">
+  <address>
+    <line2>400 N. Main Street</line2>
+    <city>Colfax</city>
+    <line1>2nd Floor, Room 228</line1>
+    <state>WA</state>
+    <location_name>Whitman County Auditor's Office</location_name>
+    <zip>99111</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="99999315">
+  <address>
+    <city>Yakima</city>
+    <line1>128 N 2nd St Rm 117</line1>
+    <state>WA</state>
+    <location_name>Yakima County Auditor's Office</location_name>
+    <zip>98901</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="999911018">
+  <address>
+    <city>Sunnyside</city>
+    <line1>Sunnyside Work Source  1925 Morgan Rd</line1>
+    <state>WA</state>
+    <location_name>*ONLY open on Election Day /solamente abierto el dia de las elecciones**</location_name>
+    <zip>98944</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="999911029">
+  <address>
+    <city>Toppenish</city>
+    <line1>Toppenish High School  141 Ward Rd</line1>
+    <state>WA</state>
+    <location_name>*ONLY open on Election Day /solo abierto el dia de las elecciones*</location_name>
+    <zip>98948</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="999911030">
+  <address>
+    <city>Yakima</city>
+    <line1>128 N 2nd St</line1>
+    <state>WA</state>
+    <location_name>Yakima County Courthouse Security Station</location_name>
+    <zip>98901</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="999911031">
+  <address>
+    <city>Yakima</city>
+    <line1>the big red box across from the Courthouse</line1>
+    <state>WA</state>
+    <location_name>24 hour ballot return - East Martin Luther King Jr Blvd</location_name>
+    <zip>98901</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="999911032">
+  <address>
+    <city>Sunnyside</city>
+    <line1>Sunnyside Work Source  1925 Morgan Rd</line1>
+    <state>WA</state>
+    <location_name>*ONLY open on Election Day /solo abierto el dia de las elecciones*</location_name>
+    <zip>98944</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="999911033">
+  <address>
+    <city>Toppenish</city>
+    <line1>Toppenish High School - 141 Ward Rd</line1>
+    <state>WA</state>
+    <location_name>*ONLY open on Election Day /solo abierto el dia de las elecciones*</location_name>
+    <zip>98948</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="999911034">
+  <address>
+    <city>Yakima</city>
+    <line1>128 N 2nd St Rm 117</line1>
+    <state>WA</state>
+    <location_name>Yakima County Auditor's Office</location_name>
+    <zip>98901</zip>
+  </address>
+</early_vote_site>
+</vip_object>

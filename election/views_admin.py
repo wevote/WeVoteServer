@@ -908,7 +908,7 @@ def election_summary_view(request, election_local_id=0, google_civic_election_id
 
         sorted_state_list = sorted(state_list_modified.items())
 
-        limit = 100  # Since this is a summary page, we don't need to show very many ballot_returned entries
+        limit = 50  # Since this is a summary page, we don't need to show very many ballot_returned entries
         ballot_returned_list_results = ballot_returned_list_manager.retrieve_ballot_returned_list_for_election(
             election.google_civic_election_id, state_code, limit, ballot_returned_search)
         ballot_returned_count_entire_election = \
