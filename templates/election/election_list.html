@@ -86,9 +86,9 @@
         <tr>
             <td>{{ forloop.counter }}</td>
             <td align="middle">
-              {% if election.include_in_list_for_voters %}<span class="font-weight-bold">Yes</span>{% endif %}
-              {% if election.include_in_list_for_voters and election.election_preparation_finished %}<br />{% endif %}
-              {% if election.election_preparation_finished %}<span class="font-weight-bold text-success">READY</span>{% endif %}
+              {% if election.include_in_list_for_voters %}<span class="font-weight-bold">Yes</span>{% endif %}{% if election.include_in_list_for_voters and election.election_preparation_finished %}, {% endif %}
+              {% if election.election_preparation_finished %}<span class="font-weight-bold text-success">DATA</span>{% endif %}{% if election.include_in_list_for_voters or election.election_preparation_finished and election.candidate_photos_finished %}, {% endif %}
+              {% if election.candidate_photos_finished %}<span class="font-weight-bold text-success">PHOTOS</span>{% endif %}
             </td>
             <td>
                 <a href="{% url 'election:election_summary' election.id %}{% if show_all_elections_this_year %}?show_all_elections_this_year=1{% elif show_all_elections %}?show_all_elections=1{% endif %}" target="_blank">

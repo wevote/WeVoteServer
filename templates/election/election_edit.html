@@ -41,7 +41,12 @@
       <input type="checkbox" name="election_preparation_finished" id="election_preparation_finished_id"
              value="True"
              {% if election.election_preparation_finished %}checked{% endif %} />
-        Election preparation finished
+        Election data import finished (Offices, Candidates, Ballots)
+      &nbsp;&nbsp;&nbsp;
+      <input type="checkbox" name="candidate_photos_finished" id="candidate_photos_finished_id"
+             value="True"
+             {% if election.candidate_photos_finished %}checked{% endif %} />
+        Candidate photos finished
     </div>
 </div>
 

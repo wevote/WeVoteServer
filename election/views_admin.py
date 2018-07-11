@@ -520,6 +520,7 @@ def election_edit_process_view(request):
 
     status = ""
 
+    candidate_photos_finished = request.POST.get('candidate_photos_finished', False)
     election_local_id = convert_to_int(request.POST.get('election_id', 0))
     election_name = request.POST.get('election_name', False)
     election_day_text = request.POST.get('election_day_text', False)
@@ -602,6 +603,7 @@ def election_edit_process_view(request):
         if ballotpedia_kind_of_election is not False:
             election_on_stage.ballotpedia_kind_of_election = ballotpedia_kind_of_election
 
+        election_on_stage.candidate_photos_finished = candidate_photos_finished
         election_on_stage.election_preparation_finished = election_preparation_finished
         election_on_stage.include_in_list_for_voters = include_in_list_for_voters
         election_on_stage.ignore_this_election = ignore_this_election
@@ -626,6 +628,7 @@ def election_edit_process_view(request):
 
         try:
             election_on_stage = Election(
+                candidate_photos_finished=candidate_photos_finished,
                 election_preparation_finished=election_preparation_finished,
                 google_civic_election_id=google_civic_election_id,
                 ignore_this_election=ignore_this_election,
@@ -1864,6 +1867,9 @@ def election_migration_view(request):
     # There are some settings on the election object we want to transfer
     if positive_value_exists(change_now) and not positive_value_exists(error):
         try:
+            google_civic_election.candidate_photos_finished = we_vote_election.candidate_photos_finished
+            we_vote_election.candidate_photos_finished = False
+
             google_civic_election.election_preparation_finished = we_vote_election.election_preparation_finished
             we_vote_election.election_preparation_finished = False
 

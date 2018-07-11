@@ -50,7 +50,11 @@
         </thead>
         <tr>
             <td>{{ forloop.counter }}</td>
-            <td align="middle">{% if election.include_in_list_for_voters %}<span class="font-weight-bold">Yes</span>{% endif %}</td>
+            <td align="middle">
+              {% if election.include_in_list_for_voters %}<span class="font-weight-bold">Yes</span>{% endif %}{% if election.include_in_list_for_voters and election.election_preparation_finished %}, {% endif %}
+              {% if election.election_preparation_finished %}<span class="font-weight-bold text-success">DATA</span>{% endif %}{% if election.include_in_list_for_voters or election.election_preparation_finished and election.candidate_photos_finished %}, {% endif %}
+              {% if election.candidate_photos_finished %}<span class="font-weight-bold text-success">PHOTOS</span>{% endif %}
+            </td>
             <td>
                 <span class="{% if election.include_in_list_for_voters %}font-weight-bold{% endif %}">{{ election.election_name }}</span>
                 {% if election.internal_notes %}
@@ -152,7 +156,12 @@
             <input type="checkbox" name="election_preparation_finished" id="election_preparation_finished_id" disabled
                    value="True"
                    {% if election.election_preparation_finished %}checked{% endif %} />
-              Election preparation finished
+              Election data import finished (Offices, Candidates, Ballots)
+            &nbsp;&nbsp;&nbsp;
+            <input type="checkbox" name="candidate_photos_finished" id="candidate_photos_finished_id" disabled
+                   value="True"
+                   {% if election.candidate_photos_finished %}checked{% endif %} />
+              Candidate photos finished
         </div>
     </div>
 
