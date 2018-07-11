@@ -248,7 +248,7 @@ def create_batch_row_action_organization(batch_description, batch_header_map, on
             batch_row_action_organization = BatchRowActionOrganization.objects.create(
                 batch_header_id=batch_description.batch_header_id,
                 batch_row_id=one_batch_row.id,
-                batch_set_id=one_batch_row.batch_set_id,
+                batch_set_id=batch_description.batch_set_id,
             )
             batch_row_action_created = True
             success = True
@@ -416,7 +416,7 @@ def create_batch_row_action_measure(batch_description, batch_header_map, one_bat
             batch_row_action_measure = BatchRowActionMeasure.objects.create(
                 batch_header_id=batch_description.batch_header_id,
                 batch_row_id=one_batch_row.id,
-                batch_set_id=one_batch_row.batch_set_id,
+                batch_set_id=batch_description.batch_set_id,
             )
             batch_row_action_created = True
             status += "BATCH_ROW_ACTION_MEASURE_CREATED "
@@ -733,7 +733,7 @@ def create_batch_row_action_elected_office(batch_description, batch_header_map, 
             batch_row_action_elected_office, new_action_elected_office_created = BatchRowActionElectedOffice.objects.\
                 update_or_create(batch_header_id=batch_description.batch_header_id,
                                  batch_row_id=one_batch_row.id,
-                                 batch_set_id=one_batch_row.batch_set_id,
+                                 batch_set_id=batch_description.batch_set_id,
                                  defaults=updated_values)
             # new_action_elected_office_created = True
             success = True
@@ -764,7 +764,7 @@ def create_batch_row_action_elected_office(batch_description, batch_header_map, 
                     BatchRowActionElectedOffice.objects.update_or_create(
                         batch_header_id=batch_description.batch_header_id,
                         batch_row_id=one_batch_row.id,
-                        batch_set_id=one_batch_row.batch_set_id,
+                        batch_set_id=batch_description.batch_set_id,
                         defaults=updated_values)
                 status += 'CREATE_BATCH_ROW_ACTION_ELECTED_OFFICE-BATCH_ROW_ACTION_ELECTED_OFFICE_DUPLICATE_ENTRIES'
                 success = True
@@ -827,7 +827,7 @@ def create_batch_row_action_contest_office(batch_description, batch_header_map, 
             batch_row_action_contest_office = BatchRowActionContestOffice.objects.create(
                 batch_header_id=batch_description.batch_header_id,
                 batch_row_id=one_batch_row.id,
-                batch_set_id=one_batch_row.batch_set_id,
+                batch_set_id=batch_description.batch_set_id,
             )
             batch_row_action_created = True
             status += "BATCH_ROW_ACTION_CONTEST_OFFICE_CREATED "
@@ -1186,7 +1186,7 @@ def create_batch_row_action_politician(batch_description, batch_header_map, one_
             batch_row_action_politician = BatchRowActionPolitician.objects.create(
                 batch_header_id=batch_description.batch_header_id,
                 batch_row_id=one_batch_row.id,
-                batch_set_id=one_batch_row.batch_set_id,
+                batch_set_id=batch_description.batch_set_id,
             )
             batch_row_action_created = True
             status += "BATCH_ROW_ACTION_CANDIDATE_CREATED "
@@ -1449,7 +1449,7 @@ def create_batch_row_action_candidate(batch_description, batch_header_map, one_b
             batch_row_action_candidate = BatchRowActionCandidate.objects.create(
                 batch_header_id=batch_description.batch_header_id,
                 batch_row_id=one_batch_row.id,
-                batch_set_id=one_batch_row.batch_set_id,
+                batch_set_id=batch_description.batch_set_id,
             )
             batch_row_action_created = True
             status += "BATCH_ROW_ACTION_CANDIDATE_CREATED "
@@ -1815,7 +1815,7 @@ def create_batch_row_action_position(batch_description, batch_header_map, one_ba
             batch_row_action_position = BatchRowActionPosition.objects.create(
                 batch_header_id=batch_description.batch_header_id,
                 batch_row_id=one_batch_row.id,
-                batch_set_id=one_batch_row.batch_set_id,
+                batch_set_id=batch_description.batch_set_id,
             )
             batch_row_action_created = True
             success = True
@@ -2173,7 +2173,7 @@ def create_batch_row_action_ballot_item(batch_description, batch_header_map, one
             batch_row_action_ballot_item = BatchRowActionBallotItem.objects.create(
                 batch_header_id=batch_description.batch_header_id,
                 batch_row_id=one_batch_row.id,
-                batch_set_id=one_batch_row.batch_set_id,
+                batch_set_id=batch_description.batch_set_id,
             )
             batch_row_action_created = True
             status += "BATCH_ROW_ACTION_BALLOT_ITEM_CREATED "
