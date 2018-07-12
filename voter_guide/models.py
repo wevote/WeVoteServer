@@ -352,7 +352,7 @@ class VoterGuideManager(models.Manager):
                     status += 'VOTER_GUIDE_UPDATED_FOR_VOTER '
             except VoterGuide.MultipleObjectsReturned as e:
                 success = False
-                status += 'MULTIPLE_MATCHING_VOTER_GUIDES_FOUND_FOR_VOTER'
+                status += 'MULTIPLE_MATCHING_VOTER_GUIDES_FOUND_FOR_VOTER '
                 exception_multiple_object_returned = True
                 new_voter_guide_created = False
 
