@@ -1626,10 +1626,12 @@ def voter_guide_save_for_api(voter_device_id, voter_guide_we_vote_id, google_civ
                 organization = organization_results['organization']
                 linked_organization_we_vote_id = organization.we_vote_id
             else:
-                status += "ORGANIZATION_NOT_FOUND_EVEN_THOUGH_WE_VOTE_ID_TIED_TO_VOTER "
+                status += "ORGANIZATION_NOT_FOUND_EVEN_THOUGH_WE_VOTE_ID_TIED_TO_VOTER: "
+                status += organization_results['status']
                 linked_organization_we_vote_id = ""
                 voter_manager = VoterManager()
                 if positive_value_exists(voter_id):
+                    # We want to remove the previously linked organization_we_vote_id
                     voter_manager.alter_linked_organization_we_vote_id(voter, None)
 
         if not positive_value_exists(linked_organization_we_vote_id):
@@ -1639,6 +1641,7 @@ def voter_guide_save_for_api(voter_device_id, voter_guide_we_vote_id, google_civ
             if organization_create_results['organization_created']:
                 organization = organization_create_results['organization']
                 linked_organization_we_vote_id = organization.we_vote_id
+                # Save the new linked_organization_we_vote_id
                 results = voter_manager.alter_linked_organization_we_vote_id(voter, linked_organization_we_vote_id)
                 if not results['success']:
                     status += "COULD_NOT_LINK_TO_NEW_ORGANIZATION "
@@ -1676,19 +1679,24 @@ def voter_guide_save_for_api(voter_device_id, voter_guide_we_vote_id, google_civ
         voter_guide_found = False
         status += results['status']
         if results['voter_guide_found']:
+            status += "VOTER_GUIDE_FOUND "
             voter_guide = results['voter_guide']
             if voter_guide.id:
                 voter_guide_found = True
                 success = True
 
         if not voter_guide_found:
+            status += "VOTER_GUIDE_NOT_FOUND "
             create_results = voter_guide_manager.update_or_create_voter_voter_guide(
                 google_civic_election_id=google_civic_election_id,
                 voter=voter)
             if create_results['voter_guide_created'] or create_results['voter_guide_saved']:
+                status += "VOTER_GUIDE_CREATED "
                 voter_guide_found = True
                 success = True
                 voter_guide = create_results['voter_guide']
+            else:
+                status += "VOTER_GUIDE_COULD_NOT_BE_UPDATED_OR_CREATED: " + create_results['status'] + " "
 
     try:
         organization
@@ -1697,9 +1705,10 @@ def voter_guide_save_for_api(voter_device_id, voter_guide_we_vote_id, google_civ
     else:
         organization_exists = True
 
-    if voter_guide_found and linked_organization_we_vote_id and organization_exists:
+    if voter_guide_found and positive_value_exists(linked_organization_we_vote_id) and organization_exists:
         refresh_results = voter_guide_manager.refresh_one_voter_guide_from_organization(voter_guide, organization)
         if refresh_results['values_changed']:
+            status += "VOTER_GUIDE_VALUES_CHANGED "
             voter_guide = refresh_results['voter_guide']
             try:
                 voter_guide.save()
@@ -1707,7 +1716,11 @@ def voter_guide_save_for_api(voter_device_id, voter_guide_we_vote_id, google_civ
                 status += "VOTER_GUIDE_REFRESHED "
             except Exception as e:
                 success = False
-                status += "COULD_NOT_REFRESH_VOTER_GUIDE "
+                status += "COULD_NOT_REFRESH_VOTER_GUIDE " + str(e)
+        else:
+            status += "VOTER_GUIDE_UPDATE_FAILED: " + refresh_results['status']
+    else:
+        status += "COULD_NOT_REFRESH_VOTER_GUIDE "
 
     json_data = {
         'status': status,
@@ -1722,7 +1735,7 @@ def voter_guide_save_for_api(voter_device_id, voter_guide_we_vote_id, google_civ
         'voter_guide_image_url_medium': voter_guide.we_vote_hosted_profile_image_url_medium,
         'voter_guide_image_url_tiny': voter_guide.we_vote_hosted_profile_image_url_tiny,
         'voter_guide_owner_type': voter_guide.voter_guide_owner_type,
-        'organization_we_vote_id': voter_guide.organization_we_vote_id,
+        'organization_we_vote_id': linked_organization_we_vote_id,
         'public_figure_we_vote_id': voter_guide.public_figure_we_vote_id,
         'twitter_description': voter_guide.twitter_description,
         'twitter_followers_count': voter_guide.twitter_followers_count,
