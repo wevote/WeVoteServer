@@ -1641,8 +1641,10 @@ def voter_guide_save_for_api(voter_device_id, voter_guide_we_vote_id, google_civ
                 linked_organization_we_vote_id = organization.we_vote_id
                 results = voter_manager.alter_linked_organization_we_vote_id(voter, linked_organization_we_vote_id)
                 if not results['success']:
-                    status += "COULD_NOT_CREATE_NEW_ORGANIZATION "
+                    status += "COULD_NOT_LINK_TO_NEW_ORGANIZATION "
                     linked_organization_we_vote_id = ""
+            else:
+                status += organization_create_results['status']
 
         if not positive_value_exists(linked_organization_we_vote_id):
             status += 'LINKED_ORGANIZATION_NOT_FOUND '
