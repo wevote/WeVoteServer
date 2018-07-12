@@ -1433,7 +1433,7 @@ def organization_search_for_api(organization_name, organization_twitter_handle, 
     organization_facebook = None
     results = organization_list_manager.organization_search_find_any_possibilities(
         organization_name, organization_twitter_handle, organization_website, organization_email,
-        organization_facebook, organization_search_term, exact_match)
+        organization_facebook, organization_search_term, exact_match=exact_match)
 
     organizations_list = []
     if results['organizations_found']:

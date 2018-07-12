@@ -47,9 +47,10 @@
     {# Default to showing only upcoming elections #}
     <label for="show_all_elections_id">
       <input type="checkbox" name="show_all_elections" id="show_all_elections_id" value="1"
-             {% if show_all_elections %}checked{% endif %} /> All Elections
+             {% if show_all_elections %}checked{% endif %} /> Include Past Elections
     </label>
     &nbsp;&nbsp;&nbsp;&nbsp;
+    <input type="hidden" name="candidate_search" id="candidate_search_id" value="{{ candidate_search }}" />
 
     {% if state_list %}
         <select id="state_code_id" name="state_code">
@@ -236,6 +237,7 @@
     <input type="hidden" name="page" value="{{ current_page_number }}" />
     <input type="hidden" name="state_code" value="{{ state_code }}" />
     <input type="text" name="candidate_search" id="candidate_search_id" value="{{ candidate_search }}" />
+    <input type="hidden" name="show_all_elections" id="show_all_elections_id" value="{{ show_all_elections }}" />
     <input type="submit" value="Search for Candidate" />
 
     {# Turn on/off review mode? #}
@@ -309,7 +311,8 @@
                     {% if candidate.office.district_id %}
                         - District {{ candidate.office.district_id }}
                     {% endif %}
-                    </a>
+                    </a><br />
+                    {{ candidate.office.we_vote_id }}
                   {% else %}
                       (office missing)
                   {% endif %}

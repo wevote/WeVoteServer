@@ -1273,6 +1273,8 @@ class OrganizationManager(models.Manager):
                 if twitter_json['name'] != organization.twitter_name:
                     organization.twitter_name = twitter_json['name']
                     values_changed = True
+                if not positive_value_exists(organization.organization_name):
+                    organization.organization_name = twitter_json['name']
             if 'followers_count' in twitter_json and positive_value_exists(twitter_json['followers_count']):
                 if convert_to_int(twitter_json['followers_count']) != organization.twitter_followers_count:
                     organization.twitter_followers_count = convert_to_int(twitter_json['followers_count'])
@@ -1469,9 +1471,10 @@ class OrganizationListManager(models.Manager):
     A class for working with lists of Organizations
     """
 
-    def organization_search_find_any_possibilities(self, organization_name, organization_twitter_handle='',
+    def organization_search_find_any_possibilities(self, organization_name='', organization_twitter_handle='',
                                                    organization_website='', organization_email='',
                                                    organization_facebook='', organization_search_term='',
+                                                   twitter_handle_list='',
                                                    exact_match=False):
         """
         We want to find *any* possible organization that includes any of the search terms
@@ -1530,6 +1533,15 @@ class OrganizationListManager(models.Manager):
                 else:
                     new_filter = Q(organization_twitter_handle__icontains=organization_twitter_handle2)
                 filters.append(new_filter)
+
+            if positive_value_exists(twitter_handle_list):
+                for one_twitter_handle in twitter_handle_list:
+                    one_twitter_handle2 = extract_twitter_handle_from_text_string(one_twitter_handle)
+                    if positive_value_exists(exact_match):
+                        new_filter = Q(organization_twitter_handle__iexact=one_twitter_handle2)
+                    else:
+                        new_filter = Q(organization_twitter_handle__icontains=one_twitter_handle2)
+                    filters.append(new_filter)
 
             if positive_value_exists(organization_website):
                 if positive_value_exists(exact_match):

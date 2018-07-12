@@ -449,6 +449,7 @@ def organization_delete_process_view(request):
     :param request:
     :return:
     """
+    status = ""
     organization_id = convert_to_int(request.POST.get('organization_id', 0))
     confirm_delete = convert_to_int(request.POST.get('confirm_delete', 0))
 
@@ -474,6 +475,21 @@ def organization_delete_process_view(request):
         if positive_value_exists(issue_count):
             messages.add_message(request, messages.ERROR, 'Could not delete -- '
                                                           'issues still attached to this organization.')
+            return HttpResponseRedirect(reverse('organization:organization_edit', args=(organization_id,)) +
+                                        "?google_civic_election_id=" + str(google_civic_election_id) +
+                                        "&state_code=" + str(state_code))
+
+        organization_we_vote_id = organization.we_vote_id
+
+        # Delete the TwitterLinkToOrganization
+        twitter_user_manager = TwitterUserManager()
+        twitter_id = 0
+        results = twitter_user_manager.delete_twitter_link_to_organization(twitter_id, organization_we_vote_id)
+        if not positive_value_exists(results['twitter_link_to_organization_deleted']) \
+                and not positive_value_exists(results['twitter_link_to_organization_not_found']):
+            status += results['status']
+            messages.add_message(request, messages.ERROR, 'Could not delete TwitterLinkToOrganization: {status}'
+                                                          ''.format(status=status))
             return HttpResponseRedirect(reverse('organization:organization_edit', args=(organization_id,)) +
                                         "?google_civic_election_id=" + str(google_civic_election_id) +
                                         "&state_code=" + str(state_code))

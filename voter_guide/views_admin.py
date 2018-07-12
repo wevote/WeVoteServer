@@ -18,6 +18,7 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from election.models import Election, ElectionManager, TIME_SPAN_LIST
 from import_export_batches.models import BATCH_HEADER_MAP_FOR_POSITIONS, BatchManager, POSITION
+from import_export_twitter.controllers import refresh_twitter_organization_details, scrape_social_media_from_one_site
 from organization.models import Organization, OrganizationListManager, OrganizationManager
 from organization.views_admin import organization_edit_process_view
 from position.models import PositionEntered, PositionForFriends, PositionListManager
@@ -206,6 +207,7 @@ def voter_guide_create_process_view(request):
     ready_to_confirm = False
     possible_candidate_list = []
     possible_candidate_list_found = False
+    twitter_user_manager = TwitterUserManager()
 
     possible_candidates_results = take_in_possible_candidate_list_from_form(request, google_civic_election_id)
     if possible_candidates_results['possible_candidate_list_found']:
@@ -219,6 +221,8 @@ def voter_guide_create_process_view(request):
         organization_we_vote_id = ""
 
     organizations_list = []
+    organization_list_manager = OrganizationListManager()
+    organization_manager = OrganizationManager()
     if positive_value_exists(organization_we_vote_id):
         organization_manager = OrganizationManager()
         results = organization_manager.retrieve_organization_from_we_vote_id(organization_we_vote_id)
@@ -229,9 +233,9 @@ def voter_guide_create_process_view(request):
             twitter_user_manager = TwitterUserManager()
             organization_twitter_handle = twitter_user_manager.fetch_twitter_handle_from_organization_we_vote_id(
                 organization_we_vote_id)
-    elif not positive_value_exists(clear_organization_options):
+    elif positive_value_exists(organization_name) or positive_value_exists(organization_twitter_handle) \
+            and not positive_value_exists(clear_organization_options):
         # Search for organizations that match
-        organization_list_manager = OrganizationListManager()
         results = organization_list_manager.organization_search_find_any_possibilities(
             organization_name=organization_name,
             organization_twitter_handle=organization_twitter_handle
@@ -249,6 +253,92 @@ def voter_guide_create_process_view(request):
             else:
                 messages.add_message(request, messages.INFO, 'We found {count} organizations '
                                                              'that might match.'.format(count=organizations_count))
+    elif positive_value_exists(voter_guide_possibility_url) and not positive_value_exists(clear_organization_options):
+        facebook_page = ""
+        twitter_or_facebook_found = False
+        twitter_handle = ""
+        twitter_handle_list = []
+
+        retrieve_list = True
+        scrape_results = scrape_social_media_from_one_site(voter_guide_possibility_url, retrieve_list)
+
+        # Only include a change if we have a new value (do not try to save blank value)
+        if scrape_results['twitter_handle_found'] and positive_value_exists(scrape_results['twitter_handle']):
+            twitter_handle = scrape_results['twitter_handle']
+            twitter_handle_list = scrape_results['twitter_handle_list']
+            twitter_or_facebook_found = True
+
+        if scrape_results['facebook_page_found'] and positive_value_exists(scrape_results['facebook_page']):
+            facebook_page = scrape_results['facebook_page']
+            twitter_or_facebook_found = True
+
+        if twitter_or_facebook_found:
+            # Search for organizations that match
+            twitter_handle_list_modified = []
+            if len(twitter_handle_list) > 1:
+                for one_twitter_handle in twitter_handle_list:
+                    if positive_value_exists(one_twitter_handle):
+                        one_twitter_handle = one_twitter_handle.strip()
+                    if positive_value_exists(one_twitter_handle):
+                        twitter_handle_lower = one_twitter_handle.lower()
+                        if twitter_handle_lower not in twitter_handle_list_modified:
+                            twitter_handle_list_modified.append(twitter_handle_lower)
+
+            # We want to create an organization for each Twitter handle we find on the page so it can be chosen below
+            if len(twitter_handle_list_modified) > 1:
+                for one_twitter_handle in twitter_handle_list_modified:
+                    one_organization_found = False
+                    results = twitter_user_manager.retrieve_twitter_link_to_organization_from_twitter_handle(
+                        one_twitter_handle)
+                    if results['twitter_link_to_organization_found']:
+                        twitter_link_to_organization = results['twitter_link_to_organization']
+                        organization_results = organization_manager.retrieve_organization_from_we_vote_id(
+                            twitter_link_to_organization.organization_we_vote_id)
+                        if organization_results['organization_found']:
+                            one_organization_found = True
+                    twitter_user_id = 0
+                    twitter_results = twitter_user_manager.retrieve_twitter_user_locally_or_remotely(
+                        twitter_user_id, one_twitter_handle)
+                    if twitter_results['twitter_user_found']:
+                        twitter_user = twitter_results['twitter_user']
+                        twitter_user_id = twitter_user.twitter_id
+                    if not one_organization_found and positive_value_exists(twitter_user_id):
+                        organization_name = ""
+                        create_results = organization_manager.create_organization(
+                            organization_name=organization_name, organization_twitter_handle=one_twitter_handle)
+                        if create_results['organization_created']:
+                            one_organization = create_results['organization']
+
+                            # Create TwitterLinkToOrganization
+                            link_results = twitter_user_manager.create_twitter_link_to_organization(
+                                twitter_user_id, one_organization.we_vote_id)
+                            # Refresh the organization with the Twitter details
+                            refresh_twitter_organization_details(one_organization, twitter_user_id)
+
+            if len(twitter_handle_list_modified) > 1:
+                results = organization_list_manager.organization_search_find_any_possibilities(
+                    organization_facebook=facebook_page,
+                    twitter_handle_list=twitter_handle_list_modified
+                )
+            else:
+                results = organization_list_manager.organization_search_find_any_possibilities(
+                    organization_facebook=facebook_page,
+                    organization_twitter_handle=twitter_handle
+                )
+
+            if results['organizations_found']:
+                organizations_list = results['organizations_list']
+                organizations_count = len(organizations_list)
+
+                if organizations_count == 0:
+                    pass
+                    # messages.add_message(request, messages.INFO, 'We did not find any organizations that match.')
+                elif organizations_count == 1:
+                    messages.add_message(request, messages.INFO, 'We found {count} organization '
+                                                                 'that might match.'.format(count=organizations_count))
+                else:
+                    messages.add_message(request, messages.INFO, 'We found {count} organizations '
+                                                                 'that might match.'.format(count=organizations_count))
 
     if not possible_candidate_list_found:
         ballot_items_list = []
