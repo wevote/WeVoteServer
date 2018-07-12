@@ -24,6 +24,8 @@
 <h1>Voter Guides</h1>
 
 <ul>
+    <li><strong><a href="{% url 'voter_guide:voter_guide_possibility_list' %}?google_civic_election_id={{ google_civic_election_id }}"
+                    target="_blank" >Review Possible Voter Guides</a></strong> (in new window)</li>
     <li><strong><a href="{% url 'voter_guide:voter_guide_create' %}?google_civic_election_id={{ google_civic_election_id }}"
                    target="_blank">Suggest a Voter Guide</a></strong> (in new window).
         Quick public tools that feeds into import_export_batch system.</li>
@@ -32,8 +34,6 @@
         Data Manager tools that create organization and voter guide.</li>
 
 {% if voter_guide_list and google_civic_election_id %}
-    <li><strong>Prepare: <a href="{% url 'voter_guide:voter_guide_possibility_list' %}?google_civic_election_id={{ google_civic_election_id }}"
-                    target="_blank" >Review Possible Voter Guides</a></strong> (in new window)</li>
     <li>Prepare: <a href="{% url 'voter_guide:generate_voter_guides_one_election' %}?google_civic_election_id={{ google_civic_election_id }}"
                     target="_blank" >Generate Voter Guides for this Election</a> (in new window)</li>
     <li>Prepare: <a href="{% url 'import_export_twitter:refresh_twitter_data_for_organizations' %}?organization_state={{ state_code }}&first_retrieve_only=0&google_civic_election_id={{ google_civic_election_id }}"
@@ -64,7 +64,7 @@
     {# Default to showing only upcoming elections #}
     <label for="show_all_elections_id">
       <input type="checkbox" name="show_all_elections" id="show_all_elections_id" value="1"
-             {% if show_all_elections %}checked{% endif %} /> All Elections
+             {% if show_all_elections %}checked{% endif %} /> Include Past Elections
     </label>
     &nbsp;&nbsp;&nbsp;&nbsp;
 

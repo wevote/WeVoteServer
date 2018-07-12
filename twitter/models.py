@@ -1064,8 +1064,10 @@ class TwitterUserManager(models.Model):
 
     def delete_twitter_link_to_organization(self, twitter_id, organization_we_vote_id):
         status = ""
+        success = True
         twitter_id = convert_to_int(twitter_id)
         twitter_link_to_organization_deleted = False
+        twitter_link_to_organization_not_found = False
 
         try:
             if positive_value_exists(twitter_id):
@@ -1074,6 +1076,8 @@ class TwitterUserManager(models.Model):
                     twitter_link_to_organization = results['twitter_link_to_organization']
                     twitter_link_to_organization.delete()
                     twitter_link_to_organization_deleted = True
+                else:
+                    twitter_link_to_organization_not_found = True
 
             elif positive_value_exists(organization_we_vote_id):
                 results = self.retrieve_twitter_link_to_organization_from_organization_we_vote_id(
@@ -1082,14 +1086,20 @@ class TwitterUserManager(models.Model):
                     twitter_link_to_organization = results['twitter_link_to_organization']
                     twitter_link_to_organization.delete()
                     twitter_link_to_organization_deleted = True
+                else:
+                    twitter_link_to_organization_not_found = True
+            else:
+                twitter_link_to_organization_not_found = True
 
         except Exception as e:
-            pass
+            success = False
+            status += "UNABLE_TO_DELETE_TWITTER_LINK_TO_ORGANIZATION "
 
         results = {
             'status':                               status,
-            'success':                              twitter_link_to_organization_deleted,
+            'success':                              success,
             'twitter_link_to_organization_deleted': twitter_link_to_organization_deleted,
+            'twitter_link_to_organization_not_found':   twitter_link_to_organization_not_found,
         }
         return results
 

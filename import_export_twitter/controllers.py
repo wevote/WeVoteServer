@@ -284,9 +284,10 @@ def refresh_twitter_organization_details(organization, twitter_user_id=0):
     return results
 
 
-def scrape_social_media_from_one_site(site_url):
+def scrape_social_media_from_one_site(site_url, retrieve_list=False):
     twitter_handle = ''
     twitter_handle_found = False
+    twitter_handle_list = []
     facebook_page = ''
     facebook_page_found = False
     success = False
@@ -317,14 +318,17 @@ def scrape_social_media_from_one_site(site_url):
         page = urllib.request.urlopen(request, timeout=5)
         for line in page.readlines():
             try:
-                if not twitter_handle_found:
+                proceed = positive_value_exists(retrieve_list) or not twitter_handle_found
+                if proceed:
                     for m in re.finditer(RE_TWITTER, line.decode()):
                         if m:
                             name = m.group(1)
                             if name not in TWITTER_BLACKLIST:
                                 twitter_handle = name
                                 twitter_handle_found = True
-                                raise GetOutOfLoopLocal
+                                twitter_handle_list.append(twitter_handle)
+                                if not positive_value_exists(retrieve_list):
+                                    raise GetOutOfLoopLocal
             except GetOutOfLoopLocal:
                 pass
             # SEE NOTE ABOUT FACEBOOK SCRAPING ABOVE
@@ -355,7 +359,7 @@ def scrape_social_media_from_one_site(site_url):
             #                 # possible_page4 = m2.group(4)
             # except GetOutOfLoopLocal:
             #     pass
-            if twitter_handle_found:  # and facebook_page_found:
+            if twitter_handle_found and not positive_value_exists(retrieve_list):  # and facebook_page_found:
                 raise GetOutOfLoop
         success = True
         status = 'FINISHED_SCRAPING_PAGE'
@@ -380,6 +384,7 @@ def scrape_social_media_from_one_site(site_url):
         'success':              success,
         'page_redirected':      twitter_handle,
         'twitter_handle':       twitter_handle,
+        'twitter_handle_list':  twitter_handle_list,
         'twitter_handle_found': twitter_handle_found,
         'facebook_page':        facebook_page,
         'facebook_page_found':  facebook_page_found,
