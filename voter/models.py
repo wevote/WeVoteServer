@@ -50,6 +50,7 @@ NOTIFICATION_NEWSLETTER_OPT_IN = 1  # "I would like to receive the We Vote newsl
 
 # See AUTH_USER_MODEL in config/base.py
 class VoterManager(BaseUserManager):
+
     def clear_out_collisions_for_linked_organization_we_vote_id(self, current_voter_we_vote_id,
                                                                 organization_we_vote_id):
         status = ""
@@ -70,6 +71,22 @@ class VoterManager(BaseUserManager):
                 except Exception as e:
                     success = False
                     status += " UNABLE_TO_UPDATE_COLLISION_VOTER_WITH_EMPTY_ORGANIZATION_WE_VOTE_ID"
+        results = {
+            'success':  success,
+            'status':   status
+        }
+        return results
+
+    def alter_linked_organization_we_vote_id(self, voter, linked_organization_we_vote_id=None):
+        status = ""
+        success = True
+        if voter and hasattr(voter, "first_name"):
+            try:
+                voter.linked_organization_we_vote_id = linked_organization_we_vote_id
+                voter.save()
+            except Exception as e:
+                success = False
+                status += " UNABLE_TO_UPDATE_VOTER_LINKED_ORGANIZATION_WE_VOTE_ID"
         results = {
             'success':  success,
             'status':   status

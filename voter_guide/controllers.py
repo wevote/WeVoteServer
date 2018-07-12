@@ -1546,12 +1546,15 @@ def voter_guide_save_for_api(voter_device_id, voter_guide_we_vote_id, google_civ
         return HttpResponse(json.dumps(json_data), content_type='application/json')
 
     voter_manager = VoterManager()
+    voter = None
     voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id)
     voter_id = 0
+    voter_full_name = ""
     linked_organization_we_vote_id = ""
     if voter_results['voter_found']:
         voter = voter_results['voter']
         voter_id = voter.id
+        voter_full_name = voter.get_full_name()
         linked_organization_we_vote_id = voter.linked_organization_we_vote_id
     if not positive_value_exists(voter_id):
         status += 'VALID_VOTER_ID_MISSING'
@@ -1619,15 +1622,27 @@ def voter_guide_save_for_api(voter_device_id, voter_guide_we_vote_id, google_civ
             organization_results = \
                 organization_manager.retrieve_organization_from_we_vote_id(linked_organization_we_vote_id)
             if organization_results['organization_found']:
+                status += "ORGANIZATION_FOUND "
                 organization = organization_results['organization']
                 linked_organization_we_vote_id = organization.we_vote_id
             else:
-                organization_create_results = organization_manager.create_organization(
-                    voter.get_full_name(), organization_website="", organization_twitter_handle="",
-                    organization_type="INDIVIDUAL")
-                if organization_create_results['organization_created']:
-                    organization = organization_create_results['organization']
-                    linked_organization_we_vote_id = organization.we_vote_id
+                status += "ORGANIZATION_NOT_FOUND_EVEN_THOUGH_WE_VOTE_ID_TIED_TO_VOTER "
+                linked_organization_we_vote_id = ""
+                voter_manager = VoterManager()
+                if positive_value_exists(voter_id):
+                    voter_manager.alter_linked_organization_we_vote_id(voter, None)
+
+        if not positive_value_exists(linked_organization_we_vote_id):
+            organization_create_results = organization_manager.create_organization(
+                voter_full_name, organization_website="", organization_twitter_handle="",
+                organization_type="INDIVIDUAL")
+            if organization_create_results['organization_created']:
+                organization = organization_create_results['organization']
+                linked_organization_we_vote_id = organization.we_vote_id
+                results = voter_manager.alter_linked_organization_we_vote_id(voter, linked_organization_we_vote_id)
+                if not results['success']:
+                    status += "COULD_NOT_CREATE_NEW_ORGANIZATION "
+                    linked_organization_we_vote_id = ""
 
         if not positive_value_exists(linked_organization_we_vote_id):
             status += 'LINKED_ORGANIZATION_NOT_FOUND '
