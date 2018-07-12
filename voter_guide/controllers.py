@@ -1718,7 +1718,7 @@ def voter_guide_save_for_api(voter_device_id, voter_guide_we_vote_id, google_civ
                 success = False
                 status += "COULD_NOT_REFRESH_VOTER_GUIDE " + str(e)
         else:
-            status += "VOTER_GUIDE_UPDATE_FAILED: " + refresh_results['status']
+            status += "VOTER_GUIDE_VALUES_DID_NOT_CHANGE "
     else:
         status += "COULD_NOT_REFRESH_VOTER_GUIDE "
 
