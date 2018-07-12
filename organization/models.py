@@ -213,13 +213,13 @@ class OrganizationManager(models.Manager):
                     organization_image=organization_image,
                     organization_type=organization_type)
             organization.save()  # We do this so the we_vote_id is created
-            status = "CREATE_ORGANIZATION_SUCCESSFUL"
+            status = "CREATE_ORGANIZATION_SUCCESSFUL "
             success = True
             organization_created = True
         except Exception as e:
             handle_record_not_saved_exception(e, logger=logger)
             organization = Organization
-            status = "CREATE_ORGANIZATION_FAILED"
+            status = "CREATE_ORGANIZATION_FAILED " + str(e)
             success = False
             organization_created = False
         results = {
