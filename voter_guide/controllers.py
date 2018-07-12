@@ -13,7 +13,7 @@ import json
 from organization.controllers import organization_follow_or_unfollow_or_ignore, \
     push_organization_data_to_other_table_caches, \
     refresh_organization_data_from_master_tables
-from organization.models import OrganizationManager, OrganizationListManager
+from organization.models import OrganizationManager, OrganizationListManager, INDIVIDUAL
 from pledge_to_vote.models import PledgeToVoteManager
 from position.controllers import retrieve_ballot_item_we_vote_ids_for_organizations_to_follow
 from position.models import ANY_STANCE, INFORMATION_ONLY, OPPOSE, \
@@ -1635,7 +1635,7 @@ def voter_guide_save_for_api(voter_device_id, voter_guide_we_vote_id, google_civ
         if not positive_value_exists(linked_organization_we_vote_id):
             organization_create_results = organization_manager.create_organization(
                 voter_full_name, organization_website="", organization_twitter_handle="",
-                organization_type="INDIVIDUAL")
+                organization_type=INDIVIDUAL)
             if organization_create_results['organization_created']:
                 organization = organization_create_results['organization']
                 linked_organization_we_vote_id = organization.we_vote_id
