@@ -48,6 +48,9 @@ def attach_ballotpedia_election_by_district_from_api(election, google_civic_elec
     status = ""
     chunks_of_district_strings = []
     election_object_found = False
+    ballotpedia_election_id = 0
+    ballotpedia_kind_of_election = ""
+    elections_retrieve_url = ""
 
     if election and positive_value_exists(election.google_civic_election_id):
         election_object_found = True
@@ -81,16 +84,19 @@ def attach_ballotpedia_election_by_district_from_api(election, google_civic_elec
 
     district_string = ""
     ballotpedia_district_id_not_used_list = []
+    count_of_districts_sent = 0
     for one_district in ballotpedia_district_id_list:
         # The url we send to Ballotpedia can only be so long. If too long, we stop adding districts to the
         #  office_district_string, but capture the districts not used
         # 3796 = 4096 - 300 (300 gives us room for all of the other url variables we need)
         if len(district_string) < 3796:
             district_string += str(one_district) + ","
+            count_of_districts_sent += 1
         else:
             # In the future we might want to set up a second query to get the races for these districts
             ballotpedia_district_id_not_used_list.append(one_district)
 
+    status += "COUNT_OF_FIRST_BLOCK_OF_DISTRICTS: " + str(count_of_districts_sent) + " "
     # Remove last comma
     district_string = district_string[:-1]
     chunks_of_district_strings.append(district_string)
@@ -118,7 +124,9 @@ def attach_ballotpedia_election_by_district_from_api(election, google_civic_elec
     # Tests are showing that election numbers aren't reused between primary & general
     election_count = 0
     election_found = False
+    which_chunk_of_district_strings = 0
     for district_string in chunks_of_district_strings:
+        which_chunk_of_district_strings += 1
         response = requests.get(BALLOTPEDIA_API_ELECTIONS_URL, params={
             "access_token":             BALLOTPEDIA_API_KEY,
             "filters[district][in]":    district_string,
@@ -126,15 +134,36 @@ def attach_ballotpedia_election_by_district_from_api(election, google_civic_elec
             "order[date]":              "ASC",
         })
 
-        # if not positive_value_exists(response.text):
-        #     success = False
-        #     status += "NO_RESPONSE_TEXT_FOUND_FROM_ONE_ELECTIONS_API_CALL "
-        #     # if positive_value_exists(response.url):
-        #     #     status += ": " + response.url
-        #     # We want to continue to try to retrieve with another block of districts
-        #     continue
+        if not hasattr(response, 'text') or not positive_value_exists(response.text):
+            status += "NO_RESPONSE_TEXT_FOUND-CHUNK: " + str(which_chunk_of_district_strings) + " "
+            if positive_value_exists(response.url):
+                shortened_url = response.url[:1000]
+                status += ": " + shortened_url + " "
+            continue
+
+        if hasattr(response, 'success') and not positive_value_exists(response.success):
+            status += "RESPONSE_SUCCESS_IS_FALSE-CHUNK: " + str(which_chunk_of_district_strings) + " "
+            if positive_value_exists(response.url):
+                shortened_url = response.url[:1000]
+                status += ": " + shortened_url + " "
+            if positive_value_exists(response.error):
+                status += "error: " + str(response.error)
+            continue
+
+        if hasattr(response, 'ok') and not positive_value_exists(response.ok):
+            success = False
+            status += "RESPONSE_OK_IS_FALSE-CHUNK: " + str(which_chunk_of_district_strings) + " "
+            if positive_value_exists(response.url):
+                shortened_url = response.url[:1000]
+                status += ": " + shortened_url + " "
+            if hasattr(response, 'status_code'):
+                status += "status_code: " + str(response.status_code)
+                if response.status_code == 414:
+                    status += " Too many races sent"
+            continue
 
         structured_json = json.loads(response.text)
+        status += "STRUCTURED_JSON_RETRIEVED "
 
         elections_retrieve_url = ""
         if positive_value_exists(response.url):

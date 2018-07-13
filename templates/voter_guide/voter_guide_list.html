@@ -87,6 +87,8 @@
             <th></th>
             <th>&nbsp;</th>
             <th>Organization</th>
+            <th></th>
+            <th></th>
             <th>Twitter</th>
             <th>Election</th>
             <th>Election Day</th>
@@ -115,6 +117,8 @@
             {% else %}
                 <td colspan="2">(no org found)</td>
             {% endif %}
+            <td>{{ voter_guide.organization_we_vote_id|default_if_none:"" }}</td>
+            <td>{{ voter_guide.owner_we_vote_id|default_if_none:"" }}</td>
             <td>{{ voter_guide.twitter_handle|default_if_none:"" }}</td>
             <td>{{ voter_guide.google_civic_election_id|default_if_none:"" }}</td>
             <td>{{ voter_guide.election_day_text|default_if_none:"" }}</td>

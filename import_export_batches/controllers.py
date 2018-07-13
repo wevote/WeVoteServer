@@ -1056,8 +1056,9 @@ def create_batch_row_action_contest_office(batch_description, batch_header_map, 
         if keep_looking_for_duplicates:
             if positive_value_exists(candidate_name) and not positive_value_exists(ballotpedia_race_id):
                 candidate_campaign_list_manager = CandidateCampaignListManager()
+                google_civic_election_id_list = [google_civic_election_id]
                 matching_results = candidate_campaign_list_manager.retrieve_candidates_from_non_unique_identifiers(
-                    google_civic_election_id, state_code, '', candidate_name)
+                    google_civic_election_id_list, state_code, '', candidate_name)
 
                 if matching_results['candidate_found']:
                     candidate = matching_results['candidate']
@@ -1609,8 +1610,9 @@ def create_batch_row_action_candidate(batch_description, batch_header_map, one_b
 
     # We don't want to use this routine if we have a ballotpedia_candidate_id
     if keep_looking_for_duplicates and not positive_value_exists(ballotpedia_candidate_id):
+        google_civic_election_id_list = [google_civic_election_id]
         matching_results = candidate_campaign_list_manager.retrieve_candidates_from_non_unique_identifiers(
-            google_civic_election_id, state_code, candidate_twitter_handle, candidate_name)
+            google_civic_election_id_list, state_code, candidate_twitter_handle, candidate_name)
 
         if matching_results['candidate_found']:
             candidate = matching_results['candidate']
@@ -1946,8 +1948,9 @@ def create_batch_row_action_position(batch_description, batch_header_map, one_ba
     # NEXT: figure out what candidate/office the endorsement is for
     if positive_value_exists(candidate_twitter_handle) or positive_value_exists(candidate_name):
         candidate_campaign_list_manager = CandidateCampaignListManager()
+        google_civic_election_id_list = [google_civic_election_id]
         matching_results = candidate_campaign_list_manager.retrieve_candidates_from_non_unique_identifiers(
-            google_civic_election_id, state_code, candidate_twitter_handle, candidate_name)
+            google_civic_election_id_list, state_code, candidate_twitter_handle, candidate_name)
 
         if matching_results['candidate_found']:
             candidate = matching_results['candidate']
@@ -2258,8 +2261,9 @@ def create_batch_row_action_ballot_item(batch_description, batch_header_map, one
 
     if keep_looking_for_duplicates:
         candidate_campaign_list_manager = CandidateCampaignListManager()
+        google_civic_election_id_list = [google_civic_election_id]
         matching_results = candidate_campaign_list_manager.retrieve_candidates_from_non_unique_identifiers(
-            google_civic_election_id, state_code, candidate_twitter_handle, candidate_name)
+            google_civic_election_id_list, state_code, candidate_twitter_handle, candidate_name)
         if matching_results['candidate_found']:
             candidate = matching_results['candidate']
             candidate_found = True

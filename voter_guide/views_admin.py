@@ -2,13 +2,15 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
-from .controllers import convert_list_of_names_to_possible_candidates, \
+from .controllers import convert_candidate_list_light_to_possible_candidates, \
+    convert_list_of_names_to_possible_candidate_dict_list, \
     extract_position_list_from_voter_guide_possibility, extract_possible_candidate_list_from_database, \
     match_candidate_list_with_candidates_in_database, refresh_existing_voter_guides, \
     take_in_possible_candidate_list_from_form, voter_guides_import_from_master_server
 from .models import VoterGuide, VoterGuideListManager, VoterGuideManager, VoterGuidePossibility, \
     VoterGuidePossibilityManager
 from admin_tools.views import redirect_to_sign_in_page
+from candidate.controllers import retrieve_candidate_list_for_all_upcoming_elections, find_candidates_on_one_web_page
 from config.base import get_environment_variable
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
@@ -54,7 +56,7 @@ def voter_guide_create_view(request):
     # Take in these values, even though they will be overwritten if we've stored a voter_guide_possibility
     ballot_items_raw = request.GET.get('ballot_items_raw', "")
     clear_organization_options = request.POST.get('clear_organization_options', 0)
-    google_civic_election_id = request.GET.get('google_civic_election_id', 0)
+    # google_civic_election_id = request.GET.get('google_civic_election_id', 0)
     organization_name = request.GET.get('organization_name', "")
     organization_twitter_handle = request.GET.get('organization_twitter_handle', "")
     organization_we_vote_id = request.GET.get('organization_we_vote_id', "")
@@ -82,9 +84,10 @@ def voter_guide_create_view(request):
                 possible_candidate_list = results['possible_candidate_list']
                 possible_candidate_list_found = True
 
+                google_civic_election_id_list = []
                 # Match incoming candidates to candidates already in the database
                 results = match_candidate_list_with_candidates_in_database(
-                    possible_candidate_list, google_civic_election_id)
+                    possible_candidate_list, google_civic_election_id_list)
                 if results['possible_candidate_list_found']:
                     possible_candidate_list = results['possible_candidate_list']
 
@@ -340,7 +343,30 @@ def voter_guide_create_process_view(request):
                     messages.add_message(request, messages.INFO, 'We found {count} organizations '
                                                                  'that might match.'.format(count=organizations_count))
 
-    if not possible_candidate_list_found:
+    google_civic_election_id_list = []
+    election_manager = ElectionManager()
+    results = election_manager.retrieve_upcoming_elections()
+    if results['election_list_found']:
+        election_list = results['election_list']
+        for one_election in election_list:
+            if positive_value_exists(one_election.google_civic_election_id):
+                google_civic_election_id_list.append(one_election.google_civic_election_id)
+
+    if not possible_candidate_list_found and positive_value_exists(voter_guide_possibility_url):
+        results = retrieve_candidate_list_for_all_upcoming_elections(google_civic_election_id_list)
+        if results['candidate_list_found']:
+            candidate_list_light = results['candidate_list_light']
+            candidate_scrape_results = \
+                find_candidates_on_one_web_page(voter_guide_possibility_url, candidate_list_light)
+            if candidate_scrape_results['at_least_one_candidate_found']:
+                selected_candidate_list_light = candidate_scrape_results['selected_candidate_list_light']
+                possible_candidates_results = convert_candidate_list_light_to_possible_candidates(
+                    selected_candidate_list_light)
+                if possible_candidates_results['possible_candidate_list_found']:
+                    possible_candidate_list = possible_candidates_results['possible_candidate_list']
+                    possible_candidate_list_found = True
+
+    if not possible_candidate_list_found and positive_value_exists(ballot_items_raw):
         ballot_items_list = []
         # First break up multiple lines
         ballot_items_list1 = ballot_items_raw.splitlines()
@@ -352,17 +378,18 @@ def voter_guide_create_process_view(request):
                 if positive_value_exists(one_item_stripped):
                     ballot_items_list.append(one_item_stripped)
 
-        possible_candidate_list = []
-        possible_candidates_results = convert_list_of_names_to_possible_candidates(
+        possible_candidates_results = convert_list_of_names_to_possible_candidate_dict_list(
             ballot_items_list, google_civic_election_id)
         if possible_candidates_results['possible_candidate_list_found']:
             possible_candidate_list = possible_candidates_results['possible_candidate_list']
             possible_candidate_list_found = True
 
     # Match incoming candidates to candidates already in the database
-    results = match_candidate_list_with_candidates_in_database(possible_candidate_list, google_civic_election_id)
-    if results['possible_candidate_list_found']:
-        possible_candidate_list = results['possible_candidate_list']
+    if len(possible_candidate_list):
+        results = match_candidate_list_with_candidates_in_database(
+            possible_candidate_list, google_civic_election_id_list)
+        if results['possible_candidate_list_found']:
+            possible_candidate_list = results['possible_candidate_list']
 
     # Now save the possibility so far
     if positive_value_exists(voter_guide_possibility_url):
@@ -382,6 +409,8 @@ def voter_guide_create_process_view(request):
                     one_possible_candidate['candidate_name']
                 updated_values['candidate_we_vote_id_' + one_possible_candidate['possible_candidate_number']] = \
                     one_possible_candidate['candidate_we_vote_id']
+                updated_values['google_civic_election_id_' + one_possible_candidate['possible_candidate_number']] = \
+                    one_possible_candidate['google_civic_election_id']
                 updated_values['stance_about_candidate_' + one_possible_candidate['possible_candidate_number']] = \
                     one_possible_candidate['stance_about_candidate']
                 updated_values['comment_about_candidate_' + one_possible_candidate['possible_candidate_number']] = \

@@ -8,6 +8,7 @@ from ballot.models import CANDIDATE
 from bookmark.models import BookmarkItemList
 from config.base import get_environment_variable
 from django.http import HttpResponse
+from election.models import ElectionManager
 from exception.models import handle_exception
 from image.controllers import retrieve_all_images_for_one_candidate, cache_master_and_resized_image, \
     BALLOTPEDIA_IMAGE_SOURCE, \
@@ -18,7 +19,10 @@ import json
 from office.models import ContestOfficeManager
 from politician.models import PoliticianManager
 from position.controllers import move_positions_to_another_candidate, update_all_position_details_from_candidate
+import re
+from socket import timeout
 from twitter.models import TwitterUserManager
+import urllib.request
 import wevote_functions.admin
 from wevote_functions.functions import add_period_to_middle_name_initial, add_period_to_name_prefix_and_suffix, \
     convert_to_political_party_constant, positive_value_exists, process_request_from_master, convert_to_int, \
@@ -29,6 +33,11 @@ logger = wevote_functions.admin.get_logger(__name__)
 
 WE_VOTE_API_KEY = get_environment_variable("WE_VOTE_API_KEY")
 CANDIDATES_SYNC_URL = get_environment_variable("CANDIDATES_SYNC_URL")  # candidatesSyncOut
+
+
+class FakeFirefoxURLopener(urllib.request.FancyURLopener):
+    version = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.9; rv:25.0)' \
+            + ' Gecko/20100101 Firefox/25.0'
 
 
 def add_candidate_name_to_next_spot(candidate_to_update, google_civic_candidate_name_to_add):
@@ -194,8 +203,9 @@ def find_duplicate_candidate(we_vote_candidate, ignore_candidate_id_list):
     # Search for other candidates within this election that match name and election
     candidate_campaign_list_manager = CandidateCampaignListManager()
     try:
+        google_civic_election_id_list = [we_vote_candidate.google_civic_election_id]
         results = candidate_campaign_list_manager.retrieve_candidates_from_non_unique_identifiers(
-            we_vote_candidate.google_civic_election_id, we_vote_candidate.state_code,
+            google_civic_election_id_list, we_vote_candidate.state_code,
             we_vote_candidate.candidate_twitter_handle, we_vote_candidate.candidate_name, ignore_candidate_id_list)
 
         if results['candidate_found']:
@@ -1292,6 +1302,51 @@ def retrieve_candidate_politician_match_options(vote_smart_id, maplight_id, cand
     return results
 
 
+def retrieve_candidate_list_for_all_upcoming_elections(upcoming_google_civic_election_id_list=[],
+                                                       return_list_of_objects=False):
+
+    status = ""
+    success = True
+    candidate_list_objects = []
+    candidate_list_light = []
+    candidate_list_found = False
+
+    if not upcoming_google_civic_election_id_list \
+            or not positive_value_exists(len(upcoming_google_civic_election_id_list)):
+        upcoming_google_civic_election_id_list = []
+        election_manager = ElectionManager()
+        results = election_manager.retrieve_upcoming_elections()
+        if results['election_list_found']:
+            election_list = results['election_list']
+            for one_election in election_list:
+                if positive_value_exists(one_election.google_civic_election_id):
+                    upcoming_google_civic_election_id_list.append(one_election.google_civic_election_id)
+        else:
+            status += results['status']
+            success = results['success']
+
+    if len(upcoming_google_civic_election_id_list):
+        candidate_list_manager = CandidateCampaignListManager()
+        results = candidate_list_manager.retrieve_candidates_for_specific_elections(
+            upcoming_google_civic_election_id_list, return_list_of_objects)
+        if results['candidate_list_found']:
+            candidate_list_found = True
+            candidate_list_light = results['candidate_list_light']
+        else:
+            status += results['status']
+            success = results['success']
+
+    results = {
+        'success': success,
+        'status': status,
+        'candidate_list_found':     candidate_list_found,
+        'candidate_list_objects':   candidate_list_objects if return_list_of_objects else [],
+        'candidate_list_light':     candidate_list_light,
+        'return_list_of_objects':   return_list_of_objects,
+    }
+    return results
+
+
 def save_google_search_image_to_candidate_table(candidate, google_search_image_file, google_search_link):
     cache_results = {
         'we_vote_hosted_profile_image_url_large':   None,
@@ -1381,3 +1436,70 @@ def save_google_search_link_to_candidate_table(candidate, google_search_link):
         candidate.save()
     except Exception as e:
         pass
+
+
+def find_candidates_on_one_web_page(site_url, candidate_list_light):
+    candidate_we_vote_ids_list = []
+    selected_candidate_list_light = []
+    status = ""
+    success = False
+    if len(site_url) < 10:
+        status = 'FIND_CANDIDATES-PROPER_URL_NOT_PROVIDED: ' + site_url
+        results = {
+            'status':                       status,
+            'success':                      success,
+            'at_least_one_candidate_found': False,
+            'candidate_we_vote_ids_list':   candidate_we_vote_ids_list,
+            'page_redirected':              False,
+        }
+        return results
+
+    urllib._urlopener = FakeFirefoxURLopener()
+    headers = {
+        'User-Agent':
+            'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.64 Safari/537.11',
+           }
+    # 'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+    # 'Accept-Encoding': 'none',
+    # 'Accept-Language': 'en-US,en;q=0.8',
+    # 'Connection': 'keep-alive'
+    # 'Accept-Charset': 'ISO-8859-1,utf-8;q=0.7,*;q=0.3',
+    try:
+        request = urllib.request.Request(site_url, None, headers)
+        page = urllib.request.urlopen(request, timeout=5)
+        for line in page.readlines():
+            try:
+                decoded_line = line.decode()
+                for one_candidate_dict in candidate_list_light:
+                    if one_candidate_dict['ballot_item_display_name'] in decoded_line:
+                        if one_candidate_dict['candidate_we_vote_id'] not in candidate_we_vote_ids_list:
+                            candidate_we_vote_ids_list.append(one_candidate_dict['candidate_we_vote_id'])
+                            selected_candidate_list_light.append(one_candidate_dict)
+            except Exception as error_message:
+                status += "SCRAPE_ONE_LINE_ERROR: {error_message}".format(error_message=error_message)
+
+        success = True
+        status += "FINISHED_SCRAPING_PAGE_FOR_CANDIDATES "
+    except timeout:
+        status += "CANDIDATE_SCRAPE_TIMEOUT_ERROR "
+        success = False
+    except IOError as error_instance:
+        # Catch the error message coming back from urllib.request.urlopen and pass it in the status
+        error_message = error_instance
+        status += "SCRAPE_SOCIAL_IO_ERROR: {error_message}".format(error_message=error_message)
+        success = False
+    except Exception as error_instance:
+        error_message = error_instance
+        status += "SCRAPE_GENERAL_EXCEPTION_ERROR: {error_message}".format(error_message=error_message)
+        success = False
+
+    at_least_one_candidate_found = positive_value_exists(len(candidate_we_vote_ids_list))
+    results = {
+        'status':                           status,
+        'success':                          success,
+        'at_least_one_candidate_found':     at_least_one_candidate_found,
+        'candidate_we_vote_ids_list':       candidate_we_vote_ids_list,
+        'page_redirected':                  False,
+        'selected_candidate_list_light':    selected_candidate_list_light,
+    }
+    return results

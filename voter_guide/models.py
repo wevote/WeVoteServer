@@ -335,7 +335,7 @@ class VoterGuideManager(models.Manager):
                 updated_values = {
                     # Values we search against below
                     'google_civic_election_id': google_civic_election_id,
-                    'organization_we_vote_id': organization.we_vote_id,
+                    'organization_we_vote_id': linked_organization_we_vote_id,
                     # The rest of the values
                     'voter_guide_owner_type': organization.organization_type,
                     'owner_voter_id': voter.id,
@@ -398,7 +398,7 @@ class VoterGuideManager(models.Manager):
         exception_multiple_object_returned = False
         voter_guide_on_stage = VoterGuide()
         voter_guide_on_stage_id = 0
-        status = "ERROR_ENTERING_RETRIEVE_VOTER_GUIDE "
+        status = ""
         try:
             if positive_value_exists(voter_guide_id):
                 status = "ERROR_RETRIEVING_VOTER_GUIDE_WITH_ID "  # Set this in case the get fails
@@ -644,6 +644,8 @@ class VoterGuideManager(models.Manager):
         :param organization:
         :return:
         """
+        success = True
+        status = ""
         values_changed = False
         if voter_guide.display_name != organization.organization_name:
             voter_guide.display_name = organization.organization_name
@@ -690,6 +692,8 @@ class VoterGuideManager(models.Manager):
         results = {
             'values_changed':   values_changed,
             'voter_guide':      voter_guide,
+            'status':           status,
+            'success':          success,
         }
         return results
 
@@ -1907,20 +1911,24 @@ class VoterGuidePossibility(models.Model):
 
     candidate_name_001 = models.CharField(verbose_name="candidate name 001", max_length=255, null=True, unique=False)
     candidate_we_vote_id_001 = models.CharField(max_length=255, null=True, unique=False)
-    stance_about_candidate_001 = models.CharField(max_length=15, choices=POSITION_CHOICES, default=SUPPORT)
     comment_about_candidate_001 = models.TextField(null=True, blank=True)
+    google_civic_election_id_001 = models.PositiveIntegerField(null=True)
+    stance_about_candidate_001 = models.CharField(max_length=15, choices=POSITION_CHOICES, default=SUPPORT)
 
     candidate_name_002 = models.CharField(verbose_name="candidate name 002", max_length=255, null=True, unique=False)
     candidate_we_vote_id_002 = models.CharField(max_length=255, null=True, unique=False)
-    stance_about_candidate_002 = models.CharField(max_length=15, choices=POSITION_CHOICES, default=SUPPORT)
     comment_about_candidate_002 = models.TextField(null=True, blank=True)
+    google_civic_election_id_002 = models.PositiveIntegerField(null=True)
+    stance_about_candidate_002 = models.CharField(max_length=15, choices=POSITION_CHOICES, default=SUPPORT)
 
     candidate_name_003 = models.CharField(verbose_name="candidate name 003", max_length=255, null=True, unique=False)
     candidate_we_vote_id_003 = models.CharField(max_length=255, null=True, unique=False)
-    stance_about_candidate_003 = models.CharField(max_length=15, choices=POSITION_CHOICES, default=SUPPORT)
     comment_about_candidate_003 = models.TextField(null=True, blank=True)
+    google_civic_election_id_003 = models.PositiveIntegerField(null=True)
+    stance_about_candidate_003 = models.CharField(max_length=15, choices=POSITION_CHOICES, default=SUPPORT)
 
     candidate_name_004 = models.CharField(verbose_name="candidate name 004", max_length=255, null=True, unique=False)
     candidate_we_vote_id_004 = models.CharField(max_length=255, null=True, unique=False)
-    stance_about_candidate_004 = models.CharField(max_length=15, choices=POSITION_CHOICES, default=SUPPORT)
     comment_about_candidate_004 = models.TextField(null=True, blank=True)
+    google_civic_election_id_004 = models.PositiveIntegerField(null=True)
+    stance_about_candidate_004 = models.CharField(max_length=15, choices=POSITION_CHOICES, default=SUPPORT)
