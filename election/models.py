@@ -6,8 +6,8 @@ from datetime import date, datetime, time
 from django.db import models
 from django.db.models import Max, Q
 import wevote_functions.admin
-from wevote_functions.functions import convert_date_to_date_as_integer, convert_to_int, \
-    extract_state_from_ocd_division_id, positive_value_exists
+from wevote_functions.functions import convert_date_to_date_as_integer, convert_date_to_we_vote_date_string, \
+    convert_to_int, extract_state_from_ocd_division_id, positive_value_exists
 
 
 TIME_SPAN_LIST = [
@@ -314,9 +314,13 @@ class ElectionManager(models.Model):
         return results
 
     def retrieve_upcoming_elections(self, state_code="", without_state_code=False, include_test_election=False):
+        election_list_found = False
         upcoming_election_list = []
+        today = datetime.now().date()
+        we_vote_date_string = convert_date_to_we_vote_date_string(today)
         try:
             election_list_query = Election.objects.using('readonly').all()
+            election_list_query = election_list_query.filter(election_day_text__gte=we_vote_date_string)
             if positive_value_exists(without_state_code):
                 election_list_query = election_list_query.filter(Q(state_code__isnull=True) | Q(state_code__exact=''))
             elif positive_value_exists(state_code):
@@ -325,30 +329,24 @@ class ElectionManager(models.Model):
                 election_list_query = election_list_query.exclude(google_civic_election_id=2000)
             election_list_query = election_list_query.order_by('election_day_text').reverse()
 
-            raw_election_list = list(election_list_query)
+            upcoming_election_list = list(election_list_query)
 
-            today = datetime.now().date()
-            today_date_as_integer = convert_date_to_date_as_integer(today)
-
-            for one_election in raw_election_list:
-                if positive_value_exists(one_election.election_day_text):
-                    election_date_as_simple_string = one_election.election_day_text.replace("-", "")
-                    this_election_date_as_integer = convert_to_int(election_date_as_simple_string)
-                    if this_election_date_as_integer >= today_date_as_integer:
-                        upcoming_election_list.append(one_election)
-                else:
-                    upcoming_election_list.append(one_election)
-
-            status = 'ELECTIONS_FOUND'
+            status = 'ELECTIONS_FOUND '
+            election_list_found = True
             success = True
         except Election.DoesNotExist as e:
-            status = 'NO_ELECTIONS_FOUND'
+            status = 'NO_ELECTIONS_FOUND '
             success = True
+            election_list_found = False
+        except Exception as e:
+            status = "RETRIEVE_UPCOMING_ELECTIONS_QUERY_FAILURE "
+            success = False
 
         results = {
             'success':          success,
             'status':           status,
             'election_list':    upcoming_election_list,
+            'election_list_found': election_list_found,
         }
         return results
 

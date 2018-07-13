@@ -179,8 +179,8 @@ class CandidateCampaignListManager(models.Model):
             success = True
         except Exception as e:
             handle_exception(e, logger=logger)
-            status = 'FAILED retrieve_all_candidates_for_office ' \
-                     '{error} [type: {error_type}]'.format(error=e.message, error_type=type(e))
+            status = 'FAILED retrieve_all_candidates_for_upcoming_election ' \
+                     '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
             success = False
 
         if candidate_list_found:
@@ -197,6 +197,68 @@ class CandidateCampaignListManager(models.Model):
             'success':                  success,
             'status':                   status,
             'google_civic_election_id': google_civic_election_id,
+            'candidate_list_found':     candidate_list_found,
+            'candidate_list_objects':   candidate_list_objects if return_list_of_objects else [],
+            'candidate_list_light':     candidate_list_light,
+        }
+        return results
+
+    def retrieve_candidates_for_specific_elections(self, google_civic_election_id_list=[],
+                                                   return_list_of_objects=False):
+        status = ""
+        candidate_list_objects = []
+        candidate_list_light = []
+        candidate_list_found = False
+
+        if not positive_value_exists(google_civic_election_id_list) or not len(google_civic_election_id_list):
+            success = False
+            status += "LIST_OF_ELECTIONS_MISSING "
+            results = {
+                'success': success,
+                'status': status,
+                'candidate_list_found': candidate_list_found,
+                'candidate_list_objects': [],
+                'candidate_list_light': [],
+            }
+            return results
+
+        try:
+            candidate_queryset = CandidateCampaign.objects.all()
+            candidate_queryset = candidate_queryset.filter(google_civic_election_id__in=google_civic_election_id_list)
+            candidate_list_objects = list(candidate_queryset)
+
+            if len(candidate_list_objects):
+                candidate_list_found = True
+                status += 'CANDIDATES_RETRIEVED '
+                success = True
+            else:
+                status += 'NO_CANDIDATES_RETRIEVED '
+                success = True
+        except CandidateCampaign.DoesNotExist:
+            # No candidates found. Not a problem.
+            status = 'NO_CANDIDATES_FOUND_DoesNotExist '
+            candidate_list_objects = []
+            success = True
+        except Exception as e:
+            handle_exception(e, logger=logger)
+            status = 'FAILED retrieve_candidates_for_specific_elections ' \
+                     '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
+            success = False
+
+        if candidate_list_found:
+            for candidate in candidate_list_objects:
+                one_candidate = {
+                    'ballot_item_display_name': candidate.display_candidate_name(),
+                    'candidate_we_vote_id':     candidate.we_vote_id,
+                    'google_civic_election_id': candidate.google_civic_election_id,
+                    'office_we_vote_id':        candidate.contest_office_we_vote_id,
+                    'measure_we_vote_id':       '',
+                }
+                candidate_list_light.append(one_candidate)
+
+        results = {
+            'success':                  success,
+            'status':                   status,
             'candidate_list_found':     candidate_list_found,
             'candidate_list_objects':   candidate_list_objects if return_list_of_objects else [],
             'candidate_list_light':     candidate_list_light,
@@ -576,7 +638,7 @@ class CandidateCampaignListManager(models.Model):
         }
         return results
 
-    def retrieve_candidates_from_non_unique_identifiers(self, google_civic_election_id, state_code,
+    def retrieve_candidates_from_non_unique_identifiers(self, google_civic_election_id_list, state_code,
                                                         candidate_twitter_handle, candidate_name,
                                                         ignore_candidate_id_list=[]):
         keep_looking_for_duplicates = True
@@ -593,7 +655,7 @@ class CandidateCampaignListManager(models.Model):
             try:
                 candidate_query = CandidateCampaign.objects.all()
                 candidate_query = candidate_query.filter(candidate_twitter_handle__iexact=candidate_twitter_handle,
-                                                         google_civic_election_id=google_civic_election_id)
+                                                         google_civic_election_id__in=google_civic_election_id_list)
                 if positive_value_exists(state_code):
                     candidate_query = candidate_query.filter(state_code__iexact=state_code)
 
@@ -631,7 +693,7 @@ class CandidateCampaignListManager(models.Model):
             try:
                 candidate_query = CandidateCampaign.objects.all()
                 candidate_query = candidate_query.filter(candidate_name__iexact=candidate_name,
-                                                         google_civic_election_id=google_civic_election_id)
+                                                         google_civic_election_id__in=google_civic_election_id_list)
                 if positive_value_exists(state_code):
                     candidate_query = candidate_query.filter(state_code__iexact=state_code)
 
@@ -668,7 +730,7 @@ class CandidateCampaignListManager(models.Model):
             # Search for Candidate(s) that contains the same first and last names
             try:
                 candidate_query = CandidateCampaign.objects.all()
-                candidate_query = candidate_query.filter(google_civic_election_id=google_civic_election_id)
+                candidate_query = candidate_query.filter(google_civic_election_id__in=google_civic_election_id_list)
                 if positive_value_exists(state_code):
                     candidate_query = candidate_query.filter(state_code__iexact=state_code)
                 first_name = extract_first_name_from_full_name(candidate_name)
@@ -763,14 +825,14 @@ class CandidateCampaignListManager(models.Model):
         #         status += "RETRIEVE_CANDIDATES_FROM_NON_UNIQUE-CANDIDATE_QUERY_FAILED4 "
 
         results = {
-            'success':                  success,
-            'status':                   status,
-            'google_civic_election_id': google_civic_election_id,
-            'candidate_found':          candidate_found,
-            'candidate':                candidate,
-            'candidate_list_found':     candidate_list_found,
-            'candidate_list':           candidate_list,
-            'multiple_entries_found':   multiple_entries_found,
+            'success':                          success,
+            'status':                           status,
+            'google_civic_election_id_list':    google_civic_election_id_list,
+            'candidate_found':                  candidate_found,
+            'candidate':                        candidate,
+            'candidate_list_found':             candidate_list_found,
+            'candidate_list':                   candidate_list,
+            'multiple_entries_found':           multiple_entries_found,
         }
         return results
 

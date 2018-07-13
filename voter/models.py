@@ -86,7 +86,9 @@ class VoterManager(BaseUserManager):
                 voter.save()
             except Exception as e:
                 success = False
-                status += " UNABLE_TO_UPDATE_VOTER_LINKED_ORGANIZATION_WE_VOTE_ID"
+                status += " UNABLE_TO_UPDATE_VOTER_LINKED_ORGANIZATION_WE_VOTE_ID " + str(e)
+        else:
+            status += "INVALID_VOTER "
         results = {
             'success':  success,
             'status':   status

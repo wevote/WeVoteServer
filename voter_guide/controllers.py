@@ -32,7 +32,50 @@ VOTER_GUIDES_SYNC_URL = get_environment_variable("VOTER_GUIDES_SYNC_URL")  # vot
 CANDIDATE_NUMBER_LIST = ["001", "002", "003", "004"]
 
 
-def convert_list_of_names_to_possible_candidates(ballot_items_list, google_civic_election_id):
+def convert_candidate_list_light_to_possible_candidates(selected_candidate_list_light):
+    status = ""
+    success = True
+    possible_candidate_list = []
+    possible_candidate_list_found = False
+    candidate_number_list = CANDIDATE_NUMBER_LIST
+    # one_candidate = {
+    #     'ballot_item_display_name': candidate.display_candidate_name(),
+    #     'candidate_we_vote_id': candidate.we_vote_id,
+    #     'google_civic_election_id': candidate.google_civic_election_id,
+    #     'office_we_vote_id': candidate.contest_office_we_vote_id,
+    #     'measure_we_vote_id': '',
+    # }
+
+    number_index = 0
+    for one_candidate in selected_candidate_list_light:
+        if number_index >= len(candidate_number_list):
+            break
+        if not positive_value_exists(one_candidate['ballot_item_display_name']):
+            continue
+        possible_candidate = {
+            'candidate_name': one_candidate['ballot_item_display_name'],
+            'candidate_we_vote_id': one_candidate['candidate_we_vote_id'],
+            'comment_about_candidate': "",
+            'google_civic_election_id': one_candidate['google_civic_election_id'],
+            'possible_candidate_number': candidate_number_list[number_index],
+            'stance_about_candidate': "SUPPORT",
+        }
+        possible_candidate_list.append(possible_candidate)
+        number_index += 1
+
+    if len(possible_candidate_list):
+        possible_candidate_list_found = True
+
+    results = {
+        'status':                           status,
+        'success':                          success,
+        'possible_candidate_list':          possible_candidate_list,
+        'possible_candidate_list_found':    possible_candidate_list_found,
+    }
+    return results
+
+
+def convert_list_of_names_to_possible_candidate_dict_list(ballot_items_list, google_civic_election_id):
     status = ""
     success = True
     possible_candidate_list = []
@@ -48,9 +91,10 @@ def convert_list_of_names_to_possible_candidates(ballot_items_list, google_civic
         possible_candidate = {
             'candidate_name': one_name,
             'candidate_we_vote_id': "",
-            'stance_about_candidate': "SUPPORT",
             'comment_about_candidate': "",
-            'possible_candidate_number': candidate_number_list[number_index]
+            'google_civic_election_id': 0,
+            'possible_candidate_number': candidate_number_list[number_index],
+            'stance_about_candidate': "SUPPORT",
         }
         possible_candidate_list.append(possible_candidate)
         number_index += 1
@@ -179,7 +223,8 @@ def extract_possible_candidate_list_from_database(voter_guide_possibility):
     return results
 
 
-def match_candidate_list_with_candidates_in_database(possible_candidate_list, google_civic_election_id, state_code=''):
+def match_candidate_list_with_candidates_in_database(
+        possible_candidate_list, google_civic_election_id_list, state_code=''):
     status = ""
     success = True
     possible_candidate_list_found = False
@@ -199,7 +244,7 @@ def match_candidate_list_with_candidates_in_database(possible_candidate_list, go
         elif 'candidate_name' in possible_candidate and positive_value_exists(possible_candidate['candidate_name']):
             # If here search for possible candidate matches
             matching_results = candidate_campaign_list_manager.retrieve_candidates_from_non_unique_identifiers(
-                google_civic_election_id, state_code, '', possible_candidate['candidate_name'])
+                google_civic_election_id_list, state_code, '', possible_candidate['candidate_name'])
 
             if matching_results['candidate_found']:
                 candidate = matching_results['candidate']
@@ -1624,7 +1669,7 @@ def voter_guide_save_for_api(voter_device_id, voter_guide_we_vote_id, google_civ
             if organization_results['organization_found']:
                 status += "ORGANIZATION_FOUND "
                 organization = organization_results['organization']
-                linked_organization_we_vote_id = organization.we_vote_id
+                # linked_organization_we_vote_id = organization.we_vote_id
             else:
                 status += "ORGANIZATION_NOT_FOUND_EVEN_THOUGH_WE_VOTE_ID_TIED_TO_VOTER: "
                 status += organization_results['status']
@@ -1644,7 +1689,7 @@ def voter_guide_save_for_api(voter_device_id, voter_guide_we_vote_id, google_civ
                 # Save the new linked_organization_we_vote_id
                 results = voter_manager.alter_linked_organization_we_vote_id(voter, linked_organization_we_vote_id)
                 if not results['success']:
-                    status += "COULD_NOT_LINK_TO_NEW_ORGANIZATION "
+                    status += "COULD_NOT_LINK_VOTER_TO_NEW_ORGANIZATION: " + results['status'] + " "
                     linked_organization_we_vote_id = ""
             else:
                 status += organization_create_results['status']
@@ -1686,7 +1731,8 @@ def voter_guide_save_for_api(voter_device_id, voter_guide_we_vote_id, google_civ
                 success = True
 
         if not voter_guide_found:
-            status += "VOTER_GUIDE_NOT_FOUND "
+            status += "VOTER_GUIDE_NOT_FOUND google_civic_election_id: " + str(google_civic_election_id) \
+                      + " linked_organization_we_vote_id: " + str(linked_organization_we_vote_id)
             create_results = voter_guide_manager.update_or_create_voter_voter_guide(
                 google_civic_election_id=google_civic_election_id,
                 voter=voter)
