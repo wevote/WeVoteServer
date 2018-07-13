@@ -469,7 +469,12 @@
         <tr>
             <td>{{ forloop.counter }}</td>
             <td>{{ voter_ballot_saved.id }}</td>
-            <td><a href="{% url 'ballot:ballot_item_list_edit_by_we_vote_id' voter_ballot_saved.ballot_returned_we_vote_id %}" target="_blank">{{ voter_ballot_saved.ballot_returned_we_vote_id }}</a></td>
+            <td>
+                {% if voter_ballot_saved.ballot_returned_we_vote_id %}
+                <a href="{% url 'ballot:ballot_item_list_edit_by_we_vote_id' voter_ballot_saved.ballot_returned_we_vote_id %}"
+                   target="_blank">{{ voter_ballot_saved.ballot_returned_we_vote_id }}</a>
+                {% endif %}
+            </td>
             <td>{{ voter_ballot_saved.original_text_for_map_search }}</td>
             <td>{% if voter_ballot_saved.voter_id and voter_ballot_saved.voter_id != 0 %}
               <a href="{% url 'voter:voter_summary' voter_ballot_saved.voter_id %}" target="_blank">{{ voter_ballot_saved.voter_id }}</a>

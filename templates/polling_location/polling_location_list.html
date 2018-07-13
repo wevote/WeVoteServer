@@ -29,6 +29,9 @@
       <a href="{% url 'polling_location:polling_location_edit' 0 %}?state_code={{ state_code }}">
          Create polling location</a>,
 
+      <a href="{% url 'electoral_district:electoral_district_list' %}?state_code={{ state_code }}">
+         See Electoral Districts</a>,
+
     {% if state_code %}
         <a href="{% url 'polling_location:polling_locations_add_latitude_and_longitude' %}?state_code={{ state_code }}">
            Add latitude/longitude to polling locations</a> (up to 1000)
