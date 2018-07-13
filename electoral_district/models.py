@@ -65,8 +65,8 @@ class ElectoralDistrict(models.Model):
     we_vote_id = models.CharField(verbose_name="permanent we vote id", max_length=255, null=True, unique=True)
 
     # required fields as per VIP specification for ElectoralDistrict are name and type, rest of the fields are optional
-    electoral_district_name = models.CharField(verbose_name="electoral district name", max_length=255, null=False,
-                                               unique=True)
+    electoral_district_name = models.CharField(verbose_name="electoral district name", max_length=255, null=True,
+                                               unique=False)
     electoral_district_type = models.CharField(verbose_name="electoral district type",
                                                choices=ELECTORAL_DISTRICT_TYPE_CHOICES, max_length=16,
                                                default=ELECTORAL_DISTRICT_TYPE_STATE, blank=False, null=False)
@@ -86,7 +86,7 @@ class ElectoralDistrict(models.Model):
     ballotpedia_district_type = models.CharField(null=True, blank=True, max_length=255)
     ballotpedia_district_url = models.URLField(verbose_name='url of district on ballotpedia', blank=True, null=True)
     ballotpedia_district_ocd_id = models.CharField(verbose_name="ocd id identifier", max_length=255, blank=True,
-                                          null=True)
+                                                   null=True)
 
     state_code = models.CharField(verbose_name="state code", max_length=3, blank=True, null=True)
 

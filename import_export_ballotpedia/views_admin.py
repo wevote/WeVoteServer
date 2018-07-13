@@ -195,6 +195,7 @@ def attach_ballotpedia_election_view(request, election_local_id=0):
         return HttpResponseRedirect(reverse('election:election_summary', args=(election_local_id,)))
 
     # If here, we know that we have some polling_locations to use in order to retrieve ballotpedia districts
+    could_not_retrieve_district_id_list_for_polling_location_count = 0
     merged_district_list = []
     for polling_location in polling_location_list:
         one_ballot_results = retrieve_ballotpedia_district_id_list_for_polling_location(
@@ -207,6 +208,13 @@ def attach_ballotpedia_election_view(request, election_local_id=0):
                     if one_ballotpedia_district_id not in merged_district_list:
                         # Build up a list of ballotpedia districts that we need to retrieve races for
                         merged_district_list.append(one_ballotpedia_district_id)
+        else:
+            could_not_retrieve_district_id_list_for_polling_location_count += 1
+
+    if positive_value_exists(could_not_retrieve_district_id_list_for_polling_location_count):
+        messages.add_message(request, messages.ERROR,
+                             'Could not retrieve district_id list for this many Polling Locations: ' +
+                             str(could_not_retrieve_district_id_list_for_polling_location_count))
 
     # Once we have a summary of all ballotpedia districts, we want to request all of the races
     if not len(merged_district_list):

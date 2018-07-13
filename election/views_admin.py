@@ -54,6 +54,21 @@ ELECTIONS_SYNC_URL = get_environment_variable("ELECTIONS_SYNC_URL")  # elections
 WE_VOTE_SERVER_ROOT_URL = get_environment_variable("WE_VOTE_SERVER_ROOT_URL")
 
 
+def test_view(request):
+    success = True
+    status = ""
+
+    # Add delay
+
+    # Every 5 seconds, send html to the browser (like a simple "."), before calling render after 30 seconds
+
+    template_values = {
+        'success':      success,
+        'status':       status,
+    }
+    return render(request, 'election/election_list.html', template_values)
+
+
 @login_required
 def election_all_ballots_retrieve_view(request, election_local_id=0):
     """
