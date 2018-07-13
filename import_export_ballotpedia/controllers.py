@@ -182,6 +182,14 @@ def attach_ballotpedia_election_by_district_from_api(election, google_civic_elec
                 if 'table' in structured_json['meta']:
                     if structured_json['meta']['table'] == 'election_dates':
                         elections_json_list = structured_json['data']
+                    else:
+                        status += "NOT_TRUE: structured_json['meta']['table'] == 'election_dates' "
+                else:
+                    status += "NOT_TRUE: if 'table' in structured_json['meta'] "
+            else:
+                status += "NOT_TRUE: if 'meta' in structured_json "
+        else:
+            status += "NOT_TRUE: if 'data' in structured_json "
 
         if len(elections_json_list):
             elections_final_json_list = elections_final_json_list + elections_json_list
@@ -537,6 +545,7 @@ def retrieve_ballotpedia_district_id_list_for_polling_location(
         force_district_retrieve_from_ballotpedia=False):
     success = True
     status = ""
+    could_not_get_or_create_count = 0
     polling_location_found = False
     ballotpedia_district_id_list = []
     force_district_retrieve_from_ballotpedia = positive_value_exists(force_district_retrieve_from_ballotpedia)
@@ -605,7 +614,6 @@ def retrieve_ballotpedia_district_id_list_for_polling_location(
             ballotpedia_district_json_list = groom_results['modified_json_list']
 
             electoral_district_manager = ElectoralDistrictManager()
-            could_not_get_or_create_count = 0
             for one_district_json in ballotpedia_district_json_list:
                 if positive_value_exists(one_district_json['ballotpedia_district_id']):
                     ballotpedia_district_id = one_district_json['ballotpedia_district_id']
@@ -640,6 +648,9 @@ def retrieve_ballotpedia_district_id_list_for_polling_location(
                             status += results['status']
                     except Exception as e:
                         could_not_get_or_create_count += 1
+
+    if positive_value_exists(could_not_get_or_create_count):
+        status += "ELECTORAL_DISTRICT-COULD_NOT_GET_OR_CREATE: " + str(could_not_get_or_create_count) + " "
 
     results = {
         'success': success,
@@ -1289,7 +1300,7 @@ def groom_ballotpedia_data_for_processing(structured_json, google_civic_election
                 status += "BALLOT_ITEM_KEY_ERROR: " + str(e) + " "
 
         success = True
-        status += ""
+        status += "CONTAINS_API-DISTRICTS_COUNT: " + str(len(modified_district_json_list)) + " "
         results = {
             'success':                          success,
             'status':                           status,

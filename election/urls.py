@@ -23,4 +23,6 @@ urlpatterns = [
     url(r'^election_remote_retrieve/$', views_admin.election_remote_retrieve_view, name='election_remote_retrieve'),
     url(r'^import/$',
         views_admin.elections_import_from_master_server_view, name='elections_import_from_master_server'),
+    url(r'^test/$',
+        views_admin.test_view, name='test'),
 ]

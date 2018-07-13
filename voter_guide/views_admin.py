@@ -141,7 +141,6 @@ def voter_guide_create_view(request):
         'display_all_done_button':  display_all_done_button,
         'messages_on_stage':        messages_on_stage,
         'upcoming_election_list':   upcoming_election_list,
-        'google_civic_election_id': google_civic_election_id,
         'state_code':               state_code,
         'state_list':               sorted_state_list,
         'ballot_items_raw':         ballot_items_raw,
