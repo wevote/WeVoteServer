@@ -1233,6 +1233,7 @@ def batch_set_batch_list_view(request):
     analyze_all_button = request.GET.get('analyze_all_button', 0)
     create_all_button = request.GET.get('create_all_button', 0)
     show_all_batches = request.GET.get('show_all_batches', False)
+    state_code = request.GET.get('state_code', "")
     update_all_button = request.GET.get('update_all_button', 0)
 
     batch_list_modified = []
@@ -1245,43 +1246,76 @@ def batch_set_batch_list_view(request):
         batch_set_count = batch_description_query.count()
         batch_list = list(batch_description_query)
 
-        retrieve_again = False
         if positive_value_exists(analyze_all_button):
+            batch_actions_analyzed = 0
+            batch_actions_not_analyzed = 0
             for one_batch_description in batch_list:
                 results = create_batch_row_actions(one_batch_description.batch_header_id)
                 if results['batch_actions_created']:
-                    retrieve_again = True
+                    batch_actions_analyzed += 1
+                else:
+                    batch_actions_not_analyzed += 1
 
-            if retrieve_again:
-                batch_description_query = BatchDescription.objects.filter(batch_set_id=batch_set_id)
-                batch_set_count = batch_description_query.count()
-                batch_list = list(batch_description_query)
+            if positive_value_exists(batch_actions_analyzed):
+                messages.add_message(request, messages.INFO, "Analyze All, BatchRows Analyzed: "
+                                                             "" + str(batch_actions_analyzed))
 
-        retrieve_again = False
+            if positive_value_exists(batch_actions_not_analyzed):
+                messages.add_message(request, messages.ERROR, "Analyze All, BatchRows NOT Analyzed: "
+                                                              "" + str(batch_actions_not_analyzed))
+
+            return HttpResponseRedirect(reverse('import_export_batches:batch_set_batch_list', args=()) +
+                                        "?google_civic_election_id=" + str(google_civic_election_id) +
+                                        "&batch_set_id=" + str(batch_set_id) +
+                                        "&state_code=" + state_code)
+
         if positive_value_exists(update_all_button):
+            batch_actions_updated = 0
+            batch_actions_not_updated = 0
             for one_batch_description in batch_list:
                 results = import_data_from_batch_row_actions(
                     one_batch_description.kind_of_batch, IMPORT_ADD_TO_EXISTING, one_batch_description.batch_header_id)
                 if results['number_of_table_rows_updated']:
-                    retrieve_again = True
+                    batch_actions_updated += 1
+                else:
+                    batch_actions_not_updated += 1
 
-            if retrieve_again:
-                batch_description_query = BatchDescription.objects.filter(batch_set_id=batch_set_id)
-                batch_set_count = batch_description_query.count()
-                batch_list = list(batch_description_query)
+            if positive_value_exists(batch_actions_updated):
+                messages.add_message(request, messages.INFO, "Update in All Batches, Updates: "
+                                                             "" + str(batch_actions_updated))
 
-        retrieve_again = False
+            if positive_value_exists(batch_actions_not_updated):
+                messages.add_message(request, messages.ERROR, "Update in All Batches, Failed Updates: "
+                                                              "" + str(batch_actions_not_updated))
+
+            return HttpResponseRedirect(reverse('import_export_batches:batch_set_batch_list', args=()) +
+                                        "?google_civic_election_id=" + str(google_civic_election_id) +
+                                        "&batch_set_id=" + str(batch_set_id) +
+                                        "&state_code=" + state_code)
+
         if positive_value_exists(create_all_button):
+            batch_actions_created = 0
+            batch_actions_not_created = 0
             for one_batch_description in batch_list:
                 results = import_data_from_batch_row_actions(
                     one_batch_description.kind_of_batch, IMPORT_CREATE, one_batch_description.batch_header_id)
                 if results['number_of_table_rows_created']:
-                    retrieve_again = True
+                    batch_actions_created += 1
+                else:
+                    batch_actions_not_created += 1
 
-            if retrieve_again:
-                batch_description_query = BatchDescription.objects.filter(batch_set_id=batch_set_id)
-                batch_set_count = batch_description_query.count()
-                batch_list = list(batch_description_query)
+            if positive_value_exists(batch_actions_created):
+                messages.add_message(request, messages.INFO, "Create in All Batches, Creates: "
+                                                             "" + str(batch_actions_created))
+
+            if positive_value_exists(batch_actions_not_created):
+                messages.add_message(request, messages.ERROR, "Create in All Batches, FAILED Creates: "
+                                                              "" + str(batch_actions_not_created))
+
+            return HttpResponseRedirect(reverse('import_export_batches:batch_set_batch_list', args=()) +
+                                        "?google_civic_election_id=" + str(google_civic_election_id) +
+                                        "&batch_set_id=" + str(batch_set_id) +
+                                        "&state_code=" + state_code)
 
         if not positive_value_exists(show_all_batches):
             batch_list = batch_list[:10]

@@ -605,6 +605,7 @@ def retrieve_ballotpedia_district_id_list_for_polling_location(
             ballotpedia_district_json_list = groom_results['modified_json_list']
 
             electoral_district_manager = ElectoralDistrictManager()
+            could_not_get_or_create_count = 0
             for one_district_json in ballotpedia_district_json_list:
                 if positive_value_exists(one_district_json['ballotpedia_district_id']):
                     ballotpedia_district_id = one_district_json['ballotpedia_district_id']
@@ -638,7 +639,7 @@ def retrieve_ballotpedia_district_id_list_for_polling_location(
                         if not results['success']:
                             status += results['status']
                     except Exception as e:
-                        pass
+                        could_not_get_or_create_count += 1
 
     results = {
         'success': success,

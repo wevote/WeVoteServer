@@ -57,6 +57,8 @@
         <tr>
             <th></th>
             <th>Name</th>
+            <th>Ballotpedia District Id</th>
+            <th>Type (Google / Ballotpedia)</th>
             <th>State</th>
             <th>we_vote_id</th>
             <th>lat/long</th>
@@ -70,12 +72,22 @@
             {% if electoral_district.electoral_district_name %}{{ electoral_district.electoral_district_name }}{% else %}(missing electoral district name)&nbsp;&nbsp;{% endif %}</a>
             </td>
             <td>
-                {{ electoral_district.state_code }}
+              {% if electoral_district.ballotpedia_district_url %}
+                <a href="{{ electoral_district.ballotpedia_district_url|default_if_none:"" }}" target="_blank">{{ electoral_district.ballotpedia_district_id|default_if_none:"" }}</a>
+              {% else %}
+                {{ electoral_district.ballotpedia_district_id|default_if_none:"" }}
+              {% endif %}
+            </td>
+            <td>
+                {{ electoral_district.electoral_district_type|default_if_none:"" }} / {{ electoral_district.ballotpedia_district_type|default_if_none:"" }}
+            </td>
+            <td>
+                {{ electoral_district.state_code|default_if_none:"" }}
             </td>
             <td>
                 {% if electoral_district.we_vote_id %}&nbsp;&nbsp;&nbsp;{{ electoral_district.we_vote_id }}{% endif %}
             </td>
-            <td>{% if electoral_district.latitude %}&nbsp;&nbsp;Lat/Long: yes{% endif %}</td>
+            <td>{% if electoral_district.ballotpedia_district_latitude %}&nbsp;&nbsp;Lat/Long: yes{% endif %}</td>
         </tr>
     {% endfor %}
     </table>
