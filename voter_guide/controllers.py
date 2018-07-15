@@ -20,7 +20,8 @@ from position.models import ANY_STANCE, INFORMATION_ONLY, OPPOSE, \
     PositionEntered, PositionManager, PositionListManager, SUPPORT
 from voter.models import fetch_voter_id_from_voter_device_link, fetch_voter_we_vote_id_from_voter_device_link, \
     fetch_voter_we_vote_id_from_voter_id, VoterManager
-from voter_guide.models import VoterGuide, VoterGuideListManager, VoterGuideManager, VoterGuidePossibilityManager
+from voter_guide.models import CANDIDATE_NUMBER_LIST, VoterGuide, VoterGuideListManager, VoterGuideManager, \
+    VoterGuidePossibilityManager
 import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, is_voter_device_id_valid, positive_value_exists, \
     process_request_from_master, is_link_to_video
@@ -29,7 +30,6 @@ logger = wevote_functions.admin.get_logger(__name__)
 
 WE_VOTE_API_KEY = get_environment_variable("WE_VOTE_API_KEY")
 VOTER_GUIDES_SYNC_URL = get_environment_variable("VOTER_GUIDES_SYNC_URL")  # voterGuidesSyncOut
-CANDIDATE_NUMBER_LIST = ["001", "002", "003", "004"]
 
 
 def convert_candidate_list_light_to_possible_candidates(selected_candidate_list_light):
@@ -75,14 +75,14 @@ def convert_candidate_list_light_to_possible_candidates(selected_candidate_list_
     return results
 
 
-def convert_list_of_names_to_possible_candidate_dict_list(ballot_items_list, google_civic_election_id):
+def convert_list_of_names_to_possible_candidate_dict_list(ballot_items_list, starting_candidate_number="001"):
     status = ""
     success = True
     possible_candidate_list = []
     possible_candidate_list_found = False
     candidate_number_list = CANDIDATE_NUMBER_LIST
 
-    number_index = 0
+    number_index = candidate_number_list.index(starting_candidate_number)
     for one_name in ballot_items_list:
         if number_index >= len(candidate_number_list):
             break
@@ -118,8 +118,6 @@ def extract_position_list_from_voter_guide_possibility(voter_guide_possibility):
     position_json_list_found = False
     candidate_number_list = CANDIDATE_NUMBER_LIST
 
-    google_civic_election_id = voter_guide_possibility.google_civic_election_id \
-        if positive_value_exists(voter_guide_possibility.google_civic_election_id) else 0
     # We might want to move to a link per position
     more_info_url = voter_guide_possibility.voter_guide_possibility_url
     organization_name = voter_guide_possibility.organization_name \
@@ -142,6 +140,7 @@ def extract_position_list_from_voter_guide_possibility(voter_guide_possibility):
                                          'comment_about_candidate_' + candidate_number)):
             candidate_name = getattr(voter_guide_possibility, 'candidate_name_' + candidate_number)
             candidate_we_vote_id = getattr(voter_guide_possibility, 'candidate_we_vote_id_' + candidate_number)
+            google_civic_election_id = getattr(voter_guide_possibility, 'google_civic_election_id_' + candidate_number)
             stance = getattr(voter_guide_possibility, 'stance_about_candidate_' + candidate_number)
             statement_text = getattr(voter_guide_possibility, 'comment_about_candidate_' + candidate_number)
             position_json = {
@@ -202,6 +201,8 @@ def extract_possible_candidate_list_from_database(voter_guide_possibility):
                 getattr(voter_guide_possibility, 'candidate_name_' + candidate_number_list[number_index]),
                 'candidate_we_vote_id':
                 getattr(voter_guide_possibility, 'candidate_we_vote_id_' + candidate_number_list[number_index]),
+                'google_civic_election_id':
+                getattr(voter_guide_possibility, 'google_civic_election_id_' + candidate_number_list[number_index]),
                 'stance_about_candidate':
                 getattr(voter_guide_possibility, 'stance_about_candidate_' + candidate_number_list[number_index]),
                 'comment_about_candidate':
@@ -240,6 +241,8 @@ def match_candidate_list_with_candidates_in_database(
             if results['candidate_campaign_found']:
                 possible_candidate['candidate'] = results['candidate_campaign']
                 possible_candidate['candidate_name'] = possible_candidate['candidate'].display_candidate_name()
+                possible_candidate['google_civic_election_id'] = \
+                    possible_candidate['candidate'].google_civic_election_id
             possible_candidate_list_modified.append(possible_candidate)
         elif 'candidate_name' in possible_candidate and positive_value_exists(possible_candidate['candidate_name']):
             # If here search for possible candidate matches
@@ -253,6 +256,7 @@ def match_candidate_list_with_candidates_in_database(
                 possible_candidate['candidate_we_vote_id'] = candidate.we_vote_id
                 possible_candidate['candidate'] = candidate
                 possible_candidate['candidate_name'] = candidate.display_candidate_name()
+                possible_candidate['google_civic_election_id'] = candidate.google_civic_election_id
                 possible_candidate_list_modified.append(possible_candidate)
             elif matching_results['multiple_entries_found']:
                 status += "MULTIPLE_CANDIDATES_FOUND "
@@ -277,7 +281,52 @@ def match_candidate_list_with_candidates_in_database(
     return results
 
 
-def take_in_possible_candidate_list_from_form(request, google_civic_election_id):
+def modify_one_row_in_possible_candidate_dict_list(possible_candidate_list, row_index_to_remove=None,
+                                                   name_to_add_to_new_row=None):
+    status = ""
+    success = True
+    candidate_number_list = CANDIDATE_NUMBER_LIST
+    possible_candidate_list_found = False
+    remaining_possible_candidate_list = []
+    updated_possible_candidate_list = []
+    shift_remaining_items = False
+
+    number_index = 0
+    if positive_value_exists(row_index_to_remove) and row_index_to_remove in candidate_number_list:
+        for possible_candidate in possible_candidate_list:
+            if number_index >= len(candidate_number_list):
+                break
+            if possible_candidate['possible_candidate_number'] == row_index_to_remove:
+                next_number_index = number_index + 1
+                remaining_possible_candidate_list = possible_candidate_list[next_number_index:]
+                shift_remaining_items = True
+                break
+            updated_possible_candidate_list.append(possible_candidate)
+            number_index += 1
+
+    if shift_remaining_items:
+        # Reset the sequence of values in possible_candidate_number
+        for possible_candidate in remaining_possible_candidate_list:
+            if number_index >= len(candidate_number_list):
+                break
+            if positive_value_exists(possible_candidate['possible_candidate_number']):
+                raw_candidate_number = "000" + str(number_index + 1)
+                possible_candidate['possible_candidate_number'] = raw_candidate_number[-3:]
+            updated_possible_candidate_list.append(possible_candidate)
+
+    if len(updated_possible_candidate_list):
+        possible_candidate_list_found = True
+
+    results = {
+        'status':                           status,
+        'success':                          success,
+        'possible_candidate_list':          updated_possible_candidate_list,
+        'possible_candidate_list_found':    possible_candidate_list_found,
+    }
+    return results
+
+
+def take_in_possible_candidate_list_from_form(request):
     status = ""
     success = True
     possible_candidate_list = []
@@ -298,10 +347,12 @@ def take_in_possible_candidate_list_from_form(request, google_civic_election_id)
                 request.POST.get('candidate_name_' + candidate_number_list[number_index], ""),
                 'candidate_we_vote_id':
                 request.POST.get('candidate_we_vote_id_' + candidate_number_list[number_index], ""),
-                'stance_about_candidate':
-                request.POST.get('stance_about_candidate_' + candidate_number_list[number_index], ""),
                 'comment_about_candidate':
                 request.POST.get('comment_about_candidate_' + candidate_number_list[number_index], ""),
+                'google_civic_election_id':
+                request.POST.get('google_civic_election_id_' + candidate_number_list[number_index], ""),
+                'stance_about_candidate':
+                request.POST.get('stance_about_candidate_' + candidate_number_list[number_index], ""),
                 'possible_candidate_number': candidate_number,
             }
             possible_candidate_list.append(possible_candidate)

@@ -1,18 +1,17 @@
 {# templates/voter_guide/voter_guide_possibility_table.html #}
 {% if voter_guide_possibility_list %}
-    <table border="1" cellpadding="5" cellspacing="5">
+    <table class="table table-condensed">
+        <thead>
         <tr>
-            <td></td>
-            <td>Voter Guide Source</td>
-            <td>&nbsp;</td>
-            <td>Organization</td>
-            <td>Twitter</td>
-            {% if google_civic_election_id == 0 %}
-            <td>Election</td>
-            {% endif %}
-            <td>Submitted By</td>
-            <td>Submitted Time (Pacific Time)</td>
+            <th></th>
+            <th>Voter Guide Source</th>
+            <th>&nbsp;</th>
+            <th>Organization</th>
+            <th>Twitter</th>
+            <th>Submitted By</th>
+            <th>Submitted Time (Pacific Time)</th>
         </tr>
+        </thead>
     {% for voter_guide_possibility in voter_guide_possibility_list %}
         <tr>
             <td>{{ forloop.counter }}</td>
@@ -58,15 +57,6 @@
             <td><a href="https://twitter.com/{{ voter_guide_possibility.organization_twitter_handle|default_if_none:"" }}" target="_blank">
               {{ voter_guide_possibility.organization_twitter_handle|default_if_none:"" }}
             </a></td>
-            {% if google_civic_election_id == 0 %}
-            <td>
-            {% if voter_guide_possibility.election %}
-                {{ voter_guide_possibility.election.election_name }} -
-                {{ voter_guide_possibility.election.google_civic_election_id }} -
-                {{ voter_guide_possibility.election.election_day_text }}
-            {% endif %}
-            </td>
-            {% endif %}
             <td>
             {% if voter_guide_possibility.voter_we_vote_id_who_submitted %}
                 <a href="{% url 'voter:voter_edit_we_vote_id' voter_guide_possibility.voter_we_vote_id_who_submitted %}"

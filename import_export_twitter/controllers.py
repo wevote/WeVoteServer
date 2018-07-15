@@ -40,6 +40,7 @@ FACEBOOK_BLACKLIST = ['group', 'group.php', 'None']
 
 # Only pays attention to https://twitter.com or http://twitter.com and ignores www.twitter.com
 RE_TWITTER = r'//twitter\.com/(?:#!/)?(\w+)'
+RE_TWITTER_WWW = r'//www\.twitter\.com/(?:#!/)?(\w+)'
 TWITTER_BLACKLIST = ['home', 'https', 'intent', 'none', 'search', 'share', 'twitterapi']
 TWITTER_CONSUMER_KEY = get_environment_variable("TWITTER_CONSUMER_KEY")
 TWITTER_CONSUMER_SECRET = get_environment_variable("TWITTER_CONSUMER_SECRET")
@@ -318,9 +319,21 @@ def scrape_social_media_from_one_site(site_url, retrieve_list=False):
         page = urllib.request.urlopen(request, timeout=5)
         for line in page.readlines():
             try:
+                decoded_line = line.decode()
                 proceed = positive_value_exists(retrieve_list) or not twitter_handle_found
                 if proceed:
-                    for m in re.finditer(RE_TWITTER, line.decode()):
+                    for m in re.finditer(RE_TWITTER, decoded_line):
+                        if m:
+                            name = m.group(1)
+                            if name not in TWITTER_BLACKLIST:
+                                twitter_handle = name
+                                twitter_handle_found = True
+                                twitter_handle_list.append(twitter_handle)
+                                if not positive_value_exists(retrieve_list):
+                                    raise GetOutOfLoopLocal
+                proceed = positive_value_exists(retrieve_list) or not twitter_handle_found
+                if proceed:
+                    for m in re.finditer(RE_TWITTER_WWW, decoded_line):
                         if m:
                             name = m.group(1)
                             if name not in TWITTER_BLACKLIST:

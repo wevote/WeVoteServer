@@ -1484,6 +1484,7 @@ class OrganizationListManager(models.Manager):
         :param organization_email:
         :param organization_facebook:
         :param organization_search_term:
+        :param twitter_handle_list:
         :param exact_match:
         :return:
         """

@@ -1,23 +1,26 @@
 <!-- Header navigation -->
 <div class="navbar navbar-inverse" style="height: 52px;">
+    {% load staticfiles %}
 
-    {# <a class="navbar-brand" href="/"><img src="/templates/image_static/wevote_52h.png"></a> #}
+    <div class="we-vote-logo">
+      <img src="{% static "apis_v1/we-vote-logo-horizontal-color.svg" %}" height="48px" />
 
-    <div class="navbar-right">
-    {% if user and not user.is_anonymous %}
-      {# <img src="{{ social.profile_photo|default:'https://pbs.twimg.com/profile_images/584051530958909441/jT5oa-9w.jpg' }}" class="navimg"> #}
-      <div class="navbar-text hidden-sm hidden-xs">
-        {% if user.first_name %}
-          <a href="/login_we_vote">{{ user.first_name }}</a> is a Voter
-        {% else %}
-          <span>Hello, Voter!</span>
-        {% endif %}
+      <div class="navbar-right">
+      {% if user and not user.is_anonymous %}
+        {# <img src="{{ social.profile_photo|default:'https://pbs.twimg.com/profile_images/584051530958909441/jT5oa-9w.jpg' }}" class="navimg"> #}
+        <div class="navbar-text hidden-sm hidden-xs">
+          {% if user.first_name %}
+            <a href="/login_we_vote">{{ user.first_name }}</a> is a Voter
+          {% else %}
+            <span>Hello, Voter!</span>
+          {% endif %}
+        </div>
+      {% else %}
+        <div class="navbar-text">
+          <a href="/login_we_vote?next={{ request.path }}">Login</a>
+        </div>
+      {% endif %}
       </div>
-    {% else %}
-      <div class="navbar-text">
-        <a href="/login_we_vote?next={{ request.path }}">Login</a>
-      </div>
-    {% endif %}
     </div>
 
 </div>

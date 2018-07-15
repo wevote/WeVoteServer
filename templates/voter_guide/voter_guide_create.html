@@ -76,23 +76,6 @@
     </div>
 </div>
 
-{% if upcoming_election_list %}
-<div class="form-group">
-    <label for="google_civic_election_id" class="col-sm-3 control-label hidden-xs">{% if 0 == google_civic_election_id|convert_to_int %}Choose {% endif %}Election</label>
-    <div class="col-sm-8 input-md">
-        <select id="google_civic_election_id" name="google_civic_election_id" class="input-group-md">
-            <option value="0" {% if 0 == google_civic_election_id|convert_to_int %} selected="selected"{% endif %}>
-                -- Choose Election --</option>
-        {% for election in upcoming_election_list %}
-            <option value="{{ election.google_civic_election_id }}"
-                    {% if election.google_civic_election_id|slugify == google_civic_election_id|slugify %} selected="selected"{% endif %}>
-                {{ election.election_name }} - {{ election.election_day_text }}</option>
-        {% endfor %}
-        </select>
-    </div>
-</div>
-{% endif %}
-
 
 {% if organization_found and organization %}
 
@@ -169,19 +152,32 @@
 {% endif %}
 
 {% if possible_candidate_list_found and not hide_possible_candidate_list %}
-<div class="form-group">
-    <label for="ballot_items_raw_id" class="col-sm-3 control-label">
-        <span class="hidden-xs">Candidates with Stances</span><br />
-    </label>
-    <div class="col-sm-8">
-        <table class="table">
-        {% for possible_candidate in possible_candidate_list %}
-            {% include "voter_guide/voter_guide_one_candidate_confirmation.html" with possible_candidate=possible_candidate %}
-            <br />
-        {% endfor %}
-        </table>
+    <div class="form-group">
+        <label for="ballot_items_raw_id" class="col-sm-3 control-label">
+            <span class="hidden-xs">Candidates with Stances</span><br />
+        </label>
+        <div class="col-sm-8">
+            <table class="table">
+            {% for possible_candidate in possible_candidate_list %}
+                {% include "voter_guide/voter_guide_one_candidate_confirmation.html" with possible_candidate=possible_candidate %}
+            {% endfor %}
+            </table>
+        </div>
+
+    {% if voter_guide_possibility_url %}
+        <label for="ballot_items_raw_id" class="col-sm-3 control-label">
+            Add More Candidates or Measures
+        </label>
+        <div class="col-sm-8">
+            <textarea name="ballot_items_additional"
+                      class="form-control animated"
+                      placeholder="Please enter one candidate or measure per line, or separated by commas..."
+                      rows="2"
+                      >{{ ballot_items_additional|default_if_none:"" }}</textarea>
+        </div>
+    {% endif %}
+
     </div>
-</div>
 
 <input type="hidden" name="ballot_items_raw" value="{{ ballot_items_raw }}">
 
@@ -210,16 +206,18 @@
 
 
 
-<div class="form-group">
-    <label for="find_voter_guide_button_id" class="col-sm-3 control-label"></label>
-    <div class="col-sm-8">
-        <a href="{% url 'voter_guide:voter_guide_create' %}">start over</a>
-        <button type="submit" class="btn btn-default" name="save_endorsements" value="1">Analyze & Save</button>
-    {% if display_all_done_button %}
-        <button type="submit" class="btn btn-success" name="all_done_with_entry" value="1">All Done!</button>
-    {% endif %}
+    <div class="form-group">
+        <label for="find_voter_guide_button_id" class="col-sm-3 control-label"></label>
+        <div class="col-sm-8">
+            <a href="{% url 'voter_guide:voter_guide_create' %}">start over</a>
+            <button type="submit" class="btn btn-default" name="save_endorsements" value="1">Analyze & Save</button>
+        {% if display_all_done_button %}
+            <button type="submit" class="btn btn-success" name="all_done_with_entry" value="1">All Done!</button>
+        {% endif %}
+        </div>
     </div>
-</div>
+
+    <input type="hidden" name="form_submitted" value="1">
 </form>
 
 
