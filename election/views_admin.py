@@ -44,7 +44,7 @@ import pytz
 from quick_info.models import QuickInfoManager
 from wevote_settings.models import RemoteRequestHistoryManager
 from voter.models import VoterAddressManager, VoterDeviceLinkManager, voter_has_authority
-from voter_guide.models import VoterGuide, VoterGuidePossibility, VoterGuideListManager
+from voter_guide.models import CANDIDATE_NUMBER_LIST, VoterGuide, VoterGuidePossibility, VoterGuideListManager
 import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, positive_value_exists, STATE_CODE_MAP
 
@@ -1674,9 +1674,11 @@ def election_migration_view(request):
     we_vote_voter_guide_possibility_count = voter_guide_possibility_query.count()
     if positive_value_exists(change_now) and positive_value_exists(we_vote_voter_guide_possibility_count):
         try:
-            VoterGuidePossibility.objects.filter(
-                google_civic_election_id=we_vote_election_id).update(
-                google_civic_election_id=google_civic_election_id)
+            for one_number in CANDIDATE_NUMBER_LIST:
+                key = "google_civic_election_id_" + one_number
+                VoterGuidePossibility.objects.filter(
+                    **{key: we_vote_election_id}).update(
+                    **{key: google_civic_election_id})
         except Exception as e:
             error = True
             status += "COULD_NOT_UPDATE_ALL_VOTER_GUIDE_POSSIBILITIES "

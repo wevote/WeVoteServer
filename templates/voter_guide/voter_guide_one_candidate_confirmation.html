@@ -1,40 +1,50 @@
 {# templates/voter_guide/voter_guide_one_candidate_confirmation.html #}
 
 <div>
-{% if possible_candidate.candidate_we_vote_id %}
-    <span><span class="h4">{{ possible_candidate.candidate.display_candidate_name|default_if_none:"" }}</span>, <span>{{ possible_candidate.candidate.contest_office_name|default_if_none:"" }}</span>&nbsp;&nbsp;&nbsp;</span>
-    <input type="hidden" name="candidate_we_vote_id_{{ possible_candidate.possible_candidate_number }}" value="{{ possible_candidate.candidate_we_vote_id }}">
-    <input type="hidden" name="candidate_name_{{ possible_candidate.possible_candidate_number }}" value="{{ possible_candidate.candidate_name }}">
-{% else %}
-    <span><span class="h4">{{ possible_candidate.candidate_name|default_if_none:"" }}</span>&nbsp;&nbsp;&nbsp;</span>
-    <input type="hidden" name="candidate_name_{{ possible_candidate.possible_candidate_number }}" value="{{ possible_candidate.candidate_name }}">
-{% endif %}
-
-    <div class="btn-group btn-group-toggle" data-toggle="buttons">
-        <label class="btn{% if possible_candidate.stance_about_candidate == "SUPPORT" %} btn-success active{% else %} btn-outline-success{% endif %}">
-          <input type="radio" name="stance_about_candidate_{{ possible_candidate.possible_candidate_number }}"
-                 id="support_{{ possible_candidate.possible_candidate_number }}" autocomplete="off"
-                 value="SUPPORT" {% if possible_candidate.stance_about_candidate == "SUPPORT" %}checked{% endif %}
-          > Support
-        </label>
-        <label class="btn{% if possible_candidate.stance_about_candidate == "OPPOSE" %} btn-danger active{% else %} btn-outline-danger{% endif %}">
-          <input type="radio" name="stance_about_candidate_{{ possible_candidate.possible_candidate_number }}"
-                 id="oppose_{{ possible_candidate.possible_candidate_number }}" autocomplete="off"
-                 value="OPPOSE" {% if possible_candidate.stance_about_candidate == "OPPOSE" %}checked{% endif %}
-          > Oppose
-        </label>
-        <label class="btn{% if possible_candidate.stance_about_candidate == "NO_STANCE" %} btn-secondary active{% else %} btn-outline-secondary{% endif %}">
-          <input type="radio" name="stance_about_candidate_{{ possible_candidate.possible_candidate_number }}"
-                 id="no_stance_{{ possible_candidate.possible_candidate_number }}" autocomplete="off"
-                 value="NO_STANCE" {% if possible_candidate.stance_about_candidate == "NO_STANCE" %}checked{% endif %}
-          > No Stance
-        </label>
+    <div>
+    {% if possible_candidate.candidate_we_vote_id %}
+        <span><span class="h4">{{ possible_candidate.candidate.display_candidate_name|default_if_none:"" }}</span>, <span>{{ possible_candidate.candidate.contest_office_name|default_if_none:"" }}</span>&nbsp;&nbsp;&nbsp;</span>
+        <input type="hidden" name="candidate_we_vote_id_{{ possible_candidate.possible_candidate_number }}" value="{{ possible_candidate.candidate_we_vote_id }}">
+        <input type="hidden" name="candidate_name_{{ possible_candidate.possible_candidate_number }}" value="{{ possible_candidate.candidate_name }}">
+    {% else %}
+        <span><input type="text" class="h4" name="candidate_name_{{ possible_candidate.possible_candidate_number }}"
+                     value="{{ possible_candidate.candidate_name|default_if_none:"" }}" />&nbsp;&nbsp;&nbsp;</span>
+    {% endif %}
     </div>
+    <div>
+        <div class="float-right"><button type="submit" class="btn btn-link" name="remove_possible_candidate_{{ possible_candidate.possible_candidate_number }}" value="1">remove</button></div>
+        <div class="btn-group btn-group-toggle" data-toggle="buttons">
+            <label class="btn{% if possible_candidate.stance_about_candidate == "SUPPORT" %} btn-success active{% else %} btn-outline-success{% endif %}">
+              <input type="radio" name="stance_about_candidate_{{ possible_candidate.possible_candidate_number }}"
+                     id="support_{{ possible_candidate.possible_candidate_number }}" autocomplete="off"
+                     value="SUPPORT" {% if possible_candidate.stance_about_candidate == "SUPPORT" %}checked{% endif %}
+              > Support
+            </label>
+            <label class="btn{% if possible_candidate.stance_about_candidate == "OPPOSE" %} btn-danger active{% else %} btn-outline-danger{% endif %}">
+              <input type="radio" name="stance_about_candidate_{{ possible_candidate.possible_candidate_number }}"
+                     id="oppose_{{ possible_candidate.possible_candidate_number }}" autocomplete="off"
+                     value="OPPOSE" {% if possible_candidate.stance_about_candidate == "OPPOSE" %}checked{% endif %}
+              > Oppose
+            </label>
+            <label class="btn{% if possible_candidate.stance_about_candidate == "NO_STANCE" %} btn-secondary active{% else %} btn-outline-secondary{% endif %}">
+              <input type="radio" name="stance_about_candidate_{{ possible_candidate.possible_candidate_number }}"
+                     id="no_stance_{{ possible_candidate.possible_candidate_number }}" autocomplete="off"
+                     value="NO_STANCE" {% if possible_candidate.stance_about_candidate == "NO_STANCE" %}checked{% endif %}
+              > No Stance
+            </label>
+        </div>
+    </div>
+    {% if possible_candidate.election_name %}
+    <div>{{ possible_candidate.election_name }}</div>
+    {% endif %}
     <textarea name="comment_about_candidate_{{ possible_candidate.possible_candidate_number }}"
               class="form-control animated"
               placeholder="Please enter the explanation for the stance, if there is one..."
               >{{ possible_candidate.comment_about_candidate|default_if_none:"" }}</textarea>
 
+</div>
+<div>
+  &nbsp;
 </div>
 
 <script>

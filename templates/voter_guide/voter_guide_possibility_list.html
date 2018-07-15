@@ -51,12 +51,12 @@
     </label>
     &nbsp;&nbsp;&nbsp;&nbsp;
 
-    {% if voter_guide_possibility_search %}
-            <a href="{% url 'voter_guide:voter_guide_possibility_list' %}?google_civic_election_id={{ google_civic_election_id }}&show_all_elections={{ show_all_elections }}">
-                 clear search</a>&nbsp;
-        {% endif %}
     <input type="text" name="voter_guide_possibility_search" id="voter_guide_possibility_search_id" value="{{ voter_guide_possibility_search }}" />
     <input type="submit" value="Search" />
+    {% if voter_guide_possibility_search %}
+        <a href="{% url 'voter_guide:voter_guide_possibility_list' %}?google_civic_election_id={{ google_civic_election_id }}&show_all_elections={{ show_all_elections }}">
+             clear search</a>&nbsp;
+    {% endif %}
     </form>
 
 <p></p>

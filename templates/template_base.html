@@ -4,7 +4,6 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{% block title %}{% endblock %}{#% trans "My Website" %#}</title>
-    {% load staticfiles %}
 
     {% block meta_tags %}{% endblock %}
 
@@ -31,21 +30,48 @@
     {% bootstrap_css %}
     {% bootstrap_javascript %}
 
-    {# Display django.contrib.messages as Bootstrap alerts #}
-    {% bootstrap_messages %}
-
     <style>
+        .u-gray-border-bottom {
+          border-bottom: 1px solid #ddd;
+        }
+        .u-gray-border-top {
+          border-top: 1px solid #ddd;
+        }
+        .float-right {
+          float: right;
+        }
+        .navbar-wrapper {
+          top: 0;
+          right: 0;
+          width: 100% !important;
+          left: 0;
+        }
+        .navbar-wrapper > .container, .navbar-wrapper > .container-fluid {
+          padding-right: 0;
+          padding-left: 0;
+          width: inherit;
+        }
+        .navbar-wrapper .navbar {
+          width: 100% !important;
+        }
+        .navbar-inverse {
+          width: 100% !important;
+          background-color: #0d5470; !important;
+          border-radius: 0;
+        }
         .u-no-break { // Replacement for nobr and &nbsp;
           white-space: nowrap;
         }
-
         .u-wrap-links {
           overflow-wrap: break-word;
           word-wrap: break-word;
           -ms-word-break: break-all;
           word-break: break-word;
         }
-
+        .we-vote-logo {
+          float: right;
+          width: 100% !important;
+        }
         input[type="radio"]:checked + .bold-select {
           font-weight: bold;
         }
@@ -56,7 +82,7 @@
 </head>
 <body class="{% block bodyclass %}{% endblock %}">
     {% block page %}
-        <div class="wrapper">
+        <div class="navbar-wrapper">
             <div id="header" class="container-fluid">
                 {% block header_navigation %}
                     {% include "header_navigation.html" %}
@@ -65,6 +91,11 @@
                     {% include "language_chooser.html" %}
                 {% endblock %}
             </div>
+        </div>
+        <div class="wrapper">
+            {# Display django.contrib.messages as Bootstrap alerts #}
+            {% bootstrap_messages %}
+
             <div id="content" class="container-fluid">
                 {% block content %}
                 {% endblock %}
