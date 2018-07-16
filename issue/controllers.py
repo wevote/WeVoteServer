@@ -805,3 +805,37 @@ def retrieve_issues_not_linked_to_organization_for_api(organization_we_vote_id):
 
     issues_linked_result['issue_list'] = issues_not_linked
     return issues_linked_result
+
+
+# Steve, Temporary location for this function, as of July 16, 2018 --
+# It could be left "as is" as a "pinger" that keeps the load balancer channel open (Keeps it from rotating to another
+# node in mid request) or we could move this to the place where it can read a global value with progress statistics
+# that you want to display for some script
+global_dot_string = ""
+global_dot_string_increasing = True
+
+
+def test_real_time_update(request):  # testRealTimeUpdate
+
+    global global_dot_string
+    global global_dot_string_increasing
+    length = len(global_dot_string)
+
+    if global_dot_string_increasing:
+        if length == 10:
+            global_dot_string_increasing = False
+            global_dot_string = global_dot_string[0:9]
+        else:
+            global_dot_string = global_dot_string + "."
+    else:
+        if length == 0:
+            global_dot_string_increasing = True
+            global_dot_string = "."
+        else:
+            global_dot_string = global_dot_string[0:length-1]
+
+    json_data = {
+        'text': global_dot_string,
+    }
+
+    return HttpResponse(json.dumps(json_data), content_type='application/json')

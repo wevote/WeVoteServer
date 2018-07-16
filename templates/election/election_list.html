@@ -22,6 +22,8 @@
 
 <h1>Elections</h1>
 
+Pinging API Server <span id="testDots" >.</span></p>
+
 <p><a href="{% url 'election:election_remote_retrieve' %}">Retrieve all elections</a>.
     <a href="https://votinginfoproject.org/news/vip-continues-support-elections-through-2018/" target="_blank">VIP elections supported.</a></p>
 
@@ -196,6 +198,20 @@
             this.form.submit();
         });
     });
+
+    // Ping the server to keep the load balancer channel open (Stay on the same load balancer node)
+    setInterval(function () {
+      let origin = new URL('{{request.build_absolute_uri}}').origin;
+      let apiURL = origin + '/apis/v1/testRealTimeUpdate';
+      $.ajax({
+        type: "GET",
+        url: apiURL,
+        success: function (data) {
+          let dots = data.text;
+          $('#testDots').html('<font color="LIMEGREEN">' + dots +'</font>');
+        },
+      });
+    }, 2000);
 </script>
 
 {% endblock %}
