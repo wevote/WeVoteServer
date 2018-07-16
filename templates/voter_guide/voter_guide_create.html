@@ -53,7 +53,7 @@
 
 {% if voter_guide_possibility_url %}
 {% else %}
-    <p>Thank you for helping us gather opinions about this upcoming election!</p>
+    <p>Help us gather voter guides from any organization that has made endorsements.</p>
 {% endif %}
 
 <input type="hidden" name="voter_guide_possibility_id" value="{{ voter_guide_possibility_id }}">
@@ -61,9 +61,9 @@
 <div class="form-group">
     <label for="voter_guide_possibility_url_id" class="col-sm-3 control-label">
     {% if voter_guide_possibility_url %}
-        Website with the endorsements
+        Link to voter guide
     {% else %}
-        Please enter the website with the endorsements
+        Paste link to voter guide
     {% endif %}
     </label>
     <div class="col-sm-8">
@@ -71,7 +71,7 @@
                name="voter_guide_possibility_url"
                id="voter_guide_possibility_url_id"
                class="form-control input-md"
-               placeholder="Please enter web address, starting with 'http' or 'www'..."
+               placeholder="Web address, starting with 'http' or 'www'..."
                value="{{ voter_guide_possibility_url }}" />
     </div>
 </div>
@@ -209,7 +209,9 @@
     <div class="form-group">
         <label for="find_voter_guide_button_id" class="col-sm-3 control-label"></label>
         <div class="col-sm-8">
+        {% if voter_guide_possibility_url %}
             <a href="{% url 'voter_guide:voter_guide_create' %}">start over</a>
+        {% endif %}
             <button type="submit" class="btn btn-default" name="save_endorsements" value="1">Analyze & Save</button>
         {% if display_all_done_button %}
             <button type="submit" class="btn btn-success" name="all_done_with_entry" value="1">All Done!</button>

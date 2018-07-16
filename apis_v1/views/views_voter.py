@@ -370,7 +370,7 @@ def voter_address_save_view(request):  # voterAddressSave
 
     if not positive_value_exists(voter_id):
         json_data = {
-            'status':               "VOTER_NOT_FOUND_FROM_DEVICE_ID",
+            'status':               "VOTER_NOT_FOUND_FROM_DEVICE_ID-VOTER_ADDRESS_SAVE ",
             'success':              False,
             'voter_device_id':      voter_device_id,
             'text_for_map_search':  text_for_map_search,
@@ -1595,6 +1595,7 @@ def voter_update_view(request):  # voterUpdate
     :return:
     """
 
+    status = ""
     voter_updated = False
 
     voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
@@ -1708,8 +1709,9 @@ def voter_update_view(request):  # voterUpdate
 
     device_id_results = is_voter_device_id_valid(voter_device_id)
     if not device_id_results['success']:
+        status += "VOTER_DEVICE_ID_NOT_BALLOT " + device_id_results['status']
         json_data = {
-                'status':                           device_id_results['status'],
+                'status':                           status,
                 'success':                          False,
                 'voter_device_id':                  voter_device_id,
                 'facebook_email':                   facebook_email,
@@ -1718,6 +1720,9 @@ def voter_update_view(request):  # voterUpdate
                 'middle_name':                      middle_name,
                 'last_name':                        last_name,
                 'twitter_profile_image_url_https':  twitter_profile_image_url_https,
+                'we_vote_hosted_profile_image_url_large': "",
+                'we_vote_hosted_profile_image_url_medium': "",
+                'we_vote_hosted_profile_image_url_tiny': "",
                 'voter_updated':                    voter_updated,
                 'interface_status_flags':           interface_status_flags,
                 'flag_integer_to_set':              flag_integer_to_set,
@@ -1737,12 +1742,12 @@ def voter_update_view(request):  # voterUpdate
         or middle_name is not False \
         or last_name is not False \
         or full_name \
-        or interface_status_flags \
-        or flag_integer_to_unset \
-        or flag_integer_to_set \
-        or notification_settings_flags \
-        or notification_flag_integer_to_unset \
-        or notification_flag_integer_to_set \
+        or interface_status_flags is not False \
+        or flag_integer_to_unset is not False \
+        or flag_integer_to_set is not False \
+        or notification_settings_flags is not False \
+        or notification_flag_integer_to_unset is not False \
+        or notification_flag_integer_to_set is not False \
         or send_journal_list \
         else False
 
@@ -1750,8 +1755,9 @@ def voter_update_view(request):  # voterUpdate
     voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id)
     voter_id = voter_results['voter_id']
     if not positive_value_exists(voter_id):
+        status += "VOTER_NOT_FOUND_FROM_DEVICE_ID-VOTER_UPDATE "
         json_data = {
-            'status':                           "VOTER_NOT_FOUND_FROM_DEVICE_ID",
+            'status':                           status,
             'success':                          False,
             'voter_device_id':                  voter_device_id,
             'facebook_email':                   facebook_email,
@@ -1760,6 +1766,9 @@ def voter_update_view(request):  # voterUpdate
             'middle_name':                      middle_name,
             'last_name':                        last_name,
             'twitter_profile_image_url_https':  twitter_profile_image_url_https,
+            'we_vote_hosted_profile_image_url_large':   "",
+            'we_vote_hosted_profile_image_url_medium':  "",
+            'we_vote_hosted_profile_image_url_tiny':    "",
             'voter_updated':                    voter_updated,
             'interface_status_flags':           interface_status_flags,
             'flag_integer_to_set':              flag_integer_to_set,
@@ -1769,6 +1778,17 @@ def voter_update_view(request):  # voterUpdate
             'notification_flag_integer_to_unset': notification_flag_integer_to_unset,
             'voter_donation_history_list':      None,
         }
+        # 'we_vote_hosted_profile_image_url_large':   we_vote_hosted_profile_image_url_large,
+        # 'we_vote_hosted_profile_image_url_medium':  we_vote_hosted_profile_image_url_medium,
+        # 'we_vote_hosted_profile_image_url_tiny':    we_vote_hosted_profile_image_url_tiny,
+        # 'voter_updated':                            results['voter_updated'],
+        # 'interface_status_flags':                   voter.interface_status_flags,
+        # 'flag_integer_to_set':                      flag_integer_to_set,
+        # 'flag_integer_to_unset':                    flag_integer_to_unset,
+        # 'notification_settings_flags':              voter.notification_settings_flags,
+        # 'notification_flag_integer_to_set':         notification_flag_integer_to_set,
+        # 'notification_flag_integer_to_unset':       notification_flag_integer_to_unset,
+        # 'voter_donation_history_list':              donation_list,
         response = HttpResponse(json.dumps(json_data), content_type='application/json')
         return response
 
@@ -1779,8 +1799,9 @@ def voter_update_view(request):  # voterUpdate
 
     if not at_least_one_variable_has_changed:
         # If here, we want to return the latest data from the voter object
+        status += "MISSING_VARIABLE-NO_VARIABLES_PASSED_IN_TO_CHANGE "
         json_data = {
-                'status':                           "MISSING_VARIABLE-NO_VARIABLES_PASSED_IN_TO_CHANGE",
+                'status':                           status,
                 'success':                          True,
                 'voter_device_id':                  voter_device_id,
                 'facebook_email':                   voter.facebook_email,
@@ -1789,6 +1810,9 @@ def voter_update_view(request):  # voterUpdate
                 'middle_name':                      voter.middle_name,
                 'last_name':                        voter.last_name,
                 'twitter_profile_image_url_https':  voter.twitter_profile_image_url_https,
+                'we_vote_hosted_profile_image_url_large':   voter.we_vote_hosted_profile_image_url_large,
+                'we_vote_hosted_profile_image_url_medium':  voter.we_vote_hosted_profile_image_url_medium,
+                'we_vote_hosted_profile_image_url_tiny':    voter.we_vote_hosted_profile_image_url_tiny,
                 'voter_updated':                    voter_updated,
                 'interface_status_flags':           voter.interface_status_flags,
                 'flag_integer_to_set':              flag_integer_to_set,
@@ -1869,8 +1893,9 @@ def voter_update_view(request):  # voterUpdate
         twitter_profile_image_url_https, we_vote_hosted_profile_image_url_large,
         we_vote_hosted_profile_image_url_medium, we_vote_hosted_profile_image_url_tiny)
     voter = results['voter']
+    status += results['status']
     json_data = {
-        'status':                                   results['status'],
+        'status':                                   status,
         'success':                                  results['success'],
         'voter_device_id':                          voter_device_id,
         'facebook_email':                           facebook_email,

@@ -1639,7 +1639,7 @@ def voter_photo_save_for_api(voter_device_id, facebook_profile_image_url_https, 
 
     if not facebook_photo_variable_exists:
         results = {
-                'status': "MISSING_VARIABLE-AT_LEAST_ONE_PHOTO",
+                'status': "MISSING_VARIABLE-AT_LEAST_ONE_PHOTO ",
                 'success': False,
                 'voter_device_id': voter_device_id,
                 'facebook_profile_image_url_https': facebook_profile_image_url_https,
@@ -1649,7 +1649,7 @@ def voter_photo_save_for_api(voter_device_id, facebook_profile_image_url_https, 
     voter_id = fetch_voter_id_from_voter_device_link(voter_device_id)
     if voter_id < 0:
         results = {
-            'status': "VOTER_NOT_FOUND_FROM_DEVICE_ID",
+            'status': "VOTER_NOT_FOUND_FROM_DEVICE_ID-VOTER_PHOTO_SAVE ",
             'success': False,
             'voter_device_id': voter_device_id,
             'facebook_profile_image_url_https': facebook_profile_image_url_https,
@@ -1664,9 +1664,9 @@ def voter_photo_save_for_api(voter_device_id, facebook_profile_image_url_https, 
 
     if results['success']:
         if positive_value_exists(facebook_profile_image_url_https):
-            status = "VOTER_FACEBOOK_PHOTO_SAVED"
+            status = "VOTER_FACEBOOK_PHOTO_SAVED "
         else:
-            status = "VOTER_PHOTOS_EMPTY_SAVED"
+            status = "VOTER_PHOTOS_EMPTY_SAVED "
 
         results = {
                 'status': status,
@@ -1704,7 +1704,10 @@ def voter_retrieve_for_api(voter_device_id, state_code_from_ip_address='',
     repair_twitter_link_to_voter_caching_now = False
     repair_facebook_link_to_voter_caching_now = False
 
+    status = "VOTER_RETRIEVE_START "
+
     if positive_value_exists(voter_device_id):
+        status += "VOTER_DEVICE_ID_RECEIVED "
         # If a voter_device_id is passed in that isn't valid, we want to throw an error
         device_id_results = is_voter_device_id_valid(voter_device_id)
         if not device_id_results['success']:
@@ -1725,7 +1728,7 @@ def voter_retrieve_for_api(voter_device_id, state_code_from_ip_address='',
             voter_id = voter_device_link.voter_id
         if not positive_value_exists(voter_id):
             json_data = {
-                'status':           "VOTER_NOT_FOUND_FROM_DEVICE_ID",
+                'status':           "VOTER_NOT_FOUND_FROM_DEVICE_ID-VOTER_RETRIEVE ",
                 'success':          False,
                 'voter_device_id':  voter_device_id,
                 'voter_created':    False,
@@ -1735,6 +1738,7 @@ def voter_retrieve_for_api(voter_device_id, state_code_from_ip_address='',
             return json_data
     else:
         # If a voter_device_id isn't passed in, automatically create a new voter_device_id and voter
+        status += "VOTER_DEVICE_NOT_PASSED_IN "
         voter_device_id = generate_voter_device_id()
 
         # We make sure a voter record hasn't already been created for this new voter_device_id, so we don't create a
@@ -1755,6 +1759,7 @@ def voter_retrieve_for_api(voter_device_id, state_code_from_ip_address='',
         results = voter_manager.create_voter()
 
         if results['voter_created']:
+            status += "VOTER_CREATED "
             voter = results['voter']
 
             # Now save the voter_device_link
@@ -1785,9 +1790,9 @@ def voter_retrieve_for_api(voter_device_id, state_code_from_ip_address='',
         voter = results['voter']
 
         if voter_created:
-            status = 'VOTER_CREATED '
+            status += 'VOTER_CREATED '
         else:
-            status = 'VOTER_FOUND '
+            status += 'VOTER_FOUND '
 
         # Save state_code found via IP address
         if positive_value_exists(state_code_from_ip_address):
@@ -1917,6 +1922,7 @@ def voter_retrieve_for_api(voter_device_id, state_code_from_ip_address='',
                             create_twitter_link_to_organization = True
 
                 if not existing_organization_for_this_voter_found:
+                    status += "EXISTING_ORGANIZATION_NOT_FOUND "
                     # If we are here, we need to create an organization for this voter
                     organization_name = voter.get_full_name()
                     organization_website = ""
@@ -1934,6 +1940,7 @@ def voter_retrieve_for_api(voter_device_id, state_code_from_ip_address='',
                     if create_results['organization_created']:
                         # Add value to twitter_owner_voter.linked_organization_we_vote_id when done.
                         organization = create_results['organization']
+                        status += "ORGANIZATION_CREATED "
                         try:
                             voter.linked_organization_we_vote_id = organization.we_vote_id
                             voter.save()
@@ -1952,6 +1959,8 @@ def voter_retrieve_for_api(voter_device_id, state_code_from_ip_address='',
 
                         except Exception as e:
                             status += "UNABLE_TO_CREATE_NEW_ORGANIZATION_TO_VOTER_FROM_RETRIEVE_VOTER "
+                    else:
+                        status += "ORGANIZATION_NOT_CREATED "
 
             # Check to see if there is a FacebookLinkToVoter for this voter, and if so, see if we need to make
             #  organization update with latest Facebook data
@@ -1959,12 +1968,14 @@ def voter_retrieve_for_api(voter_device_id, state_code_from_ip_address='',
             facebook_link_results = facebook_manager.retrieve_facebook_link_to_voter_from_voter_we_vote_id(
                 voter.we_vote_id)
             if facebook_link_results['facebook_link_to_voter_found']:
+                status += "FACEBOOK_LINK_TO_VOTER_FOUND "
                 facebook_link_to_voter = facebook_link_results['facebook_link_to_voter']
                 facebook_link_to_voter_facebook_user_id = facebook_link_to_voter.facebook_user_id
                 if positive_value_exists(facebook_link_to_voter_facebook_user_id):
                     facebook_user_results = FacebookManager().retrieve_facebook_user_by_facebook_user_id(
                         facebook_link_to_voter_facebook_user_id)
                     if facebook_user_results['facebook_user_found']:
+                        status += "FACEBOOK_USER_FOUND "
                         facebook_user = facebook_user_results['facebook_user']
 
                         organization_results = \
@@ -1975,11 +1986,15 @@ def voter_retrieve_for_api(voter_device_id, state_code_from_ip_address='',
                                 organization = organization_results['organization']
                                 save_organization = False
                                 # Look at the linked_organization for the voter and update with latest
-                                if positive_value_exists(facebook_user.facebook_profile_image_url_https) and \
-                                        not positive_value_exists(organization.facebook_profile_image_url_https):
-                                    organization.facebook_profile_image_url_https = \
-                                        facebook_user.facebook_profile_image_url_https
-                                    save_organization = True
+                                if positive_value_exists(facebook_user.facebook_profile_image_url_https):
+                                    facebook_profile_image_different = \
+                                        not positive_value_exists(organization.facebook_profile_image_url_https) \
+                                        or facebook_user.facebook_profile_image_url_https != \
+                                           organization.facebook_profile_image_url_https
+                                    if facebook_profile_image_different:
+                                        organization.facebook_profile_image_url_https = \
+                                            facebook_user.facebook_profile_image_url_https
+                                        save_organization = True
                                 if positive_value_exists(facebook_user.facebook_background_image_url_https) and \
                                         not positive_value_exists(organization.facebook_background_image_url_https):
                                     organization.facebook_background_image_url_https = \
@@ -1997,11 +2012,18 @@ def voter_retrieve_for_api(voter_device_id, state_code_from_ip_address='',
                                     repair_facebook_link_to_voter_caching_now = True
                                     organization.save()
                             except Exception as e:
+                                status += "FAILED_UPDATE_OR_CREATE_ORGANIZATION: " + str(e)
                                 logger.error('FAILED organization_manager.update_or_create_organization. '
                                              '{error} [type: {error_type}]'.format(error=e, error_type=type(e)))
+                    else:
+                        status += "FACEBOOK_USER_NOT_FOUND "
+
+            else:
+                status += "FACEBOOK_LINK_TO_VOTER_NOT_FOUND "
 
         if not positive_value_exists(voter.linked_organization_we_vote_id):
             # If we are here, we need to create an organization for this voter
+            status += "NEED_TO_CREATE_ORGANIZATION_FOR_THIS_VOTER "
             organization_name = voter.get_full_name()
             organization_website = ""
             organization_email = ""
@@ -2169,7 +2191,7 @@ def voter_retrieve_list_for_api(voter_device_id):
     else:
         # If we are here, the voter_id could not be found from the voter_device_id
         json_data = {
-            'status': "VOTER_NOT_FOUND_FROM_DEVICE_ID",
+            'status': "VOTER_NOT_FOUND_FROM_DEVICE_ID-VOTER_RETRIEVE_LIST ",
             'success': False,
             'voter_device_id': voter_device_id,
         }

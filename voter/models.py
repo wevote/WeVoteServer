@@ -27,7 +27,7 @@ BALLOT_INTRO_FRIENDS_COMPLETED = 32  # ...the voter has reached out to at least 
 BALLOT_INTRO_SHARE_COMPLETED = 64  # ...the voter has shared at least one item (no need for intro)
 BALLOT_INTRO_VOTE_COMPLETED = 128  # ...the voter learned about casting their vote (no need for intro)
 
-INTERFACE_STATUS_THRESHOLD_ISSUES_FOLLOWED = 5
+INTERFACE_STATUS_THRESHOLD_ISSUES_FOLLOWED = 3
 INTERFACE_STATUS_THRESHOLD_ORGANIZATIONS_FOLLOWED = 5
 
 # Notifications that get set from the WebApp
@@ -1372,8 +1372,10 @@ class VoterManager(BaseUserManager):
                 we_vote_hosted_profile_image_url_medium,
                 we_vote_hosted_profile_image_url_tiny)
             success = results['success']
+            status += results['status']
         else:
             voter = Voter()
+            status += "UPDATE_VOTER_BY_ID-COULD_NOT_RETRIEVE_VOTER "
 
         results = {
             'status': status,
@@ -1402,12 +1404,14 @@ class VoterManager(BaseUserManager):
             we_vote_hosted_profile_image_url_medium=False,
             we_vote_hosted_profile_image_url_tiny=False,
             data_to_preserve=False):
+        status = ""
         voter_updated = False
 
         try:
             test_we_vote_id = voter.we_vote_id
             voter_found = True
         except AttributeError as e:
+            status += "UPDATE_VOTER_BY_OBJECT-VOTER_NOT_FOUND "
             handle_record_not_saved_exception(e, logger=logger)
             voter_found = False
 
@@ -1471,17 +1475,17 @@ class VoterManager(BaseUserManager):
                 if should_save_voter:
                     voter.save()
                     voter_updated = True
-                status = "UPDATED_VOTER"
+                status += "UPDATED_VOTER "
                 success = True
             except Exception as e:
                 handle_record_not_saved_exception(e, logger=logger)
-                status = "UNABLE_TO_UPDATE_VOTER"
+                status += "UNABLE_TO_UPDATE_VOTER "
                 success = False
                 voter_updated = False
 
         else:
             # If here, we were unable to find pre-existing Voter
-            status = "UNABLE_TO_FIND_VOTER_FOR_UPDATE_VOTER"
+            status = "UNABLE_TO_FIND_VOTER_FOR_UPDATE_VOTER "
             voter = Voter()
             success = False
             voter_updated = False
