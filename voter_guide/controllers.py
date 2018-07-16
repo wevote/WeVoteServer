@@ -807,7 +807,7 @@ def voter_guide_possibility_save_for_api(voter_device_id, voter_guide_possibilit
     voter_id = fetch_voter_id_from_voter_device_link(voter_device_id)
     if not positive_value_exists(voter_id):
         json_data = {
-            'status': "VOTER_NOT_FOUND_FROM_DEVICE_ID",
+            'status': "VOTER_NOT_FOUND_FROM_DEVICE_ID-VOTER_GUIDE_POSSIBILITY ",
             'success': False,
             'voter_device_id': voter_device_id,
         }

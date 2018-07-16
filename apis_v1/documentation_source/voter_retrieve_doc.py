@@ -30,7 +30,7 @@ def voter_retrieve_doc_template_values(url_root):
             'description':  'A valid voter_device_id parameter was not included. Cannot proceed.',
         },
         {
-            'code':         'VOTER_NOT_FOUND_FROM_DEVICE_ID',
+            'code':         'VOTER_NOT_FOUND_FROM_DEVICE_ID-VOTER_RETRIEVE',
             'description':  'There is no voter_id attached to that voter_device_id',
         },
         {
