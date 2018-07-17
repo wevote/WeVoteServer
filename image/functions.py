@@ -41,10 +41,13 @@ def analyze_remote_url(image_url_https):
         handle_exception(e, logger=logger, exception_message=exception_message)
 
     if image_url_valid:
-        response = requests.get(image_url_https)
-        image = Image.open(BytesIO(response.content))
-        image_width, image_height = image.size
-        image_format = image.format
+        try:
+            response = requests.get(image_url_https)
+            image = Image.open(BytesIO(response.content))
+            image_width, image_height = image.size
+            image_format = image.format
+        except Exception as e:
+            image_url_valid = False
 
     results = {
         'image_url_valid':              image_url_valid,
