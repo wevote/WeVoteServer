@@ -938,7 +938,7 @@ def voter_merge_two_accounts_for_api(  # voterMergeTwoAccounts
     facebook_owner_voter_found = False
     twitter_owner_voter_found = False
     invitation_owner_voter_found = False
-    new_owner_voter = Voter()
+    new_owner_voter = None
     success = False
     status = ""
 
@@ -975,6 +975,7 @@ def voter_merge_two_accounts_for_api(  # voterMergeTwoAccounts
         return error_results
 
     voter = voter_results['voter']
+    status += "VOTER_MERGE_FROM-" + str(voter.we_vote_id) + "-TO... "
     current_voter_found = True
 
     if not positive_value_exists(email_secret_key) \
@@ -1000,6 +1001,7 @@ def voter_merge_two_accounts_for_api(  # voterMergeTwoAccounts
 
     # ############# EMAIL SIGN IN #####################################
     if positive_value_exists(email_secret_key):
+        status += "EMAIL_SECRET_KEY "
         email_results = email_manager.retrieve_email_address_object_from_secret_key(email_secret_key)
         if email_results['email_address_object_found']:
             email_address_object = email_results['email_address_object']
@@ -1042,9 +1044,11 @@ def voter_merge_two_accounts_for_api(  # voterMergeTwoAccounts
         to_voter_id = email_owner_voter.id
         to_voter_we_vote_id = email_owner_voter.we_vote_id
         new_owner_voter = email_owner_voter
+        status += "TO_VOTER-" + str(to_voter_we_vote_id) + " "
 
     # ############# FACEBOOK SIGN IN #####################################
     elif positive_value_exists(facebook_secret_key):
+        status += "FACEBOOK_SECRET_KEY "
         facebook_manager = FacebookManager()
         facebook_results = facebook_manager.retrieve_facebook_link_to_voter_from_facebook_secret_key(
             facebook_secret_key)
@@ -1162,9 +1166,11 @@ def voter_merge_two_accounts_for_api(  # voterMergeTwoAccounts
         to_voter_id = facebook_owner_voter.id
         to_voter_we_vote_id = facebook_owner_voter.we_vote_id
         new_owner_voter = facebook_owner_voter
+        status += "TO_VOTER-" + str(to_voter_we_vote_id) + " "
 
     # ############# TWITTER SIGN IN #####################################
     elif positive_value_exists(twitter_secret_key):
+        status += "TWITTER_SECRET_KEY "
         twitter_user_manager = TwitterUserManager()
         twitter_link_to_voter = TwitterLinkToVoter()
 
@@ -1399,9 +1405,11 @@ def voter_merge_two_accounts_for_api(  # voterMergeTwoAccounts
         to_voter_id = twitter_owner_voter.id
         to_voter_we_vote_id = twitter_owner_voter.we_vote_id
         new_owner_voter = twitter_owner_voter
+        status += "TO_VOTER-" + str(to_voter_we_vote_id) + " "
 
     # ############# INVITATION SIGN IN #####################################
     elif positive_value_exists(invitation_secret_key):
+        status += "INVITATION_SECRET_KEY "
         friend_manager = FriendManager()
         invitation_owner_voter = Voter()
         for_merge_accounts = True
@@ -1455,6 +1463,7 @@ def voter_merge_two_accounts_for_api(  # voterMergeTwoAccounts
         to_voter_id = invitation_owner_voter.id
         to_voter_we_vote_id = invitation_owner_voter.we_vote_id
         new_owner_voter = invitation_owner_voter
+        status += "TO_VOTER-" + str(to_voter_we_vote_id) + " "
 
     # The from_voter and to_voter may both have their own linked_organization_we_vote_id
     organization_manager = OrganizationManager()
@@ -1614,7 +1623,9 @@ def voter_merge_two_accounts_for_api(  # voterMergeTwoAccounts
     update_link_results = voter_device_link_manager.update_voter_device_link(voter_device_link, new_owner_voter)
     if update_link_results['voter_device_link_updated']:
         success = True
-        status += " MERGE_TWO_ACCOUNTS_VOTER_DEVICE_LINK_UPDATED "
+        status += "MERGE_TWO_ACCOUNTS_VOTER_DEVICE_LINK_UPDATED "
+    else:
+        status += "VOTER_DEVICE_LINK_NOT_UPDATED "
 
     # Data healing scripts
     repair_results = position_list_manager.repair_all_positions_for_voter(new_owner_voter.id)
