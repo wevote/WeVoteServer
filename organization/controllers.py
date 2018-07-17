@@ -194,18 +194,27 @@ def organization_analyze_tweets(organization_we_vote_id):
 def move_organization_data_to_another_organization(from_organization_we_vote_id, to_organization_we_vote_id):
     status = ""
     success = False
-    from_organization = Organization()
-    to_organization = Organization()
+    from_organization = None
+    to_organization = None
     data_transfer_complete = False
 
-    if not positive_value_exists(from_organization_we_vote_id) \
-            or not positive_value_exists(to_organization_we_vote_id):
+    if not positive_value_exists(from_organization_we_vote_id):
         results = {
-            'status': 'MOVE_ORGANIZATION_DATA_INCOMING_VARIABLES_MISSING ',
+            'status': 'MOVE_ORGANIZATION-FROM_ORGANIZATION_WE_VOTE_ID_MISSING ',
             'success': False,
             'from_organization': from_organization,
             'to_organization': to_organization,
-            'data_transfer_complete': False,
+            'data_transfer_complete': data_transfer_complete,
+        }
+        return results
+
+    if not positive_value_exists(to_organization_we_vote_id):
+        results = {
+            'status': 'MOVE_ORGANIZATION-TO_ORGANIZATION_WE_VOTE_ID_MISSING ',
+            'success': False,
+            'from_organization': from_organization,
+            'to_organization': to_organization,
+            'data_transfer_complete': data_transfer_complete,
         }
         return results
 
@@ -214,8 +223,10 @@ def move_organization_data_to_another_organization(from_organization_we_vote_id,
     if from_organization_results['organization_found']:
         from_organization = from_organization_results['organization']
     else:
+        status += 'MOVE_ORGANIZATION_DATA_COULD_NOT_RETRIEVE_FROM_ORGANIZATION: ' \
+            + str(from_organization_we_vote_id) + ": " + from_organization_results['status']
         results = {
-            'status': 'MOVE_ORGANIZATION_DATA_COULD_NOT_RETRIEVE_FROM_ORGANIZATION ',
+            'status': status,
             'success': False,
             'from_organization': from_organization,
             'to_organization': to_organization,
@@ -227,8 +238,10 @@ def move_organization_data_to_another_organization(from_organization_we_vote_id,
     if to_organization_results['organization_found']:
         to_organization = to_organization_results['organization']
     else:
+        status += 'MOVE_ORGANIZATION_DATA_COULD_NOT_RETRIEVE_TO_ORGANIZATION: ' \
+            + str(to_organization_we_vote_id) + " " + to_organization_results['status']
         results = {
-            'status': 'MOVE_ORGANIZATION_DATA_COULD_NOT_RETRIEVE_FROM_ORGANIZATION ',
+            'status': status,
             'success': False,
             'from_organization': from_organization,
             'to_organization': to_organization,
@@ -321,8 +334,7 @@ def move_organization_data_to_another_organization(from_organization_we_vote_id,
             to_organization.save()
             data_transfer_complete = True
         except Exception as e:
-            # Fail silently
-            pass
+            status += "COULD_NOT_SAVE_TO_ORGANIZATION: " + str(e) + " "
     else:
         data_transfer_complete = True
 
@@ -402,7 +414,7 @@ def move_organization_to_another_complete(from_organization_id, from_organizatio
         try:
             from_organization.delete()
         except Exception as e:
-            status += "UNABLE_TO_DELETE_FROM_ORGANIZATION "
+            status += "UNABLE_TO_DELETE_FROM_ORGANIZATION: " + str(e) + " "
 
     # We need to make sure to update voter.linked_organization_we_vote_id outside of this routine
 

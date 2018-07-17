@@ -1778,17 +1778,6 @@ def voter_update_view(request):  # voterUpdate
             'notification_flag_integer_to_unset': notification_flag_integer_to_unset,
             'voter_donation_history_list':      None,
         }
-        # 'we_vote_hosted_profile_image_url_large':   we_vote_hosted_profile_image_url_large,
-        # 'we_vote_hosted_profile_image_url_medium':  we_vote_hosted_profile_image_url_medium,
-        # 'we_vote_hosted_profile_image_url_tiny':    we_vote_hosted_profile_image_url_tiny,
-        # 'voter_updated':                            results['voter_updated'],
-        # 'interface_status_flags':                   voter.interface_status_flags,
-        # 'flag_integer_to_set':                      flag_integer_to_set,
-        # 'flag_integer_to_unset':                    flag_integer_to_unset,
-        # 'notification_settings_flags':              voter.notification_settings_flags,
-        # 'notification_flag_integer_to_set':         notification_flag_integer_to_set,
-        # 'notification_flag_integer_to_unset':       notification_flag_integer_to_unset,
-        # 'voter_donation_history_list':              donation_list,
         response = HttpResponse(json.dumps(json_data), content_type='application/json')
         return response
 

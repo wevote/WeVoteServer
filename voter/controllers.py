@@ -1153,7 +1153,7 @@ def voter_merge_two_accounts_for_api(  # voterMergeTwoAccounts
                     voter_manager.update_voter_email_ownership_verified(facebook_owner_voter,
                                                                         email_address_object)
                 except Exception as e:
-                    status += "UNABLE_TO_MAKE_FACEBOOK_EMAIL_THE_PRIMARY "
+                    status += "UNABLE_TO_MAKE_FACEBOOK_EMAIL_THE_PRIMARY " + str(e) + " "
 
         # Now we have voter (from voter_device_id) and email_owner_voter (from email_secret_key)
         # We are going to make the email_owner_voter the new master
@@ -1288,7 +1288,7 @@ def voter_merge_two_accounts_for_api(  # voterMergeTwoAccounts
                                 twitter_owner_voter.save()
                                 repair_twitter_related_organization_caching_now = True
                             except Exception as e:
-                                status += "UNABLE_TO_UPDATE_LINKED_ORGANIZATION_WE_VOTE_ID "
+                                status += "UNABLE_TO_UPDATE_LINKED_ORGANIZATION_WE_VOTE_ID " + str(e) + " "
             else:
                 # If we don't have an organization linked to this twitter_id...
                 # Check to see if there is a LinkToOrganization entry that matches this twitter_id
@@ -1325,7 +1325,7 @@ def voter_merge_two_accounts_for_api(  # voterMergeTwoAccounts
                                 twitter_owner_voter.save()
                                 repair_twitter_related_organization_caching_now = True
                             except Exception as e:
-                                status += "UNABLE_TO_UPDATE_LINKED_ORGANIZATION_WE_VOTE_ID "
+                                status += "UNABLE_TO_UPDATE_LINKED_ORGANIZATION_WE_VOTE_ID " + str(e) + " "
                 else:
                     # Create TwitterLinkToOrganization and for the org
                     # in twitter_owner_voter.linked_organization_we_vote_id
@@ -1350,7 +1350,7 @@ def voter_merge_two_accounts_for_api(  # voterMergeTwoAccounts
                     twitter_owner_voter.save()
                     repair_twitter_related_organization_caching_now = True
                 except Exception as e:
-                    status += "UNABLE_TO_TWITTER_LINK_ORGANIZATION_TO_VOTER "
+                    status += "UNABLE_TO_TWITTER_LINK_ORGANIZATION_TO_VOTER " + str(e) + " "
             else:
                 # Create new organization
                 organization_name = twitter_owner_voter.get_full_name()
@@ -1525,8 +1525,7 @@ def voter_merge_two_accounts_for_api(  # voterMergeTwoAccounts
             voter.save()
             # All positions should have already been moved with move_positions_to_another_voter
         except Exception as e:
-            # Fail silently
-            pass
+            status += "CANNOT_DELETE_LINKED_ORGANIZATION_WE_VOTE_ID: " + str(e) + " "
 
     # Transfer the organizations the from_voter is following to the new_owner_voter
     move_follow_results = move_follow_entries_to_another_voter(from_voter_id, to_voter_id, to_voter_we_vote_id)
@@ -1549,8 +1548,7 @@ def voter_merge_two_accounts_for_api(  # voterMergeTwoAccounts
             voter.email_ownership_is_verified = False
             voter.save()
         except Exception as e:
-            # Fail silently
-            pass
+            status += "CANNOT_CLEAR_OUT_VOTER_EMAIL_INFO: " + str(e) + " "
 
     # Bring over Facebook information
     move_facebook_results = move_facebook_info_to_another_voter(voter, new_owner_voter)
@@ -1598,7 +1596,7 @@ def voter_merge_two_accounts_for_api(  # voterMergeTwoAccounts
     update_link_results = voter_device_link_manager.update_voter_device_link(voter_device_link, new_owner_voter)
     if update_link_results['voter_device_link_updated']:
         success = True
-        status += " MERGE_TWO_ACCOUNTS_VOTER_DEVICE_LINK_UPDATED"
+        status += " MERGE_TWO_ACCOUNTS_VOTER_DEVICE_LINK_UPDATED "
 
     # Data healing scripts
     repair_results = position_list_manager.repair_all_positions_for_voter(new_owner_voter.id)

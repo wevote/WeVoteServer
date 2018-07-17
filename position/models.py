@@ -1427,6 +1427,7 @@ class PositionListManager(models.Model):
         organization_we_vote_id = ""
         organization_id = 0
         if results['voter_found']:
+            status += "REPAIR_POSITIONS-VOTER_FOUND "
             voter = results['voter']
             voter_id = voter.id
             voter_we_vote_id = voter.we_vote_id
@@ -1445,18 +1446,40 @@ class PositionListManager(models.Model):
                 if organization_results['organization_found']:
                     organization = organization_results['organization']
                     organization_id = organization.id
+        else:
+            status += results['status']
 
-        if not positive_value_exists(voter_id) or not positive_value_exists(voter_we_vote_id):
+        if not positive_value_exists(voter_id):
+            status += 'REPAIR_ALL_POSITIONS-MISSING_VOTER_ID '
             results = {
-                'status':           'REPAIR_ALL_POSITIONS-MISSING_VOTER_ID_OR_WE_VOTE_ID ',
+                'status':           status,
                 'success':          False,
                 'repair_complete':  False,
             }
             return results
 
-        if not positive_value_exists(organization_id) or not positive_value_exists(organization_we_vote_id):
+        if not positive_value_exists(voter_we_vote_id):
+            status += 'REPAIR_ALL_POSITIONS-MISSING_VOTER_WE_VOTE_ID '
             results = {
-                'status':           'REPAIR_ALL_POSITIONS-MISSING_ORGANIZATION_ID_OR_WE_VOTE_ID ',
+                'status':           status,
+                'success':          False,
+                'repair_complete':  False,
+            }
+            return results
+
+        if not positive_value_exists(organization_id):
+            status += 'REPAIR_ALL_POSITIONS-MISSING_ORGANIZATION_ID '
+            results = {
+                'status':           status,
+                'success':          False,
+                'repair_complete':  False,
+            }
+            return results
+
+        if not positive_value_exists(organization_we_vote_id):
+            status += 'REPAIR_ALL_POSITIONS-MISSING_ORGANIZATION_WE_VOTE_ID '
+            results = {
+                'status':           status,
                 'success':          False,
                 'repair_complete':  False,
             }
