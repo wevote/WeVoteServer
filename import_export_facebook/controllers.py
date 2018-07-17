@@ -539,6 +539,41 @@ def voter_facebook_sign_in_retrieve_for_api(voter_device_id):  # voterFacebookSi
                                                                                to_voter_we_vote_id)
                     status += " " + move_follow_results['status']
 
+                    # Verify we have the organization from facebook_linked_voter
+                    if positive_value_exists(facebook_linked_voter.linked_organization_we_vote_id):
+                        organization_results = organization_manager.retrieve_organization_from_we_vote_id(
+                            facebook_linked_voter.linked_organization_we_vote_id)
+                        if organization_results['organization_found']:
+                            facebook_linked_organization = organization_results['organization']
+                            to_voter_linked_organization_id = facebook_linked_organization.id
+                            to_voter_linked_organization_we_vote_id = facebook_linked_organization.we_vote_id
+                        else:
+                            # Remove the link to the missing organization so we don't have a future conflict
+                            try:
+                                facebook_linked_voter.linked_organization_we_vote_id = None
+                                facebook_linked_voter.save()
+                                # All positions should have already been moved with move_positions_to_another_voter
+                            except Exception as e:
+                                status += \
+                                    "FAILED_TO_REMOVE_FROM_FACEBOOK_LINKED_VOTER-LINKED_ORGANIZATION_WE_VOTE_ID " \
+                                    "" + str(e) + " "
+
+                    # Verify we have the voter organization
+                    if positive_value_exists(voter.linked_organization_we_vote_id):
+                        organization_results = organization_manager.retrieve_organization_from_we_vote_id(
+                            voter.linked_organization_we_vote_id)
+                        if organization_results['organization_found']:
+                            from_voter_organization = organization_results['organization']
+                            from_voter_linked_organization_we_vote_id = from_voter_organization.we_vote_id
+                        else:
+                            # Remove the link to the missing organization so we don't have a future conflict
+                            try:
+                                voter.linked_organization_we_vote_id = None
+                                voter.save()
+                                # All positions should have already been moved with move_positions_to_another_voter
+                            except Exception as e:
+                                status += "FAILED_TO_REMOVE_FROM_VOTER-LINKED_ORGANIZATION_WE_VOTE_ID " + str(e) + " "
+
                     # Make sure the current voter has an organization
                     if not positive_value_exists(voter.linked_organization_we_vote_id):
                         # Heal the data
@@ -546,6 +581,8 @@ def voter_facebook_sign_in_retrieve_for_api(voter_device_id):  # voterFacebookSi
                         status += repair_results['status']
                         if repair_results['voter_repaired']:
                             voter = repair_results['voter']
+                        else:
+                            status += "CURRENT_VOTER_NOT_REPAIRED "
 
                     # Make sure the facebook voter has an organization
                     if not positive_value_exists(facebook_linked_voter.linked_organization_we_vote_id):
@@ -555,23 +592,8 @@ def voter_facebook_sign_in_retrieve_for_api(voter_device_id):  # voterFacebookSi
                         status += repair_results['status']
                         if repair_results['voter_repaired']:
                             facebook_linked_voter = repair_results['voter']
-
-                    # Verify we have the organization from facebook_linked_voter
-                    if positive_value_exists(facebook_linked_voter.linked_organization_we_vote_id):
-                        organization_results = organization_manager.retrieve_organization_from_we_vote_id(
-                            facebook_linked_voter.linked_organization_we_vote_id)
-                        if organization_results['organization_found']:
-                            facebook_linked_organization = organization_results['organization']
-                            to_voter_linked_organization_id = facebook_linked_organization.id
-                            to_voter_linked_organization_we_vote_id = facebook_linked_organization.we_vote_id
-
-                    # Verify we have the voter organization
-                    if positive_value_exists(voter.linked_organization_we_vote_id):
-                        organization_results = organization_manager.retrieve_organization_from_we_vote_id(
-                            voter.linked_organization_we_vote_id)
-                        if organization_results['organization_found']:
-                            from_voter_organization = organization_results['organization']
-                            from_voter_linked_organization_we_vote_id = from_voter_organization.we_vote_id
+                        else:
+                            status += "FACEBOOK_LINKED_VOTER_NOT_REPAIRED "
 
                     # If we have both organizations, merge them
                     if positive_value_exists(from_voter_linked_organization_we_vote_id) and \
@@ -620,8 +642,7 @@ def voter_facebook_sign_in_retrieve_for_api(voter_device_id):  # voterFacebookSi
                             voter.email_ownership_is_verified = False
                             voter.save()
                         except Exception as e:
-                            # Fail silently
-                            pass
+                            status += "FAILED_TO_SAVE_EMAIL_OWNERSHIP " + str(e) + " "
 
                     if positive_value_exists(voter.linked_organization_we_vote_id):
                         # Remove the link to the organization so we don't have a future conflict
@@ -630,8 +651,7 @@ def voter_facebook_sign_in_retrieve_for_api(voter_device_id):  # voterFacebookSi
                             voter.save()
                             # All positions should have already been moved with move_positions_to_another_voter
                         except Exception as e:
-                            # Fail silently
-                            pass
+                            status += "FAILED_TO_SAVE_LINKED_ORGANIZATION_WE_VOTE_ID " + str(e) + " "
 
                     # Bring over Facebook information
                     move_facebook_results = move_facebook_info_to_another_voter(voter, facebook_linked_voter)
@@ -666,13 +686,21 @@ def voter_facebook_sign_in_retrieve_for_api(voter_device_id):  # voterFacebookSi
                     results = voter_device_link_manager.retrieve_voter_device_link(voter_device_id)
 
                     if results['voter_device_link_found']:
+                        status += "VOTER_DEVICE_LINK_FOUND "
                         voter_device_link = results['voter_device_link']
 
                         update_link_results = voter_device_link_manager.update_voter_device_link(voter_device_link,
                                                                                                  facebook_linked_voter)
                         if update_link_results['voter_device_link_updated']:
                             success = True
-                            status += " FACEBOOK_SAVE_TO_CURRENT_ACCOUNT_VOTER_DEVICE_LINK_UPDATED"
+                            status += "FACEBOOK_SAVE_TO_CURRENT_ACCOUNT_VOTER_DEVICE_LINK_UPDATED "
+                        else:
+                            status += "FACEBOOK_SAVE_TO_CURRENT_ACCOUNT_VOTER_DEVICE_LINK_NOT_UPDATED "
+                    else:
+                        status += "VOTER_DEVICE_LINK_NOT_FOUND-CREATING_NOW "
+                        results = voter_device_link_manager.save_new_voter_device_link(
+                            voter_device_id, facebook_linked_voter.id)
+                        status += results['status']
 
                     # Heal data a second time to be sure
                     repair_results = position_list_manager.repair_all_positions_for_voter(to_voter_id)

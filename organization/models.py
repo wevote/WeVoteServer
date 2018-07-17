@@ -516,8 +516,12 @@ class OrganizationManager(models.Manager):
                     twitter_organization_found = True
                     existing_linked_organization = twitter_organization_results['organization']
                     linked_organization_we_vote_id = existing_linked_organization.we_vote_id
+                else:
+                    status += "NO_ORGANIZATION_FOUND_BASED_ON_TWITTER_LINK "
             else:
-                status += "NO_LINKED_ORGANIZATION_WE_VOTE_ID_FOUND "
+                status += "NO_TWITTER_LINK_TO_ORGANIZATION_FOUND "
+        else:
+            status += "NO_TWITTER_LINK_TO_VOTER_FOUND "
 
         if positive_value_exists(voter.linked_organization_we_vote_id):
             # If here check to see if an organization exists with the value in linked_organization_we_vote_id
@@ -545,6 +549,7 @@ class OrganizationManager(models.Manager):
                     create_twitter_link_to_organization = True
         else:
             # If here, linked_organization_we_vote_id is not stored in the voter record
+            status += "LINKED_ORG_NOT_ATTACHED_TO_VOTER_OBJECT "
 
             # Is there another with linked_organization_we_vote_id matching?
             if positive_value_exists(linked_organization_we_vote_id):
@@ -562,7 +567,8 @@ class OrganizationManager(models.Manager):
                             voter_with_linked_organization_we_vote_id.save()
                             status += "REPAIR_MISSING_LINKED_ORG-REMOVED_LINKED_ORGANIZATION_WE_VOTE_ID "
                         except Exception as e:
-                            status += "REPAIR_MISSING_LINKED_ORG-COULD_NOT_REMOVE_LINKED_ORGANIZATION_WE_VOTE_ID "
+                            status += "REPAIR_MISSING_LINKED_ORG-COULD_NOT_REMOVE_LINKED_ORGANIZATION_WE_VOTE_ID " + \
+                                      str(e) + " "
 
             # If this voter is linked to a Twitter id, see if there is also an org linked to the same Twitter id
             #  so we can use that information to find an existing organization we should link to this voter

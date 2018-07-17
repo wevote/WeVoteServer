@@ -1466,6 +1466,15 @@ def voter_merge_two_accounts_for_api(  # voterMergeTwoAccounts
         if from_linked_organization_results['organization_found']:
             from_linked_organization = from_linked_organization_results['organization']
             from_voter_linked_organization_id = from_linked_organization.id
+        else:
+            # Remove the link to the organization so we don't have a future conflict
+            try:
+                from_voter_linked_organization_we_vote_id = None
+                voter.linked_organization_we_vote_id = None
+                voter.save()
+                # All positions should have already been moved with move_positions_to_another_voter
+            except Exception as e:
+                status += "FAILED_TO_REMOVE_LINKED_ORGANIZATION_WE_VOTE_ID-FROM_VOTER " + str(e) + " "
 
     to_voter_linked_organization_we_vote_id = new_owner_voter.linked_organization_we_vote_id
     to_voter_linked_organization_id = 0
@@ -1475,6 +1484,15 @@ def voter_merge_two_accounts_for_api(  # voterMergeTwoAccounts
         if to_linked_organization_results['organization_found']:
             to_linked_organization = to_linked_organization_results['organization']
             to_voter_linked_organization_id = to_linked_organization.id
+        else:
+            # Remove the link to the organization so we don't have a future conflict
+            try:
+                to_voter_linked_organization_we_vote_id = None
+                new_owner_voter.linked_organization_we_vote_id = None
+                new_owner_voter.save()
+                # All positions should have already been moved with move_positions_to_another_voter
+            except Exception as e:
+                status += "FAILED_TO_REMOVE_LINKED_ORGANIZATION_WE_VOTE_ID-TO_VOTER " + str(e) + " "
 
     # If the to_voter does not have a linked_organization_we_vote_id, then we should move the from_voter's
     #  organization_we_vote_id
