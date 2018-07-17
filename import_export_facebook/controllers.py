@@ -474,8 +474,9 @@ def voter_facebook_sign_in_retrieve_for_api(voter_device_id):  # voterFacebookSi
 
     facebook_link_results = facebook_manager.retrieve_facebook_link_to_voter(facebook_auth_response.facebook_user_id)
     if facebook_link_results['facebook_link_to_voter_found']:
+        status += "FACEBOOK_LINK_TO_VOTER_FOUND"
         facebook_link_to_voter = facebook_link_results['facebook_link_to_voter']
-        status += " " + facebook_link_results['status']
+        status += facebook_link_results['status']
         voter_we_vote_id_attached_to_facebook = facebook_link_to_voter.voter_we_vote_id
         facebook_secret_key = facebook_link_to_voter.secret_key
         repair_facebook_related_voter_caching_now = True
@@ -486,6 +487,7 @@ def voter_facebook_sign_in_retrieve_for_api(voter_device_id):  # voterFacebookSi
             voter_with_facebook_user_id = voter_results['voter']
             voter_we_vote_id_attached_to_facebook = voter_with_facebook_user_id.we_vote_id
             if positive_value_exists(voter_we_vote_id_attached_to_facebook):
+                status += "FACEBOOK_LINK_TO_VOTER_FOUND-FACEBOOK_USER_ID_IN_VOTER_ENTRY "
                 save_results = facebook_manager.create_facebook_link_to_voter(
                     facebook_auth_response.facebook_user_id, voter_we_vote_id_attached_to_facebook)
                 status += " " + save_results['status']
@@ -502,14 +504,17 @@ def voter_facebook_sign_in_retrieve_for_api(voter_device_id):  # voterFacebookSi
         # We do not want to allow people to separate their facebook_email from their facebook account, but
         #  there are conditions where it might happen and we can't prevent it. (Like someone signs in with Email A,
         #  then signs into Facebook which uses Email B, then changes their Facebook email to Email A.)
+        status += "CHECK_EMAIL_FOR_LINK_TO_FACEBOOK "
         email_manager = EmailManager()
         temp_voter_we_vote_id = ""
         email_results = email_manager.retrieve_primary_email_with_ownership_verified(
             temp_voter_we_vote_id, facebook_auth_response.facebook_email)
         if email_results['email_address_object_found']:
+            status += "EMAIL_FOUND "
             # See if we need to heal the data - look in the voter table for any records with a facebook_email
             email_address_object = email_results['email_address_object']
             voter_we_vote_id_attached_to_facebook_email = email_address_object.voter_we_vote_id
+            voter_we_vote_id_attached_to_facebook = voter_we_vote_id_attached_to_facebook_email
 
             save_results = facebook_manager.create_facebook_link_to_voter(
                 facebook_auth_response.facebook_user_id, voter_we_vote_id_attached_to_facebook_email)
@@ -681,34 +686,50 @@ def voter_facebook_sign_in_retrieve_for_api(voter_device_id):  # voterFacebookSi
                     merge_voter_accounts_results = merge_voter_accounts(voter, facebook_linked_voter)
                     status += " " + merge_voter_accounts_results['status']
 
-                    # And finally, relink the current voter_device_id to to_voter
-                    voter_device_link_manager = VoterDeviceLinkManager()
-                    results = voter_device_link_manager.retrieve_voter_device_link(voter_device_id)
-
-                    if results['voter_device_link_found']:
-                        status += "VOTER_DEVICE_LINK_FOUND "
-                        voter_device_link = results['voter_device_link']
-
-                        update_link_results = voter_device_link_manager.update_voter_device_link(voter_device_link,
-                                                                                                 facebook_linked_voter)
-                        if update_link_results['voter_device_link_updated']:
-                            success = True
-                            status += "FACEBOOK_SAVE_TO_CURRENT_ACCOUNT_VOTER_DEVICE_LINK_UPDATED "
-                        else:
-                            status += "FACEBOOK_SAVE_TO_CURRENT_ACCOUNT_VOTER_DEVICE_LINK_NOT_UPDATED "
-                    else:
-                        status += "VOTER_DEVICE_LINK_NOT_FOUND "
-                    # DALE 2018-07-17 Not sure we want to create a new link if it doesn't exist
-                    #     results = voter_device_link_manager.save_new_voter_device_link(
-                    #         voter_device_id, facebook_linked_voter.id)
-                    #     status += results['status']
-
                     # Heal data a second time to be sure
                     repair_results = position_list_manager.repair_all_positions_for_voter(to_voter_id)
                     status += repair_results['status']
 
         else:
+            status += "EMAIL_NOT_FOUND "
             voter_we_vote_id_attached_to_facebook_email = ""
+
+    if positive_value_exists(voter_we_vote_id_attached_to_facebook):
+        # Relink the current voter_device_id to to_voter
+        if not facebook_linked_voter or not hasattr(facebook_linked_voter, "we_vote_id") \
+                or not positive_value_exists(facebook_linked_voter.we_vote_id):
+            facebook_linked_voter_results = \
+                voter_manager.retrieve_voter_by_we_vote_id(voter_we_vote_id_attached_to_facebook)
+            if facebook_linked_voter_results['voter_found']:
+                facebook_linked_voter = facebook_linked_voter_results['voter']
+
+        if facebook_linked_voter and hasattr(facebook_linked_voter, "we_vote_id") \
+                and positive_value_exists(facebook_linked_voter.we_vote_id):
+            voter_device_link_manager = VoterDeviceLinkManager()
+            results = voter_device_link_manager.retrieve_voter_device_link(voter_device_id)
+
+            if results['voter_device_link_found']:
+                status += "VOTER_DEVICE_LINK_FOUND "
+                voter_device_link = results['voter_device_link']
+
+                update_link_results = voter_device_link_manager.update_voter_device_link(voter_device_link,
+                                                                                         facebook_linked_voter)
+                if update_link_results['voter_device_link_updated']:
+                    success = True
+                    status += "FACEBOOK_SAVE_TO_CURRENT_ACCOUNT_VOTER_DEVICE_LINK_UPDATED "
+                else:
+                    status += "FACEBOOK_SAVE_TO_CURRENT_ACCOUNT_VOTER_DEVICE_LINK_NOT_UPDATED: "
+                    status += update_link_results['status']
+            else:
+                status += "VOTER_DEVICE_LINK_NOT_FOUND "
+                # DALE 2018-07-17 Not sure we want to create a new link if it doesn't exist
+                #     results = voter_device_link_manager.save_new_voter_device_link(
+                #         voter_device_id, facebook_linked_voter.id)
+                #     status += results['status']
+        else:
+            status += "FACEBOOK_LINKED_VOTER_NOT_FOUND_FOR_VOTER_DEVICE_LINK "
+    else:
+        status += "VOTER_WE_VOTE_ID_ATTACHED_TO_FACEBOOK_MISSING "
 
     if repair_facebook_related_voter_caching_now:
         repair_results = voter_manager.repair_facebook_related_voter_caching(facebook_auth_response.facebook_user_id)

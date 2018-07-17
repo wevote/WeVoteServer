@@ -2122,6 +2122,8 @@ class VoterDeviceLinkManager(models.Model):
         """
         Update existing voter_device_link with a new voter_id or google_civic_election_id
         """
+        status = ""
+        success = True
         error_result = False
         exception_record_not_saved = False
         missing_required_variables = False
@@ -2148,8 +2150,12 @@ class VoterDeviceLinkManager(models.Model):
             handle_record_not_saved_exception(e, logger=logger)
             error_result = True
             exception_record_not_saved = True
+            status += "UPDATE_VOTER_DEVICE_LINK_SAVE_FAILURE: " + str(e) + " "
+            success = False
 
         results = {
+            'status':                       status,
+            'success':                      success,
             'error_result':                 error_result,
             'missing_required_variables':   missing_required_variables,
             'RecordNotSaved':               exception_record_not_saved,
