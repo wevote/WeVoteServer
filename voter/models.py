@@ -416,7 +416,7 @@ class VoterManager(BaseUserManager):
             voter_results = self.retrieve_voter_by_we_vote_id(
                 facebook_link_to_voter.voter_we_vote_id)
             if not voter_results['voter_found']:
-                status += "COULD_NOT_UPDATE_LINKED_VOTER "
+                status += "REPAIR_FACEBOOK_CACHING-COULD_NOT_UPDATE_LINKED_VOTER "
             else:
                 linked_voter = voter_results['voter']
                 try:
@@ -426,12 +426,12 @@ class VoterManager(BaseUserManager):
                         save_voter = True
                     if save_voter:
                         linked_voter.save()
-                        status += "SAVED_LINKED_VOTER "
+                        status += "REPAIR_FACEBOOK_CACHING-SAVED_LINKED_VOTER "
                     else:
-                        status += "NO_NEED_TO_SAVE_LINKED_VOTER "
+                        status += "REPAIR_FACEBOOK_CACHING-NO_NEED_TO_SAVE_LINKED_VOTER "
 
                 except Exception as e:
-                    status += "COULD_NOT_SAVE_LINKED_VOTER "
+                    status += "REPAIR_FACEBOOK_CACHING-COULD_NOT_SAVE_LINKED_VOTER " + str(e) + " "
 
         results = {
             'status': status,
@@ -474,7 +474,7 @@ class VoterManager(BaseUserManager):
                 twitter_user_manager.retrieve_twitter_user_locally_or_remotely(twitter_link_to_voter.twitter_id)
 
             if not twitter_results['twitter_user_found']:
-                status += "TWITTER_USER_NOT_FOUND "
+                status += "REPAIR_TWITTER_CACHING-TWITTER_USER_NOT_FOUND "
             else:
                 twitter_user = twitter_results['twitter_user']
 
@@ -506,14 +506,14 @@ class VoterManager(BaseUserManager):
 
                     if len(voter_list_objects):
                         voter_list_found = True
-                        status += 'TWITTER_RELATED_VOTERS_RETRIEVED '
+                        status += 'REPAIR_TWITTER_CACHING-TWITTER_RELATED_VOTERS_RETRIEVED '
                         success = True
                     else:
-                        status += 'NO_TWITTER_RELATED_VOTERS_RETRIEVED1 '
+                        status += 'REPAIR_TWITTER_CACHING-NO_TWITTER_RELATED_VOTERS_RETRIEVED1 '
                         success = True
                 except Voter.DoesNotExist:
                     # No voters found. Not a problem.
-                    status += 'NO_TWITTER_RELATED_VOTERS_RETRIEVED2 '
+                    status += 'REPAIR_TWITTER_CACHING-NO_TWITTER_RELATED_VOTERS_RETRIEVED2 '
                     voter_list_objects = []
                     success = True
                 except Exception as e:
@@ -542,7 +542,7 @@ class VoterManager(BaseUserManager):
                 voter_results = self.retrieve_voter_by_we_vote_id(
                     twitter_link_to_voter.voter_we_vote_id)
                 if not voter_results['voter_found']:
-                    status += "COULD_NOT_UPDATE_LINKED_VOTER "
+                    status += "REPAIR_TWITTER_CACHING-COULD_NOT_UPDATE_LINKED_VOTER "
                 else:
                     linked_voter = voter_results['voter']
                     try:
@@ -576,12 +576,12 @@ class VoterManager(BaseUserManager):
                             save_voter = True
                         if save_voter:
                             linked_voter.save()
-                            status += "SAVED_LINKED_VOTER "
+                            status += "REPAIR_TWITTER_CACHING-SAVED_LINKED_VOTER "
                         else:
-                            status += "NO_NEED_TO_SAVE_LINKED_VOTER "
+                            status += "REPAIR_TWITTER_CACHING-NO_NEED_TO_SAVE_LINKED_VOTER "
 
                     except Exception as e:
-                        status += "COULD_NOT_SAVE_LINKED_VOTER "
+                        status += "REPAIR_TWITTER_CACHING-COULD_NOT_SAVE_LINKED_VOTER " + str(e) + " "
 
         results = {
             'status': status,

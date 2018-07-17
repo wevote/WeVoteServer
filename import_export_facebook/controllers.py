@@ -697,10 +697,11 @@ def voter_facebook_sign_in_retrieve_for_api(voter_device_id):  # voterFacebookSi
                         else:
                             status += "FACEBOOK_SAVE_TO_CURRENT_ACCOUNT_VOTER_DEVICE_LINK_NOT_UPDATED "
                     else:
-                        status += "VOTER_DEVICE_LINK_NOT_FOUND-CREATING_NOW "
-                        results = voter_device_link_manager.save_new_voter_device_link(
-                            voter_device_id, facebook_linked_voter.id)
-                        status += results['status']
+                        status += "VOTER_DEVICE_LINK_NOT_FOUND "
+                    # DALE 2018-07-17 Not sure we want to create a new link if it doesn't exist
+                    #     results = voter_device_link_manager.save_new_voter_device_link(
+                    #         voter_device_id, facebook_linked_voter.id)
+                    #     status += results['status']
 
                     # Heal data a second time to be sure
                     repair_results = position_list_manager.repair_all_positions_for_voter(to_voter_id)
