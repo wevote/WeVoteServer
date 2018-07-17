@@ -869,7 +869,7 @@ class VoterManager(BaseUserManager):
                     status += "ABLE_TO_CLEAN_OUT_VOTER_FOUND_BY_EMAIL "
                     success = True
                 except Exception as e:
-                    status += "UNABLE_TO_CLEAN_OUT_VOTER_FOUND_BY_EMAIL "
+                    status += "UNABLE_TO_CLEAN_OUT_VOTER_FOUND_BY_EMAIL " + str(e) + " "
 
         if positive_value_exists(email_address_object.we_vote_id):
             voter_by_primary_email_results = voter_manager.retrieve_voter_by_primary_email_we_vote_id(
@@ -886,7 +886,7 @@ class VoterManager(BaseUserManager):
                     status += "ABLE_TO_CLEAN_OUT_VOTER_FOUND_BY_PRIMARY_EMAIL_WE_VOTE_ID "
                     success = True
                 except Exception as e:
-                    status += "UNABLE_TO_CLEAN_OUT_VOTER_FOUND_BY_PRIMARY_EMAIL_WE_VOTE_ID "
+                    status += "UNABLE_TO_CLEAN_OUT_VOTER_FOUND_BY_PRIMARY_EMAIL_WE_VOTE_ID " + str(e) + " "
 
         results = {
             'success': success,
@@ -917,9 +917,9 @@ class VoterManager(BaseUserManager):
 
             voter.save()
             success = True
-            status = "SAVED_VOTER_FACEBOOK_VALUES"
+            status = "SAVED_FACEBOOK_USER_VALUES "
         except Exception as e:
-            status = "UNABLE_TO_SAVE_VOTER_FACEBOOK_VALUES"
+            status = "UNABLE_TO_SAVE_FACEBOOK_USER_VALUES " + str(e) + " "
             success = False
 
         results = {
@@ -952,9 +952,9 @@ class VoterManager(BaseUserManager):
 
             voter.save()
             success = True
-            status = "SAVED_VOTER_FACEBOOK_VALUES"
+            status = "SAVED_FACEBOOK_USER_VALUES_FROM_DICT "
         except Exception as e:
-            status = "UNABLE_TO_SAVE_VOTER_FACEBOOK_VALUES"
+            status = "UNABLE_TO_SAVE_FACEBOOK_USER_VALUES_FROM_DICT " + str(e) + " "
             success = False
             handle_record_not_saved_exception(e, logger=logger, exception_message_optional=status)
 
