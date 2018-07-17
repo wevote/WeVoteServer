@@ -848,8 +848,9 @@ def friend_invitation_by_facebook_send_for_api(voter_device_id, recipients_faceb
     facebook_link_to_voter_results = facebook_manager.retrieve_facebook_link_to_voter_from_voter_we_vote_id(
         sender_voter_we_vote_id)
     if not facebook_link_to_voter_results['facebook_link_to_voter_found']:
+        status += "FRIEND_INVITATION_BY_FACEBOOK-FACEBOOK_LINK_TO_VOTER_NOT_FOUND "
         error_results = {
-            'status':                                       "FACEBOOK_LINK_TO_VOTER_NOT_FOUND",
+            'status':                                       status,
             'success':                                      False,
             'voter_device_id':                              voter_device_id,
             'all_friends_facebook_link_created_results':    all_friends_facebook_link_created_results
