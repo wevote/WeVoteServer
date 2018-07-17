@@ -468,7 +468,6 @@ class FacebookManager(models.Model):
         }
         return results
 
-
     def retrieve_facebook_auth_response(self, voter_device_id):
         """
 
@@ -486,19 +485,19 @@ class FacebookManager(models.Model):
                 facebook_auth_response_id = facebook_auth_response.id
                 facebook_auth_response_found = True
                 success = True
-                status = "RETRIEVE_FACEBOOK_AUTH_RESPONSE_FOUND_BY_VOTER_DEVICE_ID"
+                status = "RETRIEVE_FACEBOOK_AUTH_RESPONSE_FOUND_BY_VOTER_DEVICE_ID "
             else:
                 facebook_auth_response_found = False
                 success = False
-                status = "RETRIEVE_FACEBOOK_AUTH_RESPONSE_VARIABLES_MISSING"
+                status = "RETRIEVE_FACEBOOK_AUTH_RESPONSE_VARIABLES_MISSING "
         except FacebookAuthResponse.DoesNotExist:
             facebook_auth_response_found = False
             success = True
-            status = "RETRIEVE_FACEBOOK_AUTH_RESPONSE_NOT_FOUND"
+            status = "RETRIEVE_FACEBOOK_AUTH_RESPONSE_NOT_FOUND "
         except Exception as e:
             facebook_auth_response_found = False
             success = False
-            status = 'FAILED retrieve_facebook_auth_response'
+            status = 'FAILED retrieve_facebook_auth_response '
             handle_exception(e, logger=logger, exception_message=status)
 
         results = {

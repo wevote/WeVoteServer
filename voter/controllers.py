@@ -2583,7 +2583,7 @@ def voter_split_into_two_accounts_for_api(voter_device_id, split_off_twitter):  
 
     # Make sure this voter has another way to sign in once twitter is split off
     if from_voter.signed_in_facebook() or from_voter.signed_in_with_email():
-        pass
+        status += "CONFIRMED-VOTER_HAS_ANOTHER_WAY_TO_SIGN_IN "
     else:
         error_results = {
             'status':               "VOTER_SPLIT_INTO_TWO_ACCOUNTS-NO_OTHER_WAY_TO_SIGN_IN",
@@ -2737,7 +2737,7 @@ def voter_split_into_two_accounts_for_api(voter_device_id, split_off_twitter):  
         duplicate_organization_results = organization_manager.duplicate_organization_destination_twitter(
             from_voter_linked_organization)
         if not duplicate_organization_results['organization_duplicated']:
-            status += "NOT_ABLE_TO_DUPLICATE_ORGANIZATION "
+            status += "NOT_ABLE_TO_DUPLICATE_ORGANIZATION: " + duplicate_organization_results['status']
         else:
             to_voter_linked_organization = duplicate_organization_results['organization']
             to_voter_linked_organization_id = to_voter_linked_organization.id

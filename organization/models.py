@@ -257,13 +257,13 @@ class OrganizationManager(models.Manager):
             organization.we_vote_id = None  # Clear out existing we_vote_id
             organization.generate_new_we_vote_id()
             organization.save()  # We do this so the we_vote_id is created
-            status += "DUPLICATE_ORGANIZATION_SUCCESSFUL"
+            status += "DUPLICATE_ORGANIZATION_SUCCESSFUL "
             success = True
             organization_duplicated = True
         except Exception as e:
             handle_record_not_saved_exception(e, logger=logger)
             organization = Organization
-            status += "DUPLICATE_ORGANIZATION_FAILED"
+            status += "DUPLICATE_ORGANIZATION_FAILED " + str(e) + " "
         results = {
             'success':                  success,
             'status':                   status,
