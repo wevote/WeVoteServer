@@ -474,7 +474,7 @@ def voter_facebook_sign_in_retrieve_for_api(voter_device_id):  # voterFacebookSi
 
     facebook_link_results = facebook_manager.retrieve_facebook_link_to_voter(facebook_auth_response.facebook_user_id)
     if facebook_link_results['facebook_link_to_voter_found']:
-        status += "FACEBOOK_LINK_TO_VOTER_FOUND"
+        status += "FACEBOOK_SIGN_IN_RETRIEVE-FACEBOOK_LINK_TO_VOTER_FOUND "
         facebook_link_to_voter = facebook_link_results['facebook_link_to_voter']
         status += facebook_link_results['status']
         voter_we_vote_id_attached_to_facebook = facebook_link_to_voter.voter_we_vote_id
@@ -696,8 +696,16 @@ def voter_facebook_sign_in_retrieve_for_api(voter_device_id):  # voterFacebookSi
 
     if positive_value_exists(voter_we_vote_id_attached_to_facebook):
         # Relink the current voter_device_id to to_voter
-        if not facebook_linked_voter or not hasattr(facebook_linked_voter, "we_vote_id") \
-                or not positive_value_exists(facebook_linked_voter.we_vote_id):
+        facebook_linked_voter_object_exists = False
+        try:
+            facebook_linked_voter
+            if not hasattr(facebook_linked_voter, "we_vote_id") \
+                    or not positive_value_exists(facebook_linked_voter.we_vote_id):
+                facebook_linked_voter_object_exists = True
+        except Exception as e:
+            pass
+
+        if not positive_value_exists(facebook_linked_voter_object_exists):
             facebook_linked_voter_results = \
                 voter_manager.retrieve_voter_by_we_vote_id(voter_we_vote_id_attached_to_facebook)
             if facebook_linked_voter_results['voter_found']:
