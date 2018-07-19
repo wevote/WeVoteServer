@@ -294,6 +294,13 @@ span.wrap_word { word-break: break-word; }
     <div class="col-sm-8">
         <input type="text" name="facebook_url" id="facebook_url_id" class="form-control"
                value="{% if candidate %}{{ candidate.facebook_url|default_if_none:"" }}{% else %}{{ facebook_url|default_if_none:"" }}{% endif %}" />
+      {% if candidate.facebook_url %}
+      <a href="{% url 'import_export_facebook:scrape_and_save_facebook_photo' %}?candidate_we_vote_id={{ candidate.we_vote_id }}&google_civic_election_id={{ google_civic_election_id }}">
+            Refresh Facebook Photo</a>
+          {% if candidate.facebook_profile_image_url_https %}
+          (<a href="{{ candidate.facebook_profile_image_url_https|default_if_none:"" }}" target="_blank">see photo in new window</a>)
+          {% endif %}
+      {% endif %}
     </div>
 </div>
 

@@ -964,8 +964,10 @@ def voter_facebook_sign_in_save_for_api(voter_device_id,  # voterFacebookSignInS
     }
     return json_data
 
+
 def scrape_facebook_photo_url_from_web_page(facebook_candidate_url):
     candidate_we_vote_ids_list = []
+    photo_url = ""
     status = ""
     success = False
     if "http://" in facebook_candidate_url:
@@ -987,7 +989,7 @@ def scrape_facebook_photo_url_from_web_page(facebook_candidate_url):
             'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/67.0.3396.99 Safari/537.36',
            }
 
-    #https://www.facebook.com/KamalaHarris/
+    # https://www.facebook.com/KamalaHarris/
     # <div class ="uiScaledImageContainer _62ui">
     #     <img class="scaledImageFitWidth img" src="https://scontent.fsnc1-1.fna.fbcdn.net/v/t1.0-1/p720x720/19420547_10155764935092923_4741672932915645516_n.jpg?_nc_cat=1&amp;oh=2e3a0af38385415f680ccc346faf876f&amp;oe=5BCE1B27" alt="" width="500" height="500" data-ft="&#123;&quot;tn&quot;:&quot;-^&quot;&#125;" itemprop="image" />
     # </div>
@@ -1003,7 +1005,7 @@ def scrape_facebook_photo_url_from_web_page(facebook_candidate_url):
                 except Exception:
                     logger.info("==> EXCEPTION ON DECODE")
                     continue
-                #logger.info("==>" + decoded_line)
+                # logger.info("==>" + decoded_line)
                 if 'scaledImageFitWidth img' in decoded_line:
                     p = re.compile('<img class=\"scaledImageFitWidth img\" src=\"(.*?)\"')
                     photo_url = p.search(decoded_line).group(1).replace("&amp;", "&")

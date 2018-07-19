@@ -2,10 +2,10 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
-import wevote_functions.admin
-from admin_tools.views import redirect_to_sign_in_page
-from candidate.models import CandidateCampaign
 from .controllers import scrape_facebook_photo_url_from_web_page
+from admin_tools.views import redirect_to_sign_in_page
+from candidate.controllers import FACEBOOK, save_image_to_candidate_table
+from candidate.models import CandidateCampaign
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.core.urlresolvers import reverse
@@ -30,8 +30,11 @@ logger = wevote_functions.admin.get_logger(__name__)
 # Get all the lines for a specific google_civic_election_id
 #   SELECT * FROM public.candidate_candidatecampaign where google_civic_election_id = '1000052';
 # Ignoring remote_request_history_manager, how many facebook_urls are there to process?
-#   SELECT COUNT(facebook_url) FROM public.candidate_candidatecampaign where facebook_profile_image_url_https is null and google_civic_election_id = '1000052'; … 17
-# Clear the wevote_settings_remoterequesthistory table to allow all lines to be processed, by right cliking on the table in pgAdmin and choosing truncate
+#   SELECT COUNT(facebook_url) FROM public.candidate_candidatecampaign where
+# facebook_profile_image_url_https is null and google_civic_election_id = '1000052'; … 17
+# Clear the wevote_settings_remoterequesthistory table to allow all lines to be processed, by right cliking
+# on the table in pgAdmin and choosing truncate
+
 
 @login_required
 def bulk_retrieve_facebook_photos_view(request):
@@ -69,7 +72,7 @@ def bulk_retrieve_facebook_photos_view(request):
             candidate_list = candidate_list[:limit]
         candidate_list_count = candidate_list.count()
 
-         # Run Facebook account search and analysis on candidates with a linked or possible Facebook account
+        # Run Facebook account search and analysis on candidates with a linked or possible Facebook account
         number_of_candidates_to_search = 25
         current_candidate_index = 0
         while positive_value_exists(number_of_candidates_to_search) \
@@ -95,8 +98,10 @@ def bulk_retrieve_facebook_photos_view(request):
                             logger.info("Rejected URL: " + one_candidate.facebook_url + " X '" + photo_url + "'")
                         else:
                             logger.info("Scraped URL: " + one_candidate.facebook_url + " ==> " + photo_url)
-                            one_candidate.facebook_profile_image_url_https = photo_url
-                            one_candidate.save()
+                            save_image_to_candidate_table(one_candidate, photo_url,
+                                                          one_candidate.facebook_url, FACEBOOK)
+                            # one_candidate.facebook_profile_image_url_https = photo_url
+                            # one_candidate.save()
                     number_of_candidates_to_search -= 1
                     # Create a record denoting that we have retrieved from Facebook for this candidate
                     save_results_history = remote_request_history_manager.create_remote_request_history_entry(
@@ -111,6 +116,88 @@ def bulk_retrieve_facebook_photos_view(request):
         pass
 
     return HttpResponseRedirect(reverse('candidate:candidate_list', args=()) +
+                                '?google_civic_election_id=' + str(google_civic_election_id) +
+                                '&state_code=' + str(state_code) +
+                                '&hide_candidate_tools=' + str(hide_candidate_tools) +
+                                '&page=' + str(page)
+                                )
+
+
+@login_required
+def scrape_and_save_facebook_photo_view(request):
+    remote_request_history_manager = RemoteRequestHistoryManager()
+
+    authority_required = {'verified_volunteer'}  # admin, verified_volunteer
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
+    google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
+    hide_candidate_tools = request.GET.get('hide_candidate_tools', False)
+    page = request.GET.get('page', 0)
+    state_code = request.GET.get('state_code', '')
+    candidate_we_vote_id = request.GET.get('candidate_we_vote_id', "")
+
+    if not positive_value_exists(candidate_we_vote_id):
+        messages.add_message(request, messages.ERROR,
+                             'scrape_and_save_facebook_photo_view, Candidate not specified')
+        return HttpResponseRedirect(reverse('candidate:candidate_list', args=()) +
+                                    '?google_civic_election_id=' + str(google_civic_election_id) +
+                                    '&state_code=' + str(state_code) +
+                                    '&hide_candidate_tools=' + str(hide_candidate_tools) +
+                                    '&page=' + str(page)
+                                    )
+
+    try:
+        candidate_query = CandidateCampaign.objects.all()
+        candidate_query = candidate_query.filter(we_vote_id__iexact=candidate_we_vote_id)
+        candidate_list = list(candidate_query)
+        one_candidate = candidate_list[0]
+
+        # If the candidate has a facebook_url, but no facebook_profile_image_url_https,
+        # see if we already tried to scrape them
+        if not positive_value_exists(one_candidate.facebook_url):
+            messages.add_message(request, messages.ERROR,
+                                 'scrape_and_save_facebook_photo_view, No facebook_url found.')
+            return HttpResponseRedirect(
+                reverse('candidate:candidate_edit_we_vote_id', args=(one_candidate.we_vote_id,)) +
+                '?google_civic_election_id=' + str(google_civic_election_id) +
+                '&state_code=' + str(state_code) +
+                '&hide_candidate_tools=' + str(hide_candidate_tools) +
+                '&page=' + str(page)
+                )
+
+        # Facebook profile image url scrape has not been run on this candidate yet
+        results = scrape_facebook_photo_url_from_web_page(one_candidate.facebook_url)
+        if results.get('success'):
+            photo_url = results.get('photo_url')
+            if not photo_url.startswith('https://scontent'):
+                logger.info("Rejected URL: " + one_candidate.facebook_url + " X '" + photo_url + "'")
+                messages.add_message(request, messages.ERROR, 'Facebook photo NOT retrieved.')
+            else:
+                logger.info("Scraped URL: " + one_candidate.facebook_url + " ==> " + photo_url)
+                save_image_to_candidate_table(one_candidate, photo_url,
+                                              one_candidate.facebook_url, FACEBOOK)
+                messages.add_message(request, messages.INFO, 'Facebook photo retrieved.')
+
+            # Create a record denoting that we have retrieved from Facebook for this candidate
+            save_results_history = remote_request_history_manager.create_remote_request_history_entry(
+                RETRIEVE_POSSIBLE_FACEBOOK_PHOTOS, one_candidate.google_civic_election_id,
+                one_candidate.we_vote_id, None, 1, "CANDIDATE_FACEBOOK_URL_PARSED " + one_candidate.facebook_url)
+        else:
+            messages.add_message(request, messages.ERROR, 'Facebook photo NOT retrieved (2).')
+
+    except CandidateCampaign.DoesNotExist:
+        # This is fine, do nothing
+        messages.add_message(request, messages.ERROR,
+                             'scrape_and_save_facebook_photo_view, Candidate not found.')
+        return HttpResponseRedirect(reverse('candidate:candidate_list', args=()) +
+                                    '?google_civic_election_id=' + str(google_civic_election_id) +
+                                    '&state_code=' + str(state_code) +
+                                    '&hide_candidate_tools=' + str(hide_candidate_tools) +
+                                    '&page=' + str(page)
+                                    )
+
+    return HttpResponseRedirect(reverse('candidate:candidate_edit_we_vote_id', args=(one_candidate.we_vote_id,)) +
                                 '?google_civic_election_id=' + str(google_civic_election_id) +
                                 '&state_code=' + str(state_code) +
                                 '&hide_candidate_tools=' + str(hide_candidate_tools) +
