@@ -1347,62 +1347,63 @@ def retrieve_candidate_list_for_all_upcoming_elections(upcoming_google_civic_ele
     return results
 
 
-def save_google_search_image_to_candidate_table(candidate, google_search_image_file, google_search_link):
+def save_image_to_candidate_table(candidate, image_url, source_link, kind_of_source_website=None):
     cache_results = {
         'we_vote_hosted_profile_image_url_large':   None,
         'we_vote_hosted_profile_image_url_medium':  None,
         'we_vote_hosted_profile_image_url_tiny':    None
     }
 
-    google_search_website_name = extract_website_from_url(google_search_link)
-    if BALLOTPEDIA_IMAGE_SOURCE in google_search_website_name:
+    if not positive_value_exists(kind_of_source_website):
+        kind_of_source_website = extract_website_from_url(source_link)
+    if BALLOTPEDIA_IMAGE_SOURCE in kind_of_source_website:
         cache_results = cache_master_and_resized_image(
             candidate_id=candidate.id, candidate_we_vote_id=candidate.we_vote_id,
-            ballotpedia_profile_image_url=google_search_image_file,
+            ballotpedia_profile_image_url=image_url,
             image_source=BALLOTPEDIA_IMAGE_SOURCE)
         cached_ballotpedia_profile_image_url_https = cache_results['cached_ballotpedia_image_url_https']
         candidate.ballotpedia_photo_url = cached_ballotpedia_profile_image_url_https
-        candidate.ballotpedia_page_title = google_search_link
+        candidate.ballotpedia_page_title = source_link
 
-    elif LINKEDIN in google_search_website_name:
+    elif LINKEDIN in kind_of_source_website:
         cache_results = cache_master_and_resized_image(
             candidate_id=candidate.id, candidate_we_vote_id=candidate.we_vote_id,
-            linkedin_profile_image_url=google_search_image_file,
+            linkedin_profile_image_url=image_url,
             image_source=LINKEDIN)
         cached_linkedin_profile_image_url_https = cache_results['cached_linkedin_image_url_https']
-        candidate.linkedin_url = google_search_link
+        candidate.linkedin_url = source_link
         candidate.linkedin_photo_url = cached_linkedin_profile_image_url_https
 
-    elif WIKIPEDIA in google_search_website_name:
+    elif WIKIPEDIA in kind_of_source_website:
         cache_results = cache_master_and_resized_image(
             candidate_id=candidate.id, candidate_we_vote_id=candidate.we_vote_id,
-            wikipedia_profile_image_url=google_search_image_file,
+            wikipedia_profile_image_url=image_url,
             image_source=WIKIPEDIA)
         cached_wikipedia_profile_image_url_https = cache_results['cached_wikipedia_image_url_https']
         candidate.wikipedia_photo_url = cached_wikipedia_profile_image_url_https
-        candidate.wikipedia_page_title = google_search_link
+        candidate.wikipedia_page_title = source_link
 
-    elif TWITTER in google_search_website_name:
-        twitter_screen_name = extract_twitter_handle_from_text_string(google_search_link)
+    elif TWITTER in kind_of_source_website:
+        twitter_screen_name = extract_twitter_handle_from_text_string(source_link)
         candidate.candidate_twitter_handle = twitter_screen_name
-        candidate.twitter_url = google_search_link
+        candidate.twitter_url = source_link
 
-    elif FACEBOOK in google_search_website_name:
+    elif FACEBOOK in kind_of_source_website:
         cache_results = cache_master_and_resized_image(
             candidate_id=candidate.id, candidate_we_vote_id=candidate.we_vote_id,
-            facebook_profile_image_url_https=google_search_image_file,
+            facebook_profile_image_url_https=image_url,
             image_source=FACEBOOK)
         cached_facebook_profile_image_url_https = cache_results['cached_facebook_profile_image_url_https']
-        candidate.facebook_url = google_search_link
+        candidate.facebook_url = source_link
         candidate.facebook_profile_image_url_https = cached_facebook_profile_image_url_https
 
     else:
         cache_results = cache_master_and_resized_image(
             candidate_id=candidate.id, candidate_we_vote_id=candidate.we_vote_id,
-            other_source_image_url=google_search_image_file,
-            other_source=google_search_website_name)
+            other_source_image_url=image_url,
+            other_source=kind_of_source_website)
         cached_other_source_image_url_https = cache_results['cached_other_source_image_url_https']
-        candidate.other_source_url = google_search_link
+        candidate.other_source_url = source_link
         candidate.other_source_photo_url = cached_other_source_image_url_https
 
     we_vote_hosted_profile_image_url_large = cache_results['we_vote_hosted_profile_image_url_large']
