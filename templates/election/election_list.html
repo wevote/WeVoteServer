@@ -1,7 +1,7 @@
 {# templates/election/election_list.html #}
 {% extends "template_base.html" %}
 
-{% block title %}Elections{% endblock %}
+{% block title %}{% if is_national_election %}{{ national_election.election_name }}{% else %}Elections{% endif %}{% endblock %}
 
 {%  block content %}
 <p><a href="{% url 'admin_tools:admin_home' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">< Back to Admin Home</a></p>
@@ -20,43 +20,51 @@
     <a href="{% url 'polling_location:polling_location_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">Polling Locations</a>
 </p>
 
-<h1>Elections</h1>
+<h1>{% if is_national_election %}{{ national_election.election_name }}{% else %}Elections{% endif %}</h1>
 
-Pinging API Server <span id="testDots" >.</span></p>
+{#Pinging API Server <span id="testDots" >.</span>#}
 
-<p><a href="{% url 'election:election_remote_retrieve' %}">Retrieve all elections</a>.
-    <a href="https://votinginfoproject.org/news/vip-continues-support-elections-through-2018/" target="_blank">VIP elections supported.</a></p>
-
-<form name="election_search_form" method="get" action="{% url 'election:election_list' %}">
-    {% csrf_token %}
+{% if is_national_election %}
+{# ############## List of states under one National Election ############## #}
+    <a href="{% url 'election:election_list' %}">Back to Elections</a>&nbsp;
 
 
-{% if election_search %}
-    <a href="{% url 'election:election_list' %}">
-         clear search</a>&nbsp;
+{% else %}
+{# ############## List of many election dates ############## #}
+    <p><a href="{% url 'election:election_remote_retrieve' %}">Retrieve all elections</a>.
+        <a href="https://votinginfoproject.org/news/vip-continues-support-elections-through-2018/" target="_blank">VIP elections supported.</a></p>
+
+    <form name="election_search_form" method="get" action="{% url 'election:election_list' %}">
+        {% csrf_token %}
+
+
+    {% if election_search %}
+        <a href="{% url 'election:election_list' %}">
+             clear search</a>&nbsp;
+    {% endif %}
+        <input type="text" name="election_search" id="election_search_id" value="{{ election_search }}" />
+        <input type="submit" value="Search" />
+
+        {# Default to showing only upcoming elections #}
+        <label for="show_all_elections_this_year_id">
+          <input type="checkbox" name="show_all_elections_this_year" id="show_all_elections_this_year_id" value="1"
+                 {% if show_all_elections_this_year %}checked{% endif %} /> All Elections This Year
+        </label>
+        &nbsp;&nbsp;&nbsp;&nbsp;
+
+        <label for="show_all_elections_id">
+          <input type="checkbox" name="show_all_elections" id="show_all_elections_id" value="1"
+                 {% if show_all_elections %}checked{% endif %} /> Include Past Elections
+        </label>
+        &nbsp;&nbsp;&nbsp;&nbsp;
+
+        <label for="show_ignored_elections_id">
+          <input type="checkbox" name="show_ignored_elections" id="show_ignored_elections_id" value="1"
+                 {% if show_ignored_elections %}checked{% endif %} /> Show Ignored Elections
+        </label>
+        &nbsp;&nbsp;&nbsp;&nbsp;
+    </form>
 {% endif %}
-    <input type="text" name="election_search" id="election_search_id" value="{{ election_search }}" />
-    <input type="submit" value="Search" />
-
-    {# Default to showing only upcoming elections #}
-    <label for="show_all_elections_this_year_id">
-      <input type="checkbox" name="show_all_elections_this_year" id="show_all_elections_this_year_id" value="1"
-             {% if show_all_elections_this_year %}checked{% endif %} /> All Elections This Year
-    </label>
-    &nbsp;&nbsp;&nbsp;&nbsp;
-
-    <label for="show_all_elections_id">
-      <input type="checkbox" name="show_all_elections" id="show_all_elections_id" value="1"
-             {% if show_all_elections %}checked{% endif %} /> Include Past Elections
-    </label>
-    &nbsp;&nbsp;&nbsp;&nbsp;
-
-    <label for="show_ignored_elections_id">
-      <input type="checkbox" name="show_ignored_elections" id="show_ignored_elections_id" value="1"
-             {% if show_ignored_elections %}checked{% endif %} /> Show Ignored Elections
-    </label>
-    &nbsp;&nbsp;&nbsp;&nbsp;
-</form>
 
 
 {% if election_list %}
@@ -68,10 +76,12 @@ Pinging API Server <span id="testDots" >.</span></p>
         <tr>
             <th></th>
             <th>Live?</th>
-            <th>Election Name</th>
+            <th>{% if is_national_election %}Notes{% else %}Election Name{% endif %}</th>
             <th>State</th>
+        {% if not is_national_election %}
             <th>Date</th>
             <th>Google Civic ID</th>
+        {% endif %}
             <th align="middle">Offices<br />
               (w/o Candidates)</th>
             <th align="middle">Candidates<br />
@@ -93,18 +103,24 @@ Pinging API Server <span id="testDots" >.</span></p>
               {% if election.candidate_photos_finished %}<span class="font-weight-bold text-success">PHOTOS</span>{% endif %}
             </td>
             <td>
+                {% if not is_national_election %}
                 <a href="{% url 'election:election_summary' election.id %}{% if show_all_elections_this_year %}?show_all_elections_this_year=1{% elif show_all_elections %}?show_all_elections=1{% endif %}" target="_blank">
                   <span class="{% if election.include_in_list_for_voters %}font-weight-bold{% endif %}">{{ election.election_name }}</span></a>
+                {% endif %}
                 {% if election.internal_notes %}
                 <br /><span style="color: darkgray">{{ election.internal_notes|default_if_none:""|truncatechars:50 }}</span>
                 {% endif %}
             </td>
-            <td align="middle">{{ election.state_code }}</td>
+            <td align="middle">
+              {% if election.is_national_election and not is_national_election %}(<a href="{% url 'election:nationwide_election_list' %}?google_civic_election_id={{ election.google_civic_election_id }}">see all states</a>){% else %}{{ election.state_code }}{% endif %}
+            </td>
+        {% if not is_national_election %}
             <td>
                 {{ election.election_day_text }}
                 {% if election.days_until_election > 0 %} <span class="{% if election.days_until_election < 46 %}font-weight-bold text-danger{% endif %}">(in {{ election.days_until_election }} days)</span>{% endif %}
             </td>
             <td align="middle">{{ election.google_civic_election_id }}</td>
+        {% endif %}
             <td align="middle">
             {% if election.offices_with_candidates_count %}
                 <a href="{% url 'office:office_list' %}?google_civic_election_id={{ election.google_civic_election_id }}{% if show_all_elections_this_year %}&show_all_elections_this_year=1{% elif show_all_elections %}&show_all_elections=1{% endif %}"
@@ -200,18 +216,18 @@ Pinging API Server <span id="testDots" >.</span></p>
     });
 
     // Ping the server to keep the load balancer channel open (Stay on the same load balancer node)
-    setInterval(function () {
-      let origin = new URL('{{request.build_absolute_uri}}').origin;
-      let apiURL = origin + '/apis/v1/testRealTimeUpdate';
-      $.ajax({
-        type: "GET",
-        url: apiURL,
-        success: function (data) {
-          let dots = data.text;
-          $('#testDots').html('<font color="LIMEGREEN">' + dots +'</font>');
-        },
-      });
-    }, 2000);
+{#    setInterval(function () {#}
+{#      let origin = new URL('{{request.build_absolute_uri}}').origin;#}
+{#      let apiURL = origin + '/apis/v1/testRealTimeUpdate';#}
+{#      $.ajax({#}
+{#        type: "GET",#}
+{#        url: apiURL,#}
+{#        success: function (data) {#}
+{#          let dots = data.text;#}
+{#          $('#testDots').html('<font color="LIMEGREEN">' + dots +'</font>');#}
+{#        },#}
+{#      });#}
+{#    }, 2000);#}
 </script>
 
 {% endblock %}

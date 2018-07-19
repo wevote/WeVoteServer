@@ -123,6 +123,9 @@ class Election(models.Model):
     # Have we finished all of the election preparation related to Candidate photos?
     candidate_photos_finished = models.BooleanField(default=False)
 
+    # This is a multi-state election
+    is_national_election = models.BooleanField(default=False)
+
     def election_is_upcoming(self):
         if not positive_value_exists(self.election_day_text):
             return False

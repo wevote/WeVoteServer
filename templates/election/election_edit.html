@@ -59,6 +59,16 @@
 </div>
 
 <div class="form-group">
+    <label for="is_national_election_id" class="col-sm-3 control-label"></label>
+    <div class="col-sm-8">
+        <input type="checkbox" name="is_national_election" id="is_national_election_id"
+           value={% if election %}{% if election.is_national_election %}True{% else %}False{% endif %}{% else %}False{% endif %}
+           {% if election.is_national_election %}checked{% endif %} />
+        Is National Election
+    </div>
+</div>
+
+<div class="form-group">
     <label for="election_day_text_id" class="col-sm-3 control-label">Election Day
         <span class="no_break">(Format: "YYYY-MM-DD")</span></label>
     <div class="col-sm-8">
