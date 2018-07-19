@@ -199,6 +199,9 @@
         <li><a href="{% url 'twitter2:bulk_retrieve_possible_twitter_handles' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}&page={{ current_page_number }}" target="_blank" >
         Retrieve Possible Twitter Handles</a> (25 at a time - about 30 seconds - Open in New Window)</li>
 
+        <li><a href="{% url 'import_export_facebook:bulk_retrieve_facebook_photos_view' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}&page={{ current_page_number }}" target="_blank" >
+            Retrieve Facebook Photos for up to <b>{{facebook_urls_without_picture_urls}}</b> Candidates</a> (If the count does not decrease with each click, you are done for this election - Opens in a new tab)</li>
+
         <li><a href="{% url 'google_custom_search:bulk_retrieve_possible_google_search_users' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}" target="_blank" >
         Retrieve Possible Candidates from Google</a> (20 at a time - 1-2 minutes - Open in New Window)</li>
 

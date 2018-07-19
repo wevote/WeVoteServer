@@ -10,11 +10,13 @@ import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, generate_random_string, positive_value_exists
 
 
+RETRIEVE_POSSIBLE_FACEBOOK_PHOTOS = 'RETRIEVE_POSSIBLE_FACEBOOK_PHOTOS'
 RETRIEVE_POSSIBLE_GOOGLE_LINKS = 'RETRIEVE_POSSIBLE_GOOGLE_LINKS'
 RETRIEVE_POSSIBLE_TWITTER_HANDLES = 'RETRIEVE_POSSIBLE_TWITTER_HANDLES'
 STOP_BULK_SEARCH_TWITTER_LINK_POSSIBILITY = 'STOP_BULK_SEARCH_TWITTER_LINK_POSSIBILITY'
 
 KIND_OF_ACTION_CHOICES = (
+    (RETRIEVE_POSSIBLE_FACEBOOK_PHOTOS, 'Retrieve possible Facebook photos'),
     (RETRIEVE_POSSIBLE_GOOGLE_LINKS, 'Retrieve possible google links'),
     (RETRIEVE_POSSIBLE_TWITTER_HANDLES, 'Retrieve possible twitter handles'),
     (STOP_BULK_SEARCH_TWITTER_LINK_POSSIBILITY, 'Stop search for Bulk twitter links'),

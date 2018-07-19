@@ -16,7 +16,7 @@ from apis_v1.views import views_docs, views_analytics, views_ballot, views_candi
 from ballot.views_admin import ballot_items_sync_out_view, ballot_returned_sync_out_view
 from candidate.views_admin import candidates_sync_out_view
 from issue.views_admin import issues_sync_out_view, issues_retrieve_view, retrieve_issues_to_follow_view, \
-    organization_link_to_issue_sync_out_view
+    organization_link_to_issue_sync_out_view, test_real_time_update
 from measure.views_admin import measures_sync_out_view
 from office.views_admin import offices_sync_out_view
 from organization.views_admin import organizations_sync_out_view
@@ -119,6 +119,7 @@ urlpatterns = [
     url(r'^retrieveIssuesToFollow/', retrieve_issues_to_follow_view, name='retrieveIssuesToFollowView'),
     url(r'^saveAnalyticsAction/', views_analytics.save_analytics_action_view, name='saveAnalyticsActionView'),
     url(r'^searchAll/', views_misc.search_all_view, name='searchAllView'),
+    url(r'^testRealTimeUpdate/', test_real_time_update, name='testRealTimeUpdate'),
     url(r'^twitterIdentityRetrieve/', views_twitter.twitter_identity_retrieve_view, name='twitterIdentityRetrieveView'),
     url(r'^twitterNativeSignInSave/', views_twitter.twitter_native_sign_in_save_view, name='twitterNativeSignInSave'),
     url(r'^twitterSignInRequestAccessToken/',
