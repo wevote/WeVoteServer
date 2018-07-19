@@ -990,9 +990,9 @@ def scrape_facebook_photo_url_from_web_page(facebook_candidate_url):
            }
 
     # https://www.facebook.com/KamalaHarris/
-    # <div class ="uiScaledImageContainer _62ui">
-    #     <img class="scaledImageFitWidth img" src="https://scontent.fsnc1-1.fna.fbcdn.net/v/t1.0-1/p720x720/19420547_10155764935092923_4741672932915645516_n.jpg?_nc_cat=1&amp;oh=2e3a0af38385415f680ccc346faf876f&amp;oe=5BCE1B27" alt="" width="500" height="500" data-ft="&#123;&quot;tn&quot;:&quot;-^&quot;&#125;" itemprop="image" />
-    # </div>
+    #     <img class="scaledImageFitWidth img" src="https://scontent.fsnc1-1.fna.fbcdn.net/v/t1.0-1/p720x720/19420547_10155764935092923_4741672932915645516_n.jpg?_nc_cat=1&amp;oh=2e3a0af38385415f680ccc346faf876f&amp;oe=5BCE1B27" alt="" width="500" height="500" data-ft="&#123;&quot;tn&quot;:&quot;-^&quot;&#125;" itemprop="image" />  # noqa
+    # <img class="_11kf img" alt="Tim Gildersleeve's Profile Photo, Image may contain: 1 person" src="https://scontent-sjc3-1.xx.fbcdn.net/v/t1.0-1/c170.50.621.621/s320x320/532213_506005819456548_593353888_n.jpg?_nc_cat=0&amp;oh=65856fc0f400b4f3eeab5b6daa9b206f&amp;oe=5BCEB038">    # noqa
+
     try:
         request = urllib.request.Request(facebook_candidate_url, None, headers)
         page = urllib.request.urlopen(request, timeout=10)
@@ -1007,7 +1007,7 @@ def scrape_facebook_photo_url_from_web_page(facebook_candidate_url):
                     continue
                 # logger.info("==>" + decoded_line)
                 if 'scaledImageFitWidth img' in decoded_line:
-                    p = re.compile('<img class=\"scaledImageFitWidth img\" src=\"(.*?)\"')
+                    p = re.compile('<img class=\".{0,50}(?:Profile Photo, Image may contain|scaledImageFitWidth img).{1,100}src=\"(.*?)\"')   # noqa
                     photo_url = p.search(decoded_line).group(1).replace("&amp;", "&")
                     success = True
                     status += "FINISHED_SCRAPING_PAGE_FOR_ONE_CANDIDATE "
