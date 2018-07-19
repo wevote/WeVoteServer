@@ -11,6 +11,7 @@ from ballot.models import BallotItemListManager, BallotReturnedListManager, Ball
     VoterBallotSaved, VoterBallotSavedManager
 from candidate.models import CandidateCampaignListManager, CandidateCampaign
 from config.base import get_environment_variable
+import copy
 from datetime import datetime, timedelta
 from django.http import HttpResponseRedirect
 from django.core.urlresolvers import reverse
@@ -545,6 +546,7 @@ def election_edit_process_view(request):
     ballotpedia_election_id = request.POST.get('ballotpedia_election_id', False)
     ballotpedia_kind_of_election = request.POST.get('ballotpedia_kind_of_election', False)
     ignore_this_election = request.POST.get('ignore_this_election', False)
+    is_national_election = request.POST.get('is_national_election', False)
     include_in_list_for_voters = request.POST.get('include_in_list_for_voters', False)
     internal_notes = request.POST.get('internal_notes', False)
 
@@ -622,6 +624,7 @@ def election_edit_process_view(request):
         election_on_stage.election_preparation_finished = election_preparation_finished
         election_on_stage.include_in_list_for_voters = include_in_list_for_voters
         election_on_stage.ignore_this_election = ignore_this_election
+        election_on_stage.is_national_election = is_national_election
 
         if internal_notes is not False:
             election_on_stage.internal_notes = internal_notes
@@ -647,6 +650,7 @@ def election_edit_process_view(request):
                 election_preparation_finished=election_preparation_finished,
                 google_civic_election_id=google_civic_election_id,
                 ignore_this_election=ignore_this_election,
+                is_national_election=is_national_election,
                 include_in_list_for_voters=include_in_list_for_voters,
                 state_code=state_code,
             )
@@ -825,6 +829,195 @@ def election_list_view(request):
         'messages_on_stage':            messages_on_stage,
         'election_list':                election_list_modified,
         'election_search':              election_search,
+        'google_civic_election_id':     google_civic_election_id,
+        'show_all_elections':           show_all_elections,
+        'show_all_elections_this_year': show_all_elections_this_year,
+        'show_ignored_elections':       show_ignored_elections,
+        'state_code':                   state_code,
+    }
+    return render(request, 'election/election_list.html', template_values)
+
+
+@login_required()
+def nationwide_election_list_view(request):
+    # admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'partner_organization', 'political_data_manager', 'political_data_viewer',
+                          'verified_volunteer'}
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
+    google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
+    state_code = request.GET.get('state_code', '')
+    election_search = request.GET.get('election_search', '')
+    show_all_elections_this_year = request.GET.get('show_all_elections_this_year', False)
+    show_ignored_elections = request.GET.get('show_ignored_elections', False)
+    if positive_value_exists(show_all_elections_this_year):
+        # Give priority to show_all_elections_this_year
+        show_all_elections = False
+    else:
+        show_all_elections = request.GET.get('show_all_elections', False)
+        if positive_value_exists(show_all_elections):
+            # If here, then we want to make sure show_all_elections_this_year is False
+            show_all_elections_this_year = False
+
+    messages_on_stage = get_messages(request)
+    timezone = pytz.timezone("America/Los_Angeles")
+    datetime_now = timezone.localize(datetime.now())
+
+    is_national_election = False
+    national_election = None
+    if positive_value_exists(google_civic_election_id):
+        election_manager = ElectionManager()
+        results = election_manager.retrieve_election(google_civic_election_id)
+        if results['election_found']:
+            national_election = results['election']
+            is_national_election = national_election.is_national_election
+            if not positive_value_exists(is_national_election):
+                national_election = None
+
+    if is_national_election:
+        state_list = STATE_CODE_MAP
+        election_list = []
+        for one_state_code, one_state_name in state_list.items():
+            if one_state_code == "NA":
+                pass
+            else:
+                election_for_one_state = copy.deepcopy(national_election)
+                election_for_one_state.state_code = one_state_code
+                election_for_one_state.is_national_election = False
+                election_for_one_state.internal_notes = None  # Do we want to try to add this for states?
+
+                election_list.append(election_for_one_state)
+    else:
+        election_list_query = Election.objects.all()
+        election_list_query = election_list_query.order_by('election_day_text').reverse()
+        election_list_query = election_list_query.exclude(google_civic_election_id=2000)
+        if positive_value_exists(show_ignored_elections):
+            # Do not filter out ignored elections
+            pass
+        else:
+            election_list_query = election_list_query.exclude(ignore_this_election=True)
+
+        if positive_value_exists(show_all_elections_this_year):
+            first_day_this_year = datetime_now.strftime("%Y-01-01")
+            election_list_query = election_list_query.exclude(election_day_text__lt=first_day_this_year)
+        elif not positive_value_exists(show_all_elections):
+            two_days = timedelta(days=2)
+            datetime_two_days_ago = datetime_now - two_days
+            earliest_date_to_show = datetime_two_days_ago.strftime("%Y-%m-%d")
+            election_list_query = election_list_query.exclude(election_day_text__lt=earliest_date_to_show)
+
+        if positive_value_exists(election_search):
+            filters = []
+            new_filter = Q(election_name__icontains=election_search)
+            filters.append(new_filter)
+
+            new_filter = Q(election_day_text__icontains=election_search)
+            filters.append(new_filter)
+
+            new_filter = Q(google_civic_election_id__icontains=election_search)
+            filters.append(new_filter)
+
+            new_filter = Q(state_code__icontains=election_search)
+            filters.append(new_filter)
+
+            # Add the first query
+            if len(filters):
+                final_filters = filters.pop()
+
+                # ...and "OR" the remaining items in the list
+                for item in filters:
+                    final_filters |= item
+
+                election_list_query = election_list_query.filter(final_filters)
+
+        election_list = election_list_query[:200]
+
+    election_list_modified = []
+    ballot_returned_list_manager = BallotReturnedListManager()
+    batch_manager = BatchManager()
+    for election in election_list:
+        date_of_election = timezone.localize(datetime.strptime(election.election_day_text, "%Y-%m-%d"))
+        if date_of_election > datetime_now:
+            time_until_election = date_of_election - datetime_now
+            election.days_until_election = convert_to_int("%d" % time_until_election.days)
+
+        election.ballot_returned_count = \
+            ballot_returned_list_manager.fetch_ballot_returned_list_count_for_election(
+                election.google_civic_election_id, election.state_code)
+        election.ballot_location_display_option_on_count = \
+            ballot_returned_list_manager.fetch_ballot_location_display_option_on_count_for_election(
+                election.google_civic_election_id, election.state_code)
+        # Running this for every entry on the elections page makes the page too slow
+        # if election.ballot_returned_count < 500:
+        #     batch_set_source = "IMPORT_BALLOTPEDIA_BALLOT_ITEMS"
+        #     results = batch_manager.retrieve_unprocessed_batch_set_info_by_election_and_set_source(
+        #         election.google_civic_election_id, batch_set_source)
+        #     if positive_value_exists(results['batches_not_processed']):
+        #         election.batches_not_processed = results['batches_not_processed']
+        #         election.batches_not_processed_batch_set_id = results['batch_set_id']
+
+        # How many offices?
+        office_list_query = ContestOffice.objects.all()
+        office_list_query = office_list_query.filter(
+            google_civic_election_id=election.google_civic_election_id)
+        office_list = list(office_list_query)
+        election.office_count = len(office_list)
+
+        # How many offices with zero candidates?
+        offices_with_candidates_count = 0
+        offices_without_candidates_count = 0
+        for one_office in office_list:
+            candidate_list_query = CandidateCampaign.objects.all()
+            candidate_list_query = candidate_list_query.filter(contest_office_id=one_office.id)
+            candidate_count = candidate_list_query.count()
+            if positive_value_exists(candidate_count):
+                offices_with_candidates_count += 1
+            else:
+                offices_without_candidates_count += 1
+        election.offices_with_candidates_count = offices_with_candidates_count
+        election.offices_without_candidates_count = offices_without_candidates_count
+
+        # How many candidates?
+        candidate_list_query = CandidateCampaign.objects.all()
+        candidate_list_query = candidate_list_query.filter(
+            google_civic_election_id=election.google_civic_election_id)
+        election.candidate_count = candidate_list_query.count()
+
+        # How many without photos?
+        candidate_list_query = CandidateCampaign.objects.all()
+        candidate_list_query = candidate_list_query.filter(
+            google_civic_election_id=election.google_civic_election_id)
+        candidate_list_query = candidate_list_query.filter(
+            Q(we_vote_hosted_profile_image_url_tiny__isnull=True) | Q(we_vote_hosted_profile_image_url_tiny='')
+        )
+        election.candidates_without_photo_count = candidate_list_query.count()
+        if positive_value_exists(election.candidate_count):
+            election.candidates_without_photo_percentage = \
+                100 * (election.candidates_without_photo_count / election.candidate_count)
+
+        # How many measures?
+        measure_list_query = ContestMeasure.objects.all()
+        measure_list_query = measure_list_query.filter(
+            google_civic_election_id=election.google_civic_election_id)
+        election.measure_count = measure_list_query.count()
+
+        # Number of Voter Guides
+        voter_guide_query = VoterGuide.objects.filter(google_civic_election_id=election.google_civic_election_id)
+        election.voter_guides_count = voter_guide_query.count()
+
+        # Number of Public Positions
+        position_query = PositionEntered.objects.filter(google_civic_election_id=election.google_civic_election_id)
+        election.public_positions_count = position_query.count()
+
+        election_list_modified.append(election)
+
+    template_values = {
+        'messages_on_stage':            messages_on_stage,
+        'election_list':                election_list_modified,
+        'election_search':              election_search,
+        'is_national_election':         is_national_election,
+        'national_election':            national_election,
         'google_civic_election_id':     google_civic_election_id,
         'show_all_elections':           show_all_elections,
         'show_all_elections_this_year': show_all_elections_this_year,
@@ -1898,6 +2091,9 @@ def election_migration_view(request):
 
             google_civic_election.internal_notes = we_vote_election.internal_notes
             we_vote_election.internal_notes = None
+
+            google_civic_election.is_national_election = we_vote_election.is_national_election
+            we_vote_election.is_national_election = False
 
             google_civic_election.save()
             we_vote_election.save()

@@ -17,7 +17,7 @@ def twitter_sign_in_request_access_token_doc_template_values(url_root):
             'name':         'return_url',
             'value':        'string',  # boolean, integer, long, string
             'description':  'The URL where the browser should be redirected once authenticated. '
-                            'Usually https://wevote.me/more/sign_in',
+                            'Usually https://wevote.me/settings/account',
         },
         {
             'name':         'incoming_request_token',
