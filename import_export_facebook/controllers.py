@@ -3,6 +3,7 @@
 # -*- coding: UTF-8 -*-
 
 from analytics.controllers import move_analytics_info_to_another_voter
+from candidate.controllers import FakeFirefoxURLopener
 from config.base import get_environment_variable
 from donate.controllers import move_donation_info_to_another_voter
 from email_outbound.controllers import move_email_address_entries_to_another_voter
@@ -16,12 +17,16 @@ from organization.controllers import move_organization_to_another_complete
 from organization.models import OrganizationManager, INDIVIDUAL
 from position.controllers import move_positions_to_another_voter
 from position.models import PositionListManager
+import re
+from socket import timeout
+import urllib.request
 from voter.controllers import move_facebook_info_to_another_voter, move_twitter_info_to_another_voter, \
     merge_voter_accounts
 from voter.models import VoterDeviceLinkManager, VoterManager
 from voter_guide.controllers import move_voter_guides_to_another_voter
 import wevote_functions.admin
 from wevote_functions.functions import is_voter_device_id_valid, positive_value_exists
+from wevote_settings.models import RemoteRequestHistoryManager, RETRIEVE_POSSIBLE_FACEBOOK_PHOTOS
 
 logger = wevote_functions.admin.get_logger(__name__)
 
@@ -958,3 +963,75 @@ def voter_facebook_sign_in_save_for_api(voter_device_id,  # voterFacebookSignInS
         'minimum_data_saved':       minimum_data_saved,
     }
     return json_data
+
+def scrape_facebook_photo_url_from_web_page(facebook_candidate_url):
+    candidate_we_vote_ids_list = []
+    status = ""
+    success = False
+    if "http://" in facebook_candidate_url:
+        facebook_candidate_url.replace("http://", "https://")
+    if len(facebook_candidate_url) < 10:
+        status = 'FIND_CANDIDATES-PROPER_URL_NOT_PROVIDED: ' + facebook_candidate_url
+        results = {
+            'status':                       status,
+            'success':                      success,
+            'at_least_one_candidate_found': False,
+            'candidate_we_vote_ids_list':   candidate_we_vote_ids_list,
+            'page_redirected':              False,
+        }
+        return results
+
+    urllib._urlopener = FakeFirefoxURLopener()
+    headers = {
+        'User-Agent':
+            'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/67.0.3396.99 Safari/537.36',
+           }
+
+    #https://www.facebook.com/KamalaHarris/
+    # <div class ="uiScaledImageContainer _62ui">
+    #     <img class="scaledImageFitWidth img" src="https://scontent.fsnc1-1.fna.fbcdn.net/v/t1.0-1/p720x720/19420547_10155764935092923_4741672932915645516_n.jpg?_nc_cat=1&amp;oh=2e3a0af38385415f680ccc346faf876f&amp;oe=5BCE1B27" alt="" width="500" height="500" data-ft="&#123;&quot;tn&quot;:&quot;-^&quot;&#125;" itemprop="image" />
+    # </div>
+    try:
+        request = urllib.request.Request(facebook_candidate_url, None, headers)
+        page = urllib.request.urlopen(request, timeout=10)
+        success = False
+        photo_url = None
+        for line in page.readlines():
+            try:
+                try:
+                    decoded_line = line.decode()
+                except Exception:
+                    logger.info("==> EXCEPTION ON DECODE")
+                    continue
+                #logger.info("==>" + decoded_line)
+                if 'scaledImageFitWidth img' in decoded_line:
+                    p = re.compile('<img class=\"scaledImageFitWidth img\" src=\"(.*?)\"')
+                    photo_url = p.search(decoded_line).group(1).replace("&amp;", "&")
+                    success = True
+                    status += "FINISHED_SCRAPING_PAGE_FOR_ONE_CANDIDATE "
+                    if not positive_value_exists(photo_url):
+                        logger.error("scrape_facebook_photo_url_from_web_page, RegEx error, Facebook scrape has broken")
+                        success = False
+                        status += "SCRAPING_OF_PAGE_FAILED_BROKEN_REGEX "
+                    break
+            except Exception as error_message:
+                status += "SCRAPE_ONE_FACEBOOK_LINE_ERROR: {error_message}".format(error_message=error_message)
+
+    except timeout:
+        status += "CANDIDATE_SCRAPE_TIMEOUT_ERROR "
+        success = False
+    except IOError as error_instance:
+        # Catch the error message coming back from urllib.request.urlopen and pass it in the status
+        error_message = error_instance
+        status += "SCRAPE_FACEBOOK_IO_ERROR: {error_message}".format(error_message=error_message)
+        success = False
+    except Exception as error_instance:
+        error_message = error_instance
+        status += "SCRAPE_FACEBOOK_GENERAL_EXCEPTION_ERROR: {error_message}".format(error_message=error_message)
+        success = False
+    results = {
+        'status':           status,
+        'success':          success,
+        'photo_url':        photo_url,
+    }
+    return results

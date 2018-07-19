@@ -19,10 +19,7 @@ Including another URLconf
     2. Add a URL to urlpatterns:  url(r'^blog/', include(blog_urls))
 """
 
-from django.conf import settings
 from django.conf.urls import include, url
-from django.conf.urls.static import static
-from django.contrib import admin
 from django.contrib.auth import views as auth_views
 from config import startup, views
 from admin_tools.views import login_we_vote, logout_we_vote
@@ -48,6 +45,7 @@ urlpatterns = [
     url(r'^image/', include('image.urls', namespace="image")),
     url(r'^import_export_batches/', include('import_export_batches.urls', namespace="import_export_batches")),
     url(r'^import_export_ctcl/', include('import_export_ctcl.urls', namespace="import_export_ctcl")),
+    url(r'^import_export_facebook/', include('import_export_facebook.urls', namespace="import_export_facebook")),
     url(r'^import_export_google_civic/', include(
         'import_export_google_civic.urls', namespace="import_export_google_civic")),
     url(r'^import_export_maplight/', include('import_export_maplight.urls', namespace="import_export_maplight")),
