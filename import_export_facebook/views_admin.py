@@ -19,6 +19,10 @@ from wevote_settings.models import RemoteRequestHistory, RemoteRequestHistoryMan
 logger = wevote_functions.admin.get_logger(__name__)
 
 # Test SQL for pgAdmin 4
+# Find all eligible rows
+#   SELECT * FROM public.candidate_candidatecampaign
+#     where google_civic_election_id = '4456' and facebook_profile_image_url_https is null and
+#     (facebook_url is not null or facebook_url != '');
 # Set all the facebook facebook_profile_image_url_https picture urls to null
 #   UPDATE public.candidate_candidatecampaign SET facebook_profile_image_url_https = NULL;
 # Set all the  all the facebook_urls that are '' to null
@@ -32,7 +36,7 @@ logger = wevote_functions.admin.get_logger(__name__)
 # Ignoring remote_request_history_manager, how many facebook_urls are there to process?
 #   SELECT COUNT(facebook_url) FROM public.candidate_candidatecampaign where
 # facebook_profile_image_url_https is null and google_civic_election_id = '1000052'; … 17
-# Clear the wevote_settings_remoterequesthistory table to allow all lines to be processed, by right cliking
+# Clear the wevote_settings_remoterequesthistory table to allow all lines to be processed, by right clicking
 # on the table in pgAdmin and choosing truncate
 
 
