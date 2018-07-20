@@ -21,8 +21,8 @@ logger = wevote_functions.admin.get_logger(__name__)
 # Test SQL for pgAdmin 4
 # Find all eligible rows
 #   SELECT * FROM public.candidate_candidatecampaign
-#   where google_civic_election_id = '4456' and facebook_profile_image_url_https is null and
-#   (facebook_url is not null or facebook_url != '');
+#     where google_civic_election_id = '4456' and facebook_profile_image_url_https is null and
+#     (facebook_url is not null or facebook_url != '');
 # Set all the facebook facebook_profile_image_url_https picture urls to null
 #   UPDATE public.candidate_candidatecampaign SET facebook_profile_image_url_https = NULL;
 # Set all the  all the facebook_urls that are '' to null
