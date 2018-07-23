@@ -20,6 +20,7 @@ from position.models import PositionListManager
 import re
 from socket import timeout
 import urllib.request
+from urllib.error import HTTPError
 from voter.controllers import move_facebook_info_to_another_voter, move_twitter_info_to_another_voter, \
     merge_voter_accounts
 from voter.models import VoterDeviceLinkManager, VoterManager
@@ -998,6 +999,7 @@ def scrape_facebook_photo_url_from_web_page(facebook_candidate_url):
         page = urllib.request.urlopen(request, timeout=10)
         success = False
         photo_url = None
+        http_response_code = 200
         for line in page.readlines():
             try:
                 try:
@@ -1006,9 +1008,12 @@ def scrape_facebook_photo_url_from_web_page(facebook_candidate_url):
                     logger.info("==> EXCEPTION ON DECODE")
                     continue
                 # logger.info("==>" + decoded_line)
-                if 'scaledImageFitWidth img' in decoded_line:
+                if 'scaledImageFitWidth img' or 'Profile Photo, Image may contain' in decoded_line:
                     p = re.compile('<img class=\".{0,50}(?:Profile Photo, Image may contain|scaledImageFitWidth img).{1,100}src=\"(.*?)\"')   # noqa
-                    photo_url = p.search(decoded_line).group(1).replace("&amp;", "&")
+                    match_obj = p.search(decoded_line)
+                    if match_obj == None:
+                        continue
+                    photo_url = match_obj.group(1).replace("&amp;", "&")
                     success = True
                     status += "FINISHED_SCRAPING_PAGE_FOR_ONE_CANDIDATE "
                     if not positive_value_exists(photo_url):
@@ -1017,23 +1022,32 @@ def scrape_facebook_photo_url_from_web_page(facebook_candidate_url):
                         status += "SCRAPING_OF_PAGE_FAILED_BROKEN_REGEX "
                     break
             except Exception as error_message:
+                logger.error("scrape_facebook_photo_url_from_web_page regex exception for " + facebook_candidate_url +
+                             " with exception " + error_message)
                 status += "SCRAPE_ONE_FACEBOOK_LINE_ERROR: {error_message}".format(error_message=error_message)
 
     except timeout:
         status += "CANDIDATE_SCRAPE_TIMEOUT_ERROR "
         success = False
+    except HTTPError as http_error:
+        # HTTP Error 404: Not Found
+        http_response_code = http_error.code
+        success = True
     except IOError as error_instance:
-        # Catch the error message coming back from urllib.request.urlopen and pass it in the status
-        error_message = error_instance
         status += "SCRAPE_FACEBOOK_IO_ERROR: {error_message}".format(error_message=error_message)
         success = False
     except Exception as error_instance:
         error_message = error_instance
         status += "SCRAPE_FACEBOOK_GENERAL_EXCEPTION_ERROR: {error_message}".format(error_message=error_message)
         success = False
+
+    if status == '':
+        status = "NO_REGEX_MATCH_FOUND"
+
     results = {
-        'status':           status,
-        'success':          success,
-        'photo_url':        photo_url,
+        'status':               status,
+        'success':              success,
+        'http_response_code':   http_response_code,
+        'photo_url':            photo_url,
     }
     return results

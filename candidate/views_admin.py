@@ -316,13 +316,16 @@ def candidate_list_view(request):
     try:
         candidate_facebook_missing_query = CandidateCampaign.objects.all()
         if positive_value_exists(google_civic_election_id):
-            candidate_facebook_missing_query = candidate_facebook_missing_query.filter(google_civic_election_id=google_civic_election_id)
+            candidate_facebook_missing_query = \
+                candidate_facebook_missing_query.filter(google_civic_election_id=google_civic_election_id)
 
         # include profile images that are null or ''
-        candidate_facebook_missing_query = candidate_facebook_missing_query.filter(Q(facebook_profile_image_url_https__isnull=True) | Q(facebook_profile_image_url_https__exact=''))
+        candidate_facebook_missing_query = candidate_facebook_missing_query.\
+            filter(Q(facebook_profile_image_url_https__isnull=True) | Q(facebook_profile_image_url_https__exact=''))
 
         # exclude facebook_urls that are null or ''
-        candidate_facebook_missing_query = candidate_facebook_missing_query.exclude(facebook_url__isnull=True).exclude(facebook_url__iexact='')
+        candidate_facebook_missing_query = candidate_facebook_missing_query.exclude(facebook_url__isnull=True).\
+            exclude(facebook_url__iexact='').exclude(facebook_url_is_broken='true')
 
         facebook_urls_without_picture_urls = candidate_facebook_missing_query.count()
 
@@ -330,8 +333,7 @@ def candidate_list_view(request):
         logger.error("Find facebook URLs without facebook pictures in candidate: " + e)
 
     status_print_list = ""
-    status_print_list += "candidate_list_count: " + \
-                         str(candidate_list_count) + " "
+    status_print_list += "candidate_list_count: " + str(candidate_list_count) + " "
 
     messages.add_message(request, messages.INFO, status_print_list)
 
@@ -987,8 +989,9 @@ def candidate_edit_process_view(request):
 
             if google_search_image_file:
                 # If google search image exist then cache master and resized images and save them to candidate table
+                url_is_broken = False
                 save_image_to_candidate_table(candidate_on_stage, google_search_image_file,
-                                              google_search_link)
+                                              google_search_link, url_is_broken)
                 google_search_user_manager = GoogleSearchUserManager()
                 google_search_user_results = google_search_user_manager.retrieve_google_search_user_from_item_link(
                     candidate_on_stage.we_vote_id, google_search_link)

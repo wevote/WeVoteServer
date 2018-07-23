@@ -18,6 +18,36 @@ from wevote_settings.models import RemoteRequestHistory, RemoteRequestHistoryMan
 
 logger = wevote_functions.admin.get_logger(__name__)
 
+
+def scrape_one_facebook_page(one_candidate, request, remote_request_history_manager, add_messages):
+    # Facebook profile image url scrape has not been run on this candidate yet
+    results = scrape_facebook_photo_url_from_web_page(one_candidate.facebook_url)
+    if results.get('success'):
+        photo_url = results.get('photo_url')
+        link_is_broken = results.get('http_response_code') == 404
+        if not photo_url.startswith('https://scontent') and not link_is_broken:
+            logger.info("Rejected URL: " + one_candidate.facebook_url + " X '" + photo_url + "'")
+            if add_messages:
+                messages.add_message(request, messages.ERROR, 'Facebook photo NOT retrieved.')
+        else:
+            if link_is_broken:
+                logger.info("Broken URL: " + one_candidate.facebook_url)
+            else:
+                logger.info("Scraped URL: " + one_candidate.facebook_url + " ==> " + photo_url)
+            save_image_to_candidate_table(one_candidate, photo_url, one_candidate.facebook_url, link_is_broken,
+                                          FACEBOOK)
+            if add_messages:
+                messages.add_message(request, messages.INFO, 'Facebook photo retrieved.')
+        # Create a record denoting that we have retrieved from Facebook for this candidate
+        save_results_history = remote_request_history_manager.create_remote_request_history_entry(
+            RETRIEVE_POSSIBLE_FACEBOOK_PHOTOS, one_candidate.google_civic_election_id,
+            one_candidate.we_vote_id, None, 1, "CANDIDATE_FACEBOOK_URL_PARSED_HTTP:" +
+                                               str(link_is_broken) + ", " + one_candidate.facebook_url)
+    elif add_messages:
+        messages.add_message(request, messages.ERROR, 'Facebook photo NOT retrieved (2).')
+
+
+
 # Test SQL for pgAdmin 4
 # Find all eligible rows
 #   SELECT * FROM public.candidate_candidatecampaign
@@ -94,23 +124,9 @@ def bulk_retrieve_facebook_photos_view(request):
                 request_history_list = list(request_history_query)
 
                 if not positive_value_exists(request_history_list):
-                    # Facebook profile image url scrape has not been run on this candidate yet
-                    results = scrape_facebook_photo_url_from_web_page(one_candidate.facebook_url)
-                    if results.get('success'):
-                        photo_url = results.get('photo_url')
-                        if not photo_url.startswith('https://scontent'):
-                            logger.info("Rejected URL: " + one_candidate.facebook_url + " X '" + photo_url + "'")
-                        else:
-                            logger.info("Scraped URL: " + one_candidate.facebook_url + " ==> " + photo_url)
-                            save_image_to_candidate_table(one_candidate, photo_url,
-                                                          one_candidate.facebook_url, FACEBOOK)
-                            # one_candidate.facebook_profile_image_url_https = photo_url
-                            # one_candidate.save()
+                    add_messages = False
+                    scrape_one_facebook_page(one_candidate, request, remote_request_history_manager, add_messages)
                     number_of_candidates_to_search -= 1
-                    # Create a record denoting that we have retrieved from Facebook for this candidate
-                    save_results_history = remote_request_history_manager.create_remote_request_history_entry(
-                        RETRIEVE_POSSIBLE_FACEBOOK_PHOTOS, one_candidate.google_civic_election_id,
-                        one_candidate.we_vote_id, None, 1, "CANDIDATE_FACEBOOK_URL_PARSED " + one_candidate.facebook_url)
                 else:
                     logger.info("Skipped URL: " + one_candidate.facebook_url)
 
@@ -170,25 +186,8 @@ def scrape_and_save_facebook_photo_view(request):
                 '&page=' + str(page)
                 )
 
-        # Facebook profile image url scrape has not been run on this candidate yet
-        results = scrape_facebook_photo_url_from_web_page(one_candidate.facebook_url)
-        if results.get('success'):
-            photo_url = results.get('photo_url')
-            if not photo_url.startswith('https://scontent'):
-                logger.info("Rejected URL: " + one_candidate.facebook_url + " X '" + photo_url + "'")
-                messages.add_message(request, messages.ERROR, 'Facebook photo NOT retrieved.')
-            else:
-                logger.info("Scraped URL: " + one_candidate.facebook_url + " ==> " + photo_url)
-                save_image_to_candidate_table(one_candidate, photo_url,
-                                              one_candidate.facebook_url, FACEBOOK)
-                messages.add_message(request, messages.INFO, 'Facebook photo retrieved.')
-
-            # Create a record denoting that we have retrieved from Facebook for this candidate
-            save_results_history = remote_request_history_manager.create_remote_request_history_entry(
-                RETRIEVE_POSSIBLE_FACEBOOK_PHOTOS, one_candidate.google_civic_election_id,
-                one_candidate.we_vote_id, None, 1, "CANDIDATE_FACEBOOK_URL_PARSED " + one_candidate.facebook_url)
-        else:
-            messages.add_message(request, messages.ERROR, 'Facebook photo NOT retrieved (2).')
+        add_messages = True
+        scrape_one_facebook_page(one_candidate, request, remote_request_history_manager, add_messages)
 
     except CandidateCampaign.DoesNotExist:
         # This is fine, do nothing

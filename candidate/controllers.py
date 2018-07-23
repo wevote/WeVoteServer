@@ -1347,7 +1347,7 @@ def retrieve_candidate_list_for_all_upcoming_elections(upcoming_google_civic_ele
     return results
 
 
-def save_image_to_candidate_table(candidate, image_url, source_link, kind_of_source_website=None):
+def save_image_to_candidate_table(candidate, image_url, source_link, url_is_broken, kind_of_source_website=None):
     cache_results = {
         'we_vote_hosted_profile_image_url_large':   None,
         'we_vote_hosted_profile_image_url_medium':  None,
@@ -1389,13 +1389,17 @@ def save_image_to_candidate_table(candidate, image_url, source_link, kind_of_sou
         candidate.twitter_url = source_link
 
     elif FACEBOOK in kind_of_source_website:
-        cache_results = cache_master_and_resized_image(
-            candidate_id=candidate.id, candidate_we_vote_id=candidate.we_vote_id,
-            facebook_profile_image_url_https=image_url,
-            image_source=FACEBOOK)
-        cached_facebook_profile_image_url_https = cache_results['cached_facebook_profile_image_url_https']
-        candidate.facebook_url = source_link
-        candidate.facebook_profile_image_url_https = cached_facebook_profile_image_url_https
+        candidate.facebook_url_is_broken = url_is_broken
+        if not url_is_broken:
+            cache_results = cache_master_and_resized_image(
+                candidate_id=candidate.id, candidate_we_vote_id=candidate.we_vote_id,
+                facebook_profile_image_url_https=image_url,
+                image_source=FACEBOOK)
+            cached_facebook_profile_image_url_https = cache_results['cached_facebook_profile_image_url_https']
+            candidate.facebook_url = source_link
+            candidate.facebook_profile_image_url_https = cached_facebook_profile_image_url_https
+        else:
+            candidate.facebook_profile_image_url_https = None
 
     else:
         cache_results = cache_master_and_resized_image(
@@ -1406,14 +1410,16 @@ def save_image_to_candidate_table(candidate, image_url, source_link, kind_of_sou
         candidate.other_source_url = source_link
         candidate.other_source_photo_url = cached_other_source_image_url_https
 
-    we_vote_hosted_profile_image_url_large = cache_results['we_vote_hosted_profile_image_url_large']
-    we_vote_hosted_profile_image_url_medium = cache_results['we_vote_hosted_profile_image_url_medium']
-    we_vote_hosted_profile_image_url_tiny = cache_results['we_vote_hosted_profile_image_url_tiny']
+    if not url_is_broken:
+        we_vote_hosted_profile_image_url_large = cache_results['we_vote_hosted_profile_image_url_large']
+        we_vote_hosted_profile_image_url_medium = cache_results['we_vote_hosted_profile_image_url_medium']
+        we_vote_hosted_profile_image_url_tiny = cache_results['we_vote_hosted_profile_image_url_tiny']
 
     try:
-        candidate.we_vote_hosted_profile_image_url_large = we_vote_hosted_profile_image_url_large
-        candidate.we_vote_hosted_profile_image_url_medium = we_vote_hosted_profile_image_url_medium
-        candidate.we_vote_hosted_profile_image_url_tiny = we_vote_hosted_profile_image_url_tiny
+        if not url_is_broken:
+            candidate.we_vote_hosted_profile_image_url_large = we_vote_hosted_profile_image_url_large
+            candidate.we_vote_hosted_profile_image_url_medium = we_vote_hosted_profile_image_url_medium
+            candidate.we_vote_hosted_profile_image_url_tiny = we_vote_hosted_profile_image_url_tiny
         candidate.save()
     except Exception as e:
         pass
