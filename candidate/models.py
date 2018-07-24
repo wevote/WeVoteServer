@@ -1089,6 +1089,7 @@ class CandidateCampaign(models.Model):
     # The URL for the candidate's campaign web site.
     candidate_url = models.URLField(verbose_name='website url of candidate campaign', blank=True, null=True)
     facebook_url = models.URLField(verbose_name='facebook url of candidate campaign', blank=True, null=True)
+    facebook_url_is_broken = models.BooleanField(verbose_name="facebook url is broken", default=False)
     facebook_profile_image_url_https = models.URLField(verbose_name='url of profile image from facebook',
                                                        blank=True, null=True)
 
