@@ -348,6 +348,7 @@
                                     <input type="hidden" name="state_code" value="{{ state_code }}" />
                                     <input type="hidden" name="refresh_from_twitter" value="1" />
                                     <input type="hidden" name="redirect_to_candidate_list" value="1" />
+                                    <input type="hidden" name="twitter_url" value="{{ candidate.candidate_merge_possibility.twitter_url }}" />
                                     <input id="choose_{{ forloop.counter }}" type="submit" value="Choose and Update" />
                                 </form>
                             {% else %}
