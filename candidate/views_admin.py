@@ -796,6 +796,7 @@ def candidate_edit_process_view(request):
     politician_we_vote_id = request.POST.get('politician_we_vote_id', False)
     google_search_image_file = request.POST.get('google_search_image_file', False)
     google_search_link = request.POST.get('google_search_link', False)
+    twitter_url = request.POST.get('twitter_url', False)
 
     # Check to see if this candidate is already being used anywhere
     candidate_on_stage_found = False
@@ -986,6 +987,8 @@ def candidate_edit_process_view(request):
                 candidate_on_stage.google_civic_candidate_name2 = google_civic_candidate_name2
             if google_civic_candidate_name3 is not False:
                 candidate_on_stage.google_civic_candidate_name3 = google_civic_candidate_name3
+            if twitter_url is not False:
+                candidate_on_stage.twitter_url = twitter_url
 
             if google_search_image_file:
                 # If google search image exist then cache master and resized images and save them to candidate table
@@ -1046,6 +1049,8 @@ def candidate_edit_process_view(request):
                     candidate_on_stage.google_civic_candidate_name3 = google_civic_candidate_name3
                 if candidate_twitter_handle is not False:
                     candidate_on_stage.candidate_twitter_handle = candidate_twitter_handle
+                if twitter_url is not False:
+                    candidate_on_stage.twitter_url = twitter_url
                 if candidate_url is not False:
                     candidate_on_stage.candidate_url = candidate_url
                 if facebook_url is not False:
