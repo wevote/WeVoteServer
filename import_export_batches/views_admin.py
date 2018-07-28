@@ -178,6 +178,7 @@ def batch_list_process_view(request):
     polling_location_city = request.POST.get('polling_location_city', '')
     polling_location_zip = request.POST.get('polling_location_zip', '')
     show_all_elections = request.POST.get('show_all_elections', "")
+    state_code = request.POST.get('state_code', "")
     if kind_of_batch not in (MEASURE, ELECTED_OFFICE, CONTEST_OFFICE, CANDIDATE, ORGANIZATION_WORD, POSITION,
                              POLITICIAN, IMPORT_BALLOT_ITEM):
         messages.add_message(request, messages.ERROR, 'The kind_of_batch is required for a batch import.')
@@ -280,19 +281,19 @@ def batch_list_process_view(request):
                     contains_api = False
 
                 groom_results = groom_ballotpedia_data_for_processing(structured_json, google_civic_election_id,
-                                                                      contains_api)
+                                                                      state_code, contains_api)
                 modified_json_list = groom_results['modified_json_list']
                 kind_of_batch = groom_results['kind_of_batch']
 
                 if contains_api:
                     ballot_items_results = process_ballotpedia_voter_districts(
-                        google_civic_election_id, modified_json_list, polling_location_we_vote_id)
+                        google_civic_election_id, state_code, modified_json_list, polling_location_we_vote_id)
 
                     if ballot_items_results['ballot_items_found']:
                         modified_json_list = ballot_items_results['ballot_item_dict_list']
 
                 results = store_ballotpedia_json_response_to_import_batch_system(
-                    modified_json_list, google_civic_election_id, kind_of_batch)
+                    modified_json_list, google_civic_election_id, kind_of_batch)  # Add state_code=state_code ?
             else:
                 # check file type
                 filetype = batch_manager.find_file_type(batch_uri)
@@ -720,6 +721,8 @@ def batch_action_list_analyze_process_view(request):
     batch_row_id = convert_to_int(request.GET.get('batch_row_id', 0))
     kind_of_batch = request.GET.get('kind_of_batch', '')
     state_code = request.GET.get('state_code', '')
+    if state_code == "None":
+        state_code = ""
 
     if not positive_value_exists(batch_header_id):
         messages.add_message(request, messages.ERROR, 'Batch_header_id required.')

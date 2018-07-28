@@ -2140,7 +2140,6 @@ def create_batch_row_action_ballot_item(batch_description, batch_header_map, one
     batch_row_action_updated = False
     status = ''
     success = True
-    state_code = ""
     existing_ballot_item_id = 0
     existing_ballot_item_found = False
     contest_measure_text = ""
@@ -2152,15 +2151,6 @@ def create_batch_row_action_ballot_item(batch_description, batch_header_map, one
         google_civic_election_id = str(one_batch_row.google_civic_election_id)
     else:
         google_civic_election_id = str(batch_description.google_civic_election_id)
-
-    # state_code lookup from the election
-    if positive_value_exists(google_civic_election_id) and not positive_value_exists(state_code):
-        # Check to see if there is a state served for the election
-        election_manager = ElectionManager()
-        results = election_manager.retrieve_election(google_civic_election_id)
-        if results['election_found']:
-            election = results['election']
-            state_code = election.state_code
 
     # Does a BatchRowActionBallotItem entry already exist?
     # We want to start with the BatchRowAction... entry first so we can record our findings line by line while
@@ -2215,6 +2205,8 @@ def create_batch_row_action_ballot_item(batch_description, batch_header_map, one
         "contest_measure_name", batch_header_map, one_batch_row)
     local_ballot_order = batch_manager.retrieve_value_from_batch_row(
         "local_ballot_order", batch_header_map, one_batch_row)
+    state_code = batch_manager.retrieve_value_from_batch_row(
+        "state_code", batch_header_map, one_batch_row)
     voter_id = batch_manager.retrieve_value_from_batch_row(
         "voter_id", batch_header_map, one_batch_row)
     # These are not needed because they come from the measure table
@@ -2230,6 +2222,15 @@ def create_batch_row_action_ballot_item(batch_description, batch_header_map, one
     # Look up contest office or measure to see if an entry exists
     # These three parameters are needed to look up in ElectedOffice table for a match
     keep_looking_for_duplicates = True
+
+    # state_code lookup from the election
+    if positive_value_exists(google_civic_election_id) and not positive_value_exists(state_code):
+        # Check to see if there is a state served for the election
+        election_manager = ElectionManager()
+        results = election_manager.retrieve_election(google_civic_election_id)
+        if results['election_found']:
+            election = results['election']
+            state_code = election.state_code
 
     # See if we have a contest_office_we_vote_id
     contest_office_manager = ContestOfficeManager()
@@ -2381,9 +2382,10 @@ def create_batch_row_action_ballot_item(batch_description, batch_header_map, one
         elif positive_value_exists(contest_measure_name):
             batch_row_action_ballot_item.ballot_item_display_name = contest_measure_name
         batch_row_action_ballot_item.save()
+        status += "BATCH_ROW_ACTION_BALLOT_ITEM_SAVED "
     except Exception as e:
         success = False
-        status += "BATCH_ROW_ACTION_BALLOT_ITEM_UNABLE_TO_SAVE "
+        status += "BATCH_ROW_ACTION_BALLOT_ITEM_UNABLE_TO_SAVE " + str(e) + " "
 
     results = {
         'success':                      success,
@@ -4128,10 +4130,7 @@ def import_ballot_item_data_from_batch_row_actions(batch_header_id, batch_row_id
     status = ""
     number_of_ballot_items_created = 0
     number_of_ballot_items_updated = 0
-    kind_of_batch = ""
     new_ballot_item = ''
-    new_ballot_item_created = False
-    batch_row_action_list_found = False
     polling_location_we_vote_id = ""
     google_civic_election_id = 0
 
@@ -4268,6 +4267,7 @@ def import_ballot_item_data_from_batch_row_actions(batch_header_id, batch_row_id
             'measure_url':                  one_batch_row_action.measure_url,
             'no_vote_description':          one_batch_row_action.no_vote_description,
             'polling_location_we_vote_id':  one_batch_row_action.polling_location_we_vote_id,
+            'state_code':                   one_batch_row_action.state_code,
             'yes_vote_description':         one_batch_row_action.yes_vote_description,
         }
 
@@ -4292,6 +4292,8 @@ def import_ballot_item_data_from_batch_row_actions(batch_header_id, batch_row_id
                         success = False
                         status += "BALLOT_ITEM_RETRIEVE_ERROR"
                         handle_exception(e, logger=logger, exception_message=status)
+                else:
+                    status += results['status']
             elif update_entry_flag:
                 results = ballot_item_manager.update_ballot_item_row_entry(ballot_item_display_name,
                                                                            local_ballot_order, state_code,
@@ -4299,6 +4301,8 @@ def import_ballot_item_data_from_batch_row_actions(batch_header_id, batch_row_id
                 if results['ballot_item_updated']:
                     number_of_ballot_items_updated += 1
                     success = True
+                else:
+                    status += results['status']
             else:
                 # This is error, it shouldn't reach here, we are handling IMPORT_CREATE or UPDATE entries only.
                 status += "IMPORT_BALLOT_ITEM_ENTRY:NO_CREATE_OR_UPDATE_ERROR"
@@ -4310,6 +4314,8 @@ def import_ballot_item_data_from_batch_row_actions(batch_header_id, batch_row_id
                     'new_ballot_item':                  new_ballot_item,
                 }
                 return results
+        else:
+            status += "IMPORT_BALLOT_ITEM_ENTRY:MISSING_DISPLAY_NAME-STATE_CODE-OR_ELECTION_ID "
 
     if number_of_ballot_items_created or number_of_ballot_items_updated:
         if positive_value_exists(polling_location_we_vote_id) and positive_value_exists(google_civic_election_id):
@@ -4339,11 +4345,14 @@ def import_ballot_item_data_from_batch_row_actions(batch_header_id, batch_row_id
                     latitude=latitude, longitude=longitude,
                     ballot_location_display_name=polling_location_name, text_for_map_search=text_for_map_search,
                     normalized_state=state_code)
+                status += create_results['status']
 
     if number_of_ballot_items_created:
-        status += "IMPORT_BALLOT_ITEM_ENTRY:BALLOT_ITEM_CREATED"
+        status += "IMPORT_BALLOT_ITEM_ENTRY:BALLOT_ITEM_CREATED "
     elif number_of_ballot_items_updated:
-        status += "IMPORT_BALLOT_ITEM_ENTRY:BALLOT_ITEM_UPDATED"
+        status += "IMPORT_BALLOT_ITEM_ENTRY:BALLOT_ITEM_UPDATED "
+    else:
+        status += "IMPORT_BALLOT_ITEM_ENTRY:BALLOT_ITEM_NOT_UPDATED_OR_CREATED "
 
     results = {
         'success':                          success,

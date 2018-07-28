@@ -18,6 +18,6 @@ urlpatterns = [
     url(r'^(?P<election_local_id>[0-9]+)/retrieve_ballotpedia_data_for_polling_locations/$',
         views_admin.retrieve_ballotpedia_data_for_polling_locations_view,
         name='retrieve_ballotpedia_data_for_polling_locations'),
-    url(r'^retrieve_offices/$', views_admin.retrieve_ballotpedia_offices_by_election_from_api_view,
-        name='retrieve_offices'),
+    # url(r'^retrieve_offices/$', views_admin.retrieve_ballotpedia_offices_by_election_from_api_view,
+    #     name='retrieve_offices'),
 ]

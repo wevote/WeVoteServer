@@ -86,7 +86,7 @@
             {% endif %}
             {% if election.candidate_count %}
                 <br />
-                <a href="{% url 'apis_v1:candidatesSyncOutView' %}?google_civic_election_id={{ election.google_civic_election_id }}"
+                <a href="{% url 'apis_v1:candidatesSyncOutView' %}?google_civic_election_id={{ election.google_civic_election_id }}&state_code={{ election.state_code }}"
                    target="_blank">
                 open&nbsp;json</a>
             {% endif %}
