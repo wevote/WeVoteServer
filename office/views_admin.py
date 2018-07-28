@@ -160,6 +160,8 @@ def office_list_view(request):
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
+    status = ""
+
     google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
     state_code = request.GET.get('state_code', '')
     show_all_elections = request.GET.get('show_all_elections', False)
@@ -206,23 +208,26 @@ def office_list_view(request):
 
                     office_queryset = office_queryset.filter(final_filters)
 
+        office_list_count = office_queryset.count()
+
+        office_queryset = office_queryset[:500]
         office_list = list(office_queryset)
 
         if len(office_list):
             office_list_found = True
-            status = 'OFFICES_RETRIEVED'
+            status += 'OFFICES_RETRIEVED '
             success = True
         else:
-            status = 'NO_OFFICES_RETRIEVED'
+            status += 'NO_OFFICES_RETRIEVED '
             success = True
     except ContestOffice.DoesNotExist:
         # No offices found. Not a problem.
-        status = 'NO_OFFICES_FOUND_DoesNotExist'
+        status += 'NO_OFFICES_FOUND_DoesNotExist '
         office_list = []
         success = True
     except Exception as e:
-        status = 'FAILED retrieve_all_offices_for_upcoming_election ' \
-                 '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
+        status += 'FAILED retrieve_all_offices_for_upcoming_election ' \
+                 '{error} [type: {error_type}]'.format(error=e, error_type=type(e)) + " "
         success = False
 
     if office_list_found:
@@ -233,11 +238,6 @@ def office_list_view(request):
                 office.id, office.we_vote_id)
 
             updated_office_list.append(office)
-
-            office_list_count = len(updated_office_list)
-            if office_list_count >= 500:
-                # Limit to showing only 500
-                break
 
     election_manager = ElectionManager()
     if positive_value_exists(show_all_elections):

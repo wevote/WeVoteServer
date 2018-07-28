@@ -509,6 +509,7 @@ def retrieve_ballotpedia_data_for_polling_locations_view(request, election_local
         import_date = date.today()
         batch_set_id = 0
         batch_set_name = "Ballotpedia ballot locations for " + election_name + \
+                         " (state " + str(state_code.upper()) + ")" + \
                          " - ballotpedia: " + str(ballotpedia_election_id) + \
                          " - " + str(import_date)
 
