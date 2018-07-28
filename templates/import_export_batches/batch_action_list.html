@@ -977,6 +977,7 @@
                         <th>local ballot order</th>
                         <th>ballot item display name</th>
                         <th>election</th>
+                        <th>state</th>
                         <th>polling location</th>
                         <th>yes vote description</th>
                         <th>no vote description</th>
@@ -1029,6 +1030,7 @@
                             {% endif %}
                         </td>
                         <td>{{ one_batch_row.batch_row_action.google_civic_election_id|default_if_none:"" }}</td>
+                        <td>{{ one_batch_row.batch_row_action.state_code|default_if_none:"" }}</td>
                         <td>{{ one_batch_row.batch_row_action.polling_location_we_vote_id|default_if_none:"" }}</td>
                         <td>{{ one_batch_row.batch_row_action.yes_vote_description|default_if_none:"" }}</td>
                         <td>{{ one_batch_row.batch_row_action.no_vote_description|default_if_none:"" }}</td>

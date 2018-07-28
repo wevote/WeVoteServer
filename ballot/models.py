@@ -512,7 +512,10 @@ class BallotItemManager(models.Model):
                 if 'no_vote_description' in defaults:
                     no_vote_description = defaults['no_vote_description']
                     new_ballot_item.no_vote_description = no_vote_description
+                if 'state_code' in defaults and positive_value_exists(defaults['state_code']):
+                    new_ballot_item.state_code = defaults['state_code']
                 new_ballot_item.save()
+                status = "NEW_BALLOT_ITEM_CREATED "
             else:
                 success = False
                 status = "BALLOT_ITEM_CREATE_FAILED"
@@ -584,6 +587,8 @@ class BallotItemManager(models.Model):
                 if 'no_vote_description' in defaults:
                     no_vote_description = defaults['no_vote_description']
                     existing_ballot_item_entry.no_vote_description = no_vote_description
+                if 'state_code' in defaults and positive_value_exists(defaults['state_code']):
+                    existing_ballot_item_entry.state_code = defaults['state_code']
 
                 # now go ahead and save this entry (update)
                 existing_ballot_item_entry.save()

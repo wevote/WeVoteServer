@@ -5,8 +5,8 @@
 from .controllers import attach_ballotpedia_election_by_district_from_api, \
     retrieve_ballot_items_from_polling_location, \
     retrieve_ballotpedia_candidates_by_district_from_api, retrieve_ballotpedia_measures_by_district_from_api, \
-    retrieve_ballotpedia_district_id_list_for_polling_location, retrieve_ballotpedia_offices_by_district_from_api, \
-    retrieve_ballotpedia_offices_by_election_from_api
+    retrieve_ballotpedia_district_id_list_for_polling_location, retrieve_ballotpedia_offices_by_district_from_api
+#    retrieve_ballotpedia_offices_by_election_from_api
 from admin_tools.views import redirect_to_sign_in_page
 from config.base import get_environment_variable
 from datetime import date
@@ -17,7 +17,7 @@ from django.core.urlresolvers import reverse
 from django.db.models import Q
 from django.http import HttpResponseRedirect
 from django.shortcuts import redirect, render
-from election.models import Election
+from election.models import Election, ElectionManager
 from import_export_batches.models import BatchSet, BATCH_SET_SOURCE_IMPORT_BALLOTPEDIA_BALLOT_ITEMS
 from polling_location.models import PollingLocation
 from voter.models import voter_has_authority
@@ -52,7 +52,7 @@ def import_ballot_items_for_location_view(request):
     state_code = request.GET.get('state_code', "")
 
     results = retrieve_ballot_items_from_polling_location(
-        google_civic_election_id, polling_location_we_vote_id)
+        google_civic_election_id, polling_location_we_vote_id, state_code=state_code)
 
     kind_of_batch = ""
     if 'kind_of_batch' in results:
@@ -126,22 +126,15 @@ def attach_ballotpedia_election_view(request, election_local_id=0):
 
     state_code = request.GET.get('state_code', '')
     force_district_retrieve_from_ballotpedia = request.GET.get('force_district_retrieve_from_ballotpedia', False)
-    election_state_code = ""
-
-    ballotpedia_election_id = 0
-    ballotpedia_kind_of_election = ""
-    google_civic_election_id = 0
     polling_location_list = []
-    election_name = "(election name unknown)"
     status = ""
 
     try:
         election_on_stage = Election.objects.get(id=election_local_id)
-        ballotpedia_election_id = election_on_stage.ballotpedia_election_id
         google_civic_election_id = election_on_stage.google_civic_election_id
-        ballotpedia_kind_of_election = election_on_stage.ballotpedia_kind_of_election
         election_state_code = election_on_stage.get_election_state()
         election_name = election_on_stage.election_name
+        is_national_election = election_on_stage.is_national_election
     except Election.MultipleObjectsReturned as e:
         messages.add_message(request, messages.ERROR,
                              'Could not retrieve election data. More than one election found.')
@@ -151,17 +144,16 @@ def attach_ballotpedia_election_view(request, election_local_id=0):
                              'Could not retrieve election data. Election could not be found.')
         return HttpResponseRedirect(reverse('election:election_list', args=()))
 
-    # We want to be able to run this again later in the election cycle
-    # if positive_value_exists(ballotpedia_election_id) and positive_value_exists(ballotpedia_kind_of_election):
-    #     messages.add_message(request, messages.ERROR,
-    #                          'Required values already exist. '
-    #                          '(ballotpedia_election_id & ballotpedia_kind_of_election)')
-    #     return HttpResponseRedirect(reverse('election:election_summary', args=(election_local_id,)))
-
     # Check to see if we have polling location data related to the region(s) covered by this election
     # We request the ballot data for each polling location as a way to build up our local data
     if not positive_value_exists(state_code) and positive_value_exists(google_civic_election_id):
         state_code = election_state_code
+
+    if positive_value_exists(is_national_election) and not positive_value_exists(state_code):
+        messages.add_message(request, messages.ERROR,
+                             'For National elections, a State Code is required in order to run any '
+                             'Ballotpedia data preparation.')
+        return HttpResponseRedirect(reverse('election:election_summary', args=(election_local_id,)))
 
     try:
         polling_location_count_query = PollingLocation.objects.all()
@@ -184,7 +176,8 @@ def attach_ballotpedia_election_view(request, election_local_id=0):
                              'Data needed from VIP.'.format(
                                  election_name=election_name,
                                  state=state_code))
-        return HttpResponseRedirect(reverse('election:election_summary', args=(election_local_id,)))
+        return HttpResponseRedirect(reverse('election:election_summary', args=(election_local_id,)) +
+                                    "?state_code=" + str(state_code))
 
     if polling_location_count == 0:
         messages.add_message(request, messages.ERROR,
@@ -192,7 +185,8 @@ def attach_ballotpedia_election_view(request, election_local_id=0):
                              'No polling locations returned for the state \'{state}\'. (error 2)'.format(
                                  election_name=election_name,
                                  state=state_code))
-        return HttpResponseRedirect(reverse('election:election_summary', args=(election_local_id,)))
+        return HttpResponseRedirect(reverse('election:election_summary', args=(election_local_id,)) +
+                                    "?state_code=" + str(state_code))
 
     # If here, we know that we have some polling_locations to use in order to retrieve ballotpedia districts
     could_not_retrieve_district_id_list_for_polling_location_count = 0
@@ -221,10 +215,11 @@ def attach_ballotpedia_election_view(request, election_local_id=0):
         messages.add_message(request, messages.ERROR,
                              'Could not find Ballotpedia districts. ')
         return HttpResponseRedirect(reverse('election:election_summary', args=(election_local_id,)) +
-                                    '?google_civic_election_id=' + str(google_civic_election_id))
+                                    '?google_civic_election_id=' + str(google_civic_election_id) +
+                                    "&state_code=" + str(state_code))
 
     results = attach_ballotpedia_election_by_district_from_api(election_on_stage, google_civic_election_id,
-                                                               merged_district_list)
+                                                               merged_district_list, state_code=state_code)
 
     status += results['status']
     status = status[:1000]
@@ -254,8 +249,25 @@ def retrieve_ballotpedia_candidates_by_district_from_api_view(request):
 
     google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
     only_retrieve_if_zero_candidates = request.GET.get('only_retrieve_if_zero_candidates', False)
+    state_code = request.GET.get('state_code', "")
 
-    results = retrieve_ballotpedia_candidates_by_district_from_api(google_civic_election_id,
+    election_manager = ElectionManager()
+    election_local_id = 0
+    is_national_election = False
+    results = election_manager.retrieve_election(google_civic_election_id)
+    if results['election_found']:
+        election = results['election']
+        election_local_id = election.id
+        is_national_election = election.is_national_election
+
+    if positive_value_exists(is_national_election) and not positive_value_exists(state_code):
+        messages.add_message(request, messages.ERROR,
+                             'For National elections, a State Code is required in order to run any '
+                             'Ballotpedia data preparation.')
+
+        return HttpResponseRedirect(reverse('election:election_summary', args=(election_local_id,)))
+
+    results = retrieve_ballotpedia_candidates_by_district_from_api(google_civic_election_id, state_code,
                                                                    only_retrieve_if_zero_candidates)
 
     kind_of_batch = ""
@@ -308,42 +320,43 @@ def retrieve_ballotpedia_data_for_polling_locations_view(request, election_local
     state_code = request.GET.get('state_code', '')
     retrieve_races = positive_value_exists(request.GET.get('retrieve_races', False))
     retrieve_measures = positive_value_exists(request.GET.get('retrieve_measures', False))
-    election_state_code = ""
     import_limit = convert_to_int(request.GET.get('import_limit', 500))
 
-    ballotpedia_election_found = False
-    ballotpedia_election_id = 0
-    google_civic_election_id = 0
     polling_location_list = []
     polling_location_count = 0
-    election_name = "(election name unknown)"
     status = ""
 
     try:
         if positive_value_exists(election_local_id):
             election_on_stage = Election.objects.get(id=election_local_id)
-            ballotpedia_election_found = positive_value_exists(election_on_stage.ballotpedia_election_id)
             ballotpedia_election_id = election_on_stage.ballotpedia_election_id
             google_civic_election_id = election_on_stage.google_civic_election_id
-            ballotpedia_kind_of_election = election_on_stage.ballotpedia_kind_of_election
             election_state_code = election_on_stage.get_election_state()
             election_name = election_on_stage.election_name
+            is_national_election = election_on_stage.is_national_election
+        else:
+            messages.add_message(request, messages.ERROR,
+                                 'Could not retrieve Ballotpedia data. Missing election_local_id.')
+            return HttpResponseRedirect(reverse('election:election_list', args=()))
     except Election.MultipleObjectsReturned as e:
-        messages.add_message(request, messages.ERROR, 'Could not retrieve ballot data. More than one election found.')
+        messages.add_message(request, messages.ERROR, 'Could not retrieve Ballotpedia data. '
+                                                      'More than one election found.')
         return HttpResponseRedirect(reverse('election:election_list', args=()))
     except Election.DoesNotExist:
-        messages.add_message(request, messages.ERROR, 'Could not retrieve ballot data. Election could not be found.')
+        messages.add_message(request, messages.ERROR, 'Could not retrieve Ballotpedia data. '
+                                                      'Election could not be found.')
         return HttpResponseRedirect(reverse('election:election_list', args=()))
-
-    # 2018-6-7 We now can retrieve two elections at once (primary and general)
-    # if not positive_value_exists(ballotpedia_election_found):
-    #     messages.add_message(request, messages.ERROR, 'Ballotpedia election could not be found.')
-    #     return HttpResponseRedirect(reverse('election:election_summary', args=(election_local_id,)))
 
     # Check to see if we have polling location data related to the region(s) covered by this election
     # We request the ballot data for each polling location as a way to build up our local data
     if not positive_value_exists(state_code) and positive_value_exists(google_civic_election_id):
         state_code = election_state_code
+
+    if positive_value_exists(is_national_election) and not positive_value_exists(state_code):
+        messages.add_message(request, messages.ERROR,
+                             'For National elections, a State Code is required in order to run any '
+                             'Ballotpedia data preparation.')
+        return HttpResponseRedirect(reverse('election:election_summary', args=(election_local_id,)))
 
     try:
         polling_location_count_query = PollingLocation.objects.all()
@@ -429,7 +442,7 @@ def retrieve_ballotpedia_data_for_polling_locations_view(request, election_local
             kind_of_batch = "Unknown"
             results = {}
             if retrieve_races:
-                results = retrieve_ballotpedia_offices_by_district_from_api(google_civic_election_id,
+                results = retrieve_ballotpedia_offices_by_district_from_api(google_civic_election_id, state_code,
                                                                             merged_district_list)
 
                 kind_of_batch = ""
@@ -438,7 +451,7 @@ def retrieve_ballotpedia_data_for_polling_locations_view(request, election_local
                 if not positive_value_exists(kind_of_batch):
                     kind_of_batch = CONTEST_OFFICE
             elif retrieve_measures:
-                results = retrieve_ballotpedia_measures_by_district_from_api(google_civic_election_id,
+                results = retrieve_ballotpedia_measures_by_district_from_api(google_civic_election_id, state_code,
                                                                              merged_district_list)
 
                 kind_of_batch = ""
@@ -496,6 +509,7 @@ def retrieve_ballotpedia_data_for_polling_locations_view(request, election_local
         import_date = date.today()
         batch_set_id = 0
         batch_set_name = "Ballotpedia ballot locations for " + election_name + \
+                         " (state " + str(state_code.upper()) + ")" + \
                          " - ballotpedia: " + str(ballotpedia_election_id) + \
                          " - " + str(import_date)
 
@@ -517,7 +531,8 @@ def retrieve_ballotpedia_data_for_polling_locations_view(request, election_local
         # put ballot items for this location onto a ballot
         for polling_location in polling_location_list:
             one_ballot_results = retrieve_ballot_items_from_polling_location(
-                google_civic_election_id, polling_location=polling_location, batch_set_id=batch_set_id)
+                google_civic_election_id, polling_location=polling_location, batch_set_id=batch_set_id,
+                state_code=state_code)
             success = False
             if one_ballot_results['success']:
                 success = True
@@ -547,46 +562,46 @@ def retrieve_ballotpedia_data_for_polling_locations_view(request, election_local
                                     '&google_civic_election_id=' + str(google_civic_election_id))
 
 
-@login_required
-def retrieve_ballotpedia_offices_by_election_from_api_view(request):
-    """
-    Reach out to Ballotpedia API to retrieve offices.
-    """
-    # admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
-    authority_required = {'political_data_manager'}
-    if not voter_has_authority(request, authority_required):
-        return redirect_to_sign_in_page(request, authority_required)
-
-    google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
-
-    results = retrieve_ballotpedia_offices_by_election_from_api(google_civic_election_id)
-
-    kind_of_batch = ""
-    if 'kind_of_batch' in results:
-        kind_of_batch = results['kind_of_batch']
-    if not positive_value_exists(kind_of_batch):
-        kind_of_batch = CONTEST_OFFICE
-
-    batch_header_id = 0
-    if 'batch_saved' in results and results['batch_saved']:
-        messages.add_message(request, messages.INFO, 'Import batch for {google_civic_election_id} election saved.'
-                                                     ''.format(google_civic_election_id=google_civic_election_id))
-        batch_header_id = results['batch_header_id']
-    elif 'batch_header_id' in results and results['batch_header_id']:
-        messages.add_message(request, messages.INFO, 'Import batch for {google_civic_election_id} election saved, '
-                                                     'batch_header_id.'
-                                                     ''.format(google_civic_election_id=google_civic_election_id))
-        batch_header_id = results['batch_header_id']
-    else:
-        messages.add_message(request, messages.ERROR, results['status'])
-
-    if positive_value_exists(batch_header_id):
-        # Go straight to the new batch
-        return HttpResponseRedirect(reverse('import_export_batches:batch_action_list', args=()) +
-                                    "?batch_header_id=" + str(batch_header_id) +
-                                    "&kind_of_batch=" + str(kind_of_batch) +
-                                    "&google_civic_election_id=" + str(google_civic_election_id))
-    else:
-        # Go to the office listing page
-        return HttpResponseRedirect(reverse('office:office_list', args=()) +
-                                    "?google_civic_election_id=" + str(google_civic_election_id))
+# @login_required
+# def retrieve_ballotpedia_offices_by_election_from_api_view(request):
+#     """
+#     Reach out to Ballotpedia API to retrieve offices.
+#     """
+#     # admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+#     authority_required = {'political_data_manager'}
+#     if not voter_has_authority(request, authority_required):
+#         return redirect_to_sign_in_page(request, authority_required)
+#
+#     google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
+#
+#     results = retrieve_ballotpedia_offices_by_election_from_api(google_civic_election_id)
+#
+#     kind_of_batch = ""
+#     if 'kind_of_batch' in results:
+#         kind_of_batch = results['kind_of_batch']
+#     if not positive_value_exists(kind_of_batch):
+#         kind_of_batch = CONTEST_OFFICE
+#
+#     batch_header_id = 0
+#     if 'batch_saved' in results and results['batch_saved']:
+#         messages.add_message(request, messages.INFO, 'Import batch for {google_civic_election_id} election saved.'
+#                                                      ''.format(google_civic_election_id=google_civic_election_id))
+#         batch_header_id = results['batch_header_id']
+#     elif 'batch_header_id' in results and results['batch_header_id']:
+#         messages.add_message(request, messages.INFO, 'Import batch for {google_civic_election_id} election saved, '
+#                                                      'batch_header_id.'
+#                                                      ''.format(google_civic_election_id=google_civic_election_id))
+#         batch_header_id = results['batch_header_id']
+#     else:
+#         messages.add_message(request, messages.ERROR, results['status'])
+#
+#     if positive_value_exists(batch_header_id):
+#         # Go straight to the new batch
+#         return HttpResponseRedirect(reverse('import_export_batches:batch_action_list', args=()) +
+#                                     "?batch_header_id=" + str(batch_header_id) +
+#                                     "&kind_of_batch=" + str(kind_of_batch) +
+#                                     "&google_civic_election_id=" + str(google_civic_election_id))
+#     else:
+#         # Go to the office listing page
+#         return HttpResponseRedirect(reverse('office:office_list', args=()) +
+#                                     "?google_civic_election_id=" + str(google_civic_election_id))

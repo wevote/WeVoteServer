@@ -129,13 +129,14 @@ BATCH_HEADER_MAP_CANDIDATES_TO_BALLOTPEDIA_CANDIDATES = {
     'birth_day_text': 'birth_day_text',
     'candidate_email': 'candidate_email',
     'candidate_gender': 'candidate_gender',
+    'candidate_is_incumbent': 'is_incumbent',
     'candidate_participation_status': 'candidate_participation_status',
     'candidate_party_name': 'candidate_party_name',
     'candidate_twitter_handle': 'candidate_twitter_handle',
     'candidate_url': 'candidate_url',
     'crowdpac_candidate_id': 'crowdpac_candidate_id',
     'facebook_url': 'facebook_url',
-    'candidate_is_incumbent': 'is_incumbent',
+    'state_code': 'state_code',
 }
 
 BATCH_IMPORT_KEYS_ACCEPTED_FOR_CONTEST_OFFICES = {
@@ -794,7 +795,7 @@ class BatchManager(models.Model):
 
     def create_batch_from_json(self, file_name, structured_json_list, mapping_dict, kind_of_batch,
                                google_civic_election_id=0, organization_we_vote_id="", polling_location_we_vote_id="",
-                               batch_set_id=0):
+                               batch_set_id=0, state_code=""):
         success = False
         status = ""
         number_of_batch_rows = 0
@@ -5160,8 +5161,8 @@ class BatchRowActionBallotItem(models.Model):
 
 def create_batch_from_json(file_name, structured_json_list, mapping_dict, kind_of_batch,
                            google_civic_election_id=0, organization_we_vote_id="", polling_location_we_vote_id="",
-                           batch_set_id=0):
+                           batch_set_id=0, state_code=""):
     batch_manager = BatchManager()
     return batch_manager.create_batch_from_json(
         file_name, structured_json_list, mapping_dict, kind_of_batch,
-        google_civic_election_id, organization_we_vote_id, polling_location_we_vote_id, batch_set_id)
+        google_civic_election_id, organization_we_vote_id, polling_location_we_vote_id, batch_set_id, state_code)

@@ -959,8 +959,9 @@ def nationwide_election_list_view(request):
 
         # How many offices?
         office_list_query = ContestOffice.objects.all()
-        office_list_query = office_list_query.filter(
-            google_civic_election_id=election.google_civic_election_id)
+        office_list_query = office_list_query.filter(google_civic_election_id=election.google_civic_election_id)
+        if is_national_election:
+            office_list_query = office_list_query.filter(state_code__iexact=election.state_code)
         office_list = list(office_list_query)
         election.office_count = len(office_list)
 
@@ -980,14 +981,16 @@ def nationwide_election_list_view(request):
 
         # How many candidates?
         candidate_list_query = CandidateCampaign.objects.all()
-        candidate_list_query = candidate_list_query.filter(
-            google_civic_election_id=election.google_civic_election_id)
+        candidate_list_query = candidate_list_query.filter(google_civic_election_id=election.google_civic_election_id)
+        if is_national_election:
+            candidate_list_query = candidate_list_query.filter(state_code__iexact=election.state_code)
         election.candidate_count = candidate_list_query.count()
 
         # How many without photos?
         candidate_list_query = CandidateCampaign.objects.all()
-        candidate_list_query = candidate_list_query.filter(
-            google_civic_election_id=election.google_civic_election_id)
+        candidate_list_query = candidate_list_query.filter(google_civic_election_id=election.google_civic_election_id)
+        if is_national_election:
+            candidate_list_query = candidate_list_query.filter(state_code__iexact=election.state_code)
         candidate_list_query = candidate_list_query.filter(
             Q(we_vote_hosted_profile_image_url_tiny__isnull=True) | Q(we_vote_hosted_profile_image_url_tiny='')
         )
@@ -998,16 +1001,21 @@ def nationwide_election_list_view(request):
 
         # How many measures?
         measure_list_query = ContestMeasure.objects.all()
-        measure_list_query = measure_list_query.filter(
-            google_civic_election_id=election.google_civic_election_id)
+        measure_list_query = measure_list_query.filter(google_civic_election_id=election.google_civic_election_id)
+        if is_national_election:
+            measure_list_query = measure_list_query.filter(state_code__iexact=election.state_code)
         election.measure_count = measure_list_query.count()
 
         # Number of Voter Guides
         voter_guide_query = VoterGuide.objects.filter(google_civic_election_id=election.google_civic_election_id)
+        if is_national_election:
+            voter_guide_query = voter_guide_query.filter(state_code__iexact=election.state_code)
         election.voter_guides_count = voter_guide_query.count()
 
         # Number of Public Positions
         position_query = PositionEntered.objects.filter(google_civic_election_id=election.google_civic_election_id)
+        if is_national_election:
+            position_query = position_query.filter(state_code__iexact=election.state_code)
         election.public_positions_count = position_query.count()
 
         election_list_modified.append(election)
@@ -1067,6 +1075,7 @@ def election_summary_view(request, election_local_id=0, google_civic_election_id
 
     election_found = False
     election = Election()
+    is_national_election = False
 
     try:
         if positive_value_exists(election_local_id):
@@ -1075,8 +1084,10 @@ def election_summary_view(request, election_local_id=0, google_civic_election_id
             election = Election.objects.get(google_civic_election_id=google_civic_election_id)
         election_found = True
         election_local_id = election.id
+        is_national_election = election.is_national_election
         google_civic_election_id = election.google_civic_election_id
-        state_code = election.state_code
+        if not positive_value_exists(state_code):
+            state_code = election.state_code
     except Election.MultipleObjectsReturned as e:
         handle_record_found_more_than_one_exception(e, logger=logger)
     except Election.DoesNotExist:
@@ -1089,6 +1100,8 @@ def election_summary_view(request, election_local_id=0, google_civic_election_id
     if election_found:
         ballotpedia_election_query = BallotpediaElection.objects.filter(
             google_civic_election_id=google_civic_election_id)
+        if is_national_election and positive_value_exists(state_code):
+            ballotpedia_election_query = ballotpedia_election_query.filter(state_code__iexact=state_code)
         ballotpedia_election_list = list(ballotpedia_election_query)
         if len(ballotpedia_election_list) > 3:
             more_than_three_ballotpedia_elections = True
@@ -1136,9 +1149,9 @@ def election_summary_view(request, election_local_id=0, google_civic_election_id
         else:
             ballot_returned_list = []
 
-        status_print_list += "ballot_returned_count: " + str(ballot_returned_count_entire_election) + ""
-        messages.add_message(request, messages.INFO, status_print_list)
-        messages_on_stage = get_messages(request)
+        if positive_value_exists(ballot_returned_count_entire_election):
+            status_print_list += "ballot_returned_count: " + str(ballot_returned_count_entire_election) + ""
+            messages.add_message(request, messages.INFO, status_print_list)
 
         ballot_item_list_manager = BallotItemListManager()
         voter_ballot_saved_manager = VoterBallotSavedManager()
@@ -1213,10 +1226,10 @@ def election_summary_view(request, election_local_id=0, google_civic_election_id
 
         election.ballot_returned_count = \
             ballot_returned_list_manager.fetch_ballot_returned_list_count_for_election(
-                election.google_civic_election_id, election.state_code)
+                election.google_civic_election_id, state_code)
         election.ballot_location_display_option_on_count = \
             ballot_returned_list_manager.fetch_ballot_location_display_option_on_count_for_election(
-                election.google_civic_election_id, election.state_code)
+                election.google_civic_election_id, state_code)
         if election.ballot_returned_count < 500:
             batch_set_source = "IMPORT_BALLOTPEDIA_BALLOT_ITEMS"
             results = batch_manager.retrieve_unprocessed_batch_set_info_by_election_and_set_source(
@@ -1227,8 +1240,9 @@ def election_summary_view(request, election_local_id=0, google_civic_election_id
 
         # How many offices?
         office_list_query = ContestOffice.objects.all()
-        office_list_query = office_list_query.filter(
-            google_civic_election_id=election.google_civic_election_id)
+        office_list_query = office_list_query.filter(google_civic_election_id=election.google_civic_election_id)
+        if positive_value_exists(state_code):
+            office_list_query = office_list_query.filter(state_code__iexact=state_code)
         office_list = list(office_list_query)
         election.office_count = len(office_list)
 
@@ -1248,14 +1262,16 @@ def election_summary_view(request, election_local_id=0, google_civic_election_id
 
         # How many candidates?
         candidate_list_query = CandidateCampaign.objects.all()
-        candidate_list_query = candidate_list_query.filter(
-            google_civic_election_id=election.google_civic_election_id)
+        candidate_list_query = candidate_list_query.filter(google_civic_election_id=election.google_civic_election_id)
+        if positive_value_exists(state_code):
+            candidate_list_query = candidate_list_query.filter(state_code__iexact=state_code)
         election.candidate_count = candidate_list_query.count()
 
         # How many without photos?
         candidate_list_query = CandidateCampaign.objects.all()
-        candidate_list_query = candidate_list_query.filter(
-            google_civic_election_id=election.google_civic_election_id)
+        candidate_list_query = candidate_list_query.filter(google_civic_election_id=election.google_civic_election_id)
+        if positive_value_exists(state_code):
+            candidate_list_query = candidate_list_query.filter(state_code__iexact=state_code)
         candidate_list_query = candidate_list_query.filter(
             Q(we_vote_hosted_profile_image_url_tiny__isnull=True) | Q(we_vote_hosted_profile_image_url_tiny='')
         )
@@ -1266,19 +1282,26 @@ def election_summary_view(request, election_local_id=0, google_civic_election_id
 
         # How many measures?
         measure_list_query = ContestMeasure.objects.all()
-        measure_list_query = measure_list_query.filter(
-            google_civic_election_id=election.google_civic_election_id)
+        measure_list_query = measure_list_query.filter(google_civic_election_id=election.google_civic_election_id)
+        if positive_value_exists(state_code):
+            measure_list_query = measure_list_query.filter(state_code__iexact=state_code)
         election.measure_count = measure_list_query.count()
 
         # Number of Voter Guides
         voter_guide_query = VoterGuide.objects.filter(
             google_civic_election_id=election.google_civic_election_id)
+        if positive_value_exists(state_code):
+            voter_guide_query = voter_guide_query.filter(state_code__iexact=state_code)
         election.voter_guides_count = voter_guide_query.count()
 
         # Number of Public Positions
         position_query = PositionEntered.objects.filter(
             google_civic_election_id=election.google_civic_election_id)
+        if positive_value_exists(state_code):
+            position_query = position_query.filter(state_code__iexact=state_code)
         election.public_positions_count = position_query.count()
+
+        messages_on_stage = get_messages(request)
 
         template_values = {
             'ballot_returned_search':                   ballot_returned_search,
@@ -1288,6 +1311,7 @@ def election_summary_view(request, election_local_id=0, google_civic_election_id
             'entries_missing_latitude_longitude':       entries_missing_latitude_longitude,
             'election':                                 election,
             'google_civic_election_id':                 google_civic_election_id,
+            'is_national_election':                     election.is_national_election,
             'messages_on_stage':                        messages_on_stage,
             'more_than_three_ballotpedia_elections':    more_than_three_ballotpedia_elections,
             'all_ballotpedia_elections_shown':          all_ballotpedia_elections_shown,
@@ -1305,6 +1329,7 @@ def election_summary_view(request, election_local_id=0, google_civic_election_id
             'ballot_returned_search':                   ballot_returned_search,
             'entries_missing_latitude_longitude':       entries_missing_latitude_longitude,
             'google_civic_election_id':                 google_civic_election_id,
+            'is_national_election':                     is_national_election,
             'messages_on_stage':                        messages_on_stage,
             'state_code':                               state_code,
             'state_list':                               sorted_state_list,
