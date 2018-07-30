@@ -184,7 +184,7 @@ def electoral_district_list_view(request):
         info_message = '{electoral_district_count} electoral districts found.'.format(
             electoral_district_count=electoral_district_count)
 
-        electoral_district_list = electoral_district_query.order_by('electoral_district_name')[:100]
+        electoral_district_list = electoral_district_query.order_by('electoral_district_name')[:500]
 
         messages.add_message(request, messages.INFO, info_message)
 
