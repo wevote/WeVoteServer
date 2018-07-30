@@ -549,6 +549,7 @@ def retrieve_ballotpedia_district_id_list_for_polling_location(
     success = True
     status = ""
     state_code = ""
+    state_code_found = False
     could_not_get_or_create_count = 0
     polling_location_found = False
     ballotpedia_district_id_list = []
@@ -582,7 +583,10 @@ def retrieve_ballotpedia_district_id_list_for_polling_location(
             state_code = polling_location.state
             polling_location_found = True
 
-    if polling_location_found:
+    if positive_value_exists(state_code):
+        state_code_found = True
+
+    if polling_location_found and state_code_found:
         if not polling_location.latitude or not polling_location.longitude:
             success = False
             status += "RETRIEVE_DISTRICTS-MISSING_LATITUDE_LONGITUDE "
@@ -595,10 +599,21 @@ def retrieve_ballotpedia_district_id_list_for_polling_location(
 
         # Check to see if we have already stored the ballotpedia districts
         electoral_district_manager = ElectoralDistrictManager()
-        results = electoral_district_manager.retrieve_ballotpedia_district_ids_for_polling_location(
-            polling_location_we_vote_id)
-        if results['ballotpedia_district_id_list_found'] and not force_district_retrieve_from_ballotpedia:
+        ballotpedia_district_id_list_found = False
+        if positive_value_exists(force_district_retrieve_from_ballotpedia):
+            # Delete any existing links between this district and this polling location
+            results = electoral_district_manager.delete_electoral_district_link(
+                    polling_location_we_vote_id=polling_location_we_vote_id)
+            if not results['success']:
+                status += results['status']
+        else:
+            results = electoral_district_manager.retrieve_ballotpedia_district_ids_for_polling_location(
+                polling_location_we_vote_id)
             ballotpedia_district_id_list = results['ballotpedia_district_id_list']
+            ballotpedia_district_id_list_found = True
+
+        if ballotpedia_district_id_list_found and not force_district_retrieve_from_ballotpedia:
+            pass
         else:
             latitude_longitude = str(polling_location.latitude) + "," + str(polling_location.longitude)
             response = requests.get(BALLOTPEDIA_API_CONTAINS_URL, params={
@@ -627,6 +642,8 @@ def retrieve_ballotpedia_district_id_list_for_polling_location(
 
                     # See if this district (get_or_create) is already in the database
                     try:
+                        if not positive_value_exists(state_code):
+                            state_code = one_district_json['state_code']
                         defaults = {
                             'ballotpedia_district_id':  one_district_json['ballotpedia_district_id'],
                             'ballotpedia_district_kml':  one_district_json['kml'],
@@ -636,7 +653,7 @@ def retrieve_ballotpedia_district_id_list_for_polling_location(
                             'ballotpedia_district_url':  one_district_json['url'],
                             'ballotpedia_district_ocd_id':  one_district_json['ocdid'],
                             'electoral_district_name':  one_district_json['ballotpedia_district_name'],
-                            'state_code': one_district_json['state_code'],
+                            'state_code': state_code,
                         }
                         electoral_district, new_electoral_district_created = ElectoralDistrict.objects.get_or_create(
                             ballotpedia_district_id=one_district_json['ballotpedia_district_id'],
@@ -649,7 +666,8 @@ def retrieve_ballotpedia_district_id_list_for_polling_location(
                         # Now create a link between this district and this polling location
                         results = \
                             electoral_district_manager.update_or_create_electoral_district_link_to_polling_location(
-                                polling_location_we_vote_id, electoral_district_we_vote_id, ballotpedia_district_id)
+                                polling_location_we_vote_id, electoral_district_we_vote_id, ballotpedia_district_id,
+                                state_code)
                         if not results['success']:
                             status += results['status']
                     except Exception as e:

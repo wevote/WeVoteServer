@@ -87,6 +87,9 @@ class VoterGuideManager(models.Manager):
                         pledge_count = pledge_results['pledge_count']
                     else:
                         pledge_count = 0
+
+                    if positive_value_exists(state_code):
+                        state_code = state_code.lower()
                     updated_values = {
                         # Values we search against below
                         'google_civic_election_id': google_civic_election_id,

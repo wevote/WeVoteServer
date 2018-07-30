@@ -22,7 +22,7 @@ from import_export_batches.models import BatchSet, BATCH_SET_SOURCE_IMPORT_BALLO
 from polling_location.models import PollingLocation
 from voter.models import voter_has_authority
 import wevote_functions.admin
-from wevote_functions.functions import convert_to_int, positive_value_exists
+from wevote_functions.functions import convert_to_int, is_valid_state_code, positive_value_exists
 
 logger = wevote_functions.admin.get_logger(__name__)
 
@@ -153,6 +153,11 @@ def attach_ballotpedia_election_view(request, election_local_id=0):
         messages.add_message(request, messages.ERROR,
                              'For National elections, a State Code is required in order to run any '
                              'Ballotpedia data preparation.')
+        return HttpResponseRedirect(reverse('election:election_summary', args=(election_local_id,)))
+
+    if not is_valid_state_code(state_code):
+        messages.add_message(request, messages.ERROR,
+                             '{state_code} is not a valid State Code'.format(state_code=state_code))
         return HttpResponseRedirect(reverse('election:election_summary', args=(election_local_id,)))
 
     try:
