@@ -5,7 +5,7 @@
 
 {%  block content %}
 
-<a href="{% url 'polling_location:polling_location_list' %}">< Back to Polling Locations</a>
+<a href="{% url 'polling_location:polling_location_list' %}?state_code={{ polling_location.state|default_if_none:"" }}">< Back to Polling Locations</a>
 
 {% if polling_location %}
 

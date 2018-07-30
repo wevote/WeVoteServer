@@ -46,6 +46,7 @@ class PollingLocation(models.Model):
         verbose_name="how many times Google can't find address", default=None, null=True)
 
     use_for_bulk_retrieve = models.BooleanField(verbose_name="this provides geographical coverage", default=False)
+    polling_location_deleted = models.BooleanField(verbose_name="removed from usage", default=False)
 
     def get_formatted_zip(self):
         return extract_zip_formatted_from_zip9(self.zip_long)
@@ -102,7 +103,7 @@ class PollingLocationManager(models.Model):
     def update_or_create_polling_location(self, we_vote_id,
                                           polling_location_id, location_name, polling_hours_text, directions_text,
                                           line1, line2, city, state, zip_long, latitude='', longitude='',
-                                          use_for_bulk_retrieve=False):
+                                          use_for_bulk_retrieve=False, polling_location_deleted=False):
         """
         Either update or create an polling_location entry.
         """
@@ -154,6 +155,7 @@ class PollingLocationManager(models.Model):
                         'line1': line1.strip() if line1 else '',
                         'line2': line2,
                         'city': city.strip() if city else '',
+                        'polling_location_deleted': polling_location_deleted,
                         'zip_long': zip_long,
                     }
                     if latitude:
@@ -174,6 +176,7 @@ class PollingLocationManager(models.Model):
                         'line1': line1.strip() if line1 else '',
                         'line2': line2,
                         'city': city.strip() if city else '',
+                        'polling_location_deleted': polling_location_deleted,
                         'zip_long': zip_long,
                     }
                     # We use polling_location_id + state to find prior entries since I am not sure polling_location_id's
@@ -303,7 +306,7 @@ class PollingLocationManager(models.Model):
             status += "POLLING_LOCATION_SAVED_WITH_LATITUDE_AND_LONGITUDE "
             success = True
         except Exception as e:
-            status += "POLLING_LOCATION_NOT_SAVED_WITH_LATITUDE_AND_LONGITUDE "
+            status += "POLLING_LOCATION_NOT_SAVED_WITH_LATITUDE_AND_LONGITUDE " + str(e) + " "
             success = False
 
         results = {
