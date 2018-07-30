@@ -257,6 +257,7 @@
                     <th></th>
                     <th>ID</th>
                     <th>District Name</th>
+                    <th>State</th>
                     <th>District Type</th>
                     <th colspan="2">Election Type</th>
                 </tr>
@@ -265,6 +266,10 @@
                     <td><span style="color: darkgray">{{ forloop.counter }}</span></td>
                     <td>{{ ballotpedia_election.ballotpedia_election_id|default_if_none:"" }}</td>
                     <td>{{ ballotpedia_election.district_name|default_if_none:"" }}</td>
+                    <td>
+                      {{ ballotpedia_election.state_code|default_if_none:""|upper }}
+                      {{ ballotpedia_election.google_civic_election_id|default_if_none:"" }}
+                    </td>
                     <td><span class="u-no-break">{{ ballotpedia_election.district_type|default_if_none:"" }}</span></td>
                     <td>{{ ballotpedia_election.election_type|default_if_none:"" }}</td>
                     <td>{{ ballotpedia_election.election_description|default_if_none:"" }}</td>
