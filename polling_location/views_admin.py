@@ -363,6 +363,8 @@ def polling_location_list_view(request):
         polling_location_without_latitude_count_query = PollingLocation.objects.all()
         polling_location_without_latitude_count_query = \
             polling_location_without_latitude_count_query.filter(state__iexact=state_code)
+        polling_location_without_latitude_count_query = \
+            polling_location_without_latitude_count_query.filter(polling_location_deleted=False)
         if positive_value_exists(show_bulk_retrieve):
             polling_location_without_latitude_count_query = \
                 polling_location_without_latitude_count_query.filter(use_for_bulk_retrieve=True)
