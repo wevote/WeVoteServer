@@ -488,6 +488,8 @@ class BallotItemManager(models.Model):
         new_ballot_item = ''
 
         try:
+            if positive_value_exists(state_code):
+                state_code = state_code.lower()
             new_ballot_item = BallotItem.objects.create(
                 ballot_item_display_name=ballot_item_display_name,
                 local_ballot_order=local_ballot_order,
@@ -513,7 +515,9 @@ class BallotItemManager(models.Model):
                     no_vote_description = defaults['no_vote_description']
                     new_ballot_item.no_vote_description = no_vote_description
                 if 'state_code' in defaults and positive_value_exists(defaults['state_code']):
-                    new_ballot_item.state_code = defaults['state_code']
+                    state_code_from_defaults = defaults['state_code']
+                    state_code_from_defaults = state_code_from_defaults.lower()
+                    new_ballot_item.state_code = state_code_from_defaults
                 new_ballot_item.save()
                 status = "NEW_BALLOT_ITEM_CREATED "
             else:
@@ -588,7 +592,8 @@ class BallotItemManager(models.Model):
                     no_vote_description = defaults['no_vote_description']
                     existing_ballot_item_entry.no_vote_description = no_vote_description
                 if 'state_code' in defaults and positive_value_exists(defaults['state_code']):
-                    existing_ballot_item_entry.state_code = defaults['state_code']
+                    state_code = defaults['state_code']
+                    existing_ballot_item_entry.state_code = state_code.lower()
 
                 # now go ahead and save this entry (update)
                 existing_ballot_item_entry.save()
@@ -1223,7 +1228,7 @@ class BallotItemListManager(models.Model):
                 ballot_item_queryset = ballot_item_queryset.filter(
                     voter_id=voter_id)
             if positive_value_exists(state_code):
-                ballot_item_queryset = ballot_item_queryset.filter(state_code=state_code)
+                ballot_item_queryset = ballot_item_queryset.filter(state_code__iexact=state_code)
 
             # We want to find candidates with *any* of these values
             if positive_value_exists(ballot_item_display_name):

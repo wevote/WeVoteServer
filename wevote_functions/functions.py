@@ -910,6 +910,15 @@ def extract_twitter_handle_from_text_string(twitter_text_string):
     return twitter_text_string
 
 
+def is_valid_state_code(possible_state_code):
+    if positive_value_exists(possible_state_code):
+        possible_state_code_lower = possible_state_code.lower()
+        for state_code, state_name in STATE_CODE_MAP.items():
+            if state_code.lower() == possible_state_code_lower:
+                return True
+    return False
+
+
 def get_ip_from_headers(request):
     x_forwarded_for = request.META.get('X-Forwarded-For')
     http_x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')

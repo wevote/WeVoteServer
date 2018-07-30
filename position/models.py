@@ -3691,6 +3691,8 @@ class PositionManager(models.Model):
                         organization_id = organization.id
                         speaker_display_name = organization.organization_name
 
+            if positive_value_exists(state_code):
+                state_code = state_code.lower()
             position_on_stage = position_on_stage_starter(
                 voter_id=voter_id,
                 voter_we_vote_id=voter_we_vote_id,
@@ -6670,10 +6672,10 @@ class PositionManager(models.Model):
                     try:
                         # TODO DALE replace with retrieve_position_table_unknown
                         position_on_stage = position_on_stage_starter.objects.get(
-                            contest_measure_we_vote_id=measure_we_vote_id,
-                            public_figure_we_vote_id=public_figure_we_vote_id,
+                            contest_measure_we_vote_id__iexact=measure_we_vote_id,
+                            public_figure_we_vote_id__iexact=public_figure_we_vote_id,
                             google_civic_election_id=google_civic_election_id,
-                            state_code=state_code,
+                            state_code__iexact=state_code,
                         )
                         position_on_stage_found = False  # TODO Update when working
                         found_with_status = "FOUND_WITH_MEASURE_AND_PUBLIC_FIGURE_WE_VOTE_ID"
@@ -6692,10 +6694,10 @@ class PositionManager(models.Model):
                     try:
                         # TODO DALE replace with retrieve_position_table_unknown
                         position_on_stage = position_on_stage_starter.objects.get(
-                            contest_office_we_vote_id=office_we_vote_id,
-                            public_figure_we_vote_id=public_figure_we_vote_id,
+                            contest_office_we_vote_id__iexact=office_we_vote_id,
+                            public_figure_we_vote_id__iexact=public_figure_we_vote_id,
                             google_civic_election_id=google_civic_election_id,
-                            state_code=state_code
+                            state_code__iexact=state_code
                         )
                         position_on_stage_found = False  # TODO Update when public_figure working
                         found_with_status = "FOUND_WITH_OFFICE_AND_VOTER_WE_VOTE_ID"
@@ -6963,6 +6965,8 @@ class PositionManager(models.Model):
                         organization_id = organization.id
                         speaker_display_name = organization.organization_name
 
+                if positive_value_exists(state_code):
+                    state_code = state_code.lower()
                 position_on_stage = position_on_stage_starter.objects.create(
                     organization_we_vote_id=organization_we_vote_id,
                     organization_id=organization_id,

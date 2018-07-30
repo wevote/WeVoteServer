@@ -485,6 +485,7 @@ class PoliticianManager(models.Model):
                 politician_found = True
             elif positive_value_exists(first_name) and positive_value_exists(last_name) \
                     and positive_value_exists(state_code):
+                state_code = state_code.lower()
                 politician, new_politician_created = \
                     Politician.objects.update_or_create(
                         first_name=first_name,

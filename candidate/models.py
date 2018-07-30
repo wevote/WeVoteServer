@@ -2428,6 +2428,8 @@ class CandidateCampaignManager(models.Model):
         photo_url = update_values['photo_url'] \
             if 'photo_url' in update_values else ''
         state_code = update_values['state_code'] if 'state_code' in update_values else ''
+        if positive_value_exists(state_code):
+            state_code = state_code.lower()
 
         if not positive_value_exists(candidate_name) or not positive_value_exists(contest_office_we_vote_id) \
                 or not positive_value_exists(contest_office_id) \
@@ -2627,7 +2629,10 @@ class CandidateCampaignManager(models.Model):
                     existing_candidate_entry.politician_id = update_values['politician_id']
                     values_changed = True
                 if 'state_code' in update_values:
-                    existing_candidate_entry.state_code = update_values['state_code']
+                    state_code = update_values['state_code']
+                    if positive_value_exists(state_code):
+                        state_code = state_code.lower()
+                    existing_candidate_entry.state_code = state_code
                     values_changed = True
                 if 'photo_url' in update_values:
                     # check if candidate has an existing photo in the CandidateCampaign table

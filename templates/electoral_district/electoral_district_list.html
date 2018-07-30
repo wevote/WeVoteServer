@@ -82,7 +82,7 @@
                 {{ electoral_district.electoral_district_type|default_if_none:"" }} / {{ electoral_district.ballotpedia_district_type|default_if_none:"" }}
             </td>
             <td>
-                {{ electoral_district.state_code|default_if_none:"" }}
+                {{ electoral_district.state_code|default_if_none:""|upper }}
             </td>
             <td>
                 {% if electoral_district.we_vote_id %}&nbsp;&nbsp;&nbsp;{{ electoral_district.we_vote_id }}{% endif %}

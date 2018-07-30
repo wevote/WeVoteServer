@@ -278,9 +278,9 @@
             </table>
             {% if more_than_three_ballotpedia_elections %}
                 {% if all_ballotpedia_elections_shown %}
-                     <a href="{% url 'election:election_summary' election.id %}">hide most Ballotpedia elections</a>
+                     <a href="{% url 'election:election_summary' election.id %}?state_code={{ state_code|default_if_none:"" }}">hide most Ballotpedia elections</a>
                 {% else %}
-                     <a href="{% url 'election:election_summary' election.id %}?show_all_ballotpedia_elections=1">show all Ballotpedia elections</a>
+                     <a href="{% url 'election:election_summary' election.id %}?show_all_ballotpedia_elections=1&state_code={{ state_code|default_if_none:"" }}">show all Ballotpedia elections</a>
                 {% endif %}
             {% endif %}
         {% else %}
