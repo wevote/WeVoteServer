@@ -8,7 +8,7 @@
 {% if polling_location.id %}
     <a href="{% url 'polling_location:polling_location_summary' polling_location.id %}">< Back to Polling Location Summary</a>
 {% else %}
-    <a href="{% url 'polling_location:polling_location_list' %}">< Back to Polling Locations</a>
+    <a href="{% url 'polling_location:polling_location_list' %}?state_code={{ polling_location.state|default_if_none:"" }}">< Back to Polling Locations</a>
 {% endif %}
 
 <h1>{% if polling_location %}Update Polling Location: {{ polling_location.location_name|default_if_none:"" }}{% else %}Create Polling Location{% endif %}</h1>
@@ -87,6 +87,16 @@
            value="True"
            {% if polling_location and polling_location.use_for_bulk_retrieve %}checked{% endif %} />
         Use this polling location when doing bulk retrieve of ballots (so we have coverage across the state)
+    </div>
+</div>
+
+<div class="form-group">
+    <label for="polling_location_deleted_id" class="col-sm-3 control-label"></label>
+    <div class="col-sm-8">
+      <input type="checkbox" name="polling_location_deleted" id="polling_location_deleted_id"
+           value="True"
+           {% if polling_location and polling_location.polling_location_deleted %}checked{% endif %} />
+        Delete this polling location - Remove it from usage
     </div>
 </div>
 

@@ -104,6 +104,7 @@ def polling_locations_sync_out_view(request):  # pollingLocationsSyncOut
                                                                   'polling_hours_text',
                                                                   'polling_location_id', 'state',
                                                                   'use_for_bulk_retrieve',
+                                                                  'polling_location_deleted',
                                                                   'zip_long')
         if polling_location_list_dict:
             polling_location_list_json = list(polling_location_list_dict)
@@ -208,6 +209,7 @@ def polling_location_edit_process_view(request):
     latitude = convert_to_float(request.POST.get('latitude', 0))
     longitude = convert_to_float(request.POST.get('longitude', 0))
     use_for_bulk_retrieve = request.POST.get('use_for_bulk_retrieve', False)
+    polling_location_deleted = request.POST.get('polling_location_deleted', False)
 
     # Check to see if this polling_location is already being used anywhere
     polling_location_on_stage_found = False
@@ -239,6 +241,7 @@ def polling_location_edit_process_view(request):
         polling_location_on_stage.latitude = latitude
         polling_location_on_stage.longitude = longitude
         polling_location_on_stage.use_for_bulk_retrieve = positive_value_exists(use_for_bulk_retrieve)
+        polling_location_on_stage.polling_location_deleted = positive_value_exists(polling_location_deleted)
 
         polling_location_on_stage.save()
         polling_location_id = polling_location_on_stage.id
@@ -338,13 +341,16 @@ def polling_location_list_view(request):
         return redirect_to_sign_in_page(request, authority_required)
 
     google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
+    limit = convert_to_int(request.GET.get('limit', 100))
     show_bulk_retrieve = request.GET.get('show_bulk_retrieve', 0)
     state_code = request.GET.get('state_code', '')
     polling_location_search = request.GET.get('polling_location_search', '')
 
     polling_location_count_query = PollingLocation.objects.all()
+    polling_location_count_query = polling_location_count_query.filter(polling_location_deleted=False)
     polling_location_without_latitude_count = 0
     polling_location_query = PollingLocation.objects.all()
+    polling_location_query = polling_location_query.filter(polling_location_deleted=False)
 
     if positive_value_exists(show_bulk_retrieve):
         polling_location_count_query = polling_location_count_query.filter(use_for_bulk_retrieve=True)
@@ -411,7 +417,7 @@ def polling_location_list_view(request):
 
     messages.add_message(request, messages.INFO, info_message)
 
-    polling_location_list = polling_location_query.order_by('location_name')[:100]
+    polling_location_list = polling_location_query.order_by('location_name')[:limit]
 
     state_list = STATE_LIST_IMPORT
     sorted_state_list = sorted(state_list.items())
@@ -446,12 +452,13 @@ def polling_locations_add_latitude_and_longitude_view(request):
     status = ""
     limit = request.GET.get('limit', 1000)
     state_code = request.GET.get('state_code', "")
+    refresh_all = request.GET.get('refresh_all', "")
     google_civic_election_id = request.GET.get('google_civic_election_id', "")
 
     if not positive_value_exists(state_code):
         messages.add_message(request, messages.ERROR, 'State code required.')
         return HttpResponseRedirect(reverse('polling_location:polling_location_list', args=()) +
-                                    "?google_civic_election_id=" + str(google_civic_election_id) + \
+                                    "?google_civic_election_id=" + str(google_civic_election_id) +
                                     "&state_code=" + str(state_code))
 
     polling_location_manager = PollingLocationManager()
@@ -462,12 +469,17 @@ def polling_locations_add_latitude_and_longitude_view(request):
 
     try:
         # Find all polling locations with an empty latitude (with limit)
-        polling_location_query = PollingLocation.objects.filter(Q(latitude__isnull=True) | Q(latitude__exact=0.0))
+        polling_location_query = PollingLocation.objects.all()
+        if positive_value_exists(refresh_all):
+            # Do not restrict to entries without lat/long
+            pass
+        else:
+            polling_location_query = polling_location_query.filter(Q(latitude__isnull=True) | Q(latitude__exact=0.0))
         polling_location_query = polling_location_query.filter(state__iexact=state_code)
         polling_location_query = polling_location_query.order_by('location_name')[:limit]
         polling_location_list = list(polling_location_query)
     except Exception as e:
-        messages.add_message(request, messages.ERROR, 'No polling locations found that need lat/long.')
+        messages.add_message(request, messages.ERROR, 'No polling locations found that need lat/long: ' + str(e))
 
     for polling_location_on_stage in polling_location_list:
         try:
