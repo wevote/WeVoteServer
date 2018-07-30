@@ -166,6 +166,8 @@ def attach_ballotpedia_election_view(request, election_local_id=0):
         polling_location_count_query = polling_location_count_query.filter(polling_location_deleted=False)
         polling_location_count_query = polling_location_count_query.exclude(
             Q(latitude__isnull=True) | Q(latitude__exact=0.0))
+        polling_location_count_query = polling_location_count_query.exclude(
+            Q(zip_long__isnull=True) | Q(zip_long__exact='0') | Q(zip_long__exact=''))
         polling_location_count = polling_location_count_query.count()
 
         if positive_value_exists(polling_location_count):
@@ -174,6 +176,8 @@ def attach_ballotpedia_election_view(request, election_local_id=0):
             polling_location_query = polling_location_query.filter(polling_location_deleted=False)
             polling_location_query = polling_location_query.exclude(
                 Q(latitude__isnull=True) | Q(latitude__exact=0.0))
+            polling_location_query = polling_location_query.exclude(
+                Q(zip_long__isnull=True) | Q(zip_long__exact='0') | Q(zip_long__exact=''))
             # Ordering by "location_name" creates a bit of (locational) random order
             polling_location_list = polling_location_query.order_by('location_name')[:1000]
     except PollingLocation.DoesNotExist:
@@ -389,6 +393,9 @@ def retrieve_ballotpedia_data_for_polling_locations_view(request, election_local
             polling_location_count_query = PollingLocation.objects.all()
             polling_location_count_query = \
                 polling_location_count_query.exclude(Q(latitude__isnull=True) | Q(latitude__exact=0.0))
+            polling_location_count_query = \
+                polling_location_count_query.exclude(Q(zip_long__isnull=True) | Q(zip_long__exact='0') |
+                                                     Q(zip_long__exact=''))
             polling_location_count_query = polling_location_count_query.filter(state__iexact=state_code)
             polling_location_count_query = polling_location_count_query.filter(polling_location_deleted=False)
             polling_location_count = polling_location_count_query.count()
@@ -397,6 +404,9 @@ def retrieve_ballotpedia_data_for_polling_locations_view(request, election_local
                 polling_location_query = PollingLocation.objects.all()
                 polling_location_query = \
                     polling_location_query.exclude(Q(latitude__isnull=True) | Q(latitude__exact=0.0))
+                polling_location_query = \
+                    polling_location_query.exclude(Q(zip_long__isnull=True) | Q(zip_long__exact='0') |
+                                                   Q(zip_long__exact=''))
                 polling_location_query = polling_location_query.filter(state__iexact=state_code)
                 polling_location_query = polling_location_query.filter(polling_location_deleted=False)
                 # Ordering by "location_name" creates a bit of (locational) random order
