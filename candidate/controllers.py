@@ -889,7 +889,7 @@ def candidate_retrieve_for_api(candidate_id, candidate_we_vote_id):  # candidate
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 
 
-def candidates_retrieve_for_api(office_id, office_we_vote_id):
+def candidates_retrieve_for_api(office_id, office_we_vote_id):  # candidatesRetrieve
     """
     Used by the api
     :param office_id:
@@ -934,43 +934,44 @@ def candidates_retrieve_for_api(office_id, office_we_vote_id):
             if not positive_value_exists(candidate_campaign.contest_office_name):
                 candidate_manager = CandidateCampaignManager()
                 candidate_campaign = candidate_manager.refresh_cached_candidate_office_info(candidate_campaign)
+            # This should match voter_ballot_items_retrieve_for_one_election_for_api (voterBallotItemsRetrieve)
             one_candidate = {
                 'status':                       status,
                 'success':                      True,
-                'kind_of_ballot_item':          CANDIDATE,
                 'id':                           candidate_campaign.id,
                 'we_vote_id':                   candidate_campaign.we_vote_id,
                 'ballot_item_display_name':     candidate_campaign.display_candidate_name(),
+                'ballotpedia_candidate_id':     candidate_campaign.ballotpedia_candidate_id,
+                'ballotpedia_candidate_summary': candidate_campaign.ballotpedia_candidate_summary,
+                'ballotpedia_candidate_url':    candidate_campaign.ballotpedia_candidate_url,
+                'ballotpedia_person_id':        candidate_campaign.ballotpedia_person_id,
+                'candidate_email':              candidate_campaign.candidate_email,
+                'candidate_phone':              candidate_campaign.candidate_phone,
                 'candidate_photo_url_large':    candidate_campaign.we_vote_hosted_profile_image_url_large
                 if positive_value_exists(candidate_campaign.we_vote_hosted_profile_image_url_large)
                 else candidate_campaign.candidate_photo_url(),
                 'candidate_photo_url_medium':   candidate_campaign.we_vote_hosted_profile_image_url_medium,
                 'candidate_photo_url_tiny':     candidate_campaign.we_vote_hosted_profile_image_url_tiny,
-                'order_on_ballot':              candidate_campaign.order_on_ballot,
-                'google_civic_election_id':     candidate_campaign.google_civic_election_id,
-                'ballotpedia_candidate_id':     candidate_campaign.ballotpedia_candidate_id,
-                'ballotpedia_candidate_summary': candidate_campaign.ballotpedia_candidate_summary,
-                'ballotpedia_candidate_url':    candidate_campaign.ballotpedia_candidate_url,
-                'ballotpedia_person_id':        candidate_campaign.ballotpedia_person_id,
-                'maplight_id':                  candidate_campaign.maplight_id,
+                'candidate_url':                candidate_campaign.candidate_url,
                 'contest_office_id':            candidate_campaign.contest_office_id,
-                'contest_office_we_vote_id':    candidate_campaign.contest_office_we_vote_id,
                 'contest_office_name':          candidate_campaign.contest_office_name,
+                'contest_office_we_vote_id':    candidate_campaign.contest_office_we_vote_id,
+                'facebook_url':                 candidate_campaign.facebook_url,
+                'google_civic_election_id':     candidate_campaign.google_civic_election_id,
+                'google_plus_url':              candidate_campaign.google_plus_url,
+                'kind_of_ballot_item':          CANDIDATE,
+                'maplight_id':                  candidate_campaign.maplight_id,
+                'ocd_division_id':              candidate_campaign.ocd_division_id,
+                'order_on_ballot':              candidate_campaign.order_on_ballot,
+                'party':                        candidate_campaign.political_party_display(),
                 'politician_id':                candidate_campaign.politician_id,
                 'politician_we_vote_id':        candidate_campaign.politician_we_vote_id,
-                'party':                        candidate_campaign.political_party_display(),
-                'ocd_division_id':              candidate_campaign.ocd_division_id,
                 'state_code':                   candidate_campaign.state_code,
-                'candidate_url':                candidate_campaign.candidate_url,
-                'facebook_url':                 candidate_campaign.facebook_url,
                 'twitter_url':                  candidate_campaign.twitter_url,
                 'twitter_handle':               candidate_campaign.fetch_twitter_handle(),
                 'twitter_description':          candidate_campaign.twitter_description,
                 'twitter_followers_count':      candidate_campaign.twitter_followers_count,
-                'google_plus_url':              candidate_campaign.google_plus_url,
                 'youtube_url':                  candidate_campaign.youtube_url,
-                'candidate_email':              candidate_campaign.candidate_email,
-                'candidate_phone':              candidate_campaign.candidate_phone,
             }
             candidates_to_display.append(one_candidate.copy())
             # Capture the office_we_vote_id and google_civic_election_id so we can return
