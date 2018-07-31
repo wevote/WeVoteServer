@@ -1106,6 +1106,7 @@ def refresh_voter_ballot_items_from_google_civic_from_voter_ballot_saved(voter_b
             'contests_retrieved':           False,
             'ballot_location_display_name': "",
             'ballot_location_shortcut':     "",
+            'ballot_returned':              None,
             'ballot_returned_we_vote_id':   "",
         }
         return results
@@ -1124,6 +1125,7 @@ def refresh_voter_ballot_items_from_google_civic_from_voter_ballot_saved(voter_b
             'contests_retrieved':           False,
             'ballot_location_display_name': "",
             'ballot_location_shortcut':     "",
+            'ballot_returned':              None,
             'ballot_returned_we_vote_id':   "",
         }
         return results
@@ -1141,6 +1143,7 @@ def refresh_voter_ballot_items_from_google_civic_from_voter_ballot_saved(voter_b
             'contests_retrieved':           False,
             'ballot_location_display_name': "",
             'ballot_location_shortcut':     "",
+            'ballot_returned':              None,
             'ballot_returned_we_vote_id':   "",
         }
         return results
@@ -1161,6 +1164,7 @@ def refresh_voter_ballot_items_from_google_civic_from_voter_ballot_saved(voter_b
             'contests_retrieved':           False,
             'ballot_location_display_name': "",
             'ballot_location_shortcut':     "",
+            'ballot_returned':              None,
             'ballot_returned_we_vote_id':   "",
         }
         return results
@@ -1192,6 +1196,7 @@ def refresh_voter_ballot_items_from_google_civic_from_voter_ballot_saved(voter_b
             'contests_retrieved':           False,
             'ballot_location_display_name': "",
             'ballot_location_shortcut':     "",
+            'ballot_returned':              ballot_returned,
             'ballot_returned_we_vote_id':   "",
         }
         return results
@@ -1219,6 +1224,7 @@ def refresh_voter_ballot_items_from_google_civic_from_voter_ballot_saved(voter_b
                     'contests_retrieved': False,
                     'ballot_location_display_name': "",
                     'ballot_location_shortcut': "",
+                    'ballot_returned': ballot_returned,
                     'ballot_returned_we_vote_id': "",
                 }
                 return results
@@ -1302,6 +1308,7 @@ def refresh_voter_ballot_items_from_google_civic_from_voter_ballot_saved(voter_b
         'contests_retrieved':           contests_retrieved,
         'ballot_location_display_name': ballot_location_display_name,
         'ballot_location_shortcut':     ballot_location_shortcut,
+        'ballot_returned':              ballot_returned,
         'ballot_returned_we_vote_id':   ballot_returned_we_vote_id,
     }
     return results
@@ -1329,6 +1336,7 @@ def voter_ballot_items_retrieve_from_google_civic_for_api(
             'contests_retrieved':           False,
             'ballot_location_display_name': "",
             'ballot_location_shortcut':     "",
+            'ballot_returned':              None,
             'ballot_returned_we_vote_id':   "",
         }
         return results
@@ -1349,6 +1357,7 @@ def voter_ballot_items_retrieve_from_google_civic_for_api(
             'contests_retrieved':           False,
             'ballot_location_display_name': "",
             'ballot_location_shortcut':     "",
+            'ballot_returned':              None,
             'ballot_returned_we_vote_id':   "",
         }
         return results
@@ -1370,6 +1379,7 @@ def voter_ballot_items_retrieve_from_google_civic_for_api(
             'contests_retrieved':           False,
             'ballot_location_display_name': "",
             'ballot_location_shortcut':     "",
+            'ballot_returned':              None,
             'ballot_returned_we_vote_id':   "",
         }
         return results
@@ -1390,6 +1400,7 @@ def voter_ballot_items_retrieve_from_google_civic_for_api(
             'contests_retrieved':           False,
             'ballot_location_display_name': "",
             'ballot_location_shortcut':     "",
+            'ballot_returned':              None,
             'ballot_returned_we_vote_id':   "",
         }
         return results
@@ -1402,13 +1413,23 @@ def voter_ballot_items_retrieve_from_google_civic_for_api(
     polling_location_retrieved = False
     ballot_location_display_name = ''
     ballot_location_shortcut = ''
+    ballot_returned = None
     ballot_returned_we_vote_id = ''
+    original_text_city = ''
+    original_text_state = ''
+    original_text_zip = ''
     contests_retrieved = False
     state_code = ''
     if not positive_value_exists(text_for_map_search):
         # Retrieve it from voter address
         voter_address_manager = VoterAddressManager()
         text_for_map_search = voter_address_manager.retrieve_ballot_map_text_from_voter_id(voter_id)
+        results = voter_address_manager.retrieve_ballot_address_from_voter_id(voter_id)
+        if results['voter_address_found']:
+            voter_address = results['voter_address']
+            original_text_city = voter_address.normalized_city
+            original_text_state = voter_address.normalized_state
+            original_text_zip = voter_address.normalized_zip
 
     google_civic_election_id = 0
     if positive_value_exists(text_for_map_search):
@@ -1491,10 +1512,14 @@ def voter_ballot_items_retrieve_from_google_civic_for_api(
         'election_description_text':    election_description_text,
         'election_data_retrieved':      election_data_retrieved,
         'text_for_map_search':          text_for_map_search,
+        'original_text_city':           original_text_city,
+        'original_text_state':          original_text_state,
+        'original_text_zip':            original_text_zip,
         'polling_location_retrieved':   polling_location_retrieved,
         'contests_retrieved':           contests_retrieved,
         'ballot_location_display_name': ballot_location_display_name,
         'ballot_location_shortcut':     ballot_location_shortcut,
+        'ballot_returned':              ballot_returned,
         'ballot_returned_we_vote_id':   ballot_returned_we_vote_id,
     }
     return results
