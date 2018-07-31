@@ -904,6 +904,9 @@ def voter_ballot_items_retrieve_for_api(
             'google_civic_election_id':             google_civic_election_id,
             'text_for_map_search':                  '',
             'substituted_address_nearby':           '',
+            'substituted_address_city':             '',
+            'substituted_address_state':            '',
+            'substituted_address_zip':              '',
             'ballot_caveat':                        '',
             'is_from_substituted_address':          False,
             'is_from_test_ballot':                  False,
@@ -928,6 +931,9 @@ def voter_ballot_items_retrieve_for_api(
             'google_civic_election_id':     google_civic_election_id,
             'text_for_map_search':          '',
             'substituted_address_nearby':   '',
+            'substituted_address_city':     '',
+            'substituted_address_state':    '',
+            'substituted_address_zip':      '',
             'ballot_caveat':                '',
             'is_from_substituted_address':  False,
             'is_from_test_ballot':          False,
@@ -975,6 +981,9 @@ def voter_ballot_items_retrieve_for_api(
             'google_civic_election_id':     0,
             'text_for_map_search':          voter_address.text_for_map_search,
             'substituted_address_nearby':   '',
+            'substituted_address_city':     '',
+            'substituted_address_state':    '',
+            'substituted_address_zip':      '',
             'ballot_caveat':                ballot_caveat,
             'is_from_substituted_address':  False,
             'is_from_test_ballot':          False,
@@ -1055,6 +1064,9 @@ def voter_ballot_items_retrieve_for_api(
             'election_day_text':            voter_ballot_saved.election_day_text(),
             'text_for_map_search':          voter_ballot_saved.original_text_for_map_search,
             'substituted_address_nearby':   voter_ballot_saved.substituted_address_nearby,
+            'substituted_address_city':     voter_ballot_saved.substituted_address_city,
+            'substituted_address_state':    voter_ballot_saved.substituted_address_state,
+            'substituted_address_zip':      voter_ballot_saved.substituted_address_zip,
             'ballot_caveat':                voter_ballot_saved.ballot_caveat(),
             'is_from_substituted_address':  voter_ballot_saved.is_from_substituted_address,
             'is_from_test_ballot':          voter_ballot_saved.is_from_test_ballot,
@@ -1075,6 +1087,9 @@ def voter_ballot_items_retrieve_for_api(
         'google_civic_election_id':     0,
         'text_for_map_search':          '',
         'substituted_address_nearby':   '',
+        'substituted_address_city':     '',
+        'substituted_address_state':    '',
+        'substituted_address_zip':      '',
         'ballot_caveat':                '',
         'is_from_substituted_address':  False,
         'is_from_test_ballot':          False,
@@ -1192,7 +1207,10 @@ def generate_ballot_data(voter_device_link, google_civic_election_id, voter_addr
                 copy_results['polling_location_we_vote_id_source'],
                 copy_results['ballot_location_display_name'],
                 copy_results['ballot_returned_we_vote_id'],
-                copy_results['ballot_location_shortcut']
+                copy_results['ballot_location_shortcut'],
+                substituted_address_city=copy_results['substituted_address_city'],
+                substituted_address_state=copy_results['substituted_address_state'],
+                substituted_address_zip=copy_results['substituted_address_zip'],
             )
             status += save_results['status']
             results = {
@@ -1261,7 +1279,10 @@ def generate_ballot_data(voter_device_link, google_civic_election_id, voter_addr
                     copy_results['polling_location_we_vote_id_source'],
                     copy_results['ballot_location_display_name'],
                     copy_results['ballot_returned_we_vote_id'],
-                    copy_results['ballot_location_shortcut']
+                    copy_results['ballot_location_shortcut'],
+                    substituted_address_city=copy_results['substituted_address_city'],
+                    substituted_address_state=copy_results['substituted_address_state'],
+                    substituted_address_zip=copy_results['substituted_address_zip'],
                 )
                 status += save_results['status']
                 results = {
@@ -1285,7 +1306,7 @@ def generate_ballot_data(voter_device_link, google_civic_election_id, voter_addr
 
         # If a partial address doesn't exist, exit because we can't generate a ballot without an address
         if not positive_value_exists(voter_address.text_for_map_search):
-            status += "VOTER_ADDRESS_BLANK"
+            status += "VOTER_ADDRESS_BLANK "
             results = {
                 'status':                   status,
                 'success':                  True,
@@ -1325,7 +1346,10 @@ def generate_ballot_data(voter_device_link, google_civic_election_id, voter_addr
                     polling_location_we_vote_id_source,
                     ballotpedia_retrieve_results['ballot_location_display_name'],
                     ballotpedia_retrieve_results['ballot_returned_we_vote_id'],
-                    ballotpedia_retrieve_results['ballot_location_shortcut']
+                    ballotpedia_retrieve_results['ballot_location_shortcut'],
+                    original_text_city=ballotpedia_retrieve_results['original_text_city'],
+                    original_text_state=ballotpedia_retrieve_results['original_text_state'],
+                    original_text_zip=ballotpedia_retrieve_results['original_text_zip'],
                 )
                 status += save_results['status']
                 results = {
@@ -1365,7 +1389,10 @@ def generate_ballot_data(voter_device_link, google_civic_election_id, voter_addr
                     polling_location_we_vote_id_source,
                     google_retrieve_results['ballot_location_display_name'],
                     google_retrieve_results['ballot_returned_we_vote_id'],
-                    google_retrieve_results['ballot_location_shortcut']
+                    google_retrieve_results['ballot_location_shortcut'],
+                    original_text_city=google_retrieve_results['original_text_city'],
+                    original_text_state=google_retrieve_results['original_text_state'],
+                    original_text_zip=google_retrieve_results['original_text_zip'],
                 )
                 status += save_results['status']
                 results = {
@@ -1407,7 +1434,10 @@ def generate_ballot_data(voter_device_link, google_civic_election_id, voter_addr
                 copy_results['polling_location_we_vote_id_source'],
                 copy_results['ballot_location_display_name'],
                 copy_results['ballot_returned_we_vote_id'],
-                copy_results['ballot_location_shortcut']
+                copy_results['ballot_location_shortcut'],
+                substituted_address_city=copy_results['original_text_city'],
+                substituted_address_state=copy_results['original_text_state'],
+                substituted_address_zip=copy_results['original_text_zip'],
             )
             status += save_results['status']
             results = {

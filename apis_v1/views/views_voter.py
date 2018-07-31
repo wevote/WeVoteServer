@@ -492,6 +492,10 @@ def voter_ballot_items_retrieve_from_google_civic_view(request):  # voterBallotI
 
     voter_id = 0
 
+    original_text_city = ''
+    original_text_state = ''
+    original_text_zip = ''
+
     google_retrieve_results = voter_ballot_items_retrieve_from_google_civic_for_api(
         voter_device_id, text_for_map_search, use_test_election)
 
@@ -503,6 +507,12 @@ def voter_ballot_items_retrieve_from_google_civic_view(request):  # voterBallotI
             if voter_device_link_results['voter_device_link_found']:
                 voter_device_link = voter_device_link_results['voter_device_link']
                 voter_id = voter_device_link.voter_id
+
+        if positive_value_exists(google_retrieve_results['ballot_returned_we_vote_id']):
+            ballot_returned = google_retrieve_results['ballot_returned']
+            original_text_city = ballot_returned.normalized_city
+            original_text_state = ballot_returned.normalized_state
+            original_text_zip = ballot_returned.normalized_zip
 
         if positive_value_exists(voter_id):
             voter_ballot_saved_manager = VoterBallotSavedManager()
@@ -528,6 +538,9 @@ def voter_ballot_items_retrieve_from_google_civic_view(request):  # voterBallotI
                 google_retrieve_results['ballot_location_display_name'],
                 google_retrieve_results['ballot_returned_we_vote_id'],
                 google_retrieve_results['ballot_location_shortcut'],
+                original_text_city=original_text_city,
+                original_text_state=original_text_state,
+                original_text_zip=original_text_zip,
             )
 
     return HttpResponse(json.dumps(google_retrieve_results), content_type='application/json')

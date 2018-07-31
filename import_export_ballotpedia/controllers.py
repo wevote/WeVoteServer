@@ -1479,10 +1479,14 @@ def voter_ballot_items_retrieve_from_ballotpedia_for_api(voter_device_id, text_f
             'election_description_text':    "",
             'election_data_retrieved':      False,
             'text_for_map_search':          text_for_map_search,
+            'original_text_city':           '',
+            'original_text_state':          '',
+            'original_text_zip':            '',
             'polling_location_retrieved':   False,
             'contests_retrieved':           False,
             'ballot_location_display_name': "",
             'ballot_location_shortcut':     "",
+            'ballot_returned':              None,
             'ballot_returned_we_vote_id':   "",
         }
         return results
@@ -1499,10 +1503,14 @@ def voter_ballot_items_retrieve_from_ballotpedia_for_api(voter_device_id, text_f
             'election_description_text':    "",
             'election_data_retrieved':      False,
             'text_for_map_search':          text_for_map_search,
+            'original_text_city':           '',
+            'original_text_state':          '',
+            'original_text_zip':            '',
             'polling_location_retrieved':   False,
             'contests_retrieved':           False,
             'ballot_location_display_name': "",
             'ballot_location_shortcut':     "",
+            'ballot_returned':              None,
             'ballot_returned_we_vote_id':   "",
         }
         return results
@@ -1519,10 +1527,14 @@ def voter_ballot_items_retrieve_from_ballotpedia_for_api(voter_device_id, text_f
             'election_description_text':    "",
             'election_data_retrieved':      False,
             'text_for_map_search':          text_for_map_search,
+            'original_text_city':           '',
+            'original_text_state':          '',
+            'original_text_zip':            '',
             'polling_location_retrieved':   False,
             'contests_retrieved':           False,
             'ballot_location_display_name': "",
             'ballot_location_shortcut':     "",
+            'ballot_returned':              None,
             'ballot_returned_we_vote_id':   "",
         }
         return results
@@ -1535,16 +1547,26 @@ def voter_ballot_items_retrieve_from_ballotpedia_for_api(voter_device_id, text_f
     polling_location_retrieved = False
     ballot_location_display_name = ''
     ballot_location_shortcut = ''
+    ballot_returned = None
     ballot_returned_we_vote_id = ''
     contests_retrieved = False
     google_civic_election_id = 0
     latitude = 0.0
     longitude = 0.0
+    original_text_city = ''
+    original_text_state = ''
+    original_text_zip = ''
     lat_long_found = False
     if not positive_value_exists(text_for_map_search):
         # Retrieve it from voter address
         voter_address_manager = VoterAddressManager()
         text_for_map_search = voter_address_manager.retrieve_ballot_map_text_from_voter_id(voter_id)
+        results = voter_address_manager.retrieve_ballot_address_from_voter_id(voter_id)
+        if results['voter_address_found']:
+            voter_address = results['voter_address']
+            original_text_city = voter_address.normalized_city
+            original_text_state = voter_address.normalized_state
+            original_text_zip = voter_address.normalized_zip
 
     # We need to figure out the next upcoming election for this person based on the state_code in text_for_map_search
     state_code = extract_state_code_from_address_string(text_for_map_search)
@@ -1567,11 +1589,15 @@ def voter_ballot_items_retrieve_from_ballotpedia_for_api(voter_device_id, text_f
             'election_day_text': election_day_text,
             'election_description_text': election_description_text,
             'election_data_retrieved': election_data_retrieved,
-            'text_for_map_search': text_for_map_search,
+            'text_for_map_search':          text_for_map_search,
+            'original_text_city':           original_text_city,
+            'original_text_state':          original_text_state,
+            'original_text_zip':            original_text_zip,
             'polling_location_retrieved': polling_location_retrieved,
             'contests_retrieved': contests_retrieved,
             'ballot_location_display_name': ballot_location_display_name,
             'ballot_location_shortcut': ballot_location_shortcut,
+            'ballot_returned': ballot_returned,
             'ballot_returned_we_vote_id': ballot_returned_we_vote_id,
         }
         return results
@@ -1587,6 +1613,15 @@ def voter_ballot_items_retrieve_from_ballotpedia_for_api(voter_device_id, text_f
             latitude = location.latitude
             longitude = location.longitude
             lat_long_found = True
+            # Now retrieve the ZIP code
+            if not positive_value_exists(original_text_zip):
+                if hasattr(location, 'raw'):
+                    if 'address_components' in location.raw:
+                        for one_address_component in location.raw['address_components']:
+                            if 'postal_code' in one_address_component['types'] \
+                                    and positive_value_exists(one_address_component['long_name']):
+                                original_text_zip = one_address_component['long_name']
+
     except Exception as e:
         status += "RETRIEVE_FROM_BALLOTPEDIA-EXCEPTION with get_geocoder_for_service "
         success = False
@@ -1605,11 +1640,15 @@ def voter_ballot_items_retrieve_from_ballotpedia_for_api(voter_device_id, text_f
             'election_day_text': election_day_text,
             'election_description_text': election_description_text,
             'election_data_retrieved': election_data_retrieved,
-            'text_for_map_search': text_for_map_search,
+            'text_for_map_search':          text_for_map_search,
+            'original_text_city':           original_text_city,
+            'original_text_state':          original_text_state,
+            'original_text_zip':            original_text_zip,
             'polling_location_retrieved': polling_location_retrieved,
             'contests_retrieved': contests_retrieved,
             'ballot_location_display_name': ballot_location_display_name,
             'ballot_location_shortcut': ballot_location_shortcut,
+            'ballot_returned': ballot_returned,
             'ballot_returned_we_vote_id': ballot_returned_we_vote_id,
         }
         return results
@@ -1649,7 +1688,10 @@ def voter_ballot_items_retrieve_from_ballotpedia_for_api(voter_device_id, text_f
                     ballot_item_dict_list, google_civic_election_id,
                     text_for_map_search, latitude, longitude,
                     ballot_location_display_name,
-                    voter_id)
+                    voter_id,
+                    normalized_city=original_text_city,
+                    normalized_state=original_text_state,
+                    normalized_zip=original_text_zip)
             if store_one_ballot_results['success']:
                 status += 'RETRIEVED_FROM_BALLOTPEDIA_AND_STORED_BALLOT_FOR_VOTER '
                 success = True
@@ -1676,10 +1718,14 @@ def voter_ballot_items_retrieve_from_ballotpedia_for_api(voter_device_id, text_f
         'election_description_text':    election_description_text,
         'election_data_retrieved':      election_data_retrieved,
         'text_for_map_search':          text_for_map_search,
+        'original_text_city':           original_text_city,
+        'original_text_state':          original_text_state,
+        'original_text_zip':            original_text_zip,
         'polling_location_retrieved':   polling_location_retrieved,
         'contests_retrieved':           contests_retrieved,
         'ballot_location_display_name': ballot_location_display_name,
         'ballot_location_shortcut':     ballot_location_shortcut,
+        'ballot_returned':              ballot_returned,
         'ballot_returned_we_vote_id':   ballot_returned_we_vote_id,
     }
     return results
@@ -1771,7 +1817,9 @@ def retrieve_one_ballot_from_ballotpedia_api(latitude, longitude, incoming_googl
 
 def store_one_ballot_from_ballotpedia_api(ballot_item_dict_list, google_civic_election_id,
                                           text_for_map_search, latitude, longitude,
-                                          ballot_location_display_name, voter_id=0, polling_location_we_vote_id=''):
+                                          ballot_location_display_name, voter_id=0, polling_location_we_vote_id='',
+                                          normalized_city='', normalized_state='',
+                                          normalized_zip=''):
     """
     When we pass in a voter_id, we want to save this ballot related to the voter.
     When we pass in polling_location_we_vote_id, we want to save a ballot for that area, which is useful for
@@ -1781,7 +1829,6 @@ def store_one_ballot_from_ballotpedia_api(ballot_item_dict_list, google_civic_el
     election_day_text = ''
     election_description_text = ''
     ocd_division_id = ''
-    state_code = ''
     status = ""
     success = True
 
@@ -1798,7 +1845,8 @@ def store_one_ballot_from_ballotpedia_api(ballot_item_dict_list, google_civic_el
     results = election_manager.retrieve_election(google_civic_election_id)
     if results['election_found']:
         election = results['election']
-        state_code = election.state_code
+        if not positive_value_exists(normalized_state):
+            normalized_state = election.state_code
         election_day_text = election.election_day_text
 
     # If we successfully save a ballot, create/update a BallotReturned entry
@@ -1868,7 +1916,7 @@ def store_one_ballot_from_ballotpedia_api(ballot_item_dict_list, google_civic_el
             contest_measure_we_vote_id = measure_manager.fetch_contest_measure_we_vote_id_from_id(contest_measure_id)
 
         # Update or create
-        if positive_value_exists(ballot_item_display_name) and positive_value_exists(state_code) \
+        if positive_value_exists(ballot_item_display_name) and positive_value_exists(normalized_state) \
                 and positive_value_exists(google_civic_election_id):
             ballot_item_manager = BallotItemManager()
 
@@ -1885,7 +1933,7 @@ def store_one_ballot_from_ballotpedia_api(ballot_item_dict_list, google_civic_el
                         voter_id, google_civic_election_id, google_ballot_placement,
                         ballot_item_display_name, measure_subtitle, measure_text, local_ballot_order,
                         contest_office_id, contest_office_we_vote_id,
-                        contest_measure_id, contest_measure_we_vote_id, state_code, defaults)
+                        contest_measure_id, contest_measure_we_vote_id, normalized_state, defaults)
                 if results['ballot_item_found']:
                     number_of_ballot_items_updated += 1
             elif positive_value_exists(polling_location_we_vote_id):
@@ -1893,7 +1941,7 @@ def store_one_ballot_from_ballotpedia_api(ballot_item_dict_list, google_civic_el
                     polling_location_we_vote_id, google_civic_election_id, google_ballot_placement,
                     ballot_item_display_name, measure_subtitle, measure_text, local_ballot_order,
                     contest_office_id, contest_office_we_vote_id,
-                    contest_measure_id, contest_measure_we_vote_id, state_code, defaults)
+                    contest_measure_id, contest_measure_we_vote_id, normalized_state, defaults)
                 if results['ballot_item_found']:
                     number_of_ballot_items_updated += 1
 
@@ -1904,7 +1952,8 @@ def store_one_ballot_from_ballotpedia_api(ballot_item_dict_list, google_civic_el
             polling_location_we_vote_id, voter_id, google_civic_election_id,
             latitude=latitude, longitude=longitude,
             ballot_location_display_name=ballot_location_display_name, text_for_map_search=text_for_map_search,
-            normalized_state=state_code)
+            normalized_city=normalized_city, normalized_state=normalized_state, normalized_zip=normalized_zip,
+        )
         if results['ballot_returned_found']:
             ballot_returned = results['ballot_returned']
             ballot_returned_found = True

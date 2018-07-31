@@ -1948,6 +1948,7 @@ class BallotReturnedManager(models.Model):
         new_ballot_returned_created = False
         ballot_returned_found = False
         google_civic_election_id = convert_to_int(google_civic_election_id)
+        ballot_returned = None
 
         if not google_civic_election_id:
             success = False
@@ -2366,6 +2367,13 @@ class VoterBallotSaved(models.Model):
 
     original_text_for_map_search = models.CharField(max_length=255, blank=False, null=False,
                                                     verbose_name='address as entered')
+    original_text_city = models.CharField(max_length=255, null=True)
+    original_text_state = models.CharField(max_length=255, null=True)
+    original_text_zip = models.CharField(max_length=255, null=True)
+
+    substituted_address_city = models.CharField(max_length=255, null=True)
+    substituted_address_state = models.CharField(max_length=255, null=True)
+    substituted_address_zip = models.CharField(max_length=255, null=True)
     substituted_address_nearby = models.CharField(max_length=255, blank=False, null=False,
                                                   verbose_name='address from nearby ballot_returned')
 
@@ -2654,6 +2662,42 @@ class VoterBallotSavedManager(models.Model):
                 success = True
                 status += "VOTER_BALLOT_SAVED_NOT_FOUND2 "
 
+        if positive_value_exists(voter_ballot_saved_found):
+            # If an address exists
+            if positive_value_exists(voter_ballot_saved.original_text_for_map_search):
+                # ...we want to make sure we have the city/state/zip breakdown
+                if not positive_value_exists(voter_ballot_saved.original_text_city) \
+                        or not positive_value_exists(voter_ballot_saved.original_text_state) \
+                        or not positive_value_exists(voter_ballot_saved.original_text_zip):
+                    retrieve_results = \
+                        retrieve_address_fields_from_geocoder(voter_ballot_saved.original_text_for_map_search)
+                    if positive_value_exists(retrieve_results['success']):
+                        try:
+                            voter_ballot_saved.original_text_city = retrieve_results['city']
+                            voter_ballot_saved.original_text_state = retrieve_results['state_code']
+                            voter_ballot_saved.original_text_zip = retrieve_results['zip_long']
+                            voter_ballot_saved.save()
+                            status += "ORIGINAL_TEXT_UPDATED "
+                        except Exception as e:
+                            status += "COULD_NOT_SAVE_VOTER_BALLOT_SAVED-ORIGINAL_TEXT: " + str(e) + " "
+            # If a substituted address exists
+            if positive_value_exists(voter_ballot_saved.substituted_address_nearby):
+                # ...we want to make sure we have the city/state/zip breakdown
+                if not positive_value_exists(voter_ballot_saved.substituted_address_city) \
+                        or not positive_value_exists(voter_ballot_saved.substituted_address_state) \
+                        or not positive_value_exists(voter_ballot_saved.substituted_address_zip):
+                    retrieve_results = \
+                        retrieve_address_fields_from_geocoder(voter_ballot_saved.substituted_address_nearby)
+                    if positive_value_exists(retrieve_results['success']):
+                        try:
+                            voter_ballot_saved.substituted_address_city = retrieve_results['city']
+                            voter_ballot_saved.substituted_address_state = retrieve_results['state_code']
+                            voter_ballot_saved.substituted_address_zip = retrieve_results['zip_long']
+                            voter_ballot_saved.save()
+                            status += "SUBSITUTED_ADDRESS_UPDATED "
+                        except Exception as e:
+                            status += "COULD_NOT_SAVE_VOTER_BALLOT_SAVED-SUBSTITUTED_ADDRESS: " + str(e) + " "
+
         results = {
             'success':                  success,
             'status':                   status,
@@ -2733,7 +2777,13 @@ class VoterBallotSavedManager(models.Model):
             ballot_location_display_name=None,
             ballot_returned_we_vote_id=None,
             ballot_location_shortcut='',
-            called_recursively=False):
+            called_recursively=False,
+            original_text_city='',
+            original_text_state='',
+            original_text_zip='',
+            substituted_address_city='',
+            substituted_address_state='',
+            substituted_address_zip=''):
         # We assume that we tried to find an entry for this voter
         success = False
         status = ""
@@ -2743,18 +2793,24 @@ class VoterBallotSavedManager(models.Model):
         ballot_location_shortcut = ballot_location_shortcut.strip().lower()
         try:
             defaults = {
-                'voter_id': voter_id,
-                'google_civic_election_id': google_civic_election_id,
-                'state_code': state_code,
-                'election_description_text': election_description_text,
-                'original_text_for_map_search': original_text_for_map_search,
-                'substituted_address_nearby': substituted_address_nearby,
-                'is_from_substituted_address': is_from_substituted_address,
-                'is_from_test_ballot': is_from_test_ballot,
                 'ballot_location_display_name': ballot_location_display_name,
                 'ballot_returned_we_vote_id': ballot_returned_we_vote_id,
                 'ballot_location_shortcut': ballot_location_shortcut,
+                'google_civic_election_id': google_civic_election_id,
+                'election_description_text': election_description_text,
+                'is_from_substituted_address': is_from_substituted_address,
+                'is_from_test_ballot': is_from_test_ballot,
+                'original_text_for_map_search': original_text_for_map_search,
+                'original_text_city': original_text_city,
+                'original_text_state': original_text_state,
+                'original_text_zip': original_text_zip,
                 'polling_location_we_vote_id_source': polling_location_we_vote_id_source,
+                'state_code': state_code,
+                'substituted_address_nearby': substituted_address_nearby,
+                'substituted_address_city': substituted_address_city,
+                'substituted_address_state': substituted_address_state,
+                'substituted_address_zip': substituted_address_zip,
+                'voter_id': voter_id,
             }
             if positive_value_exists(election_day_text):
                 defaults['election_date'] = election_day_text
@@ -2816,7 +2872,13 @@ class VoterBallotSavedManager(models.Model):
                     ballot_location_display_name,
                     ballot_returned_we_vote_id,
                     ballot_location_shortcut,
-                    called_recursively)
+                    called_recursively,
+                    original_text_city=original_text_city,
+                    original_text_state=original_text_state,
+                    original_text_zip=original_text_zip,
+                    substituted_address_city=substituted_address_city,
+                    substituted_address_state=substituted_address_state,
+                    substituted_address_zip=substituted_address_zip)
 
         except Exception as e:
             status += 'UNABLE_TO_CREATE_BALLOT_SAVED_EXCEPTION: ' \
@@ -2875,7 +2937,13 @@ def copy_existing_ballot_items_from_stored_ballot(voter_id, text_for_map_search,
                 'state_code':                           '',
                 'status':                               status,
                 'substituted_address_nearby':           '',
+                'substituted_address_city':             '',
+                'substituted_address_state':            '',
+                'substituted_address_zip':              '',
                 'text_for_map_search':                  text_for_map_search,
+                'original_text_city':                   '',
+                'original_text_state':                  '',
+                'original_text_zip':                    '',
                 'voter_id':                             voter_id,
             }
             return error_results
@@ -2902,7 +2970,13 @@ def copy_existing_ballot_items_from_stored_ballot(voter_id, text_for_map_search,
                 'state_code':                           '',
                 'status':                               status,
                 'substituted_address_nearby':           '',
+                'substituted_address_city':             '',
+                'substituted_address_state':            '',
+                'substituted_address_zip':              '',
                 'text_for_map_search':                  text_for_map_search,
+                'original_text_city':                   '',
+                'original_text_state':                  '',
+                'original_text_zip':                    '',
                 'voter_id':                             voter_id,
             }
             return error_results
@@ -2929,7 +3003,13 @@ def copy_existing_ballot_items_from_stored_ballot(voter_id, text_for_map_search,
                 'state_code':                           '',
                 'status':                               status,
                 'substituted_address_nearby':           '',
+                'substituted_address_city':             '',
+                'substituted_address_state':            '',
+                'substituted_address_zip':              '',
                 'text_for_map_search':                  text_for_map_search,
+                'original_text_city':                   '',
+                'original_text_state':                  '',
+                'original_text_zip':                    '',
                 'voter_id':                             voter_id,
             }
             return error_results
@@ -2956,7 +3036,13 @@ def copy_existing_ballot_items_from_stored_ballot(voter_id, text_for_map_search,
                 'state_code':                           '',
                 'status':                               status,
                 'substituted_address_nearby':           '',
+                'substituted_address_city':             '',
+                'substituted_address_state':            '',
+                'substituted_address_zip':              '',
                 'text_for_map_search':                  text_for_map_search,
+                'original_text_city':                   '',
+                'original_text_state':                  '',
+                'original_text_zip':                    '',
                 'voter_id':                             voter_id,
             }
             return error_results
@@ -2996,7 +3082,13 @@ def copy_existing_ballot_items_from_stored_ballot(voter_id, text_for_map_search,
                 'state_code':                           '',
                 'status':                               status,
                 'substituted_address_nearby':           '',
+                'substituted_address_city':             '',
+                'substituted_address_state':            '',
+                'substituted_address_zip':              '',
                 'text_for_map_search':                  text_for_map_search,
+                'original_text_city':                   '',
+                'original_text_state':                  '',
+                'original_text_zip':                    '',
                 'voter_id':                             voter_id,
             }
             return error_results
@@ -3010,7 +3102,13 @@ def copy_existing_ballot_items_from_stored_ballot(voter_id, text_for_map_search,
         'election_day_text':                    ballot_returned_to_copy.election_day_text(),
         'election_description_text':            ballot_returned_to_copy.election_description_text,
         'text_for_map_search':                  ballot_returned_to_copy.text_for_map_search,
+        'original_text_city':                   ballot_returned_to_copy.normalized_city,
+        'original_text_state':                  ballot_returned_to_copy.normalized_state,
+        'original_text_zip':                    ballot_returned_to_copy.normalized_zip,
         'substituted_address_nearby':           ballot_returned_to_copy.text_for_map_search,
+        'substituted_address_city':             ballot_returned_to_copy.normalized_city,
+        'substituted_address_state':            ballot_returned_to_copy.normalized_state,
+        'substituted_address_zip':              ballot_returned_to_copy.normalized_zip,
         'ballot_returned_copied':               True,
         'ballot_location_display_name':         ballot_returned_to_copy.ballot_location_display_name,
         'ballot_returned_we_vote_id':           ballot_returned_to_copy.we_vote_id,
@@ -3274,5 +3372,50 @@ def retrieve_ballot_items_for_one_ballot_returned(voter_id, text_for_map_search,
         ballot_returned.ballot_location_shortcut else '',
         'polling_location_we_vote_id_source':   ballot_returned.polling_location_we_vote_id,
         'status':                               status,
+    }
+    return results
+
+
+def retrieve_address_fields_from_geocoder(text_for_map_search):
+    success = True
+    status = ""
+    city = ""
+    longitude = None
+    latitude = None
+    state_code = ""
+    zip_long = ""
+    try:
+        google_client = get_geocoder_for_service('google')(GOOGLE_MAPS_API_KEY)
+        location = google_client.geocode(text_for_map_search, sensor=False)
+        if location is None:
+            status += 'REFRESH_ADDRESS_FIELDS: Could not find location matching "{}" '.format(text_for_map_search)
+            logger.debug(status)
+        else:
+            latitude = location.latitude
+            longitude = location.longitude
+            # Retrieve the ZIP code
+            if hasattr(location, 'raw'):
+                if 'address_components' in location.raw:
+                    for one_address_component in location.raw['address_components']:
+                        if 'administrative_area_level_1' in one_address_component['types'] \
+                                and positive_value_exists(one_address_component['short_name']):
+                            state_code = one_address_component['short_name']
+                        if 'locality' in one_address_component['types'] \
+                                and positive_value_exists(one_address_component['long_name']):
+                            city = one_address_component['long_name']
+                        if 'postal_code' in one_address_component['types'] \
+                                and positive_value_exists(one_address_component['long_name']):
+                            zip_long = one_address_component['long_name']
+            status += "GEOCODER_WORKED "
+    except Exception as e:
+        status += "RETRIEVE_ADDRESS_FIELDS_FROM_GEOCODER_FAILED " + str(e) + " "
+    results = {
+        'success':      success,
+        'status':       status,
+        'city':         city,
+        'latitude':     latitude,
+        'longitude':    longitude,
+        'state_code':   state_code,
+        'zip_long':     zip_long,
     }
     return results
