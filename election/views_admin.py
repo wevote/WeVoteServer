@@ -1887,10 +1887,8 @@ def election_migration_view(request):
 
     # ########################################
     # VoterGuidePossibility
-    voter_guide_possibility_query = VoterGuidePossibility.objects.filter(
-        google_civic_election_id=we_vote_election_id)
-    we_vote_voter_guide_possibility_count = voter_guide_possibility_query.count()
-    if positive_value_exists(change_now) and positive_value_exists(we_vote_voter_guide_possibility_count):
+    one_number = 0
+    if positive_value_exists(change_now):
         try:
             for one_number in CANDIDATE_NUMBER_LIST:
                 key = "google_civic_election_id_" + one_number
@@ -1899,7 +1897,7 @@ def election_migration_view(request):
                     **{key: google_civic_election_id})
         except Exception as e:
             error = True
-            status += "COULD_NOT_UPDATE_ALL_VOTER_GUIDE_POSSIBILITIES "
+            status += "COULD_NOT_UPDATE_ALL_VOTER_GUIDE_POSSIBILITIES, one_number: " + str(one_number) + " "
 
     # ########################################
     # VoteSmartApiCounter
