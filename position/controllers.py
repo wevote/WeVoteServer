@@ -646,6 +646,8 @@ def find_organizations_referenced_in_positions_for_this_voter(voter):
 
     # PositionEntered
     position_list_query = PositionEntered.objects.all()
+    # As of Aug 2018 we are no longer using PERCENT_RATING
+    position_list_query = position_list_query.exclude(stance__iexact='PERCENT_RATING')
     position_list_query = position_list_query.filter(final_position_filters)
 
     for one_position in position_list_query:
@@ -663,6 +665,8 @@ def find_organizations_referenced_in_positions_for_this_voter(voter):
 
     # PositionForFriends
     position_list_query = PositionForFriends.objects.all()
+    # As of Aug 2018 we are no longer using PERCENT_RATING
+    position_list_query = position_list_query.exclude(stance__iexact='PERCENT_RATING')
     position_list_query = position_list_query.filter(final_position_filters)
 
     for one_position in position_list_query:

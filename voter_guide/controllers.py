@@ -1229,12 +1229,13 @@ def retrieve_voter_guides_to_follow_by_ballot_item(voter_id, kind_of_ballot_item
                     vote_smart_time_span=None,
                     organization_we_vote_id=one_position.organization_we_vote_id)
             else:
-                # vote_smart_time_span
-                results = voter_guide_manager.retrieve_voter_guide(
-                    voter_guide_id=0,
-                    google_civic_election_id=0,
-                    vote_smart_time_span=one_position.vote_smart_time_span,
-                    organization_we_vote_id=one_position.organization_we_vote_id)
+                results['voter_guide_found'] = False
+                # As of Aug 2018, we no longer use vote_smart_time_span
+                # results = voter_guide_manager.retrieve_voter_guide(
+                #     voter_guide_id=0,
+                #     google_civic_election_id=0,
+                #     vote_smart_time_span=one_position.vote_smart_time_span,
+                #     organization_we_vote_id=one_position.organization_we_vote_id)
 
         elif positive_value_exists(one_position.public_figure_we_vote_id):
             results['voter_guide_found'] = False
@@ -1412,64 +1413,67 @@ def retrieve_voter_guides_to_follow_by_election_for_api(voter_id, google_civic_e
         voter_guide_list_from_election_id = []
         list_from_election_id_found = False
 
-    # Second, retrieve the voter_guides stored by org & vote_smart_time_span
-    # All positions were found above with position_list_manager.retrieve_all_positions_for_election
-    # We give precedence to full voter guides from above, where we have an actual position of an org (as opposed to
-    # Vote Smart ratings)
-    maximum_number_of_guides_to_retrieve_by_time_span = \
-        maximum_number_to_retrieve - len(voter_guide_list_from_election_id)
-    if positive_value_exists(maximum_number_of_guides_to_retrieve_by_time_span):
-        org_list_found_by_time_span = []
-        orgs_we_need_found_by_position_and_time_span_list_of_dicts = []
-        for one_position in positions_list_minus_ignored_and_followed:
-            # If this was a position found that was based on vote_smart_time_span...
-            #  (That is, ignore the positions already retrieved based on google_civic_election_id)
-            if positive_value_exists(one_position.organization_we_vote_id) and \
-                    positive_value_exists(one_position.vote_smart_time_span):
-                # This shouldn't be possible, but we have it here for safety
-                org_found_by_election_id_above = one_position.organization_we_vote_id in \
-                    org_list_found_by_google_civic_election_id
-                # If we already recorded that we want to look for this org under a different time span...
-                org_found_by_different_time_span = one_position.organization_we_vote_id in \
-                    org_list_found_by_time_span
-                # Don't record that we want to look for a voter guide by this org we_vote_id or time span
-                if org_found_by_election_id_above or org_found_by_different_time_span:
-                    continue
+    # # Second, retrieve the voter_guides stored by org & vote_smart_time_span
+    # # All positions were found above with position_list_manager.retrieve_all_positions_for_election
+    # # We give precedence to full voter guides from above, where we have an actual position of an org (as opposed to
+    # # Vote Smart ratings)
+    # maximum_number_of_guides_to_retrieve_by_time_span = \
+    #     maximum_number_to_retrieve - len(voter_guide_list_from_election_id)
+    # if positive_value_exists(maximum_number_of_guides_to_retrieve_by_time_span):
+    #     org_list_found_by_time_span = []
+    #     orgs_we_need_found_by_position_and_time_span_list_of_dicts = []
+    #     for one_position in positions_list_minus_ignored_and_followed:
+    #         # If this was a position found that was based on vote_smart_time_span...
+    #         #  (That is, ignore the positions already retrieved based on google_civic_election_id)
+    #         if positive_value_exists(one_position.organization_we_vote_id) and \
+    #                 positive_value_exists(one_position.vote_smart_time_span):
+    #             # This shouldn't be possible, but we have it here for safety
+    #             org_found_by_election_id_above = one_position.organization_we_vote_id in \
+    #                 org_list_found_by_google_civic_election_id
+    #             # If we already recorded that we want to look for this org under a different time span...
+    #             org_found_by_different_time_span = one_position.organization_we_vote_id in \
+    #                 org_list_found_by_time_span
+    #             # Don't record that we want to look for a voter guide by this org we_vote_id or time span
+    #             if org_found_by_election_id_above or org_found_by_different_time_span:
+    #                 continue
+    #
+    #             org_list_found_by_time_span.append(one_position.organization_we_vote_id)
+    #             one_position_dict = {'organization_we_vote_id': one_position.organization_we_vote_id,
+    #                                  'vote_smart_time_span': one_position.vote_smart_time_span}
+    #             orgs_we_need_found_by_position_and_time_span_list_of_dicts.append(one_position_dict)
+    #
+    #     voter_guide_time_span_results = voter_guide_list_manager.retrieve_voter_guides_to_follow_by_time_span(
+    #         orgs_we_need_found_by_position_and_time_span_list_of_dicts,
+    #         search_string,
+    #         maximum_number_of_guides_to_retrieve_by_time_span, sort_by, sort_order)
+    #
+    #     if voter_guide_time_span_results['voter_guide_list_found']:
+    #         voter_guide_list_from_time_span = voter_guide_time_span_results['voter_guide_list']
+    #         list_from_time_span_found = True
+    #     else:
+    #         voter_guide_list_from_time_span = []
+    #         list_from_time_span_found = False
+    # else:
+    #     voter_guide_list_from_time_span = []
+    #     list_from_time_span_found = False
+    #
+    # # Merge these two lists
+    # if list_from_election_id_found and list_from_time_span_found:
+    #     voter_guide_list = list(chain(voter_guide_list_from_election_id, voter_guide_list_from_time_span))
+    # elif list_from_election_id_found:
+    #     voter_guide_list = list(voter_guide_list_from_election_id)
+    # elif list_from_time_span_found:
+    #     voter_guide_list = list(voter_guide_list_from_time_span)
+    # else:
+    #     voter_guide_list = []
+    # # IFF we wanted to sort here:
+    # # voter_guide_list = sorted(
+    # #     chain(voter_guide_list_from_election_id, voter_guide_list_from_time_span),
+    # #     key=attrgetter(sort_by))
+    # # But we don't, we just want to combine them with existing order
 
-                org_list_found_by_time_span.append(one_position.organization_we_vote_id)
-                one_position_dict = {'organization_we_vote_id': one_position.organization_we_vote_id,
-                                     'vote_smart_time_span': one_position.vote_smart_time_span}
-                orgs_we_need_found_by_position_and_time_span_list_of_dicts.append(one_position_dict)
-
-        voter_guide_time_span_results = voter_guide_list_manager.retrieve_voter_guides_to_follow_by_time_span(
-            orgs_we_need_found_by_position_and_time_span_list_of_dicts,
-            search_string,
-            maximum_number_of_guides_to_retrieve_by_time_span, sort_by, sort_order)
-
-        if voter_guide_time_span_results['voter_guide_list_found']:
-            voter_guide_list_from_time_span = voter_guide_time_span_results['voter_guide_list']
-            list_from_time_span_found = True
-        else:
-            voter_guide_list_from_time_span = []
-            list_from_time_span_found = False
-    else:
-        voter_guide_list_from_time_span = []
-        list_from_time_span_found = False
-
-    # Merge these two lists
-    if list_from_election_id_found and list_from_time_span_found:
-        voter_guide_list = list(chain(voter_guide_list_from_election_id, voter_guide_list_from_time_span))
-    elif list_from_election_id_found:
-        voter_guide_list = list(voter_guide_list_from_election_id)
-    elif list_from_time_span_found:
-        voter_guide_list = list(voter_guide_list_from_time_span)
-    else:
-        voter_guide_list = []
-    # IFF we wanted to sort here:
-    # voter_guide_list = sorted(
-    #     chain(voter_guide_list_from_election_id, voter_guide_list_from_time_span),
-    #     key=attrgetter(sort_by))
-    # But we don't, we just want to combine them with existing order
+    # Since we turned off using voter guides from time spans
+    voter_guide_list = list(voter_guide_list_from_election_id)
 
     status += 'SUCCESSFUL_RETRIEVE_OF_VOTER_GUIDES_BY_ELECTION '
     success = True
@@ -1553,7 +1557,7 @@ def retrieve_voter_guides_to_follow_generic_for_api(voter_id, search_string, fil
     filter_voter_guides_by_issue = positive_value_exists(filter_voter_guides_by_issue)
     voter_guide_list_found = False
 
-    # Start with orgs followed and ignored by this voter
+    # Start with organizations followed and ignored by this voter
     return_we_vote_id = True
     follow_organization_list_manager = FollowOrganizationList()
     if positive_value_exists(search_string):

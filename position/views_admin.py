@@ -51,11 +51,14 @@ def positions_sync_out_view(request):  # positionsSyncOut
         # Only return public positions
         position_list_query = PositionEntered.objects.order_by('date_entered')
 
+        # As of Aug 2018 we are no longer using PERCENT_RATING
+        position_list_query = position_list_query.exclude(stance__iexact=PERCENT_RATING)
+
         position_list_query = position_list_query.filter(google_civic_election_id=google_civic_election_id)
         # SUPPORT, STILL_DECIDING, INFORMATION_ONLY, NO_STANCE, OPPOSE, PERCENT_RATING
         if stance_we_are_looking_for != ANY_STANCE:
             # If we passed in the stance "ANY" it means we want to not filter down the list
-            position_list_query = position_list_query.filter(stance=stance_we_are_looking_for)
+            position_list_query = position_list_query.filter(stance__iexact=stance_we_are_looking_for)
 
         # convert datetime to str for date_entered and date_last_changed columns
         position_list_query = position_list_query.extra(
@@ -149,6 +152,10 @@ def position_list_view(request):
 
     # Publicly visible positions
     public_position_list_query = PositionEntered.objects.order_by('-id')  # This order_by is temp
+
+    # As of Aug 2018 we are no longer using PERCENT_RATING
+    public_position_list_query = public_position_list_query.exclude(stance__iexact=PERCENT_RATING)
+
     if positive_value_exists(google_civic_election_id):
         public_position_list_query = public_position_list_query.filter(google_civic_election_id=google_civic_election_id)
 
@@ -203,8 +210,11 @@ def position_list_view(request):
 
     # Friends-only visible positions
     friends_only_position_list_query = PositionForFriends.objects.order_by('-id')  # This order_by is temp
+    # As of Aug 2018 we are no longer using PERCENT_RATING
+    friends_only_position_list_query = friends_only_position_list_query.exclude(stance__iexact=PERCENT_RATING)
     if positive_value_exists(google_civic_election_id):
-        friends_only_position_list_query = friends_only_position_list_query.filter(google_civic_election_id=google_civic_election_id)
+        friends_only_position_list_query = friends_only_position_list_query.filter(
+            google_civic_election_id=google_civic_election_id)
 
     if positive_value_exists(position_search):
         search_words = position_search.split()
@@ -261,29 +271,31 @@ def position_list_view(request):
                          str(friends_only_position_list_count) + ' friends-only positions found.')
 
     # Heal some data
-    if positive_value_exists(google_civic_election_id):
-        public_position_list_query = PositionEntered.objects.order_by('-id')
-        public_position_list_query = public_position_list_query.filter(google_civic_election_id=google_civic_election_id)
-        public_position_list_query = public_position_list_query.filter(vote_smart_rating_integer__isnull=True)
-        public_position_list_query = public_position_list_query.filter(stance=PERCENT_RATING)
-        public_position_list_query = public_position_list_query[:5000]
-        public_position_list_heal = list(public_position_list_query)
-        integrity_error_count = 0
-        for one_position in public_position_list_heal:
-            one_position.vote_smart_rating_integer = convert_to_int(one_position.vote_smart_rating)
-            try:
-                one_position.save()
-            except IntegrityError as e:
-                integrity_error_count += 1
-
-        if len(public_position_list_heal):
-            positions_updated = len(public_position_list_heal) - integrity_error_count
-            if positive_value_exists(positions_updated):
-                messages.add_message(request, messages.INFO, str(positions_updated) +
-                                     ' positions updated with vote_smart_rating_integer.')
-        if positive_value_exists(integrity_error_count) and positive_value_exists(positions_updated):
-            messages.add_message(request, messages.ERROR, str(integrity_error_count) +
-                                 ' integrity errors.')
+    # As of Aug 2018 we are no longer using PERCENT_RATING
+    # if positive_value_exists(google_civic_election_id):
+    #     public_position_list_query = PositionEntered.objects.order_by('-id')
+    #     public_position_list_query = public_position_list_query.filter(
+    # google_civic_election_id=google_civic_election_id)
+    #     public_position_list_query = public_position_list_query.filter(vote_smart_rating_integer__isnull=True)
+    #     public_position_list_query = public_position_list_query.filter(stance=PERCENT_RATING)
+    #     public_position_list_query = public_position_list_query[:5000]
+    #     public_position_list_heal = list(public_position_list_query)
+    #     integrity_error_count = 0
+    #     for one_position in public_position_list_heal:
+    #         one_position.vote_smart_rating_integer = convert_to_int(one_position.vote_smart_rating)
+    #         try:
+    #             one_position.save()
+    #         except IntegrityError as e:
+    #             integrity_error_count += 1
+    #
+    #     if len(public_position_list_heal):
+    #         positions_updated = len(public_position_list_heal) - integrity_error_count
+    #         if positive_value_exists(positions_updated):
+    #             messages.add_message(request, messages.INFO, str(positions_updated) +
+    #                                  ' positions updated with vote_smart_rating_integer.')
+    #     if positive_value_exists(integrity_error_count) and positive_value_exists(positions_updated):
+    #         messages.add_message(request, messages.ERROR, str(integrity_error_count) +
+    #                              ' integrity errors.')
 
     election_manager = ElectionManager()
     if positive_value_exists(show_all_elections):

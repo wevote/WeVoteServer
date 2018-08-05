@@ -1424,6 +1424,8 @@ def data_voter_statistics_view(request):
         # ################################
         # For this election, how many individual voters saved at least one PositionForFriends entry?
         voter_position_for_friends_query = PositionForFriends.objects.all()
+        # As of Aug 2018 we are no longer using PERCENT_RATING
+        voter_position_for_friends_query = voter_position_for_friends_query.exclude(stance__iexact='PERCENT_RATING')
         voter_position_for_friends_query = voter_position_for_friends_query.filter(
             google_civic_election_id=one_election.google_civic_election_id)
         voter_position_for_friends_query = voter_position_for_friends_query.exclude(
@@ -1436,6 +1438,8 @@ def data_voter_statistics_view(request):
         # ################################
         # For this election, how many Public PositionForFriends entries were saved by voters?
         voter_position_for_friends_query = PositionForFriends.objects.all()
+        # As of Aug 2018 we are no longer using PERCENT_RATING
+        voter_position_for_friends_query = voter_position_for_friends_query.exclude(stance__iexact='PERCENT_RATING')
         voter_position_for_friends_query = voter_position_for_friends_query.filter(
             google_civic_election_id=one_election.google_civic_election_id)
         one_election.voter_position_for_friends_count = voter_position_for_friends_query.count()

@@ -301,8 +301,10 @@ def politician_edit_view(request, politician_id):
 
         # Working with We Vote Positions
         try:
-            politician_position_list = PositionEntered.objects.order_by('stance')
-            politician_position_list = politician_position_list.filter(
+            politician_position_query = PositionEntered.objects.order_by('stance')
+            # As of Aug 2018 we are no longer using PERCENT_RATING
+            politician_position_query = politician_position_query.exclude(stance__iexact='PERCENT_RATING')
+            politician_position_list = politician_position_query.filter(
                 politician_we_vote_id__iexact=politician_on_stage.we_vote_id)
         except Exception as e:
             politician_position_list = []
