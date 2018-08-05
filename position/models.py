@@ -1051,6 +1051,8 @@ class PositionListManager(models.Model):
         try:
             public_position_list = PositionEntered.objects.using('readonly').all()
             public_position_list = public_position_list.exclude(voter_we_vote_id=None)  # Don't include if no we_vote_id
+            # As of Aug 2018 we are no longer using PERCENT_RATING
+            public_position_list = public_position_list.exclude(stance__iexact=PERCENT_RATING)
 
             if positive_value_exists(candidate_campaign_id):
                 public_position_list = public_position_list.filter(candidate_campaign_id=candidate_campaign_id)
@@ -1058,13 +1060,15 @@ class PositionListManager(models.Model):
                 public_position_list = public_position_list.filter(
                     candidate_campaign_we_vote_id__iexact=candidate_campaign_we_vote_id)
             # SUPPORT, STILL_DECIDING, INFORMATION_ONLY, NO_STANCE, OPPOSE, PERCENT_RATING
+            # if stance_we_are_looking_for != ANY_STANCE:
+            #     # If we passed in the stance "ANY_STANCE" it means we want to not filter down the list
+            #     if stance_we_are_looking_for == SUPPORT or stance_we_are_looking_for == OPPOSE:
+            #         public_position_list = public_position_list.filter(
+            #             Q(stance=stance_we_are_looking_for) | Q(stance=PERCENT_RATING))  # | Q(stance=GRADE_RATING))
+            #     else:
+            #         public_position_list = public_position_list.filter(stance=stance_we_are_looking_for)
             if stance_we_are_looking_for != ANY_STANCE:
-                # If we passed in the stance "ANY_STANCE" it means we want to not filter down the list
-                if stance_we_are_looking_for == SUPPORT or stance_we_are_looking_for == OPPOSE:
-                    public_position_list = public_position_list.filter(
-                        Q(stance=stance_we_are_looking_for) | Q(stance=PERCENT_RATING))  # | Q(stance=GRADE_RATING))
-                else:
-                    public_position_list = public_position_list.filter(stance=stance_we_are_looking_for)
+                public_position_list = public_position_list.filter(stance__iexact=stance_we_are_looking_for)
 
             # Now filter out the positions that have a percent rating that doesn't match the stance_we_are_looking_for
             if stance_we_are_looking_for == SUPPORT or stance_we_are_looking_for == OPPOSE:
@@ -1092,6 +1096,8 @@ class PositionListManager(models.Model):
         try:
             friends_only_position_list = PositionForFriends.objects.using('readonly').all()
             friends_only_position_list = friends_only_position_list.exclude(voter_we_vote_id=None)  # No we_vote_id
+            # As of Aug 2018 we are no longer using PERCENT_RATING
+            friends_only_position_list = friends_only_position_list.exclude(stance__iexact='PERCENT_RATING')
 
             if positive_value_exists(candidate_campaign_id):
                 friends_only_position_list = friends_only_position_list.filter(
@@ -1100,13 +1106,15 @@ class PositionListManager(models.Model):
                 friends_only_position_list = friends_only_position_list.filter(
                     candidate_campaign_we_vote_id__iexact=candidate_campaign_we_vote_id)
             # SUPPORT, STILL_DECIDING, INFORMATION_ONLY, NO_STANCE, OPPOSE, PERCENT_RATING
+            # if stance_we_are_looking_for != ANY_STANCE:
+            #     # If we passed in the stance "ANY_STANCE" it means we want to not filter down the list
+            #     if stance_we_are_looking_for == SUPPORT or stance_we_are_looking_for == OPPOSE:
+            #         friends_only_position_list = friends_only_position_list.filter(
+            #             Q(stance=stance_we_are_looking_for) | Q(stance=PERCENT_RATING))  # | Q(stance=GRADE_RATING))
+            #     else:
+            #         friends_only_position_list = friends_only_position_list.filter(stance=stance_we_are_looking_for)
             if stance_we_are_looking_for != ANY_STANCE:
-                # If we passed in the stance "ANY_STANCE" it means we want to not filter down the list
-                if stance_we_are_looking_for == SUPPORT or stance_we_are_looking_for == OPPOSE:
-                    friends_only_position_list = friends_only_position_list.filter(
-                        Q(stance=stance_we_are_looking_for) | Q(stance=PERCENT_RATING))  # | Q(stance=GRADE_RATING))
-                else:
-                    friends_only_position_list = friends_only_position_list.filter(stance=stance_we_are_looking_for)
+                friends_only_position_list = friends_only_position_list.filter(stance__iexact=stance_we_are_looking_for)
 
             # Now filter out the positions that have a percent rating that doesn't match the stance_we_are_looking_for
             if stance_we_are_looking_for == SUPPORT or stance_we_are_looking_for == OPPOSE:
@@ -1158,6 +1166,8 @@ class PositionListManager(models.Model):
         try:
             public_position_list = PositionEntered.objects.using('readonly').all()
             public_position_list = public_position_list.exclude(voter_we_vote_id=None)  # Don't include if no we_vote_id
+            # As of Aug 2018 we are no longer using PERCENT_RATING
+            public_position_list = public_position_list.exclude(stance__iexact=PERCENT_RATING)
 
             if positive_value_exists(contest_measure_id):
                 public_position_list = public_position_list.filter(contest_measure_id=contest_measure_id)
@@ -1165,13 +1175,16 @@ class PositionListManager(models.Model):
                 public_position_list = public_position_list.filter(
                     contest_measure_we_vote_id__iexact=contest_measure_we_vote_id)
             # SUPPORT, STILL_DECIDING, INFORMATION_ONLY, NO_STANCE, OPPOSE, PERCENT_RATING
+            # if stance_we_are_looking_for != ANY_STANCE:
+            #     # If we passed in the stance "ANY_STANCE" it means we want to not filter down the list
+            #     if stance_we_are_looking_for == SUPPORT or stance_we_are_looking_for == OPPOSE:
+            #         public_position_list = public_position_list.filter(
+            #             Q(stance=stance_we_are_looking_for) | Q(stance=PERCENT_RATING))  # | Q(stance=GRADE_RATING))
+            #     else:
+            #         public_position_list = public_position_list.filter(stance=stance_we_are_looking_for)
+
             if stance_we_are_looking_for != ANY_STANCE:
-                # If we passed in the stance "ANY_STANCE" it means we want to not filter down the list
-                if stance_we_are_looking_for == SUPPORT or stance_we_are_looking_for == OPPOSE:
-                    public_position_list = public_position_list.filter(
-                        Q(stance=stance_we_are_looking_for) | Q(stance=PERCENT_RATING))  # | Q(stance=GRADE_RATING))
-                else:
-                    public_position_list = public_position_list.filter(stance=stance_we_are_looking_for)
+                public_position_list = public_position_list.filter(stance__iexact=stance_we_are_looking_for)
 
             # Now filter out the positions that have a percent rating that doesn't match the stance_we_are_looking_for
             if stance_we_are_looking_for == SUPPORT or stance_we_are_looking_for == OPPOSE:
@@ -1199,6 +1212,8 @@ class PositionListManager(models.Model):
         try:
             friends_only_position_list = PositionForFriends.objects.using('readonly').all()
             friends_only_position_list = friends_only_position_list.exclude(voter_we_vote_id=None)  # No we_vote_id
+            # As of Aug 2018 we are no longer using PERCENT_RATING
+            friends_only_position_list = friends_only_position_list.exclude(stance__iexact='PERCENT_RATING')
 
             if positive_value_exists(contest_measure_id):
                 friends_only_position_list = friends_only_position_list.filter(contest_measure_id=contest_measure_id)
@@ -1206,13 +1221,15 @@ class PositionListManager(models.Model):
                 friends_only_position_list = friends_only_position_list.filter(
                     contest_measure_we_vote_id__iexact=contest_measure_we_vote_id)
             # SUPPORT, STILL_DECIDING, INFORMATION_ONLY, NO_STANCE, OPPOSE, PERCENT_RATING
+            # if stance_we_are_looking_for != ANY_STANCE:
+            #     # If we passed in the stance "ANY_STANCE" it means we want to not filter down the list
+            #     if stance_we_are_looking_for == SUPPORT or stance_we_are_looking_for == OPPOSE:
+            #         friends_only_position_list = friends_only_position_list.filter(
+            #             Q(stance=stance_we_are_looking_for) | Q(stance=PERCENT_RATING))  # | Q(stance=GRADE_RATING))
+            #     else:
+            #         friends_only_position_list = friends_only_position_list.filter(stance=stance_we_are_looking_for)
             if stance_we_are_looking_for != ANY_STANCE:
-                # If we passed in the stance "ANY_STANCE" it means we want to not filter down the list
-                if stance_we_are_looking_for == SUPPORT or stance_we_are_looking_for == OPPOSE:
-                    friends_only_position_list = friends_only_position_list.filter(
-                        Q(stance=stance_we_are_looking_for) | Q(stance=PERCENT_RATING))  # | Q(stance=GRADE_RATING))
-                else:
-                    friends_only_position_list = friends_only_position_list.filter(stance=stance_we_are_looking_for)
+                friends_only_position_list = friends_only_position_list.filter(stance__iexact=stance_we_are_looking_for)
 
             # Now filter out the positions that have a percent rating that doesn't match the stance_we_are_looking_for
             if stance_we_are_looking_for == SUPPORT or stance_we_are_looking_for == OPPOSE:
@@ -1263,23 +1280,29 @@ class PositionListManager(models.Model):
                 position_on_stage = PositionForFriends()
 
             position_list = position_on_stage_starter.objects.using('readonly').order_by('date_entered')
+            # As of Aug 2018 we are no longer using PERCENT_RATING
+            position_list = position_list.exclude(stance__iexact=PERCENT_RATING)
+
             position_list = position_list.filter(organization_we_vote_id__iexact=organization_we_vote_id)
             position_list = position_list.filter(google_civic_election_id=google_civic_election_id)
             # SUPPORT, STILL_DECIDING, INFORMATION_ONLY, NO_STANCE, OPPOSE, PERCENT_RATING
-            if stance_we_are_looking_for != ANY_STANCE:
-                # If we passed in the stance "ANY_STANCE" it means we want to not filter down the list
-                if stance_we_are_looking_for == SUPPORT:
-                    position_list = position_list.filter(
-                        Q(stance=stance_we_are_looking_for) |  # Matches "is_support"
-                        (Q(stance=PERCENT_RATING) & Q(vote_smart_rating_integer__gte=66))
-                    )  # Matches "is_positive_rating"
-                elif stance_we_are_looking_for == OPPOSE:
-                    position_list = position_list.filter(
-                        Q(stance=stance_we_are_looking_for) |  # Matches "is_oppose"
-                        (Q(stance=PERCENT_RATING) & Q(vote_smart_rating_integer__lte=33))
-                    )  # Matches "is_negative_rating"
-                else:
-                    position_list = position_list.filter(stance=stance_we_are_looking_for)
+            # if stance_we_are_looking_for != ANY_STANCE:
+            #     # If we passed in the stance "ANY_STANCE" it means we want to not filter down the list
+            #     if stance_we_are_looking_for == SUPPORT:
+            #         position_list = position_list.filter(
+            #             Q(stance=stance_we_are_looking_for) |  # Matches "is_support"
+            #             (Q(stance=PERCENT_RATING) & Q(vote_smart_rating_integer__gte=66))
+            #         )  # Matches "is_positive_rating"
+            #     elif stance_we_are_looking_for == OPPOSE:
+            #         position_list = position_list.filter(
+            #             Q(stance=stance_we_are_looking_for) |  # Matches "is_oppose"
+            #             (Q(stance=PERCENT_RATING) & Q(vote_smart_rating_integer__lte=33))
+            #         )  # Matches "is_negative_rating"
+            #     else:
+            #         position_list = position_list.filter(stance=stance_we_are_looking_for)
+
+            position_list = position_list.filter(stance__iexact=stance_we_are_looking_for)
+
             # Limit to positions in the last x years - currently we are not limiting
             # position_list = position_list.filter(election_id=election_id)
 
@@ -1546,6 +1569,8 @@ class PositionListManager(models.Model):
             # Retrieve by organization_id
             public_positions_list_query = PositionEntered.objects.all()
             public_positions_list_query = public_positions_list_query.filter(organization_id=organization_id)
+            # As of Aug 2018 we are no longer using PERCENT_RATING
+            public_positions_list_query = public_positions_list_query.exclude(stance__iexact=PERCENT_RATING)
             public_positions_list = list(public_positions_list_query)  # Force the query to run
             for public_position in public_positions_list:
                 public_position_to_be_saved = False
@@ -1573,6 +1598,8 @@ class PositionListManager(models.Model):
             public_positions_list_query = PositionEntered.objects.all()
             public_positions_list_query = public_positions_list_query.filter(
                 organization_we_vote_id__iexact=organization_we_vote_id)
+            # As of Aug 2018 we are no longer using PERCENT_RATING
+            public_positions_list_query = public_positions_list_query.exclude(stance__iexact=PERCENT_RATING)
             public_positions_list = list(public_positions_list_query)  # Force the query to run
             for public_position in public_positions_list:
                 public_position_to_be_saved = False
@@ -1807,19 +1834,24 @@ class PositionListManager(models.Model):
                     position_list_query = PositionForFriends.objects.order_by('date_entered')
                 retrieve_friends_positions = True
 
+            # As of Aug 2018 we are no longer using PERCENT_RATING
+            position_list_query = position_list_query.exclude(stance__iexact=PERCENT_RATING)
+
             if positive_value_exists(candidate_campaign_id):
                 position_list_query = position_list_query.filter(candidate_campaign_id=candidate_campaign_id)
             else:
                 position_list_query = position_list_query.filter(
                     candidate_campaign_we_vote_id__iexact=candidate_campaign_we_vote_id)
             # SUPPORT, STILL_DECIDING, INFORMATION_ONLY, NO_STANCE, OPPOSE, PERCENT_RATING
+            # if stance_we_are_looking_for != ANY_STANCE:
+            #     # If we passed in the stance "ANY_STANCE" it means we want to not filter down the list
+            #     if stance_we_are_looking_for == SUPPORT or stance_we_are_looking_for == OPPOSE:
+            #         position_list_query = position_list_query.filter(
+            #             Q(stance=stance_we_are_looking_for) | Q(stance=PERCENT_RATING))  # | Q(stance=GRADE_RATING))
+            #     else:
+            #         position_list_query = position_list_query.filter(stance=stance_we_are_looking_for)
             if stance_we_are_looking_for != ANY_STANCE:
-                # If we passed in the stance "ANY_STANCE" it means we want to not filter down the list
-                if stance_we_are_looking_for == SUPPORT or stance_we_are_looking_for == OPPOSE:
-                    position_list_query = position_list_query.filter(
-                        Q(stance=stance_we_are_looking_for) | Q(stance=PERCENT_RATING))  # | Q(stance=GRADE_RATING))
-                else:
-                    position_list_query = position_list_query.filter(stance=stance_we_are_looking_for)
+                position_list_query = position_list_query.filter(stance__iexact=stance_we_are_looking_for)
 
             # Only one of these blocks will be used at a time
             if retrieve_friends_positions and friends_we_vote_id_list:
@@ -1951,6 +1983,9 @@ class PositionListManager(models.Model):
                     position_list_query = PositionForFriends.objects.order_by('date_entered')
                 retrieve_friends_positions = True
 
+            # As of Aug 2018 we are no longer using PERCENT_RATING
+            position_list_query = position_list_query.exclude(stance__iexact=PERCENT_RATING)
+
             if positive_value_exists(contest_measure_id):
                 position_list_query = position_list_query.filter(contest_measure_id=contest_measure_id)
             else:
@@ -1959,7 +1994,7 @@ class PositionListManager(models.Model):
             # SUPPORT, STILL_DECIDING, INFORMATION_ONLY, NO_STANCE, OPPOSE, PERCENT_RATING
             if stance_we_are_looking_for != ANY_STANCE:
                 # If we passed in the stance "ANY" it means we want to not filter down the list
-                position_list_query = position_list_query.filter(stance=stance_we_are_looking_for)
+                position_list_query = position_list_query.filter(stance__iexact=stance_we_are_looking_for)
                 # NOTE: We don't have a special case for
                 # "if stance_we_are_looking_for == SUPPORT or stance_we_are_looking_for == OPPOSE"
                 # for contest_measure (like we do for candidate_campaign) because we don't have to deal with
@@ -2045,6 +2080,9 @@ class PositionListManager(models.Model):
                 position_list_query = PositionForFriends.objects.order_by('date_entered')
                 retrieve_friends_positions = True
 
+            # As of Aug 2018 we are no longer using PERCENT_RATING
+            position_list_query = position_list_query.exclude(stance__iexact=PERCENT_RATING)
+
             if positive_value_exists(contest_office_we_vote_id):
                 position_list_query = position_list_query.filter(
                     contest_office_we_vote_id__iexact=contest_office_we_vote_id)
@@ -2053,7 +2091,7 @@ class PositionListManager(models.Model):
             # SUPPORT, STILL_DECIDING, INFORMATION_ONLY, NO_STANCE, OPPOSE, PERCENT_RATING
             if stance_we_are_looking_for != ANY_STANCE:
                 # If we passed in the stance "ANY" it means we want to not filter down the list
-                position_list_query = position_list_query.filter(stance=stance_we_are_looking_for)
+                position_list_query = position_list_query.filter(stance__iexact=stance_we_are_looking_for)
                 # NOTE: We don't have a special case for
                 # "if stance_we_are_looking_for == SUPPORT or stance_we_are_looking_for == OPPOSE"
                 # for contest_office (like we do for candidate_campaign) because we don't have to deal with
@@ -2264,22 +2302,28 @@ class PositionListManager(models.Model):
             status += "RETRIEVE_PUBLIC_POSITIONS "
             try:
                 # We intentionally do not use 'readonly' here since we need to save based on the results of this query
+                # Removed this order_by: '-vote_smart_time_span',
                 public_positions_list = PositionEntered.objects.order_by('ballot_item_display_name',
-                                                                         '-vote_smart_time_span',
                                                                          '-google_civic_election_id')
+                # As of Aug 2018 we are no longer using PERCENT_RATING
+                public_positions_list = public_positions_list.exclude(stance__iexact=PERCENT_RATING)
+
                 if positive_value_exists(organization_id):
                     public_positions_list = public_positions_list.filter(organization_id=organization_id)
                 else:
                     public_positions_list = public_positions_list.filter(
                         organization_we_vote_id__iexact=organization_we_vote_id)
                 # SUPPORT, STILL_DECIDING, INFORMATION_ONLY, NO_STANCE, OPPOSE, PERCENT_RATING
+                # if stance_we_are_looking_for != ANY_STANCE:
+                #     # If we passed in the stance "ANY_STANCE" it means we want to not filter down the list
+                #     if stance_we_are_looking_for == SUPPORT or stance_we_are_looking_for == OPPOSE:
+                #         public_positions_list = public_positions_list.filter(stance=stance_we_are_looking_for
+                #             Q(stance=stance_we_are_looking_for) | Q(stance=PERCENT_RATING))
+                #  | Q(stance=GRADE_RATING))
+                #     else:
+                #         public_positions_list = public_positions_list.filter(stance=stance_we_are_looking_for)
                 if stance_we_are_looking_for != ANY_STANCE:
-                    # If we passed in the stance "ANY_STANCE" it means we want to not filter down the list
-                    if stance_we_are_looking_for == SUPPORT or stance_we_are_looking_for == OPPOSE:
-                        public_positions_list = public_positions_list.filter(
-                            Q(stance=stance_we_are_looking_for) | Q(stance=PERCENT_RATING))  # | Q(stance=GRADE_RATING))
-                    else:
-                        public_positions_list = public_positions_list.filter(stance=stance_we_are_looking_for)
+                    public_positions_list = public_positions_list.filter(stance__iexact=stance_we_are_looking_for)
 
                 google_civic_election_id_local_scope = 0
                 if positive_value_exists(show_positions_current_voter_election) \
@@ -2382,9 +2426,12 @@ class PositionListManager(models.Model):
                 if voter_is_friend_of_organization:
                     # If here, then the viewer is a friend with the organization. Look up positions that
                     #  are only shown to friends.
+                    # '-vote_smart_time_span',
                     friends_positions_list = PositionForFriends.objects.order_by('ballot_item_display_name',
-                                                                                 '-vote_smart_time_span',
                                                                                  '-google_civic_election_id')
+                    # As of Aug 2018 we are no longer using PERCENT_RATING
+                    friends_positions_list = friends_positions_list.exclude(stance__iexact=PERCENT_RATING)
+
                     # Get the entries saved by the organization's voter account
                     if positive_value_exists(organization_voter_local_id):
                         friends_positions_list = friends_positions_list.filter(
@@ -2394,14 +2441,16 @@ class PositionListManager(models.Model):
                             voter_we_vote_id__iexact=organization_voter_we_vote_id)
 
                     # SUPPORT, STILL_DECIDING, INFORMATION_ONLY, NO_STANCE, OPPOSE, PERCENT_RATING
+                    # if stance_we_are_looking_for != ANY_STANCE:
+                    #     # If we passed in the stance "ANY_STANCE" it means we want to not filter down the list
+                    #     if stance_we_are_looking_for == SUPPORT or stance_we_are_looking_for == OPPOSE:
+                    #         friends_positions_list = friends_positions_list.filter(
+                    #             Q(stance=stance_we_are_looking_for) | Q(stance=PERCENT_RATING))
+                    #         # | Q(stance=GRADE_RATING))
+                    #     else:
+                    #         friends_positions_list = friends_positions_list.filter(stance=stance_we_are_looking_for)
                     if stance_we_are_looking_for != ANY_STANCE:
-                        # If we passed in the stance "ANY_STANCE" it means we want to not filter down the list
-                        if stance_we_are_looking_for == SUPPORT or stance_we_are_looking_for == OPPOSE:
-                            friends_positions_list = friends_positions_list.filter(
-                                Q(stance=stance_we_are_looking_for) | Q(stance=PERCENT_RATING))
-                            # | Q(stance=GRADE_RATING))
-                        else:
-                            friends_positions_list = friends_positions_list.filter(stance=stance_we_are_looking_for)
+                        friends_positions_list = friends_positions_list.filter(stance__iexact=stance_we_are_looking_for)
 
                     # Gather the ids for all positions in this election so we can figure out which positions
                     # relate to the election the voter is currently looking at, vs. for all other elections
@@ -2569,6 +2618,10 @@ class PositionListManager(models.Model):
             # Retrieve public positions
             try:
                 public_positions_list_query = PositionEntered.objects.all()
+
+                # As of Aug 2018 we are no longer using PERCENT_RATING
+                public_positions_list_query = public_positions_list_query.exclude(stance__iexact=PERCENT_RATING)
+
                 if positive_value_exists(voter_id):
                     public_positions_list_query = public_positions_list_query.filter(voter_id=voter_id)
                 elif positive_value_exists(voter_we_vote_id):
@@ -2584,14 +2637,18 @@ class PositionListManager(models.Model):
                     public_positions_list_query = public_positions_list_query.filter(state_code__iexact=state_code)
 
                 # SUPPORT, STILL_DECIDING, INFORMATION_ONLY, NO_STANCE, OPPOSE, PERCENT_RATING
+                # if stance_we_are_looking_for != ANY_STANCE:
+                #     # If we passed in the stance "ANY_STANCE" it means we want to not filter down the list
+                #     if stance_we_are_looking_for == SUPPORT or stance_we_are_looking_for == OPPOSE:
+                #         public_positions_list_query = public_positions_list_query.filter(
+                #             Q(stance=stance_we_are_looking_for) | Q(stance=PERCENT_RATING))
+                #  | Q(stance=GRADE_RATING))
+                #     else:
+                #         public_positions_list_query = public_positions_list_query.filter(
+                #             stance=stance_we_are_looking_for)
                 if stance_we_are_looking_for != ANY_STANCE:
-                    # If we passed in the stance "ANY_STANCE" it means we want to not filter down the list
-                    if stance_we_are_looking_for == SUPPORT or stance_we_are_looking_for == OPPOSE:
-                        public_positions_list_query = public_positions_list_query.filter(
-                            Q(stance=stance_we_are_looking_for) | Q(stance=PERCENT_RATING))  # | Q(stance=GRADE_RATING))
-                    else:
-                        public_positions_list_query = public_positions_list_query.filter(
-                            stance=stance_we_are_looking_for)
+                    public_positions_list_query = public_positions_list_query.filter(
+                        stance=stance_we_are_looking_for)
 
                 # Force the position for the most recent election to show up last
                 public_positions_list_query = public_positions_list_query.order_by('google_civic_election_id')
@@ -2611,6 +2668,10 @@ class PositionListManager(models.Model):
             # Retrieve positions meant for friends only
             try:
                 friends_positions_list_query = PositionForFriends.objects.all()
+
+                # As of Aug 2018 we are no longer using PERCENT_RATING
+                friends_positions_list_query = friends_positions_list_query.exclude(stance__iexact=PERCENT_RATING)
+
                 if positive_value_exists(voter_id):
                     friends_positions_list_query = friends_positions_list_query.filter(voter_id=voter_id)
                 elif positive_value_exists(voter_we_vote_id):
@@ -2626,14 +2687,18 @@ class PositionListManager(models.Model):
                     friends_positions_list_query = friends_positions_list_query.filter(state_code__iexact=state_code)
 
                 # SUPPORT, STILL_DECIDING, INFORMATION_ONLY, NO_STANCE, OPPOSE, PERCENT_RATING
+                # if stance_we_are_looking_for != ANY_STANCE:
+                #     # If we passed in the stance "ANY_STANCE" it means we want to not filter down the list
+                #     if stance_we_are_looking_for == SUPPORT or stance_we_are_looking_for == OPPOSE:
+                #         friends_positions_list_query = friends_positions_list_query.filter(
+                #             Q(stance=stance_we_are_looking_for) | Q(stance=PERCENT_RATING))
+                #  | Q(stance=GRADE_RATING))
+                #     else:
+                #         friends_positions_list_query = friends_positions_list_query.filter(
+                #             stance=stance_we_are_looking_for)
                 if stance_we_are_looking_for != ANY_STANCE:
-                    # If we passed in the stance "ANY_STANCE" it means we want to not filter down the list
-                    if stance_we_are_looking_for == SUPPORT or stance_we_are_looking_for == OPPOSE:
-                        friends_positions_list_query = friends_positions_list_query.filter(
-                            Q(stance=stance_we_are_looking_for) | Q(stance=PERCENT_RATING))  # | Q(stance=GRADE_RATING))
-                    else:
-                        friends_positions_list_query = friends_positions_list_query.filter(
-                            stance=stance_we_are_looking_for)
+                    friends_positions_list_query = friends_positions_list_query.filter(
+                        stance=stance_we_are_looking_for)
 
                 # Force the position for the most recent election to show up last
                 friends_positions_list_query = friends_positions_list_query.order_by('google_civic_election_id')
@@ -2742,6 +2807,10 @@ class PositionListManager(models.Model):
         # Retrieve public positions
         try:
             public_positions_list_query = PositionEntered.objects.all()
+
+            # As of Aug 2018 we are no longer using PERCENT_RATING
+            public_positions_list_query = public_positions_list_query.exclude(stance__iexact=PERCENT_RATING)
+
             if positive_value_exists(voter_id):
                 public_positions_list_query = public_positions_list_query.filter(voter_id=voter_id)
             elif positive_value_exists(voter_we_vote_id):
@@ -2767,6 +2836,10 @@ class PositionListManager(models.Model):
         # Retrieve positions meant for friends only
         try:
             friends_positions_list_query = PositionForFriends.objects.all()
+
+            # As of Aug 2018 we are no longer using PERCENT_RATING
+            friends_positions_list_query = friends_positions_list_query.exclude(stance__iexact=PERCENT_RATING)
+
             if positive_value_exists(voter_id):
                 friends_positions_list_query = friends_positions_list_query.filter(voter_id=voter_id)
             elif positive_value_exists(voter_we_vote_id):
@@ -2878,10 +2951,14 @@ class PositionListManager(models.Model):
                 position_list_query = PositionForFriends.objects.order_by('date_entered')
 
             position_list_query = position_list_query.filter(google_civic_election_id=google_civic_election_id)
+
+            # As of Aug 2018 we are no longer using PERCENT_RATING
+            position_list_query = position_list_query.exclude(stance__iexact=PERCENT_RATING)
+
             # SUPPORT, STILL_DECIDING, INFORMATION_ONLY, NO_STANCE, OPPOSE, PERCENT_RATING
             if stance_we_are_looking_for != ANY_STANCE:
                 # If we passed in the stance "ANY" it means we want to not filter down the list
-                position_list_query = position_list_query.filter(stance=stance_we_are_looking_for)
+                position_list_query = position_list_query.filter(stance__iexact=stance_we_are_looking_for)
             if positive_value_exists(limit_to_organization_we_vote_ids) and len(limit_to_organization_we_vote_ids):
                 position_list_query = position_list_query.filter(
                     organization_we_vote_id__in=limit_to_organization_we_vote_ids)
@@ -2983,6 +3060,9 @@ class PositionListManager(models.Model):
             retrieve_public_positions = True
             position_list_query = PositionEntered.objects.using('readonly').all()
 
+        # As of Aug 2018 we are no longer using PERCENT_RATING
+        position_list_query = position_list_query.exclude(stance__iexact=PERCENT_RATING)
+
         if retrieve_public_positions:
             # If retrieving PositionEntered, make sure we have the necessary variables
             if type(organizations_followed_we_vote_id_list) is list \
@@ -3003,29 +3083,30 @@ class PositionListManager(models.Model):
                     candidate_campaign_we_vote_id__iexact=candidate_campaign_we_vote_id)
             # SUPPORT, STILL_DECIDING, INFORMATION_ONLY, NO_STANCE, OPPOSE, PERCENT_RATING
             if stance_we_are_looking_for != ANY_STANCE:
-                # If we passed in the stance "ANY_STANCE" it means we want to not filter down the list
-                if stance_we_are_looking_for == SUPPORT:
-                    if retrieve_public_positions:
-                        # If here, include Vote Smart Ratings
-                        position_list_query = position_list_query.filter(
-                            Q(stance=stance_we_are_looking_for) |  # Matches "is_support"
-                            (Q(stance=PERCENT_RATING) & Q(vote_smart_rating_integer__gte=66))
-                        )  # Matches "is_positive_rating"
-                    else:
-                        # If looking for FRIENDS_ONLY positions, we can ignore Vote Smart data
-                        position_list_query = position_list_query.filter(stance=stance_we_are_looking_for)
-                elif stance_we_are_looking_for == OPPOSE:
-                    if retrieve_public_positions:
-                        # If here, include Vote Smart Ratings
-                        position_list_query = position_list_query.filter(
-                            Q(stance=stance_we_are_looking_for) |  # Matches "is_oppose"
-                            (Q(stance=PERCENT_RATING) & Q(vote_smart_rating_integer__lte=33))
-                        )  # Matches "is_negative_rating"
-                    else:
-                        # If looking for FRIENDS_ONLY positions, we can ignore Vote Smart data
-                        position_list_query = position_list_query.filter(stance=stance_we_are_looking_for)
-                else:
-                    position_list_query = position_list_query.filter(stance=stance_we_are_looking_for)
+                # # If we passed in the stance "ANY_STANCE" it means we want to not filter down the list
+                # if stance_we_are_looking_for == SUPPORT:
+                #     if retrieve_public_positions:
+                #         # If here, include Vote Smart Ratings
+                #         position_list_query = position_list_query.filter(
+                #             Q(stance=stance_we_are_looking_for) |  # Matches "is_support"
+                #             (Q(stance=PERCENT_RATING) & Q(vote_smart_rating_integer__gte=66))
+                #         )  # Matches "is_positive_rating"
+                #     else:
+                #         # If looking for FRIENDS_ONLY positions, we can ignore Vote Smart data
+                #         position_list_query = position_list_query.filter(stance=stance_we_are_looking_for)
+                # elif stance_we_are_looking_for == OPPOSE:
+                #     if retrieve_public_positions:
+                #         # If here, include Vote Smart Ratings
+                #         position_list_query = position_list_query.filter(
+                #             Q(stance=stance_we_are_looking_for) |  # Matches "is_oppose"
+                #             (Q(stance=PERCENT_RATING) & Q(vote_smart_rating_integer__lte=33))
+                #         )  # Matches "is_negative_rating"
+                #     else:
+                #         # If looking for FRIENDS_ONLY positions, we can ignore Vote Smart data
+                #         position_list_query = position_list_query.filter(stance=stance_we_are_looking_for)
+                # else:
+                #     position_list_query = position_list_query.filter(stance=stance_we_are_looking_for)
+                position_list_query = position_list_query.filter(stance__iexact=stance_we_are_looking_for)
 
             # Only one of these blocks will be used at a time
             if retrieve_friends_positions and friends_we_vote_id_list is not False:
@@ -3091,6 +3172,9 @@ class PositionListManager(models.Model):
         else:
             position_list_query = PositionEntered.objects.using('readonly').all()
 
+        # As of Aug 2018 we are no longer using PERCENT_RATING
+        position_list_query = position_list_query.exclude(stance__iexact=PERCENT_RATING)
+
         # Retrieve the support positions for this contest_office_id
         position_count = 0
         try:
@@ -3102,18 +3186,21 @@ class PositionListManager(models.Model):
             # SUPPORT, STILL_DECIDING, INFORMATION_ONLY, NO_STANCE, OPPOSE, PERCENT_RATING
             if stance_we_are_looking_for != ANY_STANCE:
                 # If we passed in the stance "ANY_STANCE" it means we want to not filter down the list
-                if stance_we_are_looking_for == SUPPORT:
-                    position_list_query = position_list_query.filter(
-                        Q(stance=stance_we_are_looking_for) |  # Matches "is_support"
-                        (Q(stance=PERCENT_RATING) & Q(vote_smart_rating_integer__gte=66))  # "is_positive_rating"
-                    )  # | Q(stance=GRADE_RATING))
-                elif stance_we_are_looking_for == OPPOSE:
-                    position_list_query = position_list_query.filter(
-                        Q(stance=stance_we_are_looking_for) |  # Matches "is_oppose"
-                        (Q(stance=PERCENT_RATING) & Q(vote_smart_rating_integer__lte=33))  # "is_negative_rating"
-                    )  # | Q(stance=GRADE_RATING))
-                else:
-                    position_list_query = position_list_query.filter(stance=stance_we_are_looking_for)
+                # if stance_we_are_looking_for == SUPPORT:
+                #     position_list_query = position_list_query.filter(
+                #         Q(stance=stance_we_are_looking_for) |  # Matches "is_support"
+                #         (Q(stance=PERCENT_RATING) & Q(vote_smart_rating_integer__gte=66))  # "is_positive_rating"
+                #     )  # | Q(stance=GRADE_RATING))
+                # elif stance_we_are_looking_for == OPPOSE:
+                #     position_list_query = position_list_query.filter(
+                #         Q(stance=stance_we_are_looking_for) |  # Matches "is_oppose"
+                #         (Q(stance=PERCENT_RATING) & Q(vote_smart_rating_integer__lte=33))  # "is_negative_rating"
+                #     )  # | Q(stance=GRADE_RATING))
+                # else:
+                #     position_list_query = position_list_query.filter(stance=stance_we_are_looking_for)
+
+                position_list_query = position_list_query.filter(stance__iexact=stance_we_are_looking_for)
+
             # Limit to positions in the last x years - currently we are not limiting
             # position_list = position_list.filter(election_id=election_id)
 
@@ -3162,6 +3249,9 @@ class PositionListManager(models.Model):
         else:
             position_list_query = PositionEntered.objects.using('readonly').all()
 
+        # As of Aug 2018 we are no longer using PERCENT_RATING
+        position_list_query = position_list_query.exclude(stance__iexact=PERCENT_RATING)
+
         # Retrieve the support positions for this contest_measure_id
         position_count = 0
         try:
@@ -3172,19 +3262,21 @@ class PositionListManager(models.Model):
                     contest_measure_we_vote_id__iexact=contest_measure_we_vote_id)
             # SUPPORT, STILL_DECIDING, INFORMATION_ONLY, NO_STANCE, OPPOSE, PERCENT_RATING
             if stance_we_are_looking_for != ANY_STANCE:
-                # If we passed in the stance "ANY_STANCE" it means we want to not filter down the list
-                if stance_we_are_looking_for == SUPPORT:
-                    position_list_query = position_list_query.filter(
-                        Q(stance=stance_we_are_looking_for) |  # Matches "is_support"
-                        (Q(stance=PERCENT_RATING) & Q(vote_smart_rating_integer__gte=66))  # "is_positive_rating"
-                    )  # | Q(stance=GRADE_RATING))
-                elif stance_we_are_looking_for == OPPOSE:
-                    position_list_query = position_list_query.filter(
-                        Q(stance=stance_we_are_looking_for) |  # Matches "is_oppose"
-                        (Q(stance=PERCENT_RATING) & Q(vote_smart_rating_integer__lte=33))  # "is_negative_rating"
-                    )  # | Q(stance=GRADE_RATING))
-                else:
-                    position_list_query = position_list_query.filter(stance=stance_we_are_looking_for)
+                # # If we passed in the stance "ANY_STANCE" it means we want to not filter down the list
+                # if stance_we_are_looking_for == SUPPORT:
+                #     position_list_query = position_list_query.filter(
+                #         Q(stance=stance_we_are_looking_for) |  # Matches "is_support"
+                #         (Q(stance=PERCENT_RATING) & Q(vote_smart_rating_integer__gte=66))  # "is_positive_rating"
+                #     )  # | Q(stance=GRADE_RATING))
+                # elif stance_we_are_looking_for == OPPOSE:
+                #     position_list_query = position_list_query.filter(
+                #         Q(stance=stance_we_are_looking_for) |  # Matches "is_oppose"
+                #         (Q(stance=PERCENT_RATING) & Q(vote_smart_rating_integer__lte=33))  # "is_negative_rating"
+                #     )  # | Q(stance=GRADE_RATING))
+                # else:
+                #     position_list_query = position_list_query.filter(stance=stance_we_are_looking_for)
+                position_list_query = position_list_query.filter(stance__iexact=stance_we_are_looking_for)
+
             # Limit to positions in the last x years - currently we are not limiting
             # position_list = position_list.filter(election_id=election_id)
 
@@ -3203,6 +3295,10 @@ class PositionListManager(models.Model):
 
         try:
             position_queryset = PositionEntered.objects.all()
+
+            # As of Aug 2018 we are no longer using PERCENT_RATING
+            position_queryset = position_queryset.exclude(stance__iexact=PERCENT_RATING)
+
             position_queryset = position_queryset.filter(google_civic_election_id=google_civic_election_id)
             # We don't look for office_we_vote_id because of the chance that locally we are using a
             # different we_vote_id
@@ -7423,6 +7519,9 @@ class PositionManager(models.Model):
         else:
             position_item_queryset = PositionForFriends.objects.all()
 
+        # As of Aug 2018 we are no longer using PERCENT_RATING
+        position_item_queryset = position_item_queryset.exclude(stance__iexact=PERCENT_RATING)
+
         positions_count = 0
         success = False
         if positive_value_exists(google_civic_election_id):
@@ -7462,6 +7561,10 @@ class PositionMetricsManager(models.Model):
         count_result = None
         try:
             count_query = PositionEntered.objects.using('readonly').all()
+
+            # As of Aug 2018 we are no longer using PERCENT_RATING
+            count_query = count_query.exclude(stance__iexact=PERCENT_RATING)
+
             if positive_value_exists(google_civic_election_id):
                 count_query = count_query.filter(google_civic_election_id=google_civic_election_id)
             if positions_taken_by_these_voter_we_vote_ids is not False:
@@ -7476,6 +7579,10 @@ class PositionMetricsManager(models.Model):
         count_result = None
         try:
             count_query = PositionEntered.objects.using('readonly').all()
+
+            # As of Aug 2018 we are no longer using PERCENT_RATING
+            count_query = count_query.exclude(stance__iexact=PERCENT_RATING)
+
             if positive_value_exists(google_civic_election_id):
                 count_query = count_query.filter(google_civic_election_id=google_civic_election_id)
             count_query = count_query.exclude(
@@ -7494,6 +7601,8 @@ class PositionMetricsManager(models.Model):
         count_result = None
         try:
             count_query = PositionForFriends.objects.using('readonly').all()
+            # As of Aug 2018 we are no longer using PERCENT_RATING
+            count_query = count_query.exclude(stance__iexact=PERCENT_RATING)
             if positive_value_exists(google_civic_election_id):
                 count_query = count_query.filter(google_civic_election_id=google_civic_election_id)
             if positions_taken_by_these_voter_we_vote_ids is not False:
@@ -7508,6 +7617,8 @@ class PositionMetricsManager(models.Model):
         count_result = None
         try:
             count_query = PositionForFriends.objects.using('readonly').all()
+            # As of Aug 2018 we are no longer using PERCENT_RATING
+            count_query = count_query.exclude(stance__iexact=PERCENT_RATING)
             if positive_value_exists(google_civic_election_id):
                 count_query = count_query.filter(google_civic_election_id=google_civic_election_id)
             count_query = count_query.exclude(
@@ -7525,6 +7636,8 @@ class PositionMetricsManager(models.Model):
         count_result = None
         try:
             count_query = PositionForFriends.objects.using('readonly').all()
+            # As of Aug 2018 we are no longer using PERCENT_RATING
+            count_query = count_query.exclude(stance__iexact=PERCENT_RATING)
             count_query = count_query.filter(voter_we_vote_id__iexact=voter_we_vote_id)
             count_query = count_query.exclude(
                 (Q(statement_text__isnull=True) | Q(statement_text__exact='')) &
@@ -7539,6 +7652,10 @@ class PositionMetricsManager(models.Model):
         count_result = None
         try:
             count_query = PositionEntered.objects.using('readonly').all()
+
+            # As of Aug 2018 we are no longer using PERCENT_RATING
+            count_query = count_query.exclude(stance__iexact=PERCENT_RATING)
+
             count_query = count_query.filter(voter_we_vote_id__iexact=voter_we_vote_id)
             count_query = count_query.exclude(
                 (Q(statement_text__isnull=True) | Q(statement_text__exact='')) &
@@ -7553,6 +7670,8 @@ class PositionMetricsManager(models.Model):
         count_result = None
         try:
             count_query = PositionForFriends.objects.using('readonly').all()
+            # As of Aug 2018 we are no longer using PERCENT_RATING
+            count_query = count_query.exclude(stance__iexact=PERCENT_RATING)
             count_query = count_query.filter(voter_we_vote_id__iexact=voter_we_vote_id)
             count_result = count_query.count()
         except Exception as e:
@@ -7563,6 +7682,10 @@ class PositionMetricsManager(models.Model):
         count_result = None
         try:
             count_query = PositionEntered.objects.using('readonly').all()
+
+            # As of Aug 2018 we are no longer using PERCENT_RATING
+            count_query = count_query.exclude(stance__iexact=PERCENT_RATING)
+
             count_query = count_query.filter(voter_we_vote_id__iexact=voter_we_vote_id)
             count_result = count_query.count()
         except Exception as e:
@@ -7592,12 +7715,20 @@ class PositionMetricsManager(models.Model):
 
         # PositionEntered
         position_list_query = PositionEntered.objects.using('readonly').all()
+
+        # As of Aug 2018 we are no longer using PERCENT_RATING
+        position_list_query = position_list_query.exclude(stance__iexact=PERCENT_RATING)
+
         position_list_query = position_list_query.filter(final_position_filters)
 
         position_entered_count = position_list_query.count()
 
         # PositionForFriends
         position_list_query = PositionForFriends.objects.using('readonly').all()
+
+        # As of Aug 2018 we are no longer using PERCENT_RATING
+        position_list_query = position_list_query.exclude(stance__iexact=PERCENT_RATING)
+
         position_list_query = position_list_query.filter(final_position_filters)
 
         position_for_friends_count = position_list_query.count()

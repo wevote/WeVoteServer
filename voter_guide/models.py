@@ -899,6 +899,8 @@ class VoterGuide(models.Model):
     pledge_count = models.PositiveIntegerField(
         verbose_name="number of voters who have pledged", null=True, blank=True, default=0)
 
+    vote_smart_ratings_only = models.BooleanField(default=False)
+
     # We usually cache the voter guide name, but in case we haven't, we force the lookup
     def voter_guide_display_name(self):
         if self.display_name:
@@ -1010,9 +1012,10 @@ class VoterGuideListManager(models.Model):
         voter_guide_list_found = False
 
         try:
-            # voter_guide_queryset = VoterGuide.objects.order_by('-twitter_followers_count')
-            voter_guide_queryset = VoterGuide.objects.order_by('display_name')
-            voter_guide_list = voter_guide_queryset.filter(
+            # voter_guide_query = VoterGuide.objects.order_by('-twitter_followers_count')
+            voter_guide_query = VoterGuide.objects.order_by('display_name')
+            voter_guide_query = voter_guide_query.exclude(vote_smart_ratings_only=True)
+            voter_guide_list = voter_guide_query.filter(
                 google_civic_election_id=google_civic_election_id)
 
             if len(voter_guide_list):
@@ -1063,16 +1066,17 @@ class VoterGuideListManager(models.Model):
             return results
 
         try:
-            voter_guide_queryset = VoterGuide.objects.all()
-            voter_guide_queryset = voter_guide_queryset.filter(
+            voter_guide_query = VoterGuide.objects.all()
+            voter_guide_query = voter_guide_query.exclude(vote_smart_ratings_only=True)
+            voter_guide_query = voter_guide_query.filter(
                 organization_we_vote_id__in=organization_we_vote_ids_followed_by_voter)
             test_election = 2000
-            voter_guide_queryset = voter_guide_queryset.exclude(google_civic_election_id=test_election)
+            voter_guide_query = voter_guide_query.exclude(google_civic_election_id=test_election)
             if filter_by_this_google_civic_election_id:
-                voter_guide_queryset = voter_guide_queryset.filter(
+                voter_guide_query = voter_guide_query.filter(
                     google_civic_election_id=filter_by_this_google_civic_election_id)
-            voter_guide_queryset = voter_guide_queryset.order_by('-twitter_followers_count')
-            voter_guide_list = voter_guide_queryset
+            voter_guide_query = voter_guide_query.order_by('-twitter_followers_count')
+            voter_guide_list = list(voter_guide_query)
 
             if len(voter_guide_list):
                 voter_guide_list_found = True
@@ -1132,19 +1136,20 @@ class VoterGuideListManager(models.Model):
 
         try:
             if positive_value_exists(for_editing):
-                voter_guide_queryset = VoterGuide.objects.all()
+                voter_guide_query = VoterGuide.objects.all()
             else:
-                voter_guide_queryset = VoterGuide.objects.using('readonly').all()
+                voter_guide_query = VoterGuide.objects.using('readonly').all()
+            voter_guide_query = voter_guide_query.exclude(vote_smart_ratings_only=True)
             if positive_value_exists(organization_we_vote_id):
-                voter_guide_queryset = voter_guide_queryset.filter(
+                voter_guide_query = voter_guide_query.filter(
                     organization_we_vote_id__iexact=organization_we_vote_id)
             elif positive_value_exists(owner_voter_id):
-                voter_guide_queryset = voter_guide_queryset.filter(
+                voter_guide_query = voter_guide_query.filter(
                     owner_voter_id=owner_voter_id)
             elif positive_value_exists(owner_voter_we_vote_id):
-                voter_guide_queryset = voter_guide_queryset.filter(
+                voter_guide_query = voter_guide_query.filter(
                     owner_we_vote_id__iexact=owner_voter_we_vote_id)
-            voter_guide_list = voter_guide_queryset
+            voter_guide_list = list(voter_guide_query)
 
             if len(voter_guide_list):
                 voter_guide_list_found = True
@@ -1176,12 +1181,16 @@ class VoterGuideListManager(models.Model):
             maximum_number_to_retrieve = 30
 
         try:
-            voter_guide_queryset = VoterGuide.objects.all()
+            voter_guide_query = VoterGuide.objects.all()
+            voter_guide_query = voter_guide_query.exclude(vote_smart_ratings_only=True)
             if search_string:
-                voter_guide_queryset = voter_guide_queryset.filter(Q(display_name__icontains=search_string) |
-                                                                   Q(twitter_handle__icontains=search_string))
+                voter_guide_query = voter_guide_query.filter(Q(display_name__icontains=search_string) |
+                                                             Q(twitter_handle__icontains=search_string))
+            else:
+                # If not searching, make sure we do not include individuals
+                voter_guide_query = voter_guide_query.exclude(voter_guide_owner_type__iexact=INDIVIDUAL)
 
-            voter_guide_queryset = voter_guide_queryset.filter(
+            voter_guide_query = voter_guide_query.filter(
                 Q(google_civic_election_id=google_civic_election_id) &
                 Q(organization_we_vote_id__in=organization_we_vote_id_list)
             )
@@ -1194,11 +1203,11 @@ class VoterGuideListManager(models.Model):
                 query_end_number = maximum_number_to_retrieve
 
             if sort_order == 'desc':
-                voter_guide_queryset = voter_guide_queryset.order_by('-' + sort_by)[query_start_number:query_end_number]
+                voter_guide_query = voter_guide_query.order_by('-' + sort_by)[query_start_number:query_end_number]
             else:
-                voter_guide_queryset = voter_guide_queryset.order_by(sort_by)[query_start_number:query_end_number]
+                voter_guide_query = voter_guide_query.order_by(sort_by)[query_start_number:query_end_number]
 
-            voter_guide_list = list(voter_guide_queryset)
+            voter_guide_list = list(voter_guide_query)
 
             if len(voter_guide_list):
                 voter_guide_list_found = True
@@ -1246,25 +1255,25 @@ class VoterGuideListManager(models.Model):
             return results
 
         try:
-            voter_guide_queryset = VoterGuide.objects.all()
+            voter_guide_query = VoterGuide.objects.all()
 
             # Retrieve all pairs that match vote_smart_time_span / organization_we_vote_id
             filter_list = Q()
             for item in orgs_we_need_found_by_position_and_time_span_list_of_dicts:
                 filter_list |= Q(vote_smart_time_span=item['vote_smart_time_span'],
                                  organization_we_vote_id__iexact=item['organization_we_vote_id'])
-            voter_guide_queryset = voter_guide_queryset.filter(filter_list)
+            voter_guide_query = voter_guide_query.filter(filter_list)
 
             if search_string:
-                voter_guide_queryset = voter_guide_queryset.filter(Q(display_name__icontains=search_string) |
+                voter_guide_query = voter_guide_query.filter(Q(display_name__icontains=search_string) |
                                                                    Q(twitter_handle__icontains=search_string))
 
             if sort_order == 'desc':
-                voter_guide_queryset = voter_guide_queryset.order_by('-' + sort_by)[:maximum_number_to_retrieve]
+                voter_guide_query = voter_guide_query.order_by('-' + sort_by)[:maximum_number_to_retrieve]
             else:
-                voter_guide_queryset = voter_guide_queryset.order_by(sort_by)[:maximum_number_to_retrieve]
+                voter_guide_query = voter_guide_query.order_by(sort_by)[:maximum_number_to_retrieve]
 
-            voter_guide_list = voter_guide_queryset
+            voter_guide_list = voter_guide_query
             if len(voter_guide_list):
                 voter_guide_list_found = True
                 status = 'VOTER_GUIDE_FOUND'
@@ -1297,10 +1306,13 @@ class VoterGuideListManager(models.Model):
             maximum_number_to_retrieve = 30
 
         try:
-            voter_guide_queryset = VoterGuide.objects.all()
+            voter_guide_query = VoterGuide.objects.all()
+            # As of August 2018, we no longer want to support Vote Smart ratings voter guides
+            voter_guide_query = voter_guide_query.exclude(vote_smart_time_span__isnull=False)
+            voter_guide_query = voter_guide_query.exclude(vote_smart_ratings_only=True)
 
             if len(organization_we_vote_ids_followed_or_ignored_by_voter):
-                voter_guide_queryset = voter_guide_queryset.exclude(
+                voter_guide_query = voter_guide_query.exclude(
                     organization_we_vote_id__in=organization_we_vote_ids_followed_or_ignored_by_voter)
 
             if search_string:
@@ -1308,15 +1320,18 @@ class VoterGuideListManager(models.Model):
                 data = search_string.split()  # split search_string into a list
 
                 for search_string_part in data:
-                    voter_guide_queryset = voter_guide_queryset.filter(Q(display_name__icontains=search_string_part) |
-                                                                       Q(twitter_handle__icontains=search_string_part))
+                    voter_guide_query = voter_guide_query.filter(Q(display_name__icontains=search_string_part) |
+                                                                 Q(twitter_handle__icontains=search_string_part))
+            else:
+                # If not searching, make sure we do not include individuals
+                voter_guide_query = voter_guide_query.exclude(voter_guide_owner_type__iexact=INDIVIDUAL)
 
             if sort_order == 'desc':
-                voter_guide_queryset = voter_guide_queryset.order_by('-' + sort_by)[:maximum_number_to_retrieve]
+                voter_guide_query = voter_guide_query.order_by('-' + sort_by)[:maximum_number_to_retrieve]
             else:
-                voter_guide_queryset = voter_guide_queryset.order_by(sort_by)[:maximum_number_to_retrieve]
+                voter_guide_query = voter_guide_query.order_by(sort_by)[:maximum_number_to_retrieve]
 
-            voter_guide_list = voter_guide_queryset
+            voter_guide_list = list(voter_guide_query)
             if len(voter_guide_list):
                 voter_guide_list_found = True
                 status = 'VOTER_GUIDE_FOUND_GENERIC_VOTER_GUIDES_TO_FOLLOW'
@@ -1381,18 +1396,22 @@ class VoterGuideListManager(models.Model):
         return voter_guide_list_filtered
 
     def retrieve_all_voter_guides_order_by(self, order_by='', limit_number=0, search_string='',
-                                           google_civic_election_id=0):
+                                           google_civic_election_id=0, show_individuals=False):
         voter_guide_list = []
         voter_guide_list_found = False
         try:
-            voter_guide_queryset = VoterGuide.objects.all()
+            voter_guide_query = VoterGuide.objects.all()
+            voter_guide_query = voter_guide_query.exclude(vote_smart_ratings_only=True)
+            voter_guide_query = voter_guide_query.exclude(vote_smart_time_span__isnull=False)
+            if not positive_value_exists(show_individuals):
+                voter_guide_query = voter_guide_query.exclude(voter_guide_owner_type__iexact=INDIVIDUAL)
             if positive_value_exists(google_civic_election_id):
-                voter_guide_queryset = voter_guide_queryset.filter(google_civic_election_id=google_civic_election_id)
+                voter_guide_query = voter_guide_query.filter(google_civic_election_id=google_civic_election_id)
             if order_by == 'google_civic_election_id':
-                voter_guide_queryset = voter_guide_queryset.order_by(
+                voter_guide_query = voter_guide_query.order_by(
                     '-vote_smart_time_span', '-google_civic_election_id')
             else:
-                voter_guide_queryset = voter_guide_queryset.order_by('-twitter_followers_count')
+                voter_guide_query = voter_guide_query.order_by('-twitter_followers_count')
 
             if positive_value_exists(search_string):
                 search_words = search_string.split()
@@ -1431,12 +1450,12 @@ class VoterGuideListManager(models.Model):
                         for item in filters:
                             final_filters |= item
 
-                        voter_guide_queryset = voter_guide_queryset.filter(final_filters)
+                        voter_guide_query = voter_guide_query.filter(final_filters)
 
             if positive_value_exists(limit_number):
-                voter_guide_list = voter_guide_queryset[:limit_number]
+                voter_guide_list = voter_guide_query[:limit_number]
             else:
-                voter_guide_list = list(voter_guide_queryset)
+                voter_guide_list = list(voter_guide_query)
 
             if len(voter_guide_list):
                 voter_guide_list_found = True
@@ -1485,15 +1504,15 @@ class VoterGuideListManager(models.Model):
         voter_guide_list_found = False
 
         try:
-            voter_guide_queryset = VoterGuide.objects.all()
+            voter_guide_query = VoterGuide.objects.all()
             if positive_value_exists(google_civic_election_id):
-                voter_guide_queryset = voter_guide_queryset.filter(google_civic_election_id=google_civic_election_id)
+                voter_guide_query = voter_guide_query.filter(google_civic_election_id=google_civic_election_id)
             elif positive_value_exists(vote_smart_time_span):
-                voter_guide_queryset = voter_guide_queryset.filter(vote_smart_time_span__iexact=vote_smart_time_span)
+                voter_guide_query = voter_guide_query.filter(vote_smart_time_span__iexact=vote_smart_time_span)
 
             # Ignore entries with we_vote_id coming in from master server
             if positive_value_exists(we_vote_id_from_master):
-                voter_guide_queryset = voter_guide_queryset.exclude(we_vote_id__iexact=we_vote_id_from_master)
+                voter_guide_query = voter_guide_query.exclude(we_vote_id__iexact=we_vote_id_from_master)
 
             # We want to find candidates with *any* of these values
             if positive_value_exists(organization_we_vote_id):
@@ -1516,9 +1535,9 @@ class VoterGuideListManager(models.Model):
                 for item in filters:
                     final_filters |= item
 
-                voter_guide_queryset = voter_guide_queryset.filter(final_filters)
+                voter_guide_query = voter_guide_query.filter(final_filters)
 
-            voter_guide_list_objects = voter_guide_queryset
+            voter_guide_list_objects = voter_guide_query
 
             if len(voter_guide_list_objects):
                 voter_guide_list_found = True
@@ -1691,7 +1710,8 @@ class VoterGuidePossibilityManager(models.Manager):
                 success = True
             elif positive_value_exists(organization_we_vote_id) and positive_value_exists(google_civic_election_id):
                 # Set this status in case the 'get' fails
-                status = "ERROR_RETRIEVING_VOTER_GUIDE_POSSIBILITY_WITH_ORGANIZATION_WE_VOTE_ID"
+                status = "ERROR_RETRIEVING_VOTER_GUIDE_POSSIBILITY_WITH_ORGANIZATION_WE_VOTE_ID "
+                # TODO: Update this to deal with the google_civic_election_id being spread across 50 fields
                 voter_guide_possibility_on_stage = VoterGuidePossibility.objects.get(
                     google_civic_election_id=google_civic_election_id,
                     organization_we_vote_id__iexact=organization_we_vote_id)
@@ -1701,6 +1721,7 @@ class VoterGuidePossibilityManager(models.Manager):
             elif positive_value_exists(owner_we_vote_id) and positive_value_exists(google_civic_election_id):
                 # Set this status in case the 'get' fails
                 status = "ERROR_RETRIEVING_VOTER_GUIDE_POSSIBILITY_WITH_VOTER_WE_VOTE_ID"
+                # TODO: Update this to deal with the google_civic_election_id being spread across 50 fields
                 voter_guide_possibility_on_stage = VoterGuidePossibility.objects.get(
                     google_civic_election_id=google_civic_election_id,
                     owner_we_vote_id__iexact=owner_we_vote_id)
@@ -1742,9 +1763,9 @@ class VoterGuidePossibilityManager(models.Manager):
         voter_guide_possibility_list = []
         voter_guide_possibility_list_found = False
         try:
-            voter_guide_queryset = VoterGuidePossibility.objects.all()
-            voter_guide_queryset = voter_guide_queryset.filter(saved_as_batch=saved_as_batch)
-            voter_guide_queryset = voter_guide_queryset.order_by('-id')
+            voter_guide_query = VoterGuidePossibility.objects.all()
+            voter_guide_query = voter_guide_query.filter(saved_as_batch=saved_as_batch)
+            voter_guide_query = voter_guide_query.order_by('-id')
 
             if positive_value_exists(search_string):
                 search_words = search_string.split()
@@ -1790,12 +1811,12 @@ class VoterGuidePossibilityManager(models.Manager):
                         for item in filters:
                             final_filters |= item
 
-                        voter_guide_queryset = voter_guide_queryset.filter(final_filters)
+                        voter_guide_query = voter_guide_query.filter(final_filters)
 
             if positive_value_exists(limit_number):
-                voter_guide_possibility_list = voter_guide_queryset[:limit_number]
+                voter_guide_possibility_list = voter_guide_query[:limit_number]
             else:
-                voter_guide_possibility_list = list(voter_guide_queryset)
+                voter_guide_possibility_list = list(voter_guide_query)
 
             if len(voter_guide_possibility_list):
                 voter_guide_possibility_list_found = True

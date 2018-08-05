@@ -817,10 +817,13 @@ def election_list_view(request):
 
         # Number of Voter Guides
         voter_guide_query = VoterGuide.objects.filter(google_civic_election_id=election.google_civic_election_id)
+        voter_guide_query = voter_guide_query.exclude(vote_smart_ratings_only=True)
         election.voter_guides_count = voter_guide_query.count()
 
         # Number of Public Positions
         position_query = PositionEntered.objects.filter(google_civic_election_id=election.google_civic_election_id)
+        # As of Aug 2018 we are no longer using PERCENT_RATING
+        position_query = position_query.exclude(stance__iexact='PERCENT_RATING')
         election.public_positions_count = position_query.count()
 
         election_list_modified.append(election)
@@ -1008,12 +1011,15 @@ def nationwide_election_list_view(request):
 
         # Number of Voter Guides
         voter_guide_query = VoterGuide.objects.filter(google_civic_election_id=election.google_civic_election_id)
+        voter_guide_query = voter_guide_query.exclude(vote_smart_ratings_only=True)
         if is_national_election:
             voter_guide_query = voter_guide_query.filter(state_code__iexact=election.state_code)
         election.voter_guides_count = voter_guide_query.count()
 
         # Number of Public Positions
         position_query = PositionEntered.objects.filter(google_civic_election_id=election.google_civic_election_id)
+        # As of Aug 2018 we are no longer using PERCENT_RATING
+        position_query = position_query.exclude(stance__iexact='PERCENT_RATING')
         if is_national_election:
             position_query = position_query.filter(state_code__iexact=election.state_code)
         election.public_positions_count = position_query.count()
@@ -1290,6 +1296,7 @@ def election_summary_view(request, election_local_id=0, google_civic_election_id
         # Number of Voter Guides
         voter_guide_query = VoterGuide.objects.filter(
             google_civic_election_id=election.google_civic_election_id)
+        voter_guide_query = voter_guide_query.exclude(vote_smart_ratings_only=True)
         if positive_value_exists(state_code):
             voter_guide_query = voter_guide_query.filter(state_code__iexact=state_code)
         election.voter_guides_count = voter_guide_query.count()
@@ -1297,6 +1304,8 @@ def election_summary_view(request, election_local_id=0, google_civic_election_id
         # Number of Public Positions
         position_query = PositionEntered.objects.filter(
             google_civic_election_id=election.google_civic_election_id)
+        # As of Aug 2018 we are no longer using PERCENT_RATING
+        position_query = position_query.exclude(stance__iexact='PERCENT_RATING')
         if positive_value_exists(state_code):
             position_query = position_query.filter(state_code__iexact=state_code)
         election.public_positions_count = position_query.count()

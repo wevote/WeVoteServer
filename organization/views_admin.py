@@ -795,6 +795,8 @@ def organization_position_list_view(request, organization_id=0, organization_we_
         organization_position_list_found = False
         try:
             public_position_query = PositionEntered.objects.all()
+            # As of Aug 2018 we are no longer using PERCENT_RATING
+            public_position_query = public_position_query.exclude(stance__iexact='PERCENT_RATING')
             public_position_query = public_position_query.filter(organization_id=organization_id)
             if positive_value_exists(google_civic_election_id):
                 public_position_query = public_position_query.filter(
@@ -804,6 +806,8 @@ def organization_position_list_view(request, organization_id=0, organization_we_
             public_position_list = list(public_position_query)
 
             friends_only_position_query = PositionForFriends.objects.all()
+            # As of Aug 2018 we are no longer using PERCENT_RATING
+            friends_only_position_query = friends_only_position_query.exclude(stance__iexact='PERCENT_RATING')
             friends_only_position_query = friends_only_position_query.filter(organization_id=organization_id)
             if positive_value_exists(google_civic_election_id):
                 friends_only_position_query = friends_only_position_query.filter(
@@ -959,12 +963,14 @@ def organization_position_new_view(request, organization_id):
         contest_measures_for_this_election_list = results['measure_list_objects']
 
     try:
-        organization_position_list = PositionEntered.objects.order_by('stance')
-        organization_position_list = organization_position_list.filter(organization_id=organization_id)
+        organization_position_query = PositionEntered.objects.order_by('stance')
+        # As of Aug 2018 we are no longer using PERCENT_RATING
+        organization_position_query = organization_position_query.exclude(stance__iexact='PERCENT_RATING')
+        organization_position_query = organization_position_query.filter(organization_id=organization_id)
         if positive_value_exists(google_civic_election_id):
-            organization_position_list = organization_position_list.filter(
+            organization_position_query = organization_position_query.filter(
                 google_civic_election_id=google_civic_election_id)
-        organization_position_list = organization_position_list.order_by(
+        organization_position_list = organization_position_query.order_by(
             'google_civic_election_id', '-vote_smart_time_span')
         if len(organization_position_list):
             organization_position_list_found = True

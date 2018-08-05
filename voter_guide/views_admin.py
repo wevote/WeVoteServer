@@ -7,7 +7,7 @@ from .controllers import CANDIDATE_NUMBER_LIST, convert_candidate_list_light_to_
     extract_position_list_from_voter_guide_possibility, extract_possible_candidate_list_from_database, \
     match_candidate_list_with_candidates_in_database, modify_one_row_in_possible_candidate_dict_list, \
     refresh_existing_voter_guides, take_in_possible_candidate_list_from_form, voter_guides_import_from_master_server
-from .models import VoterGuide, VoterGuideListManager, VoterGuideManager, VoterGuidePossibility, \
+from .models import INDIVIDUAL, VoterGuide, VoterGuideListManager, VoterGuideManager, VoterGuidePossibility, \
     VoterGuidePossibilityManager
 from admin_tools.views import redirect_to_sign_in_page
 from candidate.controllers import retrieve_candidate_list_for_all_upcoming_elections, find_candidates_on_one_web_page
@@ -526,37 +526,40 @@ def break_up_text_into_possible_candidates_list(ballot_items, starting_candidate
 
 # This page does not need to be protected.
 def voter_guides_sync_out_view(request):  # voterGuidesSyncOut
+    status = ""
     google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
 
     try:
-        voter_guide_list = VoterGuide.objects.using('readonly').all()
+        voter_guide_query = VoterGuide.objects.using('readonly').all()
+        voter_guide_query = voter_guide_query.exclude(vote_smart_ratings_only=True)
         if positive_value_exists(google_civic_election_id):
-            voter_guide_list = voter_guide_list.filter(google_civic_election_id=google_civic_election_id)
+            voter_guide_query = voter_guide_query.filter(google_civic_election_id=google_civic_election_id)
 
         # serializer = VoterGuideSerializer(voter_guide_list, many=True)
         # return Response(serializer.data)
-        voter_guide_list = voter_guide_list.extra(
+        voter_guide_query = voter_guide_query.extra(
             select={'last_updated': "to_char(last_updated, 'YYYY-MM-DD HH24:MI:SS')"})
-        voter_guide_list_dict = voter_guide_list.values('we_vote_id', 'display_name', 'google_civic_election_id',
-                                                        'election_day_text',
-                                                        'image_url', 'last_updated', 'organization_we_vote_id',
-                                                        'owner_we_vote_id', 'pledge_count', 'pledge_goal',
-                                                        'public_figure_we_vote_id',
-                                                        'twitter_description', 'twitter_followers_count',
-                                                        'twitter_handle', 'vote_smart_time_span',
-                                                        'voter_guide_owner_type',
-                                                        'we_vote_hosted_profile_image_url_large',
-                                                        'we_vote_hosted_profile_image_url_medium',
-                                                        'we_vote_hosted_profile_image_url_tiny')
-        if voter_guide_list_dict:
-            voter_guide_list_list_json = list(voter_guide_list_dict)
-            return HttpResponse(json.dumps(voter_guide_list_list_json), content_type='application/json')
+        # Removed: 'vote_smart_time_span',
+        voter_guide_query = voter_guide_query.values('we_vote_id', 'display_name', 'google_civic_election_id',
+                                                     'election_day_text',
+                                                     'image_url', 'last_updated', 'organization_we_vote_id',
+                                                     'owner_we_vote_id', 'pledge_count', 'pledge_goal',
+                                                     'public_figure_we_vote_id',
+                                                     'twitter_description', 'twitter_followers_count',
+                                                     'twitter_handle',
+                                                     'voter_guide_owner_type',
+                                                     'we_vote_hosted_profile_image_url_large',
+                                                     'we_vote_hosted_profile_image_url_medium',
+                                                     'we_vote_hosted_profile_image_url_tiny')
+        voter_guide_list_dict = list(voter_guide_query)
+        return HttpResponse(json.dumps(voter_guide_list_dict), content_type='application/json')
     except Exception as e:
-        pass
+        status += 'VOTER_GUIDE_QUERY_PROBLEM ' + str(e) + ' '
 
+    status += 'VOTER_GUIDE_LIST_MISSING'
     json_data = {
         'success': False,
-        'status': 'VOTER_GUIDE_LIST_MISSING'
+        'status': status,
     }
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 
@@ -692,8 +695,10 @@ def generate_voter_guides_view(request):
                 # organization hasn't had voter guides stored yet.
                 # Search for positions with this organization_id and google_civic_election_id
                 google_civic_election_id = int(election.google_civic_election_id)  # Convert VarChar to Integer
+                # As of August 2018 exclude Vote Smart ratings (vote_smart_rating__isnull)
                 positions_count = PositionEntered.objects.filter(
                     organization_id=organization.id,
+                    vote_smart_rating__isnull=True,
                     google_civic_election_id=google_civic_election_id).count()
                 if positions_count > 0:
                     voter_guide_manager = VoterGuideManager()
@@ -706,22 +711,23 @@ def generate_voter_guides_view(request):
                         else:
                             voter_guide_updated_count += 1
 
-            for time_span in TIME_SPAN_LIST:
-                # organization hasn't had voter guides stored yet.
-                # Search for positions with this organization_id and time_span
-                positions_count = PositionEntered.objects.filter(
-                    organization_id=organization.id,
-                    vote_smart_time_span=time_span).count()
-                if positions_count > 0:
-                    voter_guide_manager = VoterGuideManager()
-                    voter_guide_we_vote_id = ''
-                    results = voter_guide_manager.update_or_create_organization_voter_guide_by_time_span(
-                        voter_guide_we_vote_id, organization.we_vote_id, time_span)
-                    if results['success']:
-                        if results['new_voter_guide_created']:
-                            voter_guide_created_count += 1
-                        else:
-                            voter_guide_updated_count += 1
+            # As of August 2018, we no longer use Vote Smart ratings for voter guides
+            # for time_span in TIME_SPAN_LIST:
+            #     # organization hasn't had voter guides stored yet.
+            #     # Search for positions with this organization_id and time_span
+            #     positions_count = PositionEntered.objects.filter(
+            #         organization_id=organization.id,
+            #         vote_smart_time_span=time_span).count()
+            #     if positions_count > 0:
+            #         voter_guide_manager = VoterGuideManager()
+            #         voter_guide_we_vote_id = ''
+            #         results = voter_guide_manager.update_or_create_organization_voter_guide_by_time_span(
+            #             voter_guide_we_vote_id, organization.we_vote_id, time_span)
+            #         if results['success']:
+            #             if results['new_voter_guide_created']:
+            #                 voter_guide_created_count += 1
+            #             else:
+            #                 voter_guide_updated_count += 1
 
             voter_guide_stored_for_this_organization.append(organization.id)
 
@@ -738,6 +744,47 @@ def generate_voter_guides_view(request):
                          '{voter_guide_updated_count} updated.'.format(
                              voter_guide_created_count=voter_guide_created_count,
                              voter_guide_updated_count=voter_guide_updated_count,
+                         ))
+    return HttpResponseRedirect(reverse('voter_guide:voter_guide_list', args=()))
+
+
+@login_required
+def label_vote_smart_voter_guides_view(request):
+    authority_required = {'verified_volunteer'}  # admin, verified_volunteer
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
+    voter_guide_labeled_count = 0
+    voter_guide_not_labeled_count = 0
+
+    # Cycle through existing voter guides
+    voter_guide_query = VoterGuide.objects.all()
+    voter_guide_query = voter_guide_query.exclude(vote_smart_ratings_only=True)
+    voter_guide_list = list(voter_guide_query)
+    for voter_guide in voter_guide_list:
+        # Only look at voter guides attached to an election
+        if positive_value_exists(voter_guide.google_civic_election_id):
+            # Are there positions for this organization for this election?
+            positions_count = PositionEntered.objects.filter(
+                organization_we_vote_id=voter_guide.organization_we_vote_id,
+                google_civic_election_id=voter_guide.google_civic_election_id).count()
+            if positive_value_exists(positions_count):
+                # If the total number of positions that exist is the same number of vote smart positions, then we
+                # know that ALL positions are vote smart positions
+                vote_smart_positions_count = PositionEntered.objects.filter(
+                    organization_we_vote_id=voter_guide.organization_we_vote_id,
+                    vote_smart_rating__isnull=False,
+                    google_civic_election_id=voter_guide.google_civic_election_id).count()
+                if vote_smart_positions_count == positions_count:
+                    # If all of the positions have a positive value in "vote_smart_rating", then label the voter
+                    # guide as "vote_smart_ratings_only"
+                    voter_guide.vote_smart_ratings_only = True
+                    voter_guide.save()
+                    voter_guide_labeled_count += 1
+
+    messages.add_message(request, messages.INFO,
+                         '{voter_guide_labeled_count} voter guides labeled.'.format(
+                             voter_guide_labeled_count=voter_guide_labeled_count,
                          ))
     return HttpResponseRedirect(reverse('voter_guide:voter_guide_list', args=()))
 
@@ -774,6 +821,7 @@ def generate_voter_guides_for_one_election_view(request):
             # Search for positions with this organization_id and google_civic_election_id
             positions_count = PositionEntered.objects.filter(
                 organization_id=organization.id,
+                vote_smart_rating__isnull=False,
                 google_civic_election_id=google_civic_election_id).count()
             if positions_count > 0:
                 voter_guide_manager = VoterGuideManager()
@@ -786,22 +834,23 @@ def generate_voter_guides_for_one_election_view(request):
                     else:
                         voter_guide_updated_count += 1
 
-            for time_span in TIME_SPAN_LIST:
-                # organization hasn't had voter guides stored yet.
-                # Search for positions with this organization_id and time_span
-                positions_count = PositionEntered.objects.filter(
-                    organization_id=organization.id,
-                    vote_smart_time_span=time_span).count()
-                if positions_count > 0:
-                    voter_guide_manager = VoterGuideManager()
-                    voter_guide_we_vote_id = ''
-                    results = voter_guide_manager.update_or_create_organization_voter_guide_by_time_span(
-                        voter_guide_we_vote_id, organization.we_vote_id, time_span)
-                    if results['success']:
-                        if results['new_voter_guide_created']:
-                            voter_guide_created_count += 1
-                        else:
-                            voter_guide_updated_count += 1
+            # As of August 2018, we no longer use Vote Smart ratings for voter guides
+            # for time_span in TIME_SPAN_LIST:
+            #     # organization hasn't had voter guides stored yet.
+            #     # Search for positions with this organization_id and time_span
+            #     positions_count = PositionEntered.objects.filter(
+            #         organization_id=organization.id,
+            #         vote_smart_time_span=time_span).count()
+            #     if positions_count > 0:
+            #         voter_guide_manager = VoterGuideManager()
+            #         voter_guide_we_vote_id = ''
+            #         results = voter_guide_manager.update_or_create_organization_voter_guide_by_time_span(
+            #             voter_guide_we_vote_id, organization.we_vote_id, time_span)
+            #         if results['success']:
+            #             if results['new_voter_guide_created']:
+            #                 voter_guide_created_count += 1
+            #             else:
+            #                 voter_guide_updated_count += 1
 
             voter_guide_stored_for_this_organization.append(organization.id)
 
@@ -1028,6 +1077,7 @@ def voter_guide_list_view(request):
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
+    show_individuals = request.GET.get('show_individuals', False)
     google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
     show_all_elections = request.GET.get('show_all_elections', False)
     state_code = request.GET.get('state_code', '')
@@ -1039,7 +1089,7 @@ def voter_guide_list_view(request):
     order_by = "google_civic_election_id"
     limit_number = 75
     results = voter_guide_list_object.retrieve_all_voter_guides_order_by(
-        order_by, limit_number, voter_guide_search, google_civic_election_id)
+        order_by, limit_number, voter_guide_search, google_civic_election_id, show_individuals)
 
     if results['success']:
         voter_guide_list = results['voter_guide_list']
@@ -1067,10 +1117,13 @@ def voter_guide_list_view(request):
         results = election_manager.retrieve_upcoming_elections()
         election_list = results['election_list']
 
-    voter_guides_query = VoterGuide.objects.all()
+    voter_guide_query = VoterGuide.objects.all()
+    voter_guide_query = voter_guide_query.exclude(vote_smart_ratings_only=True)
     if positive_value_exists(google_civic_election_id):
-        voter_guides_query = voter_guides_query.filter(google_civic_election_id=google_civic_election_id)
-    voter_guides_count = voter_guides_query.count()
+        voter_guide_query = voter_guide_query.filter(google_civic_election_id=google_civic_election_id)
+    if not positive_value_exists(show_individuals):
+        voter_guide_query = voter_guide_query.exclude(voter_guide_owner_type__iexact=INDIVIDUAL)
+    voter_guides_count = voter_guide_query.count()
 
     messages.add_message(request, messages.INFO, 'We found {voter_guides_count} existing voter guides. '
                                                  ''.format(voter_guides_count=voter_guides_count))
@@ -1078,6 +1131,7 @@ def voter_guide_list_view(request):
     messages_on_stage = get_messages(request)
     template_values = {
         'election_list':            election_list,
+        'show_individuals':         show_individuals,
         'google_civic_election_id': google_civic_election_id,
         'show_all_elections':       show_all_elections,
         'state_code':               state_code,

@@ -423,10 +423,13 @@ def candidate_list_view(request):
 
             # Number of Voter Guides
             voter_guide_query = VoterGuide.objects.filter(google_civic_election_id=election.google_civic_election_id)
+            voter_guide_query = voter_guide_query.exclude(vote_smart_ratings_only=True)
             election.voter_guides_count = voter_guide_query.count()
 
             # Number of Public Positions
             position_query = PositionEntered.objects.filter(google_civic_election_id=election.google_civic_election_id)
+            # As of Aug 2018 we are no longer using PERCENT_RATING
+            position_query = position_query.exclude(stance__iexact='PERCENT_RATING')
             election.public_positions_count = position_query.count()
 
     # Make sure we always include the current election in the election_list, even if it is older
@@ -656,8 +659,10 @@ def candidate_edit_view(request, candidate_id=0, candidate_campaign_we_vote_id="
 
         # Working with We Vote Positions
         try:
-            candidate_position_list = PositionEntered.objects.order_by('stance')
-            candidate_position_list = candidate_position_list.filter(candidate_campaign_id=candidate_id)
+            candidate_position_query = PositionEntered.objects.order_by('stance')
+            # As of Aug 2018 we are no longer using PERCENT_RATING
+            candidate_position_query = candidate_position_query.exclude(stance__iexact='PERCENT_RATING')
+            candidate_position_list = candidate_position_query.filter(candidate_campaign_id=candidate_id)
             # if positive_value_exists(google_civic_election_id):
             #     organization_position_list = candidate_position_list.filter(
             #         google_civic_election_id=google_civic_election_id)
