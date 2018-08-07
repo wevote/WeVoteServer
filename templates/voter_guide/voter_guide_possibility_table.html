@@ -4,67 +4,94 @@
         <thead>
         <tr>
             <th></th>
-            <th>Voter Guide Source</th>
-            <th>&nbsp;</th>
             <th>Organization</th>
-            <th>Twitter</th>
-            <th>Submitted By</th>
-            <th>Submitted Time (Pacific Time)</th>
+            <th>Voter Guide Source</th>
+            <th>Actions / Notes</th>
+            <th>Candidates</th>
+            <th>Submitted Time (PT)</th>
         </tr>
         </thead>
     {% for voter_guide_possibility in voter_guide_possibility_list %}
         <tr>
             <td>{{ forloop.counter }}</td>
             <td>
-                <a href="{{ voter_guide_possibility.voter_guide_possibility_url }}" target="_blank">
-                  {{ voter_guide_possibility.voter_guide_possibility_url|truncatechars:60 }}
-                </a>
-                {% if voter_guide_possibility.ballot_items_raw %}
-                  <br />
-                  {{ voter_guide_possibility.ballot_items_raw|truncatechars:80 }}
-                {% endif %}
-                <a href="{% url 'voter_guide:voter_guide_create' %}?voter_guide_possibility_id={{ voter_guide_possibility.id }}"
-                   target="_blank"> (edit)</a>
-            </td>
-            <td>
-                {% if voter_guide_possibility.is_ready_to_save_as_batch %}
-                <a href="{% url 'voter_guide:generate_voter_guide_possibility_batch' %}?voter_guide_possibility_id={{ voter_guide_possibility.id }}"
-                   class="btn btn-success btn-sm"
-                   role="button"
-                   target="_blank">Import</a>
-                {% endif %}
-            </td>
             {% if voter_guide_possibility.organization %}
-                <td>{% if voter_guide_possibility.organization.we_vote_hosted_profile_image_url_tiny %}
-                    <a href="{% url 'organization:organization_position_list' voter_guide_possibility.organization.id %}?google_civic_election_id={{ google_civic_election_id }}"
-                       target="_blank">
-                        <img src="{{ voter_guide_possibility.organization.we_vote_hosted_profile_image_url_tiny }}" width="24px" /></a>{% endif %}
-                    <a href="{% url 'organization:organization_position_list' voter_guide_possibility.organization.id %}?google_civic_election_id={{ google_civic_election_id }}"
-                       target="_blank">
-                    {% if voter_guide_possibility.organization.organization_name %}
-                        {{ voter_guide_possibility.organization.organization_name }}
-                    {% else %}(name missing){% endif %}</a>
-                </td>
+                {% if voter_guide_possibility.organization.we_vote_hosted_profile_image_url_tiny %}
+                <a href="{% url 'organization:organization_position_list' voter_guide_possibility.organization.id %}?google_civic_election_id={{ google_civic_election_id }}"
+                   target="_blank">
+                    <img src="{{ voter_guide_possibility.organization.we_vote_hosted_profile_image_url_tiny }}" width="24px" /></a>{% endif %}
+                <a href="{% url 'organization:organization_position_list' voter_guide_possibility.organization.id %}?google_civic_election_id={{ google_civic_election_id }}"
+                   target="_blank">
+                {% if voter_guide_possibility.organization.organization_name %}
+                    {{ voter_guide_possibility.organization.organization_name }}
+                {% else %}(name missing){% endif %}</a>
             {% else %}
-                <td>
                 {% if voter_guide_possibility.organization_name %}
                   {{ voter_guide_possibility.organization_name|default_if_none:"" }}
                 {% else %}
                   (no org name found)
                 {% endif %}
-                </td>
             {% endif %}
-            <td><a href="https://twitter.com/{{ voter_guide_possibility.organization_twitter_handle|default_if_none:"" }}" target="_blank">
-              {{ voter_guide_possibility.organization_twitter_handle|default_if_none:"" }}
-            </a></td>
-            <td>
-            {% if voter_guide_possibility.voter_we_vote_id_who_submitted %}
-                <a href="{% url 'voter:voter_edit_we_vote_id' voter_guide_possibility.voter_we_vote_id_who_submitted %}"
-                   target="_blank">
-                  {{ voter_guide_possibility.voter_we_vote_id_who_submitted|default_if_none:"" }}</a>
+            {% if voter_guide_possibility.organization_twitter_handle %}
+                <br />
+                <span>
+                    <a href="https://twitter.com/{{ voter_guide_possibility.organization_twitter_handle|default_if_none:"" }}"
+                       class="u-no-break"
+                       target="_blank">
+                    <i class="fa fa-twitter"></i> {{ voter_guide_possibility.organization_twitter_handle|default_if_none:"" }}
+                    <span class="glyphicon glyphicon-new-window"></span>
+                    </a>
+                </span>
             {% endif %}
             </td>
-            <td>{{ voter_guide_possibility.date_last_changed|default_if_none:"" }}</td>
+            <td>
+                <a href="{{ voter_guide_possibility.voter_guide_possibility_url }}"
+                   class="u-no-break"
+                   target="_blank">
+                  {{ voter_guide_possibility.voter_guide_possibility_url|truncatechars:60 }}
+                  <span class="glyphicon glyphicon-new-window"></span>
+                </a>
+                {% if voter_guide_possibility.ballot_items_raw %}
+                  <br />
+                  {{ voter_guide_possibility.ballot_items_raw|truncatechars:80 }}
+                {% endif %}
+                <br />
+                <a href="{% url 'voter_guide:voter_guide_create' %}?voter_guide_possibility_id={{ voter_guide_possibility.id }}"
+                   target="_blank"> (edit)</a>
+            </td>
+            <td>
+                {% if voter_guide_possibility.positions_ready_to_save_as_batch %}
+                <a href="{% url 'voter_guide:generate_voter_guide_possibility_batch' %}?voter_guide_possibility_id={{ voter_guide_possibility.id }}"
+                   class="btn btn-success btn-sm"
+                   role="button"
+                   target="_blank">Import Positions</a>
+                {% endif %}
+                {% if voter_guide_possibility.positions_ready_to_save_as_batch and voter_guide_possibility.internal_notes %}
+                    <br />
+                {% endif %}
+                {% if voter_guide_possibility.internal_notes %}
+                    <span style="color: darkgray">{{ voter_guide_possibility.internal_notes }}</span>
+                    <a href="{% url 'voter_guide:voter_guide_create' %}?voter_guide_possibility_id={{ voter_guide_possibility.id }}"
+                       target="_blank"> (edit)</a>
+                {% endif %}
+            </td>
+            <td>
+              {% if voter_guide_possibility.number_of_candidates %}
+                  {{ voter_guide_possibility.number_of_candidates|default_if_none:"" }}
+              {% endif %}
+              {% if voter_guide_possibility.number_of_candidates_not_in_database %}
+                  <span class="u-no-break" style="color: red"> ({{ voter_guide_possibility.number_of_candidates_not_in_database }} not in db)</span>
+              {% endif %}
+            </td>
+            <td>
+              <span class="u-no-break">{{ voter_guide_possibility.date_last_changed|default_if_none:"" }}</span>
+              {% if voter_guide_possibility.voter_we_vote_id_who_submitted %}
+                  <br />
+                  from <a href="{% url 'voter:voter_edit_we_vote_id' voter_guide_possibility.voter_we_vote_id_who_submitted %}"
+                     target="_blank">
+                    {{ voter_guide_possibility.voter_we_vote_id_who_submitted|default_if_none:"" }}</a>
+              {% endif %}
+            </td>
         </tr>
     {% endfor %}
     </table>
