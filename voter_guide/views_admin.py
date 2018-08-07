@@ -146,6 +146,7 @@ def voter_guide_create_view(request):
             for one_election in upcoming_election_list:
                 if one_election.google_civic_election_id == one_possible_candidate['google_civic_election_id']:
                     one_possible_candidate['election_name'] = one_election.election_name
+                    one_possible_candidate['election_day_text'] = one_election.election_day_text
         possible_candidate_list_modified.append(one_possible_candidate)
 
     template_values = {
@@ -515,6 +516,7 @@ def voter_guide_create_process_view(request):
             for one_election in upcoming_election_list:
                 if one_election.google_civic_election_id == one_possible_candidate['google_civic_election_id']:
                     one_possible_candidate['election_name'] = one_election.election_name
+                    one_possible_candidate['election_day_text'] = one_election.election_day_text
         possible_candidate_list_modified.append(one_possible_candidate)
 
     messages_on_stage = get_messages(request)

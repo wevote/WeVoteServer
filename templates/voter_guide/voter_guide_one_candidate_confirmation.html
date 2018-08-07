@@ -2,8 +2,12 @@
 
 <div>
     <div>
+        <span class="float-right"><span style="color: darkgray">candidate #{{ possible_candidate.possible_candidate_number|default_if_none:""|add:"0" }}</span></span>
     {% if possible_candidate.candidate_we_vote_id %}
         <span><span class="h4">{{ possible_candidate.candidate.display_candidate_name|default_if_none:"" }}</span>, <span>{{ possible_candidate.candidate.contest_office_name|default_if_none:"" }}</span>&nbsp;&nbsp;&nbsp;</span>
+        <a href="{% url 'candidate:candidate_edit_we_vote_id' candidate_campaign_we_vote_id=possible_candidate.candidate_we_vote_id %}#positions"
+           target="_blank"
+           class="u-no-break"><span class="glyphicon glyphicon-new-window"></span></a>
         <input type="hidden" name="candidate_we_vote_id_{{ possible_candidate.possible_candidate_number }}" value="{{ possible_candidate.candidate_we_vote_id }}">
         <input type="hidden" name="candidate_name_{{ possible_candidate.possible_candidate_number }}" value="{{ possible_candidate.candidate_name }}">
     {% else %}
@@ -35,7 +39,10 @@
         </div>
     </div>
     {% if possible_candidate.election_name %}
-    <div>{{ possible_candidate.election_name }}</div>
+    <div>
+    {{ possible_candidate.election_name }}{% if possible_candidate.election_day_text %},
+        {{ possible_candidate.election_day_text }}{% endif %}
+    </div>
     {% endif %}
     <textarea name="comment_about_candidate_{{ possible_candidate.possible_candidate_number }}"
               class="form-control animated"
