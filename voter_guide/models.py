@@ -1840,23 +1840,23 @@ class VoterGuidePossibilityManager(models.Manager):
 
     def delete_voter_guide_possibility(self, voter_guide_possibility_id):
         voter_guide_possibility_id = convert_to_int(voter_guide_possibility_id)
-        voter_guide_deleted = False
+        voter_guide_possibility_deleted = False
 
         try:
-            if voter_guide_possibility_id:
+            if positive_value_exists(voter_guide_possibility_id):
                 results = self.retrieve_voter_guide_possibility(voter_guide_possibility_id)
-                if results['voter_guide_found']:
-                    voter_guide = results['voter_guide']
-                    voter_guide_possibility_id = voter_guide.id
-                    voter_guide.delete()
-                    voter_guide_deleted = True
+                if results['voter_guide_possibility_found']:
+                    voter_guide_possibility = results['voter_guide_possibility']
+                    voter_guide_possibility_id = voter_guide_possibility.id
+                    voter_guide_possibility.delete()
+                    voter_guide_possibility_deleted = True
         except Exception as e:
             handle_exception(e, logger=logger)
 
         results = {
-            'success':              voter_guide_deleted,
-            'voter_guide_deleted': voter_guide_deleted,
-            'voter_guide_possibility_id':      voter_guide_possibility_id,
+            'success':                          voter_guide_possibility_deleted,
+            'voter_guide_possibility_deleted':  voter_guide_possibility_deleted,
+            'voter_guide_possibility_id':       voter_guide_possibility_id,
         }
         return results
 
@@ -1892,8 +1892,11 @@ class VoterGuidePossibility(models.Model):
     # These are the candidates or measures on the voter guide (comma separated, or on own lines)
     ballot_items_raw = models.TextField(null=True, blank=True,)
 
-    # Has this VoterGuidePossibility been used to create a patch in the import_export_batch system?
+    # Has this VoterGuidePossibility been used to create a batch in the import_export_batch system?
     saved_as_batch = models.BooleanField(default=False)
+
+    # For internal notes regarding gathering data
+    internal_notes = models.TextField(null=True, blank=True, default=None)
 
     # The date of the last change to this voter_guide_possibility
     date_last_changed = models.DateTimeField(verbose_name='date last changed', null=True, auto_now=True)  # last_updated
@@ -1921,15 +1924,74 @@ class VoterGuidePossibility(models.Model):
             return
         return organization
 
-    def is_ready_to_save_as_batch(self):
+    def positions_ready_to_save_as_batch(self):
+        candidates_in_batch_exist_in_database = False
         organization_found = False
         if positive_value_exists(self.organization_we_vote_id):
             organization_found = True
 
-        if positive_value_exists(self.voter_guide_possibility_url) and organization_found:
+            if positive_value_exists(self.number_of_candidates_in_database()):
+                candidates_in_batch_exist_in_database = True
+
+        if positive_value_exists(self.voter_guide_possibility_url) and organization_found \
+                and candidates_in_batch_exist_in_database:
             return True
 
         return False
+
+    def number_of_candidates(self):
+        number_of_candidates_count = 0
+        candidate_number_list = CANDIDATE_NUMBER_LIST
+
+        for candidate_number in candidate_number_list:
+            if number_of_candidates_count >= len(candidate_number_list):
+                break
+            if positive_value_exists(getattr(self, 'candidate_name_' + candidate_number)):
+                number_of_candidates_count += 1
+            else:
+                return number_of_candidates_count
+
+        return number_of_candidates_count
+
+    def number_of_candidates_in_database(self):
+        number_of_candidates_count = 0
+        number_of_candidates_in_database_count = 0
+        candidate_number_list = CANDIDATE_NUMBER_LIST
+
+        for candidate_number in candidate_number_list:
+            if number_of_candidates_count >= len(candidate_number_list):
+                break
+            if positive_value_exists(getattr(self, 'candidate_name_' + candidate_number)):
+                number_of_candidates_count += 1
+            else:
+                # Whenever we find an entry without a candidate_name_ we exit
+                return number_of_candidates_in_database_count
+
+            # We put this *after* the "exit valve" (when there isn't a value in "candidate_name_"
+            if positive_value_exists(getattr(self, 'candidate_we_vote_id_' + candidate_number)):
+                number_of_candidates_in_database_count += 1
+
+        return number_of_candidates_in_database_count
+
+    def number_of_candidates_not_in_database(self):
+        number_of_candidates_count = 0
+        number_of_candidates_not_in_database_count = 0
+        candidate_number_list = CANDIDATE_NUMBER_LIST
+
+        for candidate_number in candidate_number_list:
+            if number_of_candidates_count >= len(candidate_number_list):
+                break
+            if positive_value_exists(getattr(self, 'candidate_name_' + candidate_number)):
+                number_of_candidates_count += 1
+            else:
+                # Whenever we find an entry without a candidate_name_ we exit
+                return number_of_candidates_not_in_database_count
+
+            # We put this *after* the "exit valve" (when there isn't a value in "candidate_name_"
+            if not positive_value_exists(getattr(self, 'candidate_we_vote_id_' + candidate_number)):
+                number_of_candidates_not_in_database_count += 1
+
+        return number_of_candidates_not_in_database_count
 
     candidate_name_001 = models.CharField(max_length=255, null=True, unique=False)
     candidate_we_vote_id_001 = models.CharField(max_length=255, null=True, unique=False)

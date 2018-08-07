@@ -75,6 +75,39 @@ def convert_candidate_list_light_to_possible_candidates(selected_candidate_list_
     return results
 
 
+def add_empty_values_to_possible_candidate_dict_list(starting_candidate_number="001"):
+    status = ""
+    success = True
+    possible_candidate_list = []
+    possible_candidate_list_found = False
+    candidate_number_list = CANDIDATE_NUMBER_LIST
+
+    number_index = candidate_number_list.index(starting_candidate_number)
+    length_of_candidate_number_list = len(candidate_number_list)
+    while number_index < length_of_candidate_number_list:
+        possible_candidate = {
+            'candidate_name': None,
+            'candidate_we_vote_id': None,
+            'comment_about_candidate': None,
+            'google_civic_election_id': None,
+            'possible_candidate_number': candidate_number_list[number_index],
+            'stance_about_candidate': "SUPPORT",
+        }
+        possible_candidate_list.append(possible_candidate)
+        number_index += 1
+
+    if len(possible_candidate_list):
+        possible_candidate_list_found = True
+
+    results = {
+        'status':                           status,
+        'success':                          success,
+        'possible_candidate_list':          possible_candidate_list,
+        'possible_candidate_list_found':    possible_candidate_list_found,
+    }
+    return results
+
+
 def convert_list_of_names_to_possible_candidate_dict_list(ballot_items_list, starting_candidate_number="001"):
     status = ""
     success = True
@@ -304,7 +337,7 @@ def modify_one_row_in_possible_candidate_dict_list(possible_candidate_list, row_
             updated_possible_candidate_list.append(possible_candidate)
             number_index += 1
 
-    if shift_remaining_items:
+    if shift_remaining_items and len(remaining_possible_candidate_list):
         # Reset the sequence of values in possible_candidate_number
         for possible_candidate in remaining_possible_candidate_list:
             if number_index >= len(candidate_number_list):
