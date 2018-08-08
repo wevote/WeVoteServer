@@ -47,9 +47,11 @@ def voter_guide_create_view(request):
     voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id)
     if voter_results['voter_found']:
         voter = voter_results['voter']
-        voter_we_vote_id_who_submitted = voter.we_vote_id
+        voter_who_submitted_name = voter.get_full_name()
+        voter_who_submitted_we_vote_id = voter.we_vote_id
     else:
-        voter_we_vote_id_who_submitted = ""
+        voter_who_submitted_we_vote_id = ""
+        voter_who_submitted_name = ""
 
     voter_guide_possibility_id = request.GET.get('voter_guide_possibility_id', 0)
 
@@ -80,7 +82,7 @@ def voter_guide_create_view(request):
             organization_name = voter_guide_possibility.organization_name
             organization_twitter_handle = voter_guide_possibility.organization_twitter_handle
             organization_we_vote_id = voter_guide_possibility.organization_we_vote_id
-            voter_we_vote_id_who_submitted = voter_guide_possibility.voter_we_vote_id_who_submitted
+            voter_who_submitted_we_vote_id = voter_guide_possibility.voter_who_submitted_we_vote_id
             voter_guide_possibility_url = voter_guide_possibility.voter_guide_possibility_url
             results = extract_possible_candidate_list_from_database(voter_guide_possibility)
             if results['possible_candidate_list_found']:
@@ -168,7 +170,7 @@ def voter_guide_create_view(request):
         'possible_candidate_list_found': possible_candidate_list_found,
         'voter_guide_possibility_id': voter_guide_possibility_id,
         'voter_guide_possibility_url': voter_guide_possibility_url,
-        'voter_we_vote_id_who_submitted': voter_we_vote_id_who_submitted,
+        'voter_who_submitted_we_vote_id': voter_who_submitted_we_vote_id,
     }
     return render(request, 'voter_guide/voter_guide_create.html', template_values)
 
@@ -194,7 +196,7 @@ def voter_guide_create_process_view(request):
     hide_possible_candidate_list = positive_value_exists(hide_possible_candidate_list)
     voter_guide_possibility_id = request.POST.get('voter_guide_possibility_id', 0)
     voter_guide_possibility_url = request.POST.get('voter_guide_possibility_url', '')
-    voter_we_vote_id_who_submitted = request.POST.get('voter_we_vote_id_who_submitted', '')
+    voter_who_submitted_we_vote_id = request.POST.get('voter_who_submitted_we_vote_id', '')
     state_code = request.POST.get('state_code', "")
 
     # Filter incoming data
@@ -203,35 +205,42 @@ def voter_guide_create_process_view(request):
     candidate_number_list = CANDIDATE_NUMBER_LIST
     voter_guide_possibility_manager = VoterGuidePossibilityManager()
     voter_manager = VoterManager()
+    voter_who_submitted_name = ""
     voter_found = False
-    if not positive_value_exists(voter_we_vote_id_who_submitted):
+    if not positive_value_exists(voter_who_submitted_we_vote_id):
         voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
         voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id)
         if voter_results['voter_found']:
             voter = voter_results['voter']
             voter_found = True
-            voter_we_vote_id_who_submitted = voter.we_vote_id
+            voter_who_submitted_name = voter.get_full_name()
+            voter_who_submitted_we_vote_id = voter.we_vote_id
         else:
-            voter_we_vote_id_who_submitted = ""
+            voter_who_submitted_name = ""
+            voter_who_submitted_we_vote_id = ""
 
-    if not positive_value_exists(voter_we_vote_id_who_submitted):
+    if not positive_value_exists(voter_who_submitted_we_vote_id):
         generate_if_no_value = True
         voter_device_id = get_voter_api_device_id(request, generate_if_no_value)
         voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id)
         if voter_results['voter_found']:
             voter = voter_results['voter']
             voter_found = True
-            voter_we_vote_id_who_submitted = voter.we_vote_id
+            voter_who_submitted_name = voter.get_full_name()
+            voter_who_submitted_we_vote_id = voter.we_vote_id
         else:
-            voter_we_vote_id_who_submitted = ""
+            voter_who_submitted_name = ""
+            voter_who_submitted_we_vote_id = ""
 
-    # if not positive_value_exists(voter_found):
-    #     generate_if_no_value = True
-    #     voter_device_id = get_voter_api_device_id(request, generate_if_no_value)
-    #     voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id)
-    #     if voter_results['voter_found']:
-    #         voter = voter_results['voter']
-    #         voter_found = True
+    if not positive_value_exists(voter_found):
+        generate_if_no_value = True
+        voter_device_id = get_voter_api_device_id(request, generate_if_no_value)
+        voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id)
+        if voter_results['voter_found']:
+            voter = voter_results['voter']
+            voter_found = True
+            voter_who_submitted_name = voter.get_full_name()
+            voter_who_submitted_we_vote_id = voter.we_vote_id
 
     political_data_manager = voter_has_authority(request, 'political_data_manager')
 
@@ -479,7 +488,8 @@ def voter_guide_create_process_view(request):
             'organization_twitter_handle':      organization_twitter_handle,
             'organization_we_vote_id':          organization_we_vote_id,
             'voter_guide_possibility_url':      voter_guide_possibility_url,
-            'voter_we_vote_id_who_submitted':   voter_we_vote_id_who_submitted,
+            'voter_who_submitted_name':         voter_who_submitted_name,
+            'voter_who_submitted_we_vote_id':   voter_who_submitted_we_vote_id,
         }
         if political_data_manager and internal_notes is not False:
             updated_values['internal_notes'] = internal_notes
@@ -546,7 +556,8 @@ def voter_guide_create_process_view(request):
         'hide_possible_candidate_list': hide_possible_candidate_list,
         'voter_guide_possibility_id':   voter_guide_possibility_id,
         'voter_guide_possibility_url':  voter_guide_possibility_url,
-        'voter_we_vote_id_who_submitted': voter_we_vote_id_who_submitted,
+        'voter_who_submitted_name':     voter_who_submitted_name,
+        'voter_who_submitted_we_vote_id': voter_who_submitted_we_vote_id,
         'state_code':                   state_code,
         'state_list':                   sorted_state_list,
     }
@@ -697,6 +708,7 @@ def generate_voter_guide_possibility_batch_view(request):
 
     if voter_guide_possibility_found and positive_value_exists(batch_header_id):
         try:
+            voter_guide_possibility.batch_header_id = batch_header_id
             voter_guide_possibility.saved_as_batch = True
             voter_guide_possibility.save()
             status += "GENERATE_VOTER_GUIDE_POSSIBILITY_BATCH-STATUS_SAVED "

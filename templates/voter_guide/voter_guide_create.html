@@ -10,7 +10,7 @@
 <form action="{% url "voter_guide:voter_guide_create_process" %}" method="post" class="form-horizontal">
 {% csrf_token %}
 
-<input type="hidden" name="voter_we_vote_id_who_submitted" value="{{ voter_we_vote_id_who_submitted }}">
+<input type="hidden" name="voter_who_submitted_we_vote_id" value="{{ voter_who_submitted_we_vote_id }}">
 
 {% if organization_found and organization %}
 
@@ -65,7 +65,6 @@
         <a href="{{ voter_guide_possibility_url }}"
            target="_blank"
            class="u-no-break"><span class="glyphicon glyphicon-new-window"></span></a>
-
     {% else %}
         Paste link to voter guide
     {% endif %}

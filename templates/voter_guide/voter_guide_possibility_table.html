@@ -66,6 +66,14 @@
                    role="button"
                    target="_blank">Import Positions</a>
                 {% endif %}
+                {% if voter_guide_possibility.batch_header_id %}
+                <br />
+                <a href="{% url 'import_export_batches:batch_action_list' %}?batch_header_id={{ voter_guide_possibility.batch_header_id }}&kind_of_batch=POSITION"
+                   class="u-no-break"
+                   target="_blank">
+                  import batch results <span class="glyphicon glyphicon-new-window"></span>
+                </a>
+                {% endif %}
                 {% if voter_guide_possibility.positions_ready_to_save_as_batch and voter_guide_possibility.internal_notes %}
                     <br />
                 {% endif %}
@@ -85,11 +93,11 @@
             </td>
             <td>
               <span class="u-no-break">{{ voter_guide_possibility.date_last_changed|default_if_none:"" }}</span>
-              {% if voter_guide_possibility.voter_we_vote_id_who_submitted %}
+              {% if voter_guide_possibility.voter_who_submitted_we_vote_id %}
                   <br />
-                  from <a href="{% url 'voter:voter_edit_we_vote_id' voter_guide_possibility.voter_we_vote_id_who_submitted %}"
+                  <a href="{% url 'voter:voter_edit_we_vote_id' voter_guide_possibility.voter_who_submitted_we_vote_id %}"
                      target="_blank">
-                    {{ voter_guide_possibility.voter_we_vote_id_who_submitted|default_if_none:"" }}</a>
+                    from {{ voter_guide_possibility.voter_who_submitted_name|default_if_none:"" }}</a>
               {% endif %}
             </td>
         </tr>
