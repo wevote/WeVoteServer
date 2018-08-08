@@ -928,7 +928,10 @@
                         <td>
                             {{ one_batch_row.batch_row_action.ballot_item_display_name|default_if_none:"" }}
                             {% if one_batch_row.batch_row_action.candidate_campaign_we_vote_id %}
-                                ({{ one_batch_row.batch_row_action.candidate_campaign_we_vote_id }})
+                                (<a href="{% url 'candidate:candidate_edit_we_vote_id' one_batch_row.batch_row_action.candidate_campaign_we_vote_id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}#positions"
+                                    target="_blank">
+                                {{ one_batch_row.batch_row_action.candidate_campaign_we_vote_id }}
+                                </a>)
                             {% elif one_batch_row.batch_row_action.contest_measure_we_vote_id %}
                                 ({{ one_batch_row.batch_row_action.contest_measure_we_vote_id }})
                             {% endif %}

@@ -1791,17 +1791,11 @@ def create_batch_row_action_position(batch_description, batch_header_map, one_ba
     organization_id = 0
     batch_row_action_updated = False
     batch_row_action_created = False
-    kind_of_action = ""
     keep_looking_for_duplicates = True
     candidate_found = False
-    candidate_we_vote_id = ""
-    candidate_id = 0
-    contest_office_found = False
     contest_office_we_vote_id = ""
-    contest_office_id = 0
     measure_found = False
     contest_measure_we_vote_id = ""
-    contest_measure_id = 0
 
     # Does a BatchRowActionPosition entry already exist?
     # We want to start with the BatchRowAction... entry first so we can record our findings line by line while
@@ -1846,6 +1840,8 @@ def create_batch_row_action_position(batch_description, batch_header_map, one_ba
     candidate_twitter_handle_raw = batch_manager.retrieve_value_from_batch_row(
         "candidate_twitter_handle", batch_header_map, one_batch_row)
     candidate_twitter_handle = extract_twitter_handle_from_text_string(candidate_twitter_handle_raw)
+    candidate_we_vote_id = batch_manager.retrieve_value_from_batch_row(
+        "candidate_we_vote_id", batch_header_map, one_batch_row)
     contest_office_name = batch_manager.retrieve_value_from_batch_row(
         "contest_office_name", batch_header_map, one_batch_row)
     contest_measure_title = batch_manager.retrieve_value_from_batch_row(
@@ -1946,7 +1942,21 @@ def create_batch_row_action_position(batch_description, batch_header_map, one_ba
 
     # By here, we should have the organization (owner of the position) and the election
     # NEXT: figure out what candidate/office the endorsement is for
-    if positive_value_exists(candidate_twitter_handle) or positive_value_exists(candidate_name):
+    if positive_value_exists(candidate_we_vote_id):
+        candidate_campaign_manager = CandidateCampaignManager()
+        candidate_results = candidate_campaign_manager.retrieve_candidate_campaign_from_we_vote_id(
+            candidate_we_vote_id)
+
+        if candidate_results['candidate_campaign_found']:
+            candidate = candidate_results['candidate_campaign']
+            candidate_found = True
+            candidate_we_vote_id = candidate.we_vote_id
+            candidate_id = candidate.id
+            contest_office_we_vote_id = candidate.contest_office_we_vote_id
+            contest_office_id = candidate.contest_office_id
+        else:
+            status += candidate_results['status']
+    elif positive_value_exists(candidate_twitter_handle) or positive_value_exists(candidate_name):
         candidate_campaign_list_manager = CandidateCampaignListManager()
         google_civic_election_id_list = [google_civic_election_id]
         matching_results = candidate_campaign_list_manager.retrieve_candidates_from_non_unique_identifiers(

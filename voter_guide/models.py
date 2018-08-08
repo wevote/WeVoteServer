@@ -1788,7 +1788,10 @@ class VoterGuidePossibilityManager(models.Manager):
                     new_filter = Q(voter_guide_possibility_url__icontains=one_word)
                     filters.append(new_filter)
 
-                    new_filter = Q(voter_we_vote_id_who_submitted__iexact=one_word)
+                    new_filter = Q(voter_who_submitted_we_vote_id__iexact=one_word)
+                    filters.append(new_filter)
+
+                    new_filter = Q(voter_who_submitted_name__icontains=one_word)
                     filters.append(new_filter)
 
                     # new_filter = Q(candidate_we_vote_id_001__icontains=one_word)
@@ -1875,7 +1878,10 @@ class VoterGuidePossibility(models.Model):
     organization_we_vote_id = models.CharField(
         verbose_name="organization we vote id", max_length=255, null=True, blank=True, unique=False)
 
-    voter_we_vote_id_who_submitted = models.CharField(
+    voter_who_submitted_name = models.CharField(
+        verbose_name="voter name who submitted this", max_length=255, null=True, blank=True, unique=False)
+
+    voter_who_submitted_we_vote_id = models.CharField(
         verbose_name="voter we vote id who submitted this", max_length=255, null=True, blank=True, unique=False)
 
     state_code = models.CharField(verbose_name="state the voter guide is related to", max_length=2, null=True)
@@ -1894,6 +1900,7 @@ class VoterGuidePossibility(models.Model):
 
     # Has this VoterGuidePossibility been used to create a batch in the import_export_batch system?
     saved_as_batch = models.BooleanField(default=False)
+    batch_header_id = models.PositiveIntegerField(null=True)
 
     # For internal notes regarding gathering data
     internal_notes = models.TextField(null=True, blank=True, default=None)
