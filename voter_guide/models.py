@@ -1765,7 +1765,7 @@ class VoterGuidePossibilityManager(models.Manager):
         try:
             voter_guide_query = VoterGuidePossibility.objects.all()
             voter_guide_query = voter_guide_query.filter(saved_as_batch=saved_as_batch)
-            voter_guide_query = voter_guide_query.order_by('-id')
+            voter_guide_query = voter_guide_query.order_by(order_by)
 
             if positive_value_exists(search_string):
                 search_words = search_string.split()

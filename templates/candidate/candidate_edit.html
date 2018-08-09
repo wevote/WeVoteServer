@@ -62,7 +62,7 @@ span.wrap_word { word-break: break-word; }
     <div class="col-sm-8">
     {% if candidate %}
         {# We don't currently offer a way to edit the google_civic_election_id once a candidate is saved. #}
-        {{ candidate.google_civic_election_id }}{% if candidate.election %} ({{ candidate.election.election_name }}){% endif %}<br />
+        {{ candidate.google_civic_election_id }}{% if candidate.election %} ({{ candidate.election.election_name }}, {{ candidate.election.election_day_text }}){% endif %}<br />
         bp: {{ candidate.ballotpedia_election_id|default_if_none:"" }}
     {% else %}
         <input type="text" name="google_civic_election_id" id="google_civic_election_id_id" class="form-control"

@@ -10,6 +10,7 @@ import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, generate_random_string, positive_value_exists
 
 
+SUGGESTED_VOTER_GUIDE_FROM_PRIOR = 'SUGGESTED_VOTER_GUIDE_FROM_PRIOR'
 RETRIEVE_POSSIBLE_FACEBOOK_PHOTOS = 'RETRIEVE_POSSIBLE_FACEBOOK_PHOTOS'
 RETRIEVE_POSSIBLE_GOOGLE_LINKS = 'RETRIEVE_POSSIBLE_GOOGLE_LINKS'
 RETRIEVE_POSSIBLE_TWITTER_HANDLES = 'RETRIEVE_POSSIBLE_TWITTER_HANDLES'
@@ -334,6 +335,27 @@ class RemoteRequestHistoryManager(models.Model):
             'remote_request_history_entry': remote_request_history_entry,
         }
         return results
+
+    def remote_request_history_entry_exists(self, kind_of_action, google_civic_election_id,
+                                            candidate_campaign_we_vote_id='', organization_we_vote_id=''):
+        success = False
+        status = ""
+
+        try:
+            list_query = RemoteRequestHistory.objects.all()
+            list_query = list_query.filter(kind_of_action__iexact=kind_of_action)
+            list_query = list_query.filter(google_civic_election_id=google_civic_election_id)
+            if positive_value_exists(candidate_campaign_we_vote_id):
+                list_query = list_query.filter(candidate_campaign_we_vote_id__iexact=candidate_campaign_we_vote_id)
+            if positive_value_exists(organization_we_vote_id):
+                list_query = list_query.filter(organization_we_vote_id__iexact=organization_we_vote_id)
+            list_query_count = list_query.count()
+            if positive_value_exists(list_query_count):
+                return True
+        except Exception as e:
+            status += "REMOTE_REQUEST_HISTORY_LIST_NOT_FOUND-EXCEPTION "
+
+        return False
 
     def retrieve_remote_request_history_list(self, google_civic_election_id=0):
         success = False

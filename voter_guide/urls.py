@@ -10,6 +10,9 @@ urlpatterns = [
     # views_admin
     url(r'^$', views_admin.voter_guide_list_view, name='voter_guide_list',),
     url(r'^create/', views_admin.voter_guide_create_view, name='voter_guide_create'),
+    url(r'^create_from_prior/',
+        views_admin.create_possible_voter_guides_from_prior_elections_view,
+        name='create_possible_voter_guides_from_prior_elections'),
     url(r'^create_process/', views_admin.voter_guide_create_process_view, name='voter_guide_create_process'),
     url(r'^(?P<voter_guide_we_vote_id>wv[\w]{2}vg[\w]+)/edit/$',
         views_admin.voter_guide_edit_view, name='voter_guide_edit'),
