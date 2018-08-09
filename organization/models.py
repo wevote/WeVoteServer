@@ -1480,7 +1480,7 @@ class OrganizationListManager(models.Manager):
     def organization_search_find_any_possibilities(self, organization_name='', organization_twitter_handle='',
                                                    organization_website='', organization_email='',
                                                    organization_facebook='', organization_search_term='',
-                                                   twitter_handle_list='',
+                                                   twitter_handle_list='', facebook_page_list='',
                                                    exact_match=False):
         """
         We want to find *any* possible organization that includes any of the search terms
@@ -1491,6 +1491,7 @@ class OrganizationListManager(models.Manager):
         :param organization_facebook:
         :param organization_search_term:
         :param twitter_handle_list:
+        :param facebook_page_list:
         :param exact_match:
         :return:
         """
@@ -1548,6 +1549,15 @@ class OrganizationListManager(models.Manager):
                         new_filter = Q(organization_twitter_handle__iexact=one_twitter_handle2)
                     else:
                         new_filter = Q(organization_twitter_handle__icontains=one_twitter_handle2)
+                    filters.append(new_filter)
+
+            if positive_value_exists(facebook_page_list):
+                for one_facebook_page in facebook_page_list:
+                    one_facebook_page2 = extract_twitter_handle_from_text_string(one_facebook_page)
+                    if positive_value_exists(exact_match):
+                        new_filter = Q(organization_facebook__iexact=one_facebook_page2)
+                    else:
+                        new_filter = Q(organization_facebook__icontains=one_facebook_page2)
                     filters.append(new_filter)
 
             if positive_value_exists(organization_website):

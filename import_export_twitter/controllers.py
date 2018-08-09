@@ -32,8 +32,8 @@ logger = wevote_functions.admin.get_logger(__name__)
 
 WE_VOTE_SERVER_ROOT_URL = get_environment_variable("WE_VOTE_SERVER_ROOT_URL")
 
-RE_FACEBOOK = r'//www\.twitter\.com/(?:#!/)?(\w+)'
-# RE_FACEBOOK = r'/(?:https?:\/\/)?(?:www\.)?facebook\.com\/(?:(?:\w)*#!\/)?(?:pages\/)?(?:[\w\-]*\/)*?(\/)?([^/?]*)/'
+# RE_FACEBOOK = r'//www\.twitter\.com/(?:#!/)?(\w+)'
+RE_FACEBOOK = r'/(?:https?:\/\/)?(?:www\.)?facebook\.com\/(?:(?:\w)*#!\/)?(?:pages\/)?(?:[\w\-]*\/)*?(\/)?([^/?]*)/'
 FACEBOOK_BLACKLIST = ['group', 'group.php', 'None']
 # NOTE: Scraping a website for the Facebook handle is more complicated than Twitter. There must be an existing
 #  solution available? My attempt turned off for now.
@@ -291,7 +291,9 @@ def scrape_social_media_from_one_site(site_url, retrieve_list=False):
     twitter_handle_list = []
     facebook_page = ''
     facebook_page_found = False
+    facebook_page_list = []
     success = False
+    status = ""
     if len(site_url) < 10:
         status = 'PROPER_URL_NOT_PROVIDED: ' + site_url
         results = {
@@ -314,6 +316,9 @@ def scrape_social_media_from_one_site(site_url, retrieve_list=False):
     # 'Accept-Language': 'en-US,en;q=0.8',
     # 'Connection': 'keep-alive'
     # 'Accept-Charset': 'ISO-8859-1,utf-8;q=0.7,*;q=0.3',
+
+    # ##########
+    # Twitter
     try:
         request = urllib.request.Request(site_url, None, headers)
         page = urllib.request.urlopen(request, timeout=5)
@@ -328,7 +333,8 @@ def scrape_social_media_from_one_site(site_url, retrieve_list=False):
                             if name not in TWITTER_BLACKLIST:
                                 twitter_handle = name
                                 twitter_handle_found = True
-                                twitter_handle_list.append(twitter_handle)
+                                if twitter_handle not in twitter_handle_list:
+                                    twitter_handle_list.append(twitter_handle)
                                 if not positive_value_exists(retrieve_list):
                                     raise GetOutOfLoopLocal
                 proceed = positive_value_exists(retrieve_list) or not twitter_handle_found
@@ -339,58 +345,87 @@ def scrape_social_media_from_one_site(site_url, retrieve_list=False):
                             if name not in TWITTER_BLACKLIST:
                                 twitter_handle = name
                                 twitter_handle_found = True
-                                twitter_handle_list.append(twitter_handle)
+                                if twitter_handle not in twitter_handle_list:
+                                    twitter_handle_list.append(twitter_handle)
                                 if not positive_value_exists(retrieve_list):
                                     raise GetOutOfLoopLocal
             except GetOutOfLoopLocal:
                 pass
-            # SEE NOTE ABOUT FACEBOOK SCRAPING ABOVE
-            # try:
-            #     if not facebook_page_found:
-            #         for m2 in re.finditer(RE_FACEBOOK, line.decode()):
-            #             if m2:
-            #                 possible_page1 = m2.group(1)
-            #                 if possible_page1 not in FACEBOOK_BLACKLIST:
-            #                     facebook_page = possible_page1
-            #                     facebook_page_found = True
-            #                     raise GetOutOfLoopLocal
-            #                 try:
-            #                     possible_page2 = m2.group(2)
-            #                     if possible_page2 not in FACEBOOK_BLACKLIST:
-            #                         facebook_page = possible_page2
-            #                         facebook_page_found = True
-            #                         raise GetOutOfLoopLocal
-            #                     # ATTEMPT 1
-            #                     # start_of_close_tag_index = possible_page2.find('"')
-            #                     # possible_page2 = possible_page2[:start_of_close_tag_index]
-            #                     # ATTEMPT 2
-            #                     # fb_re = re.compile(r'facebook.com([^"]+)')
-            #                     # results = fb_re.findall(possible_page2)
-            #                 except Exception as error_instance:
-            #                     pass
-            #                 # possible_page3 = m2.group(3)
-            #                 # possible_page4 = m2.group(4)
-            # except GetOutOfLoopLocal:
-            #     pass
             if twitter_handle_found and not positive_value_exists(retrieve_list):  # and facebook_page_found:
                 raise GetOutOfLoop
         success = True
-        status = 'FINISHED_SCRAPING_PAGE'
+        status += 'FINISHED_SCRAPING_PAGE-TWITTER '
     except timeout:
-        status = "SCRAPE_TIMEOUT_ERROR"
+        status += "SCRAPE_TIMEOUT_ERROR-TWITTER "
         success = False
     except GetOutOfLoop:
         success = True
-        status = 'TWITTER_HANDLE_FOUND-BREAK_OUT'
+        status += 'TWITTER_HANDLE_FOUND-BREAK_OUT-TWITTER '
     except IOError as error_instance:
         # Catch the error message coming back from urllib.request.urlopen and pass it in the status
         error_message = error_instance
-        status = "SCRAPE_SOCIAL_IO_ERROR: {error_message}".format(error_message=error_message)
+        status += "SCRAPE_SOCIAL_IO_ERROR-TWITTER: {error_message}".format(error_message=error_message)
         success = False
     except Exception as error_instance:
         error_message = error_instance
-        status = "SCRAPE_GENERAL_EXCEPTION_ERROR: {error_message}".format(error_message=error_message)
+        status += "SCRAPE_GENERAL_EXCEPTION_ERROR-TWITTER: {error_message}".format(error_message=error_message)
         success = False
+
+    # #########
+    # Facebook
+    try:
+        request = urllib.request.Request(site_url, None, headers)
+        page = urllib.request.urlopen(request, timeout=5)
+        for line in page.readlines():
+            try:
+                decoded_line = line.decode()
+                # decoded_line = '<div class="fb-page" data-href="https://www.facebook.com/ImmigrantAction/" data-small-header="true" data-adapt-container-width="true" data-hide-cover="false" data-show-facepile="true" data-show-posts="false"><div class="fb-xfbml-parse-ignore"><blockquote cite="https://www.facebook.com/ImmigrantAction/"><a href="https://www.facebook.com/ImmigrantAction/">ImmigrantAction</a></blockquote></div></div>'
+                proceed = positive_value_exists(retrieve_list) or not facebook_page_found
+                if proceed:
+                    for m2 in re.finditer(RE_FACEBOOK, decoded_line):
+                        if m2:
+                            possible_page1 = m2.group(0)
+                            if possible_page1 not in FACEBOOK_BLACKLIST:
+                                facebook_page = possible_page1
+                                if facebook_page not in facebook_page_list:
+                                    facebook_page_list.append(facebook_page)
+                                facebook_page_found = True
+                                if not positive_value_exists(retrieve_list):
+                                    raise GetOutOfLoopLocal
+                            try:
+                                possible_page2 = m2.group(2)
+                                if possible_page2 not in FACEBOOK_BLACKLIST:
+                                    facebook_page = possible_page2
+                                    if facebook_page not in facebook_page_list:
+                                        facebook_page_list.append(facebook_page)
+                                    facebook_page_found = True
+                                    if not positive_value_exists(retrieve_list):
+                                        raise GetOutOfLoopLocal
+                            except Exception as error_instance:
+                                pass
+                            # possible_page3 = m2.group(3)
+                            # possible_page4 = m2.group(4)
+            except GetOutOfLoopLocal:
+                pass
+            if facebook_page_found and not positive_value_exists(retrieve_list):
+                raise GetOutOfLoop
+        success = True
+        status += 'FINISHED_SCRAPING_PAGE-FACEBOOK '
+    except timeout:
+        success = False
+        status += "SCRAPE_TIMEOUT_ERROR-TWITTER "
+    except GetOutOfLoop:
+        success = True
+        status += 'FACEBOOK_PAGE_FOUND-BREAK_OUT '
+    except IOError as error_instance:
+        # Catch the error message coming back from urllib.request.urlopen and pass it in the status
+        success = False
+        error_message = error_instance
+        status += "SCRAPE_SOCIAL_IO_ERROR-FACEBOOK: {error_message}".format(error_message=error_message)
+    except Exception as error_instance:
+        success = False
+        error_message = error_instance
+        status += "SCRAPE_GENERAL_EXCEPTION_ERROR-FACEBOOK: {error_message}".format(error_message=error_message)
 
     results = {
         'status':               status,
@@ -401,6 +436,7 @@ def scrape_social_media_from_one_site(site_url, retrieve_list=False):
         'twitter_handle_found': twitter_handle_found,
         'facebook_page':        facebook_page,
         'facebook_page_found':  facebook_page_found,
+        'facebook_page_list':   facebook_page_list,
     }
     return results
 

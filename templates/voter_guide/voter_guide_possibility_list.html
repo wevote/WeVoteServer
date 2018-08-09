@@ -27,6 +27,9 @@
     <li><strong><a href="{% url 'voter_guide:voter_guide_create' %}?google_civic_election_id={{ google_civic_election_id }}"
                    target="_blank">Suggest a Voter Guide</a></strong> (in new window).
         Quick public tools that feeds into import_export_batch system.</li>
+    <li><strong><a href="{% url 'voter_guide:create_possible_voter_guides_from_prior_elections' %}?google_civic_election_id={{ google_civic_election_id }}">
+        Suggest Possible Voter Guides, from Prior Elections</a></strong>.
+        Look back at voter guides in the last 5 years from organizations that might have endorsements in upcoming elections.</li>
 </ul>
 
 <form name="voter_guide_choose_election" method="get" action="{% url 'voter_guide:voter_guide_possibility_list' %}">

@@ -12,6 +12,7 @@ from .models import INDIVIDUAL, VoterGuide, VoterGuideListManager, VoterGuideMan
 from admin_tools.views import redirect_to_sign_in_page
 from candidate.controllers import retrieve_candidate_list_for_all_upcoming_elections, find_candidates_on_one_web_page
 from config.base import get_environment_variable
+from datetime import date, datetime, timedelta, time
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.core.urlresolvers import reverse
@@ -26,13 +27,118 @@ from organization.views_admin import organization_edit_process_view
 from position.models import PositionEntered, PositionForFriends, PositionListManager
 from twitter.models import TwitterUserManager
 from voter.models import voter_has_authority, VoterManager
-from wevote_functions.functions import convert_to_int, extract_twitter_handle_from_text_string, positive_value_exists, \
+from wevote_functions.functions import convert_to_int, convert_date_to_we_vote_date_string, \
+    extract_facebook_username_from_text_string, \
+    extract_twitter_handle_from_text_string, extract_website_from_url, positive_value_exists, \
     STATE_CODE_MAP, get_voter_device_id, get_voter_api_device_id
+from wevote_settings.models import RemoteRequestHistoryManager, SUGGESTED_VOTER_GUIDE_FROM_PRIOR
 from django.http import HttpResponse
 import json
 
 VOTER_GUIDES_SYNC_URL = get_environment_variable("VOTER_GUIDES_SYNC_URL")  # voterGuidesSyncOut
 WE_VOTE_SERVER_ROOT_URL = get_environment_variable("WE_VOTE_SERVER_ROOT_URL")
+
+
+@login_required
+def create_possible_voter_guides_from_prior_elections_view(request):
+    # admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'political_data_manager'}
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
+    google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
+
+    limit = 3  # While in development
+    status = ""
+    voter_guides_suggested = 0
+    urls_already_stored = []
+
+    position_list_manager = PositionListManager()
+    remote_request_history_manager = RemoteRequestHistoryManager()
+    voter_guide_possibility_manager = VoterGuidePossibilityManager()
+
+    # Cycle through prior voter guides
+    #  Earlier than today, but not older than 5 years ago
+    today = datetime.now().date()
+    we_vote_date_string_today = convert_date_to_we_vote_date_string(today)
+
+    five_years_of_days = 5 * 365
+    five_years = timedelta(days=five_years_of_days)
+    five_years_ago = today - five_years
+    we_vote_date_string_five_years_ago = convert_date_to_we_vote_date_string(five_years_ago)
+
+    # Upcoming national election?
+    election_manager = ElectionManager()
+    results = election_manager.retrieve_next_national_election()
+    if results['election_found']:
+        national_election = results['election']
+        # Get a list of all voter_guides in last 5 years
+        voter_guide_query = VoterGuide.objects.all()
+        voter_guide_query = voter_guide_query.exclude(vote_smart_ratings_only=True)
+        voter_guide_query = voter_guide_query.filter(election_day_text__lt=we_vote_date_string_today)
+        voter_guide_query = voter_guide_query.filter(election_day_text__gte=we_vote_date_string_five_years_ago)
+        voter_guide_list = list(voter_guide_query)
+        for voter_guide in voter_guide_list:
+            # Check to see if suggested entry has already been created for that org + election
+            if not positive_value_exists(voter_guide.organization_we_vote_id):
+                # Do not try to proceed
+                continue
+            already_exists = remote_request_history_manager.remote_request_history_entry_exists(
+                SUGGESTED_VOTER_GUIDE_FROM_PRIOR,
+                google_civic_election_id=national_election.google_civic_election_id,
+                organization_we_vote_id=voter_guide.organization_we_vote_id)
+            if already_exists:
+                # Do not create another suggested entry if one already exists
+                continue
+            # If not, create Suggested entry
+            # Get a source URL
+            voter_guide_possibility_url = ""
+            limit_to_organization_we_vote_ids = [voter_guide.organization_we_vote_id]
+            position_list = position_list_manager.retrieve_all_positions_for_election(
+                voter_guide.google_civic_election_id,
+                public_only=True,
+                limit_to_organization_we_vote_ids=limit_to_organization_we_vote_ids)
+            if len(position_list):
+                for one_position in position_list:
+                    if positive_value_exists(one_position.more_info_url):
+                        voter_guide_possibility_url = one_position.more_info_url
+                        break  # Break out of this position loop
+            if positive_value_exists(voter_guide_possibility_url):
+                if voter_guide_possibility_url in urls_already_stored:
+                    continue
+                updated_values = {
+                    # 'organization_name': organization_name,
+                    # 'organization_twitter_handle': organization_twitter_handle,
+                    'organization_we_vote_id': voter_guide.organization_we_vote_id,
+                    # 'voter_who_submitted_name': voter_who_submitted_name,
+                    # 'voter_who_submitted_we_vote_id': voter_who_submitted_we_vote_id,
+                }
+                results = voter_guide_possibility_manager.update_or_create_voter_guide_possibility(
+                    voter_guide_possibility_url,
+                    updated_values=updated_values,
+                )
+                if results['voter_guide_possibility_saved']:
+                    voter_guides_suggested += 1
+                    urls_already_stored.append(voter_guide_possibility_url)
+                    history_results = remote_request_history_manager.create_remote_request_history_entry(
+                        SUGGESTED_VOTER_GUIDE_FROM_PRIOR,
+                        national_election.google_civic_election_id,
+                        organization_we_vote_id=voter_guide.organization_we_vote_id,
+                    )
+                if positive_value_exists(limit):
+                    # While developing we want to keep a limit on this
+                    if voter_guides_suggested >= limit:
+                        break
+    else:
+        # NOT national election, but upcoming state election?
+        pass
+
+    messages.add_message(request, messages.INFO,
+                         '{voter_guides_suggested} voter guides suggested.'.format(
+                             voter_guides_suggested=voter_guides_suggested,
+                         ))
+    return HttpResponseRedirect(reverse('voter_guide:voter_guide_possibility_list', args=()) +
+                                "?google_civic_election_id=" + str(google_civic_election_id))
 
 
 # We do not require login for this page
@@ -188,7 +294,7 @@ def voter_guide_create_process_view(request):
     clear_organization_options = request.POST.get('clear_organization_options', 0)
     confirm_delete = request.POST.get('confirm_delete', 0)
     form_submitted = request.POST.get('form_submitted', False)
-    internal_notes = request.POST.get('internal_notes', False)
+    internal_notes = request.POST.get('internal_notes', "")
     organization_name = request.POST.get('organization_name', '')
     organization_twitter_handle = request.POST.get('organization_twitter_handle', '')
     organization_we_vote_id = request.POST.get('organization_we_vote_id', None)
@@ -267,14 +373,17 @@ def voter_guide_create_process_view(request):
     if not positive_value_exists(voter_guide_possibility_url) and positive_value_exists(form_submitted):
         messages.add_message(request, messages.ERROR, 'Please include a link to where you found this voter guide.')
 
-    if positive_value_exists(clear_organization_options):
-        organization_we_vote_id = ""
-
     # #########################################
     # Figure out the Organization
+    if positive_value_exists(clear_organization_options):
+        organization_we_vote_id = ""
+        organization_name = ""
+        organization_twitter_handle = ""
+
     organizations_list = []
     organization_list_manager = OrganizationListManager()
     organization_manager = OrganizationManager()
+
     if positive_value_exists(organization_we_vote_id):
         organization_manager = OrganizationManager()
         results = organization_manager.retrieve_organization_from_we_vote_id(organization_we_vote_id)
@@ -307,6 +416,7 @@ def voter_guide_create_process_view(request):
                                                              'that might match.'.format(count=organizations_count))
     elif positive_value_exists(voter_guide_possibility_url) and not positive_value_exists(clear_organization_options):
         facebook_page = ""
+        facebook_page_list = []
         twitter_or_facebook_found = False
         twitter_handle = ""
         twitter_handle_list = []
@@ -322,18 +432,31 @@ def voter_guide_create_process_view(request):
 
         if scrape_results['facebook_page_found'] and positive_value_exists(scrape_results['facebook_page']):
             facebook_page = scrape_results['facebook_page']
+            facebook_page_list = scrape_results['facebook_page_list']
             twitter_or_facebook_found = True
 
         if twitter_or_facebook_found:
-            # Search for organizations that match
+            # Search for organizations that match (by Twitter Handle)
             twitter_handle_list_modified = []
             for one_twitter_handle in twitter_handle_list:
                 if positive_value_exists(one_twitter_handle):
                     one_twitter_handle = one_twitter_handle.strip()
                 if positive_value_exists(one_twitter_handle):
                     twitter_handle_lower = one_twitter_handle.lower()
+                    twitter_handle_lower = extract_twitter_handle_from_text_string(twitter_handle_lower)
                     if twitter_handle_lower not in twitter_handle_list_modified:
                         twitter_handle_list_modified.append(twitter_handle_lower)
+
+            # Search for organizations that match (by Facebook page)
+            facebook_page_list_modified = []
+            for one_facebook_page in facebook_page_list:
+                if positive_value_exists(one_facebook_page):
+                    one_facebook_page = one_facebook_page.strip()
+                if positive_value_exists(one_facebook_page):
+                    one_facebook_page_lower = one_facebook_page.lower()
+                    one_facebook_page_lower = extract_facebook_username_from_text_string(one_facebook_page_lower)
+                    if one_facebook_page_lower not in facebook_page_list_modified:
+                        facebook_page_list_modified.append(one_facebook_page_lower)
 
             # We want to create an organization for each Twitter handle we find on the page so it can be chosen below
             for one_twitter_handle in twitter_handle_list_modified:
@@ -365,16 +488,12 @@ def voter_guide_create_process_view(request):
                         # Refresh the organization with the Twitter details
                         refresh_twitter_organization_details(one_organization, twitter_user_id)
 
-            if len(twitter_handle_list_modified) > 1:
-                results = organization_list_manager.organization_search_find_any_possibilities(
-                    organization_facebook=facebook_page,
-                    twitter_handle_list=twitter_handle_list_modified
-                )
-            else:
-                results = organization_list_manager.organization_search_find_any_possibilities(
-                    organization_facebook=facebook_page,
-                    organization_twitter_handle=twitter_handle
-                )
+            voter_guide_website = extract_website_from_url(voter_guide_possibility_url)
+            results = organization_list_manager.organization_search_find_any_possibilities(
+                organization_website=voter_guide_website,
+                facebook_page_list=facebook_page_list_modified,
+                twitter_handle_list=twitter_handle_list_modified
+            )
 
             if results['organizations_found']:
                 organizations_list = results['organizations_list']
@@ -491,7 +610,7 @@ def voter_guide_create_process_view(request):
             'voter_who_submitted_name':         voter_who_submitted_name,
             'voter_who_submitted_we_vote_id':   voter_who_submitted_we_vote_id,
         }
-        if political_data_manager and internal_notes is not False:
+        if political_data_manager:
             updated_values['internal_notes'] = internal_notes
 
         for one_possible_candidate in possible_candidate_list:
@@ -815,7 +934,8 @@ def generate_voter_guides_view(request):
 
 @login_required
 def label_vote_smart_voter_guides_view(request):
-    authority_required = {'verified_volunteer'}  # admin, verified_volunteer
+    # admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'political_data_manager'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
@@ -856,7 +976,8 @@ def label_vote_smart_voter_guides_view(request):
 
 @login_required
 def generate_voter_guides_for_one_election_view(request):
-    authority_required = {'verified_volunteer'}  # admin, verified_volunteer
+    # admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'verified_volunteer'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
@@ -939,7 +1060,8 @@ def generate_voter_guides_for_one_election_view(request):
 
 @login_required
 def refresh_existing_voter_guides_view(request):
-    authority_required = {'verified_volunteer'}  # admin, verified_volunteer
+    # admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'verified_volunteer'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
     google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
@@ -966,7 +1088,8 @@ def refresh_existing_voter_guides_view(request):
 
 @login_required
 def voter_guide_edit_view(request, voter_guide_id=0, voter_guide_we_vote_id=""):
-    authority_required = {'verified_volunteer'}  # admin, verified_volunteer
+    # admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'verified_volunteer'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
@@ -1025,7 +1148,8 @@ def voter_guide_edit_process_view(request):  # NOTE: THIS FORM DOESN'T SAVE YET 
     :param request:
     :return:
     """
-    authority_required = {'verified_volunteer'}  # admin, verified_volunteer
+    # admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'verified_volunteer'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
@@ -1224,10 +1348,10 @@ def voter_guide_possibility_list_view(request):
     voter_guide_possibility_manager = VoterGuidePossibilityManager()
     election_manager = ElectionManager()
 
-    order_by = "-date_last_changed"
     limit_number = 75
 
     # Possibilities to review
+    order_by = "-id"
     results = voter_guide_possibility_manager.retrieve_voter_guide_possibility_list(
         order_by, limit_number, voter_guide_possibility_search, google_civic_election_id)
     if results['success']:
@@ -1235,6 +1359,7 @@ def voter_guide_possibility_list_view(request):
 
     # Entries we've already reviewed
     saved_as_batch = True
+    order_by = "-date_last_changed"
     results = voter_guide_possibility_manager.retrieve_voter_guide_possibility_list(
         order_by, limit_number, voter_guide_possibility_search, google_civic_election_id, saved_as_batch)
     if results['success']:
@@ -1248,11 +1373,11 @@ def voter_guide_possibility_list_view(request):
         results = election_manager.retrieve_upcoming_elections()
         election_list = results['election_list']
 
-    voter_guide_possibilities_count = len(voter_guide_possibility_list)
-
-    messages.add_message(request, messages.INFO,
-                         'We found {voter_guide_possibilities_count} existing voter guide possibilities. '
-                         ''.format(voter_guide_possibilities_count=voter_guide_possibilities_count))
+    # voter_guide_possibilities_count = len(voter_guide_possibility_list)
+    #
+    # messages.add_message(request, messages.INFO,
+    #                      'We found {voter_guide_possibilities_count} existing voter guide possibilities. '
+    #                      ''.format(voter_guide_possibilities_count=voter_guide_possibilities_count))
 
     messages_on_stage = get_messages(request)
     template_values = {
@@ -1275,7 +1400,8 @@ def voter_guide_search_view(request):
     :param request:
     :return:
     """
-    authority_required = {'verified_volunteer'}  # admin, verified_volunteer
+    # admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'verified_volunteer'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
@@ -1311,7 +1437,8 @@ def voter_guide_search_process_view(request):
     :param request:
     :return:
     """
-    authority_required = {'verified_volunteer'}  # admin, verified_volunteer
+    # admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'verified_volunteer'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
