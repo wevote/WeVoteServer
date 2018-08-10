@@ -80,6 +80,7 @@ def create_possible_voter_guides_from_prior_elections_view(request):
             status += "STATE: " + str(election.state_code) + " "
             # Get a list of all voter_guides in last 5 years
             voter_guide_query = VoterGuide.objects.all()
+            voter_guide_query = voter_guide_query.order_by('-twitter_followers_count')
             voter_guide_query = voter_guide_query.exclude(vote_smart_ratings_only=True)
             voter_guide_query = voter_guide_query.filter(state_code__iexact=election.state_code)
             voter_guide_query = voter_guide_query.filter(election_day_text__lt=we_vote_date_string_today)
@@ -94,6 +95,7 @@ def create_possible_voter_guides_from_prior_elections_view(request):
             target_google_civic_election_id = national_election.google_civic_election_id
             # Get a list of all voter_guides in last 5 years
             voter_guide_query = VoterGuide.objects.all()
+            voter_guide_query = voter_guide_query.order_by('-twitter_followers_count')
             voter_guide_query = voter_guide_query.exclude(vote_smart_ratings_only=True)
             voter_guide_query = voter_guide_query.filter(election_day_text__lt=we_vote_date_string_today)
             voter_guide_query = voter_guide_query.filter(election_day_text__gte=we_vote_date_string_five_years_ago)
@@ -112,6 +114,7 @@ def create_possible_voter_guides_from_prior_elections_view(request):
                 status += "STATE: " + str(election.state_code) + " "
                 # Get a list of all voter_guides in last 5 years
                 voter_guide_query = VoterGuide.objects.all()
+                voter_guide_query = voter_guide_query.order_by('-twitter_followers_count')
                 voter_guide_query = voter_guide_query.exclude(vote_smart_ratings_only=True)
                 voter_guide_query = voter_guide_query.filter(state_code__iexact=election.state_code)
                 voter_guide_query = voter_guide_query.filter(election_day_text__lt=we_vote_date_string_today)
