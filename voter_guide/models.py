@@ -1574,6 +1574,7 @@ class VoterGuidePossibilityManager(models.Manager):
     def update_or_create_voter_guide_possibility(
             self, voter_guide_possibility_url,
             voter_guide_possibility_id=0,
+            target_google_civic_election_id=0,
             updated_values={}):
         exception_multiple_object_returned = False
         success = False
@@ -1602,6 +1603,7 @@ class VoterGuidePossibilityManager(models.Manager):
             try:
                 voter_guide_possibility = VoterGuidePossibility.objects.get(
                     voter_guide_possibility_url__iexact=voter_guide_possibility_url,
+                    target_google_civic_election_id=target_google_civic_election_id,
                 )
                 voter_guide_possibility_found = True
                 success = True
@@ -1643,7 +1645,9 @@ class VoterGuidePossibilityManager(models.Manager):
             try:
                 new_voter_guide_possibility_created = False
                 voter_guide_possibility = VoterGuidePossibility.objects.create(
-                    voter_guide_possibility_url=voter_guide_possibility_url)
+                    voter_guide_possibility_url=voter_guide_possibility_url,
+                    target_google_civic_election_id=target_google_civic_election_id,
+                )
                 if positive_value_exists(voter_guide_possibility.id):
                     for key, value in updated_values.items():
                         if hasattr(voter_guide_possibility, key):
@@ -1759,12 +1763,13 @@ class VoterGuidePossibilityManager(models.Manager):
         return results
 
     def retrieve_voter_guide_possibility_list(self, order_by='', limit_number=0, search_string='',
-                                              google_civic_election_id=0, saved_as_batch=False):
+                                              google_civic_election_id=0,
+                                              hide_from_active_review=False):
         voter_guide_possibility_list = []
         voter_guide_possibility_list_found = False
         try:
             voter_guide_query = VoterGuidePossibility.objects.all()
-            voter_guide_query = voter_guide_query.filter(saved_as_batch=saved_as_batch)
+            voter_guide_query = voter_guide_query.filter(hide_from_active_review=hide_from_active_review)
             voter_guide_query = voter_guide_query.order_by(order_by)
 
             if positive_value_exists(search_string):
@@ -1898,8 +1903,14 @@ class VoterGuidePossibility(models.Model):
     # These are the candidates or measures on the voter guide (comma separated, or on own lines)
     ballot_items_raw = models.TextField(null=True, blank=True,)
 
+    # What election was used as the target for finding endorsements?
+    target_google_civic_election_id = models.PositiveIntegerField(null=True)
+
+    # Data manager cannot find page on this site with upcoming endorsements
+    cannot_find_endorsements = models.BooleanField(default=False)
+
     # Has this VoterGuidePossibility been used to create a batch in the import_export_batch system?
-    saved_as_batch = models.BooleanField(default=False)
+    hide_from_active_review = models.BooleanField(default=False)
     batch_header_id = models.PositiveIntegerField(null=True)
 
     # For internal notes regarding gathering data

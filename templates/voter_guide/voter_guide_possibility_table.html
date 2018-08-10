@@ -5,6 +5,7 @@
         <tr>
             <th></th>
             <th>Organization</th>
+            <th></th>
             <th>Voter Guide Source</th>
             <th>Actions / Notes</th>
             <th>Candidates</th>
@@ -45,6 +46,12 @@
             {% endif %}
             </td>
             <td>
+                <a href="{% url 'voter_guide:voter_guide_create' %}?voter_guide_possibility_id={{ voter_guide_possibility.id }}"
+                   class="btn btn-success btn-sm"
+                   role="button"
+                   target="_blank">edit</a>
+            </td>
+            <td>
                 <a href="{{ voter_guide_possibility.voter_guide_possibility_url }}"
                    class="u-no-break"
                    target="_blank">
@@ -55,11 +62,12 @@
                   <br />
                   {{ voter_guide_possibility.ballot_items_raw|truncatechars:80 }}
                 {% endif %}
-                <br />
-                <a href="{% url 'voter_guide:voter_guide_create' %}?voter_guide_possibility_id={{ voter_guide_possibility.id }}"
-                   target="_blank"> (edit)</a>
             </td>
             <td>
+                {% if voter_guide_possibility.cannot_find_endorsements %}
+                <strong>Cannot Find Endorsements</strong>
+                <br />
+                {% endif %}
                 {% if voter_guide_possibility.positions_ready_to_save_as_batch %}
                 <a href="{% url 'voter_guide:generate_voter_guide_possibility_batch' %}?voter_guide_possibility_id={{ voter_guide_possibility.id }}"
                    class="btn btn-success btn-sm"
