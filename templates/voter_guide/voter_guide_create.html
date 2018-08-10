@@ -156,6 +156,7 @@
 
 {% if possible_candidate_list_found and not hide_possible_candidate_list %}
     <div class="form-group">
+    {% if possible_candidate_list %}
         <label for="ballot_items_raw_id" class="col-sm-3 control-label">
             <span class="hidden-xs">Candidates with Stances</span><br />
         </label>
@@ -166,6 +167,7 @@
             {% endfor %}
             </table>
         </div>
+    {% endif %}
 
     {% if voter_guide_possibility_url %}
         <label for="ballot_items_raw_id" class="col-sm-3 control-label">
@@ -177,18 +179,6 @@
                       placeholder="Please enter one candidate or measure per line, or separated by commas..."
                       rows="2"
                       >{{ ballot_items_additional|default_if_none:"" }}</textarea>
-        </div>
-    {% endif %}
-
-
-    {% if political_data_manager %}
-        <br />
-        <label for="internal_notes_id" class="col-sm-3 control-label">Internal Notes</label>
-        <div class="col-sm-8">
-            <textarea name="internal_notes"
-                      class="form-control animated"
-                      id="internal_notes_id"
-                      placeholder="Status of data gathering?">{{ internal_notes|default_if_none:"" }}</textarea>
         </div>
     {% endif %}
 
@@ -219,7 +209,28 @@
 
 {% endif %}
 
-
+    {% if political_data_manager and voter_guide_possibility_url %}
+    <div class="form-group">
+        <label for="internal_notes_id" class="col-sm-3 control-label">Internal Notes</label>
+        <div class="col-sm-8">
+            <textarea name="internal_notes"
+                      class="form-control animated"
+                      id="internal_notes_id"
+                      placeholder="Status of data gathering?">{{ internal_notes|default_if_none:"" }}</textarea>
+            <input type="checkbox" name="cannot_find_endorsements" id="cannot_find_endorsements_id"
+                   value="True"
+                   {% if cannot_find_endorsements %}checked{% endif %} />
+              Cannot Find Endorsements
+            &nbsp;&nbsp;&nbsp;
+            <input type="checkbox" name="hide_from_active_review" id="hide_from_active_review_id"
+                   value="True"
+                   {% if hide_from_active_review %}checked{% endif %} />
+              Stop Reviewing
+            &nbsp;&nbsp;&nbsp;
+            <div class="float-right" style="color: darkgray">Target Election: {{ target_google_civic_election_id }}</div>
+        </div>
+    </div>
+    {% endif %}
 
     <div class="form-group">
         <label for="find_voter_guide_button_id" class="col-sm-3 control-label"></label>

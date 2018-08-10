@@ -326,16 +326,22 @@ def modify_one_row_in_possible_candidate_dict_list(possible_candidate_list, row_
 
     number_index = 0
     if positive_value_exists(row_index_to_remove) and row_index_to_remove in candidate_number_list:
-        for possible_candidate in possible_candidate_list:
-            if number_index >= len(candidate_number_list):
-                break
+        if len(possible_candidate_list) == 1:
+            possible_candidate = possible_candidate_list[0]
             if possible_candidate['possible_candidate_number'] == row_index_to_remove:
-                next_number_index = number_index + 1
-                remaining_possible_candidate_list = possible_candidate_list[next_number_index:]
-                shift_remaining_items = True
-                break
-            updated_possible_candidate_list.append(possible_candidate)
-            number_index += 1
+                updated_possible_candidate_list = []
+                possible_candidate_list_found = True
+        else:
+            for possible_candidate in possible_candidate_list:
+                if number_index >= len(candidate_number_list):
+                    break
+                if possible_candidate['possible_candidate_number'] == row_index_to_remove:
+                    next_number_index = number_index + 1
+                    remaining_possible_candidate_list = possible_candidate_list[next_number_index:]
+                    shift_remaining_items = True
+                    break
+                updated_possible_candidate_list.append(possible_candidate)
+                number_index += 1
 
     if shift_remaining_items and len(remaining_possible_candidate_list):
         # Reset the sequence of values in possible_candidate_number
