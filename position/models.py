@@ -1279,7 +1279,7 @@ class PositionListManager(models.Model):
                 position_on_stage_starter = PositionForFriends
                 position_on_stage = PositionForFriends()
 
-            position_list = position_on_stage_starter.objects.using('readonly').order_by('date_entered')
+            position_list = position_on_stage_starter.objects.using('readonly')
             # As of Aug 2018 we are no longer using PERCENT_RATING
             position_list = position_list.exclude(stance__iexact=PERCENT_RATING)
 
@@ -1301,7 +1301,8 @@ class PositionListManager(models.Model):
             #     else:
             #         position_list = position_list.filter(stance=stance_we_are_looking_for)
 
-            position_list = position_list.filter(stance__iexact=stance_we_are_looking_for)
+            if stance_we_are_looking_for != ANY_STANCE:
+                position_list = position_list.filter(stance__iexact=stance_we_are_looking_for)
 
             # Limit to positions in the last x years - currently we are not limiting
             # position_list = position_list.filter(election_id=election_id)

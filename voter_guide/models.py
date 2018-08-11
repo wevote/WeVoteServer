@@ -48,12 +48,15 @@ class VoterGuideManager(models.Manager):
     """
     A class for working with the VoterGuide model
     """
-    def update_or_create_organization_voter_guide_by_election_id(self, voter_guide_we_vote_id, organization_we_vote_id,
-                                                                 google_civic_election_id, state_code='',
+    def update_or_create_organization_voter_guide_by_election_id(self, voter_guide_we_vote_id,
+                                                                 organization_we_vote_id,
+                                                                 google_civic_election_id,
+                                                                 state_code='',
                                                                  pledge_goal=0,
                                                                  we_vote_hosted_profile_image_url_large='',
                                                                  we_vote_hosted_profile_image_url_medium='',
-                                                                 we_vote_hosted_profile_image_url_tiny=''
+                                                                 we_vote_hosted_profile_image_url_tiny='',
+                                                                 vote_smart_ratings_only=False
                                                                  ):
         """
         This creates voter_guides, and also refreshes voter guides with updated organization data
@@ -64,6 +67,7 @@ class VoterGuideManager(models.Manager):
         organization = Organization()
         organization_found = False
         new_voter_guide_created = False
+        status = ''
         if not google_civic_election_id or not organization_we_vote_id:
             status = 'ERROR_VARIABLES_MISSING_FOR_ORGANIZATION_VOTER_GUIDE'
             success = False
@@ -91,16 +95,15 @@ class VoterGuideManager(models.Manager):
                     if positive_value_exists(state_code):
                         state_code = state_code.lower()
                     updated_values = {
-                        # Values we search against below
                         'google_civic_election_id': google_civic_election_id,
                         'organization_we_vote_id':  organization_we_vote_id,
-                        # The rest of the values
                         'image_url':                organization.organization_photo_url(),
                         'twitter_handle':           organization.organization_twitter_handle,
                         'twitter_description':      organization.twitter_description,
                         'twitter_followers_count':  organization.twitter_followers_count,
                         'display_name':             organization.organization_name,
                         'voter_guide_owner_type':   organization.organization_type,
+                        'vote_smart_ratings_only':  vote_smart_ratings_only,
                         'state_code':               state_code,
                         'we_vote_hosted_profile_image_url_large':  organization.we_vote_hosted_profile_image_url_large,
                         'we_vote_hosted_profile_image_url_medium': organization.we_vote_hosted_profile_image_url_medium,
@@ -132,16 +135,16 @@ class VoterGuideManager(models.Manager):
                         defaults=updated_values)
                     success = True
                     if new_voter_guide_created:
-                        status = 'VOTER_GUIDE_CREATED_FOR_ORGANIZATION'
+                        status += 'VOTER_GUIDE_CREATED_FOR_ORGANIZATION '
                     else:
-                        status = 'VOTER_GUIDE_UPDATED_FOR_ORGANIZATION'
+                        status += 'VOTER_GUIDE_UPDATED_FOR_ORGANIZATION '
                 else:
                     success = False
-                    status = 'VOTER_GUIDE_NOT_CREATED_BECAUSE_ORGANIZATION_NOT_FOUND_LOCALLY'
+                    status += 'VOTER_GUIDE_NOT_CREATED_BECAUSE_ORGANIZATION_NOT_FOUND_LOCALLY'
             except VoterGuide.MultipleObjectsReturned as e:
                 handle_record_found_more_than_one_exception(e, logger=logger)
                 success = False
-                status = 'MULTIPLE_MATCHING_VOTER_GUIDES_FOUND_FOR_ORGANIZATION'
+                status += 'MULTIPLE_MATCHING_VOTER_GUIDES_FOUND_FOR_ORGANIZATION'
                 exception_multiple_object_returned = True
                 new_voter_guide_created = False
 
@@ -1772,6 +1775,10 @@ class VoterGuidePossibilityManager(models.Manager):
             voter_guide_query = voter_guide_query.filter(hide_from_active_review=hide_from_active_review)
             voter_guide_query = voter_guide_query.order_by(order_by)
 
+            # Allow searching for voter guide possibilities that are being ignored
+            if not positive_value_exists(search_string):
+                voter_guide_query = voter_guide_query.exclude(ignore_this_source=True)
+
             if positive_value_exists(search_string):
                 search_words = search_string.split()
                 candidate_number_list = CANDIDATE_NUMBER_LIST
@@ -1906,8 +1913,11 @@ class VoterGuidePossibility(models.Model):
     # What election was used as the target for finding endorsements?
     target_google_civic_election_id = models.PositiveIntegerField(null=True)
 
-    # Data manager cannot find page on this site with upcoming endorsements
+    # Data manager cannot find upcoming endorsements (may not be posted yet)
     cannot_find_endorsements = models.BooleanField(default=False)
+
+    # This website is not a good source for future endorsements
+    ignore_this_source = models.BooleanField(default=False)
 
     # Has this VoterGuidePossibility been used to create a batch in the import_export_batch system?
     hide_from_active_review = models.BooleanField(default=False)

@@ -75,6 +75,39 @@ def convert_candidate_list_light_to_possible_candidates(selected_candidate_list_
     return results
 
 
+def add_candidates_with_position_count_to_voter_guide_possibility_list(voter_guide_possibility_list):
+    # Identify how many candidates already have positions stored
+    voter_guide_possibility_list_modified = []
+    for one_voter_guide_possibility in voter_guide_possibility_list:
+        one_voter_guide_possibility.number_of_candidates_with_position = 0
+        possible_candidate_list = []
+        possible_candidate_list_found = False
+        if positive_value_exists(one_voter_guide_possibility.organization_we_vote_id):
+            results = extract_possible_candidate_list_from_database(one_voter_guide_possibility)
+            if results['possible_candidate_list_found']:
+                possible_candidate_list = results['possible_candidate_list']
+
+                google_civic_election_id_list = []
+                # Match incoming candidates to candidates already in the database
+                results = match_candidate_list_with_candidates_in_database(
+                    possible_candidate_list, google_civic_election_id_list)
+                if results['possible_candidate_list_found']:
+                    possible_candidate_list = results['possible_candidate_list']
+                    possible_candidate_list_found = True
+        if possible_candidate_list_found:
+            for one_possible_candidate in possible_candidate_list:
+                if 'candidate_we_vote_id' in one_possible_candidate \
+                        and positive_value_exists(one_possible_candidate['candidate_we_vote_id']):
+                    position_exists_query = PositionEntered.objects.filter(
+                        organization_we_vote_id=one_voter_guide_possibility.organization_we_vote_id,
+                        candidate_campaign_we_vote_id=one_possible_candidate['candidate_we_vote_id'])
+                    position_count = position_exists_query.count()
+                    if positive_value_exists(position_count):
+                        one_voter_guide_possibility.number_of_candidates_with_position += 1
+        voter_guide_possibility_list_modified.append(one_voter_guide_possibility)
+    return voter_guide_possibility_list_modified
+
+
 def add_empty_values_to_possible_candidate_dict_list(starting_candidate_number="001"):
     status = ""
     success = True

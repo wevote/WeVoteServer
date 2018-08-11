@@ -1050,7 +1050,7 @@ def organization_delete_existing_position_process_form_view(request, organizatio
 
 
 @login_required
-def organization_position_edit_view(request, organization_id, position_we_vote_id):
+def organization_position_edit_view(request, organization_id=0, organization_we_vote_id="", position_we_vote_id=""):
     """
     In edit, you can only change your stance and comments, not who or what the position is about
     :param request:
@@ -1069,7 +1069,10 @@ def organization_position_edit_view(request, organization_id, position_we_vote_i
     organization_id = convert_to_int(organization_id)
     organization_on_stage_found = False
     try:
-        organization_on_stage = Organization.objects.get(id=organization_id)
+        if positive_value_exists(organization_id):
+            organization_on_stage = Organization.objects.get(id=organization_id)
+        else:
+            organization_on_stage = Organization.objects.get(we_vote_id=organization_we_vote_id)
         organization_on_stage_found = True
     except Organization.MultipleObjectsReturned as e:
         handle_record_found_more_than_one_exception(e, logger=logger)

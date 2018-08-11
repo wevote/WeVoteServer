@@ -5,9 +5,11 @@
         <span class="float-right"><span style="color: darkgray">candidate #{{ possible_candidate.possible_candidate_number|default_if_none:""|add:"0" }}</span></span>
     {% if possible_candidate.candidate_we_vote_id %}
         <span><span class="h4">{{ possible_candidate.candidate.display_candidate_name|default_if_none:"" }}</span>, <span>{{ possible_candidate.candidate.contest_office_name|default_if_none:"" }}</span>&nbsp;&nbsp;&nbsp;</span>
-        <a href="{% url 'candidate:candidate_edit_we_vote_id' candidate_campaign_we_vote_id=possible_candidate.candidate_we_vote_id %}#positions"
-           target="_blank"
-           class="u-no-break"><span class="glyphicon glyphicon-new-window"></span></a>
+        {% if political_data_manager %}
+            <a href="{% url 'candidate:candidate_edit_we_vote_id' candidate_campaign_we_vote_id=possible_candidate.candidate_we_vote_id %}#positions"
+               target="_blank"
+               class="u-no-break"><span class="glyphicon glyphicon-new-window"></span></a>
+        {% endif %}
         <input type="hidden" name="candidate_we_vote_id_{{ possible_candidate.possible_candidate_number }}" value="{{ possible_candidate.candidate_we_vote_id }}">
         <input type="hidden" name="candidate_name_{{ possible_candidate.possible_candidate_number }}" value="{{ possible_candidate.candidate_name }}">
     {% else %}
@@ -15,6 +17,26 @@
                      value="{{ possible_candidate.candidate_name|default_if_none:"" }}" />&nbsp;&nbsp;&nbsp;</span>
     {% endif %}
     </div>
+
+    {% if possible_candidate.position_we_vote_id and organization_we_vote_id  %}
+    <div>
+        {% if political_data_manager %}
+        <a href="{% url 'organization:organization_we_vote_id_position_edit' organization_we_vote_id possible_candidate.position_we_vote_id %}#positions"
+           target="_blank"
+           class="u-no-break">
+            <span>
+                <strong>POSITION STORED </strong>
+                <span class="glyphicon glyphicon-new-window"></span>
+            </span>
+        </a>
+        {% else %}
+            <span>
+                <strong>POSITION ALREADY STORED </strong>
+            </span>
+        {% endif %}
+    </div>
+    {% endif %}
+
     <div>
         <div class="float-right"><button type="submit" class="btn btn-link" name="remove_possible_candidate_{{ possible_candidate.possible_candidate_number }}" value="1">remove</button></div>
         <div class="btn-group btn-group-toggle" data-toggle="buttons">

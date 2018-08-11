@@ -64,6 +64,10 @@
                 {% endif %}
             </td>
             <td>
+                {% if voter_guide_possibility.ignore_this_source %}
+                <strong>Ignore this Source</strong>
+                <br />
+                {% endif %}
                 {% if voter_guide_possibility.cannot_find_endorsements %}
                 <strong>Cannot Find Endorsements</strong>
                 <br />
@@ -97,6 +101,9 @@
               {% endif %}
               {% if voter_guide_possibility.number_of_candidates_not_in_database %}
                   <span class="u-no-break" style="color: red"> ({{ voter_guide_possibility.number_of_candidates_not_in_database }} not in db)</span>
+              {% endif %}
+              {% if voter_guide_possibility.number_of_candidates_with_position %}
+                  <span class="u-no-break" style="color: green"> ({{ voter_guide_possibility.number_of_candidates_with_position }} with position)</span>
               {% endif %}
             </td>
             <td>
