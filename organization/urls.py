@@ -33,6 +33,8 @@ urlpatterns = [
         views_admin.organization_delete_existing_position_process_form_view, name='organization_position_delete',),
     url(r'^(?P<organization_id>[0-9]+)/pos/(?P<position_we_vote_id>wv[\w]{2}pos[\w]+)/$',
         views_admin.organization_position_edit_view, name='organization_position_edit', ),
+    url(r'^(?P<organization_we_vote_id>wv[\w]{2}org[\w]+)/pos/(?P<position_we_vote_id>wv[\w]{2}pos[\w]+)/$',
+        views_admin.organization_position_edit_view, name='organization_we_vote_id_position_edit', ),
     url(r'^pos/edit_process/$',
         views_admin.organization_position_edit_process_view, name='organization_position_edit_process'),
 

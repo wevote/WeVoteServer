@@ -163,7 +163,7 @@
         <div class="col-sm-8">
             <table class="table">
             {% for possible_candidate in possible_candidate_list %}
-                {% include "voter_guide/voter_guide_one_candidate_confirmation.html" with possible_candidate=possible_candidate %}
+                {% include "voter_guide/voter_guide_one_candidate_confirmation.html" with organization_we_vote_id=organization_we_vote_id political_data_manager=political_data_manager possible_candidate=possible_candidate %}
             {% endfor %}
             </table>
         </div>
@@ -220,13 +220,20 @@
             <input type="checkbox" name="cannot_find_endorsements" id="cannot_find_endorsements_id"
                    value="True"
                    {% if cannot_find_endorsements %}checked{% endif %} />
-              Cannot Find Endorsements
+                <label for="cannot_find_endorsements_id" style="font-weight: normal !important;">Endorsements Not Available Yet</label>
+
             &nbsp;&nbsp;&nbsp;
             <input type="checkbox" name="hide_from_active_review" id="hide_from_active_review_id"
                    value="True"
                    {% if hide_from_active_review %}checked{% endif %} />
-              Stop Reviewing
+                <label for="hide_from_active_review_id" style="font-weight: normal !important;">Stop Reviewing</label>
+
             &nbsp;&nbsp;&nbsp;
+            <input type="checkbox" name="ignore_this_source" id="ignore_this_source_id"
+                   value="True"
+                   {% if ignore_this_source %}checked{% endif %} />
+                <label for="ignore_this_source_id" style="font-weight: normal !important;">Ignore this Website</label>
+
             <div class="float-right" style="color: darkgray">Target Election: {{ target_google_civic_election_id }}</div>
         </div>
     </div>
@@ -242,22 +249,51 @@
         {% if display_all_done_button %}
             <button type="submit" class="btn btn-success" name="all_done_with_entry" value="1">All Done!</button>
         {% endif %}
+        {% if political_data_manager and voter_guide_possibility_id %}
+            <br />
+            <br />
+            {% if positions_ready_to_save_as_batch %}
+            <a href="{% url 'voter_guide:generate_voter_guide_possibility_batch' %}?voter_guide_possibility_id={{ voter_guide_possibility_id }}"
+               class="btn btn-success btn-sm"
+               role="button"
+               target="_blank">Import Positions</a>
+            {% endif %}
+            {% if batch_header_id %}
+            <a href="{% url 'import_export_batches:batch_action_list' %}?batch_header_id={{ batch_header_id }}&kind_of_batch=POSITION"
+               class="u-no-break"
+               target="_blank">
+              import batch results <span class="glyphicon glyphicon-new-window"></span>
+            </a>
+            {% endif %}
+        {% endif %}
         </div>
     </div>
 
 
 {% if political_data_manager and voter_guide_possibility_id %}
-  <br />
-  <br />
+    <br />
+    <br />
     <div class="form-group">
         <label for="find_voter_guide_button_id" class="col-sm-3 control-label"></label>
         <div class="col-sm-8">
             <button type="submit" class="btn btn-danger">Delete</button>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-            <label for="confirm_delete_id">
+            <label for="confirm_delete_id" style="font-weight: normal !important;">
               <input type="checkbox" name="confirm_delete" id="confirm_delete_id" value="1" /> Check to confirm that you want to permanently delete this
             </label>
         </div>
     </div>
+    <br />
+    <br />
+    "<strong>Endorsements Not Available Yet</strong>" means: This organizations hasn't posted their endorsements for the
+    upcoming election yet, but it is worth coming back to this website later to find endorsements when they are posted.<br />
+    <br />
+    "<strong>Stop Reviewing</strong>" means: There isn't any more data to extract from this website
+    for upcoming election(s), so we want to take it off the Suggested Voter Guides list.<br />
+    <br />
+    "<strong>Ignore this Website</strong>" means: This website URL is not a good place to find endorsements.
+    No further review needed.<br />
+    <br />
+
 {% endif %}
 
 
