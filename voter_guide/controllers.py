@@ -10,6 +10,7 @@ from follow.models import FollowOrganizationList, FollowIssueList, FOLLOWING
 from itertools import chain
 from issue.models import OrganizationLinkToIssueList
 import json
+from office.models import ContestOfficeManager
 from organization.controllers import organization_follow_or_unfollow_or_ignore, \
     push_organization_data_to_other_table_caches, \
     refresh_organization_data_from_master_tables
@@ -299,6 +300,7 @@ def match_candidate_list_with_candidates_in_database(
     possible_candidate_list_modified = []
     candidate_campaign_manager = CandidateCampaignManager()
     candidate_campaign_list_manager = CandidateCampaignListManager()
+    contest_office_manager = ContestOfficeManager()
     for possible_candidate in possible_candidate_list:
         if 'candidate_we_vote_id' in possible_candidate \
                 and positive_value_exists(possible_candidate['candidate_we_vote_id']):
@@ -309,6 +311,11 @@ def match_candidate_list_with_candidates_in_database(
                 possible_candidate['candidate_name'] = possible_candidate['candidate'].display_candidate_name()
                 possible_candidate['google_civic_election_id'] = \
                     possible_candidate['candidate'].google_civic_election_id
+                if not positive_value_exists(possible_candidate['google_civic_election_id']) \
+                        and positive_value_exists(possible_candidate['candidate'].contest_office_we_vote_id):
+                    possible_candidate['google_civic_election_id'] = \
+                        contest_office_manager.fetch_google_civic_election_id_from_office_we_vote_id(
+                            possible_candidate['candidate'].contest_office_we_vote_id)
             possible_candidate_list_modified.append(possible_candidate)
         elif 'candidate_name' in possible_candidate and positive_value_exists(possible_candidate['candidate_name']):
             # If here search for possible candidate matches
@@ -323,6 +330,11 @@ def match_candidate_list_with_candidates_in_database(
                 possible_candidate['candidate'] = candidate
                 possible_candidate['candidate_name'] = candidate.display_candidate_name()
                 possible_candidate['google_civic_election_id'] = candidate.google_civic_election_id
+                if not positive_value_exists(possible_candidate['google_civic_election_id']) \
+                        and positive_value_exists(candidate.contest_office_we_vote_id):
+                    possible_candidate['google_civic_election_id'] = \
+                        contest_office_manager.fetch_google_civic_election_id_from_office_we_vote_id(
+                            candidate.contest_office_we_vote_id)
                 possible_candidate_list_modified.append(possible_candidate)
             elif matching_results['multiple_entries_found']:
                 status += "MULTIPLE_CANDIDATES_FOUND "

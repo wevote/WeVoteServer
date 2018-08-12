@@ -1942,6 +1942,7 @@ def create_batch_row_action_position(batch_description, batch_header_map, one_ba
 
     # By here, we should have the organization (owner of the position) and the election
     # NEXT: figure out what candidate/office the endorsement is for
+    contest_office_manager = ContestOfficeManager()
     if positive_value_exists(candidate_we_vote_id):
         candidate_campaign_manager = CandidateCampaignManager()
         candidate_results = candidate_campaign_manager.retrieve_candidate_campaign_from_we_vote_id(
@@ -1954,6 +1955,10 @@ def create_batch_row_action_position(batch_description, batch_header_map, one_ba
             candidate_id = candidate.id
             contest_office_we_vote_id = candidate.contest_office_we_vote_id
             contest_office_id = candidate.contest_office_id
+            if not positive_value_exists(google_civic_election_id) and positive_value_exists(contest_office_we_vote_id):
+                google_civic_election_id = \
+                    contest_office_manager.fetch_google_civic_election_id_from_office_we_vote_id(
+                        contest_office_we_vote_id)
         else:
             status += candidate_results['status']
     elif positive_value_exists(candidate_twitter_handle) or positive_value_exists(candidate_name):
@@ -1969,6 +1974,10 @@ def create_batch_row_action_position(batch_description, batch_header_map, one_ba
             candidate_id = candidate.id
             contest_office_we_vote_id = candidate.contest_office_we_vote_id
             contest_office_id = candidate.contest_office_id
+            if not positive_value_exists(google_civic_election_id) and positive_value_exists(contest_office_we_vote_id):
+                google_civic_election_id = \
+                    contest_office_manager.fetch_google_civic_election_id_from_office_we_vote_id(
+                        contest_office_we_vote_id)
         elif matching_results['multiple_entries_found']:
             # Note: In some jurisdictions like NY, they list one candidate with multiple parties.
             #  We therefore have to store multiple candidates with the same name in these cases.
@@ -1982,6 +1991,11 @@ def create_batch_row_action_position(batch_description, batch_header_map, one_ba
                 candidate_id = candidate.id
                 contest_office_we_vote_id = candidate.contest_office_we_vote_id
                 contest_office_id = candidate.contest_office_id
+                if not positive_value_exists(google_civic_election_id) and positive_value_exists(
+                        contest_office_we_vote_id):
+                    google_civic_election_id = \
+                        contest_office_manager.fetch_google_civic_election_id_from_office_we_vote_id(
+                            contest_office_we_vote_id)
         elif not matching_results['success']:
             status += matching_results['status']
         else:
@@ -1996,6 +2010,8 @@ def create_batch_row_action_position(batch_description, batch_header_map, one_ba
             measure_found = True
             contest_measure_we_vote_id = measure.we_vote_id
             contest_measure_id = measure.id
+            if not positive_value_exists(google_civic_election_id):
+                google_civic_election_id = measure.google_civic_election_d
         elif matching_results['multiple_entries_found']:
             status += "MULTIPLE_MEASURES_FOUND "
         elif not matching_results['success']:

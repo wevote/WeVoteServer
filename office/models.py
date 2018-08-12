@@ -697,6 +697,26 @@ class ContestOfficeManager(models.Model):
 
         return contest_office_id
 
+    def fetch_google_civic_election_id_from_office_we_vote_id(self, contest_office_we_vote_id):
+        """
+        Take in contest_office_we_vote_id and return google_civic_election_id
+        :param contest_office_we_vote_id:
+        :return:
+        """
+        google_civic_election_id = '0'
+        try:
+            if positive_value_exists(contest_office_we_vote_id):
+                contest_office_on_stage = ContestOffice.objects.get(we_vote_id=contest_office_we_vote_id)
+                google_civic_election_id = contest_office_on_stage.google_civic_election_id
+
+        except ContestOffice.MultipleObjectsReturned as e:
+            handle_record_found_more_than_one_exception(e, logger=logger)
+
+        except ContestOffice.DoesNotExist:
+            pass
+
+        return google_civic_election_id
+
     def fetch_state_code_from_we_vote_id(self, contest_office_we_vote_id):
         """
         Take in contest_office_we_vote_id and return the state_code

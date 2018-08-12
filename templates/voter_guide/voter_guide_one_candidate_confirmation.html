@@ -65,6 +65,10 @@
     {{ possible_candidate.election_name }}{% if possible_candidate.election_day_text %},
         {{ possible_candidate.election_day_text }}{% endif %}
     </div>
+    {% elif possible_candidate.google_civic_election_id %}
+    <div>
+    election id: {{ possible_candidate.google_civic_election_id }}
+    </div>
     {% endif %}
     <textarea name="comment_about_candidate_{{ possible_candidate.possible_candidate_number }}"
               class="form-control animated"
