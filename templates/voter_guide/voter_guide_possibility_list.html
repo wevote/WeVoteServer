@@ -21,7 +21,7 @@
     <a href="{% url 'polling_location:polling_location_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">Polling Locations</a>
 </p>
 
-<h1>Suggested Voter Guides to Approve</h1>
+<h1>Suggested Voter Guides</h1>
 
 <ul>
     <li><strong><a href="{% url 'voter_guide:voter_guide_create' %}?google_civic_election_id={{ google_civic_election_id }}"
@@ -31,6 +31,10 @@
         Suggest Possible Voter Guides, from Prior Elections</a></strong>. (3 at a time)
         Look back at voter guides in the last 5 years from organizations that might have endorsements in upcoming elections.</li>
 </ul>
+
+{% if filtered_by_title %}
+  <h3>{{ filtered_by_title }}</h3>
+{% endif %}
 
 <form name="voter_guide_choose_election" method="get" action="{% url 'voter_guide:voter_guide_possibility_list' %}">
 {% csrf_token %}
@@ -63,16 +67,62 @@
     </form>
 
 <p></p>
+
+Filters:&nbsp;
+
+{# Return to see voter guides to review #}
+<span{% if not show_cannot_find_endorsements and not show_candidates_missing_from_we_vote and not show_only_hide_from_active_review %} style="font-weight: bold;"{% endif %}>
+    <a href="{% url 'voter_guide:voter_guide_possibility_list' %}?google_civic_election_id={{ google_civic_election_id }}&show_all_elections={{ show_all_elections }}">
+      Show 'To Review'
+    </a>
+</span>
+&nbsp;&nbsp;&nbsp;
+
+{# Show voter guides where we previously couldn't find endorsements #}
+<span{% if show_cannot_find_endorsements %} style="font-weight: bold;"{% endif %}>
+    <a href="{% url 'voter_guide:voter_guide_possibility_list' %}?google_civic_election_id={{ google_civic_election_id }}&show_all_elections={{ show_all_elections }}&show_cannot_find_endorsements=1">
+        Show 'Endorsements Not Available Yet'
+    </a>
+</span>
+&nbsp;&nbsp;&nbsp;
+
+{# Show voter guides where we don't have the matching candidates or measures in our database #}
+<span{% if show_candidates_missing_from_we_vote %} style="font-weight: bold;"{% endif %}>
+    <a href="{% url 'voter_guide:voter_guide_possibility_list' %}?google_civic_election_id={{ google_civic_election_id }}&show_all_elections={{ show_all_elections }}&show_candidates_missing_from_we_vote=1">
+        Show 'Candidates/Measures Missing'
+    </a>
+</span>
+&nbsp;&nbsp;&nbsp;
+
+{# Return to see voter guides to review #}
+<span{% if show_only_hide_from_active_review %} style="font-weight: bold;"{% endif %}>
+    <a href="{% url 'voter_guide:voter_guide_possibility_list' %}?google_civic_election_id={{ google_civic_election_id }}&show_all_elections={{ show_all_elections }}&show_only_hide_from_active_review=1">
+      Show 'Archived'
+    </a>
+</span>
+&nbsp;&nbsp;&nbsp;
+
 {% if voter_guide_possibility_list %}
     {% include "voter_guide/voter_guide_possibility_table.html" with voter_guide_possibility_list=voter_guide_possibility_list google_civic_election_id=google_civic_election_id %}
 {% else %}
     <p>(no voter guide possibilities found)</p>
 {% endif %}
 
-{% if voter_guide_possibility_archive_list %}
-    <h3>Archived Suggestions - No Action Required</h3>
-    {% include "voter_guide/voter_guide_possibility_table.html" with voter_guide_possibility_list=voter_guide_possibility_archive_list google_civic_election_id=google_civic_election_id %}
-{% endif %}
+
+    <br />
+    <br />
+    <br />
+    <br />
+    "<strong>To Review</strong>" means: These are Suggested Voter Guides that need to be looked at.<br />
+    <br />
+    "<strong>Endorsements Not Available Yet</strong>" means: This organizations hasn't posted their endorsements for the
+    upcoming election yet, but it is worth coming back to this website later to find endorsements when they are posted.<br />
+    <br />
+    "<strong>Candidates/Measures Missing</strong>" means: Our voter guide scraping tool isn't retrieving all of the
+    candidates or measures from the website. Further research is needed to see if we need to add the missing candidates or measures.<br />
+    <br />
+    "<strong>Archived</strong>" means: We have extracted all of the data that we can from these Suggested Voter Guides.<br />
+    <br />
 
 
     <br />

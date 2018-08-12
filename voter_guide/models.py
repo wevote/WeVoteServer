@@ -1767,17 +1767,40 @@ class VoterGuidePossibilityManager(models.Manager):
 
     def retrieve_voter_guide_possibility_list(self, order_by='', limit_number=0, search_string='',
                                               google_civic_election_id=0,
-                                              hide_from_active_review=False):
+                                              hide_from_active_review=False,
+                                              cannot_find_endorsements=False,
+                                              candidates_missing_from_we_vote=False):
+        candidates_missing_from_we_vote = positive_value_exists(candidates_missing_from_we_vote)
+        cannot_find_endorsements = positive_value_exists(cannot_find_endorsements)
+        hide_from_active_review = positive_value_exists(hide_from_active_review)
         voter_guide_possibility_list = []
         voter_guide_possibility_list_found = False
         try:
             voter_guide_query = VoterGuidePossibility.objects.all()
-            voter_guide_query = voter_guide_query.filter(hide_from_active_review=hide_from_active_review)
             voter_guide_query = voter_guide_query.order_by(order_by)
 
             # Allow searching for voter guide possibilities that are being ignored
             if not positive_value_exists(search_string):
                 voter_guide_query = voter_guide_query.exclude(ignore_this_source=True)
+                voter_guide_query = voter_guide_query.filter(hide_from_active_review=hide_from_active_review)
+                # Cannot find endorsements
+                if positive_value_exists(cannot_find_endorsements):
+                    voter_guide_query = voter_guide_query.filter(cannot_find_endorsements=cannot_find_endorsements)
+                elif not positive_value_exists(hide_from_active_review) \
+                        and not positive_value_exists(candidates_missing_from_we_vote):
+                    # Only search for cannot_find_endorsements set to false if NOT showing 'Archived'
+                    # or 'Candidates/Measures Missing'
+                    voter_guide_query = voter_guide_query.filter(cannot_find_endorsements=False)
+                # Candidates/Measures Missing
+                if positive_value_exists(candidates_missing_from_we_vote):
+                    voter_guide_query = voter_guide_query.filter(
+                        candidates_missing_from_we_vote=candidates_missing_from_we_vote)
+                elif not positive_value_exists(hide_from_active_review) \
+                        and not positive_value_exists(cannot_find_endorsements):
+                    # Only search for candidates_missing_from_we_vote set to false if NOT showing 'Archived'
+                    # or 'Endorsements Not Available Yet'
+                    voter_guide_query = voter_guide_query.filter(
+                        candidates_missing_from_we_vote=False)
 
             if positive_value_exists(search_string):
                 search_words = search_string.split()
@@ -1912,6 +1935,9 @@ class VoterGuidePossibility(models.Model):
 
     # What election was used as the target for finding endorsements?
     target_google_civic_election_id = models.PositiveIntegerField(null=True)
+
+    # Data manager sees candidates or measures on voter guide that are not in the We Vote database
+    candidates_missing_from_we_vote = models.BooleanField(default=False)
 
     # Data manager cannot find upcoming endorsements (may not be posted yet)
     cannot_find_endorsements = models.BooleanField(default=False)

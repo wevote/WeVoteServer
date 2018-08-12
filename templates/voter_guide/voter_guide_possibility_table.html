@@ -69,7 +69,11 @@
                 <br />
                 {% endif %}
                 {% if voter_guide_possibility.cannot_find_endorsements %}
-                <strong>Cannot Find Endorsements</strong>
+                <strong>Endorsements Not Available Yet</strong>
+                <br />
+                {% endif %}
+                {% if voter_guide_possibility.candidates_missing_from_we_vote %}
+                <strong>Candidates/Measures Missing</strong>
                 <br />
                 {% endif %}
                 {% if voter_guide_possibility.positions_ready_to_save_as_batch %}

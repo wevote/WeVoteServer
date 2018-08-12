@@ -214,6 +214,7 @@ def voter_guide_create_view(request):
 
     # Take in these values, even though they will be overwritten if we've stored a voter_guide_possibility
     ballot_items_raw = request.GET.get('ballot_items_raw', "")
+    candidates_missing_from_we_vote = request.GET.get('candidates_missing_from_we_vote', "")
     cannot_find_endorsements = request.GET.get('cannot_find_endorsements', "")
     clear_organization_options = request.POST.get('clear_organization_options', 0)
     hide_from_active_review = request.GET.get('hide_from_active_review', "")
@@ -240,6 +241,7 @@ def voter_guide_create_view(request):
         if positive_value_exists(voter_guide_possibility.id):
             ballot_items_raw = voter_guide_possibility.ballot_items_raw
             batch_header_id = voter_guide_possibility.batch_header_id
+            candidates_missing_from_we_vote = voter_guide_possibility.candidates_missing_from_we_vote
             cannot_find_endorsements = voter_guide_possibility.cannot_find_endorsements
             hide_from_active_review = voter_guide_possibility.hide_from_active_review
             ignore_this_source = voter_guide_possibility.ignore_this_source
@@ -334,6 +336,7 @@ def voter_guide_create_view(request):
     template_values = {
         'ballot_items_raw':             ballot_items_raw,
         'batch_header_id':              batch_header_id,
+        'candidates_missing_from_we_vote':  candidates_missing_from_we_vote,
         'cannot_find_endorsements':     cannot_find_endorsements,
         'display_all_done_button':      display_all_done_button,
         'hide_from_active_review':      hide_from_active_review,
@@ -371,6 +374,7 @@ def voter_guide_create_process_view(request):
     all_done_with_entry = request.POST.get('all_done_with_entry', 0)
     ballot_items_raw = request.POST.get('ballot_items_raw', "")
     ballot_items_additional = request.POST.get('ballot_items_additional', "")
+    candidates_missing_from_we_vote = request.POST.get('candidates_missing_from_we_vote', "")
     cannot_find_endorsements = request.POST.get('cannot_find_endorsements', False)
     clear_organization_options = request.POST.get('clear_organization_options', 0)
     confirm_delete = request.POST.get('confirm_delete', 0)
@@ -699,6 +703,7 @@ def voter_guide_create_process_view(request):
         if political_data_manager:
             updated_values['ignore_this_source'] = ignore_this_source
             updated_values['internal_notes'] = internal_notes
+            updated_values['candidates_missing_from_we_vote'] = candidates_missing_from_we_vote
             updated_values['cannot_find_endorsements'] = cannot_find_endorsements
             updated_values['hide_from_active_review'] = hide_from_active_review
 
@@ -771,6 +776,7 @@ def voter_guide_create_process_view(request):
     template_values = {
         'ballot_items_raw':             ballot_items_raw,
         'batch_header_id':              batch_header_id,
+        'candidates_missing_from_we_vote':  candidates_missing_from_we_vote,
         'cannot_find_endorsements':     cannot_find_endorsements,
         'display_all_done_button':      display_all_done_button,
         'messages_on_stage':            messages_on_stage,
@@ -1053,10 +1059,14 @@ def label_vote_smart_voter_guides_view(request):
             if positive_value_exists(positions_count):
                 # If the total number of positions that exist is the same number of vote smart positions, then we
                 # know that ALL positions are vote smart positions
-                vote_smart_positions_count = PositionEntered.objects.filter(
+
+                # Find the count of Vote Smart ratings
+                positions_exist_query = PositionEntered.objects.filter(
                     organization_we_vote_id=voter_guide.organization_we_vote_id,
-                    vote_smart_rating__isnull=False,
-                    google_civic_election_id=voter_guide.google_civic_election_id).count()
+                    google_civic_election_id=voter_guide.google_civic_election_id)
+                positions_exist_query = positions_exist_query.filter(vote_smart_rating__isnull=False)
+                positions_exist_query = positions_exist_query.exclude(vote_smart_rating="")
+                vote_smart_positions_count = positions_exist_query.count()
                 if vote_smart_positions_count == positions_count:
                     # If all of the positions have a positive value in "vote_smart_rating", then label the voter
                     # guide as "vote_smart_ratings_only"
@@ -1099,14 +1109,19 @@ def generate_voter_guides_for_one_election_view(request):
     for organization in organization_list:
         # Cycle through elections. Find out position count for this org for each election.
         # If > 0, then create a voter_guide entry
-        if organization.id not in voter_guide_stored_for_this_organization:
+        if organization.we_vote_id not in voter_guide_stored_for_this_organization:
             # organization hasn't had voter guides stored yet in this run through.
             # Search for positions with this organization_id and google_civic_election_id
-            positions_count = PositionEntered.objects.filter(
-                organization_id=organization.id,
-                vote_smart_rating__isnull=False,
-                google_civic_election_id=google_civic_election_id).count()
+
+            # As of August 2018 exclude Vote Smart ratings (vote_smart_rating__isnull)
+            positions_exist_query = PositionEntered.objects.filter(
+                organization_we_vote_id=organization.we_vote_id,
+                google_civic_election_id=google_civic_election_id)
+            positions_exist_query = positions_exist_query.filter(
+                Q(vote_smart_rating__isnull=True) | Q(vote_smart_rating=""))
+            positions_count = positions_exist_query.count()
             if positions_count > 0:
+                # We have found positions (not including Vote Smart ratings)
                 voter_guide_manager = VoterGuideManager()
                 voter_guide_we_vote_id = ''
                 results = voter_guide_manager.update_or_create_organization_voter_guide_by_election_id(
@@ -1117,33 +1132,7 @@ def generate_voter_guides_for_one_election_view(request):
                     else:
                         voter_guide_updated_count += 1
 
-            # As of August 2018, we no longer use Vote Smart ratings for voter guides
-            # for time_span in TIME_SPAN_LIST:
-            #     # organization hasn't had voter guides stored yet.
-            #     # Search for positions with this organization_id and time_span
-            #     positions_count = PositionEntered.objects.filter(
-            #         organization_id=organization.id,
-            #         vote_smart_time_span=time_span).count()
-            #     if positions_count > 0:
-            #         voter_guide_manager = VoterGuideManager()
-            #         voter_guide_we_vote_id = ''
-            #         results = voter_guide_manager.update_or_create_organization_voter_guide_by_time_span(
-            #             voter_guide_we_vote_id, organization.we_vote_id, time_span)
-            #         if results['success']:
-            #             if results['new_voter_guide_created']:
-            #                 voter_guide_created_count += 1
-            #             else:
-            #                 voter_guide_updated_count += 1
-
-            voter_guide_stored_for_this_organization.append(organization.id)
-
-    # Cycle through public figures
-    # voter_guide_manager = VoterGuideManager()
-    # voter_guide_manager.update_or_create_public_figure_voter_guide(1234, 'wv02')
-
-    # Cycle through voters
-    # voter_guide_manager = VoterGuideManager()
-    # voter_guide_manager.update_or_create_voter_voter_guide(1234, 'wv03')
+            voter_guide_stored_for_this_organization.append(organization.we_vote_id)
 
     messages.add_message(request, messages.INFO,
                          '{voter_guide_created_count} voter guides created, '
@@ -1450,6 +1439,9 @@ def voter_guide_possibility_list_view(request):
 
     google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
     show_all_elections = request.GET.get('show_all_elections', False)
+    show_candidates_missing_from_we_vote = request.GET.get('show_candidates_missing_from_we_vote', False)
+    show_cannot_find_endorsements = request.GET.get('show_cannot_find_endorsements', False)
+    show_only_hide_from_active_review = request.GET.get('show_only_hide_from_active_review', False)
     state_code = request.GET.get('state_code', '')
     voter_guide_possibility_search = request.GET.get('voter_guide_possibility_search', '')
 
@@ -1461,24 +1453,51 @@ def voter_guide_possibility_list_view(request):
     limit_number = 75
 
     # Possibilities to review
-    order_by = "-id"
-    results = voter_guide_possibility_manager.retrieve_voter_guide_possibility_list(
-        order_by, limit_number, voter_guide_possibility_search, google_civic_election_id)
-    if results['success']:
-        voter_guide_possibility_list = results['voter_guide_possibility_list']
-        voter_guide_possibility_list = \
-            add_candidates_with_position_count_to_voter_guide_possibility_list(voter_guide_possibility_list)
-
-    # Entries we've already reviewed
-    hide_from_active_review = True
-    order_by = "-date_last_changed"
-    results = voter_guide_possibility_manager.retrieve_voter_guide_possibility_list(
-        order_by, limit_number, voter_guide_possibility_search, google_civic_election_id,
-        hide_from_active_review)
-    if results['success']:
-        voter_guide_possibility_archive_list = results['voter_guide_possibility_list']
-        voter_guide_possibility_archive_list = \
-            add_candidates_with_position_count_to_voter_guide_possibility_list(voter_guide_possibility_archive_list)
+    filtered_by_title = ""
+    if positive_value_exists(show_cannot_find_endorsements):
+        filtered_by_title = "Endorsements Not Available Yet"
+        cannot_find_endorsements = True
+        order_by = "-id"
+        results = voter_guide_possibility_manager.retrieve_voter_guide_possibility_list(
+            order_by, limit_number, voter_guide_possibility_search, google_civic_election_id,
+            cannot_find_endorsements=cannot_find_endorsements)
+        if results['success']:
+            voter_guide_possibility_list = results['voter_guide_possibility_list']
+            voter_guide_possibility_list = \
+                add_candidates_with_position_count_to_voter_guide_possibility_list(voter_guide_possibility_list)
+    elif positive_value_exists(show_candidates_missing_from_we_vote):
+        filtered_by_title = "Candidates or Measures Missing"
+        candidates_missing_from_we_vote = True
+        order_by = "-id"
+        results = voter_guide_possibility_manager.retrieve_voter_guide_possibility_list(
+            order_by, limit_number, voter_guide_possibility_search, google_civic_election_id,
+            candidates_missing_from_we_vote=candidates_missing_from_we_vote)
+        if results['success']:
+            voter_guide_possibility_list = results['voter_guide_possibility_list']
+            voter_guide_possibility_list = \
+                add_candidates_with_position_count_to_voter_guide_possibility_list(voter_guide_possibility_list)
+    elif positive_value_exists(show_only_hide_from_active_review):
+        # Entries we've already reviewed
+        filtered_by_title = "Archived"
+        hide_from_active_review = True
+        order_by = "-date_last_changed"
+        results = voter_guide_possibility_manager.retrieve_voter_guide_possibility_list(
+            order_by, limit_number, voter_guide_possibility_search, google_civic_election_id,
+            hide_from_active_review=hide_from_active_review)
+        if results['success']:
+            voter_guide_possibility_list = results['voter_guide_possibility_list']
+            voter_guide_possibility_list = \
+                add_candidates_with_position_count_to_voter_guide_possibility_list(voter_guide_possibility_list)
+    else:
+        # Entries we've already reviewed
+        filtered_by_title = "To Review"
+        order_by = "-id"
+        results = voter_guide_possibility_manager.retrieve_voter_guide_possibility_list(
+            order_by, limit_number, voter_guide_possibility_search, google_civic_election_id)
+        if results['success']:
+            voter_guide_possibility_list = results['voter_guide_possibility_list']
+            voter_guide_possibility_list = \
+                add_candidates_with_position_count_to_voter_guide_possibility_list(voter_guide_possibility_list)
 
     # Now populate the election drop down
     if positive_value_exists(show_all_elections):
@@ -1509,14 +1528,17 @@ def voter_guide_possibility_list_view(request):
 
     messages_on_stage = get_messages(request)
     template_values = {
-        'election_list':                    election_list,
-        'google_civic_election_id':         google_civic_election_id,
-        'show_all_elections':               show_all_elections,
-        'state_code':                       state_code,
-        'messages_on_stage':                messages_on_stage,
-        'voter_guide_possibility_archive_list':    voter_guide_possibility_archive_list,
-        'voter_guide_possibility_list':     voter_guide_possibility_list,
-        'voter_guide_possibility_search':   voter_guide_possibility_search,
+        'election_list':                        election_list,
+        'filtered_by_title':                    filtered_by_title,
+        'google_civic_election_id':             google_civic_election_id,
+        'show_all_elections':                   show_all_elections,
+        'show_candidates_missing_from_we_vote': show_candidates_missing_from_we_vote,
+        'show_cannot_find_endorsements':        show_cannot_find_endorsements,
+        'show_only_hide_from_active_review':    show_only_hide_from_active_review,
+        'state_code':                           state_code,
+        'messages_on_stage':                    messages_on_stage,
+        'voter_guide_possibility_list':         voter_guide_possibility_list,
+        'voter_guide_possibility_search':       voter_guide_possibility_search,
     }
     return render(request, 'voter_guide/voter_guide_possibility_list.html', template_values)
 
