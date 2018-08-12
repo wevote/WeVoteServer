@@ -714,16 +714,18 @@ def voter_guide_create_process_view(request):
                     one_possible_candidate['candidate_name']
                 updated_values['candidate_we_vote_id_' + one_possible_candidate['possible_candidate_number']] = \
                     one_possible_candidate['candidate_we_vote_id']
-                updated_values['stance_about_candidate_' + one_possible_candidate['possible_candidate_number']] = \
-                    one_possible_candidate['stance_about_candidate']
                 updated_values['comment_about_candidate_' + one_possible_candidate['possible_candidate_number']] = \
                     one_possible_candidate['comment_about_candidate']
+                updated_values['google_civic_election_id_' + one_possible_candidate['possible_candidate_number']] = \
+                    convert_to_int(one_possible_candidate['google_civic_election_id'])
+                updated_values['stance_about_candidate_' + one_possible_candidate['possible_candidate_number']] = \
+                    one_possible_candidate['stance_about_candidate']
         results = voter_guide_possibility_manager.update_or_create_voter_guide_possibility(
             voter_guide_possibility_url,
             voter_guide_possibility_id=voter_guide_possibility_id,
             updated_values=updated_values)
         if not positive_value_exists(results['success']):
-            messages.add_message(request, messages.ERROR, 'Could not save this voter guide.')
+            messages.add_message(request, messages.ERROR, 'Could not save this suggested voter guide.')
 
         voter_guide_possibility_id = results['voter_guide_possibility_id']
         if positive_value_exists(voter_guide_possibility_id):
