@@ -223,6 +223,12 @@
                 <label for="cannot_find_endorsements_id" style="font-weight: normal !important;">Endorsements Not Available Yet</label>
 
             &nbsp;&nbsp;&nbsp;
+            <input type="checkbox" name="candidates_missing_from_we_vote" id="candidates_missing_from_we_vote_id"
+                   value="True"
+                   {% if candidates_missing_from_we_vote %}checked{% endif %} />
+                <label for="candidates_missing_from_we_vote_id" style="font-weight: normal !important;">Candidates/Measures Missing</label>
+
+            &nbsp;&nbsp;&nbsp;
             <input type="checkbox" name="hide_from_active_review" id="hide_from_active_review_id"
                    value="True"
                    {% if hide_from_active_review %}checked{% endif %} />
