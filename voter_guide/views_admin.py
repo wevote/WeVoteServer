@@ -359,6 +359,7 @@ def voter_guide_create_view(request):
         'upcoming_election_list':       upcoming_election_list,
         'voter_guide_possibility_id':   voter_guide_possibility_id,
         'voter_guide_possibility_url':  voter_guide_possibility_url,
+        'voter_who_submitted_name':     voter_who_submitted_name,
         'voter_who_submitted_we_vote_id': voter_who_submitted_we_vote_id,
     }
     return render(request, 'voter_guide/voter_guide_create.html', template_values)
@@ -765,7 +766,7 @@ def voter_guide_create_process_view(request):
 
         possible_candidate_list_modified.append(one_possible_candidate)
 
-    messages_on_stage = get_messages(request)
+    # messages_on_stage = get_messages(request)
 
     if all_done_with_entry:
         messages.add_message(request, messages.SUCCESS,
@@ -775,35 +776,39 @@ def voter_guide_create_process_view(request):
     if positive_value_exists(form_submitted) and positive_value_exists(changes_made):
         messages.add_message(request, messages.SUCCESS, 'Changes saved.')
 
-    template_values = {
-        'ballot_items_raw':             ballot_items_raw,
-        'batch_header_id':              batch_header_id,
-        'candidates_missing_from_we_vote':  candidates_missing_from_we_vote,
-        'cannot_find_endorsements':     cannot_find_endorsements,
-        'display_all_done_button':      display_all_done_button,
-        'messages_on_stage':            messages_on_stage,
-        'ignore_this_source':           ignore_this_source,
-        'internal_notes':               internal_notes,
-        'organization':                 organization,
-        'organization_found':           organization_found,
-        'organization_name':            organization_name,
-        'organization_twitter_handle':  organization_twitter_handle,
-        'organization_we_vote_id':      organization_we_vote_id,
-        'organizations_list':           organizations_list,
-        'political_data_manager':       political_data_manager,
-        'possible_candidate_list':      possible_candidate_list_modified,
-        'possible_candidate_list_found': possible_candidate_list_found,
-        'positions_ready_to_save_as_batch': positions_ready_to_save_as_batch,
-        'hide_possible_candidate_list': hide_possible_candidate_list,
-        'target_google_civic_election_id':  target_google_civic_election_id,
-        'voter_guide_possibility_id':   voter_guide_possibility_id,
-        'voter_guide_possibility_url':  voter_guide_possibility_url,
-        'voter_who_submitted_name':     voter_who_submitted_name,
-        'voter_who_submitted_we_vote_id': voter_who_submitted_we_vote_id,
-        'state_code':                   state_code,
-        'state_list':                   sorted_state_list,
-    }
-    return render(request, 'voter_guide/voter_guide_create.html', template_values)
+    return HttpResponseRedirect(reverse('voter_guide:voter_guide_create', args=()) +
+                                "?voter_guide_possibility_id=" + str(voter_guide_possibility_id))
+
+    # Old approach -- now we redirect back to the display-only page
+    # template_values = {
+    #     'ballot_items_raw':             ballot_items_raw,
+    #     'batch_header_id':              batch_header_id,
+    #     'candidates_missing_from_we_vote':  candidates_missing_from_we_vote,
+    #     'cannot_find_endorsements':     cannot_find_endorsements,
+    #     'display_all_done_button':      display_all_done_button,
+    #     'messages_on_stage':            messages_on_stage,
+    #     'ignore_this_source':           ignore_this_source,
+    #     'internal_notes':               internal_notes,
+    #     'organization':                 organization,
+    #     'organization_found':           organization_found,
+    #     'organization_name':            organization_name,
+    #     'organization_twitter_handle':  organization_twitter_handle,
+    #     'organization_we_vote_id':      organization_we_vote_id,
+    #     'organizations_list':           organizations_list,
+    #     'political_data_manager':       political_data_manager,
+    #     'possible_candidate_list':      possible_candidate_list_modified,
+    #     'possible_candidate_list_found': possible_candidate_list_found,
+    #     'positions_ready_to_save_as_batch': positions_ready_to_save_as_batch,
+    #     'hide_possible_candidate_list': hide_possible_candidate_list,
+    #     'target_google_civic_election_id':  target_google_civic_election_id,
+    #     'voter_guide_possibility_id':   voter_guide_possibility_id,
+    #     'voter_guide_possibility_url':  voter_guide_possibility_url,
+    #     'voter_who_submitted_name':     voter_who_submitted_name,
+    #     'voter_who_submitted_we_vote_id': voter_who_submitted_we_vote_id,
+    #     'state_code':                   state_code,
+    #     'state_list':                   sorted_state_list,
+    # }
+    # return render(request, 'voter_guide/voter_guide_create.html', template_values)
 
 
 def break_up_text_into_possible_candidates_list(ballot_items, starting_candidate_number="001"):
@@ -951,7 +956,8 @@ def generate_voter_guide_possibility_batch_view(request):
     if voter_guide_possibility_found and positive_value_exists(batch_header_id):
         try:
             voter_guide_possibility.batch_header_id = batch_header_id
-            voter_guide_possibility.hide_from_active_review = True
+            # We do not want to hide after an import. There is often work to do after we have done the first import.
+            # voter_guide_possibility.hide_from_active_review = True
             voter_guide_possibility.save()
             status += "GENERATE_VOTER_GUIDE_POSSIBILITY_BATCH-STATUS_SAVED "
         except Exception as e:
