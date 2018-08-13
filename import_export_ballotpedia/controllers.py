@@ -75,6 +75,7 @@ def attach_ballotpedia_election_by_district_from_api(election, google_civic_elec
     is_national_election = False
     if election_object_found:
         election_day_text = election.election_day_text
+        is_national_election = election.is_national_election
         google_civic_election_id = election.google_civic_election_id
     else:
         election_manager = ElectionManager()
@@ -603,14 +604,18 @@ def retrieve_ballotpedia_district_id_list_for_polling_location(
         if positive_value_exists(force_district_retrieve_from_ballotpedia):
             # Delete any existing links between this district and this polling location
             results = electoral_district_manager.delete_electoral_district_link(
-                    polling_location_we_vote_id=polling_location_we_vote_id)
+                    polling_location_we_vote_id__iexact=polling_location_we_vote_id)
             if not results['success']:
                 status += results['status']
         else:
             results = electoral_district_manager.retrieve_ballotpedia_district_ids_for_polling_location(
                 polling_location_we_vote_id)
-            ballotpedia_district_id_list = results['ballotpedia_district_id_list']
-            ballotpedia_district_id_list_found = True
+            if results['ballotpedia_district_id_list_found']:
+                ballotpedia_district_id_list = results['ballotpedia_district_id_list']
+                ballotpedia_district_id_list_found = True
+            else:
+                ballotpedia_district_id_list = []
+                ballotpedia_district_id_list_found = False
 
         if ballotpedia_district_id_list_found and not force_district_retrieve_from_ballotpedia:
             pass
