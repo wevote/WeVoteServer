@@ -342,7 +342,7 @@
 <strong>Steps to Prepare for Election</strong><br />
 
 <ol>
-
+{% if not is_national_election or is_national_election and state_code %}
   <li>
     <a href="{% url 'ballotpedia:attach_ballotpedia_election' election.id %}?google_civic_election_id={{ election.google_civic_election_id }}&state_code={{ state_code }}"
        target="_blank">
@@ -391,6 +391,11 @@
         out, <a href="{% url 'import_export_batches:batch_set_list' %}?kind_of_batch=IMPORT_BALLOT_ITEM&google_civic_election_id={{ election.google_civic_election_id }}&state_code={{ state_code }}" target="_blank">
         go here after ~5 minutes to see the results.</a>
   </li>
+{% else %}
+  <li>
+    (To retrieve Ballot Data from Ballotpedia for this National Election, please specify a state.)<br />
+  </li>
+{% endif %}
 
 {% if election.google_civic_election_id|convert_to_int < 1000000 %}
   <li>

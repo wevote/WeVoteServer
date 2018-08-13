@@ -230,7 +230,7 @@ def attach_ballotpedia_election_view(request, election_local_id=0):
                                     "&state_code=" + str(state_code))
 
     results = attach_ballotpedia_election_by_district_from_api(election_on_stage, google_civic_election_id,
-                                                               merged_district_list, state_code=state_code)
+                                                               merged_district_list, state_code)
 
     status += results['status']
     status = status[:1000]
