@@ -676,7 +676,7 @@ def retrieve_ballotpedia_district_id_list_for_polling_location(
         if positive_value_exists(force_district_retrieve_from_ballotpedia):
             # Delete any existing links between this district and this polling location
             results = electoral_district_manager.delete_electoral_district_link(
-                    polling_location_we_vote_id__iexact=polling_location_we_vote_id)
+                    polling_location_we_vote_id=polling_location_we_vote_id)
             if not results['success']:
                 status += results['status']
         else:
