@@ -179,7 +179,7 @@ def attach_ballotpedia_election_view(request, election_local_id=0):
             polling_location_query = polling_location_query.exclude(
                 Q(zip_long__isnull=True) | Q(zip_long__exact='0') | Q(zip_long__exact=''))
             # Ordering by "location_name" creates a bit of (locational) random order
-            polling_location_list = polling_location_query.order_by('location_name')[:1000]
+            polling_location_list = polling_location_query.order_by('location_name')[:50]
     except PollingLocation.DoesNotExist:
         messages.add_message(request, messages.INFO,
                              'Could not retrieve polling location data for the {election_name}. '
