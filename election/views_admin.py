@@ -689,6 +689,7 @@ def election_list_view(request):
     state_code = request.GET.get('state_code', '')
     election_search = request.GET.get('election_search', '')
     show_all_elections_this_year = request.GET.get('show_all_elections_this_year', False)
+    show_election_statistics = request.GET.get('show_election_statistics', False)
     show_ignored_elections = request.GET.get('show_ignored_elections', False)
     if positive_value_exists(show_all_elections_this_year):
         # Give priority to show_all_elections_this_year
@@ -755,21 +756,6 @@ def election_list_view(request):
             time_until_election = date_of_election - datetime_now
             election.days_until_election = convert_to_int("%d" % time_until_election.days)
 
-        election.ballot_returned_count = \
-            ballot_returned_list_manager.fetch_ballot_returned_list_count_for_election(
-                election.google_civic_election_id, election.state_code)
-        election.ballot_location_display_option_on_count = \
-            ballot_returned_list_manager.fetch_ballot_location_display_option_on_count_for_election(
-                election.google_civic_election_id, election.state_code)
-        # Running this for every entry on the elections page makes the page too slow
-        # if election.ballot_returned_count < 500:
-        #     batch_set_source = "IMPORT_BALLOTPEDIA_BALLOT_ITEMS"
-        #     results = batch_manager.retrieve_unprocessed_batch_set_info_by_election_and_set_source(
-        #         election.google_civic_election_id, batch_set_source)
-        #     if positive_value_exists(results['batches_not_processed']):
-        #         election.batches_not_processed = results['batches_not_processed']
-        #         election.batches_not_processed_batch_set_id = results['batch_set_id']
-
         # How many offices?
         office_list_query = ContestOffice.objects.all()
         office_list_query = office_list_query.filter(
@@ -777,54 +763,70 @@ def election_list_view(request):
         office_list = list(office_list_query)
         election.office_count = len(office_list)
 
-        # How many offices with zero candidates?
-        offices_with_candidates_count = 0
-        offices_without_candidates_count = 0
-        for one_office in office_list:
+        if positive_value_exists(show_election_statistics):
+            election.ballot_returned_count = \
+                ballot_returned_list_manager.fetch_ballot_returned_list_count_for_election(
+                    election.google_civic_election_id, election.state_code)
+            election.ballot_location_display_option_on_count = \
+                ballot_returned_list_manager.fetch_ballot_location_display_option_on_count_for_election(
+                    election.google_civic_election_id, election.state_code)
+            # Running this for every entry on the elections page makes the page too slow
+            # if election.ballot_returned_count < 500:
+            #     batch_set_source = "IMPORT_BALLOTPEDIA_BALLOT_ITEMS"
+            #     results = batch_manager.retrieve_unprocessed_batch_set_info_by_election_and_set_source(
+            #         election.google_civic_election_id, batch_set_source)
+            #     if positive_value_exists(results['batches_not_processed']):
+            #         election.batches_not_processed = results['batches_not_processed']
+            #         election.batches_not_processed_batch_set_id = results['batch_set_id']
+
+            # How many offices with zero candidates?
+            offices_with_candidates_count = 0
+            offices_without_candidates_count = 0
+            for one_office in office_list:
+                candidate_list_query = CandidateCampaign.objects.all()
+                candidate_list_query = candidate_list_query.filter(contest_office_id=one_office.id)
+                candidate_count = candidate_list_query.count()
+                if positive_value_exists(candidate_count):
+                    offices_with_candidates_count += 1
+                else:
+                    offices_without_candidates_count += 1
+            election.offices_with_candidates_count = offices_with_candidates_count
+            election.offices_without_candidates_count = offices_without_candidates_count
+
+            # How many candidates?
             candidate_list_query = CandidateCampaign.objects.all()
-            candidate_list_query = candidate_list_query.filter(contest_office_id=one_office.id)
-            candidate_count = candidate_list_query.count()
-            if positive_value_exists(candidate_count):
-                offices_with_candidates_count += 1
-            else:
-                offices_without_candidates_count += 1
-        election.offices_with_candidates_count = offices_with_candidates_count
-        election.offices_without_candidates_count = offices_without_candidates_count
+            candidate_list_query = candidate_list_query.filter(
+                google_civic_election_id=election.google_civic_election_id)
+            election.candidate_count = candidate_list_query.count()
 
-        # How many candidates?
-        candidate_list_query = CandidateCampaign.objects.all()
-        candidate_list_query = candidate_list_query.filter(
-            google_civic_election_id=election.google_civic_election_id)
-        election.candidate_count = candidate_list_query.count()
+            # How many without photos?
+            candidate_list_query = CandidateCampaign.objects.all()
+            candidate_list_query = candidate_list_query.filter(
+                google_civic_election_id=election.google_civic_election_id)
+            candidate_list_query = candidate_list_query.filter(
+                Q(we_vote_hosted_profile_image_url_tiny__isnull=True) | Q(we_vote_hosted_profile_image_url_tiny='')
+            )
+            election.candidates_without_photo_count = candidate_list_query.count()
+            if positive_value_exists(election.candidate_count):
+                election.candidates_without_photo_percentage = \
+                    100 * (election.candidates_without_photo_count / election.candidate_count)
 
-        # How many without photos?
-        candidate_list_query = CandidateCampaign.objects.all()
-        candidate_list_query = candidate_list_query.filter(
-            google_civic_election_id=election.google_civic_election_id)
-        candidate_list_query = candidate_list_query.filter(
-            Q(we_vote_hosted_profile_image_url_tiny__isnull=True) | Q(we_vote_hosted_profile_image_url_tiny='')
-        )
-        election.candidates_without_photo_count = candidate_list_query.count()
-        if positive_value_exists(election.candidate_count):
-            election.candidates_without_photo_percentage = \
-                100 * (election.candidates_without_photo_count / election.candidate_count)
+            # How many measures?
+            measure_list_query = ContestMeasure.objects.all()
+            measure_list_query = measure_list_query.filter(
+                google_civic_election_id=election.google_civic_election_id)
+            election.measure_count = measure_list_query.count()
 
-        # How many measures?
-        measure_list_query = ContestMeasure.objects.all()
-        measure_list_query = measure_list_query.filter(
-            google_civic_election_id=election.google_civic_election_id)
-        election.measure_count = measure_list_query.count()
+            # Number of Voter Guides
+            voter_guide_query = VoterGuide.objects.filter(google_civic_election_id=election.google_civic_election_id)
+            voter_guide_query = voter_guide_query.exclude(vote_smart_ratings_only=True)
+            election.voter_guides_count = voter_guide_query.count()
 
-        # Number of Voter Guides
-        voter_guide_query = VoterGuide.objects.filter(google_civic_election_id=election.google_civic_election_id)
-        voter_guide_query = voter_guide_query.exclude(vote_smart_ratings_only=True)
-        election.voter_guides_count = voter_guide_query.count()
-
-        # Number of Public Positions
-        position_query = PositionEntered.objects.filter(google_civic_election_id=election.google_civic_election_id)
-        # As of Aug 2018 we are no longer using PERCENT_RATING
-        position_query = position_query.exclude(stance__iexact='PERCENT_RATING')
-        election.public_positions_count = position_query.count()
+            # Number of Public Positions
+            position_query = PositionEntered.objects.filter(google_civic_election_id=election.google_civic_election_id)
+            # As of Aug 2018 we are no longer using PERCENT_RATING
+            position_query = position_query.exclude(stance__iexact='PERCENT_RATING')
+            election.public_positions_count = position_query.count()
 
         election_list_modified.append(election)
 
@@ -835,6 +837,7 @@ def election_list_view(request):
         'google_civic_election_id':     google_civic_election_id,
         'show_all_elections':           show_all_elections,
         'show_all_elections_this_year': show_all_elections_this_year,
+        'show_election_statistics':     show_election_statistics,
         'show_ignored_elections':       show_ignored_elections,
         'state_code':                   state_code,
     }
@@ -853,6 +856,7 @@ def nationwide_election_list_view(request):
     state_code = request.GET.get('state_code', '')
     election_search = request.GET.get('election_search', '')
     show_all_elections_this_year = request.GET.get('show_all_elections_this_year', False)
+    show_election_statistics = request.GET.get('show_election_statistics', False)
     show_ignored_elections = request.GET.get('show_ignored_elections', False)
     if positive_value_exists(show_all_elections_this_year):
         # Give priority to show_all_elections_this_year
@@ -945,21 +949,6 @@ def nationwide_election_list_view(request):
             time_until_election = date_of_election - datetime_now
             election.days_until_election = convert_to_int("%d" % time_until_election.days)
 
-        election.ballot_returned_count = \
-            ballot_returned_list_manager.fetch_ballot_returned_list_count_for_election(
-                election.google_civic_election_id, election.state_code)
-        election.ballot_location_display_option_on_count = \
-            ballot_returned_list_manager.fetch_ballot_location_display_option_on_count_for_election(
-                election.google_civic_election_id, election.state_code)
-        # Running this for every entry on the elections page makes the page too slow
-        # if election.ballot_returned_count < 500:
-        #     batch_set_source = "IMPORT_BALLOTPEDIA_BALLOT_ITEMS"
-        #     results = batch_manager.retrieve_unprocessed_batch_set_info_by_election_and_set_source(
-        #         election.google_civic_election_id, batch_set_source)
-        #     if positive_value_exists(results['batches_not_processed']):
-        #         election.batches_not_processed = results['batches_not_processed']
-        #         election.batches_not_processed_batch_set_id = results['batch_set_id']
-
         # How many offices?
         office_list_query = ContestOffice.objects.all()
         office_list_query = office_list_query.filter(google_civic_election_id=election.google_civic_election_id)
@@ -968,61 +957,77 @@ def nationwide_election_list_view(request):
         office_list = list(office_list_query)
         election.office_count = len(office_list)
 
-        # How many offices with zero candidates?
-        offices_with_candidates_count = 0
-        offices_without_candidates_count = 0
-        for one_office in office_list:
+        if positive_value_exists(show_election_statistics):
+            election.ballot_returned_count = \
+                ballot_returned_list_manager.fetch_ballot_returned_list_count_for_election(
+                    election.google_civic_election_id, election.state_code)
+            election.ballot_location_display_option_on_count = \
+                ballot_returned_list_manager.fetch_ballot_location_display_option_on_count_for_election(
+                    election.google_civic_election_id, election.state_code)
+            # Running this for every entry on the elections page makes the page too slow
+            # if election.ballot_returned_count < 500:
+            #     batch_set_source = "IMPORT_BALLOTPEDIA_BALLOT_ITEMS"
+            #     results = batch_manager.retrieve_unprocessed_batch_set_info_by_election_and_set_source(
+            #         election.google_civic_election_id, batch_set_source)
+            #     if positive_value_exists(results['batches_not_processed']):
+            #         election.batches_not_processed = results['batches_not_processed']
+            #         election.batches_not_processed_batch_set_id = results['batch_set_id']
+
+            # How many offices with zero candidates?
+            offices_with_candidates_count = 0
+            offices_without_candidates_count = 0
+            for one_office in office_list:
+                candidate_list_query = CandidateCampaign.objects.all()
+                candidate_list_query = candidate_list_query.filter(contest_office_id=one_office.id)
+                candidate_count = candidate_list_query.count()
+                if positive_value_exists(candidate_count):
+                    offices_with_candidates_count += 1
+                else:
+                    offices_without_candidates_count += 1
+            election.offices_with_candidates_count = offices_with_candidates_count
+            election.offices_without_candidates_count = offices_without_candidates_count
+
+            # How many candidates?
             candidate_list_query = CandidateCampaign.objects.all()
-            candidate_list_query = candidate_list_query.filter(contest_office_id=one_office.id)
-            candidate_count = candidate_list_query.count()
-            if positive_value_exists(candidate_count):
-                offices_with_candidates_count += 1
-            else:
-                offices_without_candidates_count += 1
-        election.offices_with_candidates_count = offices_with_candidates_count
-        election.offices_without_candidates_count = offices_without_candidates_count
+            candidate_list_query = candidate_list_query.filter(google_civic_election_id=election.google_civic_election_id)
+            if is_national_election:
+                candidate_list_query = candidate_list_query.filter(state_code__iexact=election.state_code)
+            election.candidate_count = candidate_list_query.count()
 
-        # How many candidates?
-        candidate_list_query = CandidateCampaign.objects.all()
-        candidate_list_query = candidate_list_query.filter(google_civic_election_id=election.google_civic_election_id)
-        if is_national_election:
-            candidate_list_query = candidate_list_query.filter(state_code__iexact=election.state_code)
-        election.candidate_count = candidate_list_query.count()
+            # How many without photos?
+            candidate_list_query = CandidateCampaign.objects.all()
+            candidate_list_query = candidate_list_query.filter(google_civic_election_id=election.google_civic_election_id)
+            if is_national_election:
+                candidate_list_query = candidate_list_query.filter(state_code__iexact=election.state_code)
+            candidate_list_query = candidate_list_query.filter(
+                Q(we_vote_hosted_profile_image_url_tiny__isnull=True) | Q(we_vote_hosted_profile_image_url_tiny='')
+            )
+            election.candidates_without_photo_count = candidate_list_query.count()
+            if positive_value_exists(election.candidate_count):
+                election.candidates_without_photo_percentage = \
+                    100 * (election.candidates_without_photo_count / election.candidate_count)
 
-        # How many without photos?
-        candidate_list_query = CandidateCampaign.objects.all()
-        candidate_list_query = candidate_list_query.filter(google_civic_election_id=election.google_civic_election_id)
-        if is_national_election:
-            candidate_list_query = candidate_list_query.filter(state_code__iexact=election.state_code)
-        candidate_list_query = candidate_list_query.filter(
-            Q(we_vote_hosted_profile_image_url_tiny__isnull=True) | Q(we_vote_hosted_profile_image_url_tiny='')
-        )
-        election.candidates_without_photo_count = candidate_list_query.count()
-        if positive_value_exists(election.candidate_count):
-            election.candidates_without_photo_percentage = \
-                100 * (election.candidates_without_photo_count / election.candidate_count)
+            # How many measures?
+            measure_list_query = ContestMeasure.objects.all()
+            measure_list_query = measure_list_query.filter(google_civic_election_id=election.google_civic_election_id)
+            if is_national_election:
+                measure_list_query = measure_list_query.filter(state_code__iexact=election.state_code)
+            election.measure_count = measure_list_query.count()
 
-        # How many measures?
-        measure_list_query = ContestMeasure.objects.all()
-        measure_list_query = measure_list_query.filter(google_civic_election_id=election.google_civic_election_id)
-        if is_national_election:
-            measure_list_query = measure_list_query.filter(state_code__iexact=election.state_code)
-        election.measure_count = measure_list_query.count()
+            # Number of Voter Guides
+            voter_guide_query = VoterGuide.objects.filter(google_civic_election_id=election.google_civic_election_id)
+            voter_guide_query = voter_guide_query.exclude(vote_smart_ratings_only=True)
+            if is_national_election:
+                voter_guide_query = voter_guide_query.filter(state_code__iexact=election.state_code)
+            election.voter_guides_count = voter_guide_query.count()
 
-        # Number of Voter Guides
-        voter_guide_query = VoterGuide.objects.filter(google_civic_election_id=election.google_civic_election_id)
-        voter_guide_query = voter_guide_query.exclude(vote_smart_ratings_only=True)
-        if is_national_election:
-            voter_guide_query = voter_guide_query.filter(state_code__iexact=election.state_code)
-        election.voter_guides_count = voter_guide_query.count()
-
-        # Number of Public Positions
-        position_query = PositionEntered.objects.filter(google_civic_election_id=election.google_civic_election_id)
-        # As of Aug 2018 we are no longer using PERCENT_RATING
-        position_query = position_query.exclude(stance__iexact='PERCENT_RATING')
-        if is_national_election:
-            position_query = position_query.filter(state_code__iexact=election.state_code)
-        election.public_positions_count = position_query.count()
+            # Number of Public Positions
+            position_query = PositionEntered.objects.filter(google_civic_election_id=election.google_civic_election_id)
+            # As of Aug 2018 we are no longer using PERCENT_RATING
+            position_query = position_query.exclude(stance__iexact='PERCENT_RATING')
+            if is_national_election:
+                position_query = position_query.filter(state_code__iexact=election.state_code)
+            election.public_positions_count = position_query.count()
 
         election_list_modified.append(election)
 
@@ -1035,6 +1040,7 @@ def nationwide_election_list_view(request):
         'google_civic_election_id':     google_civic_election_id,
         'show_all_elections':           show_all_elections,
         'show_all_elections_this_year': show_all_elections_this_year,
+        'show_election_statistics':     show_election_statistics,
         'show_ignored_elections':       show_ignored_elections,
         'state_code':                   state_code,
     }
