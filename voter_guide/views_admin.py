@@ -472,6 +472,8 @@ def voter_guide_create_process_view(request):
     :param request:
     :return:
     """
+    status = ""
+
     all_done_with_entry = request.POST.get('all_done_with_entry', 0)
     ballot_items_raw = request.POST.get('ballot_items_raw', "")
     ballot_items_additional = request.POST.get('ballot_items_additional', "")
@@ -714,7 +716,9 @@ def voter_guide_create_process_view(request):
             voter_guide_possibility_id=voter_guide_possibility_id,
             updated_values=updated_values)
         if not positive_value_exists(results['success']):
-            messages.add_message(request, messages.ERROR, 'Could not save this suggested voter guide.')
+            status += results['status']
+            messages.add_message(request, messages.ERROR, 'Could not save this suggested voter guide. '
+                                                          'STATUS: {status}'.format(status=status))
 
         voter_guide_possibility_id = results['voter_guide_possibility_id']
 
