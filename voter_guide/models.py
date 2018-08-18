@@ -2,6 +2,7 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
+from datetime import datetime, timedelta
 from django.db import models
 from django.db.models import Q
 from election.models import ElectionManager, TIME_SPAN_LIST
@@ -12,6 +13,7 @@ from organization.models import Organization, OrganizationManager, \
     CORPORATION, GROUP, INDIVIDUAL, NEWS_ORGANIZATION, NONPROFIT, NONPROFIT_501C3, NONPROFIT_501C4, \
     POLITICAL_ACTION_COMMITTEE, PUBLIC_FIGURE, UNKNOWN, ORGANIZATION_TYPE_CHOICES
 from pledge_to_vote.models import PledgeToVoteManager
+import pytz
 import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, convert_to_str, positive_value_exists
 from wevote_settings.models import fetch_site_unique_id_prefix, fetch_next_we_vote_id_voter_guide_integer
@@ -1328,6 +1330,15 @@ class VoterGuideListManager(models.Model):
             else:
                 # If not searching, make sure we do not include individuals
                 voter_guide_query = voter_guide_query.exclude(voter_guide_owner_type__iexact=INDIVIDUAL)
+
+                # We also want to exclude voter guides with election_day_text smaller than today's date
+                timezone = pytz.timezone("America/Los_Angeles")
+                datetime_now = timezone.localize(datetime.now())
+                two_days = timedelta(days=2)
+                datetime_two_days_ago = datetime_now - two_days
+                earliest_date_to_show = datetime_two_days_ago.strftime("%Y-%m-%d")
+                voter_guide_query = voter_guide_query.exclude(election_day_text__lt=earliest_date_to_show)
+                voter_guide_query = voter_guide_query.exclude(election_day_text__isnull=True)
 
             if sort_order == 'desc':
                 voter_guide_query = voter_guide_query.order_by('-' + sort_by)[:maximum_number_to_retrieve]

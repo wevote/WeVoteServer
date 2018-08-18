@@ -1056,6 +1056,7 @@ def voter_guides_to_follow_retrieve_for_api(voter_device_id,  # voterGuidesToFol
                     non_election_voter_guide_list = non_election_results['voter_guide_list']
                     voter_guide_list = voter_guide_list + non_election_voter_guide_list
         else:
+            status += "RETRIEVING_VOTER_GUIDES_WITHOUT_ELECTION_ID_OR_BALLOT_ITEM "
             results = retrieve_voter_guides_to_follow_generic_for_api(voter_id, search_string,
                                                                       filter_voter_guides_by_issue,
                                                                       organization_we_vote_id_list_for_voter_issues,
