@@ -49,6 +49,13 @@
       <input type="checkbox" name="show_all_elections" id="show_all_elections_id" value="1"
              {% if show_all_elections %}checked{% endif %} /> Include Past Elections
     </label>
+
+    &nbsp;&nbsp;&nbsp;&nbsp;
+    <label for="show_election_statistics_id">
+      <input type="checkbox" name="show_election_statistics" id="show_election_statistics_id" value="1"
+             {% if show_election_statistics %}checked{% endif %} /> Show Election Statistics
+    </label>
+
     &nbsp;&nbsp;&nbsp;&nbsp;
     <input type="hidden" name="candidate_search" id="candidate_search_id" value="{{ candidate_search }}" />
 
@@ -80,6 +87,7 @@
             <th>Google Civic ID</th>
             <th align="middle">Offices{% if election.offices_without_candidates_count %}<br />
               (w/o Candidates){% endif %}</th>
+        {% if show_election_statistics %}
             <th align="middle">Candidates{% if election.candidates_without_photo_count %}<br />
               (w/o Photos){% endif %}</th>
             <th>Measures</th>
@@ -87,6 +95,7 @@
                Locations</th>
             <th align="middle">Voter Guides<br />
               (Public Positions)</th>
+        {% endif %}
         </tr>
       </thead>
         <tr>
@@ -109,6 +118,10 @@
             </td>
             <td align="middle">{{ election.google_civic_election_id }}</td>
             <td align="middle">
+            {% if not show_election_statistics and election.office_count %}
+                {{ election.office_count|default_if_none:"" }}
+            {% endif %}
+
             {% if election.offices_with_candidates_count %}
                 <a href="{% url 'office:office_list' %}?google_civic_election_id={{ election.google_civic_election_id }}{% if show_all_elections_this_year %}&show_all_elections_this_year=1{% elif show_all_elections %}&show_all_elections=1{% endif %}"
                    target="_blank">
@@ -118,6 +131,7 @@
                 <span style="color: darkgray">({{ election.offices_without_candidates_count|default_if_none:"" }})</span>
             {% endif %}
             </td>
+        {% if show_election_statistics %}
             <td align="middle">
             {% if election.candidate_count %}
                 {{ election.candidate_count|default_if_none:"" }}
@@ -167,6 +181,7 @@
                 ({{ election.public_positions_count|default_if_none:"" }})</a>
             {% endif %}
             </td>
+        {% endif %}
         </tr>
     </table>
 {% endif %}
@@ -530,6 +545,11 @@
     });
     $(function() {
         $('#show_all_elections_id').change(function() {
+            this.form.submit();
+        });
+    });
+    $(function() {
+        $('#show_election_statistics_id').change(function() {
             this.form.submit();
         });
     });
