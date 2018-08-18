@@ -1,7 +1,7 @@
 {# templates/voter_guide/voter_guide_create.html #}
 {% extends "template_base.html" %}
 
-{% block title %}Endorsements{% endblock %}
+{% block title %}{% if organization_found and organization %}{{ organization.organization_name }}: {% endif %}Endorsements{% endblock %}
 
 {%  block content %}
 {% load template_filters %}
