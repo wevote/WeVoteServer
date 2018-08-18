@@ -481,8 +481,6 @@ def voter_guide_create_process_view(request):
     confirm_delete = request.POST.get('confirm_delete', 0)
     form_submitted = request.POST.get('form_submitted', False)
     hide_from_active_review = request.POST.get('hide_from_active_review', False)
-    # hide_possible_candidate_list = request.POST.get('hide_possible_candidate_list', False)
-    # hide_possible_candidate_list = positive_value_exists(hide_possible_candidate_list)
     ignore_this_source = request.POST.get('ignore_this_source', False)
     internal_notes = request.POST.get('internal_notes', "")
     organization_name = request.POST.get('organization_name', '')
@@ -491,7 +489,6 @@ def voter_guide_create_process_view(request):
     voter_guide_possibility_id = request.POST.get('voter_guide_possibility_id', 0)
     voter_guide_possibility_url = request.POST.get('voter_guide_possibility_url', '')
     voter_who_submitted_we_vote_id = request.POST.get('voter_who_submitted_we_vote_id', '')
-    # state_code = request.POST.get('state_code', "")
 
     # Filter incoming data
     organization_twitter_handle = extract_twitter_handle_from_text_string(organization_twitter_handle)
@@ -532,7 +529,6 @@ def voter_guide_create_process_view(request):
         voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id)
         if voter_results['voter_found']:
             voter = voter_results['voter']
-            # voter_found = True
             voter_who_submitted_name = voter.get_full_name()
             voter_who_submitted_we_vote_id = voter.we_vote_id
 
@@ -546,12 +542,8 @@ def voter_guide_create_process_view(request):
                 return HttpResponseRedirect(reverse('voter_guide:voter_guide_create', args=()))
 
     changes_made = False
-    # display_all_done_button = False
-    # organization = None
-    # organization_found = False
     possible_candidate_list = []
     possible_candidate_list_found = False
-    # twitter_user_manager = TwitterUserManager()
 
     possible_candidates_results = take_in_possible_candidate_list_from_form(request)
     if possible_candidates_results['possible_candidate_list_found']:
@@ -568,139 +560,18 @@ def voter_guide_create_process_view(request):
         organization_name = ""
         organization_twitter_handle = ""
 
-    # organization_list_manager = OrganizationListManager()
     organization_manager = OrganizationManager()
-    # organizations_list = []
 
     if positive_value_exists(organization_we_vote_id):
         results = organization_manager.retrieve_organization_from_we_vote_id(organization_we_vote_id)
         if results['organization_found']:
-            # organization_found = True
             organization = results['organization']
             organization_name = organization.organization_name
             twitter_user_manager = TwitterUserManager()
             organization_twitter_handle = twitter_user_manager.fetch_twitter_handle_from_organization_we_vote_id(
                 organization_we_vote_id)
-    # elif positive_value_exists(organization_name) or positive_value_exists(organization_twitter_handle) \
-    #         and not positive_value_exists(clear_organization_options):
-    #     # Search for organizations that match
-    #     results = organization_list_manager.organization_search_find_any_possibilities(
-    #         organization_name=organization_name,
-    #         organization_twitter_handle=organization_twitter_handle
-    #     )
-    #
-    #     if results['organizations_found']:
-    #         organizations_list = results['organizations_list']
-    #         organizations_count = len(organizations_list)
-    #
-    #         if organizations_count == 0:
-    #             messages.add_message(request, messages.INFO, 'We did not find any organizations that match.')
-    #         elif organizations_count == 1:
-    #             messages.add_message(request, messages.INFO, 'We found {count} organization '
-    #                                                          'that might match.'.format(count=organizations_count))
-    #         else:
-    #             messages.add_message(request, messages.INFO, 'We found {count} organizations '
-    #                                                          'that might match.'.format(count=organizations_count))
-    # elif positive_value_exists(voter_guide_possibility_url) and not positive_value_exists(clear_organization_options):
-    #     facebook_page = ""
-    #     facebook_page_list = []
-    #     twitter_or_facebook_found = False
-    #     twitter_handle = ""
-    #     twitter_handle_list = []
-    #
-    #     retrieve_list = True
-    #     scrape_results = scrape_social_media_from_one_site(voter_guide_possibility_url, retrieve_list)
-    #
-    #     # Only include a change if we have a new value (do not try to save blank value)
-    #     if scrape_results['twitter_handle_found'] and positive_value_exists(scrape_results['twitter_handle']):
-    #         twitter_handle = scrape_results['twitter_handle']
-    #         twitter_handle_list = scrape_results['twitter_handle_list']
-    #         twitter_or_facebook_found = True
-    #
-    #     if scrape_results['facebook_page_found'] and positive_value_exists(scrape_results['facebook_page']):
-    #         facebook_page = scrape_results['facebook_page']
-    #         facebook_page_list = scrape_results['facebook_page_list']
-    #         twitter_or_facebook_found = True
-    #
-    #     if twitter_or_facebook_found:
-    #         # Search for organizations that match (by Twitter Handle)
-    #         twitter_handle_list_modified = []
-    #         for one_twitter_handle in twitter_handle_list:
-    #             if positive_value_exists(one_twitter_handle):
-    #                 one_twitter_handle = one_twitter_handle.strip()
-    #             if positive_value_exists(one_twitter_handle):
-    #                 twitter_handle_lower = one_twitter_handle.lower()
-    #                 twitter_handle_lower = extract_twitter_handle_from_text_string(twitter_handle_lower)
-    #                 if twitter_handle_lower not in twitter_handle_list_modified:
-    #                     twitter_handle_list_modified.append(twitter_handle_lower)
-    #
-    #         # Search for organizations that match (by Facebook page)
-    #         facebook_page_list_modified = []
-    #         for one_facebook_page in facebook_page_list:
-    #             if positive_value_exists(one_facebook_page):
-    #                 one_facebook_page = one_facebook_page.strip()
-    #             if positive_value_exists(one_facebook_page):
-    #                 one_facebook_page_lower = one_facebook_page.lower()
-    #                 one_facebook_page_lower = extract_facebook_username_from_text_string(one_facebook_page_lower)
-    #                 if one_facebook_page_lower not in facebook_page_list_modified:
-    #                     facebook_page_list_modified.append(one_facebook_page_lower)
-    #
-    #         # We want to create an organization for each Twitter handle we find on the page so it can be chosen below
-    #         for one_twitter_handle in twitter_handle_list_modified:
-    #             one_organization_found = False
-    #             results = twitter_user_manager.retrieve_twitter_link_to_organization_from_twitter_handle(
-    #                 one_twitter_handle)
-    #             if results['twitter_link_to_organization_found']:
-    #                 twitter_link_to_organization = results['twitter_link_to_organization']
-    #                 organization_results = organization_manager.retrieve_organization_from_we_vote_id(
-    #                     twitter_link_to_organization.organization_we_vote_id)
-    #                 if organization_results['organization_found']:
-    #                     one_organization_found = True
-    #             twitter_user_id = 0
-    #             twitter_results = twitter_user_manager.retrieve_twitter_user_locally_or_remotely(
-    #                 twitter_user_id, one_twitter_handle)
-    #             if twitter_results['twitter_user_found']:
-    #                 twitter_user = twitter_results['twitter_user']
-    #                 twitter_user_id = twitter_user.twitter_id
-    #             if not one_organization_found and positive_value_exists(twitter_user_id):
-    #                 organization_name = ""
-    #                 create_results = organization_manager.create_organization(
-    #                     organization_name=organization_name, organization_twitter_handle=one_twitter_handle)
-    #                 if create_results['organization_created']:
-    #                     one_organization = create_results['organization']
-    #
-    #                     # Create TwitterLinkToOrganization
-    #                     link_results = twitter_user_manager.create_twitter_link_to_organization(
-    #                         twitter_user_id, one_organization.we_vote_id)
-    #                     # Refresh the organization with the Twitter details
-    #                     refresh_twitter_organization_details(one_organization, twitter_user_id)
-    #
-    #         voter_guide_website = extract_website_from_url(voter_guide_possibility_url)
-    #         results = organization_list_manager.organization_search_find_any_possibilities(
-    #             organization_website=voter_guide_website,
-    #             facebook_page_list=facebook_page_list_modified,
-    #             twitter_handle_list=twitter_handle_list_modified
-    #         )
-    #
-    #         if results['organizations_found']:
-    #             organizations_list = results['organizations_list']
-    #             organizations_count = len(organizations_list)
-    #
-    #             if organizations_count == 0:
-    #                 pass
-    #                 # messages.add_message(request, messages.INFO, 'We did not find any organizations that match.')
-    #             elif organizations_count == 1:
-    #                 messages.add_message(request, messages.INFO, 'We found {count} organization '
-    #                                                              'that might match.'.format(count=organizations_count))
-    #             else:
-    #                 messages.add_message(request, messages.INFO, 'We found {count} organizations '
-    #                                                              'that might match.'.format(count=organizations_count))
 
-    # batch_header_id = 0
     google_civic_election_id_list = []
-    # positions_ready_to_save_as_batch = False
-    # target_google_civic_election_id = 0
-    # upcoming_election_list = []
     election_manager = ElectionManager()
     results = election_manager.retrieve_upcoming_elections()
     if results['election_list_found']:
@@ -759,13 +630,17 @@ def voter_guide_create_process_view(request):
         # The index of candidate_number_list is always 1 below the candidate_number we
         # want (index = 0, candidate_number = "001"). So if there are 3 possible candidates, the last candidate_number
         # in use will be "003". To get "004" for the next possible candidate, we pass in the index "3"
-        next_index = number_of_current_possible_candidates
-        starting_candidate_number = candidate_number_list[next_index]  # This returns a string like "004"
-        results = break_up_text_into_possible_candidates_list(ballot_items_additional, starting_candidate_number)
-        if results['possible_candidate_list_found']:
-            additional_possible_candidate_list = results['possible_candidate_list']
-            possible_candidate_list = possible_candidate_list + additional_possible_candidate_list
-            changes_made = True
+        try:
+            next_index = number_of_current_possible_candidates
+            starting_candidate_number = candidate_number_list[next_index]  # This returns a string like "004"
+            results = break_up_text_into_possible_candidates_list(ballot_items_additional, starting_candidate_number)
+            if results['possible_candidate_list_found']:
+                additional_possible_candidate_list = results['possible_candidate_list']
+                possible_candidate_list = possible_candidate_list + additional_possible_candidate_list
+                changes_made = True
+        except Exception as e:
+            # If the next index is outside the candidate_number_list then we don't want to take in new candidates
+            pass
 
     # Match incoming candidates to candidates already in the database
     if len(possible_candidate_list):
@@ -773,7 +648,6 @@ def voter_guide_create_process_view(request):
                                                                    google_civic_election_id_list)
         if results['possible_candidate_list_found']:
             possible_candidate_list = results['possible_candidate_list']
-            # possible_candidate_list_found = True
 
     # Add empty values above and beyond the values in possible_candidate_list so we overwrite (remove)
     #  data that might have already been stored in the database
@@ -782,11 +656,15 @@ def voter_guide_create_process_view(request):
     # want (index = 0, candidate_number = "001"). So if there are 3 possible candidates, the last candidate_number
     # in use will be "003". To get "004" for the next possible candidate, we pass in the index "3"
     next_index = number_of_current_possible_candidates
-    starting_candidate_number = candidate_number_list[next_index]  # This returns a string like "004"
-    results = add_empty_values_to_possible_candidate_dict_list(starting_candidate_number)
-    if results['possible_candidate_list_found']:
-        additional_possible_candidate_list = results['possible_candidate_list']
-        possible_candidate_list = possible_candidate_list + additional_possible_candidate_list
+    try:
+        starting_candidate_number = candidate_number_list[next_index]  # This returns a string like "004"
+        results = add_empty_values_to_possible_candidate_dict_list(starting_candidate_number)
+        if results['possible_candidate_list_found']:
+            additional_possible_candidate_list = results['possible_candidate_list']
+            possible_candidate_list = possible_candidate_list + additional_possible_candidate_list
+    except Exception as e:
+        # If the next index is outside the candidate_number_list then we don't want to add empty candidates
+        pass
 
     # Now save the possibility so far
     if positive_value_exists(voter_guide_possibility_url):
@@ -828,44 +706,6 @@ def voter_guide_create_process_view(request):
             messages.add_message(request, messages.ERROR, 'Could not save this suggested voter guide.')
 
         voter_guide_possibility_id = results['voter_guide_possibility_id']
-        # if positive_value_exists(voter_guide_possibility_id):
-        #     voter_guide_possibility = results['voter_guide_possibility']
-        #     batch_header_id = voter_guide_possibility.batch_header_id
-        #     ignore_this_source = voter_guide_possibility.ignore_this_source
-        #     positions_ready_to_save_as_batch = voter_guide_possibility.positions_ready_to_save_as_batch()
-        #     target_google_civic_election_id = voter_guide_possibility.target_google_civic_election_id
-
-    # state_list = STATE_CODE_MAP
-    # sorted_state_list = sorted(state_list.items())
-    #
-    # possible_candidate_list_modified = []
-    # for one_possible_candidate in possible_candidate_list:
-    #     # If we reach a candidate that doesn't have a name or we_vote_id, we are at the end of the active list
-    #     if not positive_value_exists(one_possible_candidate['candidate_name']) \
-    #             and not positive_value_exists(one_possible_candidate['candidate_we_vote_id']):
-    #         break
-    #
-    #     # Augment the information about the election this candidate is competing in
-    #     if positive_value_exists(one_possible_candidate['google_civic_election_id']):
-    #         for one_election in upcoming_election_list:
-    #             if one_election.google_civic_election_id == one_possible_candidate['google_civic_election_id']:
-    #                 one_possible_candidate['election_name'] = one_election.election_name
-    #                 one_possible_candidate['election_day_text'] = one_election.election_day_text
-    #
-    #     # Identify which candidates already have positions stored
-    #     if positive_value_exists(organization_we_vote_id) \
-    #             and 'candidate_we_vote_id' in one_possible_candidate \
-    #             and positive_value_exists(one_possible_candidate['candidate_we_vote_id']):
-    #         position_exists_query = PositionEntered.objects.filter(
-    #             organization_we_vote_id=organization_we_vote_id,
-    #             candidate_campaign_we_vote_id=one_possible_candidate['candidate_we_vote_id'])
-    #         position_list = list(position_exists_query)
-    #         if positive_value_exists(len(position_list)):
-    #             one_possible_candidate['position_we_vote_id'] = position_list[0].we_vote_id
-    #
-    #     possible_candidate_list_modified.append(one_possible_candidate)
-
-    # messages_on_stage = get_messages(request)
 
     if all_done_with_entry:
         messages.add_message(request, messages.SUCCESS,
@@ -877,37 +717,6 @@ def voter_guide_create_process_view(request):
 
     return HttpResponseRedirect(reverse('voter_guide:voter_guide_create', args=()) +
                                 "?voter_guide_possibility_id=" + str(voter_guide_possibility_id))
-
-    # Old approach -- now we redirect back to the display-only page
-    # template_values = {
-    #     'ballot_items_raw':             ballot_items_raw,
-    #     'batch_header_id':              batch_header_id,
-    #     'candidates_missing_from_we_vote':  candidates_missing_from_we_vote,
-    #     'cannot_find_endorsements':     cannot_find_endorsements,
-    #     'display_all_done_button':      display_all_done_button,
-    #     'messages_on_stage':            messages_on_stage,
-    #     'ignore_this_source':           ignore_this_source,
-    #     'internal_notes':               internal_notes,
-    #     'organization':                 organization,
-    #     'organization_found':           organization_found,
-    #     'organization_name':            organization_name,
-    #     'organization_twitter_handle':  organization_twitter_handle,
-    #     'organization_we_vote_id':      organization_we_vote_id,
-    #     'organizations_list':           organizations_list,
-    #     'political_data_manager':       political_data_manager,
-    #     'possible_candidate_list':      possible_candidate_list_modified,
-    #     'possible_candidate_list_found': possible_candidate_list_found,
-    #     'positions_ready_to_save_as_batch': positions_ready_to_save_as_batch,
-    #     'hide_possible_candidate_list': hide_possible_candidate_list,
-    #     'target_google_civic_election_id':  target_google_civic_election_id,
-    #     'voter_guide_possibility_id':   voter_guide_possibility_id,
-    #     'voter_guide_possibility_url':  voter_guide_possibility_url,
-    #     'voter_who_submitted_name':     voter_who_submitted_name,
-    #     'voter_who_submitted_we_vote_id': voter_who_submitted_we_vote_id,
-    #     'state_code':                   state_code,
-    #     'state_list':                   sorted_state_list,
-    # }
-    # return render(request, 'voter_guide/voter_guide_create.html', template_values)
 
 
 def break_up_text_into_possible_candidates_list(ballot_items, starting_candidate_number="001"):

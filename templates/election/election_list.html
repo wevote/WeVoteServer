@@ -27,7 +27,15 @@
 {% if is_national_election %}
 {# ############## List of states under one National Election ############## #}
     <a href="{% url 'election:election_list' %}">Back to Elections</a>&nbsp;
+    <form name="election_search_form" method="get" action="{% url 'election:nationwide_election_list' %}">
+        {% csrf_token %}
+        <input type="hidden" name="google_civic_election_id" value="{{ google_civic_election_id }}">
 
+        <label for="show_election_statistics_id">
+          <input type="checkbox" name="show_election_statistics" id="show_election_statistics_id" value="1"
+                 {% if show_election_statistics %}checked{% endif %} /> Show Election Statistics
+        </label>
+    </form>
 
 {% else %}
 {# ############## List of many election dates ############## #}
@@ -50,19 +58,24 @@
           <input type="checkbox" name="show_all_elections_this_year" id="show_all_elections_this_year_id" value="1"
                  {% if show_all_elections_this_year %}checked{% endif %} /> All Elections This Year
         </label>
-        &nbsp;&nbsp;&nbsp;&nbsp;
 
+        &nbsp;&nbsp;&nbsp;&nbsp;
         <label for="show_all_elections_id">
           <input type="checkbox" name="show_all_elections" id="show_all_elections_id" value="1"
                  {% if show_all_elections %}checked{% endif %} /> Include Past Elections
         </label>
-        &nbsp;&nbsp;&nbsp;&nbsp;
 
+        &nbsp;&nbsp;&nbsp;&nbsp;
         <label for="show_ignored_elections_id">
           <input type="checkbox" name="show_ignored_elections" id="show_ignored_elections_id" value="1"
                  {% if show_ignored_elections %}checked{% endif %} /> Show Ignored Elections
         </label>
+
         &nbsp;&nbsp;&nbsp;&nbsp;
+        <label for="show_election_statistics_id">
+          <input type="checkbox" name="show_election_statistics" id="show_election_statistics_id" value="1"
+                 {% if show_election_statistics %}checked{% endif %} /> Show Election Statistics
+        </label>
     </form>
 {% endif %}
 
@@ -82,14 +95,20 @@
             <th>Date</th>
             <th>Google Civic ID</th>
         {% endif %}
-            <th align="middle">Offices<br />
-              (w/o Candidates)</th>
+            <th align="middle">Offices
+              {% if show_election_statistics %}
+              <br />
+              (w/o Candidates)
+              {% endif %}
+            </th>
+        {% if show_election_statistics %}
             <th align="middle">Candidates<br />
               (w/o Photos)</th>
             <th>Measures</th>
             <th>Ballot Locations<br />(To Process)</th>
             <th align="middle">Voter Guides<br />
               (Public Positions)</th>
+        {% endif %}
         {% if not is_national_election %}
             <td>&nbsp;</td>
         {% endif %}
@@ -131,8 +150,12 @@
             <td align="middle">{{ election.google_civic_election_id }}</td>
         {% endif %}
             <td align="middle">
+            {% if not show_election_statistics and election.office_count %}
+                {{ election.office_count|default_if_none:"" }}
+            {% endif %}
+
             {% if election.offices_with_candidates_count %}
-                <a href="{% url 'office:office_list' %}?google_civic_election_id={{ election.google_civic_election_id }}{% if show_all_elections_this_year %}&show_all_elections_this_year=1{% elif show_all_elections %}&show_all_elections=1{% endif %}"
+                <a href="{% url 'office:office_list' %}?google_civic_election_id={{ election.google_civic_election_id }}{% if show_all_elections_this_year %}&show_all_elections_this_year=1{% elif show_all_elections %}&show_all_elections=1{% endif %}{% if is_national_election %}&state_code={{ election.state_code }}{% endif %}"
                    target="_blank">
                 {{ election.offices_with_candidates_count|default_if_none:"" }}</a>
             {% endif %}
@@ -140,9 +163,10 @@
                 <span style="color: darkgray">({{ election.offices_without_candidates_count|default_if_none:"" }})</span>
             {% endif %}
             </td>
+        {% if show_election_statistics %}
             <td align="middle">
             {% if election.candidate_count %}
-                <a href="{% url 'candidate:candidate_list' %}?google_civic_election_id={{ election.google_civic_election_id }}{% if show_all_elections_this_year %}&show_all_elections_this_year=1{% elif show_all_elections %}&show_all_elections=1{% endif %}"
+                <a href="{% url 'candidate:candidate_list' %}?google_civic_election_id={{ election.google_civic_election_id }}{% if show_all_elections_this_year %}&show_all_elections_this_year=1{% elif show_all_elections %}&show_all_elections=1{% endif %}{% if is_national_election %}&state_code={{ election.state_code }}{% endif %}"
                    target="_blank">
                 {{ election.candidate_count|default_if_none:"" }}</a>
             {% endif %}
@@ -162,7 +186,7 @@
             </td>
             <td align="middle">
             {% if election.measure_count %}
-                <a href="{% url 'measure:measure_list' %}?google_civic_election_id={{ election.google_civic_election_id }}{% if show_all_elections_this_year %}&show_all_elections_this_year=1{% elif show_all_elections %}&show_all_elections=1{% endif %}"
+                <a href="{% url 'measure:measure_list' %}?google_civic_election_id={{ election.google_civic_election_id }}{% if show_all_elections_this_year %}&show_all_elections_this_year=1{% elif show_all_elections %}&show_all_elections=1{% endif %}{% if is_national_election %}&state_code={{ election.state_code }}{% endif %}"
                    target="_blank">
                 {{ election.measure_count|default_if_none:"" }}</a>
             {% endif %}
@@ -192,6 +216,7 @@
                 ({{ election.public_positions_count|default_if_none:"" }})</a>
             {% endif %}
             </td>
+        {% endif %}
         {% if not is_national_election %}
             <td><a href="{% url 'election:election_edit' election.id %}" style="font-size: .65em">(edit)</a></td>
         {% endif %}
@@ -221,6 +246,11 @@
     });
     $(function() {
         $('#show_ignored_elections_id').change(function() {
+            this.form.submit();
+        });
+    });
+    $(function() {
+        $('#show_election_statistics_id').change(function() {
             this.form.submit();
         });
     });
