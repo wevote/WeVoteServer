@@ -486,6 +486,7 @@ def voter_guide_create_process_view(request):
     organization_name = request.POST.get('organization_name', '')
     organization_twitter_handle = request.POST.get('organization_twitter_handle', '')
     organization_we_vote_id = request.POST.get('organization_we_vote_id', None)
+    scan_url_again = request.POST.get('scan_url_again', False)
     voter_guide_possibility_id = request.POST.get('voter_guide_possibility_id', 0)
     voter_guide_possibility_url = request.POST.get('voter_guide_possibility_url', '')
     voter_who_submitted_we_vote_id = request.POST.get('voter_who_submitted_we_vote_id', '')
@@ -545,10 +546,13 @@ def voter_guide_create_process_view(request):
     possible_candidate_list = []
     possible_candidate_list_found = False
 
+    possible_candidate_list_from_form = []
     possible_candidates_results = take_in_possible_candidate_list_from_form(request)
     if possible_candidates_results['possible_candidate_list_found']:
-        possible_candidate_list = possible_candidates_results['possible_candidate_list']
+        possible_candidate_list_from_form = possible_candidates_results['possible_candidate_list']
         possible_candidate_list_found = True
+
+    possible_candidate_list = possible_candidate_list + possible_candidate_list_from_form
 
     if not positive_value_exists(voter_guide_possibility_url) and positive_value_exists(form_submitted):
         messages.add_message(request, messages.ERROR, 'Please include a link to where you found this voter guide.')
@@ -582,8 +586,10 @@ def voter_guide_create_process_view(request):
 
     # We will need all candidates for all upcoming elections so we can search the HTML of
     #  the possible voter guide for these names
-    if positive_value_exists(voter_guide_possibility_url) and not possible_candidate_list_found \
-            and positive_value_exists(google_civic_election_id_list):
+    possible_candidate_list_from_url_scan = []
+    first_scan_needed = positive_value_exists(voter_guide_possibility_url) and not possible_candidate_list_found
+    scan_url_now = first_scan_needed or positive_value_exists(scan_url_again)
+    if scan_url_now and positive_value_exists(google_civic_election_id_list):
         results = retrieve_candidate_list_for_all_upcoming_elections(google_civic_election_id_list)
         if results['candidate_list_found']:
             candidate_list_light = results['candidate_list_light']
@@ -594,16 +600,21 @@ def voter_guide_create_process_view(request):
                 possible_candidates_results = convert_candidate_list_light_to_possible_candidates(
                     selected_candidate_list_light)
                 if possible_candidates_results['possible_candidate_list_found']:
-                    possible_candidate_list = possible_candidates_results['possible_candidate_list']
+                    possible_candidate_list_from_url_scan = possible_candidates_results['possible_candidate_list']
                     possible_candidate_list_found = True
 
+    possible_candidate_list = possible_candidate_list + possible_candidate_list_from_url_scan
+
     # If we don't already have a list of possible candidates, check the raw text entry field
+    possible_candidate_list_from_ballot_items_raw = []
     if not possible_candidate_list_found and positive_value_exists(ballot_items_raw):
         results = break_up_text_into_possible_candidates_list(ballot_items_raw)
         if results['possible_candidate_list_found']:
-            possible_candidate_list = results['possible_candidate_list']
+            possible_candidate_list_from_ballot_items_raw = results['possible_candidate_list']
             # possible_candidate_list_found = True
             changes_made = True
+
+    possible_candidate_list = possible_candidate_list + possible_candidate_list_from_ballot_items_raw
 
     # If the "remove" link was clicked, remove that entry from the possible
     number_index = 0

@@ -26,20 +26,29 @@
             <img src="{{ organization.we_vote_hosted_profile_image_url_tiny }}" width="32px" />
         {% endif %}
             <span class="h3">{{ organization.organization_name }}</span>
+        {% if political_data_manager and organization.organization_name and organization.we_vote_id %}
+            &nbsp;
+            <a href="{% url "organization:organization_position_list" organization.id %}"
+               target="_blank"
+               class="u-no-break"><span class="glyphicon glyphicon-new-window"></span></a>
+        {% endif %}
             <br />
-            {% if organization.organization_twitter_handle %}
-                <a href="https://twitter.com/{{ organization.organization_twitter_handle }}"
-                   target="_blank"
-                   class="u-no-break">
-                <i class="fa fa-twitter"></i> {{ organization.organization_twitter_handle }}
-                <span class="glyphicon glyphicon-new-window"></span></a>
-            {% endif %}
-            {% if organization.organization_twitter_handle and organization.organization_website %}<br />{% endif %}
-            {% if organization.organization_website %}
-                <a href="{{ organization.organization_website }}"
-                   target="_blank"
-                   class="u-no-break">{{ organization.organization_website }} <span class="glyphicon glyphicon-new-window"></span></a>
-            {% endif %}
+        {% if organization.organization_twitter_handle %}
+            <a href="https://twitter.com/{{ organization.organization_twitter_handle }}"
+               target="_blank"
+               class="u-no-break">
+            <i class="fa fa-twitter"></i> {{ organization.organization_twitter_handle }}
+            &nbsp;
+            <span class="glyphicon glyphicon-new-window"></span></a>
+        {% endif %}
+        {% if organization.organization_twitter_handle and organization.organization_website %}<br />{% endif %}
+        {% if organization.organization_website %}
+            <a href="{{ organization.organization_website }}"
+               target="_blank"
+               class="u-no-break">{{ organization.organization_website }}
+            &nbsp;
+            <span class="glyphicon glyphicon-new-window"></span></a>
+        {% endif %}
     </div>
 </div>
 
@@ -270,6 +279,11 @@
                target="_blank">
               import batch results <span class="glyphicon glyphicon-new-window"></span>
             </a>
+            {% endif %}
+            {% if possible_candidate_list_found %}
+            <br />
+            <br />
+            <button type="submit" class="btn btn-default" name="scan_url_again" value="1">Scan Voter Guide Again</button>
             {% endif %}
         {% endif %}
         </div>

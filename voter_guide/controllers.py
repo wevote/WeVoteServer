@@ -1120,9 +1120,22 @@ def voter_guides_to_follow_retrieve_for_api(voter_device_id,  # voterGuidesToFol
                 voter_has_pledged = False
             position_found = False
             one_voter_guide = {
-                'we_vote_id':                   voter_guide.we_vote_id,
+                'ballot_item_we_vote_ids_this_org_supports':    ballot_item_we_vote_ids_this_org_supports,
+                'ballot_item_we_vote_ids_this_org_info_only':   ballot_item_we_vote_ids_this_org_info_only,
+                'ballot_item_we_vote_ids_this_org_opposes':     ballot_item_we_vote_ids_this_org_opposes,
+                'election_day_text':            voter_guide.election_day_text,
                 'google_civic_election_id':     voter_guide.google_civic_election_id,
+                'issue_we_vote_ids_linked':     issue_we_vote_ids_linked,
+                'last_updated':                 voter_guide.last_updated.strftime('%Y-%m-%d %H:%M'),
+                'organization_we_vote_id':      voter_guide.organization_we_vote_id,
+                'owner_voter_id':               voter_guide.owner_voter_id,
+                'pledge_goal':                  voter_guide.pledge_goal,
+                'pledge_count':                 voter_guide.pledge_count,
+                'public_figure_we_vote_id':     voter_guide.public_figure_we_vote_id,
                 'time_span':                    voter_guide.vote_smart_time_span,
+                'twitter_description':          voter_guide.twitter_description,
+                'twitter_followers_count':      voter_guide.twitter_followers_count,
+                'twitter_handle':               voter_guide.twitter_handle,
                 'voter_guide_display_name':     voter_guide.voter_guide_display_name(),
                 'voter_guide_image_url_large':  voter_guide.we_vote_hosted_profile_image_url_large
                 if positive_value_exists(voter_guide.we_vote_hosted_profile_image_url_large)
@@ -1130,20 +1143,8 @@ def voter_guides_to_follow_retrieve_for_api(voter_device_id,  # voterGuidesToFol
                 'voter_guide_image_url_medium': voter_guide.we_vote_hosted_profile_image_url_medium,
                 'voter_guide_image_url_tiny':   voter_guide.we_vote_hosted_profile_image_url_tiny,
                 'voter_guide_owner_type':       voter_guide.voter_guide_owner_type,
-                'organization_we_vote_id':      voter_guide.organization_we_vote_id,
-                'public_figure_we_vote_id':     voter_guide.public_figure_we_vote_id,
-                'twitter_description':          voter_guide.twitter_description,
-                'twitter_followers_count':      voter_guide.twitter_followers_count,
-                'twitter_handle':               voter_guide.twitter_handle,
-                'owner_voter_id':               voter_guide.owner_voter_id,
-                'ballot_item_we_vote_ids_this_org_supports':    ballot_item_we_vote_ids_this_org_supports,
-                'ballot_item_we_vote_ids_this_org_info_only':   ballot_item_we_vote_ids_this_org_info_only,
-                'ballot_item_we_vote_ids_this_org_opposes':     ballot_item_we_vote_ids_this_org_opposes,
-                'issue_we_vote_ids_linked':     issue_we_vote_ids_linked,
-                'pledge_goal':                  voter_guide.pledge_goal,
-                'pledge_count':                 voter_guide.pledge_count,
                 'voter_has_pledged':            voter_has_pledged,
-                'last_updated':                 voter_guide.last_updated.strftime('%Y-%m-%d %H:%M'),
+                'we_vote_id':                   voter_guide.we_vote_id,
             }
             if positive_value_exists(ballot_item_we_vote_id):
                 if kind_of_ballot_item == CANDIDATE:
