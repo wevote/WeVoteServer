@@ -167,7 +167,14 @@
     <div class="form-group">
     {% if possible_candidate_list %}
         <label for="ballot_items_raw_id" class="col-sm-3 control-label">
-            <span class="hidden-xs">Candidates with Stances</span><br />
+            <span class="hidden-xs">
+                Candidates with Stances
+                <br />
+                <span style="font-weight: normal !important;">
+                    Positions Stored: {{ positions_stored_count }}<br />
+                    Not Stored: {{ positions_not_stored_count }}
+                </span>
+            </span>
         </label>
         <div class="col-sm-8">
             <table class="table">
@@ -226,28 +233,44 @@
                       class="form-control animated"
                       id="internal_notes_id"
                       placeholder="Status of data gathering?">{{ internal_notes|default_if_none:"" }}</textarea>
-            <input type="checkbox" name="cannot_find_endorsements" id="cannot_find_endorsements_id"
-                   value="True"
-                   {% if cannot_find_endorsements %}checked{% endif %} />
+            <span class="u-no-break">
+                <input type="checkbox" name="cannot_find_endorsements" id="cannot_find_endorsements_id"
+                       value="True"
+                       {% if cannot_find_endorsements %}checked{% endif %} />
                 <label for="cannot_find_endorsements_id" style="font-weight: normal !important;">Endorsements Not Available Yet</label>
+            </span>
 
             &nbsp;&nbsp;&nbsp;
-            <input type="checkbox" name="candidates_missing_from_we_vote" id="candidates_missing_from_we_vote_id"
-                   value="True"
-                   {% if candidates_missing_from_we_vote %}checked{% endif %} />
+            <span class="u-no-break">
+                <input type="checkbox" name="capture_detailed_comments" id="capture_detailed_comments_id"
+                       value="True"
+                       {% if capture_detailed_comments %}checked{% endif %} />
+                <label for="capture_detailed_comments_id" style="font-weight: normal !important;">Capture Detailed Comments</label>
+            </span>
+
+            &nbsp;&nbsp;&nbsp;
+            <span class="u-no-break">
+                <input type="checkbox" name="candidates_missing_from_we_vote" id="candidates_missing_from_we_vote_id"
+                       value="True"
+                       {% if candidates_missing_from_we_vote %}checked{% endif %} />
                 <label for="candidates_missing_from_we_vote_id" style="font-weight: normal !important;">Candidates/Measures Missing</label>
+            </span>
 
             &nbsp;&nbsp;&nbsp;
-            <input type="checkbox" name="hide_from_active_review" id="hide_from_active_review_id"
-                   value="True"
-                   {% if hide_from_active_review %}checked{% endif %} />
+            <span class="u-no-break">
+                <input type="checkbox" name="hide_from_active_review" id="hide_from_active_review_id"
+                       value="True"
+                       {% if hide_from_active_review %}checked{% endif %} />
                 <label for="hide_from_active_review_id" style="font-weight: normal !important;">Stop Reviewing</label>
+            </span>
 
             &nbsp;&nbsp;&nbsp;
-            <input type="checkbox" name="ignore_this_source" id="ignore_this_source_id"
-                   value="True"
-                   {% if ignore_this_source %}checked{% endif %} />
+            <span class="u-no-break">
+                <input type="checkbox" name="ignore_this_source" id="ignore_this_source_id"
+                       value="True"
+                       {% if ignore_this_source %}checked{% endif %} />
                 <label for="ignore_this_source_id" style="font-weight: normal !important;">Ignore this Website</label>
+            </span>
 
             <div class="float-right" style="color: darkgray">Target Election: {{ target_google_civic_election_id }}</div>
         </div>
@@ -265,6 +288,12 @@
             <button type="submit" class="btn btn-success" name="all_done_with_entry" value="1">All Done!</button>
         {% endif %}
         {% if political_data_manager and voter_guide_possibility_id %}
+            <br />
+            <br />
+            <input type="checkbox" name="ignore_stored_positions" id="ignore_stored_positions_id"
+                   value="True"
+                   {% if ignore_stored_positions %}checked{% endif %} />
+                <label for="ignore_stored_positions_id" style="font-weight: normal !important;">Ignore Stored Positions</label>
             <br />
             <br />
             {% if positions_ready_to_save_as_batch %}
@@ -304,11 +333,18 @@
     </div>
     <br />
     <br />
-    "<strong>Endorsements Not Available Yet</strong>" means: This organizations hasn't posted their endorsements for the
+    "<strong>Endorsements Not Available Yet</strong>" means: This organization hasn't posted their endorsements for the
     upcoming election yet, but it is worth coming back to this website later to find endorsements when they are posted.<br />
     <br />
+    "<strong>Capture Detailed Comments</strong>" means: There is detailed commentary about candidates or measures that
+    we need to capture.<br />
+    <br />
+    "<strong>Candidates/Measures Missing</strong>" means: The voter guide has candidates or measures that aren't in the
+    We Vote database yet. Analyze this voter guide after we have added more offices/candidates/measures to the
+    We Vote database.<br />
+    <br />
     "<strong>Stop Reviewing</strong>" means: There isn't any more data to extract from this website
-    for upcoming election(s), so we want to take it off the Suggested Voter Guides list.<br />
+    for upcoming election(s), so we want to take it off the Suggested Voter Guides task list.<br />
     <br />
     "<strong>Ignore this Website</strong>" means: This website URL is not a good place to find endorsements.
     No further review needed.<br />

@@ -6,6 +6,7 @@ from .controllers import add_candidates_with_position_count_to_voter_guide_possi
     add_empty_values_to_possible_candidate_dict_list, CANDIDATE_NUMBER_LIST, \
     convert_candidate_list_light_to_possible_candidates, convert_list_of_names_to_possible_candidate_dict_list, \
     extract_position_list_from_voter_guide_possibility, extract_possible_candidate_list_from_database, \
+    fix_sequence_of_possible_candidate_list, \
     match_candidate_list_with_candidates_in_database, modify_one_row_in_possible_candidate_dict_list, \
     refresh_existing_voter_guides, take_in_possible_candidate_list_from_form, voter_guides_import_from_master_server
 from .models import INDIVIDUAL, VoterGuide, VoterGuideListManager, VoterGuideManager, VoterGuidePossibility, \
@@ -215,9 +216,11 @@ def voter_guide_create_view(request):
     # Take in these values, even though they will be overwritten if we've stored a voter_guide_possibility
     ballot_items_raw = request.GET.get('ballot_items_raw', "")
     candidates_missing_from_we_vote = request.GET.get('candidates_missing_from_we_vote', "")
-    cannot_find_endorsements = request.GET.get('cannot_find_endorsements', "")
-    clear_organization_options = request.POST.get('clear_organization_options', 0)
-    hide_from_active_review = request.GET.get('hide_from_active_review', "")
+    cannot_find_endorsements = request.GET.get('cannot_find_endorsements', False)
+    capture_detailed_comments = request.GET.get('capture_detailed_comments ', False)
+    clear_organization_options = request.POST.get('clear_organization_options', False)
+    hide_from_active_review = request.GET.get('hide_from_active_review', False)
+    ignore_stored_positions = request.GET.get('ignore_stored_positions', False)
     internal_notes = request.GET.get('internal_notes', "")
     organization_name = request.GET.get('organization_name', "")
     organization_twitter_handle = request.GET.get('organization_twitter_handle', "")
@@ -243,7 +246,9 @@ def voter_guide_create_view(request):
             batch_header_id = voter_guide_possibility.batch_header_id
             candidates_missing_from_we_vote = voter_guide_possibility.candidates_missing_from_we_vote
             cannot_find_endorsements = voter_guide_possibility.cannot_find_endorsements
+            capture_detailed_comments = voter_guide_possibility.capture_detailed_comments
             hide_from_active_review = voter_guide_possibility.hide_from_active_review
+            ignore_stored_positions = voter_guide_possibility.ignore_stored_positions
             ignore_this_source = voter_guide_possibility.ignore_this_source
             internal_notes = voter_guide_possibility.internal_notes
             organization_name = voter_guide_possibility.organization_name
@@ -410,6 +415,8 @@ def voter_guide_create_view(request):
                                          ''.format(count=organizations_count))
 
     possible_candidate_list_modified = []
+    positions_stored_count = 0
+    positions_not_stored_count = 0
     for one_possible_candidate in possible_candidate_list:
         # Augment the information about the election this candidate is competing in
         if positive_value_exists(one_possible_candidate['google_civic_election_id']):
@@ -428,6 +435,9 @@ def voter_guide_create_view(request):
             position_list = list(position_exists_query)
             if positive_value_exists(len(position_list)):
                 one_possible_candidate['position_we_vote_id'] = position_list[0].we_vote_id
+                positions_stored_count += 1
+            else:
+                positions_not_stored_count += 1
 
         possible_candidate_list_modified.append(one_possible_candidate)
 
@@ -438,8 +448,10 @@ def voter_guide_create_view(request):
         'batch_header_id':              batch_header_id,
         'candidates_missing_from_we_vote':  candidates_missing_from_we_vote,
         'cannot_find_endorsements':     cannot_find_endorsements,
+        'capture_detailed_comments':    capture_detailed_comments,
         'display_all_done_button':      display_all_done_button,
         'hide_from_active_review':      hide_from_active_review,
+        'ignore_stored_positions':      ignore_stored_positions,
         'ignore_this_source':           ignore_this_source,
         'internal_notes':               internal_notes,
         'messages_on_stage':            messages_on_stage,
@@ -453,6 +465,8 @@ def voter_guide_create_view(request):
         'possible_candidate_list':      possible_candidate_list_modified,
         'possible_candidate_list_found': possible_candidate_list_found,
         'positions_ready_to_save_as_batch': positions_ready_to_save_as_batch,
+        'positions_stored_count':       positions_stored_count,
+        'positions_not_stored_count':   positions_not_stored_count,
         'state_code':                   state_code,
         'state_list':                   sorted_state_list,
         'target_google_civic_election_id':  target_google_civic_election_id,
@@ -479,10 +493,12 @@ def voter_guide_create_process_view(request):
     ballot_items_additional = request.POST.get('ballot_items_additional', "")
     candidates_missing_from_we_vote = request.POST.get('candidates_missing_from_we_vote', "")
     cannot_find_endorsements = request.POST.get('cannot_find_endorsements', False)
+    capture_detailed_comments = request.POST.get('capture_detailed_comments', False)
     clear_organization_options = request.POST.get('clear_organization_options', 0)
     confirm_delete = request.POST.get('confirm_delete', 0)
     form_submitted = request.POST.get('form_submitted', False)
     hide_from_active_review = request.POST.get('hide_from_active_review', False)
+    ignore_stored_positions = request.POST.get('ignore_stored_positions', False)
     ignore_this_source = request.POST.get('ignore_this_source', False)
     internal_notes = request.POST.get('internal_notes', "")
     organization_name = request.POST.get('organization_name', '')
@@ -535,29 +551,16 @@ def voter_guide_create_process_view(request):
             voter_who_submitted_name = voter.get_full_name()
             voter_who_submitted_we_vote_id = voter.we_vote_id
 
-    political_data_manager = voter_has_authority(request, 'political_data_manager')
+    if not positive_value_exists(voter_guide_possibility_url) and positive_value_exists(form_submitted):
+        messages.add_message(request, messages.ERROR, 'Please include a link to where you found this voter guide.')
 
+    political_data_manager = voter_has_authority(request, 'political_data_manager')
     if positive_value_exists(political_data_manager):
         if positive_value_exists(confirm_delete):
             results = voter_guide_possibility_manager.delete_voter_guide_possibility(
                 voter_guide_possibility_id=voter_guide_possibility_id)
             if results['success']:
                 return HttpResponseRedirect(reverse('voter_guide:voter_guide_create', args=()))
-
-    changes_made = False
-    possible_candidate_list = []
-    possible_candidate_list_found = False
-
-    possible_candidate_list_from_form = []
-    possible_candidates_results = take_in_possible_candidate_list_from_form(request)
-    if possible_candidates_results['possible_candidate_list_found']:
-        possible_candidate_list_from_form = possible_candidates_results['possible_candidate_list']
-        possible_candidate_list_found = True
-
-    possible_candidate_list = possible_candidate_list + possible_candidate_list_from_form
-
-    if not positive_value_exists(voter_guide_possibility_url) and positive_value_exists(form_submitted):
-        messages.add_message(request, messages.ERROR, 'Please include a link to where you found this voter guide.')
 
     # #########################################
     # Figure out the Organization
@@ -586,6 +589,23 @@ def voter_guide_create_process_view(request):
             if positive_value_exists(one_election.google_civic_election_id):
                 google_civic_election_id_list.append(one_election.google_civic_election_id)
 
+    # #########################################
+    # Figure out the Possible Candidates
+    changes_made = False
+    possible_candidate_list = []
+    possible_candidate_list_found = False
+
+    possible_candidate_list_from_form = []
+    possible_candidates_results = take_in_possible_candidate_list_from_form(request)
+    if possible_candidates_results['possible_candidate_list_found']:
+        possible_candidate_list_from_form = possible_candidates_results['possible_candidate_list']
+        possible_candidate_list_found = True
+
+    possible_candidate_list = possible_candidate_list + possible_candidate_list_from_form
+    results = fix_sequence_of_possible_candidate_list(possible_candidate_list)
+    if results['possible_candidate_list_found']:
+        possible_candidate_list = results['possible_candidate_list']
+
     # We will need all candidates for all upcoming elections so we can search the HTML of
     #  the possible voter guide for these names
     possible_candidate_list_from_url_scan = []
@@ -599,13 +619,29 @@ def voter_guide_create_process_view(request):
                 find_candidates_on_one_web_page(voter_guide_possibility_url, candidate_list_light)
             if candidate_scrape_results['at_least_one_candidate_found']:
                 selected_candidate_list_light = candidate_scrape_results['selected_candidate_list_light']
+
+                # Remove the candidates we already have in possible_candidate_list from selected_candidate_list_light
+                selected_candidate_list_light_updated = []
+                for one_light_possible_candidate in selected_candidate_list_light:
+                    one_light_possible_candidate_is_unique = True
+                    for one_possible_candidate in possible_candidate_list:
+                        if one_light_possible_candidate['candidate_we_vote_id'] == \
+                                one_possible_candidate['candidate_we_vote_id']:
+                            one_light_possible_candidate_is_unique = False
+                            break
+                    if one_light_possible_candidate_is_unique:
+                        selected_candidate_list_light_updated.append(one_light_possible_candidate)
+
                 possible_candidates_results = convert_candidate_list_light_to_possible_candidates(
-                    selected_candidate_list_light)
+                    selected_candidate_list_light_updated)
                 if possible_candidates_results['possible_candidate_list_found']:
                     possible_candidate_list_from_url_scan = possible_candidates_results['possible_candidate_list']
                     possible_candidate_list_found = True
 
     possible_candidate_list = possible_candidate_list + possible_candidate_list_from_url_scan
+    results = fix_sequence_of_possible_candidate_list(possible_candidate_list)
+    if results['possible_candidate_list_found']:
+        possible_candidate_list = results['possible_candidate_list']
 
     # If we don't already have a list of possible candidates, check the raw text entry field
     possible_candidate_list_from_ballot_items_raw = []
@@ -617,6 +653,9 @@ def voter_guide_create_process_view(request):
             changes_made = True
 
     possible_candidate_list = possible_candidate_list + possible_candidate_list_from_ballot_items_raw
+    results = fix_sequence_of_possible_candidate_list(possible_candidate_list)
+    if results['possible_candidate_list_found']:
+        possible_candidate_list = results['possible_candidate_list']
 
     # If the "remove" link was clicked, remove that entry from the possible
     number_index = 0
@@ -650,6 +689,9 @@ def voter_guide_create_process_view(request):
             if results['possible_candidate_list_found']:
                 additional_possible_candidate_list = results['possible_candidate_list']
                 possible_candidate_list = possible_candidate_list + additional_possible_candidate_list
+                results = fix_sequence_of_possible_candidate_list(possible_candidate_list)
+                if results['possible_candidate_list_found']:
+                    possible_candidate_list = results['possible_candidate_list']
                 changes_made = True
         except Exception as e:
             # If the next index is outside the candidate_number_list then we don't want to take in new candidates
@@ -661,6 +703,32 @@ def voter_guide_create_process_view(request):
                                                                    google_civic_election_id_list)
         if results['possible_candidate_list_found']:
             possible_candidate_list = results['possible_candidate_list']
+
+        if positive_value_exists(ignore_stored_positions):
+            # Identify which candidates already have positions stored, and remove them
+            altered_position_list = []
+            altered_position_list_used = False
+            for one_possible_candidate in possible_candidate_list:
+                does_not_contain_position = True
+                if positive_value_exists(organization_we_vote_id) \
+                        and 'candidate_we_vote_id' in one_possible_candidate \
+                        and positive_value_exists(one_possible_candidate['candidate_we_vote_id']):
+                    position_exists_query = PositionEntered.objects.filter(
+                        organization_we_vote_id=organization_we_vote_id,
+                        candidate_campaign_we_vote_id=one_possible_candidate['candidate_we_vote_id'])
+                    position_list = list(position_exists_query)
+                    if positive_value_exists(len(position_list)):
+                        # Since there is a position, remove this possible candidate
+                        altered_position_list_used = True
+                        does_not_contain_position = False
+                        pass
+                if does_not_contain_position:
+                    altered_position_list.append(one_possible_candidate)
+
+            if altered_position_list_used:
+                results = fix_sequence_of_possible_candidate_list(altered_position_list)
+                if results['possible_candidate_list_found']:
+                    possible_candidate_list = results['possible_candidate_list']
 
     # Add empty values above and beyond the values in possible_candidate_list so we overwrite (remove)
     #  data that might have already been stored in the database
@@ -692,10 +760,12 @@ def voter_guide_create_process_view(request):
             'voter_who_submitted_we_vote_id':   voter_who_submitted_we_vote_id,
         }
         if political_data_manager:
+            updated_values['ignore_stored_positions'] = ignore_stored_positions
             updated_values['ignore_this_source'] = ignore_this_source
             updated_values['internal_notes'] = internal_notes
             updated_values['candidates_missing_from_we_vote'] = candidates_missing_from_we_vote
             updated_values['cannot_find_endorsements'] = cannot_find_endorsements
+            updated_values['capture_detailed_comments'] = capture_detailed_comments
             updated_values['hide_from_active_review'] = hide_from_active_review
 
         for one_possible_candidate in possible_candidate_list:

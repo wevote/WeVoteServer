@@ -410,6 +410,30 @@ def modify_one_row_in_possible_candidate_dict_list(possible_candidate_list, row_
     return results
 
 
+def fix_sequence_of_possible_candidate_list(possible_candidate_list):
+    status = ""
+    success = True
+    candidate_number_list = CANDIDATE_NUMBER_LIST
+    possible_candidate_list_found = True
+    updated_possible_candidate_list = []
+
+    number_index = 0
+    for possible_candidate in possible_candidate_list:
+        if number_index >= len(candidate_number_list):
+            break
+        possible_candidate['possible_candidate_number'] = candidate_number_list[number_index]
+        updated_possible_candidate_list.append(possible_candidate)
+        number_index += 1
+
+    results = {
+        'status':                           status,
+        'success':                          success,
+        'possible_candidate_list':          updated_possible_candidate_list,
+        'possible_candidate_list_found':    possible_candidate_list_found,
+    }
+    return results
+
+
 def take_in_possible_candidate_list_from_form(request):
     status = ""
     success = True

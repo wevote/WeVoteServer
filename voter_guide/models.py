@@ -1971,6 +1971,12 @@ class VoterGuidePossibility(models.Model):
     # Data manager cannot find upcoming endorsements (may not be posted yet)
     cannot_find_endorsements = models.BooleanField(default=False)
 
+    # Data manager will need to put more work into this in order to capture all of the details
+    capture_detailed_comments = models.BooleanField(default=False)
+
+    # While processing and reviewing this organization's endorsements, leave out positions already stored
+    ignore_stored_positions = models.BooleanField(default=False)
+
     # This website is not a good source for future endorsements
     ignore_this_source = models.BooleanField(default=False)
 
