@@ -3,7 +3,7 @@
 # -*- coding: UTF-8 -*-
 
 from .controllers import add_candidates_with_position_count_to_voter_guide_possibility_list, \
-    add_empty_values_to_possible_candidate_dict_list, CANDIDATE_NUMBER_LIST, \
+    add_empty_values_to_possible_candidate_dict_list, CANDIDATE_NUMBER_LIST, CANDIDATE_REVIEW_NUMBER_LIST, \
     convert_candidate_list_light_to_possible_candidates, convert_list_of_names_to_possible_candidate_dict_list, \
     extract_position_list_from_voter_guide_possibility, extract_possible_candidate_list_from_database, \
     fix_sequence_of_possible_candidate_list, \
@@ -255,6 +255,7 @@ def voter_guide_create_view(request):
             organization_twitter_handle = voter_guide_possibility.organization_twitter_handle
             organization_we_vote_id = voter_guide_possibility.organization_we_vote_id
             positions_ready_to_save_as_batch = voter_guide_possibility.positions_ready_to_save_as_batch()
+            state_code = voter_guide_possibility.state_code
             target_google_civic_election_id = voter_guide_possibility.target_google_civic_election_id
             voter_who_submitted_we_vote_id = voter_guide_possibility.voter_who_submitted_we_vote_id
             voter_guide_possibility_url = voter_guide_possibility.voter_guide_possibility_url
@@ -266,7 +267,7 @@ def voter_guide_create_view(request):
                 google_civic_election_id_list = []
                 # Match incoming candidates to candidates already in the database
                 results = match_candidate_list_with_candidates_in_database(
-                    possible_candidate_list, google_civic_election_id_list)
+                    possible_candidate_list, google_civic_election_id_list, state_code)
                 if results['possible_candidate_list_found']:
                     possible_candidate_list = results['possible_candidate_list']
 
@@ -505,6 +506,7 @@ def voter_guide_create_process_view(request):
     organization_twitter_handle = request.POST.get('organization_twitter_handle', '')
     organization_we_vote_id = request.POST.get('organization_we_vote_id', None)
     scan_url_again = request.POST.get('scan_url_again', False)
+    state_code = request.POST.get('state_code', '')
     voter_guide_possibility_id = request.POST.get('voter_guide_possibility_id', 0)
     voter_guide_possibility_url = request.POST.get('voter_guide_possibility_url', '')
     voter_who_submitted_we_vote_id = request.POST.get('voter_who_submitted_we_vote_id', '')
@@ -513,6 +515,7 @@ def voter_guide_create_process_view(request):
     organization_twitter_handle = extract_twitter_handle_from_text_string(organization_twitter_handle)
 
     candidate_number_list = CANDIDATE_NUMBER_LIST
+    candidate_review_number_list = CANDIDATE_REVIEW_NUMBER_LIST
     voter_guide_possibility_manager = VoterGuidePossibilityManager()
     voter_manager = VoterManager()
     voter_who_submitted_name = ""
@@ -580,15 +583,6 @@ def voter_guide_create_process_view(request):
             organization_twitter_handle = twitter_user_manager.fetch_twitter_handle_from_organization_we_vote_id(
                 organization_we_vote_id)
 
-    google_civic_election_id_list = []
-    election_manager = ElectionManager()
-    results = election_manager.retrieve_upcoming_elections()
-    if results['election_list_found']:
-        upcoming_election_list = results['election_list']
-        for one_election in upcoming_election_list:
-            if positive_value_exists(one_election.google_civic_election_id):
-                google_civic_election_id_list.append(one_election.google_civic_election_id)
-
     # #########################################
     # Figure out the Possible Candidates
     changes_made = False
@@ -606,13 +600,34 @@ def voter_guide_create_process_view(request):
     if results['possible_candidate_list_found']:
         possible_candidate_list = results['possible_candidate_list']
 
+    # Figure out the elections we care about
+    google_civic_election_id_list = []
+    election_manager = ElectionManager()
+    # If a state_code is NOT included, the national election will be returned with this query
+    results = election_manager.retrieve_upcoming_elections(state_code=state_code)
+    if results['election_list_found']:
+        upcoming_election_list = results['election_list']
+        for one_election in upcoming_election_list:
+            if positive_value_exists(one_election.google_civic_election_id):
+                google_civic_election_id_list.append(one_election.google_civic_election_id)
+
+    # If a state code IS included, then the above retrieve_upcoming_elections will have missed the national election
+    if positive_value_exists(state_code):
+        results = election_manager.retrieve_next_national_election()
+        if results['election_found']:
+            one_election = results['election']
+            if positive_value_exists(one_election.google_civic_election_id) \
+                    and one_election.google_civic_election_id not in google_civic_election_id_list:
+                google_civic_election_id_list.append(one_election.google_civic_election_id)
+
     # We will need all candidates for all upcoming elections so we can search the HTML of
     #  the possible voter guide for these names
     possible_candidate_list_from_url_scan = []
     first_scan_needed = positive_value_exists(voter_guide_possibility_url) and not possible_candidate_list_found
     scan_url_now = first_scan_needed or positive_value_exists(scan_url_again)
     if scan_url_now and positive_value_exists(google_civic_election_id_list):
-        results = retrieve_candidate_list_for_all_upcoming_elections(google_civic_election_id_list)
+        results = retrieve_candidate_list_for_all_upcoming_elections(google_civic_election_id_list,
+                                                                     limit_to_this_state_code=state_code)
         if results['candidate_list_found']:
             candidate_list_light = results['candidate_list_light']
             candidate_scrape_results = \
@@ -684,7 +699,7 @@ def voter_guide_create_process_view(request):
         # in use will be "003". To get "004" for the next possible candidate, we pass in the index "3"
         try:
             next_index = number_of_current_possible_candidates
-            starting_candidate_number = candidate_number_list[next_index]  # This returns a string like "004"
+            starting_candidate_number = candidate_review_number_list[next_index]  # This returns a string like "004"
             results = break_up_text_into_possible_candidates_list(ballot_items_additional, starting_candidate_number)
             if results['possible_candidate_list_found']:
                 additional_possible_candidate_list = results['possible_candidate_list']
@@ -755,6 +770,7 @@ def voter_guide_create_process_view(request):
             'organization_name':                organization_name,
             'organization_twitter_handle':      organization_twitter_handle,
             'organization_we_vote_id':          organization_we_vote_id,
+            'state_code':                       state_code,
             'voter_guide_possibility_url':      voter_guide_possibility_url,
             'voter_who_submitted_name':         voter_who_submitted_name,
             'voter_who_submitted_we_vote_id':   voter_who_submitted_we_vote_id,

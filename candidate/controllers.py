@@ -1304,6 +1304,7 @@ def retrieve_candidate_politician_match_options(vote_smart_id, maplight_id, cand
 
 
 def retrieve_candidate_list_for_all_upcoming_elections(upcoming_google_civic_election_id_list=[],
+                                                       limit_to_this_state_code="",
                                                        return_list_of_objects=False):
 
     status = ""
@@ -1316,7 +1317,7 @@ def retrieve_candidate_list_for_all_upcoming_elections(upcoming_google_civic_ele
             or not positive_value_exists(len(upcoming_google_civic_election_id_list)):
         upcoming_google_civic_election_id_list = []
         election_manager = ElectionManager()
-        results = election_manager.retrieve_upcoming_elections()
+        results = election_manager.retrieve_upcoming_elections(state_code=limit_to_this_state_code)
         if results['election_list_found']:
             election_list = results['election_list']
             for one_election in election_list:
@@ -1324,12 +1325,25 @@ def retrieve_candidate_list_for_all_upcoming_elections(upcoming_google_civic_ele
                     upcoming_google_civic_election_id_list.append(one_election.google_civic_election_id)
         else:
             status += results['status']
-            success = results['success']
+            # success = results['success']
+
+        # If a state code IS included, then the above retrieve_upcoming_elections will have missed the national election
+        if positive_value_exists(limit_to_this_state_code):
+            results = election_manager.retrieve_next_national_election()
+            if results['election_found']:
+                one_election = results['election']
+                if positive_value_exists(one_election.google_civic_election_id) \
+                        and one_election.google_civic_election_id not in upcoming_google_civic_election_id_list:
+                    upcoming_google_civic_election_id_list.append(one_election.google_civic_election_id)
+            else:
+                status += results['status']
 
     if len(upcoming_google_civic_election_id_list):
         candidate_list_manager = CandidateCampaignListManager()
         results = candidate_list_manager.retrieve_candidates_for_specific_elections(
-            upcoming_google_civic_election_id_list, return_list_of_objects)
+            upcoming_google_civic_election_id_list,
+            limit_to_this_state_code=limit_to_this_state_code,
+            return_list_of_objects=return_list_of_objects)
         if results['candidate_list_found']:
             candidate_list_found = True
             candidate_list_light = results['candidate_list_light']
