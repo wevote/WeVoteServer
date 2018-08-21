@@ -8,6 +8,7 @@ from .models import BallotItem, BallotItemListManager, BallotItemManager, Ballot
 from admin_tools.views import redirect_to_sign_in_page
 from candidate.models import CandidateCampaignListManager
 from config.base import get_environment_variable
+from exception.models import handle_record_not_deleted_exception
 from office.models import ContestOffice, ContestOfficeManager
 from django.http import HttpResponseRedirect
 from django.core.urlresolvers import reverse
@@ -88,6 +89,7 @@ def ballot_returned_delete_process_view(request, ballot_returned_id):
     google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
     state_code = request.GET.get('state_code', '')
 
+    status = ""
     success = False
     ballot_returned_found = False
     ballot_returned = BallotReturned()
@@ -122,6 +124,8 @@ def ballot_returned_delete_process_view(request, ballot_returned_id):
                 try:
                     one_ballot_item.delete()
                 except Exception as e:
+                    exception_message_optional = status + "UNABLE_TO_DELETE_BALLOT_ITEM "
+                    handle_record_not_deleted_exception(e, logger, exception_message_optional)
                     ballot_items_delete_failed_count += 0
 
     if not positive_value_exists(ballot_items_delete_failed_count):
@@ -130,6 +134,8 @@ def ballot_returned_delete_process_view(request, ballot_returned_id):
             ballot_returned.delete()
             success = True
         except Exception as e:
+            exception_message_optional = status + "UNABLE_TO_DELETE_BALLOT_RETURNED "
+            handle_record_not_deleted_exception(e, logger, exception_message_optional)
             success = False
 
     if success:
