@@ -305,7 +305,7 @@ def ballot_items_import_from_structured_json(structured_json):
 
     ballot_items_results = {
         'success': True,
-        'status': "ballot_items_IMPORT_PROCESS_COMPLETE",
+        'status': "BALLOT_ITEMS_IMPORT_PROCESS_COMPLETE",
         'saved': ballot_items_saved,
         'updated': ballot_items_updated,
         'not_processed': ballot_items_not_processed,
