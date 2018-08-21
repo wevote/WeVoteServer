@@ -163,6 +163,26 @@
 
 {% endif %}
 
+{% if political_data_manager and state_list %}
+    <div class="form-group">
+        <label for="ballot_items_raw_id" class="col-sm-3 control-label">
+            <span class="hidden-xs">Limit to this State</span>
+        </label>
+        <div class="col-sm-8">
+            <select id="state_code_id" name="state_code">
+                <option value="" {% if '' == state_code %} selected="selected"{% endif %}>
+                    -- Any State --</option>
+            {% for key, state in state_list %}
+                <option value="{{ key|lower }}"
+                        {% if key|lower == state_code|lower %} selected="selected"{% endif %}>
+                    {{ state }}</option>
+            {% endfor %}
+            </select>
+        </div>
+    </div>
+{% endif %}
+
+
 {% if possible_candidate_list_found and not hide_possible_candidate_list %}
     <div class="form-group">
     {% if possible_candidate_list %}

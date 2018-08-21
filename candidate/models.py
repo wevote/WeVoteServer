@@ -204,6 +204,7 @@ class CandidateCampaignListManager(models.Model):
         return results
 
     def retrieve_candidates_for_specific_elections(self, google_civic_election_id_list=[],
+                                                   limit_to_this_state_code="",
                                                    return_list_of_objects=False):
         status = ""
         candidate_list_objects = []
@@ -225,6 +226,8 @@ class CandidateCampaignListManager(models.Model):
         try:
             candidate_queryset = CandidateCampaign.objects.all()
             candidate_queryset = candidate_queryset.filter(google_civic_election_id__in=google_civic_election_id_list)
+            if positive_value_exists(limit_to_this_state_code):
+                candidate_queryset = candidate_queryset.filter(state_code__iexact=limit_to_this_state_code)
             candidate_list_objects = list(candidate_queryset)
 
             if len(candidate_list_objects):

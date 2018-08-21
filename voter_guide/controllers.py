@@ -21,7 +21,8 @@ from position.models import ANY_STANCE, INFORMATION_ONLY, OPPOSE, \
     PositionEntered, PositionManager, PositionListManager, SUPPORT
 from voter.models import fetch_voter_id_from_voter_device_link, fetch_voter_we_vote_id_from_voter_device_link, \
     fetch_voter_we_vote_id_from_voter_id, VoterManager
-from voter_guide.models import CANDIDATE_NUMBER_LIST, VoterGuide, VoterGuideListManager, VoterGuideManager, \
+from voter_guide.models import CANDIDATE_NUMBER_LIST, CANDIDATE_REVIEW_NUMBER_LIST, \
+    VoterGuide, VoterGuideListManager, VoterGuideManager, \
     VoterGuidePossibilityManager
 import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, is_voter_device_id_valid, positive_value_exists, \
@@ -38,7 +39,7 @@ def convert_candidate_list_light_to_possible_candidates(selected_candidate_list_
     success = True
     possible_candidate_list = []
     possible_candidate_list_found = False
-    candidate_number_list = CANDIDATE_NUMBER_LIST
+    candidate_number_list = CANDIDATE_REVIEW_NUMBER_LIST
     # one_candidate = {
     #     'ballot_item_display_name': candidate.display_candidate_name(),
     #     'candidate_we_vote_id': candidate.we_vote_id,
@@ -117,18 +118,19 @@ def add_empty_values_to_possible_candidate_dict_list(starting_candidate_number="
     candidate_number_list = CANDIDATE_NUMBER_LIST
 
     number_index = candidate_number_list.index(starting_candidate_number)
-    length_of_candidate_number_list = len(candidate_number_list)
-    while number_index < length_of_candidate_number_list:
-        possible_candidate = {
-            'candidate_name': None,
-            'candidate_we_vote_id': None,
-            'comment_about_candidate': None,
-            'google_civic_election_id': None,
-            'possible_candidate_number': candidate_number_list[number_index],
-            'stance_about_candidate': "SUPPORT",
-        }
-        possible_candidate_list.append(possible_candidate)
-        number_index += 1
+    if positive_value_exists(number_index):
+        length_of_candidate_number_list = len(candidate_number_list)
+        while number_index < length_of_candidate_number_list:
+            possible_candidate = {
+                'candidate_name': None,
+                'candidate_we_vote_id': None,
+                'comment_about_candidate': None,
+                'google_civic_election_id': None,
+                'possible_candidate_number': candidate_number_list[number_index],
+                'stance_about_candidate': "SUPPORT",
+            }
+            possible_candidate_list.append(possible_candidate)
+            number_index += 1
 
     if len(possible_candidate_list):
         possible_candidate_list_found = True
@@ -147,7 +149,7 @@ def convert_list_of_names_to_possible_candidate_dict_list(ballot_items_list, sta
     success = True
     possible_candidate_list = []
     possible_candidate_list_found = False
-    candidate_number_list = CANDIDATE_NUMBER_LIST
+    candidate_number_list = CANDIDATE_REVIEW_NUMBER_LIST
 
     number_index = candidate_number_list.index(starting_candidate_number)
     for one_name in ballot_items_list:
@@ -363,7 +365,7 @@ def modify_one_row_in_possible_candidate_dict_list(possible_candidate_list, row_
                                                    name_to_add_to_new_row=None):
     status = ""
     success = True
-    candidate_number_list = CANDIDATE_NUMBER_LIST
+    candidate_number_list = CANDIDATE_REVIEW_NUMBER_LIST
     possible_candidate_list_found = False
     remaining_possible_candidate_list = []
     updated_possible_candidate_list = []
@@ -413,7 +415,7 @@ def modify_one_row_in_possible_candidate_dict_list(possible_candidate_list, row_
 def fix_sequence_of_possible_candidate_list(possible_candidate_list):
     status = ""
     success = True
-    candidate_number_list = CANDIDATE_NUMBER_LIST
+    candidate_number_list = CANDIDATE_REVIEW_NUMBER_LIST
     possible_candidate_list_found = True
     updated_possible_candidate_list = []
 
