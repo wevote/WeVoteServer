@@ -541,6 +541,7 @@ def candidate_new_view(request):
     ballot_guide_official_statement = request.GET.get('ballot_guide_official_statement', "")
     vote_smart_id = request.GET.get('vote_smart_id', "")
     maplight_id = request.GET.get('maplight_id', "")
+    page = request.GET.get('page', 0)
     politician_we_vote_id = request.GET.get('politician_we_vote_id', "")
 
     # These are the Offices already entered for this election
@@ -590,6 +591,7 @@ def candidate_new_view(request):
         'ballot_guide_official_statement':  ballot_guide_official_statement,
         'vote_smart_id':                    vote_smart_id,
         'maplight_id':                      maplight_id,
+        'page':                             page,
         'politician_we_vote_id':            politician_we_vote_id,
     }
     return render(request, 'candidate/candidate_edit.html', template_values)
@@ -621,6 +623,7 @@ def candidate_edit_view(request, candidate_id=0, candidate_campaign_we_vote_id="
     ballotpedia_race_id = request.GET.get('ballotpedia_race_id', False)
     vote_smart_id = request.GET.get('vote_smart_id', False)
     maplight_id = request.GET.get('maplight_id', False)
+    page = request.GET.get('page', 0)
     state_code = request.GET.get('state_code', "")
     show_all_google_search_users = request.GET.get('show_all_google_search_users', False)
     show_all_twitter_search_results = request.GET.get('show_all_twitter_search_results', False)
@@ -744,6 +747,7 @@ def candidate_edit_view(request, candidate_id=0, candidate_campaign_we_vote_id="
             'ballotpedia_race_id':              ballotpedia_race_id,
             'vote_smart_id':                    vote_smart_id,
             'maplight_id':                      maplight_id,
+            'page':                             page,
         }
     else:
         template_values = {

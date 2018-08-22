@@ -2,7 +2,7 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
-from .controllers import scrape_facebook_photo_url_from_web_page
+from .controllers import get_facebook_photo_url_from_graphapi
 from admin_tools.views import redirect_to_sign_in_page
 from candidate.controllers import FACEBOOK, save_image_to_candidate_table
 from candidate.models import CandidateCampaign
@@ -19,9 +19,9 @@ from wevote_settings.models import RemoteRequestHistory, RemoteRequestHistoryMan
 logger = wevote_functions.admin.get_logger(__name__)
 
 
-def scrape_one_facebook_page(one_candidate, request, remote_request_history_manager, add_messages):
-    # Facebook profile image url scrape has not been run on this candidate yet
-    results = scrape_facebook_photo_url_from_web_page(one_candidate.facebook_url)
+def get_one_picture_from_facebook_graphapi(one_candidate, request, remote_request_history_manager, add_messages):
+
+    results = get_facebook_photo_url_from_graphapi(one_candidate.facebook_url)
     if results.get('success'):
         photo_url = results.get('photo_url')
         link_is_broken = results.get('http_response_code') == 404
@@ -32,12 +32,17 @@ def scrape_one_facebook_page(one_candidate, request, remote_request_history_mana
         else:
             if link_is_broken:
                 logger.info("Broken URL: " + one_candidate.facebook_url)
+                if add_messages:
+                    messages.add_message(request, messages.INFO,
+                                         'Failed to retrieve Facebook picture:  The Facebook URL is broken, or is not a '
+                                         'legal Facebook alias')
             else:
-                logger.info("Scraped URL: " + one_candidate.facebook_url + " ==> " + photo_url)
+                logger.info("Queried URL: " + one_candidate.facebook_url + " ==> " + photo_url)
+                if add_messages:
+                    messages.add_message(request, messages.INFO, 'Facebook photo retrieved.')
             save_image_to_candidate_table(one_candidate, photo_url, one_candidate.facebook_url, link_is_broken,
                                           FACEBOOK)
-            if add_messages:
-                messages.add_message(request, messages.INFO, 'Facebook photo retrieved.')
+
         # Create a record denoting that we have retrieved from Facebook for this candidate
         save_results_history = remote_request_history_manager.create_remote_request_history_entry(
             RETRIEVE_POSSIBLE_FACEBOOK_PHOTOS, one_candidate.google_civic_election_id,
@@ -125,7 +130,7 @@ def bulk_retrieve_facebook_photos_view(request):
 
                 if not positive_value_exists(request_history_list):
                     add_messages = False
-                    scrape_one_facebook_page(one_candidate, request, remote_request_history_manager, add_messages)
+                    get_one_picture_from_facebook_graphapi(one_candidate, request, remote_request_history_manager, add_messages)
                     number_of_candidates_to_search -= 1
                 else:
                     logger.info("Skipped URL: " + one_candidate.facebook_url)
@@ -144,7 +149,7 @@ def bulk_retrieve_facebook_photos_view(request):
 
 
 @login_required
-def scrape_and_save_facebook_photo_view(request):
+def get_and_save_facebook_photo_view(request):
     remote_request_history_manager = RemoteRequestHistoryManager()
 
     authority_required = {'verified_volunteer'}  # admin, verified_volunteer
@@ -159,7 +164,7 @@ def scrape_and_save_facebook_photo_view(request):
 
     if not positive_value_exists(candidate_we_vote_id):
         messages.add_message(request, messages.ERROR,
-                             'scrape_and_save_facebook_photo_view, Candidate not specified')
+                             'get_and_save_facebook_photo_view, Candidate not specified')
         return HttpResponseRedirect(reverse('candidate:candidate_list', args=()) +
                                     '?google_civic_election_id=' + str(google_civic_election_id) +
                                     '&state_code=' + str(state_code) +
@@ -177,7 +182,7 @@ def scrape_and_save_facebook_photo_view(request):
         # see if we already tried to scrape them
         if not positive_value_exists(one_candidate.facebook_url):
             messages.add_message(request, messages.ERROR,
-                                 'scrape_and_save_facebook_photo_view, No facebook_url found.')
+                                 'get_and_save_facebook_photo_view, No facebook_url found.')
             return HttpResponseRedirect(
                 reverse('candidate:candidate_edit_we_vote_id', args=(one_candidate.we_vote_id,)) +
                 '?google_civic_election_id=' + str(google_civic_election_id) +
@@ -187,12 +192,12 @@ def scrape_and_save_facebook_photo_view(request):
                 )
 
         add_messages = True
-        scrape_one_facebook_page(one_candidate, request, remote_request_history_manager, add_messages)
+        get_one_picture_from_facebook_graphapi(one_candidate, request, remote_request_history_manager, add_messages)
 
     except CandidateCampaign.DoesNotExist:
         # This is fine, do nothing
         messages.add_message(request, messages.ERROR,
-                             'scrape_and_save_facebook_photo_view, Candidate not found.')
+                             'get_and_save_facebook_photo_view, Candidate not found.')
         return HttpResponseRedirect(reverse('candidate:candidate_list', args=()) +
                                     '?google_civic_election_id=' + str(google_civic_election_id) +
                                     '&state_code=' + str(state_code) +
