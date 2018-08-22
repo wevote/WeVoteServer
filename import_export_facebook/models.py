@@ -6,7 +6,7 @@ from django.core.validators import RegexValidator
 from django.db import models
 from email_outbound.models import SEND_STATUS_CHOICES, TO_BE_PROCESSED
 from wevote_functions.functions import generate_random_string, positive_value_exists, convert_to_int
-from exception.models import handle_exception
+from exception.models import handle_exception, print_to_log
 import wevote_functions.admin
 import facebook
 
@@ -154,26 +154,72 @@ class FacebookManager(models.Model):
         return "FacebookManager"
 
     def create_facebook_link_to_voter(self, facebook_user_id, voter_we_vote_id):
+        create_new_facebook_link = True
+        facebook_link_to_voter = None
+        facebook_link_to_voter_saved = False
+        status = ""
+        success = True
+
+        if not positive_value_exists(facebook_user_id) or not positive_value_exists(voter_we_vote_id):
+            status += "CREATE_FACEBOOK_LINK_MISSING_REQUIRED_VARIABLES "
+            print_to_log(logger=logger, exception_message_optional=status)
+            success = False
+            results = {
+                'success': success,
+                'status': status,
+                'facebook_link_to_voter_saved': facebook_link_to_voter_saved,
+                'facebook_link_to_voter': facebook_link_to_voter,
+            }
+            return results
+
+        # Does a link already exist?
+        try:
+            facebook_link_to_voter = FacebookLinkToVoter.objects.get(
+                facebook_user_id=facebook_user_id,
+            )
+            success = True
+            status += "FACEBOOK_LINK_TO_VOTER_ALREADY_EXISTS "
+            if voter_we_vote_id == facebook_link_to_voter.voter_we_vote_id:
+                facebook_link_to_voter_saved = True
+                create_new_facebook_link = False
+                success = True
+            else:
+                # Write over existing voter_we_vote_id
+                create_new_facebook_link = False
+                try:
+                    facebook_link_to_voter.voter_we_vote_id = voter_we_vote_id
+                    facebook_link_to_voter.save()
+                    success = True
+                except Exception as e:
+                    status += "FACEBOOK_LINK_TO_VOTER-UPDATE_VOTER_WE_VOTE_ID_FAILED (" + str(voter_we_vote_id) + ") "
+                    handle_exception(e, logger=logger, exception_message=status)
+                    success = False
+        except FacebookAuthResponse.DoesNotExist:
+            status += "EXISTING_FACEBOOK_LINK_TO_VOTER_DOES_NOT_EXIST "
+        except Exception as e:
+            status += "FACEBOOK_LINK_TO_VOTER-GET_FAILED "
+            handle_exception(e, logger=logger, exception_message=status)
 
         # Any attempts to save a facebook_link using either facebook_user_id or voter_we_vote_id that already
         #  exist in the table will fail, since those fields are required to be unique.
-        facebook_secret_key = generate_random_string(12)
+        if create_new_facebook_link:
+            facebook_secret_key = generate_random_string(12)
 
-        try:
-            facebook_link_to_voter = FacebookLinkToVoter.objects.create(
-                facebook_user_id=facebook_user_id,
-                voter_we_vote_id=voter_we_vote_id,
-                secret_key=facebook_secret_key,
-            )
-            facebook_link_to_voter_saved = True
-            success = True
-            status = "FACEBOOK_LINK_TO_VOTER_CREATED"
-        except Exception as e:
-            facebook_link_to_voter_saved = False
-            facebook_link_to_voter = FacebookLinkToVoter()
-            success = False
-            status = "FACEBOOK_LINK_TO_VOTER_NOT_CREATED"
-            handle_exception(e, logger=logger, exception_message=status)
+            try:
+                facebook_link_to_voter = FacebookLinkToVoter.objects.create(
+                    facebook_user_id=facebook_user_id,
+                    voter_we_vote_id=voter_we_vote_id,
+                    secret_key=facebook_secret_key,
+                )
+                facebook_link_to_voter_saved = True
+                success = True
+                status += "FACEBOOK_LINK_TO_VOTER_CREATED "
+            except Exception as e:
+                facebook_link_to_voter_saved = False
+                facebook_link_to_voter = FacebookLinkToVoter()
+                success = False
+                status += "FACEBOOK_LINK_TO_VOTER_NOT_CREATED "
+                handle_exception(e, logger=logger, exception_message=status)
 
         results = {
             'success':                      success,
