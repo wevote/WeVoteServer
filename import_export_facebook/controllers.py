@@ -966,14 +966,16 @@ def voter_facebook_sign_in_save_for_api(voter_device_id,  # voterFacebookSignInS
     return json_data
 
 
-def scrape_facebook_photo_url_from_web_page(facebook_candidate_url):
+# NOTE:  This methond only works for candidates with public Facebook aliases like "AdamSchiffCA" or "audreyforcongress", it does not work for unaliased individuals like "carrie.adams.9210"
+def get_facebook_photo_url_from_graphapi(facebook_candidate_url):
     candidate_we_vote_ids_list = []
     photo_url = ""
     status = ""
     success = False
-    if "http://" in facebook_candidate_url:
-        facebook_candidate_url.replace("http://", "https://")
-    if len(facebook_candidate_url) < 10:
+    # https://www.facebook.com/aaron.peskin/
+    graphapi_url = facebook_candidate_url
+
+    if len(graphapi_url) < 10:
         status = 'FIND_CANDIDATES-PROPER_URL_NOT_PROVIDED: ' + facebook_candidate_url
         results = {
             'status':                       status,
@@ -987,62 +989,46 @@ def scrape_facebook_photo_url_from_web_page(facebook_candidate_url):
     urllib._urlopener = FakeFirefoxURLopener()
     headers = {
         'User-Agent':
-            'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/67.0.3396.99 Safari/537.36',
+            'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/68.0.3440.106 Safari/537.36',
+        'accept':
+            'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8'
            }
 
-    # https://www.facebook.com/KamalaHarris/
-    #   <img class="scaledImageFitWidth img" src="https://scontent.fsnc1-1.fna.fbcdn.net/v/t1.0-1/p720x720/19420547_10155764935092923_4741672932915645516_n.jpg?_nc_cat=1&amp;oh=2e3a0af38385415f680ccc346faf876f&amp;oe=5BCE1B27" alt="" width="500" height="500" data-ft="&#123;&quot;tn&quot;:&quot;-^&quot;&#125;" itemprop="image" />  # noqa
-    # <img class="_11kf img" alt="Tim Gildersleeve's Profile Photo, Image may contain: 1 person" src="https://scontent-sjc3-1.xx.fbcdn.net/v/t1.0-1/c170.50.621.621/s320x320/532213_506005819456548_593353888_n.jpg?_nc_cat=0&amp;oh=65856fc0f400b4f3eeab5b6daa9b206f&amp;oe=5BCEB038">    # noqa
-
     try:
-        request = urllib.request.Request(facebook_candidate_url, None, headers)
-        page = urllib.request.urlopen(request, timeout=10)
-        success = False
-        photo_url = None
-        http_response_code = 200
-        for line in page.readlines():
-            try:
-                try:
-                    decoded_line = line.decode()
-                except Exception:
-                    logger.info("==> EXCEPTION ON DECODE")
-                    continue
-                # logger.info("==>" + decoded_line)
-                if 'scaledImageFitWidth img' or 'Profile Photo, Image may contain' in decoded_line:
-                    p = re.compile('<img class=\".{0,50}(?:Profile Photo, Image may contain|scaledImageFitWidth img).{1,100}src=\"(.*?)\"')   # noqa
-                    match_obj = p.search(decoded_line)
-                    if match_obj == None:
-                        continue
-                    photo_url = match_obj.group(1).replace("&amp;", "&")
-                    success = True
-                    status += "FINISHED_SCRAPING_PAGE_FOR_ONE_CANDIDATE "
-                    if not positive_value_exists(photo_url):
-                        logger.error("scrape_facebook_photo_url_from_web_page, RegEx error, Facebook scrape has broken")
-                        success = False
-                        status += "SCRAPING_OF_PAGE_FAILED_BROKEN_REGEX "
-                    break
-            except Exception as error_message:
-                logger.error("scrape_facebook_photo_url_from_web_page regex exception for " + facebook_candidate_url +
-                             " with exception " + error_message)
-                status += "SCRAPE_ONE_FACEBOOK_LINE_ERROR: {error_message}".format(error_message=error_message)
+        graphapi_url = graphapi_url.replace("http://", "https://")
+        graphapi_url = graphapi_url.replace("www.facebook.com", "graph.facebook.com")
+        graphapi_url = graphapi_url.strip()
+        if not graphapi_url.endswith("/"):
+            graphapi_url += "/"
+        graphapi_url += "picture?type=large"
+        logger.info("API call: " + graphapi_url)
+        request = urllib.request.Request(graphapi_url, None, headers)
+        response = urllib.request.urlopen(request, timeout=10)
+        http_response_code = response.code
+        if http_response_code is 200:
+            photo_url = response.url
+            success = True
+            status += "FINISHED_QUERYING_GRAPHAPI_FOR_ONE_CANDIDATE "
+        else:
+            logger.error("get_facebook_photo_url_from_graphapi, failed to read url: " + graphapi_url +
+                         "  , username must be an alias for this to work")
+            success = False
+            status += "QUERYING_GRAPHAPI_FOR_ONE_CANDIDATE_FAILED "
 
     except timeout:
-        status += "CANDIDATE_SCRAPE_TIMEOUT_ERROR "
+        status += "CANDIDATE_QUERYING_GRAPHAPI_TIMEOUT_ERROR "
         success = False
     except HTTPError as http_error:
         # HTTP Error 404: Not Found
         http_response_code = http_error.code
         success = True
     except IOError as error_instance:
-        status += "SCRAPE_FACEBOOK_IO_ERROR: {error_message}".format(error_message=error_message)
+        status += "QUERYING_GRAPHAPI_IO_ERROR: {error_message}".format(error_message=error_message)
         success = False
     except Exception as error_instance:
         error_message = error_instance
-        status += "SCRAPE_FACEBOOK_GENERAL_EXCEPTION_ERROR: {error_message}".format(error_message=error_message)
+        status += "QUERYING_GRAPHAPI_GENERAL_EXCEPTION_ERROR: {error_message}".format(error_message=error_message)
         success = False
-
-    if status == '':
-        status = "NO_REGEX_MATCH_FOUND"
 
     results = {
         'status':               status,

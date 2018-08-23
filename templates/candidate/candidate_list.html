@@ -298,7 +298,7 @@
                 <td>{{ forloop.counter|add:candidate_count_start }}</td>
                 <td>
                     {% if candidate.candidate_photo_url %}
-                    <a href="{% url 'candidate:candidate_edit' candidate.id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}"
+                    <a href="{% url 'candidate:candidate_edit' candidate.id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}&page={{ current_page_number }}"
                        target="_blank">
                         <img src='{{ candidate.candidate_photo_url }}' height="25px" />
                     </a>
@@ -306,7 +306,7 @@
                 </td>
                 <td>
                 <span class="u-no-break">
-                  <a href="{% url 'candidate:candidate_edit' candidate.id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}"
+                  <a href="{% url 'candidate:candidate_edit' candidate.id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}&page={{ current_page_number }}"
                      target="_blank">{{ candidate.candidate_name }}</a>
                 </span>
                 <br />
@@ -460,14 +460,14 @@
                 <td>{{ forloop.counter|add:candidate_count_start }}</td>
                 <td>
                     {% if candidate.candidate_photo_url %}
-                    <a href="{% url 'candidate:candidate_edit' candidate.id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}"
+                    <a href="{% url 'candidate:candidate_edit' candidate.id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}&page={{ current_page_number }}"
                        target="_blank">
                         <img src='{{ candidate.candidate_photo_url }}' height="25px" />
                     </a>
                     {% endif %}
                 </td>
                 <td>
-                  <a href="{% url 'candidate:candidate_edit' candidate.id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}"
+                  <a href="{% url 'candidate:candidate_edit' candidate.id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}&page={{ current_page_number }}"
                      target="_blank">{{ candidate.candidate_name }}</a><br />
                   {{ candidate.we_vote_id }}
                     {% if candidate.politician_we_vote_id %}
@@ -491,7 +491,7 @@
                 {% endif %}
                 <td>
                   {% if candidate.office %}
-                    <a href="{% url 'office:office_summary' candidate.office.id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">{{ candidate.office.office_name }}
+                    <a href="{% url 'office:office_summary' candidate.office.id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}&page={{ current_page_number }}">{{ candidate.office.office_name }}
                     {% if candidate.office.district_id %}
                         - District {{ candidate.office.district_id }}
                     {% endif %}
