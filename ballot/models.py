@@ -2174,7 +2174,7 @@ class BallotReturnedManager(models.Model):
                         ballot_returned.voter_id = voter_id
                     if ballot_location_display_name is not False:
                         ballot_returned.ballot_location_display_name = ballot_location_display_name
-                    if election_day_text is not False:
+                    if election_day_text is not False and election_day_text is not None:
                         ballot_returned.election_date = datetime.strptime(election_day_text, "%Y-%m-%d").date()
                     if election_description_text is not False:
                         ballot_returned.election_description_text = election_description_text
