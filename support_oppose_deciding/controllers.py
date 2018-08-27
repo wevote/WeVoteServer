@@ -364,6 +364,17 @@ def positions_count_for_all_ballot_items_for_api(  # positionsCountForAllBallotI
         results = figure_out_google_civic_election_id_voter_is_watching(voter_device_id)
         google_civic_election_id_local_scope = results['google_civic_election_id']
 
+        # A google_civic_election_id is required to do any more work here (This API requires too much CPU work
+        #  when a google_civic_election_id is missing.)
+        if not positive_value_exists(google_civic_election_id_local_scope):
+            json_data = {
+                'status': "VALID_GOOGLE_CIVIC_ELECTION_ID_MISSING-COUNT_FOR_ALL_BALLOT_ITEMS",
+                'success': False,
+                'google_civic_election_id': google_civic_election_id_local_scope,
+                'position_counts_list': [],
+            }
+            return json_data
+
         results = ballot_item_list_manager.retrieve_all_ballot_items_for_voter(
             voter_id, google_civic_election_id_local_scope, read_only)
         status += results['status']
