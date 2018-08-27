@@ -365,6 +365,8 @@ def positions_count_for_all_ballot_items_view(request):  # positionsCountForAllB
     :param request:
     :return:
     """
+    status = ""
+
     voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
     google_civic_election_id = request.GET.get('google_civic_election_id', 0)
     force_recount = request.GET.get('force_recount', 0)
@@ -376,28 +378,17 @@ def positions_count_for_all_ballot_items_view(request):  # positionsCountForAllB
             google_civic_election_id=google_civic_election_id)
         if not positive_value_exists(google_civic_election_id):
             google_civic_election_id = calculate_results['google_civic_election_id']
+        status += calculate_results['status']
 
     # Pull the positions count from cache tables
     results = count_for_all_ballot_items_from_position_network_score_for_api(
         voter_device_id=voter_device_id,
         google_civic_election_id=google_civic_election_id)
 
-    if not force_recount and not positive_value_exists(results['support_or_oppose_exists']):
-        # No need to repeat lookup for google_civic_election_id
-        if not positive_value_exists(google_civic_election_id):
-            google_civic_election_id = results['google_civic_election_id']
-        # Calculate the positions from source tables
-        calculate_results = calculate_positions_count_for_all_ballot_items_for_api(
-            voter_device_id=voter_device_id,
-            google_civic_election_id=google_civic_election_id)
-        if positive_value_exists(calculate_results['support_or_oppose_exists']):
-            # Try again to pull the positions count from cache tables
-            results = count_for_all_ballot_items_from_position_network_score_for_api(
-                voter_device_id=voter_device_id,
-                google_civic_election_id=google_civic_election_id)
+    status += results['status']
 
     json_data = {
-        'status':                   results['status'],
+        'status':                   status,
         'success':                  results['success'],
         'google_civic_election_id': results['google_civic_election_id'],
         'position_counts_list':     results['position_counts_list'],
