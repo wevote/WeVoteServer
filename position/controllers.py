@@ -500,6 +500,18 @@ def count_for_all_ballot_items_from_position_network_score_for_api(  # positions
         results = figure_out_google_civic_election_id_voter_is_watching(voter_device_id)
         google_civic_election_id = results['google_civic_election_id']
 
+    # A google_civic_election_id is required to do any more work here (This API requires too much CPU work
+    #  when a google_civic_election_id is missing.)
+    if not positive_value_exists(google_civic_election_id):
+        json_data = {
+            'status':                   "VALID_GOOGLE_CIVIC_ELECTION_ID_MISSING-COUNT_FOR_ALL_BALLOT_ITEMS_FROM_CACHE",
+            'success':                  False,
+            'google_civic_election_id': google_civic_election_id,
+            'position_counts_list':     [],
+            'support_or_oppose_exists': False,
+        }
+        return json_data
+
     position_list_manager = PositionListManager()
     # The list where we capture results
     position_counts_list_results = []
