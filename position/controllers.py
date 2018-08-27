@@ -259,8 +259,9 @@ def calculate_positions_count_for_all_ballot_items_for_api(  # positionsCountFor
         voter_id = 0
         voter_we_vote_id = ""
     if not positive_value_exists(voter_id):
+        status += "VALID_VOTER_ID_MISSING-CALCULATE_COUNT_FOR_ALL_BALLOT_ITEMS"
         json_data = {
-            'status':                   "VALID_VOTER_ID_MISSING-CALCULATE_COUNT_FOR_ALL_BALLOT_ITEMS",
+            'status':                   status,
             'success':                  False,
             'google_civic_election_id': google_civic_election_id,
             'support_or_oppose_exists': support_or_oppose_exists,
@@ -287,6 +288,16 @@ def calculate_positions_count_for_all_ballot_items_for_api(  # positionsCountFor
         # Look up the current google_civic_election_id for this voter
         results = figure_out_google_civic_election_id_voter_is_watching(voter_device_id)
         google_civic_election_id_local_scope = results['google_civic_election_id']
+
+        if not positive_value_exists(google_civic_election_id_local_scope):
+            status += "GOOGLE_CIVIC_ELECTION_ID_LOCAL_SCOPE_MISSING-CALCULATE_COUNT_FOR_ALL_BALLOT_ITEMS"
+            json_data = {
+                'status': status,
+                'success': False,
+                'google_civic_election_id': google_civic_election_id_local_scope,
+                'support_or_oppose_exists': support_or_oppose_exists,
+            }
+            return json_data
 
         results = ballot_item_list_manager.retrieve_all_ballot_items_for_voter(
             voter_id, google_civic_election_id_local_scope)
