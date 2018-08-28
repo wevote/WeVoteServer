@@ -51,8 +51,8 @@ def ballot_items_sync_out_view(request):  # ballotItemsSyncOut
     try:
         ballot_item_list = BallotItem.objects.all()
         # We only want BallotItem values associated with polling locations
-        ballot_item_list = ballot_item_list.exclude(polling_location_we_vote_id__isnull=True)
-        ballot_item_list = ballot_item_list.exclude(polling_location_we_vote_id__iexact='')
+        ballot_item_list = ballot_item_list.exclude(
+            Q(polling_location_we_vote_id__isnull=True) | Q(polling_location_we_vote_id=""))
         if positive_value_exists(google_civic_election_id):
             ballot_item_list = ballot_item_list.filter(google_civic_election_id=google_civic_election_id)
         if positive_value_exists(state_code):
@@ -168,8 +168,8 @@ def ballot_returned_sync_out_view(request):  # ballotReturnedSyncOut
     try:
         ballot_returned_list = BallotReturned.objects.using('readonly').all()
         # We only want BallotReturned values associated with polling locations
-        ballot_returned_list = ballot_returned_list.exclude(polling_location_we_vote_id__isnull=True)
-        ballot_returned_list = ballot_returned_list.exclude(polling_location_we_vote_id__iexact='')
+        ballot_returned_list = ballot_returned_list.exclude(
+            Q(polling_location_we_vote_id__isnull=True) | Q(polling_location_we_vote_id=""))
         if positive_value_exists(google_civic_election_id):
             ballot_returned_list = ballot_returned_list.filter(google_civic_election_id=google_civic_election_id)
         if positive_value_exists(state_code):

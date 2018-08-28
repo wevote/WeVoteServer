@@ -2020,7 +2020,8 @@ class BallotReturnedManager(models.Model):
             # for that location
             ballot_returned_query = BallotReturned.objects.all()
             # Limit this query to entries stored for polling locations
-            ballot_returned_query = ballot_returned_query.exclude(polling_location_we_vote_id__isnull=True)
+            ballot_returned_query = ballot_returned_query.exclude(
+                Q(polling_location_we_vote_id__isnull=True) | Q(polling_location_we_vote_id=""))
 
             if "," in text_for_map_search:
                 address = text_for_map_search
@@ -2060,7 +2061,8 @@ class BallotReturnedManager(models.Model):
             # address has format "line_1, state zip, USA"
             ballot_returned_query = BallotReturned.objects.all()
             # Limit this query to entries stored for polling locations
-            ballot_returned_query = ballot_returned_query.exclude(polling_location_we_vote_id__isnull=True)
+            ballot_returned_query = ballot_returned_query.exclude(
+                Q(polling_location_we_vote_id__isnull=True) | Q(polling_location_we_vote_id=""))
             state_code = address.split(', ')[-2][:2]
             if positive_value_exists(state_code):
                 # This search for normalized_state is NOT redundant because some elections are in many states
@@ -2082,9 +2084,12 @@ class BallotReturnedManager(models.Model):
                         ballot_returned_query = ballot_returned_query.filter(
                             google_civic_election_id=past_google_civic_election_id)
 
+            # TODO: This should be updated to a more modern approach. I think this will be deprecated in > Django 1.9
             ballot_returned_query = ballot_returned_query.annotate(distance=(F('latitude') - location.latitude) ** 2 +
                                                                             (F('longitude') - location.longitude) ** 2)
             ballot = ballot_returned_query.order_by('distance').first()
+            # ballot_returned_list = list(ballot_returned_query)
+            # ballot = ballot_returned_list[0]
 
         if ballot is not None:
             ballot_returned = ballot
