@@ -1634,6 +1634,8 @@ def voter_ballot_items_retrieve_from_ballotpedia_for_api(voter_device_id, text_f
     original_text_state = ''
     original_text_zip = ''
     lat_long_found = False
+    status += "ENTERING-voter_ballot_items_retrieve_from_ballotpedia_for_api, text_for_map_search: " \
+              "" + str(text_for_map_search) + " "
     if not positive_value_exists(text_for_map_search):
         # Retrieve it from voter address
         voter_address_manager = VoterAddressManager()
@@ -1648,6 +1650,7 @@ def voter_ballot_items_retrieve_from_ballotpedia_for_api(voter_device_id, text_f
     # We need to figure out the next upcoming election for this person based on the state_code in text_for_map_search
     state_code = extract_state_code_from_address_string(text_for_map_search)
     if positive_value_exists(state_code):
+        original_text_state = state_code
         election_manager = ElectionManager()
         election_results = election_manager.retrieve_next_election_for_state(state_code)
         if election_results['election_found']:
@@ -1731,6 +1734,7 @@ def voter_ballot_items_retrieve_from_ballotpedia_for_api(voter_device_id, text_f
         return results
 
     one_ballot_results = retrieve_one_ballot_from_ballotpedia_api(latitude, longitude, google_civic_election_id)
+    status += one_ballot_results['status']
 
     if not one_ballot_results['success']:
         status += 'UNABLE_TO-retrieve_one_ballot_from_ballotpedia_api'
@@ -1761,6 +1765,7 @@ def voter_ballot_items_retrieve_from_ballotpedia_for_api(voter_device_id, text_f
 
             # store_on_ballot... adds an entry to the BallotReturned table
             # We update VoterAddress with normalized address data in store_one_ballot_from_google_civic_api
+            status += "GOOGLE_ID: " + str(google_civic_election_id) + " "
             store_one_ballot_results = store_one_ballot_from_ballotpedia_api(
                     ballot_item_dict_list, google_civic_election_id,
                     text_for_map_search, latitude, longitude,
@@ -1769,6 +1774,7 @@ def voter_ballot_items_retrieve_from_ballotpedia_for_api(voter_device_id, text_f
                     normalized_city=original_text_city,
                     normalized_state=original_text_state,
                     normalized_zip=original_text_zip)
+            status += store_one_ballot_results['status']
             if store_one_ballot_results['success']:
                 status += 'RETRIEVED_FROM_BALLOTPEDIA_AND_STORED_BALLOT_FOR_VOTER '
                 success = True
@@ -1778,6 +1784,9 @@ def voter_ballot_items_retrieve_from_ballotpedia_for_api(voter_device_id, text_f
                     ballot_location_display_name = ballot_returned.ballot_location_display_name
                     ballot_location_shortcut = ballot_returned.ballot_location_shortcut
                     ballot_returned_we_vote_id = ballot_returned.we_vote_id
+                    status += "STORED: " + str(ballot_returned_we_vote_id) + " "
+                else:
+                    status += "NOT_STORED "
             else:
                 status += 'UNABLE_TO-store_one_ballot_from_ballotpedia_api: '
                 status += store_one_ballot_results['status']
@@ -1837,6 +1846,7 @@ def retrieve_one_ballot_from_ballotpedia_api(latitude, longitude, incoming_googl
 
     try:
         latitude_longitude = str(latitude) + "," + str(longitude)
+        status += "LAT_LONG: " + str(latitude_longitude) + " "
         response = requests.get(BALLOTPEDIA_API_CONTAINS_URL, params={
             "access_token": BALLOTPEDIA_API_KEY,
             "point": latitude_longitude,
