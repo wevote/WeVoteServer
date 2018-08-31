@@ -82,7 +82,7 @@ def search_all_for_api(text_from_search_field, voter_device_id):
                                                   "party", "organization_name", "organization_twitter_handle",
                                                   "twitter_description", "state_name"],
                                        "slop": 5}},
-             "sort": [{"election_day_text": {"order": "desc"}},
+             "sort": [{"election_day_text": {"order": "desc", "missing": "_last"}},
                       {"_score": {"order": "desc"}}]}
 
     # Example of querying ALL indexes
