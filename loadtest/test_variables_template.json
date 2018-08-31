@@ -1,3 +1,4 @@
 {
-  "voter_device_id": "<enetr voter_device_id here>"
+  "google_civic_election_id": "0",
+  "voter_device_id": "<enter voter_device_id here>",
 }

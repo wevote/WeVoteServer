@@ -2125,11 +2125,14 @@ class Organization(models.Model):
         verbose_name="Page title on Ballotpedia", max_length=255, null=True, blank=True)
     ballotpedia_photo_url = models.URLField(verbose_name='url of ballotpedia logo', blank=True, null=True)
 
+    issue_analysis_done = models.BooleanField(default=False)
+    issue_analysis_admin_notes = models.TextField(verbose_name="we vote admin notes", null=True, blank=True)
+
     organization_type = models.CharField(
         verbose_name="type of org", max_length=2, choices=ORGANIZATION_TYPE_CHOICES, default=UNKNOWN)
     date_last_changed = models.DateTimeField(verbose_name='date last changed', null=True, auto_now=True)
 
-    organization_endorsements_api_url = models.URLField(verbose_name='url of endorsements importer', blank=True, null=True)
+    organization_endorsements_api_url = models.URLField(verbose_name='endorsements importer url', blank=True, null=True)
 
     def __unicode__(self):
         return str(self.organization_name)
