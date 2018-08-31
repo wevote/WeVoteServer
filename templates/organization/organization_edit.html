@@ -146,19 +146,36 @@ span.nobr { white-space: nowrap; }
     {% for issue in issue_list %}
       {% if not issue.hide_issue or issue.followed_by_organization %}
         <li class="list-inline-item">
-        <input type="checkbox" name="selected_issues" id="selected_issues" value={{ issue.we_vote_id }}
+        <input type="checkbox" name="selected_issues" id="selected_issues_id_{{ issue.we_vote_id }}" value={{ issue.we_vote_id }}
                 {% if issue.followed_by_organization %}checked{% endif %} />
+        <label for="selected_issues_id_{{ issue.we_vote_id }}" style="font-weight: normal !important;">
           {% if issue.hide_issue %}
           <span style="text-decoration: line-through">{{ issue.issue_name }}</span>
           {% else %}
           {{ issue.issue_name }}
           {% endif %}
+        </label>
         </li>
       {% endif %}
     {% endfor %}
     </ul>
     </div>
 </div>
+
+
+<div class="form-group">
+    <label class="col-sm-3 control-label">Issue Analysis Status</label>
+    <div class="col-sm-8 ">
+        <input type="checkbox" name="issue_analysis_done" id="issue_analysis_done_id" value="1"
+                {% if organization.issue_analysis_done %}checked{% endif %} />
+        <label for="issue_analysis_done_id" style="font-weight: normal !important;">Issue Analysis Done. <span style="color: darkgray">This organization has been tagged with the correct issues.</span></label>
+        <textarea name="issue_analysis_admin_notes"
+                  class="form-control animated"
+                  id="issue_analysis_admin_notes_id"
+                  placeholder="Status of issue analysis?">{{ organization.issue_analysis_admin_notes|default_if_none:"" }}</textarea>
+    </div>
+</div>
+
 {% endif %}
 
 {% endif %}

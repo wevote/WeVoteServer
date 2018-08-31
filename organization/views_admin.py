@@ -514,17 +514,19 @@ def organization_edit_process_view(request):
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
+    issue_analysis_admin_notes = request.POST.get('issue_analysis_admin_notes', False)
+    issue_analysis_done = request.POST.get('issue_analysis_done', False)
+    organization_endorsements_api_url = request.POST.get('organization_endorsements_api_url', False)
     organization_id = convert_to_int(request.POST.get('organization_id', 0))
+    organization_link_issue_we_vote_ids = request.POST.getlist('selected_issues', False)
     organization_name = request.POST.get('organization_name', '')
     organization_twitter_handle = request.POST.get('organization_twitter_handle', False)
     organization_facebook = request.POST.get('organization_facebook', False)
+    organization_type = request.POST.get('organization_type', GROUP)
     organization_website = request.POST.get('organization_website', False)
+    state_served_code = request.POST.get('state_code', False)
     wikipedia_page_title = request.POST.get('wikipedia_page_title', False)
     wikipedia_photo_url = request.POST.get('wikipedia_photo_url', False)
-    organization_endorsements_api_url = request.POST.get('organization_endorsements_api_url', False)
-    state_served_code = request.POST.get('state_code', False)
-    organization_link_issue_we_vote_ids = request.POST.getlist('selected_issues', False)
-    organization_type = request.POST.get('organization_type', GROUP)
 
     # A positive value in google_civic_election_id or add_organization_button means we want to create a voter guide
     # for this org for this election
@@ -566,6 +568,10 @@ def organization_edit_process_view(request):
                     # Twitter handle added where before there wasn't one
                     current_organization_with_new_twitter_handle = True
 
+            if issue_analysis_admin_notes is not False:
+                organization_on_stage.issue_analysis_admin_notes = issue_analysis_admin_notes
+            if issue_analysis_done is not False:
+                organization_on_stage.issue_analysis_done = issue_analysis_done
             if organization_name is not False:
                 organization_on_stage.organization_name = organization_name
             if organization_twitter_handle is not False:
@@ -659,6 +665,10 @@ def organization_edit_process_view(request):
             organization_on_stage = Organization(
                 organization_name=organization_name,
             )
+            if issue_analysis_admin_notes is not False:
+                organization_on_stage.issue_analysis_admin_notes = issue_analysis_admin_notes
+            if issue_analysis_done is not False:
+                organization_on_stage.issue_analysis_done = issue_analysis_done
             if organization_twitter_handle is not False:
                 organization_on_stage.organization_twitter_handle = organization_twitter_handle
             if organization_facebook is not False:
