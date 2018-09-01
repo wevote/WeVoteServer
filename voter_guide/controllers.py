@@ -118,7 +118,7 @@ def add_empty_values_to_possible_candidate_dict_list(starting_candidate_number="
     candidate_number_list = CANDIDATE_NUMBER_LIST
 
     number_index = candidate_number_list.index(starting_candidate_number)
-    if positive_value_exists(number_index):
+    if positive_value_exists(number_index) or number_index == 0:
         length_of_candidate_number_list = len(candidate_number_list)
         while number_index < length_of_candidate_number_list:
             possible_candidate = {
@@ -294,7 +294,7 @@ def extract_possible_candidate_list_from_database(voter_guide_possibility):
 
 
 def match_candidate_list_with_candidates_in_database(
-        possible_candidate_list, google_civic_election_id_list, state_code=''):
+        possible_candidate_list, google_civic_election_id_list, state_code='', all_possible_candidates_light=[]):
     status = ""
     success = True
     possible_candidate_list_found = False
@@ -347,6 +347,32 @@ def match_candidate_list_with_candidates_in_database(
                 possible_candidate_list_modified.append(possible_candidate)
             else:
                 status += "RETRIEVE_CANDIDATE_FROM_NON_UNIQUE-CANDIDATE_NOT_FOUND "
+
+                # Now we want to do a reverse search, where we cycle through all upcoming candidates and search
+                # within the incoming text for a known candidate name
+                for one_candidate_light in all_possible_candidates_light:
+                    if one_candidate_light['ballot_item_display_name'] in possible_candidate['candidate_name']:
+                        possible_candidate['candidate_we_vote_id'] = one_candidate_light['candidate_we_vote_id']
+                        possible_candidate['candidate_name'] = one_candidate_light['ballot_item_display_name']
+                        possible_candidate['google_civic_election_id'] = one_candidate_light['google_civic_election_id']
+                        matching_results = candidate_campaign_manager.retrieve_candidate_campaign_from_we_vote_id(
+                            possible_candidate['candidate_we_vote_id'])
+
+                        if matching_results['candidate_campaign_found']:
+                            candidate = matching_results['candidate_campaign']
+
+                            # If one candidate found, add we_vote_id here
+                            possible_candidate['candidate_we_vote_id'] = candidate.we_vote_id
+                            possible_candidate['candidate'] = candidate
+                            possible_candidate['candidate_name'] = candidate.display_candidate_name()
+                            possible_candidate['google_civic_election_id'] = candidate.google_civic_election_id
+                            if not positive_value_exists(possible_candidate['google_civic_election_id']) \
+                                    and positive_value_exists(candidate.contest_office_we_vote_id):
+                                possible_candidate['google_civic_election_id'] = \
+                                    contest_office_manager.fetch_google_civic_election_id_from_office_we_vote_id(
+                                        candidate.contest_office_we_vote_id)
+                        break
+
                 possible_candidate_list_modified.append(possible_candidate)
 
     if len(possible_candidate_list):
@@ -389,6 +415,8 @@ def modify_one_row_in_possible_candidate_dict_list(possible_candidate_list, row_
                     break
                 updated_possible_candidate_list.append(possible_candidate)
                 number_index += 1
+            if len(updated_possible_candidate_list):
+                possible_candidate_list_found = True
 
     if shift_remaining_items and len(remaining_possible_candidate_list):
         # Reset the sequence of values in possible_candidate_number
@@ -399,9 +427,6 @@ def modify_one_row_in_possible_candidate_dict_list(possible_candidate_list, row_
                 raw_candidate_number = "000" + str(number_index + 1)
                 possible_candidate['possible_candidate_number'] = raw_candidate_number[-3:]
             updated_possible_candidate_list.append(possible_candidate)
-
-    if len(updated_possible_candidate_list):
-        possible_candidate_list_found = True
 
     results = {
         'status':                           status,

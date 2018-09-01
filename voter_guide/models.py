@@ -1833,39 +1833,37 @@ class VoterGuidePossibilityManager(models.Manager):
                                               google_civic_election_id=0,
                                               hide_from_active_review=False,
                                               cannot_find_endorsements=False,
-                                              candidates_missing_from_we_vote=False):
+                                              candidates_missing_from_we_vote=False,
+                                              capture_detailed_comments=False):
+        hide_from_active_review = positive_value_exists(hide_from_active_review)
         candidates_missing_from_we_vote = positive_value_exists(candidates_missing_from_we_vote)
         cannot_find_endorsements = positive_value_exists(cannot_find_endorsements)
-        hide_from_active_review = positive_value_exists(hide_from_active_review)
+        capture_detailed_comments = positive_value_exists(capture_detailed_comments)
         voter_guide_possibility_list = []
         voter_guide_possibility_list_found = False
         try:
             voter_guide_query = VoterGuidePossibility.objects.all()
             voter_guide_query = voter_guide_query.order_by(order_by)
 
-            # Allow searching for voter guide possibilities that are being ignored
             if not positive_value_exists(search_string):
                 voter_guide_query = voter_guide_query.exclude(ignore_this_source=True)
                 voter_guide_query = voter_guide_query.filter(hide_from_active_review=hide_from_active_review)
-                # Cannot find endorsements
                 if positive_value_exists(cannot_find_endorsements):
-                    voter_guide_query = voter_guide_query.filter(cannot_find_endorsements=cannot_find_endorsements)
-                elif not positive_value_exists(hide_from_active_review) \
-                        and not positive_value_exists(candidates_missing_from_we_vote):
-                    # Only search for cannot_find_endorsements set to false if NOT showing 'Archived'
-                    # or 'Candidates/Measures Missing'
+                    # Cannot find endorsements
+                    voter_guide_query = voter_guide_query.filter(cannot_find_endorsements=True)
+                elif positive_value_exists(candidates_missing_from_we_vote):
+                    # Candidates/Measures Missing
+                    voter_guide_query = voter_guide_query.filter(candidates_missing_from_we_vote=True)
+                elif positive_value_exists(capture_detailed_comments):
+                    # Capture Detailed Comments
+                    voter_guide_query = voter_guide_query.filter(capture_detailed_comments=True)
+                elif not positive_value_exists(hide_from_active_review):
+                    # Remove items that need further work (and that are shown in other views) from main "Review" list
+                    voter_guide_query = voter_guide_query.filter(candidates_missing_from_we_vote=False)
                     voter_guide_query = voter_guide_query.filter(cannot_find_endorsements=False)
-                # Candidates/Measures Missing
-                if positive_value_exists(candidates_missing_from_we_vote):
-                    voter_guide_query = voter_guide_query.filter(
-                        candidates_missing_from_we_vote=candidates_missing_from_we_vote)
-                elif not positive_value_exists(hide_from_active_review) \
-                        and not positive_value_exists(cannot_find_endorsements):
-                    # Only search for candidates_missing_from_we_vote set to false if NOT showing 'Archived'
-                    # or 'Endorsements Not Available Yet'
-                    voter_guide_query = voter_guide_query.filter(
-                        candidates_missing_from_we_vote=False)
+                    voter_guide_query = voter_guide_query.filter(capture_detailed_comments=False)
 
+            # Allow searching for voter guide possibilities that are being ignored
             if positive_value_exists(search_string):
                 search_words = search_string.split()
                 candidate_number_list = CANDIDATE_NUMBER_LIST
@@ -1893,9 +1891,6 @@ class VoterGuidePossibilityManager(models.Manager):
                     new_filter = Q(voter_who_submitted_name__icontains=one_word)
                     filters.append(new_filter)
 
-                    # new_filter = Q(candidate_we_vote_id_001__icontains=one_word)
-                    # filters.append(new_filter)
-
                     for one_number in candidate_number_list:
                         key = "candidate_we_vote_id_" + one_number + "__icontains"
                         new_filter = Q(**{key: one_word})
@@ -1904,6 +1899,11 @@ class VoterGuidePossibilityManager(models.Manager):
                         key = "candidate_name_" + one_number + "__icontains"
                         new_filter = Q(**{key: one_word})
                         filters.append(new_filter)
+
+                        # if positive_value_exists(google_civic_election_id):
+                        #     key = "google_civic_election_id_" + one_number + ""
+                        #     new_filter = Q(**{key: google_civic_election_id})
+                        #     filters.append(new_filter)
 
                     # Add the first query
                     if len(filters):

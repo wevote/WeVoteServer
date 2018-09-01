@@ -622,36 +622,41 @@ def voter_guide_create_process_view(request):
 
     # We will need all candidates for all upcoming elections so we can search the HTML of
     #  the possible voter guide for these names
-    possible_candidate_list_from_url_scan = []
-    first_scan_needed = positive_value_exists(voter_guide_possibility_url) and not possible_candidate_list_found
-    scan_url_now = first_scan_needed or positive_value_exists(scan_url_again)
-    if scan_url_now and positive_value_exists(google_civic_election_id_list):
+    candidate_list_light_found = False
+    candidate_list_light = []
+    if positive_value_exists(google_civic_election_id_list):
         results = retrieve_candidate_list_for_all_upcoming_elections(google_civic_election_id_list,
                                                                      limit_to_this_state_code=state_code)
         if results['candidate_list_found']:
+            candidate_list_light_found = True
             candidate_list_light = results['candidate_list_light']
-            candidate_scrape_results = \
-                find_candidates_on_one_web_page(voter_guide_possibility_url, candidate_list_light)
-            if candidate_scrape_results['at_least_one_candidate_found']:
-                selected_candidate_list_light = candidate_scrape_results['selected_candidate_list_light']
 
-                # Remove the candidates we already have in possible_candidate_list from selected_candidate_list_light
-                selected_candidate_list_light_updated = []
-                for one_light_possible_candidate in selected_candidate_list_light:
-                    one_light_possible_candidate_is_unique = True
-                    for one_possible_candidate in possible_candidate_list:
-                        if one_light_possible_candidate['candidate_we_vote_id'] == \
-                                one_possible_candidate['candidate_we_vote_id']:
-                            one_light_possible_candidate_is_unique = False
-                            break
-                    if one_light_possible_candidate_is_unique:
-                        selected_candidate_list_light_updated.append(one_light_possible_candidate)
+    possible_candidate_list_from_url_scan = []
+    first_scan_needed = positive_value_exists(voter_guide_possibility_url) and not possible_candidate_list_found
+    scan_url_now = first_scan_needed or positive_value_exists(scan_url_again)
+    if scan_url_now and candidate_list_light_found:
+        candidate_scrape_results = \
+            find_candidates_on_one_web_page(voter_guide_possibility_url, candidate_list_light)
+        if candidate_scrape_results['at_least_one_candidate_found']:
+            selected_candidate_list_light = candidate_scrape_results['selected_candidate_list_light']
 
-                possible_candidates_results = convert_candidate_list_light_to_possible_candidates(
-                    selected_candidate_list_light_updated)
-                if possible_candidates_results['possible_candidate_list_found']:
-                    possible_candidate_list_from_url_scan = possible_candidates_results['possible_candidate_list']
-                    possible_candidate_list_found = True
+            # Remove the candidates we already have in possible_candidate_list from selected_candidate_list_light
+            selected_candidate_list_light_updated = []
+            for one_light_possible_candidate in selected_candidate_list_light:
+                one_light_possible_candidate_is_unique = True
+                for one_possible_candidate in possible_candidate_list:
+                    if one_light_possible_candidate['candidate_we_vote_id'] == \
+                            one_possible_candidate['candidate_we_vote_id']:
+                        one_light_possible_candidate_is_unique = False
+                        break
+                if one_light_possible_candidate_is_unique:
+                    selected_candidate_list_light_updated.append(one_light_possible_candidate)
+
+            possible_candidates_results = convert_candidate_list_light_to_possible_candidates(
+                selected_candidate_list_light_updated)
+            if possible_candidates_results['possible_candidate_list_found']:
+                possible_candidate_list_from_url_scan = possible_candidates_results['possible_candidate_list']
+                possible_candidate_list_found = True
 
     possible_candidate_list = possible_candidate_list + possible_candidate_list_from_url_scan
     results = fix_sequence_of_possible_candidate_list(possible_candidate_list)
@@ -688,7 +693,7 @@ def voter_guide_create_process_view(request):
 
     if row_index_to_remove is not None:
         results = modify_one_row_in_possible_candidate_dict_list(possible_candidate_list, row_index_to_remove)
-        if positive_value_exists(results['possible_candidate_list_found']):
+        if positive_value_exists(results['success']):
             possible_candidate_list = results['possible_candidate_list']
 
     # Check for additional items to add
@@ -714,8 +719,8 @@ def voter_guide_create_process_view(request):
 
     # Match incoming candidates to candidates already in the database
     if len(possible_candidate_list):
-        results = match_candidate_list_with_candidates_in_database(possible_candidate_list,
-                                                                   google_civic_election_id_list)
+        results = match_candidate_list_with_candidates_in_database(
+            possible_candidate_list, google_civic_election_id_list, all_possible_candidates_light=candidate_list_light)
         if results['possible_candidate_list_found']:
             possible_candidate_list = results['possible_candidate_list']
 
@@ -755,7 +760,7 @@ def voter_guide_create_process_view(request):
     try:
         starting_candidate_number = candidate_number_list[next_index]  # This returns a string like "004"
         results = add_empty_values_to_possible_candidate_dict_list(starting_candidate_number)
-        if results['possible_candidate_list_found']:
+        if results['success']:
             additional_possible_candidate_list = results['possible_candidate_list']
             possible_candidate_list = possible_candidate_list + additional_possible_candidate_list
     except Exception as e:
@@ -1458,6 +1463,7 @@ def voter_guide_possibility_list_view(request):
     show_all_elections = request.GET.get('show_all_elections', False)
     show_candidates_missing_from_we_vote = request.GET.get('show_candidates_missing_from_we_vote', False)
     show_cannot_find_endorsements = request.GET.get('show_cannot_find_endorsements', False)
+    show_capture_detailed_comments = request.GET.get('show_capture_detailed_comments', False)
     show_only_hide_from_active_review = request.GET.get('show_only_hide_from_active_review', False)
     state_code = request.GET.get('state_code', '')
     voter_guide_possibility_search = request.GET.get('voter_guide_possibility_search', '')
@@ -1489,6 +1495,17 @@ def voter_guide_possibility_list_view(request):
         results = voter_guide_possibility_manager.retrieve_voter_guide_possibility_list(
             order_by, limit_number, voter_guide_possibility_search, google_civic_election_id,
             candidates_missing_from_we_vote=candidates_missing_from_we_vote)
+        if results['success']:
+            voter_guide_possibility_list = results['voter_guide_possibility_list']
+            voter_guide_possibility_list = \
+                add_candidates_with_position_count_to_voter_guide_possibility_list(voter_guide_possibility_list)
+    elif positive_value_exists(show_capture_detailed_comments):
+        filtered_by_title = "Capture Detailed Comments"
+        capture_detailed_comments = True
+        order_by = "-id"
+        results = voter_guide_possibility_manager.retrieve_voter_guide_possibility_list(
+            order_by, limit_number, voter_guide_possibility_search, google_civic_election_id,
+            capture_detailed_comments=capture_detailed_comments)
         if results['success']:
             voter_guide_possibility_list = results['voter_guide_possibility_list']
             voter_guide_possibility_list = \
@@ -1551,6 +1568,7 @@ def voter_guide_possibility_list_view(request):
         'show_all_elections':                   show_all_elections,
         'show_candidates_missing_from_we_vote': show_candidates_missing_from_we_vote,
         'show_cannot_find_endorsements':        show_cannot_find_endorsements,
+        'show_capture_detailed_comments':       show_capture_detailed_comments,
         'show_only_hide_from_active_review':    show_only_hide_from_active_review,
         'state_code':                           state_code,
         'messages_on_stage':                    messages_on_stage,
