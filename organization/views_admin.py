@@ -521,6 +521,7 @@ def organization_edit_process_view(request):
     organization_link_issue_we_vote_ids = request.POST.getlist('selected_issues', False)
     organization_name = request.POST.get('organization_name', '')
     organization_twitter_handle = request.POST.get('organization_twitter_handle', False)
+    organization_email = request.POST.get('organization_email', False)
     organization_facebook = request.POST.get('organization_facebook', False)
     organization_type = request.POST.get('organization_type', GROUP)
     organization_website = request.POST.get('organization_website', False)
@@ -576,6 +577,8 @@ def organization_edit_process_view(request):
                 organization_on_stage.organization_name = organization_name
             if organization_twitter_handle is not False:
                 organization_on_stage.organization_twitter_handle = organization_twitter_handle
+            if organization_email is not False:
+                organization_on_stage.organization_email = organization_email
             if organization_facebook is not False:
                 organization_on_stage.organization_facebook = organization_facebook
             if organization_website is not False:
@@ -671,6 +674,8 @@ def organization_edit_process_view(request):
                 organization_on_stage.issue_analysis_done = issue_analysis_done
             if organization_twitter_handle is not False:
                 organization_on_stage.organization_twitter_handle = organization_twitter_handle
+            if organization_email is not False:
+                organization_on_stage.organization_email = organization_email
             if organization_facebook is not False:
                 organization_on_stage.organization_facebook = organization_facebook
             if organization_website is not False:
