@@ -138,8 +138,7 @@
             {% endif %}</th>
             <th>Vote Smart</th>
             <th>State</th>
-            <th>Wikipedia?</th>
-            <th></th>
+            <th>Email</th>
         </tr>
       </thead>
     {% endif %}
@@ -159,7 +158,11 @@
             <td>{% if organization.organization_twitter_handle %}{{ organization.organization_twitter_handle }} <br />
                 ({{ organization.twitter_followers_count }} followers){% endif %}</td>
             <td>{{ organization.organization_type_display }}</td>
-            <td>{% if organization.display_we_vote_issues %}
+            <td>
+              {% if organization.issue_analysis_done %}
+                <strong>analyzed</strong>&nbsp;
+              {% endif %}
+              {% if organization.display_we_vote_issues %}
                   {{ organization.display_we_vote_issues }}
                 {% endif %}</td>
             <td>{% if organization.vote_smart_id %}<a href="https://votesmart.org/interest-group/{{ organization.vote_smart_id }}" target="_blank">{{ organization.vote_smart_id }}</a>{% endif %}
@@ -169,9 +172,7 @@
             {% endif %}
             </td>
             <td>{{ organization.state_served_code|default_if_none:"" }}</td>
-            <td>{% if organization.wikipedia_page_id %}
-                <a href="{{ organization.generate_wikipedia_link }}" target="_blank">W yes</a>{% endif %}</td>
-            <td><a href="{% url 'organization:organization_edit' organization.id %}" style="font-size: .65em">{{ organization.we_vote_id }}</a></td>
+            <td>{{ organization.organization_email|default_if_none:"" }}</td>
         </tr>
     {% endfor %}
     </table>

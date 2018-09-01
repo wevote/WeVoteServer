@@ -29,7 +29,14 @@
     {% if organization.organization_website %}
     <tr>
         <th>Website:</th>
-        <td><a href={{ organization.organization_website }} target="_blank">{{ organization.organization_website }}</a> (open in new window)</td>
+        <td>
+            {{ organization.organization_website }}
+            {% if organization.organization_website %}
+            <a href="{{ organization.organization_website }}"
+               target="_blank"
+               class="u-no-break"><span class="glyphicon glyphicon-new-window"></span></a>
+            {% endif %}
+        </td>
     </tr>
     {% endif %}
     {% if voter %}
@@ -41,8 +48,15 @@
     {% endif %}
     <tr>
         <th>Twitter Handle:</th>
-        <td>{% if organization.generate_twitter_link %}
-            <a href="{{ organization.generate_twitter_link }}" target="_blank">{{ organization.organization_twitter_handle }}</a>
+        <td>
+        {% if organization.generate_twitter_link %}
+            {{ organization.organization_twitter_handle }}
+            {% if organization.organization_twitter_handle %}
+                <a href="{{ organization.generate_twitter_link }}"
+                   target="_blank"
+                   class="u-no-break"><span class="glyphicon glyphicon-new-window"></span></a>
+            {% endif %}
+
             ({{ organization.twitter_followers_count }} Followers)
         {% else %}
             {{ organization.organization_twitter_handle|default_if_none:"" }}
@@ -75,6 +89,14 @@
             {% else %}
             {{ organization.organization_facebook|default_if_none:"" }}
             {% endif %}</td>
+    </tr>
+    {% endif %}
+    {% if organization.organization_email %}
+    <tr>
+        <th>Contact Email: </th>
+        <td>
+            {{ organization.organization_email|default_if_none:"" }}
+        </td>
     </tr>
     {% endif %}
     {% if organization.wikipedia_page_title %}
@@ -140,7 +162,7 @@
         <td>
             <input type="checkbox" name="issue_analysis_done" id="issue_analysis_done_id" value="1" disabled
                 {% if organization.issue_analysis_done %}checked{% endif %} />
-            Issue Analysis Done. <span style="color: darkgray">This organization has been tagged with the correct issues.</span>}
+            Issue Analysis Done. <span style="color: darkgray">This organization has been tagged with the correct issues.</span>
             {% if organization.issue_analysis_admin_notes %}
             <br />
             {{ organization.issue_analysis_admin_notes|default_if_none:"" }}
