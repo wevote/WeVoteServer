@@ -82,7 +82,7 @@ class PositionEntered(models.Model):
     position_id = models.BigIntegerField(null=True, blank=True)  # NOT USED CURRENTLY
     test = models.BigIntegerField(null=True, blank=True)
     ballot_item_display_name = models.CharField(verbose_name="text name for ballot item",
-                                                max_length=255, null=True, blank=True)
+                                                max_length=255, null=True, blank=True, db_index=True)
     # We cache the url to an image for the candidate, measure or office for rapid display
     ballot_item_image_url_https = models.URLField(verbose_name='url of https image for candidate, measure or office',
                                                   blank=True, null=True)
@@ -115,20 +115,20 @@ class PositionEntered(models.Model):
     date_last_changed = models.DateTimeField(verbose_name='date last changed', null=True, auto_now=True)
 
     # The organization this position is for
-    organization_id = models.BigIntegerField(null=True, blank=True)
+    organization_id = models.BigIntegerField(null=True, blank=True, db_index=True)
     organization_we_vote_id = models.CharField(
         verbose_name="we vote permanent id for the organization", max_length=255, null=True,
-        blank=True, unique=False)
+        blank=True, unique=False, db_index=True)
 
     # The voter expressing the opinion
     # Note that for organizations who have friends, the voter_we_vote_id is what we use to link to the friends
     # (in the PositionForFriends table).
     # Public positions from an organization are shared via organization_we_vote_id (in PositionEntered table), while
     # friend's-only  positions are shared via voter_we_vote_id.
-    voter_id = models.BigIntegerField(null=True, blank=True)
+    voter_id = models.BigIntegerField(null=True, blank=True, db_index=True)
     voter_we_vote_id = models.CharField(
         verbose_name="we vote permanent id for the voter expressing the opinion", max_length=255, null=True,
-        blank=True, unique=False)
+        blank=True, unique=False, db_index=True)
 
     # The unique id of the public figure expressing the opinion. May be null if position is from org or voter
     # instead of public figure.
@@ -137,7 +137,7 @@ class PositionEntered(models.Model):
 
     # The unique ID of the election containing this contest. (Provided by Google Civic)
     google_civic_election_id = models.CharField(verbose_name="google civic election id",
-                                                max_length=255, null=True, blank=False, default=0)
+                                                max_length=255, null=True, blank=False, default=0, db_index=True)
     state_code = models.CharField(verbose_name="us state of the ballot item position is for",
                                   max_length=2, null=True, blank=True)
     google_civic_election_id_new = models.PositiveIntegerField(
@@ -166,17 +166,20 @@ class PositionEntered(models.Model):
 
     # This is the office that the position refers to.
     #  Either contest_measure is filled, contest_office OR candidate_campaign, but not all three
-    contest_office_id = models.BigIntegerField(verbose_name='id of contest_office', null=True, blank=True)
+    contest_office_id = models.BigIntegerField(verbose_name='id of contest_office',
+                                               null=True, blank=True, db_index=True)
     contest_office_we_vote_id = models.CharField(
-        verbose_name="we vote permanent id for the contest_office", max_length=255, null=True, blank=True, unique=False)
+        verbose_name="we vote permanent id for the contest_office",
+        max_length=255, null=True, blank=True, unique=False, db_index=True)
     contest_office_name = models.CharField(verbose_name="name of the office", max_length=255, null=True, blank=True)
 
     # This is the candidate/politician that the position refers to.
     #  Either candidate_campaign is filled, contest_office OR contest_measure, but not all three
-    candidate_campaign_id = models.BigIntegerField(verbose_name='id of candidate_campaign', null=True, blank=True)
+    candidate_campaign_id = models.BigIntegerField(verbose_name='id of candidate_campaign',
+                                                   null=True, blank=True, db_index=True)
     candidate_campaign_we_vote_id = models.CharField(
         verbose_name="we vote permanent id for the candidate_campaign", max_length=255, null=True,
-        blank=True, unique=False)
+        blank=True, unique=False, db_index=True)
     # The candidate's name as passed over by Google Civic. We save this so we can match to this candidate if an import
     # doesn't include a we_vote_id we recognize.
     google_civic_candidate_name = models.CharField(verbose_name="candidate name exactly as received from google civic",
@@ -194,10 +197,11 @@ class PositionEntered(models.Model):
 
     # This is the measure/initiative/proposition that the position refers to.
     #  Either contest_measure is filled, contest_office OR candidate_campaign, but not all three
-    contest_measure_id = models.BigIntegerField(verbose_name='id of contest_measure', null=True, blank=True)
+    contest_measure_id = models.BigIntegerField(verbose_name='id of contest_measure',
+                                                null=True, blank=True, db_index=True)
     contest_measure_we_vote_id = models.CharField(
         verbose_name="we vote permanent id for the contest_measure", max_length=255, null=True,
-        blank=True, unique=False)
+        blank=True, unique=False, db_index=True)
 
     # Strategic denormalization - this is redundant but will make generating the voter guide easier.
     # geo = models.ForeignKey(Geo, null=True, related_name='pos_geo')
@@ -458,7 +462,7 @@ class PositionForFriends(models.Model):
     position_id = models.BigIntegerField(null=True, blank=True)  # NOT USED CURRENTLY
     test = models.BigIntegerField(null=True, blank=True)
     ballot_item_display_name = models.CharField(verbose_name="text name for ballot item",
-                                                max_length=255, null=True, blank=True)
+                                                max_length=255, null=True, blank=True, db_index=True)
     # We cache the url to an image for the candidate, measure or office for rapid display
     ballot_item_image_url_https = models.URLField(
         verbose_name='url of https image for candidate, measure or office',
@@ -493,19 +497,19 @@ class PositionForFriends(models.Model):
     date_last_changed = models.DateTimeField(verbose_name='date last changed', null=True, auto_now=True)
 
     # The organization this position was taken by
-    organization_id = models.BigIntegerField(null=True, blank=True)
+    organization_id = models.BigIntegerField(null=True, blank=True, db_index=True)
     organization_we_vote_id = models.CharField(
         verbose_name="we vote permanent id for the organization", max_length=255, null=True,
-        blank=True, unique=False)
+        blank=True, unique=False, db_index=True)
 
     # The voter expressing the opinion
     # Note that for organizations who have friends, the voter_we_vote_id is what we use to link to the friends.
     # Public positions from an organization are shared via organization_we_vote_id (in PositionEntered table), while
     # friend's-only  positions are shared via voter_we_vote_id.
-    voter_id = models.BigIntegerField(null=True, blank=True)
+    voter_id = models.BigIntegerField(null=True, blank=True, db_index=True)
     voter_we_vote_id = models.CharField(
         verbose_name="we vote permanent id for the voter expressing the opinion", max_length=255, null=True,
-        blank=True, unique=False)
+        blank=True, unique=False, db_index=True)
 
     # The unique id of the public figure expressing the opinion. May be null if position is from org or voter
     # instead of public figure.
@@ -514,7 +518,7 @@ class PositionForFriends(models.Model):
 
     # The unique ID of the election containing this contest. (Provided by Google Civic)
     google_civic_election_id = models.PositiveIntegerField(
-        verbose_name="google civic election id", default=0, null=True, blank=True)
+        verbose_name="google civic election id", default=0, null=True, blank=True, db_index=True)
     state_code = models.CharField(verbose_name="us state of the ballot item position is for", max_length=2,
                                   null=True, blank=True)
     # ### Values from Vote Smart ###
@@ -541,18 +545,20 @@ class PositionForFriends(models.Model):
 
     # This is the office that the position refers to.
     #  Either contest_measure is filled, contest_office OR candidate_campaign, but not all three
-    contest_office_id = models.BigIntegerField(verbose_name='id of contest_office', null=True, blank=True)
+    contest_office_id = models.BigIntegerField(verbose_name='id of contest_office',
+                                               null=True, blank=True, db_index=True)
     contest_office_we_vote_id = models.CharField(
         verbose_name="we vote permanent id for the contest_office", max_length=255, null=True, blank=True,
-        unique=False)
+        unique=False, db_index=True)
     contest_office_name = models.CharField(verbose_name="name of the office", max_length=255, null=True, blank=True)
 
     # This is the candidate/politician that the position refers to.
     #  Either candidate_campaign is filled, contest_office OR contest_measure, but not all three
-    candidate_campaign_id = models.BigIntegerField(verbose_name='id of candidate_campaign', null=True, blank=True)
+    candidate_campaign_id = models.BigIntegerField(verbose_name='id of candidate_campaign',
+                                                   null=True, blank=True, db_index=True)
     candidate_campaign_we_vote_id = models.CharField(
         verbose_name="we vote permanent id for the candidate_campaign", max_length=255, null=True,
-        blank=True, unique=False)
+        blank=True, unique=False, db_index=True)
     # The candidate's name as passed over by Google Civic. We save this so we can match to this candidate if an import
     # doesn't include a we_vote_id we recognize.
     google_civic_candidate_name = models.CharField(
@@ -567,10 +573,11 @@ class PositionForFriends(models.Model):
 
     # This is the measure/initiative/proposition that the position refers to.
     #  Either contest_measure is filled, contest_office OR candidate_campaign, but not all three
-    contest_measure_id = models.BigIntegerField(verbose_name='id of contest_measure', null=True, blank=True)
+    contest_measure_id = models.BigIntegerField(verbose_name='id of contest_measure',
+                                                null=True, blank=True, db_index=True)
     contest_measure_we_vote_id = models.CharField(
         verbose_name="we vote permanent id for the contest_measure", max_length=255, null=True,
-        blank=True, unique=False)
+        blank=True, unique=False, db_index=True)
     # The measure's title as passed over by Google Civic. We save this so we can match to this measure if an import
     # doesn't include a we_vote_id we recognize.
     google_civic_measure_title = models.CharField(verbose_name="measure title exactly as received from google civic",

@@ -1627,7 +1627,7 @@ class Voter(AbstractBaseUser):
     # then the string "voter", and then a sequential integer like "123".
     # We keep the last value in WeVoteSetting.we_vote_id_last_org_integer
     we_vote_id = models.CharField(
-        verbose_name="we vote permanent id", max_length=255, null=True, blank=True, unique=True)
+        verbose_name="we vote permanent id", max_length=255, null=True, blank=True, unique=True, db_index=True)
     # When a person using an organization's Twitter handle signs in, we create a voter account. This is how
     #  we link the voter account to the organization.
     linked_organization_we_vote_id = models.CharField(

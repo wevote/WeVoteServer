@@ -558,14 +558,14 @@ class OrganizationLinkToIssue(models.Model):
 
     # The organization's we_vote_id linked to the issue
     organization_we_vote_id = models.CharField(
-        verbose_name="we vote permanent id", max_length=255, null=True, blank=True, unique=False)
+        verbose_name="we vote permanent id", max_length=255, null=True, blank=True, unique=False, db_index=True)
 
     # The issue being linked
     issue_id = models.PositiveIntegerField(null=True, blank=True)
 
     # we_vote_id of the issue
     issue_we_vote_id = models.CharField(
-        verbose_name="we vote permanent id", max_length=255, null=True, blank=True, unique=False)
+        verbose_name="we vote permanent id", max_length=255, null=True, blank=True, unique=False, db_index=True)
 
     # Are the organization and the issue linked?
     link_active = models.BooleanField(verbose_name='', default=True)

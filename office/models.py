@@ -58,7 +58,7 @@ class ContestOffice(models.Model):
     # We keep the last value in WeVoteSetting.we_vote_id_last_contest_office_integer
     we_vote_id = models.CharField(
         verbose_name="we vote permanent id for this contest office", max_length=255, default=None, null=True,
-        blank=True, unique=True)
+        blank=True, unique=True, db_index=True)
     # The name of the office for this contest.
     office_name = models.CharField(verbose_name="name of the office", max_length=255, null=False, blank=False)
     # The offices' name as passed over by Google Civic. We save this so we can match to this office even
@@ -75,10 +75,11 @@ class ContestOffice(models.Model):
                                                  max_length=255, null=True)
     # The unique ID of the election containing this contest. (Provided by Google Civic)
     google_civic_election_id = models.CharField(verbose_name="google civic election id",
-                                                max_length=255, null=False, blank=False)
+                                                max_length=255, null=False, blank=False, db_index=True)
     google_ballot_placement = models.BigIntegerField(
         verbose_name="the order this item should appear on the ballot", null=True, blank=True, unique=False)
-    state_code = models.CharField(verbose_name="state this office serves", max_length=2, null=True, blank=True)
+    state_code = models.CharField(verbose_name="state this office serves",
+                                  max_length=2, null=True, blank=True, db_index=True)
     google_civic_election_id_new = models.PositiveIntegerField(
         verbose_name="google civic election id", default=0, null=False, blank=False)
     ocd_division_id = models.CharField(verbose_name="ocd division id", max_length=255, null=True, blank=True)

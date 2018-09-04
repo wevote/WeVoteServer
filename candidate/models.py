@@ -1039,7 +1039,7 @@ class CandidateCampaign(models.Model):
     # We keep the last value in WeVoteSetting.we_vote_id_last_candidate_campaign_integer
     we_vote_id = models.CharField(
         verbose_name="we vote permanent id of this candidate campaign", max_length=255, default=None, null=True,
-        blank=True, unique=True)
+        blank=True, unique=True, db_index=True)
     maplight_id = models.CharField(
         verbose_name="maplight candidate id", max_length=255, default=None, null=True, blank=True, unique=True)
     vote_smart_id = models.CharField(
@@ -1047,11 +1047,11 @@ class CandidateCampaign(models.Model):
     # The internal We Vote id for the ContestOffice that this candidate is competing for. During setup we need to allow
     # this to be null.
     contest_office_id = models.CharField(
-        verbose_name="contest_office_id id", max_length=255, null=True, blank=True)
+        verbose_name="contest_office_id id", max_length=255, null=True, blank=True, db_index=True)
     # We want to link the candidate to the contest with permanent ids so we can export and import
     contest_office_we_vote_id = models.CharField(
         verbose_name="we vote permanent id for the office this candidate is running for", max_length=255, default=None,
-        null=True, blank=True, unique=False)
+        null=True, blank=True, unique=False, db_index=True)
     contest_office_name = models.CharField(verbose_name="name of the office", max_length=255, null=True, blank=True)
     # politician (internal) link to local We Vote Politician entry. During setup we need to allow this to be null.
     politician_id = models.BigIntegerField(verbose_name="politician unique identifier", null=True, blank=True)
@@ -1083,12 +1083,13 @@ class CandidateCampaign(models.Model):
     order_on_ballot = models.CharField(verbose_name="order on ballot", max_length=255, null=True, blank=True)
     # The unique ID of the election containing this contest. (Provided by Google Civic)
     google_civic_election_id = models.CharField(
-        verbose_name="google civic election id", max_length=255, null=True, blank=True)
+        verbose_name="google civic election id", max_length=255, null=True, blank=True, db_index=True)
     google_civic_election_id_new = models.PositiveIntegerField(
         verbose_name="google civic election id", default=0, null=True, blank=True)
     ocd_division_id = models.CharField(verbose_name="ocd division id", max_length=255, null=True, blank=True)
     # State code
-    state_code = models.CharField(verbose_name="state this candidate serves", max_length=2, null=True, blank=True)
+    state_code = models.CharField(verbose_name="state this candidate serves",
+                                  max_length=2, null=True, blank=True, db_index=True)
     # The URL for the candidate's campaign web site.
     candidate_url = models.URLField(verbose_name='website url of candidate campaign', blank=True, null=True)
     facebook_url = models.URLField(verbose_name='facebook url of candidate campaign', blank=True, null=True)

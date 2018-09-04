@@ -45,7 +45,7 @@ class BallotItem(models.Model):
     # The polling location for which this ballot was retrieved
     polling_location_we_vote_id = models.CharField(
         verbose_name="we vote permanent id of the polling location", max_length=255, default=None, null=True,
-        blank=True, unique=False)
+        blank=True, unique=False, db_index=True)
 
     # The unique ID of this election. (Provided by Google Civic)
     google_civic_election_id = models.CharField(verbose_name="google civic election id",

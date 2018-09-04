@@ -2048,7 +2048,7 @@ class Organization(models.Model):
     # then the string "org", and then a sequential integer like "123".
     # We keep the last value in WeVoteSetting.we_vote_id_last_org_integer
     we_vote_id = models.CharField(
-        verbose_name="we vote permanent id", max_length=255, null=True, blank=True, unique=True)
+        verbose_name="we vote permanent id", max_length=255, null=True, blank=True, unique=True, db_index=True)
     organization_name = models.CharField(
         verbose_name="organization name", max_length=255, null=False, blank=False)
     organization_website = models.URLField(verbose_name='url of the endorsing organization', blank=True, null=True)
