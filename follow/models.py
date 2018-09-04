@@ -45,7 +45,7 @@ class FollowIssue(models.Model):
     # We are relying on built-in Python id field
     # The voter following the issue
     voter_we_vote_id = models.CharField(
-        verbose_name="we vote permanent id", max_length=255, null=True, blank=True, unique=False)
+        verbose_name="we vote permanent id", max_length=255, null=True, blank=True, unique=False, db_index=True)
 
     # NOTE: we will use the organization_we_vote_id in FollowIssue if we decide to let a voter publish to
     # the public the issues they follow. 2017-09 NOT CURRENTLY SUPPORTED
@@ -585,16 +585,16 @@ class FollowIssueList(models.Model):
 class FollowOrganization(models.Model):
     # We are relying on built-in Python id field
     # The voter following the organization
-    voter_id = models.BigIntegerField(null=True, blank=True)
+    voter_id = models.BigIntegerField(null=True, blank=True, db_index=True)
     # The organization being followed
-    organization_id = models.BigIntegerField(null=True, blank=True)
+    organization_id = models.BigIntegerField(null=True, blank=True, db_index=True)
 
     voter_linked_organization_we_vote_id = models.CharField(
         verbose_name="organization we vote permanent id", max_length=255, null=True, blank=True, unique=False)
 
     # This is used when we want to export the organizations that a voter is following
     organization_we_vote_id = models.CharField(
-        verbose_name="we vote permanent id", max_length=255, null=True, blank=True, unique=False)
+        verbose_name="we vote permanent id", max_length=255, null=True, blank=True, unique=False, db_index=True)
 
     # Is this person following or ignoring this organization?
     following_status = models.CharField(max_length=15, choices=FOLLOWING_CHOICES, default=FOLLOWING)

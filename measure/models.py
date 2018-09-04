@@ -64,7 +64,8 @@ class ContestMeasure(models.Model):
     # then the string "meas", and then a sequential integer like "123".
     # We keep the last value in WeVoteSetting.we_vote_id_last_contest_measure_integer
     we_vote_id = models.CharField(
-        verbose_name="we vote permanent id", max_length=255, default=None, null=True, blank=True, unique=True)
+        verbose_name="we vote permanent id",
+        max_length=255, default=None, null=True, blank=True, unique=True, db_index=True)
     maplight_id = models.CharField(verbose_name="maplight unique identifier",
                                    max_length=255, null=True, blank=True, unique=False)
     vote_smart_id = models.CharField(verbose_name="votesmart unique identifier",

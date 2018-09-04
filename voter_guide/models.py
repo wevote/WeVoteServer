@@ -896,12 +896,12 @@ class VoterGuide(models.Model):
     # then the string "vg" (for voter guide), and then a sequential integer like "123".
     # We generate this id on initial save keep the last value in WeVoteSetting.we_vote_id_last_voter_guide_integer
     we_vote_id = models.CharField(
-        verbose_name="we vote permanent id", max_length=255, null=True, blank=True, unique=True)
+        verbose_name="we vote permanent id", max_length=255, null=True, blank=True, unique=True, db_index=True)
 
     # NOTE: We are using we_vote_id's instead of internal ids
     # The unique id of the organization. May be null if voter_guide owned by a public figure or voter instead of org.
     organization_we_vote_id = models.CharField(
-        verbose_name="organization we vote id", max_length=255, null=True, blank=True, unique=False)
+        verbose_name="organization we vote id", max_length=255, null=True, blank=True, unique=False, db_index=True)
 
     # The unique id of the public figure. May be null if voter_guide owned by org or voter instead of public figure.
     public_figure_we_vote_id = models.CharField(
@@ -919,14 +919,14 @@ class VoterGuide(models.Model):
 
     # The unique ID of this election. (Provided by Google Civic)
     google_civic_election_id = models.PositiveIntegerField(
-        verbose_name="google civic election id", null=True)
+        verbose_name="google civic election id", null=True, db_index=True)
     election_day_text = models.CharField(verbose_name="election day", max_length=255, null=True, blank=True)
     state_code = models.CharField(verbose_name="state the voter_guide is related to", max_length=2, null=True)
 
     # Usually in one of these two formats 2015, 2014-2015
     vote_smart_time_span = models.CharField(
         verbose_name="the period in which the organization stated this position", max_length=255, null=True,
-        blank=True, unique=False)
+        blank=True, unique=False, db_index=True)
 
     # This might be the organization name, or the
     display_name = models.CharField(
