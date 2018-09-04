@@ -1007,8 +1007,9 @@ def voter_ballot_items_retrieve_for_api(
         #  the election was calculated from an address. We want to keep google_civic_election_id tied
         #  to the voter's address
         if ballot_retrieval_based_on_voter_address:
-            voter_address.google_civic_election_id = google_civic_election_id
-            voter_address_manager.update_existing_voter_address_object(voter_address)
+            if google_civic_election_id != voter_address.google_civic_election_id:
+                voter_address.google_civic_election_id = google_civic_election_id
+                voter_address_manager.update_existing_voter_address_object(voter_address)
 
         # Get and return the ballot_item_list
         results = voter_ballot_items_retrieve_for_one_election_for_api(voter_device_id, voter_id,
@@ -1024,22 +1025,27 @@ def voter_ballot_items_retrieve_for_api(
         elif not positive_value_exists(voter_ballot_saved.election_description_text) \
                 or not positive_value_exists(voter_ballot_saved.election_day_text()):
             try:
+                voter_ballot_saved_changed = False
                 election_manager = ElectionManager()
                 election_results = election_manager.retrieve_election(google_civic_election_id)
                 if election_results['election_found']:
                     election = election_results['election']
                     if not positive_value_exists(voter_ballot_saved.election_description_text):
                         voter_ballot_saved.election_description_text = election.election_name
+                        voter_ballot_saved_changed = True
                     if not positive_value_exists(voter_ballot_saved.election_day_text()):
                         voter_ballot_saved.election_date = \
                             datetime.strptime(election.election_day_text, "%Y-%m-%d").date()
+                        voter_ballot_saved_changed = True
                 if voter_address.text_for_map_search != voter_ballot_saved.original_text_for_map_search and \
                         not specific_ballot_requested:
                     # We don't want to change the voter_ballot_saved.original_text_for_map_search to be
                     #  the voter's address if we copied this ballot based on ballot_returned_we_vote_id
                     #  or ballot_location_shortcut
                     voter_ballot_saved.original_text_for_map_search = voter_address.text_for_map_search
-                voter_ballot_saved.save()
+                    voter_ballot_saved_changed = True
+                if voter_ballot_saved_changed:
+                    voter_ballot_saved.save()
             except Exception as e:
                 status += "Failed to update election_name or original_text_for_map_search "
         elif voter_ballot_saved.original_text_for_map_search != voter_address.text_for_map_search and \
@@ -1823,7 +1829,9 @@ def voter_ballot_items_retrieve_for_one_election_for_api(voter_device_id, voter_
     ballot_items_to_display = []
     results = {}
     try:
-        results = ballot_item_list_manager.retrieve_all_ballot_items_for_voter(voter_id, google_civic_election_id)
+        read_only = True
+        results = ballot_item_list_manager.retrieve_all_ballot_items_for_voter(
+            voter_id, google_civic_election_id, read_only)
         success = results['success']
         status += results['status']
         ballot_item_list = results['ballot_item_list']
@@ -1838,12 +1846,12 @@ def voter_ballot_items_retrieve_for_one_election_for_api(voter_device_id, voter_
         for ballot_item in ballot_item_list:
             if ballot_item.contest_office_we_vote_id:
                 kind_of_ballot_item = OFFICE
-                ballot_item_id = ballot_item.contest_office_id
+                office_id = ballot_item.contest_office_id
                 office_we_vote_id = ballot_item.contest_office_we_vote_id
                 try:
                     candidate_list_object = CandidateCampaignListManager()
                     results = candidate_list_object.retrieve_all_candidates_for_office(
-                        ballot_item_id, office_we_vote_id)
+                        office_id, office_we_vote_id)
                     candidates_to_display = []
                     if results['candidate_list_found']:
                         candidate_list = results['candidate_list']
@@ -1902,7 +1910,7 @@ def voter_ballot_items_retrieve_for_one_election_for_api(voter_device_id, voter_
                         'google_ballot_placement':      ballot_item.google_ballot_placement,
                         'local_ballot_order':           ballot_item.local_ballot_order,
                         'kind_of_ballot_item':          kind_of_ballot_item,
-                        'id':                           ballot_item_id,
+                        'id':                           office_id,
                         'we_vote_id':                   office_we_vote_id,
                         'candidate_list':               candidates_to_display,
                     }
@@ -1911,13 +1919,13 @@ def voter_ballot_items_retrieve_for_one_election_for_api(voter_device_id, voter_
                     status += "NO_CANDIDATES_FOR_OFFICE:" + str(office_we_vote_id) + " "
             elif ballot_item.contest_measure_we_vote_id:
                 kind_of_ballot_item = MEASURE
-                ballot_item_id = ballot_item.contest_measure_id
+                measure_id = ballot_item.contest_measure_id
                 measure_we_vote_id = ballot_item.contest_measure_we_vote_id
                 one_ballot_item = {
                     'ballot_item_display_name':     ballot_item.ballot_item_display_name,
                     'google_civic_election_id':     ballot_item.google_civic_election_id,
                     'google_ballot_placement':      ballot_item.google_ballot_placement,
-                    'id':                           ballot_item_id,
+                    'id':                           measure_id,
                     'kind_of_ballot_item':          kind_of_ballot_item,
                     'local_ballot_order':           ballot_item.local_ballot_order,
                     'measure_subtitle':             ballot_item.measure_subtitle,
