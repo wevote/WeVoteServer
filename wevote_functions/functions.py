@@ -218,24 +218,56 @@ LANGUAGE_CODE_SPANISH = 'es'
 MEASURE_TITLE_COMMON_PHRASES_TO_REMOVE_FROM_SEARCHES = [
 ]
 
+LETTER_IDENTIFIERS = ["a", "b", "c", "d", "e"]  # Expand through z and "aa" etc.
+MAXIMUM_SUPPORTED_MEASURE_NUMBER = 100
+MEASURE_TITLE_TO_NUMBER_OR_LETTER_IDENTIFIERS = {}  # Common spellings on left,
+for letter_identifier in LETTER_IDENTIFIERS:
+    key = "prop " + str(letter_identifier)
+    MEASURE_TITLE_TO_NUMBER_OR_LETTER_IDENTIFIERS[key] = str(letter_identifier)
+    key = "prop -  " + str(letter_identifier)
+    MEASURE_TITLE_TO_NUMBER_OR_LETTER_IDENTIFIERS[key] = str(letter_identifier)
+    key = "prop. " + str(letter_identifier)
+    MEASURE_TITLE_TO_NUMBER_OR_LETTER_IDENTIFIERS[key] = str(letter_identifier)
+
 # Single digit proposition names go last, so we can find the double digit names first
-MEASURE_TITLE_EQUIVALENT_MEASURE_TITLE_PAIRS = {
-    'prop 72': 'proposition 72',
-    'prop - 72': 'proposition 72',
-    'prop. 72': 'proposition 72',
-    'prop 71': 'proposition 71',
-    'prop - 71': 'proposition 71',
-    'prop. 71': 'proposition 71',
-    'prop 70': 'proposition 70',
-    'prop - 70': 'proposition 70',
-    'prop. 70': 'proposition 70',
-    'prop 69': 'proposition 69',
-    'prop - 69': 'proposition 69',
-    'prop. 69': 'proposition 69',
-    'prop 68': 'proposition 68',
-    'prop - 68': 'proposition 68',
-    'prop. 68': 'proposition 68',
-}
+current_number = MAXIMUM_SUPPORTED_MEASURE_NUMBER
+while current_number > 0:
+    key = "prop " + str(current_number)
+    MEASURE_TITLE_TO_NUMBER_OR_LETTER_IDENTIFIERS[key] = str(current_number)
+    key = "prop -  " + str(current_number)
+    MEASURE_TITLE_TO_NUMBER_OR_LETTER_IDENTIFIERS[key] = str(current_number)
+    key = "prop. " + str(current_number)
+    MEASURE_TITLE_TO_NUMBER_OR_LETTER_IDENTIFIERS[key] = str(current_number)
+    current_number -= 1
+
+MEASURE_TITLE_EQUIVALENT_MEASURE_TITLE_PAIRS = {}
+current_number = MAXIMUM_SUPPORTED_MEASURE_NUMBER
+while current_number > 0:
+    key = "prop " + str(current_number)
+    MEASURE_TITLE_EQUIVALENT_MEASURE_TITLE_PAIRS[key] = "proposition " + str(current_number)
+    key = "prop -  " + str(current_number)
+    MEASURE_TITLE_EQUIVALENT_MEASURE_TITLE_PAIRS[key] = "proposition " + str(current_number)
+    key = "prop. " + str(current_number)
+    MEASURE_TITLE_EQUIVALENT_MEASURE_TITLE_PAIRS[key] = "proposition " + str(current_number)
+    current_number -= 1
+
+# MEASURE_TITLE_EQUIVALENT_MEASURE_TITLE_PAIRS = {
+#     'prop 72': 'proposition 72',
+#     'prop - 72': 'proposition 72',
+#     'prop. 72': 'proposition 72',
+#     'prop 71': 'proposition 71',
+#     'prop - 71': 'proposition 71',
+#     'prop. 71': 'proposition 71',
+#     'prop 70': 'proposition 70',
+#     'prop - 70': 'proposition 70',
+#     'prop. 70': 'proposition 70',
+#     'prop 69': 'proposition 69',
+#     'prop - 69': 'proposition 69',
+#     'prop. 69': 'proposition 69',
+#     'prop 68': 'proposition 68',
+#     'prop - 68': 'proposition 68',
+#     'prop. 68': 'proposition 68',
+# }
 
 OFFICE_NAME_EQUIVALENT_PHRASE_PAIRS = {
     'commissioner of insurance': 'insurance commissioner',

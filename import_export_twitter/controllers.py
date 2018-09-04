@@ -4,6 +4,8 @@
 
 # See also WeVoteServer/twitter/controllers.py for routines that manage internal twitter data
 import re
+import os
+import ssl
 import tweepy
 import urllib.request
 import wevote_functions.admin
@@ -29,6 +31,10 @@ from wevote_functions.functions import convert_to_int, extract_twitter_handle_fr
 
 logger = wevote_functions.admin.get_logger(__name__)
 
+
+# We added this so that we don't get stopped by SSL certificate complaints
+if not os.environ.get('PYTHONHTTPSVERIFY', '') and getattr(ssl, '_create_unverified_context', None):
+    ssl._create_default_https_context = ssl._create_unverified_context
 
 WE_VOTE_SERVER_ROOT_URL = get_environment_variable("WE_VOTE_SERVER_ROOT_URL")
 

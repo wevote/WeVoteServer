@@ -313,6 +313,8 @@ BATCH_HEADER_MAP_FOR_POSITIONS = {
     'election_day': 'election_day',
     'grade_rating': 'grade_rating',
     'google_civic_election_id': 'google_civic_election_id',
+    'measure_title': 'measure_title',
+    'measure_we_vote_id': 'measure_we_vote_id',
     'more_info_url': 'more_info_url',
     'stance': 'stance',
     'support': 'support',
