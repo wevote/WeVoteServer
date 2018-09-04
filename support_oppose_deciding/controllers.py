@@ -387,7 +387,7 @@ def positions_count_for_all_ballot_items_for_api(  # positionsCountForAllBallotI
     friends_we_vote_id_list = []
     if positive_value_exists(voter_we_vote_id):
         friend_manager = FriendManager()
-        friend_results = friend_manager.retrieve_friends_we_vote_id_list(voter_we_vote_id, read_only)
+        friend_results = friend_manager.retrieve_friends_we_vote_id_list(voter_we_vote_id)
         if friend_results['friends_we_vote_id_list_found']:
             friends_we_vote_id_list = friend_results['friends_we_vote_id_list']
 

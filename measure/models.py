@@ -95,7 +95,7 @@ class ContestMeasure(models.Model):
         verbose_name="the order this item should appear on the ballot", null=True, blank=True, unique=False)
     # The unique ID of the election containing this contest. (Provided by Google Civic)
     google_civic_election_id = models.CharField(
-        verbose_name="google civic election id", max_length=255, null=True, blank=True)
+        verbose_name="google civic election id", max_length=255, null=True, blank=True, db_index=True)
     google_civic_election_id_new = models.PositiveIntegerField(
         verbose_name="google civic election id new", default=0, null=False, blank=False)
     ocd_division_id = models.CharField(verbose_name="ocd division id", max_length=255, null=True, blank=True)
@@ -112,7 +112,8 @@ class ContestMeasure(models.Model):
     # would have id "34" and a scope of stateUpper.
     district_id = models.CharField(verbose_name="google civic district id", max_length=255, null=True, blank=True)
     # State code
-    state_code = models.CharField(verbose_name="state this measure affects", max_length=2, null=True, blank=True)
+    state_code = models.CharField(verbose_name="state this measure affects",
+                                  max_length=2, null=True, blank=True, db_index=True)
     # Day of the election in YYYY-MM-DD format.
     election_day_text = models.CharField(verbose_name="election day", max_length=255, null=True, blank=True)
 

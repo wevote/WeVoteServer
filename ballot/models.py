@@ -1439,7 +1439,7 @@ class BallotReturned(models.Model):
 
     # The unique ID of this election. (Provided by Google Civic)
     google_civic_election_id = models.PositiveIntegerField(
-        verbose_name="google civic election id", default=0, null=False)
+        verbose_name="google civic election id", default=0, null=False, db_index=True)
     # state_code = models.CharField(verbose_name="state the ballot item is related to", max_length=2, null=True)
 
     election_description_text = models.CharField(max_length=255, blank=False, null=False,
@@ -1449,7 +1449,7 @@ class BallotReturned(models.Model):
     # Should we show this ballot as an option for this election?
     ballot_location_display_option_on = models.BooleanField(default=False)
     ballot_location_display_name = models.CharField(verbose_name='name that shows in button',
-                                                    max_length=255, blank=True, null=True)
+                                                    max_length=255, blank=True, null=True, db_index=True)
     ballot_location_shortcut = models.CharField(verbose_name='the url string to find this location',
                                                 max_length=255, blank=True, null=True)
     ballot_location_order = models.PositiveIntegerField(

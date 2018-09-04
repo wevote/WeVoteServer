@@ -87,7 +87,8 @@ class Election(models.Model):
     # A displayable name for the election.
     election_name = models.CharField(verbose_name="election name", max_length=255, null=False, blank=False)
     # Day of the election in YYYY-MM-DD format.
-    election_day_text = models.CharField(verbose_name="election day", max_length=255, null=True, blank=True)
+    election_day_text = models.CharField(verbose_name="election day",
+                                         max_length=255, null=True, blank=True, db_index=True)
     ocd_division_id = models.CharField(verbose_name="ocd division id", max_length=255, null=True, blank=True)
 
     ballotpedia_kind_of_election = models.CharField(
@@ -110,7 +111,8 @@ class Election(models.Model):
 
     # The state code for the election. This is not directly provided from Google Civic, but useful when we are
     # entering elections manually.
-    state_code = models.CharField(verbose_name="state code for the election", max_length=2, null=True, blank=True)
+    state_code = models.CharField(verbose_name="state code for the election",
+                                  max_length=2, null=True, blank=True, db_index=True)
     include_in_list_for_voters = models.BooleanField(default=False)
 
     # For internal notes regarding gathering data for this election
