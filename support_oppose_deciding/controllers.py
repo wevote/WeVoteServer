@@ -354,7 +354,7 @@ def positions_count_for_all_ballot_items_for_api(  # positionsCountForAllBallotI
 
     # Get a list of all candidates and measures from this election (in the active election)
     ballot_item_list_manager = BallotItemListManager()
-    if google_civic_election_id:
+    if positive_value_exists(google_civic_election_id):
         results = ballot_item_list_manager.retrieve_all_ballot_items_for_voter(
             voter_id, google_civic_election_id, read_only)
         status += results['status']

@@ -40,14 +40,16 @@ class BallotItem(models.Model):
     One ballot item is either 1) a measure/referendum or 2) an office that is being competed for
     """
     # The unique id of the voter for which this ballot was retrieved
-    voter_id = models.IntegerField(verbose_name="the voter unique id", default=0, null=False, blank=False)
+    voter_id = models.IntegerField(verbose_name="the voter unique id",
+                                   default=0, null=False, blank=False, db_index=True)
     # The polling location for which this ballot was retrieved
     polling_location_we_vote_id = models.CharField(
         verbose_name="we vote permanent id of the polling location", max_length=255, default=None, null=True,
         blank=True, unique=False)
 
     # The unique ID of this election. (Provided by Google Civic)
-    google_civic_election_id = models.CharField(verbose_name="google civic election id", max_length=20, null=False)
+    google_civic_election_id = models.CharField(verbose_name="google civic election id",
+                                                max_length=20, null=False, db_index=True)
     google_civic_election_id_new = models.PositiveIntegerField(
         verbose_name="google civic election id", default=0, null=False)
     state_code = models.CharField(verbose_name="state the ballot item is related to", max_length=2, null=True)
@@ -1036,16 +1038,16 @@ class BallotItemListManager(models.Model):
         ballot_item_list = []
         ballot_item_list_found = False
         try:
-            # Intentionally not using 'readonly' here as the default
-            if read_only:
-                ballot_item_queryset = BallotItem.objects.using('readonly').all()
-            else:
-                ballot_item_queryset = BallotItem.objects.all()
-            ballot_item_queryset = ballot_item_queryset.order_by('local_ballot_order', 'google_ballot_placement')
-            ballot_item_queryset = ballot_item_queryset.filter(voter_id=voter_id)
-            if positive_value_exists(google_civic_election_id):
+            if positive_value_exists(voter_id):
+                # Intentionally not using 'readonly' here as the default
+                if read_only:
+                    ballot_item_queryset = BallotItem.objects.using('readonly').all()
+                else:
+                    ballot_item_queryset = BallotItem.objects.all()
+                ballot_item_queryset = ballot_item_queryset.order_by('local_ballot_order', 'google_ballot_placement')
+                ballot_item_queryset = ballot_item_queryset.filter(voter_id=voter_id)
                 ballot_item_queryset = ballot_item_queryset.filter(google_civic_election_id=google_civic_election_id)
-            ballot_item_list = ballot_item_queryset
+                ballot_item_list = list(ballot_item_queryset)
 
             if len(ballot_item_list):
                 ballot_item_list_found = True
