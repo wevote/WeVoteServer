@@ -966,7 +966,8 @@ def voter_facebook_sign_in_save_for_api(voter_device_id,  # voterFacebookSignInS
     return json_data
 
 
-# NOTE:  This methond only works for candidates with public Facebook aliases like "AdamSchiffCA" or "audreyforcongress", it does not work for unaliased individuals like "carrie.adams.9210"
+# NOTE:  This method only works for candidates with public Facebook aliases like "AdamSchiffCA" or "audreyforcongress",
+# it does not work for unaliased individuals like "carrie.adams.9210"
 def get_facebook_photo_url_from_graphapi(facebook_candidate_url):
     candidate_we_vote_ids_list = []
     photo_url = ""
