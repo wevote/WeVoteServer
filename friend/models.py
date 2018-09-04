@@ -42,9 +42,9 @@ class CurrentFriend(models.Model):
     who initiated the first friend invitation.
     """
     viewer_voter_we_vote_id = models.CharField(
-        verbose_name="voter we vote id person 1", max_length=255, null=True, blank=True, unique=False)
+        verbose_name="voter we vote id person 1", max_length=255, null=True, blank=True, unique=False, db_index=True)
     viewee_voter_we_vote_id = models.CharField(
-        verbose_name="voter we vote id person 2", max_length=255, null=True, blank=True, unique=False)
+        verbose_name="voter we vote id person 2", max_length=255, null=True, blank=True, unique=False, db_index=True)
     date_last_changed = models.DateTimeField(verbose_name='date last changed', null=True, auto_now=True)
 
     def fetch_other_voter_we_vote_id(self, one_we_vote_id):
@@ -122,15 +122,16 @@ class FriendInvitationVoterLink(models.Model):
     3) invites via “friend suggestion” shown on We Vote.
     """
     sender_voter_we_vote_id = models.CharField(
-        verbose_name="we vote id for the sender", max_length=255, null=True, blank=True, unique=False)
+        verbose_name="we vote id for the sender", max_length=255, null=True, blank=True, unique=False, db_index=True)
     sender_email_ownership_is_verified = models.BooleanField(default=False)  # Do we have an email address for sender?
     recipient_voter_we_vote_id = models.CharField(
-        verbose_name="we vote id for the recipient if we have it", max_length=255, null=True, blank=True, unique=False)
+        verbose_name="we vote id for the recipient if we have it",
+        max_length=255, null=True, blank=True, unique=False, db_index=True)
     secret_key = models.CharField(
         verbose_name="secret key to accept invite", max_length=255, null=True, blank=True, unique=True)
     invitation_message = models.TextField(null=True, blank=True)
     invitation_status = models.CharField(max_length=50, choices=INVITATION_STATUS_CHOICES, default=NO_RESPONSE)
-    date_last_changed = models.DateTimeField(verbose_name='date last changed', null=True, auto_now=True)
+    date_last_changed = models.DateTimeField(verbose_name='date last changed', null=True, auto_now=True, db_index=True)
     merge_by_secret_key_allowed = models.BooleanField(default=True)  # To allow merges after delete
     deleted = models.BooleanField(default=False)  # If invitation is completed or rescinded, mark as deleted
 
@@ -808,7 +809,7 @@ class FriendManager(models.Model):
         }
         return results
 
-    def retrieve_friends_we_vote_id_list(self, voter_we_vote_id, read_only=False):
+    def retrieve_friends_we_vote_id_list(self, voter_we_vote_id):
         """
         This is similar to retrieve_current_friends, but only returns the we_vote_id
         :param voter_we_vote_id:
@@ -833,10 +834,7 @@ class FriendManager(models.Model):
             return results
 
         try:
-            if read_only:
-                current_friend_queryset = CurrentFriend.objects.using('readonly').all()
-            else:
-                current_friend_queryset = CurrentFriend.objects.all()
+            current_friend_queryset = CurrentFriend.objects.using('readonly').all()
             current_friend_queryset = current_friend_queryset.filter(
                 Q(viewer_voter_we_vote_id__iexact=voter_we_vote_id) |
                 Q(viewee_voter_we_vote_id__iexact=voter_we_vote_id))

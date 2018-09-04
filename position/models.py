@@ -110,7 +110,7 @@ class PositionEntered(models.Model):
     speaker_twitter_handle = models.CharField(verbose_name='twitter screen_name for org or person with position',
                                               max_length=255, null=True, unique=False)
 
-    date_entered = models.DateTimeField(verbose_name='date entered', null=True, auto_now_add=True)
+    date_entered = models.DateTimeField(verbose_name='date entered', null=True, auto_now_add=True, db_index=True)
     # The date the this position last changed
     date_last_changed = models.DateTimeField(verbose_name='date last changed', null=True, auto_now=True)
 
@@ -207,7 +207,8 @@ class PositionEntered(models.Model):
     # geo = models.ForeignKey(Geo, null=True, related_name='pos_geo')
     # issue = models.ForeignKey(Issue, null=True, blank=True, related_name='')
 
-    stance = models.CharField(max_length=15, choices=POSITION_CHOICES, default=NO_STANCE)  # supporting/opposing
+    # supporting/opposing
+    stance = models.CharField(max_length=15, choices=POSITION_CHOICES, default=NO_STANCE, db_index=True)
 
     statement_text = models.TextField(null=True, blank=True,)
     statement_html = models.TextField(null=True, blank=True,)
@@ -492,7 +493,7 @@ class PositionForFriends(models.Model):
     speaker_twitter_handle = models.CharField(verbose_name='twitter screen_name for org or person with position',
                                               max_length=255, null=True, unique=False)
 
-    date_entered = models.DateTimeField(verbose_name='date entered', null=True, auto_now=True)
+    date_entered = models.DateTimeField(verbose_name='date entered', null=True, auto_now=True, db_index=True)
     # The date the this position last changed
     date_last_changed = models.DateTimeField(verbose_name='date last changed', null=True, auto_now=True)
 
@@ -587,7 +588,8 @@ class PositionForFriends(models.Model):
     # geo = models.ForeignKey(Geo, null=True, related_name='pos_geo')
     # issue = models.ForeignKey(Issue, null=True, blank=True, related_name='')
 
-    stance = models.CharField(max_length=15, choices=POSITION_CHOICES, default=NO_STANCE)  # supporting/opposing
+    # supporting/opposing
+    stance = models.CharField(max_length=15, choices=POSITION_CHOICES, default=NO_STANCE, db_index=True)
 
     statement_text = models.TextField(null=True, blank=True, )
     statement_html = models.TextField(null=True, blank=True, )
@@ -829,11 +831,11 @@ class PositionNetworkScore(models.Model):
     """
     # We are relying on built-in Python id field
 
-    viewing_voter_id = models.PositiveIntegerField(null=False, unique=False)
-    viewing_voter_we_vote_id = models.CharField(max_length=255, null=False, unique=False)
+    viewing_voter_id = models.PositiveIntegerField(null=False, unique=False, db_index=True)
+    viewing_voter_we_vote_id = models.CharField(max_length=255, null=False, unique=False, db_index=True)
 
     google_civic_election_id = models.PositiveIntegerField(
-        verbose_name="google civic election id", default=None, null=True, blank=True)
+        verbose_name="google civic election id", default=None, null=True, blank=True, db_index=True)
 
     # The organization that took this position (either organization or friend will have value, or both)
     organization_we_vote_id = models.CharField(max_length=255, null=True, unique=False)
@@ -842,10 +844,10 @@ class PositionNetworkScore(models.Model):
     friend_voter_we_vote_id = models.CharField(max_length=255, null=True, unique=False)
 
     # The candidate this score is about (either candidate or measure will have a value, but not both)
-    candidate_we_vote_id = models.CharField(max_length=255, null=True, unique=False)
+    candidate_we_vote_id = models.CharField(max_length=255, null=True, unique=False, db_index=True)
 
     # The measure this score is about (either candidate or measure will have a value, but not both)
-    measure_we_vote_id = models.CharField(max_length=255, null=True, unique=False)
+    measure_we_vote_id = models.CharField(max_length=255, null=True, unique=False, db_index=True)
 
     # What is the organization name, voter name, or public figure name? We cache this here for rapid display
     speaker_display_name = models.CharField(
@@ -1830,16 +1832,16 @@ class PositionListManager(models.Model):
             if retrieve_public_positions:
                 # We intentionally do not use 'readonly' here since we need to save based on the results of this query
                 if read_only:
-                    position_list_query = PositionEntered.objects.using('readonly').order_by('date_entered')
+                    position_list_query = PositionEntered.objects.using('readonly').order_by('-date_entered')
                 else:
-                    position_list_query = PositionEntered.objects.order_by('date_entered')
+                    position_list_query = PositionEntered.objects.order_by('-date_entered')
                 retrieve_friends_positions = False
             else:
                 # We intentionally do not use 'readonly' here since we need to save based on the results of this query
                 if read_only:
-                    position_list_query = PositionForFriends.objects.using('readonly').order_by('date_entered')
+                    position_list_query = PositionForFriends.objects.using('readonly').order_by('-date_entered')
                 else:
-                    position_list_query = PositionForFriends.objects.order_by('date_entered')
+                    position_list_query = PositionForFriends.objects.order_by('-date_entered')
                 retrieve_friends_positions = True
 
             # As of Aug 2018 we are no longer using PERCENT_RATING
@@ -1979,16 +1981,16 @@ class PositionListManager(models.Model):
             if retrieve_public_positions:
                 # We intentionally do not use 'readonly' here since we need to save based on the results of this query
                 if read_only:
-                    position_list_query = PositionEntered.objects.using('readonly').order_by('date_entered')
+                    position_list_query = PositionEntered.objects.using('readonly').order_by('-date_entered')
                 else:
-                    position_list_query = PositionEntered.objects.order_by('date_entered')
+                    position_list_query = PositionEntered.objects.order_by('-date_entered')
                 retrieve_friends_positions = False
             else:
                 # We intentionally do not use 'readonly' here since we need to save based on the results of this query
                 if read_only:
-                    position_list_query = PositionForFriends.objects.using('readonly').order_by('date_entered')
+                    position_list_query = PositionForFriends.objects.using('readonly').order_by('-date_entered')
                 else:
-                    position_list_query = PositionForFriends.objects.order_by('date_entered')
+                    position_list_query = PositionForFriends.objects.order_by('-date_entered')
                 retrieve_friends_positions = True
 
             # As of Aug 2018 we are no longer using PERCENT_RATING
@@ -2081,11 +2083,11 @@ class PositionListManager(models.Model):
         try:
             if retrieve_public_positions:
                 # We intentionally do not use 'readonly' here since we need to save based on the results of this query
-                position_list_query = PositionEntered.objects.order_by('date_entered')
+                position_list_query = PositionEntered.objects.order_by('-date_entered')
                 retrieve_friends_positions = False
             else:
                 # We intentionally do not use 'readonly' here since we need to save based on the results of this query
-                position_list_query = PositionForFriends.objects.order_by('date_entered')
+                position_list_query = PositionForFriends.objects.order_by('-date_entered')
                 retrieve_friends_positions = True
 
             # As of Aug 2018 we are no longer using PERCENT_RATING
@@ -2953,10 +2955,10 @@ class PositionListManager(models.Model):
         try:
             if public_only:
                 # Only return public positions
-                position_list_query = PositionEntered.objects.order_by('date_entered')
+                position_list_query = PositionEntered.objects.order_by('-date_entered')
             else:
                 # Only return PositionForFriends entries
-                position_list_query = PositionForFriends.objects.order_by('date_entered')
+                position_list_query = PositionForFriends.objects.order_by('-date_entered')
 
             position_list_query = position_list_query.filter(google_civic_election_id=google_civic_election_id)
 

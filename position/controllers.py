@@ -230,7 +230,7 @@ def add_position_network_count_entries_for_one_friend(voter_id, friend_voter_we_
     return json_data
 
 
-def calculate_positions_count_for_all_ballot_items_for_api(  # positionsCountForAllBallotItems
+def calculate_positions_count_for_all_ballot_items_for_api(
         voter_device_id, google_civic_election_id=0):
     """
     We want to return a JSON file with the list of the support and oppose counts from the orgs, friends and
@@ -280,7 +280,7 @@ def calculate_positions_count_for_all_ballot_items_for_api(  # positionsCountFor
 
     # Get a list of all candidates and measures from this election (in the active election)
     ballot_item_list_manager = BallotItemListManager()
-    if google_civic_election_id:
+    if positive_value_exists(google_civic_election_id):
         results = ballot_item_list_manager.retrieve_all_ballot_items_for_voter(voter_id, google_civic_election_id)
         status += results['status']
         ballot_item_list = results['ballot_item_list']
