@@ -1248,10 +1248,13 @@ class VoterGuideListManager(models.Model):
                 # If not searching, make sure we do not include individuals
                 voter_guide_query = voter_guide_query.exclude(voter_guide_owner_type__iexact=INDIVIDUAL)
 
-            voter_guide_query = voter_guide_query.filter(
-                Q(google_civic_election_id=google_civic_election_id) &
-                Q(organization_we_vote_id__in=organization_we_vote_id_list)
-            )
+            if positive_value_exists(len(organization_we_vote_id_list)):
+                voter_guide_query = voter_guide_query.filter(
+                    Q(google_civic_election_id=google_civic_election_id) &
+                    Q(organization_we_vote_id__in=organization_we_vote_id_list)
+                )
+            else:
+                voter_guide_query = voter_guide_query.filter(google_civic_election_id=google_civic_election_id)
 
             if positive_value_exists(start_retrieve_at_this_number):
                 query_start_number = start_retrieve_at_this_number
