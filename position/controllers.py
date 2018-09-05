@@ -234,7 +234,8 @@ def calculate_positions_count_for_all_ballot_items_for_api(
         voter_device_id, google_civic_election_id=0):
     """
     We want to return a JSON file with the list of the support and oppose counts from the orgs, friends and
-    public figures the voter follows, and be caching the results as we look them up
+    public figures the voter follows, and be caching the results as we look them up.
+    This API call refreshes the data, and is not meant to be used when we just want the latest count.
     """
     status = "CALCULATE_POSITIONS_COUNT_FOR_ALL_BALLOT_ITEMS "
     support_or_oppose_exists = False

@@ -914,7 +914,7 @@ def voter_guides_to_follow_retrieve_view(request):  # voterGuidesToFollowRetriev
     else:
         if positive_value_exists(use_test_election):
             google_civic_election_id = 2000  # The Google Civic API Test election
-        elif positive_value_exists(google_civic_election_id) or google_civic_election_id == 0:
+        elif positive_value_exists(google_civic_election_id):  # Why was this set?  "or google_civic_election_id == 0"
             # If an election was specified, we can skip down to retrieving the voter_guides
             pass
         else:

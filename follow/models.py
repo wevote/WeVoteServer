@@ -590,14 +590,15 @@ class FollowOrganization(models.Model):
     organization_id = models.BigIntegerField(null=True, blank=True, db_index=True)
 
     voter_linked_organization_we_vote_id = models.CharField(
-        verbose_name="organization we vote permanent id", max_length=255, null=True, blank=True, unique=False)
+        verbose_name="organization we vote permanent id",
+        max_length=255, null=True, blank=True, unique=False, db_index=True)
 
     # This is used when we want to export the organizations that a voter is following
     organization_we_vote_id = models.CharField(
         verbose_name="we vote permanent id", max_length=255, null=True, blank=True, unique=False, db_index=True)
 
     # Is this person following or ignoring this organization?
-    following_status = models.CharField(max_length=15, choices=FOLLOWING_CHOICES, default=FOLLOWING)
+    following_status = models.CharField(max_length=15, choices=FOLLOWING_CHOICES, default=FOLLOWING, db_index=True)
 
     # Is this person automatically following the suggested twitter organization?
     auto_followed_from_twitter_suggestion = models.BooleanField(verbose_name='', default=False)
@@ -994,13 +995,16 @@ class FollowOrganizationList(models.Model):
             follow_organization_list = []
             return follow_organization_list
 
-    def retrieve_ignore_organization_by_voter_id(self, voter_id):
+    def retrieve_ignore_organization_by_voter_id(self, voter_id, read_only=False):
         # Retrieve a list of follow_organization entries for this voter
         follow_organization_list_found = False
         following_status = FOLLOW_IGNORE
         follow_organization_list = {}
         try:
-            follow_organization_list = FollowOrganization.objects.all()
+            if positive_value_exists(read_only):
+                follow_organization_list = FollowOrganization.objects.using('readonly').all()
+            else:
+                follow_organization_list = FollowOrganization.objects.all()
             follow_organization_list = follow_organization_list.filter(voter_id=voter_id)
             follow_organization_list = follow_organization_list.filter(following_status=following_status)
             if len(follow_organization_list):
@@ -1112,10 +1116,11 @@ class FollowOrganizationList(models.Model):
                     followers_organization_list_simple_array.append(follow_organization.organization_id)
         return followers_organization_list_simple_array
 
-    def retrieve_ignore_organization_by_voter_id_simple_id_array(self, voter_id, return_we_vote_id=False):
+    def retrieve_ignore_organization_by_voter_id_simple_id_array(
+            self, voter_id, return_we_vote_id=False, read_only=False):
         follow_organization_list_manager = FollowOrganizationList()
         ignore_organization_list = \
-            follow_organization_list_manager.retrieve_ignore_organization_by_voter_id(voter_id)
+            follow_organization_list_manager.retrieve_ignore_organization_by_voter_id(voter_id, read_only)
         ignore_organization_list_simple_array = []
         if len(ignore_organization_list):
             for ignore_organization in ignore_organization_list:

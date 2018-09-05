@@ -254,7 +254,8 @@ class Issue(models.Model):
     we_vote_id = models.CharField(
         verbose_name="we vote permanent id of this issue", max_length=255, default=None, null=True,
         blank=True, unique=True)
-    issue_name = models.CharField(verbose_name="name of the issue", max_length=255, null=True, blank=True)
+    issue_name = models.CharField(verbose_name="name of the issue",
+                                  max_length=255, null=True, blank=True, db_index=True)
     # The description of the issue.
     issue_description = models.TextField(verbose_name="description of the issue",
                                          null=True, blank=True, default="")
