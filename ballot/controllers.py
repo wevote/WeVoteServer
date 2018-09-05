@@ -1325,54 +1325,65 @@ def generate_ballot_data(voter_device_link, google_civic_election_id, voter_addr
 
         # Most incoming addresses are just City, State Zip. 2018-08-27 We don't want to look those up from
         # Ballotpedia -- we want to work with cached polling locations.
-        default_election_data_source_is_ballotpedia = True
         turn_off_direct_voter_ballot_retrieve = False
+        default_election_data_source_is_ballotpedia = True
         if turn_off_direct_voter_ballot_retrieve:
             # We set this option when we want to force the retrieval of a nearby ballot
             pass
         elif default_election_data_source_is_ballotpedia:
-            # 1a) Get ballot data from Ballotpedia for the actual VoterAddress
-            ballotpedia_retrieve_results = voter_ballot_items_retrieve_from_ballotpedia_for_api(
-                voter_device_id, text_for_map_search)
-            status += ballotpedia_retrieve_results['status']
-            if ballotpedia_retrieve_results['google_civic_election_id'] \
-                    and ballotpedia_retrieve_results['contests_retrieved']:
-                is_from_substituted_address = False
-                substituted_address_nearby = ''
-                is_from_test_address = False
-                polling_location_we_vote_id_source = ''  # Not used when retrieving directly for the voter
+            status += "SHOULD_WE_USE_BALLOTPEDIA_API? "
+            length_at_which_we_suspect_address_has_street = 25
+            length_of_text_for_map_search = 0
+            if isinstance(text_for_map_search, str):
+                length_of_text_for_map_search = len(text_for_map_search)
 
-                # We update the voter_address with this google_civic_election_id outside of this function
+            # We don't want to call Ballotpedia when we just have "City, State ZIP". Since we don't always know
+            #  whether we have a street address or not, then we use a simple string length cut-off.
+            if length_of_text_for_map_search > length_at_which_we_suspect_address_has_street:
+                status += "TEXT_FOR_MAP_SEARCH_LONG_ENOUGH "
+                # 1a) Get ballot data from Ballotpedia for the actual VoterAddress
+                ballotpedia_retrieve_results = voter_ballot_items_retrieve_from_ballotpedia_for_api(
+                    voter_device_id, text_for_map_search)
+                status += ballotpedia_retrieve_results['status']
+                if ballotpedia_retrieve_results['google_civic_election_id'] \
+                        and ballotpedia_retrieve_results['contests_retrieved']:
+                    is_from_substituted_address = False
+                    substituted_address_nearby = ''
+                    is_from_test_address = False
+                    polling_location_we_vote_id_source = ''  # Not used when retrieving directly for the voter
 
-                # Save the meta information for this ballot data
-                save_results = voter_ballot_saved_manager.update_or_create_voter_ballot_saved(
-                    voter_id,
-                    ballotpedia_retrieve_results['google_civic_election_id'],
-                    ballotpedia_retrieve_results['state_code'],
-                    ballotpedia_retrieve_results['election_day_text'],
-                    ballotpedia_retrieve_results['election_description_text'],
-                    ballotpedia_retrieve_results['text_for_map_search'],
-                    substituted_address_nearby,
-                    is_from_substituted_address,
-                    is_from_test_address,
-                    polling_location_we_vote_id_source,
-                    ballotpedia_retrieve_results['ballot_location_display_name'],
-                    ballotpedia_retrieve_results['ballot_returned_we_vote_id'],
-                    ballotpedia_retrieve_results['ballot_location_shortcut'],
-                    original_text_city=ballotpedia_retrieve_results['original_text_city'],
-                    original_text_state=ballotpedia_retrieve_results['original_text_state'],
-                    original_text_zip=ballotpedia_retrieve_results['original_text_zip'],
-                )
-                status += save_results['status']
-                results = {
-                    'status': status,
-                    'success': save_results['success'],
-                    'google_civic_election_id': save_results['google_civic_election_id'],
-                    'voter_ballot_saved_found': save_results['voter_ballot_saved_found'],
-                    'voter_ballot_saved': save_results['voter_ballot_saved'],
-                }
-                return results
-            pass
+                    # We update the voter_address with this google_civic_election_id outside of this function
+
+                    # Save the meta information for this ballot data
+                    save_results = voter_ballot_saved_manager.update_or_create_voter_ballot_saved(
+                        voter_id,
+                        ballotpedia_retrieve_results['google_civic_election_id'],
+                        ballotpedia_retrieve_results['state_code'],
+                        ballotpedia_retrieve_results['election_day_text'],
+                        ballotpedia_retrieve_results['election_description_text'],
+                        ballotpedia_retrieve_results['text_for_map_search'],
+                        substituted_address_nearby,
+                        is_from_substituted_address,
+                        is_from_test_address,
+                        polling_location_we_vote_id_source,
+                        ballotpedia_retrieve_results['ballot_location_display_name'],
+                        ballotpedia_retrieve_results['ballot_returned_we_vote_id'],
+                        ballotpedia_retrieve_results['ballot_location_shortcut'],
+                        original_text_city=ballotpedia_retrieve_results['original_text_city'],
+                        original_text_state=ballotpedia_retrieve_results['original_text_state'],
+                        original_text_zip=ballotpedia_retrieve_results['original_text_zip'],
+                    )
+                    status += save_results['status']
+                    results = {
+                        'status': status,
+                        'success': save_results['success'],
+                        'google_civic_election_id': save_results['google_civic_election_id'],
+                        'voter_ballot_saved_found': save_results['voter_ballot_saved_found'],
+                        'voter_ballot_saved': save_results['voter_ballot_saved'],
+                    }
+                    return results
+            else:
+                status += "NOT_REACHING_OUT_TO_BALLOTPEDIA "
         else:
             # 1b) Get ballot data from Google Civic for the actual VoterAddress
             use_test_election = False
