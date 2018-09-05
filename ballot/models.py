@@ -2089,9 +2089,12 @@ class BallotReturnedManager(models.Model):
             # TODO: This should be updated to a more modern approach. I think this will be deprecated in > Django 1.9
             ballot_returned_query = ballot_returned_query.annotate(distance=(F('latitude') - location.latitude) ** 2 +
                                                                             (F('longitude') - location.longitude) ** 2)
-            ballot = ballot_returned_query.order_by('distance').first()
+            ballot_returned_query = ballot_returned_query.order_by('distance')
+
+            ballot = ballot_returned_query.first()
             # ballot_returned_list = list(ballot_returned_query)
-            # ballot = ballot_returned_list[0]
+            # if positive_value_exists(len(ballot_returned_list)):
+            #     ballot = ballot_returned_list[0]
 
         if ballot is not None:
             ballot_returned = ballot
@@ -3181,7 +3184,7 @@ def copy_existing_ballot_items_from_stored_ballot(voter_id, text_for_map_search,
     voter_ballot_saved_manager = VoterBallotSavedManager()
     ballot_item_list_manager = BallotItemListManager()
 
-    text_for_map_search_empty = not positive_value_exists(text_for_map_search) or text_for_map_search != ""
+    text_for_map_search_empty = not positive_value_exists(text_for_map_search) or text_for_map_search == ""
 
     if positive_value_exists(ballot_returned_we_vote_id):
         find_results = ballot_returned_manager.retrieve_ballot_returned_from_ballot_returned_we_vote_id(
@@ -3252,7 +3255,7 @@ def copy_existing_ballot_items_from_stored_ballot(voter_id, text_for_map_search,
     elif positive_value_exists(google_civic_election_id) and text_for_map_search_empty:
         find_results = ballot_returned_manager.retrieve_ballot_returned_from_google_civic_election_id(
             google_civic_election_id)
-        status += "CALLING-RETRIEVE_BALLOT_RETURNED_FROM_GOOGLE_CIVIC_ELECTION_ID, status: [["
+        status += "1-CALLING-RETRIEVE_BALLOT_RETURNED_FROM_GOOGLE_CIVIC_ELECTION_ID, status: [["
         status += find_results['status']
         status += "]] "
 
@@ -3533,7 +3536,7 @@ def retrieve_ballot_items_for_one_ballot_returned(voter_id, text_for_map_search,
     elif positive_value_exists(google_civic_election_id) and text_for_map_search_empty:
         find_results = ballot_returned_manager.retrieve_ballot_returned_from_google_civic_election_id(
             google_civic_election_id)
-        status += "CALLING-RETRIEVE_BALLOT_RETURNED_FROM_GOOGLE_CIVIC_ELECTION_ID, status: [["
+        status += "2-CALLING-RETRIEVE_BALLOT_RETURNED_FROM_GOOGLE_CIVIC_ELECTION_ID, status: [["
         status += find_results['status']
         status += "]] "
 
