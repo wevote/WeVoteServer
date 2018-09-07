@@ -19,13 +19,15 @@
        target="_blank">Google Analytics + AdWords</a> (in new window)
 </p>
 
-<h2>Sitewide Election Metrics</h2>
+
+<h2>Sitewide Voter Metrics</h2>
     <p>
-        Show activity related to each election.
-        <a href="{% url 'analytics:sitewide_election_metrics' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">see all</a>
+        Show the most recent voters who have visited site and the major steps they've completed.
+        <a href="{% url 'analytics:sitewide_voter_metrics' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">see all</a>
     </p>
 
-    {% include "analytics/sitewide_election_metrics_table.html" %}
+    {% include "analytics/sitewide_voter_metrics_table.html" with sitewide_voter_metrics_list=sitewide_voter_metrics_list %}
+
 
 
 <h2>Sitewide Daily Metrics</h2>
@@ -36,6 +38,18 @@
 
     {% include "analytics/sitewide_daily_metrics_table.html" with sitewide_daily_metrics_list=sitewide_daily_metrics_list %}
 
+
+
+<h2>Sitewide Election Metrics</h2>
+    <p>
+        Show activity related to each election.
+        <a href="{% url 'analytics:sitewide_election_metrics' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">see all</a>
+    </p>
+
+    {% include "analytics/sitewide_election_metrics_table.html" %}
+
+
+
 {% if voter_allowed_to_see_organization_analytics %}
 <h2>Organization Election Metrics</h2>
     <p>
@@ -45,15 +59,6 @@
 
     {% include "analytics/organization_election_metrics_table.html" %}
 {% endif %}
-
-
-<h2>Voter Metrics</h2>
-    <p>
-        Show the most recent voters who have visited site and the major steps they've completed.
-        <a href="{% url 'analytics:sitewide_voter_metrics' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">see all</a>
-    </p>
-
-    {% include "analytics/sitewide_voter_metrics_table.html" with sitewide_voter_metrics_list=sitewide_voter_metrics_list %}
 
 
 <h2>Manually Update Metrics</h2>

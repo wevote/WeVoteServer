@@ -150,13 +150,15 @@ def organization_daily_metrics_process_view(request):
     :param request:
     :return:
     """
-    authority_required = {'verified_volunteer'}  # admin, verified_volunteer
+    authority_required = {'political_data_manager'}  # admin, verified_volunteer
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
+    google_civic_election_id = request.GET.get('google_civic_election_id', 0)
     organization_we_vote_id = request.GET.get('organization_we_vote_id', '')
+    state_code = request.GET.get('state_code', '')
     changes_since_this_date_as_integer = convert_to_int(request.GET.get('date_as_integer', 0))
-    changes_through_this_date_as_integer = convert_to_int(request.GET.get('date_as_integer_end', 0))
+    through_date_as_integer = convert_to_int(request.GET.get('through_date_as_integer', 0))
 
     if not positive_value_exists(changes_since_this_date_as_integer):
         messages.add_message(request, messages.ERROR, 'date_as_integer required.')
@@ -168,7 +170,10 @@ def organization_daily_metrics_process_view(request):
 
     return HttpResponseRedirect(reverse('analytics:organization_daily_metrics', args=()) +
                                 "?google_civic_election_id=" + str(google_civic_election_id) +
-                                "&state_code=" + str(state_code))
+                                "&state_code=" + str(state_code) +
+                                "&date_as_integer=" + str(changes_since_this_date_as_integer) +
+                                "&through_date_as_integer=" + str(through_date_as_integer)
+                                )
 
 
 @login_required
@@ -252,7 +257,7 @@ def analytics_action_list_view(request, voter_we_vote_id=False, organization_we_
 
 @login_required
 def augment_voter_analytics_process_view(request, voter_we_vote_id):
-    authority_required = {'verified_volunteer'}  # admin, verified_volunteer
+    authority_required = {'political_data_manager'}  # admin, verified_volunteer
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
@@ -317,7 +322,7 @@ def organization_election_metrics_process_view(request):
     :param request:
     :return:
     """
-    authority_required = {'verified_volunteer'}  # admin, verified_volunteer
+    authority_required = {'political_data_manager'}  # admin, verified_volunteer
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
@@ -400,22 +405,25 @@ def sitewide_daily_metrics_process_view(request):
     :param request:
     :return:
     """
-    authority_required = {'verified_volunteer'}  # admin, verified_volunteer
+    authority_required = {'political_data_manager'}  # admin, verified_volunteer
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
     google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
     state_code = request.GET.get('state_code', '')
     changes_since_this_date_as_integer = convert_to_int(request.GET.get('date_as_integer', 0))
-    changes_through_this_date_as_integer = convert_to_int(request.GET.get('date_as_integer_end', 0))
+    through_date_as_integer = convert_to_int(request.GET.get('through_date_as_integer',
+                                                             changes_since_this_date_as_integer))
 
     analytics_manager = AnalyticsManager()
     first_visit_today_results = \
-        analytics_manager.update_first_visit_today_for_all_voters_since_date(changes_since_this_date_as_integer)
+        analytics_manager.update_first_visit_today_for_all_voters_since_date(
+            changes_since_this_date_as_integer, through_date_as_integer)
 
-    augment_results = augment_voter_analytics_action_entries_without_election_id(changes_since_this_date_as_integer)
+    augment_results = augment_voter_analytics_action_entries_without_election_id(
+        changes_since_this_date_as_integer, through_date_as_integer)
 
-    results = save_sitewide_daily_metrics(changes_since_this_date_as_integer, changes_through_this_date_as_integer)
+    results = save_sitewide_daily_metrics(changes_since_this_date_as_integer, through_date_as_integer)
 
     messages.add_message(
         request, messages.INFO,
@@ -426,7 +434,9 @@ def sitewide_daily_metrics_process_view(request):
     return HttpResponseRedirect(reverse('analytics:sitewide_daily_metrics', args=()) +
                                 "?google_civic_election_id=" + str(google_civic_election_id) +
                                 "&state_code=" + str(state_code) +
-                                "&date_as_integer=" + str(changes_since_this_date_as_integer))
+                                "&date_as_integer=" + str(changes_since_this_date_as_integer) +
+                                "&through_date_as_integer=" + str(through_date_as_integer)
+                                )
 
 
 @login_required
@@ -442,13 +452,14 @@ def sitewide_daily_metrics_view(request):
     google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
     state_code = request.GET.get('state_code', '')
     date_as_integer = convert_to_int(request.GET.get('date_as_integer', 0))
+    through_date_as_integer = convert_to_int(request.GET.get('through_date_as_integer', date_as_integer))
 
     sitewide_daily_metrics_list = []
 
     messages_on_stage = get_messages(request)
     try:
         sitewide_daily_metrics_query = SitewideDailyMetrics.objects.using('analytics').order_by('-date_as_integer')
-        sitewide_daily_metrics_list = list(sitewide_daily_metrics_query)
+        sitewide_daily_metrics_list = sitewide_daily_metrics_query[:180]  # Show past 6 months
     except SitewideDailyMetrics.DoesNotExist:
         # This is fine
         pass
@@ -459,6 +470,7 @@ def sitewide_daily_metrics_view(request):
         'google_civic_election_id':     google_civic_election_id,
         'state_code':                   state_code,
         'date_as_integer':              date_as_integer,
+        'through_date_as_integer':      through_date_as_integer,
     }
     return render(request, 'analytics/sitewide_daily_metrics.html', template_values)
 
@@ -469,7 +481,7 @@ def sitewide_election_metrics_process_view(request):
     :param request:
     :return:
     """
-    authority_required = {'verified_volunteer'}  # admin, verified_volunteer
+    authority_required = {'political_data_manager'}  # admin, verified_volunteer
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
@@ -482,7 +494,9 @@ def sitewide_election_metrics_process_view(request):
                                     "?google_civic_election_id=" + str(google_civic_election_id) +
                                     "&state_code=" + str(state_code))
 
-    results = save_sitewide_election_metrics(google_civic_election_id)
+    # results = save_sitewide_election_metrics(google_civic_election_id)  # DEBUG=1
+    messages.add_message(request, messages.INFO,
+                         'PROCESSING TURNED OFF - NEED TO UPGRADE TO INCLUDE STATE')
 
     return HttpResponseRedirect(reverse('analytics:sitewide_election_metrics', args=()) +
                                 "?google_civic_election_id=" + str(google_civic_election_id) +
@@ -532,21 +546,25 @@ def sitewide_voter_metrics_process_view(request):
     :param request:
     :return:
     """
-    authority_required = {'verified_volunteer'}  # admin, verified_volunteer
+    authority_required = {'political_data_manager'}  # admin, verified_volunteer
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
     google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
     state_code = request.GET.get('state_code', '')
     changes_since_this_date_as_integer = convert_to_int(request.GET.get('date_as_integer', 0))
+    through_date_as_integer = convert_to_int(request.GET.get('through_date_as_integer',
+                                                             changes_since_this_date_as_integer))
 
     analytics_manager = AnalyticsManager()
     first_visit_today_results = \
-        analytics_manager.update_first_visit_today_for_all_voters_since_date(changes_since_this_date_as_integer)
+        analytics_manager.update_first_visit_today_for_all_voters_since_date(
+            changes_since_this_date_as_integer, through_date_as_integer)
 
-    results = augment_voter_analytics_action_entries_without_election_id(changes_since_this_date_as_integer)
+    results = augment_voter_analytics_action_entries_without_election_id(
+        changes_since_this_date_as_integer, through_date_as_integer)
 
-    results = save_sitewide_voter_metrics(changes_since_this_date_as_integer)
+    results = save_sitewide_voter_metrics(changes_since_this_date_as_integer, through_date_as_integer)
 
     messages.add_message(request, messages.INFO,
                          str(first_visit_today_results['first_visit_today_count']) + ' first visit updates.<br />' +
@@ -555,7 +573,8 @@ def sitewide_voter_metrics_process_view(request):
     return HttpResponseRedirect(reverse('analytics:sitewide_voter_metrics', args=()) +
                                 "?google_civic_election_id=" + str(google_civic_election_id) +
                                 "&state_code=" + str(state_code) +
-                                "&date_as_integer=" + str(changes_since_this_date_as_integer)
+                                "&date_as_integer=" + str(changes_since_this_date_as_integer) +
+                                "&through_date_as_integer=" + str(through_date_as_integer)
                                 )
 
 
@@ -572,6 +591,8 @@ def sitewide_voter_metrics_view(request):
     google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
     state_code = request.GET.get('state_code', '')
     date_as_integer = convert_to_int(request.GET.get('date_as_integer', 0))
+    through_date_as_integer = convert_to_int(request.GET.get('through_date_as_integer',
+                                                             date_as_integer))
 
     sitewide_voter_metrics_list = []
 
@@ -586,8 +607,11 @@ def sitewide_voter_metrics_view(request):
         bounce_query = bounce_query.filter(welcome_visited=1, actions_count=1)
         bounce_count = bounce_query.count()
 
-        # And the total we are showing
+        # And the total we found
         voters_shown_count = len(sitewide_voter_metrics_list)
+
+        number_of_voters_to_show = 400
+        sitewide_voter_metrics_list_short = sitewide_voter_metrics_list[:number_of_voters_to_show]
 
         # Bounce rate
         total_voters = voters_shown_count + bounce_count
@@ -596,7 +620,7 @@ def sitewide_voter_metrics_view(request):
         else:
             voter_bounce_rate = 0
 
-        messages.add_message(request, messages.INFO, str(voters_shown_count) + ' voters shown. ' +
+        messages.add_message(request, messages.INFO, str(voters_shown_count) + ' voters with statistics. ' +
                              str(bounce_count) + ' welcome page bounces not shown. ' +
                              str(voter_bounce_rate) + '% visitors bounced (left with only one view).')
 
@@ -608,9 +632,10 @@ def sitewide_voter_metrics_view(request):
 
     template_values = {
         'messages_on_stage':            messages_on_stage,
-        'sitewide_voter_metrics_list':  sitewide_voter_metrics_list,
+        'sitewide_voter_metrics_list':  sitewide_voter_metrics_list_short,
         'google_civic_election_id':     google_civic_election_id,
         'state_code':                   state_code,
         'date_as_integer':              date_as_integer,
+        'through_date_as_integer':      through_date_as_integer,
     }
     return render(request, 'analytics/sitewide_voter_metrics.html', template_values)

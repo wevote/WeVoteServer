@@ -671,7 +671,7 @@ class AnalyticsManager(models.Model):
         }
         return results
 
-    def retrieve_list_of_dates_with_actions(self, date_as_integer, date_as_integer_end=0):
+    def retrieve_list_of_dates_with_actions(self, date_as_integer, through_date_as_integer=0):
         success = False
         status = ""
         date_list = []
@@ -679,8 +679,8 @@ class AnalyticsManager(models.Model):
         try:
             date_list_query = AnalyticsAction.objects.using('analytics').all()
             date_list_query = date_list_query.filter(date_as_integer__gte=date_as_integer)
-            if positive_value_exists(date_as_integer_end):
-                date_list_query = date_list_query.filter(date_as_integer__lte=date_as_integer_end)
+            if positive_value_exists(through_date_as_integer):
+                date_list_query = date_list_query.filter(date_as_integer__lte=through_date_as_integer)
             date_list_query = date_list_query.values('date_as_integer').distinct()
             date_list = list(date_list_query)
             date_list_found = True
@@ -727,7 +727,7 @@ class AnalyticsManager(models.Model):
         }
         return results
 
-    def retrieve_voter_we_vote_id_list_with_changes_since(self, date_as_integer=0):
+    def retrieve_voter_we_vote_id_list_with_changes_since(self, date_as_integer=0, through_date_as_integer=0):
         success = False
         status = ""
         voter_list = []
@@ -735,6 +735,7 @@ class AnalyticsManager(models.Model):
         try:
             voter_list_query = AnalyticsAction.objects.using('analytics').all()
             voter_list_query = voter_list_query.filter(date_as_integer__gte=date_as_integer)
+            voter_list_query = voter_list_query.filter(date_as_integer__lte=through_date_as_integer)
             voter_list_query = voter_list_query.values('voter_we_vote_id').distinct()
             # voter_list_query = voter_list_query[:5]  # TEMP limit to 5
             voter_list = list(voter_list_query)
@@ -855,7 +856,7 @@ class AnalyticsManager(models.Model):
         return results
 
     def save_sitewide_daily_metrics_values(self, sitewide_daily_metrics_values):
-        success = False
+        success = True
         status = ""
         sitewide_daily_metrics_saved = False
         sitewide_daily_metrics = SitewideDailyMetrics()
@@ -872,6 +873,8 @@ class AnalyticsManager(models.Model):
             except Exception as e:
                 success = False
                 status += 'SITEWIDE_DAILY_METRICS_UPDATE_OR_CREATE_FAILED '
+        else:
+            status += "SITEWIDE_DAILY_METRICS-MISSING_DATE_AS_INTEGER "
 
         results = {
             'success':                      success,
@@ -921,9 +924,12 @@ class AnalyticsManager(models.Model):
                     voter_we_vote_id__iexact=voter_we_vote_id,
                     defaults=sitewide_voter_metrics_values
                 )
+                success = True
             except Exception as e:
                 success = False
                 status += 'SITEWIDE_VOTER_METRICS_UPDATE_OR_CREATE_FAILED '
+        else:
+            status += "SITEWIDE_VOTER_METRICS_SAVE-MISSING_VOTER_WE_VOTE_ID "
 
         results = {
             'success': success,
@@ -933,8 +939,8 @@ class AnalyticsManager(models.Model):
         }
         return results
 
-    def update_first_visit_today_for_all_voters_since_date(self, date_as_integer=0):
-        success = False
+    def update_first_visit_today_for_all_voters_since_date(self, date_as_integer, through_date_as_integer):
+        success = True
         status = ""
         distinct_days_list = []
         first_visit_today_count = 0
@@ -943,11 +949,14 @@ class AnalyticsManager(models.Model):
         try:
             distinct_days_query = AnalyticsAction.objects.using('analytics').all()
             distinct_days_query = distinct_days_query.filter(date_as_integer__gte=date_as_integer)
+            distinct_days_query = distinct_days_query.filter(date_as_integer__lte=through_date_as_integer)
             distinct_days_query = distinct_days_query.values('date_as_integer').distinct()
             # distinct_days_query = distinct_days_query[:5]  # TEMP limit to 5
             distinct_days_list = list(distinct_days_query)
             distinct_days_found = True
         except Exception as e:
+            success = False
+            status += "UPDATE_FIRST_VISIT_TODAY-DISTINCT_DAY_QUERY_ERROR "
             distinct_days_found = False
 
         simple_distinct_days_list = []
@@ -967,6 +976,8 @@ class AnalyticsManager(models.Model):
                 voter_list = list(voter_list_query)
                 voter_list_found = True
             except Exception as e:
+                success = False
+                status += "UPDATE_FIRST_VISIT_TODAY-DISTINCT_VOTER_QUERY_ERROR "
                 voter_list_found = False
 
             simple_voter_list = []
@@ -986,11 +997,14 @@ class AnalyticsManager(models.Model):
                     first_visit_query = first_visit_query.filter(voter_we_vote_id__iexact=voter_we_vote_id)
                     analytics_action = first_visit_query.first()
 
-                    analytics_action.first_visit_today = True
-                    analytics_action.save()
-                    first_visit_saved = True
-                    first_visit_today_count += 1
+                    if not analytics_action.first_visit_today:
+                        analytics_action.first_visit_today = True
+                        analytics_action.save()
+                        first_visit_saved = True
+                        first_visit_today_count += 1
                 except Exception as e:
+                    success = False
+                    status += "UPDATE_FIRST_VISIT_TODAY-VOTER_ON_DATE_QUERY_ERROR "
                     first_visit_found = False
                     pass
 

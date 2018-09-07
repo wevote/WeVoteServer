@@ -20,7 +20,7 @@ logger = wevote_functions.admin.get_logger(__name__)
 WE_VOTE_API_KEY = get_environment_variable("WE_VOTE_API_KEY")
 
 
-def augment_voter_analytics_action_entries_without_election_id(date_as_integer):
+def augment_voter_analytics_action_entries_without_election_id(date_as_integer, through_date_as_integer):
     """
     Retrieve list of voters with AnalyticsAction entries that have an empty google_civic_election_id
      and then loop through those entries to do the following:
@@ -35,27 +35,29 @@ def augment_voter_analytics_action_entries_without_election_id(date_as_integer):
     status = ""
 
     # Get distinct voters in the time period
-    voter_list = []
+    voter_analytics_list = []
     try:
         voter_list_query = AnalyticsAction.objects.using('analytics').all()
         voter_list_query = voter_list_query.filter(date_as_integer__gte=date_as_integer)
+        voter_list_query = voter_list_query.filter(date_as_integer__lte=through_date_as_integer)
         # Find entries where there is at least one empty google_civic_election_id
         voter_list_query = voter_list_query.filter(Q(google_civic_election_id=None) | Q(google_civic_election_id=0))
         voter_list_query = voter_list_query.values('voter_we_vote_id').distinct()
         # voter_list_query = voter_list_query[:5]  # TEMP limit to 5
-        voter_list = list(voter_list_query)
+        voter_analytics_list = list(voter_list_query)
         voter_list_found = True
     except Exception as e:
         voter_list_found = False
 
     simple_voter_list = []
-    for voter_dict in voter_list:
+    for voter_dict in voter_analytics_list:
         if positive_value_exists(voter_dict['voter_we_vote_id']):
             simple_voter_list.append(voter_dict['voter_we_vote_id'])
 
     # Loop through each voter that has at least one empty google_civic_election_id entry
     analytics_updated_count = 0
     for voter_we_vote_id in simple_voter_list:
+        # Start and end time are not needed
         results = augment_one_voter_analytics_action_entries_without_election_id(voter_we_vote_id)
         analytics_updated_count += results['analytics_updated_count']
 
@@ -87,15 +89,28 @@ def augment_one_voter_analytics_action_entries_without_election_id(voter_we_vote
     # First loop through and assign election for candidates and measures associated with specific election
     candidate_campaign_manager = CandidateCampaignManager()
     contest_measure_manager = ContestMeasureManager()
+    candidate_found_list = []
+    candidate_cache = {}
+    measure_found_list = []
+    measure_cache = {}
     for analytics_action in voter_history_list:
         if positive_value_exists(analytics_action.ballot_item_we_vote_id) \
                 and not positive_value_exists(analytics_action.google_civic_election_id):
             if "cand" in analytics_action.ballot_item_we_vote_id:
                 # If we are looking at a candidate without a google_civic_election_id
-                results = candidate_campaign_manager.retrieve_candidate_campaign_from_we_vote_id(
-                    analytics_action.ballot_item_we_vote_id)
-                if results['candidate_campaign_found']:
-                    candidate_campaign = results['candidate_campaign']
+                candidate_found = False
+                if analytics_action.ballot_item_we_vote_id in candidate_found_list:
+                    candidate_found = True
+                    candidate_campaign = candidate_cache[analytics_action.ballot_item_we_vote_id]
+                else:
+                    results = candidate_campaign_manager.retrieve_candidate_campaign_from_we_vote_id(
+                        analytics_action.ballot_item_we_vote_id)
+                    if results['candidate_campaign_found']:
+                        candidate_campaign = results['candidate_campaign']
+                        candidate_cache[analytics_action.ballot_item_we_vote_id] = candidate_campaign
+                        candidate_found_list.append(analytics_action.ballot_item_we_vote_id)
+                        candidate_found = True
+                if candidate_found:
                     try:
                         analytics_action.google_civic_election_id = candidate_campaign.google_civic_election_id
                         analytics_action.save()
@@ -103,11 +118,20 @@ def augment_one_voter_analytics_action_entries_without_election_id(voter_we_vote
                     except Exception as e:
                         pass
             elif "meas" in analytics_action.ballot_item_we_vote_id:
+                measure_found = False
                 # If we are looking at a measure without a google_civic_election_id
-                results = contest_measure_manager.retrieve_contest_measure_from_we_vote_id(
-                    analytics_action.ballot_item_we_vote_id)
-                if results['contest_measure_found']:
-                    contest_measure = results['contest_measure']
+                if analytics_action.ballot_item_we_vote_id in measure_found_list:
+                    measure_found = True
+                    contest_measure = measure_cache[analytics_action.ballot_item_we_vote_id]
+                else:
+                    results = contest_measure_manager.retrieve_contest_measure_from_we_vote_id(
+                        analytics_action.ballot_item_we_vote_id)
+                    if results['contest_measure_found']:
+                        contest_measure = results['contest_measure']
+                        measure_cache[analytics_action.ballot_item_we_vote_id] = contest_measure
+                        measure_found_list.append(analytics_action.ballot_item_we_vote_id)
+                        measure_found = True
+                if measure_found:
                     try:
                         analytics_action.google_civic_election_id = contest_measure.google_civic_election_id
                         analytics_action.save()
@@ -771,14 +795,14 @@ def save_organization_election_metrics(google_civic_election_id, organization_we
     return results
 
 
-def save_sitewide_daily_metrics(date_as_integer, date_as_integer_end=0):
+def save_sitewide_daily_metrics(date_as_integer, through_date_as_integer=0):
     status = ""
-    success = False
+    success = True
     date_as_integer_list = []
 
     analytics_manager = AnalyticsManager()
     date_as_integer_results = \
-        analytics_manager.retrieve_list_of_dates_with_actions(date_as_integer, date_as_integer_end)
+        analytics_manager.retrieve_list_of_dates_with_actions(date_as_integer, through_date_as_integer)
     if positive_value_exists(date_as_integer_results['date_as_integer_list_found']):
         date_as_integer_list = date_as_integer_results['date_as_integer_list']
 
@@ -786,15 +810,19 @@ def save_sitewide_daily_metrics(date_as_integer, date_as_integer_end=0):
     for one_date_as_integer in date_as_integer_list:
         results = calculate_sitewide_daily_metrics(one_date_as_integer)
         status += results['status']
-        if results['success']:
+        if positive_value_exists(results['success']):
             sitewide_daily_metrics_values = results['sitewide_daily_metrics_values']
 
             analytics_manager = AnalyticsManager()
             update_results = analytics_manager.save_sitewide_daily_metrics_values(sitewide_daily_metrics_values)
             status += update_results['status']
-            success = update_results['success']
-            if positive_value_exists(update_results['sitewide_daily_metrics_saved']):
+            if positive_value_exists(update_results['success']):
                 sitewide_daily_metrics_saved_count += 1
+            else:
+                status += "SAVE_SITEWIDE_DAILY_METRICS-FAILED_TO_SAVE "
+                success = False
+        else:
+            status += "SAVE_SITEWIDE_DAILY_METRICS-FAILED_TO_CALCULATE "
 
     results = {
         'status':                           status,
@@ -826,29 +854,35 @@ def save_sitewide_election_metrics(google_civic_election_id):
     return results
 
 
-def save_sitewide_voter_metrics(look_for_changes_since_this_date_as_integer):
+def save_sitewide_voter_metrics(look_for_changes_since_this_date_as_integer, through_date_as_integer):
     status = ""
-    success = False
+    success = True
     sitewide_voter_metrics_updated = 0
 
     analytics_manager = AnalyticsManager()
     voter_list_results = analytics_manager.retrieve_voter_we_vote_id_list_with_changes_since(
-        look_for_changes_since_this_date_as_integer)
+        look_for_changes_since_this_date_as_integer, through_date_as_integer)
     if voter_list_results['voter_we_vote_id_list_found']:
         voter_we_vote_id_list = voter_list_results['voter_we_vote_id_list']
         for voter_we_vote_id in voter_we_vote_id_list:
             results = calculate_sitewide_voter_metrics_for_one_voter(voter_we_vote_id)
             status += results['status']
-            if results['success']:
+            if positive_value_exists(results['success']):
                 sitewide_voter_metrics_values = results['sitewide_voter_metrics_values']
 
                 analytics_manager = AnalyticsManager()
                 update_results = analytics_manager.save_sitewide_voter_metrics_values_for_one_voter(
                     sitewide_voter_metrics_values)
                 status += update_results['status']
-                success = update_results['success']
-                if success:
+                if positive_value_exists(update_results['success']):
                     sitewide_voter_metrics_updated += 1
+                else:
+                    status += "SAVE_SITEWIDE_VOTER_METRICS-FAILED_TO_SAVE "
+                    success = False
+
+            else:
+                # So we can set a breakpoint in case of problems
+                status += "SAVE_SITEWIDE_VOTER_METRICS-FAILED_TO_CALCULATE "
 
     results = {
         'status':   status,

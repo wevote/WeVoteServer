@@ -17,10 +17,7 @@
         Show the most recent voters who have visited site and the major steps they've completed.
     </p>
 
-    {% include "analytics/sitewide_voter_metrics_table.html" with sitewide_voter_metrics_list=sitewide_voter_metrics_list %}
-
-
-<h2>Manually Update Metrics</h2>
+<h4>Manually Update Metrics</h4>
 
 <form name="update_daily_metrics" method="get" action="{% url 'analytics:sitewide_voter_metrics_process' %}">
     {% csrf_token %}
@@ -28,10 +25,17 @@
     <input type="hidden" name="state_code" value="{{ state_code }}" />
 
     <div class="form-group">
-        <label for="date_to_process" class="col-sm-3 control-label">Date YYYYMMDD</label>
+        <label for="date_to_process" class="col-sm-3 control-label">Start Date YYYYMMDD</label>
         <div class="col-sm-8">
             <input type="text" name="date_as_integer" id="date_to_process_id" class="form-control"
                    value="{{ date_as_integer }}" />
+        </div>
+    </div>
+    <div class="form-group">
+        <label for="through_date_as_integer_id" class="col-sm-3 control-label">Through Date YYYYMMDD</label>
+        <div class="col-sm-8">
+            <input type="text" name="through_date_as_integer" id="through_date_as_integer_id" class="form-control"
+                   value="{{ through_date_as_integer }}" />
         </div>
     </div>
 
@@ -42,5 +46,11 @@
         </div>
     </div>
 </form>
+<br />
+<br />
+<br />
+
+{% include "analytics/sitewide_voter_metrics_table.html" with sitewide_voter_metrics_list=sitewide_voter_metrics_list %}
+
 
 {% endblock %}
