@@ -210,7 +210,7 @@ class PositionEntered(models.Model):
     # supporting/opposing
     stance = models.CharField(max_length=15, choices=POSITION_CHOICES, default=NO_STANCE, db_index=True)
 
-    statement_text = models.TextField(null=True, blank=True)
+    statement_text = models.TextField(null=True, blank=True)  # Would be better with db_index=True, but overflows index
     statement_html = models.TextField(null=True, blank=True)
     # A link to any location with more information about this position
     more_info_url = models.URLField(blank=True, null=True, verbose_name='url with more info about this position')
@@ -591,7 +591,7 @@ class PositionForFriends(models.Model):
     # supporting/opposing
     stance = models.CharField(max_length=15, choices=POSITION_CHOICES, default=NO_STANCE, db_index=True)
 
-    statement_text = models.TextField(null=True, blank=True)
+    statement_text = models.TextField(null=True, blank=True)  # Would be better with db_index=True, but overflows index
     statement_html = models.TextField(null=True, blank=True)
     # A link to any location with more information about this position
     more_info_url = models.URLField(blank=True, null=True, verbose_name='url with more info about this position')
