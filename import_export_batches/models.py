@@ -4389,9 +4389,12 @@ class BatchRowActionMeasure(models.Model):
     The definition of the action for importing one Measure.
     """
     batch_set_id = models.PositiveIntegerField(verbose_name="unique id of batch set", unique=False, null=True)
-    batch_header_id = models.PositiveIntegerField(verbose_name="unique id of header row", unique=False, null=False)
-    batch_row_id = models.PositiveIntegerField(verbose_name="unique id of batch row", unique=True, null=False)
-    kind_of_action = models.CharField(max_length=40, choices=KIND_OF_ACTION_CHOICES, default=IMPORT_TO_BE_DETERMINED)
+    batch_header_id = models.PositiveIntegerField(
+        verbose_name="unique id of header row", unique=False, null=False, db_index=True)
+    batch_row_id = models.PositiveIntegerField(
+        verbose_name="unique id of batch row", unique=True, null=False, db_index=True)
+    kind_of_action = models.CharField(
+        max_length=40, choices=KIND_OF_ACTION_CHOICES, default=IMPORT_TO_BE_DETERMINED, db_index=True)
 
     # Fields from ContestMeasure
     measure_we_vote_id = models.CharField(
@@ -4415,7 +4418,7 @@ class BatchRowActionMeasure(models.Model):
     measure_url = models.CharField(verbose_name="measure details url", max_length=255, null=True, blank=False)
     # The unique ID of the election containing this contest. (Provided by Google Civic)
     google_civic_election_id = models.PositiveIntegerField(
-        verbose_name="google civic election id", default=0, null=False, blank=False)
+        verbose_name="google civic election id", default=0, null=False, blank=False, db_index=True)
     ocd_division_id = models.CharField(verbose_name="ocd division id", max_length=255, null=True, blank=True)
     # ballot_placement: We store ballot_placement in the BallotItem table instead because it is different for each voter
     # If this is a partisan election, the name of the party it is for.
@@ -4471,9 +4474,12 @@ class BatchRowActionContestOffice(models.Model):
     The definition of the action for importing one Office.
     """
     batch_set_id = models.PositiveIntegerField(verbose_name="unique id of batch set", unique=False, null=True)
-    batch_header_id = models.PositiveIntegerField(verbose_name="unique id of header row", unique=False, null=False)
-    batch_row_id = models.PositiveIntegerField(verbose_name="unique id of batch row", unique=False, null=False)
-    kind_of_action = models.CharField(max_length=40, choices=KIND_OF_ACTION_CHOICES, default=IMPORT_TO_BE_DETERMINED)
+    batch_header_id = models.PositiveIntegerField(
+        verbose_name="unique id of header row", unique=False, null=False, db_index=True)
+    batch_row_id = models.PositiveIntegerField(
+        verbose_name="unique id of batch row", unique=False, null=False, db_index=True)
+    kind_of_action = models.CharField(
+        max_length=40, choices=KIND_OF_ACTION_CHOICES, default=IMPORT_TO_BE_DETERMINED, db_index=True)
 
     # Fields from ContestOffice
     contest_office_we_vote_id = models.CharField(
@@ -4491,7 +4497,7 @@ class BatchRowActionContestOffice(models.Model):
                                                 max_length=255, null=True, blank=True)
     # The unique ID of the election containing this contest. (Provided by Google Civic)
     google_civic_election_id = models.CharField(verbose_name="google civic election id",
-                                                max_length=255, null=False, blank=False)
+                                                max_length=255, null=False, blank=False, db_index=True)
     google_civic_election_id_new = models.PositiveIntegerField(
         verbose_name="google civic election id", default=0, null=False, blank=False)
     ocd_division_id = models.CharField(verbose_name="ocd division id", max_length=255, null=True, blank=True)
@@ -4593,9 +4599,12 @@ class BatchRowActionElectedOffice(models.Model):
     The definition of the action for importing one Office.
     """
     batch_set_id = models.PositiveIntegerField(verbose_name="unique id of batch set", unique=False, null=True)
-    batch_header_id = models.PositiveIntegerField(verbose_name="unique id of header row", unique=False, null=False)
-    batch_row_id = models.PositiveIntegerField(verbose_name="unique id of batch row", unique=False, null=False)
-    kind_of_action = models.CharField(max_length=40, choices=KIND_OF_ACTION_CHOICES, default=IMPORT_TO_BE_DETERMINED)
+    batch_header_id = models.PositiveIntegerField(
+        verbose_name="unique id of header row", unique=False, null=False, db_index=True)
+    batch_row_id = models.PositiveIntegerField(
+        verbose_name="unique id of batch row", unique=False, null=False, db_index=True)
+    kind_of_action = models.CharField(
+        max_length=40, choices=KIND_OF_ACTION_CHOICES, default=IMPORT_TO_BE_DETERMINED, db_index=True)
 
     # Fields from ElectedOffice
     elected_office_we_vote_id = models.CharField(
@@ -4612,7 +4621,7 @@ class BatchRowActionElectedOffice(models.Model):
                                                 max_length=255, null=True, blank=True)
     # The unique ID of the election containing this contest. (Provided by Google Civic)
     google_civic_election_id = models.CharField(verbose_name="google civic election id",
-                                                max_length=255, null=False, blank=False)
+                                                max_length=255, null=False, blank=False, db_index=True)
     google_civic_election_id_new = models.PositiveIntegerField(
         verbose_name="google civic election id", default=0, null=False, blank=False)
     ocd_division_id = models.CharField(verbose_name="ocd division id", max_length=255, null=True, blank=True)
@@ -4680,9 +4689,12 @@ class BatchRowActionPolitician(models.Model):
     The definition of the action for importing one Politician.
     """
     batch_set_id = models.PositiveIntegerField(verbose_name="unique id of batch set", unique=False, null=True)
-    batch_header_id = models.PositiveIntegerField(verbose_name="unique id of header row", unique=False, null=False)
-    batch_row_id = models.PositiveIntegerField(verbose_name="unique id of batch row", unique=False, null=False)
-    kind_of_action = models.CharField(max_length=40, choices=KIND_OF_ACTION_CHOICES, default=IMPORT_TO_BE_DETERMINED)
+    batch_header_id = models.PositiveIntegerField(
+        verbose_name="unique id of header row", unique=False, null=False, db_index=True)
+    batch_row_id = models.PositiveIntegerField(
+        verbose_name="unique id of batch row", unique=False, null=False, db_index=True)
+    kind_of_action = models.CharField(
+        max_length=40, choices=KIND_OF_ACTION_CHOICES, default=IMPORT_TO_BE_DETERMINED, db_index=True)
 
     # Fields from Politician
     politician_we_vote_id = models.CharField(verbose_name="we vote permanent id of this politician", max_length=255,
@@ -4758,9 +4770,12 @@ class BatchRowActionCandidate(models.Model):
     The definition of the action for importing one Candidate.
     """
     batch_set_id = models.PositiveIntegerField(verbose_name="unique id of batch set", unique=False, null=True)
-    batch_header_id = models.PositiveIntegerField(verbose_name="unique id of header row", unique=False, null=False)
-    batch_row_id = models.PositiveIntegerField(verbose_name="unique id of batch row", unique=False, null=False)
-    kind_of_action = models.CharField(max_length=40, choices=KIND_OF_ACTION_CHOICES, default=IMPORT_TO_BE_DETERMINED)
+    batch_header_id = models.PositiveIntegerField(
+        verbose_name="unique id of header row", unique=False, null=False, db_index=True)
+    batch_row_id = models.PositiveIntegerField(
+        verbose_name="unique id of batch row", unique=False, null=False, db_index=True)
+    kind_of_action = models.CharField(
+        max_length=40, choices=KIND_OF_ACTION_CHOICES, default=IMPORT_TO_BE_DETERMINED, db_index=True)
 
     # Fields from Candidate
     candidate_we_vote_id = models.CharField(
@@ -4805,7 +4820,7 @@ class BatchRowActionCandidate(models.Model):
     order_on_ballot = models.CharField(verbose_name="order on ballot", max_length=255, null=True, blank=True)
     # The unique ID of the election containing this contest. (Provided by Google Civic)
     google_civic_election_id = models.CharField(
-        verbose_name="google civic election id", max_length=255, null=True, blank=True)
+        verbose_name="google civic election id", max_length=255, null=True, blank=True, db_index=True)
     google_civic_election_id_new = models.PositiveIntegerField(
         verbose_name="google civic election id", default=0, null=True, blank=True)
     ocd_division_id = models.CharField(verbose_name="ocd division id", max_length=255, null=True, blank=True)
@@ -4891,9 +4906,12 @@ class BatchRowActionOrganization(models.Model):
     The definition of the action for importing one Organization.
     """
     batch_set_id = models.PositiveIntegerField(verbose_name="unique id of batch set", unique=False, null=True)
-    batch_header_id = models.PositiveIntegerField(verbose_name="unique id of header row", unique=False, null=False)
-    batch_row_id = models.PositiveIntegerField(verbose_name="unique id of batch row", unique=False, null=False)
-    kind_of_action = models.CharField(max_length=40, choices=KIND_OF_ACTION_CHOICES, default=IMPORT_TO_BE_DETERMINED)
+    batch_header_id = models.PositiveIntegerField(
+        verbose_name="unique id of header row", unique=False, null=False, db_index=True)
+    batch_row_id = models.PositiveIntegerField(
+        verbose_name="unique id of batch row", unique=False, null=False, db_index=True)
+    kind_of_action = models.CharField(
+        max_length=40, choices=KIND_OF_ACTION_CHOICES, default=IMPORT_TO_BE_DETERMINED, db_index=True)
 
     # Fields from Organization
     organization_we_vote_id = models.CharField(
@@ -4975,9 +4993,12 @@ class BatchRowActionPosition(models.Model):
     The definition of the action for importing one Position.
     """
     batch_set_id = models.PositiveIntegerField(verbose_name="unique id of batch set", unique=False, null=True)
-    batch_header_id = models.PositiveIntegerField(verbose_name="unique id of header row", unique=False, null=False)
-    batch_row_id = models.PositiveIntegerField(verbose_name="unique id of batch row", unique=False, null=False)
-    kind_of_action = models.CharField(max_length=40, choices=KIND_OF_ACTION_CHOICES, default=IMPORT_TO_BE_DETERMINED)
+    batch_header_id = models.PositiveIntegerField(
+        verbose_name="unique id of header row", unique=False, null=False, db_index=True)
+    batch_row_id = models.PositiveIntegerField(
+        verbose_name="unique id of batch row", unique=False, null=False, db_index=True)
+    kind_of_action = models.CharField(
+        max_length=40, choices=KIND_OF_ACTION_CHOICES, default=IMPORT_TO_BE_DETERMINED, db_index=True)
 
     # Fields from Position
     position_we_vote_id = models.CharField(
@@ -5028,7 +5049,7 @@ class BatchRowActionPosition(models.Model):
 
     # The unique ID of the election containing this contest. (Provided by Google Civic)
     google_civic_election_id = models.CharField(verbose_name="google civic election id",
-                                                max_length=255, null=True, blank=False, default=0)
+                                                max_length=255, null=True, blank=False, default=0, db_index=True)
     google_civic_election_id_new = models.PositiveIntegerField(
         verbose_name="google civic election id", default=0, null=True, blank=True)
     # State code
@@ -5109,9 +5130,12 @@ class BatchRowActionBallotItem(models.Model):
     The definition of the action for importing one ballot item.
     """
     batch_set_id = models.PositiveIntegerField(verbose_name="unique id of batch set", unique=False, null=True)
-    batch_header_id = models.PositiveIntegerField(verbose_name="unique id of header row", unique=False, null=False)
-    batch_row_id = models.PositiveIntegerField(verbose_name="unique id of batch row", unique=True, null=False)
-    kind_of_action = models.CharField(max_length=40, choices=KIND_OF_ACTION_CHOICES, default=IMPORT_TO_BE_DETERMINED)
+    batch_header_id = models.PositiveIntegerField(
+        verbose_name="unique id of header row", unique=False, null=False, db_index=True)
+    batch_row_id = models.PositiveIntegerField(
+        verbose_name="unique id of batch row", unique=True, null=False, db_index=True)
+    kind_of_action = models.CharField(
+        max_length=40, choices=KIND_OF_ACTION_CHOICES, default=IMPORT_TO_BE_DETERMINED, db_index=True)
 
     ballot_item_id = models.IntegerField(verbose_name="ballot item unique id", default=0, null=True, blank=True)
     # Fields from BallotItem
@@ -5123,7 +5147,8 @@ class BatchRowActionBallotItem(models.Model):
         blank=True, unique=False)
 
     # The unique ID of this election. (Provided by Google Civic)
-    google_civic_election_id = models.CharField(verbose_name="google civic election id", max_length=20, null=False)
+    google_civic_election_id = models.CharField(verbose_name="google civic election id",
+                                                max_length=20, null=False, db_index=True)
     google_civic_election_id_new = models.PositiveIntegerField(
         verbose_name="google civic election id", default=0, null=False)
     state_code = models.CharField(verbose_name="state the ballot item is related to", max_length=2, null=True)

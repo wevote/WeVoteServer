@@ -180,32 +180,34 @@ def voter_address_retrieve_view(request):  # voterAddressRetrieve
                 use_test_election = False
                 # Reach out to Google and populate ballot items in the database with fresh ballot data
                 # NOTE: 2016-05-26 Google civic NEVER returns a ballot for City, State ZIP, so we could change this
-                google_retrieve_results = voter_ballot_items_retrieve_from_google_civic_for_api(
-                    voter_device_id, text_for_map_search, use_test_election)
-                status += google_retrieve_results['status'] + ", "
 
-                if positive_value_exists(google_retrieve_results['google_civic_election_id']):
-                    # Update voter_address with the google_civic_election_id retrieved from Google Civic
-                    # and clear out ballot_saved information
-                    google_civic_election_id = google_retrieve_results['google_civic_election_id']
-
-                    voter_address.google_civic_election_id = google_civic_election_id
-                    voter_address_update_results = voter_address_manager.update_existing_voter_address_object(
-                        voter_address)
-
-                    if voter_address_update_results['success']:
-                        # Replace the former google_civic_election_id from this voter_device_link
-                        voter_device_link_results = voter_device_link_manager.retrieve_voter_device_link(
-                            voter_device_id)
-                        if voter_device_link_results['voter_device_link_found']:
-                            voter_device_link = voter_device_link_results['voter_device_link']
-                            voter_device_link_manager.update_voter_device_link_with_election_id(
-                                voter_device_link, google_retrieve_results['google_civic_election_id'])
-
-                else:
-                    # This block of code helps us if the google_civic_election_id wasn't found when we reached out
-                    # to the Google Civic API, following finding the voter's location from IP address.
-                    google_civic_election_id = 0
+                # DALE 2018-09-06 TURNED OFF
+                # google_retrieve_results = voter_ballot_items_retrieve_from_google_civic_for_api(
+                #     voter_device_id, text_for_map_search, use_test_election)
+                # status += google_retrieve_results['status'] + ", "
+                #
+                # if positive_value_exists(google_retrieve_results['google_civic_election_id']):
+                #     # Update voter_address with the google_civic_election_id retrieved from Google Civic
+                #     # and clear out ballot_saved information
+                #     google_civic_election_id = google_retrieve_results['google_civic_election_id']
+                #
+                #     voter_address.google_civic_election_id = google_civic_election_id
+                #     voter_address_update_results = voter_address_manager.update_existing_voter_address_object(
+                #         voter_address)
+                #
+                #     if voter_address_update_results['success']:
+                #         # Replace the former google_civic_election_id from this voter_device_link
+                #         voter_device_link_results = voter_device_link_manager.retrieve_voter_device_link(
+                #             voter_device_id)
+                #         if voter_device_link_results['voter_device_link_found']:
+                #             voter_device_link = voter_device_link_results['voter_device_link']
+                #             voter_device_link_manager.update_voter_device_link_with_election_id(
+                #                 voter_device_link, google_retrieve_results['google_civic_election_id'])
+                #
+                # else:
+                #     # This block of code helps us if the google_civic_election_id wasn't found when we reached out
+                #     # to the Google Civic API, following finding the voter's location from IP address.
+                #     google_civic_election_id = 0
 
             # We retrieve voter_device_link
             voter_device_link_results = voter_device_link_manager.retrieve_voter_device_link(voter_device_id)
@@ -914,7 +916,7 @@ def voter_guides_to_follow_retrieve_view(request):  # voterGuidesToFollowRetriev
     else:
         if positive_value_exists(use_test_election):
             google_civic_election_id = 2000  # The Google Civic API Test election
-        elif positive_value_exists(google_civic_election_id):  # Why was this set?  "or google_civic_election_id == 0"
+        elif positive_value_exists(google_civic_election_id) or google_civic_election_id == 0:  # Why "0" election?
             # If an election was specified, we can skip down to retrieving the voter_guides
             pass
         else:

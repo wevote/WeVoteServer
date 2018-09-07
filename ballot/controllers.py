@@ -26,6 +26,7 @@ from geopy.geocoders import get_geocoder_for_service
 
 logger = wevote_functions.admin.get_logger(__name__)
 
+GEOCODE_TIMEOUT = 10
 GOOGLE_CIVIC_API_KEY = get_environment_variable("GOOGLE_CIVIC_API_KEY")
 GOOGLE_MAPS_API_KEY = get_environment_variable("GOOGLE_MAPS_API_KEY")
 WE_VOTE_API_KEY = get_environment_variable("WE_VOTE_API_KEY")
@@ -415,7 +416,7 @@ def heal_geo_coordinates(text_for_map_search):
     latitude = None
     try:
         google_client = get_geocoder_for_service('google')(GOOGLE_MAPS_API_KEY)
-        location = google_client.geocode(text_for_map_search, sensor=False)
+        location = google_client.geocode(text_for_map_search, sensor=False, timeout=GEOCODE_TIMEOUT)
         if location is None:
             status = 'Could not find location matching "{}" '.format(text_for_map_search)
             logger.debug(status)

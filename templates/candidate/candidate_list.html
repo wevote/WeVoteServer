@@ -320,7 +320,7 @@
                 </td>
                 <td>{{ candidate.get_candidate_state }}</td>
                 {% if not google_civic_election_id %}
-                <td>{{ candidate.election.election_name }} - {{ candidate.election.google_civic_election_id }}</td>
+                <td>{{ candidate.election.election_name }} - {{ candidate.election.google_civic_election_id }}, <span class="u-no-break">{{ candidate.election.election_day_text }}</span></td>
                 {% endif %}
                 <td>
                 <span class="u-no-break">

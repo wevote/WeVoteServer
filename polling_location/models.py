@@ -12,7 +12,7 @@ import wevote_functions.admin
 from wevote_functions.functions import extract_zip_formatted_from_zip9, positive_value_exists
 from wevote_settings.models import fetch_next_we_vote_id_polling_location_integer, fetch_site_unique_id_prefix
 
-
+GEOCODE_TIMEOUT = 10
 GOOGLE_MAPS_API_KEY = get_environment_variable("GOOGLE_MAPS_API_KEY")
 
 logger = wevote_functions.admin.get_logger(__name__)
@@ -257,7 +257,7 @@ class PollingLocationManager(models.Model):
             polling_location.state,
             polling_location.zip_long)
         try:
-            location = self.google_client.geocode(full_ballot_address, sensor=False)
+            location = self.google_client.geocode(full_ballot_address, sensor=False, timeout=GEOCODE_TIMEOUT)
         except GeocoderQuotaExceeded:
             status += "GeocoderQuotaExceeded "
             results = {
