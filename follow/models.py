@@ -759,7 +759,8 @@ class FollowOrganizationManager(models.Model):
         }
         return results
 
-    def retrieve_follow_organization(self, follow_organization_id, voter_id, organization_id, organization_we_vote_id):
+    def retrieve_follow_organization(self, follow_organization_id, voter_id, organization_id, organization_we_vote_id,
+                                     read_only=False):
         """
         follow_organization_id is the identifier for records stored in this table (it is NOT the organization_id)
         """
@@ -771,19 +772,31 @@ class FollowOrganizationManager(models.Model):
 
         try:
             if positive_value_exists(follow_organization_id):
-                follow_organization_on_stage = FollowOrganization.objects.get(id=follow_organization_id)
+                if read_only:
+                    follow_organization_on_stage = FollowOrganization.objects.using('readonly').get(
+                        id=follow_organization_id)
+                else:
+                    follow_organization_on_stage = FollowOrganization.objects.get(id=follow_organization_id)
                 follow_organization_on_stage_id = organization_id.id
                 success = True
                 status = 'FOLLOW_ORGANIZATION_FOUND_WITH_ID'
             elif positive_value_exists(voter_id) and positive_value_exists(organization_id):
-                follow_organization_on_stage = FollowOrganization.objects.get(
-                    voter_id=voter_id, organization_id=organization_id)
+                if read_only:
+                    follow_organization_on_stage = FollowOrganization.objects.using('readonly').get(
+                        voter_id=voter_id, organization_id=organization_id)
+                else:
+                    follow_organization_on_stage = FollowOrganization.objects.get(
+                        voter_id=voter_id, organization_id=organization_id)
                 follow_organization_on_stage_id = follow_organization_on_stage.id
                 success = True
                 status = 'FOLLOW_ORGANIZATION_FOUND_WITH_VOTER_ID_AND_ORGANIZATION_ID'
             elif positive_value_exists(voter_id) and positive_value_exists(organization_we_vote_id):
-                follow_organization_on_stage = FollowOrganization.objects.get(
-                    voter_id=voter_id, organization_we_vote_id=organization_we_vote_id)
+                if read_only:
+                    follow_organization_on_stage = FollowOrganization.objects.using('readonly').get(
+                        voter_id=voter_id, organization_we_vote_id=organization_we_vote_id)
+                else:
+                    follow_organization_on_stage = FollowOrganization.objects.get(
+                        voter_id=voter_id, organization_we_vote_id=organization_we_vote_id)
                 follow_organization_on_stage_id = follow_organization_on_stage.id
                 success = True
                 status = 'FOLLOW_ORGANIZATION_FOUND_WITH_VOTER_ID_AND_ORGANIZATION_WE_VOTE_ID'
@@ -828,7 +841,7 @@ class FollowOrganizationManager(models.Model):
         return results
 
     def retrieve_voter_following_org_status(self, voter_id, voter_we_vote_id,
-                                            organization_id, organization_we_vote_id):
+                                            organization_id, organization_we_vote_id, read_only=False):
         """
         Retrieve one follow entry so we can see if a voter is following or ignoring a particular org
         """
@@ -855,7 +868,8 @@ class FollowOrganizationManager(models.Model):
             }
             return results
 
-        return self.retrieve_follow_organization(0, voter_id, organization_id, organization_we_vote_id)
+        return self.retrieve_follow_organization(
+            0, voter_id, organization_id, organization_we_vote_id, read_only=read_only)
 
     def create_or_update_suggested_organization_to_follow(self, viewer_voter_we_vote_id, organization_we_vote_id,
                                                           from_twitter=False):

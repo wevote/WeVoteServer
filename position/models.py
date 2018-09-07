@@ -210,8 +210,8 @@ class PositionEntered(models.Model):
     # supporting/opposing
     stance = models.CharField(max_length=15, choices=POSITION_CHOICES, default=NO_STANCE, db_index=True)
 
-    statement_text = models.TextField(null=True, blank=True,)
-    statement_html = models.TextField(null=True, blank=True,)
+    statement_text = models.TextField(null=True, blank=True, db_index=True)
+    statement_html = models.TextField(null=True, blank=True)
     # A link to any location with more information about this position
     more_info_url = models.URLField(blank=True, null=True, verbose_name='url with more info about this position')
 
@@ -591,8 +591,8 @@ class PositionForFriends(models.Model):
     # supporting/opposing
     stance = models.CharField(max_length=15, choices=POSITION_CHOICES, default=NO_STANCE, db_index=True)
 
-    statement_text = models.TextField(null=True, blank=True, )
-    statement_html = models.TextField(null=True, blank=True, )
+    statement_text = models.TextField(null=True, blank=True, db_index=True)
+    statement_html = models.TextField(null=True, blank=True)
     # A link to any location with more information about this position
     more_info_url = models.URLField(blank=True, null=True, verbose_name='url with more info about this position')
 
@@ -2313,8 +2313,10 @@ class PositionListManager(models.Model):
             try:
                 # We intentionally do not use 'readonly' here since we need to save based on the results of this query
                 # Removed this order_by: '-vote_smart_time_span',
-                public_positions_list = PositionEntered.objects.order_by('ballot_item_display_name',
-                                                                         '-google_civic_election_id')
+                # DALE 2018-09-07 Speeding up retrieve by removing order_by
+                # public_positions_list = PositionEntered.objects.order_by('ballot_item_display_name',
+                #                                                          '-google_civic_election_id')
+                public_positions_list = PositionEntered.objects.all()
                 # As of Aug 2018 we are no longer using PERCENT_RATING
                 public_positions_list = public_positions_list.exclude(stance__iexact=PERCENT_RATING)
 
@@ -2383,8 +2385,10 @@ class PositionListManager(models.Model):
                 if public_query_exists:
                     public_positions_list = public_positions_list.exclude(
                         Q(stance__iexact=NO_STANCE) &
-                        (Q(statement_text__isnull=True) | Q(statement_text__exact='')) &
-                        (Q(statement_html__isnull=True) | Q(statement_html__exact=''))
+                        (Q(statement_text__isnull=True) | Q(statement_text__exact=''))
+                        # Not working with statement_html yet
+                        # &
+                        # (Q(statement_html__isnull=True) | Q(statement_html__exact=''))
                     )
             except Exception as e:
                 handle_record_not_found_exception(e, logger=logger)
@@ -2437,8 +2441,10 @@ class PositionListManager(models.Model):
                     # If here, then the viewer is a friend with the organization. Look up positions that
                     #  are only shown to friends.
                     # '-vote_smart_time_span',
-                    friends_positions_list = PositionForFriends.objects.order_by('ballot_item_display_name',
-                                                                                 '-google_civic_election_id')
+                    # DALE 2018-09-07 Speeding up retrieve by removing order_by
+                    # friends_positions_list = PositionForFriends.objects.order_by('ballot_item_display_name',
+                    #                                                              '-google_civic_election_id')
+                    friends_positions_list = PositionForFriends.objects.all()
                     # As of Aug 2018 we are no longer using PERCENT_RATING
                     friends_positions_list = friends_positions_list.exclude(stance__iexact=PERCENT_RATING)
 
@@ -2504,8 +2510,10 @@ class PositionListManager(models.Model):
                         # And finally, make sure there is a stance, or text commentary -- exclude cases when there isn't
                         friends_positions_list = friends_positions_list.exclude(
                             Q(stance__iexact=NO_STANCE) &
-                            (Q(statement_text__isnull=True) | Q(statement_text__exact='')) &
-                            (Q(statement_html__isnull=True) | Q(statement_html__exact=''))
+                            (Q(statement_text__isnull=True) | Q(statement_text__exact=''))
+                            # Not working with statement_html yet
+                            # &
+                            # (Q(statement_html__isnull=True) | Q(statement_html__exact=''))
                         )
             except Exception as e:
                 handle_record_not_found_exception(e, logger=logger)
@@ -2532,22 +2540,23 @@ class PositionListManager(models.Model):
         position_list = public_positions_list + friends_positions_list
 
         # Now filter out the positions that have a percent rating that doesn't match the stance_we_are_looking_for
-        if stance_we_are_looking_for == SUPPORT or stance_we_are_looking_for == OPPOSE:
-            revised_position_list = []
-            for one_position in position_list:
-                if stance_we_are_looking_for == SUPPORT:
-                    if one_position.stance == PERCENT_RATING:
-                        if one_position.is_support_or_positive_rating():
-                            revised_position_list.append(one_position)
-                    else:
-                        revised_position_list.append(one_position)
-                elif stance_we_are_looking_for == OPPOSE:
-                    if one_position.stance == PERCENT_RATING:
-                        if one_position.is_oppose_or_negative_rating():
-                            revised_position_list.append(one_position)
-                    else:
-                        revised_position_list.append(one_position)
-            position_list = revised_position_list
+        # As of Aug 2018 we are no longer using PERCENT_RATING
+        # if stance_we_are_looking_for == SUPPORT or stance_we_are_looking_for == OPPOSE:
+        #     revised_position_list = []
+        #     for one_position in position_list:
+        #         if stance_we_are_looking_for == SUPPORT:
+        #             if one_position.stance == PERCENT_RATING:
+        #                 if one_position.is_support_or_positive_rating():
+        #                     revised_position_list.append(one_position)
+        #             else:
+        #                 revised_position_list.append(one_position)
+        #         elif stance_we_are_looking_for == OPPOSE:
+        #             if one_position.stance == PERCENT_RATING:
+        #                 if one_position.is_oppose_or_negative_rating():
+        #                     revised_position_list.append(one_position)
+        #             else:
+        #                 revised_position_list.append(one_position)
+        #     position_list = revised_position_list
 
         if len(position_list):
             position_list_found = True
@@ -7596,8 +7605,10 @@ class PositionMetricsManager(models.Model):
             if positive_value_exists(google_civic_election_id):
                 count_query = count_query.filter(google_civic_election_id=google_civic_election_id)
             count_query = count_query.exclude(
-                (Q(statement_text__isnull=True) | Q(statement_text__exact='')) &
-                (Q(statement_html__isnull=True) | Q(statement_html__exact=''))
+                (Q(statement_text__isnull=True) | Q(statement_text__exact=''))
+                # Not working with statement_html yet
+                # &
+                # (Q(statement_html__isnull=True) | Q(statement_html__exact=''))
             )
             if positions_taken_by_these_voter_we_vote_ids is not False:
                 count_query = count_query.filter(voter_we_vote_id__in=positions_taken_by_these_voter_we_vote_ids)
@@ -7632,8 +7643,10 @@ class PositionMetricsManager(models.Model):
             if positive_value_exists(google_civic_election_id):
                 count_query = count_query.filter(google_civic_election_id=google_civic_election_id)
             count_query = count_query.exclude(
-                (Q(statement_text__isnull=True) | Q(statement_text__exact='')) &
-                (Q(statement_html__isnull=True) | Q(statement_html__exact=''))
+                (Q(statement_text__isnull=True) | Q(statement_text__exact=''))
+                # Not working with statement_html yet
+                # &
+                # (Q(statement_html__isnull=True) | Q(statement_html__exact=''))
             )
             if positions_taken_by_these_voter_we_vote_ids is not False:
                 count_query = count_query.filter(voter_we_vote_id__in=positions_taken_by_these_voter_we_vote_ids)
@@ -7650,8 +7663,10 @@ class PositionMetricsManager(models.Model):
             count_query = count_query.exclude(stance__iexact=PERCENT_RATING)
             count_query = count_query.filter(voter_we_vote_id__iexact=voter_we_vote_id)
             count_query = count_query.exclude(
-                (Q(statement_text__isnull=True) | Q(statement_text__exact='')) &
-                (Q(statement_html__isnull=True) | Q(statement_html__exact=''))
+                (Q(statement_text__isnull=True) | Q(statement_text__exact=''))
+                # Not working with statement_html yet
+                # &
+                # (Q(statement_html__isnull=True) | Q(statement_html__exact=''))
             )
             count_result = count_query.count()
         except Exception as e:
@@ -7668,8 +7683,10 @@ class PositionMetricsManager(models.Model):
 
             count_query = count_query.filter(voter_we_vote_id__iexact=voter_we_vote_id)
             count_query = count_query.exclude(
-                (Q(statement_text__isnull=True) | Q(statement_text__exact='')) &
-                (Q(statement_html__isnull=True) | Q(statement_html__exact=''))
+                (Q(statement_text__isnull=True) | Q(statement_text__exact=''))
+                # Not working with statement_html yet
+                # &
+                # (Q(statement_html__isnull=True) | Q(statement_html__exact=''))
             )
             count_result = count_query.count()
         except Exception as e:

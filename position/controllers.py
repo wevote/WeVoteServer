@@ -4051,8 +4051,9 @@ def retrieve_ballot_item_we_vote_ids_for_organizations_to_follow(voter_id,
 
         follow_organization_manager = FollowOrganizationManager()
         voter_we_vote_id = ''
+        read_only = True
         following_results = follow_organization_manager.retrieve_voter_following_org_status(
-            voter_id, voter_we_vote_id, opinion_maker_id, opinion_maker_we_vote_id)
+            voter_id, voter_we_vote_id, opinion_maker_id, opinion_maker_we_vote_id, read_only=read_only)
         if following_results['is_following']:
             is_following = True
         elif following_results['is_ignoring']:
@@ -4077,6 +4078,7 @@ def retrieve_ballot_item_we_vote_ids_for_organizations_to_follow(voter_id,
         exclude_positions_current_voter_election = False
         voter_device_id = ''
 
+        # TODO for cases like this, we need a read_only option  DEBUG=1
         position_list_raw = position_list_manager.retrieve_all_positions_for_organization(
             organization_id, organization_we_vote_id, stance_we_are_looking_for, friends_vs_public,
             show_positions_current_voter_election, exclude_positions_current_voter_election, voter_device_id,
