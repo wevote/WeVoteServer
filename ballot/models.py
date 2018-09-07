@@ -30,6 +30,7 @@ KIND_OF_BALLOT_ITEM_CHOICES = (
 )
 
 GOOGLE_MAPS_API_KEY = get_environment_variable("GOOGLE_MAPS_API_KEY")
+GEOCODE_TIMEOUT = 10
 
 logger = wevote_functions.admin.get_logger(__name__)
 
@@ -1988,7 +1989,7 @@ class BallotReturnedManager(models.Model):
             self.google_client = get_geocoder_for_service('google')(GOOGLE_MAPS_API_KEY)
 
         try:
-            location = self.google_client.geocode(text_for_map_search, sensor=False)
+            location = self.google_client.geocode(text_for_map_search, sensor=False, timeout=GEOCODE_TIMEOUT)
         except GeocoderQuotaExceeded:
             try_without_maps_key = True
             status += "GEOCODER_QUOTA_EXCEEDED "
@@ -2002,7 +2003,7 @@ class BallotReturnedManager(models.Model):
             # If we have exceeded our account, try without a maps key
             try:
                 temp_google_client = get_geocoder_for_service('google')()
-                location = temp_google_client.geocode(text_for_map_search, sensor=False)
+                location = temp_google_client.geocode(text_for_map_search, sensor=False, timeout=GEOCODE_TIMEOUT)
             except GeocoderQuotaExceeded:
                 results = {
                     'status':                   status,
@@ -2265,7 +2266,7 @@ class BallotReturnedManager(models.Model):
             ballot_returned_object.normalized_state,
             ballot_returned_object.normalized_zip)
         try:
-            location = self.google_client.geocode(full_ballot_address, sensor=False)
+            location = self.google_client.geocode(full_ballot_address, sensor=False, timeout=GEOCODE_TIMEOUT)
         except GeocoderQuotaExceeded:
             status += "GeocoderQuotaExceeded "
             results = {
@@ -3655,7 +3656,7 @@ def retrieve_address_fields_from_geocoder(text_for_map_search):
     zip_long = ""
     try:
         google_client = get_geocoder_for_service('google')(GOOGLE_MAPS_API_KEY)
-        location = google_client.geocode(text_for_map_search, sensor=False)
+        location = google_client.geocode(text_for_map_search, sensor=False, timeout=GEOCODE_TIMEOUT)
         if location is None:
             status += 'REFRESH_ADDRESS_FIELDS: Could not find location matching "{}" '.format(text_for_map_search)
             logger.debug(status)

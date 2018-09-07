@@ -26,13 +26,14 @@ BALLOTPEDIA_API_ELECTIONS_URL = get_environment_variable("BALLOTPEDIA_API_ELECTI
 BALLOTPEDIA_API_FILES_URL = get_environment_variable("BALLOTPEDIA_API_FILES_URL")
 BALLOTPEDIA_API_MEASURES_URL = get_environment_variable("BALLOTPEDIA_API_MEASURES_URL")
 BALLOTPEDIA_API_RACES_URL = get_environment_variable("BALLOTPEDIA_API_RACES_URL")
-GOOGLE_MAPS_API_KEY = get_environment_variable("GOOGLE_MAPS_API_KEY")
 BALLOTPEDIA_API_CANDIDATES_TYPE = "candidates"
 BALLOTPEDIA_API_CONTAINS_TYPE = "contains"
 BALLOTPEDIA_API_ELECTIONS_TYPE = "elections"
 BALLOTPEDIA_API_FILES_TYPE = "files"
 BALLOTPEDIA_API_MEASURES_TYPE = "measures"
 BALLOTPEDIA_API_RACES_TYPE = "races"
+GEOCODE_TIMEOUT = 10
+GOOGLE_MAPS_API_KEY = get_environment_variable("GOOGLE_MAPS_API_KEY")
 
 
 def extract_value_from_array(structured_json, index_key, default_value):
@@ -1685,7 +1686,7 @@ def voter_ballot_items_retrieve_from_ballotpedia_for_api(voter_device_id, text_f
     try:
         # Make sure we have a latitude and longitude
         google_client = get_geocoder_for_service('google')(GOOGLE_MAPS_API_KEY)
-        location = google_client.geocode(text_for_map_search, sensor=False)
+        location = google_client.geocode(text_for_map_search, sensor=False, timeout=GEOCODE_TIMEOUT)
         if location is None:
             status += 'RETRIEVE_FROM_BALLOTPEDIA-Could not find location matching "{}"'.format(text_for_map_search)
             success = False
