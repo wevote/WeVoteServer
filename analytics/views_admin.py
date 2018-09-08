@@ -19,6 +19,7 @@ from django.contrib.messages import get_messages
 from django.db.models import Q
 from django.shortcuts import render
 from election.models import Election
+from exception.models import print_to_log
 from voter.models import voter_has_authority
 import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, positive_value_exists
@@ -415,20 +416,23 @@ def sitewide_daily_metrics_process_view(request):
     through_date_as_integer = convert_to_int(request.GET.get('through_date_as_integer',
                                                              changes_since_this_date_as_integer))
 
-    analytics_manager = AnalyticsManager()
-    first_visit_today_results = \
-        analytics_manager.update_first_visit_today_for_all_voters_since_date(
-            changes_since_this_date_as_integer, through_date_as_integer)
-
-    augment_results = augment_voter_analytics_action_entries_without_election_id(
-        changes_since_this_date_as_integer, through_date_as_integer)
+    # analytics_manager = AnalyticsManager()
+    # first_visit_today_results = \
+    #     analytics_manager.update_first_visit_today_for_all_voters_since_date(
+    #         changes_since_this_date_as_integer, through_date_as_integer)
+    #
+    # augment_results = augment_voter_analytics_action_entries_without_election_id(
+    #     changes_since_this_date_as_integer, through_date_as_integer)
 
     results = save_sitewide_daily_metrics(changes_since_this_date_as_integer, through_date_as_integer)
 
+    # messages.add_message(
+    #     request, messages.INFO,
+    #     str(first_visit_today_results['first_visit_today_count']) + ' first visit updates.<br />' +
+    #     'augment-analytics_updated_count: ' + str(augment_results['analytics_updated_count']) + '<br />' +
+    #     'sitewide_daily_metrics_saved_count: ' + str(results['sitewide_daily_metrics_saved_count']) + '')
     messages.add_message(
         request, messages.INFO,
-        str(first_visit_today_results['first_visit_today_count']) + ' first visit updates.<br />' +
-        'augment-analytics_updated_count: ' + str(augment_results['analytics_updated_count']) + '<br />' +
         'sitewide_daily_metrics_saved_count: ' + str(results['sitewide_daily_metrics_saved_count']) + '')
 
     return HttpResponseRedirect(reverse('analytics:sitewide_daily_metrics', args=()) +
@@ -556,14 +560,25 @@ def sitewide_voter_metrics_process_view(request):
     through_date_as_integer = convert_to_int(request.GET.get('through_date_as_integer',
                                                              changes_since_this_date_as_integer))
 
+    message = "[sitewide_voter_metrics_process_view, start: " + str(changes_since_this_date_as_integer) + "" \
+              ", end: " + str(through_date_as_integer) + ", " \
+              "about to start update_first_visit_today_for_all_voters_since_date]"
+    print_to_log(logger=logger, exception_message_optional=message)
+
     analytics_manager = AnalyticsManager()
-    first_visit_today_results = \
-        analytics_manager.update_first_visit_today_for_all_voters_since_date(
+    first_visit_today_results = analytics_manager.update_first_visit_today_for_all_voters_since_date(
             changes_since_this_date_as_integer, through_date_as_integer)
 
-    results = augment_voter_analytics_action_entries_without_election_id(
-        changes_since_this_date_as_integer, through_date_as_integer)
+    message = "[sitewide_voter_metrics_process_view, about to start " \
+              "augment_voter_analytics_action_entries_without_election_id]"
+    print_to_log(logger=logger, exception_message_optional=message)
 
+    results = augment_voter_analytics_action_entries_without_election_id(
+            changes_since_this_date_as_integer, through_date_as_integer)
+
+    message = "[sitewide_voter_metrics_process_view, about to start " \
+              "save_sitewide_voter_metrics]"
+    print_to_log(logger=logger, exception_message_optional=message)
     results = save_sitewide_voter_metrics(changes_since_this_date_as_integer, through_date_as_integer)
 
     messages.add_message(request, messages.INFO,
