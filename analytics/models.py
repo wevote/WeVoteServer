@@ -729,8 +729,8 @@ class AnalyticsManager(models.Model):
         }
         return results
 
-    def retrieve_voter_we_vote_id_list_with_changes_since(self, date_as_integer=0, through_date_as_integer=0):
-        success = False
+    def retrieve_voter_we_vote_id_list_with_changes_since(self, date_as_integer, through_date_as_integer):
+        success = True
         status = ""
         voter_list = []
 
@@ -743,6 +743,7 @@ class AnalyticsManager(models.Model):
             voter_list = list(voter_list_query)
             voter_list_found = True
         except Exception as e:
+            success = False
             voter_list_found = False
 
         modified_voter_list = []
@@ -751,8 +752,8 @@ class AnalyticsManager(models.Model):
                 modified_voter_list.append(voter_dict['voter_we_vote_id'])
 
         results = {
-            'success':                              success,
-            'status':                               status,
+            'success':                       success,
+            'status':                        status,
             'voter_we_vote_id_list':         modified_voter_list,
             'voter_we_vote_id_list_found':   voter_list_found,
         }
@@ -916,7 +917,6 @@ class AnalyticsManager(models.Model):
         success = False
         status = ""
         metrics_saved = False
-        metrics = SitewideVoterMetrics()
 
         if positive_value_exists(sitewide_voter_metrics_values['voter_we_vote_id']):
             voter_we_vote_id = sitewide_voter_metrics_values['voter_we_vote_id']
@@ -929,7 +929,14 @@ class AnalyticsManager(models.Model):
                 success = True
             except Exception as e:
                 success = False
-                status += 'SITEWIDE_VOTER_METRICS_UPDATE_OR_CREATE_FAILED '
+                status += 'SITEWIDE_VOTER_METRICS_UPDATE_OR_CREATE_FAILED ' + str(e) + ' '
+                results = {
+                    'success': success,
+                    'status': status,
+                    'metrics_saved': metrics_saved,
+                }
+                return results
+
         else:
             status += "SITEWIDE_VOTER_METRICS_SAVE-MISSING_VOTER_WE_VOTE_ID "
 
@@ -937,7 +944,6 @@ class AnalyticsManager(models.Model):
             'success': success,
             'status': status,
             'metrics_saved': metrics_saved,
-            'metrics': metrics,
         }
         return results
 
@@ -969,6 +975,9 @@ class AnalyticsManager(models.Model):
         # Loop through each day
         for one_date_as_integer in simple_distinct_days_list:
             # Get distinct voters on that day
+            if not positive_value_exists(one_date_as_integer):
+                continue
+
             voter_list = []
             try:
                 voter_list_query = AnalyticsAction.objects.using('analytics').all()
@@ -993,6 +1002,9 @@ class AnalyticsManager(models.Model):
 
             # Loop through each voter per day, and update the first entry for that day with "first_visit_today=True"
             for voter_we_vote_id in simple_voter_list:
+                if not positive_value_exists(voter_we_vote_id):
+                    continue
+
                 try:
                     first_visit_query = AnalyticsAction.objects.using('analytics').all()
                     first_visit_query = first_visit_query.order_by("id")  # order by oldest first
