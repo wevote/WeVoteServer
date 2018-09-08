@@ -36,6 +36,9 @@
         <div class="col-sm-8">
             <input type="text" name="through_date_as_integer" id="through_date_as_integer_id" class="form-control"
                    value="{{ through_date_as_integer }}" />
+            <input type="checkbox" name="augment_voter_data" value="True"
+                   {% if augment_voter_data %}checked{% endif %} />
+              Augment Voter Data First
         </div>
     </div>
 

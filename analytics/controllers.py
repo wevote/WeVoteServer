@@ -8,6 +8,7 @@ from candidate.models import CandidateCampaignManager
 from config.base import get_environment_variable
 from datetime import timedelta
 from django.db.models import Q
+from exception.models import print_to_log
 from follow.models import FollowMetricsManager, FollowOrganizationList
 from measure.models import ContestMeasureManager
 from position.models import PositionMetricsManager
@@ -879,7 +880,7 @@ def save_sitewide_voter_metrics(look_for_changes_since_this_date_as_integer, thr
                 else:
                     status += "SAVE_SITEWIDE_VOTER_METRICS-FAILED_TO_SAVE "
                     success = False
-
+                    print_to_log(logger=logger, exception_message_optional=status)
             else:
                 # So we can set a breakpoint in case of problems
                 status += "SAVE_SITEWIDE_VOTER_METRICS-FAILED_TO_CALCULATE "
