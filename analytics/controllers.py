@@ -110,7 +110,7 @@ def augment_one_voter_analytics_action_entries_without_election_id(voter_we_vote
                         candidate_cache[analytics_action.ballot_item_we_vote_id] = candidate_campaign
                         candidate_found_list.append(analytics_action.ballot_item_we_vote_id)
                         candidate_found = True
-                if candidate_found:
+                if candidate_found and positive_value_exists(candidate_campaign.google_civic_election_id):
                     try:
                         analytics_action.google_civic_election_id = candidate_campaign.google_civic_election_id
                         analytics_action.save()
@@ -131,7 +131,7 @@ def augment_one_voter_analytics_action_entries_without_election_id(voter_we_vote
                         measure_cache[analytics_action.ballot_item_we_vote_id] = contest_measure
                         measure_found_list.append(analytics_action.ballot_item_we_vote_id)
                         measure_found = True
-                if measure_found:
+                if measure_found and positive_value_exists(contest_measure.google_civic_election_id):
                     try:
                         analytics_action.google_civic_election_id = contest_measure.google_civic_election_id
                         analytics_action.save()

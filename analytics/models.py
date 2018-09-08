@@ -6,6 +6,7 @@ from django.db import models
 from django.db.models import Q
 from django.utils.timezone import localtime, now
 from election.models import Election
+from exception.models import print_to_log
 from follow.models import FollowOrganizationList
 from organization.models import Organization
 import wevote_functions.admin
@@ -75,7 +76,8 @@ class AnalyticsAction(models.Model):
 
     # We store both
     voter_we_vote_id = models.CharField(
-        verbose_name="we vote permanent id", max_length=255, default=None, null=True, blank=True, unique=False)
+        verbose_name="we vote permanent id", max_length=255, default=None, null=True, blank=True, unique=False,
+        db_index=True)
     voter_id = models.PositiveIntegerField(verbose_name="voter internal id", null=True, unique=False)
 
     # This voter is linked to a sign in account (Facebook, Twitter, Google, etc.)
@@ -93,7 +95,7 @@ class AnalyticsAction(models.Model):
 
     # The unique ID of this election. (Provided by Google Civic)
     google_civic_election_id = models.PositiveIntegerField(
-        verbose_name="google civic election id", null=True, unique=False)
+        verbose_name="google civic election id", null=True, unique=False, db_index=True)
     # This entry was the first entry on this day, used for tracking direct links to We Vote
     first_visit_today = models.BooleanField(verbose_name='', default=False)
 
@@ -982,7 +984,8 @@ class AnalyticsManager(models.Model):
 
             simple_voter_list = []
             for voter_dict in voter_list:
-                if positive_value_exists(voter_dict['voter_we_vote_id']):
+                if positive_value_exists(voter_dict['voter_we_vote_id']) and \
+                        voter_dict['voter_we_vote_id'] not in simple_voter_list:
                     simple_voter_list.append(voter_dict['voter_we_vote_id'])
 
             if not voter_list_found:
@@ -1005,8 +1008,8 @@ class AnalyticsManager(models.Model):
                 except Exception as e:
                     success = False
                     status += "UPDATE_FIRST_VISIT_TODAY-VOTER_ON_DATE_QUERY_ERROR "
+                    print_to_log(logger=logger, exception_message_optional=status)
                     first_visit_found = False
-                    pass
 
         results = {
             'success':                  success,
@@ -1326,13 +1329,14 @@ class SitewideVoterMetrics(models.Model):
     """
     A single entry per voter summarizing all activity every done on We Vote
     """
-    voter_we_vote_id = models.CharField(verbose_name="we vote permanent id",
-                                        max_length=255, default=None, null=True, blank=True, unique=False)
-    actions_count = models.PositiveIntegerField(verbose_name="all", null=True, unique=False)
+    voter_we_vote_id = models.CharField(
+        verbose_name="we vote permanent id",
+        max_length=255, default=None, null=True, blank=True, unique=False, db_index=True)
+    actions_count = models.PositiveIntegerField(verbose_name="all", null=True, unique=False, db_index=True)
     elections_viewed = models.PositiveIntegerField(verbose_name="all", null=True, unique=False)
     voter_guides_viewed = models.PositiveIntegerField(verbose_name="all", null=True, unique=False)
     ballot_visited = models.PositiveIntegerField(verbose_name="all", null=True, unique=False)
-    welcome_visited = models.PositiveIntegerField(verbose_name="all", null=True, unique=False)
+    welcome_visited = models.PositiveIntegerField(verbose_name="all", null=True, unique=False, db_index=True)
     entered_full_address = models.PositiveIntegerField(verbose_name="all", null=True, unique=False)
     issues_followed = models.PositiveIntegerField(verbose_name="all", null=True, unique=False)
     organizations_followed = models.PositiveIntegerField(verbose_name="all", null=True, unique=False)
@@ -1346,7 +1350,7 @@ class SitewideVoterMetrics(models.Model):
     signed_in_with_email = models.BooleanField(verbose_name='', default=False)
     seconds_on_site = models.PositiveIntegerField(verbose_name="all", null=True, unique=False)
     days_visited = models.PositiveIntegerField(verbose_name="all", null=True, unique=False)
-    last_action_date = models.DateTimeField(verbose_name='last action date and time', null=True)
+    last_action_date = models.DateTimeField(verbose_name='last action date and time', null=True, db_index=True)
 
 
 def display_action_constant_human_readable(action_constant):
