@@ -498,9 +498,9 @@ def sitewide_election_metrics_process_view(request):
                                     "?google_civic_election_id=" + str(google_civic_election_id) +
                                     "&state_code=" + str(state_code))
 
-    # results = save_sitewide_election_metrics(google_civic_election_id)  # DEBUG=1
+    results = save_sitewide_election_metrics(google_civic_election_id)  # DEBUG=1
     messages.add_message(request, messages.INFO,
-                         'PROCESSING TURNED OFF - NEED TO UPGRADE TO INCLUDE STATE')
+                         ' NEED TO UPGRADE TO INCLUDE NATIONAL ELECTION TO INCLUDE STATE')
 
     return HttpResponseRedirect(reverse('analytics:sitewide_election_metrics', args=()) +
                                 "?google_civic_election_id=" + str(google_civic_election_id) +
@@ -555,12 +555,15 @@ def sitewide_voter_metrics_process_view(request):
         return redirect_to_sign_in_page(request, authority_required)
 
     augment_voter_data = request.GET.get('augment_voter_data', '')
+    erase_existing_voter_metrics_data = request.GET.get('erase_existing_voter_metrics_data', False)
     google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
     state_code = request.GET.get('state_code', '')
     changes_since_this_date_as_integer = convert_to_int(request.GET.get('date_as_integer', 0))
     through_date_as_integer = convert_to_int(request.GET.get('through_date_as_integer',
                                                              changes_since_this_date_as_integer))
 
+    first_visit_today_count = 0
+    sitewide_voter_metrics_updated = 0
     if positive_value_exists(augment_voter_data):
         message = "[sitewide_voter_metrics_process_view, start: " + str(changes_since_this_date_as_integer) + "" \
                   ", end: " + str(through_date_as_integer) + ", " \
@@ -570,6 +573,7 @@ def sitewide_voter_metrics_process_view(request):
         analytics_manager = AnalyticsManager()
         first_visit_today_results = analytics_manager.update_first_visit_today_for_all_voters_since_date(
                 changes_since_this_date_as_integer, through_date_as_integer)
+        first_visit_today_count = first_visit_today_results['first_visit_today_count']
 
         message = "[sitewide_voter_metrics_process_view, STARTING " \
                   "augment_voter_analytics_action_entries_without_election_id]"
@@ -578,18 +582,24 @@ def sitewide_voter_metrics_process_view(request):
         results = augment_voter_analytics_action_entries_without_election_id(
             changes_since_this_date_as_integer, through_date_as_integer)
 
-    message = "[sitewide_voter_metrics_process_view, STARTING " \
-              "save_sitewide_voter_metrics]"
-    print_to_log(logger=logger, exception_message_optional=message)
-    results = save_sitewide_voter_metrics(changes_since_this_date_as_integer, through_date_as_integer)
+    if positive_value_exists(erase_existing_voter_metrics_data):
+        # Add code here to erase data for all of the voters who otherwise would be updated between
+        #  the dates: changes_since_this_date_as_integer and through_date_as_integer
+        pass
+    else:
+        message = "[sitewide_voter_metrics_process_view, STARTING " \
+                  "save_sitewide_voter_metrics]"
+        print_to_log(logger=logger, exception_message_optional=message)
+        results = save_sitewide_voter_metrics(changes_since_this_date_as_integer, through_date_as_integer)
+        sitewide_voter_metrics_updated = results['sitewide_voter_metrics_updated']
 
-    message = "[sitewide_voter_metrics_process_view, FINISHED " \
-              "save_sitewide_voter_metrics]"
-    print_to_log(logger=logger, exception_message_optional=message)
+        message = "[sitewide_voter_metrics_process_view, FINISHED " \
+                  "save_sitewide_voter_metrics]"
+        print_to_log(logger=logger, exception_message_optional=message)
 
     messages.add_message(request, messages.INFO,
-                         str(first_visit_today_results['first_visit_today_count']) + ' first visit updates.<br />' +
-                         'voters with updated metrics: ' + str(results['sitewide_voter_metrics_updated']) + '')
+                         str(first_visit_today_count) + ' first visit updates.<br />' +
+                         'voters with updated metrics: ' + str(sitewide_voter_metrics_updated) + '')
 
     return HttpResponseRedirect(reverse('analytics:sitewide_voter_metrics', args=()) +
                                 "?google_civic_election_id=" + str(google_civic_election_id) +

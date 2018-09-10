@@ -18,6 +18,11 @@
     </p>
 
 <h4>Manually Update Metrics</h4>
+  <p>This script finds all of the voters active between these dates.
+    For each of these voters we update their statistics to their totals through today.
+    Note that the start and through dates are only used to choose which voters were active during those dates, so
+    we know to update them. If a voter's statistics were already updated today, they are not updated again.
+  </p>
 
 <form name="update_daily_metrics" method="get" action="{% url 'analytics:sitewide_voter_metrics_process' %}">
     {% csrf_token %}

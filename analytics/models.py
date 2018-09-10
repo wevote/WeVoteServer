@@ -947,6 +947,13 @@ class AnalyticsManager(models.Model):
         }
         return results
 
+    def sitewide_voter_metrics_for_this_voter_updated_this_date(self, voter_we_vote_id, updated_date_integer):
+        updated_on_date_query = SitewideVoterMetrics.objects.using('analytics').filter(
+            voter_we_vote_id__iexact=voter_we_vote_id,
+            last_calculated_date_as_integer=updated_date_integer
+        )
+        return positive_value_exists(updated_on_date_query.count())
+
     def update_first_visit_today_for_all_voters_since_date(self, date_as_integer, through_date_as_integer):
         success = True
         status = ""
@@ -1226,9 +1233,9 @@ class SitewideDailyMetrics(models.Model):
                                                                null=True, unique=False)
 
     organizations_auto_followed_total = models.PositiveIntegerField(verbose_name="auto_follow organizations, all",
-                                                                   null=True, unique=False)
+                                                                    null=True, unique=False)
     organizations_auto_followed_today = models.PositiveIntegerField(verbose_name="auto_follow organizations, today",
-                                                                   null=True, unique=False)
+                                                                    null=True, unique=False)
 
     organizations_with_linked_issues = models.PositiveIntegerField(verbose_name="organizations linked to issues, all",
                                                                    null=True, unique=False)
@@ -1363,6 +1370,19 @@ class SitewideVoterMetrics(models.Model):
     seconds_on_site = models.PositiveIntegerField(verbose_name="all", null=True, unique=False)
     days_visited = models.PositiveIntegerField(verbose_name="all", null=True, unique=False)
     last_action_date = models.DateTimeField(verbose_name='last action date and time', null=True, db_index=True)
+    last_calculated_date_as_integer = models.PositiveIntegerField(
+        verbose_name="YYYYMMDD of the last time stats calculated", null=True, unique=False, db_index=True)
+
+    def generate_last_calculated_date_as_integer(self):
+        # We want to store the day as an integer for extremely quick database indexing and lookup
+        datetime_now = localtime(now()).date()  # We Vote uses Pacific Time for TIME_ZONE
+        day_as_string = "{:d}{:02d}{:02d}".format(
+            datetime_now.year,
+            datetime_now.month,
+            datetime_now.day,
+        )
+        self.last_calculated_date_as_integer = convert_to_int(day_as_string)
+        return
 
 
 def display_action_constant_human_readable(action_constant):

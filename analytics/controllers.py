@@ -8,6 +8,7 @@ from candidate.models import CandidateCampaignManager
 from config.base import get_environment_variable
 from datetime import timedelta
 from django.db.models import Q
+from django.utils.timezone import localtime, now
 from exception.models import print_to_log
 from follow.models import FollowMetricsManager, FollowOrganizationList
 from measure.models import ContestMeasureManager
@@ -619,6 +620,11 @@ def calculate_sitewide_election_metrics(google_civic_election_id):
 
 
 def calculate_sitewide_voter_metrics_for_one_voter(voter_we_vote_id):
+    """
+    This voter's statistics across their entire history on We Vote
+    :param voter_we_vote_id:
+    :return:
+    """
     status = ""
     success = False
     voter_id = 0
@@ -858,18 +864,46 @@ def save_sitewide_election_metrics(google_civic_election_id):
 def save_sitewide_voter_metrics(look_for_changes_since_this_date_as_integer, through_date_as_integer):
     status = ""
     success = True
+    last_calculated_date_as_integer = 0
     sitewide_voter_metrics_updated = 0
+    voter_we_vote_id_list = []
+    voter_we_vote_id_list_found = False
 
     analytics_manager = AnalyticsManager()
     voter_list_results = analytics_manager.retrieve_voter_we_vote_id_list_with_changes_since(
         look_for_changes_since_this_date_as_integer, through_date_as_integer)
     if voter_list_results['voter_we_vote_id_list_found']:
         voter_we_vote_id_list = voter_list_results['voter_we_vote_id_list']
+        voter_we_vote_id_list_found = True
+
+    if positive_value_exists(voter_we_vote_id_list_found):
+        # Remove the voter_we_vote_id's that have been updated already today
+        datetime_now = localtime(now()).date()  # We Vote uses Pacific Time for TIME_ZONE
+        day_as_string = "{:d}{:02d}{:02d}".format(
+            datetime_now.year,
+            datetime_now.month,
+            datetime_now.day,
+        )
+        last_calculated_date_as_integer = convert_to_int(day_as_string)
+        updated_voter_we_vote_id_list = []
+        for voter_we_vote_id in voter_we_vote_id_list:
+            if analytics_manager.sitewide_voter_metrics_for_this_voter_updated_this_date(
+                    voter_we_vote_id, last_calculated_date_as_integer):
+                # Don't calculate metrics for this voter
+                updated_today = True
+                pass
+            else:
+                updated_voter_we_vote_id_list.append(voter_we_vote_id)
+        voter_we_vote_id_list = updated_voter_we_vote_id_list
+        voter_we_vote_id_list_found = positive_value_exists(len(voter_we_vote_id_list))
+
+    if positive_value_exists(voter_we_vote_id_list_found):
         for voter_we_vote_id in voter_we_vote_id_list:
             results = calculate_sitewide_voter_metrics_for_one_voter(voter_we_vote_id)
             status += results['status']
             if positive_value_exists(results['success']):
                 sitewide_voter_metrics_values = results['sitewide_voter_metrics_values']
+                sitewide_voter_metrics_values['last_calculated_date_as_integer'] = last_calculated_date_as_integer
 
                 analytics_manager = AnalyticsManager()
                 update_results = analytics_manager.save_sitewide_voter_metrics_values_for_one_voter(
