@@ -2309,7 +2309,8 @@ class VoterAddress(models.Model):
     # We are relying on built-in Python id field
 
     # The voter_id that owns this address
-    voter_id = models.BigIntegerField(verbose_name="voter unique identifier", null=False, blank=False, unique=False)
+    voter_id = models.BigIntegerField(
+        verbose_name="voter unique identifier", null=False, blank=False, unique=False, db_index=True)
     address_type = models.CharField(
         verbose_name="type of address", max_length=1, choices=ADDRESS_TYPE_CHOICES, default=BALLOT_ADDRESS)
 
@@ -2341,7 +2342,8 @@ class VoterAddress(models.Model):
         blank=True, unique=False)
 
     refreshed_from_google = models.BooleanField(
-        verbose_name="have normalized fields been updated from Google since address change?", default=False)
+        verbose_name="have normalized fields been updated from Google since address change?",
+        default=False, db_index=True)
 
     voter_entered_address = models.BooleanField(verbose_name="Did the voter manually enter an address?", default=False)
     date_last_changed = models.DateTimeField(verbose_name='date last changed', null=True, auto_now=True)  # last_updated

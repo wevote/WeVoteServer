@@ -67,7 +67,7 @@ class AnalyticsAction(models.Model):
     This is an incoming action we want to track
     """
     action_constant = models.PositiveSmallIntegerField(
-        verbose_name="constant representing action", null=True, unique=False)
+        verbose_name="constant representing action", null=True, unique=False, db_index=True)
 
     exact_time = models.DateTimeField(verbose_name='date and time of action', null=False, auto_now_add=True)
     # We store YYYYMMDD as an integer for very fast lookup (ex/ "20170901" for September, 1, 2017)
@@ -87,7 +87,7 @@ class AnalyticsAction(models.Model):
         verbose_name="state_code", max_length=255, null=True, blank=True, unique=False)
 
     organization_we_vote_id = models.CharField(
-        verbose_name="we vote permanent id", max_length=255, null=True, blank=True, unique=False)
+        verbose_name="we vote permanent id", max_length=255, null=True, blank=True, unique=False, db_index=True)
     organization_id = models.PositiveIntegerField(null=True, blank=True)
 
     ballot_item_we_vote_id = models.CharField(
