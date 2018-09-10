@@ -60,13 +60,13 @@ class FollowIssue(models.Model):
         verbose_name="we vote permanent id", max_length=255, null=True, blank=True, unique=False)
 
     # Is this person following, not following, or ignoring this issue?
-    following_status = models.CharField(max_length=15, choices=FOLLOWING_CHOICES, default=FOLLOWING)
+    following_status = models.CharField(max_length=15, choices=FOLLOWING_CHOICES, default=FOLLOWING, db_index=True)
 
     # Is the fact that this issue is being followed visible to the public (if linked to organization)?
     is_follow_visible_publicly = models.BooleanField(verbose_name='', default=False)
 
     # The date the voter followed or stopped following this issue
-    date_last_changed = models.DateTimeField(verbose_name='date last changed', null=True, auto_now=True)
+    date_last_changed = models.DateTimeField(verbose_name='date last changed', null=True, auto_now=True, db_index=True)
 
     def __unicode__(self):
         return self.issue_we_vote_id
