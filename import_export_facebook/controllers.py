@@ -970,6 +970,7 @@ def voter_facebook_sign_in_save_for_api(voter_device_id,  # voterFacebookSignInS
 # it does not work for unaliased individuals like "carrie.adams.9210"
 def get_facebook_photo_url_from_graphapi(facebook_candidate_url):
     candidate_we_vote_ids_list = []
+    http_response_code = 0
     photo_url = ""
     status = ""
     success = False
@@ -990,7 +991,8 @@ def get_facebook_photo_url_from_graphapi(facebook_candidate_url):
     urllib._urlopener = FakeFirefoxURLopener()
     headers = {
         'User-Agent':
-            'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/68.0.3440.106 Safari/537.36',
+            'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_6) AppleWebKit/537.36 (KHTML, like Gecko) '
+            'Chrome/68.0.3440.106 Safari/537.36',
         'accept':
             'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8'
            }
@@ -1024,6 +1026,7 @@ def get_facebook_photo_url_from_graphapi(facebook_candidate_url):
         http_response_code = http_error.code
         success = True
     except IOError as error_instance:
+        error_message = error_instance
         status += "QUERYING_GRAPHAPI_IO_ERROR: {error_message}".format(error_message=error_message)
         success = False
     except Exception as error_instance:
