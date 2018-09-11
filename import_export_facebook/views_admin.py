@@ -28,14 +28,16 @@ def get_one_picture_from_facebook_graphapi(one_candidate, request, remote_reques
         if not photo_url.startswith('https://scontent') and not link_is_broken:
             logger.info("Rejected URL: " + one_candidate.facebook_url + " X '" + photo_url + "'")
             if add_messages:
-                messages.add_message(request, messages.ERROR, 'Facebook photo NOT retrieved.')
+                messages.add_message(request, messages.ERROR, 'Facebook photo NOT retrieved. status: ' +
+                                     results.get('status'))
         else:
             if link_is_broken:
                 logger.info("Broken URL: " + one_candidate.facebook_url)
                 if add_messages:
-                    messages.add_message(request, messages.INFO,
-                                         'Failed to retrieve Facebook picture:  The Facebook URL is broken, or is not a '
-                                         'legal Facebook alias')
+                    messages.add_message(
+                        request, messages.INFO,
+                        'Failed to retrieve Facebook picture:  The Facebook URL is broken, or is not a '
+                        'legal Facebook alias')
             else:
                 logger.info("Queried URL: " + one_candidate.facebook_url + " ==> " + photo_url)
                 if add_messages:
@@ -49,8 +51,8 @@ def get_one_picture_from_facebook_graphapi(one_candidate, request, remote_reques
             one_candidate.we_vote_id, None, 1, "CANDIDATE_FACEBOOK_URL_PARSED_HTTP:" +
                                                str(link_is_broken) + ", " + one_candidate.facebook_url)
     elif add_messages:
-        messages.add_message(request, messages.ERROR, 'Facebook photo NOT retrieved (2).')
-
+        messages.add_message(request, messages.ERROR, 'Facebook photo NOT retrieved (2). status: ' +
+                             results.get('status'))
 
 
 # Test SQL for pgAdmin 4
@@ -130,7 +132,8 @@ def bulk_retrieve_facebook_photos_view(request):
 
                 if not positive_value_exists(request_history_list):
                     add_messages = False
-                    get_one_picture_from_facebook_graphapi(one_candidate, request, remote_request_history_manager, add_messages)
+                    get_one_picture_from_facebook_graphapi(
+                        one_candidate, request, remote_request_history_manager, add_messages)
                     number_of_candidates_to_search -= 1
                 else:
                     logger.info("Skipped URL: " + one_candidate.facebook_url)
