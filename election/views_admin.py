@@ -45,7 +45,7 @@ import pytz
 from quick_info.models import QuickInfoManager
 from wevote_settings.models import RemoteRequestHistoryManager
 from voter.models import VoterAddressManager, VoterDeviceLinkManager, voter_has_authority
-from voter_guide.models import CANDIDATE_ENDORSEMENT_LIST, VoterGuide, VoterGuidePossibility, \
+from voter_guide.models import CANDIDATE_NUMBER_LIST, VoterGuide, VoterGuidePossibility, \
     VoterGuideListManager
 # POSSIBLE_ENDORSEMENT_NUMBER_LIST
 import wevote_functions.admin
@@ -1916,7 +1916,7 @@ def election_migration_view(request):
     one_number = 0
     if positive_value_exists(change_now):
         try:
-            for one_number in CANDIDATE_ENDORSEMENT_LIST:  # POSSIBLE_ENDORSEMENT_NUMBER_LIST:
+            for one_number in CANDIDATE_NUMBER_LIST:  # POSSIBLE_ENDORSEMENT_NUMBER_LIST:
                 key = "google_civic_election_id_" + one_number
                 VoterGuidePossibility.objects.filter(
                     **{key: we_vote_election_id}).update(
