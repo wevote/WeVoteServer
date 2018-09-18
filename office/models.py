@@ -204,10 +204,11 @@ class ContestOfficeManager(models.Model):
         contest_office_manager = ContestOfficeManager()
         return contest_office_manager.retrieve_contest_office(contest_office_id)
 
-    def retrieve_contest_office_from_we_vote_id(self, contest_office_we_vote_id):
+    def retrieve_contest_office_from_we_vote_id(self, contest_office_we_vote_id, read_only=False):
         contest_office_id = 0
         contest_office_manager = ContestOfficeManager()
-        return contest_office_manager.retrieve_contest_office(contest_office_id, contest_office_we_vote_id)
+        return contest_office_manager.retrieve_contest_office(contest_office_id, contest_office_we_vote_id,
+                                                              read_only=read_only)
 
     def retrieve_contest_office_from_ctcl_uuid(self, ctcl_uuid):
         contest_office_id = 0
@@ -612,7 +613,7 @@ class ContestOfficeManager(models.Model):
     # NOTE: searching by all other variables seems to return a list of objects
     def retrieve_contest_office(self, contest_office_id, contest_office_we_vote_id='',
                                 maplight_id=None, ctcl_uuid=None, ballotpedia_race_id=None,
-                                google_civic_election_id=None, ballotpedia_office_id=None):
+                                google_civic_election_id=None, ballotpedia_office_id=None, read_only=False):
         error_result = False
         exception_does_not_exist = False
         exception_multiple_object_returned = False
@@ -625,7 +626,11 @@ class ContestOfficeManager(models.Model):
                 contest_office_we_vote_id = contest_office_on_stage.we_vote_id
                 status = "RETRIEVE_OFFICE_FOUND_BY_ID "
             elif positive_value_exists(contest_office_we_vote_id):
-                contest_office_on_stage = ContestOffice.objects.get(we_vote_id__iexact=contest_office_we_vote_id)
+                if positive_value_exists(read_only):
+                    contest_office_on_stage = ContestOffice.objects.using('readonly').get(
+                        we_vote_id__iexact=contest_office_we_vote_id)
+                else:
+                    contest_office_on_stage = ContestOffice.objects.get(we_vote_id__iexact=contest_office_we_vote_id)
                 contest_office_id = contest_office_on_stage.id
                 contest_office_we_vote_id = contest_office_on_stage.we_vote_id
                 status = "RETRIEVE_OFFICE_FOUND_BY_WE_VOTE_ID "

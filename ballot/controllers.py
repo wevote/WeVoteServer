@@ -1836,6 +1836,7 @@ def voter_ballot_items_retrieve_for_one_election_for_api(voter_device_id, voter_
     """
     status = ""
     ballot_item_list_manager = BallotItemListManager()
+    contest_office_manager = ContestOfficeManager()
 
     ballot_item_list = []
     ballot_items_to_display = []
@@ -1843,7 +1844,7 @@ def voter_ballot_items_retrieve_for_one_election_for_api(voter_device_id, voter_
     try:
         read_only = True
         results = ballot_item_list_manager.retrieve_all_ballot_items_for_voter(
-            voter_id, google_civic_election_id, read_only)
+            voter_id, google_civic_election_id, read_only=read_only)
         success = results['success']
         status += results['status']
         ballot_item_list = results['ballot_item_list']
@@ -1860,10 +1861,19 @@ def voter_ballot_items_retrieve_for_one_election_for_api(voter_device_id, voter_
                 kind_of_ballot_item = OFFICE
                 office_id = ballot_item.contest_office_id
                 office_we_vote_id = ballot_item.contest_office_we_vote_id
+                race_office_level = ""
+                if positive_value_exists(office_we_vote_id):
+                    read_only = True
+                    office_results = contest_office_manager.retrieve_contest_office_from_we_vote_id(
+                        office_we_vote_id, read_only=read_only)
+                    if office_results['contest_office_found']:
+                        contest_office = office_results['contest_office']
+                        race_office_level = contest_office.ballotpedia_race_office_level
                 try:
                     candidate_list_object = CandidateCampaignListManager()
+                    read_only = True
                     results = candidate_list_object.retrieve_all_candidates_for_office(
-                        office_id, office_we_vote_id)
+                        office_id, office_we_vote_id, read_only=read_only)
                     candidates_to_display = []
                     if results['candidate_list_found']:
                         candidate_list = results['candidate_list']
@@ -1920,9 +1930,10 @@ def voter_ballot_items_retrieve_for_one_election_for_api(voter_device_id, voter_
                         'ballot_item_display_name':     ballot_item.ballot_item_display_name,
                         'google_civic_election_id':     ballot_item.google_civic_election_id,
                         'google_ballot_placement':      ballot_item.google_ballot_placement,
+                        'id':                           office_id,
                         'local_ballot_order':           ballot_item.local_ballot_order,
                         'kind_of_ballot_item':          kind_of_ballot_item,
-                        'id':                           office_id,
+                        'race_office_level':            race_office_level,
                         'we_vote_id':                   office_we_vote_id,
                         'candidate_list':               candidates_to_display,
                     }
