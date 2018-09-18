@@ -28,8 +28,9 @@ def get_one_picture_from_facebook_graphapi(one_candidate, request, remote_reques
         if not photo_url.startswith('https://scontent') and not link_is_broken:
             logger.info("Rejected URL: " + one_candidate.facebook_url + " X '" + photo_url + "'")
             if add_messages:
-                messages.add_message(request, messages.ERROR, 'Facebook photo NOT retrieved. status: ' +
-                                     results.get('status'))
+                messages.add_message(request, messages.ERROR, """The Facebook photo was not retrieved for one of the 
+                    following reasons: An invalid URL was supplied, the candidate\'s facebook page sharing settings, 
+                    or the use of an un-alisased facebook user name.""")
         else:
             if link_is_broken:
                 logger.info("Broken URL: " + one_candidate.facebook_url)
