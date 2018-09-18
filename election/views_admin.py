@@ -45,7 +45,9 @@ import pytz
 from quick_info.models import QuickInfoManager
 from wevote_settings.models import RemoteRequestHistoryManager
 from voter.models import VoterAddressManager, VoterDeviceLinkManager, voter_has_authority
-from voter_guide.models import CANDIDATE_NUMBER_LIST, VoterGuide, VoterGuidePossibility, VoterGuideListManager
+from voter_guide.models import CANDIDATE_ENDORSEMENT_LIST, VoterGuide, VoterGuidePossibility, \
+    VoterGuideListManager
+# POSSIBLE_ENDORSEMENT_NUMBER_LIST
 import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, positive_value_exists, STATE_CODE_MAP
 
@@ -749,9 +751,12 @@ def election_list_view(request):
     election_list = election_list_query[:200]
     election_list_modified = []
     ballot_returned_list_manager = BallotReturnedListManager()
-    batch_manager = BatchManager()
+    # batch_manager = BatchManager()
     for election in election_list:
-        date_of_election = timezone.localize(datetime.strptime(election.election_day_text, "%Y-%m-%d"))
+        election_day_text = election.election_day_text
+        if not positive_value_exists(election_day_text):
+            election_day_text = ""
+        date_of_election = timezone.localize(datetime.strptime(election_day_text, "%Y-%m-%d"))
         if date_of_election > datetime_now:
             time_until_election = date_of_election - datetime_now
             election.days_until_election = convert_to_int("%d" % time_until_election.days)
@@ -942,9 +947,12 @@ def nationwide_election_list_view(request):
 
     election_list_modified = []
     ballot_returned_list_manager = BallotReturnedListManager()
-    batch_manager = BatchManager()
+    # batch_manager = BatchManager()
     for election in election_list:
-        date_of_election = timezone.localize(datetime.strptime(election.election_day_text, "%Y-%m-%d"))
+        election_day_text = election.election_day_text
+        if not positive_value_exists(election_day_text):
+            election_day_text = ""
+        date_of_election = timezone.localize(datetime.strptime(election_day_text, "%Y-%m-%d"))
         if date_of_election > datetime_now:
             time_until_election = date_of_election - datetime_now
             election.days_until_election = convert_to_int("%d" % time_until_election.days)
@@ -1231,7 +1239,10 @@ def election_summary_view(request, election_local_id=0, google_civic_election_id
         # Add election statistics
         timezone = pytz.timezone("America/Los_Angeles")
         datetime_now = timezone.localize(datetime.now())
-        date_of_election = timezone.localize(datetime.strptime(election.election_day_text, "%Y-%m-%d"))
+        election_day_text = election.election_day_text
+        if not positive_value_exists(election_day_text):
+            election_day_text = ""
+        date_of_election = timezone.localize(datetime.strptime(election_day_text, "%Y-%m-%d"))
         if date_of_election > datetime_now:
             time_until_election = date_of_election - datetime_now
             election.days_until_election = convert_to_int("%d" % time_until_election.days)
@@ -1905,7 +1916,7 @@ def election_migration_view(request):
     one_number = 0
     if positive_value_exists(change_now):
         try:
-            for one_number in CANDIDATE_NUMBER_LIST:
+            for one_number in CANDIDATE_ENDORSEMENT_LIST:  # POSSIBLE_ENDORSEMENT_NUMBER_LIST:
                 key = "google_civic_election_id_" + one_number
                 VoterGuidePossibility.objects.filter(
                     **{key: we_vote_election_id}).update(
