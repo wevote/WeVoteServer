@@ -471,6 +471,7 @@ def retrieve_ballotpedia_data_for_polling_locations_view(request, election_local
                     kind_of_batch = results['kind_of_batch']
                 if not positive_value_exists(kind_of_batch):
                     kind_of_batch = CONTEST_OFFICE
+                status += results['status']
             elif retrieve_measures:
                 results = retrieve_ballotpedia_measures_by_district_from_api(google_civic_election_id, state_code,
                                                                              merged_district_list)
@@ -480,20 +481,23 @@ def retrieve_ballotpedia_data_for_polling_locations_view(request, election_local
                     kind_of_batch = results['kind_of_batch']
                 if not positive_value_exists(kind_of_batch):
                     kind_of_batch = MEASURE
-
+                status += results['status']
             batch_header_id = 0
             if 'batch_saved' in results and results['batch_saved']:
                 messages.add_message(request, messages.INFO,
                                      kind_of_batch +
-                                     ' import batch for {google_civic_election_id} election saved.'
-                                     ''.format(google_civic_election_id=google_civic_election_id))
+                                     ' import batch for {google_civic_election_id} election saved. '
+                                     'status: {status}'
+                                     ''.format(google_civic_election_id=google_civic_election_id,
+                                               status=status))
                 batch_header_id = results['batch_header_id']
             elif 'batch_header_id' in results and results['batch_header_id']:
                 messages.add_message(request, messages.INFO,
                                      kind_of_batch +
                                      ' import batch for {google_civic_election_id} election saved, '
-                                     'batch_header_id.'
-                                     ''.format(google_civic_election_id=google_civic_election_id))
+                                     'batch_header_id. status: {status}'
+                                     ''.format(google_civic_election_id=google_civic_election_id,
+                                               status=status))
                 batch_header_id = results['batch_header_id']
             else:
                 messages.add_message(request, messages.ERROR, results['status'])

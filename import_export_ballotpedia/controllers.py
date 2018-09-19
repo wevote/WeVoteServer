@@ -465,12 +465,13 @@ def retrieve_ballotpedia_candidates_by_district_from_api(google_civic_election_i
             if positive_value_exists(response.url):
                 shortened_url = response.url[:1000]
                 status += ": " + shortened_url + " "
-            results = {
-                'success': success,
-                'status': status,
-                'batch_header_id': batch_header_id,
-            }
-            return results
+            continue
+            # results = {
+            #     'success': success,
+            #     'status': status,
+            #     'batch_header_id': batch_header_id,
+            # }
+            # return results
 
         if hasattr(response, 'success') and not positive_value_exists(response.success):
             success = False
@@ -480,12 +481,13 @@ def retrieve_ballotpedia_candidates_by_district_from_api(google_civic_election_i
                 status += ": " + shortened_url + " "
             if positive_value_exists(response.error):
                 status += "error: " + str(response.error)
-            results = {
-                'success': success,
-                'status': status,
-                'batch_header_id': batch_header_id,
-            }
-            return results
+            continue
+            # results = {
+            #     'success': success,
+            #     'status': status,
+            #     'batch_header_id': batch_header_id,
+            # }
+            # return results
 
         if hasattr(response, 'ok') and not positive_value_exists(response.ok):
             success = False
@@ -497,12 +499,13 @@ def retrieve_ballotpedia_candidates_by_district_from_api(google_civic_election_i
                 status += "status_code: " + str(response.status_code)
                 if response.status_code == 414:
                     status += " Too many races sent"
-            results = {
-                'success': success,
-                'status': status,
-                'batch_header_id': batch_header_id,
-            }
-            return results
+            continue
+            # results = {
+            #     'success': success,
+            #     'status': status,
+            #     'batch_header_id': batch_header_id,
+            # }
+            # return results
 
         structured_json = json.loads(response.text)
 
@@ -948,12 +951,13 @@ def retrieve_ballotpedia_offices_by_district_from_api(google_civic_election_id, 
                 if positive_value_exists(response.url):
                     shortened_url = response.url[:1000]
                     status += ": " + shortened_url + " "
-                results = {
-                    'success': success,
-                    'status': status,
-                    'batch_header_id': batch_header_id,
-                }
-                return results
+                continue
+                # results = {
+                #     'success': success,
+                #     'status': status,
+                #     'batch_header_id': batch_header_id,
+                # }
+                # return results
 
             if hasattr(response, 'success') and not positive_value_exists(response.success):
                 success = False
@@ -963,12 +967,13 @@ def retrieve_ballotpedia_offices_by_district_from_api(google_civic_election_id, 
                     status += ": " + shortened_url + " "
                 if positive_value_exists(response.error):
                     status += "error: " + str(response.error)
-                results = {
-                    'success': success,
-                    'status': status,
-                    'batch_header_id': batch_header_id,
-                }
-                return results
+                continue
+                # results = {
+                #     'success': success,
+                #     'status': status,
+                #     'batch_header_id': batch_header_id,
+                # }
+                # return results
 
             if hasattr(response, 'ok') and not positive_value_exists(response.ok):
                 success = False
@@ -980,12 +985,13 @@ def retrieve_ballotpedia_offices_by_district_from_api(google_civic_election_id, 
                     status += "status_code: " + str(response.status_code)
                     if response.status_code == 414:
                         status += " Too many office_districts sent"
-                results = {
-                    'success': success,
-                    'status': status,
-                    'batch_header_id': batch_header_id,
-                }
-                return results
+                continue
+                # results = {
+                #     'success': success,
+                #     'status': status,
+                #     'batch_header_id': batch_header_id,
+                # }
+                # return results
 
             structured_json = json.loads(response.text)
 
@@ -1009,6 +1015,7 @@ def retrieve_ballotpedia_offices_by_district_from_api(google_civic_election_id, 
                     final_json_list.append(one_new_dict)
 
     if positive_value_exists(len(final_json_list)):
+        status += "OFFICES_RETURNED "
         results = store_ballotpedia_json_response_to_import_batch_system(
             final_json_list, google_civic_election_id, kind_of_batch, state_code=state_code)
         status += results['status']
