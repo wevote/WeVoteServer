@@ -904,6 +904,8 @@ class ContestMeasureList(models.Model):
             # We never expect more than 300 measures for one election
             if positive_value_exists(limit):
                 measure_list_objects = measure_queryset[:limit]
+            else:
+                measure_list_objects = list(measure_queryset)
 
             if len(measure_list_objects):
                 measure_list_found = True
