@@ -4176,6 +4176,8 @@ class BatchDescription(models.Model):
     polling_location_we_vote_id = models.CharField(
         verbose_name="if for ballot items, the polling location we vote id", max_length=255, null=True, blank=True)
     batch_description_text = models.CharField(max_length=255)
+    # Have the batch rows under this description been analyzed?
+    batch_description_analyzed = models.BooleanField(default=False)
     source_uri = models.URLField(blank=True, null=True, verbose_name='uri where data is coming from')
     date_created = models.DateTimeField(verbose_name='date first saved', null=True, auto_now=True)
 
@@ -4305,6 +4307,9 @@ class BatchRow(models.Model):
     google_civic_election_id = models.PositiveIntegerField(verbose_name="election id", default=0, null=True, blank=True)
     # This is useful for filtering while we are processing batch_rows
     state_code = models.CharField(verbose_name="state code for this data", max_length=2, null=True, blank=True)
+    batch_row_analyzed = models.BooleanField(default=False)
+    batch_row_created = models.BooleanField(default=False)
+
     batch_row_000 = models.TextField(null=True, blank=True)
     batch_row_001 = models.TextField(null=True, blank=True)
     batch_row_002 = models.TextField(null=True, blank=True)
