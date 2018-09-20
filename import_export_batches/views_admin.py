@@ -1246,6 +1246,7 @@ def batch_set_batch_list_view(request):
 
     try:
         batch_description_query = BatchDescription.objects.filter(batch_set_id=batch_set_id)
+        batch_description_query = batch_description_query.order_by("-batch_description_analyzed")
         batch_set_count = batch_description_query.count()
         batch_list = list(batch_description_query)
 
@@ -1256,6 +1257,12 @@ def batch_set_batch_list_view(request):
                 results = create_batch_row_actions(one_batch_description.batch_header_id)
                 if results['batch_actions_created']:
                     batch_actions_analyzed += 1
+                    try:
+                        # If BatchRowAction's were created for BatchDescription, this batch_description was analyzed
+                        one_batch_description.batch_description_analyzed = True
+                        one_batch_description.save()
+                    except Exception as e:
+                        pass
                 else:
                     batch_actions_not_analyzed += 1
 

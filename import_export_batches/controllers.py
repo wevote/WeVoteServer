@@ -107,6 +107,11 @@ def create_batch_row_actions(batch_header_id, batch_row_id=0, state_code=""):
                 batch_row_query = batch_row_query.filter(id=batch_row_id)
             elif positive_value_exists(state_code):
                 batch_row_query = batch_row_query.filter(state_code__iexact=state_code)
+            # We Vote uses Postgres, and we want the False values to be returned first
+            # https://groups.google.com/forum/#!topic/django-developers/h5ok_KeXYW4
+            # This is because we want to make sure BatchRows that have NOT been analyzed get analyzed first,
+            # and BatchRowAction entries that are set to "Create" get updated before those that are set to "Update"
+            batch_row_query = batch_row_query.order_by("-batch_row_created", "-batch_row_analyzed")
 
             batch_row_list = list(batch_row_query)
             if len(batch_row_list):
@@ -371,6 +376,14 @@ def create_batch_row_action_organization(batch_description, batch_header_map, on
         success = False
         status += "BATCH_ROW_ACTION_ORGANIZATION_UNABLE_TO_SAVE "
 
+    try:
+        if batch_row_action_created or batch_row_action_updated:
+            # If BatchRowAction was created, this batch_row was analyzed
+            one_batch_row.batch_row_analyzed = True
+            one_batch_row.save()
+    except Exception as e:
+        pass
+
     results = {
         'success': success,
         'status': status,
@@ -602,6 +615,20 @@ def create_batch_row_action_measure(batch_description, batch_header_map, one_bat
         except Exception as e:
             pass
 
+    try:
+        batch_row_changed = False
+        if positive_value_exists(state_code) and state_code.lower() != one_batch_row.state_code:
+            one_batch_row.state_code = state_code
+            batch_row_changed = True
+        if batch_row_action_created or batch_row_action_updated:
+            # If BatchRowAction was created, this batch_row was analyzed
+            one_batch_row.batch_row_analyzed = True
+            batch_row_changed = True
+        if batch_row_changed:
+            one_batch_row.save()
+    except Exception as e:
+        pass
+
     results = {
         'success':                      success,
         'status':                       status,
@@ -782,6 +809,14 @@ def create_batch_row_action_elected_office(batch_description, batch_header_map, 
         new_action_elected_office_created = False
         status = "CREATE_BATCH_ROW_ACTION_ELECTED_OFFICE_BATCH_ROW_ACTION_ELECTED_OFFICE_RETRIEVE_ERROR"
         handle_exception(e, logger=logger, exception_message=status)
+
+    try:
+        if new_action_elected_office_created or action_elected_office_updated:
+            # If BatchRowAction was created, this batch_row was analyzed
+            one_batch_row.batch_row_analyzed = True
+            one_batch_row.save()
+    except Exception as e:
+        pass
 
     results = {
         'success':                              success,
@@ -1141,6 +1176,9 @@ def create_batch_row_action_contest_office(batch_description, batch_header_map, 
     # If a state was figured out, then update the batch_row with the state_code so we can use that for filtering
     if positive_value_exists(state_code) and state_code.lower() != one_batch_row.state_code:
         try:
+            if batch_row_action_created or batch_row_action_updated:
+                # If BatchRowAction was created, this batch_row was analyzed
+                one_batch_row.batch_row_analyzed = True
             one_batch_row.state_code = state_code
             one_batch_row.save()
         except Exception as e:
@@ -1406,6 +1444,17 @@ def create_batch_row_action_politician(batch_description, batch_header_map, one_
             one_batch_row.save()
         except Exception as e:
             pass
+
+    try:
+        if positive_value_exists(state_code):
+            one_batch_row.state_code = state_code
+        if batch_row_action_created or batch_row_action_updated:
+            # If BatchRowAction was created, this batch_row was analyzed
+            one_batch_row.batch_row_analyzed = True
+        if positive_value_exists(state_code) or batch_row_action_created or batch_row_action_updated:
+            one_batch_row.save()
+    except Exception as e:
+        pass
 
     results = {
         'success':                      success,
@@ -1761,6 +1810,9 @@ def create_batch_row_action_candidate(batch_description, batch_header_map, one_b
     # If a state was figured out, then update the batch_row with the state_code so we can use that for filtering
     if positive_value_exists(state_code):
         try:
+            if batch_row_action_created or batch_row_action_updated:
+                # If BatchRowAction was created, this batch_row was analyzed
+                one_batch_row.batch_row_analyzed = True
             one_batch_row.state_code = state_code
             one_batch_row.save()
         except Exception as e:
@@ -2142,6 +2194,14 @@ def create_batch_row_action_position(batch_description, batch_header_map, one_ba
         success = False
         status += "BATCH_ROW_ACTION_POSITION_UNABLE_TO_SAVE "
 
+    try:
+        if batch_row_action_created or batch_row_action_updated:
+            # If BatchRowAction was created, this batch_row was analyzed
+            one_batch_row.batch_row_analyzed = True
+            one_batch_row.save()
+    except Exception as e:
+        pass
+
     results = {
         'success': success,
         'status': status,
@@ -2412,6 +2472,14 @@ def create_batch_row_action_ballot_item(batch_description, batch_header_map, one
     except Exception as e:
         success = False
         status += "BATCH_ROW_ACTION_BALLOT_ITEM_UNABLE_TO_SAVE " + str(e) + " "
+
+    try:
+        if batch_row_action_created or batch_row_action_updated:
+            # If BatchRowAction was created, this batch_row was analyzed
+            one_batch_row.batch_row_analyzed = True
+            one_batch_row.save()
+    except Exception as e:
+        pass
 
     results = {
         'success':                      success,

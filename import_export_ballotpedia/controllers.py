@@ -519,11 +519,13 @@ def retrieve_ballotpedia_candidates_by_district_from_api(google_civic_election_i
 
         final_json_list = final_json_list + modified_json_list
 
-    results = store_ballotpedia_json_response_to_import_batch_system(
-        final_json_list, google_civic_election_id, kind_of_batch, state_code=state_code)
-    status += results['status']
-    if 'batch_header_id' in results:
-        batch_header_id = results['batch_header_id']
+        # Since the overall script might time out, we store a batch of candidates for every chunk of race id strings
+        results = store_ballotpedia_json_response_to_import_batch_system(
+            final_json_list, google_civic_election_id, kind_of_batch, state_code=state_code)
+        status += results['status']
+        final_json_list = []
+        if 'batch_header_id' in results:
+            batch_header_id = results['batch_header_id']
 
     results = {
         'success': success,
@@ -865,7 +867,6 @@ def retrieve_ballotpedia_offices_by_district_from_api(google_civic_election_id, 
         election = results['election']
         election_day_text = election.election_day_text
         election_day_year = election_day_text[:4]
-        is_national_election = election.is_national_election
 
     ballotpedia_district_id_not_used_list = []
     chunks_of_district_strings = []
@@ -1014,15 +1015,17 @@ def retrieve_ballotpedia_offices_by_district_from_api(google_civic_election_id, 
                 if not already_in_final_dict:
                     final_json_list.append(one_new_dict)
 
-    if positive_value_exists(len(final_json_list)):
-        status += "OFFICES_RETURNED "
-        results = store_ballotpedia_json_response_to_import_batch_system(
-            final_json_list, google_civic_election_id, kind_of_batch, state_code=state_code)
-        status += results['status']
-        if 'batch_header_id' in results:
-            batch_header_id = results['batch_header_id']
-    else:
-        status += "NO_OFFICES_RETURNED "
+        # Since the overall script might time out, we store the offices in an intermediate step
+        if positive_value_exists(len(final_json_list)):
+            status += "OFFICES_RETURNED "
+            results = store_ballotpedia_json_response_to_import_batch_system(
+                final_json_list, google_civic_election_id, kind_of_batch, state_code=state_code)
+            final_json_list = []
+            status += results['status']
+            if 'batch_header_id' in results:
+                batch_header_id = results['batch_header_id']
+        else:
+            status += "NO_OFFICES_RETURNED "
 
     results = {
         'success': success,
