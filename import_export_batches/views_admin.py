@@ -1245,14 +1245,35 @@ def batch_set_batch_list_view(request):
     batch_set_kind_of_batch = ""
 
     try:
-        batch_description_query = BatchDescription.objects.filter(batch_set_id=batch_set_id)
-        batch_description_query = batch_description_query.order_by("-batch_description_analyzed")
-        batch_set_count = batch_description_query.count()
-        batch_list = list(batch_description_query)
-
         if positive_value_exists(analyze_all_button):
             batch_actions_analyzed = 0
             batch_actions_not_analyzed = 0
+            batch_header_id_created_list = []
+
+            batch_description_query = BatchDescription.objects.filter(batch_set_id=batch_set_id)
+            batch_description_query = batch_description_query.filter(batch_description_analyzed=False)
+            batch_list = list(batch_description_query)
+
+            for one_batch_description in batch_list:
+                results = create_batch_row_actions(one_batch_description.batch_header_id)
+                if results['batch_actions_created']:
+                    batch_actions_analyzed += 1
+                    try:
+                        # If BatchRowAction's were created for BatchDescription, this batch_description was analyzed
+                        one_batch_description.batch_description_analyzed = True
+                        one_batch_description.save()
+                        batch_header_id_created_list.append(one_batch_description.batch_header_id)
+                    except Exception as e:
+                        pass
+                else:
+                    batch_actions_not_analyzed += 1
+
+            batch_description_query = BatchDescription.objects.filter(batch_set_id=batch_set_id)
+            if positive_value_exists(len(batch_header_id_created_list)):
+                batch_description_query = batch_description_query.exclude(
+                    batch_header_id__in=batch_header_id_created_list)
+            batch_list = list(batch_description_query)
+
             for one_batch_description in batch_list:
                 results = create_batch_row_actions(one_batch_description.batch_header_id)
                 if results['batch_actions_created']:
@@ -1280,6 +1301,10 @@ def batch_set_batch_list_view(request):
                                         "&state_code=" + state_code)
 
         if positive_value_exists(update_all_button):
+            batch_description_query = BatchDescription.objects.filter(batch_set_id=batch_set_id)
+            batch_description_query = batch_description_query.filter(batch_description_analyzed=True)
+            batch_list = list(batch_description_query)
+
             batch_actions_updated = 0
             batch_actions_not_updated = 0
             for one_batch_description in batch_list:
@@ -1304,6 +1329,10 @@ def batch_set_batch_list_view(request):
                                         "&state_code=" + state_code)
 
         if positive_value_exists(create_all_button):
+            batch_description_query = BatchDescription.objects.filter(batch_set_id=batch_set_id)
+            batch_description_query = batch_description_query.filter(batch_description_analyzed=True)
+            batch_list = list(batch_description_query)
+
             batch_actions_created = 0
             batch_actions_not_created = 0
             for one_batch_description in batch_list:
@@ -1326,6 +1355,10 @@ def batch_set_batch_list_view(request):
                                         "?google_civic_election_id=" + str(google_civic_election_id) +
                                         "&batch_set_id=" + str(batch_set_id) +
                                         "&state_code=" + state_code)
+
+        batch_description_query = BatchDescription.objects.filter(batch_set_id=batch_set_id)
+        batch_set_count = batch_description_query.count()
+        batch_list = list(batch_description_query)
 
         if not positive_value_exists(show_all_batches):
             batch_list = batch_list[:10]
