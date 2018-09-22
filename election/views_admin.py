@@ -45,9 +45,8 @@ import pytz
 from quick_info.models import QuickInfoManager
 from wevote_settings.models import RemoteRequestHistoryManager
 from voter.models import VoterAddressManager, VoterDeviceLinkManager, voter_has_authority
-from voter_guide.models import CANDIDATE_NUMBER_LIST, VoterGuide, VoterGuidePossibility, \
+from voter_guide.models import POSSIBLE_ENDORSEMENT_NUMBER_LIST, VoterGuide, VoterGuidePossibility, \
     VoterGuideListManager
-# POSSIBLE_ENDORSEMENT_NUMBER_LIST
 import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, positive_value_exists, STATE_CODE_MAP
 
@@ -753,13 +752,15 @@ def election_list_view(request):
     ballot_returned_list_manager = BallotReturnedListManager()
     # batch_manager = BatchManager()
     for election in election_list:
-        election_day_text = election.election_day_text
-        if not positive_value_exists(election_day_text):
-            election_day_text = ""
-        date_of_election = timezone.localize(datetime.strptime(election_day_text, "%Y-%m-%d"))
-        if date_of_election > datetime_now:
-            time_until_election = date_of_election - datetime_now
-            election.days_until_election = convert_to_int("%d" % time_until_election.days)
+        if positive_value_exists(election.election_day_text):
+            try:
+                date_of_election = timezone.localize(datetime.strptime(election.election_day_text, "%Y-%m-%d"))
+                if date_of_election > datetime_now:
+                    time_until_election = date_of_election - datetime_now
+                    election.days_until_election = convert_to_int("%d" % time_until_election.days)
+            except Exception as e:
+                # Simply do not create "days_until_election"
+                pass
 
         # How many offices?
         office_list_query = ContestOffice.objects.all()
@@ -949,13 +950,15 @@ def nationwide_election_list_view(request):
     ballot_returned_list_manager = BallotReturnedListManager()
     # batch_manager = BatchManager()
     for election in election_list:
-        election_day_text = election.election_day_text
-        if not positive_value_exists(election_day_text):
-            election_day_text = ""
-        date_of_election = timezone.localize(datetime.strptime(election_day_text, "%Y-%m-%d"))
-        if date_of_election > datetime_now:
-            time_until_election = date_of_election - datetime_now
-            election.days_until_election = convert_to_int("%d" % time_until_election.days)
+        if positive_value_exists(election.election_day_text):
+            try:
+                date_of_election = timezone.localize(datetime.strptime(election.election_day_text, "%Y-%m-%d"))
+                if date_of_election > datetime_now:
+                    time_until_election = date_of_election - datetime_now
+                    election.days_until_election = convert_to_int("%d" % time_until_election.days)
+            except Exception as e:
+                # Simply do not create "days_until_election"
+                pass
 
         # How many offices?
         office_list_query = ContestOffice.objects.all()
@@ -1239,13 +1242,15 @@ def election_summary_view(request, election_local_id=0, google_civic_election_id
         # Add election statistics
         timezone = pytz.timezone("America/Los_Angeles")
         datetime_now = timezone.localize(datetime.now())
-        election_day_text = election.election_day_text
-        if not positive_value_exists(election_day_text):
-            election_day_text = ""
-        date_of_election = timezone.localize(datetime.strptime(election_day_text, "%Y-%m-%d"))
-        if date_of_election > datetime_now:
-            time_until_election = date_of_election - datetime_now
-            election.days_until_election = convert_to_int("%d" % time_until_election.days)
+        if positive_value_exists(election.election_day_text):
+            try:
+                date_of_election = timezone.localize(datetime.strptime(election.election_day_text, "%Y-%m-%d"))
+                if date_of_election > datetime_now:
+                    time_until_election = date_of_election - datetime_now
+                    election.days_until_election = convert_to_int("%d" % time_until_election.days)
+            except Exception as e:
+                # Simply do not create "days_until_election"
+                pass
 
         election.ballot_returned_count = \
             ballot_returned_list_manager.fetch_ballot_returned_list_count_for_election(
@@ -1396,7 +1401,7 @@ def elections_import_from_master_server_view(request):
 @login_required()
 def election_migration_view(request):
     # admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
-    authority_required = {'admin', 'political_data_manager'}
+    authority_required = {'admin'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
@@ -1916,7 +1921,7 @@ def election_migration_view(request):
     one_number = 0
     if positive_value_exists(change_now):
         try:
-            for one_number in CANDIDATE_NUMBER_LIST:  # POSSIBLE_ENDORSEMENT_NUMBER_LIST:
+            for one_number in POSSIBLE_ENDORSEMENT_NUMBER_LIST:
                 key = "google_civic_election_id_" + one_number
                 VoterGuidePossibility.objects.filter(
                     **{key: we_vote_election_id}).update(

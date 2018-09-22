@@ -2054,8 +2054,9 @@ def create_batch_row_action_position(batch_description, batch_header_map, one_ba
             pass
     elif positive_value_exists(contest_measure_title):
         contest_measure_list_manager = ContestMeasureList()
+        google_civic_election_id_list = [google_civic_election_id]
         matching_results = contest_measure_list_manager.retrieve_contest_measures_from_non_unique_identifiers(
-            google_civic_election_id, state_code, contest_measure_title)
+            google_civic_election_id_list, state_code, contest_measure_title)
 
         if matching_results['contest_measure_found']:
             measure = matching_results['contest_measure']
@@ -2375,8 +2376,9 @@ def create_batch_row_action_ballot_item(batch_description, batch_header_map, one
         # See if we have an measure name
         contest_measure_list = ContestMeasureList()
         keep_looking_for_duplicates = True
+        google_civic_election_id_list = [google_civic_election_id]
         matching_results = contest_measure_list.retrieve_contest_measures_from_non_unique_identifiers(
-            google_civic_election_id, state_code, contest_measure_name)
+            google_civic_election_id_list, state_code, contest_measure_name)
         if matching_results['contest_measure_found']:
             contest_measure = matching_results['contest_measure']
             contest_measure_name = contest_measure.measure_title

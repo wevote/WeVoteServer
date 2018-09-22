@@ -3192,8 +3192,8 @@ def positions_import_from_structured_json(structured_json):
                 one_position["candidate_campaign_we_vote_id"])
             if not positive_value_exists(candidate_campaign_id):
                 # If an id does not exist, then we don't have this candidate locally
-                print("positions_import did not find a candidate_campaign_id for candidate_campaign_we_vote_id: " +
-                      one_position["candidate_campaign_we_vote_id"])
+                # print("positions_import did not find a candidate_campaign_id for candidate_campaign_we_vote_id: " +
+                #       one_position["candidate_campaign_we_vote_id"])
                 positions_not_processed += 1
                 continue
         elif positive_value_exists(one_position["contest_measure_we_vote_id"]):
@@ -3202,8 +3202,8 @@ def positions_import_from_structured_json(structured_json):
                 one_position["contest_measure_we_vote_id"])
             if not positive_value_exists(contest_measure_id):
                 # If an id does not exist, then we don't have this measure locally
-                print("positions_import did not find a contest_measure_id for contest_measure_we_vote_id: " +
-                      one_position["contest_measure_we_vote_id"])
+                # print("positions_import did not find a contest_measure_id for contest_measure_we_vote_id: " +
+                #       one_position["contest_measure_we_vote_id"])
                 positions_not_processed += 1
                 continue
 
