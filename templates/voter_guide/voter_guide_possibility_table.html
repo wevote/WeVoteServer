@@ -8,7 +8,7 @@
             <th></th>
             <th>Voter Guide Source</th>
             <th>Actions / Notes</th>
-            <th>Candidates</th>
+            <th>Ballot Items</th>
             <th>Submitted Time (PT)</th>
         </tr>
         </thead>
@@ -62,7 +62,15 @@
                   <br />
                   {{ voter_guide_possibility.ballot_items_raw|truncatechars:80 }}
                 {% endif %}
-            </td>
+                {% if voter_guide_possibility.organization.organization_email %}
+                  <br />
+                <a href="mailto:{{ voter_guide_possibility.organization.organization_email }}"
+                   class="u-no-break">
+                    {{ voter_guide_possibility.organization.organization_email }}
+                  <span class="glyphicon glyphicon-new-window"></span>
+                </a>
+                {% endif %}
+           </td>
             <td>
                 {% if voter_guide_possibility.ignore_this_source %}
                 <strong>Ignore this Source</strong>
@@ -104,14 +112,14 @@
                 {% endif %}
             </td>
             <td>
-              {% if voter_guide_possibility.number_of_candidates %}
-                  {{ voter_guide_possibility.number_of_candidates|default_if_none:"" }}
+              {% if voter_guide_possibility.number_of_ballot_items %}
+                  {{ voter_guide_possibility.number_of_ballot_items|default_if_none:"" }} total<br />
               {% endif %}
-              {% if voter_guide_possibility.number_of_candidates_not_in_database %}
-                  <span class="u-no-break" style="color: red"> ({{ voter_guide_possibility.number_of_candidates_not_in_database }} not in db)</span>
+              {% if voter_guide_possibility.number_of_ballot_items_not_matched %}
+                  <span class="u-no-break" style="color: red"> ({{ voter_guide_possibility.number_of_ballot_items_not_matched }} not matched)</span>
               {% endif %}
-              {% if voter_guide_possibility.number_of_candidates_with_position %}
-                  <span class="u-no-break" style="color: green"> ({{ voter_guide_possibility.number_of_candidates_with_position }} with position)</span>
+              {% if voter_guide_possibility.number_of_endorsements_with_position %}
+                  <span class="u-no-break" style="color: green"> ({{ voter_guide_possibility.number_of_endorsements_with_position }} with position)</span>
               {% endif %}
             </td>
             <td>

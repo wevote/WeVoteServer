@@ -1460,19 +1460,20 @@ def save_google_search_link_to_candidate_table(candidate, google_search_link):
         pass
 
 
-def find_candidates_on_one_web_page(site_url, candidate_list_light):
+def find_endorsements_on_one_web_page(site_url, endorsement_list_light):
     candidate_we_vote_ids_list = []
-    selected_candidate_list_light = []
+    endorsement_list_light_modified = []
+    measure_we_vote_ids_list = []
     status = ""
     success = False
     if len(site_url) < 10:
-        status = 'FIND_CANDIDATES-PROPER_URL_NOT_PROVIDED: ' + site_url
+        status = 'FIND_ENDORSEMENTS-PROPER_URL_NOT_PROVIDED: ' + site_url
         results = {
-            'status':                       status,
-            'success':                      success,
-            'at_least_one_candidate_found': False,
-            'candidate_we_vote_ids_list':   candidate_we_vote_ids_list,
-            'page_redirected':              False,
+            'status':                           status,
+            'success':                          success,
+            'at_least_one_endorsement_found':   False,
+            'page_redirected':                  False,
+            'endorsement_list_light':           endorsement_list_light_modified,
         }
         return results
 
@@ -1492,18 +1493,38 @@ def find_candidates_on_one_web_page(site_url, candidate_list_light):
         for line in page.readlines():
             try:
                 decoded_line = line.decode()
-                for one_candidate_dict in candidate_list_light:
-                    if one_candidate_dict['ballot_item_display_name'] in decoded_line:
-                        if one_candidate_dict['candidate_we_vote_id'] not in candidate_we_vote_ids_list:
-                            candidate_we_vote_ids_list.append(one_candidate_dict['candidate_we_vote_id'])
-                            selected_candidate_list_light.append(one_candidate_dict)
+                if len(decoded_line) >= 10:  # Only proceed if the line is longer than 10 characters
+                    decide_line_lower_case = decoded_line.lower()
+                    for one_ballot_item_dict in endorsement_list_light:
+                        if positive_value_exists(one_ballot_item_dict['ballot_item_display_name']) and \
+                                one_ballot_item_dict['ballot_item_display_name'].lower() in decide_line_lower_case:
+                            if positive_value_exists(one_ballot_item_dict['candidate_we_vote_id']) \
+                                    and one_ballot_item_dict['candidate_we_vote_id'] not in candidate_we_vote_ids_list:
+                                candidate_we_vote_ids_list.append(one_ballot_item_dict['candidate_we_vote_id'])
+                                endorsement_list_light_modified.append(one_ballot_item_dict)
+                            elif positive_value_exists(one_ballot_item_dict['measure_we_vote_id']) \
+                                    and one_ballot_item_dict['measure_we_vote_id'] not in measure_we_vote_ids_list:
+                                measure_we_vote_ids_list.append(one_ballot_item_dict['measure_we_vote_id'])
+                                endorsement_list_light_modified.append(one_ballot_item_dict)
+                        elif 'ballot_item_website' in one_ballot_item_dict and \
+                                positive_value_exists(one_ballot_item_dict['ballot_item_website']):
+                            ballot_item_website = one_ballot_item_dict['ballot_item_website'].lower()
+                            # Remove the http... from the candidate website
+                            ballot_item_website_stripped = extract_website_from_url(ballot_item_website)
+                            if ballot_item_website_stripped in decide_line_lower_case:
+                                if positive_value_exists(one_ballot_item_dict['candidate_we_vote_id']) \
+                                        and one_ballot_item_dict['candidate_we_vote_id'] \
+                                        not in candidate_we_vote_ids_list:
+                                    candidate_we_vote_ids_list.append(one_ballot_item_dict['candidate_we_vote_id'])
+                                    endorsement_list_light_modified.append(one_ballot_item_dict)
+
             except Exception as error_message:
                 status += "SCRAPE_ONE_LINE_ERROR: {error_message}".format(error_message=error_message)
 
         success = True
-        status += "FINISHED_SCRAPING_PAGE_FOR_CANDIDATES "
+        status += "FINISHED_SCRAPING_PAGE "
     except timeout:
-        status += "CANDIDATE_SCRAPE_TIMEOUT_ERROR "
+        status += "ENDORSEMENTS-WEB_PAGE_SCRAPE_TIMEOUT_ERROR "
         success = False
     except IOError as error_instance:
         # Catch the error message coming back from urllib.request.urlopen and pass it in the status
@@ -1515,13 +1536,13 @@ def find_candidates_on_one_web_page(site_url, candidate_list_light):
         status += "SCRAPE_GENERAL_EXCEPTION_ERROR: {error_message}".format(error_message=error_message)
         success = False
 
-    at_least_one_candidate_found = positive_value_exists(len(candidate_we_vote_ids_list))
+    at_least_one_endorsement_found = positive_value_exists(len(candidate_we_vote_ids_list)) \
+        or positive_value_exists(len(measure_we_vote_ids_list))
     results = {
         'status':                           status,
         'success':                          success,
-        'at_least_one_candidate_found':     at_least_one_candidate_found,
-        'candidate_we_vote_ids_list':       candidate_we_vote_ids_list,
+        'at_least_one_endorsement_found':   at_least_one_endorsement_found,
         'page_redirected':                  False,
-        'selected_candidate_list_light':    selected_candidate_list_light,
+        'endorsement_list_light':           endorsement_list_light_modified,
     }
     return results

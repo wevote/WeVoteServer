@@ -252,6 +252,7 @@ class CandidateCampaignListManager(models.Model):
             for candidate in candidate_list_objects:
                 one_candidate = {
                     'ballot_item_display_name': candidate.display_candidate_name(),
+                    'ballot_item_website':      candidate.candidate_url,
                     'candidate_we_vote_id':     candidate.we_vote_id,
                     'google_civic_election_id': candidate.google_civic_election_id,
                     'office_we_vote_id':        candidate.contest_office_we_vote_id,

@@ -946,7 +946,7 @@ class ContestMeasureList(models.Model):
         return results
 
     def retrieve_contest_measures_from_non_unique_identifiers(
-            self, google_civic_election_id, incoming_state_code, contest_measure_title,
+            self, google_civic_election_id_list, incoming_state_code, contest_measure_title,
             district_id='', district_name='',
             ignore_measure_we_vote_id_list=[]):
         keep_looking_for_duplicates = True
@@ -961,9 +961,10 @@ class ContestMeasureList(models.Model):
         try:
             contest_measure_query = ContestMeasure.objects.all()
             # TODO Is there a way to filter with "dash" insensitivity? - vs --
-            contest_measure_query = contest_measure_query.filter(measure_title__iexact=contest_measure_title,
-                                                                 state_code__iexact=incoming_state_code,
-                                                                 google_civic_election_id=google_civic_election_id)
+            contest_measure_query = contest_measure_query.filter(
+                measure_title__iexact=contest_measure_title,
+                state_code__iexact=incoming_state_code,
+                google_civic_election_id__in=google_civic_election_id_list)
             if positive_value_exists(district_id):
                 contest_measure_query = contest_measure_query.filter(district_id=district_id)
             elif positive_value_exists(district_name):
@@ -1001,7 +1002,8 @@ class ContestMeasureList(models.Model):
         if keep_looking_for_duplicates:
             try:
                 contest_measure_query = ContestMeasure.objects.all()
-                contest_measure_query = contest_measure_query.filter(google_civic_election_id=google_civic_election_id)
+                contest_measure_query = contest_measure_query.filter(
+                    google_civic_election_id__in=google_civic_election_id_list)
                 if positive_value_exists(incoming_state_code):
                     contest_measure_query = contest_measure_query.filter(state_code__iexact=incoming_state_code)
 
@@ -1064,7 +1066,7 @@ class ContestMeasureList(models.Model):
             try:
                 contest_measure_query = ContestMeasure.objects.all()
                 contest_measure_query = contest_measure_query.filter(
-                    google_civic_election_id=google_civic_election_id)
+                    google_civic_election_id__in=google_civic_election_id_list)
                 if positive_value_exists(incoming_state_code):
                     contest_measure_query = contest_measure_query.filter(state_code__iexact=incoming_state_code)
 
@@ -1167,9 +1169,74 @@ class ContestMeasureList(models.Model):
             'contest_measure':              contest_measure,
             'contest_measure_list_found':   contest_measure_list_found,
             'contest_measure_list':         contest_measure_list_filtered,
-            'google_civic_election_id':     google_civic_election_id,
+            'google_civic_election_id_list': google_civic_election_id_list,
             'multiple_entries_found':       multiple_entries_found,
             'state_code':                   incoming_state_code,
+        }
+        return results
+
+    def retrieve_measures_for_specific_elections(self, google_civic_election_id_list=[],
+                                                 limit_to_this_state_code="",
+                                                 return_list_of_objects=False):
+        status = ""
+        measure_list_objects = []
+        measure_list_light = []
+        measure_list_found = False
+
+        if not positive_value_exists(google_civic_election_id_list) or not len(google_civic_election_id_list):
+            success = False
+            status += "LIST_OF_ELECTIONS_MISSING-FOR_MEASURES "
+            results = {
+                'success': success,
+                'status': status,
+                'measure_list_found': measure_list_found,
+                'measure_list_objects': [],
+                'measure_list_light': [],
+            }
+            return results
+
+        try:
+            measure_queryset = ContestMeasure.objects.all()
+            measure_queryset = measure_queryset.filter(google_civic_election_id__in=google_civic_election_id_list)
+            if positive_value_exists(limit_to_this_state_code):
+                measure_queryset = measure_queryset.filter(state_code__iexact=limit_to_this_state_code)
+            measure_list_objects = list(measure_queryset)
+
+            if len(measure_list_objects):
+                measure_list_found = True
+                status += 'MEASURES_RETRIEVED '
+                success = True
+            else:
+                status += 'NO_MEASURES_RETRIEVED '
+                success = True
+        except ContestMeasure.DoesNotExist:
+            # No measures found. Not a problem.
+            status = 'NO_MEASURES_FOUND_DoesNotExist '
+            measure_list_objects = []
+            success = True
+        except Exception as e:
+            handle_exception(e, logger=logger)
+            status = 'FAILED retrieve_measures_for_specific_elections ' \
+                     '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
+            success = False
+
+        if measure_list_found:
+            for measure in measure_list_objects:
+                one_measure = {
+                    'ballot_item_display_name': measure.measure_title,
+                    'candidate_we_vote_id':     '',
+                    'google_civic_election_id': measure.google_civic_election_id,
+                    'office_we_vote_id':        '',
+                    'measure_we_vote_id':       measure.we_vote_id,
+                }
+                measure_list_light.append(one_measure)
+
+        results = {
+            'success':              success,
+            'status':               status,
+            'measure_list_found':   measure_list_found,
+            'measure_list_objects': measure_list_objects if return_list_of_objects else [],
+            'measure_list_light':   measure_list_light,
         }
         return results
 
@@ -1191,7 +1258,7 @@ class ContestMeasureList(models.Model):
             if positive_value_exists(we_vote_id_from_master):
                 measure_queryset = measure_queryset.filter(~Q(we_vote_id__iexact=we_vote_id_from_master))
 
-            # We want to find candidates with *any* of these values
+            # We want to find measures with *any* of these values
             if positive_value_exists(measure_title):
                 new_filter = Q(measure_title__iexact=measure_title)
                 filters.append(new_filter)
@@ -1228,7 +1295,7 @@ class ContestMeasureList(models.Model):
                 status = 'NO_DUPLICATE_MEASURES_RETRIEVED'
                 success = True
         except ContestMeasure.DoesNotExist:
-            # No candidates found. Not a problem.
+            # No measures found. Not a problem.
             status = 'NO_DUPLICATE_MEASURES_FOUND_DoesNotExist'
             measure_list_objects = []
             success = True

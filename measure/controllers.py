@@ -2,7 +2,8 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
-from .models import ContestMeasure, ContestMeasureList, ContestMeasureManager, CONTEST_MEASURE_UNIQUE_IDENTIFIERS
+from .models import ContestMeasure, ContestMeasureList, ContestMeasureManager, CONTEST_MEASURE_UNIQUE_IDENTIFIERS, \
+    MEASURE_TITLE_EQUIVALENT_MEASURE_TITLE_PAIRS
 from ballot.models import MEASURE
 from config.base import get_environment_variable
 from django.http import HttpResponse
@@ -11,7 +12,7 @@ import json
 from position.controllers import update_all_position_details_from_contest_measure
 import wevote_functions.admin
 from wevote_functions.functions import convert_state_code_to_state_text, convert_to_int, positive_value_exists, \
-    process_request_from_master
+    process_request_from_master, MEASURE_TITLE_TO_NUMBER_OR_LETTER_IDENTIFIERS
 
 logger = wevote_functions.admin.get_logger(__name__)
 
@@ -125,8 +126,9 @@ def find_duplicate_contest_measure(contest_measure, ignore_measure_we_vote_id_li
     # Search for other contest measures within this election that match name and election
     contest_measure_list_manager = ContestMeasureList()
     try:
+        google_civic_election_id_list = [contest_measure.google_civic_election_id]
         results = contest_measure_list_manager.retrieve_contest_measures_from_non_unique_identifiers(
-            contest_measure.google_civic_election_id, contest_measure.state_code, contest_measure.measure_title,
+            google_civic_election_id_list, contest_measure.state_code, contest_measure.measure_title,
             contest_measure.district_id, contest_measure.district_name, ignore_measure_we_vote_id_list)
 
         if results['contest_measure_found']:
@@ -403,3 +405,129 @@ def push_contest_measure_data_to_other_table_caches(contest_measure_id=0, contes
             'update_all_position_results':  []
         }
         return results
+
+
+def retrieve_measure_list_for_all_upcoming_elections(upcoming_google_civic_election_id_list=[],
+                                                     limit_to_this_state_code="",
+                                                     return_list_of_objects=False):
+
+    status = ""
+    success = True
+    measure_list_objects = []
+    measure_list_light = []
+    measure_list_found = False
+
+    if not upcoming_google_civic_election_id_list \
+            or not positive_value_exists(len(upcoming_google_civic_election_id_list)):
+        upcoming_google_civic_election_id_list = []
+        election_manager = ElectionManager()
+        results = election_manager.retrieve_upcoming_elections(state_code=limit_to_this_state_code)
+        if results['election_list_found']:
+            election_list = results['election_list']
+            for one_election in election_list:
+                if positive_value_exists(one_election.google_civic_election_id):
+                    upcoming_google_civic_election_id_list.append(one_election.google_civic_election_id)
+        else:
+            status += results['status']
+            # success = results['success']
+
+        # If a state code IS included, then the above retrieve_upcoming_elections will have missed the national election
+        if positive_value_exists(limit_to_this_state_code):
+            results = election_manager.retrieve_next_national_election()
+            if results['election_found']:
+                one_election = results['election']
+                if positive_value_exists(one_election.google_civic_election_id) \
+                        and one_election.google_civic_election_id not in upcoming_google_civic_election_id_list:
+                    upcoming_google_civic_election_id_list.append(one_election.google_civic_election_id)
+            else:
+                status += results['status']
+
+    if len(upcoming_google_civic_election_id_list):
+        measure_list_manager = ContestMeasureList()
+        results = measure_list_manager.retrieve_measures_for_specific_elections(
+            upcoming_google_civic_election_id_list,
+            limit_to_this_state_code=limit_to_this_state_code,
+            return_list_of_objects=return_list_of_objects)
+        if results['measure_list_found']:
+            measure_list_found = True
+            measure_list_light = results['measure_list_light']
+        else:
+            status += results['status']
+            success = results['success']
+
+    results = {
+        'success': success,
+        'status': status,
+        'measure_list_found':     measure_list_found,
+        'measure_list_objects':   measure_list_objects if return_list_of_objects else [],
+        'measure_list_light':     measure_list_light,
+        'return_list_of_objects':   return_list_of_objects,
+    }
+    return results
+
+
+def add_measure_name_alternatives_to_measure_list_light(measure_list_light):
+    success = True
+    status = ""
+    measure_list_light_modified = []
+    existing_measure_name_list = []
+
+    # Look in measure_list_light and try to find variants on proposition names
+    for one_measure_light in measure_list_light:
+        # Include the original
+        existing_measure_name_list.append(one_measure_light['ballot_item_display_name'].lower())
+        measure_list_light_modified.append(one_measure_light)
+        # And now, make new versions of the measure to help us find alternate spellings
+        # MEASURE_TITLE_TO_NUMBER_OR_LETTER_IDENTIFIERS
+        for left_term, right_term in MEASURE_TITLE_EQUIVALENT_MEASURE_TITLE_PAIRS.items():
+            if left_term.lower() in one_measure_light['ballot_item_display_name'].lower():
+                new_term_already_seen = False
+                for existing_name in existing_measure_name_list:
+                    if left_term.lower() == existing_name:
+                        new_term_already_seen = True
+                if not new_term_already_seen:
+                    # Create a measure_light version where the ballot_item_display_name is the simplified prop name
+                    existing_measure_name_list.append(left_term.lower())
+                    one_measure_modified = one_measure_light.copy()  # Make a copy
+                    one_measure_modified['ballot_item_display_name'] = left_term
+                    measure_list_light_modified.append(one_measure_modified)
+
+                new_term_already_seen = False
+                for existing_name in existing_measure_name_list:
+                    if right_term.lower() == existing_name:
+                        new_term_already_seen = True
+                if not new_term_already_seen:
+                    # Create a measure_light version where the ballot_item_display_name is the simplified prop name
+                    existing_measure_name_list.append(right_term.lower())
+                    one_measure_modified = one_measure_light.copy()  # Make a copy
+                    one_measure_modified['ballot_item_display_name'] = right_term
+                    measure_list_light_modified.append(one_measure_modified)
+            if right_term.lower() in one_measure_light['ballot_item_display_name'].lower():
+                new_term_already_seen = False
+                for existing_name in existing_measure_name_list:
+                    if left_term.lower() == existing_name:
+                        new_term_already_seen = True
+                if not new_term_already_seen:
+                    # Create a measure_light version where the ballot_item_display_name is the simplified prop name
+                    existing_measure_name_list.append(left_term.lower())
+                    one_measure_modified = one_measure_light.copy()  # Make a copy
+                    one_measure_modified['ballot_item_display_name'] = left_term
+                    measure_list_light_modified.append(one_measure_modified)
+
+                new_term_already_seen = False
+                for existing_name in existing_measure_name_list:
+                    if right_term.lower() != existing_name:
+                        new_term_already_seen = True
+                if not new_term_already_seen:
+                    # Create a measure_light version where the ballot_item_display_name is the simplified prop name
+                    existing_measure_name_list.append(right_term.lower())
+                    one_measure_modified = one_measure_light.copy()  # Make a copy
+                    one_measure_modified['ballot_item_display_name'] = right_term
+                    measure_list_light_modified.append(one_measure_modified)
+
+    results = {
+        'success':              success,
+        'status':               status,
+        'measure_list_light':   measure_list_light_modified,
+    }
+    return results

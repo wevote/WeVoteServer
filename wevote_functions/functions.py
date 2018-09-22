@@ -884,7 +884,8 @@ def extract_website_from_url(url_string):
     url_string = url_string.replace("https://", "")
     url_string = url_string.replace("http://", "")
     url_string = url_string.replace("www://", "")
-    url_string = url_string.split("/")[0]
+    if 'facebook' not in url_string and 'twitter' not in url_string:
+        url_string = url_string.split("/")[0]
     return url_string
 
 
