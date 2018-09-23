@@ -244,43 +244,46 @@ def voter_guide_create_view(request):
     possible_endorsement_list_found = False
     voter_guide_possibility_manager = VoterGuidePossibilityManager()
     if positive_value_exists(voter_guide_possibility_id):
-        voter_guide_possibilities_query = VoterGuidePossibility.objects.all()
-        voter_guide_possibility = voter_guide_possibilities_query.get(id=voter_guide_possibility_id)
-        if positive_value_exists(voter_guide_possibility.id):
-            ballot_items_raw = voter_guide_possibility.ballot_items_raw
-            batch_header_id = voter_guide_possibility.batch_header_id
-            candidates_missing_from_we_vote = voter_guide_possibility.candidates_missing_from_we_vote
-            cannot_find_endorsements = voter_guide_possibility.cannot_find_endorsements
-            capture_detailed_comments = voter_guide_possibility.capture_detailed_comments
-            hide_from_active_review = voter_guide_possibility.hide_from_active_review
-            ignore_stored_positions = voter_guide_possibility.ignore_stored_positions
-            ignore_this_source = voter_guide_possibility.ignore_this_source
-            internal_notes = voter_guide_possibility.internal_notes
-            organization_name = voter_guide_possibility.organization_name
-            organization_twitter_handle = voter_guide_possibility.organization_twitter_handle
-            organization_we_vote_id = voter_guide_possibility.organization_we_vote_id
-            positions_ready_to_save_as_batch = \
-                voter_guide_possibility_manager.positions_ready_to_save_as_batch(voter_guide_possibility)
-            state_code = voter_guide_possibility.state_code
-            target_google_civic_election_id = voter_guide_possibility.target_google_civic_election_id
-            voter_who_submitted_we_vote_id = voter_guide_possibility.voter_who_submitted_we_vote_id
-            voter_guide_possibility_url = voter_guide_possibility.voter_guide_possibility_url
-            results = extract_voter_guide_possibility_position_list_from_database(voter_guide_possibility)
-            if results['possible_endorsement_list_found']:
-                possible_endorsement_list = results['possible_endorsement_list']
-                possible_endorsement_list_found = True
+        try:
+            voter_guide_possibilities_query = VoterGuidePossibility.objects.all()
+            voter_guide_possibility = voter_guide_possibilities_query.get(id=voter_guide_possibility_id)
+            if positive_value_exists(voter_guide_possibility.id):
+                ballot_items_raw = voter_guide_possibility.ballot_items_raw
+                batch_header_id = voter_guide_possibility.batch_header_id
+                candidates_missing_from_we_vote = voter_guide_possibility.candidates_missing_from_we_vote
+                cannot_find_endorsements = voter_guide_possibility.cannot_find_endorsements
+                capture_detailed_comments = voter_guide_possibility.capture_detailed_comments
+                hide_from_active_review = voter_guide_possibility.hide_from_active_review
+                ignore_stored_positions = voter_guide_possibility.ignore_stored_positions
+                ignore_this_source = voter_guide_possibility.ignore_this_source
+                internal_notes = voter_guide_possibility.internal_notes
+                organization_name = voter_guide_possibility.organization_name
+                organization_twitter_handle = voter_guide_possibility.organization_twitter_handle
+                organization_we_vote_id = voter_guide_possibility.organization_we_vote_id
+                positions_ready_to_save_as_batch = \
+                    voter_guide_possibility_manager.positions_ready_to_save_as_batch(voter_guide_possibility)
+                state_code = voter_guide_possibility.state_code
+                target_google_civic_election_id = voter_guide_possibility.target_google_civic_election_id
+                voter_who_submitted_we_vote_id = voter_guide_possibility.voter_who_submitted_we_vote_id
+                voter_guide_possibility_url = voter_guide_possibility.voter_guide_possibility_url
+                results = extract_voter_guide_possibility_position_list_from_database(voter_guide_possibility)
+                if results['possible_endorsement_list_found']:
+                    possible_endorsement_list = results['possible_endorsement_list']
+                    possible_endorsement_list_found = True
 
-                google_civic_election_id_list = []
-                # Match incoming endorsements to candidates already in the database
-                results = match_endorsement_list_with_candidates_in_database(
-                    possible_endorsement_list, google_civic_election_id_list, state_code)
-                if results['possible_endorsement_list_found']:
-                    possible_endorsement_list = results['possible_endorsement_list']
-                # Match incoming endorsements to candidates already in the database
-                results = match_endorsement_list_with_measures_in_database(
-                    possible_endorsement_list, google_civic_election_id_list, state_code)
-                if results['possible_endorsement_list_found']:
-                    possible_endorsement_list = results['possible_endorsement_list']
+                    google_civic_election_id_list = []
+                    # Match incoming endorsements to candidates already in the database
+                    results = match_endorsement_list_with_candidates_in_database(
+                        possible_endorsement_list, google_civic_election_id_list, state_code)
+                    if results['possible_endorsement_list_found']:
+                        possible_endorsement_list = results['possible_endorsement_list']
+                    # Match incoming endorsements to candidates already in the database
+                    results = match_endorsement_list_with_measures_in_database(
+                        possible_endorsement_list, google_civic_election_id_list, state_code)
+                    if results['possible_endorsement_list_found']:
+                        possible_endorsement_list = results['possible_endorsement_list']
+        except VoterGuidePossibility.DoesNotExist:
+            pass
 
     if positive_value_exists(voter_guide_possibility_url):
         display_all_done_button = True
