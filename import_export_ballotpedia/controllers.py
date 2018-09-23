@@ -1660,6 +1660,7 @@ def voter_ballot_items_retrieve_from_ballotpedia_for_api(voter_device_id, text_f
 
     # We need to figure out the next upcoming election for this person based on the state_code in text_for_map_search
     state_code = extract_state_code_from_address_string(text_for_map_search)
+    status += "[STATE_CODE: " + str(state_code) + "] "
     if positive_value_exists(state_code):
         original_text_state = state_code
         election_manager = ElectionManager()
@@ -1668,8 +1669,10 @@ def voter_ballot_items_retrieve_from_ballotpedia_for_api(voter_device_id, text_f
             election = election_results['election']
             google_civic_election_id = election.google_civic_election_id
 
+        status += "NEXT_ELECTION_FOR_STATE: " + str(google_civic_election_id) + " "
+
     if not positive_value_exists(text_for_map_search) or not positive_value_exists(google_civic_election_id):
-        status += 'MISSING_ADDRESS_TEXT_FOR_BALLOT_SEARCH'
+        status += 'MISSING_ADDRESS_TEXT_FOR_BALLOT_SEARCH_FOR_ELECTION_ID '
         success = False
         results = {
             'success': success,
@@ -1751,6 +1754,7 @@ def voter_ballot_items_retrieve_from_ballotpedia_for_api(voter_device_id, text_f
         status += 'UNABLE_TO-retrieve_one_ballot_from_ballotpedia_api'
         success = False
     else:
+        status += "RETRIEVE_ONE_BALLOT_FROM_BALLOTPEDIA_API-SUCCESS "
         success = True
         ballot_item_dict_list = one_ballot_results['structured_json']
 
@@ -1777,11 +1781,12 @@ def voter_ballot_items_retrieve_from_ballotpedia_for_api(voter_device_id, text_f
             # store_on_ballot... adds an entry to the BallotReturned table
             # We update VoterAddress with normalized address data in store_one_ballot_from_google_civic_api
             status += "GOOGLE_ID: " + str(google_civic_election_id) + " "
+            status += "VOTER_ID: " + str(voter_id) + " "
             store_one_ballot_results = store_one_ballot_from_ballotpedia_api(
                     ballot_item_dict_list, google_civic_election_id,
                     text_for_map_search, latitude, longitude,
                     ballot_location_display_name,
-                    voter_id,
+                    voter_id=voter_id,
                     normalized_city=original_text_city,
                     normalized_state=original_text_state,
                     normalized_zip=original_text_zip)
@@ -1795,12 +1800,14 @@ def voter_ballot_items_retrieve_from_ballotpedia_for_api(voter_device_id, text_f
                     ballot_location_display_name = ballot_returned.ballot_location_display_name
                     ballot_location_shortcut = ballot_returned.ballot_location_shortcut
                     ballot_returned_we_vote_id = ballot_returned.we_vote_id
-                    status += "STORED: " + str(ballot_returned_we_vote_id) + " "
+                    status += "BALLOTPEDIA-STORED: " + str(ballot_returned_we_vote_id) + " "
                 else:
-                    status += "NOT_STORED "
+                    status += "BALLOTPEDIA-NOT_STORED "
             else:
                 status += 'UNABLE_TO-store_one_ballot_from_ballotpedia_api: '
                 status += store_one_ballot_results['status']
+        else:
+            status += "BALLOT_ITEM_DICT_LIST-MISSING "
 
     # If a google_civic_election_id was not returned, outside of this function we search again using a test election,
     # so that during our initial user testing, ballot data is returned in areas where elections don't currently exist
@@ -1932,7 +1939,7 @@ def store_one_ballot_from_ballotpedia_api(ballot_item_dict_list, google_civic_el
 
     if not positive_value_exists(google_civic_election_id):
         results = {
-            'status': 'BALLOT_ITEM_DICT_LIST_MISSING_ELECTION_ID',
+            'status': 'BALLOT_ITEM_DICT_LIST_MISSING_ELECTION_ID ',
             'success': False,
             'google_civic_election_id': 0,
         }
@@ -1956,6 +1963,7 @@ def store_one_ballot_from_ballotpedia_api(ballot_item_dict_list, google_civic_el
             and not positive_value_exists(longitude):
         polling_location_manager = PollingLocationManager()
         results = polling_location_manager.retrieve_polling_location_by_id(0, polling_location_we_vote_id)
+        status += "RETRIEVING_LAT_LONG_FROM_POLLING_LOCATION "
         if results['polling_location_found']:
             polling_location = results['polling_location']
             latitude = polling_location.latitude
@@ -1971,6 +1979,7 @@ def store_one_ballot_from_ballotpedia_api(ballot_item_dict_list, google_civic_el
     measure_subtitle = ""
     measure_text = ""
     for one_ballot_item_dict in ballot_item_dict_list:
+        status += "BALLOT_ITEM-START "
         # 'contest_office_we_vote_id': one_office.we_vote_id,
         # 'contest_office_id': one_office.id,
         # 'contest_office_name': one_office.office_name,
@@ -2034,6 +2043,9 @@ def store_one_ballot_from_ballotpedia_api(ballot_item_dict_list, google_civic_el
                         contest_measure_id, contest_measure_we_vote_id, normalized_state, defaults)
                 if results['ballot_item_found']:
                     number_of_ballot_items_updated += 1
+                else:
+                    status += results['status'] + " "
+                    status += "UPDATE_OR_CREATE_BALLOT_ITEM_UNSUCCESSFUL "
             elif positive_value_exists(polling_location_we_vote_id):
                 results = ballot_item_manager.update_or_create_ballot_item_for_polling_location(
                     polling_location_we_vote_id, google_civic_election_id, google_ballot_placement,
@@ -2042,6 +2054,8 @@ def store_one_ballot_from_ballotpedia_api(ballot_item_dict_list, google_civic_el
                     contest_measure_id, contest_measure_we_vote_id, normalized_state, defaults)
                 if results['ballot_item_found']:
                     number_of_ballot_items_updated += 1
+        else:
+            status += "MISSING-BALLOT_ITEM_DISPLAY_NAME-OR-NORMALIZED_STATE-OR-ELECTION_ID"
 
     # TODO: Figure out best way to save ballot_returned
     if positive_value_exists(number_of_ballot_items_updated):
@@ -2052,12 +2066,15 @@ def store_one_ballot_from_ballotpedia_api(ballot_item_dict_list, google_civic_el
             ballot_location_display_name=ballot_location_display_name, text_for_map_search=text_for_map_search,
             normalized_city=normalized_city, normalized_state=normalized_state, normalized_zip=normalized_zip,
         )
+        status += results['status']
         if results['ballot_returned_found']:
+            status += "UPDATE_OR_CREATE_BALLOT_RETURNED-SUCCESS "
             ballot_returned = results['ballot_returned']
             ballot_returned_found = True
-
-    if number_of_ballot_items_updated:
-        status += "IMPORT_BALLOT_ITEM_ENTRY:BALLOT_ITEM_UPDATED "
+        else:
+            status += "UPDATE_OR_CREATE_BALLOT_RETURNED-BALLOT_RETURNED_FOUND-FALSE "
+    else:
+        status += "NUMBER_OF_BALLOT_ITEMS_UPDATED-NEGATIVE "
 
     results = {
         'status':                   status,

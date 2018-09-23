@@ -374,13 +374,12 @@ class BallotItemManager(models.Model):
                         ballot_item_on_stage.save()
 
                         success = True
-                        status = 'BALLOT_ITEM_UPDATED '
+                        status += 'BALLOT_ITEM_UPDATED '
 
                 except Exception as e:
                     status += "UPDATE_OR_CREATE_BALLOT_ITEM-MORE_THAN_ONE_FOUND "
                     handle_record_found_more_than_one_exception(e, logger, exception_message_optional=status)
                     success = False
-                    status = 'MULTIPLE_MATCHING_BALLOT_ITEMS_FOUND '
                     exception_multiple_object_returned = True
 
         results = {
