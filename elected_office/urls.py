@@ -12,6 +12,8 @@ urlpatterns = [
     url(r'^delete/$', views_admin.elected_office_delete_process_view, name='elected_office_delete_process'),
     url(r'^edit_process/$', views_admin.elected_office_edit_process_view, name='elected_office_edit_process'),
     url(r'^new/$', views_admin.elected_office_new_view, name='elected_office_new'),
+    url(r'^update/$', views_admin.elected_office_update_view, name='elected_office_update'),
+    url(r'^real_time_status/$', views_admin.elected_office_update_status, name='elected_office_update_status'),
     url(r'^(?P<elected_office_id>[0-9]+)/edit/$', views_admin.elected_office_edit_view, name='elected_office_edit'),
     url(r'^(?P<elected_office_id>[0-9]+)/summary/$', views_admin.elected_office_summary_view,
         name='elected_office_summary'),

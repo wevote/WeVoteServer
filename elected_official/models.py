@@ -5,6 +5,7 @@
 from django.db import models
 from django.db.models import Q
 from exception.models import handle_exception, handle_record_found_more_than_one_exception
+from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
 from elected_office.models import ElectedOffice, ElectedOfficeManager
 import re
 from wevote_settings.models import fetch_next_we_vote_id_elected_official_integer, fetch_site_unique_id_prefix
@@ -1254,10 +1255,12 @@ class ElectedOfficialManager(models.Model):
         results = self.retrieve_elected_officials_are_not_duplicates_list(elected_official_we_vote_id)
         return results['elected_officials_are_not_duplicates_list_we_vote_ids']
 
-    def update_or_create_elected_official(self, elected_official_we_vote_id, google_civic_election_id, ocd_division_id,
-                                          elected_office_id, elected_office_we_vote_id,
-                                          google_civic_elected_official_name,
-                                          updated_elected_official_values):
+    def update_or_create_elected_official(self,  elected_office_name, elected_official_name,
+                                          google_civic_elected_official_name, political_party, photo_url,
+                                          ocd_division_id, state_code, elected_official_url,
+                                          facebook_url, twitter_url, google_plus_url, youtube_url,
+                                          elected_official_phone ):
+
         """
         Either update or create a elected_official entry.
         """
@@ -1267,139 +1270,140 @@ class ElectedOfficialManager(models.Model):
         elected_official_on_stage = ElectedOfficial()
         status = ""
 
-        if not positive_value_exists(google_civic_election_id):
+        if not positive_value_exists(ocd_division_id):
             success = False
-            status += 'MISSING_GOOGLE_CIVIC_ELECTION_ID '
-        # We are avoiding requiring ocd_division_id
-        # elif not positive_value_exists(ocd_division_id):
-        #     success = False
-        #     status = 'MISSING_OCD_DIVISION_ID'
-        # DALE 2016-02-20 We aren't requiring elected_office_id or elected_office_we_vote_id to match a elected_official
-        # elif not positive_value_exists(elected_office_we_vote_id): # and not positive_value_exists(elected_office_id):
-        #     success = False
-        #     status = 'MISSING_CONTEST_OFFICE_ID'
+            status += 'MISSING_OCD_DIVISION_ID '
         elif not positive_value_exists(google_civic_elected_official_name):
             success = False
             status += 'MISSING_GOOGLE_CIVIC_ELECTED_OFFICIAL_NAME '
-        elif positive_value_exists(elected_official_we_vote_id) and positive_value_exists(elected_office_we_vote_id):
+        else:
             try:
                 # If here we are using permanent public identifier elected_office_we_vote_id
                 elected_official_on_stage, new_elected_official_created = \
                     ElectedOfficial.objects.update_or_create(
-                        google_civic_election_id__exact=google_civic_election_id,
-                        we_vote_id__iexact=elected_official_we_vote_id,
-                        elected_office_we_vote_id__iexact=elected_office_we_vote_id,
-                        defaults=updated_elected_official_values)
+                        elected_office_name=elected_office_name,
+                        elected_official_name=elected_official_name,
+                        google_civic_elected_official_name=google_civic_elected_official_name,
+                        ocd_division_id=ocd_division_id,
+                        state_code=state_code,
+                        political_party=political_party,
+                        photo_url=photo_url,
+                        elected_official_url=elected_official_url,
+                        facebook_url=facebook_url,
+                        twitter_url=twitter_url,
+                        google_plus_url=google_plus_url,
+                        youtube_url=youtube_url,
+                        elected_official_phone=elected_official_phone)
                 success = True
                 status += "ELECTED_OFFICIAL_CAMPAIGN_UPDATED_OR_CREATED "
             except ElectedOfficial.MultipleObjectsReturned as e:
                 success = False
-                status += 'MULTIPLE_MATCHING_ELECTED_OFFICIAL_CAMPAIGNS_FOUND_BY_ELECTED_OFFICIAL_WE_VOTE_ID '
+                status += 'MULTIPLE_MATCHING_ELECTED_OFFICIAL_CAMPAIGNS_FOUND_BY_GOOGLE_CIVIC_ELECTED_OFFICIAL_NAME '
                 exception_multiple_object_returned = True
             except Exception as e:
-                status += 'FAILED_TO_RETRIEVE_OFFICE_BY_GOOGLE_CIVIC_OFFICE_NAME ' \
+                status += 'FAILED_TO_RETRIEVE_OFFICE_BY_GOOGLE_CIVIC_ELECTED_OFFICIAL_NAME ' \
                          '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
-                success = False  # If coming (most likely) from a Google Civic import, or internal bulk update
-        else:
-            # Given we might have the office listed by google_civic_office_name
-            # OR office_name, we need to check both before we try to create a new entry
-            elected_official_found = False
-            try:
-                elected_official_on_stage = ElectedOfficial.objects.get(
-                    google_civic_election_id__exact=google_civic_election_id,
-                    google_civic_elected_official_name__iexact=google_civic_elected_official_name
-                )
-                elected_official_found = True
-                success = True
-                status += 'CONTEST_OFFICE_SAVED '
-            except ElectedOfficial.MultipleObjectsReturned as e:
                 success = False
-                status += 'MULTIPLE_MATCHING_CONTEST_OFFICES_FOUND_BY_GOOGLE_CIVIC_OFFICE_NAME '
-                exception_multiple_object_returned = True
-            except ElectedOfficial.DoesNotExist:
-                exception_does_not_exist = True
-                status += "RETRIEVE_OFFICE_NOT_FOUND_BY_GOOGLE_CIVIC_ELECTED_OFFICIAL_NAME "
-            except Exception as e:
-                status += 'FAILED_TO_RETRIEVE_OFFICE_BY_GOOGLE_CIVIC_OFFICE_NAME ' \
-                         '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
-
-            if not elected_official_found and not exception_multiple_object_returned:
-                # Try to find record based on office_name (instead of google_civic_office_name)
-                try:
-                    elected_official_on_stage = ElectedOfficial.objects.get(
-                        google_civic_election_id__exact=google_civic_election_id,
-                        elected_official_name__iexact=google_civic_elected_official_name
-                    )
-                    elected_official_found = True
-                    success = True
-                    status += 'ELECTED_OFFICIAL_RETRIEVED_FROM_ELECTED_OFFICIAL_NAME '
-                except ElectedOfficial.MultipleObjectsReturned as e:
-                    success = False
-                    status += 'MULTIPLE_MATCHING_ELECTED_OFFICIALS_FOUND_BY_ELECTED_OFFICIAL_NAME '
-                    exception_multiple_object_returned = True
-                except ElectedOfficial.DoesNotExist:
-                    exception_does_not_exist = True
-                    status += "RETRIEVE_ELECTED_OFFICIAL_NOT_FOUND_BY_ELECTED_OFFICIAL_NAME "
-                except Exception as e:
-                    status += 'FAILED retrieve_all_offices_for_upcoming_election ' \
-                             '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
-                    success = False
-
-            if exception_multiple_object_returned:
-                # We can't proceed because there is an error with the data
-                success = False
-            elif elected_official_found:
-                # Update record
-                # Note: When we decide to start updating elected_official_name elsewhere within We Vote, we should stop
-                #  updating elected_official_name via subsequent Google Civic imports
-                try:
-                    new_elected_official_created = False
-                    elected_official_updated = False
-                    elected_official_has_changes = False
-                    for key, value in updated_elected_official_values.items():
-                        if hasattr(elected_official_on_stage, key):
-                            elected_official_has_changes = True
-                            setattr(elected_official_on_stage, key, value)
-                    if elected_official_has_changes and positive_value_exists(elected_official_on_stage.we_vote_id):
-                        elected_official_on_stage.save()
-                        elected_official_updated = True
-                    if elected_official_updated:
-                        success = True
-                        status += "ELECTED_OFFICIAL_UPDATED "
-                    else:
-                        success = False
-                        status += "ELECTED_OFFICIAL_NOT_UPDATED "
-                except Exception as e:
-                    status += 'FAILED_TO_UPDATE_ELECTED_OFFICIAL ' \
-                             '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
-                    success = False
-            else:
-                # Create record
-                try:
-                    new_elected_official_created = False
-                    elected_official_on_stage = ElectedOfficial.objects.create(
-                        google_civic_election_id=google_civic_election_id,
-                        ocd_division_id=ocd_division_id,
-                        elected_office_id=elected_office_id,
-                        elected_office_we_vote_id=elected_office_we_vote_id,
-                        google_civic_elected_official_name=google_civic_elected_official_name)
-                    if positive_value_exists(elected_official_on_stage.id):
-                        for key, value in updated_elected_official_values.items():
-                            if hasattr(elected_official_on_stage, key):
-                                setattr(elected_official_on_stage, key, value)
-                        elected_official_on_stage.save()
-                        new_elected_official_created = True
-                    if positive_value_exists(new_elected_official_created):
-                        status += "ELECTED_OFFICIAL_CREATED "
-                        success = True
-                    else:
-                        status += "ELECTED_OFFICIAL_NOT_CREATED "
-                        success = False
-
-                except Exception as e:
-                    status += 'FAILED_TO_CREATE_ELECTED_OFFICIAL ' \
-                             '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
-                    success = False
+        # else:
+        #     # Given we might have the office listed by google_civic_office_name
+        #     # OR office_name, we need to check both before we try to create a new entry
+        #     elected_official_found = False
+        #     try:
+        #         elected_official_on_stage = ElectedOfficial.objects.get(
+        #             google_civic_election_id__exact=google_civic_election_id,
+        #             google_civic_elected_official_name__iexact=google_civic_elected_official_name
+        #         )
+        #         elected_official_found = True
+        #         success = True
+        #         status += 'CONTEST_OFFICE_SAVED '
+        #     except ElectedOfficial.MultipleObjectsReturned as e:
+        #         success = False
+        #         status += 'MULTIPLE_MATCHING_CONTEST_OFFICES_FOUND_BY_GOOGLE_CIVIC_OFFICE_NAME '
+        #         exception_multiple_object_returned = True
+        #     except ElectedOfficial.DoesNotExist:
+        #         exception_does_not_exist = True
+        #         status += "RETRIEVE_OFFICE_NOT_FOUND_BY_GOOGLE_CIVIC_ELECTED_OFFICIAL_NAME "
+        #     except Exception as e:
+        #         status += 'FAILED_TO_RETRIEVE_OFFICE_BY_GOOGLE_CIVIC_OFFICE_NAME ' \
+        #                  '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
+        #
+        #     if not elected_official_found and not exception_multiple_object_returned:
+        #         # Try to find record based on office_name (instead of google_civic_office_name)
+        #         try:
+        #             elected_official_on_stage = ElectedOfficial.objects.get(
+        #                 google_civic_election_id__exact=google_civic_election_id,
+        #                 elected_official_name__iexact=google_civic_elected_official_name
+        #             )
+        #             elected_official_found = True
+        #             success = True
+        #             status += 'ELECTED_OFFICIAL_RETRIEVED_FROM_ELECTED_OFFICIAL_NAME '
+        #         except ElectedOfficial.MultipleObjectsReturned as e:
+        #             success = False
+        #             status += 'MULTIPLE_MATCHING_ELECTED_OFFICIALS_FOUND_BY_ELECTED_OFFICIAL_NAME '
+        #             exception_multiple_object_returned = True
+        #         except ElectedOfficial.DoesNotExist:
+        #             exception_does_not_exist = True
+        #             status += "RETRIEVE_ELECTED_OFFICIAL_NOT_FOUND_BY_ELECTED_OFFICIAL_NAME "
+        #         except Exception as e:
+        #             status += 'FAILED retrieve_all_offices_for_upcoming_election ' \
+        #                      '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
+        #             success = False
+        #
+        #     if exception_multiple_object_returned:
+        #         # We can't proceed because there is an error with the data
+        #         success = False
+        #     elif elected_official_found:
+        #         # Update record
+        #         # Note: When we decide to start updating elected_official_name elsewhere within We Vote, we should stop
+        #         #  updating elected_official_name via subsequent Google Civic imports
+        #         try:
+        #             new_elected_official_created = False
+        #             elected_official_updated = False
+        #             elected_official_has_changes = False
+        #             for key, value in updated_elected_official_values.items():
+        #                 if hasattr(elected_official_on_stage, key):
+        #                     elected_official_has_changes = True
+        #                     setattr(elected_official_on_stage, key, value)
+        #             if elected_official_has_changes and positive_value_exists(elected_official_on_stage.we_vote_id):
+        #                 elected_official_on_stage.save()
+        #                 elected_official_updated = True
+        #             if elected_official_updated:
+        #                 success = True
+        #                 status += "ELECTED_OFFICIAL_UPDATED "
+        #             else:
+        #                 success = False
+        #                 status += "ELECTED_OFFICIAL_NOT_UPDATED "
+        #         except Exception as e:
+        #             status += 'FAILED_TO_UPDATE_ELECTED_OFFICIAL ' \
+        #                      '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
+        #             success = False
+        #     else:
+        #         # Create record
+        #         try:
+        #             new_elected_official_created = False
+        #             elected_official_on_stage = ElectedOfficial.objects.create(
+        #                 google_civic_election_id=google_civic_election_id,
+        #                 ocd_division_id=ocd_division_id,
+        #                 elected_office_id=elected_office_id,
+        #                 elected_office_we_vote_id=elected_office_we_vote_id,
+        #                 google_civic_elected_official_name=google_civic_elected_official_name)
+        #             if positive_value_exists(elected_official_on_stage.id):
+        #                 for key, value in updated_elected_official_values.items():
+        #                     if hasattr(elected_official_on_stage, key):
+        #                         setattr(elected_official_on_stage, key, value)
+        #                 elected_official_on_stage.save()
+        #                 new_elected_official_created = True
+        #             if positive_value_exists(new_elected_official_created):
+        #                 status += "ELECTED_OFFICIAL_CREATED "
+        #                 success = True
+        #             else:
+        #                 status += "ELECTED_OFFICIAL_NOT_CREATED "
+        #                 success = False
+        #
+        #         except Exception as e:
+        #             status += 'FAILED_TO_CREATE_ELECTED_OFFICIAL ' \
+        #                      '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
+        #             success = False
 
         results = {
             'success':                      success,

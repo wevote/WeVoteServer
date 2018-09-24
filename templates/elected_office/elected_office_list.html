@@ -4,7 +4,10 @@
 {% block title %}Elected Offices{% endblock %}
 
 {%  block content %}
-<p><a href="{% url 'admin_tools:admin_home' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">< Back to Admin Home</a></p>
+<p>
+    <a href="{% url 'admin_tools:admin_home' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">< Back to Admin Home</a>
+</p>
+
 <p>Jump to:
     <a href="{% url 'election:election_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">Elections</a> -
     <a href="{% url 'measure:measure_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">Measures</a> -
@@ -22,17 +25,44 @@
 
 <h1>Elected Offices</h1>
 
-<p><a href="{% url 'import_export_batches:batch_list' %}?kind_of_batch=ELECTED_OFFICE&google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}"
+<br/>
+<p>
+    <a href="{% url 'import_export_batches:batch_list' %}?kind_of_batch=ELECTED_OFFICE&google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}"
       target="_blank">
         Import New Elected Offices ></a> (open in new window)
 </p>
 
-<p><a href="{% url 'elected_office:elected_office_new' %}?google_civic_election_id={{ google_civic_election_id }}">Add New Elected Office</a></p>
-<p><a href="{% url 'position:refresh_positions_with_contest_office_details_for_election' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
-    Refresh Positions from Elected Office info for this election</a></p>
+<br/>
 
-    <form name="organization_position_choose_election" method="get" action="{% url 'elected_office:elected_office_list' %}">
-        {% csrf_token %}
+<form id="update_office" name="elected_office_update" method="get" action="{% url 'elected_office:elected_office_update' %}">
+        {#% csrf_token %#}
+    <input type="submit" value="Update current elected offices and officials from Google Civic for state ...">
+    {% if state_list %}
+        <select id="update_state_code_id" name="update_state_code">
+            <option value="">
+                -- Choose State to Update --</option>
+                {% for key, state in state_list %}
+                    <option value="{{ key }}"
+                            {% if key|lower == state_code|lower %} selected="selected"{% endif %}>
+                        {{ state }}</option>
+                {% endfor %}
+        </select>
+    {% endif %}
+
+    <input type="hidden" id="started_update" name="started_update" value="stop">
+    <br/>
+    <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+    <span id="realTimeStatus"></span>
+</form>
+
+<br/>
+
+<p>
+    <a href="{% url 'elected_office:elected_office_new' %}?google_civic_election_id={{ google_civic_election_id }}">Add New Elected Office</a>
+</p>
+
+<form name="organization_position_choose_election" method="get" action="{% url 'elected_office:elected_office_list' %}">
+    {% csrf_token %}
 
     {% if state_list %}
         <select id="state_code_id" name="state_code">
@@ -46,10 +76,10 @@
         </select>
         {% if state_code != "" %}
         <a href="{% url 'elected_office:elected_office_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}&candidate_search={{ candidate_search }}&show_all=1">
-            show all</a>
+            Show all Elected Offices in this state</a>
         {% endif %}
         {% endif %}
-        <br />
+        <br/><br/>
         {% if elected_office_search %}
             <a href="{% url 'elected_office:elected_office_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
                  clear search</a>&nbsp;
@@ -57,18 +87,20 @@
         <input type="text" name="elected_office_search" id="elected_office_search_id" value="{{ elected_office_search }}" style="width: 450px" />
         <input type="submit" value="Search for Elected Office" />
         {# End of if state_list #}
-{% if elected_office_list %}
-    {% if google_civic_election_id %}
-    <ul>
-        <li>Prepare: <a href="{% url 'office:find_and_merge_duplicate_offices' %}?google_civic_election_id={{ google_civic_election_id }}"
-                        target="_blank" >
-        Find and Merge Duplicate Elected Offices for this Election</a> (in new window - about 1 minute)</li>
-    </ul>
 
-    {% endif %}
-{% endif %}
+        {% if elected_office_list %}
+            {% if google_civic_election_id %}
+            <ul>
+                <li>Prepare: <a href="{% url 'office:find_and_merge_duplicate_offices' %}?google_civic_election_id={{ google_civic_election_id }}"
+                                target="_blank" >
+                Find and Merge Duplicate Elected Offices for this Election</a> (in new window - about 1 minute)</li>
+            </ul>
+
+            {% endif %}
+        {% endif %}
 
 {% if elected_office_list %}
+    <br/>
     <table class="table">
       <thead>
         <tr>
@@ -77,8 +109,7 @@
             <th>We Vote ID</th>
             <th>Elected Office Name</th>
             <th>State</th>
-            <th>District ID</th>
-            <th># of Candidates</th>
+            <th>Number Elected</th>
             <th>Ocd Division ID</th>
             <th>Ballotpedia office ID</th>
         </tr>
@@ -88,17 +119,11 @@
             <td>{{ forloop.counter }}</td>
             <td>{{ elected_office.id }}</td>
             <td>{{ elected_office.we_vote_id }}</td>
-            <td><a href="{% url 'elected_office:elected_office_summary' elected_office.id %}">{{ elected_office.elected_office_name }}
-{#                {% if elected_office.district_id %}#}
-{#                    - District {{ elected_office.district_id }}#}
-{#                {% endif %}#}
-{#                {% if elected_office.state_code %}#}
-{#                    - {{ elected_office.state_code }}#}
-{#                {% endif %}#}
-            </a></td>
+            <td>
+                <a href="{% url 'elected_office:elected_office_summary' elected_office.id %}">{{ elected_office.elected_office_name }}</a>
+            </td>
             <td>{{ elected_office.state_code }}</td>
-            <td>{{ elected_office.district_id|default_if_none:"" }}</td>
-            <td>{{ elected_office.candidate_count }}</td>   {#TODO elected office does not have candidate count#}
+            <td>{{ elected_office.number_elected }}</td>
             <td>{{ elected_office.ocd_division_id }}</td>
             <td>{{ elected_office.ballotpedia_office_id }}</td>
         </tr>
@@ -110,9 +135,9 @@
 {% else %}
     <p>(no elected offices found)</p>
 {% endif %}
-    </form>
+</form>
 
-    <script>
+<script>
     $(function() {
         $('#google_civic_election_id').change(function() {
             this.form.submit();
@@ -128,6 +153,29 @@
             this.form.submit();
         });
     });
-    </script>
+
+    $('#update_office').submit(function( event ) {
+         document.getElementById('started_update').value = 'start'
+    });
+
+    setInterval(function () {
+      let origin = new URL('{{request.build_absolute_uri}}').origin;
+      let apiURL = origin + '/elected_office/real_time_status/';
+      let started = document.getElementById('started_update').value;
+      console.log("started ---- " + started);
+      if (started === 'start') {
+        $.ajax({
+          type: "GET",
+          url: apiURL,
+          success: function (data) {
+            let status = data.text;
+            console.log(status);
+            $('#realTimeStatus').html('<font color="LIMEGREEN">' + status +'</font>');
+          },
+        });
+      }
+    }, 1000);
+
+</script>
 
 {% endblock %}

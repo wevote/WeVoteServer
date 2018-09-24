@@ -2,7 +2,6 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
-from .models import ElectedOffice, ElectedOfficeListManager
 from admin_tools.views import redirect_to_sign_in_page
 from config.base import get_environment_variable
 from django.http import HttpResponseRedirect
@@ -10,12 +9,16 @@ from django.core.urlresolvers import reverse
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.messages import get_messages
+from django.http import HttpResponse
 from django.shortcuts import render
 from django.db.models import Q
 from election.models import Election, ElectionManager
-from exception.models import handle_record_found_more_than_one_exception,\
-    handle_record_not_found_exception, handle_record_not_saved_exception
-from position.models import PositionListManager
+from elected_office.models import ElectedOffice, ElectedOfficeManager, ElectedOfficeListManager
+from elected_official.models import ElectedOfficialManager
+import exception.models
+from import_export_google_civic.controllers import retrieve_representatives_from_google_civic_api
+import json
+from polling_location.models import PollingLocationManager
 from voter.models import voter_has_authority
 import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, positive_value_exists, STATE_CODE_MAP
@@ -135,6 +138,8 @@ def elected_office_list_view(request):
         'show_all_elections':       show_all_elections,
         'state_list':               sorted_state_list,
         'google_civic_election_id': google_civic_election_id,
+        'status':                   status,
+        success:                    success
     }
     return render(request, 'elected_office/elected_office_list.html', template_values)
 
@@ -187,7 +192,7 @@ def elected_office_edit_view(request, elected_office_id=0, elected_office_we_vot
             elected_office_on_stage = ElectedOffice.objects.get(we_vote_id=elected_office_we_vote_id)
         elected_office_on_stage_found = True
     except ElectedOffice.MultipleObjectsReturned as e:
-        handle_record_found_more_than_one_exception(e, logger=logger)
+        exception.models.handle_record_found_more_than_one_exception(e, logger=logger)
     except ElectedOffice.DoesNotExist:
         # This is fine, create new
         pass
@@ -225,13 +230,13 @@ def elected_office_summary_view(request, elected_office_id):
         elected_office_on_stage_found = True
         google_civic_election_id = elected_office_on_stage.google_civic_election_id
     except ElectedOffice.MultipleObjectsReturned as e:
-        handle_record_found_more_than_one_exception(e, logger=logger)
+        exception.models.handle_record_found_more_than_one_exception(e, logger=logger)
     except ElectedOffice.DoesNotExist:
         # This is fine, create new
         pass
 
     candidate_list_modified = []
-    position_list_manager = PositionListManager()
+    # position_list_manager = PositionListManager()
 
     # TODO Get elected officials count instead candidate
     # try:
@@ -316,13 +321,14 @@ def elected_office_edit_process_view(request):
 
     # Check to see if this office is already in the database
     elected_office_on_stage_found = False
+    elected_office_on_stage = None
     try:
         elected_office_query = ElectedOffice.objects.filter(id=elected_office_id)
         if len(elected_office_query):
             elected_office_on_stage = elected_office_query[0]
             elected_office_on_stage_found = True
     except Exception as e:
-        handle_record_not_found_exception(e, logger=logger)
+        exception.models.handle_record_not_found_exception(e, logger=logger)
 
     try:
         if elected_office_on_stage_found:
@@ -347,7 +353,8 @@ def elected_office_edit_process_view(request):
             messages.add_message(request, messages.INFO, 'Office updated.')
             google_civic_election_id = elected_office_on_stage.google_civic_election_id
 
-            return HttpResponseRedirect(reverse('elected_office:elected_office_summary', args=(elected_office_on_stage_id,)) +
+            return HttpResponseRedirect(reverse('elected_office:elected_office_summary',
+                                                args=(elected_office_on_stage_id,)) +
                                         "?google_civic_election_id=" + str(google_civic_election_id) +
                                         "&state_code=" + str(state_code))
         else:
@@ -376,7 +383,7 @@ def elected_office_edit_process_view(request):
                                         "?google_civic_election_id=" + str(google_civic_election_id) +
                                         "&state_code=" + str(state_code))
     except Exception as e:
-        handle_record_not_saved_exception(e, logger=logger)
+        exception.models.handle_record_not_saved_exception(e, logger=logger)
         messages.add_message(request, messages.ERROR, 'Could not save office.')
 
     if redirect_to_elected_office_list:
@@ -401,13 +408,13 @@ def elected_office_delete_process_view(request):
     elected_office_id = convert_to_int(request.GET.get('elected_office_id', 0))
     google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
 
-    elected_office_on_stage_found = False
+    # elected_office_on_stage_found = False
     elected_office_on_stage = ElectedOffice()
     try:
         elected_office_on_stage = ElectedOffice.objects.get(id=elected_office_id)
-        elected_office_on_stage_found = True
+        # elected_office_on_stage_found = True
         google_civic_election_id = elected_office_on_stage.google_civic_election_id
-    except ElectedOffice.MultipleObjectsReturned as e:
+    except ElectedOffice.MultipleObjectsReturned:
         pass
     except ElectedOffice.DoesNotExist:
         pass
@@ -434,9 +441,191 @@ def elected_office_delete_process_view(request):
             messages.add_message(request, messages.ERROR, 'Could not delete -- '
                                                           'candidates still attached to this elected office.')
             return HttpResponseRedirect(reverse('elected_office:elected_office_summary', args=(elected_office_id,)))
-    except Exception as e:
+    except Exception:
         messages.add_message(request, messages.ERROR, 'Could not delete elected office -- exception.')
         return HttpResponseRedirect(reverse('elected_office:elected_office_summary', args=(elected_office_id,)))
 
     return HttpResponseRedirect(reverse('elected_office:elected_office_list', args=()) +
                                 "?google_civic_election_id=" + str(google_civic_election_id))
+
+
+@login_required
+def elected_office_update_view(request, elected_office_id=0, elected_office_we_vote_id=""):
+    # Get offices and officials from Google Civic API
+
+    global elected_office_status_string
+    elected_office_completion_status = ""
+    offices_created = 0
+    officials_created = 0
+
+    authority_required = {'verified_volunteer'}  # admin, verified_volunteer
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
+    messages_on_stage = get_messages(request)
+    state_code = request.GET.get('update_state_code', '')
+
+    if not state_code:
+        messages.add_message(request, messages.INFO, "Please select a state!")
+    else:
+        # Get all the polling locations that are in the current state, and extract the poll addresses from google civic
+        try:
+            officials_names = {}
+            results = PollingLocationManager().retrieve_polling_locations_in_city_or_state(state_code, None, None)
+            if results['polling_location_list_found']:
+                polling_location_list = results['polling_location_list']
+                number_of_polls = str(len(polling_location_list))
+                print("polling_location_list size  " + number_of_polls)
+                i = 0
+                for polling_location in polling_location_list:
+                    i= i + 1
+                    # Get the address for this polling place, and then retrieve the ballot from Google Civic API
+                    results = polling_location.get_text_for_map_search_results()
+                    text_for_map_search = results['text_for_map_search']
+                    json = retrieve_representatives_from_google_civic_api(text_for_map_search)
+                    one_polling_location_json = json['structured_json']
+                    if 'error' in one_polling_location_json:
+                        # These errors can be as little as "Failed to parse address" or as big as "API Limits Exceeded"
+                        message = one_polling_location_json.get("error").get("message", None)
+                        code = one_polling_location_json.get("error").get("code", None)
+                        txt = "Google Civic has returned API Errors: "
+                        if message:
+                            txt += message
+                        print(txt)
+                        elected_office_status_string = message
+                        if code == 403:
+                            elected_office_completion_status = "Processed " + str(i) + " of " + number_of_polls + \
+                                                               " polling locations for the state of " + state_code + \
+                                                        ".  Ended in mid stream, since the API User Rate was exceeded"
+                            break
+                        continue
+                    else:
+                        elected_office_status_string = \
+                            "Location " + str(i) + " of " + number_of_polls + ", offices created " \
+                            + str(offices_created) + ", officials created " + str(officials_created) + ", poll: " + \
+                            text_for_map_search
+
+                        elected_office_completion_status = "Processed " + str(i) + " of " + number_of_polls + \
+                                                           " polling locations for the state of " + state_code
+                        # print(elected_office_status_string)
+
+                    divisions = one_polling_location_json['divisions']
+                    offices  = one_polling_location_json['offices']
+                    officials = one_polling_location_json['officials']
+                    for official in officials:
+                        google_civic_elected_official_name = political_party = elected_official_phone = \
+                            elected_official_url = photo_url = google_plus_url = facebook_url = twitter_url = \
+                            youtube_url = number_elected = google_civic_elected_office_name = ocd_division_id = \
+                            elected_office_description = contest_level0 = division_name = ""
+                        if 'name' in official:
+                            google_civic_elected_official_name = official['name']
+                            # 95%+ of the data for a state is duplicate, so don't process the official's name twice.
+                            if google_civic_elected_official_name in officials_names:
+                                continue
+                            else:
+                                officials_names[google_civic_elected_official_name] = 1
+                        if 'party' in official:
+                            political_party  = official['party']
+                        if 'phones' in official:
+                            elected_official_phone = official['phones'][0]
+                        if 'urls' in official:
+                            elected_official_url = official['urls'][0]
+                        if 'photoUrl' in official:
+                            photo_url = official['photoUrl']
+                        if 'channels' in official:
+                            channels = official['channels']
+                            for channel in channels:
+                                key = channel['type']
+                                value = channel['id']
+                                if key == "GooglePlus":  # Some Google+ id's are numbers like '108233445289196913395'
+                                    google_plus_url = "https://plus.google.com/" + value
+                                elif key == "Facebook":
+                                    facebook_url = " https://www.facebook.com/" + value
+                                elif key == "Twitter":
+                                    twitter_url = "https://twitter.com/" + value
+                                elif key == "YouTube":
+                                    youtube_url = "https://www.youtube.com/" + value
+
+                        index = officials.index(official)
+                        for office in offices:
+                            list_indices = office.get('officialIndices')
+                            if index in list_indices:
+                                number_elected = str(len(list_indices))
+                                google_civic_elected_office_name = office.get('name')   # United States Senate
+                                ocd_division_id = office.get('divisionId')            # ocd-division/country:us/state:ca
+                                if office.get('roles') and len(office.get('roles')) > 0:
+                                    elected_office_description = office.get('roles')[0] # legislatorUpperBody
+                                if office.get('levels') and len(office.get('levels')) > 0:
+                                    contest_level0 = office.get('levels')[0]            # country
+                                division = divisions.get(ocd_division_id, None)
+                                if division:
+                                    division_name = division.get('name')                # United States
+                                break
+
+                        # This "print" has a dual purpose, it also slows us down enough to avoid api rate limitations
+                        # for the "limited" google civic account that developers use
+                        # print(">> " + google_civic_elected_official_name + ", " + political_party + ", " +
+                        #       elected_official_phone + ", " + elected_official_url + ", " + photo_url + ", " +
+                        #       google_plus_url + ", " + facebook_url + ", " + twitter_url + ", " + youtube_url + ", " +
+                        #       number_elected + ", " + google_civic_elected_office_name + ", " + ocd_division_id +
+                        #       ", " + elected_office_description + ", " + contest_level0 + ", " + division_name)
+
+                        # Store the data
+                        passed_state_code = ""   # The president and vp, should not have an associated state
+                        if "state" in ocd_division_id:
+                            passed_state_code = state_code
+
+                        elected_official_name = google_civic_elected_official_name  # So something shows up on the page
+                        official_results = ElectedOfficialManager().update_or_create_elected_official(
+                                                          google_civic_elected_office_name, elected_official_name,
+                                                          google_civic_elected_official_name, political_party, photo_url,
+                                                          ocd_division_id, passed_state_code,
+                                                          elected_official_url,
+                                                          facebook_url, twitter_url, google_plus_url, youtube_url,
+                                                          elected_official_phone)
+
+                        office_results = ElectedOfficeManager().update_or_create_elected_office(
+                            google_civic_elected_office_name, ocd_division_id, google_civic_elected_office_name,
+                            number_elected, passed_state_code, division_name, contest_level0,
+                            elected_office_description)
+
+                        if office_results['new_office_created']:
+                            offices_created = offices_created + 1
+                        if official_results['new_elected_official_created']:
+                            officials_created = officials_created + 1
+
+
+        except Exception as e:
+            print("Exception in get_offices_and_divisions e = ", e)
+
+    elected_office_completion_status += " (" + str(offices_created) + " Offices created, " + str(officials_created) + \
+                                        " Officials created)"
+
+    print("END of loop get_offices_and_divisions")
+
+    messages.add_message(request, messages.INFO, elected_office_completion_status)
+    elected_office_status_string = ""
+    state_list = STATE_CODE_MAP
+    sorted_state_list = sorted(state_list.items())
+
+    template_values = {
+        'messages_on_stage':        messages_on_stage,
+        'state_code':               state_code,
+        'state_list':               sorted_state_list,
+        'started_update':           'stop',
+    }
+
+    return render(request, 'elected_office/elected_office_list.html', template_values)
+
+
+def elected_office_update_status(request):
+    global elected_office_status_string
+
+    if not 'elected_office_status_string' in globals():
+        elected_office_status_string = ""
+
+    json_data = {
+        'text': elected_office_status_string,
+    }
+
+    return HttpResponse(json.dumps(json_data), content_type='application/json')
