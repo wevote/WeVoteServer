@@ -1787,6 +1787,7 @@ def voter_ballot_items_retrieve_from_ballotpedia_for_api(voter_device_id, text_f
             # We update VoterAddress with normalized address data in store_one_ballot_from_google_civic_api
             status += "GOOGLE_ID: " + str(google_civic_election_id) + " "
             status += "VOTER_ID: " + str(voter_id) + " "
+            status += "BALLOT_ITEM_DICT_LIST: " + str(ballot_item_dict_list) + " "
             store_one_ballot_results = store_one_ballot_from_ballotpedia_api(
                     ballot_item_dict_list, google_civic_election_id,
                     text_for_map_search, latitude, longitude,
