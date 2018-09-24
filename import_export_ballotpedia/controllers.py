@@ -1902,26 +1902,27 @@ def retrieve_one_ballot_from_ballotpedia_api(latitude, longitude, incoming_googl
     groom_results = groom_ballotpedia_data_for_processing(structured_json, incoming_google_civic_election_id,
                                                           state_code, contains_api)
 
-    modified_json_list = []
+    structured_json = []
     if groom_results['success']:
+        status += "GROOM_BALLOTPEDIA_DATA_FOR_PROCESSING-SUCCESSFUL "
         success = True
         modified_json_list = groom_results['modified_json_list']
         contests_retrieved = len(modified_json_list)
 
         ballot_items_results = process_ballotpedia_voter_districts(incoming_google_civic_election_id, state_code,
                                                                    modified_json_list, polling_location_we_vote_id)
-
-        if ballot_items_results['ballot_items_found']:
-            modified_json_list = ballot_items_results['ballot_item_dict_list']
+        status += ballot_items_results['status']
+        structured_json = ballot_items_results['ballot_item_dict_list']
     else:
         success = False
         status += groom_results['status']
+        status += "GROOM_BALLOTPEDIA_DATA_FOR_PROCESSING-NOT_SUCCESSFUL "
 
     results = {
         'success': success,
         'status': status,
         'contests_retrieved': contests_retrieved,
-        'structured_json': modified_json_list,
+        'structured_json': structured_json,
     }
     return results
 
