@@ -490,19 +490,24 @@ def elected_office_update_view(request, elected_office_id=0, elected_office_we_v
                         code = one_polling_location_json.get("error").get("code", None)
                         txt = "Google Civic has returned API Errors: "
                         if message:
-                            txt += message
-                        print(txt)
+                            txt += message + ", code = " + str(code)
                         elected_office_status_string = message
-                        if code == 403:
+                        if code == 400:
+                            elected_office_status_string = message + ": '" + text_for_map_search + "'"
+                            print(elected_office_status_string)
+                            continue
+                        elif code == 403:
                             elected_office_completion_status = "Processed " + str(i) + " of " + number_of_polls + \
                                                                " polling locations for the state of " + state_code + \
                                                         ".  Ended in mid stream, since the API User Rate was exceeded"
                             break
-                        continue
+                        else:
+                            print(txt)
+                            elected_office_status_string = message
                     else:
                         elected_office_status_string = \
                             "Location " + str(i) + " of " + number_of_polls + ", offices created " \
-                            + str(offices_created) + ", officials created " + str(officials_created) + ", poll: " + \
+                             + str(offices_created) + ", officials created " + str(officials_created) + ", poll: " + \
                             text_for_map_search
 
                         elected_office_completion_status = "Processed " + str(i) + " of " + number_of_polls + \
