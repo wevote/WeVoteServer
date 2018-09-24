@@ -1661,6 +1661,7 @@ def voter_ballot_items_retrieve_from_ballotpedia_for_api(voter_device_id, text_f
     # We need to figure out the next upcoming election for this person based on the state_code in text_for_map_search
     state_code = extract_state_code_from_address_string(text_for_map_search)
     status += "[STATE_CODE: " + str(state_code) + "] "
+    status += "[ORIGINAL_TEXT_STATE: " + str(original_text_state) + "] "
     if positive_value_exists(state_code):
         original_text_state = state_code
         election_manager = ElectionManager()
@@ -1708,13 +1709,17 @@ def voter_ballot_items_retrieve_from_ballotpedia_for_api(voter_device_id, text_f
             longitude = location.longitude
             lat_long_found = True
             # Now retrieve the ZIP code
-            if not positive_value_exists(original_text_zip):
+            if not positive_value_exists(original_text_zip) or not positive_value_exists(original_text_state):
                 if hasattr(location, 'raw'):
                     if 'address_components' in location.raw:
                         for one_address_component in location.raw['address_components']:
                             if 'postal_code' in one_address_component['types'] \
                                     and positive_value_exists(one_address_component['long_name']):
                                 original_text_zip = one_address_component['long_name']
+                            if not positive_value_exists(original_text_state):
+                                if 'administrative_area_level_1' in one_address_component['types'] \
+                                        and positive_value_exists(one_address_component['short_name']):
+                                    original_text_state = one_address_component['short_name']
 
     except Exception as e:
         status += "RETRIEVE_FROM_BALLOTPEDIA-EXCEPTION with get_geocoder_for_service "
@@ -1979,14 +1984,7 @@ def store_one_ballot_from_ballotpedia_api(ballot_item_dict_list, google_civic_el
     measure_subtitle = ""
     measure_text = ""
     for one_ballot_item_dict in ballot_item_dict_list:
-        status += "BALLOT_ITEM-START "
-        # 'contest_office_we_vote_id': one_office.we_vote_id,
-        # 'contest_office_id': one_office.id,
-        # 'contest_office_name': one_office.office_name,
-        # 'election_day_text': one_district['election_day_text'],
-        # 'local_ballot_order': generated_ballot_order,
-        # 'polling_location_we_vote_id': polling_location_we_vote_id,
-        # 'state_code': one_district['state_code'],
+        # status += "BALLOT_ITEM-START "
 
         contest_office_we_vote_id = one_ballot_item_dict['contest_office_we_vote_id'] \
             if 'contest_office_we_vote_id' in one_ballot_item_dict else ""
@@ -2055,7 +2053,9 @@ def store_one_ballot_from_ballotpedia_api(ballot_item_dict_list, google_civic_el
                 if results['ballot_item_found']:
                     number_of_ballot_items_updated += 1
         else:
-            status += "MISSING-BALLOT_ITEM_DISPLAY_NAME-OR-NORMALIZED_STATE-OR-ELECTION_ID"
+            status += "MISSING-BALLOT_ITEM_DISPLAY_NAME-OR-NORMALIZED_STATE-OR-ELECTION_ID "
+            status += "DISPLAY_NAME:" + str(ballot_item_display_name) + " "
+            status += "STATE:" + str(normalized_state) + " "
 
     # TODO: Figure out best way to save ballot_returned
     if positive_value_exists(number_of_ballot_items_updated):
