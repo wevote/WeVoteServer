@@ -162,8 +162,9 @@ class ElectedOfficeManager(models.Model):
             return results['elected_office_we_vote_id']
         return 0
 
-    def update_or_create_elected_office(self, elected_office_we_vote_id, maplight_id, google_civic_election_id,
-                                        elected_office_name, state_code, district_id, updated_elected_office_values):
+    def update_or_create_elected_office( self, google_civic_elected_office_name, ocd_division_id, elected_office_name,
+                                         number_elected, state_code, district_name, contest_level0,
+                                         elected_office_description):
         """
         Either update or create an elected_office entry.
         """
@@ -174,23 +175,23 @@ class ElectedOfficeManager(models.Model):
         status = ""
         elected_office_updated = False
 
-        if not google_civic_election_id:
+        if not google_civic_elected_office_name:
             success = False
-            status += 'MISSING_GOOGLE_CIVIC_ELECTION_ID '
-        # DALE 2016-05-10 Since we are allowing offices to be created prior to Google Civic data
-        # being available, we need to remove our reliance on district_id or district_name
-        # elif not (district_id or district_name):
-        #     success = False
-        #     status = 'MISSING_DISTRICT_ID'
-        elif not elected_office_name:
+            status += 'MISSING_OFFICE_NAME '
+        elif not ocd_division_id:
             success = False
-            status += 'MISSING_ELECTED_OFFICE_NAME '
-        elif positive_value_exists(elected_office_we_vote_id):
+            status += 'MISSING_OCD_DIVISION_ID '
+        else:
             try:
                 elected_office_on_stage, new_elected_office_created = ElectedOffice.objects.update_or_create(
-                    google_civic_election_id__exact=google_civic_election_id,
-                    we_vote_id__iexact=elected_office_we_vote_id,
-                    defaults=updated_elected_office_values)
+                    google_civic_elected_office_name=google_civic_elected_office_name,
+                    ocd_division_id=ocd_division_id,
+                    elected_office_name=elected_office_name,
+                    number_elected=number_elected,
+                    state_code=state_code,
+                    district_name=district_name,
+                    contest_level0=contest_level0,
+                    elected_office_description=elected_office_description)
                 elected_office_updated = not new_elected_office_created
                 success = True
                 status += 'ELECTED_OFFICE_SAVED '
@@ -205,148 +206,6 @@ class ElectedOfficeManager(models.Model):
                 status += 'FAILED_TO_RETRIEVE_ELECTED_OFFICE_BY_WE_VOTE_ID ' \
                          '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
                 success = False
-        elif positive_value_exists(maplight_id):
-            try:
-                elected_office_on_stage, new_elected_office_created = ElectedOffice.objects.update_or_create(
-                    google_civic_election_id__exact=google_civic_election_id,
-                    maplight_id__exact=maplight_id,
-                    defaults=updated_elected_office_values)
-                elected_office_updated = not new_elected_office_created
-                success = True
-                status += 'ELECTED_OFFICE_SAVED '
-            except ElectedOffice.MultipleObjectsReturned as e:
-                success = False
-                status += 'MULTIPLE_MATCHING_ELECTED_OFFICES_FOUND '
-                exception_multiple_object_returned = True
-            except ElectedOffice.DoesNotExist:
-                exception_does_not_exist = True
-                status += "RETRIEVE_ELECTED_OFFICE_NOT_FOUND "
-            except Exception as e:
-                status += 'FAILED_TO_RETRIEVE_ELECTED_OFFICE_BY_MAPLIGHT_ID ' \
-                         '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
-                success = False
-        else:
-            # Given we might have the elected_office listed by google_civic_office_name
-            # OR elected_office_name, we need to check both before we try to create a new entry
-            elected_office_found = False
-            try:
-                # TODO DALE Note that Vermont data in 2016 did not provide district_id. The unique value was in the
-                # district_name. So all "VT State Senator" candidates were lumped into a single office. But I believe
-                # Presidential races don't have either district_id or district_name, so we can't require one.
-                # Perhaps have a special case for "district" -> "scope": "stateUpper"/"stateLower"
-                # vs. "scope": "statewide"
-                if positive_value_exists(district_id):
-                    elected_office_on_stage = ElectedOffice.objects.get(
-                        google_civic_election_id__exact=google_civic_election_id,
-                        google_civic_office_name__iexact=elected_office_name,
-                        district_id__exact=district_id,
-                        state_code__iexact=state_code
-                    )
-                else:
-                    elected_office_on_stage = ElectedOffice.objects.get(
-                        google_civic_election_id__exact=google_civic_election_id,
-                        google_civic_office_name__iexact=elected_office_name,
-                        state_code__iexact=state_code
-                    )
-                elected_office_found = True
-                success = True
-                status += 'ELECTED_OFFICE_SAVED '
-            except ElectedOffice.MultipleObjectsReturned as e:
-                success = False
-                status += 'MULTIPLE_MATCHING_ELECTED_OFFICES_FOUND_BY_GOOGLE_CIVIC_OFFICE_NAME '
-                exception_multiple_object_returned = True
-            except ElectedOffice.DoesNotExist:
-                exception_does_not_exist = True
-                status += "RETRIEVE_ELECTED_OFFICE_NOT_FOUND "
-            except Exception as e:
-                status += 'FAILED_TO_RETRIEVE_ELECTED_OFFICE_BY_GOOGLE_CIVIC_OFFICE_NAME ' \
-                         '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
-                success = False
-
-            if not elected_office_found and not exception_multiple_object_returned:
-                # Try to find record based on elected_office_name (instead of google_civic_office_name)
-                try:
-                    if positive_value_exists(district_id):
-                        elected_office_on_stage = ElectedOffice.objects.get(
-                            google_civic_election_id__exact=google_civic_election_id,
-                            office_name__iexact=elected_office_name,
-                            district_id__exact=district_id,
-                            state_code__iexact=state_code
-                        )
-                    else:
-                        elected_office_on_stage = ElectedOffice.objects.get(
-                            google_civic_election_id__exact=google_civic_election_id,
-                            office_name__iexact=elected_office_name,
-                            state_code__iexact=state_code
-                        )
-                    elected_contest_office_found = True
-                    success = True
-                    status += 'ELECTED_OFFICE_SAVED '
-                except ElectedOffice.MultipleObjectsReturned as e:
-                    success = False
-                    status += 'MULTIPLE_MATCHING_ELECTED_OFFICES_FOUND_BY_OFFICE_NAME '
-                    exception_multiple_object_returned = True
-                except ElectedOffice.DoesNotExist:
-                    exception_does_not_exist = True
-                    status += "RETRIEVE_ELECTED_OFFICE_NOT_FOUND "
-                except Exception as e:
-                    status += 'FAILED retrieve_all_elected_offices ' \
-                             '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
-                    success = False
-
-            if exception_multiple_object_returned:
-                # We can't proceed because there is an error with the data
-                success = False
-            elif elected_office_found:
-                # Update record
-                try:
-                    new_elected_office_created = False
-                    elected_office_updated = False
-                    elected_office_has_changes = False
-                    for key, value in updated_elected_office_values.items():
-                        if hasattr(elected_office_on_stage, key):
-                            elected_office_has_changes = True
-                            setattr(elected_office_on_stage, key, value)
-                    if elected_office_has_changes and positive_value_exists(elected_office_on_stage.we_vote_id):
-                        elected_office_on_stage.save()
-                        elected_office_updated = True
-                    if elected_office_updated:
-                        success = True
-                        status += "ELECTED_OFFICE_UPDATED "
-                    else:
-                        success = False
-                        status += "ELECTED_OFFICE_NOT_UPDATED "
-                except Exception as e:
-                    status += 'FAILED_TO_UPDATE_ELECTED_OFFICE ' \
-                             '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
-                    success = False
-            else:
-                # Create record
-                try:
-                    elected_office_updated = False
-                    new_elected_office_created = False
-                    elected_office_on_stage = ElectedOffice.objects.create(
-                        maplight_id=maplight_id,
-                        google_civic_election_id=google_civic_election_id,
-                        elected_office_name=elected_office_name,
-                        state_code=state_code,
-                        district_id=district_id)
-                    if positive_value_exists(elected_office_on_stage.id):
-                        for key, value in updated_elected_office_values.items():
-                            if hasattr(elected_office_on_stage, key):
-                                setattr(elected_office_on_stage, key, value)
-                        elected_office_on_stage.save()
-                        new_elected_office_created = True
-                    if new_elected_office_created:
-                        success = True
-                        status += "ELECTED_OFFICE_CREATED "
-                    else:
-                        success = False
-                        status += "ELECTED_OFFICE_NOT_CREATED "
-                except Exception as e:
-                    status += 'FAILED_TO_CREATE_ELECTED_OFFICE ' \
-                             '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
-                    success = False
 
         results = {
             'success':                  success,

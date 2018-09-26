@@ -23,7 +23,15 @@
 
 <h1>Elected Officials</h1>
 
-<a href="{% url 'elected_official:elected_official_new' %}?state_code={{ state_code }}">Add New Elected Official</a><br />
+<br/>
+<p><b>
+Note: Please update Elected Officials (via Google Civic) from the "Elected Offices" tab.  Both "Offices" and "Officals" arrive in one pass.
+</b></p>
+<br/>
+
+
+<a href="{% url 'elected_official:elected_official_new' %}?state_code={{ state_code }}">Add New Elected Official</a>
+<br/><br/>
 
 <form name="state_code_form" method="get" action="{% url 'elected_official:elected_official_list' %}">
     {% csrf_token %}
@@ -40,7 +48,8 @@
         </select>
         {% if state_code != "" %}
         <a href="{% url 'elected_official:elected_official_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}&elected_official_search={{ elected_official_search }}&show_all=1">
-            show all</a>
+            Show all Elected Officials in this state</a>
+        <br/><br/>
         {% endif %}
     {% endif %}{# End of if state_list #}
 
@@ -51,17 +60,18 @@
     <input type="text" name="elected_official_search" id="elected_official_search_id" value="{{ elected_official_search }}" />
     <input type="submit" value="Search for Elected Official" />
 </form>
+<br/>
 
 {% if elected_official_list %}
-    <table border="1" cellpadding="5" cellspacing="5">
+    <table class="table">
         <tr>
             <td>&nbsp;</td>
             <td>&nbsp;</td>
             <td>Elected Official Name</td>
+            <td>Elected Office Name</td>
             <td>State</td>
             <td>Twitter Handle</td>
             <td>Website</td>
-            <td>Id</td>
             <td>We Vote Id</td>
             <td>Vote Smart Id</td>
         </tr>
@@ -76,12 +86,12 @@
                 {% endif %}
             </td>
             <td><a href="{% url 'elected_official:elected_official_edit' elected_official.id %}?google_civic_election_id={{ google_civic_election_id }}">{{ elected_official.elected_official_name }}</a></td>
+            <td>{{ elected_official.elected_office_name }}</td>
             <td>{{ elected_official.state_code }}</td>
             <td>{% if elected_official.elected_official_twitter_handle %}<a href="https://twitter.com/{{ elected_official.elected_official_twitter_handle }}"
                     target="_blank">{{ elected_official.elected_official_twitter_handle }}</a><br />
                 ({{ elected_official.twitter_followers_count }} followers){% endif %}</td>
             <td>{% if elected_official.elected_official_url %}<a href="{{ elected_official.elected_official_url }}" target="_blank">{{ elected_official.elected_official_url }}</a>{% endif %}</td>
-            <td>{{ elected_official.id }}</td>
             <td>{{ elected_official.we_vote_id }}</td>
             <td>{{ elected_official.vote_smart_id|default_if_none:"" }}</td>
         </tr>

@@ -503,7 +503,7 @@ def retrieve_representatives_from_google_civic_api(text_for_map_search):
     # }
     # return results
 
-    print("retrieving one ballot for " + str(text_for_map_search))
+    # print("retrieving one ballot for " + str(text_for_map_search))
     response = requests.get(REPRESENTATIVES_BY_ADDRESS_URL, params={
         "key": GOOGLE_CIVIC_API_KEY,
         "address": text_for_map_search,
