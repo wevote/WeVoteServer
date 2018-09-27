@@ -349,6 +349,7 @@ def batch_action_list_view(request):
 
     batch_header_id = convert_to_int(request.GET.get('batch_header_id', 0))
     kind_of_batch = request.GET.get('kind_of_batch', '')
+    show_all = request.GET.get('show_all', False)
     state_code = request.GET.get('state_code', '')
     position_owner_organization_we_vote_id = request.GET.get('position_owner_organization_we_vote_id', '')
 
@@ -404,7 +405,10 @@ def batch_action_list_view(request):
             batch_row_query = batch_row_query.filter(state_code__iexact=state_code)
             batch_row_list = list(batch_row_query)
         else:
-            batch_row_list = batch_row_query[:200]
+            if positive_value_exists(show_all):
+                batch_row_list = list(batch_row_query)
+            else:
+                batch_row_list = batch_row_query[:200]
         if len(batch_row_list):
             batch_list_found = True
     except BatchDescription.DoesNotExist:
