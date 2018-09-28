@@ -2189,7 +2189,7 @@ class VoterGuidePossibilityManager(models.Manager):
                 position_json_list.append(position_json)
             number_index += 1
 
-        class LocalBreak(Exception):
+        class LocalBreak(Exception):  # Also called BreakException elsewhere
             pass
 
         local_break = LocalBreak()

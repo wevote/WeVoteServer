@@ -2,8 +2,7 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
-from .models import ContestMeasure, ContestMeasureList, ContestMeasureManager, CONTEST_MEASURE_UNIQUE_IDENTIFIERS, \
-    MEASURE_TITLE_EQUIVALENT_MEASURE_TITLE_PAIRS
+from .models import ContestMeasure, ContestMeasureList, ContestMeasureManager, CONTEST_MEASURE_UNIQUE_IDENTIFIERS
 from ballot.models import MEASURE
 from config.base import get_environment_variable
 from django.http import HttpResponse
@@ -11,8 +10,8 @@ from election.models import ElectionManager
 import json
 from position.controllers import update_all_position_details_from_contest_measure
 import wevote_functions.admin
-from wevote_functions.functions import convert_state_code_to_state_text, convert_to_int, positive_value_exists, \
-    process_request_from_master, MEASURE_TITLE_TO_NUMBER_OR_LETTER_IDENTIFIERS
+from wevote_functions.functions import convert_state_code_to_state_text, convert_to_int, MEASURE_TITLE_SYNONYMS, \
+    positive_value_exists, process_request_from_master
 
 logger = wevote_functions.admin.get_logger(__name__)
 
@@ -467,63 +466,39 @@ def retrieve_measure_list_for_all_upcoming_elections(upcoming_google_civic_elect
 
 
 def add_measure_name_alternatives_to_measure_list_light(measure_list_light):
+    """
+    In our database, measure names are like "Measure FF: East Bay Regional Park District Parcel Tax Renewal", but
+    on endorsement pages, they are listed like "Measure FF". This function takes long names, and adds a list of
+    alternate names
+    :param measure_list_light:
+    :return:
+    """
     success = True
     status = ""
     measure_list_light_modified = []
-    existing_measure_name_list = []
+
+    class BreakException(Exception):  # Also called LocalBreak elsewhere
+        pass
+
+    break_exception = BreakException()  # Also called LocalBreak elsewhere
 
     # Look in measure_list_light and try to find variants on proposition names
     for one_measure_light in measure_list_light:
-        # Include the original
-        existing_measure_name_list.append(one_measure_light['ballot_item_display_name'].lower())
+        # Add alternate names to the 'display_name_alternatives_list' value
+        full_ballot_item_display_name = one_measure_light['ballot_item_display_name'].lower()
+        one_measure_light['display_name_alternatives_list'] = []
+        try:
+            for one_synonym_list in MEASURE_TITLE_SYNONYMS:
+                for one_synonym in one_synonym_list:
+                    if one_synonym in full_ballot_item_display_name:
+                        # If any synonym in this one_synonym_list is found within full_ballot_item_display_name,
+                        #  then use the entire synonym list for matching in other areas of the code
+                        one_measure_light['display_name_alternatives_list'] = one_synonym_list
+                        raise break_exception
+        except BreakException:
+            pass
+
         measure_list_light_modified.append(one_measure_light)
-        # And now, make new versions of the measure to help us find alternate spellings
-        # MEASURE_TITLE_TO_NUMBER_OR_LETTER_IDENTIFIERS
-        for left_term, right_term in MEASURE_TITLE_EQUIVALENT_MEASURE_TITLE_PAIRS.items():
-            if left_term.lower() in one_measure_light['ballot_item_display_name'].lower():
-                new_term_already_seen = False
-                for existing_name in existing_measure_name_list:
-                    if left_term.lower() == existing_name:
-                        new_term_already_seen = True
-                if not new_term_already_seen:
-                    # Create a measure_light version where the ballot_item_display_name is the simplified prop name
-                    existing_measure_name_list.append(left_term.lower())
-                    one_measure_modified = one_measure_light.copy()  # Make a copy
-                    one_measure_modified['ballot_item_display_name'] = left_term
-                    measure_list_light_modified.append(one_measure_modified)
-
-                new_term_already_seen = False
-                for existing_name in existing_measure_name_list:
-                    if right_term.lower() == existing_name:
-                        new_term_already_seen = True
-                if not new_term_already_seen:
-                    # Create a measure_light version where the ballot_item_display_name is the simplified prop name
-                    existing_measure_name_list.append(right_term.lower())
-                    one_measure_modified = one_measure_light.copy()  # Make a copy
-                    one_measure_modified['ballot_item_display_name'] = right_term
-                    measure_list_light_modified.append(one_measure_modified)
-            if right_term.lower() in one_measure_light['ballot_item_display_name'].lower():
-                new_term_already_seen = False
-                for existing_name in existing_measure_name_list:
-                    if left_term.lower() == existing_name:
-                        new_term_already_seen = True
-                if not new_term_already_seen:
-                    # Create a measure_light version where the ballot_item_display_name is the simplified prop name
-                    existing_measure_name_list.append(left_term.lower())
-                    one_measure_modified = one_measure_light.copy()  # Make a copy
-                    one_measure_modified['ballot_item_display_name'] = left_term
-                    measure_list_light_modified.append(one_measure_modified)
-
-                new_term_already_seen = False
-                for existing_name in existing_measure_name_list:
-                    if right_term.lower() != existing_name:
-                        new_term_already_seen = True
-                if not new_term_already_seen:
-                    # Create a measure_light version where the ballot_item_display_name is the simplified prop name
-                    existing_measure_name_list.append(right_term.lower())
-                    one_measure_modified = one_measure_light.copy()  # Make a copy
-                    one_measure_modified['ballot_item_display_name'] = right_term
-                    measure_list_light_modified.append(one_measure_modified)
 
     results = {
         'success':              success,

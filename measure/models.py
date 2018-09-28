@@ -9,9 +9,7 @@ from wevote_settings.models import fetch_next_we_vote_id_contest_measure_integer
     fetch_next_we_vote_id_measure_campaign_integer, fetch_site_unique_id_prefix
 import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, extract_state_from_ocd_division_id, \
-    MEASURE_TITLE_COMMON_PHRASES_TO_REMOVE_FROM_SEARCHES, MEASURE_TITLE_EQUIVALENT_MEASURE_TITLE_PAIRS, \
-    positive_value_exists, \
-    STATE_CODE_MAP
+    MEASURE_TITLE_COMMON_PHRASES_TO_REMOVE_FROM_SEARCHES, MEASURE_TITLE_SYNONYMS, positive_value_exists, STATE_CODE_MAP
 
 
 logger = wevote_functions.admin.get_logger(__name__)
@@ -1097,36 +1095,50 @@ class ContestMeasureList(models.Model):
                 # Remove leading and trailing spaces
                 stripped_down_contest_measure_title = stripped_down_contest_measure_title.strip()
 
-                # Search through stripped_down_contest_measure_title for MEASURE_TITLE_EQUIVALENT_MEASURE_TITLE_PAIRS
                 filters = []
-                equivalent_title_found = False
-                measure_without_equivalent_title_found = False
-                for left_term, right_term in MEASURE_TITLE_EQUIVALENT_MEASURE_TITLE_PAIRS.items():
-                    if left_term in stripped_down_contest_measure_title:
-                        new_filter = Q(measure_title__icontains=right_term) | Q(measure_title__icontains=left_term)
-                        filters.append(new_filter)
-                        equivalent_title_found = True
-                        stripped_down_contest_measure_title = stripped_down_contest_measure_title.replace(left_term, "")
-                        # Break out of the for loop since we only want to match to one district
-                        break
-                    if right_term in stripped_down_contest_measure_title:
-                        new_filter = Q(measure_title__icontains=left_term) | Q(measure_title__icontains=right_term)
-                        filters.append(new_filter)
-                        equivalent_title_found = True
-                        stripped_down_contest_measure_title = \
-                            stripped_down_contest_measure_title.replace(right_term, "")
-                        # Break out of the for loop since we only want to match to one district
-                        break
+                synonyms_found = False
 
-                if equivalent_title_found:
+                class BreakException(Exception):  # Also called LocalBreak elsewhere
+                    pass
+
+                break_exception = BreakException()  # Also called LocalBreak elsewhere
+
+                one_synonym_list = []
+                one_synonym_list_found = False
+                try:
+                    for one_synonym_list in MEASURE_TITLE_SYNONYMS:
+                        for one_synonym in one_synonym_list:
+                            if one_synonym in stripped_down_contest_measure_title:
+                                one_synonym_list_found = True
+                                raise break_exception
+                except BreakException:
+                    pass
+
+                if one_synonym_list_found:
+                    synonym_filters = []
+                    for one_synonym in one_synonym_list:
+                        new_filter = Q(measure_title__icontains=one_synonym)
+                        synonym_filters.append(new_filter)
+
+                    # Add the first query
+                    if len(synonym_filters):
+                        final_synonym_filters = synonym_filters.pop()
+
+                        # ...and "OR" the remaining items in the list
+                        for item in synonym_filters:
+                            final_synonym_filters |= item
+
+                        filters.append(final_synonym_filters)
+                        synonyms_found = True
+
+                if not synonyms_found:
                     # Remove leading and trailing spaces
                     stripped_down_contest_measure_title = stripped_down_contest_measure_title.strip()
                     if positive_value_exists(stripped_down_contest_measure_title):
                         new_filter = Q(measure_title__icontains=stripped_down_contest_measure_title)
                         filters.append(new_filter)
-                        measure_without_equivalent_title_found = True
 
-                if measure_without_equivalent_title_found:
+                if len(filters):
                     # Add the first query
                     final_filters = filters.pop()
 
@@ -1224,6 +1236,7 @@ class ContestMeasureList(models.Model):
             for measure in measure_list_objects:
                 one_measure = {
                     'ballot_item_display_name': measure.measure_title,
+                    'display_name_alternatives_list': [],  # List of alternate names
                     'candidate_we_vote_id':     '',
                     'google_civic_election_id': measure.google_civic_election_id,
                     'office_we_vote_id':        '',

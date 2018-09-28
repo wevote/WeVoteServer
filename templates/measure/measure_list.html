@@ -62,7 +62,7 @@
     {% endfor %}
     </select>
     {% if state_code != "" %}
-    <a href="{% url 'measure:measure_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}&candidate_search={{ candidate_search }}&show_all=1">
+    <a href="{% url 'measure:measure_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}&measure_search={{ measure_search }}&show_all=1">
         show all</a>
     {% endif %}
 {% endif %}{# End of if state_list #}
@@ -72,7 +72,7 @@
 
 <br />
 {% if measure_search or issues_selected %}
-    <a href="{% url 'measure:measure_list' %}">
+    <a href="{% url 'measure:measure_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
          clear search</a>&nbsp;
 {% endif %}
     <input type="text" name="measure_search" id="measure_id" value="{{ measure_search|default_if_none:"" }}" />

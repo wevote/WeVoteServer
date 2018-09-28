@@ -218,56 +218,91 @@ LANGUAGE_CODE_SPANISH = 'es'
 MEASURE_TITLE_COMMON_PHRASES_TO_REMOVE_FROM_SEARCHES = [
 ]
 
-LETTER_IDENTIFIERS = ["a", "b", "c", "d", "e"]  # Expand through z and "aa" etc.
+MEASURE_TITLE_SYNONYMS = []  # This is a list of synonym lists
+
 MAXIMUM_SUPPORTED_MEASURE_NUMBER = 100
-MEASURE_TITLE_TO_NUMBER_OR_LETTER_IDENTIFIERS = {}  # Common spellings on left,
+current_number = MAXIMUM_SUPPORTED_MEASURE_NUMBER
+while current_number > 0:
+    # This is a fresh list of synonyms based on proposition number, or letter
+    one_list_of_synonyms = []
+    one_synonym = "amendment " + str(current_number)
+    one_list_of_synonyms.append(one_synonym)
+    one_synonym = "amend. no. " + str(current_number)
+    one_list_of_synonyms.append(one_synonym)
+    one_synonym = "amendment no. " + str(current_number)
+    one_list_of_synonyms.append(one_synonym)
+    MEASURE_TITLE_SYNONYMS.append(one_list_of_synonyms)
+
+    # This is a fresh list of synonyms based on proposition number, or letter
+    one_list_of_synonyms = []
+    one_synonym = "measure " + str(current_number)
+    one_list_of_synonyms.append(one_synonym)
+    one_synonym = "measure no. " + str(current_number)
+    one_list_of_synonyms.append(one_synonym)
+    MEASURE_TITLE_SYNONYMS.append(one_list_of_synonyms)
+
+    # This is a fresh list of synonyms based on proposition number, or letter
+    one_list_of_synonyms = []
+    one_synonym = "proposition " + str(current_number)
+    one_list_of_synonyms.append(one_synonym)
+    one_synonym = "proposition no. " + str(current_number)
+    one_list_of_synonyms.append(one_synonym)
+    one_synonym = "proposition number " + str(current_number)
+    one_list_of_synonyms.append(one_synonym)
+    one_synonym = "prop " + str(current_number)
+    one_list_of_synonyms.append(one_synonym)
+    one_synonym = "prop - " + str(current_number)
+    one_list_of_synonyms.append(one_synonym)
+    one_synonym = "prop. " + str(current_number)
+    one_list_of_synonyms.append(one_synonym)
+    one_synonym = "prop. no. " + str(current_number)
+    one_list_of_synonyms.append(one_synonym)
+    MEASURE_TITLE_SYNONYMS.append(one_list_of_synonyms)
+
+    # This is a fresh list of synonyms based on proposition number, or letter
+    one_list_of_synonyms = []
+    one_synonym = "question " + str(current_number)
+    one_list_of_synonyms.append(one_synonym)
+    one_synonym = "question no. " + str(current_number)
+    one_list_of_synonyms.append(one_synonym)
+    one_synonym = "question number " + str(current_number)
+    one_list_of_synonyms.append(one_synonym)
+    MEASURE_TITLE_SYNONYMS.append(one_list_of_synonyms)
+
+    current_number -= 1
+
+LETTER_IDENTIFIERS = [
+    "a1", "b1", "c1", "d1", "e1", "f1", "g1", "h1", "i1", "j1", "k1", "l1", "m1",
+    "n1", "o1", "p1", "q1", "r1", "s1", "t1", "u1", "v1", "w1", "x1", "y1", "z1",
+    "aa", "bb", "cc", "dd", "ee", "ff", "gg", "hh", "ii", "jj", "kk", "ll", "mm",
+    "nn", "oo", "pp", "qq", "rr", "ss", "tt", "uu", "vv", "ww", "xx", "yy", "zz",
+    "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m",
+    "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z"]
 for letter_identifier in LETTER_IDENTIFIERS:
-    key = "prop " + str(letter_identifier)
-    MEASURE_TITLE_TO_NUMBER_OR_LETTER_IDENTIFIERS[key] = str(letter_identifier)
-    key = "prop -  " + str(letter_identifier)
-    MEASURE_TITLE_TO_NUMBER_OR_LETTER_IDENTIFIERS[key] = str(letter_identifier)
-    key = "prop. " + str(letter_identifier)
-    MEASURE_TITLE_TO_NUMBER_OR_LETTER_IDENTIFIERS[key] = str(letter_identifier)
+    one_list_of_synonyms = []
+    one_synonym = "amendment " + str(letter_identifier)
+    one_list_of_synonyms.append(one_synonym)
+    one_synonym = "amendment no. " + str(letter_identifier)
+    one_list_of_synonyms.append(one_synonym)
+    MEASURE_TITLE_SYNONYMS.append(one_list_of_synonyms)
 
-# Single digit proposition names go last, so we can find the double digit names first
-current_number = MAXIMUM_SUPPORTED_MEASURE_NUMBER
-while current_number > 0:
-    key = "prop " + str(current_number)
-    MEASURE_TITLE_TO_NUMBER_OR_LETTER_IDENTIFIERS[key] = str(current_number)
-    key = "prop -  " + str(current_number)
-    MEASURE_TITLE_TO_NUMBER_OR_LETTER_IDENTIFIERS[key] = str(current_number)
-    key = "prop. " + str(current_number)
-    MEASURE_TITLE_TO_NUMBER_OR_LETTER_IDENTIFIERS[key] = str(current_number)
-    current_number -= 1
+    # Start over on another list
+    one_list_of_synonyms = []
+    one_synonym = "measure " + str(letter_identifier)
+    one_list_of_synonyms.append(one_synonym)
+    MEASURE_TITLE_SYNONYMS.append(one_list_of_synonyms)
 
-MEASURE_TITLE_EQUIVALENT_MEASURE_TITLE_PAIRS = {}
-current_number = MAXIMUM_SUPPORTED_MEASURE_NUMBER
-while current_number > 0:
-    key = "prop " + str(current_number)
-    MEASURE_TITLE_EQUIVALENT_MEASURE_TITLE_PAIRS[key] = "proposition " + str(current_number)
-    key = "prop -  " + str(current_number)
-    MEASURE_TITLE_EQUIVALENT_MEASURE_TITLE_PAIRS[key] = "proposition " + str(current_number)
-    key = "prop. " + str(current_number)
-    MEASURE_TITLE_EQUIVALENT_MEASURE_TITLE_PAIRS[key] = "proposition " + str(current_number)
-    current_number -= 1
-
-# MEASURE_TITLE_EQUIVALENT_MEASURE_TITLE_PAIRS = {
-#     'prop 72': 'proposition 72',
-#     'prop - 72': 'proposition 72',
-#     'prop. 72': 'proposition 72',
-#     'prop 71': 'proposition 71',
-#     'prop - 71': 'proposition 71',
-#     'prop. 71': 'proposition 71',
-#     'prop 70': 'proposition 70',
-#     'prop - 70': 'proposition 70',
-#     'prop. 70': 'proposition 70',
-#     'prop 69': 'proposition 69',
-#     'prop - 69': 'proposition 69',
-#     'prop. 69': 'proposition 69',
-#     'prop 68': 'proposition 68',
-#     'prop - 68': 'proposition 68',
-#     'prop. 68': 'proposition 68',
-# }
+    # Start over on another list
+    one_list_of_synonyms = []
+    one_synonym = "proposition " + str(letter_identifier)
+    one_list_of_synonyms.append(one_synonym)
+    one_synonym = "prop " + str(letter_identifier)
+    one_list_of_synonyms.append(one_synonym)
+    one_synonym = "prop - " + str(letter_identifier)
+    one_list_of_synonyms.append(one_synonym)
+    one_synonym = "prop. " + str(letter_identifier)
+    one_list_of_synonyms.append(one_synonym)
+    MEASURE_TITLE_SYNONYMS.append(one_list_of_synonyms)
 
 OFFICE_NAME_EQUIVALENT_PHRASE_PAIRS = {
     'commissioner of insurance': 'insurance commissioner',
