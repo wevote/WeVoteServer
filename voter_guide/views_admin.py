@@ -616,7 +616,8 @@ def voter_guide_create_process_view(request):
     # Figure out the elections we care about
     google_civic_election_id_list = []
     election_manager = ElectionManager()
-    # If a state_code is NOT included, the national election will be returned with this query
+    # If a state_code is included, national elections will NOT be returned
+    # If a state_code is NOT included, the national election WILL be returned with this query
     results = election_manager.retrieve_upcoming_elections(state_code=state_code)
     if results['election_list_found']:
         upcoming_election_list = results['election_list']
@@ -625,6 +626,7 @@ def voter_guide_create_process_view(request):
                 google_civic_election_id_list.append(one_election.google_civic_election_id)
 
     # If a state code IS included, then the above retrieve_upcoming_elections will have missed the national election
+    # so we want to return it here
     if positive_value_exists(state_code):
         results = election_manager.retrieve_next_national_election()
         if results['election_found']:
