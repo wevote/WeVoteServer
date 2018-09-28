@@ -401,6 +401,7 @@ def batch_action_list_view(request):
 
         batch_row_query = BatchRow.objects.order_by('id')
         batch_row_query = batch_row_query.filter(batch_header_id=batch_header_id)
+
         if positive_value_exists(state_code):
             batch_row_query = batch_row_query.filter(state_code__iexact=state_code)
             batch_row_list = list(batch_row_query)
