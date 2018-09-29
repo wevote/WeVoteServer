@@ -196,22 +196,49 @@ def extract_import_position_list_from_voter_guide_possibility(voter_guide_possib
         voter_guide_possibility_parent_id=voter_guide_possibility.id).order_by('possibility_position_number')
     possibility_position_list = list(possibility_position_query)
     for possibility_position in possibility_position_list:
-        position_json = {
-            'candidate_name': possibility_position.ballot_item_name,
-            'candidate_we_vote_id': possibility_position.candidate_we_vote_id,
-            # 'candidate_twitter_handle': 'candidate_twitter_handle',
-            # 'contest_office_name': 'contest_office_name',
-            'google_civic_election_id': possibility_position.google_civic_election_id,
-            'measure_title': possibility_position.ballot_item_name,
-            'measure_we_vote_id': possibility_position.measure_we_vote_id,
-            'more_info_url': more_info_url,
-            'organization_name': organization_name,
-            'organization_we_vote_id': organization_we_vote_id,
-            'organization_twitter_handle': organization_twitter_handle,
-            'stance': possibility_position.position_stance,
-            'statement_text': possibility_position.statement_text,
-            'state_code': state_code,
-        }
+        if positive_value_exists(possibility_position.candidate_we_vote_id):
+            position_json = {
+                'candidate_name': possibility_position.ballot_item_name,
+                'candidate_we_vote_id': possibility_position.candidate_we_vote_id,
+                'google_civic_election_id': possibility_position.google_civic_election_id,
+                'more_info_url': more_info_url,
+                'organization_name': organization_name,
+                'organization_we_vote_id': organization_we_vote_id,
+                'organization_twitter_handle': organization_twitter_handle,
+                'stance': possibility_position.position_stance,
+                'statement_text': possibility_position.statement_text,
+                'state_code': state_code,
+            }
+        elif positive_value_exists(possibility_position.measure_we_vote_id):
+            position_json = {
+                'google_civic_election_id': possibility_position.google_civic_election_id,
+                'measure_title': possibility_position.ballot_item_name,
+                'measure_we_vote_id': possibility_position.measure_we_vote_id,
+                'more_info_url': more_info_url,
+                'organization_name': organization_name,
+                'organization_we_vote_id': organization_we_vote_id,
+                'organization_twitter_handle': organization_twitter_handle,
+                'stance': possibility_position.position_stance,
+                'statement_text': possibility_position.statement_text,
+                'state_code': state_code,
+            }
+        else:
+            position_json = {
+                'candidate_name': possibility_position.ballot_item_name,
+                'candidate_we_vote_id': possibility_position.candidate_we_vote_id,
+                # 'candidate_twitter_handle': 'candidate_twitter_handle',
+                # 'contest_office_name': 'contest_office_name',
+                'google_civic_election_id': possibility_position.google_civic_election_id,
+                'measure_title': possibility_position.ballot_item_name,
+                'measure_we_vote_id': possibility_position.measure_we_vote_id,
+                'more_info_url': more_info_url,
+                'organization_name': organization_name,
+                'organization_we_vote_id': organization_we_vote_id,
+                'organization_twitter_handle': organization_twitter_handle,
+                'stance': possibility_position.position_stance,
+                'statement_text': possibility_position.statement_text,
+                'state_code': state_code,
+            }
         position_json_list.append(position_json)
 
     if len(position_json_list):
