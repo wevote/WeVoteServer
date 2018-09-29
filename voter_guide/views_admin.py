@@ -451,6 +451,18 @@ def voter_guide_create_view(request):
                 positions_stored_count += 1
             else:
                 positions_not_stored_count += 1
+        elif positive_value_exists(organization_we_vote_id) \
+                and 'measure_we_vote_id' in one_possible_endorsement \
+                and positive_value_exists(one_possible_endorsement['measure_we_vote_id']):
+            position_exists_query = PositionEntered.objects.filter(
+                organization_we_vote_id=organization_we_vote_id,
+                contest_measure_we_vote_id=one_possible_endorsement['measure_we_vote_id'])
+            position_list = list(position_exists_query)
+            if positive_value_exists(len(position_list)):
+                one_possible_endorsement['position_we_vote_id'] = position_list[0].we_vote_id
+                positions_stored_count += 1
+            else:
+                positions_not_stored_count += 1
 
         possible_endorsement_list_modified.append(one_possible_endorsement)
 
