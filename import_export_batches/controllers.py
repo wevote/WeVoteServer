@@ -1847,6 +1847,7 @@ def create_batch_row_action_position(batch_description, batch_header_map, one_ba
     candidate_found = False
     contest_office_we_vote_id = ""
     measure_found = False
+    contest_measure_id = 0
     contest_measure_we_vote_id = ""
 
     # Does a BatchRowActionPosition entry already exist?
@@ -1898,6 +1899,8 @@ def create_batch_row_action_position(batch_description, batch_header_map, one_ba
         "contest_office_name", batch_header_map, one_batch_row)
     contest_measure_title = batch_manager.retrieve_value_from_batch_row(
         "contest_measure_title", batch_header_map, one_batch_row)
+    measure_we_vote_id = batch_manager.retrieve_value_from_batch_row(
+        "measure_we_vote_id", batch_header_map, one_batch_row)
     more_info_url = batch_manager.retrieve_value_from_batch_row("more_info_url", batch_header_map, one_batch_row)
     statement_text = batch_manager.retrieve_value_from_batch_row("statement_text", batch_header_map, one_batch_row)
     stance = batch_manager.retrieve_value_from_batch_row("stance", batch_header_map, one_batch_row)
@@ -2013,6 +2016,22 @@ def create_batch_row_action_position(batch_description, batch_header_map, one_ba
                         contest_office_we_vote_id)
         else:
             status += candidate_results['status']
+    elif positive_value_exists(measure_we_vote_id):
+        contest_measure_manager = ContestMeasureManager()
+        measure_results = contest_measure_manager.retrieve_contest_measure_from_we_vote_id(measure_we_vote_id)
+
+        if measure_results['contest_measure_found']:
+            measure = measure_results['contest_measure']
+            measure_found = True
+            contest_measure_we_vote_id = measure.we_vote_id
+            contest_measure_id = measure.id
+            contest_measure_title = measure.measure_title
+            if not positive_value_exists(google_civic_election_id) and positive_value_exists(measure_we_vote_id):
+                google_civic_election_id = \
+                    contest_measure_manager.fetch_google_civic_election_id_from_measure_we_vote_id(
+                        measure_we_vote_id)
+        else:
+            status += measure_results['status']
     elif positive_value_exists(candidate_twitter_handle) or positive_value_exists(candidate_name):
         candidate_campaign_list_manager = CandidateCampaignListManager()
         google_civic_election_id_list = [google_civic_election_id]
@@ -2135,6 +2154,23 @@ def create_batch_row_action_position(batch_description, batch_header_map, one_ba
                 status += " organization_we_vote_id "
             if not positive_value_exists(stance):
                 status += " stance "
+    elif positive_value_exists(contest_measure_we_vote_id):
+        ballot_item_display_name = contest_measure_title
+        # Note organization_name becomes speaker_display_name below
+        variables_found_to_create_position = positive_value_exists(ballot_item_display_name) \
+            and positive_value_exists(organization_name) \
+            and positive_value_exists(organization_we_vote_id) \
+            and positive_value_exists(stance)
+        if not variables_found_to_create_position:
+            status += "MEASURE_WE_VOTE_ID-MISSING_VARIABLES_REQUIRED_TO_CREATE "
+            if not positive_value_exists(ballot_item_display_name):
+                status += " ballot_item_display_name "
+            if not positive_value_exists(organization_name):
+                status += " organization_name "
+            if not positive_value_exists(organization_we_vote_id):
+                status += " organization_we_vote_id "
+            if not positive_value_exists(stance):
+                status += " stance "
     elif contest_measure_title:
         ballot_item_display_name = contest_measure_title
         # Note organization_name becomes speaker_display_name below
@@ -2177,7 +2213,7 @@ def create_batch_row_action_position(batch_description, batch_header_map, one_ba
         batch_row_action_position.contest_office_we_vote_id = contest_office_we_vote_id
         # batch_row_action_position.contest_office_id = contest_office_id
         batch_row_action_position.contest_measure_we_vote_id = contest_measure_we_vote_id
-        # batch_row_action_position.contest_measure_id = contest_measure_id
+        batch_row_action_position.contest_measure_id = contest_measure_id
         batch_row_action_position.google_civic_election_id = google_civic_election_id
         batch_row_action_position.more_info_url = more_info_url
         batch_row_action_position.stance = stance
