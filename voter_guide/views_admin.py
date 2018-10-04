@@ -780,6 +780,10 @@ def voter_guide_create_process_view(request):
         if results['possible_endorsement_list_found']:
             possible_endorsement_list = results['possible_endorsement_list']
 
+        results = fix_sequence_of_possible_endorsement_list(possible_endorsement_list)
+        if results['possible_endorsement_list_found']:
+            possible_endorsement_list = results['possible_endorsement_list']
+
     if positive_value_exists(ignore_stored_positions):
         # Identify which candidates already have positions stored, and remove them
         altered_position_list = []

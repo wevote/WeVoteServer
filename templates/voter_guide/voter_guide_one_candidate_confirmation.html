@@ -2,7 +2,7 @@
 
 <div>
     <div>
-        <span class="float-right"><span style="color: darkgray">candidate #{{ possible_endorsement.possibility_position_number|default_if_none:""|add:"0" }}</span></span>
+        <span class="float-right"><span style="color: darkgray">position #{{ possible_endorsement.possibility_position_number|default_if_none:""|add:"0" }}</span></span>
     {% if possible_endorsement.candidate_we_vote_id %}
         <span><span class="h4">{{ possible_endorsement.candidate.display_candidate_name|default_if_none:"" }}</span>, <span>{{ possible_endorsement.candidate.contest_office_name|default_if_none:"" }}</span>&nbsp;&nbsp;&nbsp;</span>
         {% if political_data_manager %}
