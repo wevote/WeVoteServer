@@ -337,7 +337,7 @@ class ElectionManager(models.Model):
             upcoming_election_list = list(election_list_query)
 
             status = 'ELECTIONS_FOUND '
-            election_list_found = True
+            election_list_found = positive_value_exists(len(upcoming_election_list))
             success = True
         except Election.DoesNotExist as e:
             status = 'NO_ELECTIONS_FOUND '

@@ -5,6 +5,7 @@
 from ballot.models import OFFICE, CANDIDATE, MEASURE
 from candidate.models import CandidateCampaignManager, CandidateCampaignListManager
 from config.base import get_environment_variable
+import copy
 from django.http import HttpResponse
 from follow.models import FollowOrganizationList, FollowIssueList, FOLLOWING
 from itertools import chain
@@ -408,6 +409,15 @@ def match_endorsement_list_with_candidates_in_database(
 
 def match_endorsement_list_with_measures_in_database(
         possible_endorsement_list, google_civic_election_id_list, state_code='', possible_endorsement_list_light=[]):
+    """
+
+    :param possible_endorsement_list: This is the list of measures and candidates that were either found on the
+      page or entered manually (ex/ "Prop 1")
+    :param google_civic_election_id_list:
+    :param state_code:
+    :param possible_endorsement_list_light: This is the list of actual candidates or measures in the database
+    :return:
+    """
     status = ""
     success = True
     possible_endorsement_list_found = False
@@ -416,6 +426,7 @@ def match_endorsement_list_with_measures_in_database(
     measure_manager = ContestMeasureManager()
     measure_list_manager = ContestMeasureList()
     for possible_endorsement in possible_endorsement_list:
+        possible_endorsement_matched = False
         if 'measure_we_vote_id' in possible_endorsement \
                 and positive_value_exists(possible_endorsement['measure_we_vote_id']):
             results = measure_manager.retrieve_contest_measure_from_we_vote_id(
@@ -425,6 +436,7 @@ def match_endorsement_list_with_measures_in_database(
                 possible_endorsement['ballot_item_name'] = possible_endorsement['measure'].measure_title
                 possible_endorsement['google_civic_election_id'] = \
                     possible_endorsement['measure'].google_civic_election_id
+            possible_endorsement_matched = True
             possible_endorsement_list_modified.append(possible_endorsement)
         elif 'ballot_item_name' in possible_endorsement and \
                 positive_value_exists(possible_endorsement['ballot_item_name']):
@@ -440,14 +452,15 @@ def match_endorsement_list_with_measures_in_database(
                 possible_endorsement['measure'] = measure
                 possible_endorsement['ballot_item_name'] = measure.measure_title
                 possible_endorsement['google_civic_election_id'] = measure.google_civic_election_id
+                possible_endorsement_matched = True
                 possible_endorsement_list_modified.append(possible_endorsement)
             elif matching_results['multiple_entries_found']:
                 status += "MULTIPLE_MEASURES_FOUND-CANNOT_MATCH "
-                possible_endorsement_list_modified.append(possible_endorsement)
+                # possible_endorsement_list_modified.append(possible_endorsement)
             elif not positive_value_exists(matching_results['success']):
                 status += "RETRIEVE_MEASURES_FROM_NON_UNIQUE-NO_SUCCESS "
                 status += matching_results['status']
-                possible_endorsement_list_modified.append(possible_endorsement)
+                # possible_endorsement_list_modified.append(possible_endorsement)
             else:
                 status += "RETRIEVE_MEASURES_FROM_NON_UNIQUE-MEASURE_NOT_FOUND "
 
@@ -465,13 +478,55 @@ def match_endorsement_list_with_measures_in_database(
                         if matching_results['contest_measure_found']:
                             measure = matching_results['contest_measure']
 
-                            # If one candidate found, add we_vote_id here
+                            # If one measure found, augment the data if we can
                             possible_endorsement['measure_we_vote_id'] = measure.we_vote_id
                             possible_endorsement['measure'] = measure
                             possible_endorsement['ballot_item_name'] = measure.measure_title
                             possible_endorsement['google_civic_election_id'] = measure.google_civic_election_id
+
+                        possible_endorsement_matched = True
+                        possible_endorsement_list_modified.append(possible_endorsement)
                         break
 
+        if not possible_endorsement_matched:
+            # We want to check the synonyms for each measure in upcoming elections
+            # (ex/ "Prop 1" in display_name_alternatives_list) against the possible endorsement ()
+            # NOTE: one_endorsement_light is a candidate or measure for an upcoming election
+            # NOTE: possible endorsement is one of the incoming new endorsements we are trying to match
+            synonym_found = False
+            for one_endorsement_light in possible_endorsement_list_light:
+                # Hanging off each ballot_item_dict is a display_name_alternatives_list that includes
+                #  shortened alternative names that we should check against decide_line_lower_case
+                if 'display_name_alternatives_list' in one_endorsement_light and \
+                        positive_value_exists(one_endorsement_light['display_name_alternatives_list']):
+                    display_name_alternatives_list = one_endorsement_light['display_name_alternatives_list']
+                    for ballot_item_display_name_alternate in display_name_alternatives_list:
+                        if ballot_item_display_name_alternate.lower() in \
+                                possible_endorsement['ballot_item_name'].lower():
+                            # Make a copy so we don't change the incoming object -- if we find multiple upcoming
+                            # measures that match, we should use them all
+                            possible_endorsement_copy = copy.deepcopy(possible_endorsement)
+                            possible_endorsement_copy['measure_we_vote_id'] = \
+                                one_endorsement_light['measure_we_vote_id']
+                            possible_endorsement_copy['ballot_item_name'] = \
+                                one_endorsement_light['ballot_item_display_name']
+                            possible_endorsement_copy['google_civic_election_id'] = \
+                                one_endorsement_light['google_civic_election_id']
+                            matching_results = measure_manager.retrieve_contest_measure_from_we_vote_id(
+                                possible_endorsement_copy['measure_we_vote_id'])
+
+                            if matching_results['contest_measure_found']:
+                                measure = matching_results['contest_measure']
+
+                                # If one measure found, augment the data if we can
+                                possible_endorsement_copy['measure'] = measure
+                                possible_endorsement_copy['ballot_item_name'] = measure.measure_title
+                                possible_endorsement_copy['google_civic_election_id'] = measure.google_civic_election_id
+                            synonym_found = True
+                            possible_endorsement_list_modified.append(possible_endorsement_copy)
+                            break
+            if not synonym_found:
+                # If an entry based on a synonym wasn't found, then store the orginal possibility
                 possible_endorsement_list_modified.append(possible_endorsement)
 
     if len(possible_endorsement_list_modified):
