@@ -281,6 +281,7 @@ def issue_list_view(request):
         'issue_list':               altered_issue_list,
         'issue_search':             issue_search,
         'messages_on_stage':        messages_on_stage,
+        'show_all_elections':       show_all_elections,
         'show_hidden_issues':       positive_value_exists(show_hidden_issues),
         'state_code':               state_code,
         'state_list':               sorted_state_list,

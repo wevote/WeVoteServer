@@ -1475,20 +1475,34 @@ def voter_guide_list_view(request):
 
     show_individuals = request.GET.get('show_individuals', False)
     google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
+    show_all = request.GET.get('show_all', False)
     show_all_elections = request.GET.get('show_all_elections', False)
     state_code = request.GET.get('state_code', '')
     voter_guide_search = request.GET.get('voter_guide_search', '')
 
-    voter_guide_list = []
-    voter_guide_list_object = VoterGuideListManager()
-
     order_by = "google_civic_election_id"
-    limit_number = 75
-    results = voter_guide_list_object.retrieve_all_voter_guides_order_by(
-        order_by, limit_number, voter_guide_search, google_civic_election_id, show_individuals)
+    if positive_value_exists(show_all):
+        limit_number = 0
+    else:
+        limit_number = 75
 
-    if results['success']:
-        voter_guide_list = results['voter_guide_list']
+    # voter_guide_list_object = VoterGuideListManager()
+    # results = voter_guide_list_object.retrieve_all_voter_guides_order_by(
+    #     order_by, limit_number, voter_guide_search, google_civic_election_id, show_individuals)
+
+    voter_guide_query = VoterGuide.objects.all()
+    voter_guide_query = voter_guide_query.order_by(order_by)
+    voter_guide_query = voter_guide_query.exclude(vote_smart_ratings_only=True)
+    if positive_value_exists(google_civic_election_id):
+        voter_guide_query = voter_guide_query.filter(google_civic_election_id=google_civic_election_id)
+    if not positive_value_exists(show_individuals):
+        voter_guide_query = voter_guide_query.exclude(voter_guide_owner_type__iexact=INDIVIDUAL)
+    voter_guides_count = voter_guide_query.count()
+
+    if positive_value_exists(limit_number):
+        voter_guide_list = voter_guide_query[:limit_number]
+    else:
+        voter_guide_list = list(voter_guide_query)
 
     modified_voter_guide_list = []
     position_list_manager = PositionListManager()
@@ -1526,22 +1540,15 @@ def voter_guide_list_view(request):
                     one_election = results['election']
                     election_list.append(one_election)
 
-    voter_guide_query = VoterGuide.objects.all()
-    voter_guide_query = voter_guide_query.exclude(vote_smart_ratings_only=True)
-    if positive_value_exists(google_civic_election_id):
-        voter_guide_query = voter_guide_query.filter(google_civic_election_id=google_civic_election_id)
-    if not positive_value_exists(show_individuals):
-        voter_guide_query = voter_guide_query.exclude(voter_guide_owner_type__iexact=INDIVIDUAL)
-    voter_guides_count = voter_guide_query.count()
-
     messages.add_message(request, messages.INFO, 'We found {voter_guides_count} existing voter guides. '
                                                  ''.format(voter_guides_count=voter_guides_count))
 
     messages_on_stage = get_messages(request)
     template_values = {
         'election_list':            election_list,
-        'show_individuals':         show_individuals,
         'google_civic_election_id': google_civic_election_id,
+        'show_individuals':         show_individuals,
+        'show_all':                 show_all,
         'show_all_elections':       show_all_elections,
         'state_code':               state_code,
         'messages_on_stage':        messages_on_stage,

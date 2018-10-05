@@ -97,13 +97,15 @@
             <th></th>
             <th></th>
             <th>Twitter</th>
+        {% if not google_civic_election_id %}
             <th>Election</th>
             <th>Election Day</th>
-            <th>Time Span</th>
+        {% endif %}
             <th>Type</th>
             <th>Public<br />
                 Positions</th>
-            <th>Friends-Only</th>
+            <th>Friends<br />
+                Only</th>
             <th>Last Updated</th>
             <th>we vote id</th>
         </tr>
@@ -116,23 +118,39 @@
                     <a href="{% url 'organization:organization_position_list' voter_guide.organization.id %}?google_civic_election_id={{ google_civic_election_id }}">
                         <img src="{{ voter_guide.we_vote_hosted_profile_image_url_tiny }}" width="24px" /></a>{% endif %}</td>
                 <td>
-                <a href="{% url 'organization:organization_position_list' voter_guide.organization.id %}?google_civic_election_id={{ google_civic_election_id }}">
+                <a href="{% url 'organization:organization_position_list' voter_guide.organization.id %}?google_civic_election_id={{ google_civic_election_id }}"
+                   target="_blank">
                 {% if voter_guide.organization.organization_name %}
                     {{ voter_guide.organization.organization_name }}
-                {% else %}(name missing){% endif %}</a>
+                {% else %}(name missing){% endif %} <span class="glyphicon glyphicon-new-window"></span></a>
                 </td>
             {% else %}
                 <td colspan="2">(no org found)</td>
             {% endif %}
-            <td>{{ voter_guide.organization_we_vote_id|default_if_none:"" }}</td>
+            <td>
+                {{ voter_guide.organization_we_vote_id|default_if_none:"" }}
+                {% if voter_guide.organization %}
+                    <br />
+                    {% if voter_guide.organization.issue_analysis_done %}
+                      <strong>analyzed</strong>&nbsp;
+                    {% else %}
+                      <span class="u-no-break" style="color: darkgray;">not analyzed</span>
+                    {% endif %}
+                {% endif %}
+            </td>
             <td>{{ voter_guide.owner_we_vote_id|default_if_none:"" }}</td>
             <td>{{ voter_guide.twitter_handle|default_if_none:"" }}</td>
+        {% if not google_civic_election_id %}
             <td>{{ voter_guide.google_civic_election_id|default_if_none:"" }}</td>
             <td>{{ voter_guide.election_day_text|default_if_none:"" }}</td>
-            <td>{{ voter_guide.vote_smart_time_span|default_if_none:"" }}</td>
+        {% endif %}
             <td>{{ voter_guide.voter_guide_owner_type|default_if_none:"" }}</td>
             <td>{{ voter_guide.number_of_public_positions|default_if_none:"" }}</td>
-            <td>{{ voter_guide.number_of_friends_only_positions|default_if_none:"" }}</td>
+            <td>
+                {% if voter_guide.number_of_friends_only_positions %}
+                {{ voter_guide.number_of_friends_only_positions|default_if_none:"" }}
+                {% endif %}
+            </td>
             <td>{{ voter_guide.last_updated }}</td>
             <td>
               <a href="{% url 'voter_guide:voter_guide_edit' voter_guide.we_vote_id %}" target="_blank">
@@ -142,13 +160,19 @@
         </tr>
     {% endfor %}
     </table>
+
+    {% if show_all %}
+        <a href="?voter_guide_search={{ voter_guide_search }}&google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">show fewer</a>
+    {% else %}
+        <a href="?voter_guide_search={{ voter_guide_search }}&google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}&show_all=1">show all</a>
+    {% endif %}
+
 {% else %}
     <p>(no voter guides found)</p>
 {% endif %}
 
     <p></p>
-    <p>
-    </p>
+    <p></p>
     <br />
     <br />
     <script>
