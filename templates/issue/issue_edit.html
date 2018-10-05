@@ -75,34 +75,41 @@
 <br />
 {# Show all organizations linked to this issue #}
 {% if organization_list %}
-    <table cellpadding="5" cellspacing="5" border="1">
+    <table class="table">
+     <thead>
         <tr>
-            <td></td>
-            <td></td>
-            <td>Organization</td>
-            <td>Twitter</td>
-            <td>Vote Smart ID</td>
-            <td>State</td>
-            <td>Wikipedia?</td>
-            <td></td>
+            <th></th>
+            <th></th>
+            <th>Organization</th>
+            <th></th>
+            <th>Twitter</th>
+            <th>Vote Smart ID</th>
+            <th>State</th>
         </tr>
+     </thead>
     {% for organization in organization_list %}
         <tr>
             <td>{{ forloop.counter }}</td>
             <td>{% if organization.we_vote_hosted_profile_image_url_medium %}
                 <a href="{% url 'organization:organization_edit' organization.id %}?google_civic_election_id={{ google_civic_election_id }}&candidate_we_vote_id={{ candidate_we_vote_id }}">
                     <img src="{{ organization.we_vote_hosted_profile_image_url_medium }}" width="48px" /></a>{% endif %}</td>
-            <td><a href="{% url 'organization:organization_edit' organization.id %}?google_civic_election_id={{ google_civic_election_id }}&candidate_we_vote_id={{ candidate_we_vote_id }}">
-                {{ organization.organization_name }}</a><br />
+            <td><a href="{% url 'organization:organization_edit' organization.id %}?google_civic_election_id={{ google_civic_election_id }}&candidate_we_vote_id={{ candidate_we_vote_id }}"
+                   class="u-no-break"
+                   target="_blank">
+                {{ organization.organization_name }} <span class="glyphicon glyphicon-new-window"></span></a><br />
                 &nbsp;&nbsp;&nbsp;(<a href="{% url 'image:images_for_one_organization' organization.we_vote_id %}" target="_blank">See images</a> in new window)
+            </td>
+            <td>
+              {% if organization.issue_analysis_done %}
+                <strong>analyzed</strong>&nbsp;
+              {% else %}
+                <span style="color: darkgray;">not analyzed</span>
+              {% endif %}
             </td>
             <td>{% if organization.organization_twitter_handle %}{{ organization.organization_twitter_handle }} <br />
                 ({{ organization.twitter_followers_count }} followers){% endif %}</td>
             <td>{% if organization.vote_smart_id %}{{ organization.vote_smart_id }}{% endif %}</td>
             <td>{{ organization.state_served_code }}</td>
-            <td>{% if organization.wikipedia_page_id %}
-                <a href="{{ organization.generate_wikipedia_link }}" target="_blank">W yes</a>{% endif %}</td>
-            <td><a href="{% url 'organization:organization_edit' organization.id %}" style="font-size: .65em">{{ organization.we_vote_id }}</a></td>
         </tr>
     {% endfor %}
     </table>
