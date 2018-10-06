@@ -96,7 +96,17 @@
             <th>Organization</th>
             <th></th>
             <th></th>
-            <th>Twitter</th>
+            <th>
+              {% if sort_by == "twitter" %}
+                  <a href="{% url 'voter_guide:voter_guide_list' %}?state_code={{ state_code }}&google_civic_election_id={{ google_civic_election_id }}&show_all_elections={{ show_all_elections }}&show_individuals={{ show_individuals }}&voter_guide_search={{ voter_guide_search }}">
+                  Twitter <span class="glyphicon glyphicon-triangle-bottom"></span>
+                  </a>
+              {% else %}
+                  <a href="{% url 'voter_guide:voter_guide_list' %}?sort_by=twitter&state_code={{ state_code }}&google_civic_election_id={{ google_civic_election_id }}&show_all_elections={{ show_all_elections }}&show_individuals={{ show_individuals }}&voter_guide_search={{ voter_guide_search }}">
+                  Twitter (click to sort)
+                  </a>
+              {% endif %}
+            </th>
         {% if not google_civic_election_id %}
             <th>Election</th>
             <th>Election Day</th>
@@ -139,7 +149,18 @@
                 {% endif %}
             </td>
             <td>{{ voter_guide.owner_we_vote_id|default_if_none:"" }}</td>
-            <td>{{ voter_guide.twitter_handle|default_if_none:"" }}</td>
+            <td>
+                {% if voter_guide.twitter_handle %}
+                    <a href="https://twitter.com/{{ voter_guide.twitter_handle }}"
+                       target="_blank"
+                       class="u-no-break">
+                    <i class="fa fa-twitter"></i> {{ voter_guide.twitter_handle }} ({{ voter_guide.twitter_followers_count }})
+                    &nbsp;
+                    <span class="glyphicon glyphicon-new-window"></span></a>
+                {% endif %}
+                {% if voter_guide.twitter_handle and voter_guide.organization.organization_email %}<br />{% endif %}
+                {{ voter_guide.organization.organization_email|default_if_none:"" }}
+            </td>
         {% if not google_civic_election_id %}
             <td>{{ voter_guide.google_civic_election_id|default_if_none:"" }}</td>
             <td>{{ voter_guide.election_day_text|default_if_none:"" }}</td>

@@ -1477,6 +1477,7 @@ def voter_guide_list_view(request):
     google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
     show_all = request.GET.get('show_all', False)
     show_all_elections = request.GET.get('show_all_elections', False)
+    sort_by = request.GET.get('sort_by', False)
     state_code = request.GET.get('state_code', '')
     voter_guide_search = request.GET.get('voter_guide_search', '')
 
@@ -1497,6 +1498,55 @@ def voter_guide_list_view(request):
         voter_guide_query = voter_guide_query.filter(google_civic_election_id=google_civic_election_id)
     if not positive_value_exists(show_individuals):
         voter_guide_query = voter_guide_query.exclude(voter_guide_owner_type__iexact=INDIVIDUAL)
+
+    if positive_value_exists(voter_guide_search):
+        search_words = voter_guide_search.split()
+        for one_word in search_words:
+            filters = []
+
+            new_filter = Q(we_vote_id__iexact=one_word)
+            filters.append(new_filter)
+
+            new_filter = Q(display_name__icontains=one_word)
+            filters.append(new_filter)
+
+            new_filter = Q(google_civic_election_id__iexact=one_word)
+            filters.append(new_filter)
+
+            new_filter = Q(organization_we_vote_id__iexact=one_word)
+            filters.append(new_filter)
+
+            new_filter = Q(owner_we_vote_id__iexact=one_word)
+            filters.append(new_filter)
+
+            new_filter = Q(public_figure_we_vote_id__iexact=one_word)
+            filters.append(new_filter)
+
+            new_filter = Q(state_code__icontains=one_word)
+            filters.append(new_filter)
+
+            new_filter = Q(twitter_handle__icontains=one_word)
+            filters.append(new_filter)
+
+            # Add the first query
+            if len(filters):
+                final_filters = filters.pop()
+
+                # ...and "OR" the remaining items in the list
+                for item in filters:
+                    final_filters |= item
+
+                voter_guide_query = voter_guide_query.filter(final_filters)
+
+    if positive_value_exists(sort_by):
+        if sort_by == "twitter":
+            voter_guide_query = \
+                voter_guide_query.order_by('display_name').order_by('-twitter_followers_count')
+        else:
+            voter_guide_query = voter_guide_query.order_by('display_name')
+    else:
+        voter_guide_query = voter_guide_query.order_by('display_name')
+
     voter_guides_count = voter_guide_query.count()
 
     if positive_value_exists(limit_number):
@@ -1550,6 +1600,7 @@ def voter_guide_list_view(request):
         'show_individuals':         show_individuals,
         'show_all':                 show_all,
         'show_all_elections':       show_all_elections,
+        'sort_by':                  sort_by,
         'state_code':               state_code,
         'messages_on_stage':        messages_on_stage,
         'voter_guide_list':         modified_voter_guide_list,
