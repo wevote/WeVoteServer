@@ -265,6 +265,10 @@ class Issue(models.Model):
                                                             null=False, blank=True, default=0)
     hide_issue = models.BooleanField(default=True)  # Do not show issue to voters or partners (admins/volunteers only)
 
+    # For audit reasons, would this issue broadly be considered "left" or "right"
+    considered_left = models.BooleanField(default=False)
+    considered_right = models.BooleanField(default=False)
+
     # A default image field for hard-coded local images
     issue_image_url = models.TextField(
         verbose_name='image url for issue', blank=True, null=True, default="")

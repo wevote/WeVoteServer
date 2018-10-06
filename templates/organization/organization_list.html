@@ -124,9 +124,15 @@
               </a>
             </th>
             <th>
+              {% if sort_by == "twitter" %}
+                  <a href="{% url 'organization:organization_list' %}?state_code={{ state_code }}&organization_type_filter={{ organization_type_filter }}&organization_search={{ organization_search }}">
+                  Twitter <span class="glyphicon glyphicon-triangle-bottom"></span>
+                  </a>
+              {% else %}
               <a href="{% url 'organization:organization_list' %}?sort_by=twitter&state_code={{ state_code }}&organization_type_filter={{ organization_type_filter }}&organization_search={{ organization_search }}">
-              {% if sort_by == "twitter" %}<strong>Twitter</strong>{% else %}Twitter{% endif %}
-              </a>
+                  Twitter (click to sort)
+                  </a>
+              {% endif %}
             </th>
             <th>Type</th>
             <th>Issues {% if show_issues %}

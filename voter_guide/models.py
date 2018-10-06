@@ -928,7 +928,7 @@ class VoterGuide(models.Model):
         verbose_name="the period in which the organization stated this position", max_length=255, null=True,
         blank=True, unique=False, db_index=True)
 
-    # This might be the organization name, or the
+    # This might be the organization name, or the individual's name
     display_name = models.CharField(
         verbose_name="display title for this voter guide", max_length=255, null=True, blank=True, unique=False)
 

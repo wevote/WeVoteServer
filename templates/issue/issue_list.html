@@ -71,6 +71,7 @@
     <input type="text" name="issue_search" id="issue_search_id" value="{{ issue_search }}" />
     <input type="submit" value="Search for Issue" />
 
+    &nbsp;&nbsp;&nbsp;
     {% if show_hidden_issues %}
     <a href="{% url 'issue:issue_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}&issue_search={{ issue_search }}&show_hidden_issues=0">
         only show issues visible to voters</a>
@@ -78,6 +79,11 @@
     <a href="{% url 'issue:issue_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}&issue_search={{ issue_search }}&show_hidden_issues=1">
         show hidden issues</a>
     {% endif %}
+
+    &nbsp;&nbsp;&nbsp;
+    <a href="{% url 'issue:issue_partisan_analysis' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}"
+       target="_blank">
+        show partisan analysis <span class="glyphicon glyphicon-new-window"></span></a>
 
 </form>
 
@@ -88,7 +94,6 @@
             <th>&nbsp;</th>
             <th>&nbsp;</th>
             <th>Issue Name</th>
-            <th>Image Notes</th>
             <th>Linked Org Count</th>
             <th>Followers Count</th>
             <th>Issue Description</th>
@@ -111,13 +116,6 @@
                  target="_blank">
                 {{ issue.issue_name }} <span class="glyphicon glyphicon-new-window"></span></a>{% if issue.hide_issue %} - <strong>HIDDEN</strong>{% endif %}<br />
               {{ issue.we_vote_id }}
-            </td>
-            <td>
-                {% if issue.we_vote_hosted_image_url_medium %}
-                AWS
-                {% elif issue.issue_image_url %}
-                local_image
-                {% endif %}
             </td>
             <td>{{ issue.linked_organization_count }}</td>
             <td>{{ issue.issue_followers_count }}</td>
