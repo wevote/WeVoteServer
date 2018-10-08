@@ -156,7 +156,7 @@ class OrganizationManager(models.Manager):
 
     def create_organization(self, organization_name, organization_website='', organization_twitter_handle='',
                             organization_email='', organization_facebook='', organization_image='', twitter_id='',
-                            organization_type=''):
+                            organization_type='', state_served_code=None):
         try:
             if not positive_value_exists(organization_name):
                 organization_name = ""
@@ -192,6 +192,7 @@ class OrganizationManager(models.Manager):
                     organization_facebook=organization_facebook,
                     organization_image=organization_image,
                     organization_type=organization_type,
+                    state_served_code=state_served_code,
                     twitter_user_id=twitter_user_id,
                     twitter_name=twitter_name,
                     twitter_location=twitter_location,
@@ -211,7 +212,9 @@ class OrganizationManager(models.Manager):
                     organization_email=organization_email,
                     organization_facebook=organization_facebook,
                     organization_image=organization_image,
-                    organization_type=organization_type)
+                    organization_type=organization_type,
+                    state_served_code=state_served_code
+                )
             organization.save()  # We do this so the we_vote_id is created
             status = "CREATE_ORGANIZATION_SUCCESSFUL "
             success = True
