@@ -1264,7 +1264,7 @@ class PositionListManager(models.Model):
 
         return total_count
 
-    def fetch_positions_count_for_voter_guide(self, organization_we_vote_id, google_civic_election_id, state_code,
+    def fetch_positions_count_for_voter_guide(self, organization_we_vote_id_list, google_civic_election_id, state_code,
                                               retrieve_public_positions=True, stance_we_are_looking_for=ANY_STANCE):
         # Don't proceed unless we have a correct stance identifier
         if stance_we_are_looking_for not \
@@ -1275,7 +1275,7 @@ class PositionListManager(models.Model):
         #  which means we want to return all stances
 
         # Don't proceed unless we have organization identifier and the election we care about
-        if not positive_value_exists(organization_we_vote_id) and not \
+        if not positive_value_exists(len(organization_we_vote_id_list)) and not \
                 positive_value_exists(google_civic_election_id):
             return 0
 
@@ -1292,7 +1292,7 @@ class PositionListManager(models.Model):
             # As of Aug 2018 we are no longer using PERCENT_RATING
             position_list = position_list.exclude(stance__iexact=PERCENT_RATING)
 
-            position_list = position_list.filter(organization_we_vote_id__iexact=organization_we_vote_id)
+            position_list = position_list.filter(organization_we_vote_id__in=organization_we_vote_id_list)
             position_list = position_list.filter(google_civic_election_id=google_civic_election_id)
             # SUPPORT, STILL_DECIDING, INFORMATION_ONLY, NO_STANCE, OPPOSE, PERCENT_RATING
             # if stance_we_are_looking_for != ANY_STANCE:

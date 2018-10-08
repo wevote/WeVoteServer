@@ -1473,10 +1473,13 @@ def voter_guide_list_view(request):
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
-    show_individuals = request.GET.get('show_individuals', False)
     google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
     show_all = request.GET.get('show_all', False)
+    show_all = positive_value_exists(show_all)
     show_all_elections = request.GET.get('show_all_elections', False)
+    show_all_elections = positive_value_exists(show_all_elections)
+    show_individuals = request.GET.get('show_individuals', False)
+    show_individuals = positive_value_exists(show_individuals)
     sort_by = request.GET.get('sort_by', False)
     state_code = request.GET.get('state_code', '')
     voter_guide_search = request.GET.get('voter_guide_search', '')
@@ -1559,13 +1562,14 @@ def voter_guide_list_view(request):
     for one_voter_guide in voter_guide_list:
         # How many Publicly visible positions are there in this election on this voter guide?
         retrieve_public_positions = True
+        organization_we_vote_id_list = [one_voter_guide.organization_we_vote_id]
         one_voter_guide.number_of_public_positions = position_list_manager.fetch_positions_count_for_voter_guide(
-            one_voter_guide.organization_we_vote_id, one_voter_guide.google_civic_election_id, state_code,
+            organization_we_vote_id_list, one_voter_guide.google_civic_election_id, state_code,
             retrieve_public_positions)
         # How many Friends-only visible positions are there in this election on this voter guide?
         retrieve_public_positions = False
         one_voter_guide.number_of_friends_only_positions = position_list_manager.fetch_positions_count_for_voter_guide(
-            one_voter_guide.organization_we_vote_id, one_voter_guide.google_civic_election_id, state_code,
+            organization_we_vote_id_list, one_voter_guide.google_civic_election_id, state_code,
             retrieve_public_positions)
         modified_voter_guide_list.append(one_voter_guide)
 

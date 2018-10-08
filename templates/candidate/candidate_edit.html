@@ -390,6 +390,10 @@ span.wrap_word { word-break: break-word; }
         <br />
     {% endif %}
 
+    <p>&nbsp;</p>
+    <p>&nbsp;</p>
+    <p>&nbsp;</p>
+
     <h4>We Vote Positions Related to {{ candidate.candidate_name  }}</h4>
     {% if candidate.vote_smart_id %}
         <p><a href="{% url 'import_export_vote_smart:transfer_vote_smart_ratings_to_positions_for_candidate' candidate.id %}">Transfer Vote Smart Ratings to We Vote Positions</a></p>
@@ -400,15 +404,17 @@ span.wrap_word { word-break: break-word; }
 
     <a name="positions"></a>
     {% if candidate_position_list %}
-        <table border="1">
+    <table class="table">
+      <thead>
         <tr>
-            <td></td>
-            <td>Organization</td>
-            <td>Stance</td>
-            <td>Election</td>
-            <td>Election Date</td>
-            <td>Rating Time Span</td>
+            <th></th>
+            <th>Organization Position</th>
+            <th>Stance</th>
+            <th>Election</th>
+            <th>Election Date</th>
+            <th>Rating Time Span</th>
         </tr>
+      </thead>
 
         {% for candidate_position in candidate_position_list %}
         {% if not candidate_position.id %}
@@ -423,12 +429,15 @@ span.wrap_word { word-break: break-word; }
             <td>
                 {% if candidate_position.organization_id %}
                 <a href="{% url 'organization:organization_position_edit' candidate_position.organization_id candidate_position.we_vote_id %}">
-                {{ candidate_position.organization.organization_name }}</a>
+                {{ candidate_position.organization.organization_name }} (edit position)</a>
                 {% else %}
                     (not an org)
                 {% endif %}
             </td>
             <td>{{ candidate_position.get_stance_display }}
+                {% if candidate_position.statement_text %}
+                <span style="color: darkgray">{{ candidate_position.statement_text }}</span>
+                {% endif %}
                 {% if candidate_position.vote_smart_rating %} {{ candidate_position.vote_smart_rating }}%{% endif %}</td>
             <td>{{ candidate_position.election.google_civic_election_id }}</td>
             <td>{{ candidate_position.election.election_day_text }}</td>
