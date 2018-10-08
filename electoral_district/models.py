@@ -296,7 +296,7 @@ class ElectoralDistrictManager(models.Model):
         if electoral_district_link_list_found:
             status += "ELECTORAL_DISTRICT_LINK_LIST_FOUND "
         else:
-            status += "ELECTORAL_DISTRICT_LINK_LIST_NOT_FOUND"
+            status += "ELECTORAL_DISTRICT_LINK_LIST_NOT_FOUND "
             electoral_district_link_list = []
 
         results = {

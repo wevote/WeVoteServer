@@ -1160,7 +1160,7 @@ def election_summary_view(request, election_local_id=0, google_civic_election_id
             election.google_civic_election_id, state_code, limit, ballot_returned_search)
         ballot_returned_count_entire_election = \
             ballot_returned_list_manager.fetch_ballot_returned_list_count_for_election(
-                election.google_civic_election_id)
+                election.google_civic_election_id, state_code=state_code)
         entries_missing_latitude_longitude = \
             ballot_returned_list_manager.fetch_ballot_returned_entries_needed_lat_long_for_election(
                 election.google_civic_election_id, state_code)
@@ -1234,7 +1234,7 @@ def election_summary_view(request, election_local_id=0, google_civic_election_id
         voter_ballot_saved_list = []
         voter_ballot_saved_results = \
             voter_ballot_saved_manager.retrieve_voter_ballot_saved_list_for_election(
-                google_civic_election_id, find_all_entries_for_election=True)
+                google_civic_election_id, state_code=state_code, find_all_entries_for_election=True)
         if voter_ballot_saved_results['voter_ballot_saved_list_found']:
             voter_ballot_saved_list = voter_ballot_saved_results['voter_ballot_saved_list']
 
