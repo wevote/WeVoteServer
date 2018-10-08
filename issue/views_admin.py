@@ -770,9 +770,6 @@ def issue_partisan_analysis_view(request):
     show_hidden_issues = False
     show_all_elections = False
 
-    issue_list_count = 0
-
-    issue_we_vote_id_list = []
     organization_we_vote_id_in_this_election_list = []
     organization_retrieved_list = {}
     organization_link_to_issue_list = []
@@ -788,7 +785,6 @@ def issue_partisan_analysis_view(request):
             voter_guide_list = results['voter_guide_list']
             for one_voter_guide in voter_guide_list:
                 organization_we_vote_id_in_this_election_list.append(one_voter_guide.organization_we_vote_id)
-            # try:
             if positive_value_exists(len(organization_we_vote_id_in_this_election_list)):
                 organization_link_to_issue_list_query = OrganizationLinkToIssue.objects.all()
                 organization_link_to_issue_list_query = organization_link_to_issue_list_query.filter(
@@ -807,11 +803,6 @@ def issue_partisan_analysis_view(request):
                     organizations_attached_to_this_issue[one_organization_link_to_issue.issue_we_vote_id] = []
                 organizations_attached_to_this_issue[one_organization_link_to_issue.issue_we_vote_id].\
                     append(organization_retrieved_list[one_organization_link_to_issue.organization_we_vote_id])
-                # if one_organization_link_to_issue.issue_we_vote_id not in issue_we_vote_id_list:
-                #     issue_we_vote_id_list.append(one_organization_link_to_issue.issue_we_vote_id)
-
-            # except Exception as e:
-            #     pass
 
     issue_list_left = []
     issue_list_right = []
@@ -860,6 +851,15 @@ def issue_partisan_analysis_view(request):
     issue_list_left.sort(key=lambda x: x.linked_organization_count, reverse=True)
     issue_list_right.sort(key=lambda x: x.linked_organization_count, reverse=True)
 
+    position_list_manager = PositionListManager()
+    retrieve_public_positions = True
+    endorsement_count_left = position_list_manager.fetch_positions_count_for_voter_guide(
+        organization_we_vote_id_list_left, google_civic_election_id, state_code,
+        retrieve_public_positions)
+    endorsement_count_right = position_list_manager.fetch_positions_count_for_voter_guide(
+        organization_we_vote_id_list_right, google_civic_election_id, state_code,
+        retrieve_public_positions)
+
     messages_on_stage = get_messages(request)
 
     election_manager = ElectionManager()
@@ -872,6 +872,8 @@ def issue_partisan_analysis_view(request):
 
     template_values = {
         'election_list':            election_list,
+        'endorsement_count_left':   endorsement_count_left,
+        'endorsement_count_right':  endorsement_count_right,
         'google_civic_election_id': google_civic_election_id,
         'issue_list':               altered_issue_list,
         'issue_list_left':          issue_list_left,

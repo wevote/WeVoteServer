@@ -22,7 +22,7 @@ from election.models import Election, ElectionManager
 from exception.models import handle_record_found_more_than_one_exception,\
     handle_record_not_found_exception, handle_record_not_saved_exception
 from position.controllers import move_positions_to_another_measure
-from position.models import OPPOSE, PositionListManager, SUPPORT
+from position.models import OPPOSE, PositionEntered, PositionListManager, SUPPORT
 from voter.models import voter_has_authority
 import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, positive_value_exists, STATE_CODE_MAP
@@ -772,12 +772,27 @@ def measure_summary_view(request, measure_id):
             measure_search_results_list = results['contest_measure_list']
 
     if measure_on_stage_found:
+        # Working with We Vote Positions
+        try:
+            measure_position_query = PositionEntered.objects.order_by('stance')
+            measure_position_query = measure_position_query.filter(
+                contest_measure_we_vote_id__iexact=measure_on_stage.we_vote_id)
+            # if positive_value_exists(google_civic_election_id):
+            #     measure_position_query = measure_position_query.filter(
+            #         google_civic_election_id=google_civic_election_id)
+            measure_position_list = list(measure_position_query)
+        except Exception as e:
+            handle_record_not_found_exception(e, logger=logger)
+            measure_position_list = []
+
+    if measure_on_stage_found:
         template_values = {
-            'messages_on_stage': messages_on_stage,
-            'measure': measure_on_stage,
-            'measure_search_results_list': measure_search_results_list,
             'election_list': election_list,
             'google_civic_election_id': google_civic_election_id,
+            'measure': measure_on_stage,
+            'measure_position_list': measure_position_list,
+            'measure_search_results_list': measure_search_results_list,
+            'messages_on_stage': messages_on_stage,
         }
     else:
         template_values = {

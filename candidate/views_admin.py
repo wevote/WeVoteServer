@@ -668,7 +668,8 @@ def candidate_edit_view(request, candidate_id=0, candidate_campaign_we_vote_id="
             candidate_position_query = PositionEntered.objects.order_by('stance')
             # As of Aug 2018 we are no longer using PERCENT_RATING
             candidate_position_query = candidate_position_query.exclude(stance__iexact='PERCENT_RATING')
-            candidate_position_list = candidate_position_query.filter(candidate_campaign_id=candidate_id)
+            candidate_position_query = candidate_position_query.filter(candidate_campaign_id=candidate_id)
+            candidate_position_list = list(candidate_position_query)
             # if positive_value_exists(google_civic_election_id):
             #     organization_position_list = candidate_position_list.filter(
             #         google_civic_election_id=google_civic_election_id)

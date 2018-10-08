@@ -119,18 +119,40 @@
 
 
 
+{% if google_civic_election_id %}
+<tr>
+    <td colspan="3">
+        <h2>Number of Endorsements</h2>
+    </td>
+</tr>
+<tr>
+    <td>
+      <h4>Left-Leaning</h4>
+      <p>{{ endorsement_count_left }} Candidate or Measure Endorsements</p>
+    </td>
+    <td>&nbsp;</td>
+    <td>
+      <h4>Right-Leaning</h4>
+      <p>{{ endorsement_count_right }} Candidate or Measure Endorsements</p>
+    </td>
+</tr>
+
+
 <tr>
     <td colspan="3">&nbsp;</td>
 </tr>
 
-{% if google_civic_election_id %}
+
 <tr>
-    <td colspan="3"><h2>Organizations</h2></td>
+    <td colspan="3">
+        <h2>Organizations / Public Figures</h2>
+        <p>We Vote invites all organizations and public figures to <a href="https://api.wevoteusa.org/vg/create/" target="_blank">add their endorsements</a> to We Vote.</p>
+    </td>
 </tr>
 <tr>
-    <td><h4>Left-Leaning</h4></td>
+    <td><h4>Left-Leaning ({{ organization_list_left|length }})</h4></td>
     <td>&nbsp;</td>
-    <td><h4>Right-Leaning</h4></td>
+    <td><h4>Right-Leaning ({{ organization_list_right|length }})</h4></td>
 </tr>
 <tr>
     <td valign="top">
