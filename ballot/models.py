@@ -2979,6 +2979,7 @@ class VoterBallotSavedManager(models.Model):
 
     def retrieve_voter_ballot_saved_list_for_election(self, google_civic_election_id,
                                                       polling_location_we_vote_id_source="",
+                                                      state_code="",
                                                       find_only_entries_not_copied_from_polling_location=False,
                                                       find_all_entries_for_election=False):
         status = ""
@@ -3002,6 +3003,9 @@ class VoterBallotSavedManager(models.Model):
 
             voter_ballot_saved_queryset = voter_ballot_saved_queryset.filter(
                 google_civic_election_id=google_civic_election_id)
+            if positive_value_exists(state_code):
+                voter_ballot_saved_queryset = voter_ballot_saved_queryset.filter(
+                    state_code__iexact=state_code)
             if positive_value_exists(polling_location_we_vote_id_source):
                 voter_ballot_saved_queryset = voter_ballot_saved_queryset.filter(
                     polling_location_we_vote_id_source__iexact=polling_location_we_vote_id_source)

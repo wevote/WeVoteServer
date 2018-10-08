@@ -525,7 +525,7 @@ def organization_edit_process_view(request):
     organization_facebook = request.POST.get('organization_facebook', False)
     organization_type = request.POST.get('organization_type', GROUP)
     organization_website = request.POST.get('organization_website', False)
-    state_served_code = request.POST.get('state_code', False)
+    state_served_code = request.POST.get('state_served_code', False)
     wikipedia_page_title = request.POST.get('wikipedia_page_title', False)
     wikipedia_photo_url = request.POST.get('wikipedia_photo_url', False)
 
@@ -632,7 +632,7 @@ def organization_edit_process_view(request):
                     'organization_website':         organization_website,
                     'wikipedia_page_title':         wikipedia_page_title,
                     'wikipedia_photo_url':          wikipedia_photo_url,
-                    'state_code':                   state_code,
+                    'state_served_code':            state_served_code,
                     'state_list':                   sorted_state_list,
                     'upcoming_election_list':       upcoming_election_list,
                 }
@@ -659,7 +659,7 @@ def organization_edit_process_view(request):
                     'organization_website':         organization_website,
                     'wikipedia_page_title':         wikipedia_page_title,
                     'wikipedia_photo_url':          wikipedia_photo_url,
-                    'state_code':                   state_code,
+                    'state_served_code':            state_served_code,
                     'state_list':                   sorted_state_list,
                     'upcoming_election_list':       upcoming_election_list,
                 }

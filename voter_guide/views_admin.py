@@ -29,7 +29,7 @@ from import_export_batches.models import BATCH_HEADER_MAP_FOR_POSITIONS, BatchMa
 from import_export_twitter.controllers import refresh_twitter_organization_details, scrape_social_media_from_one_site
 from measure.controllers import add_measure_name_alternatives_to_measure_list_light, \
     retrieve_measure_list_for_all_upcoming_elections
-from organization.models import Organization, OrganizationListManager, OrganizationManager
+from organization.models import GROUP, Organization, OrganizationListManager, OrganizationManager
 from organization.views_admin import organization_edit_process_view
 from position.models import PositionEntered, PositionForFriends, PositionListManager
 from twitter.models import TwitterUserManager
@@ -391,8 +391,13 @@ def voter_guide_create_view(request):
                     twitter_user_id = twitter_user.twitter_id
                 if not one_organization_found and positive_value_exists(twitter_user_id):
                     organization_name = ""
+                    if not positive_value_exists(state_code):
+                        state_code = None
                     create_results = organization_manager.create_organization(
-                        organization_name=organization_name, organization_twitter_handle=one_twitter_handle)
+                        organization_name=organization_name,
+                        organization_type=GROUP,
+                        organization_twitter_handle=one_twitter_handle,
+                        state_served_code=state_code)
                     if create_results['organization_created']:
                         one_organization = create_results['organization']
 
@@ -599,14 +604,62 @@ def voter_guide_create_process_view(request):
 
     organization_manager = OrganizationManager()
 
+    organization_found = False
+    twitter_user_manager = TwitterUserManager()
     if positive_value_exists(organization_we_vote_id):
         results = organization_manager.retrieve_organization_from_we_vote_id(organization_we_vote_id)
         if results['organization_found']:
             organization = results['organization']
+            organization_found = True
             organization_name = organization.organization_name
-            twitter_user_manager = TwitterUserManager()
             organization_twitter_handle = twitter_user_manager.fetch_twitter_handle_from_organization_we_vote_id(
                 organization_we_vote_id)
+
+    if not positive_value_exists(organization_found):
+        one_organization_found = False
+        if positive_value_exists(organization_twitter_handle):
+            results = organization_manager.retrieve_organization_from_twitter_handle(organization_twitter_handle)
+            if results['organization_found']:
+                organization = results['organization']
+                organization_found = True
+                organization_name = organization.organization_name
+                organization_we_vote_id = organization.we_vote_id
+            if not positive_value_exists(organization_found):
+                results = twitter_user_manager.retrieve_twitter_link_to_organization_from_twitter_handle(
+                    organization_twitter_handle)
+                if results['twitter_link_to_organization_found']:
+                    twitter_link_to_organization = results['twitter_link_to_organization']
+                    organization_results = organization_manager.retrieve_organization_from_we_vote_id(
+                        twitter_link_to_organization.organization_we_vote_id)
+                    if organization_results['organization_found']:
+                        one_organization_found = True
+                        organization = organization_results['organization']
+                        organization_we_vote_id = organization.we_vote_id
+                twitter_user_id = 0
+                twitter_results = twitter_user_manager.retrieve_twitter_user_locally_or_remotely(
+                    twitter_user_id, organization_twitter_handle)
+                if twitter_results['twitter_user_found']:
+                    twitter_user = twitter_results['twitter_user']
+                    twitter_user_id = twitter_user.twitter_id
+                if not one_organization_found and positive_value_exists(twitter_user_id):
+                    organization_name = ""
+                    if not positive_value_exists(state_code):
+                        state_code = None
+                    create_results = organization_manager.create_organization(
+                        organization_name=organization_name,
+                        organization_type=GROUP,
+                        organization_twitter_handle=organization_twitter_handle,
+                        state_served_code=state_code)
+                    if create_results['organization_created']:
+                        one_organization_found = True
+                        organization = create_results['organization']
+                        organization_we_vote_id = organization.we_vote_id
+
+                        # Create TwitterLinkToOrganization
+                        link_results = twitter_user_manager.create_twitter_link_to_organization(
+                            twitter_user_id, organization.we_vote_id)
+                        # Refresh the organization with the Twitter details
+                        refresh_twitter_organization_details(organization, twitter_user_id)
 
     # #########################################
     # Figure out the Possible Candidates or Measures
