@@ -2188,7 +2188,8 @@ class Organization(models.Model):
                twitter_location=None, twitter_followers_count=0, twitter_profile_image_url_https=None,
                twitter_profile_background_image_url_https=None, twitter_profile_banner_url_https=None,
                twitter_description=None, we_vote_hosted_profile_image_url_large=None,
-               we_vote_hosted_profile_image_url_medium=None, we_vote_hosted_profile_image_url_tiny=None):
+               we_vote_hosted_profile_image_url_medium=None, we_vote_hosted_profile_image_url_tiny=None,
+               state_served_code=None):
 
         if organization_twitter_handle is False or organization_twitter_handle == 'False':
             organization_twitter_handle = ""
@@ -2200,6 +2201,7 @@ class Organization(models.Model):
                            organization_facebook=organization_facebook,
                            organization_image=organization_image,
                            organization_type=organization_type,
+                           state_served_code=state_served_code,
                            twitter_user_id=twitter_user_id,
                            twitter_name=twitter_name,
                            twitter_location=twitter_location,
