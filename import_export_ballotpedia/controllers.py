@@ -634,14 +634,6 @@ def retrieve_ballotpedia_district_id_list_for_polling_location(
     ballotpedia_district_id_list = []
     force_district_retrieve_from_ballotpedia = positive_value_exists(force_district_retrieve_from_ballotpedia)
 
-    if not positive_value_exists(google_civic_election_id):
-        results = {
-            'success': False,
-            'status': "Error: Missing election id",
-            'ballotpedia_district_id_list': ballotpedia_district_id_list,
-        }
-        return results
-
     if not positive_value_exists(polling_location_we_vote_id) and not polling_location:
         results = {
             'success': False,
@@ -650,8 +642,12 @@ def retrieve_ballotpedia_district_id_list_for_polling_location(
         }
         return results
 
+    polling_location_latitude = 0
+    polling_location_longitude = 0
     if polling_location:
         polling_location_found = True
+        polling_location_latitude = polling_location.latitude
+        polling_location_longitude = polling_location.longitude
         polling_location_we_vote_id = polling_location.we_vote_id
         state_code = polling_location.state
     elif positive_value_exists(polling_location_we_vote_id):
@@ -659,6 +655,8 @@ def retrieve_ballotpedia_district_id_list_for_polling_location(
         results = polling_location_manager.retrieve_polling_location_by_id(0, polling_location_we_vote_id)
         if results['polling_location_found']:
             polling_location = results['polling_location']
+            polling_location_latitude = polling_location.latitude
+            polling_location_longitude = polling_location.longitude
             state_code = polling_location.state
             polling_location_found = True
 
@@ -709,7 +707,6 @@ def retrieve_ballotpedia_district_id_list_for_polling_location(
             # Use Ballotpedia API call counter to track the number of queries we are doing each day
             ballotpedia_api_counter_manager = BallotpediaApiCounterManager()
             ballotpedia_api_counter_manager.create_counter_entry(BALLOTPEDIA_API_CONTAINS_TYPE,
-                                                                 google_civic_election_id=google_civic_election_id,
                                                                  ballotpedia_election_id=0)
 
             contains_api = True
@@ -727,11 +724,20 @@ def retrieve_ballotpedia_district_id_list_for_polling_location(
                     try:
                         if not positive_value_exists(state_code):
                             state_code = one_district_json['state_code']
+                        if positive_value_exists(one_district_json['latitude']):
+                            ballotpedia_district_latitude = one_district_json['latitude']
+                        else:
+                            ballotpedia_district_latitude = polling_location_latitude
+                        if positive_value_exists(one_district_json['longitude']):
+                            ballotpedia_district_longitude = one_district_json['longitude']
+                        else:
+                            ballotpedia_district_longitude = polling_location_longitude
+
                         defaults = {
                             'ballotpedia_district_id':  one_district_json['ballotpedia_district_id'],
                             'ballotpedia_district_kml':  one_district_json['kml'],
-                            'ballotpedia_district_latitude':  one_district_json['latitude'],
-                            'ballotpedia_district_longitude':  one_district_json['longitude'],
+                            'ballotpedia_district_latitude':  ballotpedia_district_latitude,
+                            'ballotpedia_district_longitude':  ballotpedia_district_longitude,
                             'ballotpedia_district_type':  one_district_json['type'],
                             'ballotpedia_district_url':  one_district_json['url'],
                             'ballotpedia_district_ocd_id':  one_district_json['ocdid'],
@@ -741,8 +747,9 @@ def retrieve_ballotpedia_district_id_list_for_polling_location(
                         electoral_district, new_electoral_district_created = ElectoralDistrict.objects.get_or_create(
                             ballotpedia_district_id=one_district_json['ballotpedia_district_id'],
                             defaults=defaults)
-                        if not positive_value_exists(electoral_district.we_vote_id):
-                            # Trigger the creation of an electoral_district_we_vote_id
+                        if not positive_value_exists(electoral_district.we_vote_id) \
+                                or not positive_value_exists(new_electoral_district_created):
+                            # Trigger the creation of an electoral_district_we_vote_id, or save if this was a "get"
                             electoral_district.save()
                         electoral_district_we_vote_id = electoral_district.we_vote_id
 
@@ -765,75 +772,6 @@ def retrieve_ballotpedia_district_id_list_for_polling_location(
         'ballotpedia_district_id_list': ballotpedia_district_id_list,
     }
     return results
-
-
-# def retrieve_ballotpedia_offices_by_election_from_api(google_civic_election_id, state_code=""):
-#     success = True
-#     status = ""
-#
-#     if not positive_value_exists(google_civic_election_id):
-#         results = {
-#             'success': False,
-#             'status': "Error: Missing election id",
-#         }
-#         return results
-#
-#     batch_header_id = 0
-#     ballotpedia_election_id = 0
-#     election_manager = ElectionManager()
-#     results = election_manager.retrieve_election(google_civic_election_id)
-#     if results['election_found']:
-#         election = results['election']
-#         if election.ballotpedia_election_id:
-#             ballotpedia_election_id = election.ballotpedia_election_id
-#
-#     if not positive_value_exists(ballotpedia_election_id):
-#         results = {
-#             'success': False,
-#             'status': "Error: Missing election id",
-#         }
-#         return results
-#
-#     response = requests.get(BALLOTPEDIA_API_RACES_URL, params={
-#         "access_token": BALLOTPEDIA_API_KEY,
-#         "filters[election][in]": str(ballotpedia_election_id),
-#         "limit": 1000,
-#     })
-#
-#     if not positive_value_exists(response.text):
-#         status += "NO_RESPONSE_TEXT_FOUND"
-#         if positive_value_exists(response.url):
-#             status += ": " + response.url
-#         results = {
-#             'success': success,
-#             'status': status,
-#             'batch_header_id': batch_header_id,
-#         }
-#         return results
-#
-#     structured_json = json.loads(response.text)
-#
-#     # Use Ballotpedia API call counter to track the number of queries we are doing each day
-#     ballotpedia_api_counter_manager = BallotpediaApiCounterManager()
-#     ballotpedia_api_counter_manager.create_counter_entry(BALLOTPEDIA_API_RACES_TYPE,
-#                                                          ballotpedia_election_id=ballotpedia_election_id)
-#
-#     groom_results = groom_ballotpedia_data_for_processing(structured_json, google_civic_election_id, state_code)
-#     modified_json_list = groom_results['modified_json_list']
-#     kind_of_batch = groom_results['kind_of_batch']
-#
-#     results = store_ballotpedia_json_response_to_import_batch_system(
-#         modified_json_list, google_civic_election_id, kind_of_batch, state_code=state_code)
-#     status += results['status']
-#     if 'batch_header_id' in results:
-#         batch_header_id = results['batch_header_id']
-#
-#     results = {
-#         'success': success,
-#         'status': status,
-#         'batch_header_id': batch_header_id,
-#     }
-#     return results
 
 
 def retrieve_ballotpedia_offices_by_district_from_api(google_civic_election_id, state_code,

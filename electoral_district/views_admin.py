@@ -113,6 +113,7 @@ def electoral_district_list_view(request):
 
     google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
     polling_location_we_vote_id = request.GET.get('polling_location_we_vote_id', "")
+    show_all = request.GET.get('show_all', False)
     state_code = request.GET.get('state_code', '')
     electoral_district_search = request.GET.get('electoral_district_search', '')
 
@@ -184,7 +185,10 @@ def electoral_district_list_view(request):
         info_message = '{electoral_district_count} electoral districts found.'.format(
             electoral_district_count=electoral_district_count)
 
-        electoral_district_list = electoral_district_query.order_by('electoral_district_name')[:500]
+        if positive_value_exists(show_all):
+            electoral_district_list = electoral_district_query.order_by('electoral_district_name')
+        else:
+            electoral_district_list = electoral_district_query.order_by('electoral_district_name')[:500]
 
         messages.add_message(request, messages.INFO, info_message)
 
@@ -200,6 +204,7 @@ def electoral_district_list_view(request):
         'electoral_district_count':   electoral_district_count,
         'electoral_district_search':  electoral_district_search,
         'polling_location_we_vote_id':       polling_location_we_vote_id,
+        'show_all':                 show_all,
         'state_code':               state_code,
         'state_name':               convert_state_code_to_state_text(state_code),
         'state_list':               sorted_state_list,
@@ -208,23 +213,24 @@ def electoral_district_list_view(request):
 
 
 @login_required
-def electoral_district_summary_view(request, electoral_district_we_vote_id):
+def electoral_district_summary_view(request):
     authority_required = {'verified_volunteer'}  # admin, verified_volunteer
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
+    electoral_district_we_vote_id = request.GET.get('electoral_district_we_vote_id', "")
     google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
 
     messages_on_stage = get_messages(request)
     electoral_district_on_stage_found = False
     electoral_district_on_stage = ElectoralDistrict()
     try:
-        electoral_district_on_stage = ElectoralDistrict.objects.get(we_vote_id=electoral_district_we_vote_id)
+        electoral_district_on_stage = ElectoralDistrict.objects.get(we_vote_id__iexact=electoral_district_we_vote_id)
         electoral_district_on_stage_found = True
     except ElectoralDistrict.MultipleObjectsReturned as e:
         handle_record_found_more_than_one_exception(e, logger=logger)
     except ElectoralDistrict.DoesNotExist:
-        # This is fine, create new
+        #
         pass
 
     template_values = {

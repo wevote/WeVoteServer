@@ -249,6 +249,133 @@ def attach_ballotpedia_election_view(request, election_local_id=0):
 
 
 @login_required
+def refresh_ballotpedia_districts_for_polling_locations_view(request):
+    """
+    This function refreshes the Ballotpedia districts used with subsequent calls to Ballotpedia:
+    1) Retrieve (internally) polling locations (so we can use those addresses to retrieve a
+    representative set of ballots)
+    2) Cycle through a portion of those polling locations, enough that we are caching all of the possible ballot items
+    3) Ask for Ballotpedia districts for each of the polling locations being analyzed
+    :param request:
+    :return:
+    """
+    # admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'political_data_manager'}
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
+    google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
+    state_code = request.GET.get('state_code', '')
+    import_limit = convert_to_int(request.GET.get('import_limit', 500))
+
+    polling_location_list = []
+    polling_location_count = 0
+    status = ""
+
+    if not positive_value_exists(state_code):
+        messages.add_message(request, messages.ERROR,
+                             'Could not retrieve Ballotpedia data. Missing state_code.')
+        return HttpResponseRedirect(reverse('electoral_district:electoral_district_list', args=()))
+
+    try:
+        polling_location_count_query = PollingLocation.objects.all()
+        polling_location_count_query = polling_location_count_query.filter(state__iexact=state_code)
+        polling_location_count_query = polling_location_count_query.filter(use_for_bulk_retrieve=True)
+        polling_location_count_query = polling_location_count_query.filter(polling_location_deleted=False)
+        polling_location_count = polling_location_count_query.count()
+
+        if positive_value_exists(polling_location_count):
+            polling_location_query = PollingLocation.objects.all()
+            polling_location_query = polling_location_query.filter(state__iexact=state_code)
+            polling_location_query = polling_location_query.filter(use_for_bulk_retrieve=True)
+            polling_location_query = polling_location_query.filter(polling_location_deleted=False)
+            # We used to have a limit of 500 ballots to pull per election, but now retrieve all
+            # Ordering by "location_name" creates a bit of (locational) random order
+            polling_location_list = polling_location_query.order_by('location_name')[:import_limit]
+    except Exception as e:
+        status += "ELECTORAL_DISTRICT-COULD_NOT_FIND_POLLING_LOCATION_LIST " + str(e) + " "
+
+    if polling_location_count == 0:
+        # We didn't find any polling locations marked for bulk retrieve, so just retrieve up to the import_limit
+        try:
+            polling_location_count_query = PollingLocation.objects.all()
+            polling_location_count_query = \
+                polling_location_count_query.exclude(Q(latitude__isnull=True) | Q(latitude__exact=0.0))
+            polling_location_count_query = \
+                polling_location_count_query.exclude(Q(zip_long__isnull=True) | Q(zip_long__exact='0') |
+                                                     Q(zip_long__exact=''))
+            polling_location_count_query = polling_location_count_query.filter(state__iexact=state_code)
+            polling_location_count_query = polling_location_count_query.filter(polling_location_deleted=False)
+            polling_location_count = polling_location_count_query.count()
+
+            if positive_value_exists(polling_location_count):
+                polling_location_query = PollingLocation.objects.all()
+                polling_location_query = \
+                    polling_location_query.exclude(Q(latitude__isnull=True) | Q(latitude__exact=0.0))
+                polling_location_query = \
+                    polling_location_query.exclude(Q(zip_long__isnull=True) | Q(zip_long__exact='0') |
+                                                   Q(zip_long__exact=''))
+                polling_location_query = polling_location_query.filter(state__iexact=state_code)
+                polling_location_query = polling_location_query.filter(polling_location_deleted=False)
+                # Ordering by "location_name" creates a bit of (locational) random order
+                polling_location_list = polling_location_query.order_by('location_name')[:import_limit]
+        except PollingLocation.DoesNotExist:
+            messages.add_message(request, messages.INFO,
+                                 'Could not retrieve ballot data. '
+                                 'No polling locations exist for the state \'{state}\'. '
+                                 'Data needed from VIP.'.format(
+                                     state=state_code))
+            return HttpResponseRedirect(reverse('electoral_district:electoral_district_list', args=()))
+
+    if polling_location_count == 0:
+        messages.add_message(request, messages.ERROR,
+                             'Could not retrieve ballot data. '
+                             'No polling locations returned for the state \'{state}\'. (error 2)'.format(
+                                 state=state_code))
+        return HttpResponseRedirect(reverse('electoral_district:electoral_district_list', args=()))
+
+    # If here, we know that we have some polling_locations to use in order to retrieve ballotpedia districts
+
+    # Step though our set of polling locations, until we find one that contains a ballot.  Some won't contain ballots
+    # due to data quality issues.
+    polling_locations_with_data = 0
+    polling_locations_without_data = 0
+    # If here we just want to retrieve the races for this election
+    merged_district_list = []
+    google_civic_election_id = 0
+    force_district_retrieve_from_ballotpedia = True
+    for polling_location in polling_location_list:
+        one_ballot_results = retrieve_ballotpedia_district_id_list_for_polling_location(
+            google_civic_election_id, polling_location=polling_location,
+            force_district_retrieve_from_ballotpedia=force_district_retrieve_from_ballotpedia)
+        success = False
+        if one_ballot_results['success']:
+            success = True
+            ballotpedia_district_id_list = one_ballot_results['ballotpedia_district_id_list']
+            if len(ballotpedia_district_id_list):
+                for one_ballotpedia_district_id in ballotpedia_district_id_list:
+                    if one_ballotpedia_district_id not in merged_district_list:
+                        # Build up a list of ballotpedia districts that we need to retrieve races for
+                        merged_district_list.append(one_ballotpedia_district_id)
+
+        if success:
+            polling_locations_with_data += 1
+        else:
+            polling_locations_without_data += 1
+
+    messages.add_message(request, messages.INFO,
+                         'Electoral data retrieved from Ballotpedia. '
+                         'polling_locations_with_data: {polling_locations_with_data}, '
+                         'polling_locations_without_data: {polling_locations_without_data}. '
+                         ''.format(
+                             polling_locations_with_data=polling_locations_with_data,
+                             polling_locations_without_data=polling_locations_with_data))
+    return HttpResponseRedirect(reverse('electoral_district:electoral_district_list', args=()) +
+                                '?state_code=' + str(state_code) +
+                                '&google_civic_election_id=' + str(google_civic_election_id))
+
+
+@login_required
 def retrieve_ballotpedia_candidates_by_district_from_api_view(request):
     """
     Reach out to Ballotpedia API to retrieve candidates.
@@ -434,7 +561,7 @@ def retrieve_ballotpedia_data_for_polling_locations_view(request, election_local
 
     # Step though our set of polling locations, until we find one that contains a ballot.  Some won't contain ballots
     # due to data quality issues.
-    if retrieve_races or retrieve_measures:
+    if retrieve_races or retrieve_measures or force_district_retrieve_from_ballotpedia:
         polling_locations_with_data = 0
         polling_locations_without_data = 0
         # If here we just want to retrieve the races for this election

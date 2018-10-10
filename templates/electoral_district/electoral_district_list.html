@@ -22,6 +22,10 @@
 
 <h1>{% if state_code %}{{ state_code }} {% endif %}Electoral Districts{% if polling_location_we_vote_id %} for Polling Location {{ polling_location_we_vote_id }} {% endif %}</h1>
 
+
+<a href="{% url 'ballotpedia:refresh_ballotpedia_districts_for_polling_locations' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}"
+   target="_blank">Refresh Ballotpedia Districts for "{{ state_code }}" <span class="glyphicon glyphicon-new-window"></span></a>
+
 <form name="electoral_district_search_form" method="get" action="{% url 'electoral_district:electoral_district_list' %}">
     {% csrf_token %}
 
@@ -68,7 +72,7 @@
     {% for electoral_district in electoral_district_list %}
         <tr>
             <td>{{ forloop.counter }}</td>
-            <td><a href="{% url 'electoral_district:electoral_district_summary' %}?electoral_district_we_vote_id=&google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
+            <td><a href="{% url 'electoral_district:electoral_district_summary' %}?electoral_district_we_vote_id={{ electoral_district.we_vote_id }}&google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
             {% if electoral_district.electoral_district_name %}{{ electoral_district.electoral_district_name }}{% else %}(missing electoral district name)&nbsp;&nbsp;{% endif %}</a>
             </td>
             <td>
@@ -91,6 +95,15 @@
         </tr>
     {% endfor %}
     </table>
+
+
+
+    {% if show_all %}
+        <a href="?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">show fewer</a>
+    {% else %}
+        <a href="?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}&show_all=1">show all</a>
+    {% endif %}
+
 {% else %}
     <p>(no electoral_districts found)</p>
 {% endif %}
