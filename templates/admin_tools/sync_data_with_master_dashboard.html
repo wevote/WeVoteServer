@@ -54,6 +54,8 @@
     <br />
 {% endif %}{# End of if state_list #}
 
+</form>
+
 <table>
     <tr><td><h4>Offices</h4></td></tr>
     <tr>
@@ -152,6 +154,25 @@
         <td>The list of known polling locations.  &#34;All states&#34; can take more than 30 minutes to load.</td>
     </tr>
 
+{% if state_code %}
+    <tr>
+      <td colspan="2">
+request.build_absolute_uri: {{request.build_absolute_uri}}
+<form id="retrieve_polling_locations" name="polling_locations_import_from_master_server" method="get" action="{% url 'polling_location:polling_locations_import_from_master_server' %}">
+{#% csrf_token %#}
+    <input type="submit" value="Retrieve Polling Locations for the State {{ state_code }}">
+
+    <input type="hidden" id="google_civic_election_id" name="google_civic_election_id" value="{{ google_civic_election_id }}">
+    <input type="hidden" id="started_update" name="started_update" value="stop">
+    <input type="hidden" id="state_code" name="state_code" value="{{ state_code }}">
+    <br/>
+    <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+    <span id="realTimeStatusPollingLocations"></span>
+</form>
+
+      </td>
+    </tr>
+{% endif %}
 
     <tr><td><h4>Ballot Items</h4></td></tr>
     <tr>
@@ -185,7 +206,6 @@
         <td>The guides published by organizations</td>
     </tr>
 </table>
-</form>
 
 {# ################################### #}
     <br />
@@ -218,6 +238,28 @@
             this.form.submit();
         });
     });
+
+    $('#retrieve_polling_locations').submit(function( event ) {
+         document.getElementById('started_update').value = 'start'
+    });
+
+    setInterval(function () {
+      let origin = new URL('{{request.build_absolute_uri}}').origin;
+      let apiURL = origin + '/pl/import_status/';
+      let started = document.getElementById('started_update').value;
+      console.log("started ---- " + started);
+      if (started === 'start') {
+        $.ajax({
+          type: "GET",
+          url: apiURL,
+          success: function (data) {
+            let status = data.text;
+            console.log(status);
+            $('#realTimeStatusPollingLocations').html('<font color="LIMEGREEN">' + status +'</font>');
+          },
+        });
+      }
+    }, 1000);
 </script>
 
 {%  endblock %}

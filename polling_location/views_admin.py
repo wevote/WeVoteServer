@@ -3,7 +3,8 @@
 # -*- coding: UTF-8 -*-
 
 from .models import PollingLocation, PollingLocationManager
-from .controllers import import_and_save_all_polling_locations_data, polling_locations_import_from_master_server
+from .controllers import filter_polling_locations_structured_json_for_local_duplicates, \
+    import_and_save_all_polling_locations_data, polling_locations_import_from_structured_json
 from admin_tools.views import redirect_to_sign_in_page
 from ballot.models import BallotReturnedListManager
 from config.base import get_environment_variable
@@ -17,11 +18,12 @@ from django.shortcuts import render
 from exception.models import handle_record_found_more_than_one_exception
 from voter.models import voter_has_authority
 from wevote_functions.functions import convert_state_code_to_state_text, convert_to_float, convert_to_int, \
-    positive_value_exists
+    positive_value_exists, process_request_from_master
 import wevote_functions.admin
 from django.http import HttpResponse
 import json
 
+WE_VOTE_API_KEY = get_environment_variable("WE_VOTE_API_KEY")
 POLLING_LOCATIONS_SYNC_URL = get_environment_variable("POLLING_LOCATIONS_SYNC_URL")  # pollingLocationsSyncOut
 WE_VOTE_SERVER_ROOT_URL = get_environment_variable("WE_VOTE_SERVER_ROOT_URL")
 
@@ -88,6 +90,8 @@ STATE_LIST_IMPORT = {
         'WY': 'Wyoming'
 }
 
+polling_locations_import_status_string = ""
+
 
 # This page does not need to be protected.
 def polling_locations_sync_out_view(request):  # pollingLocationsSyncOut
@@ -136,25 +140,71 @@ def polling_locations_import_from_master_server_view(request):
                                                       "this is the Master We Vote Server.")
         return HttpResponseRedirect(reverse('admin_tools:admin_home', args=()))
 
+    global polling_locations_import_status_string
+    status = ""
+
     google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
     state_code = request.GET.get('state_code', '')
 
-    results = polling_locations_import_from_master_server(request, state_code)
+    # results = polling_locations_import_from_master_server(request, state_code)
+    import_results, structured_json = process_request_from_master(
+        request, "Loading Polling Locations from We Vote Master servers",
+        POLLING_LOCATIONS_SYNC_URL, {
+            "key":    WE_VOTE_API_KEY,  # This comes from an environment variable
+            "state":  state_code,
+        }
+    )
 
-    if not results['success']:
-        messages.add_message(request, messages.ERROR, results['status'])
+    duplicates_removed = 0
+    json_retrieved = False
+    saved = 0
+    updated = 0
+    not_processed = 0
+    if import_results['success']:
+        status += import_results['status']
+        json_retrieved = True
+        polling_locations_import_status_string = "Checking for duplicate Polling locations. "
+        results = filter_polling_locations_structured_json_for_local_duplicates(structured_json)
+        filtered_structured_json = results['structured_json']
+        duplicates_removed = results['duplicates_removed']
+
+        polling_locations_import_status_string = "Importing Polling locations."
+        import_results = polling_locations_import_from_structured_json(filtered_structured_json)
+        saved = import_results['saved']
+        updated = import_results['updated']
+        not_processed = import_results['not_processed']
+    else:
+        polling_locations_import_status_string = "Not able to retrieve filtered_structured_json from Master Server. "
+        status += polling_locations_import_status_string + import_results['status']
+
+    if not json_retrieved:
+        messages.add_message(request, messages.ERROR, status)
     else:
         messages.add_message(request, messages.INFO, 'Polling Locations import completed. '
                                                      'Saved: {saved}, Updated: {updated}, '
                                                      'Duplicates skipped: '
                                                      '{duplicates_removed}, '
                                                      'Not processed: {not_processed}'
-                                                     ''.format(saved=results['saved'],
-                                                               updated=results['updated'],
-                                                               duplicates_removed=results['duplicates_removed'],
-                                                               not_processed=results['not_processed']))
+                                                     ''.format(saved=saved,
+                                                               updated=updated,
+                                                               duplicates_removed=duplicates_removed,
+                                                               not_processed=not_processed))
     return HttpResponseRedirect(reverse('admin_tools:sync_dashboard', args=()) + "?google_civic_election_id=" +
                                 str(google_civic_election_id) + "&state_code=" + str(state_code))
+
+
+@login_required
+def polling_locations_import_from_master_server_status_view(request):
+    global polling_locations_import_status_string
+
+    if 'polling_locations_import_status_string' not in globals():
+        polling_locations_import_status_string = ""
+
+    json_data = {
+        'text': polling_locations_import_status_string,
+    }
+
+    return HttpResponse(json.dumps(json_data), content_type='application/json')
 
 
 @login_required

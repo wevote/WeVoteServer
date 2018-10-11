@@ -58,6 +58,17 @@
                   {{ voter_guide_possibility.voter_guide_possibility_url|truncatechars:60 }}
                   <span class="glyphicon glyphicon-new-window"></span>
                 </a>
+                {% if voter_guide_possibility.contributor_comments or voter_guide_possibility.contributor_email %}
+                  <br />
+                {% endif %}
+                {% if voter_guide_possibility.contributor_comments %}
+                  From contributor: <span style="color: darkgray">{{ voter_guide_possibility.contributor_comments }} </span>
+                {% endif %}
+                {% if voter_guide_possibility.contributor_email %}
+                  <a href="mailto:{{ voter_guide_possibility.contributor_email }}"
+                     target="_blank">
+                    ({{ voter_guide_possibility.contributor_email|default_if_none:"" }}&nbsp;<span class="glyphicon glyphicon-new-window"></span>)</a>
+                {% endif %}
                 {% if voter_guide_possibility.ballot_items_raw %}
                   <br />
                   {{ voter_guide_possibility.ballot_items_raw|truncatechars:80 }}

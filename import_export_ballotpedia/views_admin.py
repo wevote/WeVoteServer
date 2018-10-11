@@ -369,7 +369,7 @@ def refresh_ballotpedia_districts_for_polling_locations_view(request):
                          'polling_locations_without_data: {polling_locations_without_data}. '
                          ''.format(
                              polling_locations_with_data=polling_locations_with_data,
-                             polling_locations_without_data=polling_locations_with_data))
+                             polling_locations_without_data=polling_locations_without_data))
     return HttpResponseRedirect(reverse('electoral_district:electoral_district_list', args=()) +
                                 '?state_code=' + str(state_code) +
                                 '&google_civic_election_id=' + str(google_civic_election_id))

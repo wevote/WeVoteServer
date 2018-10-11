@@ -376,14 +376,14 @@ class ElectoralDistrictManager(models.Model):
 
             if positive_value_exists(ballotpedia_district_id):
                 ElectoralDistrictLinkToPollingLocation.objects.update_or_create(
-                    polling_location_we_vote_id=polling_location_we_vote_id,
+                    polling_location_we_vote_id__iexact=polling_location_we_vote_id,
                     ballotpedia_district_id=ballotpedia_district_id,
                     defaults=defaults,
                     )
             elif positive_value_exists(electoral_district_we_vote_id):
                 ElectoralDistrictLinkToPollingLocation.objects.update_or_create(
-                    polling_location_we_vote_id=polling_location_we_vote_id,
-                    electoral_district_we_vote_id=electoral_district_we_vote_id,
+                    polling_location_we_vote_id__iexact=polling_location_we_vote_id,
+                    electoral_district_we_vote_id__iexact=electoral_district_we_vote_id,
                     defaults=defaults,
                     )
             status = "POLLING_LOCATION_LINK_TO_ELECTORAL_DISTRICT_CREATED_OR_UPDATED "

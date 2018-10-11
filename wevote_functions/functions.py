@@ -1285,10 +1285,13 @@ def process_request_from_master(request, message_text, get_url, get_params):
         }
 
     if 'google_civic_election_id' in get_params:
-        print("... the master server returned " + str(len(structured_json)) + " items.  Election " +
-              str(get_params['google_civic_election_id']))  # Please don't remove this line
+        status_message = "... the master server returned " + str(len(structured_json)) + " items.  Election " \
+                                 + str(get_params['google_civic_election_id'])  # Please don't remove this line
+        print(status_message)
     else:
-        print("... the master server returned " + str(len(structured_json)) + " items.") # Please don't remove this line
+        # Please don't remove this line
+        status_message = "... the master server returned " + str(len(structured_json)) + " items."
+        print(status_message)
 
     return import_results, structured_json
 
