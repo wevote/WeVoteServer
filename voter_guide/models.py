@@ -2390,6 +2390,10 @@ class VoterGuidePossibility(models.Model):
     # These are the candidates or measures on the voter guide (comma separated, or on own lines)
     ballot_items_raw = models.TextField(null=True, blank=True,)
 
+    # Notes coming from the person submitting this voter guide
+    contributor_comments = models.TextField(null=True, blank=True, default=None)
+    contributor_email = models.TextField(null=True, blank=True, default=None)
+
     # What election was used as the target for finding endorsements?
     target_google_civic_election_id = models.PositiveIntegerField(null=True)
 

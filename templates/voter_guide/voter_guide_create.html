@@ -165,9 +165,7 @@
 
 {% if political_data_manager and state_list %}
     <div class="form-group">
-        <label for="ballot_items_raw_id" class="col-sm-3 control-label">
-            <span class="hidden-xs">Limit to this State</span>
-        </label>
+        <label for="ballot_items_raw_id" class="col-sm-3 control-label">Limit to this State</label>
         <div class="col-sm-8">
             <select id="state_code_id" name="state_code">
                 <option value="" {% if '' == state_code %} selected="selected"{% endif %}>
@@ -181,6 +179,31 @@
         </div>
     </div>
 {% endif %}
+
+<div class="form-group">
+    <label for="contributor_comments_id" class="col-sm-3 control-label">
+    Your comments or questions (optional)
+    </label>
+    <div class="col-sm-8">
+        <textarea name="contributor_comments"
+                  class="form-control animated"
+                  placeholder="Do you have any comments or questions for the We Vote Political Data Team? (optional)"
+                  rows="2"
+                  >{{ contributor_comments|default_if_none:"" }}</textarea>
+    </div>
+</div>
+
+<div class="form-group">
+    <label for="contributor_email_id" class="col-sm-3 control-label">Your email (optional)</label>
+    <div class="col-sm-8">
+        <input type="text"
+               placeholder="We will try to let you know when this is live."
+               name="contributor_email"
+               id="contributor_email_id"
+               class="form-control"
+               value="{{ contributor_email|default_if_none:"" }}" />
+    </div>
+</div>
 
 
 {% if possible_endorsement_list_found and not hide_possible_endorsement_list %}

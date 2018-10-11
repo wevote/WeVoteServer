@@ -25,6 +25,7 @@ from wevote_functions.functions import convert_to_int, positive_value_exists, ST
 
 OFFICES_SYNC_URL = get_environment_variable("OFFICES_SYNC_URL")  # officesSyncOut
 WE_VOTE_SERVER_ROOT_URL = get_environment_variable("WE_VOTE_SERVER_ROOT_URL")
+elected_office_status_string = ""
 
 logger = wevote_functions.admin.get_logger(__name__)
 
@@ -599,7 +600,6 @@ def elected_office_update_view(request, elected_office_id=0, elected_office_we_v
                         if official_results['new_elected_official_created']:
                             officials_created = officials_created + 1
 
-
         except Exception as e:
             print("Exception in get_offices_and_divisions e = ", e)
 
@@ -626,7 +626,7 @@ def elected_office_update_view(request, elected_office_id=0, elected_office_we_v
 def elected_office_update_status(request):
     global elected_office_status_string
 
-    if not 'elected_office_status_string' in globals():
+    if 'elected_office_status_string' not in globals():
         elected_office_status_string = ""
 
     json_data = {

@@ -222,7 +222,9 @@ def voter_guide_create_view(request):
     candidates_missing_from_we_vote = request.GET.get('candidates_missing_from_we_vote', "")
     cannot_find_endorsements = request.GET.get('cannot_find_endorsements', False)
     capture_detailed_comments = request.GET.get('capture_detailed_comments ', False)
-    clear_organization_options = request.POST.get('clear_organization_options', False)
+    clear_organization_options = request.GET.get('clear_organization_options', False)
+    contributor_comments = request.GET.get('contributor_comments', "")
+    contributor_email = request.GET.get('contributor_email', "")
     hide_from_active_review = request.GET.get('hide_from_active_review', False)
     ignore_stored_positions = request.GET.get('ignore_stored_positions', False)
     internal_notes = request.GET.get('internal_notes', "")
@@ -253,6 +255,8 @@ def voter_guide_create_view(request):
                 candidates_missing_from_we_vote = voter_guide_possibility.candidates_missing_from_we_vote
                 cannot_find_endorsements = voter_guide_possibility.cannot_find_endorsements
                 capture_detailed_comments = voter_guide_possibility.capture_detailed_comments
+                contributor_comments = voter_guide_possibility.contributor_comments
+                contributor_email = voter_guide_possibility.contributor_email
                 hide_from_active_review = voter_guide_possibility.hide_from_active_review
                 ignore_stored_positions = voter_guide_possibility.ignore_stored_positions
                 ignore_this_source = voter_guide_possibility.ignore_this_source
@@ -479,6 +483,8 @@ def voter_guide_create_view(request):
         'candidates_missing_from_we_vote':  candidates_missing_from_we_vote,
         'cannot_find_endorsements':     cannot_find_endorsements,
         'capture_detailed_comments':    capture_detailed_comments,
+        'contributor_comments':         contributor_comments,
+        'contributor_email':            contributor_email,
         'display_all_done_button':      display_all_done_button,
         'hide_from_active_review':      hide_from_active_review,
         'ignore_stored_positions':      ignore_stored_positions,
@@ -527,6 +533,8 @@ def voter_guide_create_process_view(request):
     capture_detailed_comments = request.POST.get('capture_detailed_comments', False)
     clear_organization_options = request.POST.get('clear_organization_options', 0)
     confirm_delete = request.POST.get('confirm_delete', 0)
+    contributor_comments = request.POST.get('contributor_comments', "")
+    contributor_email = request.POST.get('contributor_email', "")
     form_submitted = request.POST.get('form_submitted', False)
     hide_from_active_review = request.POST.get('hide_from_active_review', False)
     ignore_stored_positions = request.POST.get('ignore_stored_positions', False)
@@ -880,6 +888,8 @@ def voter_guide_create_process_view(request):
         # display_all_done_button = True
         updated_values = {
             'ballot_items_raw':                 ballot_items_raw,
+            'contributor_comments':             contributor_comments,
+            'contributor_email':                contributor_email,
             'organization_name':                organization_name,
             'organization_twitter_handle':      organization_twitter_handle,
             'organization_we_vote_id':          organization_we_vote_id,
@@ -969,7 +979,8 @@ def voter_guide_create_process_view(request):
         messages.add_message(request, messages.SUCCESS, 'Changes saved.')
 
     return HttpResponseRedirect(reverse('voter_guide:voter_guide_create', args=()) +
-                                "?voter_guide_possibility_id=" + str(voter_guide_possibility_id))
+                                "?voter_guide_possibility_id=" + str(voter_guide_possibility_id) +
+                                "&clear_organization_options=" + str(clear_organization_options))
 
 
 def break_up_text_into_possible_endorsement_list(ballot_items, starting_endorsement_number=1):

@@ -18,28 +18,29 @@ WE_VOTE_API_KEY = get_environment_variable("WE_VOTE_API_KEY")
 POLLING_LOCATIONS_SYNC_URL = get_environment_variable("POLLING_LOCATIONS_SYNC_URL")  # pollingLocationsSyncOut
 
 
-def polling_locations_import_from_master_server(request, state_code):
-    """
-    Get the json data, and either create new entries or update existing
-    :return:
-    """
-    import_results, structured_json = process_request_from_master(
-        request, "Loading Polling Locations from We Vote Master servers",
-        POLLING_LOCATIONS_SYNC_URL, {
-            "key":    WE_VOTE_API_KEY,  # This comes from an environment variable
-            "state":  state_code,
-        }
-    )
-
-    if import_results['success']:
-        results = filter_polling_locations_structured_json_for_local_duplicates(structured_json)
-        filtered_structured_json = results['structured_json']
-        duplicates_removed = results['duplicates_removed']
-
-        import_results = polling_locations_import_from_structured_json(filtered_structured_json)
-        import_results['duplicates_removed'] = duplicates_removed
-
-    return import_results
+# def polling_locations_import_from_master_server(request, state_code):
+#     """
+#     Get the json data, and either create new entries or update existing
+#     :return:
+#     """
+#
+#     import_results, structured_json = process_request_from_master(
+#         request, "Loading Polling Locations from We Vote Master servers",
+#         POLLING_LOCATIONS_SYNC_URL, {
+#             "key":    WE_VOTE_API_KEY,  # This comes from an environment variable
+#             "state":  state_code,
+#         }
+#     )
+#
+#     if import_results['success']:
+#         results = filter_polling_locations_structured_json_for_local_duplicates(structured_json)
+#         filtered_structured_json = results['structured_json']
+#         duplicates_removed = results['duplicates_removed']
+#
+#         import_results = polling_locations_import_from_structured_json(filtered_structured_json)
+#         import_results['duplicates_removed'] = duplicates_removed
+#
+#     return import_results
 
 
 def filter_polling_locations_structured_json_for_local_duplicates(structured_json):
