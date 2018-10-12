@@ -5,7 +5,7 @@
         <span class="float-right"><span style="color: darkgray">position #{{ possible_endorsement.possibility_position_number|default_if_none:""|add:"0" }}</span></span>
     {% if possible_endorsement.candidate_we_vote_id %}
         <span><span class="h4">{{ possible_endorsement.candidate.display_candidate_name|default_if_none:"" }}</span>, <span>{{ possible_endorsement.candidate.contest_office_name|default_if_none:"" }}</span>&nbsp;&nbsp;&nbsp;</span>
-        {% if political_data_manager %}
+        {% if has_suggested_voter_guide_rights %}
             <a href="{% url 'candidate:candidate_edit_we_vote_id' candidate_campaign_we_vote_id=possible_endorsement.candidate_we_vote_id %}#positions"
                target="_blank"
                class="u-no-break"><span class="glyphicon glyphicon-new-window"></span></a>
@@ -14,7 +14,7 @@
         <input type="hidden" name="ballot_item_name_{{ possible_endorsement.possibility_position_number }}" value="{{ possible_endorsement.ballot_item_name }}">
     {% elif possible_endorsement.measure_we_vote_id %}
         <span><span class="h4">{{ possible_endorsement.measure.measure_title|default_if_none:"" }}</span>&nbsp;&nbsp;&nbsp;</span>
-        {% if political_data_manager %}
+        {% if has_suggested_voter_guide_rights %}
             <a href="{% url 'measure:measure_edit_we_vote_id' measure_we_vote_id=possible_endorsement.measure_we_vote_id %}#positions"
                target="_blank"
                class="u-no-break"><span class="glyphicon glyphicon-new-window"></span></a>
@@ -37,7 +37,7 @@
 
     {% if possible_endorsement.position_we_vote_id and organization_we_vote_id  %}
     <div>
-        {% if political_data_manager %}
+        {% if has_suggested_voter_guide_rights %}
         <a href="{% url 'organization:organization_we_vote_id_position_edit' organization_we_vote_id possible_endorsement.position_we_vote_id %}#positions"
            target="_blank"
            class="u-no-break">

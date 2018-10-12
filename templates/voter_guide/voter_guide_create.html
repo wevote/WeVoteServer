@@ -26,7 +26,7 @@
             <img src="{{ organization.we_vote_hosted_profile_image_url_tiny }}" width="32px" />
         {% endif %}
             <span class="h3">{{ organization.organization_name }}</span>
-        {% if political_data_manager and organization.organization_name and organization.we_vote_id %}
+        {% if has_suggested_voter_guide_rights and organization.organization_name and organization.we_vote_id %}
             &nbsp;
             <a href="{% url "organization:organization_position_list" organization.id %}"
                target="_blank"
@@ -163,7 +163,7 @@
 
 {% endif %}
 
-{% if political_data_manager and state_list %}
+{% if has_suggested_voter_guide_rights and state_list %}
     <div class="form-group">
         <label for="ballot_items_raw_id" class="col-sm-3 control-label">Limit to this State</label>
         <div class="col-sm-8">
@@ -223,7 +223,7 @@
         <div class="col-sm-8">
             <table class="table">
             {% for possible_endorsement in possible_endorsement_list %}
-                {% include "voter_guide/voter_guide_one_candidate_confirmation.html" with organization_we_vote_id=organization_we_vote_id political_data_manager=political_data_manager possible_endorsement=possible_endorsement %}
+                {% include "voter_guide/voter_guide_one_candidate_confirmation.html" with organization_we_vote_id=organization_we_vote_id has_suggested_voter_guide_rights=has_suggested_voter_guide_rights possible_endorsement=possible_endorsement %}
             {% endfor %}
             </table>
         </div>
@@ -269,7 +269,7 @@
 
 {% endif %}
 
-    {% if political_data_manager and voter_guide_possibility_url %}
+    {% if has_suggested_voter_guide_rights and voter_guide_possibility_url %}
     <div class="form-group">
         <label for="internal_notes_id" class="col-sm-3 control-label">Internal Notes</label>
         <div class="col-sm-8">
@@ -331,7 +331,7 @@
         {% if display_all_done_button %}
             <button type="submit" class="btn btn-success" name="all_done_with_entry" value="1">All Done!</button>
         {% endif %}
-        {% if political_data_manager and voter_guide_possibility_id %}
+        {% if has_suggested_voter_guide_rights and voter_guide_possibility_id %}
             <br />
             <br />
             <input type="checkbox" name="ignore_stored_positions" id="ignore_stored_positions_id"
@@ -367,7 +367,7 @@
     </div>
 
 
-{% if political_data_manager and voter_guide_possibility_id %}
+{% if has_suggested_voter_guide_rights and voter_guide_possibility_id %}
     <br />
     <br />
     <div class="form-group">

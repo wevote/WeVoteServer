@@ -231,10 +231,12 @@ def voter_guide_create_view(request):
     organization_name = request.GET.get('organization_name', "")
     organization_twitter_handle = request.GET.get('organization_twitter_handle', "")
     organization_we_vote_id = request.GET.get('organization_we_vote_id', "")
-    political_data_manager = voter_has_authority(request, 'political_data_manager')
     state_code = request.GET.get('state_code', "")
     target_google_civic_election_id = request.GET.get('target_google_civic_election_id', "")
     voter_guide_possibility_url = request.GET.get('voter_guide_possibility_url', "")
+
+    authority_required = {'verified_volunteer', 'political_data_manager'}  # admin, verified_volunteer
+    has_suggested_voter_guide_rights = voter_has_authority(request, authority_required)
 
     batch_header_id = 0
     display_all_done_button = False
@@ -498,7 +500,7 @@ def voter_guide_create_view(request):
         'organization_twitter_handle':  organization_twitter_handle,
         'organization_we_vote_id':      organization_we_vote_id,
         'organizations_list':           organizations_list,
-        'political_data_manager':       political_data_manager,
+        'has_suggested_voter_guide_rights':       has_suggested_voter_guide_rights,
         'possible_endorsement_list':      possible_endorsement_list_modified,
         'possible_endorsement_list_found': possible_endorsement_list_found,
         'positions_ready_to_save_as_batch': positions_ready_to_save_as_batch,
@@ -595,8 +597,9 @@ def voter_guide_create_process_view(request):
     if not positive_value_exists(voter_guide_possibility_url) and positive_value_exists(form_submitted):
         messages.add_message(request, messages.ERROR, 'Please include a link to where you found this voter guide.')
 
-    political_data_manager = voter_has_authority(request, 'political_data_manager')
-    if positive_value_exists(political_data_manager):
+    authority_required = {'verified_volunteer', 'political_data_manager'}  # admin, verified_volunteer
+    has_suggested_voter_guide_rights = voter_has_authority(request, authority_required)
+    if positive_value_exists(has_suggested_voter_guide_rights):
         if positive_value_exists(confirm_delete):
             results = voter_guide_possibility_manager.delete_voter_guide_possibility(
                 voter_guide_possibility_id=voter_guide_possibility_id)
@@ -898,7 +901,7 @@ def voter_guide_create_process_view(request):
             'voter_who_submitted_name':         voter_who_submitted_name,
             'voter_who_submitted_we_vote_id':   voter_who_submitted_we_vote_id,
         }
-        if political_data_manager:
+        if has_suggested_voter_guide_rights:
             updated_values['ignore_stored_positions'] = ignore_stored_positions
             updated_values['ignore_this_source'] = ignore_this_source
             updated_values['internal_notes'] = internal_notes
