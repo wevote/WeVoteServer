@@ -4,6 +4,14 @@
 
 ## Installing PostgreSQL on Mac
 
+If you are familiar with Homebrew you may install PostgreSQL by running the below command:
+
+```
+brew install postgresql
+```
+
+Otherwise, you can follow the below instructions to setup PostgreSQL.
+
 Install the latest version of Postgres for your machine (see instructions further down on this page as well):
  
 **Mac:** Download and install the DMG from [http://postgresapp.com/](http://postgresapp.com/)
