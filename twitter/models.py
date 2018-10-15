@@ -335,9 +335,9 @@ class TwitterUserManager(models.Model):
     def retrieve_twitter_link_to_organization_from_twitter_user_id(self, twitter_user_id):
         return self.retrieve_twitter_link_to_organization(twitter_user_id)
 
-    def retrieve_twitter_link_to_organization_from_twitter_handle(self, twitter_handle):
+    def retrieve_twitter_link_to_organization_from_twitter_handle(self, twitter_handle, read_only=False):
         twitter_user_id = 0
-        results = self.retrieve_twitter_user_locally_or_remotely(twitter_user_id, twitter_handle)
+        results = self.retrieve_twitter_user_locally_or_remotely(twitter_user_id, twitter_handle, read_only=read_only)
         if results['twitter_user_found']:
             twitter_user = results['twitter_user']
             twitter_user_id = twitter_user.twitter_id

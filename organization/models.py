@@ -284,18 +284,18 @@ class OrganizationManager(models.Manager):
     def retrieve_organization_from_vote_smart_id(self, vote_smart_id, read_only=False):
         return self.retrieve_organization(0, '', vote_smart_id, read_only=read_only)
 
-    def retrieve_organization_from_twitter_handle(self, twitter_handle):
+    def retrieve_organization_from_twitter_handle(self, twitter_handle, read_only=False):
         organization_id = 0
         organization_we_vote_id = ""
 
         twitter_user_manager = TwitterUserManager()
         twitter_retrieve_results = twitter_user_manager.retrieve_twitter_link_to_organization_from_twitter_handle(
-            twitter_handle)
+            twitter_handle, read_only=True)  # Always read_only
         if twitter_retrieve_results['twitter_link_to_organization_found']:
             twitter_link_to_organization = twitter_retrieve_results['twitter_link_to_organization']
             organization_we_vote_id = twitter_link_to_organization.organization_we_vote_id
 
-        return self.retrieve_organization(organization_id, organization_we_vote_id)
+        return self.retrieve_organization(organization_id, organization_we_vote_id, read_only=read_only)
 
     def retrieve_organization_from_twitter_user_id(self, twitter_user_id):
         organization_we_vote_id = ''

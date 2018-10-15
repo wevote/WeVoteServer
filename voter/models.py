@@ -2049,9 +2049,14 @@ class VoterDeviceLinkManager(models.Model):
             elif positive_value_exists(voter_id):
                 status += " RETRIEVE_VOTER_DEVICE_LINK-GET_BY_VOTER_ID"
                 if read_only:
-                    voter_device_link_on_stage = VoterDeviceLink.objects.using('readonly').get(voter_id=voter_id)
+                    voter_device_link_query = VoterDeviceLink.objects.using('readonly').all()
                 else:
-                    voter_device_link_on_stage = VoterDeviceLink.objects.get(voter_id=voter_id)
+                    voter_device_link_query = VoterDeviceLink.objects.all()
+                voter_device_link_query = voter_device_link_query.filter(voter_id=voter_id)
+                voter_device_link_query = voter_device_link_query.order_by('id')
+                voter_device_link_list = list(voter_device_link_query)
+                voter_device_link_on_stage = voter_device_link_list.pop()  # Pop the last created
+
                 # If still here, we found an existing position
                 voter_device_link_id = voter_device_link_on_stage.id
             elif positive_value_exists(voter_device_link_id):
