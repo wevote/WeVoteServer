@@ -170,17 +170,27 @@ def measures_sync_out_view(request):  # measuresSyncOut
             contest_measure_query = contest_measure_query.filter(google_civic_election_id=google_civic_election_id)
         if positive_value_exists(state_code):
             contest_measure_query = contest_measure_query.filter(state_code__iexact=state_code)
-        contest_measure_list_dict = contest_measure_query.values('we_vote_id', 'maplight_id', 'vote_smart_id',
-                                                                 'measure_title', 'measure_subtitle',
-                                                                 'measure_text', 'measure_url',
-                                                                 'google_civic_election_id', 'ocd_division_id',
-                                                                 'primary_party', 'district_name',
-                                                                 'district_scope', 'district_id', 'state_code',
-                                                                 'wikipedia_page_id', 'wikipedia_page_title',
-                                                                 'wikipedia_photo_url', 'ballotpedia_page_title',
-                                                                 'ballotpedia_photo_url', 'ballotpedia_measure_url',
-                                                                 'ballotpedia_no_vote_description',
-                                                                 'ballotpedia_yes_vote_description')
+        contest_measure_list_dict = contest_measure_query.values(
+            'ballotpedia_district_id', 'ballotpedia_election_id',
+            'ballotpedia_measure_id', 'ballotpedia_measure_name',
+            'ballotpedia_measure_status', 'ballotpedia_measure_summary', 'ballotpedia_measure_text',
+            'ballotpedia_measure_url',
+            'ballotpedia_no_vote_description',
+            'ballotpedia_page_title', 'ballotpedia_photo_url',
+            'ballotpedia_yes_vote_description',
+            'ctcl_uuid',
+            'district_id', 'district_name', 'district_scope',
+            'election_day_text',
+            'google_ballot_placement', 'google_civic_election_id',
+            'google_civic_measure_title', 'google_civic_measure_title2', 'google_civic_measure_title3',
+            'google_civic_measure_title4', 'google_civic_measure_title5',
+            'maplight_id',
+            'measure_subtitle', 'measure_text', 'measure_title', 'measure_url',
+            'ocd_division_id',
+            'primary_party', 'state_code',
+            'vote_smart_id',
+            'we_vote_id',
+            'wikipedia_page_id', 'wikipedia_page_title', 'wikipedia_photo_url')
         if contest_measure_list_dict:
             contest_measure_list_json = list(contest_measure_list_dict)
             return HttpResponse(json.dumps(contest_measure_list_json), content_type='application/json')
@@ -600,6 +610,8 @@ def measure_edit_process_view(request):
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
+    ballotpedia_district_id = request.POST.get('ballotpedia_district_id', False)
+    ballotpedia_election_id = request.POST.get('ballotpedia_election_id', False)
     ballotpedia_measure_url = request.POST.get('ballotpedia_measure_url', False)
     ballotpedia_no_vote_description = request.POST.get('ballotpedia_no_vote_description', False)
     ballotpedia_yes_vote_description = request.POST.get('ballotpedia_yes_vote_description', False)
@@ -632,6 +644,10 @@ def measure_edit_process_view(request):
         try:
             if measure_on_stage_found:
                 # Update
+                if ballotpedia_district_id is not False:
+                    measure_on_stage.ballotpedia_district_id = ballotpedia_district_id
+                if ballotpedia_election_id is not False:
+                    measure_on_stage.ballotpedia_election_id = ballotpedia_election_id
                 if ballotpedia_measure_url is not False:
                     measure_on_stage.ballotpedia_measure_url = ballotpedia_measure_url
                 if ballotpedia_no_vote_description is not False:
@@ -665,6 +681,8 @@ def measure_edit_process_view(request):
             else:
                 # Create new
                 measure_on_stage = ContestMeasure(
+                    ballotpedia_district_id=ballotpedia_district_id,
+                    ballotpedia_election_id=ballotpedia_election_id,
                     ballotpedia_measure_url=ballotpedia_measure_url,
                     ballotpedia_no_vote_description=ballotpedia_no_vote_description,
                     ballotpedia_yes_vote_description=ballotpedia_yes_vote_description,
