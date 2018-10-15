@@ -323,34 +323,58 @@ def measures_import_from_structured_json(structured_json):
             state_code = one_measure['state_code'] if 'state_code' in one_measure else ''
 
             updated_contest_measure_values = {
-                # Values we search against
-                'we_vote_id': we_vote_id,
-                'google_civic_election_id': google_civic_election_id,
-                # The rest of the values
+                'ballotpedia_district_id': one_measure['ballotpedia_district_id'] if 'ballotpedia_district_id' in
+                                                                                     one_measure else '',
+                'ballotpedia_election_id': one_measure['ballotpedia_election_id'] if 'ballotpedia_election_id' in
+                                                                                     one_measure else '',
+                'ballotpedia_measure_id': one_measure['ballotpedia_measure_id'] if 'ballotpedia_measure_id' in
+                                                                                   one_measure else '',
+                'ballotpedia_measure_name': one_measure['ballotpedia_measure_name'] if 'ballotpedia_measure_name' in
+                                                                                       one_measure else '',
+                'ballotpedia_measure_status': one_measure['ballotpedia_measure_status']
+                if 'ballotpedia_measure_status' in one_measure else '',
+                'ballotpedia_measure_summary': one_measure['ballotpedia_measure_summary']
+                if 'ballotpedia_measure_summary' in one_measure else '',
+                'ballotpedia_measure_text': one_measure['ballotpedia_measure_text'] if 'ballotpedia_measure_text' in
+                                                                                       one_measure else '',
+                'ballotpedia_measure_url': one_measure['ballotpedia_measure_url']
+                if 'ballotpedia_measure_url' in one_measure else '',
+                'ballotpedia_no_vote_description': one_measure['ballotpedia_no_vote_description']
+                if 'ballotpedia_no_vote_description' in one_measure else '',
                 'ballotpedia_page_title': one_measure['ballotpedia_page_title'] if 'ballotpedia_page_title' in
                                                                                    one_measure else '',
                 'ballotpedia_photo_url': one_measure['ballotpedia_photo_url'] if 'ballotpedia_photo_url' in
                                                                                  one_measure else '',
-                'ballotpedia_measure_url': one_measure['ballotpedia_measure_url']
-                if 'ballotpedia_measure_url' in one_measure else '',
-                'ballotpedia_no_vote_description': one_measure['ballotpedia_no_vote_description']
-                if 'ballotpedia_yes_vote_description' in one_measure else '',
                 'ballotpedia_yes_vote_description': one_measure['ballotpedia_yes_vote_description']
-                if 'ballotpedia_no_vote_description' in one_measure else '',
+                if 'ballotpedia_yes_vote_description' in one_measure else '',
+                'ctcl_uuid': one_measure['ctcl_uuid'] if 'ctcl_uuid' in one_measure else '',
                 'district_id': district_id,
                 'district_name': district_name,
                 'district_scope': one_measure['district_scope'] if 'district_scope' in one_measure else '',
+                'election_day_text': one_measure['election_day_text'] if 'election_day_text' in one_measure else '',
+                'google_ballot_placement': one_measure['google_ballot_placement'] if 'google_ballot_placement' in
+                                                                                     one_measure else '',
+                'google_civic_election_id': google_civic_election_id,
+                'google_civic_measure_title':
+                    one_measure['google_civic_measure_title'] if 'google_civic_measure_title' in one_measure else '',
+                'google_civic_measure_title2':
+                    one_measure['google_civic_measure_title2'] if 'google_civic_measure_title2' in one_measure else '',
+                'google_civic_measure_title3':
+                    one_measure['google_civic_measure_title3'] if 'google_civic_measure_title3' in one_measure else '',
+                'google_civic_measure_title4':
+                    one_measure['google_civic_measure_title4'] if 'google_civic_measure_title4' in one_measure else '',
+                'google_civic_measure_title5':
+                    one_measure['google_civic_measure_title5'] if 'google_civic_measure_title5' in one_measure else '',
                 'maplight_id': one_measure['maplight_id'] if 'maplight_id' in one_measure else None,
                 'vote_smart_id': one_measure['vote_smart_id'] if 'vote_smart_id' in one_measure else None,
                 'measure_subtitle': one_measure['measure_subtitle'] if 'measure_subtitle' in one_measure else '',
                 'measure_text': one_measure['measure_text'] if 'measure_text' in one_measure else '',
-                'measure_url': one_measure['measure_url'] if 'measure_url' in one_measure else '',
                 'measure_title': measure_title,
-                'google_civic_measure_title':
-                    one_measure['google_civic_measure_title'] if 'google_civic_measure_title' in one_measure else '',
+                'measure_url': one_measure['measure_url'] if 'measure_url' in one_measure else '',
                 'ocd_division_id': one_measure['ocd_division_id'] if 'ocd_division_id' in one_measure else '',
                 'primary_party': one_measure['primary_party'] if 'primary_party' in one_measure else '',
                 'state_code': state_code,
+                'we_vote_id': we_vote_id,
                 'wikipedia_page_id': one_measure['wikipedia_page_id'] if 'wikipedia_page_id' in one_measure else '',
                 'wikipedia_page_title': one_measure['wikipedia_page_title'] if 'wikipedia_page_title' in
                                                                                one_measure else '',
