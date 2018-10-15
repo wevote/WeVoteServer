@@ -160,13 +160,28 @@ def electoral_district_list_view(request):
             for one_word in search_words:
                 filters = []
 
-                new_filter = Q(we_vote_id__icontains=one_word)
+                new_filter = Q(ballotpedia_district_id__icontains=one_word)
+                filters.append(new_filter)
+
+                new_filter = Q(ballotpedia_district_type__icontains=one_word)
+                filters.append(new_filter)
+
+                new_filter = Q(ballotpedia_district_url__icontains=one_word)
+                filters.append(new_filter)
+
+                new_filter = Q(ctcl_id_temp__icontains=one_word)
                 filters.append(new_filter)
 
                 new_filter = Q(electoral_district_name__icontains=one_word)
                 filters.append(new_filter)
 
-                new_filter = Q(ctcl_id_temp__icontains=one_word)
+                new_filter = Q(electoral_district_type__icontains=one_word)
+                filters.append(new_filter)
+
+                new_filter = Q(state_code__iexact=one_word)
+                filters.append(new_filter)
+
+                new_filter = Q(we_vote_id__icontains=one_word)
                 filters.append(new_filter)
 
                 # Add the first query
