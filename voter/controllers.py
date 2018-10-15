@@ -1749,8 +1749,7 @@ def voter_retrieve_for_api(voter_device_id, state_code_from_ip_address='',
             return json_data
 
         voter_device_link_results = \
-            voter_device_link_manager.retrieve_voter_device_link_from_voter_device_id(voter_device_id,
-                                                                                      read_only=True)
+            voter_device_link_manager.retrieve_voter_device_link_from_voter_device_id(voter_device_id)
         if voter_device_link_results['voter_device_link_found']:
             voter_device_link = voter_device_link_results['voter_device_link']
             voter_id = voter_device_link.voter_id
