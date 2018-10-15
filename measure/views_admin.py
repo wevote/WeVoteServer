@@ -612,12 +612,17 @@ def measure_edit_process_view(request):
 
     ballotpedia_district_id = request.POST.get('ballotpedia_district_id', False)
     ballotpedia_election_id = request.POST.get('ballotpedia_election_id', False)
+    ballotpedia_measure_status = request.POST.get('ballotpedia_measure_status', False)
     ballotpedia_measure_url = request.POST.get('ballotpedia_measure_url', False)
     ballotpedia_no_vote_description = request.POST.get('ballotpedia_no_vote_description', False)
     ballotpedia_yes_vote_description = request.POST.get('ballotpedia_yes_vote_description', False)
     measure_id = convert_to_int(request.POST['measure_id'])
     measure_title = request.POST.get('measure_title', False)
     google_civic_measure_title = request.POST.get('google_civic_measure_title', False)
+    google_civic_measure_title2 = request.POST.get('google_civic_measure_title2', False)
+    google_civic_measure_title3 = request.POST.get('google_civic_measure_title3', False)
+    google_civic_measure_title4 = request.POST.get('google_civic_measure_title4', False)
+    google_civic_measure_title5 = request.POST.get('google_civic_measure_title5', False)
     measure_subtitle = request.POST.get('measure_subtitle', False)
     measure_text = request.POST.get('measure_text', False)
     measure_url = request.POST.get('measure_url', False)
@@ -648,16 +653,26 @@ def measure_edit_process_view(request):
                     measure_on_stage.ballotpedia_district_id = ballotpedia_district_id
                 if ballotpedia_election_id is not False:
                     measure_on_stage.ballotpedia_election_id = ballotpedia_election_id
+                if ballotpedia_measure_status is not False:
+                    measure_on_stage.ballotpedia_measure_status = ballotpedia_measure_status
                 if ballotpedia_measure_url is not False:
                     measure_on_stage.ballotpedia_measure_url = ballotpedia_measure_url
                 if ballotpedia_no_vote_description is not False:
                     measure_on_stage.ballotpedia_no_vote_description = ballotpedia_no_vote_description
                 if ballotpedia_yes_vote_description is not False:
                     measure_on_stage.ballotpedia_yes_vote_description = ballotpedia_yes_vote_description
-                if measure_title is not False:
-                    measure_on_stage.measure_title = measure_title
                 if google_civic_measure_title is not False:
                     measure_on_stage.google_civic_measure_title = google_civic_measure_title
+                if google_civic_measure_title2 is not False:
+                    measure_on_stage.google_civic_measure_title2 = google_civic_measure_title2
+                if google_civic_measure_title3 is not False:
+                    measure_on_stage.google_civic_measure_title3 = google_civic_measure_title3
+                if google_civic_measure_title4 is not False:
+                    measure_on_stage.google_civic_measure_title4 = google_civic_measure_title4
+                if google_civic_measure_title5 is not False:
+                    measure_on_stage.google_civic_measure_title5 = google_civic_measure_title5
+                if measure_title is not False:
+                    measure_on_stage.measure_title = measure_title
                 if measure_subtitle is not False:
                     measure_on_stage.measure_subtitle = measure_subtitle
                 if measure_text is not False:
@@ -683,13 +698,18 @@ def measure_edit_process_view(request):
                 measure_on_stage = ContestMeasure(
                     ballotpedia_district_id=ballotpedia_district_id,
                     ballotpedia_election_id=ballotpedia_election_id,
+                    ballotpedia_measure_status=ballotpedia_measure_status,
                     ballotpedia_measure_url=ballotpedia_measure_url,
                     ballotpedia_no_vote_description=ballotpedia_no_vote_description,
                     ballotpedia_yes_vote_description=ballotpedia_yes_vote_description,
-                    measure_title=measure_title,
                     google_civic_measure_title=google_civic_measure_title,
+                    google_civic_measure_title2=google_civic_measure_title2,
+                    google_civic_measure_title3=google_civic_measure_title3,
+                    google_civic_measure_title4=google_civic_measure_title4,
+                    google_civic_measure_title5=google_civic_measure_title5,
                     measure_subtitle=measure_subtitle,
                     measure_text=measure_text,
+                    measure_title=measure_title,
                     measure_url=measure_url,
                     google_civic_election_id=google_civic_election_id,
                     state_code=state_code,
