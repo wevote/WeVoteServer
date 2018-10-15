@@ -5,8 +5,8 @@
 from datetime import datetime, timedelta
 from django.db import models
 from election.models import ElectionManager
-from exception.models import handle_record_found_more_than_one_exception,\
-    handle_record_not_found_exception, handle_record_not_saved_exception
+from exception.models import handle_exception, handle_record_found_more_than_one_exception,\
+    handle_record_not_found_exception, handle_record_not_saved_exception, print_to_log
 from issue.models import IssueManager
 from organization.models import OrganizationManager
 import pytz
@@ -809,6 +809,44 @@ class FollowOrganizationManager(models.Model):
             exception_multiple_object_returned = True
             success = False
             status = 'FOLLOW_ORGANIZATION_NOT_FOUND_MultipleObjectsReturned'
+            follow_organization_list_found = False
+            follow_organization_list = []
+
+            # Delete the oldest values and retrieve the correct one
+            try:
+                if positive_value_exists(voter_id) and positive_value_exists(organization_id):
+                    follow_organization_query = FollowOrganization.objects.all()
+                    follow_organization_query = follow_organization_query.filter(
+                        voter_id=voter_id, organization_id=organization_id)
+                    follow_organization_query = follow_organization_query.order_by('id')
+                    follow_organization_list = list(follow_organization_query)
+
+                    follow_organization_list_found = positive_value_exists(len(follow_organization_list))
+
+                    success = True
+                    status = 'FOLLOW_ORGANIZATION_FOUND_WITH_VOTER_ID_AND_ORGANIZATION_ID'
+                elif positive_value_exists(voter_id) and positive_value_exists(organization_we_vote_id):
+                    follow_organization_query = FollowOrganization.objects.all()
+                    follow_organization_query = follow_organization_query.filter(
+                        voter_id=voter_id, organization_we_vote_id=organization_we_vote_id)
+                    follow_organization_query = follow_organization_query.order_by('id')
+                    follow_organization_list = list(follow_organization_query)
+
+                    follow_organization_list_found = positive_value_exists(len(follow_organization_list))
+
+                    success = True
+                    status = 'FOLLOW_ORGANIZATION_FOUND_WITH_VOTER_ID_AND_ORGANIZATION_WE_VOTE_ID'
+
+                if follow_organization_list_found:
+                    follow_organization_on_stage = follow_organization_list.pop()
+                    follow_organization_on_stage_id = follow_organization_on_stage.id
+                    # Now cycle through remaining list and delete
+                    for one_follow_organization in follow_organization_list:
+                        one_follow_organization.delete()
+                    print_to_log(logger, exception_message_optional="FollowOrganization duplicates removed.")
+            except Exception as e:
+                handle_exception(e, logger,
+                                 exception_message="Error trying to delete duplicate FollowOrganization entries.")
         except FollowOrganization.DoesNotExist:
             error_result = False
             exception_does_not_exist = True

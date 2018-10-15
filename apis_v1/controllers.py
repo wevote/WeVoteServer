@@ -53,7 +53,7 @@ def organization_follow(voter_device_id, organization_id=0, organization_we_vote
     if positive_value_exists(organization_twitter_handle):
         organization_manager = OrganizationManager()
         organization_results = organization_manager.retrieve_organization_from_twitter_handle(
-            organization_twitter_handle)
+            organization_twitter_handle, read_only=True)
         if organization_results['organization_found']:
             organization_we_vote_id = organization_results['organization'].we_vote_id
 
