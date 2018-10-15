@@ -12,7 +12,7 @@ from django.conf.urls.static import static
 
 from apis_v1.views import views_docs, views_analytics, views_ballot, views_candidate, views_donation, \
     views_election, views_facebook, views_friend, views_issues, views_misc, views_organization, \
-    views_pledge_to_vote, views_position, views_twitter, views_voter
+    views_pledge_to_vote, views_position, views_twitter, views_voter, views_voter_guide
 from ballot.views_admin import ballot_items_sync_out_view, ballot_returned_sync_out_view
 from candidate.views_admin import candidates_sync_out_view
 from issue.views_admin import issues_sync_out_view, issues_retrieve_view, retrieve_issues_to_follow_view, \
@@ -163,25 +163,27 @@ urlpatterns = [
         views_voter.voter_follow_all_organizations_followed_by_organization_view,
         name='voterFollowAllOrganizationsFollowedByOrganizationView'),
     url(r'^voterGuidePossibilityRetrieve/',
-        views_voter.voter_guide_possibility_retrieve_view, name='voterGuidePossibilityRetrieveView'),
-    url(r'^voterGuidePossibilitySave/', views_voter.voter_guide_possibility_save_view,
+        views_voter_guide.voter_guide_possibility_retrieve_view, name='voterGuidePossibilityRetrieveView'),
+    url(r'^voterGuidePossibilitySave/', views_voter_guide.voter_guide_possibility_save_view,
         name='voterGuidePossibilitySaveView'),
     url(r'^voterGuidesFollowedRetrieve/',
-        views_voter.voter_guides_followed_retrieve_view, name='voterGuidesFollowedRetrieveView'),
+        views_voter_guide.voter_guides_followed_retrieve_view, name='voterGuidesFollowedRetrieveView'),
     url(r'^voterGuidesFollowedByOrganizationRetrieve/',
-        views_voter.voter_guides_followed_by_organization_retrieve_view,
+        views_voter_guide.voter_guides_followed_by_organization_retrieve_view,
         name='voterGuidesFollowedByOrganizationRetrieveView'),
     url(r'^voterGuideFollowersRetrieve/',
-        views_voter.voter_guide_followers_retrieve_view, name='voterGuideFollowersRetrieveView'),
+        views_voter_guide.voter_guide_followers_retrieve_view, name='voterGuideFollowersRetrieveView'),
     url(r'^voterGuidesIgnoredRetrieve/',
-        views_voter.voter_guides_ignored_retrieve_view, name='voterGuidesIgnoredRetrieveView'),
+        views_voter_guide.voter_guides_ignored_retrieve_view, name='voterGuidesIgnoredRetrieveView'),
     url(r'^voterGuideSave/',
-        views_voter.voter_guide_save_view, name='voterGuideSaveView'),
+        views_voter_guide.voter_guide_save_view, name='voterGuideSaveView'),
     url(r'^voterGuidesRetrieve/',
-        views_voter.voter_guides_retrieve_view, name='voterGuidesRetrieveView'),
+        views_voter_guide.voter_guides_retrieve_view, name='voterGuidesRetrieveView'),
     url(r'^voterGuidesSyncOut/', voter_guides_sync_out_view, name='voterGuidesSyncOutView'),
     url(r'^voterGuidesToFollowRetrieve/',
-        views_voter.voter_guides_to_follow_retrieve_view, name='voterGuidesToFollowRetrieveView'),
+        views_voter_guide.voter_guides_to_follow_retrieve_view, name='voterGuidesToFollowRetrieveView'),
+    url(r'^voterGuidesUpcomingRetrieve/',
+        views_voter_guide.voter_guides_upcoming_retrieve_view, name='voterGuidesUpcomingRetrieveView'),
     url(r'^voterLocationRetrieveFromIP/',
         views_voter.voter_location_retrieve_from_ip_view, name='voterLocationRetrieveFromIPView'),
     url(r'^voterMergeTwoAccounts/', views_voter.voter_merge_two_accounts_view, name='voterMergeTwoAccountsView'),
@@ -373,6 +375,8 @@ urlpatterns = [
     url(r'^docs/voterGuidesSyncOut/$', views_docs.voter_guides_sync_out_doc_view, name='voterGuidesSyncOutDocs'),
     url(r'^docs/voterGuidesToFollowRetrieve/$',
         views_docs.voter_guides_to_follow_retrieve_doc_view, name='voterGuidesToFollowRetrieveDocs'),
+    url(r'^docs/voterGuidesUpcomingRetrieve/$',
+        views_docs.voter_guides_upcoming_retrieve_doc_view, name='voterGuidesUpcomingRetrieveDocs'),
     url(r'^docs/voterLocationRetrieveFromIP/$',
         views_docs.voter_location_retrieve_from_ip_doc_view, name='voterLocationRetrieveFromIPDocs'),
     url(r'^docs/voterMergeTwoAccounts/$',

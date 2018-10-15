@@ -1038,7 +1038,7 @@ class FollowOrganizationList(models.Model):
         follow_organization_list_manager = FollowOrganizationList()
         follow_organization_list = \
             follow_organization_list_manager.retrieve_follow_organization_by_voter_id(
-                voter_id, auto_followed_from_twitter_suggestion, read_only)
+                voter_id, auto_followed_from_twitter_suggestion, read_only=read_only)
         follow_organization_list_simple_array = []
         if len(follow_organization_list):
             voter_manager = VoterManager()
@@ -1134,7 +1134,7 @@ class FollowOrganizationList(models.Model):
             self, voter_id, return_we_vote_id=False, read_only=False):
         follow_organization_list_manager = FollowOrganizationList()
         ignore_organization_list = \
-            follow_organization_list_manager.retrieve_ignore_organization_by_voter_id(voter_id, read_only)
+            follow_organization_list_manager.retrieve_ignore_organization_by_voter_id(voter_id, read_only=read_only)
         ignore_organization_list_simple_array = []
         if len(ignore_organization_list):
             for ignore_organization in ignore_organization_list:

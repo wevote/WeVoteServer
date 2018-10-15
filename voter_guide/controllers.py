@@ -1204,6 +1204,623 @@ def voter_guides_to_follow_retrieve_for_api(voter_device_id,  # voterGuidesToFol
             follow_issue_list_manager = FollowIssueList()
             following_status = FOLLOWING
             issue_list_for_voter = follow_issue_list_manager. \
+                retrieve_follow_issue_list_by_voter_we_vote_id(voter_we_vote_id, following_status)  # Read only
+            issue_list_for_voter = list(issue_list_for_voter)
+            issue_we_vote_id_list_for_voter = []
+            for issue in issue_list_for_voter:
+                issue_we_vote_id_list_for_voter.append(issue.issue_we_vote_id)
+
+            link_issue_list = OrganizationLinkToIssueList()
+            organization_we_vote_id_list_result = link_issue_list. \
+                retrieve_organization_we_vote_id_list_from_issue_we_vote_id_list(issue_we_vote_id_list_for_voter)
+            organization_we_vote_id_list_for_voter_issues = \
+                organization_we_vote_id_list_result['organization_we_vote_id_list']
+
+    voter_guide_list = []
+    voter_guides = []
+    try:
+        if positive_value_exists(kind_of_ballot_item) and positive_value_exists(ballot_item_we_vote_id):
+            results = retrieve_voter_guides_to_follow_by_ballot_item(voter_id,
+                                                                     kind_of_ballot_item, ballot_item_we_vote_id,
+                                                                     search_string, filter_voter_guides_by_issue,
+                                                                     organization_we_vote_id_list_for_voter_issues)
+            success = results['success']
+            status += results['status']
+            voter_guide_list = results['voter_guide_list']
+        elif positive_value_exists(google_civic_election_id):
+            # This retrieve also does the reordering
+            results = retrieve_voter_guides_to_follow_by_election_for_api(voter_id, google_civic_election_id,
+                                                                          search_string,
+                                                                          filter_voter_guides_by_issue,
+                                                                          organization_we_vote_id_list_for_voter_issues,
+                                                                          start_retrieve_at_this_number,
+                                                                          maximum_number_to_retrieve,
+                                                                          'twitter_followers_count', 'desc')
+            success = results['success']
+            voter_guide_list = results['voter_guide_list']
+            status = results['status'] + ", len(voter_guide_list): " + str(len(voter_guide_list)) + " "
+            if add_voter_guides_not_from_election:
+                status += "ADDING_VOTER_GUIDES_NOT_FROM_ELECTION "
+                non_election_results = retrieve_voter_guides_to_follow_generic_for_api(
+                    voter_id, search_string,
+                    filter_voter_guides_by_issue,
+                    organization_we_vote_id_list_for_voter_issues,
+                    maximum_number_to_retrieve,
+                    'twitter_followers_count', 'desc')
+                if non_election_results['success']:
+                    status += non_election_results['status']
+                    non_election_voter_guide_list = non_election_results['voter_guide_list']
+                    voter_guide_list = voter_guide_list + non_election_voter_guide_list
+        else:
+            status += "RETRIEVING_VOTER_GUIDES_WITHOUT_ELECTION_ID_OR_BALLOT_ITEM "
+            results = retrieve_voter_guides_to_follow_generic_for_api(voter_id, search_string,
+                                                                      filter_voter_guides_by_issue,
+                                                                      organization_we_vote_id_list_for_voter_issues,
+                                                                      maximum_number_to_retrieve,
+                                                                      'twitter_followers_count', 'desc')
+            success = results['success']
+            status += results['status']
+            voter_guide_list = results['voter_guide_list']
+
+    except Exception as e:
+        status += 'FAILED voter_guides_to_follow_retrieve_for_api, retrieve_voter_guides_for_election ' \
+                 '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
+        success = False
+
+    if success:
+        voter_manager = VoterManager()
+        results = voter_manager.retrieve_voter_by_id(voter_id, read_only=True)
+        linked_organization_we_vote_id = ""
+        if results['voter_found']:
+            voter = results['voter']
+            voter_we_vote_id = voter.we_vote_id
+            linked_organization_we_vote_id = voter.linked_organization_we_vote_id
+
+        number_added_to_list = 0
+        position_manager = PositionManager()
+        position = PositionEntered()
+        pledge_to_vote_manager = PledgeToVoteManager()
+        for voter_guide in voter_guide_list:
+            if positive_value_exists(voter_guide.organization_we_vote_id) \
+                    and positive_value_exists(linked_organization_we_vote_id) \
+                    and linked_organization_we_vote_id == voter_guide.organization_we_vote_id:
+                # Do not return your own voter guide to follow
+                continue
+
+            if hasattr(voter_guide, 'ballot_item_we_vote_ids_this_org_supports'):
+                ballot_item_we_vote_ids_this_org_supports = voter_guide.ballot_item_we_vote_ids_this_org_supports
+            else:
+                ballot_item_we_vote_ids_this_org_supports = []
+
+            if hasattr(voter_guide, 'ballot_item_we_vote_ids_this_org_info_only'):
+                ballot_item_we_vote_ids_this_org_info_only = voter_guide.ballot_item_we_vote_ids_this_org_info_only
+            else:
+                ballot_item_we_vote_ids_this_org_info_only = []
+
+            if hasattr(voter_guide, 'ballot_item_we_vote_ids_this_org_opposes'):
+                ballot_item_we_vote_ids_this_org_opposes = voter_guide.ballot_item_we_vote_ids_this_org_opposes
+            else:
+                ballot_item_we_vote_ids_this_org_opposes = []
+
+            organization_link_to_issue_list = OrganizationLinkToIssueList()
+            issue_we_vote_ids_linked = \
+                organization_link_to_issue_list.fetch_issue_we_vote_id_list_by_organization_we_vote_id(
+                    voter_guide.organization_we_vote_id)
+
+            pledge_to_vote_we_vote_id = ""
+            pledge_results = pledge_to_vote_manager.retrieve_pledge_to_vote(
+                pledge_to_vote_we_vote_id, voter_we_vote_id, voter_guide.we_vote_id)  # Already read_only
+            if pledge_results['pledge_found']:
+                voter_has_pledged = pledge_results['voter_has_pledged']
+            else:
+                voter_has_pledged = False
+            position_found = False
+            one_voter_guide = {
+                'ballot_item_we_vote_ids_this_org_supports':    ballot_item_we_vote_ids_this_org_supports,
+                'ballot_item_we_vote_ids_this_org_info_only':   ballot_item_we_vote_ids_this_org_info_only,
+                'ballot_item_we_vote_ids_this_org_opposes':     ballot_item_we_vote_ids_this_org_opposes,
+                'election_day_text':            voter_guide.election_day_text,
+                'google_civic_election_id':     voter_guide.google_civic_election_id,
+                'issue_we_vote_ids_linked':     issue_we_vote_ids_linked,
+                'last_updated':                 voter_guide.last_updated.strftime('%Y-%m-%d %H:%M'),
+                'organization_we_vote_id':      voter_guide.organization_we_vote_id,
+                'owner_voter_id':               voter_guide.owner_voter_id,
+                'pledge_goal':                  voter_guide.pledge_goal,
+                'pledge_count':                 voter_guide.pledge_count,
+                'public_figure_we_vote_id':     voter_guide.public_figure_we_vote_id,
+                'time_span':                    voter_guide.vote_smart_time_span,
+                'twitter_description':          voter_guide.twitter_description,
+                'twitter_followers_count':      voter_guide.twitter_followers_count,
+                'twitter_handle':               voter_guide.twitter_handle,
+                'voter_guide_display_name':     voter_guide.voter_guide_display_name(),
+                'voter_guide_image_url_large':  voter_guide.we_vote_hosted_profile_image_url_large
+                if positive_value_exists(voter_guide.we_vote_hosted_profile_image_url_large)
+                else voter_guide.voter_guide_image_url(),
+                'voter_guide_image_url_medium': voter_guide.we_vote_hosted_profile_image_url_medium,
+                'voter_guide_image_url_tiny':   voter_guide.we_vote_hosted_profile_image_url_tiny,
+                'voter_guide_owner_type':       voter_guide.voter_guide_owner_type,
+                'voter_has_pledged':            voter_has_pledged,
+                'we_vote_id':                   voter_guide.we_vote_id,
+            }
+            if positive_value_exists(ballot_item_we_vote_id):
+                if kind_of_ballot_item == CANDIDATE:
+                    organization_manager = OrganizationManager()
+                    organization_id = organization_manager.fetch_organization_id(
+                        voter_guide.organization_we_vote_id)
+                    results = position_manager.retrieve_organization_candidate_campaign_position_with_we_vote_id(
+                        organization_id, ballot_item_we_vote_id)
+                    if results['position_found']:
+                        position = results['position']
+                        position_found = True
+                elif kind_of_ballot_item == MEASURE:
+                    organization_manager = OrganizationManager()
+                    organization_id = organization_manager.fetch_organization_id(
+                        voter_guide.organization_we_vote_id)
+                    results = position_manager.retrieve_organization_contest_measure_position_with_we_vote_id(
+                        organization_id, ballot_item_we_vote_id)
+                    if results['position_found']:
+                        position = results['position']
+                        position_found = True
+
+                # Since a ballot_item_we_vote_id came in, we only want to return a voter guide if there is a
+                #  support, oppose, or a comment
+                if position_found:
+                    if position.is_support_or_positive_rating() or position.is_oppose_or_negative_rating() or \
+                            position.statement_text or is_link_to_video(position.more_info_url):
+                        # We can proceed
+                        pass
+                    else:
+                        # We shouldn't return a voter_guide in this case without support/oppose/or a comment
+                        continue
+
+                if position_found:
+                    one_voter_guide['is_support'] = position.is_support()
+                    one_voter_guide['is_positive_rating'] = position.is_positive_rating()
+                    one_voter_guide['is_support_or_positive_rating'] = position.is_support_or_positive_rating()
+                    one_voter_guide['is_oppose'] = position.is_oppose()
+                    one_voter_guide['is_negative_rating'] = position.is_negative_rating()
+                    one_voter_guide['is_oppose_or_negative_rating'] = position.is_oppose_or_negative_rating()
+                    one_voter_guide['is_information_only'] = position.is_information_only()
+                    one_voter_guide['ballot_item_display_name'] = position.ballot_item_display_name
+                    one_voter_guide['speaker_display_name'] = position.speaker_display_name
+                    one_voter_guide['statement_text'] = position.statement_text
+                    one_voter_guide['more_info_url'] = position.more_info_url
+                    one_voter_guide['has_video'] = is_link_to_video(position.more_info_url)
+                    one_voter_guide['vote_smart_rating'] = position.vote_smart_rating
+                    one_voter_guide['vote_smart_time_span'] = position.vote_smart_time_span
+
+            voter_guides.append(one_voter_guide.copy())
+            if positive_value_exists(maximum_number_to_retrieve):
+                number_added_to_list += 1
+                if number_added_to_list >= maximum_number_to_retrieve:
+                    break
+
+        number_retrieved = len(voter_guides)
+        if positive_value_exists(number_retrieved):
+            json_data = {
+                'status': status + ' VOTER_GUIDES_TO_FOLLOW_FOR_API_RETRIEVED',
+                'success': True,
+                'voter_device_id': voter_device_id,
+                'voter_guides': voter_guides,
+                'google_civic_election_id': google_civic_election_id,
+                'search_string': search_string,
+                'ballot_item_we_vote_id': ballot_item_we_vote_id,
+                'start_retrieve_at_this_number': start_retrieve_at_this_number,
+                'number_retrieved': number_retrieved,
+                'maximum_number_to_retrieve': maximum_number_to_retrieve,
+                'filter_voter_guides_by_issue': filter_voter_guides_by_issue
+            }
+        else:
+            json_data = {
+                'status': status + ' NO_VOTER_GUIDES_FOUND',
+                'success': True,
+                'voter_device_id': voter_device_id,
+                'voter_guides': voter_guides,
+                'google_civic_election_id': google_civic_election_id,
+                'search_string': search_string,
+                'ballot_item_we_vote_id': ballot_item_we_vote_id,
+                'start_retrieve_at_this_number': start_retrieve_at_this_number,
+                'number_retrieved': number_retrieved,
+                'maximum_number_to_retrieve': maximum_number_to_retrieve,
+                'filter_voter_guides_by_issue': filter_voter_guides_by_issue
+            }
+
+        results = {
+            'success': success,
+            'google_civic_election_id': google_civic_election_id,
+            'ballot_item_we_vote_id': ballot_item_we_vote_id,
+            'json_data': json_data,
+        }
+        return results
+    else:
+        json_data = {
+            'status': status,
+            'success': False,
+            'voter_device_id': voter_device_id,
+            'voter_guides': [],
+            'start_retrieve_at_this_number': start_retrieve_at_this_number,
+            'number_retrieved': number_retrieved,
+            'maximum_number_to_retrieve': maximum_number_to_retrieve,
+            'google_civic_election_id': google_civic_election_id,
+            'search_string': search_string,
+            'ballot_item_we_vote_id': ballot_item_we_vote_id,
+        }
+
+        results = {
+            'success': False,
+            'google_civic_election_id': 0,  # Force the reset of google_civic_election_id cookie
+            'ballot_item_we_vote_id': ballot_item_we_vote_id,
+            'json_data': json_data,
+        }
+        return results
+
+
+def retrieve_voter_guides_to_follow_by_ballot_item(voter_id, kind_of_ballot_item, ballot_item_we_vote_id,
+                                                   search_string, filter_voter_guides_by_issue=None,
+                                                   organization_we_vote_id_list_for_voter_issues=None):
+    if filter_voter_guides_by_issue is None:
+        filter_voter_guides_by_issue = False
+    voter_guide_list_found = False
+    retrieve_public_positions = True  # The alternate is positions for friends-only. Since this method returns positions
+    # to follow, we never need to return friend's positions here
+
+    position_list_manager = PositionListManager()
+    if (kind_of_ballot_item == CANDIDATE) and positive_value_exists(ballot_item_we_vote_id):
+        candidate_id = 0
+        all_positions_list = position_list_manager.retrieve_all_positions_for_candidate_campaign(
+            retrieve_public_positions, candidate_id, ballot_item_we_vote_id, ANY_STANCE, read_only=True)
+    elif (kind_of_ballot_item == MEASURE) and positive_value_exists(ballot_item_we_vote_id):
+        measure_id = 0
+        all_positions_list = position_list_manager.retrieve_all_positions_for_contest_measure(
+            retrieve_public_positions, measure_id, ballot_item_we_vote_id, ANY_STANCE, read_only=True)
+    elif (kind_of_ballot_item == OFFICE) and positive_value_exists(ballot_item_we_vote_id):
+        office_id = 0
+        all_positions_list = position_list_manager.retrieve_all_positions_for_contest_office(
+                office_id, ballot_item_we_vote_id, ANY_STANCE, read_only=True)
+    else:
+        voter_guide_list = []
+        results = {
+            'success':                      False,
+            'status':                       "VOTER_GUIDES_BALLOT_RELATED_VARIABLES_MISSING",
+            'search_string':                search_string,
+            'voter_guide_list_found':       False,
+            'voter_guide_list':             voter_guide_list,
+        }
+        return results
+
+    if filter_voter_guides_by_issue and organization_we_vote_id_list_for_voter_issues is not None:
+        all_positions_list = position_list_manager.remove_positions_unrelated_to_issues(
+            all_positions_list, organization_we_vote_id_list_for_voter_issues)
+
+    follow_organization_list_manager = FollowOrganizationList()
+    organizations_followed_by_voter = \
+        follow_organization_list_manager.retrieve_follow_organization_by_voter_id_simple_id_array(voter_id,
+                                                                                                  read_only=True)
+
+    positions_list = position_list_manager.calculate_positions_not_followed_by_voter(
+        all_positions_list, organizations_followed_by_voter)
+
+    voter_guide_list = []
+    # Cycle through the positions held by groups that you don't currently follow
+    voter_guide_manager = VoterGuideManager()
+    for one_position in positions_list:
+        if positive_value_exists(one_position.organization_we_vote_id):
+            if one_position.google_civic_election_id:
+                results = voter_guide_manager.retrieve_voter_guide(
+                    voter_guide_id=0,
+                    google_civic_election_id=one_position.google_civic_election_id,
+                    vote_smart_time_span=None,
+                    organization_we_vote_id=one_position.organization_we_vote_id,
+                    read_only=True)
+            else:
+                results['voter_guide_found'] = False
+                # As of Aug 2018, we no longer use vote_smart_time_span
+                # results = voter_guide_manager.retrieve_voter_guide(
+                #     voter_guide_id=0,
+                #     google_civic_election_id=0,
+                #     vote_smart_time_span=one_position.vote_smart_time_span,
+                #     organization_we_vote_id=one_position.organization_we_vote_id)
+
+        elif positive_value_exists(one_position.public_figure_we_vote_id):
+            results['voter_guide_found'] = False
+        elif positive_value_exists(one_position.voter_we_vote_id):
+            results['voter_guide_found'] = False
+        else:
+            results['voter_guide_found'] = False
+
+        if results['voter_guide_found']:
+            one_voter_guide = results['voter_guide']
+
+            # Augment the voter guide with a list of ballot_item we_vote_id's that this org supports
+            stance_we_are_looking_for = SUPPORT
+            organization_id = 0
+            ballot_item_support_results = retrieve_ballot_item_we_vote_ids_for_organizations_to_follow(
+                voter_id, organization_id, one_voter_guide.organization_we_vote_id, stance_we_are_looking_for,
+                one_position.google_civic_election_id)
+
+            if ballot_item_support_results['count']:
+                ballot_item_we_vote_ids_this_org_supports = ballot_item_support_results['ballot_item_we_vote_ids_list']
+            else:
+                ballot_item_we_vote_ids_this_org_supports = []
+
+            one_voter_guide.ballot_item_we_vote_ids_this_org_supports = \
+                ballot_item_we_vote_ids_this_org_supports
+
+            # Augment the voter guide with a list of ballot_item we_vote_id's that this org has info about
+            stance_we_are_looking_for = INFORMATION_ONLY
+            organization_id = 0
+            ballot_item_info_only_results = retrieve_ballot_item_we_vote_ids_for_organizations_to_follow(
+                voter_id, organization_id, one_voter_guide.organization_we_vote_id, stance_we_are_looking_for,
+                one_position.google_civic_election_id)
+
+            if ballot_item_info_only_results['count']:
+                ballot_item_we_vote_ids_this_org_info_only = \
+                    ballot_item_info_only_results['ballot_item_we_vote_ids_list']
+            else:
+                ballot_item_we_vote_ids_this_org_info_only = []
+
+            one_voter_guide.ballot_item_we_vote_ids_this_org_info_only = \
+                ballot_item_we_vote_ids_this_org_info_only
+
+            # Augment the voter guide with a list of ballot_item we_vote_id's that this org opposes
+            stance_we_are_looking_for = OPPOSE
+            organization_id = 0
+            ballot_item_oppose_results = retrieve_ballot_item_we_vote_ids_for_organizations_to_follow(
+                voter_id, organization_id, one_voter_guide.organization_we_vote_id, stance_we_are_looking_for,
+                one_position.google_civic_election_id)
+
+            if ballot_item_oppose_results['count']:
+                ballot_item_we_vote_ids_this_org_opposes = ballot_item_oppose_results['ballot_item_we_vote_ids_list']
+            else:
+                ballot_item_we_vote_ids_this_org_opposes = []
+
+            one_voter_guide.ballot_item_we_vote_ids_this_org_opposes = \
+                ballot_item_we_vote_ids_this_org_opposes
+
+            # If we passed in search_string, make sure they are in this entry.
+            # If they aren't, don't return voter guide
+            if positive_value_exists(search_string):
+                search_string = str(search_string)  # Make sure search_string is a string
+                twitter_handle = str(one_voter_guide.twitter_handle)
+                display_name = str(one_voter_guide.display_name)
+
+                if search_string.lower() in twitter_handle.lower() or search_string.lower() in display_name.lower():
+                    voter_guide_list.append(one_voter_guide)
+            else:
+                voter_guide_list.append(one_voter_guide)
+
+    status = 'SUCCESSFUL_RETRIEVE_OF_VOTER_GUIDES_BY_BALLOT_ITEM'
+    success = True
+
+    if len(voter_guide_list):
+        voter_guide_list_found = True
+
+    results = {
+        'success':                      success,
+        'status':                       status,
+        'search_string':                search_string,
+        'voter_guide_list_found':       voter_guide_list_found,
+        'voter_guide_list':             voter_guide_list,
+    }
+    return results
+
+
+def retrieve_voter_guides_to_follow_by_election_for_api(voter_id, google_civic_election_id, search_string,
+                                                        filter_voter_guides_by_issue=False,
+                                                        organization_we_vote_id_list_for_voter_issues=None,
+                                                        start_retrieve_at_this_number=0,
+                                                        maximum_number_to_retrieve=0, sort_by='', sort_order=''):
+    filter_voter_guides_by_issue = positive_value_exists(filter_voter_guides_by_issue)
+
+    voter_guide_list_found = False
+    status = ""
+    status += "voter_id: " + str(voter_id) + " "
+
+    # Start with orgs followed and ignored by this voter
+    follow_organization_list_manager = FollowOrganizationList()
+    return_we_vote_id = True
+    organization_we_vote_ids_followed_by_voter = \
+        follow_organization_list_manager.retrieve_follow_organization_by_voter_id_simple_id_array(
+            voter_id, return_we_vote_id, read_only=True)
+    organization_we_vote_ids_ignored_by_voter = \
+        follow_organization_list_manager.retrieve_ignore_organization_by_voter_id_simple_id_array(
+            voter_id, return_we_vote_id, read_only=True)
+
+    # position_list_manager = PositionListManager()
+    if not positive_value_exists(google_civic_election_id):
+        voter_guide_list = []
+        results = {
+            'success':                      False,
+            'status':                       "VOTER_GUIDES_BALLOT_RELATED_VARIABLES_MISSING",
+            'voter_guide_list_found':       False,
+            'voter_guide_list':             voter_guide_list,
+        }
+        return results
+
+    # Retrieve all voter guides for this election
+    voter_guide_list_manager = VoterGuideListManager()
+    org_list_found_by_google_civic_election_id = []
+    voter_guide_results = voter_guide_list_manager.retrieve_voter_guides_to_follow_by_election(
+        google_civic_election_id, org_list_found_by_google_civic_election_id, search_string,
+        start_retrieve_at_this_number,
+        maximum_number_to_retrieve, sort_by, sort_order, read_only=True)
+
+    status += " " + voter_guide_results['status'] + " "
+
+    if voter_guide_results['voter_guide_list_found']:
+        voter_guide_list = voter_guide_results['voter_guide_list']
+    else:
+        voter_guide_list = []
+
+    if filter_voter_guides_by_issue and organization_we_vote_id_list_for_voter_issues is not None:
+        # Only include voter guides from organizations in organization_we_vote_id_list_for_voter_issues
+        voter_guide_list = only_include_these_voter_guides_for_voter(
+            voter_guide_list, organization_we_vote_id_list_for_voter_issues)
+
+    # Now remove voter guides from organizations that voter is ignoring
+    voter_guide_list = remove_voter_guides_for_voter(voter_guide_list, organization_we_vote_ids_ignored_by_voter)
+
+    # Now remove voter guides from organizations that the voter is already following
+    voter_guide_list = remove_voter_guides_for_voter(voter_guide_list, organization_we_vote_ids_followed_by_voter)
+
+    if not len(voter_guide_list):
+        # If no positions are found, exit
+        voter_guide_list = []
+        results = {
+            'success':                      True,
+            'status':                       "NO_VOTER_GUIDES_TO_FOLLOW_FOUND_FOR_THIS_ELECTION-FOR_VOTER",
+            'voter_guide_list_found':       False,
+            'voter_guide_list':             voter_guide_list,
+        }
+        return results
+
+    status += 'SUCCESSFUL_RETRIEVE_OF_VOTER_GUIDES_BY_ELECTION '
+    success = True
+
+    if len(voter_guide_list):
+        voter_guide_list_found = True
+        updated_voter_guide_list = []
+        for one_voter_guide in voter_guide_list:
+            # Augment the voter guide with a list of ballot_item we_vote_id's that this org supports
+            stance_we_are_looking_for = SUPPORT
+            organization_id = 0
+            ballot_item_support_results = retrieve_ballot_item_we_vote_ids_for_organizations_to_follow(
+                voter_id, organization_id, one_voter_guide.organization_we_vote_id, stance_we_are_looking_for,
+                google_civic_election_id)  # Already read_only
+
+            if ballot_item_support_results['count']:
+                ballot_item_we_vote_ids_this_org_supports = ballot_item_support_results['ballot_item_we_vote_ids_list']
+            else:
+                ballot_item_we_vote_ids_this_org_supports = []
+
+            one_voter_guide.ballot_item_we_vote_ids_this_org_supports = ballot_item_we_vote_ids_this_org_supports
+
+            # Augment the voter guide with a list of ballot_item we_vote_id's that this org has info about
+            stance_we_are_looking_for = INFORMATION_ONLY
+            organization_id = 0
+            ballot_item_info_only_results = retrieve_ballot_item_we_vote_ids_for_organizations_to_follow(
+                voter_id, organization_id, one_voter_guide.organization_we_vote_id, stance_we_are_looking_for,
+                google_civic_election_id)
+
+            if ballot_item_info_only_results['count']:
+                ballot_item_we_vote_ids_this_org_info_only = \
+                    ballot_item_info_only_results['ballot_item_we_vote_ids_list']
+            else:
+                ballot_item_we_vote_ids_this_org_info_only = []
+
+            one_voter_guide.ballot_item_we_vote_ids_this_org_info_only = ballot_item_we_vote_ids_this_org_info_only
+
+            # Augment the voter guide with a list of ballot_item we_vote_id's that this org opposes
+            stance_we_are_looking_for = OPPOSE
+            organization_id = 0
+            ballot_item_oppose_results = retrieve_ballot_item_we_vote_ids_for_organizations_to_follow(
+                voter_id, organization_id, one_voter_guide.organization_we_vote_id, stance_we_are_looking_for,
+                google_civic_election_id)
+
+            if ballot_item_oppose_results['count']:
+                ballot_item_we_vote_ids_this_org_opposes = ballot_item_oppose_results['ballot_item_we_vote_ids_list']
+            else:
+                ballot_item_we_vote_ids_this_org_opposes = []
+
+            one_voter_guide.ballot_item_we_vote_ids_this_org_opposes = ballot_item_we_vote_ids_this_org_opposes
+
+            updated_voter_guide_list.append(one_voter_guide)
+        voter_guide_list = updated_voter_guide_list
+
+    results = {
+        'success':                      success,
+        'status':                       status,
+        'voter_guide_list_found':       voter_guide_list_found,
+        'voter_guide_list':             voter_guide_list,
+    }
+    return results
+
+
+def voter_guides_upcoming_retrieve_for_api(voter_device_id,  # voterGuidesUpcomingRetrieve
+                                           kind_of_ballot_item='', ballot_item_we_vote_id='',
+                                           google_civic_election_id=0, search_string='',
+                                           start_retrieve_at_this_number=0,
+                                           maximum_number_to_retrieve=0,
+                                           filter_voter_guides_by_issue=False,
+                                           add_voter_guides_not_from_election=False):
+    voter_we_vote_id = ""
+    start_retrieve_at_this_number = convert_to_int(start_retrieve_at_this_number)
+    number_retrieved = 0
+    filter_voter_guides_by_issue = positive_value_exists(filter_voter_guides_by_issue)
+    add_voter_guides_not_from_election = positive_value_exists(add_voter_guides_not_from_election)
+    status = ""
+    # Get voter_id from the voter_device_id so we can figure out which voter_guides to offer
+    results = is_voter_device_id_valid(voter_device_id)
+    if not results['success']:
+        json_data = {
+            'status': 'ERROR_GUIDES_TO_FOLLOW_NO_VOTER_DEVICE_ID',
+            'success': False,
+            'voter_device_id': voter_device_id,
+            'voter_guides': [],
+            'start_retrieve_at_this_number': start_retrieve_at_this_number,
+            'number_retrieved': number_retrieved,
+            'maximum_number_to_retrieve': maximum_number_to_retrieve,
+            'google_civic_election_id': google_civic_election_id,
+            'search_string': search_string,
+            'ballot_item_we_vote_id': ballot_item_we_vote_id,
+        }
+        results = {
+            'success': False,
+            'google_civic_election_id': 0,  # Force the reset of google_civic_election_id cookie
+            'ballot_item_we_vote_id': ballot_item_we_vote_id,
+            'json_data': json_data,
+        }
+        return results
+
+    voter_id = fetch_voter_id_from_voter_device_link(voter_device_id)
+    if not positive_value_exists(voter_id):
+        json_data = {
+            'status': "ERROR_GUIDES_TO_FOLLOW_VOTER_NOT_FOUND_FROM_VOTER_DEVICE_ID",
+            'success': False,
+            'voter_device_id': voter_device_id,
+            'voter_guides': [],
+            'start_retrieve_at_this_number': start_retrieve_at_this_number,
+            'number_retrieved': number_retrieved,
+            'maximum_number_to_retrieve': maximum_number_to_retrieve,
+            'google_civic_election_id': google_civic_election_id,
+            'search_string': search_string,
+            'ballot_item_we_vote_id': ballot_item_we_vote_id,
+        }
+        results = {
+            'success': False,
+            'google_civic_election_id': 0,  # Force the reset of google_civic_election_id cookie
+            'ballot_item_we_vote_id': ballot_item_we_vote_id,
+            'json_data': json_data,
+        }
+        return results
+
+    # If filter_voter_guides_by_issue is set then fetch organization_we_vote_ids related to the
+    # issues that the voter follows
+    organization_we_vote_id_list_for_voter_issues = []
+    if filter_voter_guides_by_issue:
+        voter_we_vote_id = fetch_voter_we_vote_id_from_voter_device_link(voter_device_id)
+        if not positive_value_exists(voter_we_vote_id):
+            json_data = {
+                'status': "ERROR_GUIDES_TO_FOLLOW_VOTER_NOT_FOUND_FROM_VOTER_DEVICE_ID VOTER_WE_VOTE_ID_NOT_FOUND",
+                'success': False,
+                'voter_device_id': voter_device_id,
+                'voter_guides': [],
+                'start_retrieve_at_this_number': start_retrieve_at_this_number,
+                'number_retrieved': number_retrieved,
+                'maximum_number_to_retrieve': maximum_number_to_retrieve,
+                'google_civic_election_id': google_civic_election_id,
+                'search_string': search_string,
+            }
+            results = {
+                'success': False,
+                'google_civic_election_id': 0,  # Force the reset of google_civic_election_id cookie
+                'json_data': json_data,
+            }
+            return results
+        else:
+            follow_issue_list_manager = FollowIssueList()
+            following_status = FOLLOWING
+            issue_list_for_voter = follow_issue_list_manager. \
                 retrieve_follow_issue_list_by_voter_we_vote_id(voter_we_vote_id, following_status)
             issue_list_for_voter = list(issue_list_for_voter)
             issue_we_vote_id_list_for_voter = []
@@ -1455,286 +2072,6 @@ def voter_guides_to_follow_retrieve_for_api(voter_device_id,  # voterGuidesToFol
         return results
 
 
-def retrieve_voter_guides_to_follow_by_ballot_item(voter_id, kind_of_ballot_item, ballot_item_we_vote_id,
-                                                   search_string, filter_voter_guides_by_issue=None,
-                                                   organization_we_vote_id_list_for_voter_issues=None):
-    if filter_voter_guides_by_issue is None:
-        filter_voter_guides_by_issue = False
-    voter_guide_list_found = False
-    retrieve_public_positions = True  # The alternate is positions for friends-only. Since this method returns positions
-    # to follow, we never need to return friend's positions here
-
-    position_list_manager = PositionListManager()
-    if (kind_of_ballot_item == CANDIDATE) and positive_value_exists(ballot_item_we_vote_id):
-        candidate_id = 0
-        all_positions_list = position_list_manager.retrieve_all_positions_for_candidate_campaign(
-            retrieve_public_positions, candidate_id, ballot_item_we_vote_id, ANY_STANCE)
-    elif (kind_of_ballot_item == MEASURE) and positive_value_exists(ballot_item_we_vote_id):
-        measure_id = 0
-        all_positions_list = position_list_manager.retrieve_all_positions_for_contest_measure(
-            retrieve_public_positions, measure_id, ballot_item_we_vote_id, ANY_STANCE)
-    elif (kind_of_ballot_item == OFFICE) and positive_value_exists(ballot_item_we_vote_id):
-        office_id = 0
-        all_positions_list = position_list_manager.retrieve_all_positions_for_contest_office(
-                office_id, ballot_item_we_vote_id, ANY_STANCE)
-    else:
-        voter_guide_list = []
-        results = {
-            'success':                      False,
-            'status':                       "VOTER_GUIDES_BALLOT_RELATED_VARIABLES_MISSING",
-            'search_string':                search_string,
-            'voter_guide_list_found':       False,
-            'voter_guide_list':             voter_guide_list,
-        }
-        return results
-
-    if filter_voter_guides_by_issue and organization_we_vote_id_list_for_voter_issues is not None:
-        all_positions_list = position_list_manager.remove_positions_unrelated_to_issues(
-            all_positions_list, organization_we_vote_id_list_for_voter_issues)
-
-    follow_organization_list_manager = FollowOrganizationList()
-    organizations_followed_by_voter = \
-        follow_organization_list_manager.retrieve_follow_organization_by_voter_id_simple_id_array(voter_id)
-
-    positions_list = position_list_manager.calculate_positions_not_followed_by_voter(
-        all_positions_list, organizations_followed_by_voter)
-
-    voter_guide_list = []
-    # Cycle through the positions held by groups that you don't currently follow
-    voter_guide_manager = VoterGuideManager()
-    for one_position in positions_list:
-        if positive_value_exists(one_position.organization_we_vote_id):
-            if one_position.google_civic_election_id:
-                results = voter_guide_manager.retrieve_voter_guide(
-                    voter_guide_id=0,
-                    google_civic_election_id=one_position.google_civic_election_id,
-                    vote_smart_time_span=None,
-                    organization_we_vote_id=one_position.organization_we_vote_id)
-            else:
-                results['voter_guide_found'] = False
-                # As of Aug 2018, we no longer use vote_smart_time_span
-                # results = voter_guide_manager.retrieve_voter_guide(
-                #     voter_guide_id=0,
-                #     google_civic_election_id=0,
-                #     vote_smart_time_span=one_position.vote_smart_time_span,
-                #     organization_we_vote_id=one_position.organization_we_vote_id)
-
-        elif positive_value_exists(one_position.public_figure_we_vote_id):
-            results['voter_guide_found'] = False
-        elif positive_value_exists(one_position.voter_we_vote_id):
-            results['voter_guide_found'] = False
-        else:
-            results['voter_guide_found'] = False
-
-        if results['voter_guide_found']:
-            one_voter_guide = results['voter_guide']
-
-            # Augment the voter guide with a list of ballot_item we_vote_id's that this org supports
-            stance_we_are_looking_for = SUPPORT
-            organization_id = 0
-            ballot_item_support_results = retrieve_ballot_item_we_vote_ids_for_organizations_to_follow(
-                voter_id, organization_id, one_voter_guide.organization_we_vote_id, stance_we_are_looking_for,
-                one_position.google_civic_election_id)
-
-            if ballot_item_support_results['count']:
-                ballot_item_we_vote_ids_this_org_supports = ballot_item_support_results['ballot_item_we_vote_ids_list']
-            else:
-                ballot_item_we_vote_ids_this_org_supports = []
-
-            one_voter_guide.ballot_item_we_vote_ids_this_org_supports = \
-                ballot_item_we_vote_ids_this_org_supports
-
-            # Augment the voter guide with a list of ballot_item we_vote_id's that this org has info about
-            stance_we_are_looking_for = INFORMATION_ONLY
-            organization_id = 0
-            ballot_item_info_only_results = retrieve_ballot_item_we_vote_ids_for_organizations_to_follow(
-                voter_id, organization_id, one_voter_guide.organization_we_vote_id, stance_we_are_looking_for,
-                one_position.google_civic_election_id)
-
-            if ballot_item_info_only_results['count']:
-                ballot_item_we_vote_ids_this_org_info_only = \
-                    ballot_item_info_only_results['ballot_item_we_vote_ids_list']
-            else:
-                ballot_item_we_vote_ids_this_org_info_only = []
-
-            one_voter_guide.ballot_item_we_vote_ids_this_org_info_only = \
-                ballot_item_we_vote_ids_this_org_info_only
-
-            # Augment the voter guide with a list of ballot_item we_vote_id's that this org opposes
-            stance_we_are_looking_for = OPPOSE
-            organization_id = 0
-            ballot_item_oppose_results = retrieve_ballot_item_we_vote_ids_for_organizations_to_follow(
-                voter_id, organization_id, one_voter_guide.organization_we_vote_id, stance_we_are_looking_for,
-                one_position.google_civic_election_id)
-
-            if ballot_item_oppose_results['count']:
-                ballot_item_we_vote_ids_this_org_opposes = ballot_item_oppose_results['ballot_item_we_vote_ids_list']
-            else:
-                ballot_item_we_vote_ids_this_org_opposes = []
-
-            one_voter_guide.ballot_item_we_vote_ids_this_org_opposes = \
-                ballot_item_we_vote_ids_this_org_opposes
-
-            # If we passed in search_string, make sure they are in this entry.
-            # If they aren't, don't return voter guide
-            if positive_value_exists(search_string):
-                search_string = str(search_string)  # Make sure search_string is a string
-                twitter_handle = str(one_voter_guide.twitter_handle)
-                display_name = str(one_voter_guide.display_name)
-
-                if search_string.lower() in twitter_handle.lower() or search_string.lower() in display_name.lower():
-                    voter_guide_list.append(one_voter_guide)
-            else:
-                voter_guide_list.append(one_voter_guide)
-
-    status = 'SUCCESSFUL_RETRIEVE_OF_VOTER_GUIDES_BY_BALLOT_ITEM'
-    success = True
-
-    if len(voter_guide_list):
-        voter_guide_list_found = True
-
-    results = {
-        'success':                      success,
-        'status':                       status,
-        'search_string':                search_string,
-        'voter_guide_list_found':       voter_guide_list_found,
-        'voter_guide_list':             voter_guide_list,
-    }
-    return results
-
-
-def retrieve_voter_guides_to_follow_by_election_for_api(voter_id, google_civic_election_id, search_string,
-                                                        filter_voter_guides_by_issue=False,
-                                                        organization_we_vote_id_list_for_voter_issues=None,
-                                                        start_retrieve_at_this_number=0,
-                                                        maximum_number_to_retrieve=0, sort_by='', sort_order=''):
-    filter_voter_guides_by_issue = positive_value_exists(filter_voter_guides_by_issue)
-
-    voter_guide_list_found = False
-    status = ""
-    status += "voter_id: " + str(voter_id) + " "
-
-    # Start with orgs followed and ignored by this voter
-    follow_organization_list_manager = FollowOrganizationList()
-    return_we_vote_id = True
-    read_only = True
-    organization_we_vote_ids_followed_by_voter = \
-        follow_organization_list_manager.retrieve_follow_organization_by_voter_id_simple_id_array(
-            voter_id, return_we_vote_id, read_only=read_only)
-    organization_we_vote_ids_ignored_by_voter = \
-        follow_organization_list_manager.retrieve_ignore_organization_by_voter_id_simple_id_array(
-            voter_id, return_we_vote_id, read_only=read_only)
-
-    # position_list_manager = PositionListManager()
-    if not positive_value_exists(google_civic_election_id):
-        voter_guide_list = []
-        results = {
-            'success':                      False,
-            'status':                       "VOTER_GUIDES_BALLOT_RELATED_VARIABLES_MISSING",
-            'voter_guide_list_found':       False,
-            'voter_guide_list':             voter_guide_list,
-        }
-        return results
-
-    # Retrieve all voter guides for this election
-    voter_guide_list_manager = VoterGuideListManager()
-    org_list_found_by_google_civic_election_id = []
-    voter_guide_results = voter_guide_list_manager.retrieve_voter_guides_to_follow_by_election(
-        google_civic_election_id, org_list_found_by_google_civic_election_id, search_string,
-        start_retrieve_at_this_number,
-        maximum_number_to_retrieve, sort_by, sort_order)
-
-    status += " " + voter_guide_results['status'] + " "
-
-    if voter_guide_results['voter_guide_list_found']:
-        voter_guide_list = voter_guide_results['voter_guide_list']
-    else:
-        voter_guide_list = []
-
-    if filter_voter_guides_by_issue and organization_we_vote_id_list_for_voter_issues is not None:
-        # Only include voter guides from organizations in organization_we_vote_id_list_for_voter_issues
-        voter_guide_list = only_include_these_voter_guides_for_voter(
-            voter_guide_list, organization_we_vote_id_list_for_voter_issues)
-
-    # Now remove voter guides from organizations that voter is ignoring
-    voter_guide_list = remove_voter_guides_for_voter(voter_guide_list, organization_we_vote_ids_ignored_by_voter)
-
-    # Now remove voter guides from organizations that the voter is already following
-    voter_guide_list = remove_voter_guides_for_voter(voter_guide_list, organization_we_vote_ids_followed_by_voter)
-
-    if not len(voter_guide_list):
-        # If no positions are found, exit
-        voter_guide_list = []
-        results = {
-            'success':                      True,
-            'status':                       "NO_VOTER_GUIDES_TO_FOLLOW_FOUND_FOR_THIS_ELECTION-FOR_VOTER",
-            'voter_guide_list_found':       False,
-            'voter_guide_list':             voter_guide_list,
-        }
-        return results
-
-    status += 'SUCCESSFUL_RETRIEVE_OF_VOTER_GUIDES_BY_ELECTION '
-    success = True
-
-    if len(voter_guide_list):
-        voter_guide_list_found = True
-        updated_voter_guide_list = []
-        for one_voter_guide in voter_guide_list:
-            # Augment the voter guide with a list of ballot_item we_vote_id's that this org supports
-            stance_we_are_looking_for = SUPPORT
-            organization_id = 0
-            ballot_item_support_results = retrieve_ballot_item_we_vote_ids_for_organizations_to_follow(
-                voter_id, organization_id, one_voter_guide.organization_we_vote_id, stance_we_are_looking_for,
-                google_civic_election_id)
-
-            if ballot_item_support_results['count']:
-                ballot_item_we_vote_ids_this_org_supports = ballot_item_support_results['ballot_item_we_vote_ids_list']
-            else:
-                ballot_item_we_vote_ids_this_org_supports = []
-
-            one_voter_guide.ballot_item_we_vote_ids_this_org_supports = ballot_item_we_vote_ids_this_org_supports
-
-            # Augment the voter guide with a list of ballot_item we_vote_id's that this org has info about
-            stance_we_are_looking_for = INFORMATION_ONLY
-            organization_id = 0
-            ballot_item_info_only_results = retrieve_ballot_item_we_vote_ids_for_organizations_to_follow(
-                voter_id, organization_id, one_voter_guide.organization_we_vote_id, stance_we_are_looking_for,
-                google_civic_election_id)
-
-            if ballot_item_info_only_results['count']:
-                ballot_item_we_vote_ids_this_org_info_only = \
-                    ballot_item_info_only_results['ballot_item_we_vote_ids_list']
-            else:
-                ballot_item_we_vote_ids_this_org_info_only = []
-
-            one_voter_guide.ballot_item_we_vote_ids_this_org_info_only = ballot_item_we_vote_ids_this_org_info_only
-
-            # Augment the voter guide with a list of ballot_item we_vote_id's that this org opposes
-            stance_we_are_looking_for = OPPOSE
-            organization_id = 0
-            ballot_item_oppose_results = retrieve_ballot_item_we_vote_ids_for_organizations_to_follow(
-                voter_id, organization_id, one_voter_guide.organization_we_vote_id, stance_we_are_looking_for,
-                google_civic_election_id)
-
-            if ballot_item_oppose_results['count']:
-                ballot_item_we_vote_ids_this_org_opposes = ballot_item_oppose_results['ballot_item_we_vote_ids_list']
-            else:
-                ballot_item_we_vote_ids_this_org_opposes = []
-
-            one_voter_guide.ballot_item_we_vote_ids_this_org_opposes = ballot_item_we_vote_ids_this_org_opposes
-
-            updated_voter_guide_list.append(one_voter_guide)
-        voter_guide_list = updated_voter_guide_list
-
-    results = {
-        'success':                      success,
-        'status':                       status,
-        'voter_guide_list_found':       voter_guide_list_found,
-        'voter_guide_list':             voter_guide_list,
-    }
-    return results
-
-
 def remove_voter_guides_for_voter(voter_guide_list, organizations_we_vote_ids_to_remove):
     if not positive_value_exists(len(organizations_we_vote_ids_to_remove)):
         # There aren't any organization_we_vote_ids to remove, so just return original list
@@ -1803,7 +2140,7 @@ def retrieve_voter_guides_to_follow_generic_for_api(voter_id, search_string, fil
     # First, retrieve the voter_guides stored by org and google_civic_election_id
     voter_guide_results = voter_guide_list_manager.retrieve_voter_guides_to_follow_generic(
         organization_we_vote_ids_followed_or_ignored_by_voter, search_string,
-        maximum_number_to_retrieve, sort_by, sort_order)
+        maximum_number_to_retrieve, sort_by, sort_order, read_only=True)
 
     if voter_guide_results['voter_guide_list_found']:
         voter_guide_list = voter_guide_results['voter_guide_list']

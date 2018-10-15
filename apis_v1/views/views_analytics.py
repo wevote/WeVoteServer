@@ -49,7 +49,8 @@ def save_analytics_action_view(request):  # saveAnalyticsAction
 
     # We use the lighter call to VoterDeviceLinkManager instead of VoterManager until we know there is an entry
     voter_device_link_manager = VoterDeviceLinkManager()
-    results = voter_device_link_manager.retrieve_voter_device_link_from_voter_device_id(voter_device_id)
+    results = voter_device_link_manager.retrieve_voter_device_link_from_voter_device_id(voter_device_id,
+                                                                                        read_only=True)
     if results['voter_device_link_found']:
         voter_device_link = results['voter_device_link']
         voter_id = voter_device_link.voter_id

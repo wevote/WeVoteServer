@@ -31,7 +31,8 @@ class TwitterLinkToOrganization(models.Model):
     def fetch_twitter_id_locally_or_remotely(self):
         twitter_id = 0
         twitter_user_manager = TwitterUserManager()
-        twitter_results = twitter_user_manager.retrieve_twitter_user_locally_or_remotely(self.twitter_id)
+        twitter_results = twitter_user_manager.retrieve_twitter_user_locally_or_remotely(self.twitter_id,
+                                                                                         read_only=True)
 
         if twitter_results['twitter_user_found']:
             twitter_user = twitter_results['twitter_user']
@@ -42,7 +43,8 @@ class TwitterLinkToOrganization(models.Model):
     def fetch_twitter_handle_locally_or_remotely(self):
         twitter_handle = ""
         twitter_user_manager = TwitterUserManager()
-        twitter_results = twitter_user_manager.retrieve_twitter_user_locally_or_remotely(self.twitter_id)
+        twitter_results = twitter_user_manager.retrieve_twitter_user_locally_or_remotely(self.twitter_id,
+                                                                                         read_only=True)
 
         if twitter_results['twitter_user_found']:
             twitter_user = twitter_results['twitter_user']
@@ -345,7 +347,7 @@ class TwitterUserManager(models.Model):
     def fetch_twitter_handle_from_organization_we_vote_id(self, organization_we_vote_id):
         organization_twitter_handle = ''
         twitter_results = self.retrieve_twitter_link_to_organization_from_organization_we_vote_id(
-            organization_we_vote_id)
+            organization_we_vote_id, read_only=True)
         if twitter_results['twitter_link_to_organization_found']:
             twitter_link_to_organization = twitter_results['twitter_link_to_organization']
             organization_twitter_handle = twitter_link_to_organization.fetch_twitter_handle_locally_or_remotely()
@@ -354,7 +356,7 @@ class TwitterUserManager(models.Model):
     def fetch_twitter_id_from_organization_we_vote_id(self, organization_we_vote_id):
         organization_twitter_id = 0
         twitter_results = self.retrieve_twitter_link_to_organization_from_organization_we_vote_id(
-            organization_we_vote_id)
+            organization_we_vote_id, read_only=True)
         if twitter_results['twitter_link_to_organization_found']:
             twitter_link_to_organization = twitter_results['twitter_link_to_organization']
             organization_twitter_id = twitter_link_to_organization.fetch_twitter_id_locally_or_remotely()
@@ -363,7 +365,7 @@ class TwitterUserManager(models.Model):
     def fetch_twitter_handle_from_voter_we_vote_id(self, voter_we_vote_id):
         voter_twitter_handle = ''
         twitter_results = self.retrieve_twitter_link_to_voter_from_voter_we_vote_id(
-            voter_we_vote_id)
+            voter_we_vote_id, read_only=True)
         if twitter_results['twitter_link_to_voter_found']:
             twitter_link_to_voter = twitter_results['twitter_link_to_voter']
             voter_twitter_handle = twitter_link_to_voter.fetch_twitter_handle_locally_or_remotely()
@@ -372,7 +374,7 @@ class TwitterUserManager(models.Model):
     def fetch_twitter_id_from_voter_we_vote_id(self, voter_we_vote_id):
         voter_twitter_id = 0
         twitter_results = self.retrieve_twitter_link_to_voter_from_voter_we_vote_id(
-            voter_we_vote_id)
+            voter_we_vote_id, read_only=True)
         if twitter_results['twitter_link_to_voter_found']:
             twitter_link_to_voter = twitter_results['twitter_link_to_voter']
             voter_twitter_id = twitter_link_to_voter.fetch_twitter_id_locally_or_remotely()
@@ -386,15 +388,17 @@ class TwitterUserManager(models.Model):
             return twitter_user.twitter_id
         return 0
 
-    def retrieve_twitter_link_to_organization_from_organization_we_vote_id(self, organization_we_vote_id):
+    def retrieve_twitter_link_to_organization_from_organization_we_vote_id(self, organization_we_vote_id,
+                                                                           read_only=False):
         twitter_user_id = 0
-        return self.retrieve_twitter_link_to_organization(twitter_user_id, organization_we_vote_id)
+        return self.retrieve_twitter_link_to_organization(twitter_user_id, organization_we_vote_id, read_only=read_only)
 
-    def retrieve_twitter_link_to_organization(self, twitter_id=0, organization_we_vote_id=''):
+    def retrieve_twitter_link_to_organization(self, twitter_id=0, organization_we_vote_id='', read_only=False):
         """
 
         :param twitter_id:
         :param organization_we_vote_id:
+        :param read_only:
         :return:
         """
         twitter_link_to_organization = TwitterLinkToOrganization()
@@ -402,17 +406,22 @@ class TwitterUserManager(models.Model):
 
         try:
             if positive_value_exists(twitter_id):
-                twitter_link_to_organization = TwitterLinkToOrganization.objects.get(
-                    twitter_id=twitter_id,
-                )
+                if read_only:
+                    twitter_link_to_organization = TwitterLinkToOrganization.objects.using('readonly').get(
+                        twitter_id=twitter_id)
+                else:
+                    twitter_link_to_organization = TwitterLinkToOrganization.objects.get(twitter_id=twitter_id)
                 twitter_link_to_organization_id = twitter_link_to_organization.id
                 twitter_link_to_organization_found = True
                 success = True
                 status = "RETRIEVE_TWITTER_LINK_TO_ORGANIZATION_FOUND_BY_TWITTER_USER_ID"
             elif positive_value_exists(organization_we_vote_id):
-                twitter_link_to_organization = TwitterLinkToOrganization.objects.get(
-                    organization_we_vote_id__iexact=organization_we_vote_id,
-                )
+                if read_only:
+                    twitter_link_to_organization = TwitterLinkToOrganization.objects.using('readonly').get(
+                        organization_we_vote_id__iexact=organization_we_vote_id)
+                else:
+                    twitter_link_to_organization = TwitterLinkToOrganization.objects.get(
+                        organization_we_vote_id__iexact=organization_we_vote_id)
                 twitter_link_to_organization_id = twitter_link_to_organization.id
                 twitter_link_to_organization_found = True
                 success = True
@@ -439,16 +448,17 @@ class TwitterUserManager(models.Model):
         }
         return results
 
-    def retrieve_twitter_link_to_voter_from_twitter_user_id(self, twitter_user_id):
-        return self.retrieve_twitter_link_to_voter(twitter_user_id)
+    def retrieve_twitter_link_to_voter_from_twitter_user_id(self, twitter_user_id, read_only=False):
+        return self.retrieve_twitter_link_to_voter(twitter_user_id, read_only=read_only)
 
-    def retrieve_twitter_link_to_voter_from_twitter_handle(self, twitter_handle):
+    def retrieve_twitter_link_to_voter_from_twitter_handle(self, twitter_handle, read_only=False):
         twitter_user_id = 0
-        twitter_user_results = self.retrieve_twitter_user_locally_or_remotely(twitter_user_id, twitter_handle)
+        twitter_user_results = self.retrieve_twitter_user_locally_or_remotely(twitter_user_id, twitter_handle,
+                                                                              read_only=False)
         if twitter_user_results['twitter_user_found']:
             twitter_user = twitter_user_results['twitter_user']
             if positive_value_exists(twitter_user.twitter_id):
-                return self.retrieve_twitter_link_to_voter(twitter_user.twitter_id)
+                return self.retrieve_twitter_link_to_voter(twitter_user.twitter_id, read_only=read_only)
 
         twitter_link_to_voter = TwitterLinkToVoter()
         results = {
@@ -460,22 +470,25 @@ class TwitterUserManager(models.Model):
         }
         return results
 
-    def retrieve_twitter_link_to_voter_from_voter_we_vote_id(self, voter_we_vote_id):
+    def retrieve_twitter_link_to_voter_from_voter_we_vote_id(self, voter_we_vote_id, read_only=False):
         twitter_id = 0
         twitter_secret_key = ""
-        return self.retrieve_twitter_link_to_voter(twitter_id, voter_we_vote_id, twitter_secret_key)
+        return self.retrieve_twitter_link_to_voter(twitter_id, voter_we_vote_id, twitter_secret_key,
+                                                   read_only=read_only)
 
-    def retrieve_twitter_link_to_voter_from_twitter_secret_key(self, twitter_secret_key):
+    def retrieve_twitter_link_to_voter_from_twitter_secret_key(self, twitter_secret_key, read_only=False):
         twitter_id = 0
         voter_we_vote_id = ""
-        return self.retrieve_twitter_link_to_voter(twitter_id, voter_we_vote_id, twitter_secret_key)
+        return self.retrieve_twitter_link_to_voter(twitter_id, voter_we_vote_id, twitter_secret_key,
+                                                   read_only=read_only)
 
-    def retrieve_twitter_link_to_voter(self, twitter_id=0, voter_we_vote_id='', twitter_secret_key=''):
+    def retrieve_twitter_link_to_voter(self, twitter_id=0, voter_we_vote_id='', twitter_secret_key='', read_only=False):
         """
 
         :param twitter_id:
         :param voter_we_vote_id:
         :param twitter_secret_key:
+        :param read_only:
         :return:
         """
         twitter_link_to_voter = TwitterLinkToVoter()
@@ -483,25 +496,30 @@ class TwitterUserManager(models.Model):
 
         try:
             if positive_value_exists(twitter_id):
-                twitter_link_to_voter = TwitterLinkToVoter.objects.get(
-                    twitter_id=twitter_id,
-                )
+                if read_only:
+                    twitter_link_to_voter = TwitterLinkToVoter.objects.using('readonly').get(twitter_id=twitter_id)
+                else:
+                    twitter_link_to_voter = TwitterLinkToVoter.objects.get(twitter_id=twitter_id)
                 twitter_link_to_voter_id = twitter_link_to_voter.id
                 twitter_link_to_voter_found = True
                 success = True
                 status = "RETRIEVE_TWITTER_LINK_TO_VOTER_FOUND_BY_TWITTER_USER_ID"
             elif positive_value_exists(voter_we_vote_id):
-                twitter_link_to_voter = TwitterLinkToVoter.objects.get(
-                    voter_we_vote_id__iexact=voter_we_vote_id,
-                )
+                if read_only:
+                    twitter_link_to_voter = TwitterLinkToVoter.objects.using('readonly').get(
+                        voter_we_vote_id__iexact=voter_we_vote_id)
+                else:
+                    twitter_link_to_voter = TwitterLinkToVoter.objects.get(voter_we_vote_id__iexact=voter_we_vote_id)
                 twitter_link_to_voter_id = twitter_link_to_voter.id
                 twitter_link_to_voter_found = True
                 success = True
                 status = "RETRIEVE_TWITTER_LINK_TO_VOTER_FOUND_BY_VOTER_WE_VOTE_ID"
             elif positive_value_exists(twitter_secret_key):
-                twitter_link_to_voter = TwitterLinkToVoter.objects.get(
-                    secret_key=twitter_secret_key,
-                )
+                if read_only:
+                    twitter_link_to_voter = TwitterLinkToVoter.objects.using('readonly').get(
+                        secret_key=twitter_secret_key)
+                else:
+                    twitter_link_to_voter = TwitterLinkToVoter.objects.get(secret_key=twitter_secret_key)
                 twitter_link_to_voter_id = twitter_link_to_voter.id
                 twitter_link_to_voter_found = True
                 success = True
@@ -528,12 +546,13 @@ class TwitterUserManager(models.Model):
         }
         return results
 
-    def retrieve_twitter_user_locally_or_remotely(self, twitter_user_id, twitter_handle=''):
+    def retrieve_twitter_user_locally_or_remotely(self, twitter_user_id, twitter_handle='', read_only=False):
         """
         We use this routine to quickly store and retrieve twitter user information, whether it is already in the
         database, or if we have to reach out to Twitter to get it.
         :param twitter_user_id:
         :param twitter_handle:
+        :param read_only:
         :return:
         """
         twitter_user_found = False
@@ -548,7 +567,7 @@ class TwitterUserManager(models.Model):
                 twitter_handle = ''
 
         # Is this twitter_handle already stored locally? If so, return that
-        twitter_results = self.retrieve_twitter_user(twitter_user_id, twitter_handle)
+        twitter_results = self.retrieve_twitter_user(twitter_user_id, twitter_handle, read_only=read_only)
         if twitter_results['twitter_user_found']:
             return twitter_results
 
@@ -572,7 +591,7 @@ class TwitterUserManager(models.Model):
         }
         return results
 
-    def retrieve_twitter_user(self, twitter_user_id, twitter_handle=''):
+    def retrieve_twitter_user(self, twitter_user_id, twitter_handle='', read_only=False):
         twitter_user_on_stage = TwitterUser()
         twitter_user_found = False
         success = False
@@ -586,12 +605,19 @@ class TwitterUserManager(models.Model):
         try:
             if positive_value_exists(twitter_user_id):
                 status = "RETRIEVE_TWITTER_USER_FOUND_WITH_TWITTER_USER_ID"
-                twitter_user_on_stage = TwitterUser.objects.get(twitter_id=twitter_user_id)
+                if read_only:
+                    twitter_user_on_stage = TwitterUser.objects.using('readonly').get(twitter_id=twitter_user_id)
+                else:
+                    twitter_user_on_stage = TwitterUser.objects.get(twitter_id=twitter_user_id)
                 twitter_user_found = True
                 success = True
             elif positive_value_exists(twitter_handle):
                 status = "RETRIEVE_TWITTER_USER_FOUND_WITH_HANDLE"
-                twitter_user_on_stage = TwitterUser.objects.get(twitter_handle__iexact=twitter_handle)
+                if read_only:
+                    twitter_user_on_stage = TwitterUser.objects.using('readonly').get(
+                        twitter_handle__iexact=twitter_handle)
+                else:
+                    twitter_user_on_stage = TwitterUser.objects.get(twitter_handle__iexact=twitter_handle)
                 twitter_user_found = True
                 success = True
             else:
