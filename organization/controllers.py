@@ -1209,7 +1209,7 @@ def organization_save_for_api(voter_device_id, organization_id, organization_we_
         return results
 
     voter_manager = VoterManager()
-    voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id)
+    voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id)  # Cannot be read_only
     if voter_results['voter_found']:
         voter_found = True
         voter = voter_results['voter']
@@ -1287,7 +1287,7 @@ def organization_save_for_api(voter_device_id, organization_id, organization_we_
             # Does this voter have the same Twitter handle as this organization? If so, link this organization to
             #  this particular voter
             results = twitter_user_manager.retrieve_twitter_link_to_voter_from_twitter_handle(
-                organization.organization_twitter_handle)
+                organization.organization_twitter_handle, read_only=True)
             if results['twitter_link_to_voter_found']:
                 twitter_link_to_voter = results['twitter_link_to_voter']
                 # Check to make sure another voter isn't hanging onto this organization_we_vote_id

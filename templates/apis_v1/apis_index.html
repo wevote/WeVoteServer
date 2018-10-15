@@ -595,11 +595,6 @@
         <td>Provide another We Vote Server a complete listing of all voter guides.</td>
     </tr>
     <tr>
-        <td><a href="{% url 'apis_v1:voterGuidesToFollowRetrieveDocs' %}">voterGuidesToFollowRetrieve</a></td>
-        <td></td>
-        <td>Retrieve a list of voter guides that a voter might want to follow.</td>
-    </tr>
-    <tr>
         <td><a href="{% url 'apis_v1:voterGuidesFollowedRetrieveDocs' %}">voterGuidesFollowedRetrieve</a></td>
         <td></td>
         <td>Retrieve a list of the most recent voter guide from each organization the voter follows.
@@ -625,6 +620,16 @@
         <td><a href="{% url 'apis_v1:voterGuidesIgnoredRetrieveDocs' %}">voterGuidesIgnoredRetrieve</a></td>
         <td></td>
         <td>Retrieve a list of the most recent voter guide from each organization the voter ignores.</td>
+    </tr>
+    <tr>
+        <td><a href="{% url 'apis_v1:voterGuidesToFollowRetrieveDocs' %}">voterGuidesToFollowRetrieve</a></td>
+        <td></td>
+        <td>Retrieve a list of voter guides that a voter might want to follow.</td>
+    </tr>
+    <tr>
+        <td><a href="{% url 'apis_v1:voterGuidesUpcomingRetrieveDocs' %}">voterGuidesUpcomingRetrieve</a></td>
+        <td></td>
+        <td>Retrieve all upcoming voter guides. (Implemented as cached/static json file.)</td>
     </tr>
     <tr>
         <td><a href="{% url 'apis_v1:pledgeToVoteWithVoterGuideDocs' %}">pledgeToVoteWithVoterGuide</a></td>

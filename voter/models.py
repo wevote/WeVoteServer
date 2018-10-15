@@ -233,7 +233,7 @@ class VoterManager(BaseUserManager):
         }
         return results
 
-    def retrieve_voter_from_voter_device_id(self, voter_device_id):
+    def retrieve_voter_from_voter_device_id(self, voter_device_id, read_only=False):
         voter_id = fetch_voter_id_from_voter_device_link(voter_device_id)
 
         if not voter_id:
@@ -245,7 +245,7 @@ class VoterManager(BaseUserManager):
             return results
 
         voter_manager = VoterManager()
-        results = voter_manager.retrieve_voter_by_id(voter_id)
+        results = voter_manager.retrieve_voter_by_id(voter_id, read_only=read_only)
         if results['voter_found']:
             voter_on_stage = results['voter']
             voter_on_stage_found = True
@@ -263,7 +263,7 @@ class VoterManager(BaseUserManager):
         return results
 
     def fetch_we_vote_id_from_local_id(self, voter_id):
-        results = self.retrieve_voter_by_id(voter_id)
+        results = self.retrieve_voter_by_id(voter_id, read_only=True)
         if results['voter_found']:
             voter = results['voter']
             return voter.we_vote_id
@@ -271,7 +271,7 @@ class VoterManager(BaseUserManager):
             return None
 
     def fetch_local_id_from_we_vote_id(self, voter_we_vote_id):
-        results = self.retrieve_voter_by_we_vote_id(voter_we_vote_id)
+        results = self.retrieve_voter_by_we_vote_id(voter_we_vote_id, read_only=True)
         if results['voter_found']:
             voter = results['voter']
             return voter.id
@@ -306,7 +306,7 @@ class VoterManager(BaseUserManager):
         return voter_twitter_handle
 
     def fetch_linked_organization_we_vote_id_from_local_id(self, voter_id):
-        results = self.retrieve_voter_by_id(voter_id)
+        results = self.retrieve_voter_by_id(voter_id, read_only=True)
         if results['voter_found']:
             voter = results['voter']
             return voter.linked_organization_we_vote_id
@@ -462,7 +462,7 @@ class VoterManager(BaseUserManager):
 
         twitter_user_manager = TwitterUserManager()
         twitter_link_results = twitter_user_manager.retrieve_twitter_link_to_voter_from_twitter_user_id(
-            twitter_user_id)
+            twitter_user_id, read_only=True)
         if not twitter_link_results['twitter_link_to_voter_found']:
             # We don't have an official TwitterLinkToVoter, so we don't want to clean up any caching
             status += "TWITTER_LINK_TO_VOTER_NOT_FOUND-CACHING_REPAIR_NOT_EXECUTED "
@@ -589,22 +589,22 @@ class VoterManager(BaseUserManager):
         }
         return results
 
-    def retrieve_voter_by_id(self, voter_id):
+    def retrieve_voter_by_id(self, voter_id, read_only=False):
         email = ''
         voter_we_vote_id = ''
         voter_manager = VoterManager()
-        return voter_manager.retrieve_voter(voter_id, email, voter_we_vote_id)
+        return voter_manager.retrieve_voter(voter_id, email, voter_we_vote_id, read_only=read_only)
 
-    def retrieve_voter_by_email(self, email):
+    def retrieve_voter_by_email(self, email, read_only=False):
         voter_id = ''
         voter_manager = VoterManager()
-        return voter_manager.retrieve_voter(voter_id, email)
+        return voter_manager.retrieve_voter(voter_id, email, read_only=read_only)
 
-    def retrieve_voter_by_we_vote_id(self, voter_we_vote_id):
+    def retrieve_voter_by_we_vote_id(self, voter_we_vote_id, read_only=False):
         voter_id = ''
         email = ''
         voter_manager = VoterManager()
-        return voter_manager.retrieve_voter(voter_id, email, voter_we_vote_id)
+        return voter_manager.retrieve_voter(voter_id, email, voter_we_vote_id, read_only=read_only)
 
     def retrieve_voter_by_twitter_request_token(self, twitter_request_token):
         voter_id = ''
@@ -613,7 +613,7 @@ class VoterManager(BaseUserManager):
         voter_manager = VoterManager()
         return voter_manager.retrieve_voter(voter_id, email, voter_we_vote_id, twitter_request_token)
 
-    def retrieve_voter_by_facebook_id(self, facebook_id):
+    def retrieve_voter_by_facebook_id(self, facebook_id, read_only=False):
         voter_id = ''
         email = ''
         voter_we_vote_id = ''
@@ -625,7 +625,7 @@ class VoterManager(BaseUserManager):
             voter_we_vote_id = facebook_link_to_voter.voter_we_vote_id
 
         voter_manager = VoterManager()
-        return voter_manager.retrieve_voter(voter_id, email, voter_we_vote_id)
+        return voter_manager.retrieve_voter(voter_id, email, voter_we_vote_id, read_only=read_only)
 
     def retrieve_voter_by_facebook_id_old(self, facebook_id):
         """
@@ -640,19 +640,20 @@ class VoterManager(BaseUserManager):
         voter_manager = VoterManager()
         return voter_manager.retrieve_voter(voter_id, email, voter_we_vote_id, twitter_request_token, facebook_id)
 
-    def retrieve_voter_by_twitter_id(self, twitter_id):
+    def retrieve_voter_by_twitter_id(self, twitter_id, read_only=False):
         voter_id = ''
         email = ''
         voter_we_vote_id = ''
 
         twitter_user_manager = TwitterUserManager()
-        twitter_retrieve_results = twitter_user_manager.retrieve_twitter_link_to_voter_from_twitter_user_id(twitter_id)
+        twitter_retrieve_results = twitter_user_manager.retrieve_twitter_link_to_voter_from_twitter_user_id(
+            twitter_id, read_only=True)
         if twitter_retrieve_results['twitter_link_to_voter_found']:
             twitter_link_to_voter = twitter_retrieve_results['twitter_link_to_voter']
             voter_we_vote_id = twitter_link_to_voter.voter_we_vote_id
 
         voter_manager = VoterManager()
-        return voter_manager.retrieve_voter(voter_id, email, voter_we_vote_id)
+        return voter_manager.retrieve_voter(voter_id, email, voter_we_vote_id, read_only=read_only)
 
     def retrieve_voter_by_twitter_id_old(self, twitter_id):
         """
@@ -670,7 +671,7 @@ class VoterManager(BaseUserManager):
         return voter_manager.retrieve_voter(voter_id, email, voter_we_vote_id, twitter_request_token, facebook_id,
                                             twitter_id)
 
-    def retrieve_voter_by_organization_we_vote_id(self, organization_we_vote_id):
+    def retrieve_voter_by_organization_we_vote_id(self, organization_we_vote_id, read_only=False):
         voter_id = ''
         email = ''
         voter_we_vote_id = ''
@@ -679,9 +680,9 @@ class VoterManager(BaseUserManager):
         twitter_id = 0
         voter_manager = VoterManager()
         return voter_manager.retrieve_voter(voter_id, email, voter_we_vote_id, twitter_request_token, facebook_id,
-                                            twitter_id, organization_we_vote_id)
+                                            twitter_id, organization_we_vote_id, read_only=read_only)
 
-    def retrieve_voter_by_primary_email_we_vote_id(self, primary_email_we_vote_id):
+    def retrieve_voter_by_primary_email_we_vote_id(self, primary_email_we_vote_id, read_only=False):
         voter_id = ''
         email = ''
         voter_we_vote_id = ''
@@ -691,10 +692,11 @@ class VoterManager(BaseUserManager):
         organization_we_vote_id = ''
         voter_manager = VoterManager()
         return voter_manager.retrieve_voter(voter_id, email, voter_we_vote_id, twitter_request_token, facebook_id,
-                                            twitter_id, organization_we_vote_id, primary_email_we_vote_id)
+                                            twitter_id, organization_we_vote_id, primary_email_we_vote_id,
+                                            read_only=read_only)
 
     def retrieve_voter(self, voter_id, email='', voter_we_vote_id='', twitter_request_token='', facebook_id=0,
-                       twitter_id=0, organization_we_vote_id='', primary_email_we_vote_id=''):
+                       twitter_id=0, organization_we_vote_id='', primary_email_we_vote_id='', read_only=False):
         voter_id = convert_to_int(voter_id)
         if not validate_email(email):
             # We do not want to search for an invalid email
@@ -711,13 +713,19 @@ class VoterManager(BaseUserManager):
 
         try:
             if positive_value_exists(voter_id):
-                voter_on_stage = Voter.objects.get(id=voter_id)
+                if read_only:
+                    voter_on_stage = Voter.objects.using('readonly').get(id=voter_id)
+                else:
+                    voter_on_stage = Voter.objects.get(id=voter_id)
                 # If still here, we found an existing voter
                 voter_id = voter_on_stage.id
                 success = True
                 status += "VOTER_RETRIEVED_BY_VOTER_ID "
             elif email is not '' and email is not None:
-                voter_queryset = Voter.objects.all()
+                if read_only:
+                    voter_queryset = Voter.objects.using('readonly').all()
+                else:
+                    voter_queryset = Voter.objects.all()
                 voter_queryset = voter_queryset.filter(Q(email__iexact=email))
                 voter_list = list(voter_queryset[:1])
                 if len(voter_list):
@@ -730,15 +738,19 @@ class VoterManager(BaseUserManager):
                     voter_id = 0
                     success = True
             elif positive_value_exists(voter_we_vote_id):
-                voter_on_stage = Voter.objects.get(
-                    we_vote_id__iexact=voter_we_vote_id)
+                if read_only:
+                    voter_on_stage = Voter.objects.using('readonly').get(we_vote_id__iexact=voter_we_vote_id)
+                else:
+                    voter_on_stage = Voter.objects.get(we_vote_id__iexact=voter_we_vote_id)
                 # If still here, we found an existing voter
                 voter_id = voter_on_stage.id
                 success = True
                 status += "VOTER_RETRIEVED_BY_VOTER_WE_VOTE_ID "
             elif positive_value_exists(twitter_request_token):
-                voter_on_stage = Voter.objects.get(
-                    twitter_request_token=twitter_request_token)
+                if read_only:
+                    voter_on_stage = Voter.objects.using('readonly').get(twitter_request_token=twitter_request_token)
+                else:
+                    voter_on_stage = Voter.objects.get(twitter_request_token=twitter_request_token)
                 # If still here, we found an existing voter
                 voter_id = voter_on_stage.id
                 success = True
@@ -747,8 +759,10 @@ class VoterManager(BaseUserManager):
                 # 2016-11-22 This is only used to heal data. When retrieving by facebook_id,
                 # we use the FacebookLinkToVoter table
                 # We try to keep voter.facebook_id up-to-date for rapid retrieve, but it is cached data and not master
-                voter_on_stage = Voter.objects.get(
-                    facebook_id=facebook_id)
+                if read_only:
+                    voter_on_stage = Voter.objects.using('readonly').get(facebook_id=facebook_id)
+                else:
+                    voter_on_stage = Voter.objects.get(facebook_id=facebook_id)
                 # If still here, we found an existing voter
                 voter_id = voter_on_stage.id
                 success = True
@@ -759,8 +773,10 @@ class VoterManager(BaseUserManager):
                 # We try to keep voter.twitter_id up-to-date for rapid retrieve, but it is cached data and not master
                 # We put this in an extra try block because there might be multiple voters with twitter_id
                 try:
-                    voter_on_stage = Voter.objects.get(
-                        twitter_id=twitter_id)
+                    if read_only:
+                        voter_on_stage = Voter.objects.using('readonly').get(twitter_id=twitter_id)
+                    else:
+                        voter_on_stage = Voter.objects.get(twitter_id=twitter_id)
                     # If still here, we found a single existing voter
                     voter_id = voter_on_stage.id
                     success = True
@@ -775,15 +791,22 @@ class VoterManager(BaseUserManager):
                     exception_does_not_exist = True
                     success = True
             elif positive_value_exists(organization_we_vote_id):
-                voter_on_stage = Voter.objects.get(
-                    linked_organization_we_vote_id__iexact=organization_we_vote_id)
+                if read_only:
+                    voter_on_stage = Voter.objects.using('readonly').get(
+                        linked_organization_we_vote_id__iexact=organization_we_vote_id)
+                else:
+                    voter_on_stage = Voter.objects.get(
+                        linked_organization_we_vote_id__iexact=organization_we_vote_id)
                 # If still here, we found an existing voter
                 voter_id = voter_on_stage.id
                 success = True
                 status += "VOTER_RETRIEVED_BY_ORGANIZATION_WE_VOTE_ID "
             elif positive_value_exists(primary_email_we_vote_id):
-                voter_on_stage = Voter.objects.get(
-                    primary_email_we_vote_id__iexact=primary_email_we_vote_id)
+                if read_only:
+                    voter_on_stage = Voter.objects.using('readonly').get(
+                        primary_email_we_vote_id__iexact=primary_email_we_vote_id)
+                else:
+                    voter_on_stage = Voter.objects.get(primary_email_we_vote_id__iexact=primary_email_we_vote_id)
                 # If still here, we found an existing voter
                 voter_id = voter_on_stage.id
                 success = True
@@ -1846,7 +1869,7 @@ class Voter(AbstractBaseUser):
 
     def signed_in_twitter(self):
         twitter_user_manager = TwitterUserManager()
-        twitter_link_results = twitter_user_manager.retrieve_twitter_link_to_voter(0, self.we_vote_id)
+        twitter_link_results = twitter_user_manager.retrieve_twitter_link_to_voter(0, self.we_vote_id, read_only=True)
         if twitter_link_results['twitter_link_to_voter_found']:
             twitter_link_to_voter = twitter_link_results['twitter_link_to_voter']
             if positive_value_exists(twitter_link_to_voter.twitter_id):
@@ -1998,15 +2021,16 @@ class VoterDeviceLinkManager(models.Model):
         }
         return results
 
-    def retrieve_voter_device_link_from_voter_device_id(self, voter_device_id):
+    def retrieve_voter_device_link_from_voter_device_id(self, voter_device_id, read_only=False):
         voter_id = 0
         voter_device_link_id = 0
         voter_device_link_manager = VoterDeviceLinkManager()
-        results = voter_device_link_manager.retrieve_voter_device_link(voter_device_id, voter_id, voter_device_link_id)
+        results = voter_device_link_manager.retrieve_voter_device_link(
+            voter_device_id, voter_id, voter_device_link_id, read_only=read_only)
 
         return results
 
-    def retrieve_voter_device_link(self, voter_device_id, voter_id=0, voter_device_link_id=0):
+    def retrieve_voter_device_link(self, voter_device_id, voter_id=0, voter_device_link_id=0, read_only=False):
         error_result = False
         exception_does_not_exist = False
         exception_multiple_object_returned = False
@@ -2016,16 +2040,26 @@ class VoterDeviceLinkManager(models.Model):
         try:
             if positive_value_exists(voter_device_id):
                 status += " RETRIEVE_VOTER_DEVICE_LINK-GET_BY_VOTER_DEVICE_ID"
-                voter_device_link_on_stage = VoterDeviceLink.objects.get(voter_device_id=voter_device_id)
+                if read_only:
+                    voter_device_link_on_stage = VoterDeviceLink.objects.using('readonly').get(
+                        voter_device_id=voter_device_id)
+                else:
+                    voter_device_link_on_stage = VoterDeviceLink.objects.get(voter_device_id=voter_device_id)
                 voter_device_link_id = voter_device_link_on_stage.id
             elif positive_value_exists(voter_id):
                 status += " RETRIEVE_VOTER_DEVICE_LINK-GET_BY_VOTER_ID"
-                voter_device_link_on_stage = VoterDeviceLink.objects.get(voter_id=voter_id)
+                if read_only:
+                    voter_device_link_on_stage = VoterDeviceLink.objects.using('readonly').get(voter_id=voter_id)
+                else:
+                    voter_device_link_on_stage = VoterDeviceLink.objects.get(voter_id=voter_id)
                 # If still here, we found an existing position
                 voter_device_link_id = voter_device_link_on_stage.id
             elif positive_value_exists(voter_device_link_id):
                 status += " RETRIEVE_VOTER_DEVICE_LINK-GET_BY_VOTER_DEVICE_LINK_ID"
-                voter_device_link_on_stage = VoterDeviceLink.objects.get(id=voter_device_link_id)
+                if read_only:
+                    voter_device_link_on_stage = VoterDeviceLink.objects.using('readonly').get(id=voter_device_link_id)
+                else:
+                    voter_device_link_on_stage = VoterDeviceLink.objects.get(id=voter_device_link_id)
                 # If still here, we found an existing position
                 voter_device_link_id = voter_device_link_on_stage.id
             else:
@@ -2168,7 +2202,8 @@ class VoterDeviceLinkManager(models.Model):
 # This method *just* returns the voter_id or 0
 def fetch_voter_id_from_voter_device_link(voter_device_id):
     voter_device_link_manager = VoterDeviceLinkManager()
-    results = voter_device_link_manager.retrieve_voter_device_link_from_voter_device_id(voter_device_id)
+    results = voter_device_link_manager.retrieve_voter_device_link_from_voter_device_id(
+        voter_device_id, read_only=True)
     if results['voter_device_link_found']:
         voter_device_link = results['voter_device_link']
         return voter_device_link.voter_id
@@ -2178,7 +2213,7 @@ def fetch_voter_id_from_voter_device_link(voter_device_id):
 # This method *just* returns the voter_id or 0
 def fetch_voter_id_from_voter_we_vote_id(we_vote_id):
     voter_manager = VoterManager()
-    results = voter_manager.retrieve_voter_by_we_vote_id(we_vote_id)
+    results = voter_manager.retrieve_voter_by_we_vote_id(we_vote_id, read_only=True)
     if results['voter_found']:
         voter = results['voter']
         return voter.id
@@ -2188,7 +2223,7 @@ def fetch_voter_id_from_voter_we_vote_id(we_vote_id):
 # This method *just* returns the voter_we_vote_id or ""
 def fetch_voter_we_vote_id_from_voter_id(voter_id):
     voter_manager = VoterManager()
-    results = voter_manager.retrieve_voter_by_id(voter_id)
+    results = voter_manager.retrieve_voter_by_id(voter_id, read_only=True)
     if results['voter_found']:
         voter = results['voter']
         return voter.we_vote_id
@@ -2212,12 +2247,13 @@ def fetch_voter_we_vote_id_from_voter_id(voter_id):
 
 def fetch_voter_we_vote_id_from_voter_device_link(voter_device_id):
     voter_device_link_manager = VoterDeviceLinkManager()
-    results = voter_device_link_manager.retrieve_voter_device_link_from_voter_device_id(voter_device_id)
+    results = voter_device_link_manager.retrieve_voter_device_link_from_voter_device_id(voter_device_id,
+                                                                                        read_only=True)
     if results['voter_device_link_found']:
         voter_device_link = results['voter_device_link']
         voter_id = voter_device_link.voter_id
         voter_manager = VoterManager()
-        results = voter_manager.retrieve_voter_by_id(voter_id)
+        results = voter_manager.retrieve_voter_by_id(voter_id, read_only=True)
         if results['voter_found']:
             voter = results['voter']
             return voter.we_vote_id
@@ -2227,7 +2263,7 @@ def fetch_voter_we_vote_id_from_voter_device_link(voter_device_id):
 def retrieve_voter_authority(request):
     voter_api_device_id = get_voter_api_device_id(request)
     voter_manager = VoterManager()
-    results = voter_manager.retrieve_voter_from_voter_device_id(voter_api_device_id)
+    results = voter_manager.retrieve_voter_from_voter_device_id(voter_api_device_id, read_only=True)
     if results['voter_found']:
         voter = results['voter']
         authority_results = {

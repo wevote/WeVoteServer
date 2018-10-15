@@ -2055,7 +2055,8 @@ class PositionListManager(models.Model):
     def retrieve_all_positions_for_contest_office(self, retrieve_public_positions,
                                                   contest_office_id, contest_office_we_vote_id,
                                                   stance_we_are_looking_for,
-                                                  most_recent_only=True, friends_we_vote_id_list=False):
+                                                  most_recent_only=True, friends_we_vote_id_list=False,
+                                                  read_only=False):
         if stance_we_are_looking_for not \
                 in(ANY_STANCE, SUPPORT, STILL_DECIDING, INFORMATION_ONLY, NO_STANCE, OPPOSE, PERCENT_RATING):
             position_list = []
@@ -2082,12 +2083,18 @@ class PositionListManager(models.Model):
         position_list_found = False
         try:
             if retrieve_public_positions:
-                # We intentionally do not use 'readonly' here since we need to save based on the results of this query
-                position_list_query = PositionEntered.objects.order_by('-date_entered')
+                if read_only:
+                    position_list_query = PositionEntered.objects.using('readonly').order_by('-date_entered')
+                else:
+                    # We intentionally do not use 'readonly' here for when we save based on the results of this query
+                    position_list_query = PositionEntered.objects.order_by('-date_entered')
                 retrieve_friends_positions = False
             else:
-                # We intentionally do not use 'readonly' here since we need to save based on the results of this query
-                position_list_query = PositionForFriends.objects.order_by('-date_entered')
+                if read_only:
+                    position_list_query = PositionForFriends.objects.using('readonly').order_by('-date_entered')
+                else:
+                    # We intentionally do not use 'readonly' here for when we save based on the results of this query
+                    position_list_query = PositionForFriends.objects.order_by('-date_entered')
                 retrieve_friends_positions = True
 
             # As of Aug 2018 we are no longer using PERCENT_RATING
@@ -2258,7 +2265,7 @@ class PositionListManager(models.Model):
                                                 stance_we_are_looking_for, friends_vs_public,
                                                 show_positions_current_voter_election=False,
                                                 exclude_positions_current_voter_election=False, voter_device_id='',
-                                                google_civic_election_id=0, state_code=''):
+                                                google_civic_election_id=0, state_code='', read_only=False):
         """
         Return a position list with all of the organization's positions.
         Incoming filters include: stance_we_are_looking_for, friends_vs_public, show_positions_current_voter_election,
@@ -2273,6 +2280,7 @@ class PositionListManager(models.Model):
         :param voter_device_id:
         :param google_civic_election_id:
         :param state_code:
+        :param read_only:
         :return:
         """
         status = ""
@@ -2316,7 +2324,10 @@ class PositionListManager(models.Model):
                 # DALE 2018-09-07 Speeding up retrieve by removing order_by
                 # public_positions_list = PositionEntered.objects.order_by('ballot_item_display_name',
                 #                                                          '-google_civic_election_id')
-                public_positions_list = PositionEntered.objects.all()
+                if read_only:
+                    public_positions_list = PositionEntered.objects.using('readonly').all()
+                else:
+                    public_positions_list = PositionEntered.objects.all()
                 # As of Aug 2018 we are no longer using PERCENT_RATING
                 public_positions_list = public_positions_list.exclude(stance__iexact=PERCENT_RATING)
 
@@ -2399,7 +2410,7 @@ class PositionListManager(models.Model):
                 # Current voter visiting the site
                 current_voter_we_vote_id = ""
                 voter_manager = VoterManager()
-                results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id)
+                results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id, read_only=True)
                 if results['voter_found']:
                     voter = results['voter']
                     current_voter_we_vote_id = voter.we_vote_id
@@ -2412,7 +2423,8 @@ class PositionListManager(models.Model):
                 # Find the Voter id for the organization showing the positions. Organizations that sign in with
                 #  their Twitter accounts get a Voter entry, with "voter.linked_organization_we_vote_id" containing
                 #  the organizations we_vote_id.
-                results = voter_manager.retrieve_voter_by_organization_we_vote_id(organization_we_vote_id)
+                results = voter_manager.retrieve_voter_by_organization_we_vote_id(organization_we_vote_id,
+                                                                                  read_only=True)
                 organization_voter_local_id = 0
                 organization_voter_we_vote_id = ""
                 if results['voter_found']:
@@ -2428,6 +2440,7 @@ class PositionListManager(models.Model):
                     voter_is_friend_of_organization = True
                 elif positive_value_exists(current_voter_we_vote_id):
                     friend_manager = FriendManager()
+                    # Already read_only
                     friend_results = friend_manager.retrieve_friends_we_vote_id_list(current_voter_we_vote_id)
                     if friend_results['friends_we_vote_id_list_found']:
                         friends_we_vote_id_list = friend_results['friends_we_vote_id_list']
@@ -2444,7 +2457,10 @@ class PositionListManager(models.Model):
                     # DALE 2018-09-07 Speeding up retrieve by removing order_by
                     # friends_positions_list = PositionForFriends.objects.order_by('ballot_item_display_name',
                     #                                                              '-google_civic_election_id')
-                    friends_positions_list = PositionForFriends.objects.all()
+                    if read_only:
+                        friends_positions_list = PositionForFriends.objects.using('readonly').all()
+                    else:
+                        friends_positions_list = PositionForFriends.objects.all()
                     # As of Aug 2018 we are no longer using PERCENT_RATING
                     friends_positions_list = friends_positions_list.exclude(stance__iexact=PERCENT_RATING)
 

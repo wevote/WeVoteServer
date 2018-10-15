@@ -604,14 +604,18 @@ class OrganizationLinkToIssue(models.Model):
 class OrganizationLinkToIssueList(models.Model):
     # A way to retrieve all of the organization and issue linking information
 
-    def retrieve_issue_list_by_organization_we_vote_id(self, organization_we_vote_id, show_hidden_issues=False):
+    def retrieve_issue_list_by_organization_we_vote_id(self, organization_we_vote_id, show_hidden_issues=False,
+                                                       read_only=False):
         # Retrieve a list of active issues linked to organization
         link_issue_list_found = False
         link_active = True
         link_issue_list = {}
 
         try:
-            link_issue_query = OrganizationLinkToIssue.objects.all()
+            if read_only:
+                link_issue_query = OrganizationLinkToIssue.objects.using('readonly').all()
+            else:
+                link_issue_query = OrganizationLinkToIssue.objects.all()
             link_issue_query = link_issue_query.filter(organization_we_vote_id__iexact=organization_we_vote_id)
             link_issue_query = link_issue_query.filter(link_active=link_active)
             link_issue_list = list(link_issue_query)
@@ -636,13 +640,16 @@ class OrganizationLinkToIssueList(models.Model):
             link_issue_list = {}
             return link_issue_list
 
-    def retrieve_issue_blocked_list_by_organization_we_vote_id(self, organization_we_vote_id):
+    def retrieve_issue_blocked_list_by_organization_we_vote_id(self, organization_we_vote_id, read_only=False):
         # Retrieve a list of issues bocked for an organization
         link_issue_list_found = False
         link_blocked = True
         link_issue_list = {}
         try:
-            link_issue_query = OrganizationLinkToIssue.objects.all()
+            if read_only:
+                link_issue_query = OrganizationLinkToIssue.objects.using('readonly').all()
+            else:
+                link_issue_query = OrganizationLinkToIssue.objects.all()
             link_issue_query = link_issue_query.filter(organization_we_vote_id__iexact=organization_we_vote_id)
             link_issue_query = link_issue_query.filter(link_blocked=link_blocked)
             link_issue_list = list(link_issue_query)
@@ -659,7 +666,7 @@ class OrganizationLinkToIssueList(models.Model):
 
     def fetch_issue_we_vote_id_list_by_organization_we_vote_id(self, organization_we_vote_id):
         link_issue_we_vote_id_list = []
-        link_issue_list = self.retrieve_issue_list_by_organization_we_vote_id(organization_we_vote_id)
+        link_issue_list = self.retrieve_issue_list_by_organization_we_vote_id(organization_we_vote_id, read_only=True)
         for issue in link_issue_list:
             link_issue_we_vote_id_list.append(issue.issue_we_vote_id)
         return link_issue_we_vote_id_list
@@ -667,7 +674,7 @@ class OrganizationLinkToIssueList(models.Model):
     def fetch_organization_we_vote_id_list_by_issue_we_vote_id_list(self, issue_we_vote_id_list):
         organization_we_vote_id_list = []
         results = self.retrieve_organization_we_vote_id_list_from_issue_we_vote_id_list(
-            issue_we_vote_id_list)
+            issue_we_vote_id_list)  # Already read_only
         if results['organization_we_vote_id_list_found']:
             organization_we_vote_id_list = results['organization_we_vote_id_list']
         return organization_we_vote_id_list
@@ -676,7 +683,7 @@ class OrganizationLinkToIssueList(models.Model):
         link_active = True
         link_issue_list_count = 0
         try:
-            link_issue_list = OrganizationLinkToIssue.objects.all()
+            link_issue_list = OrganizationLinkToIssue.objects.using('readonly').all()
             link_issue_list = link_issue_list.filter(organization_we_vote_id__iexact=organization_we_vote_id)
             link_issue_list = link_issue_list.filter(link_active=link_active)
             link_issue_list_count = link_issue_list.count()
@@ -690,7 +697,7 @@ class OrganizationLinkToIssueList(models.Model):
         link_active = True
         link_issue_list_count = 0
         try:
-            link_issue_list = OrganizationLinkToIssue.objects.all()
+            link_issue_list = OrganizationLinkToIssue.objects.using('readonly').all()
             link_issue_list = link_issue_list.filter(issue_we_vote_id__iexact=issue_we_vote_id)
             link_issue_list = link_issue_list.filter(link_active=link_active)
             link_issue_list_count = link_issue_list.count()
@@ -705,7 +712,7 @@ class OrganizationLinkToIssueList(models.Model):
 
         try:
             if positive_value_exists(issue_we_vote_id):
-                organization_link_to_issue_query = OrganizationLinkToIssue.objects.filter(
+                organization_link_to_issue_query = OrganizationLinkToIssue.objects.using('readonly').filter(
                     issue_we_vote_id__iexact=issue_we_vote_id,
                     link_active=True
                 )
@@ -720,7 +727,7 @@ class OrganizationLinkToIssueList(models.Model):
         organization_we_vote_id_list_found = False
         link_active = True
         try:
-            link_queryset = OrganizationLinkToIssue.objects.all()
+            link_queryset = OrganizationLinkToIssue.objects.using('readonly').all()
             # we decided not to use case-insensitivity in favour of '__in'
             link_queryset = link_queryset.filter(issue_we_vote_id__in=issue_we_vote_id_list)
             link_queryset = link_queryset.filter(link_active=link_active)

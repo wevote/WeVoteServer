@@ -733,7 +733,7 @@ def twitter_sign_in_start_for_api(voter_device_id, return_url, cordova):  # twit
         return results
 
     voter_manager = VoterManager()
-    results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id)
+    results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id, read_only=True)
     if not positive_value_exists(results['voter_found']):
         results = {
             'status':                       "VALID_VOTER_MISSING",
@@ -750,7 +750,7 @@ def twitter_sign_in_start_for_api(voter_device_id, return_url, cordova):  # twit
     voter = results['voter']
 
     twitter_user_manager = TwitterUserManager()
-    twitter_user_results = twitter_user_manager.retrieve_twitter_link_to_voter(voter.we_vote_id)
+    twitter_user_results = twitter_user_manager.retrieve_twitter_link_to_voter(voter.we_vote_id, read_only=True)
     if twitter_user_results['twitter_link_to_voter_found']:
         error_results = {
             'status':                       "TWITTER_OWNER_VOTER_FOUND_WHEN_NOT_EXPECTED",
@@ -899,6 +899,7 @@ def twitter_sign_in_start_for_api(voter_device_id, return_url, cordova):  # twit
         }
     return results
 
+
 def twitter_native_sign_in_save_for_api(voter_device_id, twitter_access_token, twitter_access_secret):
     """
     For react-native-oauth, we receive the tokens from a single authenticate() call, and save them to the
@@ -920,7 +921,7 @@ def twitter_native_sign_in_save_for_api(voter_device_id, twitter_access_token, t
         return results
 
     voter_manager = VoterManager()
-    results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id)
+    results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id, read_only=True)
     if not positive_value_exists(results['voter_found']):
         results = {
             'status':                       "VALID_VOTER_MISSING",
@@ -932,7 +933,7 @@ def twitter_native_sign_in_save_for_api(voter_device_id, twitter_access_token, t
     voter = results['voter']
 
     twitter_user_manager = TwitterUserManager()
-    twitter_user_results = twitter_user_manager.retrieve_twitter_link_to_voter(voter.we_vote_id)
+    twitter_user_results = twitter_user_manager.retrieve_twitter_link_to_voter(voter.we_vote_id, read_only=True)
     if twitter_user_results['twitter_link_to_voter_found']:
         error_results = {
             'status':                       "TWITTER_OWNER_VOTER_FOUND_WHEN_NOT_EXPECTED",
@@ -1163,7 +1164,7 @@ def twitter_sign_in_request_voter_info_for_api(voter_device_id, return_url):
         return results
 
     voter_manager = VoterManager()
-    results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id)
+    results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id, read_only=True)
     if not positive_value_exists(results['voter_found']):
         results = {
             'status':               "VALID_VOTER_MISSING",
@@ -1231,7 +1232,7 @@ def twitter_sign_in_request_voter_info_for_api(voter_device_id, return_url):
 
     twitter_user_manager = TwitterUserManager()
     twitter_link_to_voter_results = twitter_user_manager.retrieve_twitter_link_to_voter_from_voter_we_vote_id(
-        voter_we_vote_id)
+        voter_we_vote_id, read_only=True)
     if twitter_link_to_voter_results['twitter_link_to_voter_found']:
         twitter_link_to_voter = twitter_link_to_voter_results['twitter_link_to_voter']
         twitter_secret_key = twitter_link_to_voter.secret_key
@@ -1262,7 +1263,7 @@ def twitter_sign_in_retrieve_for_api(voter_device_id):  # twitterSignInRetrieve
     :return:
     """
     voter_manager = VoterManager()
-    voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id)
+    voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id, read_only=True)
     voter_id = voter_results['voter_id']
     if not positive_value_exists(voter_id):
         success = False
@@ -1366,7 +1367,7 @@ def twitter_sign_in_retrieve_for_api(voter_device_id):  # twitterSignInRetrieve
     voter_we_vote_id_attached_to_twitter = ""
     repair_twitter_related_voter_caching_now = False
 
-    twitter_link_results = twitter_user_manager.retrieve_twitter_link_to_voter(twitter_id)
+    twitter_link_results = twitter_user_manager.retrieve_twitter_link_to_voter(twitter_id, read_only=True)
     if twitter_link_results['twitter_link_to_voter_found']:
         twitter_link_to_voter = twitter_link_results['twitter_link_to_voter']
         status += " " + twitter_link_results['status']
@@ -1567,7 +1568,7 @@ def voter_twitter_save_to_current_account_for_api(voter_device_id):  # voterTwit
         return results
 
     voter_manager = VoterManager()
-    results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id)
+    results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id)  # Cannot be read_only
     if not positive_value_exists(results['voter_found']):
         results = {
             'success':                  False,
@@ -1580,7 +1581,7 @@ def voter_twitter_save_to_current_account_for_api(voter_device_id):  # voterTwit
     voter = results['voter']
 
     twitter_user_manager = TwitterUserManager()
-    twitter_results = twitter_user_manager.retrieve_twitter_link_to_voter(0, voter.we_vote_id)
+    twitter_results = twitter_user_manager.retrieve_twitter_link_to_voter(0, voter.we_vote_id, read_only=True)
     if twitter_results['twitter_link_to_voter_found']:
         # We are surprised to be here because we try to only call this routine from the WebApp if the Twitter Account
         #  isn't currently linked to any voter
@@ -1593,7 +1594,7 @@ def voter_twitter_save_to_current_account_for_api(voter_device_id):  # voterTwit
         return error_results
 
     twitter_auth_manager = TwitterAuthManager()
-    auth_response_results = twitter_auth_manager.retrieve_twitter_auth_response(voter_device_id)
+    auth_response_results = twitter_auth_manager.retrieve_twitter_auth_response(voter_device_id)  # Cannot be read_only
     if not auth_response_results['twitter_auth_response_found']:
         error_results = {
             'status':                   "TWITTER_AUTH_RESPONSE_COULD_NOT_BE_FOUND",
@@ -1606,7 +1607,8 @@ def voter_twitter_save_to_current_account_for_api(voter_device_id):  # voterTwit
     twitter_auth_response = auth_response_results['twitter_auth_response']
 
     # Make sure this Twitter id isn't linked to another voter
-    twitter_collision_results = twitter_user_manager.retrieve_twitter_link_to_voter(twitter_auth_response.twitter_id)
+    twitter_collision_results = twitter_user_manager.retrieve_twitter_link_to_voter(twitter_auth_response.twitter_id,
+                                                                                    read_only=True)
     if twitter_collision_results['twitter_link_to_voter_found']:
         # If we are here, then there is in fact a twitter_link_to_voter tied to another voter account
         # We are surprised to be here because we try to only call this routine from the WebApp if the Twitter Account
@@ -1641,7 +1643,7 @@ def voter_twitter_save_to_current_account_for_api(voter_device_id):  # voterTwit
     voter = results['voter']
 
     # Now find out if there is an organization already linked to this Twitter account
-    twitter_results = twitter_user_manager.retrieve_twitter_link_to_organization(voter.we_vote_id)
+    twitter_results = twitter_user_manager.retrieve_twitter_link_to_organization(voter.we_vote_id, read_only=True)
     if twitter_results['twitter_link_to_organization_found']:
         twitter_link_to_organization = twitter_results['twitter_link_to_organization']
         twitter_link_to_organization_exists = True

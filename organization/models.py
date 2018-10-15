@@ -275,14 +275,14 @@ class OrganizationManager(models.Manager):
         }
         return results
 
-    def retrieve_organization_from_id(self, organization_id):
-        return self.retrieve_organization(organization_id)
+    def retrieve_organization_from_id(self, organization_id, read_only=False):
+        return self.retrieve_organization(organization_id, read_only=read_only)
 
-    def retrieve_organization_from_we_vote_id(self, organization_we_vote_id):
-        return self.retrieve_organization(0, organization_we_vote_id)
+    def retrieve_organization_from_we_vote_id(self, organization_we_vote_id, read_only=False):
+        return self.retrieve_organization(0, organization_we_vote_id, read_only=read_only)
 
-    def retrieve_organization_from_vote_smart_id(self, vote_smart_id):
-        return self.retrieve_organization(0, '', vote_smart_id)
+    def retrieve_organization_from_vote_smart_id(self, vote_smart_id, read_only=False):
+        return self.retrieve_organization(0, '', vote_smart_id, read_only=read_only)
 
     def retrieve_organization_from_twitter_handle(self, twitter_handle):
         organization_id = 0
@@ -354,13 +354,15 @@ class OrganizationManager(models.Manager):
         }
         return results
 
-    def retrieve_organization(self, organization_id, we_vote_id=None, vote_smart_id=None, twitter_user_id=None):
+    def retrieve_organization(self, organization_id, we_vote_id=None, vote_smart_id=None, twitter_user_id=None,
+                              read_only=False):
         """
         Get an organization, based the passed in parameters
         :param organization_id:
         :param we_vote_id:
         :param vote_smart_id:
         :param twitter_user_id:
+        :param read_only:
         :return: the matching organization object
         """
         error_result = False
@@ -372,22 +374,34 @@ class OrganizationManager(models.Manager):
         try:
             if positive_value_exists(organization_id):
                 status = "ERROR_RETRIEVING_ORGANIZATION_WITH_ID"
-                organization_on_stage = Organization.objects.get(id=organization_id)
+                if read_only:
+                    organization_on_stage = Organization.objects.using('readonly').get(id=organization_id)
+                else:
+                    organization_on_stage = Organization.objects.get(id=organization_id)
                 organization_on_stage_id = organization_on_stage.id
                 status = "ORGANIZATION_FOUND_WITH_ID"
             elif positive_value_exists(we_vote_id):
                 status = "ERROR_RETRIEVING_ORGANIZATION_WITH_WE_VOTE_ID"
-                organization_on_stage = Organization.objects.get(we_vote_id=we_vote_id)
+                if read_only:
+                    organization_on_stage = Organization.objects.using('readonly').get(we_vote_id=we_vote_id)
+                else:
+                    organization_on_stage = Organization.objects.get(we_vote_id=we_vote_id)
                 organization_on_stage_id = organization_on_stage.id
                 status = "ORGANIZATION_FOUND_WITH_WE_VOTE_ID"
             elif positive_value_exists(vote_smart_id):
                 status = "ERROR_RETRIEVING_ORGANIZATION_WITH_VOTE_SMART_ID"
-                organization_on_stage = Organization.objects.get(vote_smart_id=vote_smart_id)
+                if read_only:
+                    organization_on_stage = Organization.objects.using('readonly').get(vote_smart_id=vote_smart_id)
+                else:
+                    organization_on_stage = Organization.objects.get(vote_smart_id=vote_smart_id)
                 organization_on_stage_id = organization_on_stage.id
                 status = "ORGANIZATION_FOUND_WITH_VOTE_SMART_ID"
             elif positive_value_exists(twitter_user_id):
                 status = "ERROR_RETRIEVING_ORGANIZATION_WITH_TWITTER_ID"
-                organization_on_stage = Organization.objects.get(twitter_user_id=twitter_user_id)
+                if read_only:
+                    organization_on_stage = Organization.objects.using('readonly').get(twitter_user_id=twitter_user_id)
+                else:
+                    organization_on_stage = Organization.objects.get(twitter_user_id=twitter_user_id)
                 organization_on_stage_id = organization_on_stage.id
                 status = "ORGANIZATION_FOUND_WITH_TWITTER_ID"
         except Organization.MultipleObjectsReturned as e:
@@ -450,7 +464,7 @@ class OrganizationManager(models.Manager):
 
     def fetch_we_vote_id_from_local_id(self, organization_id):
         if positive_value_exists(organization_id):
-            results = self.retrieve_organization(organization_id)
+            results = self.retrieve_organization(organization_id, read_only=True)
             if results['organization_found']:
                 organization = results['organization']
                 return organization.we_vote_id
@@ -501,14 +515,14 @@ class OrganizationManager(models.Manager):
         # Gather what we know about TwitterLinkToVoter
         twitter_id = 0
         twitter_link_to_voter_results = twitter_user_manager.retrieve_twitter_link_to_voter(
-            twitter_id, voter.we_vote_id)
+            twitter_id, voter.we_vote_id)  # Cannot be read_only
         if twitter_link_to_voter_results['twitter_link_to_voter_found']:
             twitter_link_to_voter = twitter_link_to_voter_results['twitter_link_to_voter']
             twitter_link_to_voter_twitter_id = twitter_link_to_voter.twitter_id
             twitter_link_to_voter_found = True
             twitter_link_to_organization_results = \
                 twitter_user_manager.retrieve_twitter_link_to_organization_from_twitter_user_id(
-                    twitter_link_to_voter_twitter_id)
+                    twitter_link_to_voter_twitter_id)  # Cannot be read_only
             if twitter_link_to_organization_results['twitter_link_to_organization_found']:
                 twitter_link_to_organization = twitter_link_to_organization_results['twitter_link_to_organization']
                 twitter_link_to_organization_found = True
@@ -539,7 +553,7 @@ class OrganizationManager(models.Manager):
                     # TwitterLinkToOrganization as well
                     twitter_link_to_organization_results = \
                         twitter_user_manager.retrieve_twitter_link_to_organization_from_twitter_user_id(
-                            twitter_link_to_voter_twitter_id)
+                            twitter_link_to_voter_twitter_id)  # Cannot be read_only
                     if twitter_link_to_organization_results['twitter_link_to_organization_found']:
                         twitter_link_to_organization = twitter_link_to_organization_results[
                             'twitter_link_to_organization']

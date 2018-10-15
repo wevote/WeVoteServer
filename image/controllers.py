@@ -23,7 +23,7 @@ from position.controllers import reset_all_position_image_details_from_candidate
     update_all_position_details_from_candidate
 from twitter.functions import retrieve_twitter_user_info
 from twitter.models import TwitterUserManager
-from voter.models import VoterManager, VoterDeviceLinkManager, VoterAddressManager, VoterAddress, Voter
+from voter.models import VoterManager, VoterDeviceLink, VoterDeviceLinkManager, VoterAddressManager, VoterAddress, Voter
 from voter_guide.models import VoterGuideManager
 from wevote_functions.functions import positive_value_exists, convert_to_int
 
@@ -389,15 +389,17 @@ def cache_voter_master_images(voter_id):
         # DALE 2018-06-19 I don't see why we need a google_civic_election_id for storing a voter's photos
         voter_device_link_results = voter_device_link_manager.retrieve_voter_device_link(0, voter_id)
         if voter_device_link_results['success']:
-            voter_address_results = voter_address_manager.retrieve_address(0, voter_id)
-            if voter_address_results['voter_address_found']:
-                voter_address = voter_address_results['voter_address']
-            else:
-                voter_address = VoterAddress()
+            voter_device_link = voter_device_link_results['voter_device_link']
+        else:
+            voter_device_link = VoterDeviceLink()
+        voter_address_results = voter_address_manager.retrieve_address(0, voter_id)
+        if voter_address_results['voter_address_found']:
+            voter_address = voter_address_results['voter_address']
+        else:
+            voter_address = VoterAddress()
 
-            results = choose_election_from_existing_data(voter_device_link_results['voter_device_link'],
-                                                         0, voter_address)
-            google_civic_election_id = results['google_civic_election_id']
+        results = choose_election_from_existing_data(voter_device_link, 0, voter_address)
+        google_civic_election_id = results['google_civic_election_id']
     else:
         return cache_all_kind_of_images_results
 
@@ -408,7 +410,7 @@ def cache_voter_master_images(voter_id):
     twitter_user_manager = TwitterUserManager()
     twitter_screen_name = ''
     twitter_link_to_voter_results = twitter_user_manager.retrieve_twitter_link_to_voter_from_voter_we_vote_id(
-        voter.we_vote_id)
+        voter.we_vote_id, read_only=True)
     if twitter_link_to_voter_results['twitter_link_to_voter_found']:
         twitter_link_to_voter = twitter_link_to_voter_results['twitter_link_to_voter']
         twitter_id = twitter_link_to_voter.twitter_id

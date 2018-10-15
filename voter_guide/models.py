@@ -459,7 +459,8 @@ class VoterGuideManager(models.Manager):
 
     def retrieve_voter_guide(self, voter_guide_id=0, voter_guide_we_vote_id="", google_civic_election_id=0,
                              vote_smart_time_span=None,
-                             organization_we_vote_id=None, public_figure_we_vote_id=None, owner_we_vote_id=None):
+                             organization_we_vote_id=None, public_figure_we_vote_id=None, owner_we_vote_id=None,
+                             read_only=False):
         voter_guide_id = convert_to_int(voter_guide_id)
         google_civic_election_id = convert_to_int(google_civic_election_id)
         organization_we_vote_id = convert_to_str(organization_we_vote_id)
@@ -475,36 +476,66 @@ class VoterGuideManager(models.Manager):
         try:
             if positive_value_exists(voter_guide_id):
                 status = "ERROR_RETRIEVING_VOTER_GUIDE_WITH_ID "  # Set this in case the get fails
-                voter_guide_on_stage = VoterGuide.objects.get(id=voter_guide_id)
+                if read_only:
+                    voter_guide_on_stage = VoterGuide.objects.using('readonly').get(id=voter_guide_id)
+                else:
+                    voter_guide_on_stage = VoterGuide.objects.get(id=voter_guide_id)
                 voter_guide_on_stage_id = voter_guide_on_stage.id
                 status = "VOTER_GUIDE_FOUND_WITH_ID "
             elif positive_value_exists(voter_guide_we_vote_id):
                 status = "ERROR_RETRIEVING_VOTER_GUIDE_WITH_WE_VOTE_ID "  # Set this in case the get fails
-                voter_guide_on_stage = VoterGuide.objects.get(we_vote_id=voter_guide_we_vote_id)
+                if read_only:
+                    voter_guide_on_stage = VoterGuide.objects.using('readonly').get(we_vote_id=voter_guide_we_vote_id)
+                else:
+                    voter_guide_on_stage = VoterGuide.objects.get(we_vote_id=voter_guide_we_vote_id)
                 voter_guide_on_stage_id = voter_guide_on_stage.id
                 status = "VOTER_GUIDE_FOUND_WITH_WE_VOTE_ID "
             elif positive_value_exists(organization_we_vote_id) and positive_value_exists(google_civic_election_id):
                 status = "ERROR_RETRIEVING_VOTER_GUIDE_WITH_ORGANIZATION_WE_VOTE_ID"  # Set this in case the get fails
-                voter_guide_on_stage = VoterGuide.objects.get(google_civic_election_id=google_civic_election_id,
-                                                              organization_we_vote_id__iexact=organization_we_vote_id)
+                if read_only:
+                    voter_guide_on_stage = VoterGuide.objects.using('readonly').get(
+                        google_civic_election_id=google_civic_election_id,
+                        organization_we_vote_id__iexact=organization_we_vote_id)
+                else:
+                    voter_guide_on_stage = VoterGuide.objects.get(
+                        google_civic_election_id=google_civic_election_id,
+                        organization_we_vote_id__iexact=organization_we_vote_id)
                 voter_guide_on_stage_id = voter_guide_on_stage.id
                 status = "VOTER_GUIDE_FOUND_WITH_ORGANIZATION_WE_VOTE_ID "
             elif positive_value_exists(organization_we_vote_id) and positive_value_exists(vote_smart_time_span):
                 status = "ERROR_RETRIEVING_VOTER_GUIDE_WITH_ORGANIZATION_WE_VOTE_ID_AND_TIME_SPAN "
-                voter_guide_on_stage = VoterGuide.objects.get(vote_smart_time_span=vote_smart_time_span,
-                                                              organization_we_vote_id__iexact=organization_we_vote_id)
+                if read_only:
+                    voter_guide_on_stage = VoterGuide.objects.using('readonly').get(
+                        vote_smart_time_span=vote_smart_time_span,
+                        organization_we_vote_id__iexact=organization_we_vote_id)
+                else:
+                    voter_guide_on_stage = VoterGuide.objects.get(
+                        vote_smart_time_span=vote_smart_time_span,
+                        organization_we_vote_id__iexact=organization_we_vote_id)
                 voter_guide_on_stage_id = voter_guide_on_stage.id
                 status = "VOTER_GUIDE_FOUND_WITH_ORGANIZATION_WE_VOTE_ID_AND_TIME_SPAN "
             elif positive_value_exists(public_figure_we_vote_id) and positive_value_exists(google_civic_election_id):
                 status = "ERROR_RETRIEVING_VOTER_GUIDE_WITH_PUBLIC_FIGURE_WE_VOTE_ID"  # Set this in case the get fails
-                voter_guide_on_stage = VoterGuide.objects.get(google_civic_election_id=google_civic_election_id,
-                                                              public_figure_we_vote_id__iexact=public_figure_we_vote_id)
+                if read_only:
+                    voter_guide_on_stage = VoterGuide.objects.using('readonly').get(
+                        google_civic_election_id=google_civic_election_id,
+                        public_figure_we_vote_id__iexact=public_figure_we_vote_id)
+                else:
+                    voter_guide_on_stage = VoterGuide.objects.get(
+                        google_civic_election_id=google_civic_election_id,
+                        public_figure_we_vote_id__iexact=public_figure_we_vote_id)
                 voter_guide_on_stage_id = voter_guide_on_stage.id
                 status = "VOTER_GUIDE_FOUND_WITH_PUBLIC_FIGURE_WE_VOTE_ID "
             elif positive_value_exists(owner_we_vote_id) and positive_value_exists(google_civic_election_id):
                 status = "ERROR_RETRIEVING_VOTER_GUIDE_WITH_VOTER_WE_VOTE_ID "  # Set this in case the get fails
-                voter_guide_on_stage = VoterGuide.objects.get(google_civic_election_id=google_civic_election_id,
-                                                              owner_we_vote_id__iexact=owner_we_vote_id)
+                if read_only:
+                    voter_guide_on_stage = VoterGuide.objects.using('readonly').get(
+                        google_civic_election_id=google_civic_election_id,
+                        owner_we_vote_id__iexact=owner_we_vote_id)
+                else:
+                    voter_guide_on_stage = VoterGuide.objects.get(
+                        google_civic_election_id=google_civic_election_id,
+                        owner_we_vote_id__iexact=owner_we_vote_id)
                 voter_guide_on_stage_id = voter_guide_on_stage.id
                 status = "VOTER_GUIDE_FOUND_WITH_VOTER_WE_VOTE_ID "
             else:
@@ -535,7 +566,7 @@ class VoterGuideManager(models.Manager):
         }
         return results
 
-    def retrieve_most_recent_voter_guide_for_org(self, organization_we_vote_id):
+    def retrieve_most_recent_voter_guide_for_org(self, organization_we_vote_id, read_only=False):
         status = 'ENTERING_RETRIEVE_MOST_RECENT_VOTER_GUIDE_FOR_ORG'
         voter_guide_found = False
         voter_guide = VoterGuide()
@@ -543,7 +574,8 @@ class VoterGuideManager(models.Manager):
         for time_span in TIME_SPAN_LIST:
             voter_guide_by_time_span_results = voter_guide_manager.retrieve_voter_guide(
                 vote_smart_time_span=time_span,
-                organization_we_vote_id=organization_we_vote_id)
+                organization_we_vote_id=organization_we_vote_id,
+                read_only=read_only)
             if voter_guide_by_time_span_results['voter_guide_found']:
                 voter_guide_found = True
                 voter_guide = voter_guide_by_time_span_results['voter_guide']
@@ -563,7 +595,8 @@ class VoterGuideManager(models.Manager):
             for one_election in election_list:
                 voter_guide_results = voter_guide_manager.retrieve_voter_guide(
                     google_civic_election_id=one_election.google_civic_election_id,
-                    organization_we_vote_id=organization_we_vote_id)
+                    organization_we_vote_id=organization_we_vote_id,
+                    read_only=read_only)
                 if voter_guide_results['voter_guide_found']:
                     voter_guide_found = True
                     voter_guide = voter_guide_results['voter_guide']
@@ -1144,7 +1177,7 @@ class VoterGuideListManager(models.Model):
             success = True
         except Exception as e:
             handle_record_not_found_exception(e, logger=logger)
-            status = 'voterGuidesToFollowRetrieve: Unable to retrieve voter guides from db. ' \
+            status = 'RETRIEVE_VOTER_GUIDES_BY_ORGANIZATION_LIST: Unable to retrieve voter guides from db. ' \
                      '{error} [type: {error_type}]'.format(error=e.message, error_type=type(e))
             success = False
 
@@ -1232,14 +1265,18 @@ class VoterGuideListManager(models.Model):
     def retrieve_voter_guides_to_follow_by_election(self, google_civic_election_id, organization_we_vote_id_list,
                                                     search_string,
                                                     start_retrieve_at_this_number=0,
-                                                    maximum_number_to_retrieve=0, sort_by='', sort_order=''):
+                                                    maximum_number_to_retrieve=0, sort_by='', sort_order='',
+                                                    read_only=False):
         voter_guide_list = []
         voter_guide_list_found = False
         if not positive_value_exists(maximum_number_to_retrieve):
             maximum_number_to_retrieve = 30
 
         try:
-            voter_guide_query = VoterGuide.objects.all()
+            if read_only:
+                voter_guide_query = VoterGuide.objects.using('readonly').all()
+            else:
+                voter_guide_query = VoterGuide.objects.all()
             voter_guide_query = voter_guide_query.exclude(vote_smart_ratings_only=True)
             if search_string:
                 voter_guide_query = voter_guide_query.filter(Q(display_name__icontains=search_string) |
@@ -1278,7 +1315,7 @@ class VoterGuideListManager(models.Model):
             success = True
         except Exception as e:
             handle_record_not_found_exception(e, logger=logger)
-            status = 'voterGuidesToFollowRetrieve: Unable to retrieve voter guides from db. ' \
+            status = 'retrieve_voter_guides_to_follow_by_election: Unable to retrieve voter guides from db. ' \
                      '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
             success = False
 
@@ -1343,7 +1380,7 @@ class VoterGuideListManager(models.Model):
             success = True
         except Exception as e:
             handle_record_not_found_exception(e, logger=logger)
-            status = 'voterGuidesToFollowRetrieve: Unable to retrieve voter guides from db. ' \
+            status = 'retrieve_voter_guides_to_follow_by_time_span: Unable to retrieve voter guides from db. ' \
                      '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
             success = False
 
@@ -1357,7 +1394,8 @@ class VoterGuideListManager(models.Model):
 
     def retrieve_voter_guides_to_follow_generic(self, organization_we_vote_ids_followed_or_ignored_by_voter,
                                                 search_string,
-                                                maximum_number_to_retrieve=0, sort_by='', sort_order=''):
+                                                maximum_number_to_retrieve=0, sort_by='', sort_order='',
+                                                read_only=False):
         """
         Get the voter guides for orgs that we found by looking at the positions for an org found based on time span
         """
@@ -1367,7 +1405,10 @@ class VoterGuideListManager(models.Model):
             maximum_number_to_retrieve = 30
 
         try:
-            voter_guide_query = VoterGuide.objects.all()
+            if read_only:
+                voter_guide_query = VoterGuide.objects.using('readonly').all()
+            else:
+                voter_guide_query = VoterGuide.objects.all()
             # As of August 2018, we no longer want to support Vote Smart ratings voter guides
             voter_guide_query = voter_guide_query.exclude(vote_smart_time_span__isnull=False)
             voter_guide_query = voter_guide_query.exclude(vote_smart_ratings_only=True)
@@ -1410,7 +1451,7 @@ class VoterGuideListManager(models.Model):
             success = True
         except Exception as e:
             handle_record_not_found_exception(e, logger=logger)
-            status = 'voterGuidesToFollowRetrieve: Unable to retrieve voter guides from db. ' \
+            status = 'retrieve_voter_guides_to_follow_generic: Unable to retrieve voter guides from db. ' \
                      '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
             success = False
 

@@ -1662,7 +1662,7 @@ def choose_election_from_existing_data(voter_device_link, google_civic_election_
     # If a google_civic_election_id was passed in, then we simply return the ballot that was saved
     if positive_value_exists(google_civic_election_id):
         voter_ballot_saved_results = voter_ballot_saved_manager.retrieve_voter_ballot_saved_by_voter_id(
-            voter_id, google_civic_election_id)
+            voter_id, google_civic_election_id)  # Not read only
         status += voter_ballot_saved_results['status']
         if voter_ballot_saved_results['voter_ballot_saved_found']:
             voter_ballot_saved = voter_ballot_saved_results['voter_ballot_saved']
@@ -1713,9 +1713,9 @@ def choose_election_from_existing_data(voter_device_link, google_civic_election_
 
                 election_manager = ElectionManager()
                 if positive_value_exists(state_code):
-                    results = election_manager.retrieve_next_election_for_state(state_code)
+                    results = election_manager.retrieve_next_election_for_state(state_code)  # Read only
                 else:
-                    results = election_manager.retrieve_next_election_with_state_optional()
+                    results = election_manager.retrieve_next_election_with_state_optional()  # Read only
 
                 if results['election_found']:
                     election = results['election']
@@ -1777,9 +1777,9 @@ def choose_election_from_existing_data(voter_device_link, google_civic_election_
 
                 election_manager = ElectionManager()
                 if positive_value_exists(state_code):
-                    results = election_manager.retrieve_next_election_for_state(state_code)
+                    results = election_manager.retrieve_next_election_for_state(state_code)  # Read only
                 else:
-                    results = election_manager.retrieve_next_election_with_state_optional()
+                    results = election_manager.retrieve_next_election_with_state_optional()  # Read only
                 if results['election_found']:
                     election = results['election']
                     if positive_value_exists(election.google_civic_election_id):

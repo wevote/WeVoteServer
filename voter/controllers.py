@@ -468,9 +468,9 @@ def move_twitter_info_to_another_voter(from_voter, to_voter):
 
     twitter_user_manager = TwitterUserManager()
     to_voter_twitter_results = twitter_user_manager.retrieve_twitter_link_to_voter_from_voter_we_vote_id(
-        to_voter.we_vote_id)
+        to_voter.we_vote_id)  # Cannot be read_only
     from_voter_twitter_results = twitter_user_manager.retrieve_twitter_link_to_voter_from_voter_we_vote_id(
-        from_voter.we_vote_id)
+        from_voter.we_vote_id)  # Cannot be read_only
 
     # Move twitter_link_to_voter
     if to_voter_twitter_results['twitter_link_to_voter_found']:
@@ -1749,7 +1749,8 @@ def voter_retrieve_for_api(voter_device_id, state_code_from_ip_address='',
             return json_data
 
         voter_device_link_results = \
-            voter_device_link_manager.retrieve_voter_device_link_from_voter_device_id(voter_device_id)
+            voter_device_link_manager.retrieve_voter_device_link_from_voter_device_id(voter_device_id,
+                                                                                      read_only=True)
         if voter_device_link_results['voter_device_link_found']:
             voter_device_link = voter_device_link_results['voter_device_link']
             voter_id = voter_device_link.voter_id

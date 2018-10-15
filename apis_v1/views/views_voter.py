@@ -3,7 +3,7 @@
 # -*- coding: UTF-8 -*-
 
 from apis_v1.controllers import voter_count
-from ballot.controllers import choose_election_from_existing_data, voter_ballot_items_retrieve_for_api
+from ballot.controllers import voter_ballot_items_retrieve_for_api
 from ballot.models import copy_existing_ballot_items_from_stored_ballot
 from config.base import get_environment_variable
 from django.http import HttpResponse
@@ -33,13 +33,9 @@ from support_oppose_deciding.controllers import voter_opposing_save, voter_stop_
 from voter.controllers import voter_address_retrieve_for_api, voter_create_for_api, voter_merge_two_accounts_for_api, \
     voter_photo_save_for_api, voter_retrieve_for_api, voter_sign_out_for_api, \
     voter_split_into_two_accounts_for_api
-from voter.models import BALLOT_ADDRESS, fetch_voter_id_from_voter_device_link, VoterAddress, \
+from voter.models import BALLOT_ADDRESS, VoterAddress, \
     VoterAddressManager, VoterDeviceLink, VoterDeviceLinkManager, VoterManager
-from voter_guide.controllers import voter_guide_possibility_retrieve_for_api, voter_guide_possibility_save_for_api, \
-    voter_guide_save_for_api, \
-    voter_guides_followed_retrieve_for_api, voter_guides_ignored_retrieve_for_api, voter_guides_retrieve_for_api, \
-    voter_guides_to_follow_retrieve_for_api, voter_guides_followed_by_organization_retrieve_for_api, \
-    voter_guide_followers_retrieve_for_api, voter_follow_all_organizations_followed_by_organization_for_api
+from voter_guide.controllers import voter_follow_all_organizations_followed_by_organization_for_api
 import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, get_maximum_number_to_retrieve_from_request, \
     get_voter_device_id, is_voter_device_id_valid, positive_value_exists
@@ -362,7 +358,8 @@ def voter_address_save_view(request):  # voterAddressSave
     # We retrieve voter_device_link
     voter_ballot_saved_manager = VoterBallotSavedManager()
     voter_device_link_manager = VoterDeviceLinkManager()
-    voter_device_link_results = voter_device_link_manager.retrieve_voter_device_link(voter_device_id)
+    voter_device_link_results = voter_device_link_manager.retrieve_voter_device_link(voter_device_id,
+                                                                                     read_only=True)
     if voter_device_link_results['voter_device_link_found']:
         voter_device_link = voter_device_link_results['voter_device_link']
         voter_id = voter_device_link.voter_id
@@ -540,7 +537,6 @@ def voter_address_save_view(request):  # voterAddressSave
 
             if voter_address_update_results['success']:
                 # Replace the former google_civic_election_id from this voter_device_link
-                voter_device_link_manager = VoterDeviceLinkManager()
                 voter_device_link_results = voter_device_link_manager.retrieve_voter_device_link(voter_device_id)
                 if voter_device_link_results['voter_device_link_found']:
                     voter_device_link = voter_device_link_results['voter_device_link']
@@ -606,7 +602,8 @@ def voter_ballot_items_retrieve_from_google_civic_view(request):  # voterBallotI
         # After the ballot is retrieved from google we want to save some info about it for the voter
         if positive_value_exists(voter_device_id):
             voter_device_link_manager = VoterDeviceLinkManager()
-            voter_device_link_results = voter_device_link_manager.retrieve_voter_device_link(voter_device_id)
+            voter_device_link_results = voter_device_link_manager.retrieve_voter_device_link(voter_device_id,
+                                                                                             read_only=True)
             if voter_device_link_results['voter_device_link_found']:
                 voter_device_link = voter_device_link_results['voter_device_link']
                 voter_id = voter_device_link.voter_id
@@ -660,7 +657,8 @@ def voter_ballot_list_retrieve_view(request):  # voterBallotListRetrieve
 
     if positive_value_exists(voter_device_id):
         voter_device_link_manager = VoterDeviceLinkManager()
-        voter_device_link_results = voter_device_link_manager.retrieve_voter_device_link(voter_device_id)
+        voter_device_link_results = voter_device_link_manager.retrieve_voter_device_link(voter_device_id,
+                                                                                         read_only=True)
         voter_device_link = voter_device_link_results['voter_device_link']
         if voter_device_link_results['voter_device_link_found']:
             voter_id = voter_device_link.voter_id
@@ -898,37 +896,6 @@ def voter_facebook_sign_in_save_view(request):  # voterFacebookSignInSave
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 
 
-def voter_guide_possibility_retrieve_view(request):  # voterGuidePossibilityRetrieve
-    """
-    Retrieve a previously saved website that may contain a voter guide (voterGuidePossibilityRetrieve)
-    :param request:
-    :return:
-    """
-    voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
-    voter_guide_possibility_url = request.GET.get('voter_guide_possibility_url', '')
-    return voter_guide_possibility_retrieve_for_api(voter_device_id=voter_device_id,
-                                                    voter_guide_possibility_url=voter_guide_possibility_url)
-
-
-def voter_guide_possibility_save_view(request):  # voterGuidePossibilitySave
-    """
-    Save a website that may contain a voter guide (voterGuidePossibilitySave)
-    :param request:
-    :return:
-    """
-    voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
-    voter_guide_possibility_url = request.GET.get('voter_guide_possibility_url', '')
-    return voter_guide_possibility_save_for_api(voter_device_id=voter_device_id,
-                                                voter_guide_possibility_url=voter_guide_possibility_url)
-
-
-def voter_guides_followed_retrieve_view(request):  # voterGuidesFollowedRetrieve
-    voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
-    maximum_number_to_retrieve = get_maximum_number_to_retrieve_from_request(request)
-    return voter_guides_followed_retrieve_for_api(voter_device_id=voter_device_id,
-                                                  maximum_number_to_retrieve=maximum_number_to_retrieve)
-
-
 def voter_follow_all_organizations_followed_by_organization_view(request):
     # voterFollowAllOrganizationsFollowedByOrganization
     organization_we_vote_id = request.GET.get('organization_we_vote_id', '')
@@ -941,114 +908,6 @@ def voter_follow_all_organizations_followed_by_organization_view(request):
         organization_we_vote_id=organization_we_vote_id,
         maximum_number_to_follow=maximum_number_to_follow, user_agent_string=user_agent_string,
         user_agent_object=user_agent_object)
-
-
-def voter_guides_followed_by_organization_retrieve_view(request):  # voterGuidesFollowedByOrganizationRetrieve
-    voter_linked_organization_we_vote_id = request.GET.get('organization_we_vote_id', '')
-    filter_by_this_google_civic_election_id = request.GET.get('filter_by_this_google_civic_election_id', '')
-    voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
-    maximum_number_to_retrieve = get_maximum_number_to_retrieve_from_request(request)
-    return voter_guides_followed_by_organization_retrieve_for_api(
-        voter_device_id,
-        voter_linked_organization_we_vote_id=voter_linked_organization_we_vote_id,
-        filter_by_this_google_civic_election_id=filter_by_this_google_civic_election_id,
-        maximum_number_to_retrieve=maximum_number_to_retrieve)
-
-
-def voter_guide_followers_retrieve_view(request):  # voterGuideFollowersRetrieve
-    organization_we_vote_id = request.GET.get('organization_we_vote_id', '')
-    voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
-    maximum_number_to_retrieve = get_maximum_number_to_retrieve_from_request(request)
-    return voter_guide_followers_retrieve_for_api(
-        voter_device_id, organization_we_vote_id=organization_we_vote_id,
-        maximum_number_to_retrieve=maximum_number_to_retrieve)
-
-
-def voter_guide_save_view(request):  # voterGuideSave
-    voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
-    voter_guide_we_vote_id = request.GET.get('voter_guide_we_vote_id', '')
-    google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
-    return voter_guide_save_for_api(voter_device_id=voter_device_id,
-                                    voter_guide_we_vote_id=voter_guide_we_vote_id,
-                                    google_civic_election_id=google_civic_election_id)
-
-
-def voter_guides_ignored_retrieve_view(request):  # voterGuidesIgnoredRetrieve
-    voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
-    maximum_number_to_retrieve = get_maximum_number_to_retrieve_from_request(request)
-    return voter_guides_ignored_retrieve_for_api(voter_device_id=voter_device_id,
-                                                 maximum_number_to_retrieve=maximum_number_to_retrieve)
-
-
-def voter_guides_retrieve_view(request):  # voterGuidesRetrieve
-    voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
-    organization_we_vote_id = request.GET.get('organization_we_vote_id', '')
-    voter_we_vote_id = request.GET.get('voter_we_vote_id', '')
-    maximum_number_to_retrieve = get_maximum_number_to_retrieve_from_request(request)
-    return voter_guides_retrieve_for_api(voter_device_id=voter_device_id,
-                                         organization_we_vote_id=organization_we_vote_id,
-                                         voter_we_vote_id=voter_we_vote_id,
-                                         maximum_number_to_retrieve=maximum_number_to_retrieve)
-
-
-def voter_guides_to_follow_retrieve_view(request):  # voterGuidesToFollowRetrieve
-    """
-    Retrieve a list of voter_guides that a voter might want to follow (voterGuidesToFollow)
-    :param request:
-    :return:
-    """
-    voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
-    kind_of_ballot_item = request.GET.get('kind_of_ballot_item', '')
-    ballot_item_we_vote_id = request.GET.get('ballot_item_we_vote_id', '')
-    google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
-    search_string = request.GET.get('search_string', '')
-    use_test_election = positive_value_exists(request.GET.get('use_test_election', False))
-    maximum_number_to_retrieve = get_maximum_number_to_retrieve_from_request(request)
-    start_retrieve_at_this_number = request.GET.get('start_retrieve_at_this_number', 0)
-    filter_voter_guides_by_issue = positive_value_exists(request.GET.get('filter_voter_guides_by_issue', False))
-    # If we want to show voter guides associated with election first, but then show more after those are exhausted,
-    #  set add_voter_guides_not_from_election to True
-    add_voter_guides_not_from_election = request.GET.get('add_voter_guides_not_from_election', False)
-    add_voter_guides_not_from_election = positive_value_exists(add_voter_guides_not_from_election)
-
-    if positive_value_exists(ballot_item_we_vote_id):
-        # We don't need both ballot_item and google_civic_election_id
-        google_civic_election_id = 0
-    else:
-        if positive_value_exists(use_test_election):
-            google_civic_election_id = 2000  # The Google Civic API Test election
-        elif positive_value_exists(google_civic_election_id) or google_civic_election_id == 0:  # Why "0" election?
-            # If an election was specified, we can skip down to retrieving the voter_guides
-            pass
-        else:
-            # If here we don't have either a ballot_item or a google_civic_election_id.
-            # Look in the places we cache google_civic_election_id
-            google_civic_election_id = 0
-            voter_device_link_manager = VoterDeviceLinkManager()
-            voter_device_link_results = voter_device_link_manager.retrieve_voter_device_link(voter_device_id)
-            voter_device_link = voter_device_link_results['voter_device_link']
-            if voter_device_link_results['voter_device_link_found']:
-                voter_id = voter_device_link.voter_id
-                voter_address_manager = VoterAddressManager()
-                voter_address_results = voter_address_manager.retrieve_address(0, voter_id)
-                if voter_address_results['voter_address_found']:
-                    voter_address = voter_address_results['voter_address']
-                else:
-                    voter_address = VoterAddress()
-            else:
-                voter_address = VoterAddress()
-            results = choose_election_from_existing_data(voter_device_link, google_civic_election_id, voter_address)
-            google_civic_election_id = results['google_civic_election_id']
-
-        # In order to return voter_guides that are independent of an election or ballot_item, we need to pass in
-        # google_civic_election_id as 0
-
-    results = voter_guides_to_follow_retrieve_for_api(voter_device_id, kind_of_ballot_item, ballot_item_we_vote_id,
-                                                      google_civic_election_id, search_string,
-                                                      start_retrieve_at_this_number, maximum_number_to_retrieve,
-                                                      filter_voter_guides_by_issue,
-                                                      add_voter_guides_not_from_election)
-    return HttpResponse(json.dumps(results['json_data']), content_type='application/json')
 
 
 def voter_issue_follow_view(request):  # issueFollow
