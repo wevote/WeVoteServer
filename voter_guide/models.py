@@ -1392,9 +1392,10 @@ class VoterGuideListManager(models.Model):
         }
         return results
 
-    def retrieve_voter_guides_to_follow_generic(self, organization_we_vote_ids_followed_or_ignored_by_voter,
-                                                search_string,
+    def retrieve_voter_guides_to_follow_generic(self, organization_we_vote_ids_followed_or_ignored_by_voter=[],
+                                                search_string='',
                                                 maximum_number_to_retrieve=0, sort_by='', sort_order='',
+                                                google_civic_election_id_list=[],
                                                 read_only=False):
         """
         Get the voter guides for orgs that we found by looking at the positions for an org found based on time span
@@ -1413,9 +1414,16 @@ class VoterGuideListManager(models.Model):
             voter_guide_query = voter_guide_query.exclude(vote_smart_time_span__isnull=False)
             voter_guide_query = voter_guide_query.exclude(vote_smart_ratings_only=True)
 
-            if len(organization_we_vote_ids_followed_or_ignored_by_voter):
+            if positive_value_exists(len(organization_we_vote_ids_followed_or_ignored_by_voter)):
                 voter_guide_query = voter_guide_query.exclude(
                     organization_we_vote_id__in=organization_we_vote_ids_followed_or_ignored_by_voter)
+
+            if positive_value_exists(len(google_civic_election_id_list)):
+                google_civic_election_id_integer_list = []
+                for google_civic_election_id in google_civic_election_id_list:
+                    google_civic_election_id_integer_list.append(convert_to_int(google_civic_election_id))
+                voter_guide_query = voter_guide_query.filter(
+                    google_civic_election_id__in=google_civic_election_id_integer_list)
 
             if search_string:
                 # Each word in the search string can be anywhere in any field we search
@@ -1428,19 +1436,22 @@ class VoterGuideListManager(models.Model):
                 # If not searching, make sure we do not include individuals
                 voter_guide_query = voter_guide_query.exclude(voter_guide_owner_type__iexact=INDIVIDUAL)
 
-                # We also want to exclude voter guides with election_day_text smaller than today's date
-                timezone = pytz.timezone("America/Los_Angeles")
-                datetime_now = timezone.localize(datetime.now())
-                two_days = timedelta(days=2)
-                datetime_two_days_ago = datetime_now - two_days
-                earliest_date_to_show = datetime_two_days_ago.strftime("%Y-%m-%d")
-                voter_guide_query = voter_guide_query.exclude(election_day_text__lt=earliest_date_to_show)
-                voter_guide_query = voter_guide_query.exclude(election_day_text__isnull=True)
+                if not positive_value_exists(len(google_civic_election_id_list)):
+                    # We also want to exclude voter guides with election_day_text smaller than today's date
+                    timezone = pytz.timezone("America/Los_Angeles")
+                    datetime_now = timezone.localize(datetime.now())
+                    two_days = timedelta(days=2)
+                    datetime_two_days_ago = datetime_now - two_days
+                    earliest_date_to_show = datetime_two_days_ago.strftime("%Y-%m-%d")
+                    voter_guide_query = voter_guide_query.exclude(election_day_text__lt=earliest_date_to_show)
+                    voter_guide_query = voter_guide_query.exclude(election_day_text__isnull=True)
 
             if sort_order == 'desc':
                 voter_guide_query = voter_guide_query.order_by('-' + sort_by)[:maximum_number_to_retrieve]
-            else:
+            elif positive_value_exists(sort_by):
                 voter_guide_query = voter_guide_query.order_by(sort_by)[:maximum_number_to_retrieve]
+            else:
+                voter_guide_query = voter_guide_query[:maximum_number_to_retrieve]
 
             voter_guide_list = list(voter_guide_query)
             if len(voter_guide_list):
@@ -1456,8 +1467,13 @@ class VoterGuideListManager(models.Model):
             success = False
 
         # If we have multiple voter guides for one org, we only want to show the most recent
+        voter_guide_list_filtered = []
         if voter_guide_list_found:
-            voter_guide_list_filtered = self.remove_older_voter_guides_for_each_org(voter_guide_list)
+            if not positive_value_exists(len(google_civic_election_id_list)):
+                # If we haven't specified multiple elections, then remove old voter guides
+                voter_guide_list_filtered = self.remove_older_voter_guides_for_each_org(voter_guide_list)
+            else:
+                voter_guide_list_filtered = voter_guide_list
         else:
             voter_guide_list_filtered = []
 

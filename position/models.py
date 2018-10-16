@@ -2265,7 +2265,8 @@ class PositionListManager(models.Model):
                                                 stance_we_are_looking_for, friends_vs_public,
                                                 show_positions_current_voter_election=False,
                                                 exclude_positions_current_voter_election=False, voter_device_id='',
-                                                google_civic_election_id=0, state_code='', read_only=False):
+                                                google_civic_election_id=0,
+                                                state_code='', read_only=False):
         """
         Return a position list with all of the organization's positions.
         Incoming filters include: stance_we_are_looking_for, friends_vs_public, show_positions_current_voter_election,
