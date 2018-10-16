@@ -4169,6 +4169,105 @@ def retrieve_ballot_item_we_vote_ids_for_organizations_to_follow(voter_id,
     return results
 
 
+def retrieve_ballot_item_we_vote_ids_for_organization_static(
+        organization, google_civic_election_id,
+        stance_we_are_looking_for=SUPPORT,
+        state_code=''):
+    """
+    For this organization, we want to return a list of ballot_items that this organization has
+    an opinion about for one election.
+    """
+    status = ''
+    organization_found = True
+    try:
+        if not organization.id or not organization.we_vote_id:
+            organization_found = False
+    except Exception as e:
+        organization_found = False
+
+    if not organization_found:
+        results = {
+            'status':                           'RETRIEVE_BALLOT_ITEM_WE_VOTE_IDS_STATIC-ORGANIZATION_NOT_FOUND',
+            'success':                          False,
+            'count':                            0,
+            'organization_id':                  0,
+            'organization_we_vote_id':          "",
+            'google_civic_election_id':         google_civic_election_id,
+            'state_code':                       state_code,
+            'ballot_item_we_vote_ids_list':     [],
+        }
+        return results
+
+    if not positive_value_exists(google_civic_election_id):
+        results = {
+            'status':                           'RETRIEVE_BALLOT_ITEM_WE_VOTE_IDS_STATIC-ELECTION_NOT_FOUND',
+            'success':                          False,
+            'count':                            0,
+            'organization_id':                  0,
+            'organization_we_vote_id':          "",
+            'google_civic_election_id':         google_civic_election_id,
+            'state_code':                       state_code,
+            'ballot_item_we_vote_ids_list':     [],
+        }
+        return results
+
+    position_list_manager = PositionListManager()
+
+    organization_id = organization.id
+    organization_we_vote_id = organization.we_vote_id
+    friends_vs_public = PUBLIC_ONLY
+
+    position_list_raw = position_list_manager.retrieve_all_positions_for_organization(
+        organization_id, organization_we_vote_id, stance_we_are_looking_for, friends_vs_public,
+        google_civic_election_id=google_civic_election_id, read_only=True)
+
+    ballot_item_we_vote_ids_list = []
+    for one_position in position_list_raw:
+        # Collect the ballot_item_we_vote_id
+        if positive_value_exists(one_position.candidate_campaign_we_vote_id):
+            # kind_of_ballot_item = CANDIDATE
+            # ballot_item_id = one_position.candidate_campaign_id
+            ballot_item_we_vote_id = one_position.candidate_campaign_we_vote_id
+            # if not positive_value_exists(one_position.contest_office_we_vote_id) \
+            #         or not positive_value_exists(one_position.contest_office_name):
+            #     missing_office_information = True
+            # if not positive_value_exists(one_position.ballot_item_image_url_https):
+            #     missing_ballot_item_image = True
+            one_position_success = True
+        elif positive_value_exists(one_position.contest_measure_we_vote_id):
+            # kind_of_ballot_item = MEASURE
+            # ballot_item_id = one_position.contest_measure_id
+            ballot_item_we_vote_id = one_position.contest_measure_we_vote_id
+            one_position_success = True
+        elif positive_value_exists(one_position.contest_office_we_vote_id):
+            # kind_of_ballot_item = OFFICE
+            # ballot_item_id = one_position.contest_office_id
+            ballot_item_we_vote_id = one_position.contest_office_we_vote_id
+            one_position_success = True
+        else:
+            # kind_of_ballot_item = "UNKNOWN_BALLOT_ITEM"
+            # ballot_item_id = None
+            ballot_item_we_vote_id = None
+            one_position_success = False
+
+        if one_position_success:
+            ballot_item_we_vote_ids_list.append(ballot_item_we_vote_id)
+
+    status += 'RETRIEVE_BALLOT_ITEM_WE_VOTE_IDS-SUCCESS '
+    success = True
+    results = {
+        'status':                       status,
+        'success':                      success,
+        'count':                        len(position_list_raw),
+        'organization_id':              organization_id,
+        'organization_we_vote_id':      organization_we_vote_id,
+        'google_civic_election_id':     google_civic_election_id,
+        'state_code':                   state_code,
+        'ballot_item_we_vote_ids_list': ballot_item_we_vote_ids_list,
+    }
+    return results
+
+
 def reset_all_position_image_details_from_candidate(candidate_campaign, twitter_profile_image_url_https):
     """
     Reset all position image urls PositionEntered and PositionForFriends from candidate details

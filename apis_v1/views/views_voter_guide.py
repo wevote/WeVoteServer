@@ -167,23 +167,16 @@ def voter_guides_upcoming_retrieve_view(request):  # voterGuidesUpcomingRetrieve
     :param request:
     :return:
     """
-    voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
-    kind_of_ballot_item = request.GET.get('kind_of_ballot_item', '')
-    ballot_item_we_vote_id = request.GET.get('ballot_item_we_vote_id', '')
-    google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
-    search_string = request.GET.get('search_string', '')
-    use_test_election = positive_value_exists(request.GET.get('use_test_election', False))
-    maximum_number_to_retrieve = get_maximum_number_to_retrieve_from_request(request)
-    start_retrieve_at_this_number = request.GET.get('start_retrieve_at_this_number', 0)
-    filter_voter_guides_by_issue = positive_value_exists(request.GET.get('filter_voter_guides_by_issue', False))
-    # If we want to show voter guides associated with election first, but then show more after those are exhausted,
-    #  set add_voter_guides_not_from_election to True
-    add_voter_guides_not_from_election = request.GET.get('add_voter_guides_not_from_election', False)
-    add_voter_guides_not_from_election = positive_value_exists(add_voter_guides_not_from_election)
+    status = ""
+    google_civic_election_id_list = request.GET.get('google_civic_election_id_list', [])
 
-    results = voter_guides_upcoming_retrieve_for_api(voter_device_id, kind_of_ballot_item, ballot_item_we_vote_id,
-                                                      google_civic_election_id, search_string,
-                                                      start_retrieve_at_this_number, maximum_number_to_retrieve,
-                                                      filter_voter_guides_by_issue,
-                                                      add_voter_guides_not_from_election)
+    if positive_value_exists(google_civic_election_id_list):
+        if not positive_value_exists(len(google_civic_election_id_list)):
+            google_civic_election_id_list = []
+    else:
+        google_civic_election_id_list = []
+
+    results = voter_guides_upcoming_retrieve_for_api(google_civic_election_id_list=google_civic_election_id_list)
+    status += results['status']
+
     return HttpResponse(json.dumps(results['json_data']), content_type='application/json')

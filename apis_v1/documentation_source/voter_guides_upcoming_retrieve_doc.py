@@ -9,11 +9,6 @@ def voter_guides_upcoming_retrieve_doc_template_values(url_root):
     """
     required_query_parameter_list = [
         {
-            'name':         'voter_device_id',
-            'value':        'string',  # boolean, integer, long, string
-            'description':  'An 88 character unique identifier linked to a voter record on the server',
-        },
-        {
             'name':         'api_key',
             'value':        'string (from post, cookie, or get (in that order))',  # boolean, integer, long, string
             'description':  'The unique key provided to any organization using the WeVoteServer APIs',
@@ -21,35 +16,10 @@ def voter_guides_upcoming_retrieve_doc_template_values(url_root):
     ]
     optional_query_parameter_list = [
         {
-            'name':         'kind_of_ballot_item',
+            'name':         'google_civic_election_id_list',
             'value':        'string',  # boolean, integer, long, string
-            'description':  'What is the type of ballot item that we are retrieving? '
-                            '(kind_of_ballot_item is either "OFFICE", "CANDIDATE", "POLITICIAN" or "MEASURE")',
-        },
-        {
-            'name':         'ballot_item_we_vote_id',
-            'value':        'string',  # boolean, integer, long, string
-            'description':  'The unique identifier for a particular ballot item. If this variable is provided, '
-                            'we want to retrieve all of the voter guides that have something to say about this '
-                            'particular ballot item.',
-        },
-        {
-            'name':         'google_civic_election_id',
-            'value':        'integer',  # boolean, integer, long, string
-            'description':  'The unique identifier for a particular election. If not provided, use the most recent '
-                            'ballot for the voter\'s address.',
-        },
-        {
-            'name':         'search_string',
-            'value':        'string',  # boolean, integer, long, string
-            'description':  'A string of keyword(s) to search for (to find twitter handle or org name).',
-        },
-        {
-            'name':         'use_test_election',
-            'value':        'boolean',  # boolean, integer, long, string
-            'description':  'If you need to request a test election, pass this with the value \'True\'. Note that '
-                            'text_for_map_search (either passed into this API endpoint as a value, or previously saved '
-                            'with voterAddressSave) is required with every election, including the test election.',
+            'description':  'The unique identifier for one or more elections. If not provided, '
+                            'use all of the upcoming elections.',
         },
         {
             'name':         'start_retrieve_at_this_number',
@@ -62,17 +32,6 @@ def voter_guides_upcoming_retrieve_doc_template_values(url_root):
             'name':         'maximum_number_to_retrieve',
             'value':        'integer',  # boolean, integer, long, string
             'description':  'Defaults to 75 voter guides. Enter a value to set your own limit.',
-        },
-        {
-            'name':         'filter_voter_guides_by_issue',
-            'value':        'boolean',  # boolean, integer, long, string
-            'description':  'Filter the voter guides to contain organizations following the same issues as voter',
-        },
-        {
-            'name':         'add_voter_guides_not_from_election',
-            'value':        'boolean',  # boolean, integer, long, string
-            'description':  'When requesting election-related voter guides, if this is true, add to the end '
-                            'of the list additional voter guides not related to the election.',
         },
     ]
 
@@ -92,8 +51,8 @@ def voter_guides_upcoming_retrieve_doc_template_values(url_root):
     ]
 
     try_now_link_variables_dict = {
-        'kind_of_ballot_item': 'CANDIDATE',
-        'ballot_item_we_vote_id': 'wv01cand2897',
+        # 'kind_of_ballot_item': 'CANDIDATE',
+        # 'ballot_item_we_vote_id': 'wv01cand2897',
     }
 
     api_response = '{\n' \
@@ -151,14 +110,7 @@ def voter_guides_upcoming_retrieve_doc_template_values(url_root):
         'api_name': 'voterGuidesUpcomingRetrieve',
         'api_slug': 'voterGuidesUpcomingRetrieve',
         'api_introduction':
-            "Look up the election and ballot items that this person is focused on. Return the organizations, "
-            "public figures, and voters that have shared voter guides available to follow. Take into consideration "
-            "which voter guides the voter has previously ignored. "
-            "Do not show voter guides the voter is already following."
-            "If neither ballot_item_we_vote_id (paired with kind_of_ballot_item) nor google_civic_election_id are"
-            "passed in, and google_civic_election_id is set to '0', then simply return a list of voter guides "
-            "that haven't been followed yet. If google_civic_election_id is NOT set to 0, the routine tries to"
-            "figure out which election is being looked at in the voter_device_link or the voter_address.",
+            "Retrieve all voter guides for all upcoming elections.",
         'try_now_link': 'apis_v1:voterGuidesUpcomingRetrieveView',
         'try_now_link_variables_dict': try_now_link_variables_dict,
         'url_root': url_root,
