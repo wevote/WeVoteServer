@@ -9,6 +9,7 @@ from candidate.models import CandidateCampaignListManager, fetch_candidate_count
 from config.base import get_environment_variable
 from electoral_district.models import ElectoralDistrict, ElectoralDistrictManager
 from election.models import BallotpediaElection, ElectionManager
+from exception.models import handle_exception
 from geopy.geocoders import get_geocoder_for_service
 from import_export_batches.controllers_ballotpedia import store_ballotpedia_json_response_to_import_batch_system
 import json
@@ -17,6 +18,7 @@ from office.models import ContestOfficeListManager, ContestOfficeManager
 from polling_location.models import PollingLocationManager
 import requests
 from voter.models import fetch_voter_id_from_voter_device_link, VoterAddressManager
+import wevote_functions.admin
 from wevote_functions.functions import extract_state_code_from_address_string, positive_value_exists
 
 BALLOTPEDIA_API_KEY = get_environment_variable("BALLOTPEDIA_API_KEY")
@@ -34,6 +36,8 @@ BALLOTPEDIA_API_MEASURES_TYPE = "measures"
 BALLOTPEDIA_API_RACES_TYPE = "races"
 GEOCODE_TIMEOUT = 10
 GOOGLE_MAPS_API_KEY = get_environment_variable("GOOGLE_MAPS_API_KEY")
+
+logger = wevote_functions.admin.get_logger(__name__)
 
 
 def extract_value_from_array(structured_json, index_key, default_value):
@@ -579,40 +583,46 @@ def retrieve_ballot_items_from_polling_location(
             }
             return results
 
-        latitude_longitude = str(polling_location.latitude) + "," + str(polling_location.longitude)
-        response = requests.get(BALLOTPEDIA_API_CONTAINS_URL, params={
-            "access_token": BALLOTPEDIA_API_KEY,
-            "point": latitude_longitude,
-        })
+        try:
+            latitude_longitude = str(polling_location.latitude) + "," + str(polling_location.longitude)
+            response = requests.get(BALLOTPEDIA_API_CONTAINS_URL, params={
+                "access_token": BALLOTPEDIA_API_KEY,
+                "point": latitude_longitude,
+            })
 
-        structured_json = json.loads(response.text)
+            structured_json = json.loads(response.text)
 
-        # Use Ballotpedia API call counter to track the number of queries we are doing each day
-        ballotpedia_api_counter_manager = BallotpediaApiCounterManager()
-        ballotpedia_api_counter_manager.create_counter_entry(BALLOTPEDIA_API_CONTAINS_TYPE,
-                                                             google_civic_election_id=google_civic_election_id,
-                                                             ballotpedia_election_id=0)
+            # Use Ballotpedia API call counter to track the number of queries we are doing each day
+            ballotpedia_api_counter_manager = BallotpediaApiCounterManager()
+            ballotpedia_api_counter_manager.create_counter_entry(BALLOTPEDIA_API_CONTAINS_TYPE,
+                                                                 google_civic_election_id=google_civic_election_id,
+                                                                 ballotpedia_election_id=0)
 
-        contains_api = True
-        groom_results = groom_ballotpedia_data_for_processing(structured_json, google_civic_election_id, state_code,
-                                                              contains_api)
+            contains_api = True
+            groom_results = groom_ballotpedia_data_for_processing(structured_json, google_civic_election_id, state_code,
+                                                                  contains_api)
 
-        modified_json_list = groom_results['modified_json_list']
-        kind_of_batch = groom_results['kind_of_batch']
+            modified_json_list = groom_results['modified_json_list']
+            kind_of_batch = groom_results['kind_of_batch']
 
-        # This function makes sure there are candidates attached to an office before including the office
-        #  on the ballot.
-        ballot_items_results = process_ballotpedia_voter_districts(google_civic_election_id, state_code,
-                                                                   modified_json_list, polling_location_we_vote_id)
+            # This function makes sure there are candidates attached to an office before including the office
+            #  on the ballot.
+            ballot_items_results = process_ballotpedia_voter_districts(google_civic_election_id, state_code,
+                                                                       modified_json_list, polling_location_we_vote_id)
 
-        if ballot_items_results['ballot_items_found']:
-            ballot_item_dict_list = ballot_items_results['ballot_item_dict_list']
+            if ballot_items_results['ballot_items_found']:
+                ballot_item_dict_list = ballot_items_results['ballot_item_dict_list']
 
-            results = store_ballotpedia_json_response_to_import_batch_system(
-                ballot_item_dict_list, google_civic_election_id, kind_of_batch, batch_set_id, state_code=state_code)
-            status += results['status']
-            if 'batch_header_id' in results:
-                batch_header_id = results['batch_header_id']
+                results = store_ballotpedia_json_response_to_import_batch_system(
+                    ballot_item_dict_list, google_civic_election_id, kind_of_batch, batch_set_id, state_code=state_code)
+                status += results['status']
+                if 'batch_header_id' in results:
+                    batch_header_id = results['batch_header_id']
+        except Exception as e:
+            success = False
+            status += 'ERROR FAILED retrieve_ballot_items_from_polling_location ' \
+                      '{error} [type: {error_type}] '.format(error=e, error_type=type(e))
+            handle_exception(e, logger=logger, exception_message=status)
 
     results = {
         'success': success,
