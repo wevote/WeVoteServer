@@ -1757,7 +1757,7 @@ def voter_guides_upcoming_retrieve_for_api(google_civic_election_id_list=[]):
 
     voter_guide_list_manager = VoterGuideListManager()
     voter_guide_results = voter_guide_list_manager.retrieve_voter_guides_to_follow_generic(
-        maximum_number_to_retrieve=1000,
+        maximum_number_to_retrieve=500, sort_by='twitter_followers_count', sort_order='desc',
         google_civic_election_id_list=google_civic_election_id_list, read_only=True)
 
     if voter_guide_results['voter_guide_list_found']:
@@ -2843,7 +2843,7 @@ def retrieve_voter_guides_followed(voter_id):
     voter_guide_list = []
     if results['voter_guide_list_found']:
         voter_guide_list = results['voter_guide_list']
-        status = 'SUCCESSFUL_RETRIEVE_OF_VOTER_GUIDES_FOLLOWED'
+        status = 'SUCCESSFUL_RETRIEVE_VOTER_GUIDES_FOLLOWED '
         success = True
         if len(voter_guide_list):
             voter_guide_list_found = True
@@ -2884,7 +2884,7 @@ def retrieve_voter_guides_followed_by_organization_we_vote_id(organization_we_vo
     voter_guide_list = []
     if results['voter_guide_list_found']:
         voter_guide_list = results['voter_guide_list']
-        status = 'SUCCESSFUL_RETRIEVE_OF_VOTER_GUIDES_FOLLOWED'
+        status = 'SUCCESSFUL_RETRIEVE_VOTER_GUIDES_FOLLOWED_BY_ORGANIZATION_WE_VOTE_ID '
         success = True
         if len(voter_guide_list):
             voter_guide_list_found = True
