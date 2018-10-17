@@ -221,6 +221,13 @@ def import_polling_locations_process_view(request):
     state_code = request.GET.get('state_code', '')
     # state_code = 'mo'  # State code for Missouri
 
+    if not positive_value_exists(state_code):
+        messages.add_message(request, messages.INFO,
+                             'State code required to run import_polling_locations_process.')
+        return HttpResponseRedirect(reverse('polling_location:polling_location_list',
+                                            args=()) + "?state_code={var}".format(
+            var=state_code))
+
     results = import_and_save_all_polling_locations_data(state_code.lower())
 
     messages.add_message(request, messages.INFO,
