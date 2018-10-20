@@ -4,6 +4,7 @@
 
 from .controllers import *
 from .models import ALPHABETICAL_ASCENDING, Issue, OrganizationLinkToIssue
+from follow.models import FollowIssue
 from admin_tools.views import redirect_to_sign_in_page
 from config.base import get_environment_variable
 from django.db.models import Q
@@ -258,6 +259,9 @@ def issue_list_view(request):
 
     # Order based on number of organizations per issue
     altered_issue_list.sort(key=lambda x: x.linked_organization_list_count, reverse=True)
+
+    # include issue_followers in the issue list
+    add_issue_followers(altered_issue_list)
 
     status_print_list = ""
     status_print_list += "issue_list_count: " + \
@@ -888,3 +892,18 @@ def issue_partisan_analysis_view(request):
         'state_list':               sorted_state_list,
     }
     return render(request, 'issue/issue_partisan_analysis.html', template_values)
+
+
+def add_issue_followers(issue_list):
+    follow_models = FollowIssue.objects.all()
+    issue_to_follow_count = {issue.we_vote_id:0 for issue in issue_list}
+
+    print(follow_models)
+
+    for model in follow_models:
+        wevote_id = model.issue_we_vote_id
+        if model.is_following():
+            issue_to_follow_count[wevote_id] += 1
+
+    for issue in issue_list:
+        issue.issue_followers_count = issue_to_follow_count[issue.we_vote_id]

@@ -2,13 +2,54 @@
 
 [Back to Install Table of Contents](README_API_INSTALL.md)
 
-## Installing PostgreSQL on Mac
+## Installing and setting up PostgreSQL and pgAdmin4 using Homebrew on Mac
+If unfamiliar with Homebrew, please see the instructions below this section to setup the WeVote server. Otherwise continue with the sections below this one.
 
-If you are familiar with Homebrew you may install PostgreSQL by running the below command:
-
+To install PostgreSQL run the following command (assuming you've installed Homebrew on your Mac).
 ```
 brew install postgresql
 ```
+
+Start PostgreSQL by running
+
+```
+brew services start postgresql
+```
+
+To create a database and log into PostgreSQL use:
+
+```
+createdb
+psql
+```
+
+You should see a prompt with your name pop-up which means everything works as expected. Once you've asserted it works, you may exit with Crtl+Z. You have to create a second user called postgres in order to be able to connect with and log in to pgAdmin. 
+
+```
+createuser -s postgres
+```
+
+You should create a password for this superuser. Log back in using `psql` and run:
+
+```
+ALTER USER  postgres  WITH PASSWORD '<your-password-here>';
+```
+
+Now you are ready to install pgAdmin4. Run:
+
+```
+brew cask install pgadmin4
+```
+
+Now open pgAdmin by clicking on the icon in your applications folder. From here on, you may follow the instructions in the `Setup - Install pgAdmin 4` section of this README starting from step 1: Right-click on "Servers" and choose "Create > Server".
+
+Note that you may terminate your PostgreSQL once done with:
+
+```
+brew services stop postgresql
+```
+
+## Installing PostgreSQL on Mac
 
 Otherwise, you can follow the below instructions to setup PostgreSQL.
 
