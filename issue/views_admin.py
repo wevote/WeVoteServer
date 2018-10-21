@@ -898,8 +898,6 @@ def add_issue_followers(issue_list):
     follow_models = FollowIssue.objects.all()
     issue_to_follow_count = {issue.we_vote_id:0 for issue in issue_list}
 
-    print(follow_models)
-
     for model in follow_models:
         wevote_id = model.issue_we_vote_id
         if model.is_following():
