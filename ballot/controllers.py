@@ -1944,6 +1944,7 @@ def voter_ballot_items_retrieve_for_one_election_for_api(voter_device_id, voter_
                 kind_of_ballot_item = MEASURE
                 measure_id = ballot_item.contest_measure_id
                 measure_we_vote_id = ballot_item.contest_measure_we_vote_id
+                measure_display_name_number = 100
                 one_ballot_item = {
                     'ballot_item_display_name':     ballot_item.ballot_item_display_name,
                     'google_civic_election_id':     ballot_item.google_civic_election_id,
