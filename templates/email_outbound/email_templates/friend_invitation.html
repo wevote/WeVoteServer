@@ -45,7 +45,7 @@
                     <td height="28" style="line-height:28px;">&nbsp;</td>
                   </tr>
                   <tr>
-                    <td style=""><span class="mb_text" style="font-family:Helvetica Neue,Helvetica,Lucida Grande,tahoma,verdana,arial,sans-serif;font-size:16px;line-height:21px;color:#141823;"><a href="{{ see_all_friend_requests_url }}" style="color:#3b5998;text-decoration:none;">{% if sender_name %}{{ sender_name }}{% else %}{{ sender_email_address }}{% endif %}</a> wants to be friends with you on We Vote. Each of you will see what the other supports or opposes.</span></td>
+                    <td style=""><span class="mb_text" style="font-family:Helvetica Neue,Helvetica,Lucida Grande,tahoma,verdana,arial,sans-serif;font-size:16px;line-height:21px;color:#141823;"><a href="{{ see_all_friend_requests_url }}" style="color:#3b5998;text-decoration:none;">{% if sender_name %}{{ sender_name }}{% else %}{{ sender_email_address }}{% endif %}</a> wants to be friends with you on We Vote. Each of you will see what the other supports or opposes. If the Confirm Request button does not work, please copy and paste this link into a browser: {{ confirm_friend_request_url }} If the See All Requests button does not work, please use this link: {{ see_all_friend_requests_url }}</span></td>
                   </tr>
                   <tr style="">
                     <td height="14" style="line-height:14px;">&nbsp;</td>
@@ -114,19 +114,23 @@
                   </tr>
                   <tr>
                     <td class="mb_blk" style="">
-                      <a href="{{ confirm_friend_request_url }}" style="color:#3b5998;text-decoration:none;">
                         <table cellspacing="0" cellpadding="0" width="100%" style="border-collapse:collapse;">
                           <tr>
                             <td style="border-collapse:collapse;border-radius:2px;text-align:center;display:block;border:solid 1px #344c80;box-shadow:inset 0 1px 1px rgba(255, 255, 255, 0.1),0 1px 0 rgba(0, 0, 0, 0.1);background:#4c649b;padding:7px 16px 11px 16px;">
-                      <a href="{{ confirm_friend_request_url }}" style="color:#3b5998;text-decoration:none;display:block;"><center><font size="3"><span style="font-family:Helvetica Neue,Helvetica,Lucida Grande,tahoma,verdana,arial,sans-serif;white-space:nowrap;font-weight:bold;vertical-align:middle;color:#ffffff;text-shadow:0 -1px 0 #415686;font-size:14px;line-height:14px;">Confirm&nbsp;Request</span></font></center></a></td></tr></table></a>
+                      <a href="{{ confirm_friend_request_url }}" style="color:#3b5998;text-decoration:none;display:block;"><center><font size="3"><span style="font-family:Helvetica Neue,Helvetica,Lucida Grande,tahoma,verdana,arial,sans-serif;white-space:nowrap;font-weight:bold;vertical-align:middle;color:#ffffff;text-shadow:0 -1px 0 #415686;font-size:14px;line-height:14px;">Confirm&nbsp;Request</span></font></center></a>
+                            </td>
+                          </tr>
+                        </table>
                     </td>
                     <td width="10" style="display:block;width:10px;" class="mb_hide">&nbsp;&nbsp;&nbsp;</td>
                     <td class="mb_blk" style="">
-                      <a href="{{ see_all_friend_requests_url }}" style="color:#3b5998;text-decoration:none;">
                         <table cellspacing="0" cellpadding="0" width="100%" style="border-collapse:collapse;">
                           <tr>
                             <td style="border-collapse:collapse;border-radius:2px;text-align:center;display:block;border:solid 1px #c9ccd1;box-shadow:0 1px 0 rgba(0, 0, 0, 0.04);background:#f6f7f8;padding:7px 16px 11px 16px;">
-                      <a href="{{ see_all_friend_requests_url }}" style="color:#3b5998;text-decoration:none;display:block;"><center><font size="3"><span style="font-family:Helvetica Neue,Helvetica,Lucida Grande,tahoma,verdana,arial,sans-serif;white-space:nowrap;font-weight:bold;vertical-align:middle;color:#525252;text-shadow:0 1px 0 #ffffff;font-size:14px;line-height:14px;">See&nbsp;All&nbsp;Requests</span></font></center></a></td></tr></table></a>
+                      <a href="{{ see_all_friend_requests_url }}" style="color:#3b5998;text-decoration:none;display:block;"><center><font size="3"><span style="font-family:Helvetica Neue,Helvetica,Lucida Grande,tahoma,verdana,arial,sans-serif;white-space:nowrap;font-weight:bold;vertical-align:middle;color:#525252;text-shadow:0 1px 0 #ffffff;font-size:14px;line-height:14px;">See&nbsp;All&nbsp;Requests</span></font></center></a>
+                            </td>
+                          </tr>
+                        </table>
                     </td>
                     <td width="100%" class="mb_hide" style=""></td>
                   </tr>

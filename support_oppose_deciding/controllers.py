@@ -512,6 +512,7 @@ def positions_count_for_one_ballot_item_for_api(voter_device_id, ballot_item_we_
     We want to return a JSON file with the a list of the support and oppose counts from the orgs, friends and
     public figures the voter follows
     """
+    status = "POSITIONS_COUNT_FOR_ONE_BALLOT_ITEM-ENTERING "
     # Get voter_id from the voter_device_id so we can know whose bookmarks to retrieve
     results = is_voter_device_id_valid(voter_device_id)
     if not results['success']:
@@ -577,7 +578,8 @@ def positions_count_for_one_ballot_item_for_api(voter_device_id, ballot_item_we_
     if "cand" in ballot_item_we_vote_id:  # Is a Candidate
         # We don't need to retrieve the candidate
 
-        # Public Positions
+        # #############################
+        # Public Positions: Candidates
         retrieve_public_positions_now = True  # The alternate is positions for friends-only
         most_recent_only = True
         public_support_positions_list_for_one_ballot_item = \
@@ -614,7 +616,8 @@ def positions_count_for_one_ballot_item_for_api(voter_device_id, ballot_item_we_
             if update_results['position_network_score_updated']:
                 public_positions_updated = True
 
-        # Friend's-only Positions
+        # ####################################
+        # Friend's-only Positions: Candidates
         retrieve_public_positions_now = False  # Return friends-only positions counts
         most_recent_only = True
         friends_only_support_positions_list_for_one_ballot_item = \
@@ -627,13 +630,13 @@ def positions_count_for_one_ballot_item_for_api(voter_device_id, ballot_item_we_
                 OPPOSE, most_recent_only, friends_we_vote_id_list=friends_we_vote_id_list)
 
         # Filter to show friend's positions
-        public_results = finalize_support_and_oppose_positions_count(
+        friends_results = finalize_support_and_oppose_positions_count(
             voter_id, show_positions_this_voter_follows,
             organizations_followed_by_voter_by_id, friends_we_vote_id_list,
             friends_only_support_positions_list_for_one_ballot_item,
             friends_only_oppose_positions_list_for_one_ballot_item)
-        friend_filtered_support_positions = public_results['support_positions_followed']
-        friend_filtered_oppose_positions = public_results['oppose_positions_followed']
+        friend_filtered_support_positions = friends_results['support_positions_followed']
+        friend_filtered_oppose_positions = friends_results['oppose_positions_followed']
 
         for one_position in friend_filtered_support_positions:
             # TODO: I think we might want to use organization_we_vote_id instead of voter_we_vote_id
@@ -679,7 +682,8 @@ def positions_count_for_one_ballot_item_for_api(voter_device_id, ballot_item_we_
     elif "meas" in ballot_item_we_vote_id:  # Is a measure
         # We don't need to retrieve the measure
 
-        # Public Positions
+        # ###########################
+        # Public Positions: Measures
         retrieve_public_positions_now = True  # The alternate is positions for friends-only
         most_recent_only = True
         public_support_positions_list_for_one_ballot_item = \
@@ -691,26 +695,16 @@ def positions_count_for_one_ballot_item_for_api(voter_device_id, ballot_item_we_
                 retrieve_public_positions_now, 0, ballot_item_we_vote_id,
                 OPPOSE, most_recent_only)
 
-        # Friend's-only Positions
-        retrieve_public_positions_now = False  # Return friends-only positions counts
-        most_recent_only = True
-        friends_support_positions_list_for_one_ballot_item = \
-            position_list_manager.retrieve_all_positions_for_contest_measure(
-                retrieve_public_positions_now, 0, ballot_item_we_vote_id,
-                SUPPORT, most_recent_only, friends_we_vote_id_list)
-        friends_oppose_positions_list_for_one_ballot_item = \
-            position_list_manager.retrieve_all_positions_for_contest_measure(
-                retrieve_public_positions_now, 0, ballot_item_we_vote_id,
-                OPPOSE, most_recent_only, friends_we_vote_id_list)
+        # Filter to show positions of the orgs you are following
+        public_results = finalize_support_and_oppose_positions_count(
+            voter_id, show_positions_this_voter_follows,
+            organizations_followed_by_voter_by_id, friends_we_vote_id_list,
+            public_support_positions_list_for_one_ballot_item,
+            public_oppose_positions_list_for_one_ballot_item)
+        public_filtered_support_positions = public_results['support_positions_followed']
+        public_filtered_oppose_positions = public_results['oppose_positions_followed']
 
-        support_positions_list_for_one_ballot_item = public_support_positions_list_for_one_ballot_item + \
-            friends_support_positions_list_for_one_ballot_item
-        oppose_positions_list_for_one_ballot_item = public_oppose_positions_list_for_one_ballot_item + \
-            friends_oppose_positions_list_for_one_ballot_item
-
-        for one_position in support_positions_list_for_one_ballot_item:
-            # TODO We may need to separate looping through friends vs. organizations -- this *might* want to be
-            #  voter_we_vote_id instead of organization_we_vote_id (see note above)
+        for one_position in public_filtered_support_positions:
             support_we_vote_id_list.append(one_position.organization_we_vote_id)
             support_name_list.append(one_position.speaker_display_name)
             update_results = update_or_create_position_network_score_wrapper(
@@ -718,7 +712,7 @@ def positions_count_for_one_ballot_item_for_api(voter_device_id, ballot_item_we_
             if update_results['position_network_score_updated']:
                 public_positions_updated = True
 
-        for one_position in oppose_positions_list_for_one_ballot_item:
+        for one_position in public_filtered_oppose_positions:
             oppose_we_vote_id_list.append(one_position.organization_we_vote_id)
             oppose_name_list.append(one_position.speaker_display_name)
             update_results = update_or_create_position_network_score_wrapper(
@@ -726,11 +720,58 @@ def positions_count_for_one_ballot_item_for_api(voter_device_id, ballot_item_we_
             if update_results['position_network_score_updated']:
                 public_positions_updated = True
 
+        # ##################################
+        # Friend's-only Positions: Measures
+        retrieve_public_positions_now = False  # Return friends-only positions counts
+        most_recent_only = True
+        friends_only_support_positions_list_for_one_ballot_item = \
+            position_list_manager.retrieve_all_positions_for_contest_measure(
+                retrieve_public_positions_now, 0, ballot_item_we_vote_id,
+                SUPPORT, most_recent_only, friends_we_vote_id_list=friends_we_vote_id_list)
+        friends_only_oppose_positions_list_for_one_ballot_item = \
+            position_list_manager.retrieve_all_positions_for_contest_measure(
+                retrieve_public_positions_now, 0, ballot_item_we_vote_id,
+                OPPOSE, most_recent_only, friends_we_vote_id_list=friends_we_vote_id_list)
+
+        # Filter to show friend's positions
+        friends_results = finalize_support_and_oppose_positions_count(
+            voter_id, show_positions_this_voter_follows,
+            organizations_followed_by_voter_by_id, friends_we_vote_id_list,
+            friends_only_support_positions_list_for_one_ballot_item,
+            friends_only_oppose_positions_list_for_one_ballot_item)
+        friend_filtered_support_positions = friends_results['support_positions_followed']
+        friend_filtered_oppose_positions = friends_results['oppose_positions_followed']
+
+        for one_position in friend_filtered_support_positions:
+            # TODO: I think we might want to use organization_we_vote_id instead of voter_we_vote_id
+            #  but this needs to be checked
+            support_we_vote_id_list.append(one_position.voter_we_vote_id)
+            support_name_list.append(one_position.speaker_display_name)
+            update_results = update_or_create_position_network_score_wrapper(
+                voter_id, voter_we_vote_id, one_position)
+            if update_results['position_network_score_updated']:
+                public_positions_updated = True
+
+        for one_position in friend_filtered_oppose_positions:
+            oppose_we_vote_id_list.append(one_position.voter_we_vote_id)
+            oppose_name_list.append(one_position.speaker_display_name)
+            update_results = update_or_create_position_network_score_wrapper(
+                voter_id, voter_we_vote_id, one_position)
+            if update_results['position_network_score_updated']:
+                public_positions_updated = True
+
+        # Now calculate the total counts
+        support_positions_list_for_one_ballot_item = public_support_positions_list_for_one_ballot_item + \
+            friends_only_support_positions_list_for_one_ballot_item
+        oppose_positions_list_for_one_ballot_item = public_oppose_positions_list_for_one_ballot_item + \
+            friends_only_oppose_positions_list_for_one_ballot_item
+
         finalize_results = finalize_support_and_oppose_positions_count(
             voter_id, show_positions_this_voter_follows,
             organizations_followed_by_voter_by_id, friends_we_vote_id_list,
             support_positions_list_for_one_ballot_item,
             oppose_positions_list_for_one_ballot_item)
+
         one_ballot_item_results = {
             'ballot_item_we_vote_id':   ballot_item_we_vote_id,
             'support_count':            finalize_results['support_positions_count'],
@@ -748,7 +789,7 @@ def positions_count_for_one_ballot_item_for_api(voter_device_id, ballot_item_we_
 
     json_data = {
         'success':                  success,
-        'status':                   "POSITIONS_COUNT_FOR_ONE_BALLOT_ITEM",
+        'status':                   status,
         'ballot_item_we_vote_id':   ballot_item_we_vote_id,
         'position_counts_list':     position_counts_list_results,
     }
@@ -759,7 +800,9 @@ def finalize_support_and_oppose_positions_count(voter_id, show_positions_this_vo
                                                 organizations_followed_by_voter_by_id, friends_we_vote_id_list,
                                                 support_positions_list_for_one_ballot_item,
                                                 oppose_positions_list_for_one_ballot_item):
+    oppose_positions_followed = []
     position_list_manager = PositionListManager()
+    support_positions_followed = []
     if show_positions_this_voter_follows:
         support_positions_followed = position_list_manager.calculate_positions_followed_by_voter(
             voter_id, support_positions_list_for_one_ballot_item, organizations_followed_by_voter_by_id,
