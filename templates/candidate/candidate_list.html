@@ -307,7 +307,8 @@
                 <td>
                 <span class="u-no-break">
                   <a href="{% url 'candidate:candidate_edit' candidate.id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}&page={{ current_page_number }}"
-                     target="_blank">{{ candidate.candidate_name }}</a>
+                     class="u-no-break"
+                     target="_blank">{{ candidate.candidate_name }} <span class="glyphicon glyphicon-new-window"></span></a>
                 </span>
                 <br />
                     {{ candidate.we_vote_id }}
