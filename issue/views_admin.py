@@ -901,7 +901,10 @@ def add_issue_followers(issue_list):
     for model in follow_models:
         wevote_id = model.issue_we_vote_id
         if model.is_following():
-            issue_to_follow_count[wevote_id] += 1
+            try:
+                issue_to_follow_count[we_vote_id] += 1
+            except KeyError:
+                issue_to_follow_count[we_vote_id] = 1
 
     for issue in issue_list:
         issue.issue_followers_count = issue_to_follow_count[issue.we_vote_id]
