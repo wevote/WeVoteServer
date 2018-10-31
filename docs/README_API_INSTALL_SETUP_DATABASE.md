@@ -69,7 +69,9 @@ login:
 
     python manage.py createsuperuser
     
-Note: If you ever need to update the password for this account, you can use this command, with your email address: `python manage.py changepassword dalemcgrew@yahoo.com`
+Note 1: If you ever need to update the password for this account, you can use this command, with your email address: `python manage.py changepassword dalemcgrew@yahoo.com`
+
+Note 2: The first time you sign in, you will need to sign out, and then sign in again to make sure you have all of your access rights.
 
 or
 
