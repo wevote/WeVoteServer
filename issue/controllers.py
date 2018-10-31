@@ -51,7 +51,7 @@ def issues_import_from_structured_json(structured_json):
         hide_issue = one_issue["hide_issue"] if "hide_issue" in one_issue else True  # We want to default to hiding
         issue_name = one_issue["issue_name"] if "issue_name" in one_issue else False
         issue_description = one_issue["issue_description"] if "issue_description" in one_issue else False
-        issue_image_url = one_issue["issue_image_url"] if "issue_image_url" in one_issue else False
+        issue_icon_local_path = one_issue["issue_icon_local_path"] if "issue_icon_local_path" in one_issue else False
         issue_followers_count = one_issue["issue_followers_count"] if "issue_followers_count" in one_issue else False
         linked_organization_count = \
             one_issue["linked_organization_count"] if "linked_organization_count" in one_issue else False
@@ -98,8 +98,8 @@ def issues_import_from_structured_json(structured_json):
             # Now save all of the fields in common to updating an existing entry vs. creating a new entry
             if issue_description is not False:
                 issue_on_stage.issue_description = issue_description
-            if issue_image_url is not False:
-                issue_on_stage.issue_image_url = issue_image_url
+            if issue_icon_local_path is not False:
+                issue_on_stage.issue_icon_local_path = issue_icon_local_path
             if issue_followers_count is not False:
                 issue_on_stage.issue_followers_count = issue_followers_count
             if linked_organization_count is not False:
@@ -179,12 +179,13 @@ def issue_retrieve_for_api(issue_id, issue_we_vote_id):  # issueRetrieve
             'we_vote_id':               issue.we_vote_id,
             'issue_name':               issue.issue_name,
             'issue_description':        issue.issue_description,
+            'issue_icon_local_path':    issue.issue_icon_local_path,
             'issue_image_url':          issue.we_vote_hosted_image_url_medium
             if positive_value_exists(issue.we_vote_hosted_image_url_medium)
-            else issue.issue_image_url,
+            else issue.we_vote_hosted_image_url_large,
             'issue_photo_url_large':    issue.we_vote_hosted_image_url_large
             if positive_value_exists(issue.we_vote_hosted_image_url_large)
-            else issue.issue_image_url,
+            else issue.we_vote_hosted_image_url_medium,
             'issue_photo_url_medium':   issue.we_vote_hosted_image_url_medium,
             'issue_photo_url_tiny':     issue.we_vote_hosted_image_url_tiny,
             'hide_issue':               issue.hide_issue,
@@ -289,9 +290,10 @@ def issues_retrieve_for_api(voter_device_id, sort_formula, google_civic_election
             'issue_we_vote_id':         issue.we_vote_id,
             'issue_name':               issue.issue_name,
             'issue_description':        issue.issue_description,
+            'issue_icon_local_path':    issue.issue_icon_local_path,
             'issue_image_url':          issue.we_vote_hosted_image_url_medium
             if positive_value_exists(issue.we_vote_hosted_image_url_medium)
-            else issue.issue_image_url,
+            else issue.we_vote_hosted_image_url_large,
             'issue_photo_url_large':    issue.we_vote_hosted_image_url_large,
             'issue_photo_url_medium':   issue.we_vote_hosted_image_url_medium,
             'issue_photo_url_tiny':     issue.we_vote_hosted_image_url_tiny,
@@ -627,9 +629,10 @@ def retrieve_issues_to_follow_for_api(voter_device_id, sort_formula):  # retriev
                 'issue_we_vote_id':             issue.we_vote_id,
                 'issue_name':                   issue.issue_name,
                 'issue_description':            issue.issue_description,
+                'issue_icon_local_path':        issue.issue_icon_local_path,
                 'issue_image_url':              issue.we_vote_hosted_image_url_medium
                 if positive_value_exists(issue.we_vote_hosted_image_url_medium)
-                else issue.issue_image_url,
+                else issue.we_vote_hosted_image_url_large,
                 'issue_photo_url_large':        issue.we_vote_hosted_image_url_large,
                 'issue_photo_url_medium':       issue.we_vote_hosted_image_url_medium,
                 'issue_photo_url_tiny':         issue.we_vote_hosted_image_url_tiny,

@@ -270,8 +270,8 @@ class Issue(models.Model):
     considered_right = models.BooleanField(default=False)
 
     # A default image field for hard-coded local images
-    issue_image_url = models.TextField(
-        verbose_name='image url for issue', blank=True, null=True, default="")
+    issue_icon_local_path = models.TextField(
+        verbose_name='path in web app for the issue icon', blank=True, null=True, default="")
     we_vote_hosted_image_url_large = models.URLField(
         verbose_name='we vote hosted large image url', blank=True, null=True)
     we_vote_hosted_image_url_medium = models.URLField(
@@ -532,7 +532,7 @@ class IssueManager(models.Model):
         }
         return results
 
-    def reset_issue_image_details(self, issue, issue_image_url=False):
+    def reset_issue_image_details(self, issue, issue_icon_local_path=False):
         """
         Reset an issue entry with original image details from we vote image.
         """
@@ -540,8 +540,8 @@ class IssueManager(models.Model):
         status = "ENTERING_RESET_ISSUE_IMAGE_DETAILS"
 
         if issue:
-            if issue_image_url is not False:
-                issue.issue_image_url = issue_image_url
+            if issue_icon_local_path is not False:
+                issue.issue_icon_local_path = issue_icon_local_path
             issue.we_vote_hosted_image_url_large = None
             issue.we_vote_hosted_image_url_medium = None
             issue.we_vote_hosted_image_url_tiny = None
