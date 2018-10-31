@@ -51,6 +51,7 @@ def issues_retrieve_doc_template_values(url_root):
                    '     "issue_we_vote_id": string,\n' \
                    '     "issue_name": string,\n' \
                    '     "issue_description": string,\n' \
+                   '     "issue_icon_local_path": string,\n' \
                    '     "issue_image_url": string,\n' \
                    '     "issue_photo_url_large": string,\n' \
                    '     "issue_photo_url_medium": string,\n' \

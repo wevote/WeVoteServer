@@ -62,7 +62,7 @@ def issues_sync_out_view(request):  # issuesSyncOut
                 issue_list = issue_list.filter(final_filters)
 
         issue_list_dict = issue_list.values('we_vote_id', 'hide_issue',
-                                            'issue_name', 'issue_description', 'issue_image_url',
+                                            'issue_name', 'issue_description', 'issue_icon_local_path',
                                             'issue_followers_count', 'linked_organization_count',
                                             'we_vote_hosted_image_url_large', 'we_vote_hosted_image_url_medium',
                                             'we_vote_hosted_image_url_tiny')
@@ -306,7 +306,7 @@ def issue_new_view(request):
     # These variables are here because there was an error on the edit_process_view and the voter needs to try again
     issue_name = request.GET.get('issue_name', "")
     issue_description = request.GET.get('issue_description', "")
-    issue_image_url = request.GET.get('issue_image_url', "")
+    issue_icon_local_path = request.GET.get('issue_icon_local_path', "")
     hide_issue = request.GET.get('hide_issue', True)  # Default to true
 
     # Its helpful to see existing issues when entering a new issue
@@ -325,7 +325,7 @@ def issue_new_view(request):
         'issue_list':           issue_list,
         'issue_name':           issue_name,
         'issue_description':    issue_description,
-        'issue_image_url':      issue_image_url,
+        'issue_icon_local_path': issue_icon_local_path,
         'messages_on_stage':    messages_on_stage,
         'state_code': state_code,
     }
@@ -346,7 +346,7 @@ def issue_edit_view(request, issue_we_vote_id):
     hide_issue = request.GET.get('hide_issue', True)
     issue_name = request.GET.get('issue_name', '')
     issue_description = request.GET.get('issue_description', '')
-    issue_image_url = request.GET.get('issue_image_url', '')
+    issue_icon_local_path = request.GET.get('issue_icon_local_path', '')
     issue_image_file = request.GET.get('issue_image_file', '')
 
     messages_on_stage = get_messages(request)
@@ -395,7 +395,7 @@ def issue_edit_view(request, issue_we_vote_id):
         'issue':                    issue_on_stage,
         'issue_name':               issue_name,
         'issue_description':        issue_description,
-        'issue_image_url':          issue_image_url,
+        'issue_icon_local_path':    issue_icon_local_path,
         'issue_image_file':         issue_image_file,
         'google_civic_election_id': google_civic_election_id,
         'state_code':               state_code,
@@ -431,7 +431,7 @@ def issue_edit_process_view(request):
     issue_we_vote_id = request.POST.get('issue_we_vote_id', False)
     issue_name = request.POST.get('issue_name', False)
     issue_description = request.POST.get('issue_description', False)
-    issue_image_url = request.POST.get('issue_image_url', False)  # Maintain manual image entry for now
+    issue_icon_local_path = request.POST.get('issue_icon_local_path', False)
     try:
         if request.method == 'POST' and request.FILES['issue_image_file']:
             issue_image_file = request.FILES.get('issue_image_file')
@@ -503,8 +503,8 @@ def issue_edit_process_view(request):
             issue_on_stage.issue_name = issue_name
         if issue_description is not False:
             issue_on_stage.issue_description = issue_description
-        if issue_image_url is not None:
-            issue_on_stage.issue_image_url = issue_image_url
+        if issue_icon_local_path is not None:
+            issue_on_stage.issue_icon_local_path = issue_icon_local_path
         if we_vote_hosted_image_url_large is not None:
             issue_on_stage.we_vote_hosted_image_url_large = we_vote_hosted_image_url_large
         if we_vote_hosted_image_url_medium is not None:
@@ -528,8 +528,8 @@ def issue_edit_process_view(request):
             )
             if issue_description is not False:
                 issue_on_stage.issue_description = issue_description
-            if issue_image_url is not None:
-                issue_on_stage.issue_image_url = issue_image_url
+            if issue_icon_local_path is not None:
+                issue_on_stage.issue_icon_local_path = issue_icon_local_path
             if we_vote_hosted_image_url_large is not None:
                 issue_on_stage.we_vote_hosted_image_url_large = we_vote_hosted_image_url_large
             if we_vote_hosted_image_url_medium is not None:
