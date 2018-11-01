@@ -45,7 +45,12 @@
 </div>
 
 <div class="form-group">
-    <label for="issue_icon_local_path_id" class="col-sm-3 control-label">Issue Icon Local Path</label>
+    <label for="issue_icon_local_path_id" class="col-sm-3 control-label">
+      Issue Icon Local Path
+      {% if issue.issue_icon_local_path %}
+        <img src="https://wevote.us/img/global/svg-icons/issues/{{ issue.issue_icon_local_path }}.svg" height="20" width="20" />
+      {% endif %}
+    </label>
     <div class="col-sm-8">
         <input type="text" name="issue_icon_local_path" id="issue_icon_local_path_id" class="form-control"
                value="{% if issue %}{{ issue.issue_icon_local_path|default_if_none:"" }}{% else %}{{ issue_icon_local_path|default_if_none:"" }}{% endif %}" />
