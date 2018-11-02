@@ -42,6 +42,8 @@ If you need to upgrade your Python version later (Macintosh), this command does 
 
     $ virtualenv3 -p /Library/Frameworks/Python.framework/Versions/3.6/bin/python3 WeVoteServer3.6.1
     
+Note: If you upgrade to Python 3.7.0+, tweepy package will stop working. 'streaming.py' utility has a reserved word problem, which you may fix locally.
+
 ## Continue with openssl update 
 
 After Python3 is installed, install pyopenssl and https clients:
@@ -60,6 +62,13 @@ For mac:
     (WeVoteServer) $ pip install --upgrade pip
     (WeVoteServer) $ pip install -r requirements.txt
     (WeVoteServer) $ python3 -m pip install pyopenssl pyasn1 ndg-httpsclient
+    
+Note: If you are having trouble with some of the packages in requirements.txt ('psycopg2') make sure that the
+libraries that pip is looking for under /usr/local/lib exists in that folder, or are linked from another location.
+For example, for -lssl and -lcrypto to work, you may wany to do the following:
+
+    $ ln -s /usr/local/opt/openssl/lib/libcrypto.dylib /usr/local/lib/libcrypto.dylib
+    $ ln -s /usr/local/opt/openssl/lib/libssl.dylib /usr/local/lib/libssl.dylib
     
 Initialize your environment_variables.json file (otherwise makemigrations will fail with an 
 'Unable to set the SECRET_KEY variable from os.environ or JSON file' error)

@@ -22,8 +22,17 @@ Retrieve “WeVoteServer” into that folder:
 1. Create a fork of wevote/WeVoteServer.git. You can do this from https://github.com/wevote/WeVoteServer with the "Fork" button  
 (upper right of screen)
 
-1. Change into your local WeVoteServer repository folder, and set up a remote for upstream:  
-`$ git remote add upstream git@github.com:wevote/WeVoteServer.git`  
+1. Go to your fork repo page, click green 'Clone or Download' button, copy the URL and clone your fork to local dev:
+
+    $ cd  ~/PythonProjects
+
+    $ git clone https://github.com/wevote/WeVoteServer.git
+ 
+1. Change into your local WeVoteServer repository folder, and set up a remote for upstream: 
+    
+       $ cd  ~/PythonProjects/WeVoteServer
+
+       $ git remote add upstream git@github.com:wevote/WeVoteServer.git
 
 ## Updating openssl on Mac
 
