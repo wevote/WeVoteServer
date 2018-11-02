@@ -17,7 +17,6 @@ from measure.models import ContestMeasureList, ContestMeasureManager
 from office.models import ContestOfficeListManager, ContestOfficeManager
 from polling_location.models import PollingLocationManager
 import requests
-
 from voter.models import fetch_voter_id_from_voter_device_link, VoterAddressManager
 import wevote_functions.admin
 from wevote_functions.functions import extract_state_code_from_address_string, positive_value_exists
