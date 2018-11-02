@@ -1825,12 +1825,27 @@ def candidate_summary_view(request, candidate_id):
         if results['candidate_merge_possibility_found']:
             candidate_search_results_list = results['candidate_list']
 
+    # Working with We Vote Positions
+    try:
+        candidate_position_query = PositionEntered.objects.order_by('stance')
+        # As of Aug 2018 we are no longer using PERCENT_RATING
+        candidate_position_query = candidate_position_query.exclude(stance__iexact='PERCENT_RATING')
+        candidate_position_query = candidate_position_query.filter(candidate_campaign_id=candidate_id)
+        candidate_position_list = list(candidate_position_query)
+        # if positive_value_exists(google_civic_election_id):
+        #     organization_position_list = candidate_position_list.filter(
+        #         google_civic_election_id=google_civic_election_id)
+    except Exception as e:
+        handle_record_not_found_exception(e, logger=logger)
+        candidate_position_list = []
+
     template_values = {
         'messages_on_stage': messages_on_stage,
         'candidate': candidate_on_stage,
         'candidate_search_results_list': candidate_search_results_list,
         'google_civic_election_id': google_civic_election_id,
         'state_code': state_code,
+        'candidate_position_list': candidate_position_list,
     }
     return render(request, 'candidate/candidate_summary.html', template_values)
 

@@ -11,7 +11,7 @@
 
 <h1>{{ candidate.candidate_name }}</h1>
 
-<table>
+<table class="table-condensed">
     <tr>
       <td>Candidate We Vote ID:</td>
       <td>
@@ -82,7 +82,7 @@
 {% endif %}
 
 {% if candidate_search_results_list %}
-    <table border="1" cellpadding="5" cellspacing="5">
+    <table class="table-condensed">
         <tr>
             <td>&nbsp;</td>
             <td>ID</td>
@@ -114,12 +114,59 @@
     {% endfor %}
     </table>
 {% endif %}
+<br/>
 
-<p>&nbsp;</p>
-<p>&nbsp;</p>
-<p>&nbsp;</p>
-<p>&nbsp;</p>
+<h3>We Vote Positions Related to {{ candidate.candidate_name  }}</h3>
+{%  if candidate_position_list %}
+<table class="table">
+      <thead>
+        <tr>
+            <th></th>
+            <th>Organization Position</th>
+            <th>Stance</th>
+            <th>Election</th>
+            <th>Election Date</th>
+            <th>Rating Time Span</th>
+        </tr>
+      </thead>
+        {% for candidate_position in candidate_position_list %}
+        {% if not candidate_position.id %}
+        <tr>
+            <td colspan="3">
+            (missing candidate_position.id)
+            </td>
+        </tr>
+        {% else %}
+        <tr>
+            <td>{{ forloop.counter }}</td>
+            <td>
+                {% if candidate_position.organization_id %}
+                <a href="{% url 'organization:organization_position_edit' candidate_position.organization_id candidate_position.we_vote_id %}">
+                {{ candidate_position.organization.organization_name }} (edit position)</a>
+                {% else %}
+                    (not an org)
+                {% endif %}
+            </td>
+            <td>{{ candidate_position.get_stance_display }}
+                {% if candidate_position.statement_text %}
+                <span style="color: darkgray">{{ candidate_position.statement_text }}</span>
+                {% endif %}
+                {% if candidate_position.vote_smart_rating %} {{ candidate_position.vote_smart_rating }}%{% endif %}</td>
+            <td>{{ candidate_position.election.google_civic_election_id }}</td>
+            <td>{{ candidate_position.election.election_day_text }}</td>
+            <td>{{ candidate_position.vote_smart_time_span|default_if_none:"" }}</td>
+        </tr>
+        {% endif %}
+        {% endfor %}
 
+</table>
+{% else %}
+    <p>(no positions found)</p>
+{% endif %}
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+<p> </p>
+<p>&nbsp;</p>
 {% else %}
 
     <h1>No Candidate Found</h1>
