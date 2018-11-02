@@ -11,11 +11,13 @@
 <h4>Google API Calls</h4>
 <p>We need to track the number of calls to the Google Civic API because there are limits to
     the number of calls we can make per day. This also gives us a glimpse into new network activity.</p>
-    <table border="1" cellpadding="5" cellspacing="1">
-         <tr>
-            <td>Date</td>
-            <td># of Calls</td>
-        </tr>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th># of Calls</th>
+            </tr>
+        </thead>
        {% for google_civic_daily_summary in google_civic_daily_summary_list %}
         <tr>
             <td>{{ google_civic_daily_summary.date_string }}</td>
@@ -26,11 +28,13 @@
 
 <h4>Vote Smart API Calls</h4>
 <p>We track the number of calls to the Vote Smart API so we don't overwhelm their servers.</p>
-    <table border="1" cellpadding="5" cellspacing="1">
-         <tr>
-            <td>Date</td>
-            <td># of Calls</td>
-        </tr>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th># of Calls</th>
+            </tr>
+        </thead>
        {% for vote_smart_daily_summary in vote_smart_daily_summary_list %}
         <tr>
             <td>{{ vote_smart_daily_summary.date_string }}</td>
@@ -41,11 +45,13 @@
 
 <h4>Ballotpedia API Calls</h4>
 <p>We track the number of calls to the Ballotpedia API so we don't overwhelm their servers.</p>
-    <table border="1" cellpadding="5" cellspacing="1">
-         <tr>
-            <td>Date</td>
-            <td># of Calls</td>
-        </tr>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th># of Calls</th>
+            </tr>
+        </thead>
        {% for ballotpedia_daily_summary in ballotpedia_daily_summary_list %}
         <tr>
             <td>{{ ballotpedia_daily_summary.date_string }}</td>
