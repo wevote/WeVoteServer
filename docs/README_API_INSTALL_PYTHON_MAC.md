@@ -42,6 +42,8 @@ If you need to upgrade your Python version later (Macintosh), this command does 
 
     $ virtualenv3 -p /Library/Frameworks/Python.framework/Versions/3.6/bin/python3 WeVoteServer3.6.1
     
+Note: If you upgrade to Python 3.7.0+, tweepy package will stop working. 'streaming.py' utility has a reserved word problem, which you may fix locally.
+
 ## Continue with openssl update 
 
 After Python3 is installed, install pyopenssl and https clients:
