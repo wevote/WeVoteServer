@@ -64,16 +64,18 @@
 
 {% else %}
 <h1>Welcome {{ request.user.first_name }} {{ request.user.last_name }}</h1>
-we_vote_id: {{ request.user.we_vote_id }}<br />
-id: {{ request.user.id }}<br />
-email: {{ request.user.email }}<br />
-twitter: {{ request.user.twitter_screen_name }}<br />
-facebook: {{ request.user.fb_username }} <br />
-admin: {{ request.user.is_admin }}<br />
-partner_organization: {{ request.user.is_partner_organization }}<br />
-political_data_manager: {{ request.user.is_political_data_manager }}<br />
-political_data_viewer: {{ request.user.is_political_data_viewer }}<br />
-verified_volunteer: {{ request.user.is_verified_volunteer }}<br />
+<table class="table-condensed">
+    <tr><td>we_vote_id:</td>            <td>{{ request.user.we_vote_id }}</td></tr>
+    <tr><td>id</td>                     <td>{{ request.user.id }}</td></tr>
+    <tr><td>email</td>                  <td>{{ request.user.email }}</td></tr>
+    <tr><td>twitter</td>                <td>{{ request.user.twitter_screen_name }}</td></tr>
+    <tr><td>facebook</td>               <td>{{ request.user.fb_username }}</td></tr>
+    <tr><td>admin</td>                  <td>{{ request.user.is_admin }}</td></tr>
+    <tr><td>partner_organization</td>   <td>{{ request.user.is_partner_organization }}</td></tr>
+    <tr><td>political_data_manager</td> <td>{{ request.user.is_political_data_manager }}</td></tr>
+    <tr><td>political_data_viewer</td>  <td>{{ request.user.is_political_data_viewer }}</td></tr>
+    <tr><td>verified_volunteer</td>     <td>{{ request.user.is_verified_volunteer }}</td></tr>
+</table>
 
 <p><br />
     <a href="{% url 'logout_we_vote' %}">Sign Out</a></p>
