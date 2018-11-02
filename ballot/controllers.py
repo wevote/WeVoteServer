@@ -21,7 +21,7 @@ import pytz
 from voter.models import BALLOT_ADDRESS, VoterAddress, VoterAddressManager, VoterDeviceLinkManager
 import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, extract_state_code_from_address_string, positive_value_exists, \
-    process_request_from_master
+    process_request_from_master, strip_html_tags
 from geopy.geocoders import get_geocoder_for_service
 
 logger = wevote_functions.admin.get_logger(__name__)
@@ -1955,9 +1955,9 @@ def voter_ballot_items_retrieve_for_one_election_for_api(voter_device_id, voter_
                     'measure_subtitle':             ballot_item.measure_subtitle,
                     'measure_text':                 ballot_item.measure_text,
                     'measure_url':                  ballot_item.measure_url,
-                    'no_vote_description':          ballot_item.no_vote_description,
+                    'no_vote_description':          strip_html_tags(ballot_item.no_vote_description),
                     'we_vote_id':                   measure_we_vote_id,
-                    'yes_vote_description':         ballot_item.yes_vote_description,
+                    'yes_vote_description':         strip_html_tags(ballot_item.yes_vote_description),
                 }
                 ballot_items_to_display.append(one_ballot_item.copy())
 

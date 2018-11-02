@@ -13,6 +13,7 @@ import wevote_functions.admin
 import json
 import requests
 from django.contrib import messages
+import django.utils.html
 
 # We don't want to include the actual constants from organization/models.py, since that can cause include conflicts
 CORPORATION = 'C'
@@ -1422,3 +1423,12 @@ def remove_period_from_name_prefix_and_suffix(name):
         'name_changed': name_changed,
     }
     return results
+
+
+def strip_html_tags(value):
+    """
+    Creating a separate strip tag function instead of using  django.utils.html.strip_tags directly where required to allow for validations/value escaping later
+    :param value: Text that needs to be stripped
+    :return: stripped value.
+    """
+    return django.utils.html.strip_tags(value)
