@@ -11,7 +11,7 @@ import json
 from position.controllers import update_all_position_details_from_contest_measure
 import wevote_functions.admin
 from wevote_functions.functions import convert_state_code_to_state_text, convert_to_int, MEASURE_TITLE_SYNONYMS, \
-    positive_value_exists, process_request_from_master,strip_html_tags
+    positive_value_exists, process_request_from_master, strip_html_tags
 
 
 logger = wevote_functions.admin.get_logger(__name__)
