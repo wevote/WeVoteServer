@@ -2257,6 +2257,17 @@ class CandidateCampaignManager(models.Model):
                 if twitter_json['location'] != candidate.twitter_location:
                     candidate.twitter_location = twitter_json['location']
                     values_changed = True
+            if 'entities' in twitter_json and \
+                'url' in twitter_json['entities'] and \
+                'urls' in twitter_json['entities']['url'] and \
+                len(twitter_json['entities']['url']['urls']) > 0:
+                # scan and pick the first encountered
+                for url_data in twitter_json['entities']['url']['urls']:
+                    if 'expanded_url' in url_data and positive_value_exists(url_data['expanded_url']):
+                        if url_data['expanded_url'] != candidate.candidate_url:
+                            candidate.candidate_url = url_data['expanded_url']
+                            values_changed = True
+                            break
 
             if values_changed:
                 candidate.save()
