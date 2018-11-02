@@ -39,4 +39,19 @@
         {% endfor %}
     </table>
 
+<h4>Ballotpedia API Calls</h4>
+<p>We track the number of calls to the Ballotpedia API so we don't overwhelm their servers.</p>
+    <table border="1" cellpadding="5" cellspacing="1">
+         <tr>
+            <td>Date</td>
+            <td># of Calls</td>
+        </tr>
+       {% for ballotpedia_daily_summary in ballotpedia_daily_summary_list %}
+        <tr>
+            <td>{{ ballotpedia_daily_summary.date_string }}</td>
+            <td>{{ ballotpedia_daily_summary.count }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+
 {%  endblock %}

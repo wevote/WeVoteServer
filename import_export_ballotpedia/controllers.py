@@ -17,6 +17,7 @@ from measure.models import ContestMeasureList, ContestMeasureManager
 from office.models import ContestOfficeListManager, ContestOfficeManager
 from polling_location.models import PollingLocationManager
 import requests
+
 from voter.models import fetch_voter_id_from_voter_device_link, VoterAddressManager
 import wevote_functions.admin
 from wevote_functions.functions import extract_state_code_from_address_string, positive_value_exists
@@ -712,7 +713,17 @@ def retrieve_ballotpedia_district_id_list_for_polling_location(
                 "point": latitude_longitude,
             })
 
+            #if response.status_code == requests.codes.ok:
             structured_json = json.loads(response.text)
+            #else:
+            #    success = False
+            #    status += response.text + " "
+            #    results = {
+            #        'success': success,
+            #        'status': status,
+            #        'ballotpedia_district_id_list': ballotpedia_district_id_list,
+            #    }
+            #    return results
 
             # Use Ballotpedia API call counter to track the number of queries we are doing each day
             ballotpedia_api_counter_manager = BallotpediaApiCounterManager()
