@@ -11,7 +11,8 @@ import json
 from position.controllers import update_all_position_details_from_contest_measure
 import wevote_functions.admin
 from wevote_functions.functions import convert_state_code_to_state_text, convert_to_int, MEASURE_TITLE_SYNONYMS, \
-    positive_value_exists, process_request_from_master
+    positive_value_exists, process_request_from_master,strip_html_tags
+
 
 logger = wevote_functions.admin.get_logger(__name__)
 
@@ -235,8 +236,8 @@ def measure_retrieve_for_api(measure_id, measure_we_vote_id):  # measureRetrieve
             'status':                   status,
             'success':                  True,
             'ballot_item_display_name': contest_measure.measure_title,
-            'no_vote_description':      contest_measure.ballotpedia_no_vote_description,
-            'yes_vote_description':     contest_measure.ballotpedia_yes_vote_description,
+            'no_vote_description':      strip_html_tags(contest_measure.ballotpedia_no_vote_description),
+            'yes_vote_description':     strip_html_tags(contest_measure.ballotpedia_yes_vote_description),
             'district_name':            contest_measure.district_name,
             'election_display_name':    election_display_name,
             'google_civic_election_id': contest_measure.google_civic_election_id,
