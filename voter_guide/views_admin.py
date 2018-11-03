@@ -1372,6 +1372,7 @@ def voter_guide_edit_view(request, voter_guide_id=0, voter_guide_we_vote_id=""):
     # google_civic_candidate_name = request.GET.get('google_civic_candidate_name', False)
     # candidate_twitter_handle = request.GET.get('candidate_twitter_handle', False)
     # candidate_url = request.GET.get('candidate_url', False)
+    # candidate_contact_form_url = request.GET.get('candidate_contact_form_url', False)
     # party = request.GET.get('party', False)
     # ballot_guide_official_statement = request.GET.get('ballot_guide_official_statement', False)
     # ballotpedia_candidate_id = request.GET.get('ballotpedia_candidate_id', False)

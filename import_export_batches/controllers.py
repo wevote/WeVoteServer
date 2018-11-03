@@ -1567,6 +1567,8 @@ def create_batch_row_action_candidate(batch_description, batch_header_map, one_b
         "candidate_twitter_handle", batch_header_map, one_batch_row)
     candidate_twitter_handle = extract_twitter_handle_from_text_string(candidate_twitter_handle_raw)
     candidate_url = batch_manager.retrieve_value_from_batch_row("candidate_url", batch_header_map, one_batch_row)
+    candidate_contact_form_url = batch_manager.retrieve_value_from_batch_row("candidate_contact_form_url",
+                                                                             batch_header_map, one_batch_row)
     facebook_url = batch_manager.retrieve_value_from_batch_row("facebook_url", batch_header_map, one_batch_row)
     candidate_email = batch_manager.retrieve_value_from_batch_row("candidate_email", batch_header_map, one_batch_row)
     candidate_profile_image_url = batch_manager.retrieve_value_from_batch_row("candidate_profile_image_url",
@@ -1789,6 +1791,7 @@ def create_batch_row_action_candidate(batch_description, batch_header_map, one_b
         batch_row_action_candidate.candidate_participation_status = candidate_participation_status
         batch_row_action_candidate.candidate_twitter_handle = candidate_twitter_handle
         batch_row_action_candidate.candidate_url = candidate_url
+        batch_row_action_candidate.candidate_contact_form_url = candidate_contact_form_url
         batch_row_action_candidate.candidate_we_vote_id = candidate_we_vote_id
         batch_row_action_candidate.contest_office_name = contest_office_name
         batch_row_action_candidate.contest_office_we_vote_id = contest_office_we_vote_id
@@ -3462,6 +3465,8 @@ def import_candidate_data_from_batch_row_actions(batch_header_id, batch_row_id, 
             update_values['candidate_twitter_handle'] = one_batch_row_action.candidate_twitter_handle
         if positive_value_exists(one_batch_row_action.candidate_url):
             update_values['candidate_url'] = one_batch_row_action.candidate_url
+        if positive_value_exists(one_batch_row_action.candidate_contact_form_url):
+            update_values['candidate_contact_form_url'] = one_batch_row_action.candidate_contact_form_url
         if positive_value_exists(one_batch_row_action.candidate_email):
             update_values['candidate_email'] = one_batch_row_action.candidate_email
         if positive_value_exists(one_batch_row_action.contest_office_we_vote_id):

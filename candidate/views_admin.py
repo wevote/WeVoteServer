@@ -83,6 +83,9 @@ def candidates_sync_out_view(request):  # candidatesSyncOut
             new_filter = Q(candidate_url__icontains=candidate_search)
             filters.append(new_filter)
 
+            new_filter = Q(candidate_contact_form_url__icontains=candidate_search)
+            filters.append(new_filter)
+
             new_filter = Q(party__icontains=candidate_search)
             filters.append(new_filter)
 
@@ -107,7 +110,7 @@ def candidates_sync_out_view(request):  # candidatesSyncOut
                                                     'photo_url', 'photo_url_from_maplight',
                                                     'photo_url_from_vote_smart', 'order_on_ballot',
                                                     'google_civic_election_id', 'ocd_division_id', 'state_code',
-                                                    'candidate_url', 'facebook_url', 'twitter_url',
+                                                    'candidate_url', 'candidate_contact_form_url', 'facebook_url', 'twitter_url',
                                                     'twitter_user_id', 'candidate_twitter_handle', 'twitter_name',
                                                     'twitter_location', 'twitter_followers_count',
                                                     'twitter_profile_image_url_https', 'twitter_description',
@@ -268,6 +271,9 @@ def candidate_list_view(request):
                 filters.append(new_filter)
 
                 new_filter = Q(candidate_url__icontains=one_word)
+                filters.append(new_filter)
+
+                new_filter = Q(candidate_contact_form_url__icontains=one_word)
                 filters.append(new_filter)
 
                 new_filter = Q(contest_office_name__icontains=one_word)
@@ -537,6 +543,7 @@ def candidate_new_view(request):
     state_code = request.GET.get('state_code', "")
     candidate_twitter_handle = request.GET.get('candidate_twitter_handle', "")
     candidate_url = request.GET.get('candidate_url', "")
+    candidate_contact_form_url = request.GET.get('candidate_contact_form_url', "")
     party = request.GET.get('party', "")
     ballot_guide_official_statement = request.GET.get('ballot_guide_official_statement', "")
     vote_smart_id = request.GET.get('vote_smart_id', "")
@@ -587,6 +594,7 @@ def candidate_new_view(request):
         'state_code':                       state_code,
         'candidate_twitter_handle':         candidate_twitter_handle,
         'candidate_url':                    candidate_url,
+        'candidate_contact_form_url':       candidate_contact_form_url,
         'party':                            party,
         'ballot_guide_official_statement':  ballot_guide_official_statement,
         'vote_smart_id':                    vote_smart_id,
@@ -610,6 +618,7 @@ def candidate_edit_view(request, candidate_id=0, candidate_campaign_we_vote_id="
     google_civic_candidate_name3 = request.GET.get('google_civic_candidate_name3', False)
     candidate_twitter_handle = request.GET.get('candidate_twitter_handle', False)
     candidate_url = request.GET.get('candidate_url', False)
+    candidate_contact_form_url = request.GET.get('candidate_contact_form_url', False)
     facebook_url = request.GET.get('facebook_url', False)
     candidate_email = request.GET.get('candidate_email', False)
     candidate_phone = request.GET.get('candidate_phone', False)
@@ -735,6 +744,7 @@ def candidate_edit_view(request, candidate_id=0, candidate_campaign_we_vote_id="
             'google_civic_candidate_name3':     google_civic_candidate_name3,
             'candidate_twitter_handle':         candidate_twitter_handle,
             'candidate_url':                    candidate_url,
+            'candidate_contact_form_url':       candidate_contact_form_url,
             'facebook_url':                     facebook_url,
             'candidate_email':                  candidate_email,
             'candidate_phone':                  candidate_phone,
@@ -789,6 +799,7 @@ def candidate_edit_process_view(request):
     if positive_value_exists(candidate_twitter_handle):
         candidate_twitter_handle = extract_twitter_handle_from_text_string(candidate_twitter_handle)
     candidate_url = request.POST.get('candidate_url', False)
+    candidate_contact_form_url = request.POST.get('candidate_contact_form_url', False)
     facebook_url = request.POST.get('facebook_url', False)
     candidate_email = request.POST.get('candidate_email', False)
     candidate_phone = request.POST.get('candidate_phone', False)
@@ -895,6 +906,7 @@ def candidate_edit_process_view(request):
                         "&contest_office_id=" + str(contest_office_id) + \
                         "&candidate_twitter_handle=" + str(candidate_twitter_handle) + \
                         "&candidate_url=" + str(candidate_url) + \
+                        "&candidate_contact_form_url=" + str(candidate_contact_form_url) + \
                         "&facebook_url=" + str(facebook_url) + \
                         "&candidate_email=" + str(candidate_email) + \
                         "&candidate_phone=" + str(candidate_phone) + \
@@ -946,6 +958,7 @@ def candidate_edit_process_view(request):
                             "&contest_office_id=" + str(contest_office_id) + \
                             "&candidate_twitter_handle=" + str(candidate_twitter_handle) + \
                             "&candidate_url=" + str(candidate_url) + \
+                            "&candidate_contact_form_url=" + str(candidate_contact_form_url) + \
                             "&facebook_url=" + str(facebook_url) + \
                             "&candidate_email=" + str(candidate_email) + \
                             "&candidate_phone=" + str(candidate_phone) + \
@@ -966,6 +979,8 @@ def candidate_edit_process_view(request):
                 candidate_on_stage.candidate_twitter_handle = candidate_twitter_handle
             if candidate_url is not False:
                 candidate_on_stage.candidate_url = candidate_url
+            if candidate_contact_form_url is not False:
+                candidate_on_stage.candidate_contact_form_url = candidate_contact_form_url
             if facebook_url is not False:
                 candidate_on_stage.facebook_url = facebook_url
             if candidate_email is not False:
@@ -1066,6 +1081,8 @@ def candidate_edit_process_view(request):
                     candidate_on_stage.twitter_url = twitter_url
                 if candidate_url is not False:
                     candidate_on_stage.candidate_url = candidate_url
+                if candidate_contact_form_url is not False:
+                    candidate_on_stage.candidate_contact_form_url = candidate_contact_form_url
                 if facebook_url is not False:
                     candidate_on_stage.facebook_url = facebook_url
                 if candidate_email is not False:
@@ -1113,6 +1130,7 @@ def candidate_edit_process_view(request):
                                 "&contest_office_id=" + str(contest_office_id) + \
                                 "&candidate_twitter_handle=" + str(candidate_twitter_handle) + \
                                 "&candidate_url=" + str(candidate_url) + \
+                                "&candidate_contact_form_url=" + str(candidate_contact_form_url) + \
                                 "&facebook_url=" + str(facebook_url) + \
                                 "&candidate_email=" + str(candidate_email) + \
                                 "&candidate_phone=" + str(candidate_phone) + \

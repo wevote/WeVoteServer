@@ -43,6 +43,13 @@
       </td>
     </tr>
     <tr>
+        <tr>
+      <td>Candidate Contact Form:</td>
+      <td>
+        <strong>{{ candidate.candidate_contact_form_url|default_if_none:"" }}</strong>
+      </td>
+    </tr>
+    <tr>
       <td>Public Positions:</td>
       <td>
         <strong>{{ candidate.public_positions_count }}</strong>

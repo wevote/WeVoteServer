@@ -157,6 +157,7 @@
                 ({{ candidate.twitter_followers_count }} followers){% endif %}</td>
             <td>
               {% if candidate.candidate_url %}<a href="{{ candidate.candidate_url }}" target="_blank">{{ candidate.candidate_url }}</a><br />{% endif %}
+              {% if candidate.candidate_contact_form_url %}<a href="{{ candidate.candidate_contact_form_url }}" target="_blank">{{ candidate.candidate_contact_form_url }}</a><br />{% endif %}
               {% if candidate.facebook_url %}<a href="{{ candidate.facebook_url }}" target="_blank">{{ candidate.facebook_url }}</a><br />{% endif %}
               {% if candidate.candidate_email %}{{ candidate.candidate_email }}{% endif %}
             </td>

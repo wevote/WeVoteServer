@@ -75,6 +75,8 @@ def process_candidates_from_structured_json(
         party = party.strip()
         order_on_ballot = one_candidate['orderOnBallot'] if 'orderOnBallot' in one_candidate else 0
         candidate_url = one_candidate['candidateUrl'] if 'candidateUrl' in one_candidate else ''
+        candidate_contact_form_url = one_candidate['candidate_contact_form_url'] \
+            if 'candidate_contact_form_url' in one_candidate else ''
         photo_url = one_candidate['photoUrl'] if 'photoUrl' in one_candidate else ''
         email = one_candidate['email'] if 'email' in one_candidate else ''
         phone = one_candidate['phone'] if 'phone' in one_candidate else ''
@@ -137,6 +139,8 @@ def process_candidates_from_structured_json(
                 updated_candidate_campaign_values["order_on_ballot"] = order_on_ballot
             if positive_value_exists(candidate_url):
                 updated_candidate_campaign_values["candidate_url"] = candidate_url
+            if positive_value_exists(candidate_contact_form_url):
+                updated_candidate_campaign_values["candidate_contact_form_url"] = candidate_contact_form_url
             if positive_value_exists(photo_url):
                 updated_candidate_campaign_values["photo_url"] = photo_url
             if positive_value_exists(facebook_url):

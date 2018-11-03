@@ -45,6 +45,7 @@ CANDIDATE_UNIQUE_IDENTIFIERS = [
     'candidate_phone',
     'candidate_twitter_handle',
     'candidate_url',
+    'candidate_contact_form_url',
     'contest_office_id',
     'contest_office_we_vote_id',
     'crowdpac_candidate_id',
@@ -251,11 +252,12 @@ class CandidateCampaignListManager(models.Model):
         if candidate_list_found:
             for candidate in candidate_list_objects:
                 one_candidate = {
-                    'ballot_item_display_name': candidate.display_candidate_name(),
-                    'ballot_item_website':      candidate.candidate_url,
-                    'candidate_we_vote_id':     candidate.we_vote_id,
-                    'google_civic_election_id': candidate.google_civic_election_id,
-                    'office_we_vote_id':        candidate.contest_office_we_vote_id,
+                    'ballot_item_display_name':   candidate.display_candidate_name(),
+                    'ballot_item_website':        candidate.candidate_url,
+                    'candidate_contact_form_url': candidate.candidate_contact_form_url,
+                    'candidate_we_vote_id':       candidate.we_vote_id,
+                    'google_civic_election_id':   candidate.google_civic_election_id,
+                    'office_we_vote_id':          candidate.contest_office_we_vote_id,
                     'measure_we_vote_id':       '',
                 }
                 candidate_list_light.append(one_candidate)
@@ -327,6 +329,9 @@ class CandidateCampaignListManager(models.Model):
         if candidate_option1.candidate_url != candidate_option2.candidate_url:
             automatic_merge_ok = False
             status += " candidate_url:"
+        if candidate_option1.candidate_contact_form_url != candidate_option2.candidate_contact_form_url:
+            automatic_merge_ok = False
+            status += " candidate_contact_form_url:"
 
         if not automatic_merge_ok:
             status = "Different: " + status
@@ -1012,6 +1017,7 @@ class CandidateCampaignListManager(models.Model):
                     'ocd_division_id':              candidate.ocd_division_id,
                     'state_code':                   candidate.state_code,
                     'candidate_url':                candidate.candidate_url,
+                    'candidate_contact_form_url':   candidate.candidate_contact_form_url,
                     'facebook_url':                 candidate.facebook_url,
                     'twitter_url':                  candidate.twitter_url,
                     'twitter_handle':               candidate.fetch_twitter_handle(),
@@ -1093,6 +1099,8 @@ class CandidateCampaign(models.Model):
                                   max_length=2, null=True, blank=True, db_index=True)
     # The URL for the candidate's campaign web site.
     candidate_url = models.URLField(verbose_name='website url of candidate campaign', blank=True, null=True)
+    candidate_contact_form_url = models.URLField(verbose_name='website url of candidate contact form',
+                                                 blank=True, null=True)
     facebook_url = models.URLField(verbose_name='facebook url of candidate campaign', blank=True, null=True)
     facebook_url_is_broken = models.BooleanField(verbose_name="facebook url is broken", default=False)
     facebook_profile_image_url_https = models.URLField(verbose_name='url of profile image from facebook',
@@ -2417,6 +2425,8 @@ class CandidateCampaignManager(models.Model):
             if 'candidate_twitter_handle' in update_values else ''
         candidate_url = update_values['candidate_url'] \
             if 'candidate_url' in update_values else ''
+        candidate_contact_form_url = update_values['candidate_contact_form_url'] \
+            if 'candidate_contact_form_url' in update_values else ''
         contest_office_we_vote_id = update_values['contest_office_we_vote_id'] \
             if 'contest_office_we_vote_id' in update_values else ''
         contest_office_id = update_values['contest_office_id'] \
@@ -2487,6 +2497,7 @@ class CandidateCampaignManager(models.Model):
                 new_candidate.candidate_participation_status = candidate_participation_status
                 new_candidate.candidate_twitter_handle = candidate_twitter_handle
                 new_candidate.candidate_url = candidate_url
+                new_candidate.candidate_contact_form_url = candidate_contact_form_url
                 new_candidate.contest_office_id = convert_to_int(contest_office_id)
                 new_candidate.contest_office_name = contest_office_name
                 new_candidate.crowdpac_candidate_id = convert_to_int(crowdpac_candidate_id)
@@ -2605,6 +2616,9 @@ class CandidateCampaignManager(models.Model):
                     values_changed = True
                 if 'candidate_url' in update_values:
                     existing_candidate_entry.candidate_url = update_values['candidate_url']
+                    values_changed = True
+                if 'candidate_contact_form_url' in update_values:
+                    existing_candidate_entry.candidate_contact_form_url = update_values['candidate_contact_form_url']
                     values_changed = True
                 if 'contest_office_we_vote_id' in update_values:
                     existing_candidate_entry.contest_office_we_vote_id = update_values['contest_office_we_vote_id']

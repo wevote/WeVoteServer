@@ -78,6 +78,7 @@ def candidate_retrieve_doc_template_values(url_root):
                    '  "ocd_division_id": string,\n' \
                    '  "state_code": string,\n' \
                    '  "candidate_url": string,\n' \
+                   '  "candidate_contact_form_url": string,\n' \
                    '  "facebook_url": string,\n' \
                    '  "twitter_url": string,\n' \
                    '  "twitter_handle": string,\n' \

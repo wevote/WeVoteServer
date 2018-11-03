@@ -115,6 +115,8 @@
 
 {% include "candidate/candidate_merge_one_field_decision.html" with field_name="candidate_url" field_label="Candidate URL" conflict_status=conflict_values.candidate_url candidate1_field_value=candidate_option1.candidate_url candidate2_field_value=candidate_option2.candidate_url candidate1=candidate_option1 candidate2=candidate_option2 %}
 
+{% include "candidate/candidate_merge_one_field_decision.html" with field_name="candidate_contact_form_url" field_label="Candidate Contact URL" conflict_status=conflict_values.candidate_contact_form_url candidate1_field_value=candidate_option1.candidate_contact_form_url candidate2_field_value=candidate_option2.candidate_contact_form_url candidate1=candidate_option1 candidate2=candidate_option2 %}
+
 {% include "candidate/candidate_merge_one_field_decision.html" with field_name="candidate_twitter_handle" field_label="Twitter Handle" conflict_status=conflict_values.candidate_twitter_handle candidate1_field_value=candidate_option1.candidate_twitter_handle candidate2_field_value=candidate_option2.candidate_twitter_handle candidate1=candidate_option1 candidate2=candidate_option2 %}
 
 {% include "candidate/candidate_merge_one_field_decision.html" with field_name="crowdpac_candidate_id" field_label="Crowdpac Candidate Id" conflict_status=conflict_values.crowdpac_candidate_id candidate1_field_value=candidate_option1.crowdpac_candidate_id candidate2_field_value=candidate_option2.crowdpac_candidate_id candidate1=candidate_option1 candidate2=candidate_option2 %}
