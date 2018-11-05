@@ -787,6 +787,7 @@ class VoterManager(BaseUserManager):
                     voter_id = 0
                     success = False
                 except Voter.DoesNotExist as e:
+                    voter_id = 0
                     error_result = True
                     exception_does_not_exist = True
                     success = True
@@ -820,11 +821,13 @@ class VoterManager(BaseUserManager):
             error_result = True
             exception_multiple_object_returned = True
             success = False
+            voter_id = 0
         except Voter.DoesNotExist as e:
             error_result = True
             exception_does_not_exist = True
             success = True
             status += "VOTER_NOT_FOUND "
+            voter_id = 0
 
         results = {
             'success':                  success,

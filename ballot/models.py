@@ -329,7 +329,7 @@ class BallotItemManager(models.Model):
                     defaults=create_values)
                 ballot_item_found = True
             except BallotItem.MultipleObjectsReturned as e:
-                status += "UPDATE_OR_CREATE_BALLOT_ITEM-MORE_THAN_ONE_FOUND "
+                status += "UPDATE_OR_CREATE_BALLOT_ITEM-MORE_THAN_ONE_FOUND-ABOUT_TO_DELETE_DUPLICATE "
                 handle_record_found_more_than_one_exception(e, logger, exception_message_optional=status)
                 success = False
                 delete_extra_ballot_item_entries = True
