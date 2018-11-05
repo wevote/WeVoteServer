@@ -1423,6 +1423,7 @@ class FriendManager(models.Model):
         }
         return results
 
+
     def retrieve_friend_invitation_from_secret_key(self, invitation_secret_key, for_merge_accounts=False):
         """
 

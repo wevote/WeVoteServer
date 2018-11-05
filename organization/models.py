@@ -2094,7 +2094,7 @@ class Organization(models.Model):
     facebook_id = models.BigIntegerField(verbose_name="facebook big integer id", null=True, blank=True)
     facebook_email = models.EmailField(verbose_name='facebook email address', max_length=255, unique=False,
                                        null=True, blank=True)
-    fb_username = models.CharField(unique=True, max_length=20, validators=[alphanumeric], null=True)
+    fb_username = models.CharField(unique=True, max_length=50, validators=[alphanumeric], null=True)
     facebook_profile_image_url_https = models.URLField(verbose_name='url of image from facebook',
                                                        blank=True, null=True)
     facebook_background_image_url_https = models.URLField(verbose_name='url of cover image from facebook',

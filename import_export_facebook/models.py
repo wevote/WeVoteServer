@@ -92,7 +92,7 @@ class FacebookMessageOutboundDescription(models.Model):
     recipient_facebook_id = models.BigIntegerField(verbose_name="facebook big integer id", null=True, blank=True)
     recipient_facebook_email = models.EmailField(verbose_name='facebook email address', max_length=255, unique=False,
                                                  null=True, blank=True)
-    recipient_fb_username = models.CharField(unique=True, max_length=20, validators=[alphanumeric], null=True)
+    recipient_fb_username = models.CharField(unique=True, max_length=50, validators=[alphanumeric], null=True)
     send_status = models.CharField(max_length=50, choices=SEND_STATUS_CHOICES, default=TO_BE_PROCESSED)
 
 

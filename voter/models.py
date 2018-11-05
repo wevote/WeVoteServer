@@ -1657,7 +1657,7 @@ class Voter(AbstractBaseUser):
         verbose_name="we vote id for linked organization", max_length=255, null=True, blank=True, unique=True)
 
     # Redefine the basic fields that would normally be defined in User
-    # username = models.CharField(unique=True, max_length=20, validators=[alphanumeric])  # Increase max_length to 255
+    # username = models.CharField(unique=True, max_length=50, validators=[alphanumeric])  # Increase max_length to 255
     # We cache the email here for quick lookup, but the official email address for the voter
     # is referenced by primary_email_we_vote_id and stored in the EmailAddress table
     email = models.EmailField(verbose_name='email address', max_length=255, unique=True, null=True, blank=True)
@@ -1685,7 +1685,7 @@ class Voter(AbstractBaseUser):
     facebook_id = models.BigIntegerField(verbose_name="facebook big integer id", null=True, blank=True)
     facebook_email = models.EmailField(verbose_name='facebook email address', max_length=255, unique=False,
                                        null=True, blank=True)
-    fb_username = models.CharField(max_length=20, validators=[alphanumeric], null=True)
+    fb_username = models.CharField(max_length=50, validators=[alphanumeric], null=True)
     facebook_profile_image_url_https = models.URLField(verbose_name='url of image from facebook', blank=True, null=True)
 
     # Twitter session information
@@ -2055,10 +2055,12 @@ class VoterDeviceLinkManager(models.Model):
                 voter_device_link_query = voter_device_link_query.filter(voter_id=voter_id)
                 voter_device_link_query = voter_device_link_query.order_by('id')
                 voter_device_link_list = list(voter_device_link_query)
-                voter_device_link_on_stage = voter_device_link_list.pop()  # Pop the last created
-
-                # If still here, we found an existing position
-                voter_device_link_id = voter_device_link_on_stage.id
+                try:
+                    voter_device_link_on_stage = voter_device_link_list.pop()  # Pop the last created
+                    # If still here, we found an existing position
+                    voter_device_link_id = voter_device_link_on_stage.id
+                except Exception as e:
+                    voter_device_link_id = 0
             elif positive_value_exists(voter_device_link_id):
                 status += " RETRIEVE_VOTER_DEVICE_LINK-GET_BY_VOTER_DEVICE_LINK_ID"
                 if read_only:

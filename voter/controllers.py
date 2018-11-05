@@ -1413,13 +1413,19 @@ def voter_merge_two_accounts_for_api(  # voterMergeTwoAccounts
         friend_manager = FriendManager()
         invitation_owner_voter = Voter()
         for_merge_accounts = True
+        recipient_voter_we_vote_id = ""
         sender_voter_we_vote_id = ""
         friend_invitation_results = friend_manager.retrieve_friend_invitation_from_secret_key(
             invitation_secret_key, for_merge_accounts)
         if friend_invitation_results['friend_invitation_found']:
-            friend_invitation = friend_invitation_results['friend_invitation']
-            recipient_voter_we_vote_id = fetch_friend_invitation_recipient_voter_we_vote_id(friend_invitation)
-            sender_voter_we_vote_id = friend_invitation.sender_voter_we_vote_id
+            if friend_invitation_results['friend_invitation_voter_link_found']:
+                friend_invitation = friend_invitation_results['friend_invitation_voter_link']
+                recipient_voter_we_vote_id = fetch_friend_invitation_recipient_voter_we_vote_id(friend_invitation)
+                sender_voter_we_vote_id = friend_invitation.sender_voter_we_vote_id
+            elif friend_invitation_results['friend_invitation_email_link_found']:
+                friend_invitation = friend_invitation_results['friend_invitation_email_link']
+                recipient_voter_we_vote_id = fetch_friend_invitation_recipient_voter_we_vote_id(friend_invitation)
+                sender_voter_we_vote_id = friend_invitation.sender_voter_we_vote_id
 
             invitation_owner_voter_results = voter_manager.retrieve_voter_by_we_vote_id(recipient_voter_we_vote_id)
             if invitation_owner_voter_results['voter_found']:
