@@ -132,7 +132,7 @@ class IssueListManager(models.Model):
         except Exception as e:
             handle_exception(e, logger=logger)
             status = 'FAILED retrieve_all_issues_for_office ' \
-                     '{error} [type: {error_type}]'.format(error=e.message, error_type=type(e))
+                     '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
 
         results = {
             'success':              success,

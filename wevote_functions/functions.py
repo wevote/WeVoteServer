@@ -1431,4 +1431,7 @@ def strip_html_tags(value):
     :param value: Text that needs to be stripped
     :return: stripped value.
     """
-    return django.utils.html.strip_tags(value)
+    if positive_value_exists(value):
+        return django.utils.html.strip_tags(value)
+    else:
+        return ""

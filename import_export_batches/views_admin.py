@@ -1209,7 +1209,7 @@ def batch_set_list_process_view(request):
                 pass
                 # results = batch_manager.create_batch(batch_uri, google_civic_election_id, organization_we_vote_id)
 
-        if results['batch_saved']:
+        if 'batch_saved' in results and results['batch_saved']:
             messages.add_message(request, messages.INFO, 'Import batch for {election_name} election saved.'
                                                          ''.format(election_name=election_name))
         else:

@@ -2065,7 +2065,8 @@ class BallotReturnedManager(models.Model):
             # Limit this query to entries stored for polling locations
             ballot_returned_query = ballot_returned_query.exclude(
                 Q(polling_location_we_vote_id__isnull=True) | Q(polling_location_we_vote_id=""))
-            state_code = address.split(', ')[-2][:2]
+            if positive_value_exists(address):
+                state_code = address.split(', ')[-2][:2]
             if positive_value_exists(state_code):
                 # This search for normalized_state is NOT redundant because some elections are in many states
                 ballot_returned_query = ballot_returned_query.filter(normalized_state__iexact=state_code)

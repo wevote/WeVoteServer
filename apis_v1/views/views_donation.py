@@ -130,13 +130,17 @@ def donation_cancel_subscription_view(request):  # donationCancelSubscription
 
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 
+
 # Using ngrok to test Stripe Webhook
 # https://a9a761d9.ngrok.io/apis/v1/donationStripeWebhook/
 # http://a9a761d9.ngrok.io -> localhost:8000
 @csrf_exempt
 def donation_stripe_webhook_view(request):
     payload = request.body.decode('utf-8')
-    sig_header = request.META['HTTP_STRIPE_SIGNATURE']
+    if 'HTTP_STRIPE_SIGNATURE' in request.META:
+        sig_header = request.META['HTTP_STRIPE_SIGNATURE']
+    else:
+        sig_header = ""
     endpoint_secret = get_environment_variable("STRIPE_SIGNING_SECRET")
 
     try:
