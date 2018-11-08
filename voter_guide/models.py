@@ -1400,6 +1400,7 @@ class VoterGuideListManager(models.Model):
         """
         Get the voter guides for orgs that we found by looking at the positions for an org found based on time span
         """
+        status = ""
         voter_guide_list = []
         voter_guide_list_found = False
         if not positive_value_exists(maximum_number_to_retrieve):
@@ -1419,6 +1420,7 @@ class VoterGuideListManager(models.Model):
                     organization_we_vote_id__in=organization_we_vote_ids_followed_or_ignored_by_voter)
 
             if positive_value_exists(len(google_civic_election_id_list)):
+                status += "CONVERTING_GOOGLE_CIVIC_ELECTION_ID_LIST_TO_INTEGER "
                 google_civic_election_id_integer_list = []
                 for google_civic_election_id in google_civic_election_id_list:
                     google_civic_election_id_integer_list.append(convert_to_int(google_civic_election_id))
@@ -1434,10 +1436,12 @@ class VoterGuideListManager(models.Model):
                                                                  Q(twitter_handle__icontains=search_string_part))
             else:
                 # If not searching, make sure we do not include individuals
+                status += "NOT_SEARCHING-EXCLUDING_INDIVIDUALS "
                 voter_guide_query = voter_guide_query.exclude(voter_guide_owner_type__iexact=INDIVIDUAL)
 
                 if not positive_value_exists(len(google_civic_election_id_list)):
                     # We also want to exclude voter guides with election_day_text smaller than today's date
+                    status += "EXCLUDE_PAST_ELECTION_DAYS "
                     timezone = pytz.timezone("America/Los_Angeles")
                     datetime_now = timezone.localize(datetime.now())
                     two_days = timedelta(days=2)
