@@ -168,7 +168,7 @@ def voter_guides_upcoming_retrieve_view(request):  # voterGuidesUpcomingRetrieve
     :return:
     """
     status = ""
-    google_civic_election_id_list = request.GET.get('google_civic_election_id_list', [])
+    google_civic_election_id_list = request.GET.getlist('google_civic_election_id_list')
 
     if positive_value_exists(google_civic_election_id_list):
         if not positive_value_exists(len(google_civic_election_id_list)):
