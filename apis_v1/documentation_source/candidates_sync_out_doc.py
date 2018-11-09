@@ -50,6 +50,7 @@ def candidates_sync_out_doc_template_values(url_root):
                    '  "candidate_phone": string,\n' \
                    '  "candidate_twitter_handle": string,\n' \
                    '  "candidate_url": string,\n' \
+                   '  "candidate_contact_form_url": string,\n' \
                    '  "contest_office_we_vote_id": string,\n' \
                    '  "contest_office_name": string,\n' \
                    '  "crowdpac_candidate_id": integer,\n' \

@@ -1897,6 +1897,7 @@ def voter_ballot_items_retrieve_for_one_election_for_api(voter_device_id, voter_
                                     candidate_campaign.we_vote_hosted_profile_image_url_medium,
                                 'candidate_photo_url_tiny': candidate_campaign.we_vote_hosted_profile_image_url_tiny,
                                 'candidate_url':                candidate_campaign.candidate_url,
+                                'candidate_contact_form_url':   candidate_campaign.candidate_contact_form_url,
                                 'contest_office_id':            candidate_campaign.contest_office_id,
                                 'contest_office_name':          candidate_campaign.contest_office_name,
                                 'contest_office_we_vote_id':    candidate_campaign.contest_office_we_vote_id,

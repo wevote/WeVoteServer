@@ -690,6 +690,8 @@ def candidates_import_from_structured_json(structured_json):
                     one_candidate['candidate_twitter_handle']
             if 'candidate_url' in one_candidate:
                 updated_candidate_values['candidate_url'] = one_candidate['candidate_url']
+            if 'candidate_contact_form_url' in one_candidate:
+                updated_candidate_values['candidate_contact_form_url'] = one_candidate['candidate_contact_form_url']
             if 'contest_office_name' in one_candidate:
                 updated_candidate_values['contest_office_name'] = one_candidate['contest_office_name']
             if 'crowdpac_candidate_id' in one_candidate:
@@ -866,6 +868,7 @@ def candidate_retrieve_for_api(candidate_id, candidate_we_vote_id):  # candidate
             'ocd_division_id':              candidate_campaign.ocd_division_id,
             'state_code':                   candidate_campaign.state_code,
             'candidate_url':                candidate_campaign.candidate_url,
+            'candidate_contact_form_url':   candidate_campaign.candidate_contact_form_url,
             'facebook_url':                 candidate_campaign.facebook_url,
             'twitter_url':                  candidate_campaign.twitter_url,
             'twitter_handle':               candidate_campaign.fetch_twitter_handle(),
@@ -953,6 +956,7 @@ def candidates_retrieve_for_api(office_id, office_we_vote_id):  # candidatesRetr
                 'candidate_photo_url_medium':   candidate_campaign.we_vote_hosted_profile_image_url_medium,
                 'candidate_photo_url_tiny':     candidate_campaign.we_vote_hosted_profile_image_url_tiny,
                 'candidate_url':                candidate_campaign.candidate_url,
+                'candidate_contact_form_url':   candidate_campaign.candidate_contact_form_url,
                 'contest_office_id':            candidate_campaign.contest_office_id,
                 'contest_office_name':          candidate_campaign.contest_office_name,
                 'contest_office_we_vote_id':    candidate_campaign.contest_office_we_vote_id,

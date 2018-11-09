@@ -392,7 +392,8 @@
                         <td>{{ one_batch_row.batch_row_action.candidate_email|default_if_none:"" }}</td>
                         <td>
                           url: {{ one_batch_row.batch_row_action.candidate_url|default_if_none:"" }}<br />
-                          bp: {{ one_batch_row.batch_row_action.ballotpedia_candidate_url|default_if_none:"" }}
+                          bp: {{ one_batch_row.batch_row_action.ballotpedia_candidate_url|default_if_none:"" }}<br />
+                          form: {{ one_batch_row.batch_row_action.candidate_contact_form_url|default_if_none:"" }}
                         </td>
                         <td>{{ one_batch_row.batch_row_action.candidate_is_incumbent|default_if_none:"" }}</td>
                     </tr>

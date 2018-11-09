@@ -105,6 +105,7 @@ BATCH_IMPORT_KEYS_ACCEPTED_FOR_CANDIDATES = {
     'candidate_profile_image_url': 'candidate_profile_image_url',
     'candidate_twitter_handle': 'candidate_twitter_handle',
     'candidate_url': 'candidate_url (website)',
+    'candidate_contact_form_url': 'candidate_contact_form_url',
     'contest_office_name': 'contest_office_name *',  # For matching only
     'contest_office_we_vote_id': 'contest_office_we_vote_id *',  # For matching only
     'crowdpac_candidate_id': 'crowdpac_candidate_id',
@@ -134,6 +135,7 @@ BATCH_HEADER_MAP_CANDIDATES_TO_BALLOTPEDIA_CANDIDATES = {
     'candidate_party_name': 'candidate_party_name',
     'candidate_twitter_handle': 'candidate_twitter_handle',
     'candidate_url': 'candidate_url',
+    'candidate_contact_form_url': 'candidate_contact_form_url',
     'crowdpac_candidate_id': 'crowdpac_candidate_id',
     'facebook_url': 'facebook_url',
     'state_code': 'state_code',
@@ -3741,6 +3743,7 @@ class BatchManager(models.Model):
             candidate_facebook_url = one_entry['facebook_url']
             candidate_twitter_url = one_entry['twitter_url']
             candidate_website_url = one_entry['website_url']
+            candidate_contact_form_url = one_entry['candidate_contact_form_url']
             party = one_entry['party']
             contest_office_name = one_entry['office_name']
             candidate_profile_image_url_https = one_entry['profile_image_url_https']
@@ -3765,6 +3768,7 @@ class BatchManager(models.Model):
                         batch_header_column_008='election_day',
                         batch_header_column_009='google_civic_election_id',
                         batch_header_column_010='candidate_ocd_division_id',
+                        batch_header_column_011='candidate_contact_form_url'
                     )
                     batch_header_id = batch_header.id
 
@@ -3783,6 +3787,7 @@ class BatchManager(models.Model):
                             batch_header_map_008='election_day',
                             batch_header_map_009='google_civic_election_id',
                             batch_header_map_010='candidate_ocd_division_id',
+                            batch_header_map_011='candidate_contact_form_url'
                         )
                         batch_header_map_id = batch_header_map.id
                         status += " BATCH_HEADER_MAP_SAVED"
@@ -3884,6 +3889,7 @@ class BatchManager(models.Model):
             grade_rating = one_entry['grade_rating']
             candidate_twitter_url = one_entry['twitter_url']
             candidate_website_url = one_entry['website_url']
+            candidate_contact_form_url = one_entry['candidate_contact_form_url']
             candidate_position_description = one_entry['position_description']
             office_name = one_entry['office_name']
             state_code = one_entry['state_code']
@@ -3909,6 +3915,7 @@ class BatchManager(models.Model):
                         batch_header_column_010='election_day',
                         batch_header_column_011='google_civic_election_id',
                         batch_header_column_012='organization_position_url',
+                        batch_header_column_013='candidate_contact_form_url',
                     )
                     batch_header_id = batch_header.id
 
@@ -3929,6 +3936,7 @@ class BatchManager(models.Model):
                             batch_header_map_010='election_day',
                             batch_header_map_011='google_civic_election_id',
                             batch_header_map_012='organization_position_url',
+                            batch_header_map_013='candidate_contact_form_url',
                         )
                         batch_header_map_id = batch_header_map.id
                         status += " BATCH_HEADER_MAP_SAVED"
@@ -3974,6 +3982,8 @@ class BatchManager(models.Model):
                     batch_row_010=election_day,
                     batch_row_011=google_civic_election_id,
                     batch_row_012=organization_position_url,
+                    batch_row_013=candidate_contact_form_url,
+
                 )
                 number_of_candidate_positions += 1
             except Exception as e:
@@ -4057,6 +4067,7 @@ class BatchManager(models.Model):
                         batch_header_column_011='state_code',
                         batch_header_column_012='election_day',
                         batch_header_column_013='google_civic_election_id',
+                        batch_header_column_014='candidate_contact_form_url',
                     )
                     batch_header_id = batch_header.id
 
@@ -4078,6 +4089,7 @@ class BatchManager(models.Model):
                             batch_header_map_011='state_code',
                             batch_header_map_012='election_day',
                             batch_header_map_013='google_civic_election_id',
+                            batch_header_map_014='candidate_contact_form_url',
                         )
                         batch_header_map_id = batch_header_map.id
                         status += " BATCH_HEADER_MAP_SAVED"
@@ -4124,6 +4136,7 @@ class BatchManager(models.Model):
                     batch_row_011=state_code,
                     batch_row_012=election_day,
                     batch_row_013=google_civic_election_id,
+                    batch_row_014=candidate_contact_form_url,
                 )
                 number_of_measure_positions += 1
             except Exception as e:
@@ -4833,6 +4846,8 @@ class BatchRowActionCandidate(models.Model):
     state_code = models.CharField(verbose_name="state this candidate serves", max_length=2, null=True, blank=True)
     # The URL for the candidate's campaign web site.
     candidate_url = models.URLField(verbose_name='website url of candidate campaign', blank=True, null=True)
+    candidate_contact_form_url = models.URLField(verbose_name='website url of candidate contact form',
+                                                 blank=True, null=True)
     facebook_url = models.URLField(verbose_name='facebook url of candidate campaign', blank=True, null=True)
 
     twitter_url = models.URLField(verbose_name='twitter url of candidate campaign', blank=True, null=True)
