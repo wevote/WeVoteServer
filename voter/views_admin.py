@@ -13,7 +13,7 @@ from django.db.models import Q
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from exception.models import handle_record_found_more_than_one_exception, handle_record_not_found_exception, \
-    handle_record_not_saved_exception
+    handle_record_not_saved_exception, handle_exception
 from import_export_facebook.models import FacebookLinkToVoter, FacebookManager
 from organization.models import Organization, OrganizationManager, INDIVIDUAL
 from position.controllers import merge_duplicate_positions_for_voter
@@ -772,6 +772,43 @@ def voter_change_authority_process_view(request):
         messages.add_message(request, messages.ERROR, 'Could not save change to authority.')
 
     return HttpResponseRedirect(reverse('voter:voter_edit', args=(voter_id,)))
+
+@login_required
+def voter_remove_facebook_auth_process_view(request, voter_id=0, voter_we_vote_id=""):
+    voter_id = request.GET.get('voter_id', 0)
+    voter_id = convert_to_int(voter_id)
+    voter_we_vote_id = request.GET.get('voter_we_vote_id', "")
+
+    facebook_user_id = ""
+    facebook_manager = FacebookManager()
+    return_auth_status = "No Facebook authentication data for this voter was found to remove."
+
+    # Get FacebookLinkToVoter then delete it
+    try:
+        link_delete_results = facebook_manager.delete_facebook_link_to_voter(voter_we_vote_id)
+        facebook_user_id = link_delete_results['facebook_user_id']
+
+        if positive_value_exists(facebook_user_id):
+            return_auth_status = "The Facebook link to voter '" + voter_we_vote_id + "' was deleted.  In addition "
+
+            delete_users_results = facebook_manager.delete_facebook_users(facebook_user_id)
+            return_auth_status += str(delete_users_results['facebook_users_deleted']) + " Facebook user rows and "
+
+            delete_auth_results = facebook_manager.delete_facebook_auth_responses(facebook_user_id)
+            return_auth_status += str(delete_auth_results['facebook_auth_rows_deleted']) + " auth rows were deleted."
+
+    except FacebookLinkToVoter.DoesNotExist:
+
+        pass
+
+    except Exception as e:
+        handle_exception(e, logger=logger,
+                         exception_message="voter_remove_facebook_auth_process_viewexception threw ")
+        pass
+
+    messages.add_message(request, messages.INFO, return_auth_status)
+
+    return HttpResponseRedirect(reverse('voter:voter_edit', args=(str(voter_id),)))
 
 
 @login_required
