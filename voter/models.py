@@ -841,7 +841,7 @@ class VoterManager(BaseUserManager):
         }
         return results
 
-    def retrieve_voter_list(self):
+    def retrieve_voter_list_with_emails(self):
         """
         Retrieve list of voter that are registered for newsletter
 
@@ -851,9 +851,12 @@ class VoterManager(BaseUserManager):
         result = dict()
         status = 'NO_VOTER_LIST'
         # get query set of voters with verified emails
-        voter_queryset = Voter.objects.extra(where=["notification_settings_flags & %s = 1",
-                                                    "email_ownership_is_verified = True"],
-                                             params=[NOTIFICATION_NEWSLETTER_OPT_IN])
+        # voter_queryset = Voter.objects.extra(where=["notification_settings_flags & %s = 1",
+        #                                             "email_ownership_is_verified = True"],
+        #                                      params=[NOTIFICATION_NEWSLETTER_OPT_IN])
+        voter_queryset = Voter.objects.filter(email_ownership_is_verified=True)
+        voter_queryset = voter_queryset.exclude((Q(email__isnull=True) | Q(email='')))
+
         if voter_queryset.exists():
             voter_list.extend(voter_queryset)
 
@@ -1057,10 +1060,10 @@ class VoterManager(BaseUserManager):
         return results
 
     def save_twitter_user_values_from_twitter_auth_response(self, voter, twitter_auth_response,
-                                                            cached_twitter_profile_image_url_https = None,
-                                                            we_vote_hosted_profile_image_url_large = None,
-                                                            we_vote_hosted_profile_image_url_medium = None,
-                                                            we_vote_hosted_profile_image_url_tiny = None):
+                                                            cached_twitter_profile_image_url_https=None,
+                                                            we_vote_hosted_profile_image_url_large=None,
+                                                            we_vote_hosted_profile_image_url_medium=None,
+                                                            we_vote_hosted_profile_image_url_tiny=None):
         """
         This is used to store the cached values in the voter record from the twitter_auth_response object once
         voter agrees to a merge.

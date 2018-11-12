@@ -10,7 +10,7 @@ from .models import BatchDescription, BatchHeader, BatchHeaderMap, BatchManager,
     BATCH_IMPORT_KEYS_ACCEPTED_FOR_POSITIONS, BATCH_IMPORT_KEYS_ACCEPTED_FOR_BALLOT_ITEMS, \
     IMPORT_CREATE, IMPORT_ADD_TO_EXISTING, IMPORT_VOTER
 from .controllers import create_batch_header_translation_suggestions, create_batch_row_actions, \
-    create_or_update_batch_header_mapping, export_voter_list, import_data_from_batch_row_actions
+    create_or_update_batch_header_mapping, export_voter_list_with_emails, import_data_from_batch_row_actions
 from import_export_ballotpedia.controllers import groom_ballotpedia_data_for_processing, \
     process_ballotpedia_voter_districts
 from import_export_batches.controllers_ballotpedia import store_ballotpedia_json_response_to_import_batch_system
@@ -697,7 +697,7 @@ def batch_action_list_export_voters_view(request):
     google_civic_election_id = request.GET.get('google_civic_election_id', '')
     organization_we_vote_id = request.GET.get('organization_we_vote_id', '')
 
-    result = export_voter_list()
+    result = export_voter_list_with_emails()
     messages.add_message(request, messages.INFO, 'Batch Action Export Voters: '
                                                  'Batch kind: {kind_of_batch}'
                                                  ''.format(kind_of_batch=kind_of_batch))

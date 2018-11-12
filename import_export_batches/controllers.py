@@ -4662,7 +4662,7 @@ def get_batch_header_id_from_batch_description(batch_set_id, kind_of_batch):
     return batch_header_id
 
 
-def export_voter_list():
+def export_voter_list_with_emails():
     """
     Exports voter list from VoterManager
 
@@ -4671,7 +4671,7 @@ def export_voter_list():
     voter_manager = VoterManager()
     export_result = dict()
     status = 'NO_EXPORT'
-    export_result = voter_manager.retrieve_voter_list()
+    export_result = voter_manager.retrieve_voter_list_with_emails()
     if export_result and export_result['voter_list']:
         status = 'SUCCESS'
 

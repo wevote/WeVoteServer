@@ -368,8 +368,11 @@ BATCH_IMPORT_KEYS_ACCEPTED_FOR_VOTERS = {
     'middle_name': 'middle_name',
     'last_name': 'last_name',
     'email': 'email',
+    'newsletter_opt_in': 'newsletter_opt_in',
     'we_vote_id': 'we_vote_id',
     'twitter_screen_name': 'twitter_screen_name',
+    'date_joined': 'date_joined',
+    'date_last_changed': 'date_last_changed',
 }
 
 
@@ -479,6 +482,9 @@ class BatchManager(models.Model):
             email = one_entry.email
             we_vote_id = one_entry.we_vote_id
             twitter_screen_name = one_entry.twitter_screen_name
+            newsletter_opt_in = one_entry.is_opt_in_newsletter()
+            date_joined = one_entry.date_joined
+            date_last_changed = one_entry.date_last_changed
 
             if first_line:
                 first_line = False
@@ -488,8 +494,11 @@ class BatchManager(models.Model):
                         batch_header_column_001=BATCH_IMPORT_KEYS_ACCEPTED_FOR_VOTERS['middle_name'],
                         batch_header_column_002=BATCH_IMPORT_KEYS_ACCEPTED_FOR_VOTERS['last_name'],
                         batch_header_column_003=BATCH_IMPORT_KEYS_ACCEPTED_FOR_VOTERS['email'],
-                        batch_header_column_004=BATCH_IMPORT_KEYS_ACCEPTED_FOR_VOTERS['we_vote_id'],
-                        batch_header_column_005=BATCH_IMPORT_KEYS_ACCEPTED_FOR_VOTERS['twitter_screen_name'],
+                        batch_header_column_004=BATCH_IMPORT_KEYS_ACCEPTED_FOR_VOTERS['newsletter_opt_in'],
+                        batch_header_column_005=BATCH_IMPORT_KEYS_ACCEPTED_FOR_VOTERS['we_vote_id'],
+                        batch_header_column_006=BATCH_IMPORT_KEYS_ACCEPTED_FOR_VOTERS['twitter_screen_name'],
+                        batch_header_column_007=BATCH_IMPORT_KEYS_ACCEPTED_FOR_VOTERS['date_joined'],
+                        batch_header_column_008=BATCH_IMPORT_KEYS_ACCEPTED_FOR_VOTERS['date_last_changed'],
                     )
                     batch_header_id = batch_header.id
 
@@ -501,8 +510,11 @@ class BatchManager(models.Model):
                             batch_header_map_001='middle_name',
                             batch_header_map_002='last_name',
                             batch_header_map_003='email',
-                            batch_header_map_004='we_vote_id',
-                            batch_header_map_005='twitter_screen_name',
+                            batch_header_map_004='newsletter_opt_in',
+                            batch_header_map_005='we_vote_id',
+                            batch_header_map_006='twitter_screen_name',
+                            batch_header_map_007='date_joined',
+                            batch_header_map_008='date_last_changed',
                         )
                         batch_header_map_id = batch_header_map.id
                         status += " BATCH_HEADER_MAP_SAVED"
@@ -536,8 +548,11 @@ class BatchManager(models.Model):
                     batch_row_001=middle_name,
                     batch_row_002=last_name,
                     batch_row_003=email,
-                    batch_row_004=we_vote_id,
-                    batch_row_005=twitter_screen_name,
+                    batch_row_004=newsletter_opt_in,
+                    batch_row_005=we_vote_id,
+                    batch_row_006=twitter_screen_name,
+                    batch_row_007=date_joined,
+                    batch_row_008=date_last_changed,
                 )
                 number_of_voters += 1
             except Exception as e:
