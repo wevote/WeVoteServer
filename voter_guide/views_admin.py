@@ -27,6 +27,7 @@ from django.shortcuts import render
 from election.models import Election, ElectionManager, TIME_SPAN_LIST
 from import_export_batches.models import BATCH_HEADER_MAP_FOR_POSITIONS, BatchManager, POSITION
 from import_export_twitter.controllers import refresh_twitter_organization_details, scrape_social_media_from_one_site
+from issue.models import IssueListManager
 from measure.controllers import add_measure_name_alternatives_to_measure_list_light, \
     retrieve_measure_list_for_all_upcoming_elections
 from organization.models import GROUP, Organization, OrganizationListManager, OrganizationManager
@@ -1626,6 +1627,7 @@ def voter_guide_list_view(request):
         voter_guide_list = list(voter_guide_query)
 
     modified_voter_guide_list = []
+    issue_list_manager = IssueListManager()
     position_list_manager = PositionListManager()
     for one_voter_guide in voter_guide_list:
         # How many Publicly visible positions are there in this election on this voter guide?
@@ -1639,6 +1641,9 @@ def voter_guide_list_view(request):
         one_voter_guide.number_of_friends_only_positions = position_list_manager.fetch_positions_count_for_voter_guide(
             organization_we_vote_id_list, one_voter_guide.google_civic_election_id, state_code,
             retrieve_public_positions)
+        # What Issues are associated with this voter_guide?
+        one_voter_guide.issue_list = issue_list_manager.fetch_organization_issue_list(
+            one_voter_guide.organization_we_vote_id)
         modified_voter_guide_list.append(one_voter_guide)
 
     election_manager = ElectionManager()

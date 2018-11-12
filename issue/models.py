@@ -175,6 +175,12 @@ class IssueListManager(models.Model):
                                                                 show_hidden_issues)
         return results['issues_display_string']
 
+    def fetch_organization_issue_list(self, organization_we_vote_id, sort_formula=None,
+                                      show_hidden_issues=False):
+        results = self.retrieve_organization_issues_for_display(organization_we_vote_id, sort_formula,
+                                                                show_hidden_issues)
+        return results['issue_list']
+
     def retrieve_organization_issues_for_display(self, organization_we_vote_id, sort_formula=None,
                                                  show_hidden_issues=False):
         issue_list_found = False
@@ -187,6 +193,7 @@ class IssueListManager(models.Model):
             results = {
                 'success': success,
                 'status': status,
+                'issue_list': [],
                 'issue_list_found': issue_list_found,
                 'issues_display_string': issues_display_string,
             }
@@ -201,6 +208,7 @@ class IssueListManager(models.Model):
             results = {
                 'success': success,
                 'status': status,
+                'issue_list': [],
                 'issue_list_found': issue_list_found,
                 'issues_display_string': issues_display_string,
             }
@@ -239,6 +247,7 @@ class IssueListManager(models.Model):
         results = {
             'success': success,
             'status': status,
+            'issue_list': issue_list,
             'issue_list_found': issue_list_found,
             'issues_display_string': issues_display_string,
         }

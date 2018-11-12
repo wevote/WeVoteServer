@@ -852,7 +852,8 @@ class VoterManager(BaseUserManager):
         status = 'NO_VOTER_LIST'
         # get query set of voters with verified emails
         voter_queryset = Voter.objects.extra(where=["notification_settings_flags & %s = 1",
-                                                    "email_ownership_is_verified = True"], params=[NOTIFICATION_NEWSLETTER_OPT_IN])
+                                                    "email_ownership_is_verified = True"],
+                                             params=[NOTIFICATION_NEWSLETTER_OPT_IN])
         if voter_queryset.exists():
             voter_list.extend(voter_queryset)
 
@@ -1831,6 +1832,11 @@ class Voter(AbstractBaseUser):
         """
         # Simplest possible answer: Yes, always
         return True
+
+    def is_opt_in_newsletter(self):
+        if self.is_notification_status_flag_set(NOTIFICATION_NEWSLETTER_OPT_IN):
+            return True
+        return False
 
     @property
     def is_staff(self):
