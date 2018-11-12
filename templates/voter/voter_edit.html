@@ -120,6 +120,10 @@ linked_organization_we_vote_id: {{ voter.linked_organization_we_vote_id|default_
   Grant Verified Volunteer Rights</a></p>
     {% endif %}
 
+<p><a href="{% url 'voter:voter_remove_facebook_auth_process' %}?voter_id={{ voter_id }}&voter_we_vote_id={{ voter.we_vote_id }}">
+    Remove Facebook Authentication (all devices and browsers)</a></p>
+<br/>
+
 {% endif %}
 
 

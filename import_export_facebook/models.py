@@ -229,6 +229,27 @@ class FacebookManager(models.Model):
         }
         return results
 
+    def delete_facebook_link_to_voter(self, voter_we_vote_id):
+        success = False
+        facebook_user_id = "";
+
+        try:
+            facebook_link_to_voter = FacebookLinkToVoter.objects.get(
+                voter_we_vote_id__iexact=voter_we_vote_id)
+            facebook_user_id = facebook_link_to_voter.facebook_user_id
+            facebook_link_to_voter.delete()
+            success = positive_value_exists(facebook_user_id)
+        except FacebookLinkToVoter.DoesNotExist:
+            pass
+        except Exception as e:
+           handle_exception(e, logger=logger, exception_message="delete_facebook_link_to_voter")
+
+        results = {
+            'success':           success,
+            'facebook_user_id':  facebook_user_id,
+        }
+        return results
+
     def update_or_create_facebook_auth_response(
             self, voter_device_id, facebook_access_token, facebook_user_id, facebook_expires_in,
             facebook_signed_request,
@@ -307,6 +328,38 @@ class FacebookManager(models.Model):
             'facebook_auth_response_saved': facebook_auth_response_saved,
             'facebook_auth_response_created': created,
             'facebook_auth_response': facebook_auth_response,
+        }
+        return results
+
+    def delete_facebook_auth_responses(self, facebook_user_id):
+        """
+        Delete all facebookauthresponse rows that have this facebook_user_id
+        :param facebook_user_id:
+        :return:
+        """
+
+        facebook_auth_rows_deleted = 0
+        try:
+            facebook_auth_response = FacebookAuthResponse()
+            facebook_auth_response = FacebookAuthResponse.objects.all()
+            facebook_auth_response = facebook_auth_response.filter(facebook_user_id__exact=facebook_user_id)
+            facebook_auth_response_list = list(facebook_auth_response)
+            for one_facebook_auth_response in facebook_auth_response_list:
+                logger.debug("DELETING one_facebook_auth_response " + str(one_facebook_auth_response.facebook_user_id))
+                one_facebook_auth_response.delete()
+                facebook_auth_rows_deleted = facebook_auth_rows_deleted + 1
+            success = True
+            status = " FACEBOOK_AUTH_RESPONSES_DELETED"
+        except Exception as e:
+            facebook_users_deleted = False
+            success = False
+            status = " FACEBOOK_AUTH_RESPONSES_NOT_DELETED"
+            handle_exception(e, logger=logger, exception_message=status)
+
+        results = {
+            'success': success,
+            'status': status,
+            'facebook_auth_rows_deleted': facebook_auth_rows_deleted,
         }
         return results
 
@@ -417,6 +470,38 @@ class FacebookManager(models.Model):
             'status':               status,
             'facebook_user_saved':  facebook_user_saved,
             'facebook_user':        facebook_user,
+            }
+        return results
+
+    def delete_facebook_users(self, facebook_user_id):
+        """
+        We use this subroutine to delete FacebookUser table row(s) with a specific facebook_user_id value.
+        :param facebook_user_id:
+        :return:
+        """
+        facebook_users_deleted = 0
+        try:
+            facebook_user = FacebookUser()
+            facebook_user_query = FacebookUser.objects.all()
+            facebook_user_query = facebook_user_query.filter(facebook_user_id__exact=facebook_user_id)
+
+            facebook_user_list = list(facebook_user_query)
+            for one_facebook_user in facebook_user_list:
+                logger.debug("DELETING one_facebook_user " + one_facebook_user.facebook_user_name)
+                one_facebook_user.delete()
+                facebook_users_deleted = facebook_users_deleted + 1
+            success = True
+            status = " FACEBOOK_USERS_DELETED"
+        except Exception as e:
+            facebook_users_deleted = False
+            success = False
+            status = " FACEBOOK_USERS_NOT_DELETED"
+            handle_exception(e, logger=logger, exception_message=status)
+
+        results = {
+            'success':                 success,
+            'status':                  status,
+            'facebook_users_deleted':  facebook_users_deleted,
             }
         return results
 
