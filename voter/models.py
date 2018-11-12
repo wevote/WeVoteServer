@@ -851,14 +851,10 @@ class VoterManager(BaseUserManager):
         result = dict()
         status = 'NO_VOTER_LIST'
         # get query set of voters with verified emails
-        voter_queryset = Voter.objects.filter(email_ownership_is_verified=True)
+        voter_queryset = Voter.objects.extra(where=["notification_settings_flags & %s = 1",
+                                                    "email_ownership_is_verified = True"], params=[NOTIFICATION_NEWSLETTER_OPT_IN])
         if voter_queryset.exists():
             voter_list.extend(voter_queryset)
-
-        # remove voters not registered for newsletter
-        for voter in voter_list:
-            if voter.notification_settings_flags & NOTIFICATION_NEWSLETTER_OPT_IN != 1:
-                voter_list.remove(voter)
 
         result = {
             'status':   status,
