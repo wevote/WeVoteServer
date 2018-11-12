@@ -600,11 +600,6 @@ def batch_action_list_export_view(request):
 
     batch_list_found = False
     try:
-        batch_row_count_query = BatchRow.objects.order_by('id')
-        batch_row_count_query = batch_row_count_query.filter(batch_header_id=batch_header_id)
-        if positive_value_exists(state_code):
-            batch_row_count_query = batch_row_count_query.filter(state_code__iexact=state_code)
-
         batch_row_query = BatchRow.objects.order_by('id')
         batch_row_query = batch_row_query.filter(batch_header_id=batch_header_id)
         if positive_value_exists(state_code):
@@ -617,6 +612,12 @@ def batch_action_list_export_view(request):
         batch_row_list = []
         batch_list_found = False
 
+    if not batch_list_found:
+        messages.add_message(request, messages.ERROR, 'No voters found to export.')
+        return HttpResponseRedirect(reverse('import_export_batches:batch_list', args=()) +
+                                    "?kind_of_batch=" + str(kind_of_batch) +
+                                    "&batch_header_id=" + str(batch_header_id)
+                                    )
 
     # get header/first row information
     header_opts = BatchHeaderMap._meta
@@ -629,7 +630,7 @@ def batch_action_list_export_view(request):
     row_opts = BatchRow._meta
     row_field_names = []
     for field in row_opts.fields:
-        if field.name not in ['id', 'batch_header_id']:
+        if field.name not in ['id', 'batch_header_id', 'batch_row_analyzed', 'batch_row_created']:
             row_field_names.append(field.name)
 
     header_list = [getattr(batch_header_map, field) for field in header_field_names]
@@ -655,10 +656,13 @@ def export_csv(batch_row_list, header_list, row_field_names, batch_description=N
     :param filename: optional name of csv file
     :return response: HttpResponse with text/csv data
     """
+    export_filename = "voter_export"
     if batch_description and not filename:
         export_filename = batch_description.batch_name
     elif filename:
         export_filename = filename
+
+    export_filename += ".csv"
 
     response = HttpResponse(content_type="text/csv")
     response['Content-Disposition'] = 'attachment; filename="{0}"'.format(export_filename)
@@ -667,7 +671,11 @@ def export_csv(batch_row_list, header_list, row_field_names, batch_description=N
 
     # output header/first row to csv
     for obj in batch_row_list:
-        csv_writer.writerow([getattr(obj, field) for field in row_field_names])
+        # csv_writer.writerow([getattr(obj, field) for field in row_field_names])
+        one_row = []
+        for field in row_field_names:
+            one_row.append(getattr(obj, field))
+        csv_writer.writerow(one_row)
 
     return response
 

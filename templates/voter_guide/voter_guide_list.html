@@ -5,6 +5,7 @@
 
 {%  block content %}
 {% load template_filters %}
+{% load humanize %}
 <p><a href="{% url 'admin_tools:admin_home' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">< Back to Admin Home</a></p>
 <p>Jump to:
     <a href="{% url 'election:election_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">Elections</a> -
@@ -139,6 +140,10 @@
             {% endif %}
             <td>
                 {{ voter_guide.organization_we_vote_id|default_if_none:"" }}
+                {% if voter_guide.owner_we_vote_id %}
+                    <br />
+                    {{ voter_guide.owner_we_vote_id|default_if_none:"" }}
+                {% endif %}
                 {% if voter_guide.organization %}
                     <br />
                     {% if voter_guide.organization.issue_analysis_done %}
@@ -148,13 +153,30 @@
                     {% endif %}
                 {% endif %}
             </td>
-            <td>{{ voter_guide.owner_we_vote_id|default_if_none:"" }}</td>
+            <td>
+              {% if voter_guide.issue_list %}
+              <span class="u-no-break">
+                {% for issue in voter_guide.issue_list %}
+                  {% if issue.issue_icon_local_path %}
+                    <img src="https://wevote.us/img/global/svg-icons/issues/{{ issue.issue_icon_local_path }}.svg"
+                         height="20"
+                         width="20"
+                         alt="{{ issue.issue_name }}"
+                         title="{{ issue.issue_name }}"
+                    />
+                  {% else %}
+                    {{ issue.issue_name|slice:":3" }}
+                  {% endif %}
+                {% endfor %}
+              </span>
+              {% endif %}
+            </td>
             <td>
                 {% if voter_guide.twitter_handle %}
                     <a href="https://twitter.com/{{ voter_guide.twitter_handle }}"
                        target="_blank"
                        class="u-no-break">
-                    <i class="fa fa-twitter"></i> {{ voter_guide.twitter_handle }} ({{ voter_guide.twitter_followers_count }})
+                    <i class="fa fa-twitter"></i> {{ voter_guide.twitter_handle }} ({{ voter_guide.twitter_followers_count|intcomma }})
                     &nbsp;
                     <span class="glyphicon glyphicon-new-window"></span></a>
                 {% endif %}

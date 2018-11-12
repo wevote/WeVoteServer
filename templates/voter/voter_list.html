@@ -42,6 +42,7 @@
             <th>Tw (cached)</th>
 {#            <th>TwitterLinkToVoter</th> 2017-3-29 Not working#}
             <th>Email</th>
+            <th>Opt In</th>
             <th>Org we_vote_id</th>
             <th>Admin</th>
             <th>Partner Organization</th>
@@ -95,7 +96,10 @@
             <td>
             {% if voter.email %}{{ voter.email }}{% else %}{% endif %}
             {% if voter.facebook_email %}fb:&nbsp;{{ voter.facebook_email|default_if_none:"" }}{% else %}{% endif %}
-
+            </td>
+            <!-- Opt In //-->
+            <td>
+            {% if voter.is_opt_in_newsletter %}Y{% else %}{% endif %}
             </td>
             <!-- Voter Linked Org //-->
             <td>

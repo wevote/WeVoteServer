@@ -509,16 +509,14 @@ class BatchManager(models.Model):
 
                     if positive_value_exists(batch_header_id) and positive_value_exists(batch_header_map_id):
                         # Now save the BatchDescription
-                        batch_name = "IMPORT_VOTERS " + " batch_header_id: " + str(batch_header_id)
+                        batch_name = "EXPORT_VOTERS batch_header_id: " + str(batch_header_id)
                         batch_description_text = ""
                         batch_description = BatchDescription.objects.create(
                             batch_header_id=batch_header_id,
                             batch_header_map_id=batch_header_map_id,
                             batch_name=batch_name,
                             batch_description_text=batch_description_text,
-                            google_civic_election_id=google_civic_election_id,
                             kind_of_batch=IMPORT_VOTER,
-                            organization_we_vote_id=organization_we_vote_id,
                         )
                         status += " BATCH_DESCRIPTION_SAVED"
                         success = True
