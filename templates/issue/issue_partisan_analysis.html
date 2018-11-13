@@ -127,12 +127,12 @@
 </tr>
 <tr>
     <td>
-      <h4>Left-Leaning</h4>
+      <h4>{{ endorsement_percent_left|floatformat:1 }}% Left-Leaning</h4>
       <p>{{ endorsement_count_left }} Candidate or Measure Endorsements</p>
     </td>
     <td>&nbsp;</td>
     <td>
-      <h4>Right-Leaning</h4>
+      <h4>{{ endorsement_percent_right|floatformat:1 }}% Right-Leaning</h4>
       <p>{{ endorsement_count_right }} Candidate or Measure Endorsements</p>
     </td>
 </tr>
@@ -150,9 +150,9 @@
     </td>
 </tr>
 <tr>
-    <td><h4>Left-Leaning ({{ organization_list_left|length }})</h4></td>
+    <td><h4>{{ organization_percent_left|floatformat:1 }}% Left-Leaning ({{ organization_list_left|length }})</h4></td>
     <td>&nbsp;</td>
-    <td><h4>Right-Leaning ({{ organization_list_right|length }})</h4></td>
+    <td><h4>{{ organization_percent_right|floatformat:1 }}% Right-Leaning ({{ organization_list_right|length }})</h4></td>
 </tr>
 <tr>
     <td valign="top">
