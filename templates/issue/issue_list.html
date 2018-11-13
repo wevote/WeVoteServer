@@ -118,6 +118,11 @@
                 <img src="https://wevote.us/img/global/svg-icons/issues/{{ issue.issue_icon_local_path }}.svg" height="20" width="20" />
               {% endif %}
               {{ issue.issue_name }} <span class="glyphicon glyphicon-new-window"></span></a>{% if issue.hide_issue %} - <strong>HIDDEN</strong>{% endif %}<br />
+              {% if issue.considered_left %}
+              <span class="glyphicon glyphicon-arrow-left"></span>
+              {% elif issue.considered_right %}
+              <span class="glyphicon glyphicon-arrow-right"></span>
+              {% endif %}
               {{ issue.we_vote_id }}
             </td>
             <td>{{ issue.linked_organization_count }}</td>

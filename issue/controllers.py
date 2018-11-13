@@ -48,6 +48,8 @@ def issues_import_from_structured_json(structured_json):
     for one_issue in structured_json:
         # Bring variables from the structure_json in, with error checking
         we_vote_id = one_issue["we_vote_id"] if "we_vote_id" in one_issue else False
+        considered_left = one_issue["considered_left"] if "considered_left" in one_issue else False
+        considered_right = one_issue["considered_right"] if "considered_right" in one_issue else False
         hide_issue = one_issue["hide_issue"] if "hide_issue" in one_issue else True  # We want to default to hiding
         issue_name = one_issue["issue_name"] if "issue_name" in one_issue else False
         issue_description = one_issue["issue_description"] if "issue_description" in one_issue else False
@@ -110,6 +112,8 @@ def issues_import_from_structured_json(structured_json):
                 issue_on_stage.we_vote_hosted_image_url_medium = we_vote_hosted_image_url_medium
             if we_vote_hosted_image_url_tiny is not False:
                 issue_on_stage.we_vote_hosted_image_url_tiny = we_vote_hosted_image_url_tiny
+            issue_on_stage.considered_left = considered_left
+            issue_on_stage.considered_right = considered_right
             issue_on_stage.hide_issue = hide_issue
 
             issue_on_stage.save()
