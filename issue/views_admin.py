@@ -876,12 +876,24 @@ def issue_partisan_analysis_view(request):
 
     total_endorsement_count = endorsement_count_left + endorsement_count_right
     total_organization_count = len(organization_list_left) + len(organization_list_right)
+    if positive_value_exists(total_endorsement_count):
+        endorsement_percent_left = 100 * (endorsement_count_left / total_endorsement_count)
+        endorsement_percent_right = 100 * (endorsement_count_right / total_endorsement_count)
+    else:
+        endorsement_percent_left = 0
+        endorsement_percent_right = 0
+    if positive_value_exists(total_organization_count):
+        organization_percent_left = 100 * (len(organization_list_left) / total_organization_count)
+        organization_percent_right = 100 * (len(organization_list_right) / total_organization_count)
+    else:
+        organization_percent_left = 0
+        organization_percent_right = 0
     template_values = {
         'election_list':            election_list,
         'endorsement_count_left':   endorsement_count_left,
         'endorsement_count_right':  endorsement_count_right,
-        'endorsement_percent_left':   100 * (endorsement_count_left / total_endorsement_count),
-        'endorsement_percent_right':  100 * (endorsement_count_right / total_endorsement_count),
+        'endorsement_percent_left': endorsement_percent_left,
+        'endorsement_percent_right': endorsement_percent_right,
         'google_civic_election_id': google_civic_election_id,
         'issue_list':               altered_issue_list,
         'issue_list_left':          issue_list_left,
@@ -890,8 +902,8 @@ def issue_partisan_analysis_view(request):
         'messages_on_stage':        messages_on_stage,
         'organization_list_left':   organization_list_left,
         'organization_list_right':  organization_list_right,
-        'organization_percent_left': 100 * (len(organization_list_left) / total_organization_count),
-        'organization_percent_right': 100 * (len(organization_list_right) / total_organization_count),
+        'organization_percent_left': organization_percent_left,
+        'organization_percent_right': organization_percent_right,
         'show_all_elections':       show_all_elections,
         'show_hidden_issues':       positive_value_exists(show_hidden_issues),
         'state_code':               state_code,
