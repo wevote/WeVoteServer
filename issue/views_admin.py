@@ -778,11 +778,11 @@ def issue_partisan_analysis_view(request):
     organization_retrieved_list = {}
     organization_link_to_issue_list = []
     organizations_attached_to_this_issue = {}
+    voter_guide_list_manager = VoterGuideListManager()
     if positive_value_exists(google_civic_election_id):
         # If we are just looking at one election, then we want to retrieve a list of the voter guides associated
         #  with this election. This way we can order the issues based on the number of organizations with positions
         #  in this election linked to issues.
-        voter_guide_list_manager = VoterGuideListManager()
         organization_manager = OrganizationManager()
         results = voter_guide_list_manager.retrieve_voter_guides_for_election(google_civic_election_id)
         if results['voter_guide_list_found']:
@@ -864,16 +864,6 @@ def issue_partisan_analysis_view(request):
         organization_we_vote_id_list_right, google_civic_election_id, state_code,
         retrieve_public_positions)
 
-    messages_on_stage = get_messages(request)
-
-    election_manager = ElectionManager()
-    if positive_value_exists(show_all_elections):
-        results = election_manager.retrieve_elections()
-        election_list = results['election_list']
-    else:
-        results = election_manager.retrieve_upcoming_elections()
-        election_list = results['election_list']
-
     total_endorsement_count = endorsement_count_left + endorsement_count_right
     total_organization_count = len(organization_list_left) + len(organization_list_right)
     if positive_value_exists(total_endorsement_count):
@@ -888,6 +878,20 @@ def issue_partisan_analysis_view(request):
     else:
         organization_percent_left = 0
         organization_percent_right = 0
+
+    messages_on_stage = get_messages(request)
+
+    google_civic_election_id_list = []
+    results = voter_guide_list_manager.retrieve_google_civic_election_id_list_for_elections_with_voter_guides()
+    if positive_value_exists(results['google_civic_election_id_list_found']):
+        google_civic_election_id_list = results['google_civic_election_id_list']
+
+    election_manager = ElectionManager()
+    read_only = True
+    results = election_manager.retrieve_elections_by_google_civic_election_id_list(
+        google_civic_election_id_list, read_only)
+    election_list = results['election_list']
+
     template_values = {
         'election_list':            election_list,
         'endorsement_count_left':   endorsement_count_left,

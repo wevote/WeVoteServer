@@ -581,6 +581,43 @@ class ElectionManager(models.Model):
         }
         return results
 
+    def retrieve_elections_by_google_civic_election_id_list(self, google_civic_election_id_list=[], read_only=False):
+        """
+        Retrieve elections using google_civic_election_id
+        :param google_civic_election_id_list:
+        :return:
+        """
+
+        if not positive_value_exists(len(google_civic_election_id_list)):
+            results = {
+                'success':          False,
+                'status':           "RETRIEVE_ELECTIONS_BY_GOOGLE_CIVIC_ELECTION_ID_LIST-MISSING ",
+                'election_list':    [],
+            }
+            return results
+
+        try:
+            if positive_value_exists(read_only):
+                election_list_query = Election.objects.using('readonly').all()
+            else:
+                election_list_query = Election.objects.all()
+            election_list_query = election_list_query.filter(google_civic_election_id__in=google_civic_election_id_list)
+            election_list_query = election_list_query.order_by('-election_day_text')
+            election_list = list(election_list_query)
+            status = 'ELECTIONS_FOUND '
+            success = True
+        except Election.DoesNotExist as e:
+            status = 'NO_ELECTIONS_FOUND '
+            success = True
+            election_list = []
+
+        results = {
+            'success':          success,
+            'status':           status,
+            'election_list':    election_list,
+        }
+        return results
+
     def retrieve_elections_by_state_and_election_date(self, state_code='', election_day_text='',
                                                       include_test_election=False):
         """
