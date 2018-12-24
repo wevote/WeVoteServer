@@ -1129,6 +1129,44 @@ class VoterGuideListManager(models.Model):
         }
         return results
 
+    def retrieve_google_civic_election_id_list_for_elections_with_voter_guides(self):
+        google_civic_election_id_list = []
+        voter_guide_list = []
+        google_civic_election_id_list_found = False
+
+        try:
+            # order_by is required for the distinct to work correctly
+            voter_guide_query = VoterGuide.objects.using('readonly').\
+                order_by().values('google_civic_election_id').distinct()
+            voter_guide_list = list(voter_guide_query)
+
+            if len(voter_guide_list):
+                google_civic_election_id_list_found = True
+                status = 'VOTER_GUIDES_FOUND-RETRIEVE_GOOGLE_CIVIC_ELECTION_ID_LIST '
+            else:
+                status = 'NO_VOTER_GUIDES_FOUND-RETRIEVE_GOOGLE_CIVIC_ELECTION_ID_LIST '
+            success = True
+        except Exception as e:
+            handle_record_not_found_exception(e, logger=logger)
+            status = 'retrieve_google_civic_election_id_list_for_elections_with_voter_guides: ' \
+                     'Unable to retrieve voter guides from db. ' \
+                     '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
+            success = False
+
+        if google_civic_election_id_list_found:
+            for voter_guide in voter_guide_list:
+                if positive_value_exists(voter_guide['google_civic_election_id']) \
+                        and voter_guide['google_civic_election_id'] not in google_civic_election_id_list:
+                    google_civic_election_id_list.append(voter_guide['google_civic_election_id'])
+
+        results = {
+            'success':                              success,
+            'status':                               status,
+            'google_civic_election_id_list_found':  google_civic_election_id_list_found,
+            'google_civic_election_id_list':        google_civic_election_id_list,
+        }
+        return results
+
     def retrieve_voter_guides_by_organization_list(self, organization_we_vote_ids_followed_by_voter,
                                                    filter_by_this_google_civic_election_id=False):
         voter_guide_list = []
