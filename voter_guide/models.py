@@ -1138,6 +1138,8 @@ class VoterGuideListManager(models.Model):
             # order_by is required for the distinct to work correctly
             voter_guide_query = VoterGuide.objects.using('readonly').\
                 order_by().values('google_civic_election_id').distinct()
+            voter_guide_query = voter_guide_query.exclude(vote_smart_ratings_only=True)
+            voter_guide_query = voter_guide_query.exclude(google_civic_election_id=2000)
             voter_guide_list = list(voter_guide_query)
 
             if len(voter_guide_list):

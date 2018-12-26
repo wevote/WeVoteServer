@@ -36,6 +36,13 @@ def twitter_sign_in_request_access_token_doc_template_values(url_root):
         },
     ]
     optional_query_parameter_list = [
+        {
+            'name': 'voter_info_mode',
+            'value': 'boolean',  # boolean, integer, long, string
+            'description': 'We collapsed twitterSignInRequestAccessToken and twitterSignInRequestVoterInfo '
+                           'into one API call. When set to true, we run Step 2: twitterSignInRequestVoterInfo and '
+                           'otherwise run Step 3: twitterSignInRequestAccessToken.',
+        },
     ]
 
     potential_status_codes_list = [
@@ -50,6 +57,7 @@ def twitter_sign_in_request_access_token_doc_template_values(url_root):
     ]
 
     try_now_link_variables_dict = {
+        'voter_info_mode': False,
     }
 
     api_response = '{\n' \
@@ -63,12 +71,12 @@ def twitter_sign_in_request_access_token_doc_template_values(url_root):
                    '}'
 
     template_values = {
-        'api_name': 'twitterSignInRequestAccessToken',
-        'api_slug': 'twitterSignInRequestAccessToken',
+        'api_name': 'twitterSignInRequest (AccessToken is default)',
+        'api_slug': 'twitterSignInRequest',
         'api_introduction':
             "Flow chart showing entire process here: "
             "https://docs.google.com/drawings/d/1WdVFsPZl3aLM9wxGuPTW3veqP-5EmZKv36KWjTz5pbU/edit",
-        'try_now_link': 'apis_v1:twitterSignInRequestAccessTokenView',
+        'try_now_link': 'apis_v1:twitterSignInRequestView',
         'try_now_link_variables_dict': try_now_link_variables_dict,
         'url_root': url_root,
         'get_or_post': 'GET',
