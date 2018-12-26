@@ -14,6 +14,13 @@ def twitter_sign_in_request_voter_info_doc_template_values(url_root):
             'description':  'An 88 character unique identifier linked to a voter record on the server',
         },
         {
+            'name':         'voter_info_mode',
+            'value':        'boolean',  # boolean, integer, long, string
+            'description':  'We collapsed twitterSignInRequestAccessToken and twitterSignInRequestVoterInfo '
+                            'into one API call. When set to true, we run Step 2: twitterSignInRequestVoterInfo and '
+                            'otherwise run Step 3: twitterSignInRequestAccessToken.',
+        },
+        {
             'name':         'return_url',
             'value':        'string',  # boolean, integer, long, string
             'description':  'The URL where the browser should be redirected once authenticated. '
@@ -46,6 +53,7 @@ def twitter_sign_in_request_voter_info_doc_template_values(url_root):
     ]
 
     try_now_link_variables_dict = {
+        'voter_info_mode': True,
     }
 
     api_response = '{\n' \
@@ -62,12 +70,12 @@ def twitter_sign_in_request_voter_info_doc_template_values(url_root):
                    '}'
 
     template_values = {
-        'api_name': 'twitterSignInRequestVoterInfo',
-        'api_slug': 'twitterSignInRequestVoterInfo',
+        'api_name': 'twitterSignInRequest?voter_info_mode=1',
+        'api_slug': 'twitterSignInRequest',
         'api_introduction':
             "Flow chart showing entire process here: "
             "https://docs.google.com/drawings/d/1WdVFsPZl3aLM9wxGuPTW3veqP-5EmZKv36KWjTz5pbU/edit",
-        'try_now_link': 'apis_v1:twitterSignInRequestVoterInfoView',
+        'try_now_link': 'apis_v1:twitterSignInRequestView',
         'try_now_link_variables_dict': try_now_link_variables_dict,
         'url_root': url_root,
         'get_or_post': 'GET',

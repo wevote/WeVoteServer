@@ -832,8 +832,9 @@ def twitter_sign_in_start_for_api(voter_device_id, return_url, cordova):  # twit
     #         # Somehow reset tokens and start over.
     #         pass
 
-    callback_url = WE_VOTE_SERVER_ROOT_URL + "/apis/v1/twitterSignInRequestAccessToken/"
-    callback_url += "?voter_device_id=" + voter_device_id
+    callback_url = WE_VOTE_SERVER_ROOT_URL + "/apis/v1/twitterSignInRequest/"  # twitterSignInRequestAccessToken
+    callback_url += "?voter_info_mode=0"
+    callback_url += "&voter_device_id=" + voter_device_id
     callback_url += "&return_url=" + return_url
     callback_url += "&cordova=" + str(cordova)
 

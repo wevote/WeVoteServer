@@ -81,8 +81,9 @@ def twitter_sign_in_start_view(request):  # twitterSignInStart (Step 1)
     results = twitter_sign_in_start_for_api(voter_device_id, return_url, cordova)
 
     if positive_value_exists(results['jump_to_request_voter_info']) and positive_value_exists(results['return_url']):
-        next_step_url = WE_VOTE_SERVER_ROOT_URL + "/apis/v1/twitterSignInRequestVoterInfo/"
-        next_step_url += "?voter_device_id=" + voter_device_id
+        next_step_url = WE_VOTE_SERVER_ROOT_URL + "/apis/v1/twitterSignInRequest/"  # twitterSignInRequestVoterInfo
+        next_step_url += "?voter_info_mode=1"
+        next_step_url += "&voter_device_id=" + voter_device_id
         next_step_url += "&return_url=" + quote(results['return_url'], safe='')
         next_step_url += "&cordova=" + str(cordova)
         return HttpResponseRedirect(next_step_url)
@@ -103,6 +104,14 @@ def twitter_sign_in_start_view(request):  # twitterSignInStart (Step 1)
         return HttpResponse(json.dumps(json_data), content_type='application/json')
 
 
+def twitter_sign_in_request_view(request):  # twitterSignInRequest (Switch for Step 1 & Step 2)
+    voter_info_mode = request.GET.get('voter_info_mode', 0)
+    if positive_value_exists(voter_info_mode):
+        return twitter_sign_in_request_voter_info_view(request)
+    else:
+        return twitter_sign_in_request_access_token_view(request)
+
+
 def twitter_sign_in_request_access_token_view(request):  # twitterSignInRequestAccessToken (Step 2)
     """
     Step 2 of the Twitter Sign In Process (twitterSignInRequestAccessToken) for the WebApp
@@ -110,6 +119,7 @@ def twitter_sign_in_request_access_token_view(request):  # twitterSignInRequestA
     :return:
     """
 
+    voter_info_mode = request.GET.get('voter_info_mode', 0)
     voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
     incoming_request_token = request.GET.get('oauth_token', '')
     incoming_oauth_verifier = request.GET.get('oauth_verifier', '')
@@ -121,8 +131,9 @@ def twitter_sign_in_request_access_token_view(request):  # twitterSignInRequestA
                                                            return_url, cordova)
 
     if positive_value_exists(results['return_url']):
-        next_step_url = WE_VOTE_SERVER_ROOT_URL + "/apis/v1/twitterSignInRequestVoterInfo/"
-        next_step_url += "?voter_device_id=" + voter_device_id
+        next_step_url = WE_VOTE_SERVER_ROOT_URL + "/apis/v1/twitterSignInRequest/"  # twitterSignInRequestVoterInfo
+        next_step_url += "?voter_info_mode=1"
+        next_step_url += "&voter_device_id=" + voter_device_id
         next_step_url += "&return_url=" + quote(results['return_url'], safe='')
         next_step_url += "&cordova=" + str(cordova)
         return HttpResponseRedirect(next_step_url)
@@ -133,6 +144,7 @@ def twitter_sign_in_request_access_token_view(request):  # twitterSignInRequestA
         'voter_device_id':                  voter_device_id,
         'access_token_and_secret_returned': results['access_token_and_secret_returned'],
         'cordova':                          cordova,
+        'voter_info_mode':                  voter_info_mode,
     }
 
     if cordova:
@@ -152,23 +164,24 @@ def twitter_native_sign_in_save_view(request):  # twitterNativeSignInSave
     voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
     twitter_access_token = request.GET.get('twitter_access_token', '')
     twitter_access_token_secret = request.GET.get('twitter_access_token_secret', '')
-    resultsNative = twitter_native_sign_in_save_for_api(voter_device_id, twitter_access_token, twitter_access_token_secret)
+    results_native = twitter_native_sign_in_save_for_api(voter_device_id, twitter_access_token,
+                                                         twitter_access_token_secret)
 
-    if resultsNative['success'] != True:
-        logger.error("Bad save in twitter_native_sign_in_save_view: " + resultsNative['status'])
+    if not results_native['success'] == True:
+        logger.error("Bad save in twitter_native_sign_in_save_view: " + results_native['status'])
 
     # Call equivalent of oAuth for WebApp Step 3
-    resultsVoterInfo = twitter_sign_in_request_voter_info_for_api(voter_device_id, "Native API Call, No Return URL")
+    results_voter_info = twitter_sign_in_request_voter_info_for_api(voter_device_id, "Native API Call, No Return URL")
 
     json_data = {
-        'status':               resultsVoterInfo['status'] + ' ' + resultsNative['status'],
-        'success':              resultsVoterInfo['success'],
-        'twitter_handle':       resultsVoterInfo['twitter_handle'],
-        'twitter_handle_found': resultsVoterInfo['twitter_handle_found'],
-        'twitter_secret_key':   resultsVoterInfo['twitter_secret_key'],
-        'voter_device_id':      resultsVoterInfo['voter_device_id'],
-        'voter_info_retrieved': resultsVoterInfo['voter_info_retrieved'],
-        'switch_accounts':      resultsVoterInfo['switch_accounts'],
+        'status':               results_voter_info['status'] + ' ' + results_native['status'],
+        'success':              results_voter_info['success'],
+        'twitter_handle':       results_voter_info['twitter_handle'],
+        'twitter_handle_found': results_voter_info['twitter_handle_found'],
+        'twitter_secret_key':   results_voter_info['twitter_secret_key'],
+        'voter_device_id':      results_voter_info['voter_device_id'],
+        'voter_info_retrieved': results_voter_info['voter_info_retrieved'],
+        'switch_accounts':      results_voter_info['switch_accounts'],
     }
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 
@@ -180,9 +193,10 @@ def twitter_sign_in_request_voter_info_view(request):  # twitterSignInRequestVot
     :return:
     """
 
-    voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
-    return_url = request.GET.get('return_url', '')
     cordova = request.GET.get('cordova', False)
+    return_url = request.GET.get('return_url', '')
+    voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
+    voter_info_mode = request.GET.get('voter_info_mode', 0)
 
     results = twitter_sign_in_request_voter_info_for_api(voter_device_id, return_url)
 
@@ -195,6 +209,7 @@ def twitter_sign_in_request_voter_info_view(request):  # twitterSignInRequestVot
         'voter_device_id':      results['voter_device_id'],
         'twitter_handle':       results['twitter_handle'],
         'twitter_handle_found': results['twitter_handle_found'],
+        'voter_info_mode':      voter_info_mode,
         'voter_info_retrieved': results['voter_info_retrieved'],
         'switch_accounts':      results['switch_accounts'],
     }
