@@ -391,9 +391,31 @@ def donation_process_charge(event):           # 'charge.succeeded'
         charge = event['data']['object']
         source = charge['source']
         outcome = charge['outcome']
+        customer = charge['customer']
         results = DonationManager.does_donation_journal_charge_exist(charge['id'])
 
-        # Charges from subscription payments, won't have our metadata
+        # Handle stripe test urls with no customer
+        if outcome == None:
+            outcome = []
+
+        if 'network_status' in outcome:
+            network_status = outcome['network_status']
+        else:
+            network_status = ""
+        if customer is None:
+            customer = "none"
+        else:
+            customer = str(charge['customer'])
+        if 'reason' in outcome:
+            reason = str('reason')
+        else:
+            reason = 'none'
+        if 'seller_message' in outcome:
+            seller_message = outcome['seller_message']
+        else:
+            seller_message = 'none'
+
+            # Charges from subscription payments, won't have our metadata
         try:
             voter_we_vote_id = charge['metadata']['voter_we_vote_id']
             if voter_we_vote_id:
@@ -401,19 +423,18 @@ def donation_process_charge(event):           # 'charge.succeeded'
                 logger.info("Stripe 'charge.succeeded' received for a PAYMENT_FROM_UI -- ignored, charge = " + charge)
                 return None
         except Exception:
-            voter_we_vote_id = DonationManager.find_we_vote_voter_id_for_stripe_customer(str(charge['customer']))
+            voter_we_vote_id = DonationManager.find_we_vote_voter_id_for_stripe_customer(customer)
 
         if results['success'] and not results['exists']:
             # Create the Journal entry for a payment initiated by an automatic subscription payment.
             DonationManager.create_donation_journal_entry("PAYMENT_AUTO_SUBSCRIPTION", "0.0.0.0",
-                                                          str(charge['customer']),
+                                                          customer,
                                                           voter_we_vote_id, charge['id'],
                                                           charge['amount'], charge['currency'], source['funding'],
                                                           charge['livemode'], "",  "",
                                                           datetime.fromtimestamp(charge['created'], timezone.utc),
                                                           str(charge['failure_code']), str(charge['failure_message']),
-                                                          outcome['network_status'], str(outcome['reason']),
-                                                          outcome['seller_message'], event['type'], charge['paid'],
+                                                          network_status, reason, seller_message, event['type'], charge['paid'],
                                                           0, charge['refunds']['total_count'], source['name'],
                                                           source['address_zip'], source['brand'], source['country'],
                                                           source['exp_month'], source['exp_year'],

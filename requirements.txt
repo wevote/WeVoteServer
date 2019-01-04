@@ -45,8 +45,7 @@ six==1.11.0
 social-auth-app-django==2.1.0
 social-auth-core==1.7.0
 static3==0.7.0
-stripe==1.55.2
-tweepy==3.6.0
+stripe==2.16.0
 Unipath==1.1
 uritemplate==3.0.0
 usaddress==0.5.10

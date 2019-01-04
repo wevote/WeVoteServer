@@ -685,6 +685,9 @@ class DonationManager(models.Model):
                    row.record_enum == "SUBSCRIPTION_SETUP_AND_INITIAL" and \
                    row.voter_we_vote_id != "":
                     return row.voter_we_vote_id
+            for row in rows:
+                if row.not_loggedin_voter_we_vote_id != None:
+                    return row.not_loggedin_voter_we_vote_id
 
             return ""
 
@@ -813,5 +816,5 @@ class DonationManager(models.Model):
 
         except Exception as e:
             handle_exception(e, logger=logger,
-                             exception_message="update_subscription_with_latest_charge_date" + str(e))
+                             exception_message="update_subscription_with_latest_charge_date: " + str(e))
         return
