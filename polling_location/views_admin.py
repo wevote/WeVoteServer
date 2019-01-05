@@ -163,18 +163,20 @@ def polling_locations_import_from_master_server_view(request):
     if import_results['success']:
         status += import_results['status']
         json_retrieved = True
-        polling_locations_import_status_string = "Checking for duplicate Polling locations. "
+        polling_locations_import_status_string = "Checking " + str(len(structured_json)) + \
+                                                 " polling locations for duplicates. "
         results = filter_polling_locations_structured_json_for_local_duplicates(structured_json)
         filtered_structured_json = results['structured_json']
         duplicates_removed = results['duplicates_removed']
 
-        polling_locations_import_status_string = "Importing Polling locations."
+        polling_locations_import_status_string = "Importing " + str(len(filtered_structured_json)) + \
+                                                 " polling locations."
         import_results = polling_locations_import_from_structured_json(filtered_structured_json)
         saved = import_results['saved']
         updated = import_results['updated']
         not_processed = import_results['not_processed']
     else:
-        polling_locations_import_status_string = "Not able to retrieve filtered_structured_json from Master Server. "
+        polling_locations_import_status_string = "Not able to retrieve the selected polling data from the Master Server. "
         status += polling_locations_import_status_string + import_results['status']
 
     if not json_retrieved:
@@ -195,6 +197,8 @@ def polling_locations_import_from_master_server_view(request):
 
 @login_required
 def polling_locations_import_from_master_server_status_view(request):
+    # This function makes the assumption that only one developer is synchronizing at a time, to make it handle
+    # multiple simultaneous users, we would need a map of strings, keyed to the device id.
     global polling_locations_import_status_string
 
     if 'polling_locations_import_status_string' not in globals():

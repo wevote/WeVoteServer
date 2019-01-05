@@ -146,33 +146,29 @@
 
     <tr><td><h4>Polling Locations</h4></td></tr>
     <tr>
-        <td>&nbsp;&nbsp;&nbsp;&nbsp;
+        {% if state_code %}
+
+        <td>
+            <form id="retrieve_polling_locations" name="polling_locations_import_from_master_server" method="get" action="{% url 'polling_location:polling_locations_import_from_master_server' %}">
+            {#% csrf_token %#}
+                <input type="submit" value="Retrieve Polling Locations for the State of {{ state_code }}" style="color: #337ab7; margin-left: 12px">
+
+                <input type="hidden" id="google_civic_election_id" name="google_civic_election_id" value="{{ google_civic_election_id }}">
+                <input type="hidden" id="started_update" name="started_update" value="stop">
+                <input type="hidden" id="state_code" name="state_code" value="{{ state_code }}">
+                <br/>
+                <div id="realTimeStatusPollingLocations" style=" margin: 5px 0 0 30px;"></div>
+            </form>
+        </td>
+        {% else %}
+       <td>&nbsp;&nbsp;&nbsp;&nbsp;
             <a href="{% url 'polling_location:polling_locations_import_from_master_server' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
                 Retrieve Polling Locations</a>
             {% if state_code %} for the state {{ state_code }}{% else %} for ALL states{% endif %}
-        </td>
+       </td>
+        {% endif %}
         <td>The list of known polling locations.  &#34;All states&#34; can take more than 30 minutes to load.</td>
     </tr>
-
-{% if state_code %}
-    <tr>
-      <td colspan="2">
-request.build_absolute_uri: {{request.build_absolute_uri}}
-<form id="retrieve_polling_locations" name="polling_locations_import_from_master_server" method="get" action="{% url 'polling_location:polling_locations_import_from_master_server' %}">
-{#% csrf_token %#}
-    <input type="submit" value="Retrieve Polling Locations for the State {{ state_code }}">
-
-    <input type="hidden" id="google_civic_election_id" name="google_civic_election_id" value="{{ google_civic_election_id }}">
-    <input type="hidden" id="started_update" name="started_update" value="stop">
-    <input type="hidden" id="state_code" name="state_code" value="{{ state_code }}">
-    <br/>
-    <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
-    <span id="realTimeStatusPollingLocations"></span>
-</form>
-
-      </td>
-    </tr>
-{% endif %}
 
     <tr><td><h4>Ballot Items</h4></td></tr>
     <tr>
@@ -246,7 +242,9 @@ request.build_absolute_uri: {{request.build_absolute_uri}}
     setInterval(function () {
       let origin = new URL('{{request.build_absolute_uri}}').origin;
       let apiURL = origin + '/pl/import_status/';
-      let started = document.getElementById('started_update').value;
+      let startedElement = document.getElementById('started_update');
+      let started = startedElement ? startedElement.value : "no";
+
       console.log("started ---- " + started);
       if (started === 'start') {
         $.ajax({
