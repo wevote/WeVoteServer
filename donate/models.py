@@ -274,7 +274,7 @@ class DonationManager(models.Model):
                 amount=donation_amount,
                 interval="month",
                 currency="usd",
-                name=recurring_donation_plan_id,
+                nickname=recurring_donation_plan_id,
                 id=recurring_donation_plan_id,
             )
             if plan.id:
