@@ -276,6 +276,10 @@ class DonationManager(models.Model):
                 currency="usd",
                 nickname=recurring_donation_plan_id,
                 id=recurring_donation_plan_id,
+                product={
+                    "name": recurring_donation_plan_id,
+                    "type": "service"
+                },
             )
             if plan.id:
                 success = True
