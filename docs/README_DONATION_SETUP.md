@@ -134,6 +134,23 @@ a note in the Python Console log ...
 
     this confims that the webhook is successfully communicating with your test setup.
 
+**If the Webhook starts failing**
+
+1. End users might see "waiting" displayed indefinitely on their donation subscription page, since the
+webhook is required for updating that data.
+
+1. Whoever is signed up for the stripe account will start receiving emails from support@stripe.com titled "Stripe webhook delivery issues for https://api.wevoteusa.org"
+
+1. The Splunk logs will start showing messages like...
+
+   ```[2019-01-08 15:50:52,788] [ERROR] api-3:apis_v1.views.views_donation: donation_stripe_webhook_view, Stripe returned SignatureVerificationError: No signatures found matching the expected signature for payload```
+
+One of the first thing to check is that the STRIPE_SIGNING_SECRET and the STRIPE_SECRET_KEY values on the production 
+server match what is shown on the [Stripe console](https://dashboard.stripe.com/account/apikeys)
+
+The stripe console now has the ability to look at Stripe logs of all the recent transactions of our access to the Stripe API, and great logging
+that shows each Webhook initiated by Stripe.
+
 
 [Back to Install Table of Contents](README_API_INSTALL.md)
  
