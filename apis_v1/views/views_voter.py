@@ -1237,7 +1237,7 @@ def voter_split_into_two_accounts_view(request):  # voterSplitIntoTwoAccounts
     :return:
     """
     voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
-    split_off_twitter = request.GET.get('split_off_twitter', True)
+    split_off_twitter = request.GET.get('split_off_twitter', True)  # We want to break off the Twitter from this account
 
     results = voter_split_into_two_accounts_for_api(voter_device_id=voter_device_id,
                                                     split_off_twitter=split_off_twitter)

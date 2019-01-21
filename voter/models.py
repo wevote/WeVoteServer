@@ -209,15 +209,22 @@ class VoterManager(BaseUserManager):
         try:
             voter.id = None  # Remove the primary key so it is forced to save a new entry
             voter.pk = None
-            voter.we_vote_id = None  # Clear out existing we_vote_id
-            voter.generate_new_we_vote_id()
             voter.email = None
             voter.email_ownership_is_verified = False
             voter.facebook_id = None
             voter.facebook_email = None
             voter.fb_username = None
             voter.linked_organization_we_vote_id = None
+            voter.twitter_access_secret = None
+            voter.twitter_access_token = None
+            voter.twitter_connection_active = False
+            voter.twitter_id = None
+            voter.twitter_request_secret = None
+            voter.twitter_request_token = None
+            voter.twitter_screen_name = None
             voter.primary_email_we_vote_id = None
+            voter.we_vote_id = None  # Clear out existing we_vote_id
+            voter.generate_new_we_vote_id()
             voter.save()
             status += "DUPLICATE_VOTER_SUCCESSFUL"
             voter_id = voter.id
@@ -1007,6 +1014,7 @@ class VoterManager(BaseUserManager):
         :param we_vote_hosted_profile_image_url_tiny:
         :return:
         """
+        status = ""
         try:
             voter_to_save = False
             # We try to keep voter.twitter_id up-to-date for rapid retrieve, but it is cached data and not master
@@ -1047,9 +1055,9 @@ class VoterManager(BaseUserManager):
             if voter_to_save:
                 voter.save()
             success = True
-            status = "SAVED_VOTER_TWITTER_VALUES"
+            status += "SAVED_VOTER_TWITTER_VALUES_FROM_TWITTER_USER_VALUES "
         except Exception as e:
-            status = "UNABLE_TO_SAVE_VOTER_TWITTER_VALUES"
+            status += "UNABLE_TO_SAVE_VOTER_TWITTER_VALUES_FROM_TWITTER_USER_VALUES "
             success = False
 
         results = {
@@ -1135,6 +1143,7 @@ class VoterManager(BaseUserManager):
                                            we_vote_hosted_profile_image_url_large=None,
                                            we_vote_hosted_profile_image_url_medium=None,
                                            we_vote_hosted_profile_image_url_tiny=None):
+        status = ""
         try:
             # 'id': 132728535,
             if 'id' in twitter_user_dict:
@@ -1166,9 +1175,9 @@ class VoterManager(BaseUserManager):
             # 'time_zone': 'Seoul',
             voter.save()
             success = True
-            status = "SAVED_VOTER_TWITTER_VALUES"
+            status += "SAVED_VOTER_TWITTER_VALUES_FROM_USER_DICT_VALUES "
         except Exception as e:
-            status = "UNABLE_TO_SAVE_VOTER_TWITTER_VALUES"
+            status += "UNABLE_TO_SAVE_VOTER_TWITTER_VALUES_FROM_USER_DICT_VALUES "
             success = False
             handle_record_not_saved_exception(e, logger=logger, exception_message_optional=status)
 

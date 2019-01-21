@@ -2534,6 +2534,12 @@ def voter_sign_out_for_api(voter_device_id, sign_out_all_devices=False):  # vote
 
 
 def voter_split_into_two_accounts_for_api(voter_device_id, split_off_twitter):  # voterSplitIntoTwoAccounts
+    """
+
+    :param voter_device_id:
+    :param split_off_twitter: Create a new account separate from this one, that we can log into later
+    :return:
+    """
     success = False
     status = ""
     repair_twitter_related_voter_caching_now = False
@@ -2562,7 +2568,7 @@ def voter_split_into_two_accounts_for_api(voter_device_id, split_off_twitter):  
         }
         return error_results
 
-    from_voter = voter_results['voter']
+    current_voter = voter_results['voter']
 
     if not positive_value_exists(split_off_twitter):
         error_results = {
@@ -2576,9 +2582,9 @@ def voter_split_into_two_accounts_for_api(voter_device_id, split_off_twitter):  
     # Make sure this voter has a TwitterLinkToVoter entry
     twitter_user_manager = TwitterUserManager()
     twitter_id = 0
-    twitter_link_to_voter_results = twitter_user_manager.retrieve_twitter_link_to_voter(
-        twitter_id, from_voter.we_vote_id)
-    if not twitter_link_to_voter_results['twitter_link_to_voter_found']:
+    twitter_link_to_current_voter_results = twitter_user_manager.retrieve_twitter_link_to_voter(
+        twitter_id, current_voter.we_vote_id)
+    if not twitter_link_to_current_voter_results['twitter_link_to_voter_found']:
         error_results = {
             'status':               "VOTER_SPLIT_INTO_TWO_ACCOUNTS_TWITTER_LINK_TO_VOTER_NOT_FOUND",
             'success':              False,
@@ -2588,7 +2594,7 @@ def voter_split_into_two_accounts_for_api(voter_device_id, split_off_twitter):  
         return error_results
 
     # Make sure this voter has another way to sign in once twitter is split off
-    if from_voter.signed_in_facebook() or from_voter.signed_in_with_email():
+    if current_voter.signed_in_facebook() or current_voter.signed_in_with_email():
         status += "CONFIRMED-VOTER_HAS_ANOTHER_WAY_TO_SIGN_IN "
     else:
         error_results = {
@@ -2599,37 +2605,64 @@ def voter_split_into_two_accounts_for_api(voter_device_id, split_off_twitter):  
         }
         return error_results
 
-    from_voter_id = from_voter.id
-    from_voter_we_vote_id = from_voter.we_vote_id
-    to_voter = Voter
-    to_voter_id = 0
-    to_voter_we_vote_id = ""
+    current_voter_id = current_voter.id
+    current_voter_we_vote_id = current_voter.we_vote_id
+    split_off_voter = Voter
+    split_off_voter_id = 0
+    split_off_voter_we_vote_id = ""
 
-    # Make sure we start the process with a from_voter_organization and correct TwitterLinkToVoter
+    # Make sure we start the process with a current_voter_organization and correct TwitterLinkToVoter
     # and TwitterLinkToOrganization entries
     organization_manager = OrganizationManager()
-    repair_results = organization_manager.repair_missing_linked_organization_we_vote_id(from_voter)
+    repair_results = organization_manager.repair_missing_linked_organization_we_vote_id(current_voter)
     if repair_results['voter_repaired']:
-        from_voter = repair_results['voter']
+        current_voter = repair_results['voter']
 
-    # Create a duplicate voter
-    voter_duplicate_results = voter_manager.duplicate_voter(from_voter)
+    # Temporarily store Twitter values from current_voter
+    split_off_twitter_access_secret = current_voter.twitter_access_secret
+    split_off_twitter_access_token = current_voter.twitter_access_token
+    split_off_twitter_connection_active = current_voter.twitter_connection_active
+    split_off_twitter_id = current_voter.twitter_id
+    split_off_twitter_request_token = current_voter.twitter_request_token
+    split_off_twitter_request_secret = current_voter.twitter_request_secret
+    split_off_twitter_screen_name = current_voter.twitter_screen_name
+
+    # Create a duplicate voter that we can split off for Twitter
+    voter_duplicate_results = voter_manager.duplicate_voter(current_voter)
     if not voter_duplicate_results['voter_duplicated']:
         status += "VOTER_SPLIT_INTO_TWO_ACCOUNTS_NEW_VOTER_NOT_DUPLICATED "
     else:
-        to_voter = voter_duplicate_results['voter']
-        to_voter_id = to_voter.id
-        to_voter_we_vote_id = to_voter.we_vote_id
+        split_off_voter = voter_duplicate_results['voter']
+        split_off_voter_id = split_off_voter.id
+        split_off_voter_we_vote_id = split_off_voter.we_vote_id
 
         # Make sure we remove any legacy of Twitter
-        from_voter.twitter_id = 0
-        from_voter.twitter_screen_name = ""
         try:
-            from_voter.save()
+            current_voter.twitter_access_secret = None
+            current_voter.twitter_access_token = None
+            current_voter.twitter_connection_active = False
+            current_voter.twitter_id = None
+            current_voter.twitter_request_token = None
+            current_voter.twitter_request_secret = None
+            current_voter.twitter_screen_name = None
+            current_voter.save()
         except Exception as e:
-            status += "VOTER_SPLIT_INTO_TWO_ACCOUNTS_NEW_VOTER_NOT_UPDATED "
+            status += "VOTER_SPLIT_INTO_TWO_ACCOUNTS-CURRENT_VOTER_TWITTER_VALUES_NOT_REMOVED "
 
-    if not positive_value_exists(to_voter_we_vote_id):
+        # And now update split_off_voter with the twitter values originally in current_voter
+        try:
+            split_off_voter.twitter_access_secret = split_off_twitter_access_secret
+            split_off_voter.twitter_access_token = split_off_twitter_access_token
+            split_off_voter.twitter_connection_active = split_off_twitter_connection_active
+            split_off_voter.twitter_id = split_off_twitter_id
+            split_off_voter.twitter_request_token = split_off_twitter_request_token
+            split_off_voter.twitter_request_secret = split_off_twitter_request_secret
+            split_off_voter.twitter_screen_name = split_off_twitter_screen_name
+            split_off_voter.save()
+        except Exception as e:
+            status += "VOTER_SPLIT_INTO_TWO_ACCOUNTS-SPLIT_OFF_VOTER_TWITTER_VALUES_NOT_UPDATED "
+
+    if not positive_value_exists(split_off_voter_we_vote_id):
         error_results = {
             'status':                       status,
             'success':                      False,
@@ -2638,13 +2671,13 @@ def voter_split_into_two_accounts_for_api(voter_device_id, split_off_twitter):  
         }
         return error_results
 
-    # Move TwitterLinkToVoter to the new voter "to_voter"
+    # Move TwitterLinkToVoter to the new voter "split_off_voter"
     twitter_link_moved = False
-    twitter_link_to_voter = twitter_link_to_voter_results['twitter_link_to_voter']
-    twitter_link_to_voter_twitter_id = twitter_link_to_voter.twitter_id
+    twitter_link_to_split_off_voter = twitter_link_to_current_voter_results['twitter_link_to_voter']
+    twitter_link_to_split_off_voter_twitter_id = twitter_link_to_split_off_voter.twitter_id
     try:
-        twitter_link_to_voter.voter_we_vote_id = to_voter.we_vote_id
-        twitter_link_to_voter.save()
+        twitter_link_to_split_off_voter.voter_we_vote_id = split_off_voter.we_vote_id
+        twitter_link_to_split_off_voter.save()
         repair_twitter_related_voter_caching_now = True
         twitter_link_moved = True
     except Exception as e:
@@ -2659,148 +2692,190 @@ def voter_split_into_two_accounts_for_api(voter_device_id, split_off_twitter):  
         }
         return error_results
 
-    # The facebook link should not require a change, since this link should still be to the from_voter
+    # The facebook link should not require a change, since this link should still be to the current_voter
     # facebook_manager = FacebookManager()
-    # facebook_link_results = facebook_manager.retrieve_facebook_link_to_voter(0, from_voter.we_vote_id)
+    # facebook_link_results = facebook_manager.retrieve_facebook_link_to_voter(0, current_voter.we_vote_id)
     # if facebook_link_results['facebook_link_to_voter_found']:
     #     facebook_link_to_voter = facebook_link_results['facebook_link_to_voter']
 
     # Get the organization linked to the twitter_id
-    # Next, link that organization connected to the Twitter account to the to_voter
-    # Then duplicate that org, and connect the duplicate to the from_voter
+    # Next, link that organization connected to the Twitter account to the split_off_voter
+    # Then duplicate that org, and connect the duplicate to the current_voter
     organization_manager = OrganizationManager()
-    twitter_link_to_organization_exists = False
-    twitter_link_to_organization_moved = False
-    to_voter_linked_organization_id = 0
-    to_voter_linked_organization_we_vote_id = ""
-    from_voter_linked_organization_id = 0
-    from_voter_linked_organization_we_vote_id = from_voter.linked_organization_we_vote_id
+    twitter_link_to_current_organization = None
+    twitter_link_to_current_organization_exists = False
+    twitter_link_to_current_organization_moved = False
+    split_off_voter_linked_organization_id = 0
+    split_off_voter_linked_organization_we_vote_id = ""
+    current_voter_linked_organization = None
+    current_voter_linked_organization_id = 0
+    current_voter_linked_organization_we_vote_id = current_voter.linked_organization_we_vote_id
 
     twitter_organization_name = ""
-    if positive_value_exists(twitter_link_to_voter_twitter_id):
-        twitter_user_results = twitter_user_manager.retrieve_twitter_user(twitter_link_to_voter_twitter_id)
+    if positive_value_exists(twitter_link_to_split_off_voter_twitter_id):
+        twitter_user_results = twitter_user_manager.retrieve_twitter_user(twitter_link_to_split_off_voter_twitter_id)
         if twitter_user_results['twitter_user_found']:
             twitter_user = twitter_user_results['twitter_user']
             twitter_organization_name = twitter_user.twitter_name
 
-    twitter_link_to_organization_results = \
+    # We want to isolate the twitter_link_to_organization entry
+    twitter_link_to_current_organization_results = \
         twitter_user_manager.retrieve_twitter_link_to_organization_from_twitter_user_id(
-            twitter_link_to_voter_twitter_id)
-    if not twitter_link_to_organization_results['twitter_link_to_organization_found']:
-        status += "NO_LINKED_ORGANIZATION_WE_VOTE_ID_FOUND "
-        organization_name = from_voter.get_full_name()
-        organization_website = ""
-        organization_twitter_handle = ""
-        organization_twitter_id = ""
-        organization_email = ""
-        organization_facebook = ""
-        organization_image = from_voter.voter_photo_url()
-        organization_type = INDIVIDUAL
-        create_results = organization_manager.create_organization(
-            organization_name, organization_website, organization_twitter_handle,
-            organization_email, organization_facebook, organization_image, organization_twitter_id, organization_type)
-        if create_results['organization_created']:
-            from_voter_linked_organization = create_results['organization']
-            from_voter_linked_organization_id = from_voter_linked_organization.id
-            from_voter_linked_organization_we_vote_id = from_voter_linked_organization.we_vote_id
-    else:
-        twitter_link_to_organization = twitter_link_to_organization_results['twitter_link_to_organization']
-        twitter_link_to_organization_exists = True
-        organization_associated_with_twitter_id_we_vote_id = twitter_link_to_organization.organization_we_vote_id
+            twitter_link_to_split_off_voter_twitter_id)
+    if twitter_link_to_current_organization_results['twitter_link_to_organization_found']:
+        # We have a Twitter link to this organization
+        twitter_link_to_current_organization = \
+            twitter_link_to_current_organization_results['twitter_link_to_organization']
+        twitter_link_to_current_organization_exists = True
+        organization_associated_with_twitter_id_we_vote_id = \
+            twitter_link_to_current_organization.organization_we_vote_id
         twitter_organization_results = organization_manager.retrieve_organization_from_we_vote_id(
             organization_associated_with_twitter_id_we_vote_id)
-        if not twitter_organization_results['organization_found']:
+        if twitter_organization_results['organization_found']:
+            # Error checking successful. The existing organization that is tied to this twitter_id will be put in
+            #  the "current_voter" and we will duplicate an organization for use with the Twitter account
+            current_voter_linked_organization = twitter_organization_results['organization']
+            current_voter_linked_organization_id = current_voter_linked_organization.id
+            current_voter_linked_organization_we_vote_id = current_voter_linked_organization.we_vote_id
+        else:
             status += "NO_LINKED_ORGANIZATION_FOUND "
             # Create new organization
-            # Update the twitter_link_to_organization with new organization_we_vote_id
-            organization_name = from_voter.get_full_name()
+            # Update the twitter_link_to_current_organization with new organization_we_vote_id
+            organization_name = current_voter.get_full_name()
             organization_website = ""
             organization_twitter_handle = ""
             organization_twitter_id = ""
             organization_email = ""
             organization_facebook = ""
-            organization_image = from_voter.voter_photo_url()
+            organization_image = current_voter.voter_photo_url()
             organization_type = INDIVIDUAL
             create_results = organization_manager.create_organization(
                 organization_name, organization_website, organization_twitter_handle,
                 organization_email, organization_facebook, organization_image, organization_twitter_id,
                 organization_type)
             if create_results['organization_created']:
-                from_voter_linked_organization = create_results['organization']
-                from_voter_linked_organization_id = from_voter_linked_organization.id
-                from_voter_linked_organization_we_vote_id = from_voter_linked_organization.we_vote_id
-        else:
-            # Error checking successful. The existing organization that is tied to this twitter_id will be put in
-            #  the "from_voter" and we will duplicate an organization for use with the Twitter account
-            from_voter_linked_organization = twitter_organization_results['organization']
-            from_voter_linked_organization_id = from_voter_linked_organization.id
-            from_voter_linked_organization_we_vote_id = from_voter_linked_organization.we_vote_id
+                current_voter_linked_organization = create_results['organization']
+                current_voter_linked_organization_id = current_voter_linked_organization.id
+                current_voter_linked_organization_we_vote_id = current_voter_linked_organization.we_vote_id
+    elif positive_value_exists(current_voter_linked_organization_we_vote_id):
+        # Retrieve organization based on current_voter_linked_organization_we_vote_id
+        current_voter_linked_organization_results = organization_manager.retrieve_organization_from_we_vote_id(
+            current_voter_linked_organization_we_vote_id)
+        if current_voter_linked_organization_results['organization_found']:
+            current_voter_linked_organization = current_voter_linked_organization_results['organization']
+            current_voter_linked_organization_id = current_voter_linked_organization.id
+            current_voter_linked_organization_we_vote_id = current_voter_linked_organization.we_vote_id
 
-    if positive_value_exists(from_voter_linked_organization_we_vote_id):
+    if not positive_value_exists(current_voter_linked_organization_we_vote_id):
+        # If for some reason there isn't an organization tied to the Twitter account, create a new organization
+        # for the split_off_voter
+        status += "NO_LINKED_ORGANIZATION_WE_VOTE_ID_FOUND "
+        organization_name = current_voter.get_full_name()
+        organization_website = ""
+        organization_twitter_handle = ""
+        organization_twitter_id = ""
+        organization_email = ""
+        organization_facebook = ""
+        organization_image = current_voter.voter_photo_url()
+        organization_type = INDIVIDUAL
+        create_results = organization_manager.create_organization(
+            organization_name, organization_website, organization_twitter_handle,
+            organization_email, organization_facebook, organization_image, organization_twitter_id, organization_type)
+        if create_results['organization_created']:
+            current_voter_linked_organization = create_results['organization']
+            current_voter_linked_organization_id = current_voter_linked_organization.id
+            current_voter_linked_organization_we_vote_id = current_voter_linked_organization.we_vote_id
+
+    if positive_value_exists(current_voter_linked_organization_we_vote_id):
         # Now that we have the organization linked to the Twitter account, we want to duplicate it,
-        #  and then remove data
-        #  that shouldn't be in both
-        duplicate_organization_results = organization_manager.duplicate_organization_destination_twitter(
-            from_voter_linked_organization)
+        #  and then remove data that shouldn't be in both
+
+        # Start by saving aside the Twitter-related values
+        split_off_organization_twitter_handle = current_voter_linked_organization.organization_twitter_handle
+        split_off_twitter_description = current_voter_linked_organization.twitter_description
+        split_off_twitter_followers_count = current_voter_linked_organization.twitter_followers_count
+        split_off_twitter_location = current_voter_linked_organization.twitter_location
+        split_off_twitter_user_id = current_voter_linked_organization.twitter_user_id
+
+        duplicate_organization_results = organization_manager.duplicate_organization(
+            current_voter_linked_organization)
         if not duplicate_organization_results['organization_duplicated']:
             status += "NOT_ABLE_TO_DUPLICATE_ORGANIZATION: " + duplicate_organization_results['status']
         else:
-            to_voter_linked_organization = duplicate_organization_results['organization']
-            to_voter_linked_organization_id = to_voter_linked_organization.id
-            to_voter_linked_organization_we_vote_id = to_voter_linked_organization.we_vote_id
+            split_off_voter_linked_organization = duplicate_organization_results['organization']
+            split_off_voter_linked_organization_id = split_off_voter_linked_organization.id
+            split_off_voter_linked_organization_we_vote_id = split_off_voter_linked_organization.we_vote_id
 
-            if positive_value_exists(to_voter_linked_organization_we_vote_id):
-                # Remove the Twitter information from the from_voter_linked_organization
+            if positive_value_exists(split_off_voter_linked_organization_we_vote_id):
+                # Remove the Twitter information from the current_voter_linked_organization
                 # and update the name to be voter focused
                 try:
-                    from_voter_linked_organization.organization_name = from_voter.get_full_name()
-                    from_voter_linked_organization.twitter_user_id = 0
-                    from_voter_linked_organization.twitter_followers_count = 0
-                    from_voter_linked_organization.save()
+                    current_voter_linked_organization.organization_name = current_voter.get_full_name()
+                    current_voter_linked_organization.organization_twitter_handle = None
+                    current_voter_linked_organization.twitter_description = None
+                    current_voter_linked_organization.twitter_user_id = 0
+                    current_voter_linked_organization.twitter_followers_count = 0
+                    current_voter_linked_organization.twitter_location = None
+                    current_voter_linked_organization.save()
                 except Exception as e:
                     status += "UNABLE_TO_SAVE_FROM_ORGANIZATION "
 
-                # Update the link to the organization on the to_voter
+                # Update the link to the organization on the split_off_voter, and other Twitter values
                 try:
-                    to_voter.linked_organization_we_vote_id = to_voter_linked_organization_we_vote_id
-                    to_voter.save()
+                    split_off_voter.linked_organization_we_vote_id = split_off_voter_linked_organization_we_vote_id
+                    split_off_voter.save()
                 except Exception as e:
                     status += "UNABLE_TO_SAVE_LINKED_ORGANIZATION_WE_VOTE_ID_IN_TO_VOTER "
 
-                # Update the TwitterLinkToOrganization to the organization on the to_voter
-                if twitter_link_to_organization_exists:
+                # Update the TwitterLinkToOrganization to the organization on the split_off_voter
+                if twitter_link_to_current_organization_exists:
                     try:
-                        twitter_link_to_organization.organization_we_vote_id = to_voter_linked_organization_we_vote_id
-                        twitter_link_to_organization.save()
+                        twitter_link_to_current_organization.organization_we_vote_id = \
+                            split_off_voter_linked_organization_we_vote_id
+                        twitter_link_to_current_organization.save()
                         repair_twitter_related_organization_caching_now = True
                     except Exception as e:
                         status += "UNABLE_TO_SAVE_TWITTER_LINK_TO_ORGANIZATION "
                 else:
                     results = twitter_user_manager.create_twitter_link_to_organization(
-                        twitter_link_to_voter_twitter_id, to_voter_linked_organization_we_vote_id)
+                        twitter_link_to_split_off_voter_twitter_id, split_off_voter_linked_organization_we_vote_id)
                     status += results['status']
                     if results['twitter_link_to_organization_found']:
-                        twitter_link_to_organization = results['twitter_link_to_organization']
+                        twitter_link_to_current_organization = results['twitter_link_to_organization']
                         repair_twitter_related_organization_caching_now = True
 
-                # Update the link to the organization on the from_voter
+                # Update the link to the organization on the current_voter
                 try:
-                    from_voter.linked_organization_we_vote_id = from_voter_linked_organization_we_vote_id
-                    from_voter.save()
+                    current_voter.linked_organization_we_vote_id = current_voter_linked_organization_we_vote_id
+                    current_voter.save()
                 except Exception as e:
                     status += "UNABLE_TO_SAVE_LINKED_ORGANIZATION_WE_VOTE_ID_IN_FROM_VOTER "
-
-                # Update the name of the organization to match Twitter name
-                if positive_value_exists(twitter_organization_name):
+                    # Clear out all other voters
+                    voter_manager.clear_out_collisions_for_linked_organization_we_vote_id(
+                        current_voter.we_vote_id,
+                        current_voter_linked_organization_we_vote_id)
                     try:
-                        to_voter_linked_organization.organization_name = twitter_organization_name
-                        to_voter_linked_organization.save()
+                        current_voter.linked_organization_we_vote_id = current_voter_linked_organization_we_vote_id
+                        current_voter.save()
                     except Exception as e:
-                        status += "UNABLE_TO_SAVE_TO_VOTER_ORGANIZATION_NAME "
+                        status += "UNABLE_TO_SAVE_LINKED_ORGANIZATION_WE_VOTE_ID_IN_FROM_VOTER2 "
 
-                twitter_link_to_organization_moved = True
+                # Update the organization with the Twitter values
+                try:
+                    split_off_voter_linked_organization.organization_name = twitter_organization_name
+                    split_off_voter_linked_organization.organization_twitter_handle = \
+                        split_off_organization_twitter_handle
+                    split_off_voter_linked_organization.twitter_description = split_off_twitter_description
+                    split_off_voter_linked_organization.twitter_followers_count = split_off_twitter_followers_count
+                    split_off_voter_linked_organization.twitter_location = split_off_twitter_location
+                    split_off_voter_linked_organization.twitter_user_id = split_off_twitter_user_id
+                    split_off_voter_linked_organization.save()
+                except Exception as e:
+                    status += "UNABLE_TO_SAVE_TO_SPLIT_OFF_VOTER_ORGANIZATION "
 
-    if not twitter_link_to_organization_moved:
+                twitter_link_to_current_organization_moved = True
+
+    if not twitter_link_to_current_organization_moved:
         error_results = {
             'status': status,
             'success': False,
@@ -2812,54 +2887,54 @@ def voter_split_into_two_accounts_for_api(voter_device_id, split_off_twitter):  
     if repair_twitter_related_voter_caching_now:
         # And make sure we don't have multiple voters using same twitter_id (once there is a TwitterLinkToVoter)
         repair_results = voter_manager.repair_twitter_related_voter_caching(
-            twitter_link_to_voter.twitter_id)
+            twitter_link_to_split_off_voter.twitter_id)
         status += repair_results['status']
 
     # Make sure to clean up the twitter information in the organization table
     if repair_twitter_related_organization_caching_now:
         organization_list_manager = OrganizationListManager()
         repair_results = organization_list_manager.repair_twitter_related_organization_caching(
-            twitter_link_to_organization.twitter_id)
+            twitter_link_to_current_organization.twitter_id)
         status += repair_results['status']
 
     # Duplicate VoterAddress (we are not currently bringing over ballot_items)
     voter_address_manager = VoterAddressManager()
     duplicate_voter_address_results = \
-        voter_address_manager.duplicate_voter_address_from_voter_id(from_voter_id, to_voter_id)
+        voter_address_manager.duplicate_voter_address_from_voter_id(current_voter_id, split_off_voter_id)
     status += " " + duplicate_voter_address_results['status']
 
-    # If anyone is following the from_voter's organization, move those followers to the to_voter's organization
+    # If anyone is following current_voter's organization, move those followers to the split_off_voter's organization
     move_organization_followers_results = duplicate_organization_followers_to_another_organization(
-        from_voter_linked_organization_id, from_voter_linked_organization_we_vote_id,
-        to_voter_linked_organization_id, to_voter_linked_organization_we_vote_id)
+        current_voter_linked_organization_id, current_voter_linked_organization_we_vote_id,
+        split_off_voter_linked_organization_id, split_off_voter_linked_organization_we_vote_id)
     status += " " + move_organization_followers_results['status']
 
-    # If from_voter is following organizations, copy the follow_organization entries to the to_voter
+    # If current_voter is following organizations, copy the follow_organization entries to the split_off_voter
     duplicate_follow_entries_results = duplicate_follow_entries_to_another_voter(
-        from_voter_id, from_voter_we_vote_id, to_voter_id, to_voter_we_vote_id)
+        current_voter_id, current_voter_we_vote_id, split_off_voter_id, split_off_voter_we_vote_id)
     status += " " + duplicate_follow_entries_results['status']
 
-    # If from_voter is following issues, copy the follow_issue entries to the to_voter
+    # If current_voter is following issues, copy the follow_issue entries to the split_off_voter
     duplicate_follow_issue_entries_results = duplicate_follow_issue_entries_to_another_voter(
-        from_voter_we_vote_id, to_voter_we_vote_id)
+        current_voter_we_vote_id, split_off_voter_we_vote_id)
     status += " " + duplicate_follow_issue_entries_results['status']
 
-    # If from_voter has any position, duplicate positions from_voter to to_voter
+    # If current_voter has any position, duplicate positions current_voter to split_off_voter
     move_positions_results = duplicate_positions_to_another_voter(
-        from_voter_id, from_voter_we_vote_id,
-        to_voter_id, to_voter_we_vote_id,
-        to_voter_linked_organization_id, to_voter_linked_organization_we_vote_id)
+        current_voter_id, current_voter_we_vote_id,
+        split_off_voter_id, split_off_voter_we_vote_id,
+        split_off_voter_linked_organization_id, split_off_voter_linked_organization_we_vote_id)
     status += " " + move_positions_results['status']
 
     # We do not transfer friends or friend invitations from voter to new_owner_voter
 
     # Duplicate and repair both voter guides to have updated names and photos
     voter_guide_results = duplicate_voter_guides(
-        from_voter_id, from_voter_we_vote_id, from_voter_linked_organization_we_vote_id,
-        to_voter_id, to_voter_we_vote_id, to_voter_linked_organization_we_vote_id)
+        current_voter_id, current_voter_we_vote_id, current_voter_linked_organization_we_vote_id,
+        split_off_voter_id, split_off_voter_we_vote_id, split_off_voter_linked_organization_we_vote_id)
     status += " " + voter_guide_results['status']
 
-    # We do not bring over all emails from the from_voter over to the to_voter
+    # We do not bring over all emails from the current_voter over to the split_off_voter
 
     # We do not bring over Facebook information
 
