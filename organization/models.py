@@ -242,7 +242,7 @@ class OrganizationManager(models.Manager):
             return twitter_user_results['twitter_user']
         return None
 
-    def duplicate_organization_destination_twitter(self, organization):
+    def duplicate_organization(self, organization):
         """
         Starting with an existing organization, create a duplicate version with different we_vote_id
         :param organization:
@@ -255,8 +255,14 @@ class OrganizationManager(models.Manager):
         try:
             organization.id = None  # Remove the primary key so it is forced to save a new entry
             organization.pk = None
-            organization.facebook_email = ""
-            organization.fb_username = ""
+            organization.facebook_email = None
+            organization.fb_username = None
+            # clear unique Twitter information
+            organization.organization_twitter_handle = None
+            organization.twitter_description = None
+            organization.twitter_followers_count = 0
+            organization.twitter_location = None
+            organization.twitter_user_id = None
             organization.we_vote_id = None  # Clear out existing we_vote_id
             organization.generate_new_we_vote_id()
             organization.save()  # We do this so the we_vote_id is created

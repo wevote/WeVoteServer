@@ -1717,6 +1717,10 @@ def voter_twitter_save_to_current_account_for_api(voter_device_id):  # voterTwit
             try:
                 voter.linked_organization_we_vote_id = new_organization.organization_we_vote_id
                 voter.save()
+            except Exception as e:
+                status += "UNABLE_TO_UPDATE_VOTER_LINKED_ORGANIZATION_WE_VOTE_ID "
+
+            try:
                 # Create TwitterLinkToOrganization
                 results = twitter_user_manager.create_twitter_link_to_organization(
                     twitter_auth_response.twitter_id, voter.linked_organization_we_vote_id)
@@ -1725,9 +1729,11 @@ def voter_twitter_save_to_current_account_for_api(voter_device_id):  # voterTwit
                     twitter_link_to_organization_exists = True
                     twitter_link_to_organization_twitter_id = twitter_auth_response.twitter_id
                 else:
+                    status += results['status']
                     status += "TwitterLinkToOrganization_NOT_CREATED_AFTER_ORGANIZATION_CREATE "
             except Exception as e:
-                status += "UNABLE_TO_UPDATE_VOTER_LINKED_ORGANIZATION_WE_VOTE_ID_OR_CREATE_TWITTER_LINK_TO_ORG "
+                status += results['status']
+                status += "UNABLE_TO_CREATE_TWITTER_LINK_TO_ORG "
 
     if twitter_link_to_organization_exists:
         organization_list_manager = OrganizationListManager()
