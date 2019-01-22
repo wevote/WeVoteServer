@@ -223,6 +223,42 @@ class ElectionManager(models.Model):
         }
         return results
 
+    def retrieve_ballotpedia_election(self, ballotpedia_election_id=0):
+        ballotpedia_election_id = convert_to_int(ballotpedia_election_id)
+
+        ballotpedia_election = BallotpediaElection()
+        try:
+            if positive_value_exists(ballotpedia_election_id):
+                ballotpedia_election = BallotpediaElection.objects.get(ballotpedia_election_id=ballotpedia_election_id)
+                if ballotpedia_election.id:
+                    ballotpedia_election_found = True
+                    status = "BALLOTPEDIA_ELECTION_FOUND_WITH_GOOGLE_CIVIC_ELECTION_ID "
+                else:
+                    ballotpedia_election_found = False
+                    status = "BALLOTPEDIA_ELECTION_NOT_FOUND_WITH_GOOGLE_CIVIC_ELECTION_ID "
+                success = True
+            else:
+                ballotpedia_election_found = False
+                status = "Insufficient variables included to retrieve one Ballotpedia election."
+                success = False
+        except BallotpediaElection.MultipleObjectsReturned as e:
+            ballotpedia_election_found = False
+            status = "ERROR_MORE_THAN_ONE_BALLOTPEDIA_ELECTION_FOUND"
+            success = False
+        except BallotpediaElection.DoesNotExist:
+            ballotpedia_election_found = False
+            status = "BALLOTPEDIA_ELECTION_NOT_FOUND"
+            success = True
+
+        results = {
+            'success':                      success,
+            'status':                       status,
+            'ballotpedia_election_found':   ballotpedia_election_found,
+            'ballotpedia_election_id':      ballotpedia_election_id,
+            'ballotpedia_election':         ballotpedia_election,
+        }
+        return results
+
     def retrieve_elections_by_date(self, newest_to_oldest=True, include_test_election=False):
         try:
             election_list_query = Election.objects.using('readonly').all()

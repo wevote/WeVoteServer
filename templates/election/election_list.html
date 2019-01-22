@@ -125,7 +125,7 @@
             <td>
                 {% if not is_national_election %}
                 <a href="{% url 'election:election_summary' election.id %}{% if show_all_elections_this_year %}?show_all_elections_this_year=1{% elif show_all_elections %}?show_all_elections=1{% endif %}" target="_blank">
-                  <span class="{% if election.include_in_list_for_voters %}font-weight-bold{% endif %}">{{ election.election_name }}</span></a>
+                  <span class="{% if election.include_in_list_for_voters %}font-weight-bold{% endif %}">{{ election.election_name }} <span class="glyphicon glyphicon-new-window"></span></span></a>
                 {% endif %}
                 {% if election.internal_notes %}
                 <br /><span style="color: darkgray">{{ election.internal_notes|default_if_none:""|truncatechars:50 }}</span>
