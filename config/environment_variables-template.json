@@ -154,5 +154,8 @@
   "ISSUES_IMAGE_LARGE_WIDTH":       200,
   "ISSUES_IMAGE_LARGE_HEIGHT":      200,
 
+  "_comment":                       "GeoLite2 IP address database location",
+  "GEOLITE2_DATABASE_LOCATION":     "geoip2/city-db/GeoLite2-City.mmdb",
+
   "_comment":                       "End of json_environment_variables.json"
 }

@@ -2,9 +2,9 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
-# requires an installation of the C library at https://github.com/maxmind/geoip-api-c
-from django.contrib.gis.geoip import GeoIP
+import geoip2.database
 import wevote_functions.admin
+from config.base import get_environment_variable
 from wevote_functions.functions import get_ip_from_headers, positive_value_exists
 
 logger = wevote_functions.admin.get_logger(__name__)
@@ -13,6 +13,9 @@ logger = wevote_functions.admin.get_logger(__name__)
 def voter_location_retrieve_from_ip_for_api(request, ip_address=''):
     """
     Used by the api voterLocationRetrieveFromIP
+    https://www.maxmind.com/en/geoip2-databases
+    https://geoip2.readthedocs.io/en/latest/#city-database
+    https://www.maxmind.com/en/geoip-demo
     :param request:
     :param ip_address:
     :return:
@@ -26,6 +29,10 @@ def voter_location_retrieve_from_ip_for_api(request, ip_address=''):
     # For testing - NY IP Address
     # if not positive_value_exists(ip_address):
     #     ip_address = '108.46.177.24'
+
+    if ip_address == '127.0.0.1':
+        print("Running on a local dev server, so substituting an Oakland IP address 73.158.32.221 for 127.0.0.1")
+        ip_address = '73.158.32.221'
 
     if not positive_value_exists(ip_address):
         # return HttpResponse('missing ip_address request parameter', status=400)
@@ -44,11 +51,13 @@ def voter_location_retrieve_from_ip_for_api(request, ip_address=''):
 
         return response_content
 
-    g = GeoIP()
-    location = g.city(ip_address)
-    if location is None:
-        # Consider this alternate way of responding to front end:
-        # return HttpResponse('no matching location for IP address {}'.format(ip_address), status=400)
+    try:
+        reader = geoip2.database.Reader(get_environment_variable('GEOLITE2_DATABASE_LOCATION'))
+        response = reader.city(ip_address)
+
+    except geoip2.errors.AddressNotFoundError as e:
+        logger.error("voter_location_retrieve_from_ip_for_api ip " + ip_address + " not found: " + str(e))
+
         response_content = {
             'success':              True,
             'status':               'LOCATION_NOT_FOUND',
@@ -61,42 +70,51 @@ def voter_location_retrieve_from_ip_for_api(request, ip_address=''):
             'x_forwarded_for':      x_forwarded_for,
             'http_x_forwarded_for': http_x_forwarded_for,
         }
-    else:
-        voter_location = ''
-        city = ''
-        region = ''  # could be state_code
-        postal_code = ''
-        if 'city' in location and location['city']:
-            city = location['city']
-            voter_location += location['city']
-            if ('region' in location and location['region']) or \
-                    ('postal_code' in location and location['postal_code']):
+
+        return response_content
+
+    voter_location = ''
+    city = ''
+    region = ''  # could be state_code
+    postal_code = ''
+    success = True
+    try:
+        if response.city.name:
+            city = response.city.name
+            voter_location += city
+            if response.subdivisions.most_specific.iso_code or response.postal.code:
                 voter_location += ', '
-        if 'region' in location and location['region']:
-            region = location['region']
-            voter_location += location['region']
-            if 'postal_code' in location and location['postal_code']:
+        if response.subdivisions.most_specific.iso_code:
+            region = response.subdivisions.most_specific.iso_code
+            voter_location += region
+            if response.postal.code:
                 voter_location += ' '
-        if 'postal_code' in location and location['postal_code']:
-            postal_code = location['postal_code']
-            voter_location += location['postal_code']
+        if response.postal.code:
+            postal_code = response.postal.code
+            voter_location += postal_code
         if positive_value_exists(voter_location):
             status = 'LOCATION_FOUND'
             voter_location_found = True
         else:
             status = 'IP_FOUND_BUT_LOCATION_NOT_RETURNED'
             voter_location_found = False
-        response_content = {
-            'success':              True,
-            'status':               status,
-            'voter_location_found': voter_location_found,
-            'voter_location':       voter_location,
-            'city':                 city,
-            'region':               region,
-            'postal_code':          postal_code,
-            'ip_address':           ip_address,
-            'x_forwarded_for':      x_forwarded_for,
-            'http_x_forwarded_for': http_x_forwarded_for,
-        }
+
+    except Exception as e:
+        logger.error("voter_location_retrieve_from_ip_for_api ip " + ip_address + " parse error: " + str(e))
+        status = str(e)
+        success = False
+
+    response_content = {
+        'success':              success,
+        'status':               status,
+        'voter_location_found': voter_location_found,
+        'voter_location':       voter_location,
+        'city':                 city,
+        'region':               region,
+        'postal_code':          postal_code,
+        'ip_address':           ip_address,
+        'x_forwarded_for':      x_forwarded_for,
+        'http_x_forwarded_for': http_x_forwarded_for,
+    }
 
     return response_content

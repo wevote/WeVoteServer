@@ -14,6 +14,7 @@ djangorestframework==3.8.2
 elasticsearch>=1.0.0,<2.0.0
 facebook-sdk==2.0.0
 future==0.16.0
+geoip2==2.9.0
 geopy==1.14.0
 google-api-python-client==1.6.7
 gunicorn==19.8.1
