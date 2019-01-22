@@ -72,6 +72,64 @@ def test_view(request):
 
 
 @login_required
+def ballotpedia_election_delete_process_view(request):
+    """
+    Delete a ballotpedia election
+    :param request:
+    :return:
+    """
+    # admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'political_data_manager'}
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
+    ballotpedia_election_id = convert_to_int(request.POST.get('ballotpedia_election_id', 0))
+    confirm_delete = convert_to_int(request.POST.get('confirm_delete', 0))
+
+    google_civic_election_id = request.POST.get('google_civic_election_id', 0)
+    state_code = request.POST.get('state_code', '')
+
+    election_manager = ElectionManager()
+    election_id = 0
+    if not positive_value_exists(confirm_delete):
+        messages.add_message(request, messages.ERROR,
+                             'Unable to delete this ballotpedia election without confirmation. '
+                             'Please check the checkbox to confirm you want to delete this election.')
+        if positive_value_exists(google_civic_election_id):
+            results = election_manager.retrieve_election(google_civic_election_id)
+            if results['election_found']:
+                election = results['election']
+                election_id = election.id
+
+        if positive_value_exists(election_id):
+            return HttpResponseRedirect(reverse('election:election_edit', args=(election_id,)) +
+                                        "?google_civic_election_id=" + str(google_civic_election_id) +
+                                        "&state_code=" + str(state_code))
+        else:
+            return HttpResponseRedirect(reverse('election:election_list', args=()) +
+                                        "?google_civic_election_id=" + str(google_civic_election_id) +
+                                        "&state_code=" + str(state_code))
+
+    results = election_manager.retrieve_ballotpedia_election(ballotpedia_election_id)
+    if results['ballotpedia_election_found']:
+        ballotpedia_election = results['ballotpedia_election']
+        ballotpedia_election.delete()
+        messages.add_message(request, messages.INFO, 'Ballotpedia election deleted.')
+    else:
+        messages.add_message(request, messages.ERROR, 'Ballotpedia election not found.')
+
+    if positive_value_exists(google_civic_election_id):
+        results = election_manager.retrieve_election(google_civic_election_id)
+        if results['election_found']:
+            election = results['election']
+            return HttpResponseRedirect(reverse('election:election_edit', args=(election.id,)) +
+                                        "?google_civic_election_id=" + str(google_civic_election_id) +
+                                        "&state_code=" + str(state_code))
+
+    return HttpResponseRedirect(reverse('election:election_list', args=()))
+
+
+@login_required
 def election_all_ballots_retrieve_view(request, election_local_id=0):
     """
     Reach out to Google and retrieve (for one election):
@@ -444,6 +502,9 @@ def election_edit_view(request, election_local_id):
         return redirect_to_sign_in_page(request, authority_required)
 
     messages_on_stage = get_messages(request)
+
+    google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
+    state_code = request.GET.get('state_code', '')
     election_local_id = convert_to_int(election_local_id)
     election_on_stage_found = False
     election_on_stage = Election()
@@ -469,8 +530,10 @@ def election_edit_view(request, election_local_id):
 
         template_values = {
             'ballotpedia_election_list': ballotpedia_election_list,
+            'google_civic_election_id': google_civic_election_id,
             'election': election_on_stage,
             'messages_on_stage': messages_on_stage,
+            'state_code': state_code,
         }
     else:
         template_values = {
@@ -486,6 +549,11 @@ def election_delete_process_view(request):
     :param request:
     :return:
     """
+    # admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'political_data_manager'}
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
     election_id = convert_to_int(request.POST.get('election_id', 0))
     confirm_delete = convert_to_int(request.POST.get('confirm_delete', 0))
 
@@ -494,7 +562,7 @@ def election_delete_process_view(request):
 
     if not positive_value_exists(confirm_delete):
         messages.add_message(request, messages.ERROR,
-                             'Unable to delete this election. '
+                             'Unable to delete this election without confirmation. '
                              'Please check the checkbox to confirm you want to delete this election.')
         return HttpResponseRedirect(reverse('election:election_edit', args=(election_id,)) +
                                     "?google_civic_election_id=" + str(google_civic_election_id) +
@@ -537,19 +605,19 @@ def election_edit_process_view(request):
 
     status = ""
 
-    candidate_photos_finished = request.POST.get('candidate_photos_finished', False)
-    election_local_id = convert_to_int(request.POST.get('election_id', 0))
-    election_name = request.POST.get('election_name', False)
-    election_day_text = request.POST.get('election_day_text', False)
-    election_preparation_finished = request.POST.get('election_preparation_finished', False)
-    state_code = request.POST.get('state_code', False)
-    google_civic_election_id = request.POST.get('google_civic_election_id', '0')
     ballotpedia_election_id = request.POST.get('ballotpedia_election_id', False)
     ballotpedia_kind_of_election = request.POST.get('ballotpedia_kind_of_election', False)
+    candidate_photos_finished = request.POST.get('candidate_photos_finished', False)
+    election_day_text = request.POST.get('election_day_text', False)
+    election_local_id = convert_to_int(request.POST.get('election_id', 0))
+    election_name = request.POST.get('election_name', False)
+    election_preparation_finished = request.POST.get('election_preparation_finished', False)
+    google_civic_election_id = request.POST.get('google_civic_election_id', '0')
     ignore_this_election = request.POST.get('ignore_this_election', False)
-    is_national_election = request.POST.get('is_national_election', False)
     include_in_list_for_voters = request.POST.get('include_in_list_for_voters', False)
     internal_notes = request.POST.get('internal_notes', False)
+    is_national_election = request.POST.get('is_national_election', False)
+    state_code = request.POST.get('state_code', False)
 
     election_on_stage = Election()
 
