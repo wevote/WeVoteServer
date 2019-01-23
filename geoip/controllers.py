@@ -4,7 +4,7 @@
 
 import geoip2.database
 import wevote_functions.admin
-from config.base import get_environment_variable
+from config.base import get_environment_variable_default
 from wevote_functions.functions import get_ip_from_headers, positive_value_exists
 
 logger = wevote_functions.admin.get_logger(__name__)
@@ -52,8 +52,8 @@ def voter_location_retrieve_from_ip_for_api(request, ip_address=''):
         return response_content
 
     try:
-        # database_location = get_environment_variable('GEOLITE2_DATABASE_LOCATION')  # Temporarily commented out
-        database_location = "geoip2/city-db/GeoLite2-City.mmdb"
+        database_location = get_environment_variable_default('GEOLITE2_DATABASE_LOCATION',
+                                                             'geoip2/city-db/GeoLite2-City.mmdb')
         reader = geoip2.database.Reader(database_location)
         response = reader.city(ip_address)
 
