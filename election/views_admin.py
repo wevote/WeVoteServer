@@ -14,7 +14,7 @@ from config.base import get_environment_variable
 import copy
 from datetime import datetime, timedelta
 from django.http import HttpResponseRedirect
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.messages import get_messages

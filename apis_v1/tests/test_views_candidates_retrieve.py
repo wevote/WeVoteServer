@@ -3,7 +3,7 @@
 # -*- coding: UTF-8 -*-
 
 from admin_tools.controllers import import_data_for_tests
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.test import TestCase
 import json
 from office.models import ContestOffice, ContestOfficeManager

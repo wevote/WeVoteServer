@@ -5,7 +5,7 @@
 from admin_tools.views import redirect_to_sign_in_page
 from config.base import get_environment_variable
 from django.http import HttpResponseRedirect
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.messages import get_messages
@@ -495,7 +495,7 @@ def elected_office_update_view(request, elected_office_id=0, elected_office_we_v
                         elected_office_status_string = message
                         if code == 400:
                             elected_office_status_string = message + ": '" + text_for_map_search + "'"
-                            print(elected_office_status_string)
+                            print("views_admin:" + elected_office_status_string)
                             continue
                         elif code == 403:
                             elected_office_completion_status = "Processed " + str(i) + " of " + number_of_polls + \
@@ -503,7 +503,7 @@ def elected_office_update_view(request, elected_office_id=0, elected_office_we_v
                                                         ".  Ended in mid stream, since the API User Rate was exceeded"
                             break
                         else:
-                            print(txt)
+                            print("elected office non-specific error: " + txt)
                             elected_office_status_string = message
                     else:
                         elected_office_status_string = \

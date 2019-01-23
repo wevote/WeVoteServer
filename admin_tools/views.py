@@ -10,7 +10,7 @@ from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.messages import get_messages
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.db.models import Count, Q
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
@@ -1671,7 +1671,7 @@ def login_we_vote(request):
     username = ''
 
     # Does Django think user is already signed in?
-    if request.user.is_authenticated():
+    if request.user.is_authenticated:
         # If so, make sure user and voter_on_stage are the same.
         if request.user.id != voter_on_stage_id:
             # Delete the prior voter_api_device_id from database
@@ -1718,7 +1718,7 @@ def login_we_vote(request):
         store_new_voter_api_device_id_in_cookie = results['store_new_voter_api_device_id_in_cookie']
 
     # Does Django think user is signed in?
-    if request.user.is_authenticated():
+    if request.user.is_authenticated:
         voter_signed_in = True
     else:
         info_message = "Please log in below..."

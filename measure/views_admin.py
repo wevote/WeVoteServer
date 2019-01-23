@@ -12,7 +12,7 @@ from ballot.controllers import move_ballot_items_to_another_measure
 from bookmark.models import BookmarkItemList
 from config.base import get_environment_variable
 from django.http import HttpResponseRedirect
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.messages import get_messages

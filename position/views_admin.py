@@ -10,7 +10,7 @@ from .models import ANY_STANCE, PositionEntered, PositionForFriends, PositionLis
 from admin_tools.views import redirect_to_sign_in_page
 from candidate.models import CandidateCampaign
 from config.base import get_environment_variable
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.messages import get_messages

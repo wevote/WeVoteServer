@@ -1,7 +1,7 @@
 # -*- coding: UTF-8 -*-
 
 from django.contrib.gis import geoip
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.test import Client, TestCase
 from functools import wraps
 import json

@@ -13,7 +13,7 @@ from candidate.controllers import move_candidates_to_another_office
 from candidate.models import CandidateCampaign, CandidateCampaignListManager, fetch_candidate_count_for_office
 from config.base import get_environment_variable
 from django.http import HttpResponseRedirect
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.messages import get_messages
@@ -806,7 +806,7 @@ def find_and_merge_duplicate_offices_view(request):
                 office = merge_results['office']
                 message = "Office '{office_name}' automatically merged.".format(office_name=office.office_name)
                 # print_to_log(logger, exception_message_optional=message)
-                print(message)
+                print("Offices merged:", message)
                 # try:
                 #     messages.add_message(request, messages.INFO, "Office {office_name} automatically merged."
                 #                                                  "".format(office_name=office.office_name))

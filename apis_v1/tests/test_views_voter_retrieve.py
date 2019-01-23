@@ -3,7 +3,7 @@
 # -*- coding: UTF-8 -*-
 
 from future.standard_library import install_aliases
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.test import TestCase
 import json
 install_aliases()

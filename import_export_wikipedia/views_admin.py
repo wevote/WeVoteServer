@@ -7,7 +7,7 @@ from .controllers import retrieve_all_organizations_logos_from_wikipedia, \
 from admin_tools.views import redirect_to_sign_in_page
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.http import HttpResponseRedirect
 from organization.models import OrganizationManager
 from voter.models import voter_has_authority

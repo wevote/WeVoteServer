@@ -454,7 +454,7 @@ class DonationManager(models.Model):
                                      'and credit card information was submitted very recently.',
             'fraudulent': 'This transaction has been flagged as potentially fraudulent. Contact your bank for more '
                           'information.',
-            'incorrect_number':	'Your card number is incorrect. Please enter the correct number and try again.',
+            'incorrect_number': 'Your card number is incorrect. Please enter the correct number and try again.',
             'incorrect_pin': 'Your pin is incorrect. Please enter the correct number and try again.',
             'incorrect_zip': 'Your ZIP/postal code is incorrect. Please enter the correct number and try again.',
             'insufficient_funds': 'Your card has insufficient funds to complete this transaction.',
@@ -471,9 +471,9 @@ class DonationManager(models.Model):
                                                  'your bank for more information.',
             'withdrawal_count_limit_exceeded': 'You have exceeded the balance or credit limit on your card. Please try '
                                                'another payment method.',
-            'pin_try_exceeded':	'The allowable number of PIN tries has been exceeded. Please try again later or use '
+            'pin_try_exceeded': 'The allowable number of PIN tries has been exceeded. Please try again later or use '
                                    'another payment method.',
-            'processing_error':	'An error occurred while processing the card. Please try again.'
+            'processing_error': 'An error occurred while processing the card. Please try again.'
         }
 
         for error in card_error_message:

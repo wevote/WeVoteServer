@@ -1,10 +1,13 @@
-{% block doctype %}<!DOCTYPE html>{% endblock %}
+{% block doctype %}
+<!DOCTYPE html>
+{% endblock %}
 <html lang="{{ LANGUAGE_CODE }}">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{% block title %}{% endblock %}{#% trans "My Website" %#}</title>
-    <link rel="shortcut icon" type="image/x-icon "href="https://wevote.us/img/global/icons/favicon-32x32.png" />
+    <link rel="shortcut icon" type="image/x-icon" href="https://wevote.us/img/global/icons/favicon-32x32.png" />
+
 
     {% block meta_tags %}{% endblock %}
 

@@ -78,8 +78,8 @@ def convert_state_code_to_state_text(incoming_state_code):
 logging.basicConfig(level=logging.INFO, format='%(levelname)s %(asctime)s: %(message)s')
 
 if len(sys.argv) != 6:
-	print("Usage: %s <pgsql-host> <pgsql-username> <pgsql-password> <pgsql-db> <elasticsearch-host>" % sys.argv[0])
-	sys.exit(-1)
+    print("Usage: %s <pgsql-host> <pgsql-username> <pgsql-password> <pgsql-db> <elasticsearch-host>" % sys.argv[0])
+    sys.exit(-1)
 
 pgsql_host = sys.argv[1]
 pgsql_user = sys.argv[2]
@@ -88,11 +88,11 @@ pgsql_db = sys.argv[4]
 es_host = sys.argv[5]
 
 conn = psycopg2.connect(
-	database = pgsql_db,
-	user = pgsql_user,
-	password = pgsql_pass,
-	host = pgsql_host,
-	port = "5432"
+    database = pgsql_db,
+    user = pgsql_user,
+    password = pgsql_pass,
+    host = pgsql_host,
+    port = "5432"
 )
 
 print("Connected to DB")
@@ -109,10 +109,10 @@ indexes = ['election']
 # create indexes
 index_settings = { 'settings': { 'number_of_shards': 3, 'number_of_replicas': 0 } }
 for index in indexes:
-	logging.info("Dropping index %s", index)
-	es.indices.delete(index = index, ignore = [400, 404])
-	logging.info("Creating index %s", index)
-	es.indices.create(index = index, body = index_settings)
+    logging.info("Dropping index %s", index)
+    es.indices.delete(index = index, ignore = [400, 404])
+    logging.info("Creating index %s", index)
+    es.indices.create(index = index, body = index_settings)
 
 # index election_election table
 logging.info("Indexing election data")
@@ -123,16 +123,16 @@ rows = cur.fetchall()
 
 bulk_data = []
 for row in rows:
-	bulk_data.append({
-		'index' : { "_index" : "elections", "_type" : "election", "_id" : row[4] }
-	})
-	bulk_data.append({ 
-		"election_name": row[0],
-		"election_day_text": row[1],
-		"google_civic_election_id": row[2],
-		"state_code": row[3],
-		"state_name": convert_state_code_to_state_text(row[3])
-	})
+    bulk_data.append({
+        'index' : { "_index" : "elections", "_type" : "election", "_id" : row[4] }
+    })
+    bulk_data.append({
+        "election_name": row[0],
+        "election_day_text": row[1],
+        "google_civic_election_id": row[2],
+        "state_code": row[3],
+        "state_name": convert_state_code_to_state_text(row[3])
+    })
 
 logging.info("Bulk indexing election data")
 bulk_data_json = "\n".join(map(json.dumps,bulk_data))
