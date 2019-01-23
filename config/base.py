@@ -45,6 +45,14 @@ def get_environment_variable(var_name, json_environment_vars=json_environment_va
         error_msg = "Unable to set the {} variable from os.environ or JSON file".format(var_name)
         raise ImproperlyConfigured(error_msg)
 
+
+def get_environment_variable_default(var_name, default_value):
+    try:
+        return os.environ[var_name]
+    except KeyError:
+        return default_value
+
+
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 PROJECT_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
