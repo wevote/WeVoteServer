@@ -52,7 +52,9 @@ def voter_location_retrieve_from_ip_for_api(request, ip_address=''):
         return response_content
 
     try:
-        reader = geoip2.database.Reader(get_environment_variable('GEOLITE2_DATABASE_LOCATION'))
+        # database_location = get_environment_variable('GEOLITE2_DATABASE_LOCATION')  # Temporarily commented out
+        database_location = "geoip2/city-db/GeoLite2-City.mmdb"
+        reader = geoip2.database.Reader(database_location)
         response = reader.city(ip_address)
 
     except geoip2.errors.AddressNotFoundError as e:
