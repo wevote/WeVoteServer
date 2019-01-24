@@ -162,6 +162,10 @@ AUTHENTICATION_BACKENDS = (
     'django.contrib.auth.backends.ModelBackend',
 )
 
+PASSWORD_HASHERS = [
+    'django.contrib.auth.hashers.PBKDF2PasswordHasher',
+]
+
 ROOT_URLCONF = 'config.urls'
 
 TEMPLATES = [

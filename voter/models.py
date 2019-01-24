@@ -168,6 +168,36 @@ class VoterManager(BaseUserManager):
         }
         return results
 
+
+    def create_developer(self, first_name, last_name, email, password):
+        voter = Voter()
+        voter_id = 0
+        try:
+            if validate_email(email):
+                voter.email = email
+            else:
+                email_not_valid = True
+
+            if password:
+                voter.set_password(password)
+            else:
+                password_not_valid = True
+            voter.is_admin = True
+            voter.is_verified_volunteer = True
+            voter.is_active = True
+            voter.save()
+            logger.debug("create_voter successfully created developer (voter) : " + first_name)
+
+        except IntegrityError as e:
+            handle_record_not_saved_exception(e, logger=logger)
+            print("create_developer IntegrityError exception:" + str(e))
+        except Exception as e:
+            handle_record_not_saved_exception(e, logger=logger)
+            logger.debug("create_voter general exception: " + str(e))
+
+        return voter
+
+
     def delete_voter(self, email):
         email = self.normalize_email(email)
         voter_id = 0

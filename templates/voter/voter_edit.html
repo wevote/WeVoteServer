@@ -73,7 +73,7 @@ linked_organization_we_vote_id: {{ voter.linked_organization_we_vote_id|default_
     <br />
 
 <label for="password_text_id">New Password</label>
-<input type="text" name="password_text" id="password_text_id" value="" /> (Enter password to reset)<br />
+<input type="text" name="password_text" id="password_text_id" value="" /> (Enter the new password here)<br />
 <p><a href="{% url 'voter:voter_list' %}">cancel</a>
 <input type="submit" value="{% if voter %}Update Voter Account{% else %}Create New Voter Account{% endif %}" /></p>
 

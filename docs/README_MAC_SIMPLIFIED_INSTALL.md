@@ -16,8 +16,8 @@ reinstalling them causes no harm, skip the parts you are sure you already have.
     `$ mkdir /Users/<YOUR NAME HERE>/PythonProjects/`
 
 1. Create a fork of wevote/WeVoteServer.git. 
-    You can do this from [https://github.com/wevote/WeVoteServer](https://github.com/wevote/WeVoteServer) with the "Fork" 
-    button (upper right of screen)
+    You can do this from [https://github.com/wevote/WeVoteServer](https://github.com/wevote/WeVoteServer), by selecting 
+    the "Fork" button (upper right of screen)
 
 1. Go to your fork repo page, click green 'Clone or Download' button, copy the URL and clone your fork to local dev:
     ```
@@ -29,7 +29,7 @@ reinstalling them causes no harm, skip the parts you are sure you already have.
 
 1. In PyCharm copy `environment_variables-template.json` to `environment_variables.json`
 
-    ![ScreenShot](images/PyCharmTemplateCopy)
+    ![ScreenShot](images/PyCharmTemplateCopy.png)
 
     Right click on `environment_variables-template.json`, then paste it onto the `config` directory.
     A copy dialog will open up, and change the "new name:" to `environment_variables.json`
@@ -77,7 +77,7 @@ the following command:
     `$ source ~/.bash_profile`
 
 1. Create a place for the virtual environment to live on your hard drive. We recommend installing it 
-outside of `PythonProjects` folder:
+outside of the `PythonProjects` folder.  Create it in a new `PythonEnvironments` directory off of your home dir:
     ```
     $ mkdir /Users/<YOUR NAME HERE>/PythonEnvironments/
     $ cd /Users/<YOUR NAME HERE>/PythonEnvironments/
@@ -90,7 +90,7 @@ outside of `PythonProjects` folder:
     $ source /Users/<YOUR NAME HERE>/PythonEnvironments/WeVoteServer3.7/bin/activate
     $ virtualenv3 -p python3 WeVoteServer3.7
     
-15. Install OpenSSL, and the pyopenssl and https clients:
+15. Install OpenSSL, the pyopenssl and https clients:
  
     `(WeVoteServer) $ brew install openssl`
     `(WeVoteServer) $ python3 -m pip install pyopenssl pyasn1 ndg-httpsclient`
@@ -126,7 +126,7 @@ project starts running in the virtual environment:
 
     In PyCharm, Navigate to the PyCharm menu (top line of the screen), and open Preferences.
     
-    ![ScreenShot](images/ProjectInterpreter.png)
+    ![ScreenShot](images/ProjectInterpreterChoice.png)
     
     Click the blue pulldown in the upper right, and add a new intepreter 
     in the virtual environment you previously created.  In this example, for the
@@ -186,36 +186,10 @@ project starts running in the virtual environment:
     WeVoteServerDB-# \q
     (WeVoteServer3.7) admins-iMac:WeVoteServer admin$ 
     ```
-    
-[//]:1. Give postgres http access permissions:  (this might no longer be necessary!  the file looks right from the start)
-[//]:
-[//]:    (WeVoteServer3.7) admins-iMac:WeVoteServer admin$ vi /usr/local/var/postgres/pg_hba.conf    
-[//]:    
-[//]:Open this file:
-[//]:
-[//]:    admin=# SHOW hba_file;
-[//]:              hba_file               
-[//]:    -------------------------------------
-[//]:    /usr/local/var/postgres/pg_hba.conf
-[//]:    (1 row)
-[//]:    
-[//]:    admin=# 
-[//]:
-[//]:    $ sudo vi /etc/postgres/9.6/main/pg_hba.conf
-[//]:
-[//]:Change the line:
-[//]:
-[//]:    # Database administrative login by Unix domain socket
-[//]:    local   all             postgres                                peer
-[//]:to
-[//]:
-[//]:    # Database administrative login by Unix domain socket
-[//]:    local   all             postgres                                trust    
 
 1. Now you are ready to install pgAdmin4 (a powerful WYSIWYG database administration tool). Run:
 
     `brew cask install pgadmin4`
-
 
 1. Use Spotlight to find and launch pgAdmin4 and navigate to:
 
@@ -272,8 +246,21 @@ so that you can use the excellent debugger in PyCharm).  Run:
     Starting development server at http://127.0.0.1:8000/
     Quit the server with CONTROL-C.
     ```
+
+1.  Create a simple default user so you can login to the managment pages of the WeVoteServer.  This will have all the
+rights you need to login to [http://localhost:8000/admin/](http://localhost:8000/admin/) and start synchronizing data (downloading
+ballot and issue data from the master server in the cloud, to your local server).
+
+    The useage is:  python manage.py initialize_dev_user first_name last_name email password
+
+    ```
+    (WeVoteServer3.7) admins-iMac:WeVoteServer admin$ python manage.py create_dev_user Samuel Adams samuel@adams.com ale 
+    Creating developer first name=Samuel, last name=Adams, email=samuel@adams.com
+    End of create_dev_user
+    (WeVoteServer3.7) admins-iMac:WeVoteServer admin$ 
+    ```
     
-4.  The local instance of the WeVoteServer is now setup and running (although it has no data in Postgres at this point).
+1.  The local instance of the WeVoteServer is now setup and running (although it has no election data in Postgres at this point).
 
 
 
