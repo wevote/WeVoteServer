@@ -146,13 +146,11 @@ MIDDLEWARE = [
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
-    # 'social_django.middleware.SocialAuthBaseException',
     'social_django.middleware.SocialAuthExceptionMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'wevote_social.middleware.SocialMiddleware',
-    # 'wevote_social.middleware.WeVoteSocialAuthExceptionMiddleware',
 ]
 
 AUTHENTICATION_BACKENDS = (

@@ -70,7 +70,7 @@ class WeVoteSettingsManager(models.Model):
         except WeVoteSetting.DoesNotExist:
             return ''
         except Exception as e:
-            print("steve", e)
+            print("Settings exception: ", e)
             return ''
 
         return ''

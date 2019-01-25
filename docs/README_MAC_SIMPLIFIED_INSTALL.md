@@ -246,11 +246,12 @@ so that you can use the excellent debugger in PyCharm).  Run:
     Quit the server with CONTROL-C.
     ```
 
-1.  Create a simple default user so you can login to the managment pages of the WeVoteServer.  This will have all the
-rights you need to login to [http://localhost:8000/admin/](http://localhost:8000/admin/) and start synchronizing data (downloading
-ballot and issue data from the master server in the cloud, to your local server).
+1.  Create a simple default user so you can login to the managment pages of the WeVoteServer.  End users in We Vote are
+called "voter"s.  This new "voter" will have all the rights you as a developer need to login to 
+[http://localhost:8000/admin/](http://localhost:8000/admin/) and start synchronizing data (downloading ballot and issue 
+data from the master server in the cloud, to your local server).
 
-    The useage is:  python manage.py initialize_dev_user first_name last_name email password
+    The useage is:  python manage.py create_dev_user first_name last_name email password
 
     ```
     (WeVoteServer3.7) admins-iMac:WeVoteServer admin$ python manage.py create_dev_user Samuel Adams samuel@adams.com ale 
