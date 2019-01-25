@@ -11,7 +11,6 @@ from wevote_social.facebook import FacebookAPI
 # from social_core.exceptions import SocialAuthBaseException
 import wevote_functions.admin
 
-from voter.views_admin import init_developer_on_dev_machine
 
 logger = wevote_functions.admin.get_logger(__name__)
 
@@ -20,8 +19,6 @@ class SocialMiddleware(object):
     def __init__(self, get_response):
         self.get_response = get_response
         # One-time configuration and initialization.
-        print("SocialMiddleware init response:", get_response) # STEVE STEVE STEVE DONT CHECKIN
-        init_developer_on_dev_machine(1, "Steve", "Podell", "steve@podell.com", "steve")
 
     def __call__(self, request):
         # Code to be executed for each request before

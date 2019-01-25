@@ -137,7 +137,7 @@ project starts running in the virtual environment:
     Now the project runs in the virtual environment, and the terminal sessions
     startup with the virtual environment running.  (A nice and easy setup!)
     
-    ![ScreenShot](images/VirtualEnvRunningInTerminal.png)
+    ![ScreenShot](images/VirtualEnvRunningViaPlay.png)
     
 
     
@@ -211,10 +211,9 @@ project starts running in the virtual environment:
 
     ![ScreenShot](images/CreateServerConnection.png)
 
-4. Press Save
+9. Press Save
 
-
-1. Create the Database by right clicking on Databases in the server tree on the left. and select Create Database on the 
+10. Create the Database by right clicking on Databases in the server tree on the left. and select Create Database on the 
 cascading menu
    ![ScreenShot](images/CreateDatabase.png)
 

@@ -332,7 +332,7 @@ def candidate_list_view(request):
 
         # exclude facebook_urls that are null or ''
         candidate_facebook_missing_query = candidate_facebook_missing_query.exclude(facebook_url__isnull=True).\
-            exclude(facebook_url__iexact='').exclude(facebook_url_is_broken='true')
+            exclude(facebook_url__iexact='').exclude(facebook_url_is_broken='True')
 
         facebook_urls_without_picture_urls = candidate_facebook_missing_query.count()
 
