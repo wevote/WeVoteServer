@@ -30,25 +30,27 @@ reinstalling them causes no harm, skip the parts you are sure you already have.
 
     ![ScreenShot](images/CustomizePyCharm.png)
 
-Create a place to put all of the code from Github:
-`$ mkdir /Users/<YOUR NAME HERE>/PythonProjects/`
-
-1. Navigate to [github](https://github.com).  Create an account if you don't already have one.
+1. Navigate in Chrome to [github](https://github.com).  Create an account if you don't already have one.
  
 1. Within the github site, navigage to [https://github.com/wevote/WeVoteServer](https://github.com/wevote/WeVoteServer) Create a fork of wevote/WeVoteServer.git by selecting 
     the "Fork" button (upper right of screen)
-
-Go to your fork repo page, click green 'Clone or Download' button, copy the URL and clone your fork to local dev:
-```
-$ cd  ~/PythonProjects
-$ git clone https://github.com/wevote/WeVoteServer.git
-```
     
 1. In PyCharm, go to the VCS/Enable Version Control Integration menu choice dialog, and select "git"
 
     ![ScreenShot](images/EnableVCIntegrationGit.png)
 
+1. In PyCharm set your git remotes, set the name for your personal github branch origin/develop
+   
+   ![ScreenShot](images/DefineOrigin.png)
 
+    The set the latest in the WeVote project's dev branch in github upstream/develop and the latest in your
+   gitub branch
+   
+   ![ScreenShot](images/DefineUpstream.png) 
+   
+   and when done, it looks like this
+   
+   ![ScreenShot](images/BothRemotesDefined.png)  
 
 1. In PyCharm copy `environment_variables-template.json` to `environment_variables.json`
 
