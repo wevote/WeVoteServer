@@ -32,25 +32,37 @@ reinstalling them causes no harm, skip the parts you are sure you already have.
 
 1. Navigate in Chrome to [github](https://github.com).  Create an account if you don't already have one.
  
-1. Within the github site, navigage to [https://github.com/wevote/WeVoteServer](https://github.com/wevote/WeVoteServer) Create a fork of wevote/WeVoteServer.git by selecting 
+10. Within the github site, navigage to [https://github.com/wevote/WeVoteServer](https://github.com/wevote/WeVoteServer) Create a fork of wevote/WeVoteServer.git by selecting 
     the "Fork" button (upper right of screen)
     
+1. Check out the project development branch from github
+
+    ![ScreenShot](images/CheckoutFromVC-Clome.png)
+
+    After the checkout, you can see the code in the Project browser
+    
+    ![ScreenShot](images/AfterCheckoutFirstIDEshows.png)
+
+
 1. In PyCharm, go to the VCS/Enable Version Control Integration menu choice dialog, and select "git"
 
     ![ScreenShot](images/EnableVCIntegrationGit.png)
 
-1. In PyCharm set your git remotes, set the name for your personal github branch origin/develop
-   
-   ![ScreenShot](images/DefineOrigin.png)
 
-    The set the latest in the WeVote project's dev branch in github upstream/develop and the latest in your
-   gitub branch
+1. In PyCharm set your git remotes. Navigate to the remotes dialog
+
+   ![ScreenShot](images/GitMenuRemotes.png)
    
-   ![ScreenShot](images/DefineUpstream.png) 
+   Unfortunately the WeVote project defines upstream and origin differently than most projects, so correct the remote initially
+   configured as origin to be upstream, but clicking the edit pencil icon
+   and changing the name.  This is how it looks after the change.
    
-   and when done, it looks like this
+   ![ScreenShot](images/CorrectedToUpstream.png)
    
-   ![ScreenShot](images/BothRemotesDefined.png)  
+1.  Add a remote for your pesonal branch (copy the url from the github website).  When
+    complete it will look something like this.
+    
+    ![ScreenShot](images/BothOriginsCorrect.png)
 
 1. In PyCharm copy `environment_variables-template.json` to `environment_variables.json`
 
@@ -61,17 +73,12 @@ reinstalling them causes no harm, skip the parts you are sure you already have.
     
     If you skip this step, in a much later step when you run "makemigrations", it will fail with an 
     'Unable to set the SECRET_KEY variable from os.environ or JSON file' error.
+    
+    There are a number of secret values in `environment_variables.json` that are not in source control,
+    you will need to check in with Dale as you find you need them.
 
 1. In PyCharm, open up the Terminal window (from the list of options on the second from the bottom line in the IDE)
-   
-1. The terminal window will automatically start the session in the  `/Users/<YOUR NAME HERE>/PythonProjects/` directory.
-   Type the following command to set up a git remote for upstream in github...
-   
-    `$ git remote add upstream git@github.com:wevote/WeVoteServer.git`
-       
-   This will open up an OSX dialog that asks you to install the "Apple Command Line Software Development Tools" which includes a binary for git.  You may 
-   have to run this same command again after loading the command line software.
-       
+         
 1. In the PyCharm terminal window download [Homebrew]( https://brew.sh/) ("the missing package manager for MacOS) by entering
 the following command:
 
@@ -81,44 +88,35 @@ the following command:
     sudo which temporarily gives the script root priviliges to install software, so you will need an admin password for
     your Mac.  
 
-1. Install the latest Python (3.7.2) or higher.  This installs the python3 and pip3 executables 
-    ```
-    $ brew install python3
-    $ brew link --overwrite python
-    ```
+1. In the PyCharm/Preferences dialog (from the top line of the Mac), select Project: WeVoteServer then Project Interpreter.
+   The dialog will show Python 2.7, the default that comes with MacOS, click the Gear icon.
+   
+   ![ScreenShot](images/InterpreterPane.png)
+   
+   Change the top line to read `/Users/admin/PycharmEnvironments/Python3.7` the interpreter line to point to Python 3.7 
+   (that you recently installed with brew).  Then press Ok.
+   
+1. The preferences pane comes up, and press Apply then Ok   
+   
+   ![ScreenShot](images/PreferencesAFTER.png)
 
-1. Setup a virtual environment for running the WeVoteServer
-    ``` 
-    $ pip3 install --user virtualenv
-    $ vim ~/.bash_profile
-    ```
-    
-    Add the following to .bash_profile, save and quit:
+1. In the PyCharm terminal, press the `+` button to open a new terminal session.
+   Note that the terminal shows we are running in the `Python3.7` virtual environment
+   and in the terminal window type python --version to confirm that the WeVoteServer
+   and its terminal windows are running python 3.7
+   
+   ![ScreenShot](images/Terminal37.png)
 
-   `alias virtualenv3='/Users/admin/Library/Python/3.7/lib/python/site-packages/virtualenv'`
-
-    Update the current Terminal window to use the alias you just saved:
-
-    `$ source ~/.bash_profile`
-
-1. Create a place for the virtual environment to live on your hard drive. We recommend installing it 
-outside of the `PythonProjects` folder.  Create it in a new `PythonEnvironments` directory off of your home dir:
-    ```
-    $ mkdir /Users/<YOUR NAME HERE>/PythonEnvironments/
-    $ cd /Users/<YOUR NAME HERE>/PythonEnvironments/
-    $ $ /Users/<YOUR NAME HERE>/Library/Python/3.7/bin/virtualenv WeVoteServer3.7
-    ```
-    
-1. Now activate this new virtual environment for WeVoteServer:
-
-    $ cd /Users/<YOUR NAME HERE>/PythonProjects/WeVoteServer/
-    $ source /Users/<YOUR NAME HERE>/PythonEnvironments/WeVoteServer3.7/bin/activate
-    $ virtualenv3 -p python3 WeVoteServer3.7
-    
 15. Install OpenSSL, the pyopenssl and https clients:
  
     `(WeVoteServer) $ brew install openssl`
-    `(WeVoteServer) $ python3 -m pip install pyopenssl pyasn1 ndg-httpsclient`
+    
+    If it is already installed, that is ok!
+    
+    `(Python3.7) admins-iMac:WeVoteServer admin$ pip install pyopenssl pyasn1 ndg-httpsclient
+`
+
+Change to WeVoteServerPy3.7!!!
 
     Link libssl and libcrypto so that pip can find them:
  
