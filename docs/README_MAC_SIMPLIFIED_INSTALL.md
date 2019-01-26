@@ -8,24 +8,47 @@ reinstalling them causes no harm, skip the parts you are sure you already have.
 
 1. Install the Chrome browser for Mac
 
+1. Open the Mac "App Store" app, and download Apple's Xcode, which includes "c" language compilers and native git integration.
+
+    ![ScreenShot](images/DownloadXcodeFromAppStore.png)
+
+1. Start xcode (you can find it with Spotlight, or in the Application folder)
+
+    ![ScreenShot](images/FindXcode.png)
+
+1. When prompted, download the "Additional Components" tools (takes a while)
+
+1. When you get to Weclome to Xcode, quit out of the app (the tools we need are command line tools
+    that have been installed.)
+
+    ![ScreenShot](images/WelcomeToXcode.png)
+
 1. Download and install the Community version of PyCharm, it's free!
     [https://www.jetbrains.com/pycharm/download/#section=mac](https://www.jetbrains.com/pycharm/download/#section=mac)
 
-1. Create a place to put all of the code from Github:
+1. Start PyCharm and enable the Markdown and BashSupport tools (this takes a while)
 
-    `$ mkdir /Users/<YOUR NAME HERE>/PythonProjects/`
+    ![ScreenShot](images/CustomizePyCharm.png)
 
-1. Create a fork of wevote/WeVoteServer.git. 
-    You can do this from [https://github.com/wevote/WeVoteServer](https://github.com/wevote/WeVoteServer), by selecting 
+Create a place to put all of the code from Github:
+`$ mkdir /Users/<YOUR NAME HERE>/PythonProjects/`
+
+1. Navigate to [github](https://github.com).  Create an account if you don't already have one.
+ 
+1. Within the github site, navigage to [https://github.com/wevote/WeVoteServer](https://github.com/wevote/WeVoteServer) Create a fork of wevote/WeVoteServer.git by selecting 
     the "Fork" button (upper right of screen)
 
-1. Go to your fork repo page, click green 'Clone or Download' button, copy the URL and clone your fork to local dev:
-    ```
-    $ cd  ~/PythonProjects
-    $ git clone https://github.com/wevote/WeVoteServer.git
-    ```
+Go to your fork repo page, click green 'Clone or Download' button, copy the URL and clone your fork to local dev:
+```
+$ cd  ~/PythonProjects
+$ git clone https://github.com/wevote/WeVoteServer.git
+```
     
 1. In PyCharm, go to the VCS/Enable Version Control Integration menu choice dialog, and select "git"
+
+    ![ScreenShot](images/EnableVCIntegrationGit.png)
+
+
 
 1. In PyCharm copy `environment_variables-template.json` to `environment_variables.json`
 
