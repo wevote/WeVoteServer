@@ -93,7 +93,7 @@ the following command:
    
    ![ScreenShot](images/InterpreterPane.png)
    
-   Change the top line to read `/Users/admin/PycharmEnvironments/Python3.7` the interpreter line to point to Python 3.7 
+   Change the top line to read `/Users/admin/PycharmEnvironments/WeVoteServerPy3.7` the interpreter line to point to Python 3.7 
    (that you recently installed with brew).  Then press Ok.
    
 1. The preferences pane comes up, and press Apply then Ok   
@@ -109,11 +109,11 @@ the following command:
 
 15. Install OpenSSL, the pyopenssl and https clients:
  
-    `(WeVoteServer) $ brew install openssl`
+    `(WeVoteServerPy3.7) $ brew install openssl`
     
     If it is already installed, that is ok!
     
-    `(Python3.7) admins-iMac:WeVoteServer admin$ pip install pyopenssl pyasn1 ndg-httpsclient
+    `(WeVoteServerPy3.7) admins-iMac:WeVoteServer admin$ pip install pyopenssl pyasn1 ndg-httpsclient
 `
 
 Change to WeVoteServerPy3.7!!!
@@ -127,7 +127,7 @@ Change to WeVoteServerPy3.7!!!
  
 1. Install libmagic
 
-    `(WeVoteServer) $ brew install libmagic`
+    `(WeVoteServerPy3.7) $ brew install libmagic`
 
 1. Probably not needed, but make sure we have the latest pip
 
@@ -252,13 +252,13 @@ into your database schema." Run makemigrations to prepare for initialzing the We
     `(WeVoteServer3.7) $ python manage.py makemigrations wevote_settings`
     
 2. Run migrate.  "migrate, which is responsible for applying and unapplying migrations."
-    `(WeVoteServer) $ python manage.py migrate`
+    `(WeVoteServerPy3.7) $ python manage.py migrate`
     
 3. Then start the server running from the command line. (It is also possible to
 start the server with the play button in PyCharm, and you will want to set this up
 so that you can use the excellent debugger in PyCharm).  Run:
     ```
-    (WeVoteServer) $ python manage.py runserver
+    (WeVoteServerPy3.7) $ python manage.py runserver
     Performing system checks...
     
     Running
