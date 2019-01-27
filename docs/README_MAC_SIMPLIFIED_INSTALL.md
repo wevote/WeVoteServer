@@ -19,21 +19,24 @@ reinstalling them causes no harm, skip the parts you are sure you already have.
 1. When prompted, download the "Additional Components" tools (takes a while)
 
 1. When you get to Welcome to Xcode, quit out of the app. (For the WeVoteServer, we only need the command line tools that 
-come with Xcode, Apple's IDE for MacOS and iOS native development.)
+come with Xcode, which is Apple's IDE for MacOS and iOS native development.)
 
     ![ScreenShot](images/WelcomeToXcode.png)
 
 1. Download and install the Community version of PyCharm, it's free!
     [https://www.jetbrains.com/pycharm/download/#section=mac](https://www.jetbrains.com/pycharm/download/#section=mac)
 
-1. Start PyCharm and enable the Markdown and BashSupport tools (this takes a while)
+1. Start PyCharm and enable the Markdown and BashSupport tools (this takes a while).  Feel free to add any other PyCharm tools
+that you would like!
 
     ![ScreenShot](images/CustomizePyCharm.png)
 
-1. Navigate in Chrome to [github](https://github.com).  Create an account if you don't already have one.
+1. Navigate in Chrome to [github](https://github.com).  Create a personal account if you don't already have one.
  
 1. Within the github site, navigage to [https://github.com/wevote/WeVoteServer](https://github.com/wevote/WeVoteServer). 
     Create a fork of wevote/WeVoteServer.git by selecting the "Fork" button (in the upper right of screen).
+    
+     ![ScreenShot](images/Fork.png)
     
 1. In PyCharm, check out the project development branch from github
 
@@ -81,10 +84,11 @@ that the instance is running Python 3.7, when Python 3.8 comes out, feel free to
 
     ![ScreenShot](images/PyCharmTemplateCopy.png)
 
-    Right click on `environment_variables-template.json`, then paste it onto the `config` directory.
-    A copy dialog will open up, and change the "new name:" to `environment_variables.json`
+    Right click on `environment_variables-template.json` and select 'Copy', then right clik paste on the `config` 
+    directory and select 'Paste' in the pop-up, and then in the copy dialog that open up, and change the "new name:" to 
+    `environment_variables.json`
     
-    If you skip this step, in a much later step when you run "makemigrations", it will fail with an 
+    If you skip this step, in a much later step, when you run "makemigrations", it will fail with an 
     'Unable to set the SECRET_KEY variable from os.environ or JSON file' error.
     
     **There are a number of secret values in `environment_variables.json` that are not in source control,
@@ -98,8 +102,8 @@ the following command:
 
     `$ /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"`
     
-    This loads a Ruby script (Ruby comes preloaded in MacOS), and Ruby uses curl (also preloaded) to pull the file into the
-    command execution.  The script also internally uses sudo which temporarily gives the script root priviliges to install 
+    This loads a Ruby script (Ruby comes pre-loaded in MacOS), and Ruby uses curl (also pre-loaded) to pull the file into the
+    command execution.  The script also internally uses 'sudo' which temporarily gives the script root priviliges to install 
     software, so you will need to know an admin password for your Mac.  
 
 1. In the PyCharm/Preferences dialog (from the top line of the Mac), select Project: WeVoteServer then Project Interpreter.
@@ -110,16 +114,16 @@ the following command:
    ![ScreenShot](images/PyEnv37.png)
    
    Change the top "Location" line to read `/Users/admin/PycharmEnvironments/WeVoteServerPy3.7` and the interpreter 
-   pulldown to point to Python 3.7 (that you installed with brew a few steps ago).   Then press Ok.
+   pulldown to point to the Python 3.7 (that you installed with brew a few steps ago).   Then press Ok.
    
-1. The preferences pane comes up.   If there is a yellow warning at the bottom of the dialog that says to "Install latest 
-    Python packaging tools", click it and install them, if you don't see this message, no worries. Finally on the dialog 
-    frame, press "Apply" then "Ok"   
+1. The Preferences pane is displayed again.   If there is a yellow warning at the bottom of the dialog that says to "Install latest 
+    Python packaging tools", click it and install them, if you don't see this message, no worries. Finally on the Preferences 
+    pane, press "Apply" then "Ok"   
    
    ![ScreenShot](images/PreferencesAFTER.png)
    
-   Now Python "Run" and terminal sessions execute within the `WeVoteServerPy3.7` virtual environment that you have setup, 
-   without effecting the global environment settings of your Mac.  
+   Now Python "Run" (Play button) and terminal sessions execute within the `WeVoteServerPy3.7` virtual environment that you have setup, 
+   without having any effect on the global environment settings of your Mac.  
 
 1. In the PyCharm terminal, press the `+` button to open a new terminal session.
    Note that the terminal shows we are running in the `WeVoteServerPy3.7` virtual environment
@@ -160,7 +164,8 @@ the following command:
 
     `(WeVoteServerPy3.7) admins-iMac:WeVoteServer admin$ brew install postgresql`
 
-1. Start PostgreSQL (this is actually instructing the MacOS/Linux launchd to start Postgres every time you start your Mac):
+1. Start PostgreSQL (this is actually instructing the MacOS [launchd](https://en.wikipedia.org/wiki/Launchd) to start 
+    Postgres every time you start your Mac):
 
     `(WeVoteServerPy3.7) admins-iMac:WeVoteServer admin$ brew services start postgresql`
 
@@ -176,11 +181,12 @@ the following command:
     admin=# 
     ```
 
-    The `psql` command starts a PostgresSQL command session which appears in the terminal window, within this PostgresSQL command session
-    type the following Postgres commands...
+    The `psql` command starts a PostgresSQL command session which is started in the bash terminal window, within this 
+    PostgresSQL command session type the following Postgres commands... ("admin" is just an example password, use what ever
+    password you would like to go with your postgres role name.)
 
     ```
-    admin=# ALTER USER  postgres  WITH PASSWORD 'admin37+';
+    admin=# ALTER USER postgres WITH PASSWORD 'admin';
     ALTER ROLE
     admin=# \du
                                        List of roles
@@ -193,7 +199,7 @@ the following command:
     (WeVoteServerPy3.7) admins-iMac:WeVoteServer admin$
     ```
     
-    That `\du` command confirms that we have created a postgres user.  The `\q` command quits psql.
+    That `\du` command confirms that we have a 'postgres' role.  The `\q` command quits psql.
 
  1. Now you are ready to install pgAdmin4 (a powerful WYSIWYG database administration tool). Run:
 
@@ -202,7 +208,7 @@ the following command:
     The latest pgAdmin4 has a webapp architecture, where the app you start from the Application folder is a single 
     purpose web server, and the UI for the app appears in Chrome as a local website.
 
-1. Use Spotlight to find and launch the pgAdmin4 app and within Chrome onthe the pgAdmin4 web page, Right-click on "Servers" 
+1. Use Spotlight to find and launch the pgAdmin4 app and within Chrome on the the pgAdmin4 web page, Right-click on "Servers" 
 and choose "Create > Server"
 
     ![ScreenShot](images/CreateServerInPgAdmin.png)
@@ -250,7 +256,7 @@ cascading menu
     used by the admin pages by developers.)
 
 1. "Migrations are Django’s way of propagating changes you make to your models (creating a table, adding a field, deleting a model, etc.) 
-into your database schema." Run makemigrations to prepare for initialzing the WeVoteServer database:
+    into your database schema." Run makemigrations to prepare for initialzing the WeVoteServer database:
 
     `(WeVoteServerPy3.7) admins-iMac:WeVoteServer admin$ python manage.py makemigrations`
     `(WeVoteServerPy3.7) admins-iMac:WeVoteServer admin$ python manage.py makemigrations wevote_settings`
@@ -266,20 +272,26 @@ into your database schema." Run makemigrations to prepare for initialzing the We
 
    ![ScreenShot](images/AddConfiguration.png)
    
-   Press the "Add Configuration..." button that is to the left of the play button.
+   Press the "Add Configuration..." button that is to the left of the play button.  Select "Templatees" and then "Python".
    
    ![ScreenShot](images/Run-Debug-Settings.png)
    
-   Then select Python, and press the "+" button.  For "Script path", add the path to your `manage.py` file in your 
-   project root directory , and for "Parameters" add `runserver` as the command.  Then press "Run"
+   With Python selected, and press the "+" button to create a new run configuration.  For "Script path", add the path 
+   to your `manage.py` file in your project root directory , and for "Parameters" add `runserver` as the command.  Then press "Ok".
    
     ![ScreenShot](images/RunningServer.png)
+    
+    1. Press the triangular Run button on the top line of the ide, and note that a run window opens at the bottom of the IDE,
+    on the same line as the "Terminal" tab.  As API calls are made to the server, the http requests will be displayed in 
+    this runtime log.  Python print commands, only send their output to this log.  Python logger commands send the output
+    to both this runtime log, and the log file that we created a few steps back.  On the production servers in AWS, these 
+    log lines can be searched using Splunk (ask Dale for Splunk access if you want it.)
    
-1.  Now, with the server still running, open a terminal window, and create a simple default user so you can login to the 
-managment pages of the WeVoteServer.  At We Vote, "voters" are what we call end users.  This new "voter" will have all the 
-rights that you (as a developer) need to login to 
-[http://localhost:8000/admin/](http://localhost:8000/admin/) and start synchronizing data (downloading ballot and issue 
-data from the master server in the cloud, to your local server).
+1.  Now, with the server still running, open a terminal window, and create a simple default user (a voter) so you can login to the 
+    managment pages of the WeVoteServer.  At We Vote, "voters" are what we call end users.  This new "voter" will have all the 
+    rights that you (as a developer) need to login to 
+    [http://localhost:8000/admin/](http://localhost:8000/admin/) and start synchronizing data (downloading ballot and issue 
+    data from the master server in the cloud, to your local server).
 
     The useage is:  python manage.py create_dev_user first_name last_name email password
 

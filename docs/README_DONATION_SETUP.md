@@ -72,19 +72,18 @@ Python server's port 8000.
     ```
     (WeVoteServer3.6) Steves-MacBook-Pro-32GB-Oct-3171:PythonProjects stevepodell$ ./ngrok http 8000
     
-    ngrok by @inconshreveable                                                                                                                                                                                                                                   (Ctrl+C to quit)
-                                                                                                                                                                                                                                                                                
-    Session Status                online                                                                                                                                                                                                                                        
-    Account                       Steve Podell (Plan: Free)                                                                                                                                                                                                                     
-    Version                       2.2.8                                                                                                                                                                                                                                         
-    Region                        United States (us)                                                                                                                                                                                                                            
-    Web Interface                 http://127.0.0.1:4040                                                                                                                                                                                                                         
-    Forwarding                    http://d35f3739.ngrok.io -> localhost:8000                                                                                                                                                                                                    
-    Forwarding                    https://d35f3739.ngrok.io -> localhost:8000                                                                                                                                                                                                   
-                                                                                                                                                                                                                                                                                
-    Connections                   ttl     opn     rt1     rt5     p50     p90                                                                                                                                                                                                   
-                                  0       0       0.00    0.00    0.00    0.00     
+    ngrok by @inconshreveable                        (Ctrl+C to quit)
     
+    Session Status                online     
+    Account                       Steve Podell (Plan: Free) 
+    Version                       2.2.8 
+    Region                        United States (us)   
+    Web Interface                 http://127.0.0.1:4040 
+    Forwarding                    http://d35f3739.ngrok.io -> localhost:8000   
+    Forwarding                    https://d35f3739.ngrok.io -> localhost:8000  
+      
+    Connections                   ttl     opn     rt1     rt5     p50     p90 
+                                  0       0       0.00    0.00    0.00    0.00 
      ```
 
     Keep this ngrok server running in a terminal window, since everytime you restart (with the free version) 
