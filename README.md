@@ -21,11 +21,11 @@ more detailed set with more options for Linux and AWS
 2. More detailed [Installation instructions](docs/README_API_INSTALL.md) that also cover installation on Linux and in AWS 
 
 
-## Installing We Vote Mobile Web Application (Node/React/Flux)
+## Installing We Vote Mobile Web Application (React/Flux)
 
 The website front end application is powered by the [We Vote WebApp](https://github.com/wevote/WebApp)
 
-We wrap the We Vote Web app in a Apache Cordova wrapper, with some native features, to provide [iOS and Android](https://github.com/wevote/WeVoteCordova) apps.
+We distribute the We Vote WebApp in an Apache Cordova wrapper, with some native features, to provide [iOS and Android](https://github.com/wevote/WeVoteCordova) apps.
 
 See the iOS [We Vote 2018 Ballot, @WeVote](https://itunes.apple.com/us/app/we-vote-2018-ballot-wevote/id1347335726?mt=8) in the iTunes app store for iPhones and iPads.
 

@@ -262,68 +262,6 @@ def voter_edit_process_view(request):
 
     return HttpResponseRedirect(reverse('voter:voter_edit', args=(voter_id,)))
 
-# login NOT required, this is a simple tool for use on dev machines only
-# create a file called init_developer.json in the "WeVoteServer" root directory containing the following
-
-
-def init_developer_on_dev_machine(voter_id, first_name, last_name, email, password_text):
-    voter_on_stage = Voter()
-
-    # Check to see if this voter is already being used anywhere
-    try:
-        voter_query = Voter.objects.filter(id=voter_id)
-        if len(voter_query):
-            voter_on_stage = voter_query[0]
-
-    except Exception as e:
-        print("Failure, voter not found, number: ", voter_id)
-        return False
-
-    try:
-        # Update existing voter
-        print("About to try saving: " + email)
-        voter_on_stage.first_name = first_name
-        voter_on_stage.last_name = last_name
-        voter_on_stage.email = email
-        voter_on_stage.set_password(password_text)
-        voter_on_stage.save()
-        print("Saved: " + email)
-
-    except Exception as e:
-        print("Exception in dangerous_hack", e )
-        return False
-
-    print("Success in dangerous_hack for " + email )
-    return True
-
-def create_developer_on_dev_machine(first_name, last_name, email, password_text):
-    try:
-        # Create new
-        voter_on_stage = Voter.objects.create_user(email, email, password_text)
-
-        # Update new voter
-        if first_name is not False:
-            voter_on_stage.first_name = first_name
-            at_least_one_value_changed = True
-        if last_name is not False:
-            voter_on_stage.last_name = last_name
-            at_least_one_value_changed = True
-        if twitter_handle is not False:
-            voter_on_stage.twitter_screen_name = twitter_handle
-            at_least_one_value_changed = True
-        if email is not False:
-            voter_on_stage.email = email
-            at_least_one_value_changed = True
-
-        if at_least_one_value_changed:
-            voter_on_stage.save()
-
-        messages.add_message(request, messages.INFO, 'Added new Voter.')
-    except Exception as e:
-        messages.add_message(request, messages.ERROR, 'Could not save voter.')
-    print("Success in dangerous_hack for " + email )
-    return True
-
 
 @login_required
 def voter_edit_view(request, voter_id=0, voter_we_vote_id=""):
