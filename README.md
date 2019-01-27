@@ -42,12 +42,9 @@ If you need to test donations and have not updated your openssl and pyopenssl du
 [to update your local](docs/README_DONATION_SETUP.md).
 
 ## Join Us
-Join our Google Group here to discuss the WeVoteServer application (creating a social ballot):
-https://groups.google.com/forum/#!forum/wevoteengineering
 
 We meet weekly on Wednesday nights at the 
 [Code for San Francisco brigade of Code for America](http://www.meetup.com/Code-for-San-Francisco-Civic-Hack-Night/), 
 daily on a Google hangout, and have mini-hackathons on many weekends. Please contact Dale.McGrew@WeVote.US for more information.
 
-You may join our Google Group here for questions about election related data (importing and exporting):
-https://groups.google.com/forum/#!forum/electiondata
+

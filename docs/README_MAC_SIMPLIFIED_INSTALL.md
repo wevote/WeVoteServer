@@ -18,8 +18,8 @@ reinstalling them causes no harm, skip the parts you are sure you already have.
 
 1. When prompted, download the "Additional Components" tools (takes a while)
 
-1. When you get to Weclome to Xcode, quit out of the app (the tools we need are command line tools
-    that have been installed.)
+1. When you get to Welcome to Xcode, quit out of the app. (For the WeVoteServer, we only need the command line tools that 
+come with Xcode, Apple's IDE for MacOS and iOS native development.)
 
     ![ScreenShot](images/WelcomeToXcode.png)
 
@@ -32,8 +32,8 @@ reinstalling them causes no harm, skip the parts you are sure you already have.
 
 1. Navigate in Chrome to [github](https://github.com).  Create an account if you don't already have one.
  
-1. Within the github site, navigage to [https://github.com/wevote/WeVoteServer](https://github.com/wevote/WeVoteServer) Create a fork of wevote/WeVoteServer.git by selecting 
-    the "Fork" button (upper right of screen)
+1. Within the github site, navigage to [https://github.com/wevote/WeVoteServer](https://github.com/wevote/WeVoteServer). 
+    Create a fork of wevote/WeVoteServer.git by selecting the "Fork" button (in the upper right of screen).
     
 1. In PyCharm, check out the project development branch from github
 
@@ -44,7 +44,7 @@ reinstalling them causes no harm, skip the parts you are sure you already have.
     
     ![ScreenShot](images/AfterCheckoutFirstIDEshows.png)
 
-11. In PyCharm, go to the VCS/Enable Version Control Integration menu choice dialog, and select "git".  If the Git option is
+11. In PyCharm, go to the VCS/Enable Version Control Integration menu choice dialog, and select "git".  But, if the Git option is
     already present in the middle of the pull down, and you don't see a "Enable Version Control Integration" option, don't worry
     about it -- PyCharm picked up that setting from a previous install or another JetBrains tool that you might have installed.
 
@@ -58,18 +58,18 @@ reinstalling them causes no harm, skip the parts you are sure you already have.
    
    ![ScreenShot](images/IncorrectOrigin.png)
    
-   Click the edit pencil icon, and change the word origin to upstream.  (We call the working branch for the project in
-   GitHub "upstream"). This is how it looks after the change.
+   Click the edit (pencil) icon, and change the word origin to upstream.  (We call the working development branch for the 
+   project in GitHub "upstream"). This is how it looks after the change.
    
    ![ScreenShot](images/CorrectedToUpstream.png)
 
-1. Then add a remote for your private branch, the WeVoteServer project origin (copy the url from the github website). In 
-    this example, the developer is "SailingSteve".
+1. Then add a remote for your private branch by pressing the "+ button on the Git Remotes dialog.  Add the url for your
+    fork of the the WeVoteServer project origin (copy the url from the github website). In this example, the developer 
+    is "SailingSteve".
 
    ![ScreenShot](images/CorrectOrigin.png)
       
-1.  Add a remote for your pesonal branch (copy the url from the github website).  When
-    complete it will look something like this.
+1.  When complete it will look something like this.
     
     ![ScreenShot](images/BothOriginsCorrect.png)
 
@@ -88,19 +88,19 @@ that the instance is running Python 3.7, when Python 3.8 comes out, feel free to
     'Unable to set the SECRET_KEY variable from os.environ or JSON file' error.
     
     **There are a number of secret values in `environment_variables.json` that are not in source control,
-    you will need to check in with Dale as you find you need them.**
+    you will need to check in with Dale as you find that you need them.**
 
 1. In PyCharm, open up the Terminal window (from the list of options on the second from the bottom line in the IDE).  Note that
 the terminal opens up with the project root directory set as the pwd (which is handy).
          
-1. In the PyCharm terminal window download [Homebrew]( https://brew.sh/) ("the missing package manager for MacOS) by entering
+1. In the PyCharm terminal window download [Homebrew]( https://brew.sh/) ("the missing package manager for MacOS") by entering
 the following command:
 
     `$ /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"`
     
-    This loads a Ruby script (Ruby comes preloaded in MacOS), and runs it with curl (also preloaded).  The script internally 
-    uses sudo which temporarily gives the script root priviliges to install software, so you will need an admin password for
-    your Mac.  
+    This loads a Ruby script (Ruby comes preloaded in MacOS), and Ruby uses curl (also preloaded) to pull the file into the
+    command execution.  The script also internally uses sudo which temporarily gives the script root priviliges to install 
+    software, so you will need to know an admin password for your Mac.  
 
 1. In the PyCharm/Preferences dialog (from the top line of the Mac), select Project: WeVoteServer then Project Interpreter.
    The dialog will show Python 2.7, the default that comes with MacOS, click the Gear icon, then select "Add".
@@ -110,19 +110,20 @@ the following command:
    ![ScreenShot](images/PyEnv37.png)
    
    Change the top "Location" line to read `/Users/admin/PycharmEnvironments/WeVoteServerPy3.7` and the interpreter 
-   pulldown to point to Python 3.7 (that you recently installed with brew).   Then press Ok.
+   pulldown to point to Python 3.7 (that you installed with brew a few steps ago).   Then press Ok.
    
 1. The preferences pane comes up.   If there is a yellow warning at the bottom of the dialog that says to "Install latest 
-    Python packaging tools", click it and install them, if not it is ok. Finally on the dialog frame, press "Apply" then "Ok"   
+    Python packaging tools", click it and install them, if you don't see this message, no worries. Finally on the dialog 
+    frame, press "Apply" then "Ok"   
    
    ![ScreenShot](images/PreferencesAFTER.png)
    
-   Now python and the terminal sessions run in the `WeVoteServerPy3.7` virtual environment that you have setup, without effecting the global
-   environment of MacOS.  
+   Now Python "Run" and terminal sessions execute within the `WeVoteServerPy3.7` virtual environment that you have setup, 
+   without effecting the global environment settings of your Mac.  
 
 1. In the PyCharm terminal, press the `+` button to open a new terminal session.
    Note that the terminal shows we are running in the `WeVoteServerPy3.7` virtual environment
-   and in the terminal window type python --version to confirm that the WeVoteServer
+   and in the terminal window, type `python --version` to confirm that the WeVoteServer
    and its terminal windows are running python 3.7
    
    ![ScreenShot](images/Terminal37.png)
@@ -131,18 +132,12 @@ the following command:
  
     `(WeVoteServerPy3.7) $ brew install openssl`
     
-    If it is already installed, that is ok!
+    If it is already installed, no worries!
     
     `(WeVoteServerPy3.7) admins-iMac:WeVoteServer admin$ pip install pyopenssl pyasn1 ndg-httpsclient`
     
-    If the previous install command tells you to upgrade your pip version, do it!
+    If running this command, has some output that tells you to upgrade your pip version, follow those instructions and do it!
 
-//Link libssl and libcrypto so that pip can find them:
-//```
-//$ ln -s /usr/local/opt/openssl/lib/libcrypto.dylib /usr/local/lib/libcrypto.dylib
-//$ ln -s /usr/local/opt/openssl/lib/libssl.dylib /usr/local/lib/libssl.dylib
-//```
- 
 1. Install libmagic
 
     `(WeVoteServerPy3.7) $ brew install libmagic`
@@ -151,12 +146,12 @@ the following command:
 
     `(WeVoteServer3.7) $ pip install -r requirements.txt`
 
-    This is a big operation that loads a number of wheels (*.whl files are Python containers that contain
-    pre-compiled c language objects that are made for the current MacOS) and then it compiles with gcc other 
-    c language packages for which a current wheel does not exist.
+    This is a big operation that loads a number of wheels and then it compiles with gcc other 
+    c language packages for which a current wheel does not exist.  (Wheel or `*.whl` files are Python containers that contain
+    pre-compiled c language objects that are pre-compiled for the current MacOS).
     
     If this install succeeds with no missing libraries, or other compiler errors, we are
-    most of the way to done.  If the command fails on the first try, try it again.
+    most of the way to done.  If this command fails on the first try, try it again -- that usually resolves the problem.
     
      
 ## Install and set up PostgreSQL and pgAdmin4
@@ -165,7 +160,7 @@ the following command:
 
     `(WeVoteServerPy3.7) admins-iMac:WeVoteServer admin$ brew install postgresql`
 
-1. Start PostgreSQL (this is actually instructing launchd to start Postgres every time you start your Mac):
+1. Start PostgreSQL (this is actually instructing the MacOS/Linux launchd to start Postgres every time you start your Mac):
 
     `(WeVoteServerPy3.7) admins-iMac:WeVoteServer admin$ brew services start postgresql`
 
@@ -181,10 +176,11 @@ the following command:
     admin=# 
     ```
 
-    The `psql` command starts a PostgresSQL command session to appear in the terminal window, within this PostgresSQL command session
+    The `psql` command starts a PostgresSQL command session which appears in the terminal window, within this PostgresSQL command session
     type the following Postgres commands...
 
-    `admin=# ALTER USER  postgres  WITH PASSWORD 'admin37+';
+    ```
+    admin=# ALTER USER  postgres  WITH PASSWORD 'admin37+';
     ALTER ROLE
     admin=# \du
                                        List of roles
@@ -194,7 +190,8 @@ the following command:
      postgres  | Superuser, Create role, Create DB                          | {}
     
     admin-# \q
-    (WeVoteServerPy3.7) admins-iMac:WeVoteServer admin$  `
+    (WeVoteServerPy3.7) admins-iMac:WeVoteServer admin$
+    ```
     
     That `\du` command confirms that we have created a postgres user.  The `\q` command quits psql.
 
@@ -202,22 +199,19 @@ the following command:
 
     `(WeVoteServerPy3.7) admins-iMac:WeVoteServer admin$ brew cask install pgadmin4`
     
-    The latest pgAdmin4 has a webapp architecture, where the app you start from the Application folder is a little single 
-    purpose web server, and the UI appears in Chrome.
+    The latest pgAdmin4 has a webapp architecture, where the app you start from the Application folder is a single 
+    purpose web server, and the UI for the app appears in Chrome as a local website.
 
-1. Use Spotlight to find and launch the pgAdmin4 ap and navigate within Chrome to:
-
-    Server Groups > Servers
-
-1. Right-click on "Servers" and choose "Create > Server"
+1. Use Spotlight to find and launch the pgAdmin4 app and within Chrome onthe the pgAdmin4 web page, Right-click on "Servers" 
+and choose "Create > Server"
 
     ![ScreenShot](images/CreateServerInPgAdmin.png)
 
-2. Name: WeVoteServer
+2. On the first tab, add in the Name field: WeVoteServer
 
     ![ScreenShot](images/CreateServerDialog.png)
 
-3. Switch to "Connection" tab
+3. Switch to "Connection" tab, and enter the following information:
    * Host name: localhost
    * Port: 5432
    * Maintenance database: postgres
@@ -229,7 +223,7 @@ the following command:
 
 9. Press Save
 
-10. Create the Database by right clicking on Databases in the server tree on the left. and select Create Database on the 
+10. Create the Database by right clicking on Databases in the server tree on the left. and select Create > Database on the 
 cascading menu
    ![ScreenShot](images/CreateDatabase.png)
 
@@ -238,19 +232,22 @@ cascading menu
 
 ## Initialize an empty WeVoteServerDB
 
-1. Create an empty log file on your computer to match the one expected in the environment_variables.json file:
+1. Create an empty log file on your computer to match the one expected by the app as configured in the environment_variables.json file:
 
     ```
     (WeVoteServerPy3.7) admins-iMac:WeVoteServer admin$ sudo mkdir /var/log/wevote/
-    (WeVoteServerPy3.7) admins-iMac:WeVoteServer admin$sudo touch /var/log/wevote/wevoteserver.log
-    (WeVoteServerPy3.7) admins-iMac:WeVoteServer admin$sudo chmod -R 0777 /var/log/wevote/
+    (WeVoteServerPy3.7) admins-iMac:WeVoteServer admin$ sudo touch /var/log/wevote/wevoteserver.log
+    (WeVoteServerPy3.7) admins-iMac:WeVoteServer admin$ udo chmod -R 0777 /var/log/wevote/
     ```
 
     As configured in github, only errors get written to the log.
     Logging has five levels: CRITICAL, ERROR, INFO, WARN, DEBUG.
-    It works as a hierarchy (i.e. INFO picks up all messages logged as INFO, ERROR and CRITICAL), and when logging we
-    specify the level assigned to each message. You can change this to info items by changing the LOG_FILE_LEVEL variable 
+    It works as a hierarchy (i.e. INFO picks up all messages logged as INFO, ERROR and CRITICAL), and when adding logging 
+    code we specify the level assigned to each message. You can change this to info items by changing the LOG_FILE_LEVEL variable 
     in the WeVoteServer/config/environment_variables.json file to "INFO".
+    
+    (Logging causes Python to run slower, so only use it for very important or very rarely used code or code that is only
+    used by the admin pages by developers.)
 
 1. "Migrations are Django’s way of propagating changes you make to your models (creating a table, adding a field, deleting a model, etc.) 
 into your database schema." Run makemigrations to prepare for initialzing the WeVoteServer database:
@@ -258,9 +255,10 @@ into your database schema." Run makemigrations to prepare for initialzing the We
     `(WeVoteServerPy3.7) admins-iMac:WeVoteServer admin$ python manage.py makemigrations`
     `(WeVoteServerPy3.7) admins-iMac:WeVoteServer admin$ python manage.py makemigrations wevote_settings`
     
-     (January 28, 2019:  that second makemigrations for the wevote_settings table should not be necessary, but it is today)
+     (January 28, 2019:  that second makemigrations for the wevote_settings table should not be necessary, but as of today, 
+     it is necessary.  The second makemigrations will be harmless, if it becomes unnecessary at some point.)
     
-2. Run migrate.  "migrate, which is responsible for applying and unapplying migrations."
+2. Run migrate.  Django "migrate is responsible for applying and unapplying migrations."
 
     `(WeVoteServerPy3.7) admins-iMac:WeVoteServer admin$ python manage.py migrate`
     
@@ -277,8 +275,9 @@ into your database schema." Run makemigrations to prepare for initialzing the We
    
     ![ScreenShot](images/RunningServer.png)
    
-1.  Now, with the server still running, open a terminal window, and create a simple default user so you can login to the managment pages of the WeVoteServer.  End users in We Vote are
-called "voter"s.  This new "voter" will have all the rights you as a developer need to login to 
+1.  Now, with the server still running, open a terminal window, and create a simple default user so you can login to the 
+managment pages of the WeVoteServer.  At We Vote, "voters" are what we call end users.  This new "voter" will have all the 
+rights that you (as a developer) need to login to 
 [http://localhost:8000/admin/](http://localhost:8000/admin/) and start synchronizing data (downloading ballot and issue 
 data from the master server in the cloud, to your local server).
 
@@ -299,8 +298,8 @@ data from the master server in the cloud, to your local server).
 ## import some ballot data from the live production API Server
 
    
-These instructions cover steps 1 through 5 of the multi-page instructions, so now you can skip to step 6 to load some 
-ballot data.
+**This page of instructions has covered steps 1 through 5 of the multi-page instructions, so now you can skip to step 6 to 
+load some ballot data.**
 
 Step 6:  [Set up Initial Data](README_API_INSTALL_SETUP_DATA.md)
 
