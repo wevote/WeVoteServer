@@ -22,7 +22,6 @@ class Command(BaseCommand):
         else:
             print("Creating developer first name=" +  args[0] + ", last name=" + args[1] + ", email=" + args[2])
             VoterManager().create_developer(args[0], args[1], args[2], args[3])
-
-        # create_developer(self, first_name, last_name, email, password
+            # create_developer(self, first_name, last_name, email, password
 
         print("End of create_dev_user")

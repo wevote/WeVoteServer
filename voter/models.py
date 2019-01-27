@@ -171,17 +171,11 @@ class VoterManager(BaseUserManager):
 
     def create_developer(self, first_name, last_name, email, password):
         voter = Voter()
-        voter_id = 0
         try:
-            if validate_email(email):
-                voter.email = email
-            else:
-                email_not_valid = True
-
-            if password:
-                voter.set_password(password)
-            else:
-                password_not_valid = True
+            voter.set_password(password)
+            voter.first_name = first_name
+            voter.last_name = last_name
+            voter.email = email
             voter.is_admin = True
             voter.is_verified_volunteer = True
             voter.is_active = True
