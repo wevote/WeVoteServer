@@ -868,6 +868,8 @@ class ContestOfficeManager(models.Model):
                     existing_office_entry.district_name = defaults['district_name']
                 if 'district_scope' in defaults:
                     existing_office_entry.district_scope = defaults['district_scope']
+                if 'ballotpedia_district_id' in defaults:
+                    existing_office_entry.ballotpedia_district_id = convert_to_int(defaults['ballotpedia_district_id'])
                 if 'ballotpedia_election_id' in defaults:
                     existing_office_entry.ballotpedia_election_id = convert_to_int(defaults['ballotpedia_election_id'])
                 if 'ballotpedia_office_id' in defaults:

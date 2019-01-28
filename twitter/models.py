@@ -491,6 +491,7 @@ class TwitterUserManager(models.Model):
         :param read_only:
         :return:
         """
+        status = ""
         twitter_link_to_voter = TwitterLinkToVoter()
         twitter_link_to_voter_id = 0
 
@@ -503,7 +504,7 @@ class TwitterUserManager(models.Model):
                 twitter_link_to_voter_id = twitter_link_to_voter.id
                 twitter_link_to_voter_found = True
                 success = True
-                status = "RETRIEVE_TWITTER_LINK_TO_VOTER_FOUND_BY_TWITTER_USER_ID"
+                status += "RETRIEVE_TWITTER_LINK_TO_VOTER_FOUND_BY_TWITTER_USER_ID "
             elif positive_value_exists(voter_we_vote_id):
                 if read_only:
                     twitter_link_to_voter = TwitterLinkToVoter.objects.using('readonly').get(
@@ -513,7 +514,7 @@ class TwitterUserManager(models.Model):
                 twitter_link_to_voter_id = twitter_link_to_voter.id
                 twitter_link_to_voter_found = True
                 success = True
-                status = "RETRIEVE_TWITTER_LINK_TO_VOTER_FOUND_BY_VOTER_WE_VOTE_ID"
+                status += "RETRIEVE_TWITTER_LINK_TO_VOTER_FOUND_BY_VOTER_WE_VOTE_ID "
             elif positive_value_exists(twitter_secret_key):
                 if read_only:
                     twitter_link_to_voter = TwitterLinkToVoter.objects.using('readonly').get(
@@ -523,19 +524,19 @@ class TwitterUserManager(models.Model):
                 twitter_link_to_voter_id = twitter_link_to_voter.id
                 twitter_link_to_voter_found = True
                 success = True
-                status = "RETRIEVE_TWITTER_LINK_TO_VOTER_FOUND_BY_TWITTER_SECRET_KEY"
+                status += "RETRIEVE_TWITTER_LINK_TO_VOTER_FOUND_BY_TWITTER_SECRET_KEY "
             else:
                 twitter_link_to_voter_found = False
                 success = False
-                status = "RETRIEVE_TWITTER_LINK_TO_VOTER_VARIABLES_MISSING"
+                status += "RETRIEVE_TWITTER_LINK_TO_VOTER_VARIABLES_MISSING "
         except TwitterLinkToVoter.DoesNotExist:
             twitter_link_to_voter_found = False
             success = True
-            status = "RETRIEVE_TWITTER_LINK_TO_VOTER_NOT_FOUND"
+            status += "RETRIEVE_TWITTER_LINK_TO_VOTER_NOT_FOUND "
         except Exception as e:
             twitter_link_to_voter_found = False
             success = False
-            status = 'FAILED retrieve_twitter_link_to_voter'
+            status += 'FAILED retrieve_twitter_link_to_voter '
 
         results = {
             'success': success,
@@ -981,6 +982,7 @@ class TwitterUserManager(models.Model):
         :param we_vote_hosted_profile_image_url_tiny
         :return:
         """
+        status = ""
         values_changed = False
 
         twitter_results = self.retrieve_twitter_user(twitter_id)
@@ -1067,10 +1069,10 @@ class TwitterUserManager(models.Model):
             if values_changed:
                 twitter_user.save()
                 success = True
-                status = "SAVED_TWITTER_USER_DETAILS"
+                status += "SAVED_TWITTER_USER_DETAILS "
             else:
                 success = True
-                status = "NO_CHANGES_SAVED_TO_USER_TWITTER_DETAILS"
+                status += "NO_CHANGES_SAVED_TO_USER_TWITTER_DETAILS "
             results = {
                 'success':              success,
                 'status':               status,
