@@ -1377,7 +1377,7 @@ def twitter_sign_in_retrieve_for_api(voter_device_id):  # twitterSignInRetrieve
         existing_twitter_account_found = True
         repair_twitter_related_voter_caching_now = True
     else:
-        # Look in the voter table for any records with a twitter_id and link to the first one
+        # See if we need to heal the data - look in the voter table for any records with twitter_id
         voter_results = voter_manager.retrieve_voter_by_twitter_id_old(twitter_id)
         if voter_results['voter_found']:
             voter_with_twitter_id = voter_results['voter']

@@ -95,7 +95,8 @@ def offices_sync_out_view(request):  # officesSyncOut
         # get the data using values_list
         contest_office_list_dict = contest_office_list.values('we_vote_id', 'office_name', 'google_civic_election_id',
                                                               'ocd_division_id', 'maplight_id',
-                                                              'ballotpedia_id', 'ballotpedia_office_id',
+                                                              'ballotpedia_id', 'ballotpedia_district_id',
+                                                              'ballotpedia_office_id',
                                                               'ballotpedia_office_name', 'ballotpedia_office_url',
                                                               'ballotpedia_race_id', 'ballotpedia_race_office_level',
                                                               'google_ballot_placement',

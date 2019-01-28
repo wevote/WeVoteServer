@@ -150,6 +150,7 @@ class TwitterAuthManager(models.Model):
         :param twitter_user_object:
         :return:
         """
+        status = ""
         try:
             twitter_auth_value_to_save = False
             if hasattr(twitter_user_object, "id") and positive_value_exists(twitter_user_object.id):
@@ -180,9 +181,9 @@ class TwitterAuthManager(models.Model):
             if twitter_auth_value_to_save:
                 twitter_auth_response.save()
             success = True
-            status = "SAVED_TWITTER_AUTH_VALUES"
+            status += "SAVED_TWITTER_AUTH_VALUES "
         except Exception as e:
-            status = "UNABLE_TO_SAVE_TWITTER_AUTH_VALUES"
+            status += "UNABLE_TO_SAVE_TWITTER_AUTH_VALUES "
             logger.error("save_twitter_auth_values threw " + str(e))
             success = False
 

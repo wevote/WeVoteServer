@@ -397,7 +397,7 @@ class FacebookManager(models.Model):
             }
         return results
 
-    def create_or_update_facebook_user(self, facebook_user_id, facebook_user_first_name, facebook_user_middle_name,
+    def update_or_create_facebook_user(self, facebook_user_id, facebook_user_first_name, facebook_user_middle_name,
                                        facebook_user_last_name, facebook_user_name=None, facebook_user_location_id=None,
                                        facebook_user_location_name=None, facebook_user_gender=None,
                                        facebook_user_birthday=None, facebook_profile_image_url_https=None,
