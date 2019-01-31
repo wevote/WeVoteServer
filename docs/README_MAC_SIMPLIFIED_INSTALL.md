@@ -106,6 +106,13 @@ the following command:
     command execution.  The script also internally uses 'sudo' which temporarily gives the script root priviliges to install 
     software, so you will need to know an admin password for your Mac.  
 
+1. Install the latest Python
+
+    ```
+    $ brew install python
+    $ export PATH="/usr/local/opt/python/libexec/bin:$PATH"
+    ```
+
 1. In the PyCharm/Preferences dialog (from the top line of the Mac), select Project: WeVoteServer then Project Interpreter.
    The dialog will show Python 2.7, the default that comes with MacOS, click the Gear icon, then select "Add".
    
@@ -141,6 +148,15 @@ the following command:
     `(WeVoteServerPy3.7) admins-iMac:WeVoteServer admin$ pip install pyopenssl pyasn1 ndg-httpsclient`
     
     If running this command, has some output that tells you to upgrade your pip version, follow those instructions and do it!
+    
+<-- This is not needed for fresh installs, but may be needed for updating existing installs done with a different proceedure    
+    
+1.  Link libssl and libcrypto so that pip can find them:
+    ```
+    $ ln -s /usr/local/opt/openssl/lib/libcrypto.dylib /usr/local/lib/libcrypto.dylib
+    $ ln -s /usr/local/opt/openssl/lib/libssl.dylib /usr/local/lib/libssl.dylib
+    ```
+-->
 
 1. Install libmagic
 
@@ -159,6 +175,24 @@ the following command:
     
      
 ## Install and set up PostgreSQL and pgAdmin4
+
+1. If you are sure that Postgres has not already been installed, and is not currently running on this Mac, you can skip
+this step.  To see if postgres is already running:
+
+    ```
+    ((WeVoteServerPy3.7) admins-iMac:WeVoteServer admin$ lsof -i -P | grep -i "listen" | grep postgres
+    postgres  13254 admin    5u  IPv6 0x35032d9cf207f247      0t0  TCP localhost:5432 (LISTEN)
+    postgres  13254 admin    6u  IPv4 0x35032d9d01cd2647      0t0  TCP localhost:5432 (LISTEN)
+    (WeVoteServerPy3.7) admins-iMac:WeVoteServer admin$
+    ```  
+    
+    **If that lsof line returns nothing, then you don't currently have postgres running, and you can continue on to the next step.**
+    
+    If the output shows postgres has already been installed and is listening on port 5432, then the command from the next step 
+    (`brew install postgresql`) would install a second postgres instance running on port 5433, and then you would have a "ports" mess to fixup. 
+    If you  find that postgres is already running, you have two choices.  
+    1. Figure out how postgres has been installed, turn it off, and contine with these instructions and install the latest version with homebrew.
+    2. Move forward with your existing install, but first figure out how to upgrade postgres to the latest version.
 
 1. Install PostgreSQL run the following command:
 
@@ -258,9 +292,10 @@ cascading menu
 1. "Migrations are Django’s way of propagating changes you make to your models (creating a table, adding a field, deleting a model, etc.) 
     into your database schema." Run makemigrations to prepare for initialzing the WeVoteServer database:
 
-    `(WeVoteServerPy3.7) admins-iMac:WeVoteServer admin$ python manage.py makemigrations`
-    `(WeVoteServerPy3.7) admins-iMac:WeVoteServer admin$ python manage.py makemigrations wevote_settings`
-    
+    ```
+    (WeVoteServerPy3.7) admins-iMac:WeVoteServer admin$ python manage.py makemigrations
+    (WeVoteServerPy3.7) admins-iMac:WeVoteServer admin$ python manage.py makemigrations wevote_settings
+    ```
      (January 28, 2019:  that second makemigrations for the wevote_settings table should not be necessary, but as of today, 
      it is necessary.  The second makemigrations will be harmless, if it becomes unnecessary at some point.)
     
@@ -272,7 +307,7 @@ cascading menu
 
    ![ScreenShot](images/AddConfiguration.png)
    
-   Press the "Add Configuration..." button that is to the left of the play button.  Select "Templatees" and then "Python".
+   Press the "Add Configuration..." button that is to the left of the play button.  Select "Templates" and then "Python".
    
    ![ScreenShot](images/Run-Debug-Settings.png)
    
@@ -303,7 +338,7 @@ cascading menu
     ```
     
 1.  Navigate to [http://localhost:8000/admin/](http://localhost:8000/admin/) and sign in with your new user name/password.    
-    
+  
 1.  The local instance of the WeVoteServer is now setup and running (although it has no election data stored in Postgres 
     at this point).
 
