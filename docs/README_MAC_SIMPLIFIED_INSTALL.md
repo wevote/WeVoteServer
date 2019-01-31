@@ -149,15 +149,15 @@ the following command:
     
     If running this command, has some output that tells you to upgrade your pip version, follow those instructions and do it!
     
-<-- This is not needed for fresh installs, but may be needed for updating existing installs done with a different proceedure    
+    <!-- This is not needed for fresh installs, but may be needed for updating existing installs done with a different proceedure    
+        
+    1.  Link libssl and libcrypto so that pip can find them:
+        ```
+        $ ln -s /usr/local/opt/openssl/lib/libcrypto.dylib /usr/local/lib/libcrypto.dylib
+        $ ln -s /usr/local/opt/openssl/lib/libssl.dylib /usr/local/lib/libssl.dylib
+        ```
+    -->
     
-1.  Link libssl and libcrypto so that pip can find them:
-    ```
-    $ ln -s /usr/local/opt/openssl/lib/libcrypto.dylib /usr/local/lib/libcrypto.dylib
-    $ ln -s /usr/local/opt/openssl/lib/libssl.dylib /usr/local/lib/libssl.dylib
-    ```
--->
-
 1. Install libmagic
 
     `(WeVoteServerPy3.7) $ brew install libmagic`
