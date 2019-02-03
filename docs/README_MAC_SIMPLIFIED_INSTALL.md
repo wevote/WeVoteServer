@@ -232,7 +232,7 @@ this step.  To see if postgres is already running:
     admin-# \q
     (WeVoteServerPy3.7) admins-iMac:WeVoteServer admin$
     ```
-    
+
     That `\du` command confirms that we have a 'postgres' role.  The `\q` command quits psql.
 
  1. Now you are ready to install pgAdmin4 (a powerful WYSIWYG database administration tool). Run:

@@ -2071,7 +2071,6 @@ class VoterDeviceLinkManager(models.Model):
                 voter_device_id, voter_id, voter_device_link_id, read_only=read_only)
         except Exception as e:
             handle_record_found_more_than_one_exception(e, logger=logger)
-
         return results
 
     def retrieve_voter_device_link(self, voter_device_id, voter_id=0, voter_device_link_id=0, read_only=False):
