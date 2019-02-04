@@ -17,6 +17,9 @@ import textwrap
 
 logger = get_logger(__name__)
 stripe.api_key = get_environment_variable("STRIPE_SECRET_KEY")
+if (not stripe.api_key.startswith("sk_")):
+    logger.error("Configuration error, the stripe secret key, must begin with 'sk_' -- don't use the publishable key "
+                 "on the server!")
 
 
 def donation_with_stripe_for_api(request, token, email, donation_amount, monthly_donation, voter_we_vote_id):
