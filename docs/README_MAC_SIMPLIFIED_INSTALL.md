@@ -191,7 +191,8 @@ this step.  To see if postgres is already running:
     If the output shows postgres has already been installed and is listening on port 5432, then the command from the next step 
     (`brew install postgresql`) would install a second postgres instance running on port 5433, and then you would have a "ports" mess to fixup. 
     If you  find that postgres is already running, you have two choices.  
-    1. Figure out how postgres has been installed, turn it off, and contine with these instructions and install the latest version with homebrew.
+    1. Figure out how postgres has been installed, turn it off (flat out deleting old versions off of your disk is the most 
+    sure way to move forward), and continue with these instructions and install the latest version with homebrew.
     2. Move forward with your existing install, but first figure out how to upgrade postgres to the latest version.
 
 1. Install PostgreSQL run the following command:
