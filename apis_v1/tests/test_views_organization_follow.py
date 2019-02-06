@@ -4,8 +4,10 @@
 
 from django.urls import reverse
 from django.test import TestCase
+from django.test import Client
 import json
 from organization.models import Organization
+from wevote_functions.functions import convert_to_int
 
 
 class WeVoteAPIsV1TestsOrganizationFollow(TestCase):
@@ -17,11 +19,13 @@ class WeVoteAPIsV1TestsOrganizationFollow(TestCase):
         self.organization_stop_following_url = reverse("apis_v1:organizationStopFollowingView")
         self.voter_count_url = reverse("apis_v1:voterCountView")
         self.voter_create_url = reverse("apis_v1:voterCreateView")
+        self.client2 = Client(HTTP_USER_AGENT='Mozilla/5.0')
+
 
     def test_follow_with_no_voter_device_id(self):
         #######################################
         # Make sure the correct errors are thrown when no one is signed in
-        response01 = self.client.get(self.organization_follow_url)
+        response01 = self.client2.get(self.organization_follow_url)
         json_data01 = json.loads(response01.content.decode())
 
         self.assertEqual('status' in json_data01, True, "'status' expected in the json response, and not found")
@@ -44,7 +48,7 @@ class WeVoteAPIsV1TestsOrganizationFollow(TestCase):
 
         #######################################
         # Make sure the correct errors are thrown when no one is signed in
-        response02 = self.client.get(self.organization_follow_ignore_url)
+        response02 = self.client2.get(self.organization_follow_ignore_url)
         json_data02 = json.loads(response02.content.decode())
 
         self.assertEqual('status' in json_data02, True, "'status' expected in the json response, and not found")
@@ -67,7 +71,7 @@ class WeVoteAPIsV1TestsOrganizationFollow(TestCase):
 
         #######################################
         # Make sure the correct errors are thrown when no one is signed in
-        response03 = self.client.get(self.organization_stop_following_url)
+        response03 = self.client2.get(self.organization_stop_following_url)
         json_data03 = json.loads(response03.content.decode())
 
         self.assertEqual('status' in json_data03, True, "'status' expected in the json response, and not found")
@@ -91,7 +95,7 @@ class WeVoteAPIsV1TestsOrganizationFollow(TestCase):
     def test_follow_with_voter_device_id(self):
         #######################################
         # Generate the voter_device_id cookie
-        response10 = self.client.get(self.generate_voter_device_id_url)
+        response10 = self.client2.get(self.generate_voter_device_id_url)
         json_data10 = json.loads(response10.content.decode())
 
         # Make sure we got back a voter_device_id we can use
@@ -103,7 +107,7 @@ class WeVoteAPIsV1TestsOrganizationFollow(TestCase):
 
         #######################################
         # Create a voter so we can test retrieve
-        response11 = self.client.get(self.voter_create_url, {'voter_device_id': voter_device_id})
+        response11 = self.client2.get(self.voter_create_url, {'voter_device_id': voter_device_id})
         json_data11 = json.loads(response11.content.decode())
 
         self.assertEqual('status' in json_data11, True,
@@ -120,7 +124,7 @@ class WeVoteAPIsV1TestsOrganizationFollow(TestCase):
 
         #######################################
         # Make sure the correct errors are thrown when an organization_id isn't passed in
-        response12 = self.client.get(self.organization_follow_url, {'voter_device_id': voter_device_id})
+        response12 = self.client2.get(self.organization_follow_url, {'voter_device_id': voter_device_id})
         json_data12 = json.loads(response12.content.decode())
 
         self.assertEqual('status' in json_data12, True, "'status' expected in the json response, and not found")
@@ -141,7 +145,7 @@ class WeVoteAPIsV1TestsOrganizationFollow(TestCase):
 
         #######################################
         # Make sure the correct errors are thrown when an organization_id isn't passed in
-        response13 = self.client.get(self.organization_follow_ignore_url, {'voter_device_id': voter_device_id})
+        response13 = self.client2.get(self.organization_follow_ignore_url, {'voter_device_id': voter_device_id})
         json_data13 = json.loads(response13.content.decode())
 
         self.assertEqual('status' in json_data13, True, "'status' expected in the json response, and not found")
@@ -161,7 +165,7 @@ class WeVoteAPIsV1TestsOrganizationFollow(TestCase):
 
         #######################################
         # Make sure the correct errors are thrown when an organization_id isn't passed in
-        response14 = self.client.get(self.organization_stop_following_url, {'voter_device_id': voter_device_id})
+        response14 = self.client2.get(self.organization_stop_following_url, {'voter_device_id': voter_device_id})
         json_data14 = json.loads(response14.content.decode())
 
         self.assertEqual('status' in json_data14, True, "'status' expected in the json response, and not found")
@@ -181,7 +185,7 @@ class WeVoteAPIsV1TestsOrganizationFollow(TestCase):
 
         #######################################
         # Make sure the correct errors are thrown when an organization_id is passed in for an org that doesn't exist
-        response15 = self.client.get(self.organization_follow_url, {'organization_id': 1,
+        response15 = self.client2.get(self.organization_follow_url, {'organization_id': 1,
                                                                     'voter_device_id': voter_device_id})
         json_data15 = json.loads(response15.content.decode())
 
@@ -197,13 +201,13 @@ class WeVoteAPIsV1TestsOrganizationFollow(TestCase):
             "voter_device_id: {voter_device_id}".format(
                 status=json_data15['status'], voter_device_id=json_data15['voter_device_id']))
         self.assertEqual(json_data15['success'], False, "success 'False' expected, True returned")
-        self.assertEqual(json_data15['organization_id'], 1,
+        self.assertEqual(convert_to_int(json_data15['organization_id']), 1,
                          "organization_id == 1 expected, organization_id: {organization_id} returned".format(
                              organization_id=json_data15['organization_id']))
 
         #######################################
         # Make sure the correct errors are thrown when an organization_id is passed in for an org that doesn't exist
-        response16 = self.client.get(self.organization_follow_ignore_url, {'organization_id': 1,
+        response16 = self.client2.get(self.organization_follow_ignore_url, {'organization_id': 1,
                                                                            'voter_device_id': voter_device_id})
         json_data16 = json.loads(response16.content.decode())
 
@@ -219,13 +223,13 @@ class WeVoteAPIsV1TestsOrganizationFollow(TestCase):
             "voter_device_id: {voter_device_id}".format(
                 status=json_data16['status'], voter_device_id=json_data16['voter_device_id']))
         self.assertEqual(json_data16['success'], False, "success 'False' expected, True returned")
-        self.assertEqual(json_data16['organization_id'], 1,
+        self.assertEqual(convert_to_int(json_data16['organization_id']), 1,
                          "organization_id == 1 expected, organization_id: {organization_id} returned".format(
                              organization_id=json_data16['organization_id']))
 
         #######################################
         # Make sure the correct errors are thrown when an organization_id is passed in for an org that doesn't exist
-        response17 = self.client.get(self.organization_stop_following_url, {'organization_id': 1,
+        response17 = self.client2.get(self.organization_stop_following_url, {'organization_id': 1,
                                                                             'voter_device_id': voter_device_id})
         json_data17 = json.loads(response17.content.decode())
 
@@ -241,7 +245,7 @@ class WeVoteAPIsV1TestsOrganizationFollow(TestCase):
             "voter_device_id: {voter_device_id}".format(
                 status=json_data17['status'], voter_device_id=json_data17['voter_device_id']))
         self.assertEqual(json_data17['success'], False, "success 'False' expected, True returned")
-        self.assertEqual(json_data17['organization_id'], 1,
+        self.assertEqual(convert_to_int(json_data17['organization_id']), 1,
                          "organization_id == 1 expected, organization_id: {organization_id} returned".format(
                              organization_id=json_data17['organization_id']))
 
@@ -255,7 +259,7 @@ class WeVoteAPIsV1TestsOrganizationFollow(TestCase):
 
         #######################################
         # Make sure the correct results are given when saved successfully
-        response18 = self.client.get(self.organization_follow_url, {'organization_id': organization1.id,
+        response18 = self.client2.get(self.organization_follow_url, {'organization_id': organization1.id,
                                                                     'voter_device_id': voter_device_id})
         json_data18 = json.loads(response18.content.decode())
 
@@ -266,19 +270,19 @@ class WeVoteAPIsV1TestsOrganizationFollow(TestCase):
         self.assertEqual('voter_device_id' in json_data18, True,
                          "'voter_device_id' expected in the json response, and not found")
         self.assertEqual(
-            json_data18['status'], 'FOLLOWING',
-            "status: {status} (FOLLOWING expected), "
+            json_data18['status'].startswith('FOLLOWING'), True,
+            "status: {status} (FOLLOWING ADD_POSITION_NETWORK_COUNT_FOR_ONE_ORGANIZATION expected), "
             "voter_device_id: {voter_device_id}".format(
                 status=json_data18['status'], voter_device_id=json_data18['voter_device_id']))
-        self.assertEqual(json_data18['success'], True, "success 'True' expected, False returned")
-        self.assertEqual(json_data18['organization_id'], organization1.id,
+        self.assertEqual(json_data18['success'], True, "success True expected, False returned")
+        self.assertEqual(convert_to_int(json_data18['organization_id']), organization1.id,
                          "organization_id returned (organization_id: {organization_id}) didn't match"
                          "original passed in".format(
                              organization_id=json_data18['organization_id']))
 
         #######################################
         # Make sure the correct results are given when saved successfully
-        response19 = self.client.get(self.organization_follow_ignore_url, {'organization_id': organization1.id,
+        response19 = self.client2.get(self.organization_follow_ignore_url, {'organization_id': organization1.id,
                                                                            'voter_device_id': voter_device_id})
         json_data19 = json.loads(response19.content.decode())
 
@@ -289,19 +293,19 @@ class WeVoteAPIsV1TestsOrganizationFollow(TestCase):
         self.assertEqual('voter_device_id' in json_data19, True,
                          "'voter_device_id' expected in the json response, and not found")
         self.assertEqual(
-            json_data19['status'], 'IGNORING',
+            json_data19['status'].startswith('IGNORING'), True,
             "status: {status} (IGNORING expected), "
             "voter_device_id: {voter_device_id}".format(
                 status=json_data19['status'], voter_device_id=json_data19['voter_device_id']))
         self.assertEqual(json_data19['success'], True, "success 'True' expected, False returned")
-        self.assertEqual(json_data19['organization_id'], organization1.id,
+        self.assertEqual(convert_to_int(json_data19['organization_id']), organization1.id,
                          "organization_id returned (organization_id: {organization_id}) didn't match"
                          "original passed in".format(
                              organization_id=json_data19['organization_id']))
 
         #######################################
         # Make sure the correct results are given when saved successfully
-        response20 = self.client.get(self.organization_stop_following_url, {'organization_id': organization1.id,
+        response20 = self.client2.get(self.organization_stop_following_url, {'organization_id': organization1.id,
                                                                             'voter_device_id': voter_device_id})
         json_data20 = json.loads(response20.content.decode())
 
@@ -312,12 +316,12 @@ class WeVoteAPIsV1TestsOrganizationFollow(TestCase):
         self.assertEqual('voter_device_id' in json_data20, True,
                          "'voter_device_id' expected in the json response, and not found")
         self.assertEqual(
-            json_data20['status'], 'STOPPED_FOLLOWING',
+            json_data20['status'].startswith('STOPPED_FOLLOWING'), True,
             "status: {status} (STOPPED_FOLLOWING expected), "
             "voter_device_id: {voter_device_id}".format(
                 status=json_data20['status'], voter_device_id=json_data20['voter_device_id']))
         self.assertEqual(json_data20['success'], True, "success 'True' expected, False returned")
-        self.assertEqual(json_data20['organization_id'], organization1.id,
+        self.assertEqual(convert_to_int(json_data20['organization_id']), organization1.id,
                          "organization_id returned (organization_id: {organization_id}) didn't match"
                          "original passed in".format(
                              organization_id=json_data20['organization_id']))

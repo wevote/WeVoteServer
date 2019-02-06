@@ -671,6 +671,7 @@ def office_retrieve_for_api(office_id, office_we_vote_id):
             'ocd_division_id':          contest_office.ocd_division_id,
             'maplight_id':              contest_office.maplight_id,
             'ballotpedia_id':           contest_office.ballotpedia_id,
+            'ballotpedia_district_id':  contest_office.ballotpedia_district_id,
             'ballotpedia_office_id':    contest_office.ballotpedia_office_id,
             'ballotpedia_office_url':   contest_office.ballotpedia_office_url,
             'ballotpedia_race_id':      contest_office.ballotpedia_race_id,

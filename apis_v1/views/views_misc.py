@@ -4,6 +4,7 @@
 from config.base import get_environment_variable
 from django.http import HttpResponse
 import json
+import sys
 from measure.controllers import measure_retrieve_for_api
 from office.controllers import office_retrieve_for_api
 from quick_info.controllers import quick_info_retrieve_for_api
@@ -26,8 +27,9 @@ def device_id_generate_view(request):  # deviceIdGenerate
     :return: Unique device id that can be stored in a cookie
     """
     voter_device_id = generate_voter_device_id()  # Stored in cookie elsewhere
-    logger.debug("apis_v1/views.py, device_id_generate-voter_device_id: {voter_device_id}".format(
-        voter_device_id=voter_device_id
+    if not 'test' in sys.argv:
+        logger.debug("apis_v1/views.py, device_id_generate-voter_device_id: {voter_device_id}".format(
+            voter_device_id=voter_device_id
     ))
 
     if positive_value_exists(voter_device_id):

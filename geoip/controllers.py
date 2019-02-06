@@ -2,6 +2,7 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
+import sys
 import geoip2.database
 import wevote_functions.admin
 from config.base import get_environment_variable_default
@@ -30,7 +31,7 @@ def voter_location_retrieve_from_ip_for_api(request, ip_address=''):
     # if not positive_value_exists(ip_address):
     #     ip_address = '108.46.177.24'
 
-    if ip_address == '127.0.0.1':
+    if ip_address == '127.0.0.1' and not 'test' in sys.argv:
         print("Running on a local dev server, so substituting an Oakland IP address 73.158.32.221 for 127.0.0.1")
         ip_address = '73.158.32.221'
 
@@ -58,7 +59,8 @@ def voter_location_retrieve_from_ip_for_api(request, ip_address=''):
         response = reader.city(ip_address)
 
     except geoip2.errors.AddressNotFoundError as e:
-        logger.error("voter_location_retrieve_from_ip_for_api ip " + ip_address + " not found: " + str(e))
+        if not 'test' in sys.argv:
+            logger.error("voter_location_retrieve_from_ip_for_api ip " + ip_address + " not found: " + str(e))
 
         response_content = {
             'success':              True,

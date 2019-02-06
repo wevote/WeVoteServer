@@ -48,3 +48,7 @@ Alternatively, you can try the prebuilt Vagrant box, which lets you avoid Ansibl
 ## Installing on Amazon Web Services (For network team only)
 
 [AWS Notes](README_API_INSTALL_AWS.md)
+
+## Maintaining Django Code Tests
+
+[Django Code Tests](README_DJANGO_TESTS.md)

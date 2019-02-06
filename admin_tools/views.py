@@ -1803,6 +1803,7 @@ def redirect_to_sign_in_page(request, authority_required={}):
     error_message = "You must sign in with account that {authority_required_text} to see that page. " \
                     "<b>There is a known bug with this check, if you think this message is wrong, Sign Out and try " \
                     "again.</b>".format(authority_required_text=authority_required_text)
+
     messages.add_message(request, messages.ERROR, error_message)
 
     if positive_value_exists(request.path):
