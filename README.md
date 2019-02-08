@@ -16,9 +16,9 @@ To get started as a We Vote developer, <a href="https://www.clahub.com/agreement
 We have two sets of install instuctions, the first is a simplified version specifically for the Mac, and the second is a 
 more detailed set with more options for Linux and AWS
 
-1. [Simplified Instructions for Mac](docs/README_MAC_SIMPLIFIED_INSTALL.md) leveraging the free (and powerful) PyCharm IDE and debugger 
+1. Use these [Simplified Instructions for Mac](docs/README_MAC_SIMPLIFIED_INSTALL.md) leveraging the free (and powerful) PyCharm IDE and debugger (**recommended!**) 
 
-2. More detailed [Installation instructions](docs/README_API_INSTALL.md) that also cover installation on Linux and in AWS 
+2. Or use these more detailed [Installation instructions](docs/README_API_INSTALL.md) that also cover installation on Linux and in AWS 
 
 
 ## Installing We Vote Mobile Web Application (React/Flux)

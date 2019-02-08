@@ -120,7 +120,8 @@ the following command:
    
    ![ScreenShot](images/PyEnv37.png)
    
-   Change the top "Location" line to read `/Users/admin/PycharmEnvironments/WeVoteServerPy3.7` and the interpreter 
+   Change the top "Location" line to read `/Users/admin/PycharmEnvironments/WeVoteServerPy3.7` (remember to substitute your
+   user name for 'admin' in this example!) and the interpreter 
    pulldown to point to the Python 3.7 (that you installed with brew a few steps ago).   Then press Ok.
    
 1. The Preferences pane is displayed again.   If there is a yellow warning at the bottom of the dialog that says to "Install latest 
@@ -147,7 +148,8 @@ the following command:
     
     `(WeVoteServerPy3.7) admins-iMac:WeVoteServer admin$ pip install pyopenssl pyasn1 ndg-httpsclient`
     
-    If running this command, has some output that tells you to upgrade your pip version, follow those instructions and do it!
+    If running this command, causes some output to be displayed, that tells you to upgrade your pip version, follow 
+    those instructions and do the install they recommend.  It never hurts to update pip.
     
     <!-- This is not needed for fresh installs, but may be needed for updating existing installs done with a different proceedure    
         
@@ -162,16 +164,17 @@ the following command:
 
     `(WeVoteServerPy3.7) $ brew install libmagic`
 
-1. Install the other Python packages required by the WeVoteServer project
+1. Install all the other Python packages required by the WeVoteServer project (there are a lot of them!)
 
     `(WeVoteServer3.7) $ pip install -r requirements.txt`
 
-    This is a big operation that loads a number of wheels and then it compiles with gcc other 
-    c language packages for which a current wheel does not exist.  (Wheel or `*.whl` files are Python containers that contain
-    pre-compiled c language objects that are pre-compiled for the current MacOS).
+    This is a big operation that loads a number of wheels and then it compiles other 
+    c language packages with gcc, for which a current wheel does not exist.  (Wheel or `*.whl` files are Python containers that contain
+    pre-compiled c language objects.  Objects that are specifically pre-compiled for the current MacOS version).
     
     If this install succeeds with no missing libraries, or other compiler errors, we are
-    most of the way to done.  If this command fails on the first try, try it again -- that usually resolves the problem.
+    most of the way to done.  If this command fails on the first try, try it again -- that usually resolves the problem.  This 
+    should work the first time on a clean first install.
     
      
 ## Install and set up PostgreSQL and pgAdmin4
@@ -189,13 +192,15 @@ this step.  To see if postgres is already running:
     **If that lsof line returns nothing, then you don't currently have postgres running, and you can continue on to the next step.**
     
     If the output shows postgres has already been installed and is listening on port 5432, then the command from the next step 
-    (`brew install postgresql`) would install a second postgres instance running on port 5433, and then you would have a "ports" mess to fixup. 
+    (`brew install postgresql`) would install a second postgres instance running on port 5433, and then you would have a "port" 
+    assignment mess to fixup. 
+    
     If you  find that postgres is already running, you have two choices.  
     1. Figure out how postgres has been installed, turn it off (flat out deleting old versions off of your disk is the most 
     sure way to move forward), and continue with these instructions and install the latest version with homebrew.
     2. Move forward with your existing install, but first figure out how to upgrade postgres to the latest version.
 
-1. Install PostgreSQL run the following command:
+1. Install PostgreSQL by running the following command:
 
     `(WeVoteServerPy3.7) admins-iMac:WeVoteServer admin$ brew install postgresql`
 
@@ -204,7 +209,7 @@ this step.  To see if postgres is already running:
 
     `(WeVoteServerPy3.7) admins-iMac:WeVoteServer admin$ brew services start postgresql`
 
-1. Create a default database, and a default user, and then log into the psql PostgreSQL command interpreter:
+1. Create a default database, and a default user, and then log into the 'psql' PostgreSQL command interpreter:
 
     ```
     (WeVoteServerPy3.7) admins-iMac:WeVoteServer admin$ createdb
@@ -240,15 +245,16 @@ this step.  To see if postgres is already running:
 
     `(WeVoteServerPy3.7) admins-iMac:WeVoteServer admin$ brew cask install pgadmin4`
     
-    The latest pgAdmin4 has a webapp architecture, where the app you start from the Application folder is a single 
-    purpose web server, and the UI for the app appears in Chrome as a local website.
+    The latest pgAdmin4 has a webapp architecture, where the app you start from the Application folder is actually a 
+    single purpose web server, and the UI for the app appears in Chrome as a local website.
 
-1. Use Spotlight to find and launch the pgAdmin4 app and within Chrome on the the pgAdmin4 web page, Right-click on "Servers" 
+1. Use Spotlight to find and launch the pgAdmin4 app and the pgAdmin4 webapp will display in a new tab within Chrome.
+On that new tab, Right-click on "Servers" 
 and choose "Create > Server"
 
     ![ScreenShot](images/CreateServerInPgAdmin.png)
 
-2. On the first tab, add in the Name field: WeVoteServer
+2. On the first tab of the "Create - Server" dialog, add into the Name field: WeVoteServer
 
     ![ScreenShot](images/CreateServerDialog.png)
 
@@ -281,14 +287,15 @@ cascading menu
     (WeVoteServerPy3.7) admins-iMac:WeVoteServer admin$ udo chmod -R 0777 /var/log/wevote/
     ```
 
-    As configured in github, only errors get written to the log.
+    As configured by default in our configuration code from github, only errors get written to the log.
     Logging has five levels: CRITICAL, ERROR, INFO, WARN, DEBUG.
     It works as a hierarchy (i.e. INFO picks up all messages logged as INFO, ERROR and CRITICAL), and when adding logging 
     code we specify the level assigned to each message. You can change this to info items by changing the LOG_FILE_LEVEL variable 
     in the WeVoteServer/config/environment_variables.json file to "INFO".
     
-    (Logging causes Python to run slower, so only use it for very important or very rarely used code or code that is only
-    used by the admin pages by developers.)
+    (Logging causes Python to run slower in production, so only use it for very important or very rarely used code or 
+    code that is only used by the admin pages by developers.  You can also write your log files at the DEBUG level and they
+    won't execute on the production server.)
 
 1. "Migrations are Django’s way of propagating changes you make to your models (creating a table, adding a field, deleting a model, etc.) 
     into your database schema." Run makemigrations to prepare for initialzing the WeVoteServer database:
@@ -298,7 +305,7 @@ cascading menu
     (WeVoteServerPy3.7) admins-iMac:WeVoteServer admin$ python manage.py makemigrations wevote_settings
     ```
      (January 28, 2019:  that second makemigrations for the wevote_settings table should not be necessary, but as of today, 
-     it is necessary.  The second makemigrations will be harmless, if it becomes unnecessary at some point.)
+     it is necessary.  That second makemigrations line will be harmless, if it becomes unnecessary at some point.)
     
 2. Run migrate.  Django "migrate is responsible for applying and unapplying migrations."
 
@@ -313,7 +320,8 @@ cascading menu
    ![ScreenShot](images/Run-Debug-Settings.png)
    
    With Python selected, and press the "+" button to create a new run configuration.  For "Script path", add the path 
-   to your `manage.py` file in your project root directory , and for "Parameters" add `runserver` as the command.  Then press "Ok".
+   to your `manage.py` file that will be in your project root directory, and for "Parameters" add `runserver` as the command.  
+   Then press "Ok".
    
     ![ScreenShot](images/RunningServer.png)
     
@@ -321,7 +329,7 @@ cascading menu
     on the same line as the "Terminal" tab.  As API calls are made to the server, the http requests will be displayed in 
     this runtime log.  Python print commands, only send their output to this log.  Python logger commands send the output
     to both this runtime log, and the log file that we created a few steps back.  On the production servers in AWS, these 
-    log lines can be searched using Splunk (ask Dale for Splunk access if you want it.)
+    log lines can be searched using Splunk (ask Dale for Splunk access if you could use it.)
    
 1.  Now, with the server still running, open a terminal window, and create a simple default user (a voter) so you can login to the 
     managment pages of the WeVoteServer.  At We Vote, "voters" are what we call end users.  This new "voter" will have all the 
@@ -332,16 +340,16 @@ cascading menu
     The useage is:  python manage.py create_dev_user first_name last_name email password
 
     ```
-    (WeVoteServer3.7) admins-iMac:WeVoteServer admin$ python manage.py create_dev_user Samuel Adams samuel@adams.com ale 
+    (WeVoteServer3.7) admin$ python manage.py create_dev_user Samuel Adams samuel@adams.com ale 
     Creating developer first name=Samuel, last name=Adams, email=samuel@adams.com
     End of create_dev_user
-    (WeVoteServer3.7) admins-iMac:WeVoteServer admin$ 
+    (WeVoteServer3.7) admin$ 
     ```
     
 1.  Navigate to [http://localhost:8000/admin/](http://localhost:8000/admin/) and sign in with your new user name/password.    
   
-1.  The local instance of the WeVoteServer is now setup and running (although it has no election data stored in Postgres 
-    at this point).
+1.  The local instance of the WeVoteServer is now setup and running (although there is no election data stored in Postgres, 
+    for it to serve to clients at this point).
 
 ## import some ballot data from the live production API Server
 
