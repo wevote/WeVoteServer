@@ -1736,6 +1736,7 @@ def voter_retrieve_for_api(voter_device_id, state_code_from_ip_address='',
     twitter_link_to_voter = TwitterLinkToVoter()
     repair_twitter_link_to_voter_caching_now = False
     repair_facebook_link_to_voter_caching_now = False
+    facebook_user = None;
 
     status = "VOTER_RETRIEVE_START "
 
@@ -2128,6 +2129,7 @@ def voter_retrieve_for_api(voter_device_id, state_code_from_ip_address='',
                                           is_desktop=user_agent_object.is_pc,
                                           is_tablet=user_agent_object.is_tablet)
 
+        facebook_profile, voter_photo_large, voter_photo_medium = get_displayable_images(voter, facebook_user)
         donation_list = donation_history_for_a_voter(voter.we_vote_id)
         json_data = {
             'status':                           status,
@@ -2139,7 +2141,7 @@ def voter_retrieve_for_api(voter_device_id, state_code_from_ip_address='',
             'facebook_id':                      voter.facebook_id,
             'email':                            voter.email,
             'facebook_email':                   voter.facebook_email,
-            'facebook_profile_image_url_https': voter.facebook_profile_image_url_https,
+            'facebook_profile_image_url_https': facebook_profile,
             'full_name':                        voter.get_full_name(),
             'first_name':                       voter.first_name,
             'last_name':                        voter.last_name,
@@ -2158,9 +2160,8 @@ def voter_retrieve_for_api(voter_device_id, state_code_from_ip_address='',
             'has_data_to_preserve':             voter.has_data_to_preserve(),
             'has_email_with_verified_ownership':    voter.has_email_with_verified_ownership(),
             'linked_organization_we_vote_id':   voter.linked_organization_we_vote_id,
-            'voter_photo_url_large':            voter.we_vote_hosted_profile_image_url_large if positive_value_exists(
-                voter.we_vote_hosted_profile_image_url_large) else voter.voter_photo_url(),
-            'voter_photo_url_medium':           voter.we_vote_hosted_profile_image_url_medium,
+            'voter_photo_large':                voter_photo_large,
+            'voter_photo_url_medium':           voter_photo_medium,
             'voter_photo_url_tiny':             voter.we_vote_hosted_profile_image_url_tiny,
             'voter_donation_history_list':      donation_list,
             'interface_status_flags':           voter.interface_status_flags,
@@ -2208,6 +2209,21 @@ def voter_retrieve_for_api(voter_device_id, state_code_from_ip_address='',
             'state_code_from_ip_address':       state_code_from_ip_address,
         }
         return json_data
+
+
+def get_displayable_images(voter, facebook_user):
+    # Hack to find any usable voter images.
+    # We have too many duplicate image urls setters, repairers, and healers -- some of those setters are broken
+    facebook_profile = voter.facebook_profile_image_url_https
+    if not positive_value_exists(facebook_profile) and facebook_user is not None:
+        facebook_profile = facebook_user.facebook_profile_image_url_https
+    voter_photo_large = voter.we_vote_hosted_profile_image_url_large
+    if not positive_value_exists(voter_photo_large):
+        voter_photo_large = facebook_profile
+    voter_photo_medium = voter.we_vote_hosted_profile_image_url_medium
+    if not positive_value_exists(voter_photo_medium):
+        voter_photo_medium = facebook_profile
+    return facebook_profile, voter_photo_large, voter_photo_medium
 
 
 def voter_retrieve_list_for_api(voter_device_id):
