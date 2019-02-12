@@ -3,7 +3,7 @@
 boto3==1.7.26
 dj-database-url==0.5.0
 dj-static==0.0.6
-Django==2.1.5
+Django==2.1.7
 django-bootstrap3==10.0.1
 django-cors-headers==2.4.0
 django-crispy-forms==1.7.2
