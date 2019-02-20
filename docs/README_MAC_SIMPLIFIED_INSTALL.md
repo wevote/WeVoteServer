@@ -6,20 +6,31 @@ These instructions are for a new Mac, or at least a Mac that hasn't been used fo
 Python development before.  Some of these tools may already be setup on your Mac, but
 reinstalling them causes no harm, skip the parts you are sure you already have.
 
+If you have never installed Postgres on your Mac (or don't mind fully deleting any Postgres that you have already 
+installed on your Mac), these instructions should take an hour or so to complete. 
+
 1. Install the Chrome browser for Mac
 
-1. Open the Mac "App Store" app, and download Apple's Xcode, which includes "c" language compilers and native git integration.
+1. Open the Mac "App Store" app, and download the current version of Apple's Xcode, which includes "c" language compilers 
+    and native git integration. This download also includes Apple's Xcode IDE for MacOS and iOS native development.
 
+    **Note: Xcode requires about 30 GB of diskspace, if you don't have much that room on your Mac, it is sufficient 
+    to download only the "Xcode Command Line Tools", but you need to sign up as an apple developer to do that.  Download (the latest version of) "Command Line Tools (macOS 10.14) for Xcode 10" at 
+    [https://developer.apple.com/download/more/](https://developer.apple.com/download/more/)  These tools only require 185 MB 
+    of disk space.  If you choose to download only the tools, skip on to Step 6.**
+    
+    If you have enough disk space, it is much easier to just install all of Xcode (including the full Xcode IDE) from 
+    the app store:
     ![ScreenShot](images/DownloadXcodeFromAppStore.png)
 
 1. Start xcode (you can find it with Spotlight, or in the Application folder)
 
     ![ScreenShot](images/FindXcode.png)
 
-1. When prompted, download the "Additional Components" tools (takes a while)
+1. When prompted, download the "Additional Components" (the Command Line Tools).  This takes a many minutes to complete.
 
-1. When you get to Welcome to Xcode, quit out of the app. (For the WeVoteServer, we only need the command line tools that 
-come with Xcode, which is Apple's IDE for MacOS and iOS native development.)
+1. When you get to "Welcome to Xcode", quit out of the app. (For the WeVoteServer, we only need the command line tools that 
+come with Xcode.)
 
     ![ScreenShot](images/WelcomeToXcode.png)
 
@@ -103,8 +114,8 @@ the following command:
     `$ /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"`
     
     This loads a Ruby script (Ruby comes pre-loaded in MacOS), and Ruby uses curl (also pre-loaded) to pull the file into the
-    command execution.  The script also internally uses 'sudo' which temporarily gives the script root priviliges to install 
-    software, so you will need to know an admin password for your Mac.  
+    the bash (terminal) command shell for execution.  This Ruby script also internally uses 'sudo' which temporarily gives 
+    the script root priviliges to install software, so you will need to know an admin password for your Mac.  
 
 1. Install the latest Python
 
@@ -146,7 +157,7 @@ the following command:
     
     If it is already installed, no worries!
     
-    `(WeVoteServerPy3.7) admins-iMac:WeVoteServer admin$ pip install pyopenssl pyasn1 ndg-httpsclient`
+    `(WeVoteServerPy3.7) $ pip install pyopenssl pyasn1 ndg-httpsclient`
     
     If running this command, causes some output to be displayed, that tells you to upgrade your pip version, follow 
     those instructions and do the install they recommend.  It never hurts to update pip.
@@ -180,41 +191,49 @@ the following command:
 ## Install and set up PostgreSQL and pgAdmin4
 
 1. If you are sure that Postgres has not already been installed, and is not currently running on this Mac, you can skip
-this step.  To see if postgres is already running:
+this step.  To see if postgres is already running, check with lsof in a terminal window `lsof -i -P | grep -i "listen" | grep postgres`:
 
     ```
-    ((WeVoteServerPy3.7) admins-iMac:WeVoteServer admin$ lsof -i -P | grep -i "listen" | grep postgres
+    ((WeVoteServerPy3.7) $ lsof -i -P | grep -i "listen" | grep postgres
     postgres  13254 admin    5u  IPv6 0x35032d9cf207f247      0t0  TCP localhost:5432 (LISTEN)
     postgres  13254 admin    6u  IPv4 0x35032d9d01cd2647      0t0  TCP localhost:5432 (LISTEN)
-    (WeVoteServerPy3.7) admins-iMac:WeVoteServer admin$
+    (WeVoteServerPy3.7) $
     ```  
-    
+ 
+     If the output shows postgres has already been installed and is listening on port 5432, then the command from the next step 
+    (`brew install postgresql`) would install a second postgres instance running on port 5433, and then you would have hours of "port 
+    assignment" mess to cleanup. 
+   
     **If that lsof line returns nothing, then you don't currently have postgres running, and you can continue on to the next step.**
-    
-    If the output shows postgres has already been installed and is listening on port 5432, then the command from the next step 
-    (`brew install postgresql`) would install a second postgres instance running on port 5433, and then you would have a "port" 
-    assignment mess to fixup. 
-    
-    If you  find that postgres is already running, you have two choices.  
-    1. Figure out how postgres has been installed, turn it off (flat out deleting old versions off of your disk is the most 
-    sure way to move forward), and continue with these instructions and install the latest version with homebrew.
-    2. Move forward with your existing install, but first figure out how to upgrade postgres to the latest version.
 
+    or
+
+    **If you don't mind fully deleting any Postgres that you have already installed, then delete the existing Postgres now.  Postgres
+    can be setup in many ways, so there are no instructions here on how to delete Postgres. You can start with running `which postgres`
+    in a terminal and going to that directory and deleting the instance or the symbolic links to the instance, then it is
+    probably easiest to reboot your Mac to see if Postgres starts up again.**
+    
+    or
+    
+    **If you have to keep some data that is already stored in a Postgres instance that is installed on your Mac, then you must
+    take the time to upgrade that Postgres to the latest version you need keep to the latest version (PostgreSQL 11.x as of February 2019) 
+    before proceeding.**
+    
 1. Install PostgreSQL by running the following command:
 
-    `(WeVoteServerPy3.7) admins-iMac:WeVoteServer admin$ brew install postgresql`
+    `(WeVoteServerPy3.7) $ brew install postgresql`
 
 1. Start PostgreSQL (this is actually instructing the MacOS [launchd](https://en.wikipedia.org/wiki/Launchd) to start 
     Postgres every time you start your Mac):
 
-    `(WeVoteServerPy3.7) admins-iMac:WeVoteServer admin$ brew services start postgresql`
+    `(WeVoteServerPy3.7) $ brew services start postgresql`
 
 1. Create a default database, and a default user, and then log into the 'psql' PostgreSQL command interpreter:
 
     ```
-    (WeVoteServerPy3.7) admins-iMac:WeVoteServer admin$ createdb
-    (WeVoteServerPy3.7) admins-iMac:WeVoteServer admin$ createuser -s postgres
-    (WeVoteServerPy3.7) admins-iMac:WeVoteServer admin$ psql
+    (WeVoteServerPy3.7) $ createdb
+    (WeVoteServerPy3.7) $ createuser -s postgres
+    (WeVoteServerPy3.7) $ psql
     psql (11.1)
     Type "help" for help.
     
@@ -236,14 +255,14 @@ this step.  To see if postgres is already running:
      postgres  | Superuser, Create role, Create DB                          | {}
     
     admin-# \q
-    (WeVoteServerPy3.7) admins-iMac:WeVoteServer admin$
+    (WeVoteServerPy3.7) $
     ```
 
     That `\du` command confirms that we have a 'postgres' role.  The `\q` command quits psql.
 
  1. Now you are ready to install pgAdmin4 (a powerful WYSIWYG database administration tool). Run:
 
-    `(WeVoteServerPy3.7) admins-iMac:WeVoteServer admin$ brew cask install pgadmin4`
+    `(WeVoteServerPy3.7) $ brew cask install pgadmin4`
     
     The latest pgAdmin4 has a webapp architecture, where the app you start from the Application folder is actually a 
     single purpose web server, and the UI for the app appears in Chrome as a local website.
@@ -282,9 +301,9 @@ cascading menu
 1. Create an empty log file on your computer to match the one expected by the app as configured in the environment_variables.json file:
 
     ```
-    (WeVoteServerPy3.7) admins-iMac:WeVoteServer admin$ sudo mkdir /var/log/wevote/
-    (WeVoteServerPy3.7) admins-iMac:WeVoteServer admin$ sudo touch /var/log/wevote/wevoteserver.log
-    (WeVoteServerPy3.7) admins-iMac:WeVoteServer admin$ udo chmod -R 0777 /var/log/wevote/
+    (WeVoteServerPy3.7) $ sudo mkdir /var/log/wevote/
+    (WeVoteServerPy3.7) $ sudo touch /var/log/wevote/wevoteserver.log
+    (WeVoteServerPy3.7) $ sudo chmod -R 0777 /var/log/wevote/
     ```
 
     As configured by default in our configuration code from github, only errors get written to the log.
@@ -301,15 +320,15 @@ cascading menu
     into your database schema." Run makemigrations to prepare for initialzing the WeVoteServer database:
 
     ```
-    (WeVoteServerPy3.7) admins-iMac:WeVoteServer admin$ python manage.py makemigrations
-    (WeVoteServerPy3.7) admins-iMac:WeVoteServer admin$ python manage.py makemigrations wevote_settings
+    (WeVoteServerPy3.7) $ python manage.py makemigrations
+    (WeVoteServerPy3.7) $ python manage.py makemigrations wevote_settings
     ```
      (January 28, 2019:  that second makemigrations for the wevote_settings table should not be necessary, but as of today, 
      it is necessary.  That second makemigrations line will be harmless, if it becomes unnecessary at some point.)
     
 2. Run migrate.  Django "migrate is responsible for applying and unapplying migrations."
 
-    `(WeVoteServerPy3.7) admins-iMac:WeVoteServer admin$ python manage.py migrate`
+    `(WeVoteServerPy3.7) $ python manage.py migrate`
     
 1. Setup a run configuration in PyCharm (this will enable the playbutton and the debug button on the top line)    
 
