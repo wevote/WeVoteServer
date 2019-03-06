@@ -34,6 +34,9 @@ DATABASES = {
         'PASSWORD': get_environment_variable('DATABASE_PASSWORD_READONLY'),
         'HOST':     get_environment_variable('DATABASE_HOST_READONLY'),
         'PORT':     get_environment_variable('DATABASE_PORT_READONLY'),
+        'TEST': {
+            'MIRROR': 'default',
+        }
     },
     'analytics': {
         'ENGINE':   get_environment_variable('DATABASE_ENGINE_ANALYTICS'),
@@ -42,6 +45,9 @@ DATABASES = {
         'PASSWORD': get_environment_variable('DATABASE_PASSWORD_ANALYTICS'),
         'HOST':     get_environment_variable('DATABASE_HOST_ANALYTICS'),
         'PORT':     get_environment_variable('DATABASE_PORT_ANALYTICS'),
+        'TEST': {
+            'MIRROR': 'default',
+        }
     }
 }
 

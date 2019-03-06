@@ -8,7 +8,7 @@ from django.shortcuts import get_object_or_404, render
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.messages import get_messages
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.views import generic
 from .models import Politician, PoliticianTagLink
 from tag.models import Tag

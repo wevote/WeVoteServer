@@ -18,7 +18,7 @@ from datetime import datetime, timedelta
 from office.models import ContestOffice, ContestOfficeManager
 from django.db.models import Q
 from django.http import HttpResponseRedirect
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.messages import get_messages
@@ -332,7 +332,7 @@ def candidate_list_view(request):
 
         # exclude facebook_urls that are null or ''
         candidate_facebook_missing_query = candidate_facebook_missing_query.exclude(facebook_url__isnull=True).\
-            exclude(facebook_url__iexact='').exclude(facebook_url_is_broken='true')
+            exclude(facebook_url__iexact='').exclude(facebook_url_is_broken='True')
 
         facebook_urls_without_picture_urls = candidate_facebook_missing_query.count()
 

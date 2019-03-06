@@ -2,7 +2,7 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.test import TestCase
 import json
 
@@ -95,7 +95,7 @@ class WeVoteAPIsV1TestsVoterBallotItemsRetrieve(TestCase):
         self.assertEqual('ballot_item_list' in json_data05, True,
                          "ballot_item_list expected in the voterBallotItemsRetrieve json response but not found")
         self.assertEqual(
-            json_data05['status'], ' VOTER_ADDRESS_DOES_NOT_EXIST',  # The extra space needs to be there
+            json_data05['status'].startswith(' VOTER_ADDRESS_DOES_NOT_EXIST'), True,  # The extra space needs to be there
             "status: {status} (VOTER_ADDRESS_DOES_NOT_EXIST expected), voter_device_id: {voter_device_id}".format(
                 status=json_data05['status'], voter_device_id=json_data05['voter_device_id']))
 

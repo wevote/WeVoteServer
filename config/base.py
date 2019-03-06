@@ -109,13 +109,13 @@ INSTALLED_APPS = (
     'import_export_ballotpedia',
     'import_export_batches',
     'import_export_ctcl',
+    'import_export_endorsements',
     'import_export_facebook',
     'import_export_google_civic',
     'import_export_maplight',
     'import_export_twitter',  # See also twitter (below)
     'import_export_vote_smart',
     'import_export_wikipedia',
-    'import_export_endorsements',
     'issue',
     'measure',
     'office',
@@ -127,9 +127,9 @@ INSTALLED_APPS = (
     'position',
     'position_like',
     'quick_info',
-    'rest_framework',
-    'support_oppose_deciding',
+    'rest_framework',    # Jan 2019, looks abandoned
     'search',
+    'support_oppose_deciding',
     'tag',
     'twitter',  # See also import_export_twitter
     'voter',  # See also AUTH_USER_MODEL in config/settings.py
@@ -137,25 +137,21 @@ INSTALLED_APPS = (
     'wevote_functions',
     'wevote_settings',
     'wevote_social',
-
 )
 
-MIDDLEWARE_CLASSES = (
+MIDDLEWARE = [
     'django.contrib.sessions.middleware.SessionMiddleware',
     'corsheaders.middleware.CorsMiddleware',
     'corsheaders.middleware.CorsPostCsrfMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
-    'social_django.middleware.SocialAuthBaseException',
     'social_django.middleware.SocialAuthExceptionMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'wevote_social.middleware.SocialMiddleware',
-    'wevote_social.middleware.WeVoteSocialAuthExceptionMiddleware',
-)
+]
 
 AUTHENTICATION_BACKENDS = (
     'social_core.backends.facebook.FacebookOAuth2',
@@ -163,6 +159,10 @@ AUTHENTICATION_BACKENDS = (
     'social_core.backends.twitter.TwitterOAuth',
     'django.contrib.auth.backends.ModelBackend',
 )
+
+PASSWORD_HASHERS = [
+    'django.contrib.auth.hashers.PBKDF2PasswordHasher',
+]
 
 ROOT_URLCONF = 'config.urls'
 

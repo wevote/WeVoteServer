@@ -9,7 +9,7 @@ from candidate.models import CandidateCampaign, CandidateCampaignListManager, Ca
 from config.base import get_environment_variable
 from django.db.models import Q
 from django.http import HttpResponseRedirect
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.messages import get_messages

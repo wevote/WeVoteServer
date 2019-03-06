@@ -3,7 +3,7 @@
 # -*- coding: UTF-8 -*-
 import json
 
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.test import TestCase
 
 
@@ -85,11 +85,9 @@ class WeVoteAPIsV1TestsVoterAddressSave(TestCase):
                          "address expected in the voterAddressSaveView json response but not found")
 
         # First address save
-        self.assertEqual(
-            json_data2['status'], ' VOTER_ADDRESS_FOUND_BY_VOTER_ID_AND_ADDRESS_TYPE BALLOT_NOT_FOUND_OR_GENERATED-SUFFICIENT_ADDRESS_PROBABLY_MISSING',
+        self.assertEqual('VOTER_BALLOT_SAVED_NOT_FOUND_FROM_EXISTING_DATA' in json_data2['status'], True,
             "status: {status} "
-            "' VOTER_ADDRESS_FOUND_BY_VOTER_ID_AND_ADDRESS_TYPE BALLOT_NOT_FOUND_OR_GENERATED-SUFFICIENT_ADDRESS_PROBABLY_MISSING'"
-            " expected in voterAddressSaveView), "
+            "(VOTER_BALLOT_SAVED_NOT_FOUND_FROM_EXISTING_DATA expected in voterAddressSaveView), "
             "voter_device_id: {voter_device_id}".format(
                 status=json_data2['status'], voter_device_id=json_data2['voter_device_id']))
 
@@ -101,10 +99,8 @@ class WeVoteAPIsV1TestsVoterAddressSave(TestCase):
         json_data3 = json.loads(response3.content.decode())
 
         # First address update
-        self.assertEqual(
-            json_data3['status'], ' VOTER_ADDRESS_FOUND_BY_VOTER_ID_AND_ADDRESS_TYPE BALLOT_NOT_FOUND_OR_GENERATED-SUFFICIENT_ADDRESS_PROBABLY_MISSING',
-            "status: {status} (' VOTER_ADDRESS_FOUND_BY_VOTER_ID_AND_ADDRESS_TYPE BALLOT_NOT_FOUND_OR_GENERATED-SUFFICIENT_ADDRESS_PROBABLY_MISSING'"
-            " expected in voterAddressSaveView), "
+        self.assertEqual('VOTER_BALLOT_SAVED_NOT_FOUND_FROM_EXISTING_DATA' in json_data3['status'], True,
+            "status: {status} ('VOTER_BALLOT_SAVED_NOT_FOUND_FROM_EXISTING_DATA expected in voterAddressSaveView), "
             "voter_device_id: {voter_device_id}".format(
                 status=json_data3['status'], voter_device_id=json_data3['voter_device_id']))
 

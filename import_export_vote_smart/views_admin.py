@@ -20,7 +20,7 @@ from candidate.models import CandidateCampaignManager, CandidateCampaign
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.contrib.messages import get_messages
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from exception.models import print_to_log

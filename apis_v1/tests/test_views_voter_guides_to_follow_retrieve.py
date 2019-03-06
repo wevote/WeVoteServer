@@ -2,7 +2,7 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.test import TestCase
 import json
 from organization.models import Organization
@@ -94,10 +94,8 @@ class WeVoteAPIsV1TestsVoterGuidesToFollowRetrieve(TestCase):
                          "voter_device_id expected in the voterGuidesToFollowRetrieveView json response but not found")
         self.assertEqual('voter_guides' in json_data04, True,
                          "voter_guides expected in the voterGuidesToFollowRetrieveView json response but not found")
-        self.assertEqual(
-            json_data04['status'], 'SUCCESSFUL_RETRIEVE_OF_VOTER_GUIDES_GENERIC NO_VOTER_GUIDES_FOUND',
-            "status: {status} ('SUCCESSFUL_RETRIEVE_OF_VOTER_GUIDES_GENERIC NO_VOTER_GUIDES_FOUND' expected), "
-            "voter_device_id: {voter_device_id}".format(
+        self.assertEqual('NO_VOTER_GUIDES_FOUND' in json_data04['status'], True,
+            "status: {status} ('NO_VOTER_GUIDES_FOUND' expected), voter_device_id: {voter_device_id}".format(
                 status=json_data04['status'], voter_device_id=json_data04['voter_device_id']))
 
         #######################################

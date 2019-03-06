@@ -11,7 +11,7 @@ from admin_tools.views import redirect_to_sign_in_page
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.http import HttpResponseRedirect
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 logger = wevote_functions.admin.get_logger(__name__)
 
 

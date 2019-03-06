@@ -2,10 +2,10 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.test import TestCase
 import json
-from voter.models import VoterManager
+from voter.models import VoterManager, Voter
 from future.standard_library import install_aliases
 install_aliases()
 
@@ -60,6 +60,15 @@ class WeVoteAPIsV1TestsVoterCount(TestCase):
             email=email3,
             password="password123",
         )
+
+        # test runs seem to use an in-memory instance of test_WeVoteServerDB, so this sanity check helps during debug
+        # voters = Voter()
+        # try:
+        #     voters = Voter.objects.all()
+        # except Exception as e:
+        #     print(e)
+        # for voter in voters:
+        #     print("voter.we_vote_id: " + voter.we_vote_id)
 
         #######################################
         # Check to see if there are 3 voters

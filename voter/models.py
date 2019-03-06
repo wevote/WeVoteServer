@@ -8,6 +8,7 @@ from django.contrib.auth.models import (BaseUserManager, AbstractBaseUser)  # Pe
 from django.core.validators import RegexValidator
 from exception.models import handle_exception, handle_record_found_more_than_one_exception,\
     handle_record_not_saved_exception
+import sys
 from import_export_facebook.models import FacebookManager
 from twitter.models import TwitterUserManager
 from validate_email import validate_email
@@ -167,6 +168,30 @@ class VoterManager(BaseUserManager):
             'voter':                voter,
         }
         return results
+
+
+    def create_developer(self, first_name, last_name, email, password):
+        voter = Voter()
+        try:
+            voter.set_password(password)
+            voter.first_name = first_name
+            voter.last_name = last_name
+            voter.email = email
+            voter.is_admin = True
+            voter.is_verified_volunteer = True
+            voter.is_active = True
+            voter.save()
+            logger.debug("create_voter successfully created developer (voter) : " + first_name)
+
+        except IntegrityError as e:
+            handle_record_not_saved_exception(e, logger=logger)
+            print("create_developer IntegrityError exception:" + str(e))
+        except Exception as e:
+            handle_record_not_saved_exception(e, logger=logger)
+            logger.debug("create_voter general exception: " + str(e))
+
+        return voter
+
 
     def delete_voter(self, email):
         email = self.normalize_email(email)
@@ -2042,8 +2067,12 @@ class VoterDeviceLinkManager(models.Model):
         voter_id = 0
         voter_device_link_id = 0
         voter_device_link_manager = VoterDeviceLinkManager()
-        results = voter_device_link_manager.retrieve_voter_device_link(
-            voter_device_id, voter_id, voter_device_link_id, read_only=read_only)
+        results = []
+        try:
+            results = voter_device_link_manager.retrieve_voter_device_link(
+                voter_device_id, voter_id, voter_device_link_id, read_only=read_only)
+        except Exception as e:
+            handle_record_found_more_than_one_exception(e, logger=logger)
 
         return results
 
@@ -2057,7 +2086,7 @@ class VoterDeviceLinkManager(models.Model):
         try:
             if positive_value_exists(voter_device_id):
                 status += " RETRIEVE_VOTER_DEVICE_LINK-GET_BY_VOTER_DEVICE_ID"
-                if read_only:
+                if read_only and not 'test' in sys.argv:
                     voter_device_link_on_stage = VoterDeviceLink.objects.using('readonly').get(
                         voter_device_id=voter_device_id)
                 else:
@@ -2876,7 +2905,11 @@ class VoterMetricsManager(models.Model):
     def fetch_voter_count(self, or_filter=True,
                           has_twitter=False, has_facebook=False, has_email=False, has_verified_email=False,
                           by_notification_settings=0, by_interface_status_flags=0):
-        voter_queryset = Voter.objects.using('readonly').all()
+        if not 'test' in sys.argv:
+            voter_queryset = Voter.objects.using('readonly').all()
+        else:
+            # Feb 2019: We shouldn't need to do this special case for django tests.
+            voter_queryset = Voter.objects.all()
 
         voter_raw_filters = []
         if positive_value_exists(or_filter):

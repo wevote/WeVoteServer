@@ -8,14 +8,24 @@ from django.http import HttpResponse
 from wevote_social.facebook import FacebookAPI
 # from social_django import exceptions as social_exceptions
 # from social.apps.django_app.middleware import SocialAuthExceptionMiddleware
-from social_core.exceptions import SocialAuthBaseException
+# from social_core.exceptions import SocialAuthBaseException
 import wevote_functions.admin
+
 
 logger = wevote_functions.admin.get_logger(__name__)
 
 
 class SocialMiddleware(object):
-    def process_request(self, request):
+    def __init__(self, get_response):
+        self.get_response = get_response
+        # One-time configuration and initialization.
+
+    def __call__(self, request):
+        # Code to be executed for each request before
+        # the view (and later middleware) are called.
+
+        response = self.get_response(request)
+    # def process_request(self, request):
         if hasattr(request, 'user'):
             if request.user and hasattr(request.user, 'social_auth'):
                 social_user = request.user.social_auth.filter(
@@ -24,15 +34,9 @@ class SocialMiddleware(object):
                 if social_user:
                     request.facebook = FacebookAPI(social_user)
 
-        return None
+        return response
 
-
-class WeVoteSocialAuthExceptionMiddleware(SocialAuthBaseException):
-    """
-    We want to catch these exceptions and deal with them:
-    AuthAlreadyAssociated
-    """
-    def process_exception(self, request, exception):
+    def process_exception(request, exception):
         # if hasattr(social_exceptions, exception.__class__.__name__):
         #     if exception.__class__.__name__ == 'AuthAlreadyAssociated':
         #         return HttpResponse("AuthAlreadyAssociated: %s" % exception)
@@ -51,7 +55,7 @@ class WeVoteSocialAuthExceptionMiddleware(SocialAuthBaseException):
                 error_exception = exception.message
             except Exception as e2:
                 error_exception = "Failure in exception processing in our middleware"
-                print(error_exception)
+                print("Middleware custom: " + error_exception)
 
         try:
             print_path = request.path

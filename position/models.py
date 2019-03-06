@@ -160,9 +160,11 @@ class PositionEntered(models.Model):
     # This is the voter / authenticated user who entered the position for an organization
     #  (NOT the voter expressing opinion)
     voter_entering_position = models.ForeignKey(
-        Voter, verbose_name='authenticated user who entered position', null=True, blank=True)
+        Voter, verbose_name='authenticated user who entered position', null=True, blank=True,
+        on_delete=models.deletion.CASCADE)
     # The Twitter user account that generated this position
-    twitter_user_entered_position = models.ForeignKey(TwitterUser, null=True, verbose_name='')
+    twitter_user_entered_position = models.ForeignKey(TwitterUser, null=True, verbose_name='',
+                                                      on_delete=models.deletion.CASCADE)
 
     # This is the office that the position refers to.
     #  Either contest_measure is filled, contest_office OR candidate_campaign, but not all three
@@ -540,9 +542,11 @@ class PositionForFriends(models.Model):
     # This is the voter / authenticated user who entered the position for an organization
     #  (NOT the voter expressing opinion)
     voter_entering_position = models.ForeignKey(
-        Voter, verbose_name='authenticated user who entered position', null=True, blank=True)
+        Voter, verbose_name='authenticated user who entered position', null=True, blank=True,
+        on_delete=models.deletion.CASCADE)
     # The Twitter user account that generated this position
-    twitter_user_entered_position = models.ForeignKey(TwitterUser, null=True, verbose_name='')
+    twitter_user_entered_position = models.ForeignKey(TwitterUser, null=True, verbose_name='',
+                                                      on_delete=models.deletion.CASCADE)
 
     # This is the office that the position refers to.
     #  Either contest_measure is filled, contest_office OR candidate_campaign, but not all three

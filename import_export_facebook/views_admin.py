@@ -8,7 +8,7 @@ from candidate.controllers import FACEBOOK, save_image_to_candidate_table
 from candidate.models import CandidateCampaign
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.http import HttpResponseRedirect
 from voter.models import voter_has_authority
 from wevote_functions.functions import convert_to_int, positive_value_exists

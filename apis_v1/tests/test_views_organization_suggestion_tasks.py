@@ -2,7 +2,7 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.test import TestCase
 import json
 
@@ -134,12 +134,11 @@ class WeVoteAPIsV1TestsOrganizationSuggestionTasks(TestCase):
                          "'organization_suggestion_list' expected in the json response, and not found")
 
         self.assertEqual(
-            json_data12['status'], ' TWITTER_WHO_I_FOLLOW_LIST_RETRIEVED  FAILED retrieve_twitter_link_to_organization'
-                                   ' FAILED retrieve_twitter_link_to_organization',
-            "status: {status} (TWITTER_WHO_I_FOLLOW_LIST_RETRIEVED  FAILED retrieve_twitter_link_to_organization FAILED"
+            'RETRIEVE_TWITTER_LINK_TO_ORGANIZATION_NOT_FOUND' in json_data12['status'], True,
+            "status: {status} (RETRIEVE_TWITTER_LINK_TO_ORGANIZATION_NOT_FOUND retrieve_twitter_link_to_organization FAILED"
             " retrieve_twitter_link_to_organization expected), voter_device_id: {voter_device_id}".format
             (status=json_data12['status'], voter_device_id=json_data12['voter_device_id']))
-        self.assertEqual(json_data12['success'], False, "success 'False' expected, True returned")
+        self.assertEqual(json_data12['success'], True, "success 'True' expected, False returned")
         self.assertEqual(json_data12['organization_suggestion_task_saved'], False,
                          "organization_suggestion_task_saved == False expected, organization_suggestion_task_saved: "
                          "{organization_suggestion_task_saved} returned".format(

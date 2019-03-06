@@ -8,7 +8,7 @@ from admin_tools.views import redirect_to_sign_in_page
 from candidate.models import CandidateCampaignManager, CandidateCampaign
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.http import HttpResponseRedirect
 from google_custom_search.models import GoogleSearchUser
 from voter.models import voter_has_authority

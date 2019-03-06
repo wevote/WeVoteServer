@@ -6,7 +6,7 @@ from .models import FollowOrganization
 from admin_tools.views import redirect_to_sign_in_page
 from django.db.models import Q
 from django.http import HttpResponseRedirect
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.contrib.auth.decorators import login_required
 from voter.models import retrieve_voter_authority, voter_has_authority, VoterManager
 from wevote_functions.functions import convert_to_int, extract_twitter_handle_from_text_string, positive_value_exists, \

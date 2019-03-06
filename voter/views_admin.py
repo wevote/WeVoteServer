@@ -4,7 +4,7 @@
 
 from .models import Voter, VoterAddressManager, VoterDeviceLinkManager
 from admin_tools.views import redirect_to_sign_in_page
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.contrib import messages
 from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
@@ -113,7 +113,7 @@ def voter_authenticate_manually_view(request):
             'messages_on_stage':                messages_on_stage,
             'voter':                            voter_on_stage,
             'voter_api_device_id':              voter_api_device_id,
-            'is_authenticated':                 request.user.is_authenticated(),
+            'is_authenticated':                 request.user.is_authenticated,
             'set_this_voter_as_admin':          set_this_voter_as_admin,
             'unset_this_voter_as_admin':        unset_this_voter_as_admin,
             'set_as_partner_organization':      set_as_partner_organization,

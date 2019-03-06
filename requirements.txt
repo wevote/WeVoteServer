@@ -3,14 +3,14 @@
 boto3==1.7.26
 dj-database-url==0.5.0
 dj-static==0.0.6
-Django==1.8.19
+Django==2.1.7
 django-bootstrap3==10.0.1
-django-cors-headers==2.2.0
+django-cors-headers==2.4.0
 django-crispy-forms==1.7.2
 django-toolbelt==0.0.1
 django-twitter-bootstrap==3.3.0
-django-user-agents==0.3.2
-djangorestframework==3.8.2
+django-user_agents==0.3.2
+djangorestframework==3.9.1
 elasticsearch>=1.0.0,<2.0.0
 facebook-sdk==2.0.0
 future==0.16.0
@@ -23,7 +23,7 @@ oauth2client==4.1.2
 oauthlib==2.1.0
 nameparser==0.5.6
 Pillow==5.3.0
-psycopg2==2.7.4
+psycopg2-binary==2.7.6.1
 pyasn1==0.4.3
 pyasn1-modules==0.2.1
 py3dns==3.2.0
@@ -40,14 +40,15 @@ robot-detection==0.4
 rsa==3.4.2
 selenium==3.12.0
 sendgrid-django==2.0.0
-setuptools==39.2.0
+setuptools==40.6.3
 simplejson==3.6.5
 six==1.11.0
-social-auth-app-django==2.1.0
-social-auth-core==1.7.0
+social-auth-app-django==3.1.0
+social-auth-core==3.0.0
 static3==0.7.0
 stripe==2.16.0
-Unipath==1.1
+tweepy==3.7.0
+# Unipath==1.1s
 uritemplate==3.0.0
 usaddress==0.5.10
 user-agents==1.1.0

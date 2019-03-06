@@ -676,8 +676,10 @@ class PoliticianTagLink(models.Model):
     """
     A confirmed (undisputed) link between tag & item of interest.
     """
-    tag = models.ForeignKey(Tag, null=False, blank=False, verbose_name='tag unique identifier')
-    politician = models.ForeignKey(Politician, null=False, blank=False, verbose_name='politician unique identifier')
+    tag = models.ForeignKey(Tag, null=False, blank=False, verbose_name='tag unique identifier',
+                            on_delete=models.deletion.CASCADE)
+    politician = models.ForeignKey(Politician, null=False, blank=False, verbose_name='politician unique identifier',
+                                   on_delete=models.deletion.CASCADE)
     # measure_id
     # office_id
     # issue_id
@@ -691,8 +693,10 @@ class PoliticianTagLinkDisputed(models.Model):
     We split off how things are tagged to avoid conflict wars between liberals & conservatives
     (Deal with some tags visible in some networks, and not in others - ex/ #ObamaSucks)
     """
-    tag = models.ForeignKey(Tag, null=False, blank=False, verbose_name='tag unique identifier')
-    politician = models.ForeignKey(Politician, null=False, blank=False, verbose_name='politician unique identifier')
+    tag = models.ForeignKey(Tag, null=False, blank=False, verbose_name='tag unique identifier',
+                            on_delete=models.deletion.CASCADE)
+    politician = models.ForeignKey(Politician, null=False, blank=False, verbose_name='politician unique identifier',
+                                   on_delete=models.deletion.CASCADE)
     # measure_id
     # office_id
     # issue_id

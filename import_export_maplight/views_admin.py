@@ -7,7 +7,7 @@ from .models import MapLightCandidate
 from candidate.models import CandidateCampaignManager
 from django.contrib import messages
 from django.contrib.messages import get_messages
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.http import HttpResponseRedirect
 from django.shortcuts import redirect, render
 from exception.models import handle_record_not_saved_exception
@@ -34,7 +34,7 @@ def import_maplight_from_json_view(request):
     Take data from Test XML file and store in the local Voting Info Project database
     """
     # If person isn't signed in, we don't want to let them visit this page yet
-    if not request.user.is_authenticated():
+    if not request.user.is_authenticated:
         return redirect('/admin')
 
     import_maplight_from_json(request)

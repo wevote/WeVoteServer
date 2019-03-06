@@ -10,7 +10,7 @@ from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.messages import get_messages
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.db.models import Count, Q
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
@@ -1671,7 +1671,7 @@ def login_we_vote(request):
     username = ''
 
     # Does Django think user is already signed in?
-    if request.user.is_authenticated():
+    if request.user.is_authenticated:
         # If so, make sure user and voter_on_stage are the same.
         if request.user.id != voter_on_stage_id:
             # Delete the prior voter_api_device_id from database
@@ -1718,7 +1718,7 @@ def login_we_vote(request):
         store_new_voter_api_device_id_in_cookie = results['store_new_voter_api_device_id_in_cookie']
 
     # Does Django think user is signed in?
-    if request.user.is_authenticated():
+    if request.user.is_authenticated:
         voter_signed_in = True
     else:
         info_message = "Please log in below..."
@@ -1800,9 +1800,10 @@ def redirect_to_sign_in_page(request, authority_required={}):
         if each_authority == 'verified_volunteer':
             authority_required_text += ' or ' if len(authority_required_text) > 0 else ''
             authority_required_text += 'has Verified Volunteer rights'
-    error_message = "You must sign in with account that " \
-                    "{authority_required_text} to see that page." \
-                    "".format(authority_required_text=authority_required_text)
+    error_message = "You must sign in with account that {authority_required_text} to see that page. " \
+                    "<b>There is a known bug with this check, if you think this message is wrong, Sign Out and try " \
+                    "again.</b>".format(authority_required_text=authority_required_text)
+
     messages.add_message(request, messages.ERROR, error_message)
 
     if positive_value_exists(request.path):

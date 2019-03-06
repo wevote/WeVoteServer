@@ -31,7 +31,7 @@ class BallotTestCase(TestCase):
 
             result = self.ballot_manager.find_closest_ballot_returned('Oakland, CA')
             self.assertEqual(google_client.geocode.call_count, 1)
-            self.assertEqual(result, {'status': 'No stored ballot matches the state CA.',
+            self.assertEqual(result, {'status': 'GEOCODER_FOUND_LOCATION NO_STORED_BALLOT_MATCHES_STATE CA. ',
                                       'geocoder_quota_exceeded': False,
                                       'ballot_returned_found': False,
                                       'ballot_returned': None})
@@ -42,7 +42,8 @@ class BallotTestCase(TestCase):
             google_client.geocode.return_value = None
             result = self.ballot_manager.find_closest_ballot_returned('blah bal blh, OK')
             self.assertEqual(google_client.geocode.call_count, 1)
-            self.assertEqual(result, {'status': 'Could not find location matching "blah bal blh, OK"',
+            self.assertEqual(result, {'status': 'Geocoder could not find location matching "blah bal blh, OK". Trying '
+                                                'City, State. NO_STORED_BALLOT_MATCHES_STATE OK. ',
                                       'geocoder_quota_exceeded': False,
                                       'ballot_returned_found': False,
                                       'ballot_returned': None})
@@ -56,7 +57,7 @@ class BallotTestCase(TestCase):
                                                           latitude=32.310251, longitude=-90.3289724)
 
             result = self.ballot_manager.find_closest_ballot_returned('Jackson, MS')
-            self.assertEqual(result, {'status': 'Ballot returned found.',
+            self.assertEqual(result, {'status': 'GEOCODER_FOUND_LOCATION BALLOT_RETURNED_FOUND ',
                                       'geocoder_quota_exceeded': False,
                                       'ballot_returned_found': True,
                                       'ballot_returned': ballot_in_ms})
@@ -81,7 +82,7 @@ class BallotTestCase(TestCase):
 
             result = self.ballot_manager.find_closest_ballot_returned('Jackson, MS')
 
-            self.assertEqual(result, {'status': 'Ballot returned found.',
+            self.assertEqual(result, {'status': 'GEOCODER_FOUND_LOCATION BALLOT_RETURNED_FOUND ',
                                       'geocoder_quota_exceeded': False,
                                       'ballot_returned_found': True,
                                       'ballot_returned': ballot_in_jackson})
