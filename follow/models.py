@@ -410,11 +410,12 @@ class FollowMetricsManager(models.Model):
                 election_result = election_manager.retrieve_election(google_civic_election_id)
                 if election_result['election_found']:
                     election = election_result['election']
-                    timezone = pytz.timezone("America/Los_Angeles")
-                    date_of_election = timezone.localize(datetime.strptime(election.election_day_text, "%Y-%m-%d"))
-                    date_of_election += timedelta(days=1)  # Add one day, to catch the entire election day
-                    # Find all of the follow entries before or on the day of the election
-                    count_query = count_query.filter(date_last_changed__lte=date_of_election)
+                    if positive_value_exists(election.election_day_text):
+                        timezone = pytz.timezone("America/Los_Angeles")
+                        date_of_election = timezone.localize(datetime.strptime(election.election_day_text, "%Y-%m-%d"))
+                        date_of_election += timedelta(days=1)  # Add one day, to catch the entire election day
+                        # Find all of the follow entries before or on the day of the election
+                        count_query = count_query.filter(date_last_changed__lte=date_of_election)
                 else:
                     # Failed retrieving date, so we return 0
                     return 0

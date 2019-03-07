@@ -96,7 +96,6 @@ def donation_refund_view(request):  # donationRefund
             'success': False,
         }
 
-
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 
 

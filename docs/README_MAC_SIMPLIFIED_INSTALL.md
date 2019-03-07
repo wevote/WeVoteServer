@@ -68,7 +68,7 @@ that you would like!
 
    ![ScreenShot](images/GitMenuRemotes.png)
    
-   Unfortunately the WeVoteServer project defines upstream and origin differently than most projects.
+   The WeVoteServer project defines upstream and origin differently than most projects.
    
    ![ScreenShot](images/IncorrectOrigin.png)
    
@@ -76,6 +76,18 @@ that you would like!
    project in GitHub "upstream"). This is how it looks after the change.
    
    ![ScreenShot](images/CorrectedToUpstream.png)
+   
+   To change manually:
+   
+   ```
+   \[remote "origin"\]
+        url = git@github.com:YOUR_GITHUB_HANDLE_HERE/WeVoteServer.git
+        fetch = +refs/heads/\*:refs/remotes/origin/\*
+   \[remote "upstream"\]
+        url = git@github.com:wevote/WeVoteServer.git
+        fetch = +refs/heads/\*:refs/remotes/upstream/\*
+
+   ```
 
 1. Then add a remote for your private branch by pressing the "+ button on the Git Remotes dialog.  Add the url for your
     fork of the the WeVoteServer project origin (copy the url from the github website). In this example, the developer 
@@ -260,7 +272,8 @@ this step.  To see if postgres is already running, check with lsof in a terminal
 
     That `\du` command confirms that we have a 'postgres' role.  The `\q` command quits psql.
 
- 1. Now you are ready to install pgAdmin4 (a powerful WYSIWYG database administration tool). Run:
+ 1. Now you are ready to install pgAdmin4 (a powerful WYSIWYG database administration tool that is open source 
+ and built by volunteers (Many thanks to the pgAdmin team!)). Run:
 
     `(WeVoteServerPy3.7) $ brew cask install pgadmin4`
     

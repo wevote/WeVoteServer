@@ -1035,9 +1035,10 @@ def voter_ballot_items_retrieve_for_api(
                         voter_ballot_saved.election_description_text = election.election_name
                         voter_ballot_saved_changed = True
                     if not positive_value_exists(voter_ballot_saved.election_day_text()):
-                        voter_ballot_saved.election_date = \
-                            datetime.strptime(election.election_day_text, "%Y-%m-%d").date()
-                        voter_ballot_saved_changed = True
+                        if positive_value_exists(election.election_day_text):
+                            voter_ballot_saved.election_date = \
+                                datetime.strptime(election.election_day_text, "%Y-%m-%d").date()
+                            voter_ballot_saved_changed = True
                 if voter_address.text_for_map_search != voter_ballot_saved.original_text_for_map_search and \
                         not specific_ballot_requested:
                     # We don't want to change the voter_ballot_saved.original_text_for_map_search to be
@@ -1957,6 +1958,10 @@ def voter_ballot_items_retrieve_for_one_election_for_api(voter_device_id, voter_
                     'measure_text':                 ballot_item.measure_text,
                     'measure_url':                  ballot_item.measure_url,
                     'no_vote_description':          strip_html_tags(ballot_item.no_vote_description),
+                    'district_name':                "",  # TODO Add this
+                    'election_display_name':        "",  # TODO Add this
+                    'regional_display_name':        "",  # TODO Add this
+                    'state_display_name':           "",  # TODO Add this
                     'we_vote_id':                   measure_we_vote_id,
                     'yes_vote_description':         strip_html_tags(ballot_item.yes_vote_description),
                 }
