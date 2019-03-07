@@ -532,7 +532,6 @@ class PoliticianManager(models.Model):
             return results['politician_we_vote_id']
         return ''
 
-
     def create_politician_row_entry(self, politician_name, politician_first_name, politician_middle_name,
                                     politician_last_name, ctcl_uuid, political_party, politician_email_address,
                                     politician_phone_number, politician_twitter_handle, politician_facebook_id,
@@ -677,9 +676,9 @@ class PoliticianTagLink(models.Model):
     A confirmed (undisputed) link between tag & item of interest.
     """
     tag = models.ForeignKey(Tag, null=False, blank=False, verbose_name='tag unique identifier',
-                            on_delete=models.deletion.CASCADE)
+                            on_delete=models.deletion.DO_NOTHING)
     politician = models.ForeignKey(Politician, null=False, blank=False, verbose_name='politician unique identifier',
-                                   on_delete=models.deletion.CASCADE)
+                                   on_delete=models.deletion.DO_NOTHING)
     # measure_id
     # office_id
     # issue_id
@@ -694,9 +693,9 @@ class PoliticianTagLinkDisputed(models.Model):
     (Deal with some tags visible in some networks, and not in others - ex/ #ObamaSucks)
     """
     tag = models.ForeignKey(Tag, null=False, blank=False, verbose_name='tag unique identifier',
-                            on_delete=models.deletion.CASCADE)
+                            on_delete=models.deletion.DO_NOTHING)
     politician = models.ForeignKey(Politician, null=False, blank=False, verbose_name='politician unique identifier',
-                                   on_delete=models.deletion.CASCADE)
+                                   on_delete=models.deletion.DO_NOTHING)
     # measure_id
     # office_id
     # issue_id

@@ -364,10 +364,11 @@ def candidate_list_view(request):
             batch_manager = BatchManager()
             timezone = pytz.timezone("America/Los_Angeles")
             datetime_now = timezone.localize(datetime.now())
-            date_of_election = timezone.localize(datetime.strptime(election.election_day_text, "%Y-%m-%d"))
-            if date_of_election > datetime_now:
-                time_until_election = date_of_election - datetime_now
-                election.days_until_election = convert_to_int("%d" % time_until_election.days)
+            if positive_value_exists(election.election_day_text):
+                date_of_election = timezone.localize(datetime.strptime(election.election_day_text, "%Y-%m-%d"))
+                if date_of_election > datetime_now:
+                    time_until_election = date_of_election - datetime_now
+                    election.days_until_election = convert_to_int("%d" % time_until_election.days)
 
             # How many offices?
             office_list_query = ContestOffice.objects.all()
