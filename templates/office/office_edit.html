@@ -131,6 +131,20 @@
 </div>
 
 <div class="form-group">
+    <label for="ballotpedia_race_office_level_id" class="col-sm-3 control-label">Ballotpedia Race Office Level</label>
+    <div class="col-sm-8">
+        <input type="radio" name="ballotpedia_race_office_level" value="Federal"{% if office.ballotpedia_race_office_level == "Federal" %} checked{% endif %} > Federal&nbsp;&nbsp;
+        <input type="radio" name="ballotpedia_race_office_level" value="State"{% if office.ballotpedia_race_office_level == "State" %} checked{% endif %} > State&nbsp;&nbsp;
+        <input type="radio" name="ballotpedia_race_office_level" value="Measure"{% if office.ballotpedia_race_office_level == "Measure" %} checked{% endif %} > Measure&nbsp;&nbsp;
+        <input type="radio" name="ballotpedia_race_office_level" value="Local"{% if office.ballotpedia_race_office_level == "Local" %} checked{% endif %} > Local&nbsp;&nbsp;
+        <input type="radio" name="ballotpedia_race_office_level" value=""{% if office.ballotpedia_race_office_level != "Federal" and office.ballotpedia_race_office_level != "State" and office.ballotpedia_race_office_level != "Measure" and office.ballotpedia_race_office_level != "Local" %} checked{% endif %} > Unknown
+      {% if office.ballotpedia_race_office_level != "Federal" and office.ballotpedia_race_office_level != "State" and office.ballotpedia_race_office_level != "Measure" and office.ballotpedia_race_office_level != "Local" %}
+      &nbsp;&nbsp;({{office.ballotpedia_race_office_level}})
+      {% endif %}
+    </div>
+</div>
+
+<div class="form-group">
     <label for="primary_party_id" class="col-sm-3 control-label">Primary Party</label>
     <div class="col-sm-8">
         {% if office %}{{ office.primary_party|default_if_none:"" }}{% else %}{{ primary_party|default_if_none:"" }}{% endif %}

@@ -78,14 +78,28 @@ def elections_import_from_structured_json(structured_json):
             u"election_day_text: {election_day_text}".format(**one_election)
         )
 
-        google_civic_election_id = one_election["google_civic_election_id"] \
-            if "google_civic_election_id" in one_election else ''
+        ballotpedia_election_id = one_election["ballotpedia_election_id"] \
+            if "ballotpedia_election_id" in one_election else ''
+        ballotpedia_kind_of_election = one_election["ballotpedia_kind_of_election"] \
+            if "ballotpedia_kind_of_election" in one_election else ''
+        candidate_photos_finished = one_election["candidate_photos_finished"] \
+            if "candidate_photos_finished" in one_election else ''
         election_name = one_election["election_name"] if "election_name" in one_election else ''
         election_day_text = one_election["election_day_text"] if "election_day_text" in one_election else ''
-        ocd_division_id = one_election["ocd_division_id"] if "ocd_division_id" in one_election else ''
-        state_code = one_election["state_code"] if "state_code" in one_election else ''
+        election_preparation_finished = one_election["election_preparation_finished"] \
+            if "election_preparation_finished" in one_election else ''
+        google_civic_election_id = one_election["google_civic_election_id"] \
+            if "google_civic_election_id" in one_election else ''
+        ignore_this_election = one_election["ignore_this_election"] \
+            if "ignore_this_election" in one_election else ''
         include_in_list_for_voters = one_election["include_in_list_for_voters"] \
             if "include_in_list_for_voters" in one_election else ''
+        internal_notes = one_election["internal_notes"] if "internal_notes" in one_election else ''
+        is_national_election_raw = one_election["is_national_election"] \
+            if "is_national_election" in one_election else ''
+        is_national_election = positive_value_exists(is_national_election_raw)
+        ocd_division_id = one_election["ocd_division_id"] if "ocd_division_id" in one_election else ''
+        state_code = one_election["state_code"] if "state_code" in one_election else ''
 
         # Make sure we have the minimum required variables
         if not positive_value_exists(google_civic_election_id) or not positive_value_exists(election_name):
@@ -93,12 +107,11 @@ def elections_import_from_structured_json(structured_json):
             continue
 
         results = election_manager.update_or_create_election(
-                google_civic_election_id,
-                election_name,
-                election_day_text,
-                ocd_division_id,
-                state_code,
-                include_in_list_for_voters)
+                google_civic_election_id, election_name, election_day_text, ocd_division_id,
+                ballotpedia_election_id, ballotpedia_kind_of_election, candidate_photos_finished,
+                election_preparation_finished, ignore_this_election, include_in_list_for_voters,
+                internal_notes, is_national_election, state_code)
+
         if results['success']:
             if results['new_election_created']:
                 elections_saved += 1
