@@ -62,7 +62,7 @@
     <label for="is_national_election_id" class="col-sm-3 control-label"></label>
     <div class="col-sm-8">
         <input type="checkbox" name="is_national_election" id="is_national_election_id"
-           value={% if election %}{% if election.is_national_election %}True{% else %}False{% endif %}{% else %}False{% endif %}
+           value="True"
            {% if election.is_national_election %}checked{% endif %} />
         Is National Election
     </div>

@@ -173,8 +173,11 @@ class ElectionManager(models.Model):
             last_integer = 1000000
         return last_integer
 
-    def update_or_create_election(self, google_civic_election_id, election_name, election_day_text,
-                                  ocd_division_id, state_code='', include_in_list_for_voters=None):
+    def update_or_create_election(
+            self, google_civic_election_id, election_name, election_day_text, ocd_division_id,
+            ballotpedia_election_id=None, ballotpedia_kind_of_election=None, candidate_photos_finished=None,
+            election_preparation_finished=None, ignore_this_election=None, include_in_list_for_voters=None,
+            internal_notes=None, is_national_election=None, state_code=''):
         """
         Either update or create an election entry.
         """
@@ -206,8 +209,32 @@ class ElectionManager(models.Model):
                 success = True
                 status = 'ELECTION_SAVED'
 
+                election_changed = False
+                if ballotpedia_election_id is not None:
+                    election_on_stage.ballotpedia_election_id = ballotpedia_election_id
+                    election_changed = True
+                if ballotpedia_kind_of_election is not None:
+                    election_on_stage.ballotpedia_kind_of_election = ballotpedia_kind_of_election
+                    election_changed = True
+                if candidate_photos_finished is not None:
+                    election_on_stage.candidate_photos_finished = candidate_photos_finished
+                    election_changed = True
+                if election_preparation_finished is not None:
+                    election_on_stage.election_preparation_finished = election_preparation_finished
+                    election_changed = True
+                if ignore_this_election is not None:
+                    election_on_stage.ignore_this_election = ignore_this_election
+                    election_changed = True
                 if include_in_list_for_voters is not None:
                     election_on_stage.include_in_list_for_voters = include_in_list_for_voters
+                    election_changed = True
+                if internal_notes is not None:
+                    election_on_stage.internal_notes = internal_notes
+                    election_changed = True
+                if is_national_election is not None:
+                    election_on_stage.is_national_election = is_national_election
+                    election_changed = True
+                if election_changed:
                     election_on_stage.save()
 
             except Election.MultipleObjectsReturned as e:
