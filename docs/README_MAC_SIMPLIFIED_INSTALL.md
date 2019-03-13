@@ -77,7 +77,7 @@ that you would like!
    
    ![ScreenShot](images/CorrectedToUpstream.png)
    
-   To change manually:
+   To change manually from a terminal window, change into the WeVoteServer folder and then run, `vi .git/config`:
    
    ```
    \[remote "origin"\]
