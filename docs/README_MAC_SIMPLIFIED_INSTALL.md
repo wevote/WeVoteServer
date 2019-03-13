@@ -77,15 +77,15 @@ that you would like!
    
    ![ScreenShot](images/CorrectedToUpstream.png)
    
-   To change manually from a terminal window, change into the WeVoteServer folder and then run, `vi .git/config`:
+   To change origin and upstream manually from a terminal window, change into the WeVoteServer folder and then run, `vi .git/config`:
    
    ```
-   \[remote "origin"\]
+   [remote "origin"]
         url = git@github.com:YOUR_GITHUB_HANDLE_HERE/WeVoteServer.git
-        fetch = +refs/heads/\*:refs/remotes/origin/\*
-   \[remote "upstream"\]
+        fetch = +refs/heads/*:refs/remotes/origin/*
+   [remote "upstream"]
         url = git@github.com:wevote/WeVoteServer.git
-        fetch = +refs/heads/\*:refs/remotes/upstream/\*
+        fetch = +refs/heads/*:refs/remotes/upstream/*
 
    ```
 
