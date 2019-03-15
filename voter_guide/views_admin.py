@@ -220,7 +220,8 @@ def voter_guide_create_view(request):
 
     # Take in these values, even though they will be overwritten if we've stored a voter_guide_possibility
     ballot_items_raw = request.GET.get('ballot_items_raw', "")
-    candidates_missing_from_we_vote = request.GET.get('candidates_missing_from_we_vote', "")
+    candidates_missing_from_we_vote = request.GET.get('candidates_missing_from_we_vote', False)
+    candidates_missing_from_we_vote = positive_value_exists(candidates_missing_from_we_vote)
     cannot_find_endorsements = request.GET.get('cannot_find_endorsements', False)
     capture_detailed_comments = request.GET.get('capture_detailed_comments ', False)
     clear_organization_options = request.GET.get('clear_organization_options', False)
@@ -531,7 +532,8 @@ def voter_guide_create_process_view(request):
     all_done_with_entry = request.POST.get('all_done_with_entry', 0)
     ballot_items_raw = request.POST.get('ballot_items_raw', "")
     ballot_items_additional = request.POST.get('ballot_items_additional', "")
-    candidates_missing_from_we_vote = request.POST.get('candidates_missing_from_we_vote', "")
+    candidates_missing_from_we_vote = request.POST.get('candidates_missing_from_we_vote', False)
+    candidates_missing_from_we_vote = positive_value_exists(candidates_missing_from_we_vote)
     cannot_find_endorsements = request.POST.get('cannot_find_endorsements', False)
     capture_detailed_comments = request.POST.get('capture_detailed_comments', False)
     clear_organization_options = request.POST.get('clear_organization_options', 0)
