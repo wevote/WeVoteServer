@@ -41,6 +41,8 @@ We also have a [ReactNative for iOS and Android](https://github.com/wevote/WeVot
 If you need to test donations and have not updated your openssl and pyopenssl during install and setup, you will need
 [to update your local](docs/README_DONATION_SETUP.md).
 
+See [Instructions for Scheduled Tasks](docs/README_SCHEDULED_TASKS.md)
+
 ## Join Us
 
 We meet weekly on Wednesday nights at the 

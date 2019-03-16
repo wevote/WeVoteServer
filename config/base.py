@@ -81,6 +81,7 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
 
     # third party
+    'background_task',
     'bootstrap3',
     'corsheaders',  # cross origin requests
     # 'social.apps.django_app.default',
@@ -128,6 +129,7 @@ INSTALLED_APPS = (
     'position_like',
     'quick_info',
     'rest_framework',    # Jan 2019, looks abandoned
+    'scheduled_tasks',
     'search',
     'support_oppose_deciding',
     'tag',
@@ -285,7 +287,6 @@ CORS_ALLOW_CREDENTIALS = True
 # specify whether to replace the HTTP_REFERER header if CORS checks pass so that CSRF django middleware checks
 # will work with https
 CORS_REPLACE_HTTPS_REFERER = True
-CSRF_TRUSTED_ORIGINS = ['api.wevoteusa.org']
 
 # CORS_ORIGIN_WHITELIST = (
 #     'google.com',

@@ -157,5 +157,8 @@
   "_comment":                       "GeoLite2 IP address database location",
   "GEOLITE2_DATABASE_LOCATION":     "geoip2/city-db/GeoLite2-City.mmdb",
 
+  "_comment":                       "Scheduled Tasks, Retain History of completed tasks for n days",
+  "SCHEDULED_TASKS_RETAIN_HISTORY":  90,
+
   "_comment":                       "End of json_environment_variables.json"
 }
