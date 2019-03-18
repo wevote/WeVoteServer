@@ -77,7 +77,9 @@ that you would like!
    
    ![ScreenShot](images/CorrectedToUpstream.png)
    
-   <!-- I would move this out of this file and into the other install steps. It adds an unnecessary fork in the path towards an easy install. -->
+   <!-- The goal of this instruction set was to remove any steps that weren't absolutely necessary, and to leverage built 
+   in GUI based operations in PyCharm in order to make the install non-techical as possible
+
    **Optional alternative way to do the same thing:** If you would prefer to directly edit the git configuration files, 
    there is another way to perform the same changes described in this step.  To change origin and upstream manually 
    from a terminal window, change into the WeVoteServer folder and then run, `vi .git/config`:
@@ -91,6 +93,7 @@ that you would like!
         fetch = +refs/heads/*:refs/remotes/upstream/*
 
    ```
+    -->
 
 1. Then add a remote for your private branch by pressing the "+ button on the Git Remotes dialog.  Add the url for your
     fork of the the WeVoteServer project origin (copy the url from the github website). In this example, the developer 
