@@ -2788,6 +2788,12 @@ def position_list_for_opinion_maker_for_api(voter_device_id,  # positionListForO
                 'is_information_only':                  one_position.is_information_only(),
                 'is_public_position':                   one_position.is_public_position(),
                 'speaker_display_name':                 one_position.speaker_display_name,  # Organization name
+                'speaker_image_url_https_large':        one_position.speaker_image_url_https_large,
+                'speaker_image_url_https_medium':       one_position.speaker_image_url_https_medium,
+                'speaker_image_url_https_tiny':         one_position.speaker_image_url_https_tiny,
+                'speaker_twitter_handle':               one_position.speaker_twitter_handle,
+                'organization_we_vote_id':              one_position.organization_we_vote_id,
+                'speaker_we_vote_id':                   one_position.organization_we_vote_id,
                 'vote_smart_rating':                    one_position.vote_smart_rating,
                 'vote_smart_time_span':                 one_position.vote_smart_time_span,
                 'google_civic_election_id':             one_position.google_civic_election_id,
