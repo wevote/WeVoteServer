@@ -309,6 +309,13 @@ def ballot_item_list_edit_view(request, ballot_returned_id=0, ballot_returned_we
             ballot_returned_found = True
             google_civic_election_id = ballot_returned.google_civic_election_id
             polling_location_we_vote_id = ballot_returned.polling_location_we_vote_id
+        else:
+            messages.add_message(request, messages.ERROR,
+                                 'Could not find \'ballot_returned\' entry, with '
+                                 'ballot_returned_id: {ballot_returned_id}'
+                                 ' or ballot_returned_we_vote_id: {ballot_returned_we_vote_id}'
+                                 ''.format(ballot_returned_id=ballot_returned_id,
+                                           ballot_returned_we_vote_id=ballot_returned_we_vote_id))
     elif positive_value_exists(polling_location_we_vote_id):
         results = ballot_returned_manager.retrieve_existing_ballot_returned_by_identifier(
             ballot_returned_id, google_civic_election_id, voter_id, polling_location_we_vote_id)
@@ -316,6 +323,11 @@ def ballot_item_list_edit_view(request, ballot_returned_id=0, ballot_returned_we
             ballot_returned = results['ballot_returned']
             ballot_returned_found = True
             google_civic_election_id = ballot_returned.google_civic_election_id
+        else:
+            messages.add_message(request, messages.ERROR,
+                                 'Could not find \'ballot_returned\' entry, with '
+                                 'polling_location_we_vote_id: {polling_location_we_vote_id}'
+                                 ''.format(polling_location_we_vote_id=polling_location_we_vote_id))
 
     election = Election()
     election_state = ''
@@ -549,6 +561,7 @@ def ballot_item_list_edit_process_view(request):
                 if not positive_value_exists(polling_location_id):
                     polling_location_we_vote_id = ballot_returned.polling_location_we_vote_id
         except Exception as e:
+            status += "FAILURE_TRYING_TO_FIND_EXISTING_BALLOT_RETURNED "
             pass
 
     election_manager = ElectionManager()
@@ -558,6 +571,7 @@ def ballot_item_list_edit_process_view(request):
 
     try:
         if ballot_returned_found:
+            status += "BALLOT_RETURNED_FOUND_BY_ID "
             # Update
 
             # Check to see if this is a We Vote-created election
@@ -600,6 +614,7 @@ def ballot_item_list_edit_process_view(request):
         else:
             # Create new ballot_returned entry
             # election must be found
+            status += "CREATING_NEW_BALLOT_RETURNED "
             election_results = election_manager.retrieve_election(google_civic_election_id)
             if election_results['election_found']:
                 election = election_results['election']
@@ -629,32 +644,37 @@ def ballot_item_list_edit_process_view(request):
                     polling_location = results['polling_location']
                     polling_location_we_vote_id = polling_location.we_vote_id
                     polling_location_found = True
+            else:
+                status += "POLLING_LOCATION_NOT_FOUND "
+                polling_location_found = False
 
             if positive_value_exists(polling_location_found):
                 # If this is from a polling location, override what was entered on the form
                 results = polling_location.get_text_for_map_search_results()
                 text_for_map_search = results['text_for_map_search']
 
-            # We don't support creating new entries for Voters here
-            ballot_returned = BallotReturned(
-                election_date=election.election_day_text,
-                election_description_text=election.election_name,
-                google_civic_election_id=google_civic_election_id,
-                polling_location_we_vote_id=polling_location.we_vote_id,
-                normalized_city=polling_location.city,
-                normalized_line1=polling_location.line1,
-                normalized_line2=polling_location.line2,
-                normalized_state=polling_location.state,
-                normalized_zip=polling_location.get_formatted_zip(),
-                ballot_location_display_name=ballot_location_display_name,
-                ballot_location_display_option_on=ballot_location_display_option_on,
-                ballot_location_shortcut=ballot_location_shortcut,
-                text_for_map_search=text_for_map_search,
-            )
-            ballot_returned.save()
-            ballot_returned_id = ballot_returned.id
-            ballot_returned_found = True
-            messages.add_message(request, messages.INFO, 'New ballot_returned saved.')
+                # We don't support creating new entries for Voters here
+                ballot_returned = BallotReturned(
+                    election_date=election.election_day_text,
+                    election_description_text=election.election_name,
+                    google_civic_election_id=google_civic_election_id,
+                    polling_location_we_vote_id=polling_location.we_vote_id,
+                    normalized_city=polling_location.city,
+                    normalized_line1=polling_location.line1,
+                    normalized_line2=polling_location.line2,
+                    normalized_state=polling_location.state,
+                    normalized_zip=polling_location.get_formatted_zip(),
+                    ballot_location_display_name=ballot_location_display_name,
+                    ballot_location_display_option_on=ballot_location_display_option_on,
+                    ballot_location_shortcut=ballot_location_shortcut,
+                    text_for_map_search=text_for_map_search,
+                )
+                ballot_returned.save()
+                ballot_returned_id = ballot_returned.id
+                ballot_returned_found = True
+                messages.add_message(request, messages.INFO, 'New ballot_returned saved.')
+            else:
+                status += "COULD_NOT_CREATE_BALLOT_RETURNED-NO_POLLING_LOCATION "
 
         # #######################################
         # Update the ballot_returned entry latitude & longitude
@@ -705,7 +725,8 @@ def ballot_item_list_edit_process_view(request):
             if results['new_ballot_item_created']:
                 messages.add_message(request, messages.INFO, 'Office 1 added.')
             else:
-                messages.add_message(request, messages.ERROR, 'Office 1 could not be added.')
+                messages.add_message(request, messages.ERROR, 'Office 1 could not be added. status: {status}'
+                                                              ''.format(status=status))
 
         # Contest Measure 1
         contest_measure_manager = ContestMeasureManager()
@@ -721,12 +742,18 @@ def ballot_item_list_edit_process_view(request):
             if not positive_value_exists(state_code):
                 state_code = contest_measure.state_code
 
-            ballot_item_manager.update_or_create_ballot_item_for_polling_location(
+            results = ballot_item_manager.update_or_create_ballot_item_for_polling_location(
                 polling_location.we_vote_id, google_civic_election_id, google_ballot_placement,
                 ballot_item_display_name, contest_measure.measure_subtitle, contest_measure.measure_text,
                 local_ballot_order,
                 contest_office_id, contest_office_we_vote_id,
                 contest_measure.id, contest_measure.we_vote_id, state_code)
+
+            if results['new_ballot_item_created']:
+                messages.add_message(request, messages.INFO, 'Measure 1 added.')
+            else:
+                messages.add_message(request, messages.ERROR, 'Measure 1 could not be added. status: {status}'
+                                                              ''.format(status=status))
 
         # Update the ballot item order
         if positive_value_exists(polling_location_we_vote_id) and positive_value_exists(google_civic_election_id):
@@ -737,6 +764,7 @@ def ballot_item_list_edit_process_view(request):
                 ballot_item_list = ballot_item_list_results['ballot_item_list']
                 local_ballot_order_count = 0
                 for one_ballot_item in ballot_item_list:
+                    local_ballot_order = 0
                     try:
                         local_ballot_order_count += 1
                         local_ballot_order_key = 'local_ballot_order_' + str(one_ballot_item.id)
@@ -747,11 +775,18 @@ def ballot_item_list_edit_process_view(request):
                             one_ballot_item.local_ballot_order = local_ballot_order
                             one_ballot_item.save()
                     except Exception as e:
+                        error_string = str(e)
                         messages.add_message(request, messages.ERROR,
-                                             'Could not save local_ballot_order: ', local_ballot_order)
+                                             'Could not save local_ballot_order: {local_ballot_order} '
+                                             'error: {error_string}'
+                                             ''.format(error_string=error_string,
+                                                       local_ballot_order=local_ballot_order))
 
     except Exception as e:
-        messages.add_message(request, messages.ERROR, 'Could not save ballot_returned.')
+        error_string = str(e)
+        messages.add_message(request, messages.ERROR, 'Could not save ballot_returned. '
+                                                      'error: {error_string}'
+                                                      ''.format(error_string=error_string))
 
     return HttpResponseRedirect(reverse('ballot:ballot_item_list_edit', args=(ballot_returned_id,)) +
                                 "?google_civic_election_id=" + str(google_civic_election_id) +
