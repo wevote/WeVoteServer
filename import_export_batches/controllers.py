@@ -4363,11 +4363,8 @@ def import_ballot_item_data_from_batch_row_actions(batch_header_id, batch_row_id
         }
         return results
 
-    ballot_returned_manager = BallotReturnedManager()
-    ballot_returned_entries_that_exist = []
-    measure_manager = ContestMeasureManager()
     office_manager = ContestOfficeManager()
-    polling_location_manager = PollingLocationManager()
+    measure_manager = ContestMeasureManager()
     for one_batch_row_action in batch_row_action_list:
         # Find the column in the incoming batch_row with the header == ballot_item_display_name
         ballot_item_display_name = one_batch_row_action.ballot_item_display_name
@@ -4454,57 +4451,38 @@ def import_ballot_item_data_from_batch_row_actions(batch_header_id, batch_row_id
                     'new_ballot_item':                  new_ballot_item,
                 }
                 return results
-
-            if positive_value_exists(polling_location_we_vote_id) and positive_value_exists(google_civic_election_id):
-                # If we are here, we want to make sure that we have a BallotReturned entry for this BallotItem
-                combined_key = str(polling_location_we_vote_id) + "-" + str(google_civic_election_id)
-                if combined_key in ballot_returned_entries_that_exist:
-                    pass
-                else:
-                    results = ballot_returned_manager.retrieve_ballot_returned_from_polling_location_we_vote_id(
-                        polling_location_we_vote_id, google_civic_election_id)
-                    if results['success'] and not results['ballot_returned_found']:
-                        # Create new BallotReturned entry
-                        voter_id = 0
-                        polling_location_results = polling_location_manager.retrieve_polling_location_by_id(
-                            0, polling_location_we_vote_id)
-                        if polling_location_results['polling_location_found']:
-                            polling_location = polling_location_results['polling_location']
-                            latitude = polling_location.latitude
-                            longitude = polling_location.longitude
-                            polling_location_name = polling_location.location_name
-                            results = polling_location.get_text_for_map_search_results()
-                            text_for_map_search = results['text_for_map_search']
-                            state_code = polling_location.state
-
-                            create_results = ballot_returned_manager.update_or_create_ballot_returned(
-                                polling_location_we_vote_id, voter_id, google_civic_election_id,
-                                latitude=latitude, longitude=longitude,
-                                ballot_location_display_name=polling_location_name,
-                                text_for_map_search=text_for_map_search,
-                                normalized_state=state_code)
-                            if create_results['ballot_returned_found']:
-                                ballot_returned_entries_that_exist.append(combined_key)
-                                status += "BALLOT_RETURNED_CREATED_OR_UPDATED "
-                            else:
-                                status += create_results['status']
-                        else:
-                            status += "POLLING_LOCATION_NOT_FOUND: '" + polling_location_we_vote_id + "' "
-                    else:
-                        # Either retrieve failed, or ballot_returned_found was true
-                        pass
-            else:
-                # Missing polling_location_we_vote_id or google_civic_election_id
-                pass
         else:
             status += "IMPORT_BALLOT_ITEM_ENTRY:MISSING_DISPLAY_NAME-STATE_CODE-OR_ELECTION_ID "
 
-    # if number_of_ballot_items_created or number_of_ballot_items_updated:
-    #     if positive_value_exists(polling_location_we_vote_id) and positive_value_exists(google_civic_election_id):
-    #         # Make sure there is a ballot_returned entry
-    #         results = ballot_returned_manager.retrieve_ballot_returned_from_polling_location_we_vote_id(
-    #             polling_location_we_vote_id, google_civic_election_id)
-    #         if results['success'] and not results['ballot_returned_found']:
+    if number_of_ballot_items_created or number_of_ballot_items_updated:
+        if positive_value_exists(polling_location_we_vote_id) and positive_value_exists(google_civic_election_id):
+            # Make sure there is a ballot_returned entry
+            ballot_returned_manager = BallotReturnedManager()
+            results = ballot_returned_manager.retrieve_ballot_returned_from_polling_location_we_vote_id(
+                polling_location_we_vote_id, google_civic_election_id)
+            if results['success'] and not results['ballot_returned_found']:
+                voter_id = 0
+                polling_location_manager = PollingLocationManager()
+                polling_location_results = polling_location_manager.retrieve_polling_location_by_id(
+                    0, polling_location_we_vote_id)
+                latitude = None
+                longitude = None
+                polling_location_name = ""
+                if polling_location_results['polling_location_found']:
+                    polling_location = polling_location_results['polling_location']
+                    latitude = polling_location.latitude
+                    longitude = polling_location.longitude
+                    polling_location_name = polling_location.location_name
+                    results = polling_location.get_text_for_map_search_results()
+                    text_for_map_search = results['text_for_map_search']
+                    state_code = polling_location.state
+
+                create_results = ballot_returned_manager.update_or_create_ballot_returned(
+                    polling_location_we_vote_id, voter_id, google_civic_election_id,
+                    latitude=latitude, longitude=longitude,
+                    ballot_location_display_name=polling_location_name, text_for_map_search=text_for_map_search,
+                    normalized_state=state_code)
+                status += create_results['status']
 
     if number_of_ballot_items_created:
         status += "IMPORT_BALLOT_ITEM_ENTRY:BALLOT_ITEM_CREATED "

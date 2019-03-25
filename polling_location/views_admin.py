@@ -18,7 +18,7 @@ from django.shortcuts import render
 from exception.models import handle_record_found_more_than_one_exception
 from voter.models import voter_has_authority
 from wevote_functions.functions import convert_state_code_to_state_text, convert_to_float, convert_to_int, \
-    positive_value_exists, process_request_from_master
+    positive_value_exists, process_request_from_master, STATE_CODE_MAP, STATE_GEOGRAPHIC_CENTER
 import wevote_functions.admin
 from django.http import HttpResponse
 import json
@@ -392,6 +392,30 @@ def polling_location_edit_view(request, polling_location_local_id=0, polling_loc
             'state_code': state_code,
         }
     return render(request, 'polling_location/polling_location_edit.html', template_values)
+
+@login_required
+def polling_location_visualize_view(request, polling_location_local_id=0, polling_location_we_vote_id=""):
+    authority_required = {'verified_volunteer'}  # admin, verified_volunteer
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
+    google_civic_election_id = request.GET.get('google_civic_election_id', 0)
+    state_code = request.GET.get('state_code', 'CA')
+    if state_code == '':
+        state_code = 'CA'
+
+    state_list = STATE_CODE_MAP
+    sorted_state_list = sorted(state_list.items())
+
+    template_values = {
+        'geo_center_lat': STATE_GEOGRAPHIC_CENTER.get(state_code)[0],
+        'geo_center_lng': STATE_GEOGRAPHIC_CENTER.get(state_code)[1],
+        'geo_center_zoom': STATE_GEOGRAPHIC_CENTER.get(state_code)[2],
+        'state_code': state_code,
+        'state_list': sorted_state_list,
+    }
+
+    return render(request, 'polling_location/polling_location_visualize.html', template_values)
 
 
 @login_required

@@ -735,32 +735,7 @@ def refresh_voter_ballots_not_copied_from_polling_location(google_civic_election
     ballots_refreshed = 0
 
     ballot_item_list_manager = BallotItemListManager()
-    ballot_returned_manager = BallotReturnedManager()
     ballot_saved_manager = VoterBallotSavedManager()
-
-    # When we set up voter_ballot_saved entries by copying data from a polling location, if something
-    # happens to the ballot_returned entry, we need to repair it
-    retrieve_results = ballot_saved_manager.retrieve_voter_ballot_saved_list_for_election(
-        google_civic_election_id, find_all_entries_for_election=True)
-    voter_ballot_saved_entries_deleted_count = 0
-    if retrieve_results['voter_ballot_saved_list_found']:
-        voter_ballot_saved_list = retrieve_results['voter_ballot_saved_list']
-        for voter_ballot_saved in voter_ballot_saved_list:
-            # Make sure a BallotReturned entry exists for entries with voter_ballot_saved.ballot_returned_we_vote_id
-            if positive_value_exists(voter_ballot_saved.ballot_returned_we_vote_id):
-                ballot_returned_results = \
-                    ballot_returned_manager.retrieve_ballot_returned_from_ballot_returned_we_vote_id(
-                        voter_ballot_saved.ballot_returned_we_vote_id)
-                if not positive_value_exists(ballot_returned_results['ballot_returned_found']):
-                    # Delete the voter_ballot_saved entry
-                    voter_ballot_saved.delete()
-                    voter_ballot_saved_entries_deleted_count += 1
-
-    if positive_value_exists(voter_ballot_saved_entries_deleted_count):
-        status += "VOTER_BALLOT_SAVED_ENTRIES_DELETED:" + str(voter_ballot_saved_entries_deleted_count) + " "
-    else:
-        status += "ALL_VOTER_BALLOT_SAVED_ENTRIES_HAVE_ACCURATE_BALLOT_RETURNED_WE_VOTE_ID "
-
     # When voters provide complete addresses, we get their ballot straight from Google Civic
     # We want to find all voter_ballot_saved entries for these voters with full addresses
     # This function does NOT reach back out to Google Civic
@@ -894,11 +869,10 @@ def repair_ballot_items_for_election(google_civic_election_id, refresh_from_goog
              "saved_count: {saved_count}, " \
              "state_code_not_found_count: {state_code_not_found_count}, " \
              "error_count: {error_count}\n" \
-             ", REFRESH: ballots_refreshed: {ballots_refreshed} refresh_ballot_status: {refresh_ballot_status}" \
+             "REFRESH: ballots_refreshed: {ballots_refreshed} " \
              "".format(ballot_item_list_count=ballot_item_list_count,
                        ballot_items_deleted_count=ballot_items_deleted_count,
                        ballots_refreshed=ballots_refreshed,
-                       refresh_ballot_status=refresh_ballot_results['status'],
                        saved_count=saved_count,
                        state_code_not_found_count=state_code_not_found_count,
                        error_count=error_count)
