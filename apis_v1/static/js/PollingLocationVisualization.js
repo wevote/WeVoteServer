@@ -68,8 +68,12 @@ function createMarker (latlng, name, address) {
 function addMarkers (results) {
   // Create markers.
   for (let i = 0; i < results.length; i++) {
-    const { latitude, longitude, polling_location_id: plId, location_name: locationName, line1, city, state: resultsState, we_vote_id: weVoteId  } = results[i];
-    const address = `${line1}, ${city} ${resultsState}<br/>${weVoteId} - ${plId}`;
+    const { latitude, longitude, location_name: locationName, line1, city, state: resultsState, we_vote_id: weVoteId,
+      id: pollingLocTableId  } = results[i];
+    let { href } = window.location;
+    href = `${href.substring(0, href.lastIndexOf('/pl/') + 4) + pollingLocTableId}/summary/`;
+    const link = `<a href='${href}' target='_blank'>Open ${weVoteId}</a>`;
+    const address = `${line1}, ${city} ${resultsState}<br/>${link}`;
     createMarker(new google.maps.LatLng(latitude, longitude), locationName, address);
   }
 }
