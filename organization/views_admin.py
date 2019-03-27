@@ -3,7 +3,7 @@
 # -*- coding: UTF-8 -*-
 
 from .controllers import organizations_import_from_master_server, push_organization_data_to_other_table_caches
-from .models import Organization, GROUP
+from .models import GROUP, INDIVIDUAL, Organization
 from admin_tools.views import redirect_to_sign_in_page
 from candidate.models import CandidateCampaign, CandidateCampaignListManager, CandidateCampaignManager
 from config.base import get_environment_variable
@@ -107,10 +107,11 @@ def organizations_sync_out_view(request):  # organizationsSyncOut
     state_served_code = request.GET.get('state_served_code', '')
 
     try:
-        organization_list = Organization.objects.using('readonly').all()
+        organization_queryset = Organization.objects.using('readonly').all()
+        organization_queryset = organization_queryset.exclude(organization_type__iexact=INDIVIDUAL)
         if positive_value_exists(state_served_code):
-            organization_list = organization_list.filter(state_served_code__iexact=state_served_code)
-        organization_list_dict = organization_list.values(
+            organization_queryset = organization_queryset.filter(state_served_code__iexact=state_served_code)
+        organization_list_dict = organization_queryset.values(
             'we_vote_id', 'organization_name', 'organization_type',
             'organization_description', 'state_served_code',
             'organization_website', 'organization_email',
@@ -207,8 +208,20 @@ def organization_list_view(request):
 
     if positive_value_exists(state_code):
         organization_list_query = organization_list_query.filter(state_served_code__iexact=state_code)
+
     if positive_value_exists(organization_type_filter):
-        organization_list_query = organization_list_query.filter(organization_type__iexact=organization_type_filter)
+        if organization_type_filter == UNKNOWN:
+            # Make sure to also show organizations that are not specified
+            organization_list_query = organization_list_query.filter(
+                Q(organization_type__iexact=organization_type_filter) |
+                Q(organization_type__isnull=True) |
+                Q(organization_type__exact='')
+            )
+        else:
+            organization_list_query = organization_list_query.filter(organization_type__iexact=organization_type_filter)
+    else:
+        # By default, don't show individuals
+        organization_list_query = organization_list_query.exclude(organization_type__iexact=INDIVIDUAL)
 
     link_issue_list_manager = OrganizationLinkToIssueList()
     issue_list_manager = IssueListManager()
@@ -290,6 +303,10 @@ def organization_list_view(request):
 
             # NOTE this is "exclude"
             organization_list_query = organization_list_query.exclude(final_filters)
+
+    organization_count = organization_list_query.count()
+    messages.add_message(request, messages.INFO,
+                         '{organization_count:,} organizations found.'.format(organization_count=organization_count))
 
     # Limit to only showing 200 on screen
     organization_list = organization_list_query[:200]
