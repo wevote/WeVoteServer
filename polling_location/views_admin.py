@@ -109,7 +109,7 @@ def polling_locations_sync_out_view(request):  # pollingLocationsSyncOut
                                                                   'polling_location_id', 'state',
                                                                   'use_for_bulk_retrieve',
                                                                   'polling_location_deleted',
-                                                                  'zip_long')
+                                                                  'zip_long', 'id')
         if polling_location_list_dict:
             polling_location_list_json = list(polling_location_list_dict)
             return HttpResponse(json.dumps(polling_location_list_json), content_type='application/json')
