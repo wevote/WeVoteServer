@@ -52,6 +52,8 @@
 <form name="state_code_form" method="get" action="{% url 'organization:organization_list' %}">
     {% csrf_token %}
     <input type="hidden" name="sort_by" value="{{ sort_by }}">
+    <input type="hidden" name="show_all" value="{{ show_all }}">
+    <input type="hidden" name="show_more" value="{{ show_more }}">
 
 {% if state_list %}
     <select id="state_code_id" name="state_code">
@@ -185,6 +187,20 @@
         </tr>
     {% endfor %}
     </table>
+    {% if not show_all and not show_more %}
+    <a href="{% url 'organization:organization_list' %}?google_civic_election_id={{ google_civic_election_id }}&organization_search={{ organization_search }}&state_code={{ state_code }}&show_issues={{ show_issues }}&organization_type_filter={{ organization_type_filter }}&sort_by={{ sort_by }}&show_more=1">
+        show more</a>
+    {% endif %}
+    {% if show_more %}
+    <a href="{% url 'organization:organization_list' %}?google_civic_election_id={{ google_civic_election_id }}&organization_search={{ organization_search }}&state_code={{ state_code }}&show_issues={{ show_issues }}&organization_type_filter={{ organization_type_filter }}&sort_by={{ sort_by }}&show_all=1">
+        show all</a>
+    {% endif %}
+    {% if show_all or show_more %}
+    &nbsp;&nbsp;&nbsp;
+      (<a href="{% url 'organization:organization_list' %}?google_civic_election_id={{ google_civic_election_id }}&organization_search={{ organization_search }}&state_code={{ state_code }}&show_issues={{ show_issues }}&organization_type_filter={{ organization_type_filter }}&sort_by={{ sort_by }}">
+        show fewer</a>)
+    {% endif %}
+
     <p></p>
     <p>
         <a href="{% url 'apis_v1:organizationsSyncOutView' %}?format=json" target="_blank" >Export Organizations</a>

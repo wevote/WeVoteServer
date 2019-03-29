@@ -6,7 +6,7 @@ from .models import PollingLocation, PollingLocationManager
 from .controllers import filter_polling_locations_structured_json_for_local_duplicates, \
     import_and_save_all_polling_locations_data, polling_locations_import_from_structured_json
 from admin_tools.views import redirect_to_sign_in_page
-from ballot.models import BallotReturnedListManager
+from ballot.models import BallotReturned, BallotReturnedListManager
 from config.base import get_environment_variable
 from django.http import HttpResponseRedirect
 from django.urls import reverse
@@ -643,9 +643,26 @@ def polling_location_summary_by_we_vote_id_view(request, polling_location_we_vot
         # This is fine, create new
         pass
 
+    ballot_returned_list = []
+    ballot_returned_list_found = False
+    if polling_location_on_stage_found:
+        ballot_returned_queryset = BallotReturned.objects.using('readonly').all()
+        if positive_value_exists(google_civic_election_id):
+            ballot_returned_queryset = ballot_returned_queryset.filter(
+                google_civic_election_id=google_civic_election_id)
+        ballot_returned_queryset = ballot_returned_queryset.filter(
+            polling_location_we_vote_id=polling_location_we_vote_id)
+
+        ballot_returned_list = list(ballot_returned_queryset)
+
+        if len(ballot_returned_list):
+            ballot_returned_list_found = True
+
     template_values = {
-        'google_civic_election_id': google_civic_election_id,
-        'messages_on_stage':        messages_on_stage,
-        'polling_location':         polling_location_on_stage,
+        'ballot_returned_list':         ballot_returned_list,
+        'ballot_returned_list_found':   ballot_returned_list_found,
+        'google_civic_election_id':     google_civic_election_id,
+        'messages_on_stage':            messages_on_stage,
+        'polling_location':             polling_location_on_stage,
     }
     return render(request, 'polling_location/polling_location_summary.html', template_values)

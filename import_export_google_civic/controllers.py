@@ -514,10 +514,12 @@ def retrieve_representatives_from_google_civic_api(text_for_map_search):
     })
 
     structured_json = json.loads(response.text)
-    if 'success' in structured_json and structured_json['success'] == False:
+    if 'success' in structured_json and not positive_value_exists(structured_json['success']):
         import_results = {
-            'success': False,
-            'status': "Error: " + structured_json['status'],
+            'success':              False,
+            'status':               "Error: " + structured_json['status'],
+            'locations_retrieved':  False,
+            'structured_json':      {},
         }
         return import_results
 
@@ -584,9 +586,10 @@ def retrieve_representatives_from_google_civic_api(text_for_map_search):
     #             success = True
 
     results = {
-        'success': success,
-        'status': status,
-        'structured_json': structured_json,
+        'success':              success,
+        'status':               status,
+        'locations_retrieved':  True,
+        'structured_json':      structured_json,
     }
     return results
 

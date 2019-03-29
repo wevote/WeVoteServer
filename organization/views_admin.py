@@ -193,6 +193,8 @@ def organization_list_view(request):
     selected_issue_vote_id_list = request.GET.getlist('selected_issues', '')
     sort_by = request.GET.get('sort_by', '')
     state_code = request.GET.get('state_code', '')
+    show_all = request.GET.get('show_all', False)
+    show_more = request.GET.get('show_more', False)  # Show up to 1,000 organizations
     show_issues = request.GET.get('show_issues', '')
 
     messages_on_stage = get_messages(request)
@@ -309,7 +311,12 @@ def organization_list_view(request):
                          '{organization_count:,} organizations found.'.format(organization_count=organization_count))
 
     # Limit to only showing 200 on screen
-    organization_list = organization_list_query[:200]
+    if positive_value_exists(show_more):
+        organization_list = organization_list_query[:1000]
+    elif positive_value_exists(show_all):
+        organization_list = organization_list_query
+    else:
+        organization_list = organization_list_query[:200]
 
     # Now loop through these organizations and add on the linked_issues_count
     modified_organization_list = []
@@ -348,7 +355,9 @@ def organization_list_view(request):
         'organization_types':       organization_types_list,
         'organization_list':        modified_organization_list,
         'organization_search':      organization_search,
+        'show_all':                 show_all,
         'show_issues':              show_issues,
+        'show_more':                show_more,
         'sort_by':                  sort_by,
         'state_code':               state_code,
         'state_list':               sorted_state_list,
