@@ -96,7 +96,14 @@
 </div>
 
 <div class="form-group">
-    <label for="election_id" class="col-sm-3 control-label">Election</label>
+    <label for="election_id" class="col-sm-3 control-label">Election
+    {% if election.id %}
+      &nbsp;
+      <a href="{% url 'election:election_summary' election.id %}{% if show_all_elections_this_year %}?show_all_elections_this_year=1{% elif show_all_elections %}?show_all_elections=1{% endif %}" target="_blank">
+        <span class="glyphicon glyphicon-new-window"></span>
+      </a>
+    {% endif %}
+    </label>
     <div class="col-sm-8">
         <input type="text" name="election" id="election_id" class="form-control" disabled
                value="{{ google_civic_election_id }}{% if election %} ({{ election.election_name }}){% endif %}" />

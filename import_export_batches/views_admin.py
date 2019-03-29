@@ -80,11 +80,17 @@ def batch_list_view(request):
     modified_batch_list = []
     batch_manager = BatchManager()
     try:
-        batch_list = BatchDescription.objects.order_by('-batch_header_id')
-        if positive_value_exists(google_civic_election_id):
-            batch_list = batch_list.filter(google_civic_election_id=google_civic_election_id)
+        batch_list_query = BatchDescription.objects.order_by('-batch_header_id')
         if positive_value_exists(kind_of_batch):
-            batch_list = batch_list.filter(kind_of_batch__iexact=kind_of_batch)
+            batch_list_query = batch_list_query.filter(kind_of_batch__iexact=kind_of_batch)
+        if positive_value_exists(google_civic_election_id):
+            batch_list_query = batch_list_query.filter(google_civic_election_id=google_civic_election_id)
+
+        if positive_value_exists(google_civic_election_id):
+            batch_list = list(batch_list_query)
+        else:
+            batch_list = batch_list_query[:50]
+
         if len(batch_list):
             batch_list_found = True
             for one_batch in batch_list:

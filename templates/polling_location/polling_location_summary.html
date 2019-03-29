@@ -38,8 +38,59 @@
 <p><a href="{% url 'import_export_google_civic:retrieve_representatives_for_one_address' %}?polling_location_we_vote_id={{ polling_location.we_vote_id }}&google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
    Retrieve Representatives for this Polling Location</a></p>
 
-<p>TODO: Add a way to find all ballot returned entries for an election that were copied from this Polling Location.</p>
+  <br />
+  <br />
+{% if ballot_returned_list %}
+  <h4>Ballot Returned Entries that Rely on this Polling Location</h4>
 
+    <table class="table">
+    {% for ballot_returned in ballot_returned_list %}
+    {% if forloop.counter == 1 or forloop.counter|divisibleby:35 %}
+       <thead>
+       <tr>
+            <th></th>
+            <th><span class="u-no-break">Ballot Returned ID</span></th>
+            <th>Display Name</th>
+            <th>Shortcut?</th>
+            <th>Text for Map Search</th>
+            <th>Lat/Long?</th>
+            <th>Offices & Candidates</th>
+            <th>Ballot Items</th>
+            <th>Voter</th>
+{#            <th>Polling Location</th>#}
+        </tr>
+        </thead>
+    {% endif %}
+        <tr>
+            <td>{{ forloop.counter }}</td>
+            <td><a href="{% url 'ballot:ballot_item_list_edit' ballot_returned.id %}" target="_blank">{{ ballot_returned.we_vote_id }} <span class="glyphicon glyphicon-new-window"></span></a></td>
+            <td align="middle">{% if ballot_returned.ballot_location_display_name %}{{ ballot_returned.ballot_location_display_name }}{% endif %}</td>
+            <td align="middle">{% if ballot_returned.ballot_location_shortcut %}{{ ballot_returned.ballot_location_shortcut }}{% endif %}{% if ballot_returned.ballot_location_display_option_on %} ON{% endif %}</td>
+            <td>{{ ballot_returned.text_for_map_search }}</td>
+            <td align="middle">{% if ballot_returned.latitude %}yes{% endif %}</td>
+            <td align="middle">{% if ballot_returned.office_and_candidate_text %}<span class="u-no-break">{{ ballot_returned.office_and_candidate_text }}</span>{% endif %}</td>
+            <td align="middle">{% if ballot_returned.ballot_items_count %}{{ ballot_returned.ballot_items_count }}{% endif %}</td>
+            <td>{% if ballot_returned.voter_id and ballot_returned.voter_id != 0 %}
+              <a href="{% url 'voter:voter_summary' ballot_returned.voter_id %}" target="_blank">{{ ballot_returned.voter_id }}</a>
+            {% endif %}</td>
+
+{#            <td>#}
+{#                {% if ballot_returned.polling_location_we_vote_id %}#}
+{#                <a href="{% url 'polling_location:polling_location_summary_by_we_vote_id' ballot_returned.polling_location_we_vote_id %}" target="_blank">#}
+{#                {{ ballot_returned.polling_location_we_vote_id|default_if_none:"" }}#}
+{#                </a>#}
+{#                {% endif %}#}
+{#            </td>#}
+        </tr>
+    {% endfor %}
+    </table>
+    <br />
+    <br />
+    <br />
+    <br />
+{% else %}
+    <p>(This polling location is not being used by any BallotReturned entries.)</p>
+{% endif %}
 
 {% else %}
 

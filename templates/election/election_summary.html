@@ -421,8 +421,13 @@
   </li>
 
   <li>
-  <a href="{% url 'ballot:ballot_item_list_edit' 0 %}?google_civic_election_id={{ election.google_civic_election_id }}&state_code={{ state_code }}">
-      Create Ballot for this Election for one Location</a> (so voters can find a ballot before Google Civic data is live)
+      <a href="{% url 'ballot:ballot_item_list_edit' 0 %}?google_civic_election_id={{ election.google_civic_election_id }}&state_code={{ state_code }}">
+          Create Ballot for this Election for one Location</a> (so voters can find a ballot before Google Civic data is live)
+  </li>
+
+  <li>
+      <a href="{% url 'import_export_batches:batch_list' %}?kind_of_batch=IMPORT_BALLOT_ITEM&google_civic_election_id={{ election.google_civic_election_id }}&state_code={{ state_code }}">
+        Import Complete Ballot at One Location (Import/Export Batches)</a>
   </li>
 
   <li>
