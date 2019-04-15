@@ -45,8 +45,9 @@
         (Choose state to add latitude/longitude to polling locations),
     {% endif %}
 
-        <a href="{% url 'polling_location:polling_location_visualize' 0 %}?state_code={{ state_code }}">
-         Google Maps Polling Locations
+        <a href="{% url 'polling_location:polling_location_visualize' 0 %}?state_code={{ state_code }}"
+           target="_blank">
+         Google Maps Polling Locations <span class="glyphicon glyphicon-new-window"></span>
         </a>
     </p>
 
