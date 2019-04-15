@@ -291,6 +291,8 @@ def issues_retrieve_for_api(voter_device_id, sort_formula, google_civic_election
             is_issue_followed = False
             is_issue_ignored = False
         one_issue = {
+            'considered_left':          issue.considered_left,
+            'considered_right':         issue.considered_right,
             'issue_we_vote_id':         issue.we_vote_id,
             'issue_name':               issue.issue_name,
             'issue_description':        issue.issue_description,
