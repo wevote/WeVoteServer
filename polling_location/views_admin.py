@@ -393,6 +393,7 @@ def polling_location_edit_view(request, polling_location_local_id=0, polling_loc
         }
     return render(request, 'polling_location/polling_location_edit.html', template_values)
 
+
 @login_required
 def polling_location_visualize_view(request, polling_location_local_id=0, polling_location_we_vote_id=""):
     authority_required = {'verified_volunteer'}  # admin, verified_volunteer
