@@ -49,7 +49,7 @@ def get_template_filename(kind_of_email_template, text_or_html):
 
 def merge_message_content_with_template(kind_of_email_template, template_variables_in_json):
     success = True
-    status = ""
+    status = "KIND_OF_EMAIL_TEMPLATE: " + str(kind_of_email_template) + " "
     message_text = ""
     message_html = ""
 
@@ -76,7 +76,7 @@ def merge_message_content_with_template(kind_of_email_template, template_variabl
         message_html = html_template.render(template_variables_object)
         status += "RENDERED_HTML_TEMPLATE "
     except Exception as e:
-        status += "FAILED_RENDERING_TEMPLATE "
+        status += "FAILED_RENDERING_TEMPLATE, error: " + str(e) + " "
         success = False
 
     results = {
