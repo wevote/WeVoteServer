@@ -55,7 +55,7 @@ def merge_message_content_with_template(kind_of_email_template, template_variabl
 
     # Transfer JSON template variables back into a dict
     template_variables_dict = json.loads(template_variables_in_json)
-    template_variables_object = Context(template_variables_dict)
+    # template_variables_object = Context(template_variables_dict)  # Used previously with Django 1.8
 
     # Set up the templates
     text_template_path = "email_outbound/email_templates/" + get_template_filename(kind_of_email_template, "TEXT")
@@ -71,9 +71,9 @@ def merge_message_content_with_template(kind_of_email_template, template_variabl
         subject = "From We Vote"
 
     try:
-        message_text = text_template.render(template_variables_object)
+        message_text = text_template.render(template_variables_dict)
         status += "RENDERED_TEXT_TEMPLATE "
-        message_html = html_template.render(template_variables_object)
+        message_html = html_template.render(template_variables_dict)
         status += "RENDERED_HTML_TEMPLATE "
     except Exception as e:
         status += "FAILED_RENDERING_TEMPLATE, error: " + str(e) + " "
