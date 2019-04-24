@@ -290,6 +290,7 @@ def move_email_address_entries_to_another_voter(from_voter_we_vote_id, to_voter_
 
 def schedule_email_with_email_outbound_description(email_outbound_description, send_status=TO_BE_PROCESSED):
     email_manager = EmailManager()
+    status = ""
 
     template_variables_in_json = email_outbound_description.template_variables_in_json
     if positive_value_exists(email_outbound_description.kind_of_email_template):
@@ -305,13 +306,14 @@ def schedule_email_with_email_outbound_description(email_outbound_description, s
         schedule_email_results = email_manager.schedule_email(email_outbound_description, subject,
                                                               message_text, message_html, send_status)
         success = schedule_email_results['success']
-        status = schedule_email_results['status']
+        status += schedule_email_results['status']
         email_scheduled_saved = schedule_email_results['email_scheduled_saved']
         email_scheduled = schedule_email_results['email_scheduled']
         email_scheduled_id = schedule_email_results['email_scheduled_id']
     else:
         success = False
-        status = "SCHEDULE_EMAIL_TEMPLATE_NOT_PROCESSED"
+        status += "SCHEDULE_EMAIL_TEMPLATE_NOT_PROCESSED "
+        status += email_template_results['status'] + " "
         email_scheduled_saved = False
         email_scheduled = EmailScheduled()
         email_scheduled_id = 0
