@@ -98,6 +98,8 @@ def organization_search_doc_template_values(url_root):
                    '     "organization_facebook": string,\n' \
                    '     "organization_email": string,\n' \
                    '     "organization_website": string,\n' \
+                   '     "organization_photo_url_medium": string,\n' \
+                   '     "organization_photo_url_tiny": string,\n' \
                    '   ],\n' \
                    '}'
 

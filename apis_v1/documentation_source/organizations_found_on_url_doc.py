@@ -37,8 +37,19 @@ def organizations_found_on_url_doc_template_values(url_root):
     api_response = '{\n' \
                    '  "status": string,\n' \
                    '  "success": boolean,\n' \
-                   '  "organization_twitter_handle": string,\n' \
-                   '  "voter_linked_organization_we_vote_id": string,\n' \
+                   '  "organization_count": integer,\n' \
+                   '  "organization_list": list\n' \
+                   '   [\n' \
+                   '     "organization_id": integer,\n' \
+                   '     "organization_we_vote_id": string,\n' \
+                   '     "organization_name": string,\n' \
+                   '     "organization_twitter_handle": string,\n' \
+                   '     "organization_facebook": string,\n' \
+                   '     "organization_email": string,\n' \
+                   '     "organization_website": string,\n' \
+                   '     "organization_photo_url_medium": string,\n' \
+                   '     "organization_photo_url_tiny": string,\n' \
+                   '   ],\n' \
                    '}'
 
     template_values = {
