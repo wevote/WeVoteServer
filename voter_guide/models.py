@@ -1175,7 +1175,7 @@ class VoterGuideListManager(models.Model):
         voter_guide_list_found = False
 
         if not type(organization_we_vote_ids_followed_by_voter) is list:
-            status = 'NO_VOTER_GUIDES_FOUND_MISSING_ORGANIZATION_LIST'
+            status = 'NO_VOTER_GUIDES_FOUND_MISSING_ORGANIZATION_LIST '
             success = False
             results = {
                 'success':                      success,
@@ -1186,8 +1186,8 @@ class VoterGuideListManager(models.Model):
             return results
 
         if not len(organization_we_vote_ids_followed_by_voter):
-            status = 'NO_VOTER_GUIDES_FOUND_NO_ORGANIZATIONS_IN_LIST'
-            success = False
+            status = 'NO_VOTER_GUIDES_FOUND_NO_ORGANIZATIONS_IN_LIST '
+            success = True
             results = {
                 'success':                      success,
                 'status':                       status,
@@ -1211,14 +1211,14 @@ class VoterGuideListManager(models.Model):
 
             if len(voter_guide_list):
                 voter_guide_list_found = True
-                status = 'VOTER_GUIDES_FOUND_BY_ORGANIZATION_LIST'
+                status = 'VOTER_GUIDES_FOUND_BY_ORGANIZATION_LIST '
             else:
-                status = 'NO_VOTER_GUIDES_FOUND_BY_ORGANIZATION_LIST'
+                status = 'NO_VOTER_GUIDES_FOUND_BY_ORGANIZATION_LIST '
             success = True
         except Exception as e:
             handle_record_not_found_exception(e, logger=logger)
             status = 'RETRIEVE_VOTER_GUIDES_BY_ORGANIZATION_LIST: Unable to retrieve voter guides from db. ' \
-                     '{error} [type: {error_type}]'.format(error=e.message, error_type=type(e))
+                     '{error} [type: {error_type}] '.format(error=e.message, error_type=type(e))
             success = False
 
         # If we have multiple voter guides for one org, we only want to show the most recent

@@ -30,6 +30,7 @@ from import_export_twitter.controllers import refresh_twitter_organization_detai
 from issue.models import IssueListManager
 from measure.controllers import add_measure_name_alternatives_to_measure_list_light, \
     retrieve_measure_list_for_all_upcoming_elections
+from voter_guide.controllers_possibility import organizations_found_on_url
 from organization.models import GROUP, Organization, OrganizationListManager, OrganizationManager
 from organization.views_admin import organization_edit_process_view
 from position.models import PositionEntered, PositionForFriends, PositionListManager
@@ -341,102 +342,22 @@ def voter_guide_create_view(request):
                                      'We found {count} organizations that might match.'
                                      ''.format(count=organizations_count))
     elif positive_value_exists(voter_guide_possibility_url) and not positive_value_exists(clear_organization_options):
-        facebook_page_list = []
-        twitter_or_facebook_found = False
-        twitter_handle_list = []
+        scrape_results = organizations_found_on_url(voter_guide_possibility_url, state_code)
 
-        retrieve_list = True
-        scrape_results = scrape_social_media_from_one_site(voter_guide_possibility_url, retrieve_list)
+        organizations_list = scrape_results['organization_list']
+        organization_count = scrape_results['organization_count']
 
-        # Only include a change if we have a new value (do not try to save blank value)
-        if scrape_results['twitter_handle_found'] and positive_value_exists(scrape_results['twitter_handle']):
-            twitter_handle_list = scrape_results['twitter_handle_list']
-            twitter_or_facebook_found = True
-
-        if scrape_results['facebook_page_found'] and positive_value_exists(scrape_results['facebook_page']):
-            facebook_page_list = scrape_results['facebook_page_list']
-            twitter_or_facebook_found = True
-
-        if twitter_or_facebook_found:
-            # Search for organizations that match (by Twitter Handle)
-            twitter_handle_list_modified = []
-            for one_twitter_handle in twitter_handle_list:
-                if positive_value_exists(one_twitter_handle):
-                    one_twitter_handle = one_twitter_handle.strip()
-                if positive_value_exists(one_twitter_handle):
-                    twitter_handle_lower = one_twitter_handle.lower()
-                    twitter_handle_lower = extract_twitter_handle_from_text_string(twitter_handle_lower)
-                    if twitter_handle_lower not in twitter_handle_list_modified:
-                        twitter_handle_list_modified.append(twitter_handle_lower)
-
-            # Search for organizations that match (by Facebook page)
-            facebook_page_list_modified = []
-            for one_facebook_page in facebook_page_list:
-                if positive_value_exists(one_facebook_page):
-                    one_facebook_page = one_facebook_page.strip()
-                if positive_value_exists(one_facebook_page):
-                    one_facebook_page_lower = one_facebook_page.lower()
-                    one_facebook_page_lower = extract_facebook_username_from_text_string(one_facebook_page_lower)
-                    if one_facebook_page_lower not in facebook_page_list_modified:
-                        facebook_page_list_modified.append(one_facebook_page_lower)
-
-            # We want to create an organization for each Twitter handle we find on the page so it can be chosen below
-            for one_twitter_handle in twitter_handle_list_modified:
-                one_organization_found = False
-                results = twitter_user_manager.retrieve_twitter_link_to_organization_from_twitter_handle(
-                    one_twitter_handle)
-                if results['twitter_link_to_organization_found']:
-                    twitter_link_to_organization = results['twitter_link_to_organization']
-                    organization_results = organization_manager.retrieve_organization_from_we_vote_id(
-                        twitter_link_to_organization.organization_we_vote_id)
-                    if organization_results['organization_found']:
-                        one_organization_found = True
-                twitter_user_id = 0
-                twitter_results = twitter_user_manager.retrieve_twitter_user_locally_or_remotely(
-                    twitter_user_id, one_twitter_handle)
-                if twitter_results['twitter_user_found']:
-                    twitter_user = twitter_results['twitter_user']
-                    twitter_user_id = twitter_user.twitter_id
-                if not one_organization_found and positive_value_exists(twitter_user_id):
-                    organization_name = ""
-                    if not positive_value_exists(state_code):
-                        state_code = None
-                    create_results = organization_manager.create_organization(
-                        organization_name=organization_name,
-                        organization_type=GROUP,
-                        organization_twitter_handle=one_twitter_handle,
-                        state_served_code=state_code)
-                    if create_results['organization_created']:
-                        one_organization = create_results['organization']
-
-                        # Create TwitterLinkToOrganization
-                        link_results = twitter_user_manager.create_twitter_link_to_organization(
-                            twitter_user_id, one_organization.we_vote_id)
-                        # Refresh the organization with the Twitter details
-                        refresh_twitter_organization_details(one_organization, twitter_user_id)
-
-            voter_guide_website = extract_website_from_url(voter_guide_possibility_url)
-            results = organization_list_manager.organization_search_find_any_possibilities(
-                organization_website=voter_guide_website,
-                facebook_page_list=facebook_page_list_modified,
-                twitter_handle_list=twitter_handle_list_modified
-            )
-
-            if results['organizations_found']:
-                organizations_list = results['organizations_list']
-                organizations_count = len(organizations_list)
-
-                if organizations_count == 0:
-                    pass
-                    # messages.add_message(request, messages.INFO, 'We did not find any organizations that match.')
-                elif organizations_count == 1:
-                    messages.add_message(request, messages.INFO,
-                                         'We found {count} organization that might match.'
-                                         ''.format(count=organizations_count))
-                else:
-                    messages.add_message(request, messages.INFO,
-                                         'We found {count} organizations that might match.'
-                                         ''.format(count=organizations_count))
+        if organization_count == 0:
+            pass
+            # messages.add_message(request, messages.INFO, 'We did not find any organizations that match.')
+        elif organization_count == 1:
+            messages.add_message(request, messages.INFO,
+                                 'We found {count} organization that might match.'
+                                 ''.format(count=organization_count))
+        else:
+            messages.add_message(request, messages.INFO,
+                                 'We found {count} organizations that might match.'
+                                 ''.format(count=organization_count))
 
     number_of_ballot_items = voter_guide_possibility_manager.number_of_ballot_items(voter_guide_possibility_id)
 

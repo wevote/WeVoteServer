@@ -1616,7 +1616,7 @@ class OrganizationListManager(models.Manager):
 
             if len(organization_objects_list):
                 organizations_found = True
-                status = 'ORGANIZATIONS_RETRIEVED'
+                status = 'ORGANIZATIONS_RETRIEVED '
                 for organization in organization_objects_list:
                     one_organization_json = {
                         'organization_id': organization.id,
@@ -1635,16 +1635,18 @@ class OrganizationListManager(models.Manager):
                         'organization_facebook':
                             organization.organization_facebook if positive_value_exists(
                                 organization.organization_facebook) else '',
+                        'organization_photo_url_medium': organization.we_vote_hosted_profile_image_url_medium,
+                        'organization_photo_url_tiny': organization.we_vote_hosted_profile_image_url_tiny,
                     }
                     organization_list_for_json.append(one_organization_json)
             else:
                 organizations_found = False
-                status = 'NO_ORGANIZATIONS_RETRIEVED'
+                status = 'NO_ORGANIZATIONS_RETRIEVED '
             success = True
         except Organization.DoesNotExist:
             # No organizations found. Not a problem.
             organizations_found = False
-            status = 'NO_ORGANIZATIONS_FOUND_DoesNotExist'
+            status = 'NO_ORGANIZATIONS_FOUND_DoesNotExist '
             success = True  # We are still successful if no organizations are found
         except Exception as e:
             organizations_found = False
