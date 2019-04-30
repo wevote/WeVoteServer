@@ -15,8 +15,8 @@ from follow.controllers import organization_suggestion_tasks_for_api
 import json
 from organization.controllers import organization_retrieve_for_api, organization_save_for_api, \
     organization_search_for_api, organizations_followed_retrieve_for_api
-from organization.models import UNKNOWN
 from voter.models import voter_has_authority, VoterManager
+from voter_guide.controllers_possibility import organizations_found_on_url
 import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, get_voter_device_id, \
     get_maximum_number_to_retrieve_from_request, positive_value_exists
@@ -66,6 +66,34 @@ def organization_follow_ignore_api_view(request):  # organizationFollowIgnore
     return organization_follow_ignore(voter_device_id=voter_device_id, organization_id=organization_id,
                                       organization_we_vote_id=organization_we_vote_id,
                                       user_agent_string=user_agent_string, user_agent_object=user_agent_object)
+
+
+def organizations_found_on_url_api_view(request):  # organizationsFoundOnUrl
+    """
+    Take in a web page and find all organizations that have a Twitter handle or Facebook page listed on that web page
+    :param request:
+    :return:
+    """
+    url_to_scan = request.GET.get('url_to_scan', '')
+    state_code = request.GET.get('state_code', '')
+    scan_results = organizations_found_on_url(
+        url_to_scan=url_to_scan,
+        state_code=state_code,
+    )
+
+    organization_list_for_json = []
+    success = scan_results['success']
+    status = scan_results['status']
+    if positive_value_exists(scan_results['organization_count']):
+        organization_list_for_json = scan_results['organization_list']
+
+    json_data = {
+        'status':               status,
+        'success':              success,
+        'url_to_scan':          url_to_scan,
+        'organization_list':    organization_list_for_json,
+    }
+    return HttpResponse(json.dumps(json_data), content_type='application/json')
 
 
 def organization_retrieve_view(request):

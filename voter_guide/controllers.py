@@ -2849,7 +2849,7 @@ def retrieve_voter_guides_followed(voter_id):
             voter_guide_list_found = True
     else:
         status = results['status']
-        success = False
+        success = results['success']
 
     results = {
         'success':                      success,
@@ -2890,7 +2890,7 @@ def retrieve_voter_guides_followed_by_organization_we_vote_id(organization_we_vo
             voter_guide_list_found = True
     else:
         status = results['status']
-        success = False
+        success = results['success']
 
     results = {
         'success':                      success,
@@ -3055,7 +3055,7 @@ def retrieve_voter_guides_ignored(voter_id):  # voterGuidesIgnoredRetrieve
             voter_guide_list_found = True
     else:
         status = results['status']
-        success = False
+        success = results['success']
 
     results = {
         'success':                      success,

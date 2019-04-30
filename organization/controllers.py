@@ -24,7 +24,8 @@ from twitter.models import TwitterUserManager
 from voter.models import fetch_voter_id_from_voter_device_link, VoterManager, Voter
 from voter_guide.models import VoterGuide, VoterGuideManager, VoterGuideListManager
 import wevote_functions.admin
-from wevote_functions.functions import convert_to_int, extract_twitter_handle_from_text_string, positive_value_exists, \
+from wevote_functions.functions import convert_to_int, \
+    extract_twitter_handle_from_text_string, positive_value_exists, \
     process_request_from_master
 import tweepy
 import re
