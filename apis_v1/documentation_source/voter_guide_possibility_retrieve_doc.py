@@ -18,18 +18,19 @@ def voter_guide_possibility_retrieve_doc_template_values(url_root):
             'value':        'string (from post, cookie, or get (in that order))',  # boolean, integer, long, string
             'description':  'The unique key provided to any organization using the WeVoteServer APIs',
         },
+    ]
+    optional_query_parameter_list = [
         {
             'name':         'url_to_scan',
             'value':        'string',  # boolean, integer, long, string
-            'description':  'The url where a voter guide can be found.',
+            'description':  'The url where a voter guide can be found. '
+                            'Either this url or the voter_guide_possibility_id is required.',
         },
-    ]
-    optional_query_parameter_list = [
-        # {
-        #     'name':         '',
-        #     'value':        '',  # boolean, integer, long, string
-        #     'description':  '',
-        # },
+        {
+            'name':         'voter_guide_possibility_id',
+            'value':        'integer',  # boolean, integer, long, string
+            'description':  'Either this id or a url_to_scan is required.',
+        },
     ]
 
     potential_status_codes_list = [
@@ -57,16 +58,18 @@ def voter_guide_possibility_retrieve_doc_template_values(url_root):
 
     try_now_link_variables_dict = {
         'url_to_scan':
-            'http://ww2.kqed.org/news/2015/10/25/guide-to-san-francisco-2015-ballot-propositions-a-to-k',
+            'https://projects.sfchronicle.com/2018/voter-guide/endorsements-list/',
     }
 
     api_response = '{\n' \
                    '  "status": string,\n' \
                    '  "success": boolean,\n' \
                    '  "candidates_missing_from_we_vote": boolean,\n' \
+                   '  "cannot_find_endorsements": boolean,\n' \
                    '  "capture_detailed_comments": boolean,\n' \
                    '  "contributor_comments": string,\n' \
                    '  "contributor_email": string,\n' \
+                   '  "hide_from_active_review": boolean,\n' \
                    '  "ignore_this_source": boolean,\n' \
                    '  "internal_notes": string,\n' \
                    '  "possible_organization_name": string,\n' \

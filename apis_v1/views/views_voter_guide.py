@@ -19,8 +19,6 @@ from wevote_functions.functions import convert_to_int, get_maximum_number_to_ret
 
 logger = wevote_functions.admin.get_logger(__name__)
 
-WE_VOTE_SERVER_ROOT_URL = get_environment_variable("WE_VOTE_SERVER_ROOT_URL")
-
 
 def voter_guide_possibility_retrieve_view(request):  # voterGuidePossibilityRetrieve
     """
@@ -30,7 +28,9 @@ def voter_guide_possibility_retrieve_view(request):  # voterGuidePossibilityRetr
     """
     voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
     url_to_scan = request.GET.get('url_to_scan', '')
+    voter_guide_possibility_id = request.GET.get('voter_guide_possibility_id', 0)
     return voter_guide_possibility_retrieve_for_api(voter_device_id=voter_device_id,
+                                                    voter_guide_possibility_id=voter_guide_possibility_id,
                                                     url_to_scan=url_to_scan)
 
 

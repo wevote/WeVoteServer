@@ -1985,8 +1985,9 @@ class VoterGuidePossibilityManager(models.Manager):
                 success = True
             elif positive_value_exists(voter_guide_possibility_url):
                 status += "RETRIEVING_VOTER_GUIDE_POSSIBILITY_WITH_URL "  # Set this in case the get fails
-                voter_guide_possibility_on_stage = VoterGuidePossibility.objects.get(
+                voter_guide_possibility_query = VoterGuidePossibility.objects.filter(
                     voter_guide_possibility_url=voter_guide_possibility_url)
+                voter_guide_possibility_on_stage = voter_guide_possibility_query.first()
                 voter_guide_possibility_on_stage_id = voter_guide_possibility_on_stage.id
                 status += "VOTER_GUIDE_POSSIBILITY_FOUND_WITH_URL "
                 success = True
@@ -2013,17 +2014,15 @@ class VoterGuidePossibilityManager(models.Manager):
             else:
                 status += "VOTER_GUIDE_POSSIBILITY_NOT_FOUND_INSUFFICIENT_VARIABLES "
                 success = False
-        except VoterGuidePossibility.MultipleObjectsReturned as e:
-            handle_record_found_more_than_one_exception(e, logger)
-            error_result = True
-            exception_multiple_object_returned = True
-            status += ", ERROR_MORE_THAN_ONE_VOTER_GUIDE_POSSIBILITY_FOUND "
-            success = False
         except VoterGuidePossibility.DoesNotExist:
             error_result = True
             exception_does_not_exist = True
             status += "VOTER_GUIDE_POSSIBILITY_NOT_FOUND "
             success = True
+        except Exception as e:
+            error_result = True
+            status += ", ERROR_RETRIEVING_VOTER_GUIDE_POSSIBILITY: " + str(e)
+            success = False
 
         voter_guide_possibility_on_stage_found = True if voter_guide_possibility_on_stage_id > 0 else False
         results = {
