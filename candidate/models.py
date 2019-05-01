@@ -206,7 +206,8 @@ class CandidateCampaignListManager(models.Model):
 
     def retrieve_candidates_for_specific_elections(self, google_civic_election_id_list=[],
                                                    limit_to_this_state_code="",
-                                                   return_list_of_objects=False):
+                                                   return_list_of_objects=False,
+                                                   super_light_candidate_list=False):
         status = ""
         candidate_list_objects = []
         candidate_list_light = []
@@ -251,16 +252,24 @@ class CandidateCampaignListManager(models.Model):
 
         if candidate_list_found:
             for candidate in candidate_list_objects:
-                one_candidate = {
-                    'ballot_item_display_name':   candidate.display_candidate_name(),
-                    'display_name_alternatives_list':   candidate.display_name_alternatives_list(),
-                    'ballot_item_website':        candidate.candidate_url,
-                    'candidate_contact_form_url': candidate.candidate_contact_form_url,
-                    'candidate_we_vote_id':       candidate.we_vote_id,
-                    'google_civic_election_id':   candidate.google_civic_election_id,
-                    'office_we_vote_id':          candidate.contest_office_we_vote_id,
-                    'measure_we_vote_id':       '',
-                }
+                if positive_value_exists(super_light_candidate_list):
+                    one_candidate = {
+                        'ballot_item_display_name':         candidate.display_candidate_name(),
+                        'alternate_names':   candidate.display_alternate_names_list(),
+                        'candidate_we_vote_id':             candidate.we_vote_id,
+                        'measure_we_vote_id':               '',
+                    }
+                else:
+                    one_candidate = {
+                        'ballot_item_display_name':   candidate.display_candidate_name(),
+                        'alternate_names':   candidate.display_alternate_names_list(),
+                        'ballot_item_website':        candidate.candidate_url,
+                        'candidate_contact_form_url': candidate.candidate_contact_form_url,
+                        'candidate_we_vote_id':       candidate.we_vote_id,
+                        'google_civic_election_id':   candidate.google_civic_election_id,
+                        'office_we_vote_id':          candidate.contest_office_we_vote_id,
+                        'measure_we_vote_id':       '',
+                    }
                 candidate_list_light.append(one_candidate)
 
         results = {
@@ -1290,17 +1299,17 @@ class CandidateCampaign(models.Model):
             return full_name_corrected_capitalization
         return full_name
 
-    def display_name_alternatives_list(self):
-        display_name_alternatives_list = []
+    def display_alternate_names_list(self):
+        alternate_names = []
         if self.ballotpedia_candidate_name and (self.ballotpedia_candidate_name != self.display_candidate_name()):
-            display_name_alternatives_list.append(self.ballotpedia_candidate_name)
+            alternate_names.append(self.ballotpedia_candidate_name)
         if self.google_civic_candidate_name and (self.google_civic_candidate_name != self.display_candidate_name()):
-            display_name_alternatives_list.append(self.google_civic_candidate_name)
+            alternate_names.append(self.google_civic_candidate_name)
         if self.google_civic_candidate_name2 and (self.google_civic_candidate_name2 != self.display_candidate_name()):
-            display_name_alternatives_list.append(self.google_civic_candidate_name2)
+            alternate_names.append(self.google_civic_candidate_name2)
         if self.google_civic_candidate_name3 and (self.google_civic_candidate_name3 != self.display_candidate_name()):
-            display_name_alternatives_list.append(self.google_civic_candidate_name3)
-        return display_name_alternatives_list
+            alternate_names.append(self.google_civic_candidate_name3)
+        return alternate_names
 
     def extract_title(self):
         full_name = self.display_candidate_name()

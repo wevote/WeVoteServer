@@ -38,8 +38,10 @@ def candidate_list_for_upcoming_elections_retrieve_api_view(request):  # candida
     # We will need all candidates for all upcoming elections so we can search the HTML of
     #  the possible voter guide for these names
     candidate_list_light = []
+    super_light = True  # limit the response package
     results = retrieve_candidate_list_for_all_upcoming_elections(google_civic_election_id_list,
-                                                                 limit_to_this_state_code=state_code)
+                                                                 limit_to_this_state_code=state_code,
+                                                                 super_light_candidate_list=super_light)
     if results['candidate_list_found']:
         candidate_list_light = results['candidate_list_light']
 
