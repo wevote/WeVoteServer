@@ -486,6 +486,7 @@ def retrieve_measure_list_for_all_upcoming_elections(upcoming_google_civic_elect
         'measure_list_objects':   measure_list_objects if return_list_of_objects else [],
         'measure_list_light':     measure_list_light,
         'return_list_of_objects':   return_list_of_objects,
+        'google_civic_election_id_list': upcoming_google_civic_election_id_list,
     }
     return results
 

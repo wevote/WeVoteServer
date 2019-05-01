@@ -1040,9 +1040,9 @@ def voter_guides_import_from_structured_json(structured_json):
     return voter_guides_results
 
 
-def voter_guide_possibility_retrieve_for_api(voter_device_id, voter_guide_possibility_url):
+def voter_guide_possibility_retrieve_for_api(voter_device_id, url_to_scan):
     results = is_voter_device_id_valid(voter_device_id)
-    voter_guide_possibility_url = voter_guide_possibility_url  # TODO Use scrapy here
+    # url_to_scan = url_to_scan  # TODO Use scrapy here
     if not results['success']:
         return HttpResponse(json.dumps(results['json_data']), content_type='application/json')
 
@@ -1058,27 +1058,66 @@ def voter_guide_possibility_retrieve_for_api(voter_device_id, voter_guide_possib
     # TODO We will need the voter_id here so we can control volunteer actions
 
     voter_guide_possibility_manager = VoterGuidePossibilityManager()
-    results = voter_guide_possibility_manager.retrieve_voter_guide_possibility_from_url(voter_guide_possibility_url)
+    results = voter_guide_possibility_manager.retrieve_voter_guide_possibility_from_url(url_to_scan)
+
+    organization_we_vote_id = results['organization_we_vote_id']
+
+    candidates_missing_from_we_vote = False
+    capture_detailed_comments = False
+    contributor_email = ""
+    contributor_comments = ""
+    ignore_this_source = False
+    internal_notes = ""
+    possible_organization_name = ""
+    possible_organization_twitter_handle = ""
+    state_limited_to = ""
+    if results['voter_guide_possibility_found']:
+        voter_guide_possibility = results['voter_guide_possibility']
+
+    organization_dict = {}
+    if positive_value_exists(organization_we_vote_id):
+        organization_manager = OrganizationManager()
+        organization_results = organization_manager.retrieve_organization_from_we_vote_id(organization_we_vote_id)
+        if organization_results['organization_found']:
+            organization = organization_results['organization']
+            organization_dict = {
+                'organization_we_vote_id': organization_we_vote_id,
+                'organization_name': organization.organization_name,
+                'organization_website': organization.organization_website,
+                'organization_twitter_handle': organization.organization_twitter_handle,
+                'organization_email': organization.organization_email,
+                'organization_facebook': organization.organization_facebook,
+                'we_vote_hosted_profile_image_url_medium': organization.we_vote_hosted_profile_image_url_medium,
+                'we_vote_hosted_profile_image_url_tiny': organization.we_vote_hosted_profile_image_url_tiny,
+            }
 
     json_data = {
-        'voter_device_id':              voter_device_id,
-        'voter_guide_possibility_url':  results['voter_guide_possibility_url'],
-        'voter_guide_possibility_id':   results['voter_guide_possibility_id'],
-        'organization_we_vote_id':      results['organization_we_vote_id'],
-        'public_figure_we_vote_id':     results['public_figure_we_vote_id'],
-        'owner_we_vote_id':             results['owner_we_vote_id'],
-        'status':                       results['status'],
-        'success':                      results['success'],
+        'status':                               results['status'],
+        'success':                              results['success'],
+        'candidates_missing_from_we_vote':      candidates_missing_from_we_vote,
+        'capture_detailed_comments':            capture_detailed_comments,
+        'contributor_email':                    contributor_email,
+        'contributor_comments':                 contributor_comments,
+        'ignore_this_source':                   ignore_this_source,
+        'internal_notes':                       internal_notes,
+        'organization':                         organization_dict,
+        'possible_organization_name':           possible_organization_name,
+        'possible_organization_twitter_handle': possible_organization_twitter_handle,
+        'state_limited_to':                     state_limited_to,
+        'url_to_scan':                          url_to_scan,
+        'voter_device_id':                      voter_device_id,
+        'voter_guide_possibility_url':          results['voter_guide_possibility_url'],
+        'voter_guide_possibility_id':           results['voter_guide_possibility_id'],
     }
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 
 
-def voter_guide_possibility_save_for_api(voter_device_id, voter_guide_possibility_url):
+def voter_guide_possibility_save_for_api(voter_device_id, url_to_scan):
     results = is_voter_device_id_valid(voter_device_id)
     if not results['success']:
         return HttpResponse(json.dumps(results['json_data']), content_type='application/json')
 
-    if not voter_guide_possibility_url:
+    if not url_to_scan:
         json_data = {
                 'status': "MISSING_POST_VARIABLE-URL",
                 'success': False,
@@ -1101,13 +1140,13 @@ def voter_guide_possibility_save_for_api(voter_device_id, voter_guide_possibilit
 
     # We wrap get_or_create because we want to centralize error handling
     results = voter_guide_possibility_manager.update_or_create_voter_guide_possibility(
-        voter_guide_possibility_url.strip())
+        url_to_scan.strip())
     if results['success']:
         json_data = {
                 'status': "VOTER_GUIDE_POSSIBILITY_SAVED",
                 'success': True,
                 'voter_device_id': voter_device_id,
-                'voter_guide_possibility_url': voter_guide_possibility_url,
+                'url_to_scan': url_to_scan,
             }
 
     # elif results['status'] == 'MULTIPLE_MATCHING_ADDRESSES_FOUND':

@@ -37,6 +37,7 @@ def organizations_found_on_url_doc_template_values(url_root):
     api_response = '{\n' \
                    '  "status": string,\n' \
                    '  "success": boolean,\n' \
+                   '  "url_to_scan": string,\n' \
                    '  "organization_count": integer,\n' \
                    '  "organization_list": list\n' \
                    '   [\n' \

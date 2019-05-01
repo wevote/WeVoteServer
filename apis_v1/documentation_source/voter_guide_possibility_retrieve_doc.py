@@ -19,7 +19,7 @@ def voter_guide_possibility_retrieve_doc_template_values(url_root):
             'description':  'The unique key provided to any organization using the WeVoteServer APIs',
         },
         {
-            'name':         'voter_guide_possibility_url',
+            'name':         'url_to_scan',
             'value':        'string',  # boolean, integer, long, string
             'description':  'The url where a voter guide can be found.',
         },
@@ -56,19 +56,37 @@ def voter_guide_possibility_retrieve_doc_template_values(url_root):
     ]
 
     try_now_link_variables_dict = {
-        'voter_guide_possibility_url':
+        'url_to_scan':
             'http://ww2.kqed.org/news/2015/10/25/guide-to-san-francisco-2015-ballot-propositions-a-to-k',
     }
 
     api_response = '{\n' \
                    '  "status": string,\n' \
                    '  "success": boolean,\n' \
+                   '  "candidates_missing_from_we_vote": boolean,\n' \
+                   '  "capture_detailed_comments": boolean,\n' \
+                   '  "contributor_comments": string,\n' \
+                   '  "contributor_email": string,\n' \
+                   '  "ignore_this_source": boolean,\n' \
+                   '  "internal_notes": string,\n' \
+                   '  "possible_organization_name": string,\n' \
+                   '  "possible_organization_twitter_handle": string,\n' \
+                   '  "state_limited_to": string,\n' \
+                   '  "url_to_scan": string,\n' \
                    '  "voter_device_id": string (88 characters long),\n' \
                    '  "voter_guide_possibility_url": string,\n' \
                    '  "voter_guide_possibility_id": integer,\n' \
-                   '  "organization_we_vote_id": string,\n' \
-                   '  "public_figure_we_vote_id": string,\n' \
-                   '  "owner_we_vote_id": string,\n' \
+                   '  "organization": dict\n' \
+                   '   {\n' \
+                   '     "organization_we_vote_id": string,\n' \
+                   '     "organization_name": string,\n' \
+                   '     "organization_website": string,\n' \
+                   '     "organization_twitter_handle": string,\n' \
+                   '     "organization_email": string,\n' \
+                   '     "organization_facebook": string,\n' \
+                   '     "we_vote_hosted_profile_image_url_medium": string,\n'\
+                   '     "we_vote_hosted_profile_image_url_tiny": string,\n' \
+                   '   },\n' \
                    '}'
 
     template_values = {

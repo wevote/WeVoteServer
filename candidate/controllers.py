@@ -1358,10 +1358,11 @@ def retrieve_candidate_list_for_all_upcoming_elections(upcoming_google_civic_ele
     results = {
         'success': success,
         'status': status,
-        'candidate_list_found':     candidate_list_found,
-        'candidate_list_objects':   candidate_list_objects if return_list_of_objects else [],
-        'candidate_list_light':     candidate_list_light,
-        'return_list_of_objects':   return_list_of_objects,
+        'candidate_list_found':             candidate_list_found,
+        'candidate_list_objects':           candidate_list_objects if return_list_of_objects else [],
+        'candidate_list_light':             candidate_list_light,
+        'google_civic_election_id_list':    upcoming_google_civic_election_id_list,
+        'return_list_of_objects':           return_list_of_objects,
     }
     return results
 

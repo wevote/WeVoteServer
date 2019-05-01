@@ -11,7 +11,7 @@ from django.conf.urls import url
 from django.conf.urls.static import static
 
 from apis_v1.views import views_docs, views_analytics, views_ballot, views_candidate, views_donation, \
-    views_election, views_facebook, views_friend, views_issues, views_misc, views_organization, \
+    views_election, views_facebook, views_friend, views_issues, views_measure, views_misc, views_organization, \
     views_pledge_to_vote, views_position, views_task, views_twitter, views_voter, views_voter_guide
 from ballot.views_admin import ballot_items_sync_out_view, ballot_returned_sync_out_view
 from candidate.views_admin import candidates_sync_out_view
@@ -34,6 +34,9 @@ urlpatterns = [
     url(r'^ballotItemsSyncOut/', ballot_items_sync_out_view, name='ballotItemsSyncOutView'),
     url(r'^ballotReturnedSyncOut/', ballot_returned_sync_out_view, name='ballotReturnedSyncOutView'),
     url(r'^candidateRetrieve/', views_candidate.candidate_retrieve_view, name='candidateRetrieveView'),
+    url(r'^candidateListForUpcomingElectionsRetrieve/',
+        views_candidate.candidate_list_for_upcoming_elections_retrieve_api_view,
+        name='candidateListForUpcomingElectionsRetrieveView'),
     url(r'^candidatesRetrieve/', views_candidate.candidates_retrieve_view, name='candidatesRetrieveView'),
     url(r'^candidatesSyncOut/', candidates_sync_out_view, name='candidatesSyncOutView'),
     url(r'^deviceIdGenerate/$', views_misc.device_id_generate_view, name='deviceIdGenerateView'),
@@ -66,8 +69,11 @@ urlpatterns = [
         name='issuesToLinkToForOrganizationView'),
     url(r'^issuesRetrieve/', issues_retrieve_view, name='issuesRetrieveView'),
     url(r'^issuesSyncOut/', issues_sync_out_view, name='issuesSyncOutView'),
-    url(r'^measureRetrieve/', views_misc.measure_retrieve_view, name='measureRetrieveView'),
+    url(r'^measureRetrieve/', views_measure.measure_retrieve_view, name='measureRetrieveView'),
     url(r'^measuresSyncOut/', measures_sync_out_view, name='measuresSyncOutView'),
+    url(r'^measureListForUpcomingElectionsRetrieve/',
+        views_measure.measure_list_for_upcoming_elections_retrieve_api_view,
+        name='measureListForUpcomingElectionsRetrieveView'),
     url(r'^officeRetrieve/', views_misc.office_retrieve_view, name='officeRetrieveView'),
     url(r'^officesSyncOut/', offices_sync_out_view, name='officesSyncOutView'),
     url(r'^organizationCount/', views_organization.organization_count_view, name='organizationCountView'),
@@ -230,6 +236,9 @@ urlpatterns = [
     url(r'^docs/ballotReturnedSyncOut/$',
         views_docs.ballot_returned_sync_out_doc_view, name='ballotReturnedSyncOutDocs'),
     url(r'^docs/candidateRetrieve/$', views_docs.candidate_retrieve_doc_view, name='candidateRetrieveDocs'),
+    url(r'^docs/candidateListForUpcomingElectionsRetrieve/$',
+        views_docs.candidate_list_for_upcoming_elections_retrieve_doc_view,
+        name='candidateListForUpcomingElectionsRetrieveDocs'),
     url(r'^docs/candidatesRetrieve/$', views_docs.candidates_retrieve_doc_view, name='candidatesRetrieveDocs'),
     url(r'^docs/candidatesSyncOut/$', views_docs.candidates_sync_out_doc_view, name='candidatesSyncOutDocs'),
     url(r'^docs/deviceIdGenerate/$', views_docs.device_id_generate_doc_view, name='deviceIdGenerateDocs'),
@@ -261,6 +270,9 @@ urlpatterns = [
         name='issuesToLinkToForOrganizationDocs'),
     url(r'^docs/measureRetrieve/$', views_docs.measure_retrieve_doc_view, name='measureRetrieveDocs'),
     url(r'^docs/measuresSyncOut/$', views_docs.measures_sync_out_doc_view, name='measuresSyncOutDocs'),
+    url(r'^docs/measureListForUpcomingElectionsRetrieve/$',
+        views_docs.measure_list_for_upcoming_elections_retrieve_doc_view,
+        name='measureListForUpcomingElectionsRetrieveDocs'),
     url(r'^docs/officeRetrieve/$', views_docs.office_retrieve_doc_view, name='officeRetrieveDocs'),
     url(r'^docs/officeSyncOut/$', views_docs.offices_sync_out_doc_view, name='officesSyncOutDocs'),
     url(r'^docs/organizationCount/$', views_docs.organization_count_doc_view, name='organizationCountDocs'),

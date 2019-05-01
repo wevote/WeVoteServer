@@ -253,6 +253,7 @@ class CandidateCampaignListManager(models.Model):
             for candidate in candidate_list_objects:
                 one_candidate = {
                     'ballot_item_display_name':   candidate.display_candidate_name(),
+                    'display_name_alternatives_list':   candidate.display_name_alternatives_list(),
                     'ballot_item_website':        candidate.candidate_url,
                     'candidate_contact_form_url': candidate.candidate_contact_form_url,
                     'candidate_we_vote_id':       candidate.we_vote_id,
@@ -1288,6 +1289,18 @@ class CandidateCampaign(models.Model):
             full_name_corrected_capitalization = display_full_name_with_correct_capitalization(full_name)
             return full_name_corrected_capitalization
         return full_name
+
+    def display_name_alternatives_list(self):
+        display_name_alternatives_list = []
+        if self.ballotpedia_candidate_name and (self.ballotpedia_candidate_name != self.display_candidate_name()):
+            display_name_alternatives_list.append(self.ballotpedia_candidate_name)
+        if self.google_civic_candidate_name and (self.google_civic_candidate_name != self.display_candidate_name()):
+            display_name_alternatives_list.append(self.google_civic_candidate_name)
+        if self.google_civic_candidate_name2 and (self.google_civic_candidate_name2 != self.display_candidate_name()):
+            display_name_alternatives_list.append(self.google_civic_candidate_name2)
+        if self.google_civic_candidate_name3 and (self.google_civic_candidate_name3 != self.display_candidate_name()):
+            display_name_alternatives_list.append(self.google_civic_candidate_name3)
+        return display_name_alternatives_list
 
     def extract_title(self):
         full_name = self.display_candidate_name()
