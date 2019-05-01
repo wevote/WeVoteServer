@@ -404,19 +404,19 @@ def match_endorsement_list_with_candidates_in_database(
                         break
 
         if not possible_endorsement_matched:
-            # We want to check 'display_name_alternatives_list' candidate names in upcoming elections
-            # (ex/ Candidate name with middle initial in display_name_alternatives_list)
+            # We want to check 'alternate_names' candidate names in upcoming elections
+            # (ex/ Candidate name with middle initial in alternate_names)
             #  against the possible endorsement ()
             # NOTE: one_endorsement_light is a candidate or measure for an upcoming election
             # NOTE: possible endorsement is one of the incoming new endorsements we are trying to match
             synonym_found = False
             for one_endorsement_light in possible_endorsement_list_light:
-                # Hanging off each ballot_item_dict is a display_name_alternatives_list that includes
+                # Hanging off each ballot_item_dict is a alternate_names that includes
                 #  shortened alternative names that we should check against decide_line_lower_case
-                if 'display_name_alternatives_list' in one_endorsement_light and \
-                        positive_value_exists(one_endorsement_light['display_name_alternatives_list']):
-                    display_name_alternatives_list = one_endorsement_light['display_name_alternatives_list']
-                    for ballot_item_display_name_alternate in display_name_alternatives_list:
+                if 'alternate_names' in one_endorsement_light and \
+                        positive_value_exists(one_endorsement_light['alternate_names']):
+                    alternate_names = one_endorsement_light['alternate_names']
+                    for ballot_item_display_name_alternate in alternate_names:
                         if ballot_item_display_name_alternate.lower() in \
                                 possible_endorsement['ballot_item_name'].lower():
                             # Make a copy so we don't change the incoming object -- if we find multiple upcoming
@@ -540,17 +540,17 @@ def match_endorsement_list_with_measures_in_database(
 
         if not possible_endorsement_matched:
             # We want to check the synonyms for each measure in upcoming elections
-            # (ex/ "Prop 1" in display_name_alternatives_list) against the possible endorsement ()
+            # (ex/ "Prop 1" in alternate_names) against the possible endorsement ()
             # NOTE: one_endorsement_light is a candidate or measure for an upcoming election
             # NOTE: possible endorsement is one of the incoming new endorsements we are trying to match
             synonym_found = False
             for one_endorsement_light in possible_endorsement_list_light:
-                # Hanging off each ballot_item_dict is a display_name_alternatives_list that includes
+                # Hanging off each ballot_item_dict is a alternate_names that includes
                 #  shortened alternative names that we should check against decide_line_lower_case
-                if 'display_name_alternatives_list' in one_endorsement_light and \
-                        positive_value_exists(one_endorsement_light['display_name_alternatives_list']):
-                    display_name_alternatives_list = one_endorsement_light['display_name_alternatives_list']
-                    for ballot_item_display_name_alternate in display_name_alternatives_list:
+                if 'alternate_names' in one_endorsement_light and \
+                        positive_value_exists(one_endorsement_light['alternate_names']):
+                    alternate_names = one_endorsement_light['alternate_names']
+                    for ballot_item_display_name_alternate in alternate_names:
                         if ballot_item_display_name_alternate.lower() in \
                                 possible_endorsement['ballot_item_name'].lower():
                             # Make a copy so we don't change the incoming object -- if we find multiple upcoming

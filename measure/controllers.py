@@ -510,16 +510,16 @@ def add_measure_name_alternatives_to_measure_list_light(measure_list_light):
 
     # Look in measure_list_light and try to find variants on proposition names
     for one_measure_light in measure_list_light:
-        # Add alternate names to the 'display_name_alternatives_list' value
+        # Add alternate names to the 'alternate_names' value
         full_ballot_item_display_name = one_measure_light['ballot_item_display_name'].lower()
-        one_measure_light['display_name_alternatives_list'] = []
+        one_measure_light['alternate_names'] = []
         try:
             for one_synonym_list in MEASURE_TITLE_SYNONYMS:
                 for one_synonym in one_synonym_list:
                     if one_synonym in full_ballot_item_display_name:
                         # If any synonym in this one_synonym_list is found within full_ballot_item_display_name,
                         #  then use the entire synonym list for matching in other areas of the code
-                        one_measure_light['display_name_alternatives_list'] = one_synonym_list
+                        one_measure_light['alternate_names'] = one_synonym_list
                         raise break_exception
         except BreakException:
             pass

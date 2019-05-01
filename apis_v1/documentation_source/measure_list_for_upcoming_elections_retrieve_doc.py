@@ -50,7 +50,7 @@ def doc_template_values(url_root):
                    '     "ballot_item_website": string,\n' \
                    '     "candidate_contact_form_url": string,\n' \
                    '     "candidate_we_vote_id": string,\n' \
-                   '     "display_name_alternatives_list": list,\n' \
+                   '     "alternate_names": list,\n' \
                    '     [\n' \
                    '     "String here",\n' \
                    '     ],\n' \

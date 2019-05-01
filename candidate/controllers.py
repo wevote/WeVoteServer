@@ -1309,7 +1309,8 @@ def retrieve_candidate_politician_match_options(vote_smart_id, maplight_id, cand
 
 def retrieve_candidate_list_for_all_upcoming_elections(upcoming_google_civic_election_id_list=[],
                                                        limit_to_this_state_code="",
-                                                       return_list_of_objects=False):
+                                                       return_list_of_objects=False,
+                                                       super_light_candidate_list=False):
 
     status = ""
     success = True
@@ -1347,7 +1348,8 @@ def retrieve_candidate_list_for_all_upcoming_elections(upcoming_google_civic_ele
         results = candidate_list_manager.retrieve_candidates_for_specific_elections(
             upcoming_google_civic_election_id_list,
             limit_to_this_state_code=limit_to_this_state_code,
-            return_list_of_objects=return_list_of_objects)
+            return_list_of_objects=return_list_of_objects,
+            super_light_candidate_list=super_light_candidate_list)
         if results['candidate_list_found']:
             candidate_list_found = True
             candidate_list_light = results['candidate_list_light']
@@ -1363,6 +1365,7 @@ def retrieve_candidate_list_for_all_upcoming_elections(upcoming_google_civic_ele
         'candidate_list_light':             candidate_list_light,
         'google_civic_election_id_list':    upcoming_google_civic_election_id_list,
         'return_list_of_objects':           return_list_of_objects,
+        'super_light_candidate_list':       super_light_candidate_list,
     }
     return results
 
@@ -1501,12 +1504,12 @@ def find_endorsements_on_one_web_page(site_url, endorsement_list_light):
                 if len(decoded_line) >= 10:  # Only proceed if the line is longer than 10 characters
                     decide_line_lower_case = decoded_line.lower()
                     for one_ballot_item_dict in endorsement_list_light:
-                        # Hanging off each ballot_item_dict is a display_name_alternatives_list that includes
+                        # Hanging off each ballot_item_dict is a alternate_names that includes
                         #  shortened alternative names that we should check against decide_line_lower_case
                         if positive_value_exists(one_ballot_item_dict['measure_we_vote_id']) \
                                 and one_ballot_item_dict['measure_we_vote_id'] not in measure_we_vote_ids_list:
-                            display_name_alternatives_list = one_ballot_item_dict['display_name_alternatives_list']
-                            for ballot_item_display_name_alternate in display_name_alternatives_list:
+                            alternate_names = one_ballot_item_dict['alternate_names']
+                            for ballot_item_display_name_alternate in alternate_names:
                                 if ballot_item_display_name_alternate in decide_line_lower_case:
                                     measure_we_vote_ids_list.append(one_ballot_item_dict['measure_we_vote_id'])
                                     endorsement_list_light_modified.append(one_ballot_item_dict)

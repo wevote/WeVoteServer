@@ -1256,7 +1256,7 @@ class ContestMeasureList(models.Model):
             for measure in measure_list_objects:
                 one_measure = {
                     'ballot_item_display_name': measure.measure_title,
-                    'display_name_alternatives_list': [],  # List of alternate names
+                    'alternate_names': [],  # List of alternate names
                     'candidate_we_vote_id':     '',
                     'google_civic_election_id': measure.google_civic_election_id,
                     'office_we_vote_id':        '',
