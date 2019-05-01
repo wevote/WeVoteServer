@@ -41,13 +41,19 @@ def doc_template_values(url_root):
                    '  "status": string,\n' \
                    '  "success": boolean,\n' \
                    '  "google_civic_election_id_list": list\n' \
-                   '   []\n' \
+                   '  [\n' \
+                   '  integer,\n' \
+                   '  ],\n' \
                    '  "measure_list": list\n' \
                    '   [\n' \
                    '     "ballot_item_display_name": string,\n' \
                    '     "ballot_item_website": string,\n' \
                    '     "candidate_contact_form_url": string,\n' \
                    '     "candidate_we_vote_id": string,\n' \
+                   '     "display_name_alternatives_list": list,\n' \
+                   '     [\n' \
+                   '     "String here",\n' \
+                   '     ],\n' \
                    '     "google_civic_election_id": string,\n' \
                    '     "office_we_vote_id": string,\n' \
                    '     "measure_we_vote_id": string,\n' \
@@ -58,7 +64,8 @@ def doc_template_values(url_root):
         'api_name': 'measureListForUpcomingElectionsRetrieve',
         'api_slug': 'measureListForUpcomingElectionsRetrieve',
         'api_introduction':
-            "Retrieve all of the measures in upcoming elections.",
+            "Retrieve all of the measures in upcoming elections. This shares the same response package format with "
+            "candidateListForUpcomingElectionsRetrieve.",
         'try_now_link': 'apis_v1:measureListForUpcomingElectionsRetrieveView',
         'try_now_link_variables_dict': try_now_link_variables_dict,
         'url_root': url_root,
