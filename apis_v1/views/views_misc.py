@@ -5,7 +5,6 @@ from config.base import get_environment_variable
 from django.http import HttpResponse
 import json
 import sys
-from measure.controllers import measure_retrieve_for_api
 from office.controllers import office_retrieve_for_api
 from quick_info.controllers import quick_info_retrieve_for_api
 from search.controllers import search_all_for_api
@@ -45,12 +44,6 @@ def device_id_generate_view(request):  # deviceIdGenerate
         'status': status,
     }
     return HttpResponse(json.dumps(json_data), content_type='application/json')
-
-
-def measure_retrieve_view(request):  # measureRetrieve
-    measure_id = request.GET.get('measure_id', 0)
-    measure_we_vote_id = request.GET.get('measure_we_vote_id', None)
-    return measure_retrieve_for_api(measure_id, measure_we_vote_id)
 
 
 def office_retrieve_view(request):  # officeRetrieve

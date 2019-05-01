@@ -91,6 +91,7 @@ def organizations_found_on_url_api_view(request):  # organizationsFoundOnUrl
         'status':               status,
         'success':              success,
         'url_to_scan':          url_to_scan,
+        'organization_count':   scan_results['organization_count'],
         'organization_list':    organization_list_for_json,
     }
     return HttpResponse(json.dumps(json_data), content_type='application/json')

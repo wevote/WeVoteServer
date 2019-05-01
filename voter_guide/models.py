@@ -1964,8 +1964,8 @@ class VoterGuidePossibilityManager(models.Manager):
     def retrieve_voter_guide_possibility(self, voter_guide_possibility_id=0, google_civic_election_id=0,
                                          voter_guide_possibility_url='',
                                          organization_we_vote_id=None,
-                                         public_figure_we_vote_id=None,
                                          owner_we_vote_id=None):
+        status = ""
         voter_guide_possibility_id = convert_to_int(voter_guide_possibility_id)
         google_civic_election_id = convert_to_int(google_civic_election_id)
         organization_we_vote_id = convert_to_str(organization_we_vote_id)
@@ -1978,51 +1978,51 @@ class VoterGuidePossibilityManager(models.Manager):
         voter_guide_possibility_on_stage_id = 0
         try:
             if positive_value_exists(voter_guide_possibility_id):
-                status = "ERROR_RETRIEVING_VOTER_GUIDE_POSSIBILITY_WITH_ID"  # Set this in case the get fails
+                status += "RETRIEVING_VOTER_GUIDE_POSSIBILITY_WITH_ID "  # Set this in case the get fails
                 voter_guide_possibility_on_stage = VoterGuidePossibility.objects.get(id=voter_guide_possibility_id)
                 voter_guide_possibility_on_stage_id = voter_guide_possibility_on_stage.id
-                status = "VOTER_GUIDE_POSSIBILITY_FOUND_WITH_ID"
+                status += "VOTER_GUIDE_POSSIBILITY_FOUND_WITH_ID "
                 success = True
             elif positive_value_exists(voter_guide_possibility_url):
-                status = "ERROR_RETRIEVING_VOTER_GUIDE_POSSIBILITY_WITH_URL"  # Set this in case the get fails
+                status += "RETRIEVING_VOTER_GUIDE_POSSIBILITY_WITH_URL "  # Set this in case the get fails
                 voter_guide_possibility_on_stage = VoterGuidePossibility.objects.get(
                     voter_guide_possibility_url=voter_guide_possibility_url)
                 voter_guide_possibility_on_stage_id = voter_guide_possibility_on_stage.id
-                status = "VOTER_GUIDE_POSSIBILITY_FOUND_WITH_URL"
+                status += "VOTER_GUIDE_POSSIBILITY_FOUND_WITH_URL "
                 success = True
             elif positive_value_exists(organization_we_vote_id) and positive_value_exists(google_civic_election_id):
                 # Set this status in case the 'get' fails
-                status = "ERROR_RETRIEVING_VOTER_GUIDE_POSSIBILITY_WITH_ORGANIZATION_WE_VOTE_ID "
+                status += "RETRIEVING_VOTER_GUIDE_POSSIBILITY_WITH_ORGANIZATION_WE_VOTE_ID "
                 # TODO: Update this to deal with the google_civic_election_id being spread across 50 fields
                 voter_guide_possibility_on_stage = VoterGuidePossibility.objects.get(
                     google_civic_election_id=google_civic_election_id,
                     organization_we_vote_id__iexact=organization_we_vote_id)
                 voter_guide_possibility_on_stage_id = voter_guide_possibility_on_stage.id
-                status = "VOTER_GUIDE_POSSIBILITY_FOUND_WITH_ORGANIZATION_WE_VOTE_ID"
+                status += "VOTER_GUIDE_POSSIBILITY_FOUND_WITH_ORGANIZATION_WE_VOTE_ID "
                 success = True
             elif positive_value_exists(owner_we_vote_id) and positive_value_exists(google_civic_election_id):
                 # Set this status in case the 'get' fails
-                status = "ERROR_RETRIEVING_VOTER_GUIDE_POSSIBILITY_WITH_VOTER_WE_VOTE_ID"
+                status += "RETRIEVING_VOTER_GUIDE_POSSIBILITY_WITH_VOTER_WE_VOTE_ID "
                 # TODO: Update this to deal with the google_civic_election_id being spread across 50 fields
                 voter_guide_possibility_on_stage = VoterGuidePossibility.objects.get(
                     google_civic_election_id=google_civic_election_id,
                     owner_we_vote_id__iexact=owner_we_vote_id)
                 voter_guide_possibility_on_stage_id = voter_guide_possibility_on_stage.id
-                status = "VOTER_GUIDE_POSSIBILITY_FOUND_WITH_VOTER_WE_VOTE_ID"
+                status += "VOTER_GUIDE_POSSIBILITY_FOUND_WITH_VOTER_WE_VOTE_ID "
                 success = True
             else:
-                status = "VOTER_GUIDE_POSSIBILITY_NOT_FOUND_INSUFFICIENT_VARIABLES"
+                status += "VOTER_GUIDE_POSSIBILITY_NOT_FOUND_INSUFFICIENT_VARIABLES "
                 success = False
         except VoterGuidePossibility.MultipleObjectsReturned as e:
             handle_record_found_more_than_one_exception(e, logger)
             error_result = True
             exception_multiple_object_returned = True
-            status += ", ERROR_MORE_THAN_ONE_VOTER_GUIDE_POSSIBILITY_FOUND"
+            status += ", ERROR_MORE_THAN_ONE_VOTER_GUIDE_POSSIBILITY_FOUND "
             success = False
         except VoterGuidePossibility.DoesNotExist:
             error_result = True
             exception_does_not_exist = True
-            status = "VOTER_GUIDE_POSSIBILITY_NOT_FOUND"
+            status += "VOTER_GUIDE_POSSIBILITY_NOT_FOUND "
             success = True
 
         voter_guide_possibility_on_stage_found = True if voter_guide_possibility_on_stage_id > 0 else False

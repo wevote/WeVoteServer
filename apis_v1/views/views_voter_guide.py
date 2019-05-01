@@ -29,9 +29,9 @@ def voter_guide_possibility_retrieve_view(request):  # voterGuidePossibilityRetr
     :return:
     """
     voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
-    voter_guide_possibility_url = request.GET.get('voter_guide_possibility_url', '')
+    url_to_scan = request.GET.get('url_to_scan', '')
     return voter_guide_possibility_retrieve_for_api(voter_device_id=voter_device_id,
-                                                    voter_guide_possibility_url=voter_guide_possibility_url)
+                                                    url_to_scan=url_to_scan)
 
 
 def voter_guide_possibility_save_view(request):  # voterGuidePossibilitySave
@@ -41,9 +41,9 @@ def voter_guide_possibility_save_view(request):  # voterGuidePossibilitySave
     :return:
     """
     voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
-    voter_guide_possibility_url = request.GET.get('voter_guide_possibility_url', '')
+    url_to_scan = request.GET.get('url_to_scan', '')
     return voter_guide_possibility_save_for_api(voter_device_id=voter_device_id,
-                                                voter_guide_possibility_url=voter_guide_possibility_url)
+                                                url_to_scan=url_to_scan)
 
 
 def voter_guides_followed_retrieve_view(request):  # voterGuidesFollowedRetrieve

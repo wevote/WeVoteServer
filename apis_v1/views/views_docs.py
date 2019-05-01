@@ -5,14 +5,15 @@
 from apis_v1.documentation_source import ballot_item_options_retrieve_doc, ballot_item_retrieve_doc, \
     ballot_items_sync_out_doc, ballot_returned_sync_out_doc, \
     candidate_retrieve_doc, \
-    candidates_retrieve_doc, candidates_sync_out_doc, device_id_generate_doc, donation_with_stripe_doc, \
+    candidates_retrieve_doc, candidate_list_for_upcoming_elections_retrieve_doc, \
+    candidates_sync_out_doc, device_id_generate_doc, donation_with_stripe_doc, \
     elections_retrieve_doc, elections_sync_out_doc, facebook_disconnect_doc, facebook_friends_action_doc, \
     friend_invitation_by_email_send_doc, \
     friend_invitation_by_email_verify_doc, friend_invitation_by_we_vote_id_send_doc, \
     friend_invitation_by_facebook_send_doc, friend_invitation_by_facebook_verify_doc, \
     friend_invite_response_doc, friend_list_doc, issue_follow_doc, issues_retrieve_doc, issues_sync_out_doc, \
     issues_linked_to_organization_doc, issues_to_link_to_for_organization_doc, \
-    measure_retrieve_doc, measures_sync_out_doc, \
+    measure_retrieve_doc, measures_sync_out_doc, measure_list_for_upcoming_elections_retrieve_doc, \
     office_retrieve_doc, offices_sync_out_doc, \
     organization_count_doc, organizations_followed_retrieve_doc, \
     organization_follow_doc, organization_follow_ignore_doc, organizations_found_on_url_doc, \
@@ -129,6 +130,16 @@ def candidate_retrieve_doc_view(request):
     """
     url_root = WE_VOTE_SERVER_ROOT_URL
     template_values = candidate_retrieve_doc.candidate_retrieve_doc_template_values(url_root)
+    return render(request, 'apis_v1/api_doc_page.html', template_values)
+
+
+def candidate_list_for_upcoming_elections_retrieve_doc_view(request):
+    """
+    Show documentation about candidateListForUpcomingElectionsRetrieve
+    """
+    url_root = WE_VOTE_SERVER_ROOT_URL
+    template_values = \
+        candidate_list_for_upcoming_elections_retrieve_doc.doc_template_values(url_root)
     return render(request, 'apis_v1/api_doc_page.html', template_values)
 
 
@@ -369,6 +380,16 @@ def measures_sync_out_doc_view(request):
     url_root = WE_VOTE_SERVER_ROOT_URL
     template_values = measures_sync_out_doc.measures_sync_out_doc_template_values(url_root)
     template_values['voter_api_device_id'] = get_voter_api_device_id(request)
+    return render(request, 'apis_v1/api_doc_page.html', template_values)
+
+
+def measure_list_for_upcoming_elections_retrieve_doc_view(request):
+    """
+    Show documentation about measureListForUpcomingElectionsRetrieve
+    """
+    url_root = WE_VOTE_SERVER_ROOT_URL
+    template_values = \
+        measure_list_for_upcoming_elections_retrieve_doc.doc_template_values(url_root)
     return render(request, 'apis_v1/api_doc_page.html', template_values)
 
 
