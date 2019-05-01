@@ -254,11 +254,12 @@ class CandidateCampaignListManager(models.Model):
             for candidate in candidate_list_objects:
                 if positive_value_exists(super_light_candidate_list):
                     one_candidate = {
-                        'ballot_item_display_name':         candidate.display_candidate_name(),
-                        'alternate_names':   candidate.display_alternate_names_list(),
-                        'candidate_we_vote_id':             candidate.we_vote_id,
-                        'measure_we_vote_id':               '',
+                        'name':         candidate.display_candidate_name(),
+                        'we_vote_id':   candidate.we_vote_id,
                     }
+                    alternate_names = candidate.display_alternate_names_list()
+                    if len(alternate_names):
+                        one_candidate['alternate_names'] = alternate_names
                 else:
                     one_candidate = {
                         'ballot_item_display_name':   candidate.display_candidate_name(),

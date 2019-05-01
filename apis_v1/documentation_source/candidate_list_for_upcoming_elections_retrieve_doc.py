@@ -46,13 +46,12 @@ def doc_template_values(url_root):
                    '  ],\n' \
                    '  "candidate_list": list\n' \
                    '   [\n' \
-                   '     "ballot_item_display_name": string,\n' \
-                   '     "candidate_we_vote_id": string,\n' \
+                   '     "name": string,\n' \
+                   '     "we_vote_id": string,\n' \
                    '     "alternate_names": list,\n' \
                    '     [\n' \
                    '     "String here",\n' \
                    '     ],\n' \
-                   '     "measure_we_vote_id": string,\n' \
                    '   ],\n' \
                    '}'
 
