@@ -77,7 +77,7 @@ def voter_guide_possibility_retrieve_doc_template_values(url_root):
                    '  "state_limited_to": string,\n' \
                    '  "url_to_scan": string,\n' \
                    '  "voter_device_id": string (88 characters long),\n' \
-                   '  "voter_guide_possibility_url": string,\n' \
+                   '  "voter_guide_possibility_edit": string,\n' \
                    '  "voter_guide_possibility_id": integer,\n' \
                    '  "organization": dict\n' \
                    '   {\n' \

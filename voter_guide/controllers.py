@@ -257,10 +257,12 @@ def extract_import_position_list_from_voter_guide_possibility(voter_guide_possib
     return results
 
 
-def extract_voter_guide_possibility_position_list_from_database(voter_guide_possibility):
+def extract_voter_guide_possibility_position_list_from_database(
+        voter_guide_possibility, voter_guide_possibility_position_id=0):
     """
     Get voter_guide_possibility data from the database and put it into the Suggested Voter Guide system format we use
     :param voter_guide_possibility:
+    :param voter_guide_possibility_position_id: This is included if we only want to retrieve one possible position
     :return:
     """
     status = ""
@@ -280,6 +282,8 @@ def extract_voter_guide_possibility_position_list_from_database(voter_guide_poss
 
     possibility_position_query = VoterGuidePossibilityPosition.objects.filter(
         voter_guide_possibility_parent_id=voter_guide_possibility.id).order_by('possibility_position_number')
+    if positive_value_exists(voter_guide_possibility_position_id):
+        possibility_position_query = possibility_position_query.filter(id=voter_guide_possibility_position_id)
     possibility_position_list = list(possibility_position_query)
     for possibility_position in possibility_position_list:
         if positive_value_exists(possibility_position.more_info_url):
@@ -1155,7 +1159,7 @@ def voter_guide_possibility_retrieve_for_api(voter_device_id, voter_guide_possib
     possible_organization_name = ""
     possible_organization_twitter_handle = ""
     state_limited_to = ""
-    voter_guide_possibility_url = ""
+    voter_guide_possibility_edit = ""
     if results['voter_guide_possibility_found']:
         voter_guide_possibility = results['voter_guide_possibility']
         candidates_missing_from_we_vote = voter_guide_possibility.candidates_missing_from_we_vote
@@ -1169,7 +1173,8 @@ def voter_guide_possibility_retrieve_for_api(voter_device_id, voter_guide_possib
         possible_organization_name = voter_guide_possibility.organization_name
         possible_organization_twitter_handle = voter_guide_possibility.organization_twitter_handle
         state_limited_to = voter_guide_possibility.state_code
-        voter_guide_possibility_url = WE_VOTE_SERVER_ROOT_URL + "/vg/create/?voter_guide_possibility_id=" + \
+        url_to_scan = voter_guide_possibility.voter_guide_possibility_url
+        voter_guide_possibility_edit = WE_VOTE_SERVER_ROOT_URL + "/vg/create/?voter_guide_possibility_id=" + \
             str(voter_guide_possibility_id)
 
     organization_dict = {}
@@ -1207,7 +1212,7 @@ def voter_guide_possibility_retrieve_for_api(voter_device_id, voter_guide_possib
         'state_limited_to':                     state_limited_to,
         'url_to_scan':                          url_to_scan,
         'voter_device_id':                      voter_device_id,
-        'voter_guide_possibility_url':          voter_guide_possibility_url,
+        'voter_guide_possibility_edit':         voter_guide_possibility_edit,
         'voter_guide_possibility_id':           voter_guide_possibility_id,
     }
     return HttpResponse(json.dumps(json_data), content_type='application/json')
@@ -1215,15 +1220,16 @@ def voter_guide_possibility_retrieve_for_api(voter_device_id, voter_guide_possib
 
 def voter_guide_possibility_positions_retrieve_for_api(
         voter_device_id, voter_guide_possibility_id, voter_guide_possibility_position_id=0):
-    status = ""
+    status = "VOTER_GUIDE_POSSIBILITY_POSITIONS_RETRIEVE "
     results = is_voter_device_id_valid(voter_device_id)
     if not results['success']:
         return HttpResponse(json.dumps(results['json_data']), content_type='application/json')
 
     voter_id = fetch_voter_id_from_voter_device_link(voter_device_id)
     if not positive_value_exists(voter_id):
+        status += "VOTER_NOT_FOUND_FROM_VOTER_DEVICE_ID "
         json_data = {
-            'status': "VOTER_NOT_FOUND_FROM_VOTER_DEVICE_ID",
+            'status': status,
             'success': False,
             'voter_device_id': voter_device_id,
         }
@@ -1241,7 +1247,8 @@ def voter_guide_possibility_positions_retrieve_for_api(
         limited_to_state_code = voter_guide_possibility.state_code
         organization_we_vote_id = voter_guide_possibility.organization_we_vote_id
 
-        results = extract_voter_guide_possibility_position_list_from_database(voter_guide_possibility)
+        results = extract_voter_guide_possibility_position_list_from_database(
+            voter_guide_possibility, voter_guide_possibility_position_id)
         if results['possible_endorsement_list_found']:
             possible_endorsement_list = results['possible_endorsement_list']
 
@@ -1294,14 +1301,30 @@ def voter_guide_possibility_positions_retrieve_for_api(
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 
 
-def voter_guide_possibility_save_for_api(voter_device_id, url_to_scan):
+def voter_guide_possibility_save_for_api(  # voterGuidePossibilitySave
+        voter_device_id,
+        voter_guide_possibility_id,
+        candidates_missing_from_we_vote=None,
+        capture_detailed_comments=None,
+        clear_organization_options=None,
+        contributor_comments=None,
+        contributor_email=None,
+        hide_from_active_review=None,
+        ignore_this_source=None,
+        internal_notes=None,
+        organization_we_vote_id=None,
+        possible_organization_name=None,
+        possible_organization_twitter_handle=None,
+        state_limited_to=None):
+    status = ""
+    success = True
     results = is_voter_device_id_valid(voter_device_id)
     if not results['success']:
         return HttpResponse(json.dumps(results['json_data']), content_type='application/json')
 
-    if not url_to_scan:
+    if not positive_value_exists(voter_guide_possibility_id):
         json_data = {
-                'status': "MISSING_POST_VARIABLE-URL",
+                'status': "MISSING_REQUIRED_VARIABLE-VOTER_GUIDE_POSSIBILITY_ID",
                 'success': False,
                 'voter_device_id': voter_device_id,
             }
@@ -1319,27 +1342,81 @@ def voter_guide_possibility_save_for_api(voter_device_id, url_to_scan):
     # At this point, we have a valid voter
 
     voter_guide_possibility_manager = VoterGuidePossibilityManager()
-
-    # We wrap get_or_create because we want to centralize error handling
-    results = voter_guide_possibility_manager.update_or_create_voter_guide_possibility(
-        url_to_scan.strip())
-    if results['success']:
+    results = voter_guide_possibility_manager.retrieve_voter_guide_possibility(
+        voter_guide_possibility_id=voter_guide_possibility_id)
+    if not results['voter_guide_possibility_found']:
         json_data = {
-                'status': "VOTER_GUIDE_POSSIBILITY_SAVED",
-                'success': True,
-                'voter_device_id': voter_device_id,
-                'url_to_scan': url_to_scan,
-            }
+            'status': results['status'],
+            'success': results['success'],
+            'voter_device_id': voter_device_id,
+        }
+        return HttpResponse(json.dumps(json_data), content_type='application/json')
 
-    # elif results['status'] == 'MULTIPLE_MATCHING_ADDRESSES_FOUND':
-        # delete all currently matching addresses and save again?
-    else:
+    at_least_one_change = False
+    voter_guide_possibility = results['voter_guide_possibility']
+    voter_guide_possibility_id = voter_guide_possibility.id
+
+    try:
+        if candidates_missing_from_we_vote is not None:
+            voter_guide_possibility.candidates_missing_from_we_vote = \
+                positive_value_exists(candidates_missing_from_we_vote)
+            at_least_one_change = True
+        if capture_detailed_comments is not None:
+            voter_guide_possibility.capture_detailed_comments = \
+                positive_value_exists(capture_detailed_comments)
+            at_least_one_change = True
+        if clear_organization_options is not None:
+            voter_guide_possibility.clear_organization_options = \
+                positive_value_exists(clear_organization_options)
+            at_least_one_change = True
+        if contributor_comments is not None:
+            voter_guide_possibility.contributor_comments = contributor_comments
+            at_least_one_change = True
+        if contributor_email is not None:
+            voter_guide_possibility.contributor_email = contributor_email
+            at_least_one_change = True
+        if hide_from_active_review is not None:
+            voter_guide_possibility.hide_from_active_review = \
+                positive_value_exists(hide_from_active_review)
+            at_least_one_change = True
+        if ignore_this_source is not None:
+            voter_guide_possibility.ignore_this_source = \
+                positive_value_exists(ignore_this_source)
+            at_least_one_change = True
+        if internal_notes is not None:
+            voter_guide_possibility.internal_notes = internal_notes
+            at_least_one_change = True
+        if organization_we_vote_id is not None:
+            voter_guide_possibility.organization_we_vote_id = organization_we_vote_id
+            at_least_one_change = True
+        if possible_organization_name is not None:
+            voter_guide_possibility.organization_name = possible_organization_name
+            at_least_one_change = True
+        if possible_organization_twitter_handle is not None:
+            voter_guide_possibility.organization_twitter_handle = possible_organization_twitter_handle
+            at_least_one_change = True
+        if state_limited_to is not None:
+            voter_guide_possibility.state_code = state_limited_to
+            at_least_one_change = True
+
+        if at_least_one_change:
+            voter_guide_possibility.save()
+    except Exception as e:
+        status += 'FAILED_TO_UPDATE_VOTER_GUIDE_POSSIBILITY ' \
+                  '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
+        success = False
+
+    if not success:
         json_data = {
-                'status': results['status'],
-                'success': False,
-                'voter_device_id': voter_device_id,
-            }
-    return HttpResponse(json.dumps(json_data), content_type='application/json')
+            'status': status,
+            'success': success,
+            'voter_device_id': voter_device_id,
+        }
+        return HttpResponse(json.dumps(json_data), content_type='application/json')
+
+    # If here, the voter_guide_possibility was successfully saved, so we want to return the refreshed data
+    return voter_guide_possibility_retrieve_for_api(voter_device_id,
+                                                    voter_guide_possibility_id=voter_guide_possibility_id)
 
 
 def voter_guides_to_follow_retrieve_for_api(voter_device_id,  # voterGuidesToFollowRetrieve

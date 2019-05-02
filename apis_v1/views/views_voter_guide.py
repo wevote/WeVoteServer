@@ -53,13 +53,40 @@ def voter_guide_possibility_positions_retrieve_view(request):  # voterGuidePossi
 def voter_guide_possibility_save_view(request):  # voterGuidePossibilitySave
     """
     Save a website that may contain a voter guide (voterGuidePossibilitySave)
+    Note that this does not save positions -- we do that with voterGuidePossibilityPositionSave
     :param request:
     :return:
     """
     voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
-    url_to_scan = request.GET.get('url_to_scan', '')
-    return voter_guide_possibility_save_for_api(voter_device_id=voter_device_id,
-                                                url_to_scan=url_to_scan)
+    voter_guide_possibility_id = request.GET.get('voter_guide_possibility_id', 0)
+    voter_guide_possibility_id = convert_to_int(voter_guide_possibility_id)
+    clear_organization_options = request.GET.get('clear_organization_options', None)
+    contributor_comments = request.GET.get('contributor_comments', None)
+    contributor_email = request.GET.get('contributor_email', None)
+    candidates_missing_from_we_vote = request.GET.get('candidates_missing_from_we_vote', None)
+    capture_detailed_comments = request.GET.get('capture_detailed_comments', None)
+    hide_from_active_review = request.GET.get('hide_from_active_review', None)
+    ignore_this_source = request.GET.get('ignore_this_source', None)
+    internal_notes = request.GET.get('internal_notes', None)
+    organization_we_vote_id = request.GET.get('organization_we_vote_id', None)
+    possible_organization_name = request.GET.get('possible_organization_name', None)
+    possible_organization_twitter_handle = request.GET.get('possible_organization_twitter_handle', None)
+    state_limited_to = request.GET.get('state_limited_to', None)
+    return voter_guide_possibility_save_for_api(
+        voter_device_id=voter_device_id,
+        voter_guide_possibility_id=voter_guide_possibility_id,
+        candidates_missing_from_we_vote=candidates_missing_from_we_vote,
+        capture_detailed_comments=capture_detailed_comments,
+        clear_organization_options=clear_organization_options,
+        contributor_comments=contributor_comments,
+        contributor_email=contributor_email,
+        hide_from_active_review=hide_from_active_review,
+        ignore_this_source=ignore_this_source,
+        internal_notes=internal_notes,
+        organization_we_vote_id=organization_we_vote_id,
+        possible_organization_name=possible_organization_name,
+        possible_organization_twitter_handle=possible_organization_twitter_handle,
+        state_limited_to=state_limited_to)
 
 
 def voter_guides_followed_retrieve_view(request):  # voterGuidesFollowedRetrieve
