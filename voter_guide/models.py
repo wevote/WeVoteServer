@@ -4667,3 +4667,5 @@ class VoterGuidePossibilityPosition(models.Model):
     statement_text = models.TextField(null=True, blank=True)
     google_civic_election_id = models.PositiveIntegerField(null=True)
     position_stance = models.CharField(max_length=15, choices=POSITION_CHOICES, default=SUPPORT)
+    # A link to any location with more information about this position
+    more_info_url = models.URLField(blank=True, null=True, verbose_name='url with more info about this position')

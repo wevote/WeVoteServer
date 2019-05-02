@@ -291,6 +291,7 @@ def voter_guide_create_view(request):
                         possible_endorsement_list, google_civic_election_id_list, state_code)
                     if results['possible_endorsement_list_found']:
                         possible_endorsement_list = results['possible_endorsement_list']
+
         except VoterGuidePossibility.DoesNotExist:
             pass
 
