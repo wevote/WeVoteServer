@@ -7,7 +7,8 @@ from config.base import get_environment_variable
 from django.http import HttpResponse
 import json
 from voter.models import VoterAddress, VoterAddressManager, VoterDeviceLinkManager
-from voter_guide.controllers import voter_guide_possibility_retrieve_for_api, voter_guide_possibility_save_for_api, \
+from voter_guide.controllers import voter_guide_possibility_retrieve_for_api, \
+    voter_guide_possibility_positions_retrieve_for_api, voter_guide_possibility_save_for_api, \
     voter_guide_save_for_api, \
     voter_guides_followed_retrieve_for_api, voter_guides_ignored_retrieve_for_api, voter_guides_retrieve_for_api, \
     voter_guides_followed_by_organization_retrieve_for_api, \
@@ -32,6 +33,21 @@ def voter_guide_possibility_retrieve_view(request):  # voterGuidePossibilityRetr
     return voter_guide_possibility_retrieve_for_api(voter_device_id=voter_device_id,
                                                     voter_guide_possibility_id=voter_guide_possibility_id,
                                                     url_to_scan=url_to_scan)
+
+
+def voter_guide_possibility_positions_retrieve_view(request):  # voterGuidePossibilityPositionsRetrieve
+    """
+    Retrieve the possible positions from one organization on one page.
+    :param request:
+    :return:
+    """
+    voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
+    voter_guide_possibility_id = request.GET.get('voter_guide_possibility_id', 0)
+    voter_guide_possibility_position_id = request.GET.get('voter_guide_possibility_position_id', 0)
+    return voter_guide_possibility_positions_retrieve_for_api(
+        voter_device_id=voter_device_id,
+        voter_guide_possibility_id=voter_guide_possibility_id,
+        voter_guide_possibility_position_id=voter_guide_possibility_position_id)
 
 
 def voter_guide_possibility_save_view(request):  # voterGuidePossibilitySave
