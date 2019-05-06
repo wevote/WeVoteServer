@@ -40,7 +40,8 @@ from apis_v1.documentation_source import ballot_item_options_retrieve_doc, ballo
     voter_email_address_sign_in_doc, voter_email_address_verify_doc, voter_facebook_save_to_current_account_doc, \
     voter_facebook_sign_in_retrieve_doc, voter_facebook_sign_in_save_doc, \
     voter_follow_all_organizations_followed_by_organization_doc, \
-    voter_guide_possibility_retrieve_doc, voter_guide_possibility_positions_retrieve_doc, \
+    voter_guide_possibility_retrieve_doc, \
+    voter_guide_possibility_position_save_doc, voter_guide_possibility_positions_retrieve_doc, \
     voter_guide_possibility_save_doc, \
     voter_guides_followed_retrieve_doc, voter_guides_followed_by_organization_retrieve_doc, \
     voter_guide_followers_retrieve_doc, voter_guide_save_doc, voter_guides_ignored_retrieve_doc, \
@@ -920,6 +921,18 @@ def voter_guide_possibility_retrieve_doc_view(request):
     url_root = WE_VOTE_SERVER_ROOT_URL
     template_values = \
         voter_guide_possibility_retrieve_doc.voter_guide_possibility_retrieve_doc_template_values(url_root)
+    template_values['voter_api_device_id'] = get_voter_api_device_id(request)
+    return render(request, 'apis_v1/api_doc_page.html', template_values)
+
+
+def voter_guide_possibility_position_save_doc_view(request):
+    """
+    Show documentation about voterGuidePossibilityPositionSave
+    """
+    url_root = WE_VOTE_SERVER_ROOT_URL
+    template_values = \
+        voter_guide_possibility_position_save_doc.voter_guide_possibility_position_save_doc_template_values(
+            url_root)
     template_values['voter_api_device_id'] = get_voter_api_device_id(request)
     return render(request, 'apis_v1/api_doc_page.html', template_values)
 

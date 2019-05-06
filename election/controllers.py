@@ -271,3 +271,29 @@ def elections_sync_out_list_for_api(voter_device_id):
         'json_data': json_data,
     }
     return results
+
+
+def retrieve_upcoming_election_id_list(limit_to_this_state_code=''):
+    # Figure out the elections we care about
+    google_civic_election_id_list = []
+    election_manager = ElectionManager()
+    # If a state_code is included, national elections will NOT be returned
+    # If a state_code is NOT included, the national election WILL be returned with this query
+    results = election_manager.retrieve_upcoming_elections(state_code=limit_to_this_state_code)
+    if results['election_list_found']:
+        upcoming_election_list = results['election_list']
+        for one_election in upcoming_election_list:
+            if positive_value_exists(one_election.google_civic_election_id):
+                google_civic_election_id_list.append(one_election.google_civic_election_id)
+
+    # If a state code IS included, then the above retrieve_upcoming_elections will have missed the national election
+    # so we want to return it here
+    if positive_value_exists(limit_to_this_state_code):
+        results = election_manager.retrieve_next_national_election()
+        if results['election_found']:
+            one_election = results['election']
+            if positive_value_exists(one_election.google_civic_election_id) \
+                    and one_election.google_civic_election_id not in google_civic_election_id_list:
+                google_civic_election_id_list.append(one_election.google_civic_election_id)
+
+    return google_civic_election_id_list

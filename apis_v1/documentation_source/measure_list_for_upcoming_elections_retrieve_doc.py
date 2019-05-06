@@ -9,8 +9,8 @@ def doc_template_values(url_root):
     """
     required_query_parameter_list = [
         {
-            'name':         'google_civic_election_id_list',
-            'value':        'integer',  # boolean, integer, long, string
+            'name':         'google_civic_election_id_list[]',
+            'value':        'integerlist',  # boolean, integer, long, string
             'description':  'List of election ids we care about.',
         },
     ]

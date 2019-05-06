@@ -3,11 +3,11 @@
 # -*- coding: UTF-8 -*-
 
 from ballot.controllers import choose_election_from_existing_data
-from config.base import get_environment_variable
 from django.http import HttpResponse
 import json
 from voter.models import VoterAddress, VoterAddressManager, VoterDeviceLinkManager
 from voter_guide.controllers import voter_guide_possibility_retrieve_for_api, \
+    voter_guide_possibility_position_save_for_api, \
     voter_guide_possibility_positions_retrieve_for_api, voter_guide_possibility_save_for_api, \
     voter_guide_save_for_api, \
     voter_guides_followed_retrieve_for_api, voter_guides_ignored_retrieve_for_api, voter_guides_retrieve_for_api, \
@@ -33,6 +33,51 @@ def voter_guide_possibility_retrieve_view(request):  # voterGuidePossibilityRetr
     return voter_guide_possibility_retrieve_for_api(voter_device_id=voter_device_id,
                                                     voter_guide_possibility_id=voter_guide_possibility_id,
                                                     url_to_scan=url_to_scan)
+
+
+def voter_guide_possibility_position_save_view(request):  # voterGuidePossibilityPositionSave
+    """
+    Update one possible position from one organization on one page.
+    :param request:
+    :return:
+    """
+    voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
+    voter_guide_possibility_id = request.GET.get('voter_guide_possibility_id', 0)
+    voter_guide_possibility_position_id = request.GET.get('voter_guide_possibility_position_id', 0)
+    ballot_item_name = request.GET.get('ballot_item_name', None)
+    position_stance = request.GET.get('position_stance', None)
+    statement_text = request.GET.get('statement_text', None)
+    more_info_url = request.GET.get('more_info_url', None)
+    possibility_should_be_deleted = request.GET.get('possibility_should_be_deleted', None)
+    possibility_should_be_ignored = request.GET.get('possibility_should_be_ignored', None)
+    candidate_we_vote_id = request.GET.get('candidate_we_vote_id', None)
+    measure_we_vote_id = request.GET.get('measure_we_vote_id', None)
+    position_should_be_removed = request.GET.get('position_should_be_removed', None)
+
+    google_civic_election_id_list = request.GET.getlist('google_civic_election_id_list[]')
+    try:
+        if positive_value_exists(google_civic_election_id_list):
+            if not positive_value_exists(len(google_civic_election_id_list)):
+                google_civic_election_id_list = None
+        else:
+            google_civic_election_id_list = None
+    except:
+        google_civic_election_id_list = None
+
+    return voter_guide_possibility_position_save_for_api(
+        voter_device_id=voter_device_id,
+        voter_guide_possibility_id=voter_guide_possibility_id,
+        voter_guide_possibility_position_id=voter_guide_possibility_position_id,
+        ballot_item_name=ballot_item_name,
+        position_stance=position_stance,
+        statement_text=statement_text,
+        more_info_url=more_info_url,
+        possibility_should_be_deleted=possibility_should_be_deleted,
+        possibility_should_be_ignored=possibility_should_be_ignored,
+        candidate_we_vote_id=candidate_we_vote_id,
+        measure_we_vote_id=measure_we_vote_id,
+        position_should_be_removed=position_should_be_removed,
+        google_civic_election_id_list=google_civic_election_id_list)
 
 
 def voter_guide_possibility_positions_retrieve_view(request):  # voterGuidePossibilityPositionsRetrieve
@@ -71,7 +116,7 @@ def voter_guide_possibility_save_view(request):  # voterGuidePossibilitySave
     organization_we_vote_id = request.GET.get('organization_we_vote_id', None)
     possible_organization_name = request.GET.get('possible_organization_name', None)
     possible_organization_twitter_handle = request.GET.get('possible_organization_twitter_handle', None)
-    state_limited_to = request.GET.get('state_limited_to', None)
+    limit_to_this_state_code = request.GET.get('limit_to_this_state_code', None)
     return voter_guide_possibility_save_for_api(
         voter_device_id=voter_device_id,
         voter_guide_possibility_id=voter_guide_possibility_id,
@@ -86,7 +131,7 @@ def voter_guide_possibility_save_view(request):  # voterGuidePossibilitySave
         organization_we_vote_id=organization_we_vote_id,
         possible_organization_name=possible_organization_name,
         possible_organization_twitter_handle=possible_organization_twitter_handle,
-        state_limited_to=state_limited_to)
+        limit_to_this_state_code=limit_to_this_state_code)
 
 
 def voter_guides_followed_retrieve_view(request):  # voterGuidesFollowedRetrieve
@@ -211,7 +256,7 @@ def voter_guides_upcoming_retrieve_view(request):  # voterGuidesUpcomingRetrieve
     :return:
     """
     status = ""
-    google_civic_election_id_list = request.GET.getlist('google_civic_election_id_list')
+    google_civic_election_id_list = request.GET.getlist('google_civic_election_id_list[]')
 
     if positive_value_exists(google_civic_election_id_list):
         if not positive_value_exists(len(google_civic_election_id_list)):
