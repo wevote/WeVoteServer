@@ -2,9 +2,18 @@
 
 <div>
     <div>
-        <span class="float-right"><span style="color: darkgray">position #{{ possible_endorsement.possibility_position_number|default_if_none:""|add:"0" }}</span></span>
+        <span class="float-right"><span style="color: darkgray;{% if possible_endorsement.possibility_should_be_ignored %} text-decoration: line-through;{% endif %}">(id {{ possible_endorsement.possibility_position_id|default_if_none:""}}) #{{ possible_endorsement.possibility_position_number|default_if_none:""|add:"0" }}</span></span>
     {% if possible_endorsement.candidate_we_vote_id %}
-        <span><span class="h4">{{ possible_endorsement.candidate.display_candidate_name|default_if_none:"" }}</span>, <span>{{ possible_endorsement.candidate.contest_office_name|default_if_none:"" }}</span>&nbsp;&nbsp;&nbsp;</span>
+        <span>
+          <span class="h4">{{ possible_endorsement.candidate.display_candidate_name|default_if_none:"" }}</span>,
+          <span>{{ possible_endorsement.candidate.contest_office_name|default_if_none:"" }}</span>
+          {% if possible_endorsement.google_civic_election_id %}
+          <span>
+          (election: {{ possible_endorsement.google_civic_election_id }})
+          </span>
+          {% endif %}
+        </span>
+        </span>
         {% if has_suggested_voter_guide_rights %}
             <a href="{% url 'candidate:candidate_edit_we_vote_id' candidate_campaign_we_vote_id=possible_endorsement.candidate_we_vote_id %}#positions"
                target="_blank"
@@ -55,7 +64,10 @@
     {% endif %}
 
     <div>
-        <div class="float-right"><button type="submit" class="btn btn-link" name="remove_possibility_position_number_{{ possible_endorsement.possibility_position_number }}" value="1">remove</button></div>
+        <div class="float-right">
+          <input type="checkbox" name="possibility_should_be_deleted_{{ possible_endorsement.possibility_position_number }}" value="1" />
+          delete
+        </div>
         <div class="btn-group btn-group-toggle" data-toggle="buttons">
             <label class="btn{% if possible_endorsement.position_stance == "SUPPORT" %} btn-success active{% else %} btn-outline-success{% endif %}">
               <input type="radio" name="position_stance_{{ possible_endorsement.possibility_position_number }}"
@@ -75,26 +87,31 @@
                      value="NO_STANCE" {% if possible_endorsement.position_stance == "NO_STANCE" %}checked{% endif %}
               > No Stance
             </label>
+            <input type="hidden" name="possibility_position_id_{{ possible_endorsement.possibility_position_number }}" value="{{ possible_endorsement.id }}"
         </div>
     </div>
     {% if possible_endorsement.election_name %}
-    <div>
-    {{ possible_endorsement.election_name }}{% if possible_endorsement.election_day_text %},
-        {{ possible_endorsement.election_day_text }}{% endif %}
-    </div>
-    {% elif possible_endorsement.google_civic_election_id %}
-    <div>
-    election id: {{ possible_endorsement.google_civic_election_id }}
-    </div>
+        <div>
+        {{ possible_endorsement.election_name }}
+        {% if possible_endorsement.election_day_text %},
+            {{ possible_endorsement.election_day_text }}
+        {% endif %}
+        </div>
     {% endif %}
     <textarea name="statement_text_{{ possible_endorsement.possibility_position_number }}"
               class="form-control animated"
               placeholder="Please enter the explanation for the stance, if there is one..."
+              rows="1"
               >{{ possible_endorsement.statement_text|default_if_none:"" }}</textarea>
-
-</div>
-<div>
-  &nbsp;
+    {% if possible_endorsement.statement_text_stored %}
+        <textarea name="statement_text_stored_{{ possible_endorsement.possibility_position_number }}"
+                  class="form-control animated"
+                  placeholder="Already stored"
+                  rows="1"
+                  disabled
+                  >{{ possible_endorsement.statement_text_stored|default_if_none:"" }}</textarea>
+    {% endif %}
+    <hr />
 </div>
 
 <script>

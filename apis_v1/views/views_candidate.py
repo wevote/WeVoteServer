@@ -32,7 +32,7 @@ def candidate_list_for_upcoming_elections_retrieve_api_view(request):  # candida
     :return:
     """
     status = ""
-    google_civic_election_id_list = request.GET.getlist('google_civic_election_id_list[]', "")
+    google_civic_election_id_list = request.GET.getlist('google_civic_election_id_list[]')
     state_code = request.GET.get('state_code', '')
 
     # We will need all candidates for all upcoming elections so we can search the HTML of

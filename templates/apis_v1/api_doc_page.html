@@ -19,6 +19,7 @@
     </link>
     </meta>
     </meta>
+    <link rel="shortcut icon" type="image/x-icon" href="https://wevote.us/img/global/icons/favicon-32x32.png" />
 </head>
 <body class="devsite-doc-page devsite-header-no-upper-tabs" id="top_of_page">
 <div class="devsite-wrapper">
@@ -147,6 +148,18 @@
                                 {% endif %}>
                             </td>
                         </tr>
+                    {% elif query_parameter.value == 'integerlist' %}
+                        <tr>
+                            <td>{{ query_parameter.name }}: </td>
+                            <td colspan="2">
+                                <input type="text" name="{{ query_parameter.name }}[]" maxlength="255" size="30"
+                                {% if query_parameter.name in try_now_link_variables_dict %}
+                                      value="{{ try_now_link_variables_dict|get_value_from_dict:query_parameter.name }}"
+                                {% endif %}>
+                                <input type="text" name="{{ query_parameter.name }}[]" maxlength="255" size="30" value="" >
+                                <input type="text" name="{{ query_parameter.name }}[]" maxlength="255" size="30" value="" >
+                            </td>
+                        </tr>
                     {% elif query_parameter.value == 'boolean' %}
                         <tr>
                             <td>{{ query_parameter.name }}: </td>
@@ -170,6 +183,18 @@
                                 {% elif query_parameter.name == 'voter_device_id' %}
                                       value="{{ voter_api_device_id }}"
                                 {% endif %}>
+                            </td>
+                        </tr>
+                    {% elif query_parameter.value == 'integerlist' %}
+                        <tr>
+                            <td>{{ query_parameter.name }}: </td>
+                            <td colspan="2">
+                                <input type="text" name="{{ query_parameter.name }}[]" maxlength="255" size="30"
+                                {% if query_parameter.name in try_now_link_variables_dict %}
+                                      value="{{ try_now_link_variables_dict|get_value_from_dict:query_parameter.name }}"
+                                {% endif %}>
+                                <input type="text" name="{{ query_parameter.name }}[]" maxlength="255" size="30" value="" >
+                                <input type="text" name="{{ query_parameter.name }}[]" maxlength="255" size="30" value="" >
                             </td>
                         </tr>
                     {% elif query_parameter.value == 'boolean' %}

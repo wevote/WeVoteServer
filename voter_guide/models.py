@@ -1875,23 +1875,24 @@ class VoterGuidePossibilityManager(models.Manager):
                 status += 'FAILED_TO_RETRIEVE_VOTER_GUIDE_POSSIBILITY_POSITION_BY_WE_VOTE_ID ' \
                           '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
 
-        if not voter_guide_possibility_position_found:
-            try:
-                voter_guide_possibility_position = VoterGuidePossibilityPosition.objects.get(
-                    voter_guide_possibility_parent_id=voter_guide_possibility_id,
-                    possibility_position_number=updated_values['possibility_position_number'],
-                )
-                voter_guide_possibility_position_id = voter_guide_possibility_position.id
-                voter_guide_possibility_position_found = True
-                success = True
-                status += 'VOTER_GUIDE_POSSIBILITY_POSITION_FOUND_BY_URL '
-            except VoterGuidePossibilityPosition.MultipleObjectsReturned as e:
-                status += 'MULTIPLE_MATCHING_VOTER_GUIDE_POSSIBILITIES_FOUND_BY_URL-CREATE_NEW '
-            except VoterGuidePossibilityPosition.DoesNotExist:
-                status += "RETRIEVE_VOTER_GUIDE_POSSIBILITY_POSITION_NOT_FOUND_BY_URL "
-            except Exception as e:
-                status += 'FAILED_TO_RETRIEVE_VOTER_GUIDE_POSSIBILITY_POSITION_BY_URL ' \
-                          '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
+        # 2019-05 We no longer want to think of possibility_position_number as unique
+        # if not voter_guide_possibility_position_found:
+        #     try:
+        #         voter_guide_possibility_position = VoterGuidePossibilityPosition.objects.get(
+        #             voter_guide_possibility_parent_id=voter_guide_possibility_id,
+        #             possibility_position_number=updated_values['possibility_position_number'],
+        #         )
+        #         voter_guide_possibility_position_id = voter_guide_possibility_position.id
+        #         voter_guide_possibility_position_found = True
+        #         success = True
+        #         status += 'VOTER_GUIDE_POSSIBILITY_POSITION_FOUND_BY_URL '
+        #     except VoterGuidePossibilityPosition.MultipleObjectsReturned as e:
+        #         status += 'MULTIPLE_MATCHING_VOTER_GUIDE_POSSIBILITIES_FOUND_BY_URL-CREATE_NEW '
+        #     except VoterGuidePossibilityPosition.DoesNotExist:
+        #         status += "RETRIEVE_VOTER_GUIDE_POSSIBILITY_POSITION_NOT_FOUND_BY_URL "
+        #     except Exception as e:
+        #         status += 'FAILED_TO_RETRIEVE_VOTER_GUIDE_POSSIBILITY_POSITION_BY_URL ' \
+        #                   '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
 
         if voter_guide_possibility_position_found:
             # Update record
@@ -1920,6 +1921,19 @@ class VoterGuidePossibilityManager(models.Manager):
                 success = False
         else:
             # Create record
+            if not positive_value_exists(voter_guide_possibility_id):
+                status += "CANNOT_CREATE-MISSING_PARENT_ID "
+                results = {
+                    'success': False,
+                    'status': status,
+                    'MultipleObjectsReturned': exception_multiple_object_returned,
+                    'voter_guide_possibility_position_saved': False,
+                    'new_voter_guide_possibility_position_created': new_voter_guide_possibility_position_created,
+                    'voter_guide_possibility_position': voter_guide_possibility_position,
+                    'voter_guide_possibility_position_id': voter_guide_possibility_position_id,
+                }
+                return results
+
             try:
                 new_voter_guide_possibility_position_created = False
                 voter_guide_possibility_position = VoterGuidePossibilityPosition.objects.create(
@@ -2179,6 +2193,44 @@ class VoterGuidePossibilityManager(models.Manager):
             'status':                               status,
             'voter_guide_possibility_list_found':   voter_guide_possibility_list_found,
             'voter_guide_possibility_list':         voter_guide_possibility_list,
+        }
+        return results
+
+    def retrieve_voter_guide_possibility_position(self, voter_guide_possibility_position_id):
+        status = ""
+        voter_guide_possibility_position_id = convert_to_int(voter_guide_possibility_position_id)
+
+        if not positive_value_exists(voter_guide_possibility_position_id):
+            success = False
+            status = "CANNOT_RETRIEVE_VOTER_GUIDE_POSSIBILITY_POSITION-MISSING_POSITION_ID "
+            results = {
+                'success': success,
+                'status': status,
+                'voter_guide_possibility_position': None,
+                'voter_guide_possibility_position_found': False,
+            }
+            return results
+
+        voter_guide_possibility_position = None
+        voter_guide_possibility_position_found = False
+        try:
+            voter_guide_possibility_position = \
+                VoterGuidePossibilityPosition.objects.get(id=voter_guide_possibility_position_id)
+            voter_guide_possibility_position_found = True
+            status += "VOTER_GUIDE_POSSIBILITY_POSITION_FOUND_WITH_ID "
+            success = True
+        except VoterGuidePossibility.DoesNotExist:
+            status += "VOTER_GUIDE_POSSIBILITY_POSITION_NOT_FOUND_IN_DB "
+            success = True
+        except Exception as e:
+            status += ", ERROR_RETRIEVING_VOTER_GUIDE_POSSIBILITY_POSITION: " + str(e)
+            success = False
+
+        results = {
+            'success':                                  success,
+            'status':                                   status,
+            'voter_guide_possibility_position':         voter_guide_possibility_position,
+            'voter_guide_possibility_position_found':   voter_guide_possibility_position_found,
         }
         return results
 
@@ -3945,708 +3997,6 @@ class VoterGuidePossibility(models.Model):
     google_civic_election_id_200 = models.PositiveIntegerField(null=True)
     stance_about_candidate_200 = models.CharField(max_length=15, choices=POSITION_CHOICES, default=SUPPORT)
 
-    # We Comment out all of these fields because PostGres has a 1600 column limit (including dropped fields!)
-    # candidate_name_201 = models.CharField(max_length=255, null=True, unique=False)
-    # candidate_we_vote_id_201 = models.CharField(max_length=255, null=True, unique=False)
-    # measure_we_vote_id_201 = models.CharField(max_length=255, null=True, unique=False)
-    # comment_about_candidate_201 = models.TextField(null=True, blank=True)
-    # google_civic_election_id_201 = models.PositiveIntegerField(null=True)
-    # stance_about_candidate_201 = models.CharField(max_length=15, choices=POSITION_CHOICES, default=SUPPORT)
-    #
-    # candidate_name_202 = models.CharField(max_length=255, null=True, unique=False)
-    # candidate_we_vote_id_202 = models.CharField(max_length=255, null=True, unique=False)
-    # measure_we_vote_id_202 = models.CharField(max_length=255, null=True, unique=False)
-    # comment_about_candidate_202 = models.TextField(null=True, blank=True)
-    # google_civic_election_id_202 = models.PositiveIntegerField(null=True)
-    # stance_about_candidate_202 = models.CharField(max_length=15, choices=POSITION_CHOICES, default=SUPPORT)
-    #
-    # candidate_name_203 = models.CharField(max_length=255, null=True, unique=False)
-    # candidate_we_vote_id_203 = models.CharField(max_length=255, null=True, unique=False)
-    # measure_we_vote_id_203 = models.CharField(max_length=255, null=True, unique=False)
-    # comment_about_candidate_203 = models.TextField(null=True, blank=True)
-    # google_civic_election_id_203 = models.PositiveIntegerField(null=True)
-    # stance_about_candidate_203 = models.CharField(max_length=15, choices=POSITION_CHOICES, default=SUPPORT)
-    #
-    # candidate_name_204 = models.CharField(max_length=255, null=True, unique=False)
-    # candidate_we_vote_id_204 = models.CharField(max_length=255, null=True, unique=False)
-    # measure_we_vote_id_204 = models.CharField(max_length=255, null=True, unique=False)
-    # comment_about_candidate_204 = models.TextField(null=True, blank=True)
-    # google_civic_election_id_204 = models.PositiveIntegerField(null=True)
-    # stance_about_candidate_204 = models.CharField(max_length=15, choices=POSITION_CHOICES, default=SUPPORT)
-    #
-    # candidate_name_205 = models.CharField(max_length=255, null=True, unique=False)
-    # candidate_we_vote_id_205 = models.CharField(max_length=255, null=True, unique=False)
-    # measure_we_vote_id_205 = models.CharField(max_length=255, null=True, unique=False)
-    # comment_about_candidate_205 = models.TextField(null=True, blank=True)
-    # google_civic_election_id_205 = models.PositiveIntegerField(null=True)
-    # stance_about_candidate_205 = models.CharField(max_length=15, choices=POSITION_CHOICES, default=SUPPORT)
-    #
-    # candidate_name_206 = models.CharField(max_length=255, null=True, unique=False)
-    # candidate_we_vote_id_206 = models.CharField(max_length=255, null=True, unique=False)
-    # measure_we_vote_id_206 = models.CharField(max_length=255, null=True, unique=False)
-    # comment_about_candidate_206 = models.TextField(null=True, blank=True)
-    # google_civic_election_id_206 = models.PositiveIntegerField(null=True)
-    # stance_about_candidate_206 = models.CharField(max_length=15, choices=POSITION_CHOICES, default=SUPPORT)
-    #
-    # candidate_name_207 = models.CharField(max_length=255, null=True, unique=False)
-    # candidate_we_vote_id_207 = models.CharField(max_length=255, null=True, unique=False)
-    # measure_we_vote_id_207 = models.CharField(max_length=255, null=True, unique=False)
-    # comment_about_candidate_207 = models.TextField(null=True, blank=True)
-    # google_civic_election_id_207 = models.PositiveIntegerField(null=True)
-    # stance_about_candidate_207 = models.CharField(max_length=15, choices=POSITION_CHOICES, default=SUPPORT)
-    #
-    # candidate_name_208 = models.CharField(max_length=255, null=True, unique=False)
-    # candidate_we_vote_id_208 = models.CharField(max_length=255, null=True, unique=False)
-    # measure_we_vote_id_208 = models.CharField(max_length=255, null=True, unique=False)
-    # comment_about_candidate_208 = models.TextField(null=True, blank=True)
-    # google_civic_election_id_208 = models.PositiveIntegerField(null=True)
-    # stance_about_candidate_208 = models.CharField(max_length=15, choices=POSITION_CHOICES, default=SUPPORT)
-    #
-    # candidate_name_209 = models.CharField(max_length=255, null=True, unique=False)
-    # candidate_we_vote_id_209 = models.CharField(max_length=255, null=True, unique=False)
-    # measure_we_vote_id_209 = models.CharField(max_length=255, null=True, unique=False)
-    # comment_about_candidate_209 = models.TextField(null=True, blank=True)
-    # google_civic_election_id_209 = models.PositiveIntegerField(null=True)
-    # stance_about_candidate_209 = models.CharField(max_length=15, choices=POSITION_CHOICES, default=SUPPORT)
-    #
-    # candidate_name_210 = models.CharField(max_length=255, null=True, unique=False)
-    # candidate_we_vote_id_210 = models.CharField(max_length=255, null=True, unique=False)
-    # measure_we_vote_id_210 = models.CharField(max_length=255, null=True, unique=False)
-    # comment_about_candidate_210 = models.TextField(null=True, blank=True)
-    # google_civic_election_id_210 = models.PositiveIntegerField(null=True)
-    # stance_about_candidate_210 = models.CharField(max_length=15, choices=POSITION_CHOICES, default=SUPPORT)
-    #
-    # candidate_name_211 = models.CharField(max_length=255, null=True, unique=False)
-    # candidate_we_vote_id_211 = models.CharField(max_length=255, null=True, unique=False)
-    # measure_we_vote_id_211 = models.CharField(max_length=255, null=True, unique=False)
-    # comment_about_candidate_211 = models.TextField(null=True, blank=True)
-    # google_civic_election_id_211 = models.PositiveIntegerField(null=True)
-    # stance_about_candidate_211 = models.CharField(max_length=15, choices=POSITION_CHOICES, default=SUPPORT)
-    #
-    # candidate_name_212 = models.CharField(max_length=255, null=True, unique=False)
-    # candidate_we_vote_id_212 = models.CharField(max_length=255, null=True, unique=False)
-    # measure_we_vote_id_212 = models.CharField(max_length=255, null=True, unique=False)
-    # comment_about_candidate_212 = models.TextField(null=True, blank=True)
-    # google_civic_election_id_212 = models.PositiveIntegerField(null=True)
-    # stance_about_candidate_212 = models.CharField(max_length=15, choices=POSITION_CHOICES, default=SUPPORT)
-    #
-    # candidate_name_213 = models.CharField(max_length=255, null=True, unique=False)
-    # candidate_we_vote_id_213 = models.CharField(max_length=255, null=True, unique=False)
-    # measure_we_vote_id_213 = models.CharField(max_length=255, null=True, unique=False)
-    # comment_about_candidate_213 = models.TextField(null=True, blank=True)
-    # google_civic_election_id_213 = models.PositiveIntegerField(null=True)
-    # stance_about_candidate_213 = models.CharField(max_length=15, choices=POSITION_CHOICES, default=SUPPORT)
-    #
-    # candidate_name_214 = models.CharField(max_length=255, null=True, unique=False)
-    # candidate_we_vote_id_214 = models.CharField(max_length=255, null=True, unique=False)
-    # measure_we_vote_id_214 = models.CharField(max_length=255, null=True, unique=False)
-    # comment_about_candidate_214 = models.TextField(null=True, blank=True)
-    # google_civic_election_id_214 = models.PositiveIntegerField(null=True)
-    # stance_about_candidate_214 = models.CharField(max_length=15, choices=POSITION_CHOICES, default=SUPPORT)
-    #
-    # candidate_name_215 = models.CharField(max_length=255, null=True, unique=False)
-    # candidate_we_vote_id_215 = models.CharField(max_length=255, null=True, unique=False)
-    # measure_we_vote_id_215 = models.CharField(max_length=255, null=True, unique=False)
-    # comment_about_candidate_215 = models.TextField(null=True, blank=True)
-    # google_civic_election_id_215 = models.PositiveIntegerField(null=True)
-    # stance_about_candidate_215 = models.CharField(max_length=15, choices=POSITION_CHOICES, default=SUPPORT)
-    #
-    # candidate_name_216 = models.CharField(max_length=255, null=True, unique=False)
-    # candidate_we_vote_id_216 = models.CharField(max_length=255, null=True, unique=False)
-    # measure_we_vote_id_216 = models.CharField(max_length=255, null=True, unique=False)
-    # comment_about_candidate_216 = models.TextField(null=True, blank=True)
-    # google_civic_election_id_216 = models.PositiveIntegerField(null=True)
-    # stance_about_candidate_216 = models.CharField(max_length=15, choices=POSITION_CHOICES, default=SUPPORT)
-    #
-    # candidate_name_217 = models.CharField(max_length=255, null=True, unique=False)
-    # candidate_we_vote_id_217 = models.CharField(max_length=255, null=True, unique=False)
-    # measure_we_vote_id_217 = models.CharField(max_length=255, null=True, unique=False)
-    # comment_about_candidate_217 = models.TextField(null=True, blank=True)
-    # google_civic_election_id_217 = models.PositiveIntegerField(null=True)
-    # stance_about_candidate_217 = models.CharField(max_length=15, choices=POSITION_CHOICES, default=SUPPORT)
-    #
-    # candidate_name_218 = models.CharField(max_length=255, null=True, unique=False)
-    # candidate_we_vote_id_218 = models.CharField(max_length=255, null=True, unique=False)
-    # measure_we_vote_id_218 = models.CharField(max_length=255, null=True, unique=False)
-    # comment_about_candidate_218 = models.TextField(null=True, blank=True)
-    # google_civic_election_id_218 = models.PositiveIntegerField(null=True)
-    # stance_about_candidate_218 = models.CharField(max_length=15, choices=POSITION_CHOICES, default=SUPPORT)
-    #
-    # candidate_name_219 = models.CharField(max_length=255, null=True, unique=False)
-    # candidate_we_vote_id_219 = models.CharField(max_length=255, null=True, unique=False)
-    # measure_we_vote_id_219 = models.CharField(max_length=255, null=True, unique=False)
-    # comment_about_candidate_219 = models.TextField(null=True, blank=True)
-    # google_civic_election_id_219 = models.PositiveIntegerField(null=True)
-    # stance_about_candidate_219 = models.CharField(max_length=15, choices=POSITION_CHOICES, default=SUPPORT)
-    #
-    # candidate_name_220 = models.CharField(max_length=255, null=True, unique=False)
-    # candidate_we_vote_id_220 = models.CharField(max_length=255, null=True, unique=False)
-    # measure_we_vote_id_220 = models.CharField(max_length=255, null=True, unique=False)
-    # comment_about_candidate_220 = models.TextField(null=True, blank=True)
-    # google_civic_election_id_220 = models.PositiveIntegerField(null=True)
-    # stance_about_candidate_220 = models.CharField(max_length=15, choices=POSITION_CHOICES, default=SUPPORT)
-    #
-    # candidate_name_221 = models.CharField(max_length=255, null=True, unique=False)
-    # candidate_we_vote_id_221 = models.CharField(max_length=255, null=True, unique=False)
-    # measure_we_vote_id_221 = models.CharField(max_length=255, null=True, unique=False)
-    # comment_about_candidate_221 = models.TextField(null=True, blank=True)
-    # google_civic_election_id_221 = models.PositiveIntegerField(null=True)
-    # stance_about_candidate_221 = models.CharField(max_length=15, choices=POSITION_CHOICES, default=SUPPORT)
-    #
-    # candidate_name_222 = models.CharField(max_length=255, null=True, unique=False)
-    # candidate_we_vote_id_222 = models.CharField(max_length=255, null=True, unique=False)
-    # measure_we_vote_id_222 = models.CharField(max_length=255, null=True, unique=False)
-    # comment_about_candidate_222 = models.TextField(null=True, blank=True)
-    # google_civic_election_id_222 = models.PositiveIntegerField(null=True)
-    # stance_about_candidate_222 = models.CharField(max_length=15, choices=POSITION_CHOICES, default=SUPPORT)
-    #
-    # candidate_name_223 = models.CharField(max_length=255, null=True, unique=False)
-    # candidate_we_vote_id_223 = models.CharField(max_length=255, null=True, unique=False)
-    # measure_we_vote_id_223 = models.CharField(max_length=255, null=True, unique=False)
-    # comment_about_candidate_223 = models.TextField(null=True, blank=True)
-    # google_civic_election_id_223 = models.PositiveIntegerField(null=True)
-    # stance_about_candidate_223 = models.CharField(max_length=15, choices=POSITION_CHOICES, default=SUPPORT)
-    #
-    # candidate_name_224 = models.CharField(max_length=255, null=True, unique=False)
-    # candidate_we_vote_id_224 = models.CharField(max_length=255, null=True, unique=False)
-    # measure_we_vote_id_224 = models.CharField(max_length=255, null=True, unique=False)
-    # comment_about_candidate_224 = models.TextField(null=True, blank=True)
-    # google_civic_election_id_224 = models.PositiveIntegerField(null=True)
-    # stance_about_candidate_224 = models.CharField(max_length=15, choices=POSITION_CHOICES, default=SUPPORT)
-    #
-    # candidate_name_225 = models.CharField(max_length=255, null=True, unique=False)
-    # candidate_we_vote_id_225 = models.CharField(max_length=255, null=True, unique=False)
-    # measure_we_vote_id_225 = models.CharField(max_length=255, null=True, unique=False)
-    # comment_about_candidate_225 = models.TextField(null=True, blank=True)
-    # google_civic_election_id_225 = models.PositiveIntegerField(null=True)
-    # stance_about_candidate_225 = models.CharField(max_length=15, choices=POSITION_CHOICES, default=SUPPORT)
-    #
-    # candidate_name_226 = models.CharField(max_length=255, null=True, unique=False)
-    # candidate_we_vote_id_226 = models.CharField(max_length=255, null=True, unique=False)
-    # measure_we_vote_id_226 = models.CharField(max_length=255, null=True, unique=False)
-    # comment_about_candidate_226 = models.TextField(null=True, blank=True)
-    # google_civic_election_id_226 = models.PositiveIntegerField(null=True)
-    # stance_about_candidate_226 = models.CharField(max_length=15, choices=POSITION_CHOICES, default=SUPPORT)
-    #
-    # candidate_name_227 = models.CharField(max_length=255, null=True, unique=False)
-    # candidate_we_vote_id_227 = models.CharField(max_length=255, null=True, unique=False)
-    # measure_we_vote_id_227 = models.CharField(max_length=255, null=True, unique=False)
-    # comment_about_candidate_227 = models.TextField(null=True, blank=True)
-    # google_civic_election_id_227 = models.PositiveIntegerField(null=True)
-    # stance_about_candidate_227 = models.CharField(max_length=15, choices=POSITION_CHOICES, default=SUPPORT)
-    #
-    # candidate_name_228 = models.CharField(max_length=255, null=True, unique=False)
-    # candidate_we_vote_id_228 = models.CharField(max_length=255, null=True, unique=False)
-    # measure_we_vote_id_228 = models.CharField(max_length=255, null=True, unique=False)
-    # comment_about_candidate_228 = models.TextField(null=True, blank=True)
-    # google_civic_election_id_228 = models.PositiveIntegerField(null=True)
-    # stance_about_candidate_228 = models.CharField(max_length=15, choices=POSITION_CHOICES, default=SUPPORT)
-    #
-    # candidate_name_229 = models.CharField(max_length=255, null=True, unique=False)
-    # candidate_we_vote_id_229 = models.CharField(max_length=255, null=True, unique=False)
-    # measure_we_vote_id_229 = models.CharField(max_length=255, null=True, unique=False)
-    # comment_about_candidate_229 = models.TextField(null=True, blank=True)
-    # google_civic_election_id_229 = models.PositiveIntegerField(null=True)
-    # stance_about_candidate_229 = models.CharField(max_length=15, choices=POSITION_CHOICES, default=SUPPORT)
-    #
-    # candidate_name_230 = models.CharField(max_length=255, null=True, unique=False)
-    # candidate_we_vote_id_230 = models.CharField(max_length=255, null=True, unique=False)
-    # measure_we_vote_id_230 = models.CharField(max_length=255, null=True, unique=False)
-    # comment_about_candidate_230 = models.TextField(null=True, blank=True)
-    # google_civic_election_id_230 = models.PositiveIntegerField(null=True)
-    # stance_about_candidate_230 = models.CharField(max_length=15, choices=POSITION_CHOICES, default=SUPPORT)
-    #
-    # candidate_name_231 = models.CharField(max_length=255, null=True, unique=False)
-    # candidate_we_vote_id_231 = models.CharField(max_length=255, null=True, unique=False)
-    # measure_we_vote_id_231 = models.CharField(max_length=255, null=True, unique=False)
-    # comment_about_candidate_231 = models.TextField(null=True, blank=True)
-    # google_civic_election_id_231 = models.PositiveIntegerField(null=True)
-    # stance_about_candidate_231 = models.CharField(max_length=15, choices=POSITION_CHOICES, default=SUPPORT)
-    #
-    # candidate_name_232 = models.CharField(max_length=255, null=True, unique=False)
-    # candidate_we_vote_id_232 = models.CharField(max_length=255, null=True, unique=False)
-    # measure_we_vote_id_232 = models.CharField(max_length=255, null=True, unique=False)
-    # comment_about_candidate_232 = models.TextField(null=True, blank=True)
-    # google_civic_election_id_232 = models.PositiveIntegerField(null=True)
-    # stance_about_candidate_232 = models.CharField(max_length=15, choices=POSITION_CHOICES, default=SUPPORT)
-    #
-    # candidate_name_233 = models.CharField(max_length=255, null=True, unique=False)
-    # candidate_we_vote_id_233 = models.CharField(max_length=255, null=True, unique=False)
-    # measure_we_vote_id_233 = models.CharField(max_length=255, null=True, unique=False)
-    # comment_about_candidate_233 = models.TextField(null=True, blank=True)
-    # google_civic_election_id_233 = models.PositiveIntegerField(null=True)
-    # stance_about_candidate_233 = models.CharField(max_length=15, choices=POSITION_CHOICES, default=SUPPORT)
-    #
-    # candidate_name_234 = models.CharField(max_length=255, null=True, unique=False)
-    # candidate_we_vote_id_234 = models.CharField(max_length=255, null=True, unique=False)
-    # measure_we_vote_id_234 = models.CharField(max_length=255, null=True, unique=False)
-    # comment_about_candidate_234 = models.TextField(null=True, blank=True)
-    # google_civic_election_id_234 = models.PositiveIntegerField(null=True)
-    # stance_about_candidate_234 = models.CharField(max_length=15, choices=POSITION_CHOICES, default=SUPPORT)
-    #
-    # candidate_name_235 = models.CharField(max_length=255, null=True, unique=False)
-    # candidate_we_vote_id_235 = models.CharField(max_length=255, null=True, unique=False)
-    # measure_we_vote_id_235 = models.CharField(max_length=255, null=True, unique=False)
-    # comment_about_candidate_235 = models.TextField(null=True, blank=True)
-    # google_civic_election_id_235 = models.PositiveIntegerField(null=True)
-    # stance_about_candidate_235 = models.CharField(max_length=15, choices=POSITION_CHOICES, default=SUPPORT)
-    #
-    # candidate_name_236 = models.CharField(max_length=255, null=True, unique=False)
-    # candidate_we_vote_id_236 = models.CharField(max_length=255, null=True, unique=False)
-    # measure_we_vote_id_236 = models.CharField(max_length=255, null=True, unique=False)
-    # comment_about_candidate_236 = models.TextField(null=True, blank=True)
-    # google_civic_election_id_236 = models.PositiveIntegerField(null=True)
-    # stance_about_candidate_236 = models.CharField(max_length=15, choices=POSITION_CHOICES, default=SUPPORT)
-    #
-    # candidate_name_237 = models.CharField(max_length=255, null=True, unique=False)
-    # candidate_we_vote_id_237 = models.CharField(max_length=255, null=True, unique=False)
-    # measure_we_vote_id_237 = models.CharField(max_length=255, null=True, unique=False)
-    # comment_about_candidate_237 = models.TextField(null=True, blank=True)
-    # google_civic_election_id_237 = models.PositiveIntegerField(null=True)
-    # stance_about_candidate_237 = models.CharField(max_length=15, choices=POSITION_CHOICES, default=SUPPORT)
-    #
-    # candidate_name_238 = models.CharField(max_length=255, null=True, unique=False)
-    # candidate_we_vote_id_238 = models.CharField(max_length=255, null=True, unique=False)
-    # measure_we_vote_id_238 = models.CharField(max_length=255, null=True, unique=False)
-    # comment_about_candidate_238 = models.TextField(null=True, blank=True)
-    # google_civic_election_id_238 = models.PositiveIntegerField(null=True)
-    # stance_about_candidate_238 = models.CharField(max_length=15, choices=POSITION_CHOICES, default=SUPPORT)
-    #
-    # candidate_name_239 = models.CharField(max_length=255, null=True, unique=False)
-    # candidate_we_vote_id_239 = models.CharField(max_length=255, null=True, unique=False)
-    # measure_we_vote_id_239 = models.CharField(max_length=255, null=True, unique=False)
-    # comment_about_candidate_239 = models.TextField(null=True, blank=True)
-    # google_civic_election_id_239 = models.PositiveIntegerField(null=True)
-    # stance_about_candidate_239 = models.CharField(max_length=15, choices=POSITION_CHOICES, default=SUPPORT)
-    #
-    # candidate_name_240 = models.CharField(max_length=255, null=True, unique=False)
-    # candidate_we_vote_id_240 = models.CharField(max_length=255, null=True, unique=False)
-    # measure_we_vote_id_240 = models.CharField(max_length=255, null=True, unique=False)
-    # comment_about_candidate_240 = models.TextField(null=True, blank=True)
-    # google_civic_election_id_240 = models.PositiveIntegerField(null=True)
-    # stance_about_candidate_240 = models.CharField(max_length=15, choices=POSITION_CHOICES, default=SUPPORT)
-    #
-    # candidate_name_241 = models.CharField(max_length=255, null=True, unique=False)
-    # candidate_we_vote_id_241 = models.CharField(max_length=255, null=True, unique=False)
-    # measure_we_vote_id_241 = models.CharField(max_length=255, null=True, unique=False)
-    # comment_about_candidate_241 = models.TextField(null=True, blank=True)
-    # google_civic_election_id_241 = models.PositiveIntegerField(null=True)
-    # stance_about_candidate_241 = models.CharField(max_length=15, choices=POSITION_CHOICES, default=SUPPORT)
-    #
-    # candidate_name_242 = models.CharField(max_length=255, null=True, unique=False)
-    # candidate_we_vote_id_242 = models.CharField(max_length=255, null=True, unique=False)
-    # measure_we_vote_id_242 = models.CharField(max_length=255, null=True, unique=False)
-    # comment_about_candidate_242 = models.TextField(null=True, blank=True)
-    # google_civic_election_id_242 = models.PositiveIntegerField(null=True)
-    # stance_about_candidate_242 = models.CharField(max_length=15, choices=POSITION_CHOICES, default=SUPPORT)
-    #
-    # candidate_name_243 = models.CharField(max_length=255, null=True, unique=False)
-    # candidate_we_vote_id_243 = models.CharField(max_length=255, null=True, unique=False)
-    # measure_we_vote_id_243 = models.CharField(max_length=255, null=True, unique=False)
-    # comment_about_candidate_243 = models.TextField(null=True, blank=True)
-    # google_civic_election_id_243 = models.PositiveIntegerField(null=True)
-    # stance_about_candidate_243 = models.CharField(max_length=15, choices=POSITION_CHOICES, default=SUPPORT)
-    #
-    # candidate_name_244 = models.CharField(max_length=255, null=True, unique=False)
-    # candidate_we_vote_id_244 = models.CharField(max_length=255, null=True, unique=False)
-    # measure_we_vote_id_244 = models.CharField(max_length=255, null=True, unique=False)
-    # comment_about_candidate_244 = models.TextField(null=True, blank=True)
-    # google_civic_election_id_244 = models.PositiveIntegerField(null=True)
-    # stance_about_candidate_244 = models.CharField(max_length=15, choices=POSITION_CHOICES, default=SUPPORT)
-    #
-    # candidate_name_245 = models.CharField(max_length=255, null=True, unique=False)
-    # candidate_we_vote_id_245 = models.CharField(max_length=255, null=True, unique=False)
-    # measure_we_vote_id_245 = models.CharField(max_length=255, null=True, unique=False)
-    # comment_about_candidate_245 = models.TextField(null=True, blank=True)
-    # google_civic_election_id_245 = models.PositiveIntegerField(null=True)
-    # stance_about_candidate_245 = models.CharField(max_length=15, choices=POSITION_CHOICES, default=SUPPORT)
-    #
-    # candidate_name_246 = models.CharField(max_length=255, null=True, unique=False)
-    # candidate_we_vote_id_246 = models.CharField(max_length=255, null=True, unique=False)
-    # measure_we_vote_id_246 = models.CharField(max_length=255, null=True, unique=False)
-    # comment_about_candidate_246 = models.TextField(null=True, blank=True)
-    # google_civic_election_id_246 = models.PositiveIntegerField(null=True)
-    # stance_about_candidate_246 = models.CharField(max_length=15, choices=POSITION_CHOICES, default=SUPPORT)
-    #
-    # candidate_name_247 = models.CharField(max_length=255, null=True, unique=False)
-    # candidate_we_vote_id_247 = models.CharField(max_length=255, null=True, unique=False)
-    # measure_we_vote_id_247 = models.CharField(max_length=255, null=True, unique=False)
-    # comment_about_candidate_247 = models.TextField(null=True, blank=True)
-    # google_civic_election_id_247 = models.PositiveIntegerField(null=True)
-    # stance_about_candidate_247 = models.CharField(max_length=15, choices=POSITION_CHOICES, default=SUPPORT)
-    #
-    # candidate_name_248 = models.CharField(max_length=255, null=True, unique=False)
-    # candidate_we_vote_id_248 = models.CharField(max_length=255, null=True, unique=False)
-    # measure_we_vote_id_248 = models.CharField(max_length=255, null=True, unique=False)
-    # comment_about_candidate_248 = models.TextField(null=True, blank=True)
-    # google_civic_election_id_248 = models.PositiveIntegerField(null=True)
-    # stance_about_candidate_248 = models.CharField(max_length=15, choices=POSITION_CHOICES, default=SUPPORT)
-    #
-    # candidate_name_249 = models.CharField(max_length=255, null=True, unique=False)
-    # candidate_we_vote_id_249 = models.CharField(max_length=255, null=True, unique=False)
-    # measure_we_vote_id_249 = models.CharField(max_length=255, null=True, unique=False)
-    # comment_about_candidate_249 = models.TextField(null=True, blank=True)
-    # google_civic_election_id_249 = models.PositiveIntegerField(null=True)
-    # stance_about_candidate_249 = models.CharField(max_length=15, choices=POSITION_CHOICES, default=SUPPORT)
-    #
-    # candidate_name_250 = models.CharField(max_length=255, null=True, unique=False)
-    # candidate_we_vote_id_250 = models.CharField(max_length=255, null=True, unique=False)
-    # measure_we_vote_id_250 = models.CharField(max_length=255, null=True, unique=False)
-    # comment_about_candidate_250 = models.TextField(null=True, blank=True)
-    # google_civic_election_id_250 = models.PositiveIntegerField(null=True)
-    # stance_about_candidate_250 = models.CharField(max_length=15, choices=POSITION_CHOICES, default=SUPPORT)
-    #
-    # candidate_name_251 = models.CharField(max_length=255, null=True, unique=False)
-    # candidate_we_vote_id_251 = models.CharField(max_length=255, null=True, unique=False)
-    # measure_we_vote_id_251 = models.CharField(max_length=255, null=True, unique=False)
-    # comment_about_candidate_251 = models.TextField(null=True, blank=True)
-    # google_civic_election_id_251 = models.PositiveIntegerField(null=True)
-    # stance_about_candidate_251 = models.CharField(max_length=15, choices=POSITION_CHOICES, default=SUPPORT)
-    #
-    # candidate_name_252 = models.CharField(max_length=255, null=True, unique=False)
-    # candidate_we_vote_id_252 = models.CharField(max_length=255, null=True, unique=False)
-    # measure_we_vote_id_252 = models.CharField(max_length=255, null=True, unique=False)
-    # comment_about_candidate_252 = models.TextField(null=True, blank=True)
-    # google_civic_election_id_252 = models.PositiveIntegerField(null=True)
-    # stance_about_candidate_252 = models.CharField(max_length=15, choices=POSITION_CHOICES, default=SUPPORT)
-    #
-    # candidate_name_253 = models.CharField(max_length=255, null=True, unique=False)
-    # candidate_we_vote_id_253 = models.CharField(max_length=255, null=True, unique=False)
-    # measure_we_vote_id_253 = models.CharField(max_length=255, null=True, unique=False)
-    # comment_about_candidate_253 = models.TextField(null=True, blank=True)
-    # google_civic_election_id_253 = models.PositiveIntegerField(null=True)
-    # stance_about_candidate_253 = models.CharField(max_length=15, choices=POSITION_CHOICES, default=SUPPORT)
-    #
-    # candidate_name_254 = models.CharField(max_length=255, null=True, unique=False)
-    # candidate_we_vote_id_254 = models.CharField(max_length=255, null=True, unique=False)
-    # measure_we_vote_id_254 = models.CharField(max_length=255, null=True, unique=False)
-    # comment_about_candidate_254 = models.TextField(null=True, blank=True)
-    # google_civic_election_id_254 = models.PositiveIntegerField(null=True)
-    # stance_about_candidate_254 = models.CharField(max_length=15, choices=POSITION_CHOICES, default=SUPPORT)
-    #
-    # candidate_name_255 = models.CharField(max_length=255, null=True, unique=False)
-    # candidate_we_vote_id_255 = models.CharField(max_length=255, null=True, unique=False)
-    # measure_we_vote_id_255 = models.CharField(max_length=255, null=True, unique=False)
-    # comment_about_candidate_255 = models.TextField(null=True, blank=True)
-    # google_civic_election_id_255 = models.PositiveIntegerField(null=True)
-    # stance_about_candidate_255 = models.CharField(max_length=15, choices=POSITION_CHOICES, default=SUPPORT)
-    #
-    # candidate_name_256 = models.CharField(max_length=255, null=True, unique=False)
-    # candidate_we_vote_id_256 = models.CharField(max_length=255, null=True, unique=False)
-    # measure_we_vote_id_256 = models.CharField(max_length=255, null=True, unique=False)
-    # comment_about_candidate_256 = models.TextField(null=True, blank=True)
-    # google_civic_election_id_256 = models.PositiveIntegerField(null=True)
-    # stance_about_candidate_256 = models.CharField(max_length=15, choices=POSITION_CHOICES, default=SUPPORT)
-    #
-    # candidate_name_257 = models.CharField(max_length=255, null=True, unique=False)
-    # candidate_we_vote_id_257 = models.CharField(max_length=255, null=True, unique=False)
-    # measure_we_vote_id_257 = models.CharField(max_length=255, null=True, unique=False)
-    # comment_about_candidate_257 = models.TextField(null=True, blank=True)
-    # google_civic_election_id_257 = models.PositiveIntegerField(null=True)
-    # stance_about_candidate_257 = models.CharField(max_length=15, choices=POSITION_CHOICES, default=SUPPORT)
-    #
-    # candidate_name_258 = models.CharField(max_length=255, null=True, unique=False)
-    # candidate_we_vote_id_258 = models.CharField(max_length=255, null=True, unique=False)
-    # measure_we_vote_id_258 = models.CharField(max_length=255, null=True, unique=False)
-    # comment_about_candidate_258 = models.TextField(null=True, blank=True)
-    # google_civic_election_id_258 = models.PositiveIntegerField(null=True)
-    # stance_about_candidate_258 = models.CharField(max_length=15, choices=POSITION_CHOICES, default=SUPPORT)
-    #
-    # candidate_name_259 = models.CharField(max_length=255, null=True, unique=False)
-    # candidate_we_vote_id_259 = models.CharField(max_length=255, null=True, unique=False)
-    # measure_we_vote_id_259 = models.CharField(max_length=255, null=True, unique=False)
-    # comment_about_candidate_259 = models.TextField(null=True, blank=True)
-    # google_civic_election_id_259 = models.PositiveIntegerField(null=True)
-    # stance_about_candidate_259 = models.CharField(max_length=15, choices=POSITION_CHOICES, default=SUPPORT)
-    #
-    # candidate_name_260 = models.CharField(max_length=255, null=True, unique=False)
-    # candidate_we_vote_id_260 = models.CharField(max_length=255, null=True, unique=False)
-    # measure_we_vote_id_260 = models.CharField(max_length=255, null=True, unique=False)
-    # comment_about_candidate_260 = models.TextField(null=True, blank=True)
-    # google_civic_election_id_260 = models.PositiveIntegerField(null=True)
-    # stance_about_candidate_260 = models.CharField(max_length=15, choices=POSITION_CHOICES, default=SUPPORT)
-    #
-    # candidate_name_261 = models.CharField(max_length=255, null=True, unique=False)
-    # candidate_we_vote_id_261 = models.CharField(max_length=255, null=True, unique=False)
-    # measure_we_vote_id_261 = models.CharField(max_length=255, null=True, unique=False)
-    # comment_about_candidate_261 = models.TextField(null=True, blank=True)
-    # google_civic_election_id_261 = models.PositiveIntegerField(null=True)
-    # stance_about_candidate_261 = models.CharField(max_length=15, choices=POSITION_CHOICES, default=SUPPORT)
-    #
-    # candidate_name_262 = models.CharField(max_length=255, null=True, unique=False)
-    # candidate_we_vote_id_262 = models.CharField(max_length=255, null=True, unique=False)
-    # measure_we_vote_id_262 = models.CharField(max_length=255, null=True, unique=False)
-    # comment_about_candidate_262 = models.TextField(null=True, blank=True)
-    # google_civic_election_id_262 = models.PositiveIntegerField(null=True)
-    # stance_about_candidate_262 = models.CharField(max_length=15, choices=POSITION_CHOICES, default=SUPPORT)
-    #
-    # candidate_name_263 = models.CharField(max_length=255, null=True, unique=False)
-    # candidate_we_vote_id_263 = models.CharField(max_length=255, null=True, unique=False)
-    # measure_we_vote_id_263 = models.CharField(max_length=255, null=True, unique=False)
-    # comment_about_candidate_263 = models.TextField(null=True, blank=True)
-    # google_civic_election_id_263 = models.PositiveIntegerField(null=True)
-    # stance_about_candidate_263 = models.CharField(max_length=15, choices=POSITION_CHOICES, default=SUPPORT)
-    #
-    # candidate_name_264 = models.CharField(max_length=255, null=True, unique=False)
-    # candidate_we_vote_id_264 = models.CharField(max_length=255, null=True, unique=False)
-    # measure_we_vote_id_264 = models.CharField(max_length=255, null=True, unique=False)
-    # comment_about_candidate_264 = models.TextField(null=True, blank=True)
-    # google_civic_election_id_264 = models.PositiveIntegerField(null=True)
-    # stance_about_candidate_264 = models.CharField(max_length=15, choices=POSITION_CHOICES, default=SUPPORT)
-    #
-    # candidate_name_265 = models.CharField(max_length=255, null=True, unique=False)
-    # candidate_we_vote_id_265 = models.CharField(max_length=255, null=True, unique=False)
-    # measure_we_vote_id_265 = models.CharField(max_length=255, null=True, unique=False)
-    # comment_about_candidate_265 = models.TextField(null=True, blank=True)
-    # google_civic_election_id_265 = models.PositiveIntegerField(null=True)
-    # stance_about_candidate_265 = models.CharField(max_length=15, choices=POSITION_CHOICES, default=SUPPORT)
-    #
-    # candidate_name_266 = models.CharField(max_length=255, null=True, unique=False)
-    # candidate_we_vote_id_266 = models.CharField(max_length=255, null=True, unique=False)
-    # measure_we_vote_id_266 = models.CharField(max_length=255, null=True, unique=False)
-    # comment_about_candidate_266 = models.TextField(null=True, blank=True)
-    # google_civic_election_id_266 = models.PositiveIntegerField(null=True)
-    # stance_about_candidate_266 = models.CharField(max_length=15, choices=POSITION_CHOICES, default=SUPPORT)
-    #
-    # candidate_name_267 = models.CharField(max_length=255, null=True, unique=False)
-    # candidate_we_vote_id_267 = models.CharField(max_length=255, null=True, unique=False)
-    # measure_we_vote_id_267 = models.CharField(max_length=255, null=True, unique=False)
-    # comment_about_candidate_267 = models.TextField(null=True, blank=True)
-    # google_civic_election_id_267 = models.PositiveIntegerField(null=True)
-    # stance_about_candidate_267 = models.CharField(max_length=15, choices=POSITION_CHOICES, default=SUPPORT)
-    #
-    # candidate_name_268 = models.CharField(max_length=255, null=True, unique=False)
-    # candidate_we_vote_id_268 = models.CharField(max_length=255, null=True, unique=False)
-    # measure_we_vote_id_268 = models.CharField(max_length=255, null=True, unique=False)
-    # comment_about_candidate_268 = models.TextField(null=True, blank=True)
-    # google_civic_election_id_268 = models.PositiveIntegerField(null=True)
-    # stance_about_candidate_268 = models.CharField(max_length=15, choices=POSITION_CHOICES, default=SUPPORT)
-    #
-    # candidate_name_269 = models.CharField(max_length=255, null=True, unique=False)
-    # candidate_we_vote_id_269 = models.CharField(max_length=255, null=True, unique=False)
-    # measure_we_vote_id_269 = models.CharField(max_length=255, null=True, unique=False)
-    # comment_about_candidate_269 = models.TextField(null=True, blank=True)
-    # google_civic_election_id_269 = models.PositiveIntegerField(null=True)
-    # stance_about_candidate_269 = models.CharField(max_length=15, choices=POSITION_CHOICES, default=SUPPORT)
-    #
-    # candidate_name_270 = models.CharField(max_length=255, null=True, unique=False)
-    # candidate_we_vote_id_270 = models.CharField(max_length=255, null=True, unique=False)
-    # measure_we_vote_id_270 = models.CharField(max_length=255, null=True, unique=False)
-    # comment_about_candidate_270 = models.TextField(null=True, blank=True)
-    # google_civic_election_id_270 = models.PositiveIntegerField(null=True)
-    # stance_about_candidate_270 = models.CharField(max_length=15, choices=POSITION_CHOICES, default=SUPPORT)
-    #
-    # candidate_name_271 = models.CharField(max_length=255, null=True, unique=False)
-    # candidate_we_vote_id_271 = models.CharField(max_length=255, null=True, unique=False)
-    # measure_we_vote_id_271 = models.CharField(max_length=255, null=True, unique=False)
-    # comment_about_candidate_271 = models.TextField(null=True, blank=True)
-    # google_civic_election_id_271 = models.PositiveIntegerField(null=True)
-    # stance_about_candidate_271 = models.CharField(max_length=15, choices=POSITION_CHOICES, default=SUPPORT)
-    #
-    # candidate_name_272 = models.CharField(max_length=255, null=True, unique=False)
-    # candidate_we_vote_id_272 = models.CharField(max_length=255, null=True, unique=False)
-    # measure_we_vote_id_272 = models.CharField(max_length=255, null=True, unique=False)
-    # comment_about_candidate_272 = models.TextField(null=True, blank=True)
-    # google_civic_election_id_272 = models.PositiveIntegerField(null=True)
-    # stance_about_candidate_272 = models.CharField(max_length=15, choices=POSITION_CHOICES, default=SUPPORT)
-    #
-    # candidate_name_273 = models.CharField(max_length=255, null=True, unique=False)
-    # candidate_we_vote_id_273 = models.CharField(max_length=255, null=True, unique=False)
-    # measure_we_vote_id_273 = models.CharField(max_length=255, null=True, unique=False)
-    # comment_about_candidate_273 = models.TextField(null=True, blank=True)
-    # google_civic_election_id_273 = models.PositiveIntegerField(null=True)
-    # stance_about_candidate_273 = models.CharField(max_length=15, choices=POSITION_CHOICES, default=SUPPORT)
-    #
-    # candidate_name_274 = models.CharField(max_length=255, null=True, unique=False)
-    # candidate_we_vote_id_274 = models.CharField(max_length=255, null=True, unique=False)
-    # measure_we_vote_id_274 = models.CharField(max_length=255, null=True, unique=False)
-    # comment_about_candidate_274 = models.TextField(null=True, blank=True)
-    # google_civic_election_id_274 = models.PositiveIntegerField(null=True)
-    # stance_about_candidate_274 = models.CharField(max_length=15, choices=POSITION_CHOICES, default=SUPPORT)
-    #
-    # candidate_name_275 = models.CharField(max_length=255, null=True, unique=False)
-    # candidate_we_vote_id_275 = models.CharField(max_length=255, null=True, unique=False)
-    # measure_we_vote_id_275 = models.CharField(max_length=255, null=True, unique=False)
-    # comment_about_candidate_275 = models.TextField(null=True, blank=True)
-    # google_civic_election_id_275 = models.PositiveIntegerField(null=True)
-    # stance_about_candidate_275 = models.CharField(max_length=15, choices=POSITION_CHOICES, default=SUPPORT)
-    #
-    # candidate_name_276 = models.CharField(max_length=255, null=True, unique=False)
-    # candidate_we_vote_id_276 = models.CharField(max_length=255, null=True, unique=False)
-    # measure_we_vote_id_276 = models.CharField(max_length=255, null=True, unique=False)
-    # comment_about_candidate_276 = models.TextField(null=True, blank=True)
-    # google_civic_election_id_276 = models.PositiveIntegerField(null=True)
-    # stance_about_candidate_276 = models.CharField(max_length=15, choices=POSITION_CHOICES, default=SUPPORT)
-    #
-    # candidate_name_277 = models.CharField(max_length=255, null=True, unique=False)
-    # candidate_we_vote_id_277 = models.CharField(max_length=255, null=True, unique=False)
-    # measure_we_vote_id_277 = models.CharField(max_length=255, null=True, unique=False)
-    # comment_about_candidate_277 = models.TextField(null=True, blank=True)
-    # google_civic_election_id_277 = models.PositiveIntegerField(null=True)
-    # stance_about_candidate_277 = models.CharField(max_length=15, choices=POSITION_CHOICES, default=SUPPORT)
-    #
-    # candidate_name_278 = models.CharField(max_length=255, null=True, unique=False)
-    # candidate_we_vote_id_278 = models.CharField(max_length=255, null=True, unique=False)
-    # measure_we_vote_id_278 = models.CharField(max_length=255, null=True, unique=False)
-    # comment_about_candidate_278 = models.TextField(null=True, blank=True)
-    # google_civic_election_id_278 = models.PositiveIntegerField(null=True)
-    # stance_about_candidate_278 = models.CharField(max_length=15, choices=POSITION_CHOICES, default=SUPPORT)
-    #
-    # candidate_name_279 = models.CharField(max_length=255, null=True, unique=False)
-    # candidate_we_vote_id_279 = models.CharField(max_length=255, null=True, unique=False)
-    # measure_we_vote_id_279 = models.CharField(max_length=255, null=True, unique=False)
-    # comment_about_candidate_279 = models.TextField(null=True, blank=True)
-    # google_civic_election_id_279 = models.PositiveIntegerField(null=True)
-    # stance_about_candidate_279 = models.CharField(max_length=15, choices=POSITION_CHOICES, default=SUPPORT)
-    #
-    # candidate_name_280 = models.CharField(max_length=255, null=True, unique=False)
-    # candidate_we_vote_id_280 = models.CharField(max_length=255, null=True, unique=False)
-    # measure_we_vote_id_280 = models.CharField(max_length=255, null=True, unique=False)
-    # comment_about_candidate_280 = models.TextField(null=True, blank=True)
-    # google_civic_election_id_280 = models.PositiveIntegerField(null=True)
-    # stance_about_candidate_280 = models.CharField(max_length=15, choices=POSITION_CHOICES, default=SUPPORT)
-    #
-    # candidate_name_281 = models.CharField(max_length=255, null=True, unique=False)
-    # candidate_we_vote_id_281 = models.CharField(max_length=255, null=True, unique=False)
-    # measure_we_vote_id_281 = models.CharField(max_length=255, null=True, unique=False)
-    # comment_about_candidate_281 = models.TextField(null=True, blank=True)
-    # google_civic_election_id_281 = models.PositiveIntegerField(null=True)
-    # stance_about_candidate_281 = models.CharField(max_length=15, choices=POSITION_CHOICES, default=SUPPORT)
-    #
-    # candidate_name_282 = models.CharField(max_length=255, null=True, unique=False)
-    # candidate_we_vote_id_282 = models.CharField(max_length=255, null=True, unique=False)
-    # measure_we_vote_id_282 = models.CharField(max_length=255, null=True, unique=False)
-    # comment_about_candidate_282 = models.TextField(null=True, blank=True)
-    # google_civic_election_id_282 = models.PositiveIntegerField(null=True)
-    # stance_about_candidate_282 = models.CharField(max_length=15, choices=POSITION_CHOICES, default=SUPPORT)
-    #
-    # candidate_name_283 = models.CharField(max_length=255, null=True, unique=False)
-    # candidate_we_vote_id_283 = models.CharField(max_length=255, null=True, unique=False)
-    # measure_we_vote_id_283 = models.CharField(max_length=255, null=True, unique=False)
-    # comment_about_candidate_283 = models.TextField(null=True, blank=True)
-    # google_civic_election_id_283 = models.PositiveIntegerField(null=True)
-    # stance_about_candidate_283 = models.CharField(max_length=15, choices=POSITION_CHOICES, default=SUPPORT)
-    #
-    # candidate_name_284 = models.CharField(max_length=255, null=True, unique=False)
-    # candidate_we_vote_id_284 = models.CharField(max_length=255, null=True, unique=False)
-    # measure_we_vote_id_284 = models.CharField(max_length=255, null=True, unique=False)
-    # comment_about_candidate_284 = models.TextField(null=True, blank=True)
-    # google_civic_election_id_284 = models.PositiveIntegerField(null=True)
-    # stance_about_candidate_284 = models.CharField(max_length=15, choices=POSITION_CHOICES, default=SUPPORT)
-    #
-    # candidate_name_285 = models.CharField(max_length=255, null=True, unique=False)
-    # candidate_we_vote_id_285 = models.CharField(max_length=255, null=True, unique=False)
-    # measure_we_vote_id_285 = models.CharField(max_length=255, null=True, unique=False)
-    # comment_about_candidate_285 = models.TextField(null=True, blank=True)
-    # google_civic_election_id_285 = models.PositiveIntegerField(null=True)
-    # stance_about_candidate_285 = models.CharField(max_length=15, choices=POSITION_CHOICES, default=SUPPORT)
-    #
-    # candidate_name_286 = models.CharField(max_length=255, null=True, unique=False)
-    # candidate_we_vote_id_286 = models.CharField(max_length=255, null=True, unique=False)
-    # measure_we_vote_id_286 = models.CharField(max_length=255, null=True, unique=False)
-    # comment_about_candidate_286 = models.TextField(null=True, blank=True)
-    # google_civic_election_id_286 = models.PositiveIntegerField(null=True)
-    # stance_about_candidate_286 = models.CharField(max_length=15, choices=POSITION_CHOICES, default=SUPPORT)
-    #
-    # candidate_name_287 = models.CharField(max_length=255, null=True, unique=False)
-    # candidate_we_vote_id_287 = models.CharField(max_length=255, null=True, unique=False)
-    # measure_we_vote_id_287 = models.CharField(max_length=255, null=True, unique=False)
-    # comment_about_candidate_287 = models.TextField(null=True, blank=True)
-    # google_civic_election_id_287 = models.PositiveIntegerField(null=True)
-    # stance_about_candidate_287 = models.CharField(max_length=15, choices=POSITION_CHOICES, default=SUPPORT)
-    #
-    # candidate_name_288 = models.CharField(max_length=255, null=True, unique=False)
-    # candidate_we_vote_id_288 = models.CharField(max_length=255, null=True, unique=False)
-    # measure_we_vote_id_288 = models.CharField(max_length=255, null=True, unique=False)
-    # comment_about_candidate_288 = models.TextField(null=True, blank=True)
-    # google_civic_election_id_288 = models.PositiveIntegerField(null=True)
-    # stance_about_candidate_288 = models.CharField(max_length=15, choices=POSITION_CHOICES, default=SUPPORT)
-    #
-    # candidate_name_289 = models.CharField(max_length=255, null=True, unique=False)
-    # candidate_we_vote_id_289 = models.CharField(max_length=255, null=True, unique=False)
-    # measure_we_vote_id_289 = models.CharField(max_length=255, null=True, unique=False)
-    # comment_about_candidate_289 = models.TextField(null=True, blank=True)
-    # google_civic_election_id_289 = models.PositiveIntegerField(null=True)
-    # stance_about_candidate_289 = models.CharField(max_length=15, choices=POSITION_CHOICES, default=SUPPORT)
-    #
-    # candidate_name_290 = models.CharField(max_length=255, null=True, unique=False)
-    # candidate_we_vote_id_290 = models.CharField(max_length=255, null=True, unique=False)
-    # measure_we_vote_id_290 = models.CharField(max_length=255, null=True, unique=False)
-    # comment_about_candidate_290 = models.TextField(null=True, blank=True)
-    # google_civic_election_id_290 = models.PositiveIntegerField(null=True)
-    # stance_about_candidate_290 = models.CharField(max_length=15, choices=POSITION_CHOICES, default=SUPPORT)
-    #
-    # candidate_name_291 = models.CharField(max_length=255, null=True, unique=False)
-    # candidate_we_vote_id_291 = models.CharField(max_length=255, null=True, unique=False)
-    # measure_we_vote_id_291 = models.CharField(max_length=255, null=True, unique=False)
-    # comment_about_candidate_291 = models.TextField(null=True, blank=True)
-    # google_civic_election_id_291 = models.PositiveIntegerField(null=True)
-    # stance_about_candidate_291 = models.CharField(max_length=15, choices=POSITION_CHOICES, default=SUPPORT)
-    #
-    # candidate_name_292 = models.CharField(max_length=255, null=True, unique=False)
-    # candidate_we_vote_id_292 = models.CharField(max_length=255, null=True, unique=False)
-    # measure_we_vote_id_292 = models.CharField(max_length=255, null=True, unique=False)
-    # comment_about_candidate_292 = models.TextField(null=True, blank=True)
-    # google_civic_election_id_292 = models.PositiveIntegerField(null=True)
-    # stance_about_candidate_292 = models.CharField(max_length=15, choices=POSITION_CHOICES, default=SUPPORT)
-    #
-    # candidate_name_293 = models.CharField(max_length=255, null=True, unique=False)
-    # candidate_we_vote_id_293 = models.CharField(max_length=255, null=True, unique=False)
-    # measure_we_vote_id_293 = models.CharField(max_length=255, null=True, unique=False)
-    # comment_about_candidate_293 = models.TextField(null=True, blank=True)
-    # google_civic_election_id_293 = models.PositiveIntegerField(null=True)
-    # stance_about_candidate_293 = models.CharField(max_length=15, choices=POSITION_CHOICES, default=SUPPORT)
-    #
-    # candidate_name_294 = models.CharField(max_length=255, null=True, unique=False)
-    # candidate_we_vote_id_294 = models.CharField(max_length=255, null=True, unique=False)
-    # measure_we_vote_id_294 = models.CharField(max_length=255, null=True, unique=False)
-    # comment_about_candidate_294 = models.TextField(null=True, blank=True)
-    # google_civic_election_id_294 = models.PositiveIntegerField(null=True)
-    # stance_about_candidate_294 = models.CharField(max_length=15, choices=POSITION_CHOICES, default=SUPPORT)
-    #
-    # candidate_name_295 = models.CharField(max_length=255, null=True, unique=False)
-    # candidate_we_vote_id_295 = models.CharField(max_length=255, null=True, unique=False)
-    # measure_we_vote_id_295 = models.CharField(max_length=255, null=True, unique=False)
-    # comment_about_candidate_295 = models.TextField(null=True, blank=True)
-    # google_civic_election_id_295 = models.PositiveIntegerField(null=True)
-    # stance_about_candidate_295 = models.CharField(max_length=15, choices=POSITION_CHOICES, default=SUPPORT)
-    #
-    # candidate_name_296 = models.CharField(max_length=255, null=True, unique=False)
-    # candidate_we_vote_id_296 = models.CharField(max_length=255, null=True, unique=False)
-    # measure_we_vote_id_296 = models.CharField(max_length=255, null=True, unique=False)
-    # comment_about_candidate_296 = models.TextField(null=True, blank=True)
-    # google_civic_election_id_296 = models.PositiveIntegerField(null=True)
-    # stance_about_candidate_296 = models.CharField(max_length=15, choices=POSITION_CHOICES, default=SUPPORT)
-    #
-    # candidate_name_297 = models.CharField(max_length=255, null=True, unique=False)
-    # candidate_we_vote_id_297 = models.CharField(max_length=255, null=True, unique=False)
-    # measure_we_vote_id_297 = models.CharField(max_length=255, null=True, unique=False)
-    # comment_about_candidate_297 = models.TextField(null=True, blank=True)
-    # google_civic_election_id_297 = models.PositiveIntegerField(null=True)
-    # stance_about_candidate_297 = models.CharField(max_length=15, choices=POSITION_CHOICES, default=SUPPORT)
-    #
-    # candidate_name_298 = models.CharField(max_length=255, null=True, unique=False)
-    # candidate_we_vote_id_298 = models.CharField(max_length=255, null=True, unique=False)
-    # measure_we_vote_id_298 = models.CharField(max_length=255, null=True, unique=False)
-    # comment_about_candidate_298 = models.TextField(null=True, blank=True)
-    # google_civic_election_id_298 = models.PositiveIntegerField(null=True)
-    # stance_about_candidate_298 = models.CharField(max_length=15, choices=POSITION_CHOICES, default=SUPPORT)
-    #
-    # candidate_name_299 = models.CharField(max_length=255, null=True, unique=False)
-    # candidate_we_vote_id_299 = models.CharField(max_length=255, null=True, unique=False)
-    # measure_we_vote_id_299 = models.CharField(max_length=255, null=True, unique=False)
-    # comment_about_candidate_299 = models.TextField(null=True, blank=True)
-    # google_civic_election_id_299 = models.PositiveIntegerField(null=True)
-    # stance_about_candidate_299 = models.CharField(max_length=15, choices=POSITION_CHOICES, default=SUPPORT)
-    #
-    # candidate_name_300 = models.CharField(max_length=255, null=True, unique=False)
-    # candidate_we_vote_id_300 = models.CharField(max_length=255, null=True, unique=False)
-    # measure_we_vote_id_300 = models.CharField(max_length=255, null=True, unique=False)
-    # comment_about_candidate_300 = models.TextField(null=True, blank=True)
-    # google_civic_election_id_300 = models.PositiveIntegerField(null=True)
-    # stance_about_candidate_300 = models.CharField(max_length=15, choices=POSITION_CHOICES, default=SUPPORT)
-    # This is the end
-
 
 class VoterGuidePossibilityPosition(models.Model):
     """
@@ -4669,3 +4019,9 @@ class VoterGuidePossibilityPosition(models.Model):
     position_stance = models.CharField(max_length=15, choices=POSITION_CHOICES, default=SUPPORT)
     # A link to any location with more information about this position
     more_info_url = models.URLField(blank=True, null=True, verbose_name='url with more info about this position')
+    # We don't want to work with this possibility any more
+    possibility_should_be_ignored = models.BooleanField(default=False,
+                                                        verbose_name='Soft delete. Stop analyzing this entry.')
+    # Delete existing PositionEntered from database
+    position_should_be_removed = models.BooleanField(default=False,
+                                                     verbose_name='Delete saved position from PositionEntered.')
