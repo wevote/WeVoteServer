@@ -325,12 +325,9 @@
         <label for="find_voter_guide_button_id" class="col-sm-3 control-label"></label>
         <div class="col-sm-8">
         {% if voter_guide_possibility_url %}
-            <a href="{% url 'voter_guide:voter_guide_create' %}">start over</a>
+            <a href="{% url 'voter_guide:voter_guide_create' %}">start over</a> &nbsp;&nbsp;&nbsp;
         {% endif %}
-            <button type="submit" class="btn btn-default" name="save_endorsements" value="1">Analyze & Save</button>
-        {% if display_all_done_button %}
-            <button type="submit" class="btn btn-success" name="all_done_with_entry" value="1">All Done!</button>
-        {% endif %}
+            <button type="submit" class="btn btn-success" name="save_endorsements" value="1">Analyze & Save</button>
         {% if has_suggested_voter_guide_rights and voter_guide_possibility_id %}
             <br />
             <br />

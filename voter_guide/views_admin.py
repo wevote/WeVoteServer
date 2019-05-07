@@ -243,7 +243,6 @@ def voter_guide_create_view(request):
     has_suggested_voter_guide_rights = voter_has_authority(request, authority_required)
 
     batch_header_id = 0
-    display_all_done_button = False
     ignore_this_source = False
     organization = None
     organization_found = False
@@ -308,9 +307,6 @@ def voter_guide_create_view(request):
 
         except VoterGuidePossibility.DoesNotExist:
             pass
-
-    if positive_value_exists(voter_guide_possibility_url):
-        display_all_done_button = True
 
     election_manager = ElectionManager()
     upcoming_election_list = []
@@ -429,7 +425,6 @@ def voter_guide_create_view(request):
         'capture_detailed_comments':    capture_detailed_comments,
         'contributor_comments':         contributor_comments,
         'contributor_email':            contributor_email,
-        'display_all_done_button':      display_all_done_button,
         'hide_from_active_review':      hide_from_active_review,
         'ignore_stored_positions':      ignore_stored_positions,
         'ignore_this_source':           ignore_this_source,
@@ -846,7 +841,6 @@ def voter_guide_create_process_view(request):
 
     # Now save the possibility so far
     if positive_value_exists(voter_guide_possibility_url):
-        # display_all_done_button = True
         updated_values = {
             'ballot_items_raw':                 ballot_items_raw,
             'contributor_comments':             contributor_comments,
