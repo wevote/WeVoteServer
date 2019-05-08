@@ -1784,6 +1784,7 @@ class PositionListManager(models.Model):
                                                       friends_we_vote_id_list=False,
                                                       organizations_followed_we_vote_id_list=False,
                                                       retrieve_all_admin_override=False,
+                                                      private_citizens_only=False,
                                                       read_only=False):
         """
         We do not attempt to retrieve public positions and friend's-only positions in the same call.
@@ -1798,6 +1799,8 @@ class PositionListManager(models.Model):
          If it comes in as False, we can consider looking up the values if they are needed,
          but we will then need voter_device_id passed in too.
         :param retrieve_all_admin_override:
+        :param private_citizens_only: If False, only retrieve positions from groups and public figures.
+            If True, only return positions from private citizens.
         :param read_only:
         :return:
         """
@@ -1866,6 +1869,13 @@ class PositionListManager(models.Model):
             #         position_list_query = position_list_query.filter(stance=stance_we_are_looking_for)
             if stance_we_are_looking_for != ANY_STANCE:
                 position_list_query = position_list_query.filter(stance__iexact=stance_we_are_looking_for)
+
+            if positive_value_exists(private_citizens_only):
+                # position_list_query = position_list_query.filter(is_private_citizen=True)
+                pass
+            else:
+                # position_list_query = position_list_query.filter(is_private_citizen=False)
+                pass
 
             # Only one of these blocks will be used at a time
             if retrieve_friends_positions and friends_we_vote_id_list:

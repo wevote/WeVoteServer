@@ -8,7 +8,8 @@ from ballot.controllers import figure_out_google_civic_election_id_voter_is_watc
 from ballot.models import OFFICE, CANDIDATE, MEASURE
 from position.controllers import calculate_positions_count_for_all_ballot_items_for_api, \
     count_for_all_ballot_items_from_position_network_score_for_api, \
-    position_list_for_ballot_item_for_api, position_list_for_opinion_maker_for_api, \
+    position_list_for_ballot_item_for_api, position_list_for_ballot_item_for_one_voter_for_api, \
+    position_list_for_opinion_maker_for_api, \
     position_list_for_voter_for_api, \
     position_retrieve_for_api, position_save_for_api
 from position.models import ANY_STANCE, SUPPORT, STILL_DECIDING, INFORMATION_ONLY, NO_STANCE, OPPOSE, PERCENT_RATING, \
@@ -33,6 +34,59 @@ def position_list_for_ballot_item_view(request):  # positionListForBallotItem
     :param request:
     :return:
     """
+    stance = request.GET.get('stance', ANY_STANCE)
+    if stance in (ANY_STANCE, SUPPORT, STILL_DECIDING, INFORMATION_ONLY, NO_STANCE, OPPOSE, PERCENT_RATING):
+        stance_we_are_looking_for = stance
+    else:
+        stance_we_are_looking_for = ANY_STANCE
+
+    kind_of_ballot_item = request.GET.get('kind_of_ballot_item', "")
+    ballot_item_id = request.GET.get('ballot_item_id', 0)
+    ballot_item_we_vote_id = request.GET.get('ballot_item_we_vote_id', "")
+    private_citizens_only = positive_value_exists(request.GET.get('private_citizens_only', False))
+    if kind_of_ballot_item == OFFICE:
+        office_id = ballot_item_id
+        office_we_vote_id = ballot_item_we_vote_id
+        candidate_id = 0
+        candidate_we_vote_id = ''
+        measure_id = 0
+        measure_we_vote_id = ''
+    elif kind_of_ballot_item == CANDIDATE:
+        office_id = 0
+        office_we_vote_id = ''
+        candidate_id = ballot_item_id
+        candidate_we_vote_id = ballot_item_we_vote_id
+        measure_id = 0
+        measure_we_vote_id = ''
+    elif kind_of_ballot_item == MEASURE:
+        office_id = 0
+        office_we_vote_id = ''
+        candidate_id = 0
+        candidate_we_vote_id = ''
+        measure_id = ballot_item_id
+        measure_we_vote_id = ballot_item_we_vote_id
+    else:
+        office_id = 0
+        office_we_vote_id = ''
+        candidate_id = 0
+        candidate_we_vote_id = ''
+        measure_id = 0
+        measure_we_vote_id = ''
+    return position_list_for_ballot_item_for_api(office_id=office_id,
+                                                 office_we_vote_id=office_we_vote_id,
+                                                 candidate_id=candidate_id,
+                                                 candidate_we_vote_id=candidate_we_vote_id,
+                                                 measure_id=measure_id,
+                                                 measure_we_vote_id=measure_we_vote_id,
+                                                 stance_we_are_looking_for=stance_we_are_looking_for,
+                                                 private_citizens_only=private_citizens_only)
+
+
+def position_list_for_ballot_item_for_one_voter_view(request):  # positionListForBallotItem
+    """
+    :param request:
+    :return:
+    """
     voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
     stance = request.GET.get('stance', ANY_STANCE)
     if stance in (ANY_STANCE, SUPPORT, STILL_DECIDING, INFORMATION_ONLY, NO_STANCE, OPPOSE, PERCENT_RATING):
@@ -46,7 +100,8 @@ def position_list_for_ballot_item_view(request):  # positionListForBallotItem
     else:
         friends_vs_public = FRIENDS_AND_PUBLIC
 
-    show_positions_this_voter_follows = request.GET.get('show_positions_this_voter_follows', True)
+    show_positions_this_voter_follows = \
+        positive_value_exists(request.GET.get('show_positions_this_voter_follows', True))
     kind_of_ballot_item = request.GET.get('kind_of_ballot_item', "")
     ballot_item_id = request.GET.get('ballot_item_id', 0)
     ballot_item_we_vote_id = request.GET.get('ballot_item_we_vote_id', "")
@@ -78,16 +133,17 @@ def position_list_for_ballot_item_view(request):  # positionListForBallotItem
         candidate_we_vote_id = ''
         measure_id = 0
         measure_we_vote_id = ''
-    return position_list_for_ballot_item_for_api(voter_device_id=voter_device_id,
-                                                 friends_vs_public=friends_vs_public,
-                                                 office_id=office_id,
-                                                 office_we_vote_id=office_we_vote_id,
-                                                 candidate_id=candidate_id,
-                                                 candidate_we_vote_id=candidate_we_vote_id,
-                                                 measure_id=measure_id,
-                                                 measure_we_vote_id=measure_we_vote_id,
-                                                 stance_we_are_looking_for=stance_we_are_looking_for,
-                                                 show_positions_this_voter_follows=show_positions_this_voter_follows)
+    return position_list_for_ballot_item_for_one_voter_for_api(
+        voter_device_id=voter_device_id,
+        friends_vs_public=friends_vs_public,
+        office_id=office_id,
+        office_we_vote_id=office_we_vote_id,
+        candidate_id=candidate_id,
+        candidate_we_vote_id=candidate_we_vote_id,
+        measure_id=measure_id,
+        measure_we_vote_id=measure_we_vote_id,
+        stance_we_are_looking_for=stance_we_are_looking_for,
+        show_positions_this_voter_follows=show_positions_this_voter_follows)
 
 
 def position_list_for_opinion_maker_view(request):  # positionListForOpinionMaker

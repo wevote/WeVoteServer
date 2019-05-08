@@ -54,11 +54,11 @@ def position_list_for_ballot_item_doc_template_values(url_root):
                             'Other options include FRIENDS_ONLY, PUBLIC_ONLY, FRIENDS_AND_PUBLIC',
         },
         {
-            'name':         'show_positions_this_voter_follows',
+            'name':         'private_citizens_only',
             'value':        'boolean',  # boolean, integer, long, string
-            'description':  'True default shows the positions of organizations, public figures and '
-                            'friends this voter is following. '
-                            'If False, show positions that the voter is NOT following.',
+            'description':  'Defaults to False. '
+                            'If False, only retrieve positions from groups and public figures. '
+                            'If True, only return positions from private citizens.',
         },
     ]
 
