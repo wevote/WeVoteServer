@@ -171,6 +171,8 @@ def attach_ballotpedia_election_view(request, election_local_id=0):
         polling_location_count = polling_location_count_query.count()
 
         if positive_value_exists(polling_location_count):
+            polling_location_half_count = polling_location_count // 2
+
             polling_location_query = PollingLocation.objects.all()
             polling_location_query = polling_location_query.filter(state__iexact=state_code)
             polling_location_query = polling_location_query.filter(polling_location_deleted=False)
@@ -178,8 +180,8 @@ def attach_ballotpedia_election_view(request, election_local_id=0):
                 Q(latitude__isnull=True) | Q(latitude__exact=0.0))
             polling_location_query = polling_location_query.exclude(
                 Q(zip_long__isnull=True) | Q(zip_long__exact='0') | Q(zip_long__exact=''))
-            # Ordering by "location_name" creates a bit of (locational) random order
-            polling_location_list = polling_location_query.order_by('location_name')[:1000]
+            # Ordering by "line1" creates a bit of (locational) random order
+            polling_location_list = polling_location_query.order_by('line1')[:polling_location_half_count]
     except PollingLocation.DoesNotExist:
         messages.add_message(request, messages.INFO,
                              'Could not retrieve polling location data for the {election_name}. '
@@ -285,13 +287,15 @@ def refresh_ballotpedia_districts_for_polling_locations_view(request):
         polling_location_count = polling_location_count_query.count()
 
         if positive_value_exists(polling_location_count):
+            polling_location_half_count = polling_location_count // 2
+
             polling_location_query = PollingLocation.objects.all()
             polling_location_query = polling_location_query.filter(state__iexact=state_code)
             polling_location_query = polling_location_query.filter(use_for_bulk_retrieve=True)
             polling_location_query = polling_location_query.filter(polling_location_deleted=False)
             # We used to have a limit of 500 ballots to pull per election, but now retrieve all
-            # Ordering by "location_name" creates a bit of (locational) random order
-            polling_location_list = polling_location_query.order_by('location_name')[:import_limit]
+            # Ordering by "line1" creates a bit of (locational) random order
+            polling_location_list = polling_location_query.order_by('line1')[:polling_location_half_count]
     except Exception as e:
         status += "ELECTORAL_DISTRICT-COULD_NOT_FIND_POLLING_LOCATION_LIST " + str(e) + " "
 
@@ -309,6 +313,8 @@ def refresh_ballotpedia_districts_for_polling_locations_view(request):
             polling_location_count = polling_location_count_query.count()
 
             if positive_value_exists(polling_location_count):
+                polling_location_half_count = polling_location_count // 2
+
                 polling_location_query = PollingLocation.objects.all()
                 polling_location_query = \
                     polling_location_query.exclude(Q(latitude__isnull=True) | Q(latitude__exact=0.0))
@@ -317,8 +323,8 @@ def refresh_ballotpedia_districts_for_polling_locations_view(request):
                                                    Q(zip_long__exact=''))
                 polling_location_query = polling_location_query.filter(state__iexact=state_code)
                 polling_location_query = polling_location_query.filter(polling_location_deleted=False)
-                # Ordering by "location_name" creates a bit of (locational) random order
-                polling_location_list = polling_location_query.order_by('location_name')[:import_limit]
+                # Ordering by "line1" creates a bit of (locational) random order
+                polling_location_list = polling_location_query.order_by('line1')[:polling_location_half_count]
         except PollingLocation.DoesNotExist:
             messages.add_message(request, messages.INFO,
                                  'Could not retrieve ballot data. '
@@ -504,13 +510,15 @@ def retrieve_ballotpedia_data_for_polling_locations_view(request, election_local
         polling_location_count = polling_location_count_query.count()
 
         if positive_value_exists(polling_location_count):
+            polling_location_half_count = polling_location_count // 2
+
             polling_location_query = PollingLocation.objects.all()
             polling_location_query = polling_location_query.filter(state__iexact=state_code)
             polling_location_query = polling_location_query.filter(use_for_bulk_retrieve=True)
             polling_location_query = polling_location_query.filter(polling_location_deleted=False)
             # We used to have a limit of 500 ballots to pull per election, but now retrieve all
-            # Ordering by "location_name" creates a bit of (locational) random order
-            polling_location_list = polling_location_query.order_by('location_name')[:import_limit]
+            # Ordering by "line1" creates a bit of (locational) random order
+            polling_location_list = polling_location_query.order_by('line1')[:polling_location_half_count]
     except Exception as e:
         status += "COULD_NOT_FIND_POLLING_LOCATION_LIST " + str(e) + " "
 
@@ -528,6 +536,8 @@ def retrieve_ballotpedia_data_for_polling_locations_view(request, election_local
             polling_location_count = polling_location_count_query.count()
 
             if positive_value_exists(polling_location_count):
+                polling_location_half_count = polling_location_count // 2
+
                 polling_location_query = PollingLocation.objects.all()
                 polling_location_query = \
                     polling_location_query.exclude(Q(latitude__isnull=True) | Q(latitude__exact=0.0))
@@ -536,8 +546,8 @@ def retrieve_ballotpedia_data_for_polling_locations_view(request, election_local
                                                    Q(zip_long__exact=''))
                 polling_location_query = polling_location_query.filter(state__iexact=state_code)
                 polling_location_query = polling_location_query.filter(polling_location_deleted=False)
-                # Ordering by "location_name" creates a bit of (locational) random order
-                polling_location_list = polling_location_query.order_by('location_name')[:import_limit]
+                # Ordering by "line1" creates a bit of (locational) random order
+                polling_location_list = polling_location_query.order_by('line1')[:polling_location_half_count]
         except PollingLocation.DoesNotExist:
             messages.add_message(request, messages.INFO,
                                  'Could not retrieve ballot data for the {election_name}. '
