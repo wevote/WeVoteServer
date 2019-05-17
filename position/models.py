@@ -119,6 +119,7 @@ class PositionEntered(models.Model):
     organization_we_vote_id = models.CharField(
         verbose_name="we vote permanent id for the organization", max_length=255, null=True,
         blank=True, unique=False, db_index=True)
+    is_private_citizen = models.NullBooleanField()
 
     # The voter expressing the opinion
     # Note that for organizations who have friends, the voter_we_vote_id is what we use to link to the friends
@@ -504,6 +505,7 @@ class PositionForFriends(models.Model):
     organization_we_vote_id = models.CharField(
         verbose_name="we vote permanent id for the organization", max_length=255, null=True,
         blank=True, unique=False, db_index=True)
+    is_private_citizen = models.NullBooleanField()
 
     # The voter expressing the opinion
     # Note that for organizations who have friends, the voter_we_vote_id is what we use to link to the friends.
@@ -7267,10 +7269,16 @@ class PositionManager(models.Model):
                         # speaker_twitter_handle is missing so look it up from source
                         position_object.speaker_twitter_handle = organization_twitter_handle
                         position_change = True
+                    if position_object.is_private_citizen is None or force_update:
+                        position_object.is_private_citizen = organization.is_private_citizen()
+                        position_change = True
                     if not positive_value_exists(position_object.organization_id) \
                             or position_object.organization_id != organization.id:
                         position_object.organization_id = organization.id
                         position_change = True
+                else:
+                    position_object.is_private_citizen = True
+                    position_change = True
 
             except Exception as e:
                 pass

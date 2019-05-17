@@ -183,13 +183,14 @@ class ElectionManager(models.Model):
         """
         exception_multiple_object_returned = False
         new_election_created = False
+        status = ""
 
         if not google_civic_election_id:
             success = False
-            status = 'MISSING_GOOGLE_CIVIC_ELECTION_ID'
+            status += 'MISSING_GOOGLE_CIVIC_ELECTION_ID'
         elif not election_name:
             success = False
-            status = 'MISSING_ELECTION_NAME'
+            status += 'MISSING_ELECTION_NAME'
         else:
             if not positive_value_exists(state_code) and positive_value_exists(ocd_division_id):
                 state_code = extract_state_from_ocd_division_id(ocd_division_id)
@@ -207,7 +208,7 @@ class ElectionManager(models.Model):
                 election_on_stage, new_election_created = Election.objects.update_or_create(
                     google_civic_election_id=google_civic_election_id, defaults=updated_values)
                 success = True
-                status = 'ELECTION_SAVED'
+                status += 'ELECTION_SAVED '
 
                 election_changed = False
                 if ballotpedia_election_id is not None:
@@ -239,8 +240,11 @@ class ElectionManager(models.Model):
 
             except Election.MultipleObjectsReturned as e:
                 success = False
-                status = 'MULTIPLE_MATCHING_ELECTIONS_FOUND'
+                status += 'MULTIPLE_MATCHING_ELECTIONS_FOUND '
                 exception_multiple_object_returned = True
+            except Exception as e:
+                success = False
+                status += "ELECTION_SAVE_FAILURE: " + str(e) + " "
 
         results = {
             'success':                  success,

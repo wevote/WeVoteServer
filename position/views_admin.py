@@ -78,7 +78,7 @@ def positions_sync_out_view(request):  # positionsSyncOut
             'politician_we_vote_id', 'contest_measure_we_vote_id', 'stance',
             'statement_text', 'statement_html', 'more_info_url', 'from_scraper',
             'organization_certified', 'volunteer_certified', 'voter_entering_position',
-            'tweet_source_id', 'twitter_user_entered_position')
+            'tweet_source_id', 'twitter_user_entered_position', 'is_private_citizen')
 
         if position_list_dict:
             position_list_json = list(position_list_dict)

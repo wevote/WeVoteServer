@@ -731,27 +731,6 @@ def voter_guide_create_process_view(request):
     if results['possible_endorsement_list_found']:
         possible_endorsement_list = results['possible_endorsement_list']
 
-    # If the "remove" link was clicked, remove that entry from the possible
-    # max_possibility_number = 900
-    # number_index = 1
-    # possibility_position_number_to_remove = None
-    # continue_looking_for_possible_remove_ballot_item = True
-    # while continue_looking_for_possible_remove_ballot_item:
-    #     if number_index > max_possibility_number:
-    #         continue_looking_for_possible_remove_ballot_item = False
-    #     if positive_value_exists(request.POST.get('remove_possibility_position_id_' + str(number_index), False)):
-    #         # A request to remove this row was found
-    #         possibility_position_number_to_remove = str(number_index)
-    #         # Only remove one at a time
-    #         continue_looking_for_possible_remove_ballot_item = False
-    #     number_index += 1
-    #
-    # if possibility_position_number_to_remove is not None:
-    #     results = modify_one_row_in_possible_endorsement_list(
-    #         possible_endorsement_list, possibility_position_number_to_remove)
-    #     if positive_value_exists(results['success']):
-    #         possible_endorsement_list = results['possible_endorsement_list']
-
     remove_possibility_position_id = request.POST.get('remove_possibility_position_id', 0)
 
     if positive_value_exists(remove_possibility_position_id):

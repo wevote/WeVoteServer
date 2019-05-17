@@ -2282,6 +2282,20 @@ class Organization(models.Model):
             NONPROFIT_501C3, NONPROFIT_501C4, POLITICAL_ACTION_COMMITTEE,
             CORPORATION, NEWS_ORGANIZATION)
 
+    def is_private_citizen(self):
+        # Return True if this person or organization is not in the public sphere
+        is_in_public_sphere = self.organization_type in (
+            CORPORATION,
+            NONPROFIT,
+            NONPROFIT_501C3,
+            NONPROFIT_501C4,
+            NEWS_ORGANIZATION,
+            ORGANIZATION,
+            POLITICAL_ACTION_COMMITTEE,
+            PUBLIC_FIGURE)
+
+        return not is_in_public_sphere
+
     def generate_facebook_link(self):
         if self.organization_facebook:
             return "https://facebook.com/{facebook_page}".format(facebook_page=self.organization_facebook)
