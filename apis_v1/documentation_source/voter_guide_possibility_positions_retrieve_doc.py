@@ -70,6 +70,7 @@ def voter_guide_possibility_positions_retrieve_doc_template_values(url_root):
                    '     "possibility_position_id": integer,\n' \
                    '     "possibility_position_number": integer,\n' \
                    '     "ballot_item_name": string,\n' \
+                   '     "ballot_item_image_url_https_medium": string,\n' \
                    '     "position_stance": string,\n' \
                    '     "statement_text": string,\n' \
                    '     "more_info_url": string,\n' \
@@ -79,6 +80,7 @@ def voter_guide_possibility_positions_retrieve_doc_template_values(url_root):
                    '     "ballot_item_name": string,\n' \
                    '     "office_we_vote_id": string,\n' \
                    '     "office_name": string,\n' \
+                   '     "political_party": string,\n' \
                    '     "measure_we_vote_id": string,\n' \
                    '     "position_we_vote_id": string,\n' \
                    '     "edit_position_url": string,\n' \

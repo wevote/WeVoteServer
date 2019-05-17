@@ -66,6 +66,9 @@ def convert_endorsement_list_light_to_possible_endorsement_list(endorsement_list
             'google_civic_election_id': one_endorsement['google_civic_election_id'],
             'measure_we_vote_id': one_endorsement['measure_we_vote_id'],
             'possibility_position_number': str(number_index),
+            'possibility_should_be_deleted': False,
+            'possibility_should_be_ignored': False,
+            'position_should_be_removed': False,
             'position_stance': "SUPPORT",
             'statement_text': "",
         }
@@ -159,6 +162,9 @@ def convert_list_of_names_to_possible_endorsement_list(ballot_items_list, starti
             'google_civic_election_id': 0,
             'measure_we_vote_id': "",
             'possibility_position_number': str(number_index),
+            'possibility_should_be_deleted': False,
+            'possibility_should_be_ignored': False,
+            'position_should_be_removed': False,
             'position_stance': "SUPPORT",
         }
         possible_endorsement_list.append(possible_endorsement)
@@ -352,8 +358,12 @@ def augment_candidate_possible_position_with_position_table_data(
             if positive_value_exists(attach_objects):
                 possible_endorsement['candidate'] = candidate
             possible_endorsement['ballot_item_name'] = candidate.display_candidate_name()
-            possible_endorsement['google_civic_election_id'] = \
-                candidate.google_civic_election_id
+            possible_endorsement['google_civic_election_id'] = candidate.google_civic_election_id
+            possible_endorsement['office_name'] = candidate.contest_office_name
+            possible_endorsement['office_we_vote_id'] = candidate.contest_office_we_vote_id
+            possible_endorsement['political_party'] = candidate.party
+            possible_endorsement['ballot_item_image_url_https_medium'] = \
+                candidate.we_vote_hosted_profile_image_url_medium
             if not positive_value_exists(possible_endorsement['google_civic_election_id']) \
                     and positive_value_exists(candidate.contest_office_we_vote_id):
                 possible_endorsement['google_civic_election_id'] = \
@@ -377,6 +387,11 @@ def augment_candidate_possible_position_with_position_table_data(
                 possible_endorsement['candidate'] = candidate
             possible_endorsement['ballot_item_name'] = candidate.display_candidate_name()
             possible_endorsement['google_civic_election_id'] = candidate.google_civic_election_id
+            possible_endorsement['office_name'] = candidate.contest_office_name
+            possible_endorsement['office_we_vote_id'] = candidate.contest_office_we_vote_id
+            possible_endorsement['political_party'] = candidate.party
+            possible_endorsement['ballot_item_image_url_https_medium'] = \
+                candidate.we_vote_hosted_profile_image_url_medium
             if not positive_value_exists(possible_endorsement['google_civic_election_id']) \
                     and positive_value_exists(candidate.contest_office_we_vote_id):
                 possible_endorsement['google_civic_election_id'] = \
@@ -402,6 +417,11 @@ def augment_candidate_possible_position_with_position_table_data(
                     possible_endorsement_copy['candidate'] = candidate
                 possible_endorsement_copy['ballot_item_name'] = candidate.display_candidate_name()
                 possible_endorsement_copy['google_civic_election_id'] = candidate.google_civic_election_id
+                possible_endorsement_copy['office_name'] = candidate.contest_office_name
+                possible_endorsement_copy['office_we_vote_id'] = candidate.contest_office_we_vote_id
+                possible_endorsement_copy['political_party'] = candidate.party
+                possible_endorsement_copy['ballot_item_image_url_https_medium'] = \
+                    candidate.we_vote_hosted_profile_image_url_medium
                 if not positive_value_exists(possible_endorsement_copy['google_civic_election_id']) \
                         and positive_value_exists(candidate.contest_office_we_vote_id):
                     possible_endorsement_copy['google_civic_election_id'] = \
@@ -438,6 +458,11 @@ def augment_candidate_possible_position_with_position_table_data(
                             possible_endorsement['candidate'] = candidate
                         possible_endorsement['ballot_item_name'] = candidate.display_candidate_name()
                         possible_endorsement['google_civic_election_id'] = candidate.google_civic_election_id
+                        possible_endorsement['office_name'] = candidate.contest_office_name
+                        possible_endorsement['office_we_vote_id'] = candidate.contest_office_we_vote_id
+                        possible_endorsement['political_party'] = candidate.party
+                        possible_endorsement['ballot_item_image_url_https_medium'] = \
+                            candidate.we_vote_hosted_profile_image_url_medium
                         if not positive_value_exists(possible_endorsement['google_civic_election_id']) \
                                 and positive_value_exists(candidate.contest_office_we_vote_id):
                             possible_endorsement['google_civic_election_id'] = \
@@ -484,6 +509,11 @@ def augment_candidate_possible_position_with_position_table_data(
                                 possible_endorsement_copy['candidate'] = candidate
                             possible_endorsement_copy['ballot_item_name'] = candidate.candidate_name
                             possible_endorsement_copy['google_civic_election_id'] = candidate.google_civic_election_id
+                            possible_endorsement_copy['office_name'] = candidate.contest_office_name
+                            possible_endorsement_copy['office_we_vote_id'] = candidate.contest_office_we_vote_id
+                            possible_endorsement_copy['political_party'] = candidate.party
+                            possible_endorsement_copy['ballot_item_image_url_https_medium'] = \
+                                candidate.we_vote_hosted_profile_image_url_medium
                         synonym_found = True
                         possible_endorsement_count += 1
                         possible_endorsement_return_list.append(possible_endorsement_copy)
@@ -572,8 +602,7 @@ def match_endorsement_list_with_measures_in_database(
                 if positive_value_exists(attach_objects):
                     possible_endorsement['measure'] = measure
                 possible_endorsement['ballot_item_name'] = measure.measure_title
-                possible_endorsement['google_civic_election_id'] = \
-                    measure.google_civic_election_id
+                possible_endorsement['google_civic_election_id'] = measure.google_civic_election_id
             possible_endorsement_matched = True
             possible_endorsement_list_modified.append(possible_endorsement)
         elif 'ballot_item_name' in possible_endorsement and \
@@ -1288,7 +1317,7 @@ def voter_guide_possibility_retrieve_for_api(voter_device_id, voter_guide_possib
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 
 
-def voter_guide_possibility_positions_retrieve_for_api(
+def voter_guide_possibility_positions_retrieve_for_api(  # voterGuidePossibilityPositionsRetrieve
         voter_device_id, voter_guide_possibility_id, voter_guide_possibility_position_id=0):
     status = "VOTER_GUIDE_POSSIBILITY_POSITIONS_RETRIEVE "
     results = is_voter_device_id_valid(voter_device_id)
@@ -1686,6 +1715,8 @@ def voter_guide_possibility_position_save_for_api(  # voterGuidePossibilityPosit
         'organization_we_vote_id': organization_we_vote_id,
         'organization_twitter_handle': organization_twitter_handle,
         'possibility_position_number': voter_guide_possibility_position.possibility_position_number,
+        'possibility_should_be_ignored': voter_guide_possibility_position.possibility_should_be_ignored,
+        'position_should_be_removed': voter_guide_possibility_position.position_should_be_removed,
         'position_we_vote_id': voter_guide_possibility_position.position_we_vote_id,
         'position_stance': voter_guide_possibility_position.position_stance,
         'statement_text': voter_guide_possibility_position.statement_text,
@@ -2440,7 +2471,7 @@ def retrieve_voter_guides_to_follow_by_election_for_api(voter_id, google_civic_e
     return results
 
 
-def voter_guides_upcoming_retrieve_for_api(google_civic_election_id_list=[]):
+def voter_guides_upcoming_retrieve_for_api(google_civic_election_id_list=[]):  # voterGuidesUpcomingRetrieve
     status = ""
 
     voter_guides = []

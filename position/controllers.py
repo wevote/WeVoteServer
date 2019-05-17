@@ -3496,6 +3496,7 @@ def positions_import_from_structured_json(structured_json):
                 position_on_stage.stance = one_position["stance"]
                 position_on_stage.statement_text = one_position["statement_text"]
                 position_on_stage.statement_html = one_position["statement_html"]
+                position_on_stage.is_private_citizen = one_position["is_private_citizen"]
             else:
                 # Create new
                 position_on_stage = PositionEntered(
@@ -3516,6 +3517,7 @@ def positions_import_from_structured_json(structured_json):
                     stance=one_position["stance"],
                     statement_html=one_position["statement_html"],
                     statement_text=one_position["statement_text"],
+                    is_private_citizen=one_position["is_private_citizen"],
                 )
 
             position_on_stage.ballot_item_display_name = one_position["ballot_item_display_name"]
