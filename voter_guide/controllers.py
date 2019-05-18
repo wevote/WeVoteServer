@@ -362,6 +362,8 @@ def augment_candidate_possible_position_with_position_table_data(
             possible_endorsement['office_name'] = candidate.contest_office_name
             possible_endorsement['office_we_vote_id'] = candidate.contest_office_we_vote_id
             possible_endorsement['political_party'] = candidate.party
+            possible_endorsement['ballot_item_image_url_https_large'] = \
+                candidate.we_vote_hosted_profile_image_url_large
             possible_endorsement['ballot_item_image_url_https_medium'] = \
                 candidate.we_vote_hosted_profile_image_url_medium
             if not positive_value_exists(possible_endorsement['google_civic_election_id']) \
@@ -390,6 +392,8 @@ def augment_candidate_possible_position_with_position_table_data(
             possible_endorsement['office_name'] = candidate.contest_office_name
             possible_endorsement['office_we_vote_id'] = candidate.contest_office_we_vote_id
             possible_endorsement['political_party'] = candidate.party
+            possible_endorsement['ballot_item_image_url_https_large'] = \
+                candidate.we_vote_hosted_profile_image_url_large
             possible_endorsement['ballot_item_image_url_https_medium'] = \
                 candidate.we_vote_hosted_profile_image_url_medium
             if not positive_value_exists(possible_endorsement['google_civic_election_id']) \
@@ -420,6 +424,8 @@ def augment_candidate_possible_position_with_position_table_data(
                 possible_endorsement_copy['office_name'] = candidate.contest_office_name
                 possible_endorsement_copy['office_we_vote_id'] = candidate.contest_office_we_vote_id
                 possible_endorsement_copy['political_party'] = candidate.party
+                possible_endorsement_copy['ballot_item_image_url_https_large'] = \
+                    candidate.we_vote_hosted_profile_image_url_large
                 possible_endorsement_copy['ballot_item_image_url_https_medium'] = \
                     candidate.we_vote_hosted_profile_image_url_medium
                 if not positive_value_exists(possible_endorsement_copy['google_civic_election_id']) \
@@ -461,6 +467,8 @@ def augment_candidate_possible_position_with_position_table_data(
                         possible_endorsement['office_name'] = candidate.contest_office_name
                         possible_endorsement['office_we_vote_id'] = candidate.contest_office_we_vote_id
                         possible_endorsement['political_party'] = candidate.party
+                        possible_endorsement['ballot_item_image_url_https_large'] = \
+                            candidate.we_vote_hosted_profile_image_url_large
                         possible_endorsement['ballot_item_image_url_https_medium'] = \
                             candidate.we_vote_hosted_profile_image_url_medium
                         if not positive_value_exists(possible_endorsement['google_civic_election_id']) \
@@ -512,6 +520,8 @@ def augment_candidate_possible_position_with_position_table_data(
                             possible_endorsement_copy['office_name'] = candidate.contest_office_name
                             possible_endorsement_copy['office_we_vote_id'] = candidate.contest_office_we_vote_id
                             possible_endorsement_copy['political_party'] = candidate.party
+                            possible_endorsement_copy['ballot_item_image_url_https_large'] = \
+                                candidate.we_vote_hosted_profile_image_url_large
                             possible_endorsement_copy['ballot_item_image_url_https_medium'] = \
                                 candidate.we_vote_hosted_profile_image_url_medium
                         synonym_found = True
