@@ -799,6 +799,7 @@ def take_in_possible_endorsement_list_from_form(request):
                 or (request.POST.get('candidate_we_vote_id_' + str(number_index), None) is not None) \
                 or (request.POST.get('statement_text_' + str(number_index), None) is not None) \
                 or (request.POST.get('measure_we_vote_id_' + str(number_index), None) is not None) \
+                or (request.POST.get('more_info_url_' + str(number_index), None) is not None) \
                 or (request.POST.get('google_civic_election_id_' + str(number_index), None) is not None) \
                 or (request.POST.get('position_stance_' + str(number_index), None) is not None) \
                 or (request.POST.get('possibility_should_be_ignored_' + str(number_index), None) is not None) \
@@ -808,6 +809,7 @@ def take_in_possible_endorsement_list_from_form(request):
                 'ballot_item_name': request.POST.get('ballot_item_name_' + str(number_index), ""),
                 'candidate_we_vote_id': request.POST.get('candidate_we_vote_id_' + str(number_index), ""),
                 'measure_we_vote_id': request.POST.get('measure_we_vote_id_' + str(number_index), ""),
+                'more_info_url': request.POST.get('more_info_url_' + str(number_index), ""),
                 'statement_text': request.POST.get('statement_text_' + str(number_index), ""),
                 'google_civic_election_id': request.POST.get('google_civic_election_id_' + str(number_index), ""),
                 'position_stance': request.POST.get('position_stance_' + str(number_index), ""),

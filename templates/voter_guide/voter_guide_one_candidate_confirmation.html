@@ -103,13 +103,24 @@
               placeholder="Please enter the explanation for the stance, if there is one..."
               rows="1"
               >{{ possible_endorsement.statement_text|default_if_none:"" }}</textarea>
-    {% if possible_endorsement.statement_text_stored %}
+    <textarea name="more_info_url_{{ possible_endorsement.possibility_position_number }}"
+              class="form-control animated"
+              placeholder="Link for only this one endorsement..."
+              rows="1"
+              >{{ possible_endorsement.more_info_url|default_if_none:"" }}</textarea>
+    {% if possible_endorsement.statement_text_stored or possible_endorsement.more_info_url_stored %}
         <textarea name="statement_text_stored_{{ possible_endorsement.possibility_position_number }}"
                   class="form-control animated"
                   placeholder="Already stored"
                   rows="1"
                   disabled
                   >{{ possible_endorsement.statement_text_stored|default_if_none:"" }}</textarea>
+        <textarea name="more_info_url_stored_{{ possible_endorsement.possibility_position_number }}"
+                  class="form-control animated"
+                  placeholder="Stored link for this one endorsement..."
+                  rows="1"
+                  disabled
+                  >{{ possible_endorsement.more_info_url_stored|default_if_none:"" }}</textarea>
     {% endif %}
     <hr />
 </div>
