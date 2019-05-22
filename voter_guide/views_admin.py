@@ -395,6 +395,7 @@ def voter_guide_create_view(request):
                 one_possible_endorsement['position_we_vote_id'] = position_list[0].we_vote_id
                 one_possible_endorsement['statement_text_stored'] = position_list[0].statement_text
                 one_possible_endorsement['position_stance_stored'] = position_list[0].stance
+                one_possible_endorsement['more_info_url_stored'] = position_list[0].more_info_url
                 positions_stored_count += 1
             else:
                 positions_not_stored_count += 1
@@ -409,6 +410,7 @@ def voter_guide_create_view(request):
                 one_possible_endorsement['position_we_vote_id'] = position_list[0].we_vote_id
                 one_possible_endorsement['statement_text_stored'] = position_list[0].statement_text
                 one_possible_endorsement['position_stance_stored'] = position_list[0].stance
+                one_possible_endorsement['more_info_url_stored'] = position_list[0].more_info_url
                 positions_stored_count += 1
             else:
                 positions_not_stored_count += 1
@@ -879,15 +881,17 @@ def voter_guide_create_process_view(request):
                 updated_position_values = {
                     'ballot_item_name':                 one_possible_endorsement['ballot_item_name'],
                     'candidate_we_vote_id':             one_possible_endorsement['candidate_we_vote_id'],
-                    'measure_we_vote_id':               one_possible_endorsement['measure_we_vote_id'],
-                    'position_stance':                  one_possible_endorsement['position_stance'],
                     'google_civic_election_id': convert_to_int(one_possible_endorsement['google_civic_election_id']),
+                    'measure_we_vote_id':               one_possible_endorsement['measure_we_vote_id'],
+                    'more_info_url':                    one_possible_endorsement['more_info_url'],
+                    'position_stance':                  one_possible_endorsement['position_stance'],
                     'possibility_position_number':      convert_to_int(
                         one_possible_endorsement['possibility_position_number']),
                     'possibility_should_be_ignored':    positive_value_exists(
                         one_possible_endorsement['possibility_should_be_ignored']),
                     'position_should_be_removed':       positive_value_exists(
                         one_possible_endorsement['position_should_be_removed']),
+                    'statement_text':                   one_possible_endorsement['statement_text'],
                 }
                 # ADD updated_values['more_info_url'] = one_possible_endorsement['more_info_url']
 
