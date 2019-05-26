@@ -31,7 +31,7 @@ from voter.models import fetch_voter_id_from_voter_device_link, fetch_voter_we_v
     fetch_voter_we_vote_id_from_voter_id, VoterManager
 from voter_guide.models import POSSIBLE_ENDORSEMENT_NUMBER_LIST, POSSIBLE_ENDORSEMENT_NUMBER_LIST_FULL, \
     VoterGuide, VoterGuideListManager, VoterGuideManager, \
-    VoterGuidePossibilityManager, VoterGuidePossibilityPosition
+    VoterGuidePossibility, VoterGuidePossibilityManager, VoterGuidePossibilityPosition
 import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, is_voter_device_id_valid, positive_value_exists, \
     process_request_from_master, is_link_to_video
@@ -1246,18 +1246,44 @@ def voter_guide_possibility_retrieve_for_api(voter_device_id, voter_guide_possib
         }
         return HttpResponse(json.dumps(json_data), content_type='application/json')
 
+    voter_who_submitted_we_vote_id = fetch_voter_we_vote_id_from_voter_id(voter_id)
     # TODO We will need the voter_id here so we can control volunteer actions
 
     voter_guide_possibility_manager = VoterGuidePossibilityManager()
+    voter_guide_possibility = VoterGuidePossibility()
     if positive_value_exists(voter_guide_possibility_id):
         results = voter_guide_possibility_manager.retrieve_voter_guide_possibility(
             voter_guide_possibility_id=voter_guide_possibility_id)
     else:
-        results = voter_guide_possibility_manager.retrieve_voter_guide_possibility_from_url(url_to_scan)
+        if not positive_value_exists(url_to_scan):
+            status += "VOTER_GUIDE_POSSIBILITY_RETRIEVE-URL_TO_SCAN_MISSING "
+            json_data = {
+                'status': status,
+                'success': False,
+                'voter_device_id': voter_device_id,
+            }
+            return HttpResponse(json.dumps(json_data), content_type='application/json')
 
-    voter_guide_possibility_id = results['voter_guide_possibility_id']
-    organization_we_vote_id = results['organization_we_vote_id']
+        results = voter_guide_possibility_manager.retrieve_voter_guide_possibility_from_url(
+                url_to_scan, voter_who_submitted_we_vote_id)
+
     status += results['status']
+    voter_guide_possibility_found = False
+    organization_we_vote_id = ""
+    if results['voter_guide_possibility_found']:
+        voter_guide_possibility_found = True
+        voter_guide_possibility = results['voter_guide_possibility']
+        voter_guide_possibility_id = results['voter_guide_possibility_id']
+        organization_we_vote_id = results['organization_we_vote_id']
+    elif positive_value_exists(results['success']):
+        # Create new entry
+        create_results = voter_guide_possibility_manager.update_or_create_voter_guide_possibility(
+            url_to_scan, voter_who_submitted_we_vote_id)
+        if create_results['voter_guide_possibility_saved']:
+            voter_guide_possibility_found = True
+            voter_guide_possibility = create_results['voter_guide_possibility']
+            voter_guide_possibility_id = create_results['voter_guide_possibility_id']
+            organization_we_vote_id = voter_guide_possibility.organization_we_vote_id
 
     candidates_missing_from_we_vote = False
     cannot_find_endorsements = False
@@ -1271,8 +1297,7 @@ def voter_guide_possibility_retrieve_for_api(voter_device_id, voter_guide_possib
     possible_organization_twitter_handle = ""
     limit_to_this_state_code = ""
     voter_guide_possibility_edit = ""
-    if results['voter_guide_possibility_found']:
-        voter_guide_possibility = results['voter_guide_possibility']
+    if voter_guide_possibility_found:
         candidates_missing_from_we_vote = voter_guide_possibility.candidates_missing_from_we_vote
         cannot_find_endorsements = voter_guide_possibility.cannot_find_endorsements
         capture_detailed_comments = voter_guide_possibility.capture_detailed_comments

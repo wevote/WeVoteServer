@@ -1744,6 +1744,7 @@ class VoterGuidePossibilityManager(models.Manager):
     """
     def update_or_create_voter_guide_possibility(
             self, voter_guide_possibility_url,
+            voter_who_submitted_we_vote_id,
             voter_guide_possibility_id=0,
             target_google_civic_election_id=0,
             updated_values={}):
@@ -1774,6 +1775,7 @@ class VoterGuidePossibilityManager(models.Manager):
             try:
                 voter_guide_possibility = VoterGuidePossibility.objects.get(
                     voter_guide_possibility_url__iexact=voter_guide_possibility_url,
+                    voter_who_submitted_we_vote_id=voter_who_submitted_we_vote_id,
                     target_google_civic_election_id=target_google_civic_election_id,
                 )
                 voter_guide_possibility_found = True
@@ -1817,6 +1819,7 @@ class VoterGuidePossibilityManager(models.Manager):
                 new_voter_guide_possibility_created = False
                 voter_guide_possibility = VoterGuidePossibility.objects.create(
                     voter_guide_possibility_url=voter_guide_possibility_url,
+                    voter_who_submitted_we_vote_id=voter_who_submitted_we_vote_id,
                     target_google_civic_election_id=target_google_civic_election_id,
                 )
                 if positive_value_exists(voter_guide_possibility.id):
@@ -1969,21 +1972,22 @@ class VoterGuidePossibilityManager(models.Manager):
         }
         return results
 
-    def retrieve_voter_guide_possibility_from_url(self, voter_guide_possibility_url):
+    def retrieve_voter_guide_possibility_from_url(self, voter_guide_possibility_url, voter_who_submitted_we_vote_id):
         voter_guide_possibility_id = 0
         google_civic_election_id = 0
-        return self.retrieve_voter_guide_possibility(voter_guide_possibility_id, google_civic_election_id,
-                                                     voter_guide_possibility_url)
+        return self.retrieve_voter_guide_possibility(
+            voter_guide_possibility_id, google_civic_election_id,
+            voter_guide_possibility_url, voter_who_submitted_we_vote_id=voter_who_submitted_we_vote_id)
 
     def retrieve_voter_guide_possibility(self, voter_guide_possibility_id=0, google_civic_election_id=0,
                                          voter_guide_possibility_url='',
                                          organization_we_vote_id=None,
-                                         owner_we_vote_id=None):
+                                         voter_who_submitted_we_vote_id=None):
         status = ""
         voter_guide_possibility_id = convert_to_int(voter_guide_possibility_id)
         google_civic_election_id = convert_to_int(google_civic_election_id)
         organization_we_vote_id = convert_to_str(organization_we_vote_id)
-        owner_we_vote_id = convert_to_str(owner_we_vote_id)
+        voter_who_submitted_we_vote_id = convert_to_str(voter_who_submitted_we_vote_id)
 
         error_result = False
         exception_does_not_exist = False
@@ -1994,17 +1998,25 @@ class VoterGuidePossibilityManager(models.Manager):
             if positive_value_exists(voter_guide_possibility_id):
                 status += "RETRIEVING_VOTER_GUIDE_POSSIBILITY_WITH_ID "  # Set this in case the get fails
                 voter_guide_possibility_on_stage = VoterGuidePossibility.objects.get(id=voter_guide_possibility_id)
-                voter_guide_possibility_on_stage_id = voter_guide_possibility_on_stage.id
-                status += "VOTER_GUIDE_POSSIBILITY_FOUND_WITH_ID "
-                success = True
+                if voter_guide_possibility_on_stage is not None:
+                    voter_guide_possibility_on_stage_id = voter_guide_possibility_on_stage.id
+                    status += "VOTER_GUIDE_POSSIBILITY_FOUND_WITH_ID "
+                    success = True
+                else:
+                    status += "VOTER_GUIDE_POSSIBILITY_NOT_FOUND_WITH_ID "
+                    success = True
             elif positive_value_exists(voter_guide_possibility_url):
                 status += "RETRIEVING_VOTER_GUIDE_POSSIBILITY_WITH_URL "  # Set this in case the get fails
                 voter_guide_possibility_query = VoterGuidePossibility.objects.filter(
                     voter_guide_possibility_url=voter_guide_possibility_url)
                 voter_guide_possibility_on_stage = voter_guide_possibility_query.first()
-                voter_guide_possibility_on_stage_id = voter_guide_possibility_on_stage.id
-                status += "VOTER_GUIDE_POSSIBILITY_FOUND_WITH_URL "
-                success = True
+                if voter_guide_possibility_on_stage is not None:
+                    voter_guide_possibility_on_stage_id = voter_guide_possibility_on_stage.id
+                    status += "VOTER_GUIDE_POSSIBILITY_FOUND_WITH_URL "
+                    success = True
+                else:
+                    status += "VOTER_GUIDE_POSSIBILITY_NOT_FOUND_WITH_URL "
+                    success = True
             elif positive_value_exists(organization_we_vote_id) and positive_value_exists(google_civic_election_id):
                 # Set this status in case the 'get' fails
                 status += "RETRIEVING_VOTER_GUIDE_POSSIBILITY_WITH_ORGANIZATION_WE_VOTE_ID "
@@ -2012,19 +2024,28 @@ class VoterGuidePossibilityManager(models.Manager):
                 voter_guide_possibility_on_stage = VoterGuidePossibility.objects.get(
                     google_civic_election_id=google_civic_election_id,
                     organization_we_vote_id__iexact=organization_we_vote_id)
-                voter_guide_possibility_on_stage_id = voter_guide_possibility_on_stage.id
-                status += "VOTER_GUIDE_POSSIBILITY_FOUND_WITH_ORGANIZATION_WE_VOTE_ID "
-                success = True
-            elif positive_value_exists(owner_we_vote_id) and positive_value_exists(google_civic_election_id):
+                if voter_guide_possibility_on_stage is not None:
+                    voter_guide_possibility_on_stage_id = voter_guide_possibility_on_stage.id
+                    status += "VOTER_GUIDE_POSSIBILITY_FOUND_WITH_ORGANIZATION_WE_VOTE_ID "
+                    success = True
+                else:
+                    status += "VOTER_GUIDE_POSSIBILITY_NOT_FOUND_WITH_ORGANIZATION_WE_VOTE_ID "
+                    success = True
+            elif positive_value_exists(voter_who_submitted_we_vote_id) and \
+                    positive_value_exists(google_civic_election_id):
                 # Set this status in case the 'get' fails
                 status += "RETRIEVING_VOTER_GUIDE_POSSIBILITY_WITH_VOTER_WE_VOTE_ID "
                 # TODO: Update this to deal with the google_civic_election_id being spread across 50 fields
                 voter_guide_possibility_on_stage = VoterGuidePossibility.objects.get(
                     google_civic_election_id=google_civic_election_id,
-                    owner_we_vote_id__iexact=owner_we_vote_id)
-                voter_guide_possibility_on_stage_id = voter_guide_possibility_on_stage.id
-                status += "VOTER_GUIDE_POSSIBILITY_FOUND_WITH_VOTER_WE_VOTE_ID "
-                success = True
+                    voter_who_submitted_we_vote_id__iexact=voter_who_submitted_we_vote_id)
+                if voter_guide_possibility_on_stage is not None:
+                    voter_guide_possibility_on_stage_id = voter_guide_possibility_on_stage.id
+                    status += "VOTER_GUIDE_POSSIBILITY_FOUND_WITH_VOTER_WE_VOTE_ID "
+                    success = True
+                else:
+                    status += "VOTER_GUIDE_POSSIBILITY_NOT_FOUND_WITH_VOTER_WE_VOTE_ID "
+                    success = True
             else:
                 status += "VOTER_GUIDE_POSSIBILITY_NOT_FOUND_INSUFFICIENT_VARIABLES "
                 success = False

@@ -36,7 +36,7 @@ from organization.models import GROUP, Organization, OrganizationListManager, Or
 from organization.views_admin import organization_edit_process_view
 from position.models import PositionEntered, PositionForFriends, PositionListManager
 from twitter.models import TwitterUserManager
-from voter.models import voter_has_authority, VoterManager
+from voter.models import voter_has_authority, VoterManager, fetch_voter_we_vote_id_from_voter_device_link
 from wevote_functions.functions import convert_to_int, convert_date_to_we_vote_date_string, \
     extract_facebook_username_from_text_string, \
     extract_twitter_handle_from_text_string, extract_website_from_url, positive_value_exists, \
@@ -55,6 +55,9 @@ def create_possible_voter_guides_from_prior_elections_view(request):
     authority_required = {'political_data_manager'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
+
+    voter_device_id = get_voter_device_id(request)  # We look in the cookies for voter_api_device_id
+    voter_who_submitted_we_vote_id = fetch_voter_we_vote_id_from_voter_device_link(voter_device_id)
 
     google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
     target_google_civic_election_id = 0
@@ -173,6 +176,7 @@ def create_possible_voter_guides_from_prior_elections_view(request):
                 results = voter_guide_possibility_manager.update_or_create_voter_guide_possibility(
                     voter_guide_possibility_url,
                     target_google_civic_election_id=target_google_civic_election_id,
+                    voter_who_submitted_we_vote_id=voter_who_submitted_we_vote_id,
                     updated_values=updated_values,
                 )
                 if results['voter_guide_possibility_saved']:
@@ -845,6 +849,7 @@ def voter_guide_create_process_view(request):
 
         results = voter_guide_possibility_manager.update_or_create_voter_guide_possibility(
             voter_guide_possibility_url,
+            voter_who_submitted_we_vote_id,
             voter_guide_possibility_id=voter_guide_possibility_id,
             updated_values=updated_values)
         if positive_value_exists(results['success']):
