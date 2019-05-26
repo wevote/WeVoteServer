@@ -2039,14 +2039,18 @@ class VoterGuidePossibilityManager(models.Manager):
             success = False
 
         voter_guide_possibility_on_stage_found = True if voter_guide_possibility_on_stage_id > 0 else False
+        organization_we_vote_id_from_possibility = voter_guide_possibility_on_stage.organization_we_vote_id if \
+            voter_guide_possibility_on_stage else None
+        voter_guide_possibility_url_from_possibility = voter_guide_possibility_on_stage.voter_guide_possibility_url if \
+            voter_guide_possibility_on_stage else None
         results = {
             'success':                          success,
             'status':                           status,
-            'organization_we_vote_id':          voter_guide_possibility_on_stage.organization_we_vote_id,
+            'organization_we_vote_id':          organization_we_vote_id_from_possibility,
             'voter_guide_possibility':          voter_guide_possibility_on_stage,
             'voter_guide_possibility_found':    voter_guide_possibility_on_stage_found,
             'voter_guide_possibility_id':       voter_guide_possibility_on_stage_id,
-            'voter_guide_possibility_url':      voter_guide_possibility_on_stage.voter_guide_possibility_url,
+            'voter_guide_possibility_url':      voter_guide_possibility_url_from_possibility,
             'error_result':                     error_result,
             'DoesNotExist':                     exception_does_not_exist,
             'MultipleObjectsReturned':          exception_multiple_object_returned,
