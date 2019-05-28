@@ -32,7 +32,7 @@ from issue.models import IssueListManager
 from measure.controllers import add_measure_name_alternatives_to_measure_list_light, \
     retrieve_measure_list_for_all_upcoming_elections
 from voter_guide.controllers_possibility import organizations_found_on_url
-from organization.models import GROUP, Organization, OrganizationListManager, OrganizationManager
+from organization.models import GROUP, Organization, OrganizationListManager, OrganizationManager, ORGANIZATION_TYPE_MAP
 from organization.views_admin import organization_edit_process_view
 from position.models import PositionEntered, PositionForFriends, PositionListManager
 from twitter.models import TwitterUserManager
@@ -1824,6 +1824,18 @@ def voter_guide_search_view(request):
 
     messages_on_stage = get_messages(request)
 
+    organization_types_map = ORGANIZATION_TYPE_MAP
+    # Sort by organization_type value (instead of key)
+    # organization_type_list = sorted(organization_types_map.items(), key=operator.itemgetter(1))
+
+    organization_type_list = []
+    for key, value in organization_types_map.items():
+        new_dict = {
+            'organization_type_key': key,
+            'organization_type_name': value,
+        }
+        organization_type_list.append(new_dict)
+
     election_manager = ElectionManager()
     upcoming_election_list = []
     results = election_manager.retrieve_upcoming_elections()
@@ -1835,10 +1847,11 @@ def voter_guide_search_view(request):
 
     template_values = {
         'messages_on_stage': messages_on_stage,
-        'upcoming_election_list':   upcoming_election_list,
         'google_civic_election_id': google_civic_election_id,
+        'organization_type_list':   organization_type_list,
         'state_code':               state_code,
         'state_list':               sorted_state_list,
+        'upcoming_election_list':   upcoming_election_list,
     }
     return render(request, 'voter_guide/voter_guide_search.html', template_values)
 
@@ -1862,6 +1875,7 @@ def voter_guide_search_process_view(request):
     organization_name = request.POST.get('organization_name', '')
     organization_twitter_handle = request.POST.get('organization_twitter_handle', '')
     organization_facebook = request.POST.get('organization_facebook', '')
+    organization_type = request.POST.get('organization_type', '')
     organization_website = request.POST.get('organization_website', '')
     state_code = request.POST.get('state_code', "")
 
@@ -1906,6 +1920,7 @@ def voter_guide_search_process_view(request):
         'organization_name':            organization_name,
         'organization_twitter_handle':  organization_twitter_handle,
         'organization_facebook':        organization_facebook,
+        'organization_type':            organization_type,
         'organization_website':         organization_website,
         'state_code':                   state_code,
         'state_list':                   sorted_state_list,
