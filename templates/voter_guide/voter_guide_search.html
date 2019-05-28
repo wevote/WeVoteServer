@@ -79,6 +79,20 @@
     </div>
 </div>
 
+<div class="form-group">
+    <label for="organization_type_id" class="col-sm-3 control-label">Organization Type</label>
+    <div class="col-sm-8">
+        <select id="organization_type_id" name="organization_type" class="form-control">
+            <option value="">-- Choose Organization Type --</option>
+        {% for organization_type_from_list in organization_type_list %}
+            <option value="{{ organization_type_from_list.organization_type_key }}"
+                    {% if organization_type_from_list.organization_type_key|slugify == organization_type|slugify %} selected="selected"{% endif %}>
+                {{ organization_type_from_list.organization_type_name }}</option>
+        {% endfor %}
+        </select>
+    </div>
+</div>
+
 {% if upcoming_election_list %}
 <div class="form-group">
     <label for="google_civic_election_id" class="col-sm-3 control-label">Election</label>
