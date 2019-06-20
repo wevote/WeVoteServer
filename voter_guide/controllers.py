@@ -3693,7 +3693,7 @@ def retrieve_voter_guide_followers_by_organization_we_vote_id(organization_we_vo
             organization_list_found = True
     else:
         status = results['status']
-        success = False
+        success = results['success']
 
     results = {
         'success':                      success,
@@ -3791,7 +3791,7 @@ def voter_guides_ignored_retrieve_for_api(voter_device_id, maximum_number_to_ret
             status = 'NO_VOTER_GUIDES_IGNORED_FOUND'
             success = True
     else:
-        success = False
+        success = results['success']
 
     json_data = {
         'status': status,

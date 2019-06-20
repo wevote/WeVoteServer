@@ -6,12 +6,13 @@ from .models import Organization, OrganizationListManager, OrganizationManager, 
     CORPORATION, GROUP, INDIVIDUAL, NEWS_ORGANIZATION, NONPROFIT, NONPROFIT_501C3, NONPROFIT_501C4, \
     POLITICAL_ACTION_COMMITTEE, ORGANIZATION, PUBLIC_FIGURE, UNKNOWN, VOTER, ORGANIZATION_TYPE_CHOICES
 from analytics.models import ACTION_ORGANIZATION_FOLLOW, ACTION_ORGANIZATION_FOLLOW_IGNORE, \
-    ACTION_ORGANIZATION_STOP_FOLLOWING, AnalyticsManager
+    ACTION_ORGANIZATION_STOP_FOLLOWING, ACTION_ORGANIZATION_STOP_IGNORING, AnalyticsManager
 from config.base import get_environment_variable
 from django.http import HttpResponse
 from exception.models import handle_record_not_found_exception
 from follow.controllers import move_organization_followers_to_another_organization
-from follow.models import FollowOrganizationManager, FollowOrganizationList, FOLLOW_IGNORE, FOLLOWING, STOP_FOLLOWING
+from follow.models import FollowOrganizationManager, FollowOrganizationList, FOLLOW_IGNORE, FOLLOWING, \
+    STOP_FOLLOWING, STOP_IGNORING
 from image.controllers import retrieve_all_images_for_one_organization
 from import_export_facebook.models import FacebookManager
 import json
@@ -446,7 +447,7 @@ def organization_follow_or_unfollow_or_ignore(voter_device_id, organization_id, 
 
     if not positive_value_exists(voter_device_id):
         json_data = {
-            'status': 'VALID_VOTER_DEVICE_ID_MISSING',
+            'status': 'VALID_VOTER_DEVICE_ID_MISSING ',
             'success': False,
             'voter_device_id': voter_device_id,
             'organization_id': organization_id,
@@ -459,7 +460,7 @@ def organization_follow_or_unfollow_or_ignore(voter_device_id, organization_id, 
     voter_id = fetch_voter_id_from_voter_device_link(voter_device_id)
     if not positive_value_exists(voter_id):
         json_data = {
-            'status': 'VALID_VOTER_ID_MISSING',
+            'status': 'VALID_VOTER_ID_MISSING ',
             'success': False,
             'voter_device_id': voter_device_id,
             'organization_id': organization_id,
@@ -473,7 +474,7 @@ def organization_follow_or_unfollow_or_ignore(voter_device_id, organization_id, 
     results = voter_manager.retrieve_voter_by_id(voter_id)
     if not results['voter_found']:
         json_data = {
-            'status': 'VOTER_NOT_FOUND',
+            'status': 'VOTER_NOT_FOUND ',
             'success': False,
             'voter_device_id': voter_device_id,
             'organization_id': organization_id,
@@ -508,7 +509,7 @@ def organization_follow_or_unfollow_or_ignore(voter_device_id, organization_id, 
         results = follow_organization_manager.toggle_on_voter_following_organization(
             voter_id, organization_id, organization_we_vote_id, voter_linked_organization_we_vote_id)
         if results['follow_organization_found']:
-            status += 'FOLLOWING'
+            status += 'FOLLOWING '
             success = True
             state_code = ''
             follow_organization = results['follow_organization']
@@ -517,7 +518,7 @@ def organization_follow_or_unfollow_or_ignore(voter_device_id, organization_id, 
 
             add_results = add_position_network_count_entries_for_one_organization(
                 voter_id, organization_we_vote_id)
-            status += add_results['status']
+            status += add_results['status'] + ' '
 
             analytics_results = analytics_manager.save_action(
                 ACTION_ORGANIZATION_FOLLOW, voter_we_vote_id, voter_id, is_signed_in, state_code,
@@ -525,14 +526,14 @@ def organization_follow_or_unfollow_or_ignore(voter_device_id, organization_id, 
                 is_mobile=user_agent_object.is_mobile, is_desktop=user_agent_object.is_pc,
                 is_tablet=user_agent_object.is_tablet)
         else:
-            status += results['status']
+            status += results['status'] + ' '
             success = False
 
     elif follow_kind == FOLLOW_IGNORE:
         results = follow_organization_manager.toggle_ignore_voter_following_organization(
             voter_id, organization_id, organization_we_vote_id, voter_linked_organization_we_vote_id)
         if results['follow_organization_found']:
-            status += 'IGNORING'
+            status += 'IGNORING '
             success = True
             state_code = ''
             follow_organization = results['follow_organization']
@@ -542,7 +543,7 @@ def organization_follow_or_unfollow_or_ignore(voter_device_id, organization_id, 
             # Remove all position_network_scores from this organization for voter
             remove_results = position_list_manager.remove_position_network_scores_when_voter_stops_following(
                     voter_id, organization_we_vote_id)
-            status += remove_results['status']
+            status += remove_results['status'] + ' '
 
             analytics_results = analytics_manager.save_action(
                 ACTION_ORGANIZATION_FOLLOW_IGNORE, voter_we_vote_id, voter_id, is_signed_in, state_code,
@@ -550,13 +551,13 @@ def organization_follow_or_unfollow_or_ignore(voter_device_id, organization_id, 
                 is_mobile=user_agent_object.is_mobile, is_desktop=user_agent_object.is_pc,
                 is_tablet=user_agent_object.is_tablet)
         else:
-            status += results['status']
+            status += results['status'] + ' '
             success = False
     elif follow_kind == STOP_FOLLOWING:
         results = follow_organization_manager.toggle_off_voter_following_organization(
             voter_id, organization_id, organization_we_vote_id, voter_linked_organization_we_vote_id)
         if results['follow_organization_found']:
-            status += 'STOPPED_FOLLOWING'
+            status += 'STOPPED_FOLLOWING '
             success = True
             state_code = ''
             follow_organization = results['follow_organization']
@@ -566,7 +567,7 @@ def organization_follow_or_unfollow_or_ignore(voter_device_id, organization_id, 
             # Remove all position_network_scores from this organization for voter
             remove_results = position_list_manager.remove_position_network_scores_when_voter_stops_following(
                     voter_id, organization_we_vote_id)
-            status += remove_results['status']
+            status += remove_results['status'] + ' '
 
             analytics_results = analytics_manager.save_action(
                 ACTION_ORGANIZATION_STOP_FOLLOWING, voter_we_vote_id, voter_id, is_signed_in, state_code,
@@ -574,7 +575,31 @@ def organization_follow_or_unfollow_or_ignore(voter_device_id, organization_id, 
                 is_mobile=user_agent_object.is_mobile, is_desktop=user_agent_object.is_pc,
                 is_tablet=user_agent_object.is_tablet)
         else:
-            status += results['status']
+            status += results['status'] + ' '
+            success = False
+    elif follow_kind == STOP_IGNORING:
+        results = follow_organization_manager.toggle_off_voter_ignoring_organization(
+            voter_id, organization_id, organization_we_vote_id, voter_linked_organization_we_vote_id)
+        if results['follow_organization_found']:
+            status += 'STOPPED_IGNORING '
+            success = True
+            state_code = ''
+            follow_organization = results['follow_organization']
+            organization_id = follow_organization.organization_id
+            organization_we_vote_id = follow_organization.organization_we_vote_id
+
+            # Remove all position_network_scores from this organization for voter
+            # remove_results = position_list_manager.remove_position_network_scores_when_voter_stops_following(
+            #     voter_id, organization_we_vote_id)
+            # status += remove_results['status']
+
+            analytics_results = analytics_manager.save_action(
+                ACTION_ORGANIZATION_STOP_IGNORING, voter_we_vote_id, voter_id, is_signed_in, state_code,
+                organization_we_vote_id, organization_id, user_agent_string=user_agent_string, is_bot=is_bot,
+                is_mobile=user_agent_object.is_mobile, is_desktop=user_agent_object.is_pc,
+                is_tablet=user_agent_object.is_tablet)
+        else:
+            status += results['status'] + ' '
             success = False
     else:
         status += 'INCORRECT_FOLLOW_KIND'
