@@ -4,7 +4,7 @@
 
 from django.http import HttpResponse
 from exception.models import handle_exception
-from follow.models import FOLLOW_IGNORE, FOLLOWING, STOP_FOLLOWING
+from follow.models import FOLLOW_IGNORE, FOLLOWING, STOP_FOLLOWING, STOP_IGNORING
 import json
 from organization.models import Organization, OrganizationManager
 from organization.controllers import organization_follow_or_unfollow_or_ignore
@@ -90,6 +90,24 @@ def organization_stop_following(voter_device_id, organization_id=0, organization
     """
     json_data = organization_follow_or_unfollow_or_ignore(voter_device_id, organization_id, organization_we_vote_id,
                                                           follow_kind=STOP_FOLLOWING,
+                                                          user_agent_string=user_agent_string,
+                                                          user_agent_object=user_agent_object)
+    return HttpResponse(json.dumps(json_data), content_type='application/json')
+
+
+def organization_stop_ignoring(voter_device_id, organization_id=0, organization_we_vote_id='',
+                               user_agent_string='', user_agent_object=None):
+    """
+    Save that the voter wants to stop following this org, organizationStopIgnoring
+    :param voter_device_id:
+    :param organization_id:
+    :param organization_we_vote_id
+    :param user_agent_string:
+    :param user_agent_object:
+    :return:
+    """
+    json_data = organization_follow_or_unfollow_or_ignore(voter_device_id, organization_id, organization_we_vote_id,
+                                                          follow_kind=STOP_IGNORING,
                                                           user_agent_string=user_agent_string,
                                                           user_agent_object=user_agent_object)
     return HttpResponse(json.dumps(json_data), content_type='application/json')

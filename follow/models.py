@@ -18,10 +18,12 @@ from voter.models import VoterManager
 FOLLOWING = 'FOLLOWING'
 STOP_FOLLOWING = 'STOP_FOLLOWING'
 FOLLOW_IGNORE = 'FOLLOW_IGNORE'
+STOP_IGNORING = 'STOP_IGNORING'
 FOLLOWING_CHOICES = (
     (FOLLOWING,         'Following'),
     (STOP_FOLLOWING,    'Not Following'),
     (FOLLOW_IGNORE,     'Ignoring'),
+    (STOP_IGNORING,     'Not Ignoring'),
 )
 
 # Kinds of lists of suggested organization
@@ -677,6 +679,13 @@ class FollowOrganizationManager(models.Model):
         return follow_organization_manager.toggle_voter_following_organization(
             voter_id, organization_id, organization_we_vote_id, voter_linked_organization_we_vote_id, following_status)
 
+    def toggle_off_voter_ignoring_organization(self, voter_id, organization_id, organization_we_vote_id,
+                                               voter_linked_organization_we_vote_id):
+        following_status = STOP_FOLLOWING  # STOP_IGNORING (We don't actually store STOP_IGNORING in the database
+        follow_organization_manager = FollowOrganizationManager()
+        return follow_organization_manager.toggle_voter_following_organization(
+            voter_id, organization_id, organization_we_vote_id, voter_linked_organization_we_vote_id, following_status)
+
     def toggle_voter_following_organization(self, voter_id, organization_id, organization_we_vote_id,
                                             voter_linked_organization_we_vote_id, following_status,
                                             auto_followed_from_twitter_suggestion=False):
@@ -713,11 +722,11 @@ class FollowOrganizationManager(models.Model):
                 follow_organization_on_stage_found = True
                 status += 'UPDATE ' + following_status
             except Exception as e:
-                status += 'FAILED_TO_UPDATE ' + following_status
+                status += 'FAILED_TO_UPDATE ' + following_status + ' '
                 handle_record_not_saved_exception(e, logger=logger, exception_message_optional=status)
         elif results['MultipleObjectsReturned']:
             logger.warning("follow_organization: delete all but one and take it over?")
-            status += 'TOGGLE_FOLLOWING_ORGANIZATION MultipleObjectsReturned ' + following_status
+            status += 'TOGGLE_FOLLOWING_ORGANIZATION MultipleObjectsReturned ' + following_status + ' '
         elif results['DoesNotExist']:
             try:
                 # Create new follow_organization entry
@@ -741,11 +750,11 @@ class FollowOrganizationManager(models.Model):
                     follow_organization_on_stage.save()
                     follow_organization_on_stage_id = follow_organization_on_stage.id
                     follow_organization_on_stage_found = True
-                    status += 'CREATE ' + following_status
+                    status += 'CREATE ' + following_status + ' '
                 else:
-                    status += 'ORGANIZATION_NOT_FOUND_ON_CREATE ' + following_status
+                    status += 'ORGANIZATION_NOT_FOUND_ON_CREATE ' + following_status + ' '
             except Exception as e:
-                status += 'FAILED_TO_UPDATE ' + following_status
+                status += 'FAILED_TO_UPDATE ' + following_status + ' '
                 handle_record_not_saved_exception(e, logger=logger, exception_message_optional=status)
         else:
             status += results['status']

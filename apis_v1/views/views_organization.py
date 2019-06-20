@@ -7,7 +7,7 @@ from follow.models import UPDATE_SUGGESTIONS_FROM_TWITTER_IDS_I_FOLLOW, UPDATE_S
     FOLLOW_SUGGESTIONS_FROM_FRIENDS_ON_TWITTER, FOLLOW_SUGGESTIONS_FROM_FRIENDS, \
     FOLLOW_SUGGESTIONS_FROM_TWITTER_IDS_I_FOLLOW
 from apis_v1.controllers import organization_count, organization_follow, organization_follow_ignore, \
-    organization_stop_following
+    organization_stop_following, organization_stop_ignoring
 from config.base import get_environment_variable
 from django.http import HttpResponse
 from django_user_agents.utils import get_user_agent
@@ -55,6 +55,17 @@ def organization_stop_following_api_view(request):  # organizationStopFollowing
     return organization_stop_following(voter_device_id=voter_device_id, organization_id=organization_id,
                                        organization_we_vote_id=organization_we_vote_id,
                                        user_agent_string=user_agent_string, user_agent_object=user_agent_object)
+
+
+def organization_stop_ignoring_api_view(request):  # organizationStopIgnoring
+    voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
+    organization_id = request.GET.get('organization_id', 0)
+    organization_we_vote_id = request.GET.get('organization_we_vote_id', '')
+    user_agent_string = request.META['HTTP_USER_AGENT']
+    user_agent_object = get_user_agent(request)
+    return organization_stop_ignoring(voter_device_id=voter_device_id, organization_id=organization_id,
+                                      organization_we_vote_id=organization_we_vote_id,
+                                      user_agent_string=user_agent_string, user_agent_object=user_agent_object)
 
 
 def organization_follow_ignore_api_view(request):  # organizationFollowIgnore
