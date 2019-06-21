@@ -1260,6 +1260,7 @@ class ContestMeasureList(models.Model):
                     'candidate_we_vote_id':     '',
                     'google_civic_election_id': measure.google_civic_election_id,
                     'office_we_vote_id':        '',
+                    'more_info_url':            '',
                     'measure_we_vote_id':       measure.we_vote_id,
                 }
                 measure_list_light.append(one_measure)

@@ -265,17 +265,25 @@ def position_list_view(request):
                 friends_only_position_list_query = friends_only_position_list_query.filter(final_filters)
 
     friends_only_position_list_count_query = friends_only_position_list_query
+    friends_only_position_list_comments_count_query = friends_only_position_list_query
     friends_only_position_list_count = friends_only_position_list_count_query.count()
+
+    friends_only_position_list_comments_count_query = friends_only_position_list_comments_count_query.exclude(
+        (Q(statement_text__isnull=True) | Q(statement_text__exact='')))
+    friends_only_position_list_comments_count = friends_only_position_list_comments_count_query.count()
 
     friends_only_position_list_query = friends_only_position_list_query[:50]
     friends_only_position_list = list(friends_only_position_list_query)
 
     position_list = public_position_list + friends_only_position_list
 
-    messages.add_message(request, messages.INFO,
-                         str(public_position_list_count) + ' public positions found. ' +
-                         str(public_position_list_comments_count) + ' of those public positions have commentary. ' +
-                         str(friends_only_position_list_count) + ' friends-only positions found.')
+    messages.add_message(
+        request, messages.INFO,
+        str(public_position_list_count) + ' public positions found ' +
+        '(' + str(public_position_list_comments_count) + ' with commentary). ' +
+        str(friends_only_position_list_count) + ' friends-only positions found ' +
+        '(' + str(friends_only_position_list_comments_count) + ' with commentary). '
+        )
 
     # Heal some data
     # As of Aug 2018 we are no longer using PERCENT_RATING
