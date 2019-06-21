@@ -65,6 +65,7 @@ def convert_endorsement_list_light_to_possible_endorsement_list(endorsement_list
             'candidate_we_vote_id': one_endorsement['candidate_we_vote_id'],
             'google_civic_election_id': one_endorsement['google_civic_election_id'],
             'measure_we_vote_id': one_endorsement['measure_we_vote_id'],
+            'more_info_url': "",
             'possibility_position_number': str(number_index),
             'possibility_should_be_deleted': False,
             'possibility_should_be_ignored': False,
@@ -161,6 +162,7 @@ def convert_list_of_names_to_possible_endorsement_list(ballot_items_list, starti
             'statement_text': "",
             'google_civic_election_id': 0,
             'measure_we_vote_id': "",
+            'more_info_url': "",
             'possibility_position_number': str(number_index),
             'possibility_should_be_deleted': False,
             'possibility_should_be_ignored': False,
@@ -2587,6 +2589,12 @@ def voter_guides_upcoming_retrieve_for_api(google_civic_election_id_list=[]):  #
         else:
             ballot_item_we_vote_ids_this_org_opposes = []
         voter_guide.ballot_item_we_vote_ids_this_org_opposes = ballot_item_we_vote_ids_this_org_opposes
+
+        # If there aren't any opinions in the voter guide, skip it and don't return it
+        if not len(ballot_item_we_vote_ids_this_org_supports) and \
+                not len(ballot_item_we_vote_ids_this_org_info_only) and \
+                not len(ballot_item_we_vote_ids_this_org_opposes):
+            continue
 
         organization_link_to_issue_list = OrganizationLinkToIssueList()
         issue_we_vote_ids_linked = \

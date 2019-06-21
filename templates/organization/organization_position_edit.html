@@ -154,7 +154,14 @@ Position on {{ organization_position.ballot_item_display_name }}{% endif %}</h1>
 
 {# URI for more details #}
 <div class="form-group">
-    <label for="more_info_url_id" class="col-sm-2 control-label">Website Source URL</label>
+    <label for="more_info_url_id" class="col-sm-2 control-label">
+      Website Source URL
+      {% if organization_position.more_info_url or more_info_url %}
+      <a href="{% if organization_position.more_info_url %}{{ organization_position.more_info_url }}{% else %}{{ more_info_url }}{% endif %}"
+         target="_blank"
+         class="u-no-break"><span class="glyphicon glyphicon-new-window"></span></a>
+      {% endif %}
+    </label>
     <div class="col-sm-9">
         <input type="text" name="more_info_url" id="more_info_url_id"
                value="{% if organization_position.more_info_url %}{{ organization_position.more_info_url }}{% else %}{{ more_info_url }}{% endif %}"

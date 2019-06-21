@@ -270,6 +270,7 @@ class CandidateCampaignListManager(models.Model):
                         'google_civic_election_id':   candidate.google_civic_election_id,
                         'office_we_vote_id':          candidate.contest_office_we_vote_id,
                         'measure_we_vote_id':       '',
+                        'more_info_url':            '',
                     }
                 candidate_list_light.append(one_candidate)
 
