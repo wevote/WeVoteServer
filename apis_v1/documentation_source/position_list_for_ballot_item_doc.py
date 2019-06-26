@@ -110,6 +110,7 @@ def position_list_for_ballot_item_doc_template_values(url_root):
                    '     "speaker_image_url_https_medium": string,\n' \
                    '     "speaker_image_url_https_tiny": string,\n' \
                    '     "speaker_twitter_handle": string,\n' \
+                   '     "twitter_followers_count": integer,\n' \
                    '     "speaker_type": string, ' \
                    '      (One of these: \'ORGANIZATION\', \'VOTER\', \'PUBLIC_FIGURE\', \'UNKNOWN\',)\n' \
                    '     "speaker_id": integer,\n' \

@@ -29,6 +29,7 @@ from wevote_functions.functions import is_voter_device_id_valid, positive_value_
 
 logger = wevote_functions.admin.get_logger(__name__)
 
+UNKNOWN = 'U'
 WE_VOTE_API_KEY = get_environment_variable("WE_VOTE_API_KEY")
 POSITIONS_SYNC_URL = get_environment_variable("POSITIONS_SYNC_URL")  # positionsSyncOut
 
@@ -1262,11 +1263,15 @@ def move_positions_to_another_organization(from_organization_id, from_organizati
     position_list_manager = PositionListManager()
     organization_manager = OrganizationManager()
     to_organization_name = ""
+    to_organization_type = None
+    to_twitter_followers_count = None
     if positive_value_exists(to_organization_we_vote_id):
         results = organization_manager.retrieve_organization_from_we_vote_id(to_organization_we_vote_id)
         if results['organization_found']:
             to_voter_organization = results['organization']
             to_organization_name = to_voter_organization.organization_name
+            to_organization_type = to_voter_organization.organization_type
+            to_twitter_followers_count = to_voter_organization.twitter_followers_count
 
     # Find private positions for the "from_organization" that we are moving away from
     stance_we_are_looking_for = ANY_STANCE
@@ -1308,6 +1313,13 @@ def move_positions_to_another_organization(from_organization_id, from_organizati
             # Update the voter values to the new "to" voter
             to_position_entry.voter_id = to_voter_id
             to_position_entry.voter_we_vote_id = to_voter_we_vote_id
+            # Update cached organization information
+            if positive_value_exists(to_organization_name):
+                to_position_entry.speaker_display_name = to_organization_name
+            if positive_value_exists(to_organization_type):
+                to_position_entry.speaker_type = to_organization_type
+            if positive_value_exists(to_twitter_followers_count):
+                to_position_entry.twitter_followers_count = to_twitter_followers_count
             try:
                 to_position_entry.save()
             except Exception as e:
@@ -1315,12 +1327,18 @@ def move_positions_to_another_organization(from_organization_id, from_organizati
         else:
             # Change the position values to the new we_vote_id
             try:
-                if positive_value_exists(to_organization_name):
-                    from_position_entry.speaker_display_name = to_organization_name
                 from_position_entry.organization_id = to_organization_id
                 from_position_entry.organization_we_vote_id = to_organization_we_vote_id
                 from_position_entry.voter_id = to_voter_id
                 from_position_entry.voter_we_vote_id = to_voter_we_vote_id
+                # Update cached organization information
+                if positive_value_exists(to_organization_name):
+                    from_position_entry.speaker_display_name = to_organization_name
+                if positive_value_exists(to_organization_type):
+                    from_position_entry.speaker_type = to_organization_type
+                if positive_value_exists(to_twitter_followers_count):
+                    from_position_entry.twitter_followers_count = to_twitter_followers_count
+
                 from_position_entry.save()
                 position_entries_moved += 1
             except Exception as e:
@@ -1374,6 +1392,13 @@ def move_positions_to_another_organization(from_organization_id, from_organizati
             # Update the voter values to the new "to" voter
             to_position_entry.voter_id = to_voter_id
             to_position_entry.voter_we_vote_id = to_voter_we_vote_id
+            # Update cached organization information
+            if positive_value_exists(to_organization_name):
+                to_position_entry.speaker_display_name = to_organization_name
+            if positive_value_exists(to_organization_type):
+                to_position_entry.speaker_type = to_organization_type
+            if positive_value_exists(to_twitter_followers_count):
+                to_position_entry.twitter_followers_count = to_twitter_followers_count
             try:
                 to_position_entry.save()
             except Exception as e:
@@ -1381,12 +1406,18 @@ def move_positions_to_another_organization(from_organization_id, from_organizati
         else:
             # Change the position values to the new we_vote_id
             try:
-                if positive_value_exists(to_organization_name):
-                    from_position_entry.speaker_display_name = to_organization_name
                 from_position_entry.organization_id = to_organization_id
                 from_position_entry.organization_we_vote_id = to_organization_we_vote_id
                 from_position_entry.voter_id = to_voter_id
                 from_position_entry.voter_we_vote_id = to_voter_we_vote_id
+                # Update cached organization information
+                if positive_value_exists(to_organization_name):
+                    from_position_entry.speaker_display_name = to_organization_name
+                if positive_value_exists(to_organization_type):
+                    from_position_entry.speaker_type = to_organization_type
+                if positive_value_exists(to_twitter_followers_count):
+                    from_position_entry.twitter_followers_count = to_twitter_followers_count
+
                 from_position_entry.save()
                 position_entries_moved += 1
             except Exception as e:
@@ -1427,6 +1458,8 @@ def move_positions_to_another_voter(from_voter_id, from_voter_we_vote_id,
     position_list_manager = PositionListManager()
     organization_manager = OrganizationManager()
     to_organization_name = ""
+    to_organization_type = None
+    to_twitter_followers_count = None
 
     if from_voter_id == to_voter_id:
         status += "MOVE_POSITIONS_TO_ANOTHER_VOTER-from_voter_id and to_voter_id identical "
@@ -1461,6 +1494,8 @@ def move_positions_to_another_voter(from_voter_id, from_voter_we_vote_id,
         if results['organization_found']:
             to_voter_organization = results['organization']
             to_organization_name = to_voter_organization.organization_name
+            to_organization_type = to_voter_organization.organization_type
+            to_twitter_followers_count = to_voter_organization.twitter_followers_count
 
     # Find private positions for the "from_voter" that we are moving away from
     stance_we_are_looking_for = ANY_STANCE
@@ -1501,6 +1536,13 @@ def move_positions_to_another_voter(from_voter_id, from_voter_we_vote_id,
             # Update the organization values
             to_position_entry.organization_we_vote_id = to_voter_linked_organization_we_vote_id
             to_position_entry.organization_id = to_voter_linked_organization_id
+            # Update cached organization information
+            if positive_value_exists(to_organization_name):
+                to_position_entry.speaker_display_name = to_organization_name
+            if positive_value_exists(to_organization_type):
+                to_position_entry.speaker_type = to_organization_type
+            if positive_value_exists(to_twitter_followers_count):
+                to_position_entry.twitter_followers_count = to_twitter_followers_count
             try:
                 to_position_entry.save()
             except Exception as e:
@@ -1508,12 +1550,18 @@ def move_positions_to_another_voter(from_voter_id, from_voter_we_vote_id,
         else:
             # Change the position values to the new values
             try:
-                if positive_value_exists(to_organization_name):
-                    from_position_entry.speaker_display_name = to_organization_name
                 from_position_entry.organization_id = to_voter_linked_organization_id
                 from_position_entry.organization_we_vote_id = to_voter_linked_organization_we_vote_id
                 from_position_entry.voter_id = to_voter_id
                 from_position_entry.voter_we_vote_id = to_voter_we_vote_id
+                # Update cached organization information
+                if positive_value_exists(to_organization_name):
+                    from_position_entry.speaker_display_name = to_organization_name
+                if positive_value_exists(to_organization_type):
+                    from_position_entry.speaker_type = to_organization_type
+                if positive_value_exists(to_twitter_followers_count):
+                    from_position_entry.twitter_followers_count = to_twitter_followers_count
+
                 from_position_entry.save()
                 position_entries_moved += 1
             except Exception as e:
@@ -1577,12 +1625,18 @@ def move_positions_to_another_voter(from_voter_id, from_voter_we_vote_id,
         else:
             # Change the position values to the new we_vote_id
             try:
-                if positive_value_exists(to_organization_name):
-                    from_position_entry.speaker_display_name = to_organization_name
                 from_position_entry.organization_id = to_voter_linked_organization_id
                 from_position_entry.organization_we_vote_id = to_voter_linked_organization_we_vote_id
                 from_position_entry.voter_id = to_voter_id
                 from_position_entry.voter_we_vote_id = to_voter_we_vote_id
+                # Update cached organization information
+                if positive_value_exists(to_organization_name):
+                    from_position_entry.speaker_display_name = to_organization_name
+                if positive_value_exists(to_organization_type):
+                    from_position_entry.speaker_type = to_organization_type
+                if positive_value_exists(to_twitter_followers_count):
+                    from_position_entry.twitter_followers_count = to_twitter_followers_count
+
                 from_position_entry.save()
                 position_entries_moved += 1
             except Exception as e:
@@ -1741,6 +1795,8 @@ def position_retrieve_for_api(position_we_vote_id, voter_device_id):  # position
             'speaker_image_url_https_medium':   '',
             'speaker_image_url_https_tiny':     '',
             'speaker_twitter_handle':           '',
+            'twitter_followers_count':          '',
+            'speaker_type':                     '',
             'is_support':                       False,
             'is_positive_rating':               False,
             'is_support_or_positive_rating':    False,
@@ -1790,6 +1846,8 @@ def position_retrieve_for_api(position_we_vote_id, voter_device_id):  # position
             'speaker_image_url_https_medium':   position.speaker_image_url_https_medium,
             'speaker_image_url_https_tiny':     position.speaker_image_url_https_tiny,
             'speaker_twitter_handle':           position.speaker_twitter_handle,
+            'twitter_followers_count':          '',
+            'speaker_type':                     position.speaker_type,
             'is_support':                       results['is_support'],
             'is_positive_rating':               results['is_positive_rating'],
             'is_support_or_positive_rating':    results['is_support_or_positive_rating'],
@@ -1824,6 +1882,8 @@ def position_retrieve_for_api(position_we_vote_id, voter_device_id):  # position
             'speaker_image_url_https_medium':   '',
             'speaker_image_url_https_tiny':     '',
             'speaker_twitter_handle':           '',
+            'twitter_followers_count':          '',
+            'speaker_type':                     '',
             'is_support':                       False,
             'is_positive_rating':               False,
             'is_support_or_positive_rating':    False,
@@ -1864,8 +1924,7 @@ def position_save_for_api(  # positionSave
         set_as_public_position,
         statement_text,
         statement_html,
-        more_info_url
-        ):
+        more_info_url):
     position_we_vote_id = position_we_vote_id.strip().lower()
 
     existing_unique_identifier_found = positive_value_exists(position_we_vote_id)
@@ -1894,6 +1953,8 @@ def position_save_for_api(  # positionSave
             'speaker_display_name':     '',
             'speaker_image_url_https':  '',
             'speaker_twitter_handle':   '',
+            'twitter_followers_count':  '',
+            'speaker_type':             '',
             'is_support':                       False,
             'is_positive_rating':               False,
             'is_support_or_positive_rating':    False,
@@ -1927,6 +1988,8 @@ def position_save_for_api(  # positionSave
             'speaker_display_name':     '',
             'speaker_image_url_https':  '',
             'speaker_twitter_handle':   '',
+            'twitter_followers_count':  '',
+            'speaker_type':             '',
             'is_support':                       False,
             'is_positive_rating':               False,
             'is_support_or_positive_rating':    False,
@@ -1985,6 +2048,8 @@ def position_save_for_api(  # positionSave
             'speaker_display_name':     position.speaker_display_name,
             'speaker_image_url_https':  position.speaker_image_url_https,
             'speaker_twitter_handle':   position.speaker_twitter_handle,
+            'twitter_followers_count':  position.twitter_followers_count,
+            'speaker_type':             position.speaker_type,
             'is_support':                       position.is_support(),
             'is_positive_rating':               position.is_positive_rating(),
             'is_support_or_positive_rating':    position.is_support_or_positive_rating(),
@@ -2018,6 +2083,8 @@ def position_save_for_api(  # positionSave
             'speaker_display_name':     '',
             'speaker_image_url_https':  '',
             'speaker_twitter_handle':   '',
+            'twitter_followers_count':  '',
+            'speaker_type':             '',
             'is_support':                       False,
             'is_positive_rating':               False,
             'is_support_or_positive_rating':    False,
@@ -2203,7 +2270,6 @@ def position_list_for_ballot_item_for_api(office_id, office_we_vote_id,  # posit
 
         # Whose position is it?
         if positive_value_exists(one_position.organization_we_vote_id):
-            speaker_type = ORGANIZATION
             speaker_id = one_position.organization_id
             speaker_we_vote_id = one_position.organization_we_vote_id
             one_position_success = True
@@ -2212,7 +2278,8 @@ def position_list_for_ballot_item_for_api(office_id, office_we_vote_id,  # posit
                     or not positive_value_exists(one_position.speaker_image_url_https_large) \
                     or not positive_value_exists(one_position.speaker_image_url_https_medium) \
                     or not positive_value_exists(one_position.speaker_image_url_https_tiny) \
-                    or not positive_value_exists(one_position.speaker_twitter_handle):
+                    or not positive_value_exists(one_position.speaker_twitter_handle) \
+                    or one_position.speaker_type == UNKNOWN:
                 results = position_manager.refresh_cached_position_info(
                     one_position,
                     offices_dict=offices_dict,
@@ -2230,7 +2297,6 @@ def position_list_for_ballot_item_for_api(office_id, office_we_vote_id,  # posit
                 voters_dict = results['voters_dict']
             speaker_display_name = one_position.speaker_display_name
         else:
-            speaker_type = UNKNOWN
             speaker_display_name = "Unknown"
             speaker_id = None
             speaker_we_vote_id = None
@@ -2250,7 +2316,8 @@ def position_list_for_ballot_item_for_api(office_id, office_we_vote_id,  # posit
                 'speaker_image_url_https_medium':   one_position.speaker_image_url_https_medium,
                 'speaker_image_url_https_tiny':     one_position.speaker_image_url_https_tiny,
                 'speaker_twitter_handle':           one_position.speaker_twitter_handle,
-                'speaker_type':                     speaker_type,
+                'twitter_followers_count':          one_position.twitter_followers_count,
+                'speaker_type':                     one_position.speaker_type,
                 'speaker_id':                       speaker_id,
                 'speaker_we_vote_id':               speaker_we_vote_id,
                 'is_support':                       one_position.is_support(),
@@ -2589,7 +2656,6 @@ def position_list_for_ballot_item_for_one_voter_for_api(voter_device_id, friends
             if linked_organization_we_vote_id == one_position.organization_we_vote_id:
                 # Do not show your own position on the position list, since it will be in the edit spot already
                 continue
-            speaker_type = ORGANIZATION
             speaker_id = one_position.organization_id
             speaker_we_vote_id = one_position.organization_we_vote_id
             one_position_success = True
@@ -2598,7 +2664,8 @@ def position_list_for_ballot_item_for_one_voter_for_api(voter_device_id, friends
                     or not positive_value_exists(one_position.speaker_image_url_https_large) \
                     or not positive_value_exists(one_position.speaker_image_url_https_medium) \
                     or not positive_value_exists(one_position.speaker_image_url_https_tiny) \
-                    or not positive_value_exists(one_position.speaker_twitter_handle):
+                    or not positive_value_exists(one_position.speaker_twitter_handle) \
+                    or one_position.speaker_type == UNKNOWN:
                 results = position_manager.refresh_cached_position_info(
                     one_position,
                     offices_dict=offices_dict,
@@ -2619,7 +2686,6 @@ def position_list_for_ballot_item_for_one_voter_for_api(voter_device_id, friends
             if voter_id == one_position.voter_id:
                 # Do not show your own position on the position list, since it will be in the edit spot already
                 continue
-            speaker_type = VOTER
             speaker_id = one_position.voter_id
             speaker_we_vote_id = one_position.voter_we_vote_id
             one_position_success = True
@@ -2628,7 +2694,8 @@ def position_list_for_ballot_item_for_one_voter_for_api(voter_device_id, friends
                     or not positive_value_exists(one_position.voter_we_vote_id) \
                     or not positive_value_exists(one_position.speaker_image_url_https_large) \
                     or not positive_value_exists(one_position.speaker_image_url_https_medium) \
-                    or not positive_value_exists(one_position.speaker_image_url_https_tiny):
+                    or not positive_value_exists(one_position.speaker_image_url_https_tiny) \
+                    or one_position.speaker_type == UNKNOWN:
                 results = position_manager.refresh_cached_position_info(
                     one_position,
                     offices_dict=offices_dict,
@@ -2649,7 +2716,6 @@ def position_list_for_ballot_item_for_one_voter_for_api(voter_device_id, friends
             else:
                 speaker_display_name = "Your Friend (Missing Name)"
         elif positive_value_exists(one_position.public_figure_we_vote_id):
-            speaker_type = PUBLIC_FIGURE
             speaker_id = one_position.public_figure_id
             speaker_we_vote_id = one_position.public_figure_we_vote_id
             one_position_success = True
@@ -2658,7 +2724,8 @@ def position_list_for_ballot_item_for_one_voter_for_api(voter_device_id, friends
                     or not positive_value_exists(one_position.speaker_image_url_https_large) \
                     or not positive_value_exists(one_position.speaker_image_url_https_medium) \
                     or not positive_value_exists(one_position.speaker_image_url_https_tiny) \
-                    or not positive_value_exists(one_position.speaker_twitter_handle):
+                    or not positive_value_exists(one_position.speaker_twitter_handle) \
+                    or one_position.speaker_type == UNKNOWN:
                 results = position_manager.refresh_cached_position_info(
                     one_position,
                     offices_dict=offices_dict,
@@ -2676,7 +2743,6 @@ def position_list_for_ballot_item_for_one_voter_for_api(voter_device_id, friends
                 voters_dict = results['voters_dict']
             speaker_display_name = one_position.speaker_display_name
         else:
-            speaker_type = UNKNOWN
             speaker_display_name = "Unknown"
             speaker_id = None
             speaker_we_vote_id = None
@@ -2696,7 +2762,8 @@ def position_list_for_ballot_item_for_one_voter_for_api(voter_device_id, friends
                 'speaker_image_url_https_medium':   one_position.speaker_image_url_https_medium,
                 'speaker_image_url_https_tiny':     one_position.speaker_image_url_https_tiny,
                 'speaker_twitter_handle':           one_position.speaker_twitter_handle,
-                'speaker_type':                     speaker_type,
+                'twitter_followers_count':          one_position.twitter_followers_count,
+                'speaker_type':                     one_position.speaker_type,
                 'speaker_id':                       speaker_id,
                 'speaker_we_vote_id':               speaker_we_vote_id,
                 'is_support':                       one_position.is_support(),
@@ -2984,6 +3051,7 @@ def position_list_for_opinion_maker_for_api(voter_device_id,  # positionListForO
             if force_update or not positive_value_exists(one_position.ballot_item_display_name) \
                     or not positive_value_exists(one_position.state_code) \
                     or not positive_value_exists(one_position.speaker_image_url_https) \
+                    or one_position.speaker_type == UNKNOWN \
                     or missing_ballot_item_image \
                     or missing_office_information:
                 results = position_manager.refresh_cached_position_info(
@@ -3033,6 +3101,8 @@ def position_list_for_opinion_maker_for_api(voter_device_id,  # positionListForO
                 'speaker_image_url_https_medium':       one_position.speaker_image_url_https_medium,
                 'speaker_image_url_https_tiny':         one_position.speaker_image_url_https_tiny,
                 'speaker_twitter_handle':               one_position.speaker_twitter_handle,
+                'twitter_followers_count':              one_position.twitter_followers_count,
+                'speaker_type':                         one_position.speaker_type,
                 'organization_we_vote_id':              one_position.organization_we_vote_id,
                 'speaker_we_vote_id':                   one_position.organization_we_vote_id,
                 'vote_smart_rating':                    one_position.vote_smart_rating,
@@ -3532,6 +3602,8 @@ def positions_import_from_structured_json(structured_json):
             position_on_stage.speaker_display_name = one_position["speaker_display_name"]
             position_on_stage.speaker_image_url_https = one_position["speaker_image_url_https"]
             position_on_stage.speaker_twitter_handle = one_position["speaker_twitter_handle"]
+            position_on_stage.twitter_followers_count = one_position["twitter_followers_count"]
+            position_on_stage.speaker_type = one_position["speaker_type"]
             position_on_stage.tweet_source_id = one_position["tweet_source_id"]
             position_on_stage.twitter_user_entered_position = one_position["twitter_user_entered_position"]
             position_on_stage.volunteer_certified = one_position["volunteer_certified"]
@@ -3596,6 +3668,8 @@ def voter_position_retrieve_for_api(voter_device_id, office_we_vote_id, candidat
             'speaker_display_name':     '',
             'speaker_image_url_https':  '',
             'speaker_twitter_handle':   '',
+            'twitter_followers_count':  '',
+            'speaker_type':             '',
             'is_support':               False,
             'is_oppose':                False,
             'is_information_only':      False,
@@ -3632,6 +3706,8 @@ def voter_position_retrieve_for_api(voter_device_id, office_we_vote_id, candidat
             'speaker_display_name':     '',
             'speaker_image_url_https':  '',
             'speaker_twitter_handle':   '',
+            'twitter_followers_count':  '',
+            'speaker_type':             '',
             'is_support':               False,
             'is_oppose':                False,
             'is_information_only':      False,
@@ -3677,6 +3753,8 @@ def voter_position_retrieve_for_api(voter_device_id, office_we_vote_id, candidat
             'speaker_display_name':     position.speaker_display_name,
             'speaker_image_url_https':  position.speaker_image_url_https,
             'speaker_twitter_handle':   position.speaker_twitter_handle,
+            'twitter_followers_count':  position.twitter_followers_count,
+            'speaker_type':             position.speaker_type,
             'is_support':               results['is_support'],
             'is_oppose':                results['is_oppose'],
             'is_information_only':      results['is_information_only'],
@@ -3706,6 +3784,8 @@ def voter_position_retrieve_for_api(voter_device_id, office_we_vote_id, candidat
             'speaker_display_name':     '',
             'speaker_image_url_https':  '',
             'speaker_twitter_handle':   '',
+            'twitter_followers_count':  '',
+            'speaker_type':             '',
             'is_support':               False,
             'is_oppose':                False,
             'is_information_only':      False,

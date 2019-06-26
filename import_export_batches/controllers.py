@@ -3995,7 +3995,8 @@ def import_position_data_from_batch_row_actions(
                 set_as_public_position=True,
                 statement_text=one_batch_row_action.statement_text,
                 statement_html=one_batch_row_action.statement_html,
-                more_info_url=one_batch_row_action.more_info_url)
+                more_info_url=one_batch_row_action.more_info_url,
+            )
             # office_we_vote_id = one_batch_row_action.contest_office_we_vote_id,
 
             if not results['new_position_created']:
