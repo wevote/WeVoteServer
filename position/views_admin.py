@@ -184,6 +184,7 @@ def position_list_view(request):
 
     # Make sure all positions in this election have a speaker_type
     public_position_list_clean_count = 0
+    friend_position_list_clean_count = 0
     if positive_value_exists(google_civic_election_id):
         public_position_list_clean_query = PositionEntered.objects.all()
         public_position_list_clean_query = public_position_list_clean_query.filter(
