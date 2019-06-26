@@ -636,6 +636,7 @@ def transfer_vote_smart_ratings_to_positions(candidate_campaign_id, politician_i
     we_vote_organizations_created = 0
     organization_positions_that_exist = 0
     organization_positions_created = 0
+    ratings_status = ""
     candidate_manager = CandidateCampaignManager()
     candidate_results = candidate_manager.retrieve_candidate_campaign_from_id(candidate_campaign_id)
 
@@ -672,7 +673,6 @@ def transfer_vote_smart_ratings_to_positions(candidate_campaign_id, politician_i
                 }
                 return results
 
-        ratings_status = ""
         position_manager = PositionManager()
         special_interest_group_manager = VoteSmartSpecialInterestGroupManager()
         for one_candidate_rating in rating_list:
@@ -744,7 +744,7 @@ def transfer_vote_smart_ratings_to_positions(candidate_campaign_id, politician_i
                                                 status=position_results['status'])
 
     success = True
-    status = "TRANSFER_PROCESS_COMPLETED: " + ratings_status
+    status = "TRANSFER_PROCESS_COMPLETED: " + ratings_status + " "
 
     results = {
         'status':   status,

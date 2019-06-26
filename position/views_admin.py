@@ -23,12 +23,14 @@ from exception.models import handle_record_found_more_than_one_exception,\
     handle_record_not_found_exception, handle_record_not_saved_exception
 from measure.controllers import push_contest_measure_data_to_other_table_caches
 from office.controllers import push_contest_office_data_to_other_table_caches
+from organization.models import OrganizationManager
 from voter.models import voter_has_authority
 import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, positive_value_exists
 from django.http import HttpResponse
 import json
 
+UNKNOWN = 'U'
 POSITIONS_SYNC_URL = get_environment_variable("POSITIONS_SYNC_URL")  # positionsSyncOut
 WE_VOTE_SERVER_ROOT_URL = get_environment_variable("WE_VOTE_SERVER_ROOT_URL")
 
@@ -75,8 +77,8 @@ def positions_sync_out_view(request):  # positionsSyncOut
             'vote_smart_rating_id', 'vote_smart_time_span', 'vote_smart_rating',
             'vote_smart_rating_name', 'contest_office_we_vote_id',
             'candidate_campaign_we_vote_id', 'google_civic_candidate_name',
-            'politician_we_vote_id', 'contest_measure_we_vote_id', 'stance',
-            'statement_text', 'statement_html', 'more_info_url', 'from_scraper',
+            'politician_we_vote_id', 'contest_measure_we_vote_id', 'speaker_type', 'stance',
+            'statement_text', 'statement_html', 'twitter_followers_count', 'more_info_url', 'from_scraper',
             'organization_certified', 'volunteer_certified', 'voter_entering_position',
             'tweet_source_id', 'twitter_user_entered_position', 'is_private_citizen')
 
@@ -131,6 +133,36 @@ def positions_import_from_master_server_view(request):
                                 str(google_civic_election_id) + "&state_code=" + str(state_code))
 
 
+def update_position_list_with_speaker_type(position_list):
+    organization_manager = OrganizationManager()
+    organization_dict = {}
+    for one_position in position_list:
+        position_change = False
+        speaker_type = UNKNOWN
+        twitter_followers_count = 0
+        if one_position.organization_we_vote_id in organization_dict:
+            organization = organization_dict[one_position.organization_we_vote_id]
+            speaker_type = organization.organization_type
+            twitter_followers_count = organization.twitter_followers_count
+        else:
+            organization_results = organization_manager.retrieve_organization_from_we_vote_id(
+                one_position.organization_we_vote_id)
+            if organization_results['organization_found']:
+                organization = organization_results['organization']
+                organization_dict[one_position.organization_we_vote_id] = organization
+                speaker_type = organization.organization_type
+                twitter_followers_count = organization.twitter_followers_count
+        if speaker_type != UNKNOWN:
+            one_position.speaker_type = speaker_type
+            position_change = True
+        if positive_value_exists(twitter_followers_count):
+            one_position.twitter_followers_count = twitter_followers_count
+            position_change = True
+        if position_change:
+            one_position.save()
+    return True
+
+
 @login_required
 def position_list_view(request):
     """
@@ -149,6 +181,29 @@ def position_list_view(request):
     state_code = request.GET.get('state_code', '')
 
     position_search = request.GET.get('position_search', '')
+
+    # Make sure all positions in this election have a speaker_type
+    public_position_list_clean_count = 0
+    if positive_value_exists(google_civic_election_id):
+        public_position_list_clean_query = PositionEntered.objects.all()
+        public_position_list_clean_query = public_position_list_clean_query.filter(
+            google_civic_election_id=google_civic_election_id,
+            speaker_type=UNKNOWN,
+        )
+        public_position_list_clean_count_query = public_position_list_clean_query
+        public_position_list_clean_count = public_position_list_clean_count_query.count()
+        public_position_list_clean = list(public_position_list_clean_count_query)
+        update_position_list_with_speaker_type(public_position_list_clean)
+
+        friend_position_list_clean_query = PositionForFriends.objects.all()
+        friend_position_list_clean_query = friend_position_list_clean_query.filter(
+            google_civic_election_id=google_civic_election_id,
+            speaker_type=UNKNOWN,
+        )
+        friend_position_list_clean_count_query = friend_position_list_clean_query
+        friend_position_list_clean_count = friend_position_list_clean_count_query.count()
+        friend_position_list_clean = list(friend_position_list_clean_count_query)
+        update_position_list_with_speaker_type(friend_position_list_clean)
 
     # Publicly visible positions
     public_position_list_query = PositionEntered.objects.order_by('-id')  # This order_by is temp
@@ -283,6 +338,13 @@ def position_list_view(request):
         '(' + str(public_position_list_comments_count) + ' with commentary). ' +
         str(friends_only_position_list_count) + ' friends-only positions found ' +
         '(' + str(friends_only_position_list_comments_count) + ' with commentary). '
+        )
+
+    if public_position_list_clean_count or friend_position_list_clean_count:
+        messages.add_message(
+            request, messages.INFO,
+            str(public_position_list_clean_count) + ' public positions to be updated with speaker_type. ' +
+            str(friend_position_list_clean_count) + ' friends-only positions to be updated with speaker_type. '
         )
 
     # Heal some data

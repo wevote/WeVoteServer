@@ -16,7 +16,9 @@ from follow.models import FollowOrganizationManager, FollowOrganizationList
 from friend.models import FriendManager
 from measure.models import ContestMeasure, ContestMeasureManager
 from office.models import ContestOfficeManager
-from organization.models import Organization, OrganizationManager
+from organization.models import Organization, OrganizationManager, \
+    CORPORATION, GROUP, INDIVIDUAL, NONPROFIT, NONPROFIT_501C3, NONPROFIT_501C4, NEWS_ORGANIZATION, \
+    ORGANIZATION, POLITICAL_ACTION_COMMITTEE, PUBLIC_FIGURE, UNKNOWN, VOTER, ORGANIZATION_TYPE_CHOICES
 import robot_detection
 from twitter.models import TwitterUser
 from voter.models import fetch_voter_id_from_voter_we_vote_id, fetch_voter_we_vote_id_from_voter_id, Voter, VoterManager
@@ -109,6 +111,10 @@ class PositionEntered(models.Model):
                                                                 'person with position', blank=True, null=True)
     speaker_twitter_handle = models.CharField(verbose_name='twitter screen_name for org or person with position',
                                               max_length=255, null=True, unique=False)
+    twitter_followers_count = models.IntegerField(verbose_name="number of twitter followers",
+                                                  null=False, blank=True, default=0)
+    speaker_type = models.CharField(
+        verbose_name="type of org", max_length=2, choices=ORGANIZATION_TYPE_CHOICES, default=UNKNOWN)
 
     date_entered = models.DateTimeField(verbose_name='date entered', null=True, auto_now_add=True, db_index=True)
     # The date the this position last changed
@@ -495,6 +501,10 @@ class PositionForFriends(models.Model):
                                                                 'person with position', blank=True, null=True)
     speaker_twitter_handle = models.CharField(verbose_name='twitter screen_name for org or person with position',
                                               max_length=255, null=True, unique=False)
+    twitter_followers_count = models.IntegerField(verbose_name="number of twitter followers",
+                                                  null=False, blank=True, default=0)
+    speaker_type = models.CharField(
+        verbose_name="type of org", max_length=2, choices=ORGANIZATION_TYPE_CHOICES, default=UNKNOWN)
 
     date_entered = models.DateTimeField(verbose_name='date entered', null=True, auto_now=True, db_index=True)
     # The date the this position last changed
@@ -5014,6 +5024,8 @@ class PositionManager(models.Model):
                 speaker_display_name=existing_position.speaker_display_name,
                 speaker_image_url_https=existing_position.speaker_image_url_https,
                 speaker_twitter_handle=existing_position.speaker_twitter_handle,
+                twitter_followers_count=existing_position.twitter_followers_count,
+                speaker_type=existing_position.speaker_type,
             )
             status = 'SWITCH_POSITION_VISIBILITY_SUCCESS'
             position_copied = True
@@ -6390,6 +6402,14 @@ class PositionManager(models.Model):
                 position_object.speaker_twitter_handle != organization.organization_twitter_handle:
             position_object.speaker_twitter_handle = organization.organization_twitter_handle
             position_change = True
+        if positive_value_exists(organization.organization_type) and \
+                position_object.speaker_type != organization.organization_type:
+            position_object.speaker_type = organization.organization_type
+            position_change = True
+        if positive_value_exists(organization.twitter_followers_count) and \
+                position_object.twitter_followers_count != organization.twitter_followers_count:
+            position_object.twitter_followers_count = organization.twitter_followers_count
+            position_change = True
         if position_change:
             try:
                 position_object.save()
@@ -6443,6 +6463,7 @@ class PositionManager(models.Model):
         no_unique_actor_variables_received = False
         too_many_unique_ballot_item_variables_received = False
         no_unique_ballot_item_variables_received = False
+        organization_id = 0
         if set_as_public_position:
             position_on_stage_starter = PositionEntered
             position_on_stage = PositionEntered()
@@ -6482,8 +6503,14 @@ class PositionManager(models.Model):
                     position_on_stage.organization_we_vote_id = organization_we_vote_id
                     # Lookup organization_id based on organization_we_vote_id and update
                     organization_manager = OrganizationManager()
-                    position_on_stage.organization_id = \
-                        organization_manager.fetch_organization_id(organization_we_vote_id)
+                    organization_results = organization_manager.retrieve_organization_from_we_vote_id(organization_we_vote_id)
+                    if organization_results['organization_found']:
+                        organization = organization_results['organization']
+                        position_on_stage.organization_id = organization.id
+                        position_on_stage.twitter_followers_count = organization.twitter_followers_count
+                        position_on_stage.speaker_type = organization.organization_type
+                    else:
+                        position_on_stage.organization_id = 0
                 if google_civic_election_id:
                     position_on_stage.google_civic_election_id = google_civic_election_id
                 if state_code:
@@ -7099,6 +7126,8 @@ class PositionManager(models.Model):
                 voter_manager = VoterManager()
                 results = voter_manager.retrieve_voter_by_we_vote_id(voter_we_vote_id)
                 voter_id = 0
+                speaker_type = UNKNOWN
+                twitter_followers_count = 0
                 if results['voter_found']:
                     voter = results['voter']
                     voter_id = voter.id
@@ -7112,6 +7141,8 @@ class PositionManager(models.Model):
                         organization = organization_results['organization']
                         organization_id = organization.id
                         speaker_display_name = organization.organization_name
+                        speaker_type = organization.organization_type
+                        twitter_followers_count = organization.twitter_followers_count
 
                 if positive_value_exists(state_code):
                     state_code = state_code.lower()
@@ -7137,7 +7168,9 @@ class PositionManager(models.Model):
                     vote_smart_time_span=vote_smart_time_span,
                     vote_smart_rating_id=vote_smart_rating_id,
                     vote_smart_rating=vote_smart_rating,
-                    vote_smart_rating_name=vote_smart_rating_name
+                    vote_smart_rating_name=vote_smart_rating_name,
+                    twitter_followers_count=twitter_followers_count,
+                    speaker_type=speaker_type,
                 )
                 position_list_manager.update_position_network_scores_for_one_position(position_on_stage)
                 status = "CREATE_POSITION_SUCCESSFUL"
@@ -7198,6 +7231,7 @@ class PositionManager(models.Model):
                 or not positive_value_exists(position_object.speaker_image_url_https_large) \
                 or not positive_value_exists(position_object.speaker_image_url_https_medium) \
                 or not positive_value_exists(position_object.speaker_image_url_https_tiny) \
+                or position_object.speaker_type == UNKNOWN \
                 or force_update:
             try:
                 # We need to look in the organization table for speaker_display_name & speaker images
@@ -7269,12 +7303,20 @@ class PositionManager(models.Model):
                         # speaker_twitter_handle is missing so look it up from source
                         position_object.speaker_twitter_handle = organization_twitter_handle
                         position_change = True
+                    if position_object.speaker_type == UNKNOWN or force_update:
+                        position_object.speaker_type = organization.organization_type
+                        position_change = True
                     if position_object.is_private_citizen is None or force_update:
                         position_object.is_private_citizen = organization.is_private_citizen()
                         position_change = True
                     if not positive_value_exists(position_object.organization_id) \
                             or position_object.organization_id != organization.id:
                         position_object.organization_id = organization.id
+                        position_change = True
+                    if not positive_value_exists(position_object.twitter_followers_count) or force_update or \
+                            position_change:
+                        # If we are saving anyways, update this
+                        position_object.twitter_followers_count = organization.twitter_followers_count
                         position_change = True
                 else:
                     position_object.is_private_citizen = True
@@ -7344,6 +7386,9 @@ class PositionManager(models.Model):
                         voter_twitter_handle = voter_manager.fetch_twitter_handle_from_voter_we_vote_id(
                             voter.we_vote_id)
                         position_object.speaker_twitter_handle = voter_twitter_handle
+                        position_change = True
+                    if position_object.speaker_type == UNKNOWN or force_update:
+                        position_object.speaker_type = INDIVIDUAL
                         position_change = True
                 except Exception as e:
                     pass
