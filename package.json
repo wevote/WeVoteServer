@@ -3,7 +3,9 @@
   "version": "0.0.1",
   "description": "We vote server backend and front end ui",
   "scripts": {
-    "test": "echo \"no test\" && exit 0"
+    "test": "echo \"no test\" && exit 0",
+    "snyk-protect": "snyk protect",
+    "prepublish": "npm run snyk-protect"
   },
   "repository": {
     "type": "git",
@@ -16,6 +18,8 @@
     "redux-devtools": "^2.1.5"
   },
   "dependencies": {
-    "redux": "^3.0.4"
-  }
+    "redux": "^3.0.4",
+    "snyk": "^1.189.0"
+  },
+  "snyk": true
 }
