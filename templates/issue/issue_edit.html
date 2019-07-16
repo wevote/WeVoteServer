@@ -6,7 +6,7 @@
 {%  block content %}
 {% load template_filters %}
 <a href="{% url 'issue:issue_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
-    < Back to Issues</a>
+    < Back to Values/Issues</a>
 
 <h1>{% if issue %}Edit Issue "{{ issue.issue_name }}"{% else %}New Issue{% endif %}</h1>
 {% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}

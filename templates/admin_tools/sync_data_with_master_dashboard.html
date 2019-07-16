@@ -104,13 +104,13 @@
         <td>The list of unique measures, like &#34;Measure BB - Berkeley&#34;</td>
     </tr>
 
-    <tr><td><h4>Issues</h4></td></tr>
+    <tr><td><h4>Values/Issues</h4></td></tr>
     <tr>
         <td>&nbsp;&nbsp;&nbsp;&nbsp;
             <a href="{% url 'issue:issues_import_from_master_server' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
-                Retrieve Issues</a>
+                Retrieve Values/Issues</a>
         </td>
-        <td>Note: Issues are independent of elections and state_codes</td>
+        <td>Note: Values/Issues are independent of elections and state_codes</td>
     </tr>
 
     <tr><td><h4>Organizations</h4></td></tr>
@@ -122,13 +122,13 @@
         <td>The list of organizations that make ballot recomendations</td>
     </tr>
 
-    <tr><td><h4>Organization Links to Issues</h4></td></tr>
+    <tr><td><h4>Organization Links to Values/Issues</h4></td></tr>
     <tr>
         <td>&nbsp;&nbsp;&nbsp;&nbsp;
             <a href="{% url 'issue:organization_link_to_issue_import_from_master_server' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
-                Retrieve Organization Links to Issues</a>
+                Retrieve Organization Links to Values/Issues</a>
         </td>
-        <td>Organization Links to Issues are independent of elections and state_codes</td>
+        <td>Organization Links to Values/Issues are independent of elections and state_codes</td>
     </tr>
 
     <tr><td><h4>Positions</h4></td></tr>
