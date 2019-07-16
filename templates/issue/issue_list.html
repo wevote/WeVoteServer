@@ -1,7 +1,7 @@
 {# templates/issue/issue_list.html #}
 {% extends "template_base.html" %}
 
-{% block title %}Issues{% endblock %}
+{% block title %}Values/Issues{% endblock %}
 
 {%  block content %}
 {% load template_filters %}
@@ -14,14 +14,14 @@
     <a href="{% url 'elected_office:elected_office_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">Elected Offices</a> -
     <a href="{% url 'elected_official:elected_official_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">Elected Officials</a> -
     <a href="{% url 'politician:politician_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">Politicians</a> -
-    <a href="{% url 'issue:issue_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">Issues</a> -
+    <a href="{% url 'issue:issue_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">Values/Issues</a> -
     <a href="{% url 'organization:organization_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">Organizations</a> -
     <a href="{% url 'position:position_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">Opinions/Positions</a> -
     <a href="{% url 'voter_guide:voter_guide_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">Voter Guides</a> -
     <a href="{% url 'polling_location:polling_location_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">Polling Locations</a>
 </p>
 
-<h1>Issues</h1>
+<h1>Values/Issues</h1>
 
 <form name="issue_choose_election" method="get" action="{% url 'issue:issue_list' %}">
     {% csrf_token %}
@@ -144,7 +144,7 @@
     </table>
 
     <p>
-        <a href="{% url 'apis_v1:issuesSyncOutView' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}&issue_search={{ issue_search }}" target="_blank" >Export Issues</a><br />
+        <a href="{% url 'apis_v1:issuesSyncOutView' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}&issue_search={{ issue_search }}" target="_blank" >Export Values/Issues</a><br />
     </p>
 
     <p></p>

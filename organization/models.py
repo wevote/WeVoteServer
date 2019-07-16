@@ -735,7 +735,10 @@ class OrganizationManager(models.Manager):
             facebook_id=False, facebook_email=False,
             facebook_profile_image_url_https=False,
             facebook_background_image_url_https=False,
-            ):
+            chosen_domain_string=False, chosen_google_analytics_account_number=False,
+            chosen_html_verification_string=False, chosen_logo_displayed=None, chosen_social_share_description=False,
+            chosen_sub_domain_string=False, chosen_subscription_plan=False,
+    ):
         """
         Either update or create an organization entry.
         :param organization_id:
@@ -756,6 +759,13 @@ class OrganizationManager(models.Manager):
         :param facebook_email:
         :param facebook_profile_image_url_https:
         :param facebook_background_image_url_https:
+        :param chosen_domain_string:
+        :param chosen_google_analytics_account_number:
+        :param chosen_html_verification_string:
+        :param chosen_logo_displayed:
+        :param chosen_social_share_description:
+        :param chosen_sub_domain_string:
+        :param chosen_subscription_plan:
         :return:
         """
 
@@ -785,6 +795,14 @@ class OrganizationManager(models.Manager):
             else False
         organization_image = organization_image.strip() if organization_image is not False else False
         organization_type = organization_type.strip() if organization_type is not False else False
+        chosen_domain_string = chosen_domain_string.strip() if chosen_domain_string is not False else False
+        chosen_google_analytics_account_number = chosen_google_analytics_account_number.strip() \
+            if chosen_google_analytics_account_number is not False else False
+        chosen_html_verification_string = chosen_html_verification_string.strip() \
+            if chosen_html_verification_string is not False else False
+        chosen_social_share_description = chosen_social_share_description.strip() \
+            if chosen_social_share_description is not False else False
+        chosen_sub_domain_string = chosen_sub_domain_string.strip() if chosen_sub_domain_string is not False else False
 
         # Values that can only be updated by a refresh_from_twitter
         twitter_user_id = False
@@ -874,6 +892,27 @@ class OrganizationManager(models.Manager):
                 if organization_type is not False:
                     value_changed = True
                     organization_on_stage.organization_type = organization_type
+                if chosen_domain_string is not False:
+                    value_changed = True
+                    organization_on_stage.chosen_domain_string = chosen_domain_string
+                if chosen_google_analytics_account_number is not False:
+                    value_changed = True
+                    organization_on_stage.chosen_google_analytics_account_number = chosen_google_analytics_account_number
+                if chosen_html_verification_string is not False:
+                    value_changed = True
+                    organization_on_stage.chosen_html_verification_string = chosen_html_verification_string
+                if chosen_logo_displayed is not None:
+                    value_changed = True
+                    organization_on_stage.chosen_logo_displayed = chosen_logo_displayed
+                if chosen_social_share_description is not False:
+                    value_changed = True
+                    organization_on_stage.chosen_social_share_description = chosen_social_share_description
+                if chosen_sub_domain_string is not False:
+                    value_changed = True
+                    organization_on_stage.chosen_sub_domain_string = chosen_sub_domain_string
+                if chosen_subscription_plan is not False:
+                    value_changed = True
+                    organization_on_stage.chosen_subscription_plan = chosen_subscription_plan
 
                 if twitter_user_id or twitter_name or twitter_followers_count or twitter_profile_image_url_https \
                         or twitter_profile_banner_url_https or twitter_profile_background_image_url_https \
@@ -1065,6 +1104,27 @@ class OrganizationManager(models.Manager):
                     if organization_type is not False:
                         value_changed = True
                         organization_on_stage.organization_type = organization_type
+                    if chosen_domain_string is not False:
+                        value_changed = True
+                        organization_on_stage.chosen_domain_string = chosen_domain_string
+                    if chosen_google_analytics_account_number is not False:
+                        value_changed = True
+                        organization_on_stage.chosen_google_analytics_account_number = chosen_google_analytics_account_number
+                    if chosen_html_verification_string is not False:
+                        value_changed = True
+                        organization_on_stage.chosen_html_verification_string = chosen_html_verification_string
+                    if chosen_logo_displayed is not None:
+                        value_changed = True
+                        organization_on_stage.chosen_logo_displayed = chosen_logo_displayed
+                    if chosen_social_share_description is not False:
+                        value_changed = True
+                        organization_on_stage.chosen_social_share_description = chosen_social_share_description
+                    if chosen_sub_domain_string is not False:
+                        value_changed = True
+                        organization_on_stage.chosen_sub_domain_string = chosen_sub_domain_string
+                    if chosen_subscription_plan is not False:
+                        value_changed = True
+                        organization_on_stage.chosen_subscription_plan = chosen_subscription_plan
 
                     if positive_value_exists(twitter_user_id) or positive_value_exists(twitter_name) \
                             or positive_value_exists(twitter_followers_count) \
@@ -1190,6 +1250,29 @@ class OrganizationManager(models.Manager):
 
                     if positive_value_exists(organization_instagram_handle):
                         organization_on_stage.organization_instagram_handle = organization_instagram_handle
+
+                    if chosen_domain_string is not False:
+                        value_changed = True
+                        organization_on_stage.chosen_domain_string = chosen_domain_string
+                    if chosen_google_analytics_account_number is not False:
+                        value_changed = True
+                        organization_on_stage.chosen_google_analytics_account_number = \
+                            chosen_google_analytics_account_number
+                    if chosen_html_verification_string is not False:
+                        value_changed = True
+                        organization_on_stage.chosen_html_verification_string = chosen_html_verification_string
+                    if chosen_logo_displayed is not None:
+                        value_changed = True
+                        organization_on_stage.chosen_logo_displayed = chosen_logo_displayed
+                    if chosen_social_share_description is not False:
+                        value_changed = True
+                        organization_on_stage.chosen_social_share_description = chosen_social_share_description
+                    if chosen_sub_domain_string is not False:
+                        value_changed = True
+                        organization_on_stage.chosen_sub_domain_string = chosen_sub_domain_string
+                    if chosen_subscription_plan is not False:
+                        value_changed = True
+                        organization_on_stage.chosen_subscription_plan = chosen_subscription_plan
 
                     if value_changed:
                         try:
@@ -2156,6 +2239,28 @@ class Organization(models.Model):
     organization_type = models.CharField(
         verbose_name="type of org", max_length=2, choices=ORGANIZATION_TYPE_CHOICES, default=UNKNOWN)
     date_last_changed = models.DateTimeField(verbose_name='date last changed', null=True, auto_now=True)
+
+    # This is the domain name the client has configured for their We Vote configured site
+    chosen_domain_string = models.CharField(
+        verbose_name="client domain name for we vote site", max_length=255, null=True, blank=True)
+    chosen_favicon_url_https = models.URLField(verbose_name='url of client favicon', blank=True, null=True)
+    chosen_google_analytics_account_number = models.CharField(max_length=255, null=True, blank=True)
+    chosen_html_verification_string = models.CharField(max_length=255, null=True, blank=True)
+    # Set to True to hide We Vote logo
+    chosen_logo_displayed = models.BooleanField(default=False)
+    chosen_logo_url_https = models.URLField(verbose_name='url of client logo', blank=True, null=True)
+    # Client configured text that will show in index.html
+    chosen_social_share_description = models.TextField(null=True, blank=True)
+    chosen_social_share_image_256x256_url_https = models.URLField(
+        verbose_name='url of client social share image', blank=True, null=True)
+    # This is the subdomain the client has configured for yyy.WeVote.US
+    chosen_sub_domain_string = models.CharField(
+        verbose_name="client we vote subdomain", max_length=255, null=True, blank=True)
+    chosen_subscription_plan = models.PositiveIntegerField(verbose_name="number of the plan client chose", default=0)
+    # Last date the subscription is paid through ex/ 20200415
+    subscription_plan_end_day_text = models.CharField(
+        verbose_name="paid through day", max_length=8, null=True, blank=True)
+    subscription_plan_features_active = models.PositiveIntegerField(verbose_name="features that are active", default=0)
 
     organization_endorsements_api_url = models.URLField(verbose_name='endorsements importer url', blank=True, null=True)
 

@@ -13,7 +13,7 @@
     <a href="{% url 'elected_office:elected_office_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">Elected Offices</a> -
     <a href="{% url 'elected_official:elected_official_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">Elected Officials</a> -
     <a href="{% url 'politician:politician_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">Politicians</a> -
-    <a href="{% url 'issue:issue_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">Issues</a> -
+    <a href="{% url 'issue:issue_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">Values/Issues</a> -
     <a href="{% url 'organization:organization_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">Organizations</a> -
     <a href="{% url 'position:position_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">Opinions/Positions</a> -
     <a href="{% url 'voter_guide:voter_guide_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">Voter Guides</a> -
@@ -93,7 +93,7 @@
     <br />
 
 {% if issue_list %}
-    <p>Issues to filter [OR] :
+    <p>Values/Issues to filter [OR] :
     {% for issue in issue_list %}
         <input type="checkbox" name="selected_issues" id="selected_issues" value={{ issue.we_vote_id }}
         {% if issue.selected %}checked{% endif %} />{{ issue.issue_name }} &nbsp;
@@ -137,7 +137,7 @@
               {% endif %}
             </th>
             <th>Type</th>
-            <th>Issues {% if show_issues %}
+            <th>Values/Issues {% if show_issues %}
               <a href="{% url 'organization:organization_list' %}?sort_by={{ sort_by }}&state_code={{ state_code }}&organization_type_filter={{ organization_type_filter }}&organization_search={{ organization_search }}">
               (hide)</a>
             {% else %}
@@ -161,7 +161,7 @@
                 &nbsp;&nbsp;&nbsp;(<a href="{% url 'image:images_for_one_organization' organization.we_vote_id %}"
                                       target="_blank">See images</a> in new window)
               {% if organization.linked_issues_count %}
-                {{ organization.linked_issues_count }} Issues Linked
+                {{ organization.linked_issues_count }} Values/Issues Linked
               {% endif %}
             </td>
             <td>{% if organization.organization_twitter_handle %}{{ organization.organization_twitter_handle }} <br />

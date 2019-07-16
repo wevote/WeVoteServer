@@ -37,6 +37,48 @@ def organization_save_doc_template_values(url_root):
     ]
     optional_query_parameter_list = [
         {
+            'name':         'chosen_domain_string',
+            'value':        'string',  # boolean, integer, long, string
+            'description':  'This is the value of client\'s customized web address. Ex/ vote.organization.org'
+                            'It is changed by a client in Settings section.',
+        },
+        {
+            'name':         'chosen_google_analytics_account_number',
+            'value':        'string',  # boolean, integer, long, string
+            'description':  'This is the value of client\'s Google Analytics code. '
+                            'It is changed by a client in Settings section.',
+        },
+        {
+            'name':         'chosen_html_verification_string',
+            'value':        'string',  # boolean, integer, long, string
+            'description':  'This is the value of client\'s verification string, needed by Google. '
+                            'It is changed by a client in Settings section.',
+        },
+        {
+            'name':         'chosen_logo_displayed',
+            'value':        'boolean',  # boolean, integer, long, string
+            'description':  'The client wants to show their own logo instead of the default. '
+                            'It is changed by a client in Settings section.',
+        },
+        {
+            'name':         'chosen_social_share_description',
+            'value':        'string',  # boolean, integer, long, string
+            'description':  'This is the value of client\'s customized description. '
+                            'It is changed by a client in Settings section.',
+        },
+        {
+            'name':         'chosen_sub_domain_string',
+            'value':        'string',  # boolean, integer, long, string
+            'description':  'This is the value of client\'s customized subdomain. Ex/ cats.WeVote.US '
+                            'It is changed by a client in Settings section.',
+        },
+        {
+            'name':         'chosen_subscription_plan',
+            'value':        'integer',  # boolean, integer, long, string
+            'description':  'This is an integer value specifying the subscription plan the client has chosen. '
+                            'It is changed by a client in Settings section.',
+        },
+        {
             'name':         'facebook_id',
             'value':        'string',  # boolean, integer, long, string
             'description':  'Facebook identifier of the voter who wants to share a voter guide. '

@@ -157,6 +157,14 @@ def organization_save_view(request):  # organizationSave
     facebook_email = request.GET.get('facebook_email', False)
     facebook_profile_image_url_https = request.GET.get('facebook_profile_image_url_https', False)
 
+    chosen_domain_string = request.GET.get('chosen_domain_string', False)
+    chosen_google_analytics_account_number = request.GET.get('chosen_google_analytics_account_number', False)
+    chosen_html_verification_string = request.GET.get('chosen_html_verification_string', False)
+    chosen_logo_displayed = request.GET.get('chosen_logo_displayed', None)
+    chosen_social_share_description = request.GET.get('chosen_social_share_description', False)
+    chosen_sub_domain_string = request.GET.get('chosen_sub_domain_string', False)
+    chosen_subscription_plan = request.GET.get('chosen_subscription_plan', False)
+
     # admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
     authority_required = {'admin', 'political_data_manager', 'verified_volunteer'}
     voter_has_authority_required = False
@@ -196,6 +204,16 @@ def organization_save_view(request):  # organizationSave
             results = {
                 'status': "VOTER_LACKS_AUTHORITY_TO_SAVE_ORGANIZATION",
                 'success': False,
+                'chosen_domain_string': '',
+                'chosen_favicon_url_https': '',
+                'chosen_google_analytics_account_number': '',
+                'chosen_html_verification_string': '',
+                'chosen_logo_displayed': '',
+                'chosen_logo_url_https': '',
+                'chosen_social_share_description': '',
+                'chosen_social_share_image_256x256_url_https': '',
+                'chosen_sub_domain_string': '',
+                'chosen_subscription_plan': '',
                 'facebook_id': facebook_id,
                 'facebook_email': facebook_email,
                 'facebook_profile_image_url_https': facebook_profile_image_url_https,
@@ -228,6 +246,11 @@ def organization_save_view(request):  # organizationSave
         organization_type=organization_type, refresh_from_twitter=refresh_from_twitter,
         facebook_id=facebook_id, facebook_email=facebook_email,
         facebook_profile_image_url_https=facebook_profile_image_url_https,
+        chosen_domain_string=chosen_domain_string,
+        chosen_google_analytics_account_number=chosen_google_analytics_account_number,
+        chosen_html_verification_string=chosen_html_verification_string, chosen_logo_displayed=chosen_logo_displayed,
+        chosen_social_share_description=chosen_social_share_description,
+        chosen_sub_domain_string=chosen_sub_domain_string, chosen_subscription_plan=chosen_subscription_plan,
     )
 
     return HttpResponse(json.dumps(results), content_type='application/json')
