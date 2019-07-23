@@ -65,4 +65,14 @@
             <a href="{% url 'logout_we_vote' %}?next={{ request.path }}">Logout</a>
     </p>
     {% endif %}
+
+<br>
+<br>
+<br>
+{# ################## #}
+<h4>Technical Information</h4>
+<p>
+    Running: {{ python_version }}
+</p>
+
 {%  endblock %}

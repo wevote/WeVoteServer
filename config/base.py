@@ -53,6 +53,12 @@ def get_environment_variable_default(var_name, default_value):
         return default_value
 
 
+def get_python_version():
+    version = os.popen('python --version').read()
+    print(version)    # Something like 'Python 3.7.2'
+    return version
+
+
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 PROJECT_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))

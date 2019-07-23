@@ -2,7 +2,7 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
-from config.base import get_environment_variable, LOGIN_URL
+from config.base import get_environment_variable, get_python_version, LOGIN_URL
 from ballot.models import BallotReturned, VoterBallotSaved
 from candidate.models import CandidateCampaign, CandidateCampaignManager
 from candidate.controllers import candidates_import_from_sample_file
@@ -91,6 +91,7 @@ def admin_home_view(request):
         'voter_email_accounts_count':       voter_email_accounts_count,
         'voter_address_basic_count':        voter_address_basic_count,
         'voter_address_full_address_count': voter_address_full_address_count,
+        'python_version':                   get_python_version(),
     }
     response = render(request, 'admin_tools/index.html', template_values)
 
