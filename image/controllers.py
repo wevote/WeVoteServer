@@ -803,7 +803,7 @@ def retrieve_facebook_image_url(facebook_user_id):
     }
     facebook_manager = FacebookManager()
 
-    get_url = "https://graph.facebook.com/v2.8/{facebook_user_id}/picture?width=200&height=200"\
+    get_url = "https://graph.facebook.com/v3.1/{facebook_user_id}/picture?width=200&height=200"\
         .format(facebook_user_id=facebook_user_id)
     response = requests.get(get_url)
     if response.status_code == HTTP_OK:

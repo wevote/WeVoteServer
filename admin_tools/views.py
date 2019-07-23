@@ -2,7 +2,7 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
-from config.base import get_environment_variable, LOGIN_URL
+from config.base import get_environment_variable, get_python_version, LOGIN_URL
 from ballot.models import BallotReturned, VoterBallotSaved
 from candidate.models import CandidateCampaign, CandidateCampaignManager
 from candidate.controllers import candidates_import_from_sample_file
@@ -91,6 +91,7 @@ def admin_home_view(request):
         'voter_email_accounts_count':       voter_email_accounts_count,
         'voter_address_basic_count':        voter_address_basic_count,
         'voter_address_full_address_count': voter_address_full_address_count,
+        'python_version':                   get_python_version(),
     }
     response = render(request, 'admin_tools/index.html', template_values)
 
@@ -1801,8 +1802,8 @@ def redirect_to_sign_in_page(request, authority_required={}):
             authority_required_text += ' or ' if len(authority_required_text) > 0 else ''
             authority_required_text += 'has Verified Volunteer rights'
     error_message = "You must sign in with account that {authority_required_text} to see that page. " \
-                    "<b>There is a known bug with this check, if you think this message is wrong, Sign Out and try " \
-                    "again.</b>".format(authority_required_text=authority_required_text)
+                    "-- NOTE: There is a known bug with this check, if you think this message is wrong, Sign Out and try " \
+                    "again".format(authority_required_text=authority_required_text)
 
     messages.add_message(request, messages.ERROR, error_message)
 
