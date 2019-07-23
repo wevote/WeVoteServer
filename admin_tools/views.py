@@ -1801,8 +1801,8 @@ def redirect_to_sign_in_page(request, authority_required={}):
             authority_required_text += ' or ' if len(authority_required_text) > 0 else ''
             authority_required_text += 'has Verified Volunteer rights'
     error_message = "You must sign in with account that {authority_required_text} to see that page. " \
-                    "<b>There is a known bug with this check, if you think this message is wrong, Sign Out and try " \
-                    "again.</b>".format(authority_required_text=authority_required_text)
+                    "-- NOTE: There is a known bug with this check, if you think this message is wrong, Sign Out and try " \
+                    "again".format(authority_required_text=authority_required_text)
 
     messages.add_message(request, messages.ERROR, error_message)
 
