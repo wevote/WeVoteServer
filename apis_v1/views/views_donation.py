@@ -4,7 +4,7 @@
 from config.base import get_environment_variable
 from django.http import HttpResponse
 from donate.controllers import donation_with_stripe_for_api, donation_process_stripe_webhook_event, \
-    donation_refund_for_api, donation_subscription_cancellation_for_api
+    donation_refund_for_api, donation_subscription_cancellation_for_api, donation_history_for_a_voter
 import json
 from voter.models import fetch_voter_we_vote_id_from_voter_device_link
 import wevote_functions.admin
@@ -160,3 +160,42 @@ def donation_stripe_webhook_view(request):
     donation_process_stripe_webhook_event(event)
 
     return HttpResponse(status=200)
+
+
+def donation_history_list_view(request):
+    """
+    Get the donor history list for a voter
+    :type request: object
+    :param request:
+    :return:
+    """
+
+    subscription_id = request.GET.get('subscription_id', '')
+    voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
+
+    if positive_value_exists(voter_device_id):
+        voter_we_vote_id = fetch_voter_we_vote_id_from_voter_device_link(voter_device_id)
+        if not positive_value_exists(voter_we_vote_id):
+            logger.error("invalid voter_device_id passed to get_donor_history_list" + voter_device_id)
+            status = "INVALID VOTER_DEVICE_ID PASSED TO GET_DONOR_HISTORY_LIST"
+            success = False
+        else:
+            status = "SUCCESSFULY RETRIEVED DONATION HISTORY"
+            success = True
+
+        donation_list = donation_history_for_a_voter(voter_we_vote_id)
+
+        json_data = {
+            'donation_list': donation_list,
+            'status': status,
+            'success': success,
+        }
+    else:
+        print('donation_subscription_cancellation_with_stripe_view stripe_subscription_id is missing')
+        json_data = {
+            'donation_list': [],
+            'status': "STRIPE_SUBSCRIPTION_ID_IS_MISSING",
+            'success': False,
+        }
+
+    return HttpResponse(json.dumps(json_data), content_type='application/json')
