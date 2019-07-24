@@ -42,6 +42,7 @@ urlpatterns = [
     url(r'^deviceIdGenerate/$', views_misc.device_id_generate_view, name='deviceIdGenerateView'),
     url(r'^donationCancelSubscription',
         views_donation.donation_cancel_subscription_view, name='donationCancelSubscription'),
+    url(r'^donationHistory', views_donation.donation_history_list_view, name='donationHistory'),
     url(r'^donationRefund', views_donation.donation_refund_view, name='donationRefund'),
     url(r'^donationStripeWebhook/', views_donation.donation_stripe_webhook_view, name='donationStripeWebhookView'),
     url(r'^donationWithStripe', views_donation.donation_with_stripe_view, name='donationWithStripeView'),
