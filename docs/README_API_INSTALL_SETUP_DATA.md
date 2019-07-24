@@ -8,9 +8,19 @@ Sample data is provided. Go here:
 
     http://localhost:8000/admin
     
+    <!-- this seemed to fail because the user (Samuel Adams) didn't have admin privileges. 
+    Was able to get there via an admin link from the Samuel Adams page after logging in  -->http://localhost:8000/admin
+    
 Find the "Sync Data with Master We Vote Servers" link, and click it: http://localhost:8000/admin/sync_dashboard/
 
+<!-- before choosing an upcoming election, must retrieve elections -->
+
 Choose 1) an upcoming election from the drop down, and 2) your local state, and then run all scripts from top to bottom.
+
+<!-- chose US 2020 presidential primary elections, then when running retrieve offices, got error:
+Error: CONTEST_OFFICE_MISSING  
+
+retrieve candidates:  Error: CANDIDATE_LIST_MISSING -->
  
 ### Google Civic
 In order to retrieve fresh ballot data, you will need to sign up for a Google Civic API key:
