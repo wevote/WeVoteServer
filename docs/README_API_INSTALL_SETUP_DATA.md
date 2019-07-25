@@ -8,11 +8,17 @@ Sample data is provided. Go here:
 
     http://localhost:8000/admin
     
+Make sure you have given yourself admin privileges. When you run the following command, enter your email address and a simple password. This admin account is only used in development.
+
+    python manage.py createsuperuser
+    
 Find the "Sync Data with Master We Vote Servers" link, and click it: http://localhost:8000/admin/sync_dashboard/
 
-Choose 1) an upcoming election from the drop down, and 2) your local state, and then run all scripts from top to bottom.
+Start by clicking the `Retrieve All Elections` link.
+
+Choose 1) an election from the drop down (we recommend `US 2018 Midterm Election - 6000`, and 2) your local state, and then run all scripts from top to bottom. Please make sure to let each step finish running before moving on to the next step.
  
-### Google Civic
+### Google Civic - Advanced (Please skip unless you are working on Google Civic integration code)
 In order to retrieve fresh ballot data, you will need to sign up for a Google Civic API key:
 
   - Go here:  https://console.developers.google.com/projectselector/apis/credentials?pli=1
@@ -27,7 +33,7 @@ In order to retrieve fresh ballot data, you will need to sign up for a Google Ci
   * Note: if your email address is part of a G Suite domain, you may not have the admin access rights to create a project.  If so, logout of the G Suite account and use your personal account to create the project.
   
   
-### Vote Smart
+### Vote Smart - Advanced (Please skip unless you are working on Vote Smart integration code)
 We also have a paid subscription with Vote Smart. You can sign up for a 
 [Vote Smart developer key](http://votesmart.org/share/api/register#.VrIx4VMrJhE), or reach out to 
 Dale.McGrew@WeVote.US to discuss using our organizational account.

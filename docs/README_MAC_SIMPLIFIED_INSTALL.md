@@ -44,7 +44,7 @@ that you would like!
 
 1. Navigate in Chrome to [github](https://github.com).  Create a personal account if you don't already have one.
  
-1. Within the github site, navigage to [https://github.com/wevote/WeVoteServer](https://github.com/wevote/WeVoteServer). 
+1. Within the github site, navigate to [https://github.com/wevote/WeVoteServer](https://github.com/wevote/WeVoteServer). 
     Create a fork of wevote/WeVoteServer.git by selecting the "Fork" button (in the upper right of screen).
     
      ![ScreenShot](images/Fork.png)
@@ -57,6 +57,9 @@ that you would like!
     After the checkout, answer yes to the "Would you like to open the directory ..." dialog
     
     ![ScreenShot](images/AfterCheckoutFirstIDEshows.png)
+    
+    Alternatively, using terminal, create a folder, cd to it and git clone the fork. `origin` will default to the fork.
+    then do `git remote add upstream https://github.com/wevote/WeVoteServer.git`
 
 11. In PyCharm, go to the VCS/Enable Version Control Integration menu choice dialog, and select "git".  But, if the Git option is
     already present in the middle of the pull down, and you don't see a "Enable Version Control Integration" option, don't worry
@@ -175,19 +178,22 @@ the following command:
     
     If it is already installed, no worries!
     
-    `(WeVoteServerPy3.7) $ pip install pyopenssl pyasn1 ndg-httpsclient`
+    On some machines, both python 2 and python 3 are installed on your mac. If that is so, `python` launches python 2 and `python3` 
+    launches python 3. Start by running the following comment (using 'pip3' instead of 'pip'). 
+    If that doesn't work replace `pip3` below with `pip`.
+    
+    `(WeVoteServerPy3.7) $ pip3 install pyopenssl pyasn1 ndg-httpsclient`
     
     If running this command, causes some output to be displayed, that tells you to upgrade your pip version, follow 
     those instructions and do the install they recommend.  It never hurts to update pip.
     
-    <!-- This is not needed for fresh installs, but may be needed for updating existing installs done with a different proceedure    
+    This is not needed for fresh installs, but may be needed for updating existing installs done with a different procedure.    
         
     1.  Link libssl and libcrypto so that pip can find them:
         ```
         $ ln -s /usr/local/opt/openssl/lib/libcrypto.dylib /usr/local/lib/libcrypto.dylib
         $ ln -s /usr/local/opt/openssl/lib/libssl.dylib /usr/local/lib/libssl.dylib
         ```
-    -->
     
 1. Install libmagic
 
@@ -195,7 +201,7 @@ the following command:
 
 1. Install all the other Python packages required by the WeVoteServer project (there are a lot of them!)
 
-    `(WeVoteServer3.7) $ pip install -r requirements.txt`
+    `(WeVoteServer3.7) $ pip3 install -r requirements.txt`
 
     This is a big operation that loads a number of wheels and then it compiles other 
     c language packages with gcc, for which a current wheel does not exist.  (Wheel or `*.whl` files are Python containers that contain
@@ -204,6 +210,27 @@ the following command:
     If this install succeeds with no missing libraries, or other compiler errors, we are
     most of the way to done.  If this command fails on the first try, try it again -- that usually resolves the problem.  This 
     should work the first time on a clean first install.
+    
+    Installing requirements.txt can fail for two reasons.
+    First, it can expect 'python' to run python 3, but on some macs it runs python 2.
+    You can this by adding `alias python='python3'` in your .bash_profile 
+    
+    The second failure was pg_config executable not found (detailed message below). This was resolved by first installing postgres
+    then going back to `pip install -r requirements.txt`
+    
+    ```
+    Collecting psycopg2 (from django-toolbelt==0.0.1->-r requirements.txt (line 11))
+  Using cached https://files.pythonhosted.org/packages/5c/1c/6997288da181277a0c29bc39a5f9143ff20b8c99f2a7d059cfb55163e165/psycopg2-2.8.3.tar.gz
+    ERROR: Complete output from command python setup.py egg_info:
+    ERROR: running egg_info
+    creating pip-egg-info/psycopg2.egg-info
+    writing pip-egg-info/psycopg2.egg-info/PKG-INFO
+    writing dependency_links to pip-egg-info/psycopg2.egg-info/dependency_links.txt
+    writing top-level names to pip-egg-info/psycopg2.egg-info/top_level.txt
+    writing manifest file 'pip-egg-info/psycopg2.egg-info/SOURCES.txt'
+    
+    Error: pg_config executable not found.
+    ```
     
      
 ## Install and set up PostgreSQL and pgAdmin4
@@ -287,8 +314,10 @@ this step.  To see if postgres is already running, check with lsof in a terminal
     single purpose web server, and the UI for the app appears in Chrome as a local website.
 
 1. Use Spotlight to find and launch the pgAdmin4 app and the pgAdmin4 webapp will display in a new tab within Chrome.
-On that new tab, Right-click on "Servers" 
-and choose "Create > Server"
+    On that new tab, Right-click on "Servers" 
+    and choose "Create > Server"
+
+    When brew cask install pgadmin4 finishes, it prints out `Moving App 'pgAdmin 4.app' to '/Applications/pgAdmin 4.app'.`
 
     ![ScreenShot](images/CreateServerInPgAdmin.png)
 
@@ -314,6 +343,8 @@ cascading menu
 
 1. Name the new database WeVoteServerDB and press save.
    ![ScreenShot](images/NameDatabase.png)
+   
+   <!-- owner is 'admin' in the picture, but defaulted to 'postgres' in my install -->
 
 ## Initialize an empty WeVoteServerDB
 
@@ -344,6 +375,11 @@ cascading menu
     ```
      (January 28, 2019:  that second makemigrations for the wevote_settings table should not be necessary, but as of today, 
      it is necessary.  That second makemigrations line will be harmless, if it becomes unnecessary at some point.)
+     
+     You might see the following error at the start of any invocation of manage.py, but it doesn't stop the script:
+     ```
+     Configuration error, the stripe secret key, must begin with 'sk_' -- don't use the publishable key on the server!
+     ```
     
 2. Run migrate.  Django "migrate is responsible for applying and unapplying migrations."
 
