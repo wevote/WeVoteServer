@@ -36,7 +36,7 @@ def donation_with_stripe_view(request):  # donationWithStripe
     if positive_value_exists(voter_device_id):
         voter_we_vote_id = fetch_voter_we_vote_id_from_voter_device_link(voter_device_id)
     else:
-        print('view voter_we_vote_id is missing')
+        logger.error('donation_with_stripe_view voter_we_vote_id is missing')
 
     if positive_value_exists(token):
         results = donation_with_stripe_for_api(request, token, email, donation_amount, monthly_donation,
@@ -51,6 +51,7 @@ def donation_with_stripe_view(request):  # donationWithStripe
             'saved_stripe_donation': results['saved_stripe_donation'],
             'monthly_donation': monthly_donation,
             'subscription': results['subscription'],
+            'donation_list': donation_history_for_a_voter(voter_we_vote_id),
             'error_message_for_voter': results['error_message_for_voter']
         }
         return HttpResponse(json.dumps(json_data), content_type='application/json')
@@ -81,16 +82,17 @@ def donation_refund_view(request):  # donationRefund
             json_data = {
                 'success': str(results),
                 'charge_id': charge_id,
+                'donation_list': donation_history_for_a_voter(voter_we_vote_id),
                 'voter_we_vote_id': voter_we_vote_id,
             }
         else :
-            print('donation_refund_view voter_we_vote_id is missing')
+            logger.error('donation_refund_view voter_we_vote_id is missing')
             json_data = {
                 'status': "VOTER_WE_VOTE_ID_IS_MISSING",
                 'success': False,
             }
     else :
-        print('donation_refund_view stripe_charge_id is missing')
+        logger.error('donation_refund_view stripe_charge_id is missing')
         json_data = {
             'status': "STRIPE_CHARGE_ID_IS_MISSING",
             'success': False,
@@ -115,13 +117,13 @@ def donation_cancel_subscription_view(request):  # donationCancelSubscription
         if len(subscription_id) > 0:
             json_data = donation_subscription_cancellation_for_api(request, subscription_id, voter_we_vote_id)
         else:
-            print('donation_subscription_cancellation_with_stripe_view voter_we_vote_id is missing')
+            logger.error('donation_cancel_subscription_view voter_we_vote_id is missing')
             json_data = {
                 'status': "VOTER_WE_VOTE_ID_IS_MISSING",
                 'success': False,
             }
     else:
-        print('donation_subscription_cancellation_with_stripe_view stripe_subscription_id is missing')
+        logger.error('donation_cancel_subscription_view stripe_subscription_id is missing')
         json_data = {
             'status': "STRIPE_SUBSCRIPTION_ID_IS_MISSING",
             'success': False,
@@ -176,8 +178,8 @@ def donation_history_list_view(request):
     if positive_value_exists(voter_device_id):
         voter_we_vote_id = fetch_voter_we_vote_id_from_voter_device_link(voter_device_id)
         if not positive_value_exists(voter_we_vote_id):
-            logger.error("invalid voter_device_id passed to get_donor_history_list" + voter_device_id)
-            status = "INVALID VOTER_DEVICE_ID PASSED TO GET_DONOR_HISTORY_LIST"
+            logger.error("donation_history_list received invalid voter_device_id: " + voter_device_id)
+            status = "DONATION_HISTORY_LIST INVALID VOTER_DEVICE_ID PASSED"
             success = False
         else:
             status = "SUCCESSFULY RETRIEVED DONATION HISTORY"
@@ -191,10 +193,10 @@ def donation_history_list_view(request):
             'success': success,
         }
     else:
-        print('donation_subscription_cancellation_with_stripe_view stripe_subscription_id is missing')
+        logger.error('donation_history_list stripe_subscription_id is missing')
         json_data = {
             'donation_list': [],
-            'status': "STRIPE_SUBSCRIPTION_ID_IS_MISSING",
+            'status': "DONATION_HISTORY_LIST STRIPE_SUBSCRIPTION_ID_IS_MISSING",
             'success': False,
         }
 

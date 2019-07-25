@@ -39,7 +39,6 @@ from voter_guide.controllers import voter_follow_all_organizations_followed_by_o
 import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, get_maximum_number_to_retrieve_from_request, \
     get_voter_device_id, is_voter_device_id_valid, positive_value_exists
-from donate.controllers import donation_history_for_a_voter
 
 logger = wevote_functions.admin.get_logger(__name__)
 
@@ -1705,7 +1704,6 @@ def voter_update_view(request):  # voterUpdate
                 'notification_settings_flags':      notification_settings_flags,
                 'notification_flag_integer_to_set': notification_flag_integer_to_set,
                 'notification_flag_integer_to_unset': notification_flag_integer_to_unset,
-                'voter_donation_history_list':      None,
             }
         response = HttpResponse(json.dumps(json_data), content_type='application/json')
         return response
@@ -1751,7 +1749,6 @@ def voter_update_view(request):  # voterUpdate
             'notification_settings_flags':      notification_settings_flags,
             'notification_flag_integer_to_set': notification_flag_integer_to_set,
             'notification_flag_integer_to_unset': notification_flag_integer_to_unset,
-            'voter_donation_history_list':      None,
         }
         response = HttpResponse(json.dumps(json_data), content_type='application/json')
         return response
@@ -1759,7 +1756,6 @@ def voter_update_view(request):  # voterUpdate
     voter = voter_results['voter']
 
     # At this point, we have a valid voter
-    donation_list = donation_history_for_a_voter(voter.we_vote_id)
 
     if not at_least_one_variable_has_changed:
         # If here, we want to return the latest data from the voter object
@@ -1784,7 +1780,6 @@ def voter_update_view(request):  # voterUpdate
                 'notification_settings_flags':      voter.notification_settings_flags,
                 'notification_flag_integer_to_set': notification_flag_integer_to_set,
                 'notification_flag_integer_to_unset': notification_flag_integer_to_unset,
-                'voter_donation_history_list':      donation_list,
             }
         response = HttpResponse(json.dumps(json_data), content_type='application/json')
         return response
@@ -1878,7 +1873,6 @@ def voter_update_view(request):  # voterUpdate
         'notification_settings_flags':              voter.notification_settings_flags,
         'notification_flag_integer_to_set':         notification_flag_integer_to_set,
         'notification_flag_integer_to_unset':       notification_flag_integer_to_unset,
-        'voter_donation_history_list':              donation_list,
     }
 
     response = HttpResponse(json.dumps(json_data), content_type='application/json')

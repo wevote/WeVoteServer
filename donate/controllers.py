@@ -641,6 +641,7 @@ def donation_subscription_cancellation_for_api(request, subscription_id, voter_w
             'email': results['metadata']['email'],
             'voter_we_vote_id': results['metadata']['voter_we_vote_id'],
             'livemode': results['livemode'],
+            'donation_list': donation_history_for_a_voter(voter_we_vote_id),
             'success': True,
         }
     except stripe.error.InvalidRequestError as err:
