@@ -129,7 +129,7 @@
   "_comment":                       "django secret key",
   "SECRET_KEY":                     "REALLYANYTHINGYOUWANT",
 
-  "_comment":                       "stripe test secret key (The Publishable key is only used on the WebApp!)",
+  "_comment":                       "stripe test 'Secret Key' (The 'Publishable key' is only used on the WebApp!)",
   "STRIPE_SECRET_KEY":              "API Secret key begins with - pk_...",
   "STRIPE_SIGNING_SECRET":          "Webhook signing secret key, begins with - whsec_...",
   "STRIPE_REFUND_DAYS":             30,

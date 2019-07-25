@@ -57,7 +57,11 @@ class DonationPlanDefinition(models.Model):
                                 null=False, blank=False)
     donation_plan_is_active = models.BooleanField(verbose_name="status of recurring donation plan", default=True,
                                                   null=False, blank=False)
-
+    is_business_plan = models.BooleanField(verbose_name="is this a business plan (and not a personal subscription)",
+                                           default=False, null=False, blank=False)
+    # A big int, is a 64bit signed integer, so 63 bits of boolean values are possible.
+    features_provided_bitmap = models.BigIntegerField(verbose_name="Business features provided bitmap", null=False,
+                                                      default=0)
 
 class DonationJournal(models.Model):
     """
