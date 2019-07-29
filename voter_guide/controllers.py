@@ -2959,6 +2959,10 @@ def voter_guide_save_for_api(voter_device_id, voter_guide_we_vote_id, google_civ
     else:
         status += "COULD_NOT_REFRESH_VOTER_GUIDE "
 
+    if voter_guide.last_updated:
+        last_updated = voter_guide.last_updated.strftime('%Y-%m-%d %H:%M')
+    else:
+        last_updated = ''
     json_data = {
         'status': status,
         'success': success,
@@ -2980,7 +2984,7 @@ def voter_guide_save_for_api(voter_device_id, voter_guide_we_vote_id, google_civ
         'owner_voter_id': voter_guide.owner_voter_id,
         'pledge_goal': voter_guide.pledge_goal,
         'pledge_count': voter_guide.pledge_count,
-        'last_updated': voter_guide.last_updated.strftime('%Y-%m-%d %H:%M'),
+        'last_updated': last_updated,
     }
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 
