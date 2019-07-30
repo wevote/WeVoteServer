@@ -7,8 +7,33 @@
 {% load template_filters %}
 
 
-<form action="{% url "voter_guide:voter_guide_create_process" %}" method="post" class="form-horizontal">
+<form id="the_form" action="{% url "voter_guide:voter_guide_create_process" %}" method="post" class="form-horizontal">
 {% csrf_token %}
+
+<script>
+    $('#the_form').on("submit", function(e) {
+        const url = $('#voter_guide_possibility_url_id').val();
+        if (url.startsWith("http")) {
+            return true;
+        }
+
+        const httpUrl = "http://" + url
+        $.ajax({
+            type: "GET",
+            url: httpUrl,
+            data: "",
+            success: function() {
+                $('#voter_guide_possibility_url_id').val(httpUrl);
+                $('#the_form').submit();
+            },
+            error: function(XMLHttpRequest, textStatus, errorThrown) {
+                $('#voter_guide_possibility_url_id').val("https://" + url);
+                $('#the_form').submit();
+            }
+        });
+        return false;
+    });
+</script>
 
 <input type="hidden" name="voter_who_submitted_we_vote_id" value="{{ voter_who_submitted_we_vote_id }}">
 
