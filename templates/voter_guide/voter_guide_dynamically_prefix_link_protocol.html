@@ -1,0 +1,30 @@
+{# if necessary add 'http://' or 'https:// to link signaled by glyph icon #}
+{# include parameters are: link and text (only) #}
+
+<a onclick="prefix_protocol_link('{{ link }}')" class="u-no-break">
+{% if text %}
+{{ text }}
+{% endif %}
+<span class="glyphicon glyphicon-new-window" style="color: #337ab7"></span></a>
+
+<script>
+    function prefix_protocol_link(url) {
+        if (url.startsWith("http")) {
+            window.open(url, '_blank');
+            return;
+        }
+
+        const httpUrl = "http://" + url
+        $.ajax({
+            type: "GET",
+            url: httpUrl,
+            data: "",
+            success: function() {
+                window.open(httpUrl, '_blank');
+            },
+            error: function(XMLHttpRequest, textStatus, errorThrown) {
+                window.open("https://" + url, '_blank');
+            }
+        });
+    }
+</script>

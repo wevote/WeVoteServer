@@ -71,35 +71,7 @@
     <label for="voter_guide_possibility_url_id" class="col-sm-3 control-label">
     {% if voter_guide_possibility_url %}
         Link to voter guide&nbsp;
-        <a id="link_to_voter_guide"
-           class="u-no-break"><span class="glyphicon glyphicon-new-window" style="color: #337ab7"></span></a>
-
-        <script>
-        $(function() {
-            $('a#link_to_voter_guide').click(function() {
-                const url = "{{ voter_guide_possibility_url }}";
-                if (url.startsWith("http")) {
-                    window.open(url, '_blank');
-                    return;
-                }
-
-                const httpUrl = "http://" + url
-                $.ajax({
-                    type: "GET",
-                    url: httpUrl,
-                    data: "",
-                    success: function() {
-                        window.open(httpUrl, '_blank');
-                    },
-                    error: function(XMLHttpRequest, textStatus, errorThrown) {
-                        window.open("https://" + url, '_blank');
-                    }
-                });
-
-            });
-        });
-        </script>
-
+        {% include "voter_guide/voter_guide_dynamically_prefix_link_protocol.html" with link=voter_guide_possibility_url text="" only %}
     {% else %}
         Paste link to voter guide
     {% endif %}
