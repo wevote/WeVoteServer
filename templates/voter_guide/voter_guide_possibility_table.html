@@ -52,7 +52,7 @@
                    target="_blank">edit</a>
             </td>
             <td>
-                {% include "voter_guide/voter_guide_dynamically_prefix_link_protocol.html" with link=voter_guide_possibility.voter_guide_possibility_url text=voter_guide_possibility.voter_guide_possibility_url|truncatechars:60 only %}
+                {% include "voter_guide/voter_guide_dynamically_prefix_link_protocol.html" with link=voter_guide_possibility.voter_guide_possibility_url text=voter_guide_possibility.voter_guide_possibility_url|truncatechars:60 count=forloop.counter only %}
                 {% if voter_guide_possibility.contributor_comments or voter_guide_possibility.contributor_email %}
                   <br />
                 {% endif %}

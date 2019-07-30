@@ -71,7 +71,7 @@
     <label for="voter_guide_possibility_url_id" class="col-sm-3 control-label">
     {% if voter_guide_possibility_url %}
         Link to voter guide&nbsp;
-        {% include "voter_guide/voter_guide_dynamically_prefix_link_protocol.html" with link=voter_guide_possibility_url text="" only %}
+        {% include "voter_guide/voter_guide_dynamically_prefix_link_protocol.html" with link=voter_guide_possibility_url text="" count=1 only %}
     {% else %}
         Paste link to voter guide
     {% endif %}

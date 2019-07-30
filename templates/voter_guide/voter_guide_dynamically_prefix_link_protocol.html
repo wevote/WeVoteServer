@@ -1,5 +1,6 @@
 {# if necessary add 'http://' or 'https:// to link signaled by glyph icon #}
-{# include parameters are: link and text (only) #}
+{# include parameters are: link, text, count (only) #}
+{# if count==1 include the <script> section #}
 
 <a onclick="prefix_protocol_link('{{ link }}')" class="u-no-break">
 {% if text %}
@@ -7,6 +8,7 @@
 {% endif %}
 <span class="glyphicon glyphicon-new-window" style="color: #337ab7"></span></a>
 
+{% if count == 1 %}
 <script>
     function prefix_protocol_link(url) {
         if (url.startsWith("http")) {
@@ -28,3 +30,4 @@
         });
     }
 </script>
+{% endif %}
