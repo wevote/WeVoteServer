@@ -401,7 +401,7 @@ def polling_location_visualize_view(request, polling_location_local_id=0, pollin
         return redirect_to_sign_in_page(request, authority_required)
 
     google_civic_election_id = request.GET.get('google_civic_election_id', 0)
-    state_code = request.GET.get('state_code', 'CA')
+    state_code = request.GET.get('state_code', 'CA').upper()
     if state_code == '':
         state_code = 'CA'
 

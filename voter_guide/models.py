@@ -470,9 +470,11 @@ class VoterGuideManager(models.Manager):
         error_result = False
         exception_does_not_exist = False
         exception_multiple_object_returned = False
+        status = ""
+        success = True
         voter_guide_on_stage = VoterGuide()
         voter_guide_on_stage_id = 0
-        status = ""
+        voter_guide_on_stage_we_vote_id = ''
         try:
             if positive_value_exists(voter_guide_id):
                 status = "ERROR_RETRIEVING_VOTER_GUIDE_WITH_ID "  # Set this in case the get fails
@@ -481,6 +483,7 @@ class VoterGuideManager(models.Manager):
                 else:
                     voter_guide_on_stage = VoterGuide.objects.get(id=voter_guide_id)
                 voter_guide_on_stage_id = voter_guide_on_stage.id
+                voter_guide_on_stage_we_vote_id = voter_guide_on_stage.we_vote_id
                 status = "VOTER_GUIDE_FOUND_WITH_ID "
             elif positive_value_exists(voter_guide_we_vote_id):
                 status = "ERROR_RETRIEVING_VOTER_GUIDE_WITH_WE_VOTE_ID "  # Set this in case the get fails
@@ -489,9 +492,10 @@ class VoterGuideManager(models.Manager):
                 else:
                     voter_guide_on_stage = VoterGuide.objects.get(we_vote_id=voter_guide_we_vote_id)
                 voter_guide_on_stage_id = voter_guide_on_stage.id
+                voter_guide_on_stage_we_vote_id = voter_guide_on_stage.we_vote_id
                 status = "VOTER_GUIDE_FOUND_WITH_WE_VOTE_ID "
             elif positive_value_exists(organization_we_vote_id) and positive_value_exists(google_civic_election_id):
-                status = "ERROR_RETRIEVING_VOTER_GUIDE_WITH_ORGANIZATION_WE_VOTE_ID"  # Set this in case the get fails
+                status = "ERROR_RETRIEVING_VOTER_GUIDE_WITH_ORGANIZATION_WE_VOTE_ID "  # Set this in case the get fails
                 if read_only:
                     voter_guide_on_stage = VoterGuide.objects.using('readonly').get(
                         google_civic_election_id=google_civic_election_id,
@@ -501,6 +505,7 @@ class VoterGuideManager(models.Manager):
                         google_civic_election_id=google_civic_election_id,
                         organization_we_vote_id__iexact=organization_we_vote_id)
                 voter_guide_on_stage_id = voter_guide_on_stage.id
+                voter_guide_on_stage_we_vote_id = voter_guide_on_stage.we_vote_id
                 status = "VOTER_GUIDE_FOUND_WITH_ORGANIZATION_WE_VOTE_ID "
             elif positive_value_exists(organization_we_vote_id) and positive_value_exists(vote_smart_time_span):
                 status = "ERROR_RETRIEVING_VOTER_GUIDE_WITH_ORGANIZATION_WE_VOTE_ID_AND_TIME_SPAN "
@@ -513,9 +518,10 @@ class VoterGuideManager(models.Manager):
                         vote_smart_time_span=vote_smart_time_span,
                         organization_we_vote_id__iexact=organization_we_vote_id)
                 voter_guide_on_stage_id = voter_guide_on_stage.id
+                voter_guide_on_stage_we_vote_id = voter_guide_on_stage.we_vote_id
                 status = "VOTER_GUIDE_FOUND_WITH_ORGANIZATION_WE_VOTE_ID_AND_TIME_SPAN "
             elif positive_value_exists(public_figure_we_vote_id) and positive_value_exists(google_civic_election_id):
-                status = "ERROR_RETRIEVING_VOTER_GUIDE_WITH_PUBLIC_FIGURE_WE_VOTE_ID"  # Set this in case the get fails
+                status = "ERROR_RETRIEVING_VOTER_GUIDE_WITH_PUBLIC_FIGURE_WE_VOTE_ID "  # Set this in case the get fails
                 if read_only:
                     voter_guide_on_stage = VoterGuide.objects.using('readonly').get(
                         google_civic_election_id=google_civic_election_id,
@@ -525,6 +531,7 @@ class VoterGuideManager(models.Manager):
                         google_civic_election_id=google_civic_election_id,
                         public_figure_we_vote_id__iexact=public_figure_we_vote_id)
                 voter_guide_on_stage_id = voter_guide_on_stage.id
+                voter_guide_on_stage_we_vote_id = voter_guide_on_stage.we_vote_id
                 status = "VOTER_GUIDE_FOUND_WITH_PUBLIC_FIGURE_WE_VOTE_ID "
             elif positive_value_exists(owner_we_vote_id) and positive_value_exists(google_civic_election_id):
                 status = "ERROR_RETRIEVING_VOTER_GUIDE_WITH_VOTER_WE_VOTE_ID "  # Set this in case the get fails
@@ -537,6 +544,7 @@ class VoterGuideManager(models.Manager):
                         google_civic_election_id=google_civic_election_id,
                         owner_we_vote_id__iexact=owner_we_vote_id)
                 voter_guide_on_stage_id = voter_guide_on_stage.id
+                voter_guide_on_stage_we_vote_id = voter_guide_on_stage.we_vote_id
                 status = "VOTER_GUIDE_FOUND_WITH_VOTER_WE_VOTE_ID "
             else:
                 status = "Insufficient variables included to retrieve one voter guide."
@@ -545,17 +553,20 @@ class VoterGuideManager(models.Manager):
             error_result = True
             exception_multiple_object_returned = True
             status += ", ERROR_MORE_THAN_ONE_VOTER_GUIDE_FOUND "
+            success = False
         except VoterGuide.DoesNotExist:
             error_result = True
             exception_does_not_exist = True
             status += ", VOTER_GUIDE_DOES_NOT_EXIST "
+            success = False
 
-        voter_guide_on_stage_found = True if voter_guide_on_stage_id > 0 else False
+        voter_guide_on_stage_found = True if positive_value_exists(voter_guide_on_stage_we_vote_id) else False
         results = {
-            'success':                      True if voter_guide_on_stage_found else False,
+            'success':                      success,
             'status':                       status,
             'voter_guide_found':            voter_guide_on_stage_found,
             'voter_guide_id':               voter_guide_on_stage_id,
+            'voter_guide_we_vote_id':       voter_guide_on_stage_we_vote_id,
             'organization_we_vote_id':      voter_guide_on_stage.organization_we_vote_id,
             'public_figure_we_vote_id':     voter_guide_on_stage.public_figure_we_vote_id,
             'owner_we_vote_id':             voter_guide_on_stage.owner_we_vote_id,
@@ -822,6 +833,104 @@ class VoterGuideManager(models.Manager):
             'success':              voter_guide_deleted,
             'voter_guide_deleted': voter_guide_deleted,
             'voter_guide_id':      voter_guide_id,
+        }
+        return results
+
+    def merge_duplicate_voter_guides_for_organization_and_election(
+            self, organization_we_vote_id, google_civic_election_id):
+        success = True
+        status = ''
+        number_of_voter_guides_found = 0
+        number_of_voter_guides_deleted = 0
+        voter_guide_found = False
+        voter_guide = None
+        voter_guide_list = []
+        # Make sure there are both variables
+        if not organization_we_vote_id or not google_civic_election_id:
+            success = False
+            status += 'MERGE_DUPLICATE_VOTER_GUIDES_MISSING_REQUIRED_VARIABLE '
+            results = {
+                'success':                          success,
+                'status':                           status,
+                'number_of_voter_guides_found':     number_of_voter_guides_found,
+                'number_of_voter_guides_deleted':   number_of_voter_guides_deleted,
+                'voter_guide_found':                voter_guide_found,
+                'voter_guide':                      voter_guide,
+            }
+            return results
+
+        # Find full list of voter guides
+        try:
+            voter_guide_query = VoterGuide.objects.order_by('pk')
+            voter_guide_query = voter_guide_query.exclude(vote_smart_ratings_only=True)
+            voter_guide_query = voter_guide_query.filter(organization_we_vote_id=organization_we_vote_id)
+            voter_guide_list = voter_guide_query.filter(google_civic_election_id=google_civic_election_id)
+
+            number_of_voter_guides_found = len(voter_guide_list)
+            if positive_value_exists(number_of_voter_guides_found):
+                status += 'MERGE_DUPLICATE_VOTER_GUIDES_VOTER_GUIDES_FOUND: ' + str(number_of_voter_guides_found) + ' '
+            else:
+                status += 'MERGE_DUPLICATE_VOTER_GUIDES_NO_VOTER_GUIDES_FOUND '
+            success = True
+        except Exception as e:
+            status += 'merge_duplicate_voter_guides_for_organization_and_election: ' \
+                      'Unable to retrieve voter guides from db. ' \
+                      '{error} [type: {error_type}] '.format(error=e, error_type=type(e))
+            success = False
+
+        # If there are more than one voter_guides found, delete extras after merging in data
+        new_master_voter_guide = None
+        if success:
+            is_first_voter_guide = True
+            if number_of_voter_guides_found > 1:
+                for one_voter_guide in voter_guide_list:
+                    if is_first_voter_guide:
+                        new_master_voter_guide = one_voter_guide
+                        is_first_voter_guide = False
+                        continue
+                    else:
+                        new_master_voter_guide_changed = False
+                        # Take oldest one, and add any new information from the later entries
+                        # Merge in duplicate voter guide before deleting
+                        try:
+                            if not new_master_voter_guide.display_name:
+                                new_master_voter_guide_changed = True
+                                new_master_voter_guide.display_name = one_voter_guide.display_name
+                            if not new_master_voter_guide.election_day_text:
+                                new_master_voter_guide_changed = True
+                                new_master_voter_guide.election_day_text = one_voter_guide.election_day_text
+                            if not new_master_voter_guide.state_code:
+                                new_master_voter_guide_changed = True
+                                new_master_voter_guide.state_code = one_voter_guide.state_code
+                            if new_master_voter_guide.vote_smart_ratings_only:
+                                new_master_voter_guide_changed = True
+                                new_master_voter_guide.vote_smart_ratings_only = False
+                            if new_master_voter_guide_changed:
+                                new_master_voter_guide.save()
+                            one_voter_guide.delete()
+                            number_of_voter_guides_deleted += 1
+                        except Exception as e:
+                            status += 'MERGE_DUPLICATE_VOTER_GUIDES-MERGE_FAILED {error} [type: {error_type}] ' \
+                                      ''.format(error=e, error_type=type(e))
+                            success = False
+
+        if success:
+            if number_of_voter_guides_found is 1:
+                status += 'ONE_FOUND '
+                voter_guide_found = True
+                voter_guide = voter_guide_list[0]
+            else:
+                status += 'VOTER_GUIDES_MERGED '
+                voter_guide_found = True
+                voter_guide = new_master_voter_guide
+
+        results = {
+            'success':                          success,
+            'status':                           status,
+            'number_of_voter_guides_found':     number_of_voter_guides_found,
+            'number_of_voter_guides_deleted':   number_of_voter_guides_deleted,
+            'voter_guide_found':                voter_guide_found,
+            'voter_guide':                      voter_guide,
         }
         return results
 
