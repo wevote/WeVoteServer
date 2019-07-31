@@ -2147,10 +2147,17 @@ class CandidateCampaignManager(models.Model):
         if candidate:
             if candidate_twitter_handle:
                 if candidate_twitter_handle != candidate.candidate_twitter_handle:
+                    if len(str(candidate_twitter_handle)) > 255:
+                        candidate_twitter_handle = str(candidate_twitter_handle)
+                        candidate_twitter_handle = candidate_twitter_handle[:255]
+                        pass
                     candidate.candidate_twitter_handle = candidate_twitter_handle
                     values_changed = True
             if candidate_facebook:
                 if candidate_facebook != candidate.facebook_url:
+                    if len(str(candidate_facebook)) > 200:
+                        candidate_facebook = str(candidate_facebook)
+                        candidate_facebook = candidate_facebook[:200]
                     candidate.facebook_url = candidate_facebook
                     values_changed = True
 

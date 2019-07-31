@@ -24,7 +24,7 @@ function createSelect () {
     const matchStateCode = match.substring(2, 4);
     if (matchStateCode !== 'NA') {
       const matchStateLong = match.substring(8, match.length - 2);
-      const selected = matchStateCode === state ? ' selected=\'selected\'' : '';
+      const selected = matchStateCode.toUpperCase() === state.toUpperCase() ? ' selected=\'selected\'' : '';
       selectComponent += `<option value='${matchStateCode}' ${selected} >${matchStateLong}</option>`;      // <option value='AK'>Alaska</option>
     }
   }
@@ -45,9 +45,9 @@ function setStateVariable () {
   const href1 = window.location.href;
   const stateURL = href1.substring(href1.length - 2);
   if (stateHtml.length !== 2) {
-    stateHtml = $('#state_code').val();
+    stateHtml = $('#state_code').val().toUpperCase();
   }
-  state = (stateURL.lastIndexOf('=') < 0) ? stateURL : stateHtml;
+  state = (stateURL.lastIndexOf('=') < 0) ? stateURL.toUpperCase() : stateHtml.toUpperCase();
 }
 
 function createMarker (latlng, name, address) {
@@ -73,7 +73,7 @@ function addMarkers (results) {
     let { href } = window.location;
     href = `${href.substring(0, href.lastIndexOf('/pl/') + 4) + pollingLocTableId}/summary/`;
     const link = `<a href='${href}' target='_blank'>Open ${weVoteId}</a>`;
-    const address = `${line1}, ${city} ${resultsState}<br/>${link}`;
+    const address = `${line1}, ${city} ${resultsState.toUpperCase()}<br/>${link}`;
     createMarker(new google.maps.LatLng(latitude, longitude), locationName, address);
   }
 }
@@ -115,7 +115,7 @@ window.initMap = () => {
 
 $(() => {
   const theMap = $('#map');
-  stateHtml = $('#state_code').val();
+  stateHtml = $('#state_code').val().toUpperCase();
 
   setStateVariable();
 

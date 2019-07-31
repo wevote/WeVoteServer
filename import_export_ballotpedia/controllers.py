@@ -170,6 +170,7 @@ def attach_ballotpedia_election_by_district_from_api(election, google_civic_elec
     which_chunk_of_district_strings = 0
     for district_string in chunks_of_district_strings:
         which_chunk_of_district_strings += 1
+        status += "CHUNK_OF_DISTRICT_STRINGS-" + str(which_chunk_of_district_strings) + " "
 
         if not positive_value_exists(election_day_text):
             status += "MISSING_ELECTION_DAY_TEXT "
@@ -234,6 +235,8 @@ def attach_ballotpedia_election_by_district_from_api(election, google_civic_elec
                 if 'table' in structured_json['meta']:
                     if structured_json['meta']['table'] == 'election_dates':
                         elections_json_list = structured_json['data']
+                        elections_json_count = elections_json_list.length()
+                        status += "ELECTIONS_JSON_FOUND: " + str(elections_json_count) + " "
                     else:
                         status += "NOT_TRUE: structured_json['meta']['table'] == 'election_dates' "
                 else:
@@ -246,7 +249,9 @@ def attach_ballotpedia_election_by_district_from_api(election, google_civic_elec
         if len(elections_json_list):
             elections_final_json_list = elections_final_json_list + elections_json_list
 
-    if len(elections_final_json_list):
+    if not len(elections_final_json_list):
+        status += 'NO_ELECTIONS_RETURNED_FROM_BALLOTPEDIA '
+    else:
         election_found = True
         status += "BALLOTPEDIA_ELECTION_DATA_FOUND "
         for one_election_json in elections_final_json_list:
