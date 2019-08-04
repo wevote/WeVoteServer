@@ -235,8 +235,11 @@ def attach_ballotpedia_election_by_district_from_api(election, google_civic_elec
                 if 'table' in structured_json['meta']:
                     if structured_json['meta']['table'] == 'election_dates':
                         elections_json_list = structured_json['data']
-                        elections_json_count = elections_json_list.length()
-                        status += "ELECTIONS_JSON_FOUND: " + str(elections_json_count) + " "
+                        if elections_json_list:
+                            elections_json_count = len(elections_json_list)
+                            status += "ELECTIONS_JSON_FOUND: " + str(elections_json_count) + " "
+                        else:
+                            status += "ELECTIONS_JSON-GLITCH, no elections found "
                     else:
                         status += "NOT_TRUE: structured_json['meta']['table'] == 'election_dates' "
                 else:
