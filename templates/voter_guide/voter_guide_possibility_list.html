@@ -71,7 +71,7 @@
 Filters:&nbsp;
 
 {# Return to see voter guides to review #}
-<span{% if not show_cannot_find_endorsements and not show_candidates_missing_from_we_vote and not show_capture_detailed_comments and not show_only_hide_from_active_review %} style="font-weight: bold;"{% endif %}>
+<span{% if not show_cannot_find_endorsements and not show_candidates_missing_from_we_vote and not show_capture_detailed_comments and not show_only_hide_from_active_review and not show_ignore_this_source %} style="font-weight: bold;"{% endif %}>
     <a href="{% url 'voter_guide:voter_guide_possibility_list' %}?google_civic_election_id={{ google_civic_election_id }}&show_all_elections={{ show_all_elections }}">
       Show 'To Review'
     </a>
@@ -108,6 +108,15 @@ Filters:&nbsp;
       Show 'Stop Reviewing'
     </a>
 </span>
+
+
+{# Show voter guides where we ignore the source #}
+<span{% if show_ignore_this_source %} style="font-weight: bold;"{% endif %}>
+    <a href="{% url 'voter_guide:voter_guide_possibility_list' %}?google_civic_election_id={{ google_civic_election_id }}&show_all_elections={{ show_all_elections }}&show_ignore_this_source=1">
+        Show 'Ignore this Website'
+    </a>
+</span>
+
 
 {% if voter_guide_possibility_list %}
     <form name="voter_guide_possibility_markings" method="post" action="{% url 'voter_guide:voter_guide_possibility_list_process' %}">
