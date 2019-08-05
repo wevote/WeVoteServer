@@ -1758,6 +1758,37 @@ def voter_guide_possibility_list_view(request):
 
 
 @login_required
+def voter_guide_possibility_list_process_view(request):
+    # admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'verified_volunteer'}
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
+    select_for_marking_organization_ids = request.POST.getlist('select_for_marking_checks[]')
+    which_marking = request.POST.get("which_marking")
+
+    print(f"voter_guide_possibility_list_process_view {which_marking}")
+    print(f"marked:{select_for_marking_organization_ids}")
+
+    voter_guide_possibility_manager = VoterGuidePossibilityManager()
+
+    if which_marking and select_for_marking_organization_ids:
+        for voter_guide_possibility_id_string in select_for_marking_organization_ids:
+            try:
+                voter_guide_possibility_id = int(voter_guide_possibility_id_string)
+                results = voter_guide_possibility_manager.update_or_create_voter_guide_possibility(
+                    None,
+                    None,
+                    voter_guide_possibility_id=voter_guide_possibility_id,
+                    updated_values={which_marking: True})
+                print(f"voter_guide_possibility_list_process_view {results}")
+            except ValueError:
+                print(f"bad id for {voter_guide_possibility_id_string}")
+
+    return HttpResponseRedirect(reverse('voter_guide:voter_guide_possibility_list', args=()))
+
+
+@login_required
 def voter_guide_possibility_list_migration_view(request):
     # admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
     authority_required = {'admin'}

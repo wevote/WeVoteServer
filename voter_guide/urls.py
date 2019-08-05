@@ -28,6 +28,7 @@ urlpatterns = [
         name='voter_guides_import_from_master_server'),
     url(r'^label/', views_admin.label_vote_smart_voter_guides_view, name='label_vote_smart_voter_guides'),
     url(r'^possibility_list/', views_admin.voter_guide_possibility_list_view, name='voter_guide_possibility_list', ),
+    url(r'^possibility_list_process/', views_admin.voter_guide_possibility_list_process_view, name='voter_guide_possibility_list_process', ),
     url(r'^possibility_list_migration/',
         views_admin.voter_guide_possibility_list_migration_view, name='voter_guide_possibility_list_migration', ),
     url(r'^refresh/', views_admin.refresh_existing_voter_guides_view, name='refresh_existing_voter_guides'),
