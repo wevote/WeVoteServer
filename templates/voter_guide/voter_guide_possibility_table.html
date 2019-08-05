@@ -10,6 +10,7 @@
             <th>Actions / Notes</th>
             <th>Ballot Items</th>
             <th>Submitted Time (PT)</th>
+            <th>Select</th>
         </tr>
         </thead>
     {% for voter_guide_possibility in voter_guide_possibility_list %}
@@ -136,6 +137,9 @@
                      target="_blank">
                     from {{ voter_guide_possibility.voter_who_submitted_name|default_if_none:"" }}</a>
               {% endif %}
+            </td>
+            <td>
+                <input type="checkbox" name="select_for_marking_checks[]" id="select_for_marking_id" value="{{ voter_guide_possibility.id }}"/>
             </td>
         </tr>
     {% endfor %}

@@ -2192,11 +2192,13 @@ class VoterGuidePossibilityManager(models.Manager):
                                               hide_from_active_review=False,
                                               cannot_find_endorsements=False,
                                               candidates_missing_from_we_vote=False,
-                                              capture_detailed_comments=False):
+                                              capture_detailed_comments=False,
+                                              ignore_this_source=False):
         hide_from_active_review = positive_value_exists(hide_from_active_review)
         candidates_missing_from_we_vote = positive_value_exists(candidates_missing_from_we_vote)
         cannot_find_endorsements = positive_value_exists(cannot_find_endorsements)
         capture_detailed_comments = positive_value_exists(capture_detailed_comments)
+        ignore_this_source = positive_value_exists(ignore_this_source)
         voter_guide_possibility_list = []
         voter_guide_possibility_list_found = False
         try:
@@ -2204,7 +2206,9 @@ class VoterGuidePossibilityManager(models.Manager):
             voter_guide_query = voter_guide_query.order_by(order_by)
 
             if not positive_value_exists(search_string):
-                voter_guide_query = voter_guide_query.exclude(ignore_this_source=True)
+                if not positive_value_exists(ignore_this_source):
+                    # generally skip these unless we specifically ask for it?
+                    voter_guide_query = voter_guide_query.exclude(ignore_this_source=True)
                 voter_guide_query = voter_guide_query.filter(hide_from_active_review=hide_from_active_review)
                 if positive_value_exists(cannot_find_endorsements):
                     # Cannot find endorsements
@@ -2215,6 +2219,9 @@ class VoterGuidePossibilityManager(models.Manager):
                 elif positive_value_exists(capture_detailed_comments):
                     # Capture Detailed Comments
                     voter_guide_query = voter_guide_query.filter(capture_detailed_comments=True)
+                elif positive_value_exists(ignore_this_source):
+                    # Ignore this Website
+                    voter_guide_query = voter_guide_query.filter(ignore_this_source=True)
                 elif not positive_value_exists(hide_from_active_review):
                     # Remove items that need further work (and that are shown in other views) from main "Review" list
                     voter_guide_query = voter_guide_query.filter(candidates_missing_from_we_vote=False)

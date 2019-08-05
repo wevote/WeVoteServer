@@ -1651,6 +1651,7 @@ def voter_guide_possibility_list_view(request):
     show_cannot_find_endorsements = request.GET.get('show_cannot_find_endorsements', False)
     show_capture_detailed_comments = request.GET.get('show_capture_detailed_comments', False)
     show_only_hide_from_active_review = request.GET.get('show_only_hide_from_active_review', False)
+    show_ignore_this_source = request.GET.get('show_ignore_this_source', False)
     state_code = request.GET.get('state_code', '')
     voter_guide_possibility_search = request.GET.get('voter_guide_possibility_search', '')
 
@@ -1697,6 +1698,16 @@ def voter_guide_possibility_list_view(request):
         results = voter_guide_possibility_manager.retrieve_voter_guide_possibility_list(
             order_by, limit_number, voter_guide_possibility_search, google_civic_election_id,
             hide_from_active_review=hide_from_active_review)
+        if results['success']:
+            voter_guide_possibility_list = results['voter_guide_possibility_list']
+    elif positive_value_exists(show_ignore_this_source):
+        filtered_by_title = "Ignore this Website"
+        ignore_this_source = True
+        order_by = "-id"
+        results = voter_guide_possibility_manager.retrieve_voter_guide_possibility_list(
+            order_by, limit_number, voter_guide_possibility_search, google_civic_election_id,
+            ignore_this_source=ignore_this_source)
+        print(f"show_ignore_this_source results {results}")
         if results['success']:
             voter_guide_possibility_list = results['voter_guide_possibility_list']
     else:
@@ -1748,6 +1759,7 @@ def voter_guide_possibility_list_view(request):
         'show_candidates_missing_from_we_vote': show_candidates_missing_from_we_vote,
         'show_cannot_find_endorsements':        show_cannot_find_endorsements,
         'show_capture_detailed_comments':       show_capture_detailed_comments,
+        'show_ignore_this_source':              show_ignore_this_source,
         'show_only_hide_from_active_review':    show_only_hide_from_active_review,
         'state_code':                           state_code,
         'messages_on_stage':                    messages_on_stage,
@@ -1755,6 +1767,37 @@ def voter_guide_possibility_list_view(request):
         'voter_guide_possibility_search':       voter_guide_possibility_search,
     }
     return render(request, 'voter_guide/voter_guide_possibility_list.html', template_values)
+
+
+@login_required
+def voter_guide_possibility_list_process_view(request):
+    # admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'verified_volunteer'}
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
+    select_for_marking_organization_ids = request.POST.getlist('select_for_marking_checks[]')
+    which_marking = request.POST.get("which_marking")
+
+    print(f"voter_guide_possibility_list_process_view {which_marking}")
+    print(f"marked:{select_for_marking_organization_ids}")
+
+    voter_guide_possibility_manager = VoterGuidePossibilityManager()
+
+    if which_marking and select_for_marking_organization_ids:
+        for voter_guide_possibility_id_string in select_for_marking_organization_ids:
+            try:
+                voter_guide_possibility_id = int(voter_guide_possibility_id_string)
+                results = voter_guide_possibility_manager.update_or_create_voter_guide_possibility(
+                    None,
+                    None,
+                    voter_guide_possibility_id=voter_guide_possibility_id,
+                    updated_values={which_marking: True})
+                print(f"voter_guide_possibility_list_process_view {results}")
+            except ValueError:
+                print(f"bad id for {voter_guide_possibility_id_string}")
+
+    return HttpResponseRedirect(reverse('voter_guide:voter_guide_possibility_list', args=()))
 
 
 @login_required
