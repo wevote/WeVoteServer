@@ -19,15 +19,33 @@
         <th>We Vote ID:</th>
         <td> {{ organization.we_vote_id }}
             (<a href="{% url 'organization:organization_edit' organization.id %}?google_civic_election_id={{ google_civic_election_id }}">edit</a>) (<a href="{% url 'image:images_for_one_organization' organization.we_vote_id %}" target="_blank">See images</a> in new window)</td>
+        <th>Logo:</th>
+
+        <td>{{organization.chosen_logo_displayed }}
+
+         <!-- add body here! -->
+
+        </td>
     </tr>
-    {% if organization.vote_smart_id %}
+
     <tr>
+
         <th>Vote Smart ID:</th>
-        <td><a href="https://votesmart.org/interest-group/{{ organization.vote_smart_id }}" target="_blank">{{ organization.vote_smart_id|default_if_none:"" }}</a></td>
+        <td>{% if organization.vote_smart_id %}
+            <a href="https://votesmart.org/interest-group/{{ organization.vote_smart_id }}" target="_blank">{{ organization.vote_smart_id|default_if_none:"" }}</a>
+            {% endif %}
+        </td>
+
+        <th>Domain string: </th>
+        <td>
+            {{organization.chosen_domain_string}}
+        </td>
+
     </tr>
-    {% endif %}
-    {% if organization.organization_website %}
+
+
     <tr>
+         {% if organization.organization_website %}
         <th>Website:</th>
         <td>
             {{ organization.organization_website }}
@@ -37,8 +55,16 @@
                class="u-no-break"><span class="glyphicon glyphicon-new-window"></span></a>
             {% endif %}
         </td>
+         {% endif %}
+
+        <th>Favicon URL: </th>
+        <td>
+            {{organization.chosen_favicon_url_https}}
+
+        </td>
+
     </tr>
-    {% endif %}
+
     {% if voter %}
     <tr>
         <th>Voter:</th>
@@ -62,51 +88,93 @@
             {{ organization.organization_twitter_handle|default_if_none:"" }}
         {% endif %} (<a href="{% url 'import_export_twitter:refresh_twitter_organization_details' organization.id %}?google_civic_election_id={{ google_civic_election_id }}">refresh Twitter details</a>)
         (<a href="{% url 'import_export_twitter:delete_images_view'%}?organization_id={{ organization.id }}&google_civic_election_id={{ google_civic_election_id }}">Delete Cached Images</a>)</td>
+
+        <th>Google Analytics account number:  </th>
+        <td>
+            {{organization.chosen_google_analytics_account_number}}
+
+        </td>
     </tr>
-    {% if organization.twitter_name %}
+
     <tr>
+        {% if organization.twitter_name %}
         <th>Twitter Descriptive Name:</th>
         <td>{{ organization.twitter_name|default_if_none:"" }}</td>
+        {% endif %}
+        <th>HTML verification string: </th>
+        <td>
+            {{organization.chosen_html_verification_string}}
+        </td>
+
     </tr>
-    {% endif %}
-    {% if organization.twitter_description %}
+
     <tr>
+        {% if organization.twitter_description %}
         <th>Twitter Description:</th>
         <td>{{ organization.twitter_description|default_if_none:"" }}</td>
+        {% endif %}
+        <th> LOGO URL:</th>
+        <td>
+            {{organization.chosen_logo_url_https}}
+        </td>
     </tr>
-    {% endif %}
-    {% if organization.twitter_location %}
     <tr>
+        {% if organization.twitter_location %}
         <th>Twitter Location:</th>
         <td>{{ organization.twitter_location|default_if_none:"" }}</td>
+         {% endif %}
+
+        <th> Social share description:</th>
+        <td>
+            {{organization.chosen_social_share_description}}
+        </td>
     </tr>
-    {% endif %}
-    {% if organization.organization_facebook %}
     <tr>
+       {% if organization.organization_facebook %}
         <th>Facebook: </th>
         <td>{% if organization.generate_facebook_link %}
                 <a href="{{ organization.generate_facebook_link }}" target="_blank">{{ organization.organization_facebook }}</a>
             {% else %}
             {{ organization.organization_facebook|default_if_none:"" }}
-            {% endif %}</td>
+            {% endif %}
+        </td>
+        {% endif %}
+
+        <th> Social share image:</th>
+        <td>
+            {{organization.chosen_social_share_image_256x256_url_https}}
+        </td>
+
     </tr>
-    {% endif %}
-    {% if organization.organization_email %}
     <tr>
+       {% if organization.organization_email %}
         <th>Contact Email: </th>
         <td>
             {{ organization.organization_email|default_if_none:"" }}
         </td>
+       {% endif %}
+
+        <th> Sub domain string:</th>
+        <td>
+            {{organization.chosen_sub_domain_string}}
+        </td>
+
     </tr>
-    {% endif %}
-    {% if organization.wikipedia_page_title %}
     <tr>
+        {% if organization.wikipedia_page_title %}
         <th>Wikipedia Page:</th>
         <td>{% if organization.wikipedia_page_title %}
                 <a href="{{ organization.generate_wikipedia_link }}" target="_blank">{{ organization.wikipedia_page_title }}</a>
-            {% endif %}</td>
+            {% endif %}
+        </td>
+        {% endif %}
+
+        <th> Subscription plan:</th>
+        <td>
+            {{organization.chosen_subscription_plan}}
+        </td>
+
     </tr>
-    {% endif %}
     {% if organization.organization_endorsements_api_url %}
     <tr>
         <th>Endorsements Importer URL:</th>
@@ -117,6 +185,7 @@
         </td>
     </tr>
     {% endif %}
+
     {% if organization_issues_list %}
     <tr>
         <th>Values/Issues Linked:</th>
