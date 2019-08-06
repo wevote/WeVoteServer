@@ -73,7 +73,7 @@ Filters:&nbsp;
 {# Return to see voter guides to review #}
 <span{% if not show_cannot_find_endorsements and not show_candidates_missing_from_we_vote and not show_capture_detailed_comments and not show_only_hide_from_active_review and not show_ignore_this_source %} style="font-weight: bold;"{% endif %}>
     <a href="{% url 'voter_guide:voter_guide_possibility_list' %}?google_civic_election_id={{ google_civic_election_id }}&show_all_elections={{ show_all_elections }}">
-      Show 'To Review'
+      To Review
     </a>
 </span>
 
@@ -81,7 +81,7 @@ Filters:&nbsp;
 {# Show voter guides where we previously couldn't find endorsements #}
 <span{% if show_cannot_find_endorsements %} style="font-weight: bold;"{% endif %}>
     <a href="{% url 'voter_guide:voter_guide_possibility_list' %}?google_civic_election_id={{ google_civic_election_id }}&show_all_elections={{ show_all_elections }}&show_cannot_find_endorsements=1">
-        Show 'Endorsements Not Available Yet'
+        Endorsements Not Available Yet
     </a>
 </span>
 
@@ -89,7 +89,7 @@ Filters:&nbsp;
 {# Show voter guides where we don't have the matching candidates or measures in our database #}
 <span{% if show_candidates_missing_from_we_vote %} style="font-weight: bold;"{% endif %}>
     <a href="{% url 'voter_guide:voter_guide_possibility_list' %}?google_civic_election_id={{ google_civic_election_id }}&show_all_elections={{ show_all_elections }}&show_candidates_missing_from_we_vote=1">
-        Show 'Candidates/Measures Missing'
+        Candidates/Measures Missing
     </a>
 </span>
 
@@ -97,7 +97,7 @@ Filters:&nbsp;
 {# Show voter guides where we have more work to do if we want to capture more detailed comments #}
 <span{% if show_capture_detailed_comments %} style="font-weight: bold;"{% endif %}>
     <a href="{% url 'voter_guide:voter_guide_possibility_list' %}?google_civic_election_id={{ google_civic_election_id }}&show_all_elections={{ show_all_elections }}&show_capture_detailed_comments=1">
-        Show 'Capture Detailed Comments'
+        Capture Detailed Comments
     </a>
 </span>
 
@@ -105,15 +105,15 @@ Filters:&nbsp;
 {# Return to see voter guides to review #}
 <span{% if show_only_hide_from_active_review %} style="font-weight: bold;"{% endif %}>
     <a href="{% url 'voter_guide:voter_guide_possibility_list' %}?google_civic_election_id={{ google_civic_election_id }}&show_all_elections={{ show_all_elections }}&show_only_hide_from_active_review=1">
-      Show 'Stop Reviewing'
+      Stop Reviewing
     </a>
 </span>
 
-
+&nbsp;&nbsp;&nbsp;
 {# Show voter guides where we ignore the source #}
 <span{% if show_ignore_this_source %} style="font-weight: bold;"{% endif %}>
     <a href="{% url 'voter_guide:voter_guide_possibility_list' %}?google_civic_election_id={{ google_civic_election_id }}&show_all_elections={{ show_all_elections }}&show_ignore_this_source=1">
-        Show 'Ignore this Website'
+        Ignore this Website
     </a>
 </span>
 
@@ -122,18 +122,24 @@ Filters:&nbsp;
     <form name="voter_guide_possibility_markings" method="post" action="{% url 'voter_guide:voter_guide_possibility_list_process' %}">
         {% csrf_token %}
         <div class="form-group pull-right">
-            <div class="col-sm-8">
-                <label for="which_marking_id" class="col-sm-3 control-label"><span class="u-no-break">Mark selected rows</span></label>
+            <div class="col-xs-4">
+                <label for="which_marking_id" class="control-label">
+                  <span class="u-no-break">Mark selected rows as:</span>
+                </label>
+            </div>
+            <div class="col-xs-6">
                 <select id="which_marking_id" name="which_marking">
                     {# note: option values match keys in updated_values parameter of update_or_create_voter_guide_possibility() #}
-                    <option value="cannot_find_endorsements">Endorsements Not Available Yet</option>
+                    <option value="hide_from_active_review">Stop Reviewing</option>
                     <option value="capture_detailed_comments">Capture Detailed Comments</option>
                     <option value="candidates_missing_from_we_vote">Candidates/Measures Missing</option>
-                    <option value="hide_from_active_review">Stop Reviewing</option>
-                    <option value="ignore_this_source">Ignore this Website</option>
+                    <option value="cannot_find_endorsements">Endorsements Not Available Yet</option>
+                    <option value="ignore_this_source">Ignore Website in Future Elections</option>
                 </select>
             </div>
-            <input type="submit" value="Mark as ..." />
+            <div class="col-xs-1">
+                <input type="submit" value="Save" />
+            </div>
         </div>
         {% include "voter_guide/voter_guide_possibility_table.html" with voter_guide_possibility_list=voter_guide_possibility_list google_civic_election_id=google_civic_election_id %}
     </form>

@@ -3,11 +3,11 @@
 # -*- coding: UTF-8 -*-
 
 from config.base import get_environment_variable
+from candidate.models import CandidateCampaignListManager, CandidateCampaignManager
 from import_export_twitter.controllers import refresh_twitter_organization_details, scrape_social_media_from_one_site
 from organization.models import Organization, OrganizationListManager, OrganizationManager, \
     CORPORATION, GROUP, INDIVIDUAL, NEWS_ORGANIZATION, NONPROFIT, NONPROFIT_501C3, NONPROFIT_501C4, \
     POLITICAL_ACTION_COMMITTEE, ORGANIZATION, PUBLIC_FIGURE, UNKNOWN, VOTER, ORGANIZATION_TYPE_CHOICES
-
 from twitter.models import TwitterUserManager
 import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, convert_date_to_we_vote_date_string, \
@@ -19,6 +19,78 @@ logger = wevote_functions.admin.get_logger(__name__)
 
 WE_VOTE_API_KEY = get_environment_variable("WE_VOTE_API_KEY")
 VOTER_GUIDES_SYNC_URL = get_environment_variable("VOTER_GUIDES_SYNC_URL")  # voterGuidesSyncOut
+
+
+def candidates_found_on_url(url_to_scan, google_civic_election_id_list=[], state_code=''):
+    status = ""
+    success = True
+    candidate_list_manager = CandidateCampaignListManager()
+
+    facebook_page_list = []
+    twitter_or_facebook_found = False
+    twitter_handle_list = []
+    twitter_handle_list_modified = []
+    owner_of_website_candidate_list = []
+    owner_of_website_candidate_list_count = 0
+
+    retrieve_list = True
+    scrape_results = scrape_social_media_from_one_site(url_to_scan, retrieve_list)
+
+    # Only include a change if we have a new value (do not try to save blank value)
+    if scrape_results['twitter_handle_found'] and positive_value_exists(scrape_results['twitter_handle']):
+        twitter_handle_list = scrape_results['twitter_handle_list']
+        twitter_or_facebook_found = True
+
+    if scrape_results['facebook_page_found'] and positive_value_exists(scrape_results['facebook_page']):
+        facebook_page_list = scrape_results['facebook_page_list']
+        twitter_or_facebook_found = True
+
+    if twitter_or_facebook_found:
+        # Search for candidates that match (by Twitter Handle)
+        for one_twitter_handle in twitter_handle_list:
+            if positive_value_exists(one_twitter_handle):
+                one_twitter_handle = one_twitter_handle.strip()
+            if positive_value_exists(one_twitter_handle):
+                twitter_handle_lower = one_twitter_handle.lower()
+                twitter_handle_lower = extract_twitter_handle_from_text_string(twitter_handle_lower)
+                if twitter_handle_lower not in twitter_handle_list_modified:
+                    twitter_handle_list_modified.append(twitter_handle_lower)
+
+        # Search for organizations that match (by Facebook page)
+        facebook_page_list_modified = []
+        for one_facebook_page in facebook_page_list:
+            if positive_value_exists(one_facebook_page):
+                one_facebook_page = one_facebook_page.strip()
+            if positive_value_exists(one_facebook_page):
+                one_facebook_page_lower = one_facebook_page.lower()
+                one_facebook_page_lower = extract_facebook_username_from_text_string(one_facebook_page_lower)
+                if one_facebook_page_lower not in facebook_page_list_modified:
+                    facebook_page_list_modified.append(one_facebook_page_lower)
+
+        voter_guide_website = extract_website_from_url(url_to_scan)
+        results = candidate_list_manager.search_candidates_for_upcoming_election(
+            google_civic_election_id_list=google_civic_election_id_list,
+            candidate_website=voter_guide_website,
+            facebook_page_list=facebook_page_list_modified,
+            state_code=state_code,
+            twitter_handle_list=twitter_handle_list_modified
+        )
+        # search_candidates_for_upcoming_election(self, google_civic_election_id_list, search_string='', state_code='',
+        #                                         candidate_name='', candidate_twitter_handle='',
+        #                                         candidate_website='', candidate_email='',
+        #                                         candidate_facebook='', twitter_handle_list='', facebook_page_list='',
+        #                                         exact_match=False)
+        if results['candidate_list_found']:
+            owner_of_website_candidate_list = results['candidate_list']
+            owner_of_website_candidate_list_count = len(owner_of_website_candidate_list)
+
+    results = {
+        'status':           status,
+        'success':          success,
+        'candidate_list':   owner_of_website_candidate_list,
+        'candidate_count':  owner_of_website_candidate_list_count,
+    }
+    return results
 
 
 def organizations_found_on_url(url_to_scan, state_code=''):

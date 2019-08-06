@@ -208,6 +208,14 @@ class CandidateCampaignListManager(models.Model):
                                                    limit_to_this_state_code="",
                                                    return_list_of_objects=False,
                                                    super_light_candidate_list=False):
+        """
+        This function is needed for our scraping tools.
+        :param google_civic_election_id_list:
+        :param limit_to_this_state_code:
+        :param return_list_of_objects:
+        :param super_light_candidate_list:
+        :return:
+        """
         status = ""
         candidate_list_objects = []
         candidate_list_light = []
@@ -226,7 +234,7 @@ class CandidateCampaignListManager(models.Model):
             return results
 
         try:
-            candidate_queryset = CandidateCampaign.objects.all()
+            candidate_queryset = CandidateCampaign.objects.using('readonly').all()
             candidate_queryset = candidate_queryset.filter(google_civic_election_id__in=google_civic_election_id_list)
             if positive_value_exists(limit_to_this_state_code):
                 candidate_queryset = candidate_queryset.filter(state_code__iexact=limit_to_this_state_code)
@@ -394,6 +402,22 @@ class CandidateCampaignListManager(models.Model):
                                                candidate_twitter_handle,
                                                ballotpedia_candidate_id, vote_smart_id, maplight_id,
                                                we_vote_id_from_master=''):
+        """
+        retrieve_possible_duplicate_candidates is used primarily to avoid duplicate candidate imports.
+        :param candidate_name:
+        :param google_civic_candidate_name:
+        :param google_civic_candidate_name2:
+        :param google_civic_candidate_name3:
+        :param google_civic_election_id:
+        :param office_we_vote_id:
+        :param politician_we_vote_id:
+        :param candidate_twitter_handle:
+        :param ballotpedia_candidate_id:
+        :param vote_smart_id:
+        :param maplight_id:
+        :param we_vote_id_from_master:
+        :return:
+        """
         candidate_list_objects = []
         filters = []
         candidate_list_found = False
@@ -662,6 +686,18 @@ class CandidateCampaignListManager(models.Model):
     def retrieve_candidates_from_non_unique_identifiers(self, google_civic_election_id_list, state_code,
                                                         candidate_twitter_handle, candidate_name,
                                                         ignore_candidate_id_list=[]):
+        """
+        This function, retrieve_candidates_from_non_unique_identifiers, is built to find possible duplicate candidates
+        with stricter parameters.
+        This is a different approach from search_candidates_for_upcoming_election, which casts a wider net.
+        Another related function, retrieve_possible_duplicate_candidates, is used to avoid duplicate candidate imports.
+        :param google_civic_election_id_list:
+        :param state_code:
+        :param candidate_twitter_handle:
+        :param candidate_name:
+        :param ignore_candidate_id_list:
+        :return:
+        """
         keep_looking_for_duplicates = True
         candidate = CandidateCampaign()
         candidate_found = False
@@ -927,12 +963,29 @@ class CandidateCampaignListManager(models.Model):
 
         return 0
 
-    def search_candidates_for_upcoming_election(self, google_civic_election_id, search_string='', state_code=''):
+    def search_candidates_for_upcoming_election(self, google_civic_election_id_list, search_string='', state_code='',
+                                                candidate_name='', candidate_twitter_handle='',
+                                                candidate_website='', candidate_email='',
+                                                candidate_facebook='', twitter_handle_list='', facebook_page_list='',
+                                                exact_match=False):
         """
-
-        :param google_civic_election_id:
+        This function, search_candidates_for_upcoming_election, is meant to cast a wider net for any
+        possible candidates that might match.
+        It has some parallels with organization.models: organization_search_find_any_possibilities
+        This is different than retrieve_candidates_from_non_unique_identifiers, which is built to find
+        possible duplicate candidates with stricter parameters.
+        Another related function, retrieve_possible_duplicate_candidates, is used to avoid duplicate candidate imports.
+        :param google_civic_election_id_list:
         :param search_string:
         :param state_code:
+        :param candidate_name:
+        :param candidate_twitter_handle:
+        :param candidate_website:
+        :param candidate_email:
+        :param candidate_facebook:
+        :param twitter_handle_list:
+        :param facebook_page_list:
+        :param exact_match:
         :return:
         """
         status = ""
@@ -942,9 +995,12 @@ class CandidateCampaignListManager(models.Model):
 
         search_words = search_string.split()
 
+        # candidate_website = voter_guide_website,
+        # facebook_page_list = facebook_page_list_modified,
+        # twitter_handle_list = twitter_handle_list_modified
         try:
             candidate_queryset = CandidateCampaign.objects.all()
-            candidate_queryset = candidate_queryset.filter(google_civic_election_id=google_civic_election_id)
+            candidate_queryset = candidate_queryset.filter(google_civic_election_id__in=google_civic_election_id_list)
             if positive_value_exists(state_code):
                 candidate_queryset = candidate_queryset.filter(state_code__iexact=state_code)
             candidate_queryset = candidate_queryset.order_by("candidate_name")
@@ -956,19 +1012,14 @@ class CandidateCampaignListManager(models.Model):
                 # We want to find candidates with *any* of these values
                 new_filter = Q(ballotpedia_candidate_name__icontains=search_word)
                 filters.append(new_filter)
-
                 new_filter = Q(google_civic_candidate_name__icontains=search_word)
                 filters.append(new_filter)
-
                 new_filter = Q(candidate_name__icontains=search_word)
                 filters.append(new_filter)
-
                 new_filter = Q(candidate_twitter_handle__icontains=search_word)
                 filters.append(new_filter)
-
                 new_filter = Q(contest_office_name__icontains=search_word)
                 filters.append(new_filter)
-
                 new_filter = Q(twitter_name__icontains=search_word)
                 filters.append(new_filter)
 
@@ -979,7 +1030,50 @@ class CandidateCampaignListManager(models.Model):
                 for item in filters:
                     final_filters |= item
 
+                # Add as new filter for "AND"
                 candidate_queryset = candidate_queryset.filter(final_filters)
+
+            # Reset filters for next batch of "OR"
+            filters = []
+
+            if positive_value_exists(twitter_handle_list):
+                for one_twitter_handle in twitter_handle_list:
+                    one_twitter_handle2 = extract_twitter_handle_from_text_string(one_twitter_handle)
+                    if positive_value_exists(exact_match):
+                        new_filter = Q(candidate_twitter_handle__iexact=one_twitter_handle2)
+                    else:
+                        new_filter = Q(candidate_twitter_handle__icontains=one_twitter_handle2)
+                    filters.append(new_filter)
+
+            if positive_value_exists(facebook_page_list):
+                for one_facebook_page in facebook_page_list:
+                    one_facebook_page2 = extract_twitter_handle_from_text_string(one_facebook_page)
+                    if positive_value_exists(exact_match):
+                        new_filter = Q(facebook_url__iexact=one_facebook_page2)
+                    else:
+                        new_filter = Q(facebook_url__icontains=one_facebook_page2)
+                    filters.append(new_filter)
+
+            if positive_value_exists(candidate_website):
+                if positive_value_exists(exact_match):
+                    new_filter = Q(candidate_url__iexact=candidate_website)
+                else:
+                    new_filter = Q(candidate_url__icontains=candidate_website)
+                filters.append(new_filter)
+
+            if positive_value_exists(candidate_email):
+                if positive_value_exists(exact_match):
+                    new_filter = Q(candidate_email__iexact=candidate_email)
+                else:
+                    new_filter = Q(candidate_email__icontains=candidate_email)
+                filters.append(new_filter)
+
+            final_filters = filters.pop()
+            for item in filters:
+                final_filters |= item
+
+            # Add as new filter for "AND"
+            candidate_queryset = candidate_queryset.filter(final_filters)
 
             candidate_list_objects = candidate_queryset[:10]
 
@@ -1043,7 +1137,7 @@ class CandidateCampaignListManager(models.Model):
         results = {
             'success': success,
             'status': status,
-            'google_civic_election_id': google_civic_election_id,
+            'candidate_list': candidate_list_objects,
             'candidate_list_found': candidate_list_found,
             'candidate_list_json': candidate_list_json,
         }

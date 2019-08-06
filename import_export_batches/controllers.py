@@ -3983,6 +3983,7 @@ def import_position_data_from_batch_row_actions(
     for one_batch_row_action in batch_row_action_list:
         if create_entry_flag:
             position_we_vote_id = ""
+            # DALE 2019-08-05 Refactoring this function to use update_values will take some time
             results = position_manager.update_or_create_position(
                 position_we_vote_id,
                 organization_we_vote_id=one_batch_row_action.organization_we_vote_id,
@@ -4032,14 +4033,33 @@ def import_position_data_from_batch_row_actions(
             # except Exception as e:
             #     pass
         elif update_entry_flag:
-            pass
-            # organization_we_vote_id = one_batch_row_action.organization_we_vote_id
-            # results = organization_manager.update_organization_row_entry(organization_title, organization_subtitle,
-            #                                                            organization_text, state_code, ctcl_uuid,
-            #                                                         google_civic_election_id, organization_we_vote_id)
-            # if results['organization_updated']:
-            #     number_of_organizations_updated += 1
-            #     success = True
+            update_values = {}
+            # These fields we only replace data -- we don't need to wipe any values out
+            if positive_value_exists(one_batch_row_action.organization_we_vote_id):
+                update_values['organization_we_vote_id'] = one_batch_row_action.organization_we_vote_id
+            if positive_value_exists(one_batch_row_action.google_civic_election_id):
+                update_values['google_civic_election_id'] = one_batch_row_action.google_civic_election_id
+            if positive_value_exists(one_batch_row_action.state_code):
+                update_values['state_code'] = one_batch_row_action.state_code
+            if positive_value_exists(one_batch_row_action.candidate_campaign_we_vote_id):
+                update_values['candidate_campaign_we_vote_id'] = one_batch_row_action.candidate_campaign_we_vote_id
+            if positive_value_exists(one_batch_row_action.contest_measure_we_vote_id):
+                update_values['contest_measure_we_vote_id'] = one_batch_row_action.contest_measure_we_vote_id
+            if positive_value_exists(one_batch_row_action.stance):
+                update_values['stance'] = one_batch_row_action.stance
+            # These fields we will clear
+            update_values['statement_text'] = one_batch_row_action.statement_text \
+                if positive_value_exists(one_batch_row_action.statement_text) else ""
+            update_values['statement_html'] = one_batch_row_action.statement_html \
+                if positive_value_exists(one_batch_row_action.statement_html) else ""
+            update_values['more_info_url'] = one_batch_row_action.more_info_url \
+                if positive_value_exists(one_batch_row_action.more_info_url) else ""
+
+            position_we_vote_id = one_batch_row_action.position_we_vote_id
+            results = position_manager.update_position_row_entry(position_we_vote_id, update_values)
+            if results['position_updated']:
+                number_of_positions_updated += 1
+                success = True
         else:
             # This is error, it shouldn't reach here, we are handling IMPORT_CREATE or UPDATE entries only.
             status += "IMPORT_POSITION_ENTRY:NO_CREATE_OR_UPDATE_ERROR "

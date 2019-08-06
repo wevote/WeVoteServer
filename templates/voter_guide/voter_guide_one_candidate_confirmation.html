@@ -3,7 +3,24 @@
 <div>
     <div>
         <span class="float-right"><span style="color: darkgray;{% if possible_endorsement.possibility_should_be_ignored %} text-decoration: line-through;{% endif %}">(id {{ possible_endorsement.possibility_position_id|default_if_none:""}}) #{{ possible_endorsement.possibility_position_number|default_if_none:""|add:"0" }}</span></span>
-    {% if possible_endorsement.candidate_we_vote_id %}
+    {% if is_list_of_endorsements_for_candidate %}
+        <span>
+          <span class="h4">{{ possible_endorsement.organization_name|default_if_none:"" }}{% if candidate_name %}, about {{ candidate_name }}{% endif %}</span>
+          {% if possible_endorsement.google_civic_election_id %}
+          <span>
+          (election: {{ possible_endorsement.google_civic_election_id }})
+          </span>
+          {% endif %}
+        </span>
+        </span>
+        {% if has_suggested_voter_guide_rights and candidate_we_vote_id %}
+            <a href="{% url 'candidate:candidate_edit_we_vote_id' candidate_campaign_we_vote_id=candidate_we_vote_id %}#positions"
+               target="_blank"
+               class="u-no-break"><span class="glyphicon glyphicon-new-window"></span></a>
+        {% endif %}
+        <input type="hidden" name="candidate_we_vote_id_{{ possible_endorsement.possibility_position_number }}" value="{{ candidate_we_vote_id }}">
+        <input type="hidden" name="organization_we_vote_id_{{ possible_endorsement.possibility_position_number }}" value="{{ organization_we_vote_id }}">
+    {% elif possible_endorsement.candidate_we_vote_id %}
         <span>
           <span class="h4">{{ possible_endorsement.candidate.display_candidate_name|default_if_none:"" }}</span>,
           <span>{{ possible_endorsement.candidate.contest_office_name|default_if_none:"" }}</span>
@@ -21,6 +38,7 @@
         {% endif %}
         <input type="hidden" name="candidate_we_vote_id_{{ possible_endorsement.possibility_position_number }}" value="{{ possible_endorsement.candidate_we_vote_id }}">
         <input type="hidden" name="ballot_item_name_{{ possible_endorsement.possibility_position_number }}" value="{{ possible_endorsement.ballot_item_name }}">
+        <input type="hidden" name="organization_we_vote_id_{{ possible_endorsement.possibility_position_number }}" value="{{ possible_endorsement.organization_we_vote_id }}">
     {% elif possible_endorsement.measure_we_vote_id %}
         <span><span class="h4">{{ possible_endorsement.measure.measure_title|default_if_none:"" }}</span>&nbsp;&nbsp;&nbsp;</span>
         {% if has_suggested_voter_guide_rights %}
@@ -30,6 +48,7 @@
         {% endif %}
         <input type="hidden" name="measure_we_vote_id_{{ possible_endorsement.possibility_position_number }}" value="{{ possible_endorsement.measure_we_vote_id }}">
         <input type="hidden" name="ballot_item_name_{{ possible_endorsement.possibility_position_number }}" value="{{ possible_endorsement.ballot_item_name }}">
+        <input type="hidden" name="organization_we_vote_id_{{ possible_endorsement.possibility_position_number }}" value="{{ possible_endorsement.organization_we_vote_id }}">
     {% else %}
         <span class="u-no-break">
             <input type="text" class="h4" name="ballot_item_name_{{ possible_endorsement.possibility_position_number }}"
@@ -41,6 +60,8 @@
                 <span class="glyphicon glyphicon-new-window"></span>
             </a>
         </span>
+        <input type="hidden" name="candidate_we_vote_id_{{ possible_endorsement.possibility_position_number }}" value="{{ candidate_we_vote_id }}">
+        <input type="hidden" name="organization_we_vote_id_{{ possible_endorsement.possibility_position_number }}" value="{{ organization_we_vote_id }}">
     {% endif %}
     </div>
 

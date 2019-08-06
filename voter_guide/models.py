@@ -32,6 +32,14 @@ POSITION_CHOICES = (
     (NO_STANCE,         'No stance'),
     (OPPOSE,            'Opposes'),
 )
+ORGANIZATION_ENDORSING_CANDIDATES = 'ORG'
+ENDORSEMENTS_FOR_CANDIDATE = 'CAND'
+UNKNOWN_TYPE = 'UNKNOWN'
+VOTER_GUIDE_POSSIBILITY_TYPES = (
+    (ORGANIZATION_ENDORSING_CANDIDATES, 'Organization or News Website Endorsing Candidates'),
+    (ENDORSEMENTS_FOR_CANDIDATE, 'List of Endorsements for One Candidate'),
+    (UNKNOWN_TYPE, 'List of Endorsements for One Candidate'),
+)
 POSSIBLE_ENDORSEMENT_NUMBER_LIST = [
     "001", "002", "003", "004", "005", "006", "007", "008", "009", "010",
     "011", "012", "013", "014", "015", "016", "017", "018", "019", "020",
@@ -1179,7 +1187,23 @@ class VoterGuide(models.Model):
             self.we_vote_id = self.we_vote_id.strip().lower()
         if self.we_vote_id == "" or self.we_vote_id is None:  # If there isn't a value...
             self.generate_new_we_vote_id()
-        super(VoterGuide, self).save(*args, **kwargs)
+        try:
+            # Attempt 1
+            super(VoterGuide, self).save(*args, **kwargs)
+        except Exception as e:
+            self.generate_new_we_vote_id()
+            try:
+                # Attempt 2
+                super(VoterGuide, self).save(*args, **kwargs)
+            except Exception as e:
+                self.generate_new_we_vote_id()
+                try:
+                    # Attempt 3
+                    super(VoterGuide, self).save(*args, **kwargs)
+                except Exception as e:
+                    self.generate_new_we_vote_id()
+                    # Attempt 4
+                    super(VoterGuide, self).save(*args, **kwargs)
 
     def generate_new_we_vote_id(self):
         # ...generate a new id
@@ -1193,7 +1217,6 @@ class VoterGuide(models.Model):
             site_unique_id_prefix=site_unique_id_prefix,
             next_integer=next_local_integer,
         )
-        # TODO we need to deal with the situation where we_vote_id is NOT unique on save
         return
 
 
@@ -2199,6 +2222,8 @@ class VoterGuidePossibilityManager(models.Manager):
         cannot_find_endorsements = positive_value_exists(cannot_find_endorsements)
         capture_detailed_comments = positive_value_exists(capture_detailed_comments)
         ignore_this_source = positive_value_exists(ignore_this_source)
+
+        status = ""
         voter_guide_possibility_list = []
         voter_guide_possibility_list_found = False
         try:
@@ -2319,9 +2344,9 @@ class VoterGuidePossibilityManager(models.Manager):
 
             if len(voter_guide_possibility_list):
                 voter_guide_possibility_list_found = True
-                status = 'VOTER_GUIDE_FOUND'
+                status += 'VOTER_GUIDE_FOUND '
             else:
-                status = 'NO_VOTER_GUIDES_FOUND'
+                status += 'NO_VOTER_GUIDES_FOUND '
             success = True
         except Exception as e:
             handle_record_not_found_exception(e, logger=logger)
@@ -2590,6 +2615,23 @@ class VoterGuidePossibilityManager(models.Manager):
 
         return number_of_measures_in_database_count
 
+    def number_of_possible_organizations_in_database(self, voter_guide_possibility_id):
+        """
+        Out of all of the VoterGuidePossibilityPosition entries, how many have been tied to candidates?
+        :param voter_guide_possibility_id:
+        :return:
+        """
+        if not positive_value_exists(voter_guide_possibility_id):
+            return 0
+
+        number_query = VoterGuidePossibilityPosition.objects.all()
+        number_query = number_query.filter(voter_guide_possibility_parent_id=voter_guide_possibility_id)
+        # Remove rows without candidate_we_vote_id
+        number_query = number_query.exclude(Q(organization_we_vote_id__isnull=True) | Q(organization_we_vote_id=""))
+        number_of_possible_organizations_in_database_count = number_query.count()
+
+        return number_of_possible_organizations_in_database_count
+
     def number_of_ballot_items_not_matched(self, voter_guide_possibility_id):
         """
         Out of all of the VoterGuidePossibilityPosition entries, how many have not been matched to ballot items?
@@ -2612,6 +2654,7 @@ class VoterGuidePossibilityManager(models.Manager):
     def positions_ready_to_save_as_batch(self, voter_guide_possibility):
         ballot_item_in_batch_exists_in_database = False
         organization_found = False
+        candidate_found = False
         if positive_value_exists(voter_guide_possibility.organization_we_vote_id):
             organization_found = True
 
@@ -2619,9 +2662,14 @@ class VoterGuidePossibilityManager(models.Manager):
                 ballot_item_in_batch_exists_in_database = True
             elif positive_value_exists(self.number_of_measures_in_database(voter_guide_possibility.id)):
                 ballot_item_in_batch_exists_in_database = True
+        elif positive_value_exists(voter_guide_possibility.candidate_we_vote_id):
+            candidate_found = True
 
-        if positive_value_exists(voter_guide_possibility.voter_guide_possibility_url) and organization_found \
-                and ballot_item_in_batch_exists_in_database:
+            if positive_value_exists(self.number_of_possible_organizations_in_database(voter_guide_possibility.id)):
+                ballot_item_in_batch_exists_in_database = True
+
+        if positive_value_exists(voter_guide_possibility.voter_guide_possibility_url) \
+                and ballot_item_in_batch_exists_in_database and organization_found or candidate_found:
             return True
 
         return False
@@ -2659,9 +2707,17 @@ class VoterGuidePossibility(models.Model):
     # Where a volunteer thinks there is a voter guide
     voter_guide_possibility_url = models.URLField(verbose_name='url of possible voter guide', blank=True, null=True)
 
-    # The unique id of the organization, if/when we know it
+    # The unique id of the organization making the endorsements, if/when we know it
     organization_we_vote_id = models.CharField(
         verbose_name="organization we vote id", max_length=255, null=True, blank=True, unique=False)
+
+    candidate_name = models.CharField(
+        verbose_name="candidate name", max_length=255, null=True, blank=True, unique=False)
+    candidate_twitter_handle = models.CharField(
+        verbose_name="candidate twitter handle", max_length=255, null=True, blank=True, unique=False)
+    # The unique id of the candidate these endorsements are about, if/when we know it
+    candidate_we_vote_id = models.CharField(
+        verbose_name="candidate we vote id", max_length=255, null=True, blank=True, unique=False)
 
     voter_who_submitted_name = models.CharField(
         verbose_name="voter name who submitted this", max_length=255, null=True, blank=True, unique=False)
@@ -2675,6 +2731,8 @@ class VoterGuidePossibility(models.Model):
     voter_guide_owner_type = models.CharField(
         verbose_name="is owner org, public figure, or voter?", max_length=2, choices=ORGANIZATION_TYPE_CHOICES,
         default=UNKNOWN)
+    voter_guide_possibility_type = models.CharField(
+        max_length=7, choices=VOTER_GUIDE_POSSIBILITY_TYPES, default=UNKNOWN_TYPE)
 
     organization_name = models.CharField(
         verbose_name="organization name", max_length=255, null=True, blank=True, unique=False)
@@ -2753,6 +2811,10 @@ class VoterGuidePossibilityPosition(models.Model):
     possibility_position_number = models.PositiveIntegerField(null=True, db_index=True)
     ballot_item_name = models.CharField(max_length=255, null=True, unique=False)
     candidate_we_vote_id = models.CharField(max_length=255, null=True, unique=False)
+    candidate_twitter_handle = models.CharField(max_length=255, null=True, unique=False)
+    organization_name = models.CharField(max_length=255, null=True, unique=False)
+    organization_twitter_handle = models.CharField(max_length=255, null=True, unique=False)
+    organization_we_vote_id = models.CharField(max_length=255, null=True, unique=False)
     position_we_vote_id = models.CharField(max_length=255, null=True, unique=False)
     measure_we_vote_id = models.CharField(max_length=255, null=True, unique=False)
     statement_text = models.TextField(null=True, blank=True)

@@ -4,7 +4,7 @@
         <thead>
         <tr>
             <th></th>
-            <th>Organization</th>
+            <th>Organization/Candidate</th>
             <th></th>
             <th>Voter Guide Source</th>
             <th>Actions / Notes</th>
@@ -17,33 +17,64 @@
         <tr>
             <td>{{ forloop.counter }}</td>
             <td>
-            {% if voter_guide_possibility.organization %}
-                {% if voter_guide_possibility.organization.we_vote_hosted_profile_image_url_tiny %}
-                <a href="{% url 'organization:organization_position_list' voter_guide_possibility.organization.id %}?google_civic_election_id={{ google_civic_election_id }}"
-                   target="_blank">
-                    <img src="{{ voter_guide_possibility.organization.we_vote_hosted_profile_image_url_tiny }}" width="24px" /></a>{% endif %}
-                <a href="{% url 'organization:organization_position_list' voter_guide_possibility.organization.id %}?google_civic_election_id={{ google_civic_election_id }}"
-                   target="_blank">
-                {% if voter_guide_possibility.organization.organization_name %}
-                    {{ voter_guide_possibility.organization.organization_name }}
-                {% else %}(name missing){% endif %}</a>
-            {% else %}
-                {% if voter_guide_possibility.organization_name %}
-                  {{ voter_guide_possibility.organization_name|default_if_none:"" }}
-                {% else %}
-                  (no org name found)
-                {% endif %}
-            {% endif %}
-            {% if voter_guide_possibility.organization_twitter_handle %}
-                <br />
-                <span>
-                    <a href="https://twitter.com/{{ voter_guide_possibility.organization_twitter_handle|default_if_none:"" }}"
-                       class="u-no-break"
+            {% if voter_guide_possibility.voter_guide_possibility_type == ORGANIZATION_ENDORSING_CANDIDATES or voter_guide_possibility.voter_guide_possibility_type == UNKNOWN_TYPE %}
+                {% if voter_guide_possibility.organization %}
+                    {% if voter_guide_possibility.organization.we_vote_hosted_profile_image_url_tiny %}
+                    <a href="{% url 'organization:organization_position_list' voter_guide_possibility.organization.id %}?google_civic_election_id={{ google_civic_election_id }}"
                        target="_blank">
-                    <i class="fa fa-twitter"></i> {{ voter_guide_possibility.organization_twitter_handle|default_if_none:"" }}
-                    <span class="glyphicon glyphicon-new-window"></span>
-                    </a>
-                </span>
+                        <img src="{{ voter_guide_possibility.organization.we_vote_hosted_profile_image_url_tiny }}" width="24px" /></a>{% endif %}
+                    <a href="{% url 'organization:organization_position_list' voter_guide_possibility.organization.id %}?google_civic_election_id={{ google_civic_election_id }}"
+                       target="_blank">
+                    {% if voter_guide_possibility.organization.organization_name %}
+                        {{ voter_guide_possibility.organization.organization_name }}
+                    {% else %}(name missing){% endif %}</a>
+                {% else %}
+                    {% if voter_guide_possibility.organization_name %}
+                      {{ voter_guide_possibility.organization_name|default_if_none:"" }}
+                    {% else %}
+                      (no org name found)
+                    {% endif %}
+                {% endif %}
+                {% if voter_guide_possibility.organization_twitter_handle %}
+                    <br />
+                    <span>
+                        <a href="https://twitter.com/{{ voter_guide_possibility.organization_twitter_handle|default_if_none:"" }}"
+                           class="u-no-break"
+                           target="_blank">
+                        <i class="fa fa-twitter"></i> {{ voter_guide_possibility.organization_twitter_handle|default_if_none:"" }}
+                        <span class="glyphicon glyphicon-new-window"></span>
+                        </a>
+                    </span>
+                {% endif %}
+            {% elif voter_guide_possibility.voter_guide_possibility_type == ENDORSEMENTS_FOR_CANDIDATE %}
+                {% if voter_guide_possibility.candidate %}
+                    {% if voter_guide_possibility.candidate.we_vote_hosted_profile_image_url_tiny %}
+                        <img src="{{ voter_guide_possibility.candidate.we_vote_hosted_profile_image_url_tiny }}" width="32px" />
+                    {% endif %}
+                    <span class="h3">{{ voter_guide_possibility.candidate.display_candidate_name }}</span>
+                    {% if voter_guide_possibility.candidate.display_candidate_name and voter_guide_possibility.candidate.id %}
+                        <a href="{% url "candidate:candidate_summary" voter_guide_possibility.candidate.id %}"
+                           target="_blank"
+                           class="u-no-break"><span class="glyphicon glyphicon-new-window"></span></a>
+                    {% endif %}
+                    <br />
+                    {% if voter_guide_possibility.candidate.fetch_twitter_handle %}
+                        <a href="https://twitter.com/{{ voter_guide_possibility.candidate.fetch_twitter_handle }}"
+                           target="_blank"
+                           class="u-no-break">
+                        <i class="fa fa-twitter"></i> {{ voter_guide_possibility.candidate.fetch_twitter_handle }}
+                        &nbsp;
+                        <span class="glyphicon glyphicon-new-window"></span></a>
+                    {% endif %}
+                {% else %}
+                    {% if voter_guide_possibility.candidate_name %}
+                      {{ voter_guide_possibility.candidate_name|default_if_none:"" }}
+                    {% else %}
+                      (no candidate name found)
+                    {% endif %}
+                {% endif %}
+            {% else %}
+                (no org or candidate name found)
             {% endif %}
             </td>
             <td>
