@@ -21,7 +21,7 @@
             (<a href="{% url 'organization:organization_edit' organization.id %}?google_civic_election_id={{ google_civic_election_id }}">edit</a>) (<a href="{% url 'image:images_for_one_organization' organization.we_vote_id %}" target="_blank">See images</a> in new window)</td>
         <th>Logo:</th>
 
-        <td>{{organization.chosen_logo_displayed }}
+        <td>{{organization.chosen_logo_displayed|default_if_none:""}}
 
          <!-- add body here! -->
 
@@ -38,7 +38,7 @@
 
         <th>Domain string: </th>
         <td>
-            {{organization.chosen_domain_string}}
+            {{organization.chosen_domain_string|default_if_none:""}}
         </td>
 
     </tr>
@@ -59,7 +59,7 @@
 
         <th>Favicon URL: </th>
         <td>
-            {{organization.chosen_favicon_url_https}}
+            {{organization.chosen_favicon_url_https|default_if_none:""}}
 
         </td>
 
@@ -91,19 +91,17 @@
 
         <th>Google Analytics account number:  </th>
         <td>
-            {{organization.chosen_google_analytics_account_number}}
+            {{organization.chosen_google_analytics_account_number|default_if_none:""}}
 
         </td>
     </tr>
 
     <tr>
-        {% if organization.twitter_name %}
         <th>Twitter Descriptive Name:</th>
         <td>{{ organization.twitter_name|default_if_none:"" }}</td>
-        {% endif %}
         <th>HTML verification string: </th>
         <td>
-            {{organization.chosen_html_verification_string}}
+            {{organization.chosen_html_verification_string|default_if_none:""}}
         </td>
 
     </tr>
@@ -115,7 +113,7 @@
         {% endif %}
         <th> LOGO URL:</th>
         <td>
-            {{organization.chosen_logo_url_https}}
+            {{organization.chosen_logo_url_https|default_if_none:""}}
         </td>
     </tr>
     <tr>
@@ -126,11 +124,10 @@
 
         <th> Social share description:</th>
         <td>
-            {{organization.chosen_social_share_description}}
+            {{organization.chosen_social_share_description|default_if_none:""}}
         </td>
     </tr>
     <tr>
-       {% if organization.organization_facebook %}
         <th>Facebook: </th>
         <td>{% if organization.generate_facebook_link %}
                 <a href="{{ organization.generate_facebook_link }}" target="_blank">{{ organization.organization_facebook }}</a>
@@ -138,11 +135,10 @@
             {{ organization.organization_facebook|default_if_none:"" }}
             {% endif %}
         </td>
-        {% endif %}
 
         <th> Social share image:</th>
         <td>
-            {{organization.chosen_social_share_image_256x256_url_https}}
+            {{organization.chosen_social_share_image_256x256_url_https|default_if_none:""}}
         </td>
 
     </tr>
@@ -156,22 +152,20 @@
 
         <th> Sub domain string:</th>
         <td>
-            {{organization.chosen_sub_domain_string}}
+            {{organization.chosen_sub_domain_string|default_if_none:""}}
         </td>
 
     </tr>
     <tr>
-        {% if organization.wikipedia_page_title %}
         <th>Wikipedia Page:</th>
         <td>{% if organization.wikipedia_page_title %}
                 <a href="{{ organization.generate_wikipedia_link }}" target="_blank">{{ organization.wikipedia_page_title }}</a>
             {% endif %}
         </td>
-        {% endif %}
 
         <th> Subscription plan:</th>
         <td>
-            {{organization.chosen_subscription_plan}}
+            {{organization.chosen_subscription_plan|default_if_none:""}}
         </td>
 
     </tr>
